@@ -4,11 +4,16 @@
 
 #include "flutter/lib/gpu/shader.h"
 
+#include <atomic>
+#include <chrono>
 #include <cstring>
 #include <utility>
 
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/gpu/formats.h"
+#include "flutter/lib/gpu/replay.h"
 #include "fml/make_copyable.h"
+#include "impeller/base/promise.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/shader_function.h"
@@ -58,28 +63,41 @@ fml::RefPtr<Shader> Shader::Make(
   shader->code_mapping_ = std::move(code_mapping);
   shader->inputs_ = std::move(inputs);
   shader->layouts_ = std::move(layouts);
-  shader->uniform_structs_ = std::move(uniform_structs);
-  shader->uniform_textures_ = std::move(uniform_textures);
+  shader->reflection_ =
+      MakeReflection(std::move(uniform_structs), std::move(uniform_textures),
+                     std::move(storage_buffers));
   shader->descriptor_set_layouts_ = std::move(descriptor_set_layouts);
-  shader->storage_buffers_ = std::move(storage_buffers);
   shader->workgroup_size_ = workgroup_size;
-  shader->RebuildBindingOrder();
   return shader;
+}
+
+std::shared_ptr<const Shader::Reflection> Shader::MakeReflection(
+    std::unordered_map<std::string, UniformBinding> uniform_structs,
+    std::unordered_map<std::string, TextureBinding> uniform_textures,
+    absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers) {
+  auto reflection = std::make_shared<Reflection>();
+  reflection->uniform_structs = std::move(uniform_structs);
+  reflection->uniform_textures = std::move(uniform_textures);
+  reflection->storage_buffers = std::move(storage_buffers);
+  reflection->uniform_struct_order.reserve(reflection->uniform_structs.size());
+  for (const auto& entry : reflection->uniform_structs) {
+    reflection->uniform_struct_order.push_back(&entry.second);
+  }
+  reflection->uniform_texture_order.reserve(
+      reflection->uniform_textures.size());
+  for (const auto& entry : reflection->uniform_textures) {
+    reflection->uniform_texture_order.push_back(&entry.second);
+  }
+  reflection->storage_buffer_order.reserve(reflection->storage_buffers.size());
+  for (const auto& entry : reflection->storage_buffers) {
+    reflection->storage_buffer_order.push_back(&entry.second);
+  }
+  return reflection;
 }
 
 std::string Shader::GetScopedName() const {
   return impeller::ShaderKey::MakeUserScopedName(
       impeller::ShaderKey::kScopeFlutterGPU, library_id_, entrypoint_);
-}
-
-std::shared_ptr<const impeller::ShaderFunction> Shader::GetFunctionFromLibrary(
-    impeller::ShaderLibrary& library) {
-  return library.GetFunction(GetScopedName(), stage_);
-}
-
-bool Shader::IsRegistered(Context& context) {
-  auto& lib = *context.GetContext().GetShaderLibrary();
-  return GetFunctionFromLibrary(lib) != nullptr;
 }
 
 bool Shader::IsDirty() const {
@@ -107,25 +125,20 @@ void Shader::ResetFrom(Shader& other) {
 
   // library_id_ is intentionally preserved: the scoped registry key
   // (library_id + entrypoint) must remain stable across reloads so the
-  // eviction triple-call in `RegisterSync` lands at the same slot.
+  // eviction in `ScheduleRegistration` lands at the same slot.
   entrypoint_ = std::move(other.entrypoint_);
   stage_ = other.stage_;
   code_mapping_ = std::move(other.code_mapping_);
   inputs_ = std::move(other.inputs_);
   layouts_ = std::move(other.layouts_);
-  uniform_structs_ = std::move(other.uniform_structs_);
-  uniform_textures_ = std::move(other.uniform_textures_);
+  // Swapped rather than mutated, so recordings holding the old reflection
+  // keep valid binding pointers.
+  reflection_ = std::move(other.reflection_);
   descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
-  storage_buffers_ = std::move(other.storage_buffers_);
   workgroup_size_ = other.workgroup_size_;
-  RebuildBindingOrder();
   if (code_changed) {
     is_dirty_ = true;
   }
-}
-
-bool Shader::RegisterSync(Context& context) {
-  return RegisterSync(context.GetContext()).ok();
 }
 
 absl::Status Shader::RegisterSync(impeller::Context& context) {
@@ -162,6 +175,52 @@ absl::Status Shader::RegisterSync(impeller::Context& context) {
   return absl::OkStatus();
 }
 
+const std::shared_future<bool>& Shader::GetRegistration() const {
+  return registration_;
+}
+
+static std::atomic<uint64_t> registration_generation = 0;
+
+uint64_t Shader::GetRegistrationGeneration() {
+  return registration_generation.load(std::memory_order_relaxed);
+}
+
+void Shader::ScheduleRegistration(Context& context) {
+  const bool failed = registration_.valid() &&
+                      registration_.wait_for(std::chrono::seconds(0)) ==
+                          std::future_status::ready &&
+                      !registration_.get();
+  if (!is_dirty_ && !failed) {
+    return;
+  }
+  is_dirty_ = false;
+
+  auto promise = std::make_shared<impeller::NoExceptionPromise<bool>>();
+  registration_ = promise->get_future().share();
+  auto task = [context = context.GetContextShared(), name = GetScopedName(),
+               stage = stage_, code = code_mapping_, promise]() {
+    TRACE_EVENT0("flutter", "FlutterGPU::RegisterShader");
+    auto& library = *context->GetShaderLibrary();
+    // After a reload an earlier version still occupies the scoped slot.
+    // Evict it, and the pipelines built from it, before registering the new
+    // code. Mirrors `RuntimeEffectContents::RegisterShader`.
+    if (auto existing = library.GetFunction(name, stage)) {
+      context->GetPipelineLibrary()->RemovePipelinesWithEntryPoint(existing);
+      library.UnregisterFunction(name, stage);
+      registration_generation.fetch_add(1, std::memory_order_relaxed);
+    }
+    library.RegisterFunction(name, stage, code, [promise](bool result) {
+      promise->set_value(result);
+    });
+  };
+  context.GetReplayQueue()->Post(std::move(task));
+}
+
+std::shared_ptr<const impeller::ShaderFunction> Shader::GetFunctionFromLibrary(
+    impeller::ShaderLibrary& library) {
+  return library.GetFunction(GetScopedName(), stage_);
+}
+
 std::shared_ptr<impeller::VertexDescriptor> Shader::CreateVertexDescriptor()
     const {
   auto vertex_descriptor = std::make_shared<impeller::VertexDescriptor>();
@@ -193,8 +252,8 @@ Shader::GetDescriptorSetLayouts() const {
 
 const Shader::UniformBinding* Shader::GetUniformStruct(
     const std::string& name) const {
-  auto uniform = uniform_structs_.find(name);
-  if (uniform == uniform_structs_.end()) {
+  auto uniform = reflection_->uniform_structs.find(name);
+  if (uniform == reflection_->uniform_structs.end()) {
     return nullptr;
   }
   return &uniform->second;
@@ -202,8 +261,8 @@ const Shader::UniformBinding* Shader::GetUniformStruct(
 
 const Shader::TextureBinding* Shader::GetUniformTexture(
     const std::string& name) const {
-  auto uniform = uniform_textures_.find(name);
-  if (uniform == uniform_textures_.end()) {
+  auto uniform = reflection_->uniform_textures.find(name);
+  if (uniform == reflection_->uniform_textures.end()) {
     return nullptr;
   }
   return &uniform->second;
@@ -211,8 +270,8 @@ const Shader::TextureBinding* Shader::GetUniformTexture(
 
 const Shader::StorageBufferBinding* Shader::GetStorageBuffer(
     const std::string& name) const {
-  auto storage_buffer = storage_buffers_.find(name);
-  if (storage_buffer == storage_buffers_.end()) {
+  auto storage_buffer = reflection_->storage_buffers.find(name);
+  if (storage_buffer == reflection_->storage_buffers.end()) {
     return nullptr;
   }
   return &storage_buffer->second;
@@ -227,8 +286,9 @@ int Shader::GetUniformStructIndex(const std::string& name) const {
   if (binding == nullptr) {
     return -1;
   }
-  for (size_t i = 0; i < uniform_struct_order_.size(); i++) {
-    if (uniform_struct_order_[i] == binding) {
+  const auto& order = reflection_->uniform_struct_order;
+  for (size_t i = 0; i < order.size(); i++) {
+    if (order[i] == binding) {
       return static_cast<int>(i);
     }
   }
@@ -236,10 +296,11 @@ int Shader::GetUniformStructIndex(const std::string& name) const {
 }
 
 const Shader::UniformBinding* Shader::GetUniformStructAt(int index) const {
-  if (index < 0 || static_cast<size_t>(index) >= uniform_struct_order_.size()) {
+  const auto& order = reflection_->uniform_struct_order;
+  if (index < 0 || static_cast<size_t>(index) >= order.size()) {
     return nullptr;
   }
-  return uniform_struct_order_[index];
+  return order[index];
 }
 
 int Shader::GetUniformTextureIndex(const std::string& name) const {
@@ -247,8 +308,9 @@ int Shader::GetUniformTextureIndex(const std::string& name) const {
   if (binding == nullptr) {
     return -1;
   }
-  for (size_t i = 0; i < uniform_texture_order_.size(); i++) {
-    if (uniform_texture_order_[i] == binding) {
+  const auto& order = reflection_->uniform_texture_order;
+  for (size_t i = 0; i < order.size(); i++) {
+    if (order[i] == binding) {
       return static_cast<int>(i);
     }
   }
@@ -256,11 +318,11 @@ int Shader::GetUniformTextureIndex(const std::string& name) const {
 }
 
 const Shader::TextureBinding* Shader::GetUniformTextureAt(int index) const {
-  if (index < 0 ||
-      static_cast<size_t>(index) >= uniform_texture_order_.size()) {
+  const auto& order = reflection_->uniform_texture_order;
+  if (index < 0 || static_cast<size_t>(index) >= order.size()) {
     return nullptr;
   }
-  return uniform_texture_order_[index];
+  return order[index];
 }
 
 int Shader::GetStorageBufferIndex(const std::string& name) const {
@@ -268,8 +330,9 @@ int Shader::GetStorageBufferIndex(const std::string& name) const {
   if (binding == nullptr) {
     return -1;
   }
-  for (size_t i = 0; i < storage_buffer_order_.size(); i++) {
-    if (storage_buffer_order_[i] == binding) {
+  const auto& order = reflection_->storage_buffer_order;
+  for (size_t i = 0; i < order.size(); i++) {
+    if (order[i] == binding) {
       return static_cast<int>(i);
     }
   }
@@ -278,28 +341,11 @@ int Shader::GetStorageBufferIndex(const std::string& name) const {
 
 const Shader::StorageBufferBinding* Shader::GetStorageBufferAt(
     int index) const {
-  if (index < 0 || static_cast<size_t>(index) >= storage_buffer_order_.size()) {
+  const auto& order = reflection_->storage_buffer_order;
+  if (index < 0 || static_cast<size_t>(index) >= order.size()) {
     return nullptr;
   }
-  return storage_buffer_order_[index];
-}
-
-void Shader::RebuildBindingOrder() {
-  uniform_struct_order_.clear();
-  uniform_struct_order_.reserve(uniform_structs_.size());
-  for (const auto& entry : uniform_structs_) {
-    uniform_struct_order_.push_back(&entry.second);
-  }
-  uniform_texture_order_.clear();
-  uniform_texture_order_.reserve(uniform_textures_.size());
-  for (const auto& entry : uniform_textures_) {
-    uniform_texture_order_.push_back(&entry.second);
-  }
-  storage_buffer_order_.clear();
-  storage_buffer_order_.reserve(storage_buffers_.size());
-  for (const auto& entry : storage_buffers_) {
-    storage_buffer_order_.push_back(&entry.second);
-  }
+  return order[index];
 }
 
 }  // namespace gpu

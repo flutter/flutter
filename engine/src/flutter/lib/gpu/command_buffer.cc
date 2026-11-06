@@ -5,11 +5,9 @@
 #include "flutter/lib/gpu/command_buffer.h"
 
 #include "dart_api.h"
-#include "fml/logging.h"
+#include "flutter/lib/gpu/replay.h"
 #include "fml/make_copyable.h"
-#include "impeller/core/buffer_view.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/render_pass.h"
 #include "lib/ui/ui_dart_state.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -18,120 +16,60 @@ namespace gpu {
 
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, CommandBuffer);
 
-CommandBuffer::CommandBuffer(
-    std::shared_ptr<impeller::Context> context,
-    std::shared_ptr<impeller::CommandBuffer> command_buffer)
+CommandBuffer::CommandBuffer(std::shared_ptr<impeller::Context> context,
+                             std::shared_ptr<ReplayQueue> replay_queue)
     : context_(std::move(context)),
-      command_buffer_(std::move(command_buffer)) {}
+      replay_queue_(replay_queue
+                        ? std::move(replay_queue)
+                        : std::make_shared<ReplayQueue>(context_, nullptr)),
+      encoder_(std::make_shared<CommandBufferEncoder>(replay_queue_)) {}
 
-CommandBuffer::~CommandBuffer() = default;
-
-bool CommandBuffer::Encodable::EncodeCommands() const {
-  if (render_pass) {
-    return render_pass->EncodeCommands();
+CommandBuffer::~CommandBuffer() {
+  // Never submitted. The Impeller command buffer belongs to the replay thread.
+  if (encoder_) {
+    replay_queue_->Post(
+        [encoder = std::move(encoder_)]() mutable { encoder.reset(); });
   }
-  if (blit_pass) {
-    return blit_pass->EncodeCommands();
-  }
-  if (compute_pass) {
-    return compute_pass->EncodeCommands();
-  }
-  return false;
 }
 
-std::shared_ptr<impeller::CommandBuffer> CommandBuffer::GetCommandBuffer() {
-  return command_buffer_;
-}
-
-std::shared_ptr<impeller::RenderPass> CommandBuffer::CreateRenderPass(
-    const impeller::RenderTarget& render_target) {
-  if (!EndOpenPass()) {
+PassRecording* CommandBuffer::BeginPass(PassRecording::Kind kind,
+                                        const void* owner) {
+  if (submitted_) {
     return nullptr;
   }
-  auto render_pass = command_buffer_->CreateRenderPass(render_target);
-  if (!render_pass) {
-    return nullptr;
-  }
-  Encodable encodable;
-  encodable.render_pass = render_pass;
-  encodables_.push_back(std::move(encodable));
-  has_open_pass_ = true;
-  return render_pass;
+  EndOpenPass();
+  open_pass_ = PassRecording::Acquire(kind);
+  open_pass_owner_ = owner;
+  return open_pass_.get();
 }
 
-bool CommandBuffer::EndRenderPass(const impeller::RenderPass* render_pass) {
-  if (!render_pass || !has_open_pass_ ||
-      encodables_.back().render_pass.get() != render_pass) {
-    return true;
+void CommandBuffer::EndPass(const void* owner) {
+  if (open_pass_ && open_pass_owner_ == owner) {
+    EndOpenPass();
   }
-  return EndOpenPass();
 }
 
-std::shared_ptr<impeller::ComputePass> CommandBuffer::CreateComputePass() {
-  if (!EndOpenPass()) {
-    return nullptr;
+void CommandBuffer::EndOpenPass() {
+  if (!open_pass_) {
+    return;
   }
-  auto compute_pass = command_buffer_->CreateComputePass();
-  if (!compute_pass) {
-    return nullptr;
-  }
-  Encodable encodable;
-  encodable.compute_pass = compute_pass;
-  encodables_.push_back(std::move(encodable));
-  has_open_pass_ = true;
-  return compute_pass;
-}
-
-absl::Status CommandBuffer::EndComputePass(
-    const impeller::ComputePass* compute_pass) {
-  FML_DCHECK(compute_pass);
-  if (!has_open_pass_ ||
-      encodables_.back().compute_pass.get() != compute_pass) {
-    return absl::OkStatus();
-  }
-  if (!EndOpenPass()) {
-    return absl::InternalError("Failed to encode the compute pass.");
-  }
-  return absl::OkStatus();
+  open_pass_owner_ = nullptr;
+  recorded_bytes_ += open_pass_->ops.GetAllocatedSize();
+  replay_queue_->Post(fml::MakeCopyable(
+      [encoder = encoder_, recording = std::move(open_pass_)]() mutable {
+        encoder->Encode(std::move(recording));
+      }));
 }
 
 const std::shared_ptr<impeller::Context>& CommandBuffer::GetContext() const {
   return context_;
 }
 
-bool CommandBuffer::EndOpenPass() {
-  if (!has_open_pass_) {
-    return true;
+PassRecording* CommandBuffer::OpenBlitPass() {
+  if (open_pass_ && open_pass_->GetKind() == PassRecording::Kind::kBlit) {
+    return open_pass_.get();
   }
-  has_open_pass_ = false;
-  // GLES passes are encoded at submit, on the raster thread.
-  if (context_->GetBackendType() == impeller::Context::BackendType::kOpenGLES) {
-    return true;
-  }
-  if (!encodables_.back().EncodeCommands()) {
-    encoding_failed_ = true;
-    return false;
-  }
-  return true;
-}
-
-std::shared_ptr<impeller::BlitPass> CommandBuffer::GetOrCreateBlitPass() {
-  // Consecutive copies share one blit pass.
-  if (has_open_pass_ && encodables_.back().blit_pass) {
-    return encodables_.back().blit_pass;
-  }
-  if (!EndOpenPass()) {
-    return nullptr;
-  }
-  auto blit_pass = command_buffer_->CreateBlitPass();
-  if (!blit_pass) {
-    return nullptr;
-  }
-  Encodable encodable;
-  encodable.blit_pass = blit_pass;
-  encodables_.push_back(std::move(encodable));
-  has_open_pass_ = true;
-  return blit_pass;
+  return BeginPass(PassRecording::Kind::kBlit, nullptr);
 }
 
 bool CommandBuffer::CopyBufferToTexture(DeviceBuffer& source,
@@ -141,41 +79,63 @@ bool CommandBuffer::CopyBufferToTexture(DeviceBuffer& source,
                                         impeller::IRect destination_region,
                                         uint32_t mip_level,
                                         uint32_t slice) {
-  auto blit_pass = GetOrCreateBlitPass();
-  if (!blit_pass) {
+  const size_t source_size =
+      source.GetBuffer()->GetDeviceBufferDescriptor().size;
+  if (source_offset > source_size ||
+      source_length > source_size - source_offset) {
     return false;
   }
-  impeller::BufferView source_view(
-      source.GetBuffer(), impeller::Range(source_offset, source_length));
-  return blit_pass->AddCopy(
-      std::move(source_view), destination.GetTexture(), destination_region,
-      /*label=*/"CommandBuffer.copyBufferToTexture", mip_level, slice);
+  PassRecording* blits = OpenBlitPass();
+  if (!blits) {
+    return false;
+  }
+  blits->Retain(source.GetRetainStamp(), source.GetBuffer());
+  blits->Retain(destination.GetRetainStamp(), destination.GetTexture());
+  auto* op = blits->ops.Append<CopyBufferToTextureOp>();
+  op->source = source.GetBuffer().get();
+  op->source_offset = source_offset;
+  op->source_length = source_length;
+  op->destination = destination.GetTexture().get();
+  op->destination_region = destination_region;
+  op->mip_level = mip_level;
+  op->slice = slice;
+  return true;
 }
 
 bool CommandBuffer::CopyTextureToBuffer(Texture& source,
                                         impeller::IRect source_region,
                                         DeviceBuffer& destination,
                                         size_t destination_offset) {
-  auto blit_pass = GetOrCreateBlitPass();
-  if (!blit_pass) {
+  PassRecording* blits = OpenBlitPass();
+  if (!blits) {
     return false;
   }
-  return blit_pass->AddCopy(source.GetTexture(), destination.GetBuffer(),
-                            source_region, destination_offset,
-                            "CommandBuffer.copyTextureToBuffer");
+  blits->Retain(source.GetRetainStamp(), source.GetTexture());
+  blits->Retain(destination.GetRetainStamp(), destination.GetBuffer());
+  auto* op = blits->ops.Append<CopyTextureToBufferOp>();
+  op->source = source.GetTexture().get();
+  op->destination = destination.GetBuffer().get();
+  op->source_region = source_region;
+  op->destination_offset = destination_offset;
+  return true;
 }
 
 bool CommandBuffer::CopyTextureToTexture(Texture& source,
                                          Texture& destination,
                                          impeller::IRect source_region,
                                          impeller::IPoint destination_origin) {
-  auto blit_pass = GetOrCreateBlitPass();
-  if (!blit_pass) {
+  PassRecording* blits = OpenBlitPass();
+  if (!blits) {
     return false;
   }
-  return blit_pass->AddCopy(source.GetTexture(), destination.GetTexture(),
-                            source_region, destination_origin,
-                            "CommandBuffer.copyTextureToTexture");
+  blits->Retain(source.GetRetainStamp(), source.GetTexture());
+  blits->Retain(destination.GetRetainStamp(), destination.GetTexture());
+  auto* op = blits->ops.Append<CopyTextureToTextureOp>();
+  op->source = source.GetTexture().get();
+  op->destination = destination.GetTexture().get();
+  op->source_region = source_region;
+  op->destination_origin = destination_origin;
+  return true;
 }
 
 bool CommandBuffer::AddCompletionCallback(
@@ -198,11 +158,8 @@ bool CommandBuffer::Submit(
   if (submitted_) {
     return false;
   }
-  submitted_ = true;
-
-  // On Metal and Vulkan this encodes the last pass. Every earlier pass was
-  // encoded when it ended.
   EndOpenPass();
+  submitted_ = true;
 
   std::vector<impeller::CommandBuffer::CompletionCallback> callbacks =
       std::move(completion_callbacks_);
@@ -220,50 +177,20 @@ bool CommandBuffer::Submit(
         };
   }
 
-  // For the GLES backend, command queue submission just flushes the reactor,
-  // which needs to happen on the raster thread.
-  if (context_->GetBackendType() == impeller::Context::BackendType::kOpenGLES) {
-    auto dart_state = flutter::UIDartState::Current();
-    auto& task_runners = dart_state->GetTaskRunners();
-
-    task_runners.GetRasterTaskRunner()->PostTask(
-        fml::MakeCopyable([context = context_, command_buffer = command_buffer_,
-                           completion_callback = combined_completion_callback,
-                           encodables = encodables_]() mutable {
-          for (auto& encodable : encodables) {
-            if (!encodable.EncodeCommands()) {
-              if (completion_callback) {
-                completion_callback(impeller::CommandBuffer::Status::kError);
-              }
-              context->DisposeThreadLocalCachedResources();
-              return;
-            }
-          }
-
-          auto status = context->GetCommandQueue()->Submit({command_buffer},
-                                                           completion_callback);
-          if (!status.ok() && completion_callback) {
-            completion_callback(impeller::CommandBuffer::Status::kError);
-          }
-          context->DisposeThreadLocalCachedResources();
-        }));
-    return true;
+  replay_queue_->AddInFlightBytes(recorded_bytes_);
+  if (replay_queue_->RunsOnCallingThread()) {
+    return CommandBufferEncoder::Submit(std::move(encoder_),
+                                        std::move(combined_completion_callback),
+                                        recorded_bytes_);
   }
-
-  if (encoding_failed_) {
-    if (combined_completion_callback) {
-      combined_completion_callback(impeller::CommandBuffer::Status::kError);
-    }
-    return false;
-  }
-
-  auto status = context_->GetCommandQueue()->Submit(
-      {command_buffer_}, combined_completion_callback);
-  context_->DisposeThreadLocalCachedResources();
-  if (!status.ok() && combined_completion_callback) {
-    combined_completion_callback(impeller::CommandBuffer::Status::kError);
-  }
-  return status.ok();
+  replay_queue_->Post(
+      fml::MakeCopyable([encoder = std::move(encoder_),
+                         completion = std::move(combined_completion_callback),
+                         bytes = recorded_bytes_]() mutable {
+        CommandBufferEncoder::Submit(std::move(encoder), std::move(completion),
+                                     bytes);
+      }));
+  return true;
 }
 
 }  // namespace gpu
@@ -277,8 +204,7 @@ bool InternalFlutterGpu_CommandBuffer_Initialize(
     Dart_Handle wrapper,
     flutter::gpu::Context* contextWrapper) {
   auto res = fml::MakeRefCounted<flutter::gpu::CommandBuffer>(
-      contextWrapper->GetContextShared(),
-      contextWrapper->GetContext().CreateCommandBuffer());
+      contextWrapper->GetContextShared(), contextWrapper->GetReplayQueue());
   res->AssociateWithDartWrapper(wrapper);
 
   return true;

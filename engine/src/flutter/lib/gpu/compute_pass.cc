@@ -4,6 +4,7 @@
 
 #include "flutter/lib/gpu/compute_pass.h"
 
+#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -11,7 +12,6 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/capabilities.h"
-#include "impeller/renderer/sampler_library.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "tonic/converter/dart_converter.h"
@@ -26,8 +26,7 @@ ComputePass::ComputePass() = default;
 ComputePass::~ComputePass() = default;
 
 absl::Status ComputePass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
-  compute_pass_ = command_buffer.CreateComputePass();
-  if (!compute_pass_) {
+  if (!command_buffer.BeginPass(PassRecording::Kind::kCompute, this)) {
     return absl::InternalError("Failed to begin ComputePass.");
   }
   context_ = command_buffer.GetContext();
@@ -35,13 +34,10 @@ absl::Status ComputePass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
   return absl::OkStatus();
 }
 
-absl::Status ComputePass::End() {
-  if (!command_buffer_) {
-    return absl::OkStatus();
+void ComputePass::End() {
+  if (command_buffer_) {
+    command_buffer_->EndPass(this);
   }
-  absl::Status status = command_buffer_->EndComputePass(compute_pass_.get());
-  command_buffer_ = nullptr;
-  return status;
 }
 
 const std::shared_ptr<impeller::Context>& ComputePass::GetContext() const {
@@ -131,21 +127,19 @@ absl::Status ComputePass::BindTexture(
     const Shader& shader,
     const Shader::TextureBinding* binding,
     std::shared_ptr<const impeller::Texture> texture,
-    const impeller::raw_ptr<const impeller::Sampler>& sampler) {
+    const impeller::SamplerDescriptor& sampler) {
   if (absl::Status status = ValidateBinding(shader, binding); !status.ok()) {
     return status;
   }
   if (!texture) {
     return absl::InvalidArgumentError("The texture is null.");
   }
-  if (!sampler) {
-    return absl::InvalidArgumentError("The sampler is null.");
-  }
-  texture_bindings_.insert_or_assign(&binding->metadata,
-                                     TextureBinding{
-                                         .texture = std::move(texture),
-                                         .sampler = sampler,
-                                     });
+  texture_bindings_.insert_or_assign(
+      &binding->metadata,
+      TextureBinding{
+          .texture = std::move(texture),
+          .sampler_key = impeller::SamplerDescriptor::ToKey(sampler),
+      });
   bindings_dirty_ = true;
   return absl::OkStatus();
 }
@@ -224,7 +218,33 @@ static bool IsOptimizedOut(size_t backend_index) {
   return backend_index == impeller::kOptimizedOutBinding;
 }
 
+// Records a bind of [view]. The recording holds the buffer until the GPU
+// finishes, since the op only points at it.
+static void RecordBufferBind(PassRecording& recording,
+                             impeller::DescriptorType type,
+                             const impeller::ShaderUniformSlot& slot,
+                             const impeller::ShaderMetadata& metadata,
+                             impeller::BufferView view) {
+  auto* op = recording.ops.Append<BindComputeBufferOp>();
+  op->type = type;
+  op->slot = &slot;
+  op->metadata = &metadata;
+  op->buffer = view.GetBuffer();
+  op->offset = view.GetRange().offset;
+  op->length = view.GetRange().length;
+  recording.Retain(view.TakeBuffer());
+}
+
 absl::Status ComputePass::ApplyBindings(const Shader& shader) {
+  PassRecording* recording = GetRecording();
+  if (!recording) {
+    return absl::FailedPreconditionError("The ComputePass is not recording.");
+  }
+  // The slots and metadata the ops point at live in the reflection.
+  const std::shared_ptr<const Shader::Reflection>& reflection =
+      shader.GetReflection();
+  recording->Retain(reflection->retain_stamp, reflection);
+
   auto missing = [&shader](std::string_view kind, std::string_view name) {
     return absl::FailedPreconditionError(absl::StrCat(
         "The compute shader '", shader.GetEntrypoint(), "' declares the ", kind,
@@ -248,9 +268,8 @@ absl::Status ComputePass::ApplyBindings(const Shader& shader) {
     if (IsOptimizedOut(binding->slot.ext_res_0)) {
       continue;
     }
-    compute_pass_->BindResource(impeller::ShaderStage::kCompute,
-                                impeller::DescriptorType::kUniformBuffer,
-                                binding->slot, &binding->metadata, *view);
+    RecordBufferBind(*recording, impeller::DescriptorType::kUniformBuffer,
+                     binding->slot, binding->metadata, *view);
   }
 
   for (int i = 0; const Shader::StorageBufferBinding* binding =
@@ -270,41 +289,43 @@ absl::Status ComputePass::ApplyBindings(const Shader& shader) {
     if (IsOptimizedOut(binding->slot.ext_res_0)) {
       continue;
     }
-    compute_pass_->BindResource(impeller::ShaderStage::kCompute,
-                                impeller::DescriptorType::kStorageBuffer,
-                                binding->slot, &binding->metadata, *view);
+    RecordBufferBind(*recording, impeller::DescriptorType::kStorageBuffer,
+                     binding->slot, binding->metadata, *view);
   }
 
   for (int i = 0;
        const Shader::TextureBinding* binding = shader.GetUniformTextureAt(i);
        i++) {
     std::shared_ptr<const impeller::Texture> texture;
-    impeller::raw_ptr<const impeller::Sampler> sampler;
+    uint64_t sampler_key = 0;
     if (auto found = texture_bindings_.find(&binding->metadata);
         found != texture_bindings_.end()) {
       texture = found->second.texture;
-      sampler = found->second.sampler;
+      sampler_key = found->second.sampler_key;
     } else if (const BindingSet::TextureBinding* set_binding =
                    FindTextureInSets(binding_sets_, &binding->metadata)) {
       texture = set_binding->texture;
-      sampler = set_binding->sampler;
+      sampler_key = set_binding->sampler_key;
     } else {
       return missing("texture", binding->metadata.name);
     }
     if (IsOptimizedOut(binding->slot.texture_index)) {
       continue;
     }
-    compute_pass_->BindResource(impeller::ShaderStage::kCompute,
-                                impeller::DescriptorType::kSampledImage,
-                                binding->slot, &binding->metadata,
-                                std::move(texture), sampler);
+    auto* op = recording->ops.Append<BindComputeTextureOp>();
+    op->slot = &binding->slot;
+    op->metadata = &binding->metadata;
+    op->texture = texture.get();
+    op->sampler_key = sampler_key;
+    recording->Retain(std::move(texture));
   }
 
   return absl::OkStatus();
 }
 
 absl::Status ComputePass::Dispatch(std::array<uint32_t, 3> workgroup_count) {
-  if (!command_buffer_ || !compute_pass_) {
+  PassRecording* recording = GetRecording();
+  if (!recording) {
     return absl::FailedPreconditionError("The ComputePass is not recording.");
   }
   // Nothing to do, like a draw with no vertices.
@@ -334,13 +355,12 @@ absl::Status ComputePass::Dispatch(std::array<uint32_t, 3> workgroup_count) {
   std::shared_ptr<BackendComputePipeline> pipeline =
       std::move(pipeline_or).value();
   if (pipeline != bound_pipeline_) {
-    compute_pass_->SetPipeline(pipeline);
-    bound_pipeline_ = pipeline;
+    recording->ops.Append<SetComputePipelineOp>()->pipeline = pipeline.get();
     // A hot reload can replace the pipeline while this command buffer is
     // still running, and Vulkan does not track pipelines in its command
-    // buffers, so hold this one until the command buffer completes.
-    command_buffer_->AddCompletionCallback(
-        [pipeline](impeller::CommandBuffer::Status) {});
+    // buffers, so the recording holds this one until the work completes.
+    recording->Retain(pipeline);
+    bound_pipeline_ = std::move(pipeline);
     // Rebind for the new pipeline's shader, which can declare other bindings
     // at the same indices.
     bindings_dirty_ = true;
@@ -353,10 +373,9 @@ absl::Status ComputePass::Dispatch(std::array<uint32_t, 3> workgroup_count) {
     bindings_dirty_ = false;
   }
 
-  if (absl::Status status = compute_pass_->Compute(workgroup_count);
-      !status.ok()) {
-    return absl::InternalError(status.message());
-  }
+  auto* op = recording->ops.Append<DispatchOp>();
+  std::copy(workgroup_count.begin(), workgroup_count.end(),
+            op->workgroup_count);
   return absl::OkStatus();
 }
 
@@ -388,7 +407,8 @@ Dart_Handle InternalFlutterGpu_ComputePass_Begin(
 
 Dart_Handle InternalFlutterGpu_ComputePass_End(
     flutter::gpu::ComputePass* wrapper) {
-  return ToDartError(wrapper->End());
+  wrapper->End();
+  return Dart_Null();
 }
 
 void InternalFlutterGpu_ComputePass_BindPipeline(
@@ -442,18 +462,12 @@ bool InternalFlutterGpu_ComputePass_BindTextureIndexed(
     int width_address_mode,
     int height_address_mode,
     int max_anisotropy) {
-  if (!wrapper->GetContext()) {
-    return false;
-  }
-  const impeller::SamplerDescriptor sampler_desc =
-      flutter::gpu::ToImpellerSamplerDescriptor(
-          min_filter, mag_filter, mip_filter, width_address_mode,
-          height_address_mode, max_anisotropy);
   return wrapper
-      ->BindTexture(
-          *shader, shader->GetUniformTextureAt(uniform_texture_index),
-          texture->GetTexture(),
-          wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc))
+      ->BindTexture(*shader, shader->GetUniformTextureAt(uniform_texture_index),
+                    texture->GetTexture(),
+                    flutter::gpu::ToImpellerSamplerDescriptor(
+                        min_filter, mag_filter, mip_filter, width_address_mode,
+                        height_address_mode, max_anisotropy))
       .ok();
 }
 

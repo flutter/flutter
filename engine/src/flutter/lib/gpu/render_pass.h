@@ -5,19 +5,18 @@
 #ifndef FLUTTER_LIB_GPU_RENDER_PASS_H_
 #define FLUTTER_LIB_GPU_RENDER_PASS_H_
 
-#include <array>
 #include <cstdint>
-#include <map>
 #include <memory>
+
 #include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/pipeline_state.h"
+#include "flutter/lib/gpu/recording.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
-#include "impeller/renderer/command.h"
-#include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 #include "lib/gpu/device_buffer.h"
 #include "lib/gpu/render_pipeline.h"
@@ -35,30 +34,36 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   ~RenderPass() override;
 
-  const std::shared_ptr<const impeller::Context>& GetContext() const;
-
   impeller::RenderTarget& GetRenderTarget();
   const impeller::RenderTarget& GetRenderTarget() const;
 
-  impeller::ColorAttachmentDescriptor& GetColorAttachmentDescriptor(
-      size_t color_attachment_index);
+  const PipelineState& GetPipelineState() const { return pipeline_state_; }
 
-  impeller::DepthAttachmentDescriptor& GetDepthAttachmentDescriptor();
+  /// [color_attachment_index] must be less than
+  /// `PipelineState::kMaxColorAttachments`.
+  void SetColorAttachmentDescriptor(
+      size_t color_attachment_index,
+      const impeller::ColorAttachmentDescriptor& descriptor);
 
-  impeller::StencilAttachmentDescriptor& GetStencilFrontAttachmentDescriptor();
+  void SetDepthAttachmentDescriptor(
+      const impeller::DepthAttachmentDescriptor& descriptor);
 
-  impeller::StencilAttachmentDescriptor& GetStencilBackAttachmentDescriptor();
+  void SetStencilFrontAttachmentDescriptor(
+      const impeller::StencilAttachmentDescriptor& descriptor);
 
-  impeller::PipelineDescriptor& GetPipelineDescriptor();
+  void SetStencilBackAttachmentDescriptor(
+      const impeller::StencilAttachmentDescriptor& descriptor);
 
-  /// Ends the command buffer's open pass and starts recording this one.
+  /// Ends the command buffer's open pass and starts recording this one, for
+  /// the command buffer to replay on the raster thread. Fails when the render
+  /// target is invalid or the command buffer was already submitted.
   bool Begin(flutter::gpu::CommandBuffer& command_buffer);
 
   /// Ends this pass if it is still the command buffer's open pass. Does
   /// nothing if a later command already ended it.
-  bool End();
+  void End();
 
-  void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
+  void SetPipeline(RenderPipeline* pipeline);
 
   /// Set the face culling mode for subsequent draws.
   void SetCullMode(impeller::CullMode mode);
@@ -76,101 +81,97 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   /// `RenderPass.maxBindingSets` in `gpu/lib/src/render_pass.dart`.
   static constexpr size_t kMaxBindingSets = 4;
 
+  /// Mirrors `impeller::kMaxVertexBuffers`. Index `i` corresponds to the
+  /// binding declared at slot `i` in the active VertexLayout.
+  static constexpr size_t kMaxVertexBufferSlots = 16;
+
   /// Puts [set] in [slot], replacing whatever was there. Passing a null set
   /// empties the slot. Out of range slots are ignored.
-  void BindSet(size_t slot, fml::RefPtr<BindingSet> set);
+  void BindSet(size_t slot, BindingSet* set);
 
   void ClearBindings();
 
-  /// Append a draw to the underlying render pass. [element_count] is the
-  /// vertex count for a non-indexed draw, or the index count when
-  /// [indexed] is true. [instance_count] is the number of instances to draw.
+  /// Records [binding] of [shader] reading [length_in_bytes] of [buffer] at
+  /// [offset_in_bytes]. Returns false when the binding is missing, the
+  /// shader's stage takes no bindings, or the view runs past the buffer.
+  bool BindUniform(Shader& shader,
+                   const Shader::UniformBinding* binding,
+                   DeviceBuffer& buffer,
+                   size_t offset_in_bytes,
+                   size_t length_in_bytes);
+
+  /// The texture counterpart to `BindUniform`. The sampler is resolved when
+  /// the pass is replayed.
+  bool BindTexture(Shader& shader,
+                   const Shader::TextureBinding* binding,
+                   Texture& texture,
+                   const impeller::SamplerDescriptor& sampler);
+
+  /// Ignored when [slot] is out of range or the view runs past the buffer.
+  void BindVertexBuffer(size_t slot,
+                        DeviceBuffer& buffer,
+                        size_t offset_in_bytes,
+                        size_t length_in_bytes);
+
+  /// Ignored when the view runs past the buffer.
+  void BindIndexBuffer(DeviceBuffer& buffer,
+                       size_t offset_in_bytes,
+                       size_t length_in_bytes,
+                       impeller::IndexType type);
+
+  void SetStencilReference(uint32_t reference);
+
+  void SetScissor(impeller::IRect32 scissor);
+
+  void SetViewport(const impeller::Viewport& viewport);
+
+  /// Records a draw. [element_count] is the vertex count for a non-indexed
+  /// draw, or the index count when [indexed] is true. Returns false when the
+  /// pass is not recording (not begun, or already ended), when an indexed
+  /// draw has no index buffer, or when the backend already failed to build
+  /// the pipeline for the current state. A first build failure is only
+  /// known at replay, so that draw is dropped there and later draws with the
+  /// same state fail here.
   bool Draw(size_t element_count, size_t instance_count, bool indexed);
 
-  /// Whether the next draw must rebuild its backend pipeline. Exposed for
-  /// testing the memoization's dirty tracking.
+  /// Whether the next draw must record the pipeline state. Exposed for
+  /// testing the dirty tracking.
   bool IsPipelineStateDirtyForTesting() const;
 
-  /// Clears the pipeline dirty flag without building a pipeline, so tests
-  /// can observe which mutations re-dirty it.
+  /// Clears the pipeline dirty flag without recording, so tests can observe
+  /// which mutations re-dirty it.
   void ClearPipelineStateDirtyForTesting();
 
-  struct BufferAndUniformSlot {
-    impeller::ShaderUniformSlot slot;
-    impeller::BufferResource view;
-  };
-
-  using BufferUniformMap =
-      std::unordered_map<const flutter::gpu::Shader::UniformBinding*,
-                         BufferAndUniformSlot>;
-  using TextureUniformMap =
-      std::unordered_map<const flutter::gpu::Shader::TextureBinding*,
-                         impeller::TextureAndSampler>;
-
-  BufferUniformMap vertex_uniform_bindings;
-  TextureUniformMap vertex_texture_bindings;
-  BufferUniformMap fragment_uniform_bindings;
-  TextureUniformMap fragment_texture_bindings;
-
-  // Binding sets replayed by every draw, in slot order. Individual binds are
-  // replayed after these, so a bind that collides with a set member wins.
-  std::array<fml::RefPtr<BindingSet>, kMaxBindingSets> binding_sets;
-
-  // Vertex buffers indexed by binding slot. Mirrors
-  // `impeller::kMaxVertexBuffers`; Impeller's HAL caps vertex buffer
-  // bindings at 16 per draw, and index `i` here corresponds to the binding
-  // declared at slot `i` in the active VertexLayout. Devices may impose a
-  // lower per-pipeline limit on the total attribute count across all bound
-  // buffers.
-  static constexpr size_t kMaxVertexBufferSlots = 16;
-  std::array<impeller::BufferView, kMaxVertexBufferSlots> vertex_buffers;
-  // Highest slot index that has been bound on this pass (plus one).
-  size_t vertex_buffer_count = 0;
-  impeller::BufferView index_buffer;
-  impeller::IndexType index_buffer_type = impeller::IndexType::kNone;
-
-  uint32_t stencil_reference = 0;
-  std::optional<impeller::IRect32> scissor;
-  std::optional<impeller::Viewport> viewport;
+  /// The pass's open recording, or null when it is not recording.
+  PassRecording* GetRecordingForTesting() const { return GetRecording(); }
 
  private:
-  /// Lookup an Impeller pipeline by building a descriptor based on the current
-  /// command state, or return the memoized pipeline when that state is
-  /// unchanged since the last draw. Returns null (after a validation log)
-  /// when a stage function cannot be resolved or the backend fails to build
-  /// the pipeline.
-  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
-  GetOrCreatePipeline();
+  /// The recording while this pass is the command buffer's open pass.
+  PassRecording* GetRecording() const {
+    return command_buffer_ ? command_buffer_->GetOpenPass(this) : nullptr;
+  }
 
-  // The non-dirtying counterpart of GetColorAttachmentDescriptor, for the
-  // pipeline rebuild itself.
-  impeller::ColorAttachmentDescriptor& ColorAttachmentDescriptorAt(
-      size_t color_attachment_index);
+  template <typename T>
+  void SetPipelineStateField(T& field, const T& value);
 
-  // The result of building a pipeline for the current pipeline-affecting
-  // state, null when that build failed (memoized so a broken pipeline is
-  // reported once, not per draw). Every mutable-state accessor above marks
-  // the state dirty; consecutive draws with unchanged state reuse this
-  // directly, skipping the descriptor rebuild, hash, and pipeline-library
-  // lookup.
-  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
-      memoized_pipeline_;
-  bool pipeline_state_dirty_ = true;
+  /// Fills in the parts of the pipeline state the render target decides.
+  void CaptureRenderTargetState();
+
+  /// Records the pipeline state for the draws that follow.
+  void RecordPipelineState(PassRecording& recording);
 
   impeller::RenderTarget render_target_;
-  std::shared_ptr<impeller::RenderPass> render_pass_;
+  // Set by `Begin`. A pass records only while the command buffer says it is
+  // the open pass, so nothing has to tell the pass when it ended.
   fml::RefPtr<CommandBuffer> command_buffer_;
-
-  // Command encoding state.
   fml::RefPtr<RenderPipeline> render_pipeline_;
-  impeller::PipelineDescriptor pipeline_descriptor_;
 
-  // Pipeline descriptor layout state. We always keep track of this state,
-  // but we'll only apply it as necessary to match the RenderTarget.
-  std::map<size_t, impeller::ColorAttachmentDescriptor> color_descriptors_;
-  impeller::StencilAttachmentDescriptor stencil_front_desc_;
-  impeller::StencilAttachmentDescriptor stencil_back_desc_;
-  impeller::DepthAttachmentDescriptor depth_desc_;
+  PipelineState pipeline_state_;
+  bool pipeline_state_dirty_ = true;
+  // Whether the backend already failed to build the current state.
+  bool pipeline_known_failed_ = false;
+
+  impeller::IndexType index_buffer_type_ = impeller::IndexType::kNone;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPass);
 };

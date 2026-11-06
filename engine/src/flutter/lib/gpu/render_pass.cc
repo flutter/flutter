@@ -3,26 +3,20 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/gpu/render_pass.h"
-#include <future>
+
+#include <algorithm>
+#include <cstring>
 #include <memory>
 
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/gpu/render_pipeline.h"
 #include "flutter/lib/gpu/shader.h"
-#include "fml/make_copyable.h"
 #include "fml/memory/ref_ptr.h"
-#include "impeller/base/validation.h"
-#include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/geometry/color.h"
-#include "impeller/renderer/command.h"
-#include "impeller/renderer/pipeline.h"
-#include "impeller/renderer/pipeline_descriptor.h"
-#include "impeller/renderer/pipeline_library.h"
 #include "lib/gpu/context.h"
-#include "lib/ui/ui_dart_state.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -34,10 +28,6 @@ RenderPass::RenderPass() = default;
 
 RenderPass::~RenderPass() = default;
 
-const std::shared_ptr<const impeller::Context>& RenderPass::GetContext() const {
-  return render_pass_->GetContext();
-}
-
 impeller::RenderTarget& RenderPass::GetRenderTarget() {
   pipeline_state_dirty_ = true;
   return render_target_;
@@ -45,44 +35,6 @@ impeller::RenderTarget& RenderPass::GetRenderTarget() {
 
 const impeller::RenderTarget& RenderPass::GetRenderTarget() const {
   return render_target_;
-}
-
-impeller::ColorAttachmentDescriptor& RenderPass::ColorAttachmentDescriptorAt(
-    size_t color_attachment_index) {
-  auto color = color_descriptors_.find(color_attachment_index);
-  if (color == color_descriptors_.end()) {
-    return color_descriptors_[color_attachment_index] = {};
-  }
-  return color->second;
-}
-
-impeller::ColorAttachmentDescriptor& RenderPass::GetColorAttachmentDescriptor(
-    size_t color_attachment_index) {
-  pipeline_state_dirty_ = true;
-  return ColorAttachmentDescriptorAt(color_attachment_index);
-}
-
-impeller::DepthAttachmentDescriptor&
-RenderPass::GetDepthAttachmentDescriptor() {
-  pipeline_state_dirty_ = true;
-  return depth_desc_;
-}
-
-impeller::StencilAttachmentDescriptor&
-RenderPass::GetStencilFrontAttachmentDescriptor() {
-  pipeline_state_dirty_ = true;
-  return stencil_front_desc_;
-}
-
-impeller::StencilAttachmentDescriptor&
-RenderPass::GetStencilBackAttachmentDescriptor() {
-  pipeline_state_dirty_ = true;
-  return stencil_back_desc_;
-}
-
-impeller::PipelineDescriptor& RenderPass::GetPipelineDescriptor() {
-  pipeline_state_dirty_ = true;
-  return pipeline_descriptor_;
 }
 
 bool RenderPass::IsPipelineStateDirtyForTesting() const {
@@ -93,300 +45,302 @@ void RenderPass::ClearPipelineStateDirtyForTesting() {
   pipeline_state_dirty_ = false;
 }
 
+void RenderPass::CaptureRenderTargetState() {
+  pipeline_state_.sample_count = render_target_.GetSampleCount();
+
+  const impeller::PixelFormat color_format =
+      render_target_.GetRenderTargetPixelFormat();
+  uint8_t color_attachment_count = 0;
+  render_target_.IterateAllColorAttachments(
+      [&](size_t index, const impeller::ColorAttachment& attachment) -> bool {
+        if (index < PipelineState::kMaxColorAttachments) {
+          pipeline_state_.colors[index].format = color_format;
+          color_attachment_count =
+              std::max(color_attachment_count, static_cast<uint8_t>(index + 1));
+        }
+        return true;
+      });
+  pipeline_state_.color_attachment_count = color_attachment_count;
+
+  const auto& stencil = render_target_.GetStencilAttachment();
+  pipeline_state_.stencil_format =
+      stencil && impeller::IsStencilWritable(
+                     stencil->texture->GetTextureDescriptor().format)
+          ? stencil->texture->GetTextureDescriptor().format
+          : impeller::PixelFormat::kUnknown;
+
+  const auto& depth = render_target_.GetDepthAttachment();
+  pipeline_state_.depth_format =
+      depth && impeller::IsDepthWritable(
+                   depth->texture->GetTextureDescriptor().format)
+          ? depth->texture->GetTextureDescriptor().format
+          : impeller::PixelFormat::kUnknown;
+}
+
 bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
-  render_pass_ = command_buffer.CreateRenderPass(render_target_);
-  if (!render_pass_) {
+  if (command_buffer_ || !render_target_.IsValid()) {
     return false;
   }
+  PassRecording* recording =
+      command_buffer.BeginPass(PassRecording::Kind::kRender, this);
+  if (!recording) {
+    return false;
+  }
+  recording->render_target = render_target_;
   command_buffer_ = fml::Ref(&command_buffer);
+  CaptureRenderTargetState();
+  pipeline_state_dirty_ = true;
   return true;
 }
 
-bool RenderPass::End() {
-  if (!command_buffer_) {
-    return true;
+void RenderPass::End() {
+  if (command_buffer_) {
+    command_buffer_->EndPass(this);
   }
-  bool result = command_buffer_->EndRenderPass(render_pass_.get());
-  command_buffer_ = nullptr;
-  return result;
 }
 
-void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
-  if (render_pipeline_.get() == pipeline.get()) {
+void RenderPass::SetPipeline(RenderPipeline* pipeline) {
+  if (render_pipeline_.get() == pipeline) {
     return;
   }
   pipeline_state_dirty_ = true;
-  // On debug this makes a difference, but not on release builds.
-  // NOLINTNEXTLINE(performance-move-const-arg)
-  render_pipeline_ = std::move(pipeline);
+  render_pipeline_ = fml::Ref(pipeline);
 }
 
-// The setters below assign through the pipeline descriptor directly rather
-// than through GetPipelineDescriptor, which would dirty the state
-// unconditionally. Callers re-send the same fixed-function state ahead of
-// most draws, and dirtying on a redundant assignment would rebuild the
-// pipeline for every one of them.
+// Callers re-send the same fixed-function state ahead of most draws, and
+// dirtying on a redundant assignment would record the pipeline state for
+// every one of them.
+template <typename T>
+void RenderPass::SetPipelineStateField(T& field, const T& value) {
+  if (!(field == value)) {
+    field = value;
+    pipeline_state_dirty_ = true;
+  }
+}
 
 void RenderPass::SetCullMode(impeller::CullMode mode) {
-  if (pipeline_descriptor_.GetCullMode() == mode) {
-    return;
-  }
-  pipeline_descriptor_.SetCullMode(mode);
-  pipeline_state_dirty_ = true;
+  SetPipelineStateField(pipeline_state_.cull_mode, mode);
 }
 
 void RenderPass::SetWindingOrder(impeller::WindingOrder order) {
-  if (pipeline_descriptor_.GetWindingOrder() == order) {
-    return;
-  }
-  pipeline_descriptor_.SetWindingOrder(order);
-  pipeline_state_dirty_ = true;
+  SetPipelineStateField(pipeline_state_.winding_order, order);
 }
 
 void RenderPass::SetPrimitiveType(impeller::PrimitiveType type) {
-  if (pipeline_descriptor_.GetPrimitiveType() == type) {
-    return;
-  }
-  pipeline_descriptor_.SetPrimitiveType(type);
-  pipeline_state_dirty_ = true;
+  SetPipelineStateField(pipeline_state_.primitive_type, type);
 }
 
 void RenderPass::SetPolygonMode(impeller::PolygonMode mode) {
-  if (pipeline_descriptor_.GetPolygonMode() == mode) {
-    return;
-  }
-  pipeline_descriptor_.SetPolygonMode(mode);
-  pipeline_state_dirty_ = true;
+  SetPipelineStateField(pipeline_state_.polygon_mode, mode);
 }
 
-void RenderPass::BindSet(size_t slot, fml::RefPtr<BindingSet> set) {
-  if (slot >= kMaxBindingSets) {
+void RenderPass::SetColorAttachmentDescriptor(
+    size_t color_attachment_index,
+    const impeller::ColorAttachmentDescriptor& descriptor) {
+  FML_DCHECK(color_attachment_index < PipelineState::kMaxColorAttachments);
+  SetPipelineStateField(pipeline_state_.colors[color_attachment_index],
+                        descriptor);
+}
+
+void RenderPass::SetDepthAttachmentDescriptor(
+    const impeller::DepthAttachmentDescriptor& descriptor) {
+  SetPipelineStateField(pipeline_state_.depth, descriptor);
+}
+
+void RenderPass::SetStencilFrontAttachmentDescriptor(
+    const impeller::StencilAttachmentDescriptor& descriptor) {
+  SetPipelineStateField(pipeline_state_.stencil_front, descriptor);
+}
+
+void RenderPass::SetStencilBackAttachmentDescriptor(
+    const impeller::StencilAttachmentDescriptor& descriptor) {
+  SetPipelineStateField(pipeline_state_.stencil_back, descriptor);
+}
+
+void RenderPass::BindSet(size_t slot, BindingSet* set) {
+  PassRecording* recording = GetRecording();
+  if (!recording || slot >= kMaxBindingSets) {
     return;
   }
-  // On debug this makes a difference, but not on release builds.
-  // NOLINTNEXTLINE(performance-move-const-arg)
-  binding_sets[slot] = std::move(set);
+  auto* op = recording->ops.Append<BindSetOp>();
+  op->slot = static_cast<uint32_t>(slot);
+  op->contents = nullptr;
+  if (set) {
+    const std::shared_ptr<const BindingSet::Contents>& contents =
+        set->Snapshot();
+    recording->Retain(contents->retain_stamp, contents);
+    op->contents = contents.get();
+  }
 }
 
 void RenderPass::ClearBindings() {
-  vertex_uniform_bindings.clear();
-  vertex_texture_bindings.clear();
-  fragment_uniform_bindings.clear();
-  fragment_texture_bindings.clear();
-  for (auto& set : binding_sets) {
-    set = nullptr;
+  index_buffer_type_ = impeller::IndexType::kNone;
+  if (PassRecording* recording = GetRecording()) {
+    recording->ops.Append<ClearBindingsOp>();
   }
-  for (auto& buffer : vertex_buffers) {
-    buffer = {};
-  }
-  vertex_buffer_count = 0;
-  index_buffer = {};
-  index_buffer_type = impeller::IndexType::kNone;
 }
 
-std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
-RenderPass::GetOrCreatePipeline() {
-  // Consecutive draws overwhelmingly reuse the same pipeline state; skip the
-  // descriptor rebuild, hash, and pipeline-library lookup entirely until a
-  // state mutation marks it dirty. Draw rates reach tens of thousands per
-  // frame, so this path stays free of per-draw allocation and hashing. A
-  // memoized null is a build failure that was already reported for this
-  // exact state; returning it without retrying keeps a broken pipeline from
-  // re-logging on every draw.
-  if (!pipeline_state_dirty_) {
-    return memoized_pipeline_;
+// Whether a shader stage can take resource bindings from a render pass.
+static bool IsRenderStage(impeller::ShaderStage stage) {
+  return stage == impeller::ShaderStage::kVertex ||
+         stage == impeller::ShaderStage::kFragment;
+}
+
+// Whether a view fits in [buffer]. Written so that neither term can overflow.
+static bool IsViewInBounds(const DeviceBuffer& buffer,
+                           size_t offset_in_bytes,
+                           size_t length_in_bytes) {
+  const size_t size = buffer.GetBuffer()->GetDeviceBufferDescriptor().size;
+  return offset_in_bytes <= size && length_in_bytes <= size - offset_in_bytes;
+}
+
+bool RenderPass::BindUniform(Shader& shader,
+                             const Shader::UniformBinding* binding,
+                             DeviceBuffer& buffer,
+                             size_t offset_in_bytes,
+                             size_t length_in_bytes) {
+  PassRecording* recording = GetRecording();
+  if (!recording || !binding || !IsRenderStage(shader.GetShaderStage()) ||
+      !IsViewInBounds(buffer, offset_in_bytes, length_in_bytes)) {
+    return false;
   }
+  const std::shared_ptr<const Shader::Reflection>& reflection =
+      shader.GetReflection();
+  recording->Retain(reflection->retain_stamp, reflection);
+  recording->Retain(buffer.GetRetainStamp(), buffer.GetBuffer());
+  auto* op = recording->ops.Append<BindUniformOp>();
+  op->stage = shader.GetShaderStage();
+  op->binding = binding;
+  op->buffer = buffer.GetBuffer().get();
+  op->offset = static_cast<uint32_t>(offset_in_bytes);
+  op->length = static_cast<uint32_t>(length_in_bytes);
+  recording->uniform_bind_count++;
+  return true;
+}
+
+bool RenderPass::BindTexture(Shader& shader,
+                             const Shader::TextureBinding* binding,
+                             Texture& texture,
+                             const impeller::SamplerDescriptor& sampler) {
+  PassRecording* recording = GetRecording();
+  if (!recording || !binding || !IsRenderStage(shader.GetShaderStage())) {
+    return false;
+  }
+  const std::shared_ptr<const Shader::Reflection>& reflection =
+      shader.GetReflection();
+  recording->Retain(reflection->retain_stamp, reflection);
+  recording->Retain(texture.GetRetainStamp(), texture.GetTexture());
+  auto* op = recording->ops.Append<BindTextureOp>();
+  op->stage = shader.GetShaderStage();
+  op->binding = binding;
+  op->texture = texture.GetTexture().get();
+  op->sampler_key = impeller::SamplerDescriptor::ToKey(sampler);
+  recording->texture_bind_count++;
+  return true;
+}
+
+void RenderPass::BindVertexBuffer(size_t slot,
+                                  DeviceBuffer& buffer,
+                                  size_t offset_in_bytes,
+                                  size_t length_in_bytes) {
+  PassRecording* recording = GetRecording();
+  if (!recording || slot >= kMaxVertexBufferSlots ||
+      !IsViewInBounds(buffer, offset_in_bytes, length_in_bytes)) {
+    return;
+  }
+  recording->Retain(buffer.GetRetainStamp(), buffer.GetBuffer());
+  auto* op = recording->ops.Append<BindVertexBufferOp>();
+  op->slot = static_cast<uint32_t>(slot);
+  op->buffer = buffer.GetBuffer().get();
+  op->offset = static_cast<uint32_t>(offset_in_bytes);
+  op->length = static_cast<uint32_t>(length_in_bytes);
+  recording->vertex_buffer_bind_count++;
+}
+
+void RenderPass::BindIndexBuffer(DeviceBuffer& buffer,
+                                 size_t offset_in_bytes,
+                                 size_t length_in_bytes,
+                                 impeller::IndexType type) {
+  PassRecording* recording = GetRecording();
+  if (!recording || !IsViewInBounds(buffer, offset_in_bytes, length_in_bytes)) {
+    return;
+  }
+  index_buffer_type_ = type;
+  recording->Retain(buffer.GetRetainStamp(), buffer.GetBuffer());
+  auto* op = recording->ops.Append<BindIndexBufferOp>();
+  op->type = type;
+  op->buffer = buffer.GetBuffer().get();
+  op->offset = static_cast<uint32_t>(offset_in_bytes);
+  op->length = static_cast<uint32_t>(length_in_bytes);
+}
+
+void RenderPass::SetStencilReference(uint32_t reference) {
+  if (PassRecording* recording = GetRecording()) {
+    recording->ops.Append<SetStencilReferenceOp>()->reference = reference;
+  }
+}
+
+void RenderPass::SetScissor(impeller::IRect32 scissor) {
+  if (PassRecording* recording = GetRecording()) {
+    recording->ops.Append<SetScissorOp>()->scissor = scissor;
+  }
+}
+
+void RenderPass::SetViewport(const impeller::Viewport& viewport) {
+  if (PassRecording* recording = GetRecording()) {
+    auto* op = recording->ops.Append<SetViewportOp>();
+    op->rect = viewport.rect;
+    op->z_near = viewport.depth_range.z_near;
+    op->z_far = viewport.depth_range.z_far;
+  }
+}
+
+void RenderPass::RecordPipelineState(PassRecording& recording) {
   pipeline_state_dirty_ = false;
-  memoized_pipeline_ = nullptr;
-
-  // Infer the pipeline layout based on the shape of the RenderTarget.
-  auto pipeline_desc = pipeline_descriptor_;
-
-  pipeline_desc.SetSampleCount(render_target_.GetSampleCount());
-
-  render_target_.IterateAllColorAttachments(
-      [&](size_t index, const impeller::ColorAttachment& attachment) -> bool {
-        auto& color = ColorAttachmentDescriptorAt(index);
-        color.format = render_target_.GetRenderTargetPixelFormat();
-        return true;
-      });
-
-  pipeline_desc.SetColorAttachmentDescriptors(color_descriptors_);
-
-  {
-    auto stencil = render_target_.GetStencilAttachment();
-    if (stencil && impeller::IsStencilWritable(
-                       stencil->texture->GetTextureDescriptor().format)) {
-      pipeline_desc.SetStencilPixelFormat(
-          stencil->texture->GetTextureDescriptor().format);
-      pipeline_desc.SetStencilAttachmentDescriptors(stencil_front_desc_,
-                                                    stencil_back_desc_);
-    } else {
-      pipeline_desc.ClearStencilAttachments();
-    }
+  const std::shared_ptr<const RenderPipeline::Core>& core =
+      render_pipeline_->GetCore();
+  pipeline_known_failed_ = core->HasBuildFailed(pipeline_state_);
+  if (pipeline_known_failed_) {
+    return;
   }
-
-  {
-    auto depth = render_target_.GetDepthAttachment();
-    if (depth && impeller::IsDepthWritable(
-                     depth->texture->GetTextureDescriptor().format)) {
-      pipeline_desc.SetDepthPixelFormat(
-          depth->texture->GetTextureDescriptor().format);
-      pipeline_desc.SetDepthStencilAttachmentDescriptor(depth_desc_);
-    } else {
-      pipeline_desc.ClearDepthAttachment();
-    }
-  }
-
-  auto& context = *GetContext();
-
-  if (!render_pipeline_->BindToPipelineDescriptor(*context.GetShaderLibrary(),
-                                                  pipeline_desc)) {
-    return nullptr;
-  }
-
-  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline;
-
-  if (context.GetBackendType() == impeller::Context::BackendType::kOpenGLES &&
-      !context.GetPipelineLibrary()->HasPipeline(pipeline_desc)) {
-    // New pipeline creation for this backend must be done on the reactor
-    // (raster) thread. We're about the draw, so we need to synchronize with a
-    // raster task in order to get the new pipeline. Depending on how busy the
-    // raster thread is, this could hang the UI thread long enough to miss a
-    // frame.
-
-    // Note that this branch is only called if a new pipeline actually needs to
-    // be built.
-    auto dart_state = flutter::UIDartState::Current();
-    std::promise<
-        std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>>
-        pipeline_promise;
-    auto pipeline_future = pipeline_promise.get_future();
-    fml::TaskRunner::RunNowOrPostTask(
-        dart_state->GetTaskRunners().GetRasterTaskRunner(),
-        fml::MakeCopyable([promise = std::move(pipeline_promise),
-                           context = GetContext(), pipeline_desc]() mutable {
-          promise.set_value(context->GetPipelineLibrary()
-                                ->GetPipeline(pipeline_desc, true, true)
-                                .Get());
-        }));
-    pipeline = pipeline_future.get();
-  } else {
-    pipeline = context.GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
-  }
-
-  if (!pipeline) {
-    VALIDATION_LOG << "Failed to build the render pipeline. The vertex and "
-                      "fragment shaders may be incompatible (for example, a "
-                      "fragment input with no matching vertex output).";
-    return nullptr;
-  }
-
-  memoized_pipeline_ = pipeline;
-  return pipeline;
+  recording.Retain(core->GetRetainStamp(), core);
+  auto* op = recording.ops.Append<SetPipelineStateOp>(
+      SetPipelineStateOp::SizeFor(pipeline_state_));
+  op->core = core.get();
+  std::memcpy(static_cast<void*>(&op->state), &pipeline_state_,
+              pipeline_state_.GetUsedSize());
 }
 
 bool RenderPass::Draw(size_t element_count,
                       size_t instance_count,
                       bool indexed) {
+  PassRecording* recording = GetRecording();
+  if (!recording) {
+    return false;
+  }
   if (element_count == 0u || instance_count == 0u) {
     return true;
   }
-
-  if (indexed && index_buffer_type == impeller::IndexType::kNone) {
+  if (indexed && index_buffer_type_ == impeller::IndexType::kNone) {
     // drawIndexed was called without an index buffer bound.
     return false;
   }
-
-  auto pipeline = GetOrCreatePipeline();
-  if (!pipeline) {
-    // The failure was already validation-logged with the specifics; failing
-    // the draw surfaces a Dart exception instead of crashing on a null
-    // pipeline in the backend.
+  if (!render_pipeline_) {
     return false;
   }
-  render_pass_->SetPipeline(impeller::PipelineRef(pipeline));
-
-  // Binding sets are replayed first, so an individual bind that collides
-  // with a set member overrides it for this draw. Their metadata is borrowed
-  // from the shader rather than copied, so no allocation happens here.
-  // A set's compute bindings belong to compute passes.
-  for (const auto& set : binding_sets) {
-    if (!set) {
-      continue;
-    }
-    for (const auto& buffer : set->GetBufferBindings()) {
-      if (buffer.stage == impeller::ShaderStage::kCompute) {
-        continue;
-      }
-      render_pass_->BindResource(buffer.stage,
-                                 impeller::DescriptorType::kUniformBuffer,
-                                 buffer.slot, buffer.metadata, buffer.view);
-    }
-    for (const auto& texture : set->GetTextureBindings()) {
-      if (texture.stage == impeller::ShaderStage::kCompute) {
-        continue;
-      }
-      render_pass_->BindResource(
-          texture.stage, impeller::DescriptorType::kSampledImage, texture.slot,
-          texture.metadata, texture.texture, texture.sampler);
-    }
+  if (pipeline_state_dirty_) {
+    RecordPipelineState(*recording);
   }
-
-  for (const auto& [_, buffer] : vertex_uniform_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kVertex,
-        impeller::DescriptorType::kUniformBuffer, buffer.slot,
-        std::make_unique<impeller::ShaderMetadata>(*buffer.view.GetMetadata()),
-        buffer.view.resource);
+  if (pipeline_known_failed_) {
+    // The backend already failed to build this state, and logged why.
+    return false;
   }
-  for (const auto& [_, texture] : vertex_texture_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kVertex, impeller::DescriptorType::kSampledImage,
-        texture.slot,
-        std::make_unique<impeller::ShaderMetadata>(
-            *texture.texture.GetMetadata()),
-        texture.texture.resource, texture.sampler);
-  }
-  for (const auto& [_, buffer] : fragment_uniform_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kFragment,
-        impeller::DescriptorType::kUniformBuffer, buffer.slot,
-        std::make_unique<impeller::ShaderMetadata>(*buffer.view.GetMetadata()),
-        buffer.view.resource);
-  }
-  for (const auto& [_, texture] : fragment_texture_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kFragment,
-        impeller::DescriptorType::kSampledImage, texture.slot,
-        std::make_unique<impeller::ShaderMetadata>(
-            *texture.texture.GetMetadata()),
-        texture.texture.resource, texture.sampler);
-  }
-
-  render_pass_->SetVertexBuffer(vertex_buffers.data(), vertex_buffer_count);
-  if (indexed) {
-    render_pass_->SetIndexBuffer(index_buffer, index_buffer_type);
-  } else {
-    render_pass_->SetIndexBuffer(impeller::BufferView{},
-                                 impeller::IndexType::kNone);
-  }
-  render_pass_->SetElementCount(element_count);
-  render_pass_->SetInstanceCount(instance_count);
-
-  render_pass_->SetStencilReference(stencil_reference);
-
-  if (viewport.has_value()) {
-    render_pass_->SetViewport(viewport.value());
-  }
-
-  if (scissor.has_value()) {
-    render_pass_->SetScissor(scissor.value());
-  }
-
-  bool result = render_pass_->Draw().ok();
-
-  return result;
+  auto* op = recording->ops.Append<DrawOp>();
+  op->indexed = indexed;
+  op->element_count = static_cast<uint32_t>(element_count);
+  op->instance_count = static_cast<uint32_t>(instance_count);
+  recording->draw_count++;
+  return true;
 }
 
 }  // namespace gpu
@@ -488,34 +442,14 @@ Dart_Handle InternalFlutterGpu_RenderPass_Begin(
 
 Dart_Handle InternalFlutterGpu_RenderPass_End(
     flutter::gpu::RenderPass* wrapper) {
-  if (!wrapper->End()) {
-    return tonic::ToDart("Failed to end RenderPass");
-  }
+  wrapper->End();
   return Dart_Null();
 }
 
 void InternalFlutterGpu_RenderPass_BindPipeline(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::RenderPipeline* pipeline) {
-  auto ref = fml::RefPtr<flutter::gpu::RenderPipeline>(pipeline);
-  wrapper->SetPipeline(std::move(ref));
-}
-
-static void BindVertexBuffer(
-    flutter::gpu::RenderPass* wrapper,
-    const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
-    int offset_in_bytes,
-    int length_in_bytes,
-    int slot) {
-  if (slot < 0 || static_cast<size_t>(slot) >=
-                      flutter::gpu::RenderPass::kMaxVertexBufferSlots) {
-    return;
-  }
-  wrapper->vertex_buffers[slot] = impeller::BufferView(
-      buffer, impeller::Range(offset_in_bytes, length_in_bytes));
-  if (static_cast<size_t>(slot) >= wrapper->vertex_buffer_count) {
-    wrapper->vertex_buffer_count = static_cast<size_t>(slot) + 1;
-  }
+  wrapper->SetPipeline(pipeline);
 }
 
 void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
@@ -524,19 +458,12 @@ void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
     int offset_in_bytes,
     int length_in_bytes,
     int slot) {
-  BindVertexBuffer(wrapper, device_buffer->GetBuffer(), offset_in_bytes,
-                   length_in_bytes, slot);
-}
-
-static void BindIndexBuffer(
-    flutter::gpu::RenderPass* wrapper,
-    const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
-    int offset_in_bytes,
-    int length_in_bytes,
-    int index_type) {
-  wrapper->index_buffer = impeller::BufferView(
-      buffer, impeller::Range(offset_in_bytes, length_in_bytes));
-  wrapper->index_buffer_type = flutter::gpu::ToImpellerIndexType(index_type);
+  if (slot < 0 || offset_in_bytes < 0 || length_in_bytes < 0) {
+    return;
+  }
+  wrapper->BindVertexBuffer(static_cast<size_t>(slot), *device_buffer,
+                            static_cast<size_t>(offset_in_bytes),
+                            static_cast<size_t>(length_in_bytes));
 }
 
 void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
@@ -545,49 +472,27 @@ void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
     int offset_in_bytes,
     int length_in_bytes,
     int index_type) {
-  BindIndexBuffer(wrapper, device_buffer->GetBuffer(), offset_in_bytes,
-                  length_in_bytes, index_type);
+  if (offset_in_bytes < 0 || length_in_bytes < 0) {
+    return;
+  }
+  wrapper->BindIndexBuffer(*device_buffer, static_cast<size_t>(offset_in_bytes),
+                           static_cast<size_t>(length_in_bytes),
+                           flutter::gpu::ToImpellerIndexType(index_type));
 }
 
 static bool BindUniformStruct(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::Shader* shader,
     const flutter::gpu::Shader::UniformBinding* uniform_struct,
-    const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
+    flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes) {
-  if (!uniform_struct) {
+  if (offset_in_bytes < 0 || length_in_bytes < 0) {
     return false;
   }
-
-  flutter::gpu::RenderPass::BufferUniformMap* uniform_map = nullptr;
-  switch (shader->GetShaderStage()) {
-    case impeller::ShaderStage::kVertex:
-      uniform_map = &wrapper->vertex_uniform_bindings;
-      break;
-    case impeller::ShaderStage::kFragment:
-      uniform_map = &wrapper->fragment_uniform_bindings;
-      break;
-    case impeller::ShaderStage::kUnknown:
-    case impeller::ShaderStage::kCompute:
-      return false;
-  }
-
-  if (!buffer || static_cast<size_t>(offset_in_bytes + length_in_bytes) >
-                     buffer->GetDeviceBufferDescriptor().size) {
-    return false;
-  }
-
-  uniform_map->insert_or_assign(
-      uniform_struct,
-      flutter::gpu::RenderPass::BufferAndUniformSlot{
-          .slot = uniform_struct->slot,
-          .view = impeller::BufferResource{
-              &uniform_struct->metadata,
-              impeller::BufferView(
-                  buffer, impeller::Range(offset_in_bytes, length_in_bytes)),
-          }});
-  return true;
+  return wrapper->BindUniform(*shader, uniform_struct, *device_buffer,
+                              static_cast<size_t>(offset_in_bytes),
+                              static_cast<size_t>(length_in_bytes));
 }
 
 bool InternalFlutterGpu_RenderPass_BindUniformDevice(
@@ -598,9 +503,9 @@ bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     int offset_in_bytes,
     int length_in_bytes) {
   auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
-  return BindUniformStruct(
-      wrapper, shader, shader->GetUniformStruct(uniform_name),
-      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
+  return BindUniformStruct(wrapper, shader,
+                           shader->GetUniformStruct(uniform_name),
+                           device_buffer, offset_in_bytes, length_in_bytes);
 }
 
 bool InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed(
@@ -610,9 +515,9 @@ bool InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes) {
-  return BindUniformStruct(
-      wrapper, shader, shader->GetUniformStructAt(uniform_struct_index),
-      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
+  return BindUniformStruct(wrapper, shader,
+                           shader->GetUniformStructAt(uniform_struct_index),
+                           device_buffer, offset_in_bytes, length_in_bytes);
 }
 
 static bool BindTextureBinding(
@@ -626,37 +531,11 @@ static bool BindTextureBinding(
     int width_address_mode,
     int height_address_mode,
     int max_anisotropy) {
-  if (!texture_binding) {
-    return false;
-  }
-
-  const impeller::SamplerDescriptor sampler_desc =
+  return wrapper->BindTexture(
+      *shader, texture_binding, *texture,
       flutter::gpu::ToImpellerSamplerDescriptor(
           min_filter, mag_filter, mip_filter, width_address_mode,
-          height_address_mode, max_anisotropy);
-  auto sampler =
-      wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
-
-  flutter::gpu::RenderPass::TextureUniformMap* uniform_map = nullptr;
-  switch (shader->GetShaderStage()) {
-    case impeller::ShaderStage::kVertex:
-      uniform_map = &wrapper->vertex_texture_bindings;
-      break;
-    case impeller::ShaderStage::kFragment:
-      uniform_map = &wrapper->fragment_texture_bindings;
-      break;
-    case impeller::ShaderStage::kUnknown:
-    case impeller::ShaderStage::kCompute:
-      return false;
-  }
-  uniform_map->insert_or_assign(
-      texture_binding,
-      impeller::TextureAndSampler{
-          .slot = texture_binding->slot,
-          .texture = {&texture_binding->metadata, texture->GetTexture()},
-          .sampler = sampler,
-      });
-  return true;
+          height_address_mode, max_anisotropy));
 }
 
 bool InternalFlutterGpu_RenderPass_BindTexture(
@@ -701,7 +580,7 @@ void InternalFlutterGpu_RenderPass_BindSet(
   if (slot < 0) {
     return;
   }
-  wrapper->BindSet(slot, fml::RefPtr<flutter::gpu::BindingSet>(binding_set));
+  wrapper->BindSet(slot, binding_set);
 }
 
 void InternalFlutterGpu_RenderPass_ClearBindings(
@@ -709,12 +588,23 @@ void InternalFlutterGpu_RenderPass_ClearBindings(
   wrapper->ClearBindings();
 }
 
+// Whether [index] names a color attachment a pass can configure.
+static bool IsColorAttachmentIndex(int index) {
+  return index >= 0 && static_cast<size_t>(index) <
+                           flutter::gpu::PipelineState::kMaxColorAttachments;
+}
+
 void InternalFlutterGpu_RenderPass_SetColorBlendEnable(
     flutter::gpu::RenderPass* wrapper,
     int color_attachment_index,
     bool enable) {
-  auto& color = wrapper->GetColorAttachmentDescriptor(color_attachment_index);
+  if (!IsColorAttachmentIndex(color_attachment_index)) {
+    return;
+  }
+  impeller::ColorAttachmentDescriptor color =
+      wrapper->GetPipelineState().colors[color_attachment_index];
   color.blending_enabled = enable;
+  wrapper->SetColorAttachmentDescriptor(color_attachment_index, color);
 }
 
 void InternalFlutterGpu_RenderPass_SetColorBlendEquation(
@@ -726,7 +616,11 @@ void InternalFlutterGpu_RenderPass_SetColorBlendEquation(
     int alpha_blend_operation,
     int source_alpha_blend_factor,
     int destination_alpha_blend_factor) {
-  auto& color = wrapper->GetColorAttachmentDescriptor(color_attachment_index);
+  if (!IsColorAttachmentIndex(color_attachment_index)) {
+    return;
+  }
+  impeller::ColorAttachmentDescriptor color =
+      wrapper->GetPipelineState().colors[color_attachment_index];
   color.color_blend_op =
       flutter::gpu::ToImpellerBlendOperation(color_blend_operation);
   color.src_color_blend_factor =
@@ -739,27 +633,30 @@ void InternalFlutterGpu_RenderPass_SetColorBlendEquation(
       flutter::gpu::ToImpellerBlendFactor(source_alpha_blend_factor);
   color.dst_alpha_blend_factor =
       flutter::gpu::ToImpellerBlendFactor(destination_alpha_blend_factor);
+  wrapper->SetColorAttachmentDescriptor(color_attachment_index, color);
 }
 
 void InternalFlutterGpu_RenderPass_SetDepthWriteEnable(
     flutter::gpu::RenderPass* wrapper,
     bool enable) {
-  auto& depth = wrapper->GetDepthAttachmentDescriptor();
+  impeller::DepthAttachmentDescriptor depth = wrapper->GetPipelineState().depth;
   depth.depth_write_enabled = enable;
+  wrapper->SetDepthAttachmentDescriptor(depth);
 }
 
 void InternalFlutterGpu_RenderPass_SetDepthCompareOperation(
     flutter::gpu::RenderPass* wrapper,
     int compare_operation) {
-  auto& depth = wrapper->GetDepthAttachmentDescriptor();
+  impeller::DepthAttachmentDescriptor depth = wrapper->GetPipelineState().depth;
   depth.depth_compare =
       flutter::gpu::ToImpellerCompareFunction(compare_operation);
+  wrapper->SetDepthAttachmentDescriptor(depth);
 }
 
 void InternalFlutterGpu_RenderPass_SetStencilReference(
     flutter::gpu::RenderPass* wrapper,
     int stencil_reference) {
-  wrapper->stencil_reference = static_cast<uint32_t>(stencil_reference);
+  wrapper->SetStencilReference(static_cast<uint32_t>(stencil_reference));
 }
 
 void InternalFlutterGpu_RenderPass_SetScissor(flutter::gpu::RenderPass* wrapper,
@@ -767,7 +664,7 @@ void InternalFlutterGpu_RenderPass_SetScissor(flutter::gpu::RenderPass* wrapper,
                                               int y,
                                               int width,
                                               int height) {
-  wrapper->scissor = impeller::IRect32::MakeXYWH(x, y, width, height);
+  wrapper->SetScissor(impeller::IRect32::MakeXYWH(x, y, width, height));
 }
 
 void InternalFlutterGpu_RenderPass_SetViewport(
@@ -788,7 +685,7 @@ void InternalFlutterGpu_RenderPass_SetViewport(
   viewport.rect = rect;
   viewport.depth_range = depth_range;
 
-  wrapper->viewport = viewport;
+  wrapper->SetViewport(viewport);
 }
 
 void InternalFlutterGpu_RenderPass_SetStencilConfig(
@@ -814,10 +711,10 @@ void InternalFlutterGpu_RenderPass_SetStencilConfig(
 
   // Corresponds to the `StencilFace` enum in `gpu/lib/src/render_pass.dart`.
   if (target_face != 2 /* both or front */) {
-    wrapper->GetStencilFrontAttachmentDescriptor() = desc;
+    wrapper->SetStencilFrontAttachmentDescriptor(desc);
   }
   if (target_face != 1 /* both or back */) {
-    wrapper->GetStencilBackAttachmentDescriptor() = desc;
+    wrapper->SetStencilBackAttachmentDescriptor(desc);
   }
 }
 

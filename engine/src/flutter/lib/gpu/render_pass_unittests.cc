@@ -4,12 +4,20 @@
 
 #include "flutter/lib/gpu/render_pass.h"
 
+#include <limits>
+
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "flutter/lib/gpu/binding_set.h"
+#include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/render_pipeline.h"
 #include "flutter/lib/gpu/shader.h"
 #include "fml/memory/ref_ptr.h"
+#include "impeller/base/validation.h"
+#include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/core/texture_descriptor.h"
+#include "impeller/renderer/testing/mocks.h"
 
 namespace flutter::gpu {
 namespace {
@@ -21,11 +29,61 @@ fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
                       /*descriptor_set_layouts=*/{});
 }
 
+// A shader declaring one uniform struct, "FrameInfo".
+fml::RefPtr<Shader> MakeShaderWithUniform(impeller::ShaderStage stage) {
+  std::unordered_map<std::string, Shader::UniformBinding> uniform_structs;
+  uniform_structs["FrameInfo"] = Shader::UniformBinding{
+      .slot = impeller::ShaderUniformSlot{.name = "FrameInfo"},
+      .metadata = impeller::ShaderMetadata{.name = "FrameInfo", .members = {}},
+      .size_in_bytes = 64,
+  };
+  return Shader::Make("library", "Entrypoint", stage,
+                      /*code_mapping=*/nullptr, /*inputs=*/{}, /*layouts=*/{},
+                      std::move(uniform_structs), /*uniform_textures=*/{},
+                      /*descriptor_set_layouts=*/{});
+}
+
+// A pass with a single color attachment, begun on [command_buffer].
+fml::RefPtr<RenderPass> MakeBegunRenderPass(CommandBuffer& command_buffer) {
+  impeller::TextureDescriptor desc;
+  desc.size = impeller::ISize{1, 1};
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  auto texture =
+      std::make_shared<::testing::NiceMock<impeller::testing::MockTexture>>(
+          desc);
+  ON_CALL(*texture, IsValid).WillByDefault(::testing::Return(true));
+  ON_CALL(*texture, GetSize).WillByDefault(::testing::Return(desc.size));
+  impeller::ColorAttachment color;
+  color.texture = texture;
+  color.load_action = impeller::LoadAction::kClear;
+  color.store_action = impeller::StoreAction::kStore;
+
+  auto render_pass = fml::MakeRefCounted<RenderPass>();
+  render_pass->GetRenderTarget().SetColorAttachment(color, 0);
+  EXPECT_TRUE(render_pass->Begin(command_buffer));
+  return render_pass;
+}
+
 fml::RefPtr<RenderPipeline> MakeRenderPipeline() {
   auto vertex = MakeShader(impeller::ShaderStage::kVertex);
   auto fragment = MakeShader(impeller::ShaderStage::kFragment);
   return fml::MakeRefCounted<RenderPipeline>(vertex, fragment,
                                              vertex->CreateVertexDescriptor());
+}
+
+fml::RefPtr<DeviceBuffer> MakeDeviceBuffer(size_t size) {
+  impeller::DeviceBufferDescriptor desc;
+  desc.size = size;
+  return fml::MakeRefCounted<DeviceBuffer>(
+      std::make_shared<impeller::testing::MockDeviceBuffer>(desc));
+}
+
+size_t CountOps(const RenderPass& render_pass, RecordedOp kind) {
+  size_t count = 0;
+  render_pass.GetRecordingForTesting()->ops.ForEach(
+      [&](const OpHeader& header) { count += header.op == kind ? 1 : 0; });
+  return count;
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/188712:
@@ -37,10 +95,10 @@ TEST(FlutterGpuRenderPassTest, SetDepthWriteEnableHonorsArgument) {
   auto render_pass = fml::MakeRefCounted<RenderPass>();
 
   InternalFlutterGpu_RenderPass_SetDepthWriteEnable(render_pass.get(), true);
-  EXPECT_TRUE(render_pass->GetDepthAttachmentDescriptor().depth_write_enabled);
+  EXPECT_TRUE(render_pass->GetPipelineState().depth.depth_write_enabled);
 
   InternalFlutterGpu_RenderPass_SetDepthWriteEnable(render_pass.get(), false);
-  EXPECT_FALSE(render_pass->GetDepthAttachmentDescriptor().depth_write_enabled);
+  EXPECT_FALSE(render_pass->GetPipelineState().depth.depth_write_enabled);
 }
 
 // Draws memoize the built pipeline until the pipeline-affecting state
@@ -81,7 +139,8 @@ TEST(FlutterGpuRenderPassTest, PipelineStateMutationsMarkStateDirty) {
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
 
   render_pass->ClearPipelineStateDirtyForTesting();
-  render_pass->SetPipeline(MakeRenderPipeline());
+  auto pipeline = MakeRenderPipeline();
+  render_pass->SetPipeline(pipeline.get());
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
 }
 
@@ -96,14 +155,17 @@ TEST(FlutterGpuRenderPassTest, RedundantPipelineStateAssignmentsAreIgnored) {
   render_pass->SetWindingOrder(impeller::WindingOrder::kCounterClockwise);
   render_pass->SetPrimitiveType(impeller::PrimitiveType::kTriangleStrip);
   render_pass->SetPolygonMode(impeller::PolygonMode::kLine);
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(pipeline.get());
 
   render_pass->ClearPipelineStateDirtyForTesting();
   render_pass->SetCullMode(impeller::CullMode::kBackFace);
   render_pass->SetWindingOrder(impeller::WindingOrder::kCounterClockwise);
   render_pass->SetPrimitiveType(impeller::PrimitiveType::kTriangleStrip);
   render_pass->SetPolygonMode(impeller::PolygonMode::kLine);
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(pipeline.get());
+  InternalFlutterGpu_RenderPass_SetColorBlendEnable(render_pass.get(), 0,
+                                                    false);
+  InternalFlutterGpu_RenderPass_SetDepthWriteEnable(render_pass.get(), false);
   EXPECT_FALSE(render_pass->IsPipelineStateDirtyForTesting());
 
   // A real change still dirties.
@@ -111,32 +173,117 @@ TEST(FlutterGpuRenderPassTest, RedundantPipelineStateAssignmentsAreIgnored) {
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
 }
 
-// A set goes into a slot rather than onto a list, so rebinding it once per
-// draw (the expected usage) must not accumulate bindings on the pass.
-TEST(FlutterGpuRenderPassTest, BindSetReplacesTheSlotContents) {
-  auto render_pass = fml::MakeRefCounted<RenderPass>();
-  auto first = fml::MakeRefCounted<BindingSet>();
-  auto second = fml::MakeRefCounted<BindingSet>();
+// Draws record the pipeline state when it was last dirtied, so consecutive
+// draws share one record.
+TEST(FlutterGpuRenderPassTest, DrawsRecordPipelineStateOnlyWhenItChanges) {
+  auto context = std::make_shared<
+      ::testing::NiceMock<impeller::testing::MockImpellerContext>>();
+  CommandBuffer command_buffer(context);
+  auto render_pass = MakeBegunRenderPass(command_buffer);
+  auto pipeline = MakeRenderPipeline();
+  render_pass->SetPipeline(pipeline.get());
 
-  render_pass->BindSet(0, first);
-  render_pass->BindSet(0, first);
-  EXPECT_EQ(render_pass->binding_sets[0].get(), first.get());
+  EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
+  EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
+  render_pass->SetCullMode(impeller::CullMode::kBackFace);
+  EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
+  // No index buffer bound.
+  EXPECT_FALSE(render_pass->Draw(3, 1, /*indexed=*/true));
 
-  render_pass->BindSet(0, second);
-  EXPECT_EQ(render_pass->binding_sets[0].get(), second.get());
+  EXPECT_EQ(CountOps(*render_pass, RecordedOp::kSetPipelineState), 2u);
+  EXPECT_EQ(CountOps(*render_pass, RecordedOp::kDraw), 3u);
+}
 
-  render_pass->BindSet(1, first);
-  EXPECT_EQ(render_pass->binding_sets[0].get(), second.get());
-  EXPECT_EQ(render_pass->binding_sets[1].get(), first.get());
+// Once a pass ends its recording belongs to the replay thread, so the pass
+// must not record anything more into it.
+TEST(FlutterGpuRenderPassTest, EndedPassesRecordNothing) {
+  auto context = std::make_shared<
+      ::testing::NiceMock<impeller::testing::MockImpellerContext>>();
+  CommandBuffer command_buffer(context);
+  auto render_pass = MakeBegunRenderPass(command_buffer);
+  auto pipeline = MakeRenderPipeline();
+  render_pass->SetPipeline(pipeline.get());
+  EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
 
-  // An out of range slot is dropped rather than corrupting a valid one.
-  render_pass->BindSet(RenderPass::kMaxBindingSets, first);
-  EXPECT_EQ(render_pass->binding_sets[0].get(), second.get());
-
-  render_pass->ClearBindings();
-  for (const auto& set : render_pass->binding_sets) {
-    EXPECT_EQ(set.get(), nullptr);
+  {
+    // The mock context makes no command buffer, so the inline replay fails.
+    impeller::ScopedValidationDisable disable_validation;
+    render_pass->End();
   }
+
+  EXPECT_EQ(render_pass->GetRecordingForTesting(), nullptr);
+  EXPECT_FALSE(render_pass->Draw(3, 1, /*indexed=*/false));
+}
+
+// A later command ends the open pass without telling the pass.
+TEST(FlutterGpuRenderPassTest, PassesEndedByALaterPassRecordNothing) {
+  auto context = std::make_shared<
+      ::testing::NiceMock<impeller::testing::MockImpellerContext>>();
+  CommandBuffer command_buffer(context);
+  auto first = MakeBegunRenderPass(command_buffer);
+  auto pipeline = MakeRenderPipeline();
+  first->SetPipeline(pipeline.get());
+
+  impeller::ScopedValidationDisable disable_validation;
+  auto second = MakeBegunRenderPass(command_buffer);
+
+  EXPECT_EQ(first->GetRecordingForTesting(), nullptr);
+  EXPECT_FALSE(first->Draw(3, 1, /*indexed=*/false));
+  EXPECT_NE(second->GetRecordingForTesting(), nullptr);
+}
+
+TEST(FlutterGpuRenderPassTest, ViewsMustFitTheirBuffer) {
+  auto context = std::make_shared<
+      ::testing::NiceMock<impeller::testing::MockImpellerContext>>();
+  CommandBuffer command_buffer(context);
+  auto render_pass = MakeBegunRenderPass(command_buffer);
+  auto shader = MakeShaderWithUniform(impeller::ShaderStage::kVertex);
+  auto buffer = MakeDeviceBuffer(128);
+
+  EXPECT_TRUE(render_pass->BindUniform(*shader, shader->GetUniformStructAt(0),
+                                       *buffer, 64, 64));
+  EXPECT_FALSE(render_pass->BindUniform(*shader, shader->GetUniformStructAt(0),
+                                        *buffer, 100, 64));
+  // A sum that overflows must not pass the bounds check.
+  EXPECT_FALSE(render_pass->BindUniform(*shader, shader->GetUniformStructAt(0),
+                                        *buffer, 64,
+                                        std::numeric_limits<size_t>::max()));
+
+  render_pass->BindVertexBuffer(0, *buffer, 64, 64);
+  render_pass->BindVertexBuffer(0, *buffer, 100, 64);
+  render_pass->BindIndexBuffer(*buffer, 100, 64, impeller::IndexType::k16bit);
+  EXPECT_EQ(CountOps(*render_pass, RecordedOp::kBindVertexBuffer), 1u);
+  EXPECT_EQ(CountOps(*render_pass, RecordedOp::kBindIndexBuffer), 0u);
+}
+
+// A shader reload swaps the reflection a recorded binding points into. The
+// recording keeps the old reflection alive so the binding stays valid until
+// replay.
+TEST(FlutterGpuRenderPassTest, RecordingRetainsReflectionAcrossReload) {
+  auto context = std::make_shared<
+      ::testing::NiceMock<impeller::testing::MockImpellerContext>>();
+  CommandBuffer command_buffer(context);
+  auto render_pass = MakeBegunRenderPass(command_buffer);
+
+  auto shader = MakeShaderWithUniform(impeller::ShaderStage::kVertex);
+  auto buffer = MakeDeviceBuffer(128);
+  ASSERT_TRUE(render_pass->BindUniform(*shader, shader->GetUniformStructAt(0),
+                                       *buffer, 0, 64));
+
+  std::weak_ptr<const Shader::Reflection> recorded = shader->GetReflection();
+  auto reloaded = MakeShaderWithUniform(impeller::ShaderStage::kVertex);
+  shader->ResetFrom(*reloaded);
+  EXPECT_NE(shader->GetReflection(), recorded.lock());
+  EXPECT_FALSE(recorded.expired());
+
+  {
+    // The mock context makes no command buffer, so the inline replay fails
+    // and nothing else holds the recording.
+    impeller::ScopedValidationDisable disable_validation;
+    render_pass->End();
+    command_buffer.Submit();
+  }
+  EXPECT_TRUE(recorded.expired());
 }
 
 }  // namespace
