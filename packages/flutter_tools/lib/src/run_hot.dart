@@ -1246,6 +1246,18 @@ Future<OperationResult> defaultReloadSourcesHelper(
   return OperationResult(0, 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries');
 }
 
+/// Sends a `reloadSources` request to one isolate of each isolate group on [device].
+///
+/// The VM reloads every isolate in the isolate group of the isolate that receives the request,
+/// so one request per group also updates isolates spawned with `Isolate.spawn`. Sending one
+/// request per isolate would reload the same group once for each of its isolates.
+///
+/// Limitation: when [pause] is true, this optimization is skipped and every isolate still gets
+/// its own request. The VM pauses only the isolate that received the request, and debuggers
+/// re-send breakpoints only to the isolates that paused. With one request per group, the other
+/// isolates would not get their breakpoints again, so a breakpoint that moved because lines were
+/// added above it would not be hit there. This can be removed once debuggers re-send breakpoints
+/// to every isolate of the group.
 Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
   FlutterDevice device,
   String entryPath, {
@@ -1253,13 +1265,16 @@ Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
 }) async {
   final deviceEntryUri = device.devFS!.baseUri!.resolve(entryPath).toString();
   final vm_service.VM vm = await device.vmService!.service.getVM();
+  final bool reloadEveryIsolate = pause ?? false;
+  final reloadedIsolateGroupIds = <String>{};
   return <Future<vm_service.ReloadReport>>[
     for (final vm_service.IsolateRef isolateRef in vm.isolates!)
-      device.vmService!.service.reloadSources(
-        isolateRef.id!,
-        pause: pause,
-        rootLibUri: deviceEntryUri,
-      ),
+      if (reloadEveryIsolate || reloadedIsolateGroupIds.add(isolateRef.isolateGroupId!))
+        device.vmService!.service.reloadSources(
+          isolateRef.id!,
+          pause: pause,
+          rootLibUri: deviceEntryUri,
+        ),
   ];
 }
 

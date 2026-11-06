@@ -472,6 +472,76 @@ void main() {
     }),
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/194648
+  for (final pause in <bool>[false, true]) {
+    final reloadTarget = pause ? 'every isolate' : 'one isolate per isolate group';
+    final reloadedIsolateIds = pause ? <String>['1', '2', '3'] : <String>['1', '3'];
+    testUsingContext(
+      'ResidentRunner sends reloadSources to $reloadTarget when pause is $pause',
+      () => testbed.run(() async {
+        vm_service.Isolate isolateInGroup(String id, String isolateGroupId) {
+          return vm_service.Isolate.parse(<String, Object?>{
+            ...fakeUnpausedIsolate.toJson(),
+            'id': id,
+            'number': id,
+            'isolateGroupId': isolateGroupId,
+          })!;
+        }
+
+        fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            listViews,
+            listViews,
+            listViews,
+            getVm(<vm_service.Isolate>[
+              isolateInGroup('1', 'isolateGroups/1'),
+              isolateInGroup('2', 'isolateGroups/1'),
+              isolateInGroup('3', 'isolateGroups/2'),
+            ]),
+            for (final isolateId in reloadedIsolateIds)
+              FakeVmServiceRequest(
+                method: kReloadSourcesServiceName,
+                args: <String, Object>{
+                  'isolateId': isolateId,
+                  'pause': pause,
+                  'rootLibUri': 'main.dart.incremental.dill',
+                },
+                jsonResponse: <String, Object>{
+                  'type': 'ReloadReport',
+                  'success': true,
+                  'details': <String, Object>{'loadedLibraryCount': 1},
+                },
+              ),
+            FakeVmServiceRequest(
+              method: 'getIsolatePauseEvent',
+              args: <String, Object>{'isolateId': '1'},
+              jsonResponse: fakeUnpausedEvent.toJson(),
+            ),
+            FakeVmServiceRequest(
+              method: 'ext.flutter.reassemble',
+              args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
+            ),
+          ],
+        );
+        final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
+        final futureAppStart = Completer<void>.sync();
+        unawaited(
+          residentRunner.attach(
+            appStartedCompleter: futureAppStart,
+            connectionInfoCompleter: futureConnectionInfo,
+          ),
+        );
+        await futureAppStart.future;
+        flutterDevice.report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
+
+        final OperationResult result = await residentRunner.restart(pause: pause);
+
+        expect(result.code, 0);
+        expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+      }),
+    );
+  }
+
   testUsingContext(
     'ResidentRunner resets compilation time on reload reject',
     () => testbed.run(() async {
