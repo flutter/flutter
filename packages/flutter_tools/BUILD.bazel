@@ -580,6 +580,10 @@ _INTEGRATION_APPLE_MACOS = [
 _INTEGRATION_APPLE_IOS = [
     "test/integration.shard/build_ios_config_only_test.dart",
     "test/integration.shard/build_without_xcworkspace_test.dart",
+    # `flutter build ios --no-codesign` of dev/integration_tests/
+    # ios_app_with_extensions (it checks the tool asks Xcode for the watch
+    # target's settings): a device build on the facsimile's iOS engine.
+    "test/integration.shard/ios_app_with_extensions_test.dart",
     "test/integration.shard/ios_content_validation_test.dart",
     "test/integration.shard/lldb_init_test.dart",
     "test/integration.shard/swift_package_manager_add2app_test.dart",
@@ -801,6 +805,7 @@ dart_package_tests(
 # second shard, run by name (manual) on a Mac with a development certificate.
 _APPLE_DATA = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
     "//dev/integration_tests/darwin_add2app_swiftpm:project",
+    "//dev/integration_tests/ios_app_with_extensions:project",
     "//dev/integration_tests/spell_check:project",
 ]
 
