@@ -349,13 +349,11 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     try {
       assert(() {
         if (debugPrintRecognizerCallbacksTrace) {
-          final String? report = debugReport != null ? debugReport() : null;
+          final String report = debugReport?.call() ?? '';
           // The 19 in the line below is the width of the prefix used by
           // _debugLogDiagnostic in arena.dart.
           final prefix = debugPrintGestureArenaDiagnostics ? '${' ' * 19}❙ ' : '';
-          debugPrint(
-            '$prefix$this calling $name callback.${(report?.isNotEmpty ?? false) ? " $report" : ""}',
-          );
+          debugPrint('$prefix$this calling $name callback.${report.isNotEmpty ? " $report" : ""}');
         }
         return true;
       }());
