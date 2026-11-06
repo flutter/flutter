@@ -1387,6 +1387,36 @@ void main() {
       expect(pixel(200, 25), borderColor);
     });
 
+    test('keeps hairline borders around a span', () async {
+      //   +---------+----+
+      //   |    A    | B  |
+      //   +----+----+----+
+      //   | C  | D  | E  |
+      //   +----+----+----+
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(
+          TableBorder.all(width: 0.0, color: borderColor),
+          spans: <(int, int), (int, int)>{(0, 0): (2, 1)},
+        ),
+      );
+      // The hairline inside A is clipped out.
+      expect(pixel(99, 25), transparent);
+      expect(pixel(100, 25), transparent);
+      // The hairlines around A are painted like those around the other cells.
+      expect(pixel(0, 25), isNot(transparent));
+      expect(pixel(0, 25), pixel(0, 75));
+      expect(pixel(50, 0), isNot(transparent));
+      expect(pixel(50, 0), pixel(250, 0));
+      expect(pixel(199, 25), isNot(transparent));
+      expect(pixel(199, 25), pixel(199, 75));
+      expect(pixel(200, 25), pixel(200, 75));
+      // Skia and Impeller place a hairline differently, so this compares both
+      // rows that the hairline below A can be in.
+      expect(pixel(150, 50), isNot(transparent));
+      expect(pixel(150, 49), pixel(250, 49));
+      expect(pixel(150, 50), pixel(250, 50));
+    });
+
     test('clips what a TableBorder subclass paints inside a span', () async {
       final Color Function(int, int) pixel = await paintPixels(
         spanningTable(

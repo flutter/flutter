@@ -1971,21 +1971,27 @@ class RenderTable extends RenderBox {
     final bool usesStrokeInset =
         hasRoundedCorners &&
         !(matchesTop(border.right) && matchesTop(border.bottom) && matchesTop(border.left));
-    // A side that is not painted takes up no room, whatever its width.
-    double outerWidthOf(BorderSide side) {
+    // A side that is not painted takes up no room, whatever its width. A
+    // hairline, a side with a width of 0.0, is one physical pixel wide. That is
+    // at most one logical pixel, so it is given one logical pixel.
+    double widthOf(BorderSide side) {
       if (side.style == BorderStyle.none) {
         return 0.0;
       }
-      return usesStrokeInset ? side.strokeInset : side.width;
+      return side.width == 0.0 ? 1.0 : side.width;
     }
 
-    double innerWidthOf(BorderSide side) => side.style == BorderStyle.none ? 0.0 : side.width;
+    double outerWidthOf(BorderSide side) {
+      final double width = widthOf(side);
+      return usesStrokeInset ? side.copyWith(width: width).strokeInset : width;
+    }
+
     final double leftWidth = outerWidthOf(border.left);
     final double topWidth = outerWidthOf(border.top);
     final double rightWidth = outerWidthOf(border.right);
     final double bottomWidth = outerWidthOf(border.bottom);
-    final double verticalInset = innerWidthOf(border.verticalInside) / 2.0;
-    final double horizontalInset = innerWidthOf(border.horizontalInside) / 2.0;
+    final double verticalInset = widthOf(border.verticalInside) / 2.0;
+    final double horizontalInset = widthOf(border.horizontalInside) / 2.0;
     final RRect? insideOuterBorder = !hasRoundedCorners
         ? null
         : EdgeInsets.fromLTRB(

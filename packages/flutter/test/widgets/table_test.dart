@@ -1999,6 +1999,56 @@ void main() {
         );
       });
 
+      testWidgets('Table with spans and a hairline border is displayed correctly', (
+        WidgetTester tester,
+      ) async {
+        Widget cell(String label) {
+          return SizedBox(height: 40, child: Center(child: Text(label)));
+        }
+
+        await tester.pumpWidget(
+          RepaintBoundary(
+            child: Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: SizedBox(
+                  width: 300,
+                  child: Table(
+                    border: TableBorder.all(width: 0.0),
+                    defaultColumnWidth: const FixedColumnWidth(100),
+                    children: <TableRow>[
+                      TableRow(
+                        children: <Widget>[
+                          TableCell(colSpan: 2, child: cell('A + B')),
+                          TableCell.none,
+                          cell('C'),
+                        ],
+                      ),
+                      TableRow(
+                        children: <Widget>[
+                          cell('D'),
+                          cell('E'),
+                          TableCell(
+                            rowSpan: 2,
+                            verticalAlignment: TableCellVerticalAlignment.fill,
+                            child: cell('F'),
+                          ),
+                        ],
+                      ),
+                      TableRow(children: <Widget>[cell('G'), cell('H'), TableCell.none]),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await expectLater(
+          find.byType(RepaintBoundary),
+          matchesGoldenFile('table.hairline_border.png'),
+        );
+      });
+
       group('Table VerticalAlignment with Spans', () {
         Widget buildGoldenTable({required TableCellVerticalAlignment alignment}) {
           return RepaintBoundary(
