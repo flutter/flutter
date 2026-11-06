@@ -141,7 +141,7 @@
   "moduleExtensions": {
     "//build_defs/java:maven.bzl%maven": {
       "general": {
-        "bzlTransitiveDigest": "in+oawXvTAs3FniwqBHZfV4wlU3peJG/82fanFC3ogs=",
+        "bzlTransitiveDigest": "7ZEHy7j3nxJUfJ3uplhTs2JaKmNZSF1eV6MJ5rG7aw0=",
         "usagesDigest": "+1atAPOezAlPm7GKMji/22VrYkgM0K+wmDldS8j/0Hg=",
         "recordedInputs": [],
         "generatedRepoSpecs": {

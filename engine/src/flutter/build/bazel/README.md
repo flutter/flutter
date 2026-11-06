@@ -1829,7 +1829,11 @@ each at first use; `maven_lock.py` pins each file (the `.aar` or the
 `maven_artifacts` repository rule fetches them into
 `@maven_android_tests` (1.9 GB, the android-all jars most of it; AARs
 unpacked, `classes.jar` and `res/` apart; the android-all jars in one
-directory of their own, never on a class path). `robolectric.bzl` then:
+directory of their own, never on a class path) -- Maven Central's files
+from Google's copy of it on Cloud Storage first
+(`maven-central.storage-download.googleapis.com`), since repo1.maven.org
+limits requests by address and the bots, each fetching the set afresh,
+share theirs (429s on a linux_unopt drone). `robolectric.bzl` then:
 `java_classes` compiles the 96 files with `@openjdk`'s javac into one jar
 (`--release 17`; `android.jar` first on the class path rather than the
 boot class path, which javac refuses past release 8 -- what AGP does for
