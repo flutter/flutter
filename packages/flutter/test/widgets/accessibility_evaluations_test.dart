@@ -96,6 +96,128 @@ void main() {
       );
       handle.dispose();
     });
+
+    testWidgets('fails for unlabeled link', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox(
+            width: 48.0,
+            height: 48.0,
+            child: Semantics(
+              container: true,
+              link: true,
+              linkUrl: Uri.parse('https://flutter.dev'),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, hasLength(1));
+      expect(
+        result.violations.first.reason,
+        contains('expected tappable node to have semantic label'),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('passes for labeled link', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox(
+            width: 48.0,
+            height: 48.0,
+            child: Semantics(
+              container: true,
+              link: true,
+              linkUrl: Uri.parse('https://flutter.dev'),
+              label: 'Flutter website',
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('skips link without linkUrl', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox(width: 48.0, height: 48.0, child: Semantics(container: true, link: true)),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('skips link with empty linkUrl', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox(
+            width: 48.0,
+            height: 48.0,
+            child: Semantics(container: true, link: true, linkUrl: Uri()),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('fails for link whose name only comes from unmerged descendants', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox(
+            width: 48.0,
+            height: 48.0,
+            child: Semantics(
+              container: true,
+              link: true,
+              linkUrl: Uri.parse('https://flutter.dev'),
+              explicitChildNodes: true,
+              child: Semantics(label: 'Flutter website'),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, hasLength(1));
+      expect(
+        result.violations.first.reason,
+        contains('expected tappable node to have semantic label'),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('passes when link is merged into labeled descendant', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox(
+            width: 48.0,
+            height: 48.0,
+            child: Semantics(
+              container: true,
+              link: true,
+              linkUrl: Uri.parse('https://flutter.dev'),
+              child: Semantics(label: 'Flutter website'),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
   });
 
   group('MinimumTextContrastEvaluation', () {
