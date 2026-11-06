@@ -17,8 +17,6 @@
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
-#include "impeller/renderer/shader_function.h"
-#include "impeller/renderer/shader_library.h"
 #include "impeller/renderer/testing/mocks.h"
 
 namespace impeller {
@@ -32,30 +30,6 @@ using ::testing::Contains;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-
-class FakeShaderFunction final : public ShaderFunction {
- public:
-  FakeShaderFunction(std::string name, ShaderStage stage)
-      : ShaderFunction(UniqueID{}, std::move(name), stage) {}
-};
-
-/// A shader library that resolves every entrypoint, as if every shader had
-/// been compiled into it.
-class FakeShaderLibrary final : public ShaderLibrary {
- public:
-  // |ShaderLibrary|
-  bool IsValid() const override { return true; }
-
-  // |ShaderLibrary|
-  std::shared_ptr<const ShaderFunction> GetFunction(
-      std::string_view name,
-      ShaderStage stage) override {
-    return std::make_shared<FakeShaderFunction>(std::string(name), stage);
-  }
-
-  // |ShaderLibrary|
-  void UnregisterFunction(std::string name, ShaderStage stage) override {}
-};
 
 PipelineFuture<PipelineDescriptor> MakeRealizedPipelineFuture(
     PipelineDescriptor descriptor) {
@@ -84,6 +58,11 @@ class ContentContextTest : public ::testing::Test {
         .WillByDefault(Return(shader_library_));
     ON_CALL(*context_, GetPipelineLibrary())
         .WillByDefault(Return(pipeline_library_));
+    // Resolve every entrypoint, as if every shader had been compiled in.
+    ON_CALL(*shader_library_, GetFunction(_, _))
+        .WillByDefault([](std::string_view name, ShaderStage stage) {
+          return std::make_shared<MockShaderFunction>(std::string(name), stage);
+        });
     ON_CALL(*pipeline_library_, GetPipeline(_, _, _))
         .WillByDefault([this](PipelineDescriptor descriptor, bool /*async*/,
                               bool /*threadsafe*/) {
@@ -94,8 +73,8 @@ class ContentContextTest : public ::testing::Test {
 
  protected:
   std::shared_ptr<const Capabilities> capabilities_;
-  std::shared_ptr<FakeShaderLibrary> shader_library_ =
-      std::make_shared<FakeShaderLibrary>();
+  std::shared_ptr<NiceMock<MockShaderLibrary>> shader_library_ =
+      std::make_shared<NiceMock<MockShaderLibrary>>();
   std::shared_ptr<NiceMock<MockPipelineLibrary>> pipeline_library_ =
       std::make_shared<NiceMock<MockPipelineLibrary>>();
   std::shared_ptr<NiceMock<MockImpellerContext>> context_ =
