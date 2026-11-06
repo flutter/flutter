@@ -14,11 +14,12 @@ import '../runner/flutter_command.dart';
 /// the use of device/artifact autodetection.
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({
-    bool verboseHelp = false,
+    super.verboseHelp = false,
     required this._cache,
     required this._platform,
     required this._logger,
     required this._featureFlags,
+    required super.toolContext,
   }) {
     argParser.addFlag(
       'all-platforms',
