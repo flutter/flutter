@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <vector>
 
-#include "flutter/fml/status.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
@@ -16,6 +15,7 @@
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -106,7 +106,7 @@ class TextureSourceVK {
   ///
   /// @return     If the layout transition was successfully made.
   ///
-  fml::Status SetLayout(const BarrierVK& barrier) const;
+  absl::Status SetLayout(const BarrierVK& barrier) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Store the layout of the image.
@@ -179,9 +179,9 @@ class TextureSourceVK {
 
  private:
   struct CachedFrameDataEntry {
-    SampleCount sample_count;
-    uint32_t mip_level;
-    uint32_t slice;
+    SampleCount sample_count = SampleCount::kCount1;
+    uint32_t mip_level = 0;
+    uint32_t slice = 0;
     FramebufferAndRenderPass data;
   };
   // Linear-scanned because N is typically 1 and bounded by

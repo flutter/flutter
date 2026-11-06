@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -31,6 +32,7 @@ import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/web/web_options.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
@@ -58,10 +60,6 @@ void main() {
     late FakeLockTrackingCache lockTrackingCache;
     late FakeLockCheckingPub lockCheckingPub;
 
-    setUpAll(() {
-      Cache.flutterRoot = '/path/to/sdk/flutter';
-    });
-
     setUp(() {
       Cache.disableLocking();
       cache = FakeCache();
@@ -73,7 +71,7 @@ void main() {
       fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
-      preRunValidator = PreRunValidator(fileSystem: fileSystem);
+      preRunValidator = PreRunValidator(fileSystem: fileSystem, cache: cache);
       lockTrackingCache = FakeLockTrackingCache();
       lockCheckingPub = FakeLockCheckingPub(lockTrackingCache);
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -155,7 +153,9 @@ void main() {
     testUsingContext(
       "throws toolExit if flutter_tools source dir doesn't exist",
       () async {
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(
+          toolContext: DelegatingToolContext(preRunValidator: preRunValidator),
+        );
         await expectToolExitLater(
           flutterCommand.run(),
           contains('Flutter SDK installation appears corrupted'),
@@ -164,7 +164,6 @@ void main() {
       overrides: <Type, Generator>{
         Cache: () => cache,
         FileSystem: () => fileSystem,
-        PreRunValidator: () => preRunValidator,
         ProcessManager: () => processManager,
       },
     );
@@ -241,8 +240,8 @@ void main() {
       'prints warning when enable-impeller flag is used with release build',
       () async {
         final flutterCommand = DummyFlutterCommand()
-          ..addBuildModeFlags(verboseHelp: false)
-          ..addEnableImpellerFlag(verboseHelp: false);
+          ..registerOptionBundle(const BuildModeOptionsBundle())
+          ..argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller);
 
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--release', '--enable-impeller']);
@@ -262,8 +261,8 @@ void main() {
       'prints warning when no-enable-impeller flag is used with release build',
       () async {
         final flutterCommand = DummyFlutterCommand()
-          ..addBuildModeFlags(verboseHelp: false)
-          ..addEnableImpellerFlag(verboseHelp: false);
+          ..registerOptionBundle(const BuildModeOptionsBundle())
+          ..argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller);
 
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--release', '--no-enable-impeller']);
@@ -283,8 +282,8 @@ void main() {
       'does not print warning when enable-impeller flag is used with debug build',
       () async {
         final flutterCommand = DummyFlutterCommand()
-          ..addBuildModeFlags(verboseHelp: false)
-          ..addEnableImpellerFlag(verboseHelp: false);
+          ..registerOptionBundle(const BuildModeOptionsBundle())
+          ..argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller);
 
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--debug', '--enable-impeller']);
@@ -301,8 +300,8 @@ void main() {
       'does not print warning when no impeller flags are used with release build',
       () async {
         final flutterCommand = DummyFlutterCommand()
-          ..addBuildModeFlags(verboseHelp: false)
-          ..addEnableImpellerFlag(verboseHelp: false);
+          ..registerOptionBundle(const BuildModeOptionsBundle())
+          ..argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller);
 
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--release']);
@@ -494,7 +493,11 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns parsed uri',
       () async {
-        final command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+        final command = DummyFlutterCommand();
+        command.argParser.addDescriptors(<OptionDescriptor<Object?>>[
+          DebuggingOptionDescriptors.enableDevTools,
+          DebuggingOptionDescriptors.devToolsServerAddress(),
+        ]);
         await createTestCommandRunner(command).run(<String>[
           'dummy',
           '--${FlutterCommand.kDevToolsServerAddress}',
@@ -511,7 +514,11 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns null for bad input',
       () async {
-        final command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+        final command = DummyFlutterCommand();
+        command.argParser.addDescriptors(<OptionDescriptor<Object?>>[
+          DebuggingOptionDescriptors.enableDevTools,
+          DebuggingOptionDescriptors.devToolsServerAddress(),
+        ]);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>[
           'dummy',
@@ -817,6 +824,24 @@ void main() {
     );
 
     testUsingContext(
+      'preserves hasOption and typed getters when subclass replaces argParser with a copy',
+      () async {
+        final command = _DummyOverriddenArgParserCommand();
+        await createTestCommandRunner(command)
+            .run(<String>['dummy', '--filesystem-scheme=org-dartlang-app', '--ipv6']);
+        expect(command.hasOption(BuildInfoOptions.fileSystemScheme), isTrue);
+        expect(command.hasOption(DebuggingOptionDescriptors.ipv6), isTrue);
+        expect(command.hasOption(CommonOptions.fatalWarnings), isFalse);
+        expect(command.fileSystemScheme, 'org-dartlang-app');
+        expect(command.ipv6, isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'reports the enable-hcpp feature flag to gradle as the injected default',
       () async {
         final command = DummyHcppFlutterCommand();
@@ -972,7 +997,11 @@ void main() {
     testUsingContext(
       'includes initializeFromDill in BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final flutterCommand = DummyFlutterCommand();
+        flutterCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+          BuildInfoOptions.initializeFromDill,
+          BuildInfoOptions.assumeInitializeFromDillUpToDate,
+        ], hideOverride: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--initialize-from-dill=/foo/bar.dill']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -989,7 +1018,11 @@ void main() {
     testUsingContext(
       'includes assumeInitializeFromDillUpToDate in BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final flutterCommand = DummyFlutterCommand();
+        flutterCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+          BuildInfoOptions.initializeFromDill,
+          BuildInfoOptions.assumeInitializeFromDillUpToDate,
+        ], hideOverride: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -1006,7 +1039,11 @@ void main() {
     testUsingContext(
       'unsets assumeInitializeFromDillUpToDate in BuildInfo when disabled',
       () async {
-        final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final flutterCommand = DummyFlutterCommand();
+        flutterCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+          BuildInfoOptions.initializeFromDill,
+          BuildInfoOptions.assumeInitializeFromDillUpToDate,
+        ], hideOverride: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--no-assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -1189,7 +1226,11 @@ void main() {
       late CommandRunner<void> dummyCommandRunner;
 
       setUp(() {
-        dummyCommand = DummyFlutterCommand()..usesDartDefineOption();
+        dummyCommand = DummyFlutterCommand();
+        dummyCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+          CommonOptions.dartDefines,
+          CommonOptions.dartDefineFromFile,
+        ]);
         dummyCommandRunner = createTestCommandRunner(dummyCommand);
       });
 
@@ -1688,7 +1729,7 @@ flutter:
               return FlutterCommandResult.success();
             },
           );
-          flutterCommand.usesFlavorOption();
+          flutterCommand.argParser.addDescriptor(BuildInfoOptions.flavor);
           final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
           await runner.run(<String>['dummy', '--flavor', 'bar']);
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -2212,6 +2253,9 @@ Use the "flutter config" command to enable feature flags.''',
 }
 
 class FakeDeprecatedCommand extends FlutterCommand {
+  FakeDeprecatedCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   @override
   String get description => 'A fake command';
 
@@ -2228,8 +2272,9 @@ class FakeDeprecatedCommand extends FlutterCommand {
 }
 
 class FakeTargetCommand extends FlutterCommand {
-  FakeTargetCommand() {
-    usesTargetOption();
+  FakeTargetCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
+    CommonOptions.target.addTo(argParser);
   }
 
   @override
@@ -2248,8 +2293,9 @@ class FakeTargetCommand extends FlutterCommand {
 }
 
 class FakeDdsCommand extends FlutterCommand {
-  FakeDdsCommand() {
-    addDdsOptions(verboseHelp: false);
+  FakeDdsCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
+    registerOptionBundle(const DdsAndDevToolsOptionsBundle(includeDevTools: false));
   }
 
   @override
@@ -2277,6 +2323,10 @@ class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
 }
 
 class FakeCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '/path/to/sdk/flutter';
+  @override
+  set flutterRoot(String? value) {}
   List<Set<DevelopmentArtifact>> artifacts = <Set<DevelopmentArtifact>>[];
 
   @override
@@ -2354,8 +2404,9 @@ class FakeFeature extends Feature {
 }
 
 class DummyFlutterCommandWithPub extends FlutterCommand {
-  DummyFlutterCommandWithPub() {
-    usesPubOption();
+  DummyFlutterCommandWithPub({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
+    CommonOptions.pub.addTo(argParser);
   }
 
   @override
@@ -2374,6 +2425,10 @@ class DummyFlutterCommandWithPub extends FlutterCommand {
 }
 
 class FakeLockTrackingCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '/path/to/sdk/flutter';
+  @override
+  set flutterRoot(String? value) {}
   bool isLockHeld = false;
 
   @override
@@ -2469,27 +2524,92 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
 class DummyMachineFlutterCommand extends DummyFlutterCommand {
   DummyMachineFlutterCommand() : super(name: 'dummy') {
-    addMachineOutputFlag(verboseHelp: false);
+    CommonOptions.machine.addTo(argParser);
   }
 }
 
 class DummyHcppFlutterCommand extends DummyFlutterCommand {
   DummyHcppFlutterCommand() : super(name: 'dummy') {
-    addEnableHcppFlag(verboseHelp: false);
+    DebuggingOptionDescriptors.enableHcpp.addTo(argParser);
   }
 }
 
 class DummyDeprecatedJsInteropFlutterCommand extends DummyFlutterCommand {
   DummyDeprecatedJsInteropFlutterCommand() : super(name: 'dummy') {
-    usesDeprecatedJsInteropFlag(verboseHelp: false);
+    WebOptions.deprecatedJsInterop.addTo(argParser);
   }
 }
 
 class DummyAllBuildOptionsFlutterCommand extends DummyFlutterCommand {
   DummyAllBuildOptionsFlutterCommand() : super(name: 'dummy') {
-    usesTrackWidgetCreation(verboseHelp: false);
-    addTreeShakeIconsFlag();
-    usesExtraDartFlagOptions(verboseHelp: false);
-    addAndroidSpecificBuildOptions();
+    registerOptionBundle(const AndroidGradleOptionsBundle());
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.trackWidgetCreation,
+      CommonOptions.treeShakeIcons,
+      BuildInfoOptions.extraFrontEndOptions,
+      BuildInfoOptions.extraGenSnapshotOptions,
+    ]);
   }
+}
+
+class _DummyOverriddenArgParserCommand extends FlutterCommand {
+  _DummyOverriddenArgParserCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
+    registerOptionBundle(const FilesystemOptionsBundle());
+    DebuggingOptionDescriptors.ipv6.addTo(argParser);
+    final copy = ArgParser(
+      allowTrailingOptions: argParser.allowTrailingOptions,
+      usageLineLength: argParser.usageLineLength,
+    );
+    for (final MapEntry<String, Option> entry in argParser.options.entries) {
+      final Option option = entry.value;
+      if (option.isFlag) {
+        copy.addFlag(
+          entry.key,
+          abbr: option.abbr,
+          help: option.help,
+          defaultsTo: option.defaultsTo as bool?,
+          negatable: option.negatable!,
+          hide: option.hide,
+        );
+      } else if (option.isSingle) {
+        copy.addOption(
+          entry.key,
+          abbr: option.abbr,
+          help: option.help,
+          valueHelp: option.valueHelp,
+          defaultsTo: option.defaultsTo as String?,
+          hide: option.hide,
+        );
+      } else if (option.isMultiple) {
+        copy.addMultiOption(
+          entry.key,
+          abbr: option.abbr,
+          help: option.help,
+          valueHelp: option.valueHelp,
+          defaultsTo: option.defaultsTo as Iterable<String>?,
+          splitCommas: option.splitCommas,
+          hide: option.hide,
+        );
+      }
+    }
+    _overriddenArgParser = copy;
+  }
+
+  ArgParser? _overriddenArgParser;
+
+  @override
+  ArgParser get argParser => _overriddenArgParser ?? super.argParser;
+
+  @override
+  String get description => 'does nothing';
+
+  @override
+  String get name => 'dummy';
+
+  @override
+  bool get shouldUpdateCache => false;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.success();
 }

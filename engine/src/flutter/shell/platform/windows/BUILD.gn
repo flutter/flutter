@@ -195,6 +195,7 @@ source_set("flutter_windows_source") {
     "//flutter/third_party/angle:libEGL_static",
     "//flutter/third_party/angle:libGLESv2_static",
     "//flutter/third_party/rapidjson",
+    "//third_party/abseil-cpp/absl/status:statusor",
   ]
 }
 

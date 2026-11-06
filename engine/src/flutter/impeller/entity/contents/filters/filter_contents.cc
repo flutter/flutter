@@ -15,7 +15,6 @@
 #include "flutter/fml/logging.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/filters/border_mask_blur_filter_contents.h"
 #include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/filters/local_matrix_filter_contents.h"
@@ -47,18 +46,6 @@ std::shared_ptr<FilterContents> FilterContents::MakeGaussianBlur(
       mask_geometry);
   blur->SetInputs({input});
   return blur;
-}
-
-std::shared_ptr<FilterContents> FilterContents::MakeBorderMaskBlur(
-    FilterInput::Ref input,
-    Sigma sigma_x,
-    Sigma sigma_y,
-    BlurStyle blur_style) {
-  auto filter = std::make_shared<BorderMaskBlurFilterContents>();
-  filter->SetInputs({std::move(input)});
-  filter->SetSigma(sigma_x, sigma_y);
-  filter->SetBlurStyle(blur_style);
-  return filter;
 }
 
 std::shared_ptr<FilterContents> FilterContents::MakeDirectionalMorphology(
