@@ -64,7 +64,7 @@ VARS = {
     "run_fuchsia_emu": False,
     "setup_githooks": True,
     "skia_git": "https://skia.googlesource.com",
-    "skia_revision": "b5abed66da868c222a7686ebec77d75d369622ca",
+    "skia_revision": "a5aacd103e68aefc1e2688971c4bbb7165293865",
     "upstream_VulkanMemoryAllocator": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git",
     "upstream_abseil-cpp": "https://github.com/abseil/abseil-cpp.git",
     "upstream_angle": "https://github.com/google/angle.git",
@@ -382,7 +382,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/skia": {
         "url": "https://skia.googlesource.com/skia.git",
-        "revision": "b5abed66da868c222a7686ebec77d75d369622ca",
+        "revision": "a5aacd103e68aefc1e2688971c4bbb7165293865",
     },
     "engine/src/flutter/third_party/sqlite": {
         "url": "https://flutter.googlesource.com/third_party/sqlite",
