@@ -39,4 +39,5 @@ part 'plugins.dart';
 part 'pointer.dart';
 part 'semantics.dart';
 part 'text.dart';
+part 'text_styles.g.dart';
 part 'window.dart';

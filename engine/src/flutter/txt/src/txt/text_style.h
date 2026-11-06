@@ -21,28 +21,31 @@
 
 namespace txt {
 
+// Primitive fields are value-initialized (`= {}`); default values for
+// `dart:ui` are defined on `TextStyle._` in `lib/ui/text.dart` and seeded onto
+// `ParagraphStyle::default_text_style` by `flutter::ParagraphBuilder`.
 class TextStyle {
  public:
-  SkColor color = SK_ColorWHITE;
-  int decoration = TextDecoration::kNone;
-  // Does not make sense to draw a transparent object, so we use it as a default
-  // value to indicate no decoration color was set.
-  SkColor decoration_color = SK_ColorTRANSPARENT;
-  TextDecorationStyle decoration_style = TextDecorationStyle::kSolid;
+  SkColor color = {};
+  int decoration = {};
+  // Does not make sense to draw a transparent object, so SK_ColorTRANSPARENT
+  // (0) is used as a sentinel to indicate no decoration color was set.
+  SkColor decoration_color = {};
+  TextDecorationStyle decoration_style = {};
   // Thickness is applied as a multiplier to the default thickness of the font.
-  double decoration_thickness_multiplier = 1.0;
-  int font_weight = FontWeight::normal;
-  FontStyle font_style = FontStyle::normal;
-  TextBaseline text_baseline = TextBaseline::kAlphabetic;
-  bool half_leading = false;
+  double decoration_thickness_multiplier = {};
+  int font_weight = {};
+  FontStyle font_style = {};
+  TextBaseline text_baseline = {};
+  bool half_leading = {};
   // An ordered list of fonts in order of priority. The first font is more
   // highly preferred than the last font.
   std::vector<std::string> font_families;
-  double font_size = 14.0;
-  double letter_spacing = 0.0;
-  double word_spacing = 0.0;
-  double height = 1.0;
-  bool has_height_override = false;
+  double font_size = {};
+  double letter_spacing = {};
+  double word_spacing = {};
+  double height = {};
+  bool has_height_override = {};
   std::string locale;
   std::optional<flutter::DlPaint> background;
   std::optional<flutter::DlPaint> foreground;

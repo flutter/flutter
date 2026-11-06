@@ -282,6 +282,8 @@ compile_platform("strong_platform") {
     "$root_out_dir/flutter_patched_sdk/vm_outline_strong.dill",
   ]
 
+  deps = [ "//flutter/lib/ui:generate_text_styles" ]
+
   pool = "//build/toolchain:toolchain_pool"
 
   is_runtime_mode_release =

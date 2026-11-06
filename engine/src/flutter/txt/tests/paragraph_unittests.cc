@@ -103,6 +103,7 @@ class PainterTestBase : public CanvasTestBase<T> {
     t_style.decoration = txt::TextDecoration::kUnderline;
     t_style.decoration_style = style;
     t_style.decoration_color = SK_ColorBLACK;
+    t_style.decoration_thickness_multiplier = 1.0;
     t_style.font_families.push_back("ahem");
     return t_style;
   }
