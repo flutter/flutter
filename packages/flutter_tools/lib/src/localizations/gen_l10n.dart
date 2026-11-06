@@ -1381,7 +1381,10 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             tempVariables.add(
               pluralVariableTemplate
                   .replaceAll('@(varName)', tempVarName)
-                  .replaceAll(
+                  .replaceAll('@(count)', identifier.value!)
+                  .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.values.join('\n'))
+                  // Must run last and only once, so message text is never rewritten.
+                  .replaceFirst(
                     '@(explicitPluralCases)',
                     explicitPluralArgs.entries
                         .toList()
@@ -1391,9 +1394,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
                               '${identifier.value!} == ${entry.key}\n        ? ${entry.value}\n        : ',
                         )
                         .join(),
-                  )
-                  .replaceAll('@(count)', identifier.value!)
-                  .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.values.join('\n')),
+                  ),
             );
             return '\$$tempVarName';
 

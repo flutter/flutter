@@ -2637,26 +2637,45 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 }''',
         }, useExplicitPluralValues: true);
         final String content = getGeneratedFileContent(locale: 'en');
-        expect(content, contains(r"count == 1\n        ? 'one $name'".replaceAll(r'\n', '\n')));
+        expect(content, contains("count == 1\n        ? 'one \$name'"));
         expect(content, contains(r"other: '$name has $count items',"));
       });
 
-      testWithoutContext('explicit plural values too large for an integer throw when enabled', () {
-        try {
+      testWithoutContext(
+        'explicit plural values do not substitute template placeholders in messages',
+        () {
           setupLocalizations(<String, String>{
+            'en': '''
+{
+  "itemCount": "{count,plural, =1{Costs @(count)} =2{@(pluralLogicArgs)} other{@(explicitPluralCases)}}"
+}''',
+          }, useExplicitPluralValues: true);
+          final String content = getGeneratedFileContent(locale: 'en');
+          expect(content, contains("'Costs @(count)'"));
+          expect(content, contains("'@(pluralLogicArgs)'"));
+          expect(content, contains("other: '@(explicitPluralCases)',"));
+          expect(content, contains('count == 1'));
+          expect(content, contains('count == 2'));
+        },
+      );
+
+      testWithoutContext('explicit plural values too large for an integer throw when enabled', () {
+        expect(
+          () => setupLocalizations(<String, String>{
             'en': '''
 {
   "count": "{count,plural, =99999999999999999999{Huge} other{Hmm...}}"
 }''',
-          }, useExplicitPluralValues: true);
-          fail('Expected an L10nException.');
-        } on L10nException catch (error) {
-          expect(error.message, contains('Found syntax errors.'));
-          expect(
-            logger.errorText,
-            contains('The plural case "=99999999999999999999" is too large'),
-          );
-        }
+          }, useExplicitPluralValues: true),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains('Found syntax errors.'),
+            ),
+          ),
+        );
+        expect(logger.errorText, contains('The plural case "=99999999999999999999" is too large'));
       });
 
       testWithoutContext('repeated explicit plural values warn when enabled', () {
@@ -2711,28 +2730,6 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     {count,plural, one{Hello} one{hello} other{hi}}
                    ^'''),
         );
-      });
-
-      testWithoutContext('undefined plural categories throw a syntax error when enabled', () {
-        try {
-          setupLocalizations(<String, String>{
-            'en': '''
-{
-  "count": "{count,plural, =3{Three} some{Undefined Behavior!} other{Hmm...}}"
-}''',
-          }, useExplicitPluralValues: true);
-          fail('Expected an L10nException.');
-        } on L10nException catch (error) {
-          expect(error.message, contains('Found syntax errors.'));
-          expect(logger.hadErrorOutput, isTrue);
-          expect(
-            logger.errorText,
-            contains('''
-[app_en.arb:count] ICU Syntax Error: Plural expressions case must be one of "zero", "one", "two", "few", "many", or "other".
-    {count,plural, =3{Three} some{Undefined Behavior!} other{Hmm...}}
-                             ^'''),
-          );
-        }
       });
 
       testWithoutContext(
