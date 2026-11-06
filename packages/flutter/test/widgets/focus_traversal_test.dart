@@ -3206,9 +3206,9 @@ void main() {
       await tester.pump();
       expect(gridNodes[1][0].hasPrimaryFocus, isTrue);
 
-      // Right moves within row 1, so the path recorded by the enclosing scope
-      // no longer leads to the focused card.
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      // Right moves within row 1, so the enclosing scope's history goes stale.
+      // Arrow keys scroll on the web, so the move is requested directly.
+      gridNodes[1][0].focusInDirection(TraversalDirection.right);
       await tester.pump();
       expect(gridNodes[1][1].hasPrimaryFocus, isTrue);
 
