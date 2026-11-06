@@ -31,6 +31,7 @@ class RepeatTapTabScaffoldExample extends StatefulWidget {
 class _RepeatTapTabScaffoldExampleState
     extends State<RepeatTapTabScaffoldExample> {
   final CupertinoTabController _tabController = CupertinoTabController();
+  int _lastSelectedIndex = 0;
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys =
       <GlobalKey<NavigatorState>>[
@@ -54,7 +55,7 @@ class _RepeatTapTabScaffoldExampleState
 
   void _onTabTapped(int index) {
     // If the active tab was re-tapped, perform iOS-idiomatic repeat-tap actions.
-    if (index == _tabController.index) {
+    if (index == _lastSelectedIndex) {
       final NavigatorState? currentNavigator =
           _navigatorKeys[index].currentState;
       if (currentNavigator != null && currentNavigator.canPop()) {
@@ -68,6 +69,8 @@ class _RepeatTapTabScaffoldExampleState
           curve: Curves.easeOut,
         );
       }
+    } else {
+      _lastSelectedIndex = index;
     }
   }
 

@@ -44,5 +44,33 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Tab Search'), findsOneWidget);
   });
-}
 
+  testWidgets(
+    'Switching to an inactive tab with a pushed sub-page does not pop it',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.RepeatTapTabScaffoldApp());
+
+      // 1. Switch to Search tab.
+      await tester.tap(find.byIcon(CupertinoIcons.search));
+      await tester.pumpAndSettle();
+      expect(find.text('Tab Search'), findsOneWidget);
+
+      // 2. Push a sub-page on Search tab.
+      await tester.tap(find.text('Push Sub-Page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Sub-Page'), findsOneWidget);
+
+      // 3. Switch back to Home tab.
+      await tester.tap(find.byIcon(CupertinoIcons.home));
+      await tester.pumpAndSettle();
+      expect(find.text('Tab Home'), findsOneWidget);
+
+      // 4. Switch back to Search tab.
+      await tester.tap(find.byIcon(CupertinoIcons.search));
+      await tester.pumpAndSettle();
+
+      // 5. The sub-page on Search tab should still be open.
+      expect(find.text('Sub-Page'), findsOneWidget);
+    },
+  );
+}
