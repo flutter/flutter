@@ -589,79 +589,41 @@ flutter:
       fs = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'returns true when the project is using AndroidX',
-      () async {
-        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
-          'flutter_android.',
-        );
+    testWithoutContext('returns true when the project is using AndroidX', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
-        androidDirectory
-            .childFile('gradle.properties')
-            .writeAsStringSync('android.useAndroidX=true');
+      androidDirectory.childFile('gradle.properties').writeAsStringSync('android.useAndroidX=true');
 
-        expect(isAppUsingAndroidX(androidDirectory), isTrue);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(isAppUsingAndroidX(androidDirectory), isTrue);
+    });
 
-    testUsingContext(
-      'returns false when the project is not using AndroidX',
-      () async {
-        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
-          'flutter_android.',
-        );
+    testWithoutContext('returns false when the project is not using AndroidX', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
-        androidDirectory
-            .childFile('gradle.properties')
-            .writeAsStringSync('android.useAndroidX=false');
+      androidDirectory
+          .childFile('gradle.properties')
+          .writeAsStringSync('android.useAndroidX=false');
 
-        expect(isAppUsingAndroidX(androidDirectory), isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(isAppUsingAndroidX(androidDirectory), isFalse);
+    });
 
-    testUsingContext(
-      'returns false when gradle.properties does not exist',
-      () async {
-        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
-          'flutter_android.',
-        );
+    testWithoutContext('returns false when gradle.properties does not exist', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
-        expect(isAppUsingAndroidX(androidDirectory), isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(isAppUsingAndroidX(androidDirectory), isFalse);
+    });
 
-    testUsingContext(
-      'returns false for commented-out AndroidX properties',
-      () async {
-        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
-          'flutter_android.',
-        );
+    testWithoutContext('returns false for commented-out AndroidX properties', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
-        androidDirectory
-            .childFile('gradle.properties')
-            .writeAsStringSync('#android.useAndroidX=true');
+      androidDirectory
+          .childFile('gradle.properties')
+          .writeAsStringSync('#android.useAndroidX=true');
 
-        expect(isAppUsingAndroidX(androidDirectory), isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(isAppUsingAndroidX(androidDirectory), isFalse);
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'returns true when AndroidX property has spaces around the separator',
       () async {
         final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
@@ -673,10 +635,6 @@ flutter:
             .writeAsStringSync('android.useAndroidX = true');
 
         expect(isAppUsingAndroidX(androidDirectory), isTrue);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
       },
     );
   });

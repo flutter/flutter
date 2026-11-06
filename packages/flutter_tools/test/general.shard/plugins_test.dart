@@ -3219,13 +3219,26 @@ iosPrefix: FLT
       },
     );
 
-    late FileSystem errorAccessDeniedFs;
-
-    testUsingContext(
+    testWithoutContext(
       'Symlink ERROR_ACCESS_DENIED failures show developers paths that were used',
       () async {
+        final handle = FileExceptionHandler();
+        final fileSystem = ErrorHandlingFileSystem(
+          platform: FakePlatform(),
+          delegate: MemoryFileSystem.test(
+            style: FileSystemStyle.windows,
+            opHandle: handle.opHandle,
+          ),
+        );
+        const pluginSymlinkPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
+        handle.addError(
+          fileSystem.link(pluginSymlinkPath),
+          FileSystemOp.create,
+          const FileSystemException('', '', OSError('', 5)),
+        );
+
         final flutterProject = FakeFlutterProject()
-          ..directory = errorAccessDeniedFs.currentDirectory.childDirectory('app');
+          ..directory = fileSystem.currentDirectory.childDirectory('app');
         final Directory windowsManagedDirectory = flutterProject.directory
             .childDirectory('windows')
             .childDirectory('flutter');
@@ -3273,28 +3286,6 @@ iosPrefix: FLT
           ),
           throwsToolExit(message: expectedMessage),
         );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () {
-          final handle = FileExceptionHandler();
-          final fileSystem = ErrorHandlingFileSystem(
-            platform: FakePlatform(),
-            delegate: MemoryFileSystem.test(
-              style: FileSystemStyle.windows,
-              opHandle: handle.opHandle,
-            ),
-          );
-          const pluginSymlinkPath =
-              r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
-          handle.addError(
-            fileSystem.link(pluginSymlinkPath),
-            FileSystemOp.create,
-            const FileSystemException('', '', OSError('', 5)),
-          );
-          return errorAccessDeniedFs = fileSystem;
-        },
-        Platform: () => FakePlatform(operatingSystem: 'windows'),
-        ProcessManager: () => FakeProcessManager.empty(),
       },
     );
 
@@ -3656,83 +3647,70 @@ iosPrefix: FLT
     });
   });
 
-  late FileSystem deletingPluginSymlinksFs;
+  testWithoutContext('exits tool when deleting .plugin_symlinks fails', () async {
+    final handle = FileExceptionHandler();
+    final fileSystem = ErrorHandlingFileSystem(
+      platform: FakePlatform(),
+      delegate: MemoryFileSystem.test(style: FileSystemStyle.windows, opHandle: handle.opHandle),
+    );
+    const symlinkDirectoryPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks';
+    handle.addError(
+      fileSystem.directory(symlinkDirectoryPath),
+      FileSystemOp.delete,
+      const PathNotFoundException(
+        symlinkDirectoryPath,
+        OSError('The system cannot find the path specified.', 3),
+      ),
+    );
 
-  testUsingContext(
-    'exits tool when deleting .plugin_symlinks fails',
-    () async {
-      final flutterProject = FakeFlutterProject()
-        ..directory = deletingPluginSymlinksFs.currentDirectory.childDirectory('app');
-      final flutterManifest = FakeFlutterManifest();
-      final Directory windowsManagedDirectory = flutterProject.directory
-          .childDirectory('windows')
-          .childDirectory('flutter');
-      final windowsProject = FakeWindowsProject()
-        ..managedDirectory = windowsManagedDirectory
-        ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
-        ..generatedPluginCmakeFile = windowsManagedDirectory.childFile('generated_plugins.mk')
-        ..pluginSymlinkDirectory = windowsManagedDirectory
-            .childDirectory('ephemeral')
-            .childDirectory('.plugin_symlinks')
-        ..exists = true;
+    final flutterProject = FakeFlutterProject()
+      ..directory = fileSystem.currentDirectory.childDirectory('app');
+    final flutterManifest = FakeFlutterManifest();
+    final Directory windowsManagedDirectory = flutterProject.directory
+        .childDirectory('windows')
+        .childDirectory('flutter');
+    final windowsProject = FakeWindowsProject()
+      ..managedDirectory = windowsManagedDirectory
+      ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
+      ..generatedPluginCmakeFile = windowsManagedDirectory.childFile('generated_plugins.mk')
+      ..pluginSymlinkDirectory = windowsManagedDirectory
+          .childDirectory('ephemeral')
+          .childDirectory('.plugin_symlinks')
+      ..exists = true;
 
-      flutterProject
-        ..manifest = flutterManifest
-        ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
-          '.flutter-plugins-dependencies',
-        )
-        ..windows = windowsProject;
+    flutterProject
+      ..manifest = flutterManifest
+      ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
+        '.flutter-plugins-dependencies',
+      )
+      ..windows = windowsProject;
 
-      writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
 
-      createPluginSymlinks(
+    createPluginSymlinks(
+      flutterProject,
+      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+      force: true,
+      os: FakeOperatingSystemUtils(''),
+      platform: FakePlatform(operatingSystem: 'windows'),
+    );
+
+    expect(
+      () => createPluginSymlinks(
         flutterProject,
         featureFlags: TestFeatureFlags(isWindowsEnabled: true),
         force: true,
         os: FakeOperatingSystemUtils(''),
         platform: FakePlatform(operatingSystem: 'windows'),
-      );
-
-      expect(
-        () => createPluginSymlinks(
-          flutterProject,
-          featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-          force: true,
-          os: FakeOperatingSystemUtils(''),
-          platform: FakePlatform(operatingSystem: 'windows'),
+      ),
+      throwsToolExit(
+        message: RegExp(
+          'Unable to delete file or directory at '
+          r'"C:\\app\\windows\\flutter\\ephemeral\\\.plugin_symlinks"',
         ),
-        throwsToolExit(
-          message: RegExp(
-            'Unable to delete file or directory at '
-            r'"C:\\app\\windows\\flutter\\ephemeral\\\.plugin_symlinks"',
-          ),
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () {
-        final handle = FileExceptionHandler();
-        final fileSystem = ErrorHandlingFileSystem(
-          platform: FakePlatform(),
-          delegate: MemoryFileSystem.test(
-            style: FileSystemStyle.windows,
-            opHandle: handle.opHandle,
-          ),
-        );
-        const symlinkDirectoryPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks';
-        handle.addError(
-          fileSystem.directory(symlinkDirectoryPath),
-          FileSystemOp.delete,
-          const PathNotFoundException(
-            symlinkDirectoryPath,
-            OSError('The system cannot find the path specified.', 3),
-          ),
-        );
-        return deletingPluginSymlinksFs = fileSystem;
-      },
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
-  );
+      ),
+    );
+  });
 
   group('resolvePluginImplementationsForPlatform', () {
     testWithoutContext('filters plugins based on platformKey', () {

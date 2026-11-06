@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,7 +17,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
@@ -29,7 +29,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
-import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
 import '../../../src/throwing_pub.dart';
@@ -82,10 +81,11 @@ void main() {
       .readAsStringSync();
 
   setUp(() {
+    final rawFs = MemoryFileSystem.test();
+    fs = ErrorHandlingFileSystem(delegate: rawFs, platform: linux);
+    final logger = BufferLogger.test();
     testbed = TestBed(
       setup: () {
-        final ToolContext(fs: FileSystem contextFs, :Logger logger) = const DelegatingToolContext();
-        fs = contextFs;
         fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 name: foo
 ''');
@@ -133,7 +133,11 @@ name: foo
           ..writeAsStringSync(serviceWorkerStub);
         environment.buildDir.createSync(recursive: true);
       },
-      overrides: <Type, Generator>{Platform: () => linux},
+      overrides: <Type, Generator>{
+        FileSystem: () => rawFs,
+        Logger: () => logger,
+        Platform: () => linux,
+      },
     );
   });
 
@@ -619,35 +623,40 @@ _flutter.loader.load();
 
   test(
     'WebEntrypointTarget generates an entrypoint with plugins and init platform on windows',
-    () => testbed.run(
-      () async {
-        final File mainFile = fs.file(fs.path.join('foo', 'lib', 'main.dart'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('void main() {}');
-        environment.defines[kTargetFile] = mainFile.path;
+    () async {
+      final rawWindowsFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      fs = ErrorHandlingFileSystem(delegate: rawWindowsFs, platform: windows);
+      await testbed.run(
+        () async {
+          final File mainFile = fs.file(fs.path.join('foo', 'lib', 'main.dart'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('void main() {}');
+          environment.defines[kTargetFile] = mainFile.path;
 
-        environment.defines[kHasWebPlugins] = 'true';
-        await const WebEntrypointTarget().build(environment);
+          environment.defines[kHasWebPlugins] = 'true';
+          await const WebEntrypointTarget().build(environment);
 
-        final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
+          final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
-        // Plugins
-        expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
-        expect(generated, contains('pluginRegistrant.registerPlugins();'));
+          // Plugins
+          expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
+          expect(generated, contains('pluginRegistrant.registerPlugins();'));
 
-        // Import.
-        expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
+          // Import.
+          expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
 
-        // Main
-        expect(generated, contains('ui_web.bootstrapEngine('));
-        expect(generated, contains('entrypoint.main as _'));
-      },
-      overrides: <Type, Generator>{
-        Platform: () => windows,
-        TemplateRenderer: () => const MustacheTemplateRenderer(),
-        Pub: ThrowingPub.new,
-      },
-    ),
+          // Main
+          expect(generated, contains('ui_web.bootstrapEngine('));
+          expect(generated, contains('entrypoint.main as _'));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => rawWindowsFs,
+          Platform: () => windows,
+          TemplateRenderer: () => const MustacheTemplateRenderer(),
+          Pub: ThrowingPub.new,
+        },
+      );
+    },
   );
 
   test(

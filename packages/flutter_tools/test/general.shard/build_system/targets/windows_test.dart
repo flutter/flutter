@@ -143,9 +143,11 @@ void main() {
 
   // AssetBundleFactory still uses context injection
   late FileSystem fileSystem;
+  late FileSystem flavorFileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    flavorFileSystem = MemoryFileSystem.test();
   });
 
   testUsingContext(
@@ -175,8 +177,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
-
-  late FileSystem flavorFileSystem;
 
   testUsingContext(
     'DebugBundleWindowsAssets bundles assets for the selected flavor',
@@ -229,7 +229,7 @@ flutter:
       expect(assetManifest.containsKey('assets/vanilla/ice-cream.png'), isFalse);
     },
     overrides: <Type, Generator>{
-      FileSystem: () => flavorFileSystem = MemoryFileSystem.test(),
+      FileSystem: () => flavorFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );

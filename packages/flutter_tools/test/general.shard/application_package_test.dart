@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -92,7 +91,7 @@ void main() {
         applicationBinary: apkFile,
       );
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -165,7 +164,7 @@ void main() {
         applicationBinary: apkFile,
       );
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -203,7 +202,7 @@ void main() {
 
     testUsingContext('AndroidApk.fromAndroidProject parses manifest with activity-alias', () async {
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -261,7 +260,7 @@ void main() {
       'AndroidApk.fromAndroidProject returns null if launch activity has no android:name',
       () async {
         final logger = BufferLogger.test();
-        final FlutterProject project = await aModuleProject();
+        final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
         project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
         final File appGradle = project.android.hostAppGradleRoot.childFile(
           fs.path.join('app', 'build.gradle'),
@@ -414,7 +413,7 @@ void main() {
       );
 
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -491,7 +490,7 @@ void main() {
         );
 
         final logger = BufferLogger.test();
-        final FlutterProject project = await aModuleProject();
+        final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
         project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
         final File appGradle = project.android.hostAppGradleRoot.childFile(
           fs.path.join('app', 'build.gradle'),
@@ -1359,8 +1358,7 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
   late String aaptPath;
 }
 
-Future<FlutterProject> aModuleProject() async {
-  final ToolContext(:FileSystem fs, :Logger logger) = const DelegatingToolContext();
+Future<FlutterProject> aModuleProject({required FileSystem fs, required Logger logger}) async {
   final Directory directory = fs.directory('module_project');
   writePackageConfigFiles(directory: directory, mainLibName: 'my_app');
   directory.childFile('pubspec.yaml').writeAsStringSync('''
