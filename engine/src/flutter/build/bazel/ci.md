@@ -392,11 +392,34 @@ the test for real, and so does the command from `engine/src`.
   Too many open files": the soft descriptor limit is 256 there and ninja's
   Darwin build waits on its pipes with pselect(2), bounded by 1024, so
   gn_build.py caps a Mac at 800 jobs as the recipe does (crbug.com/936864)
-  and raises the limit.
+  and raises the limit. On the pool (presubmits at 524–531, 11-05/06, warm,
+  against master's GN+reclient postsubmits of the same day):
+  mac_host_engine 13–15 minutes (GN 30–48; 44 with local compiles),
+  mac_ios_engine 12–17 (GN 31–74), mac_android_aot_engine 13–14 (GN
+  22–31); the standalone Mac test builders, on Bazel since 524:
+  mac_host_debug_arm64_tests 15–16 (GN 20–35), host_debug_unopt_arm64 24–25
+  (GN 38–40), the iOS simulator unopt builders 18–22, the licenses builder
+  7–8. The test targets whose copts name the Xcode's platform directories
+  (XCTest, Testing: 15 rules) compile on the Mac (`no-remote-exec`, from
+  the converter): a worker has no Xcode.
+- The Linux test drones (`linux_unopt`, eight builds, each with its tests
+  on the bot): 25:54 at 531 against GN's 16–17, the difference the Android
+  embedding's Robolectric suite -- 87 JVMs, one per class, on an 8-core bot:
+  one at a time at first (each declared 12 GB to the scheduler against the
+  bot's 20 GB budget; 23 minutes for a suite Gradle's eight forks finish in
+  four), six abreast since 530 (3 GB declared, measured 3.0 GB peak;
+  11–13.5 minutes), and with the C1 compiler alone and the serial
+  collector since 533 (a class-loading-bound JVM that lives seconds; 2.5×
+  faster at six abreast on eight cores in a measurement here). The other
+  drones are at GN's times: `ci/host_debug_unopt` builds in 3:15 (GN 2:20)
+  and runs its host tests in 4:43 (GN 5:30).
 - Presubmit: the switched builders run on every PR as they did under GN,
   which is the point. A new `.ci.yaml` target cannot do that: cocoon admits
   it only as `bringup: true`, which runs in postsubmit on the staging pool
-  until the usual promotion.
+  until the usual promotion. **The presubmit at 531 (`2f1e2923442`,
+  11-05) was 338/338 green: the Linux and Mac engine builders, the
+  standalone Mac test builders, the Linux test drones and every framework
+  and tool shard on Bazel through the unchanged recipes.**
 
 ## What a recipe change would do differently
 
@@ -428,14 +451,27 @@ simpler, faster and better reported:
    outlives a build, which the recipe's clobber of the `builder` cache
    today denies to anything under the checkout. With it a bot's second
    build of a configuration is incremental; today every build is cold.
+   The repository cache (`--repository_cache`, the downloaded external
+   repositories) belongs in the same named cache: today every run of a
+   linux_unopt Java drone downloads the Android embedding's test
+   dependencies again -- 99 Maven files, 2.2 GB, the Robolectric
+   android-all jars most of it -- about 40 s of the step on a bot (and the
+   reason 531 fetches Maven Central through Google's mirror: repo1.maven.org
+   rate-limits the bots' shared addresses).
 4. **The rest of remote execution.** The execution itself is in, above: the
    RBE instance needed nothing outside this repository, since every bot
    already holds the credentials for reclient. What a recipe change adds:
    `--bes_backend` for invocation pages beside the step log; the wrapped GN
    builds taken out of the bot's critical path (a named cache for the
    output root, or the Dart runtime as a prebuilt the recipe fetches); and
-   the Mac builders' actions on the Linux workers once the toolchains
-   cross-compile for a Mac host, or on a Mac pool of the instance.
+   the Mac builders' remaining local actions (links, lipo, dsymutil,
+   codesign, the test targets that read the Xcode by absolute path) on a
+   Mac pool of the instance -- their compiles already run on the Linux
+   workers (519). The Robolectric tests stay on the bot by measurement: the
+   instance's 2-vCPU workers run a class 7–10× slower than a bot's eight
+   cores and each would materialize the 2.3 GB of android-all jars and
+   JDK; six abreast on the bot with C1 and the serial collector (533) is
+   the better shape.
 5. **Archives from `bazel-bin`, no install.** The install exists to lay out
    GN's directory for the recipe's `archives` paths and generators. A recipe
    that asks Bazel for the artifacts (`bazel build //engine/src/flutter/
