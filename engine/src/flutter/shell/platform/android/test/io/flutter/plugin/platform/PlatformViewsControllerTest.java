@@ -59,6 +59,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -2164,6 +2165,56 @@ public class PlatformViewsControllerTest {
     assertFalse(wrapper.isLayoutRequested());
     assertEquals(10, wrapper.getLeft());
     assertEquals(20, wrapper.getTop());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void configureForTextureLayerComposition_resizesRenderTargetBeforeGettingSurface() {
+    FlutterRenderer.debugDisableSurfaceClear = false;
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    final Surface surface = mock(Surface.class);
+    final android.graphics.Canvas canvas = mock(android.graphics.Canvas.class);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+    final TextureRegistry.SurfaceProducer surfaceProducer =
+        mock(TextureRegistry.SurfaceProducer.class);
+    when(surfaceProducer.getSurface()).thenReturn(surface);
+    when(platformViewsController.textureRegistry.createSurfaceProducer(any()))
+        .thenReturn(surfaceProducer);
+
+    final PlatformViewRegistry registry = platformViewsController.getRegistry();
+    registry.registerViewFactory(
+        CountingPlatformView.VIEW_TYPE_ID,
+        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+          @Override
+          public PlatformView create(Context context, int viewId, Object args) {
+            return new CountingPlatformView(context);
+          }
+        });
+
+    final int viewId = 0;
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
+            viewId,
+            CountingPlatformView.VIEW_TYPE_ID,
+            0,
+            0,
+            128,
+            256,
+            View.LAYOUT_DIRECTION_LTR,
+            null);
+    final PlatformView pView = platformViewsController.createPlatformView(request, true);
+    platformViewsController.configureForTextureLayerComposition(pView, request);
+
+    final InOrder inOrder = inOrder(surfaceProducer, surface);
+    inOrder.verify(surfaceProducer).setSize(128, 256);
+    inOrder.verify(surfaceProducer).getSurface();
+    inOrder.verify(surface).lockHardwareCanvas();
+    inOrder.verify(surface).unlockCanvasAndPost(canvas);
+    verify(surfaceProducer, times(1)).setSize(128, 256);
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {
