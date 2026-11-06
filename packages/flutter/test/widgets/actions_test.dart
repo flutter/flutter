@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -419,8 +418,10 @@ void main() {
       await buildTest(true);
       focusNode.requestFocus();
       await tester.pump();
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+      final TestGesture gesture = await tester.startHoverAt(
+        tester.getCenter(find.byKey(containerKey)),
+      );
+      addTearDown(gesture.removePointer);
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(hovering, isTrue);
@@ -460,11 +461,8 @@ void main() {
           ),
         ),
       );
-      final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
-        pointer: 1,
-      );
-      await gesture.addPointer(location: const Offset(1, 1));
+      final TestGesture gesture = await tester.startHoverAt(const Offset(1, 1), pointer: 1);
+      addTearDown(gesture.removePointer);
       await tester.pump();
 
       expect(
@@ -792,8 +790,10 @@ void main() {
       await pumpTest(tester, key: containerKey);
       focusNode.requestFocus();
       await tester.pump();
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+      final TestGesture gesture = await tester.startHoverAt(
+        tester.getCenter(find.byKey(containerKey)),
+      );
+      addTearDown(gesture.removePointer);
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(hovering, isTrue);
@@ -862,8 +862,10 @@ void main() {
       await pumpTest(tester, key: containerKey, supplyCallbacks: false);
       focusNode.requestFocus();
       await tester.pump();
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+      final TestGesture gesture = await tester.startHoverAt(
+        tester.getCenter(find.byKey(containerKey)),
+      );
+      addTearDown(gesture.removePointer);
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(hovering, isFalse);
