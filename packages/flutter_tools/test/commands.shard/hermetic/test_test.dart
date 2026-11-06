@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -36,7 +35,6 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../bin/fuchsia_tester.dart' as fuchsia_tester;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -2329,63 +2327,6 @@ resolution: workspace
       };
       expect(hiddenInVerboseMode, isEmpty);
     });
-
-    testWithoutContext(
-      'fuchsia_tester.run links artifacts and invokes testWrapper without AppContext',
-      () async {
-        final fileSystem = MemoryFileSystem.test();
-        fileSystem.file('/bin/flutter_tester').createSync(recursive: true);
-        fileSystem.file('/sdk_root/platform_strong.dill').createSync(recursive: true);
-        fileSystem.file('/icudtl.dat').createSync(recursive: true);
-        fileSystem.file('/.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{"configVersion": 2, "packages": []}');
-        fileSystem.file('/test/foo_test.dart').createSync(recursive: true);
-        fileSystem.file('/out/foo_test.dart.dill').createSync(recursive: true);
-        fileSystem.file('/tests.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            '[{"source": "/test/foo_test.dart", "dill": "/out/foo_test.dart.dill"}]',
-          );
-
-        final artifacts = Artifacts.test(fileSystem: fileSystem);
-        final fakePackageTest = FakePackageTest();
-        final toolContext = FakeToolContext(
-          artifacts: artifacts,
-          fs: fileSystem,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(numberOfProcessors: 4),
-          processManager: FakeProcessManager.empty(),
-        );
-
-        await fuchsia_tester.run(
-          const <String>[
-            '--packages=/.dart_tool/package_config.json',
-            '--shell=/bin/flutter_tester',
-            '--sdk-root=/sdk_root',
-            '--icudtl=/icudtl.dat',
-            '--tests=/tests.json',
-          ],
-          toolContext: toolContext,
-          testWrapper: fakePackageTest,
-        );
-
-        expect(
-          fileSystem.link(artifacts.getArtifactPath(Artifact.flutterTester)).targetSync(),
-          '/bin/flutter_tester',
-        );
-        final String sdkDestPath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
-        expect(
-          fileSystem.link(fileSystem.path.join(sdkDestPath, 'platform_strong.dill')).targetSync(),
-          '/sdk_root/platform_strong.dill',
-        );
-        expect(
-          fileSystem.link(fileSystem.path.join(sdkDestPath, 'platform.dill')).targetSync(),
-          'platform_strong.dill',
-        );
-        expect(fakePackageTest.lastArgs, contains(Uri.file('/test/foo_test.dart').toString()));
-      },
-    );
   });
 }
 

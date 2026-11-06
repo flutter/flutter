@@ -47,9 +47,8 @@ const _kOptionCoveragePath = 'coverage-path';
 Future<void> main(List<String> args) async {
   final shutdownHooks = ShutdownHooks();
   final fs = LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, shutdownHooks);
-  Directory? tempDir;
   try {
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
+    final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
     final ToolDependencies dependencies = await ToolDependencies.bootstrap(
       analytics: const NoOpAnalytics(),
       flutterRoot: tempDir.path,
@@ -59,7 +58,6 @@ Future<void> main(List<String> args) async {
     );
     await run(args, toolContext: dependencies.toolContext);
   } finally {
-    tempDir?.deleteSync(recursive: true);
     await fs.dispose();
   }
   // TODO(ianh): There's apparently some sort of lost async task keeping the
@@ -135,7 +133,7 @@ Future<void> run(
 
   Directory? testDirectory;
   CoverageCollector? collector;
-  if (argResults['coverage'] as bool? ?? false) {
+  if (argResults[_kOptionCoverage] as bool? ?? false) {
     // If we have a specified coverage directory then accept all libraries by
     // setting libraryNames to null.
     final Set<String>? libraryNames = coverageDirectory != null

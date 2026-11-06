@@ -823,7 +823,11 @@ void main() {
     testWithoutContext('executes diagnose via injected Doctor', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+      final command = DoctorCommand(
+        androidContext: FakeAndroidContext(),
+        doctor: fakeDoctor,
+        toolContext: fakeToolContext,
+      );
       expect(command.toolContext, same(fakeToolContext));
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -837,8 +841,9 @@ void main() {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
       final command = DoctorCommand(
-        toolContext: fakeToolContext,
+        androidContext: FakeAndroidContext(),
         doctor: fakeDoctor,
+        toolContext: fakeToolContext,
         verbose: true,
       );
 
@@ -852,7 +857,11 @@ void main() {
     testWithoutContext('passes --android-licenses to doctor.diagnose', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+      final command = DoctorCommand(
+        androidContext: FakeAndroidContext(),
+        doctor: fakeDoctor,
+        toolContext: fakeToolContext,
+      );
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor', '--android-licenses']);
@@ -866,8 +875,9 @@ void main() {
       final fakeToolContext = FakeToolContext();
       final fakeLicenseValidator = FakeAndroidLicenseValidator();
       final command = DoctorCommand(
-        toolContext: fakeToolContext,
+        androidContext: FakeAndroidContext(),
         doctor: fakeDoctor,
+        toolContext: fakeToolContext,
         androidLicenseValidator: fakeLicenseValidator,
       );
 
@@ -877,19 +887,6 @@ void main() {
       expect(fakeDoctor.diagnoseCalled, isTrue);
       expect(fakeDoctor.androidLicensesPassed, isTrue);
       expect(fakeDoctor.androidLicenseValidatorPassed, same(fakeLicenseValidator));
-    });
-
-    testWithoutContext('lazily falls back when androidLicenseValidator is not provided', () async {
-      final fakeDoctor = FakeDiagnoseDoctor();
-      final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
-
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>['doctor', '--android-licenses']);
-
-      expect(fakeDoctor.diagnoseCalled, isTrue);
-      expect(fakeDoctor.androidLicensesPassed, isTrue);
-      expect(fakeDoctor.androidLicenseValidatorPassed, isNull);
     });
 
     testWithoutContext('lazily creates AndroidLicenseValidator from androidContext when androidLicenseValidator is not provided', () async {
@@ -912,7 +909,11 @@ void main() {
     testWithoutContext('checks remote artifacts when flag provided', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+      final command = DoctorCommand(
+        androidContext: FakeAndroidContext(),
+        doctor: fakeDoctor,
+        toolContext: fakeToolContext,
+      );
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor', '--check-for-remote-artifacts=1234567890abcdef']);
@@ -923,7 +924,11 @@ void main() {
     testWithoutContext('throws ToolExit on missing remote artifacts', () async {
       final fakeDoctor = FakeDiagnoseDoctor(checkRemoteArtifactsResult: true);
       final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+      final command = DoctorCommand(
+        androidContext: FakeAndroidContext(),
+        doctor: fakeDoctor,
+        toolContext: fakeToolContext,
+      );
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await expectLater(

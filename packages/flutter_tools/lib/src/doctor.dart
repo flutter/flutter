@@ -9,9 +9,7 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
-import 'android/java.dart';
 import 'artifacts.dart';
 import 'base/async_guard.dart';
 import 'base/file_system.dart';
@@ -147,7 +145,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       :IOSWorkflow iosWorkflow,
       :Xcode xcode,
     ) = _appleContext;
-    final AndroidContext(:AndroidSdk? androidSdk, :Java? java) = _androidContext;
     final proxyValidator = ProxyValidator(platform: platform);
     return _validators = <DoctorValidator>[
       FlutterValidator(
@@ -170,8 +167,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[
           AndroidValidator(
-            androidSdk: androidSdk,
-            java: java,
+            androidSdk: _androidContext.androidSdk,
+            java: _androidContext.java,
             logger: logger,
             osUtils: os,
             platform: platform,
@@ -179,8 +176,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
             userMessages: userMessages,
           ),
           AndroidLicenseValidator(
-            androidSdk: androidSdk,
-            java: java,
+            androidSdk: _androidContext.androidSdk,
+            java: _androidContext.java,
             logger: logger,
             platform: platform,
             processManager: processManager,

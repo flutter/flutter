@@ -450,13 +450,13 @@ void main() {
       group('toolContext', () {
         test('is preserved when provided to constructor', () {
           final fakeToolContext = FakeToolContext();
-          final runner = TestFlutterCommandRunner(toolContext: fakeToolContext);
+          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
           expect(runner.toolContext, same(fakeToolContext));
         });
 
         test('command preserves provided toolContext', () {
           final fakeToolContext = FakeToolContext();
-          final runner = TestFlutterCommandRunner(toolContext: fakeToolContext);
+          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
           final command = FakeFlutterCommand(toolContext: fakeToolContext);
           runner.addCommand(command);
           expect(command.toolContext, same(fakeToolContext));
@@ -720,7 +720,7 @@ void main() {
           () async {
             final toolContext = FakeToolContext();
             final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
-            final runner = TestFlutterCommandRunner(
+            final runner = FlutterCommandRunner(
               toolContext: toolContext,
               featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
             )..addCommand(dynamicCommand);
@@ -736,7 +736,7 @@ void main() {
           () async {
             final toolContext = FakeToolContext();
             final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
-            final runner = TestFlutterCommandRunner(
+            final runner = FlutterCommandRunner(
               toolContext: toolContext,
               featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
             )..addCommand(dynamicCommand);
@@ -757,7 +757,7 @@ void main() {
             subcommand: dynamicSubcommand,
             toolContext: toolContext,
           );
-          final runner = TestFlutterCommandRunner(
+          final runner = FlutterCommandRunner(
             toolContext: toolContext,
             featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
           )..addCommand(parentCommand);
@@ -773,7 +773,7 @@ void main() {
           () async {
             final toolContext = FakeToolContext();
             final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
-            final runner = TestFlutterCommandRunner(
+            final runner = FlutterCommandRunner(
               toolContext: toolContext,
               featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
             )..addCommand(dynamicCommand);
@@ -796,7 +796,7 @@ void main() {
               subcommand: dynamicSubcommand,
               toolContext: toolContext,
             );
-            final runner = TestFlutterCommandRunner(
+            final runner = FlutterCommandRunner(
               toolContext: toolContext,
               featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
             )..addCommand(parentCommand);

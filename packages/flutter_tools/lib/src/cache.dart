@@ -158,6 +158,7 @@ class Cache {
     @protected List<ArtifactSet>? artifacts,
     @visibleForTesting ArtifactUpdater? artifactUpdater,
     this._flutterRoot,
+    this._isLocalEngineBuilder,
     @protected this._rootOverride,
     this._stdio,
   }) : _fileSystem = fileSystem,
@@ -178,6 +179,7 @@ class Cache {
     List<ArtifactSet>? artifacts,
     ArtifactUpdater? artifactUpdater,
     String? flutterRoot,
+    bool Function()? isLocalEngineBuilder,
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
@@ -202,6 +204,7 @@ class Cache {
       artifacts: artifacts ?? <ArtifactSet>[],
       artifactUpdater: artifactUpdater,
       flutterRoot: flutterRoot,
+      isLocalEngineBuilder: isLocalEngineBuilder,
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
@@ -223,6 +226,7 @@ class Cache {
   OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
+  final bool Function()? _isLocalEngineBuilder;
   final Stdio? _stdio;
   final Net _net;
   final FileSystemUtils _fsUtils;
@@ -780,10 +784,10 @@ class Cache {
 
   /// Returns the list of artifacts that need updating from [requiredArtifacts].
   Future<List<ArtifactSet>> _collectArtifactsToUpdate(
-    Set<DevelopmentArtifact> requiredArtifacts, {
-    required bool isLocalEngine,
-  }) async {
+    Set<DevelopmentArtifact> requiredArtifacts,
+  ) async {
     final artifactsToUpdate = <ArtifactSet>[];
+    final bool isLocalEngine = _isLocalEngineBuilder?.call() ?? false;
 
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
@@ -805,19 +809,12 @@ class Cache {
   }
 
   /// Update the cache to contain all `requiredArtifacts`.
-  Future<void> updateAll(
-    Set<DevelopmentArtifact> requiredArtifacts, {
-    bool isLocalEngine = false,
-    bool offline = false,
-  }) async {
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
     if (!_lockEnabled) {
       return;
     }
 
-    final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(
-      requiredArtifacts,
-      isLocalEngine: isLocalEngine,
-    );
+    final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(requiredArtifacts);
 
     if (artifactsToUpdate.isEmpty) {
       return;

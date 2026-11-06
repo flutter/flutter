@@ -43,7 +43,6 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
-import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
@@ -66,7 +65,6 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
-import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -1125,7 +1123,6 @@ class FakeCache extends Fake implements Cache {
   @override
   Future<void> updateAll(
     Set<DevelopmentArtifact> requiredArtifacts, {
-    bool isLocalEngine = false,
     bool offline = false,
   }) async {}
 
@@ -1158,13 +1155,7 @@ class FakeGit extends Fake implements Git {}
 
 class FakeGradleUtils extends Fake implements GradleUtils {}
 
-class FakeCocoaPods extends Fake implements CocoaPods {
-  @override
-  void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {}
-
-  @override
-  Future<void> setupPodfile(XcodeBasedProject xcodeProject) async {}
-}
+class FakeCocoaPods extends Fake implements CocoaPods {}
 
 class FakeCocoaPodsValidator extends Fake implements CocoaPodsValidator {}
 
@@ -1240,29 +1231,6 @@ class FakeEmulatorManager extends Fake implements EmulatorManager {
   }
 }
 
-class FakeExtensionManager extends Fake implements ExtensionManager {
-  @override
-  List<ConfigurationExtension> get configurationExtensions => const <ConfigurationExtension>[];
-
-  @override
-  List<ExtensionConnection> get connections => const <ExtensionConnection>[];
-
-  @override
-  List<DeviceService> get deviceExtensions => const <DeviceService>[];
-
-  @override
-  List<DiagnosticsExtension> get diagnosticsExtensions => const <DiagnosticsExtension>[];
-
-  @override
-  void disable() {}
-
-  @override
-  Future<void> dispose() async {}
-
-  @override
-  Future<void> ensureInitialized() async {}
-}
-
 class FakeToolDependencies extends Fake implements ToolDependencies {
   FakeToolDependencies({
     this._analytics,
@@ -1275,12 +1243,11 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._deviceManager,
     this._doctor,
     this._emulatorManager,
-    this._extensionBuildManager,
-    this._extensionCleanManager,
-    this._extensionManager,
+    this.extensionBuildManager,
+    this.extensionCleanManager,
+    this.extensionManager,
     this._featureFlags,
     this._macOSWorkflow,
-    this._templateRenderer,
     this._toolContext,
     this._windowsWorkflow,
   });
@@ -1295,12 +1262,8 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final DeviceManager? _deviceManager;
   final Doctor? _doctor;
   final EmulatorManager? _emulatorManager;
-  final ExtensionBuildManager? _extensionBuildManager;
-  final ExtensionCleanManager? _extensionCleanManager;
-  final ExtensionManager? _extensionManager;
   final FeatureFlags? _featureFlags;
   final MacOSWorkflow? _macOSWorkflow;
-  final TemplateRenderer? _templateRenderer;
   final ToolContext? _toolContext;
   final WindowsWorkflow? _windowsWorkflow;
 
@@ -1340,25 +1303,13 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
 
   @override
-  late final ExtensionBuildManager extensionBuildManager =
-      _extensionBuildManager ??
-      ExtensionBuildManager(
-        extensionManager: extensionManager,
-        featureFlags: featureFlags,
-        logger: _logger,
-      );
+  final ExtensionBuildManager? extensionBuildManager;
 
   @override
-  late final ExtensionCleanManager extensionCleanManager =
-      _extensionCleanManager ??
-      ExtensionCleanManager(
-        extensionManager: extensionManager,
-        featureFlags: featureFlags,
-        logger: _logger,
-      );
+  final ExtensionCleanManager? extensionCleanManager;
 
   @override
-  late final ExtensionManager extensionManager = _extensionManager ?? FakeExtensionManager();
+  final ExtensionManager? extensionManager;
 
   @override
   FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
@@ -1368,16 +1319,12 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
       _macOSWorkflow ?? MacOSWorkflow(featureFlags: featureFlags, platform: _platform);
 
   @override
-  TemplateRenderer get templateRenderer => _templateRenderer ?? FakeTemplateRenderer();
-
-  @override
-  late final ToolContext toolContext = _toolContext ?? FakeToolContext();
+  ToolContext get toolContext => _toolContext ?? FakeToolContext();
 
   @override
   late final WindowsWorkflow windowsWorkflow =
       _windowsWorkflow ?? WindowsWorkflow(featureFlags: featureFlags, platform: _platform);
 
-  Logger get _logger => toolContext.logger;
   Platform get _platform => toolContext.platform;
 }
 

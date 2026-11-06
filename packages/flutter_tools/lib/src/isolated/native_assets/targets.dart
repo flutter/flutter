@@ -93,7 +93,7 @@ sealed class AssetBuildTarget {
           targetPlatform,
           environmentDefines,
           supportedAssetTypes,
-          androidSdkBuilder: androidSdkBuilder,
+          androidSdk: androidSdkBuilder?.call(),
         );
       case TargetPlatform.ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
@@ -164,13 +164,13 @@ sealed class AssetBuildTarget {
     TargetPlatform targetPlatform,
     Map<String, String> environmentDefines,
     List<SupportedAssetTypes> supportedAssetTypes, {
-    required AndroidSdk? Function()? androidSdkBuilder,
+    required AndroidSdk? androidSdk,
   }) {
     return _androidArchs(targetPlatform, environmentDefines[kAndroidArchs])
         .map(getNativeAndroidArchitecture)
         .map(
           (Architecture architecture) => AndroidAssetTarget(
-            androidSdkBuilder: androidSdkBuilder,
+            androidSdk: androidSdk,
             architecture: architecture,
             supportedAssetTypes: supportedAssetTypes,
             environmentDefines: environmentDefines,
@@ -409,17 +409,16 @@ final class MacOSAssetTarget extends CodeAssetTarget {
 
 final class AndroidAssetTarget extends CodeAssetTarget {
   AndroidAssetTarget({
+    required this.androidSdk,
     required super.architecture,
     required Map<String, String> environmentDefines,
     required super.supportedAssetTypes,
-    this._androidSdkBuilder,
   }) : _androidCodeConfig = AndroidCodeConfig(
          targetNdkApi: targetAndroidNdkApi(environmentDefines),
        ),
        super(os: OS.android);
 
-  final AndroidSdk? Function()? _androidSdkBuilder;
-  late final AndroidSdk? androidSdk = _androidSdkBuilder?.call();
+  final AndroidSdk? androidSdk;
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override

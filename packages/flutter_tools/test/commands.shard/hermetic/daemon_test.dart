@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -131,8 +130,9 @@ void main() {
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
+        final fs = LocalFileSystemBlockingSetCurrentDirectory();
         // Use the flutter_gallery project which has a known set of supported platforms.
-        final String projectPath = globals.fs.path.join(
+        final String projectPath = fs.path.join(
           getFlutterRoot(),
           'dev',
           'integration_tests',
@@ -1236,130 +1236,119 @@ void main() {
       }, ioOverrides);
     });
 
-    testUsingContext(
-      'app.start throws DaemonException if app fails to start early',
-      () async {
-        daemon = Daemon(
-          daemonConnection,
-          analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
-          xcode: null,
-          notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
-        );
-        final ResidentRunner runner = FakeResidentRunner();
-        final Device device = FakeAndroidDevice();
+    testWithoutContext('app.start throws DaemonException if app fails to start early', () async {
+      final fs = MemoryFileSystem.test();
+      daemon = Daemon(
+        daemonConnection,
+        analytics: const NoOpAnalytics(),
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        toolContext: FakeToolContext(fs: fs),
+        xcode: null,
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+      );
+      final ResidentRunner runner = FakeResidentRunner();
+      final Device device = FakeAndroidDevice();
 
-        await expectLater(
-          () => daemon.appDomain.launch(
-            runner,
-            ({
-              Completer<DebugConnectionInfo>? connectionInfoCompleter,
-              Completer<void>? appStartedCompleter,
-            }) async {
-              // App exits immediately without completing appStartedCompleter
-              return;
-            },
-            device,
-            null, // projectDirectory
-            false, // enableHotReload
-            globals.fs.directory('/'), // cwd
-            LaunchMode.run,
-            MachineOutputLogger(parent: notifyingLogger),
-          ),
-          throwsA(
-            isA<DaemonException>().having(
-              (DaemonException e) => e.message,
-              'message',
-              'App failed to start',
-            ),
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
-      'app.restart sent before the app has started waits for startup',
-      () async {
-        daemon = Daemon(
-          daemonConnection,
-          analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
-          xcode: null,
-          notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
-        );
-        final runner = FakeRestartableResidentRunner();
-        final startApp = Completer<void>();
-        final exitApp = Completer<void>();
-
-        final Future<AppInstance> launched = daemon.appDomain.launch(
+      await expectLater(
+        () => daemon.appDomain.launch(
           runner,
           ({
             Completer<DebugConnectionInfo>? connectionInfoCompleter,
             Completer<void>? appStartedCompleter,
           }) async {
-            await startApp.future;
-            appStartedCompleter?.complete();
-            await exitApp.future;
+            // App exits immediately without completing appStartedCompleter
+            return;
           },
-          FakeAndroidDevice(),
+          device,
           null, // projectDirectory
-          true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          false, // enableHotReload
+          fs.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
-        );
+        ),
+        throwsA(
+          isA<DaemonException>().having(
+            (DaemonException e) => e.message,
+            'message',
+            'App failed to start',
+          ),
+        ),
+      );
+    });
 
-        // `app.start` is sent before the runner has finished starting up, so
-        // the client already has the app ID at this point.
-        final DaemonMessage startEvent = await daemonStreams.outputs.stream.firstWhere(
-          (DaemonMessage message) => message.data['event'] == 'app.start',
-        );
-        final appId = (startEvent.data['params']! as Map<String, Object?>)['appId']! as String;
+    testWithoutContext('app.restart sent before the app has started waits for startup', () async {
+      final fs = MemoryFileSystem.test();
+      daemon = Daemon(
+        daemonConnection,
+        analytics: const NoOpAnalytics(),
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        toolContext: FakeToolContext(fs: fs),
+        xcode: null,
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+      );
+      final runner = FakeRestartableResidentRunner();
+      final startApp = Completer<void>();
+      final exitApp = Completer<void>();
 
-        final Future<OperationResult> restarted = daemon.appDomain.restart(<String, Object?>{
-          'appId': appId,
-        })!;
+      final Future<AppInstance> launched = daemon.appDomain.launch(
+        runner,
+        ({
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+        }) async {
+          await startApp.future;
+          appStartedCompleter?.complete();
+          await exitApp.future;
+        },
+        FakeAndroidDevice(),
+        null, // projectDirectory
+        true, // enableHotReload
+        fs.directory('/'), // cwd
+        LaunchMode.run,
+        MachineOutputLogger(parent: notifyingLogger),
+      );
 
-        // The restart must not reach the runner while startup is in flight.
-        await pumpEventQueue();
-        expect(runner.restartCount, 0);
+      // `app.start` is sent before the runner has finished starting up, so
+      // the client already has the app ID at this point.
+      final DaemonMessage startEvent = await daemonStreams.outputs.stream.firstWhere(
+        (DaemonMessage message) => message.data['event'] == 'app.start',
+      );
+      final appId = (startEvent.data['params']! as Map<String, Object?>)['appId']! as String;
 
-        startApp.complete();
-        await launched;
+      final Future<OperationResult> restarted = daemon.appDomain.restart(<String, Object?>{
+        'appId': appId,
+      })!;
 
-        expect(await restarted, OperationResult.ok);
-        expect(runner.restartCount, 1);
+      // The restart must not reach the runner while startup is in flight.
+      await pumpEventQueue();
+      expect(runner.restartCount, 0);
 
-        exitApp.complete();
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      startApp.complete();
+      await launched;
 
-    testUsingContext(
+      expect(await restarted, OperationResult.ok);
+      expect(runner.restartCount, 1);
+
+      exitApp.complete();
+    });
+
+    testWithoutContext(
       'app.restart sent before the app has started reports an error if startup fails',
       () async {
+        final fs = MemoryFileSystem.test();
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
+          toolContext: FakeToolContext(fs: fs),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         final runner = FakeRestartableResidentRunner();
         final exitApp = Completer<void>();
@@ -1376,7 +1365,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          fs.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );
@@ -1404,24 +1393,21 @@ void main() {
         await expectLater(() => restarted, matcher);
         expect(runner.restartCount, 0);
       },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-      },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'a pending app.restart gets an error when startup throws a non-Exception',
       () async {
+        final fs = MemoryFileSystem.test();
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
+          toolContext: FakeToolContext(fs: fs),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         final runner = FakeRestartableResidentRunner();
         final failStartup = Completer<void>();
@@ -1441,7 +1427,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          fs.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );
@@ -1462,24 +1448,21 @@ void main() {
         await expectLater(() => restarted, throwsStateError);
         expect(runner.restartCount, 0);
       },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-      },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'a failed start does not fault a runner listener that has no error handler',
       () async {
+        final fs = MemoryFileSystem.test();
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
+          toolContext: FakeToolContext(fs: fs),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         final exitApp = Completer<void>();
         var listenerFired = false;
@@ -1504,7 +1487,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          fs.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );
@@ -1525,10 +1508,6 @@ void main() {
         // Let any unhandled async error reach the test zone.
         await pumpEventQueue();
         expect(listenerFired, isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
       },
     );
   });

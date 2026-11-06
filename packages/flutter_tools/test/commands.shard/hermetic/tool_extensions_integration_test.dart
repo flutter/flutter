@@ -16,13 +16,16 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_features.dart';
 import 'package:flutter_tools/src/flutter_features_config.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -32,157 +35,167 @@ void main() {
   });
 
   group('Tool Extensions Integration - Disabled', () {
-    testWithoutContext(
+    testUsingContext(
       'ExtensionManager.ensureInitialized() is a no-op when feature flag disabled',
       () async {
-        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          logger: testLogger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
 
         await manager.ensureInitialized();
         expect(manager.connections, isEmpty);
+        await manager.dispose();
       },
+      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
     );
 
-    testWithoutContext(
+    testUsingContext(
       'ConfigCommand does not output Extension Settings when feature flag disabled',
       () async {
-        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          logger: testLogger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
         final configCommand = ConfigCommand(
           androidContext: FakeAndroidContext(),
-          toolContext: FakeToolContext(logger: logger),
+          toolContext: FakeToolContext(logger: testLogger),
           featureFlags: featureFlags,
           extensionManager: manager,
         );
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
         await commandRunner.run(<String>['config', '--list']);
-        expect(logger.statusText, isNot(contains('Extension Settings:')));
+        expect(testLogger.statusText, isNot(contains('Extension Settings:')));
+
+        await manager.dispose();
       },
+      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
     );
 
-    testWithoutContext(
+    testUsingContext(
       'Doctor.diagnose does not execute extension validators when feature flag disabled',
       () async {
-        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          logger: testLogger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
         final cache = FakeCache();
         final doctor = Doctor(
           analytics: const NoOpAnalytics(),
           cache: cache,
           clock: const SystemClock(),
-          logger: logger,
+          logger: testLogger,
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               DoctorValidatorsProvider.create(
                 androidContext: FakeAndroidContext(),
                 appleContext: FakeAppleContext(),
                 extensionManager: extensionManager,
                 featureFlags: featureFlags,
-                toolContext: FakeToolContext(cache: cache, logger: logger),
+                toolContext: FakeToolContext(cache: cache, logger: testLogger),
               ),
         );
 
         await doctor.diagnose(extensionManager: manager);
-        expect(logger.statusText, isNot(contains('Linux Custom Extension Prototype')));
+        expect(testLogger.statusText, isNot(contains('Linux Custom Extension Prototype')));
+
+        await manager.dispose();
       },
+      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
     );
   });
 
   group('Tool Extensions Integration - Enabled', () {
-    testWithoutContext(
+    testUsingContext(
       'ExtensionManager.ensureInitialized() initializes connections when feature flag enabled',
       () async {
-        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          logger: testLogger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
 
         await manager.ensureInitialized();
         expect(manager.connections, isNotEmpty);
+        await manager.dispose();
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'ConfigCommand outputs Extension Settings when feature flag enabled',
       () async {
-        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          logger: testLogger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
         final configCommand = ConfigCommand(
           androidContext: FakeAndroidContext(),
-          toolContext: FakeToolContext(logger: logger),
+          toolContext: FakeToolContext(logger: testLogger),
           featureFlags: featureFlags,
           extensionManager: manager,
         );
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
         await commandRunner.run(<String>['config', '--list']);
-        expect(logger.statusText, contains('Extension Settings:'));
+        expect(testLogger.statusText, contains('Extension Settings:'));
+
+        await manager.dispose();
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'Doctor.diagnose executes extension validators when feature flag enabled',
       () async {
-        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          logger: testLogger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
         final cache = FakeCache();
         final doctor = Doctor(
           analytics: const NoOpAnalytics(),
           cache: cache,
           clock: const SystemClock(),
-          logger: logger,
+          logger: testLogger,
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               DoctorValidatorsProvider.create(
                 androidContext: FakeAndroidContext(),
                 appleContext: FakeAppleContext(),
                 extensionManager: extensionManager,
                 featureFlags: featureFlags,
-                toolContext: FakeToolContext(cache: cache, logger: logger),
+                toolContext: FakeToolContext(cache: cache, logger: testLogger),
               ),
         );
 
         await doctor.diagnose(extensionManager: manager);
-        expect(logger.statusText, contains('[✓] Linux Custom Extension Prototype'));
+        expect(testLogger.statusText, contains('[✓] Linux Custom Extension Prototype'));
+
+        await manager.dispose();
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
       },
     );
   });
@@ -235,7 +248,6 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
         final toolContext = FakeToolContext(logger: logger);
         final configCommand = ConfigCommand(
           androidContext: FakeAndroidContext(),
@@ -243,7 +255,7 @@ void main() {
           featureFlags: featureFlags,
           extensionManager: manager,
         );
-        final runner = TestFlutterCommandRunner(
+        final runner = FlutterCommandRunner(
           toolContext: toolContext,
           featureFlags: featureFlags,
           extensionManager: manager,
@@ -252,6 +264,8 @@ void main() {
         await runner.run(args);
         expect(logger.statusText, isNot(contains('Extension Settings:')));
         expect(manager.connections, isEmpty);
+
+        await manager.dispose();
       },
     );
 
@@ -277,7 +291,6 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
         final toolContext = FakeToolContext(logger: logger);
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
@@ -294,7 +307,7 @@ void main() {
           toolContext: toolContext,
           discovery: discovery,
         );
-        final runner = TestFlutterCommandRunner(
+        final runner = FlutterCommandRunner(
           toolContext: toolContext,
           featureFlags: featureFlags,
           extensionManager: manager,
@@ -303,6 +316,8 @@ void main() {
         await runner.run(const <String>['--no-extensions', 'probe-devices']);
         expect(probeCommand.discoveredDevices, isEmpty);
         expect(manager.connections, isEmpty);
+
+        await manager.dispose();
       },
     );
   });

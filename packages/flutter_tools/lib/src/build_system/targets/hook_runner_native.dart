@@ -38,7 +38,6 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
     );
 
     final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
-      androidSdkBuilder: () => environment.androidSdk,
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
@@ -47,7 +46,6 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
       logger: environment.logger,
       buildCodeAssets: null,
       buildDataAssets: true,
-      visualStudio: environment.visualStudio,
     );
 
     final FlutterHookResult flutterHookResult = buildResult.asFlutterResult;

@@ -75,6 +75,38 @@ import 'version.dart';
 import 'web/workflow.dart';
 import 'windows/windows_workflow.dart';
 
+class _GlobalAndroidContext implements AndroidContext {
+  const _GlobalAndroidContext();
+
+  @override
+  AndroidSdk? get androidSdk => globals.androidSdk;
+
+  @override
+  AndroidSdk? Function() get androidSdkBuilder =>
+      () => androidSdk;
+
+  @override
+  AndroidStudio? get androidStudio => globals.androidStudio;
+
+  @override
+  AndroidStudio? Function() get androidStudioBuilder =>
+      () => androidStudio;
+
+  @override
+  GradleUtils get gradleUtils => globals.gradleUtils!;
+
+  @override
+  GradleUtils Function() get gradleUtilsBuilder =>
+      () => gradleUtils;
+
+  @override
+  Java? get java => globals.java;
+
+  @override
+  Java? Function() get javaBuilder =>
+      () => java;
+}
+
 /// A [ToolContext] that delegates to [globals] for legacy callers.
 class _GlobalToolContext implements ToolContext {
   const _GlobalToolContext();
@@ -95,7 +127,8 @@ class _GlobalToolContext implements ToolContext {
   CustomDevicesConfig get customDevicesConfig => globals.customDevicesConfig;
 
   @override
-  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+  FileSystemUtils get fileSystemUtils =>
+      context.get<FileSystemUtils>() ?? FileSystemUtils(fileSystem: fs, platform: platform);
 
   @override
   FlutterVersion get flutterVersion => globals.flutterVersion;
@@ -234,6 +267,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       Cache: () => FlutterCache(
         fileSystem: globals.fs,
+        isLocalEngineBuilder: () => globals.artifacts?.localEngineInfo != null,
         logger: globals.logger,
         platform: globals.platform,
         osUtils: globals.os,
@@ -425,12 +459,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
 
 DoctorValidatorsProvider _createDoctorValidatorsProvider({ExtensionManager? extensionManager}) {
   return DoctorValidatorsProvider.create(
-    androidContext: AndroidContext(
-      androidSdkBuilder: () => globals.androidSdk,
-      androidStudioBuilder: () => globals.androidStudio,
-      gradleUtilsBuilder: () => globals.gradleUtils!,
-      javaBuilder: () => globals.java,
-    ),
+    androidContext: const _GlobalAndroidContext(),
     appleContext: AppleContext(
       cocoaPodsBuilder: () => globals.cocoaPods!,
       cocoapodsValidatorBuilder: () => globals.cocoapodsValidator!,

@@ -124,6 +124,17 @@ class AppContext {
     return _parent?.hasOverride(type) ?? false;
   }
 
+  /// Gets the value associated with the specified [T] from explicit
+  /// `overrides` in this context or an ancestor context, or `null` if no
+  /// explicit override has been associated (ignoring `fallbacks`).
+  T? resolveOverride<T>() {
+    final Object? value = _generateIfNecessary(T, _overrides);
+    if (value != null) {
+      return _unboxNull(value) as T?;
+    }
+    return _parent?.resolveOverride<T>();
+  }
+
   /// Gets the value associated with the specified [T], or `null` if no
   /// such value has been associated.
   T? get<T>() {

@@ -190,40 +190,6 @@ void main() {
       );
     },
   );
-
-  testUsingContext(
-    'does not invoke androidSdkBuilder for data-only hooks on Android',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isDartDataAssetsEnabled: true),
-    },
-    () async {
-      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-      await packageConfig.create(recursive: true);
-      var androidSdkEvaluations = 0;
-      final buildRunner = FakeFlutterNativeAssetsBuildRunner(
-        packagesWithNativeAssetsResult: <String>['bar'],
-      );
-      await runFlutterSpecificBuildHooks(
-        environmentDefines: <String, String>{
-          kBuildMode: BuildMode.debug.cliName,
-          kMinSdkVersion: minSdkVersion,
-        },
-        targetPlatform: TargetPlatform.android_arm64,
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        logger: logger,
-        buildRunner: buildRunner,
-        buildCodeAssets: null,
-        buildDataAssets: true,
-        androidSdkBuilder: () {
-          androidSdkEvaluations++;
-          return null;
-        },
-      );
-      expect(androidSdkEvaluations, 0);
-      expect(buildRunner.buildInvocations, 1);
-    },
-  );
 }
 
 class _BuildRunnerWithoutNdk extends FakeFlutterNativeAssetsBuildRunner {
