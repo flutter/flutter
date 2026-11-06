@@ -2450,6 +2450,173 @@ flutter:
         },
       );
     }
+
+    for (final deprecatedJsInterop in <bool>[true, false]) {
+      testUsingContext(
+        'ResidentWebRunner sends flutterBuildInfo analytics on debug DDC '
+        'compile success when deprecatedJsInterop: $deprecatedJsInterop',
+        () async {
+          fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+          setupMocks();
+
+          final ResidentRunner residentWebRunner = setUpResidentRunner(
+            flutterDevice,
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo(
+                BuildMode.debug,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+                deprecatedJsInterop: deprecatedJsInterop,
+              ),
+            ),
+          );
+          residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+
+          final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+          unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+          await connectionInfoCompleter.future;
+
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(
+                label: 'web-compile',
+                buildType: 'web',
+                command: 'run',
+                settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
+        'ResidentWebRunner sends flutterBuildInfo analytics with error on debug '
+        'DDC compile failure when deprecatedJsInterop: $deprecatedJsInterop',
+        () async {
+          fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+          setupMocks();
+          webDevFS.report = UpdateFSReport();
+
+          final ResidentRunner residentWebRunner = setUpResidentRunner(
+            flutterDevice,
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo(
+                BuildMode.debug,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+                deprecatedJsInterop: deprecatedJsInterop,
+              ),
+            ),
+          );
+
+          expect(await residentWebRunner.run(), 1);
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(
+                label: 'web-compile',
+                buildType: 'web',
+                command: 'run',
+                settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+                error: 'ddc-compile-failure',
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Pub: ThrowingPub.new,
+        },
+      );
+    }
+
+    testUsingContext(
+      'ResidentWebRunner does not send flutterBuildInfo analytics on debug DDC '
+      'compile when deprecatedJsInterop is null',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+        setupMocks();
+
+        final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+        residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+        await connectionInfoCompleter.future;
+
+        expect(
+          fakeAnalytics.sentEvents.where((Event e) => e.eventData['label'] == 'web-compile'),
+          isEmpty,
+        );
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+
+    testUsingContext(
+      'passes manifestPath to assetBundle when cwd is not project directory',
+      () async {
+        final Directory projectDir = fileSystem.directory('/other_project')..createSync();
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: other_project\n');
+        projectDir.childFile('lib/main.dart').createSync(recursive: true);
+        writePackageConfigFiles(directory: projectDir, mainLibName: 'other_project');
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+
+        final ResidentRunner residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: project,
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo(
+              .debug,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: projectDir
+                  .childDirectory('.dart_tool')
+                  .childFile('package_config.json')
+                  .path,
+            ),
+          ),
+          stayResident: false,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: test_fakes.FakeToolContext(
+            fs: fileSystem,
+            systemClock: SystemClock.fixed(DateTime(2001)),
+          ),
+          analytics: fakeAnalytics,
+        );
+
+        expect(fileSystem.currentDirectory.path, isNot(projectDir.path));
+
+        webDevFS.report = UpdateFSReport(success: true);
+        expect(await residentWebRunner.run(), 0);
+        final fakeAssetBundle = residentWebRunner.assetBundle as FakeCapturingAssetBundle;
+        expect(fakeAssetBundle.lastNeedsBuildManifestPath, project.pubspecFile.path);
+        expect(fakeAssetBundle.lastBuildManifestPath, project.pubspecFile.path);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+        AssetBundleFactory: FakeAssetBundleFactory.new,
+      },
+    );
   });
 }
 
@@ -2873,4 +3040,37 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   bool areDependenciesModified(DevFSContent shaderContent) => false;
+}
+
+class FakeCapturingAssetBundle extends Fake implements AssetBundle {
+  String? lastNeedsBuildManifestPath;
+  String? lastBuildManifestPath;
+
+  @override
+  bool wasBuiltOnce() => false;
+
+  @override
+  bool needsBuild({String manifestPath = 'pubspec.yaml'}) {
+    lastNeedsBuildManifestPath = manifestPath;
+    return true;
+  }
+
+  @override
+  Future<int> build({
+    FlutterHookResult? flutterHookResult,
+    String manifestPath = 'pubspec.yaml',
+    required String packageConfigPath,
+    bool deferredComponentsEnabled = false,
+    required TargetPlatform targetPlatform,
+    String? flavor,
+    bool includeAssetsFromDevDependencies = false,
+  }) async {
+    lastBuildManifestPath = manifestPath;
+    return 0;
+  }
+}
+
+class FakeAssetBundleFactory implements AssetBundleFactory {
+  @override
+  AssetBundle createBundle() => FakeCapturingAssetBundle();
 }

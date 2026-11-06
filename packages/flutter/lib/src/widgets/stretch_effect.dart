@@ -152,7 +152,7 @@ class _StretchOverscrollEffect extends StatefulWidget {
 }
 
 class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
-  ui.FragmentShader? _fragmentShader;
+  _StretchEffectUniforms? _uniforms;
 
   /// The maximum scale multiplier applied during a stretch effect.
   static const double maxStretchIntensity = 1.0;
@@ -165,7 +165,7 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
 
   @override
   void dispose() {
-    _fragmentShader?.dispose();
+    _uniforms?.dispose();
     super.dispose();
   }
 
@@ -182,23 +182,23 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
     final ui.ImageFilter imageFilter;
 
     if (_StretchEffectShader._initialized) {
-      _fragmentShader?.dispose();
-      _fragmentShader = _StretchEffectShader._program!.fragmentShader();
-      _fragmentShader!.setFloat(2, maxStretchIntensity);
+      final _StretchEffectUniforms uniforms = _uniforms ??= _StretchEffectUniforms(
+        _StretchEffectShader._program!,
+      );
+      uniforms.maxStretchIntensity.set(maxStretchIntensity);
       if (widget.axis == Axis.vertical) {
-        _fragmentShader!.setFloat(3, 0.0);
-        _fragmentShader!.setFloat(4, widget.stretchStrength);
+        uniforms.overscrollX.set(0.0);
+        uniforms.overscrollY.set(widget.stretchStrength);
       } else {
-        _fragmentShader!.setFloat(3, widget.stretchStrength);
-        _fragmentShader!.setFloat(4, 0.0);
+        uniforms.overscrollX.set(widget.stretchStrength);
+        uniforms.overscrollY.set(0.0);
       }
-      _fragmentShader!.setFloat(5, interpolationStrength);
+      uniforms.interpolationStrength.set(interpolationStrength);
 
-      imageFilter = ui.ImageFilter.shader(_fragmentShader!);
+      // The shader is reused across builds. ImageFilter.shader copies the
+      // uniform values, so each build's filter reflects that build's values.
+      imageFilter = ui.ImageFilter.shader(uniforms.shader);
     } else {
-      _fragmentShader?.dispose();
-      _fragmentShader = null;
-
       imageFilter = _emptyFilter;
     }
 
@@ -236,6 +236,36 @@ class _StretchEffectPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// A [ui.FragmentShader] for `shaders/stretch_effect.frag`, together with the
+/// uniforms that [StretchEffect] sets.
+///
+/// The uniforms are looked up by name once, so that each build only has to set
+/// their values. `u_size` and `u_texture` are set by the engine for
+/// [ui.ImageFilter.shader].
+///
+/// This object owns [shader]. Call [dispose] when it's no longer needed.
+class _StretchEffectUniforms {
+  /// Creates a shader from [program] and looks up its uniforms.
+  _StretchEffectUniforms(ui.FragmentProgram program) : this._(program.fragmentShader());
+
+  _StretchEffectUniforms._(this.shader)
+    : maxStretchIntensity = shader.getUniformFloat('u_max_stretch_intensity'),
+      overscrollX = shader.getUniformFloat('u_overscroll_x'),
+      overscrollY = shader.getUniformFloat('u_overscroll_y'),
+      interpolationStrength = shader.getUniformFloat('u_interpolation_strength');
+
+  final ui.FragmentShader shader;
+  final ui.UniformFloatSlot maxStretchIntensity;
+  final ui.UniformFloatSlot overscrollX;
+  final ui.UniformFloatSlot overscrollY;
+  final ui.UniformFloatSlot interpolationStrength;
+
+  /// Releases [shader].
+  void dispose() {
+    shader.dispose();
+  }
 }
 
 class _StretchEffectShader {
