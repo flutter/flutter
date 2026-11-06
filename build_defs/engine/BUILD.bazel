@@ -13,6 +13,8 @@
 # without building the engine first.
 
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@host_platform//:host.bzl", "HOST_OS")
+load("//build_defs/dist:local_engine.bzl", "files_directory")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -86,3 +88,28 @@ alias(
         "//conditions:default": "//engine/src/flutter/lib/gpu:dart_sources",
     }),
 )
+
+# A Mac's prebuilt host engine directories as one directory artifact each,
+# for the tool tests' SDK facsimile (packages/flutter_tools/BUILD.bazel):
+# bin/cache's darwin-x64{,-profile,-release} hold FlutterMacOS.xcframework,
+# whose framework is a versioned bundle of directory links (Versions/Current
+# -> A, Headers -> Versions/Current/Headers, ...). @flutter_bin_cache's globs
+# follow the links, so laid file by file the bundle comes flat, its contents
+# three times over, which a codesign refuses ("bundle format is ambiguous";
+# the apple shard's `flutter build macos` under --config=prebuilt_engine,
+# the Mac's T78). files_directory copies the files and makes the links
+# again (assemble_directory.py's relink_frameworks), as the tree's
+# host_engine_directory has them. On Linux the files lie flat anyway and
+# are laid in place (no frameworks).
+[
+    files_directory(
+        name = "prebuilt_host_engine%s_directory" % suffix,
+        srcs = ["@flutter_bin_cache//:host_engine" + suffix],
+        strip_prefix = "artifacts/engine/darwin-x64" + suffix.replace("_", "-"),
+    )
+    for suffix in ([
+        "",
+        "_profile",
+        "_release",
+    ] if HOST_OS == "mac" else [])
+]

@@ -15,6 +15,12 @@ sandbox's own input links are absolute) is made again as the link it is --
 also when the sandbox's absolute link leads to it (a link inside a
 directory output, an xcframework's framework: the sandbox stages the
 directory's entries one by one, each as a link to the output tree's).
+A framework bundle laid file by file is made a bundle again afterwards
+(relink_frameworks over the output): bin/cache's FlutterMacOS.xcframework
+reaches a build through a glob that followed its directory links, so its
+files come three times over -- under Versions/A, Versions/Current and the
+top level -- and a codesign of the copy finds the bundle's format
+ambiguous (the apple shard under --config=prebuilt_engine, a Mac's T78).
 """
 
 import argparse
@@ -124,6 +130,8 @@ def main():
     destination = os.path.join(options.output, path)
     os.makedirs(os.path.dirname(destination), exist_ok=True)
     copy_file(source, destination)
+  if options.file:
+    relink_frameworks(options.output)
 
 
 if __name__ == '__main__':
