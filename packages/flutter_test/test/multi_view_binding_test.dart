@@ -87,7 +87,14 @@ void main() {
     expect(scrollController.offset, greaterThan(0.0));
     final double offsetAfterTimedDrag = scrollController.offset;
 
-    await tester.fling(find.byType(ListView), const Offset(0.0, -100.0), 500.0);
+    // The non-zero initialOffset exercises the pointer move that flingFrom
+    // dispatches before the main drag; it must carry the view id as well.
+    await tester.fling(
+      find.byType(ListView),
+      const Offset(0.0, -100.0),
+      500.0,
+      initialOffset: const Offset(0.0, -10.0),
+    );
     expect(scrollController.offset, greaterThan(offsetAfterTimedDrag));
 
     // dragUntilVisible in continuous mode starts and ends its gesture on the
