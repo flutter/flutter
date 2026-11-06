@@ -843,6 +843,40 @@ public class FlutterRendererTest {
   }
 
   @Test
+  @Config(sdk = 31)
+  public void createSurfaceProducer_usesSurfaceTextureWhenMate60HardwareBufferDefect() {
+    // Setup: Simulate a Huawei Mate 60 (ALN-AL00) on API 31, which uses Kirin 9000S.
+    ShadowBuild.setManufacturer("HUAWEI");
+    ShadowBuild.setModel("ALN-AL00");
+
+    // Execute the behavior under test.
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    // Verify: Should return SurfaceTextureSurfaceProducer instead of ImageReaderSurfaceProducer.
+    assertTrue(
+        "Expected SurfaceTextureSurfaceProducer on Mate 60 due to HardwareBuffer defect",
+        producer instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
+  @Config(sdk = 31)
+  public void createSurfaceProducer_usesSurfaceTextureWhenMateX5HardwareBufferDefect() {
+    // Setup: Simulate a Huawei Mate X5 (ALT-AL10) on API 31, which uses Kirin 9000S.
+    ShadowBuild.setManufacturer("HUAWEI");
+    ShadowBuild.setModel("ALT-AL10");
+
+    // Execute the behavior under test.
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    // Verify: Should return SurfaceTextureSurfaceProducer instead of ImageReaderSurfaceProducer.
+    assertTrue(
+        "Expected SurfaceTextureSurfaceProducer on Mate X5 due to HardwareBuffer defect",
+        producer instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
   public void ImageReaderSurfaceProducerDoesNotCropOrRotate() {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
