@@ -76,6 +76,10 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   RenderAnimatedSize({
     required TickerProvider vsync,
     required Duration duration,
+    @Deprecated(
+      'This field is ignored because RenderAnimatedSize only animates forward. '
+      'This feature was deprecated after v3.47.0-0.0.pre.',
+    )
     Duration? reverseDuration,
     Curve curve = Curves.linear,
     super.alignment,
@@ -152,7 +156,15 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   /// The duration of the animation when running in reverse.
+  @Deprecated(
+    'This field is ignored because RenderAnimatedSize only animates forward. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   Duration? get reverseDuration => _controller.reverseDuration;
+  @Deprecated(
+    'This field is ignored because RenderAnimatedSize only animates forward. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   set reverseDuration(Duration? value) {
     if (value == _controller.reverseDuration) {
       return;

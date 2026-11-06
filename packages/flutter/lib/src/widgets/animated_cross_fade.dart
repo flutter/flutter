@@ -412,7 +412,6 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       child: AnimatedSize(
         alignment: widget.alignment,
         duration: widget.duration,
-        reverseDuration: widget.reverseDuration,
         curve: widget.sizeCurve,
         clipBehavior: widget.clipBehavior,
         child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),

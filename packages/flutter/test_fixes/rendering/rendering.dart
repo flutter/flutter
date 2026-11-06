@@ -60,4 +60,12 @@ void main() {
     cacheExtent: 1.0,
     cacheExtentStyle: cacheExtentStyle,
   );
+
+  // Change made in https://github.com/flutter/flutter/pull/195129
+  final TickerProvider vsync;
+  RenderAnimatedSize(
+    vsync: vsync,
+    duration: Duration.zero,
+    reverseDuration: Duration.zero,
+  );
 }
