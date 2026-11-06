@@ -116,8 +116,8 @@ void main() {
           ..dds = fakeDds;
       });
 
-      tearDown(() {
-        fakeLogReader.dispose();
+      tearDown(() async {
+        await fakeLogReader.dispose();
       });
 
       testUsingContext(
