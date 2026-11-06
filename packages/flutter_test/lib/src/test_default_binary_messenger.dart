@@ -366,7 +366,15 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     }
 
     final controller = StreamController<Object?>();
-    addTearDown(controller.close);
+    addTearDown(() {
+      // If the handler already closed the stream (for example with
+      // MockStreamHandlerEventSink.endOfStream inside a testWidgets body), the
+      // done future belongs to the test's fake async zone. Tear down does not
+      // run that zone, so awaiting the done future again does not return.
+      if (!controller.isClosed) {
+        return controller.close();
+      }
+    });
 
     setMockMethodCallHandler(
       MethodChannel(channel.name, channel.codec),
