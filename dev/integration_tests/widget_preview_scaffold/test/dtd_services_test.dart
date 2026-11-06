@@ -5,23 +5,26 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/persistent_preferences.dart';
 import 'package:test/fake.dart';
 import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
+import '../../../../packages/flutter_tools/test/commands.shard/permeable/utils/project_testing_utils.dart';
+import '../../../../packages/flutter_tools/test/integration.shard/test_utils.dart'
+    show processManager;
 import '../../../../packages/flutter_tools/test/src/common.dart';
 import '../../../../packages/flutter_tools/test/src/context.dart';
 import '../../../../packages/flutter_tools/test/src/fakes.dart';
-import '../../../../packages/flutter_tools/test/commands.shard/permeable/utils/project_testing_utils.dart';
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   FakeFlutterProject();
@@ -63,8 +66,8 @@ void main() {
       shutdownHooks: ShutdownHooks(),
       dtdLauncher: DtdLauncher(
         logger: logger,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: context.get<Artifacts>()!,
+        processManager: context.get<ProcessManager>() ?? processManager,
       ),
       onHotRestartPreviewerRequest: onHotRestartPreviewerRequest ?? () {},
       project: FakeFlutterProject(),

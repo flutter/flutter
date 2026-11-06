@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -1743,7 +1742,7 @@ void main() {
   });
 
   testUsingContext('Check current DevTools version', () async {
-    final String currentDevToolsVersion = globals.cache.devToolsVersion;
+    final String currentDevToolsVersion = const DelegatingToolContext().cache.devToolsVersion;
     final devToolsVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
     expect(devToolsVersionFormat.allMatches(currentDevToolsVersion).length, 1);
   });
@@ -1751,7 +1750,7 @@ void main() {
   // Check that the build number matches the format documented here:
   // https://dart.dev/get-dart#release-channels
   testUsingContext('Check current Dart SDK build number', () async {
-    final String currentDartSdkVersion = globals.cache.dartSdkBuild;
+    final String currentDartSdkVersion = const DelegatingToolContext().cache.dartSdkBuild;
     final dartSdkVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
 
     expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1);

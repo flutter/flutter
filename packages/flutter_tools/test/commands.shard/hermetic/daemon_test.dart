@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -22,7 +23,6 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -132,7 +132,7 @@ void main() {
           featureFlags: featureFlags,
         );
         // Use the flutter_gallery project which has a known set of supported platforms.
-        final String projectPath = globals.fs.path.join(
+        final String projectPath = context.get<FileSystem>()!.path.join(
           getFlutterRoot(),
           'dev',
           'integration_tests',
@@ -1265,7 +1265,7 @@ void main() {
             device,
             null, // projectDirectory
             false, // enableHotReload
-            globals.fs.directory('/'), // cwd
+            context.get<FileSystem>()!.directory('/'), // cwd
             LaunchMode.run,
             MachineOutputLogger(parent: notifyingLogger),
           ),
@@ -1314,7 +1314,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          context.get<FileSystem>()!.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );
@@ -1376,7 +1376,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          context.get<FileSystem>()!.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );
@@ -1441,7 +1441,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          context.get<FileSystem>()!.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );
@@ -1504,7 +1504,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          context.get<FileSystem>()!.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );

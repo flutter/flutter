@@ -7,15 +7,18 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
@@ -31,6 +34,12 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
+  final localFs = LocalFileSystem.test(signals: FakeSignals());
+  const Platform localPlatform = LocalPlatform();
+
+  tearDownAll(() async {
+    await localFs.dispose();
+  });
 
   /// Runs the equivalent of `flutter build aar`.
   ///
@@ -46,16 +55,17 @@ void main() {
     AndroidSdk? androidSdk = const _FakeAndroidSdk(),
     List<String>? arguments,
   }) async {
+    const delegatingContext = DelegatingToolContext();
     final command = BuildAarCommand(
       androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
       androidContext: FakeAndroidContext(androidSdk: androidSdk),
-      buildSystem: globals.buildSystem,
+      buildSystem: context.get<BuildSystem>()!,
       toolContext: FakeToolContext(
-        fs: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-        processManager: globals.processManager,
-        projectFactory: globals.projectFactory,
+        fs: delegatingContext.fs,
+        logger: delegatingContext.logger,
+        platform: delegatingContext.platform,
+        processManager: delegatingContext.processManager,
+        projectFactory: delegatingContext.projectFactory,
       ),
     );
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -72,7 +82,7 @@ void main() {
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
     tearDown(() {
@@ -194,7 +204,7 @@ void main() {
 
     setUp(() {
       fakeAndroidBuilder = _CapturingFakeAndroidBuilder();
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_build_aar_test.');
+      tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_build_aar_test.');
     });
 
     tearDown(() {
@@ -343,16 +353,16 @@ void main() {
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      gradlew = globals.fs.path.join(
+      gradlew = localFs.path.join(
         tempDir.path,
         'flutter_project',
         '.android',
-        globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
+        localPlatform.isWindows ? 'gradlew.bat' : 'gradlew',
       );
       processManager = FakeProcessManager.empty();
       flutterRoot = getFlutterRoot();
@@ -394,7 +404,7 @@ void main() {
             'missing_project',
             arguments: <String>[
               '--no-pub',
-              globals.fs.path.join('missing_project', 'lib', 'main.dart'),
+              localFs.path.join('missing_project', 'lib', 'main.dart'),
             ],
           );
         }, throwsToolExit(message: 'main.dart does not exist'));
@@ -450,13 +460,13 @@ void main() {
           FakeCommand(
             command: <String>[
               gradlew,
-              '-I=${globals.fs.path.join(flutterRoot, 'packages', 'flutter_tools', 'gradle', 'aar_init_script.gradle')}',
+              '-I=${localFs.path.join(flutterRoot, 'packages', 'flutter_tools', 'gradle', 'aar_init_script.gradle')}',
               '-Pflutter-root=$flutterRoot',
-              '-Poutput-dir=${globals.fs.path.join(tempDir.path, 'flutter_project', 'build', 'host')}',
+              '-Poutput-dir=${localFs.path.join(tempDir.path, 'flutter_project', 'build', 'host')}',
               '-Pis-plugin=false',
               '-PbuildNumber=1.0',
               '-q',
-              '-Ptarget=${globals.fs.path.join('lib', 'main.dart')}',
+              '-Ptarget=${localFs.path.join('lib', 'main.dart')}',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
                 'FLUTTER_BUILD_NAME': '1.0.0',
                 'FLUTTER_BUILD_NUMBER': '1',
@@ -515,7 +525,7 @@ void main() {
         required String name,
         required String value,
       }) {
-        final String manifestPath = globals.fs.path.join(
+        final String manifestPath = localFs.path.join(
           projectPath,
           '.android',
           'app',
@@ -527,7 +537,7 @@ void main() {
         // It would be unnecessarily complicated to parse this XML file and
         // insert the key-value pair, so we just insert it right before the
         // closing </application> tag.
-        final String oldManifest = globals.fs.file(manifestPath).readAsStringSync();
+        final String oldManifest = localFs.file(manifestPath).readAsStringSync();
         final String newManifest = oldManifest.replaceFirst(
           '</application>',
           '    <meta-data\n'
@@ -535,7 +545,7 @@ void main() {
               '        android:value="$value" />\n'
               '    </application>',
         );
-        globals.fs.file(manifestPath).writeAsStringSync(newManifest);
+        localFs.file(manifestPath).writeAsStringSync(newManifest);
       }
 
       testUsingContext(
@@ -565,28 +575,29 @@ void main() {
       testUsingContext(
         'EnableImpeller="true" reports an enabled event',
         () async {
+          const delegatingContext = DelegatingToolContext();
           final String projectPath = await createProject(
             tempDir,
             arguments: <String>['--no-pub', '--template=module'],
           );
           final FlutterProject project = FlutterProject.fromDirectory(
-            globals.fs.directory(projectPath),
-            logger: globals.logger,
+            delegatingContext.fs.directory(projectPath),
+            logger: delegatingContext.logger,
           );
           await project.android.ensureReadyForPlatformSpecificTooling(
             toolContext: FakeToolContext(
-              cache: globals.cache,
-              config: globals.config,
-              flutterVersion: globals.flutterVersion,
-              fs: globals.fs,
-              logger: globals.logger,
-              os: globals.os,
-              platform: globals.platform,
-              processManager: globals.processManager,
-              systemClock: globals.systemClock,
+              cache: delegatingContext.cache,
+              config: delegatingContext.config,
+              flutterVersion: delegatingContext.flutterVersion,
+              fs: delegatingContext.fs,
+              logger: delegatingContext.logger,
+              os: delegatingContext.os,
+              platform: delegatingContext.platform,
+              processManager: delegatingContext.processManager,
+              systemClock: delegatingContext.systemClock,
             ),
-            gradleUtils: globals.gradleUtils,
-            templateRenderer: globals.templateRenderer,
+            gradleUtils: context.get<GradleUtils>(),
+            templateRenderer: context.get<TemplateRenderer>()!,
           );
 
           writeManifestMetadata(
@@ -614,28 +625,29 @@ void main() {
       testUsingContext(
         'EnableImpeller="false" reports a disabled event',
         () async {
+          const delegatingContext = DelegatingToolContext();
           final String projectPath = await createProject(
             tempDir,
             arguments: <String>['--no-pub', '--template=module'],
           );
           final FlutterProject project = FlutterProject.fromDirectory(
-            globals.fs.directory(projectPath),
-            logger: globals.logger,
+            delegatingContext.fs.directory(projectPath),
+            logger: delegatingContext.logger,
           );
           await project.android.ensureReadyForPlatformSpecificTooling(
             toolContext: FakeToolContext(
-              cache: globals.cache,
-              config: globals.config,
-              flutterVersion: globals.flutterVersion,
-              fs: globals.fs,
-              logger: globals.logger,
-              os: globals.os,
-              platform: globals.platform,
-              processManager: globals.processManager,
-              systemClock: globals.systemClock,
+              cache: delegatingContext.cache,
+              config: delegatingContext.config,
+              flutterVersion: delegatingContext.flutterVersion,
+              fs: delegatingContext.fs,
+              logger: delegatingContext.logger,
+              os: delegatingContext.os,
+              platform: delegatingContext.platform,
+              processManager: delegatingContext.processManager,
+              systemClock: delegatingContext.systemClock,
             ),
-            gradleUtils: globals.gradleUtils,
-            templateRenderer: globals.templateRenderer,
+            gradleUtils: context.get<GradleUtils>(),
+            templateRenderer: context.get<TemplateRenderer>()!,
           );
 
           writeManifestMetadata(

@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/windows.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../../src/common.dart';
@@ -177,10 +176,11 @@ void main() {
     },
   );
 
+  late FileSystem flavorFileSystem;
+
   testUsingContext(
     'DebugBundleWindowsAssets bundles assets for the selected flavor',
     () async {
-      final FileSystem flavorFileSystem = globals.fs;
       final environment = Environment.test(
         flavorFileSystem.currentDirectory,
         artifacts: Artifacts.test(),
@@ -229,7 +229,7 @@ flutter:
       expect(assetManifest.containsKey('assets/vanilla/ice-cream.png'), isFalse);
     },
     overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => flavorFileSystem = MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     },
   );

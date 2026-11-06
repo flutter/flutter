@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/android/android_engine_cli_flags.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -27,7 +28,6 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -66,8 +66,8 @@ void main() {
     testUsingContext('preserves expected hidden and visible options across verboseHelp modes', () {
       final defaultCommand = RunCommand(
         appleContext: FakeAppleContext(),
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
+        buildSystem: context.get<BuildSystem>()!,
+        buildTargets: context.get<BuildTargets>()!,
         toolContext: const DelegatingToolContext(),
       );
       expect(defaultCommand.argParser.options['track-widget-creation']?.hide, isFalse);
@@ -77,8 +77,8 @@ void main() {
       final verboseCommand = RunCommand(
         verboseHelp: true,
         appleContext: FakeAppleContext(),
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
+        buildSystem: context.get<BuildSystem>()!,
+        buildTargets: context.get<BuildTargets>()!,
         toolContext: const DelegatingToolContext(),
       );
       expect(verboseCommand.argParser.options['track-widget-creation']?.hide, isFalse);
@@ -91,8 +91,8 @@ void main() {
       () async {
         final command = RunCommand(
           appleContext: FakeAppleContext(),
-          buildSystem: globals.buildSystem,
-          buildTargets: globals.buildTargets,
+          buildSystem: context.get<BuildSystem>()!,
+          buildTargets: context.get<BuildTargets>()!,
           toolContext: const DelegatingToolContext(),
         );
         expect(
@@ -130,17 +130,16 @@ void main() {
 
         final command = RunCommand(
           appleContext: FakeAppleContext(),
-          buildSystem: globals.buildSystem,
-          buildTargets: globals.buildTargets,
+          buildSystem: context.get<BuildSystem>()!,
+          buildTargets: context.get<BuildTargets>()!,
           toolContext: const DelegatingToolContext(),
         );
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
           throwsToolExit(),
         );
-        final bufferLogger = globals.logger as BufferLogger;
         expect(
-          bufferLogger.statusText,
+          logger.statusText,
           containsIgnoringWhitespace('Changing current working directory to:'),
         );
       },
@@ -159,8 +158,8 @@ void main() {
 
         final command = RunCommand(
           appleContext: FakeAppleContext(),
-          buildSystem: globals.buildSystem,
-          buildTargets: globals.buildTargets,
+          buildSystem: context.get<BuildSystem>()!,
+          buildTargets: context.get<BuildTargets>()!,
           toolContext: const DelegatingToolContext(),
         );
         await expectLater(
@@ -179,8 +178,8 @@ void main() {
       expectAcceptsDeprecatedJsInteropFlag(
         RunCommand(
           appleContext: FakeAppleContext(),
-          buildSystem: globals.buildSystem,
-          buildTargets: globals.buildTargets,
+          buildSystem: context.get<BuildSystem>()!,
+          buildTargets: context.get<BuildTargets>()!,
           toolContext: const DelegatingToolContext(),
         ),
       );
@@ -349,8 +348,8 @@ void main() {
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           testDeviceManager.devices = <Device>[];
@@ -378,8 +377,8 @@ void main() {
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           final device = FakeDevice(isLocalEmulator: true);
@@ -462,8 +461,8 @@ void main() {
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(
@@ -492,7 +491,7 @@ void main() {
           expect(
             testLogger.statusText,
             containsIgnoringWhitespace(
-              globals.userMessages.flutterMissPlatformProjects(
+              const DelegatingToolContext().userMessages.flutterMissPlatformProjects(
                 Device.devicesPlatformTypes(<Device>[mockDevice]),
               ),
             ),
@@ -548,8 +547,8 @@ void main() {
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
@@ -585,8 +584,8 @@ void main() {
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
@@ -609,7 +608,7 @@ void main() {
             contains(
               analytics.Event.commandUsageValues(
                 workflow: 'run',
-                commandHasTerminal: globals.stdio.hasTerminal,
+                commandHasTerminal: const DelegatingToolContext().stdio.hasTerminal,
                 runIsEmulator: false,
                 runTargetName: 'ios',
                 runTargetOsVersion: 'iOS 13',
@@ -648,8 +647,8 @@ void main() {
               .createSync(recursive: true);
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
@@ -667,7 +666,7 @@ void main() {
             contains(
               analytics.Event.commandUsageValues(
                 workflow: 'run',
-                commandHasTerminal: globals.stdio.hasTerminal,
+                commandHasTerminal: const DelegatingToolContext().stdio.hasTerminal,
                 runIsEmulator: false,
                 runTargetName: 'ios',
                 runTargetOsVersion: 'iOS 13',
@@ -741,8 +740,8 @@ void main() {
             () async {
               final command = RunCommand(
                 appleContext: FakeAppleContext(),
-                buildSystem: globals.buildSystem,
-                buildTargets: globals.buildTargets,
+                buildSystem: context.get<BuildSystem>()!,
+                buildTargets: context.get<BuildTargets>()!,
                 toolContext: const DelegatingToolContext(),
               );
               final device = FakeDevice(
@@ -906,8 +905,8 @@ void main() {
         expect(
           await RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
@@ -922,8 +921,8 @@ void main() {
         expect(
           await RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
@@ -941,8 +940,8 @@ void main() {
         expect(
           await RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
@@ -960,8 +959,8 @@ void main() {
         expect(
           await RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
@@ -1333,8 +1332,8 @@ void main() {
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
@@ -1362,8 +1361,8 @@ void main() {
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await expectLater(
@@ -1392,8 +1391,8 @@ void main() {
 
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await expectLater(
@@ -1424,8 +1423,8 @@ void main() {
           testDeviceManager.devices = <Device>[FakeDevice(platformType: PlatformType.android)];
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await expectLater(
@@ -1450,8 +1449,8 @@ void main() {
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await expectLater(
@@ -1479,8 +1478,8 @@ void main() {
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>[
@@ -1543,8 +1542,8 @@ server:
 ''');
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
@@ -1574,8 +1573,8 @@ server:
 ''');
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
@@ -1610,8 +1609,8 @@ server:
 ''');
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>[
@@ -1653,8 +1652,8 @@ server:
 ''');
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
@@ -1687,8 +1686,8 @@ server:
 ''');
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>[
@@ -1734,8 +1733,8 @@ server:
 ''');
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
@@ -1771,8 +1770,8 @@ server:
           // No web_dev_config.yaml file exists
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>[
@@ -1835,8 +1834,8 @@ server:
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
@@ -1864,8 +1863,8 @@ server:
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await expectLater(
@@ -1890,8 +1889,8 @@ server:
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await expectLater(
@@ -1916,8 +1915,8 @@ server:
         () async {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
+            buildSystem: context.get<BuildSystem>()!,
+            buildTargets: context.get<BuildTargets>()!,
             toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
@@ -2090,8 +2089,8 @@ server:
     () async {
       final command = RunCommand(
         appleContext: FakeAppleContext(),
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
+        buildSystem: context.get<BuildSystem>()!,
+        buildTargets: context.get<BuildTargets>()!,
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(
@@ -2117,8 +2116,8 @@ server:
     () async {
       final command = RunCommand(
         appleContext: FakeAppleContext(),
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
+        buildSystem: context.get<BuildSystem>()!,
+        buildTargets: context.get<BuildTargets>()!,
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(
@@ -2182,8 +2181,8 @@ server:
     () async {
       final command = RunCommand(
         appleContext: FakeAppleContext(),
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
+        buildSystem: context.get<BuildSystem>()!,
+        buildTargets: context.get<BuildTargets>()!,
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(
@@ -2208,8 +2207,8 @@ server:
     () async {
       final command = RunCommand(
         appleContext: FakeAppleContext(),
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
+        buildSystem: context.get<BuildSystem>()!,
+        buildTargets: context.get<BuildTargets>()!,
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(
@@ -2234,8 +2233,8 @@ server:
     () async {
       final command = RunCommand(
         appleContext: FakeAppleContext(),
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
+        buildSystem: context.get<BuildSystem>()!,
+        buildTargets: context.get<BuildTargets>()!,
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(

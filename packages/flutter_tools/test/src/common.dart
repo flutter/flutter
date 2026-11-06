@@ -13,13 +13,13 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'context_runner.dart';
 import 'fakes.dart';
 import 'fs_safety.dart';
 
@@ -75,7 +75,7 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = path.split(globals.localFileSystem.path.fromUri(scriptUri));
+  final List<String> parts = path.split(path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
@@ -197,9 +197,7 @@ void test(
   test_package.test(
     description,
     () async {
-      addTearDown(() async {
-        await globals.localFileSystem.dispose();
-      });
+      addTearDown(disposeContextRunnerLocalFileSystem);
 
       return io.IOOverrides.runWithIOOverrides(() => body(), FSGuardIOOverrides());
     },
@@ -217,7 +215,7 @@ void test(
 /// Executes a test body in zone that does not allow context-based injection.
 ///
 /// For classes which have been refactored to exclude context-based injection
-/// or globals like [globals.fs] or [globals.platform], prefer using
+/// or ambient global singletons, prefer using
 /// this test method as it will prevent accidentally including these
 /// context getters in future code changes.
 ///

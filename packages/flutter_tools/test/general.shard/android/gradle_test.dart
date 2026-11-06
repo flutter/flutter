@@ -15,8 +15,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -288,14 +288,14 @@ void main() {
         () {
           gradle_utils.updateLocalProperties(
             cache: Cache.test(processManager: FakeProcessManager.any()),
-            project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
-            analytics: globals.analytics,
-            logger: globals.logger,
+            project: FlutterProject.fromDirectoryTest(MemoryFileSystem.test().currentDirectory),
+            analytics: const NoOpAnalytics(),
+            logger: testLogger,
           );
         },
         throwsToolExit(
           message:
-              '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_HOME environment variable.',
+              '${testLogger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_HOME environment variable.',
         ),
       );
     }, overrides: <Type, Generator>{AndroidSdk: () => null});
@@ -340,18 +340,18 @@ void main() {
       String? expectedBuildName,
       String? expectedBuildNumber,
     }) async {
-      final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
+      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
 
       gradle_utils.updateLocalProperties(
         cache: Cache.test(processManager: FakeProcessManager.any()),
-        project: FlutterProject.fromDirectoryTest(globals.fs.directory('path/to/project')),
+        project: FlutterProject.fromDirectoryTest(fs.directory('path/to/project')),
         buildInfo: buildInfo,
         requireAndroidSdk: false,
       );
 
-      final File localPropertiesFile = globals.fs.file('path/to/project/android/local.properties');
+      final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
       expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
       expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
     }
@@ -592,7 +592,7 @@ flutter:
     testUsingContext(
       'returns true when the project is using AndroidX',
       () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
           'flutter_android.',
         );
 
@@ -611,7 +611,7 @@ flutter:
     testUsingContext(
       'returns false when the project is not using AndroidX',
       () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
           'flutter_android.',
         );
 
@@ -630,7 +630,7 @@ flutter:
     testUsingContext(
       'returns false when gradle.properties does not exist',
       () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
           'flutter_android.',
         );
 
@@ -645,7 +645,7 @@ flutter:
     testUsingContext(
       'returns false for commented-out AndroidX properties',
       () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
           'flutter_android.',
         );
 
@@ -664,7 +664,7 @@ flutter:
     testUsingContext(
       'returns true when AndroidX property has spaces around the separator',
       () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
           'flutter_android.',
         );
 

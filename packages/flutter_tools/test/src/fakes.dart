@@ -15,6 +15,8 @@ import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -47,7 +49,6 @@ import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -67,6 +68,7 @@ import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -1582,7 +1584,7 @@ class FakeToolContext extends Fake implements ToolContext {
       _fileSystemUtils ?? FileSystemUtils(fileSystem: fs, platform: platform);
 }
 
-/// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
+/// A [ToolContext] that dynamically delegates to [AppContext] for use in [testUsingContext].
 class DelegatingToolContext with Fake implements ToolContext {
   const DelegatingToolContext({
     this._artifacts,
@@ -1595,6 +1597,7 @@ class DelegatingToolContext with Fake implements ToolContext {
     this._git,
     this._localEngineLocator,
     this._logger,
+    this._nativeAssetsBuilder,
     this._os,
     this._outputPreferences,
     this._persistentToolState,
@@ -1612,6 +1615,10 @@ class DelegatingToolContext with Fake implements ToolContext {
     this._userMessages,
   });
 
+  static final LocalFileSystem _fallbackLocalFileSystem = LocalFileSystem.test(
+    signals: FakeSignals(),
+  );
+
   final Artifacts? _artifacts;
   final BotDetector? _botDetector;
   final Cache? _cache;
@@ -1622,6 +1629,7 @@ class DelegatingToolContext with Fake implements ToolContext {
   final Git? _git;
   final LocalEngineLocator? _localEngineLocator;
   final Logger? _logger;
+  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
   final OperatingSystemUtils? _os;
   final OutputPreferences? _outputPreferences;
   final PersistentToolState? _persistentToolState;
@@ -1639,34 +1647,40 @@ class DelegatingToolContext with Fake implements ToolContext {
   final UserMessages? _userMessages;
 
   @override
-  Artifacts get artifacts => _artifacts ?? globals.artifacts ?? Artifacts.test();
+  Artifacts get artifacts => _artifacts ?? context.get<Artifacts>() ?? Artifacts.test();
 
   @override
-  BotDetector get botDetector => _botDetector ?? globals.botDetector;
+  BotDetector get botDetector =>
+      _botDetector ?? context.get<BotDetector>() ?? BotDetector(platform: platform);
 
   @override
-  Cache get cache => _cache ?? globals.cache;
+  Cache get cache => _cache ?? context.get<Cache>()!;
 
   @override
-  Config get config => _config ?? globals.config;
+  Config get config => _config ?? context.get<Config>()!;
 
   @override
   CustomDevicesConfig get customDevicesConfig =>
-      _customDevicesConfig ?? globals.customDevicesConfig;
+      _customDevicesConfig ?? context.get<CustomDevicesConfig>()!;
 
   @override
-  FlutterVersion get flutterVersion => _flutterVersion ?? globals.flutterVersion;
+  FlutterVersion get flutterVersion => _flutterVersion ?? context.get<FlutterVersion>()!;
 
   @override
-  FileSystem get fs => _fs ?? globals.fs;
+  FileSystem get fs =>
+      _fs ??
+      ErrorHandlingFileSystem(
+        delegate: context.get<FileSystem>() ?? _fallbackLocalFileSystem,
+        platform: platform,
+      );
 
   @override
-  Git get git => _git ?? globals.git;
+  Git get git => _git ?? context.get<Git>()!;
 
   @override
   LocalEngineLocator get localEngineLocator =>
       _localEngineLocator ??
-      globals.localEngineLocator ??
+      context.get<LocalEngineLocator>() ??
       LocalEngineLocator(
         fileSystem: fs,
         flutterRoot: cache.flutterRoot,
@@ -1676,58 +1690,87 @@ class DelegatingToolContext with Fake implements ToolContext {
       );
 
   @override
-  Logger get logger => _logger ?? globals.logger;
+  Logger get logger => _logger ?? context.get<Logger>()!;
 
   @override
-  OperatingSystemUtils get os => _os ?? globals.os;
+  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder =>
+      _nativeAssetsBuilder ?? context.get<TestCompilerNativeAssetsBuilder>();
 
   @override
-  OutputPreferences get outputPreferences => _outputPreferences ?? globals.outputPreferences;
+  OperatingSystemUtils get os => _os ?? context.get<OperatingSystemUtils>()!;
+
+  @override
+  OutputPreferences get outputPreferences =>
+      _outputPreferences ??
+      context.get<OutputPreferences>() ??
+      OutputPreferences(
+        wrapText: stdio.hasTerminal,
+        showColor: platform.stdoutSupportsAnsi,
+        stdio: stdio,
+      );
 
   @override
   PersistentToolState get persistentToolState =>
       _persistentToolState ??
-      globals.persistentToolState ??
+      context.get<PersistentToolState>() ??
       PersistentToolState.test(
         directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
         logger: logger,
       );
 
   @override
-  Platform get platform => _platform ?? globals.platform;
+  Platform get platform => _platform ?? context.get<Platform>() ?? const LocalPlatform();
 
   @override
-  PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+  PreRunValidator get preRunValidator =>
+      _preRunValidator ?? context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
 
   @override
-  ProcessInfo get processInfo => _processInfo ?? globals.processInfo;
+  ProcessInfo get processInfo => _processInfo ?? context.get<ProcessInfo>()!;
 
   @override
-  ProcessManager get processManager => _processManager ?? globals.processManager;
+  ProcessManager get processManager =>
+      _processManager ?? context.get<ProcessManager>() ?? const LocalProcessManager();
 
   @override
-  ProcessUtils get processUtils => _processUtils ?? globals.processUtils;
+  ProcessUtils get processUtils => _processUtils ?? context.get<ProcessUtils>()!;
 
   @override
-  FlutterProjectFactory get projectFactory => _projectFactory ?? globals.projectFactory;
+  FlutterProjectFactory get projectFactory =>
+      _projectFactory ??
+      context.get<FlutterProjectFactory>() ??
+      FlutterProjectFactory(
+        config: config,
+        featureFlagsBuilder: () => featureFlags,
+        fileSystem: fs,
+        logger: logger,
+        plistParser:
+            context.get<PlistParser>() ??
+            PlistParser(fileSystem: fs, processManager: processManager, logger: logger),
+        xcodeBuilder: () => context.get<Xcode>(),
+        xcodeProjectInterpreterBuilder: () => context.get<XcodeProjectInterpreter>(),
+      );
 
   @override
-  ShutdownHooks get shutdownHooks => _shutdownHooks ?? globals.shutdownHooks;
+  ShutdownHooks get shutdownHooks => _shutdownHooks ?? LocalSignals.instance.shutdownHooks;
 
   @override
-  Signals get signals => _signals ?? globals.signals;
+  Signals get signals => _signals ?? context.get<Signals>() ?? LocalSignals.instance;
 
   @override
-  Stdio get stdio => _stdio ?? globals.stdio;
+  Stdio get stdio => _stdio ?? context.get<Stdio>() ?? Stdio();
 
   @override
-  SystemClock get systemClock => _systemClock ?? globals.systemClock;
+  SystemClock get systemClock => _systemClock ?? context.get<SystemClock>() ?? const SystemClock();
 
   @override
-  AnsiTerminal get terminal => _terminal ?? globals.terminal;
+  AnsiTerminal get terminal =>
+      _terminal ??
+      context.get<AnsiTerminal>() ??
+      AnsiTerminal(stdio: stdio, platform: platform, shutdownHooks: shutdownHooks);
 
   @override
-  UserMessages get userMessages => _userMessages ?? globals.userMessages;
+  UserMessages get userMessages => _userMessages ?? context.get<UserMessages>()!;
 
   @override
   FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);

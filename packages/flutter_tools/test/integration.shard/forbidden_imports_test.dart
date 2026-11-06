@@ -41,31 +41,28 @@ void main() {
     }
   });
 
-  test('no imports of globals without a global prefix', () {
-    final skippedPaths = <String>[];
-    bool isNotSkipped(FileSystemEntity entity) =>
-        skippedPaths.every((String path) => !entity.path.startsWith(path));
+  test('no imports of removed global singletons or legacy context runner', () {
+    final forbiddenImport = RegExp(
+      r'^\s*import\b.*(?:globals(?:_null_migrated)?\.dart|package:flutter_tools/src/context_runner\.dart)',
+    );
+    final forbiddenLibContextRunnerImport = RegExp(r'^\s*import\b.*context_runner\.dart');
 
-    final Iterable<File> files = fileSystem
-        .directory(fileSystem.path.join(flutterTools, 'lib', 'src'))
-        .listSync(recursive: true)
-        .followedBy(
-          fileSystem
-              .directory(fileSystem.path.join(flutterTools, 'test'))
-              .listSync(recursive: true),
-        )
-        .where(_isDartFile)
-        .where(isNotSkipped)
-        .map(_asFile);
-    for (final file in files) {
-      for (final String line in file.readAsLinesSync()) {
-        if ((line.startsWith(RegExp(r'import.*globals.dart')) ||
-                line.startsWith(RegExp(r'import.*globals_null_migrated.dart'))) &&
-            !line.contains(r'as globals')) {
-          final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
-          fail(
-            '$relativePath imports globals_null_migrated.dart or globals.dart without a globals prefix.',
-          );
+    for (final dirName in const <String>['lib', 'bin', 'test']) {
+      final Iterable<File> files = fileSystem
+          .directory(fileSystem.path.join(flutterTools, dirName))
+          .listSync(recursive: true)
+          .where(_isDartFile)
+          .map(_asFile);
+      for (final file in files) {
+        for (final String line in file.readAsLinesSync()) {
+          if (forbiddenImport.hasMatch(line) ||
+              (dirName != 'test' && forbiddenLibContextRunnerImport.hasMatch(line))) {
+            final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
+            fail(
+              '$relativePath imports a removed global singleton library or '
+              'package:flutter_tools/src/context_runner.dart: $line',
+            );
+          }
         }
       }
     }

@@ -12,12 +12,12 @@ import 'package:flutter_tools/src/android/gradle_utils.dart'
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
@@ -34,13 +34,19 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
+  final localFs = LocalFileSystem.test(signals: FakeSignals());
+  const Platform localPlatform = LocalPlatform();
+
+  tearDownAll(() async {
+    await localFs.dispose();
+  });
 
   group('Usage', () {
     late Directory tempDir;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -278,8 +284,8 @@ void main() {
           tempDir,
           arguments: <String>['--no-pub', '--template=app'],
         );
-        final File manifestFile = globals.fs.file(
-          globals.fs.path.join(projectPath, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
+        final File manifestFile = localFs.file(
+          localFs.path.join(projectPath, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
         );
         manifestFile.writeAsStringSync(
           manifestFile.readAsStringSync().replaceFirst(
@@ -521,7 +527,7 @@ void main() {
         required String name,
         required String value,
       }) {
-        final String manifestPath = globals.fs.path.join(
+        final String manifestPath = localFs.path.join(
           projectPath,
           'android',
           'app',
@@ -533,7 +539,7 @@ void main() {
         // It would be unnecessarily complicated to parse this XML file and
         // insert the key-value pair, so we just insert it right before the
         // closing </application> tag.
-        final String oldManifest = globals.fs.file(manifestPath).readAsStringSync();
+        final String oldManifest = localFs.file(manifestPath).readAsStringSync();
         final String newManifest = oldManifest.replaceFirst(
           '</application>',
           '    <meta-data\n'
@@ -541,7 +547,7 @@ void main() {
               '        android:value="$value" />\n'
               '    </application>',
         );
-        globals.fs.file(manifestPath).writeAsStringSync(newManifest);
+        localFs.file(manifestPath).writeAsStringSync(newManifest);
       }
 
       testUsingContext(
@@ -638,15 +644,15 @@ void main() {
     late FakeAnalytics analytics;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      gradlew = globals.fs.path.join(
+      tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      gradlew = localFs.path.join(
         tempDir.path,
         'flutter_project',
         'android',
-        globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
+        localPlatform.isWindows ? 'gradlew.bat' : 'gradlew',
       );
       processManager = FakeProcessManager.empty();
-      mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      mockAndroidSdk = FakeAndroidSdk(localFs.directory('irrelevant'));
       analytics = getInitializedFakeAnalyticsInstance(
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -696,7 +702,7 @@ void main() {
               gradlew,
               '-q',
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+              '-Ptarget=${localFs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
                 'FLUTTER_BUILD_NAME': '1.0.0',
@@ -747,7 +753,7 @@ void main() {
               gradlew,
               '-q',
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+              '-Ptarget=${localFs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
                 'FLUTTER_BUILD_NAME': '1.0.0',
@@ -802,7 +808,7 @@ void main() {
               gradlew,
               '-q',
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+              '-Ptarget=${localFs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
                 'FLUTTER_BUILD_NAME': '1.0.0',
@@ -857,7 +863,7 @@ void main() {
               gradlew,
               '-q',
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+              '-Ptarget=${localFs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
                 'FLUTTER_BUILD_NAME': '1.0.0',
@@ -914,7 +920,7 @@ void main() {
               gradlew,
               '-q',
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+              '-Ptarget=${localFs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
                 'FLUTTER_BUILD_NAME': '1.0.0',
@@ -976,7 +982,7 @@ void main() {
               gradlew,
               '-q',
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+              '-Ptarget=${localFs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
                 'FLUTTER_BUILD_NAME': '1.0.0',
@@ -1049,7 +1055,7 @@ void main() {
               gradlew,
               '-q',
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+              '-Ptarget=${localFs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
                 'FLUTTER_BUILD_NAME': '1.0.0',
@@ -1097,6 +1103,7 @@ Future<BuildApkCommand> runBuildApkCommand(
   AndroidBuilder? androidBuilder,
   List<String>? arguments,
 }) async {
+  const delegatingContext = DelegatingToolContext();
   final command = BuildApkCommand(
     androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
     androidContext: FakeAndroidContext(
@@ -1107,14 +1114,14 @@ Future<BuildApkCommand> runBuildApkCommand(
           ),
     ),
     buildSystem: context.get<BuildSystem>() ?? TestBuildSystem.all(BuildResult(success: true)),
-    toolContext: const DelegatingToolContext(),
+    toolContext: delegatingContext,
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'apk',
     ...?arguments,
     '--no-pub',
-    globals.fs.path.join(target, 'lib', 'main.dart'),
+    delegatingContext.fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
 }

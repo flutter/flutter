@@ -8,11 +8,9 @@ import 'dart:io';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 
 import '../src/common.dart';
@@ -52,11 +50,10 @@ void main() {
 
       late FileSystem localFileSystem;
       await testbed.run(() {
-        localFileSystem = globals.fs;
+        localFileSystem = context.get<FileSystem>()!;
       });
 
-      expect(localFileSystem, isA<ErrorHandlingFileSystem>());
-      expect((localFileSystem as ErrorHandlingFileSystem).fileSystem, isA<MemoryFileSystem>());
+      expect(localFileSystem, isA<MemoryFileSystem>());
     });
 
     test('Can provide setup interfaces', () async {

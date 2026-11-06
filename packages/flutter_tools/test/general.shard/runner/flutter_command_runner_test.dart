@@ -7,16 +7,17 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/experimental/extension_arg_parser.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -63,7 +64,7 @@ void main() {
         'checks that Flutter installation is up-to-date',
         () async {
           final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = context.get<FlutterVersion>()! as FakeFlutterVersion;
 
           await runner.run(<String>['dummy']);
 
@@ -83,7 +84,7 @@ void main() {
         'does not check that Flutter installation is up-to-date with --machine flag',
         () async {
           final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = context.get<FlutterVersion>()! as FakeFlutterVersion;
 
           await runner.run(<String>['dummy', '--machine', '--version']);
 
@@ -104,7 +105,7 @@ void main() {
           final runner = createTestCommandRunner(
             _FlutterCommandWithItsOwnMachineFlag(verboseHelp: false),
           ) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = context.get<FlutterVersion>()! as FakeFlutterVersion;
 
           await runner.run(<String>['dummy-with-machine', '--machine']);
 
@@ -123,7 +124,7 @@ void main() {
         'does not check that Flutter installation is up-to-date with CI=true in environment',
         () async {
           final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = context.get<FlutterVersion>()! as FakeFlutterVersion;
 
           await runner.run(<String>['dummy', '--version']);
 
@@ -142,7 +143,7 @@ void main() {
         'checks that Flutter installation is up-to-date with CI=true and --machine when explicit --version-check',
         () async {
           final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = context.get<FlutterVersion>()! as FakeFlutterVersion;
 
           await runner.run(<String>['dummy', '--version', '--machine', '--version-check']);
 
@@ -162,7 +163,7 @@ void main() {
         () async {
           final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
           final runner = createTestCommandRunner(command) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = context.get<FlutterVersion>()! as FakeFlutterVersion;
 
           await runner.run(<String>['bash-completion']);
 
@@ -183,7 +184,7 @@ void main() {
         () async {
           final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
           final runner = createTestCommandRunner(command) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = context.get<FlutterVersion>()! as FakeFlutterVersion;
 
           await runner.run(<String>['bash-completion']);
 
@@ -204,7 +205,7 @@ void main() {
         () async {
           final runner =
               createTestCommandRunner(DummyFlutterCommand(), fakeAnalytics) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = context.get<FlutterVersion>()! as FakeFlutterVersion;
 
           await runner.run(<String>['--version']);
           expect(version.didFetchTagsAndUpdate, true);
@@ -215,7 +216,7 @@ void main() {
                 commandPath: 'version',
                 result: 'success',
                 commandHasTerminal: false,
-                hostArch: globals.os.hostPlatform.cliName,
+                hostArch: context.get<OperatingSystemUtils>()!.hostPlatform.cliName,
               ),
             ),
           );
@@ -836,7 +837,7 @@ void main() {
 
             Artifacts? artifactsInsideCommand;
             fakeCommand.onRun = () {
-              artifactsInsideCommand = globals.artifacts;
+              artifactsInsideCommand = context.get<Artifacts>();
             };
 
             await runner.run(<String>[
@@ -876,7 +877,7 @@ class FakeFlutterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() {
     ran = true;
-    preferences = globals.outputPreferences;
+    preferences = toolContext.outputPreferences;
     onRun?.call();
     return Future<FlutterCommandResult>.value(const FlutterCommandResult(ExitStatus.success));
   }
