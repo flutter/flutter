@@ -113,3 +113,25 @@ alias(
         "_release",
     ] if HOST_OS == "mac" else [])
 ]
+
+# The iOS engine directories the same way (`flutter precache --ios`:
+# bin/cache's artifacts/engine/ios{,-profile,-release}), for the apple
+# shard's facsimile under the prebuilt engine: the device and simulator
+# Flutter.xcframeworks, the extension-safe ones, gen_snapshot_arm64 and the
+# LICENSE the cache copied in. An iOS framework is a flat bundle, so there
+# is nothing to relink; the directory artifact is what the facsimile's
+# writable copies (APFS clones) want. Empty where the tool has not fetched
+# them, in which case the tool fetches them at run time as the checkout's
+# would.
+[
+    files_directory(
+        name = "prebuilt_ios_engine%s_directory" % suffix,
+        srcs = ["@flutter_bin_cache//:ios_engine" + suffix],
+        strip_prefix = "artifacts/engine/ios" + suffix.replace("_", "-"),
+    )
+    for suffix in ([
+        "",
+        "_profile",
+        "_release",
+    ] if HOST_OS == "mac" else [])
+]
