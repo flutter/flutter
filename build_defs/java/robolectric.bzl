@@ -21,10 +21,22 @@ Nothing of rules_java is used: the engine's JDK is the one CI's Gradle
 runs with, and the root module's graph stays as it is (maven.bzl).
 """
 
-# The flags test_runner/build.gradle gives the test JVM: Robolectric's
-# recommendation for JDK 17 and later, and the heap Gradle allows.
+# The flags test_runner/build.gradle gives the test JVM -- Robolectric's
+# recommendation for JDK 17 and later, and the heap Gradle allows -- and two
+# for a JVM that lives seconds to a minute and runs six abreast on an
+# 8-core bot: the C1 compiler alone (a class-loading-bound run never
+# amortizes C2) and the serial collector (six G1s' parallel threads on
+# eight cores contend with each other more than they collect). Measured
+# over the 87 classes at six at once on 8 CPUs: the suite's summed time
+# 6,605 s -> 3,305 s with C1 alone -> 2,430 s with both, the longest class
+# 418 s -> 191 -> 133, the wall 1,150 s -> 600 -> 467; the heaviest classes'
+# resident peak 3.0 GB -> 2.3 GB. Gradle's forks have neither flag, but
+# each of them runs many classes and amortizes what these JVMs pay once per
+# class; what a test observes is the same.
 JVM_FLAGS = [
     "-Xmx8g",
+    "-XX:TieredStopAtLevel=1",
+    "-XX:+UseSerialGC",
     "--add-opens=java.base/java.lang=ALL-UNNAMED",
     "--add-opens=java.base/java.util=ALL-UNNAMED",
     "--add-opens=java.base/java.io=ALL-UNNAMED",
@@ -308,11 +320,11 @@ def robolectric_tests(name, tests, classes, prefix = "test/", tags = [], size = 
       size: each test's size.
       memory_mb: what one test's JVM takes, told to Bazel's scheduler as `resources:memory:` so
         that it runs as many at once as the machine holds and no more. The embedding's classes
-        peak at 3.0 GB of resident memory (the five biggest, Robolectric's sandbox over the
-        activity and text-input tests; 0.9 GB on average; sampled every 2 s over the suite), under
-        the JVM's 8 GB cap that Gradle's forks have too: an 8-core, 30 GB bot runs six at once,
-        as Gradle ran eight. (12 GB here once ran them one at a time on such a bot: 23 minutes
-        for a suite Gradle finishes in four.)
+        peak at 2.3 GB of resident memory with JVM_FLAGS' serial collector (3.0 GB under G1; the
+        five biggest, Robolectric's sandbox over the activity and text-input tests; 0.9 GB on
+        average; sampled every 2 s over the suite), under the JVM's 8 GB cap that Gradle's forks
+        have too: an 8-core, 30 GB bot runs six at once, as Gradle ran eight. (12 GB here once ran
+        them one at a time on such a bot: 23 minutes for a suite Gradle finishes in four.)
       **kwargs: robolectric_test's other attributes, the same for every class.
     """
     names = []
