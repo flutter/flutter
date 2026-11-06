@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -75,8 +74,8 @@ Widget myNewPreview() => Container();
     );
     await reloadSub.cancel();
 
-    final File generatedFile = globals.fs.file(
-      globals.fs.path.join(scaffoldPath!, 'lib', 'src', 'generated_preview.dart'),
+    final File generatedFile = fileSystem.file(
+      fileSystem.path.join(scaffoldPath!, 'lib', 'src', 'generated_preview.dart'),
     );
     if (!generatedFile.existsSync()) {
       throw StateError('generated_preview.dart was not created!');

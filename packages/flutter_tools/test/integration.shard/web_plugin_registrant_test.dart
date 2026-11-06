@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -14,7 +16,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/template.dart';
@@ -36,7 +37,7 @@ void main() {
   });
 
   setUp(() {
-    tempDir = globals.fs.systemTempDirectory.createTempSync(
+    tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_tools_generated_plugin_registrant_test.',
     );
     projectDir = tempDir.childDirectory('flutter_project');
@@ -89,12 +90,12 @@ void main() {
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-        stdio: globals.stdio,
+        fileSystem: fileSystem,
+        logger: context.get<Logger>()!,
+        processManager: processManager,
+        botDetector: context.get<BotDetector>()!,
+        platform: platform,
+        stdio: context.get<Stdio>()!,
       ),
       TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
@@ -147,12 +148,12 @@ void main() {
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-        stdio: globals.stdio,
+        fileSystem: fileSystem,
+        logger: context.get<Logger>()!,
+        processManager: processManager,
+        botDetector: context.get<BotDetector>()!,
+        platform: platform,
+        stdio: context.get<Stdio>()!,
       ),
       TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
@@ -185,12 +186,12 @@ void main() {
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-        stdio: globals.stdio,
+        fileSystem: fileSystem,
+        logger: context.get<Logger>()!,
+        processManager: processManager,
+        botDetector: context.get<BotDetector>()!,
+        platform: platform,
+        stdio: context.get<Stdio>()!,
       ),
       TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
@@ -223,12 +224,12 @@ void main() {
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-        stdio: globals.stdio,
+        fileSystem: fileSystem,
+        logger: context.get<Logger>()!,
+        processManager: processManager,
+        botDetector: context.get<BotDetector>()!,
+        platform: platform,
+        stdio: context.get<Stdio>()!,
       ),
       TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
@@ -274,12 +275,12 @@ void main() {
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-        stdio: globals.stdio,
+        fileSystem: fileSystem,
+        logger: context.get<Logger>()!,
+        processManager: processManager,
+        botDetector: context.get<BotDetector>()!,
+        platform: platform,
+        stdio: context.get<Stdio>()!,
       ),
       TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
@@ -399,14 +400,14 @@ ${linterRules.map((String rule) => '    - $rule').join('\n')}
 }
 
 Future<void> _analyzeEntity(FileSystemEntity target) async {
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+  final String flutterToolsSnapshotPath = fileSystem.path.absolute(
+    fileSystem.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   final args = <String>[flutterToolsSnapshotPath, 'analyze', target.path];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getArtifactPath(
+    context.get<Artifacts>()!.getArtifactPath(
       Artifact.engineDartBinary,
       platform: TargetPlatform.web_javascript,
     ),
@@ -429,12 +430,12 @@ Future<void> _doFlutterPubGet(Directory workingDir) async {
 // to run `flutter build web`.
 // `workingDir` is the directory on which the flutter command will be run.
 Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory workingDir) async {
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+  final String flutterToolsSnapshotPath = fileSystem.path.absolute(
+    fileSystem.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   final args = <String>[
-    globals.artifacts!.getArtifactPath(
+    context.get<Artifacts>()!.getArtifactPath(
       Artifact.engineDartBinary,
       platform: TargetPlatform.web_javascript,
     ),
@@ -442,9 +443,6 @@ Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory work
     ...flutterCommandArgs,
   ];
 
-  final ProcessResult exec = await globals.processManager.run(
-    args,
-    workingDirectory: workingDir.path,
-  );
+  final ProcessResult exec = await processManager.run(args, workingDirectory: workingDir.path);
   expect(exec, const ProcessResultMatcher());
 }
