@@ -428,8 +428,33 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
   if (!android_surface_) {
     return nullptr;
   }
-  return android_surface_->CreateGPUSurface(
+  std::unique_ptr<Surface> surface = android_surface_->CreateGPUSurface(
       android_context_->GetMainSkiaContext().get());
+  // Creating the GPU surface sets up the swapchain, which is what may change
+  // the context's default color format.
+  CheckWarmedColorFormat();
+  return surface;
+}
+
+void PlatformViewAndroid::CheckWarmedColorFormat() const {
+  if (!warmed_color_format_.has_value()) {
+    return;
+  }
+  std::shared_ptr<impeller::Context> impeller_context =
+      android_context_->GetImpellerContext();
+  if (!impeller_context) {
+    return;
+  }
+  const impeller::PixelFormat surface_color_format =
+      impeller_context->GetCapabilities()->GetDefaultColorFormat();
+  FML_DCHECK(surface_color_format == warmed_color_format_.value())
+      << "The default pipelines were warmed for "
+      << impeller::PixelFormatToString(warmed_color_format_.value())
+      << " but the surface renders to "
+      << impeller::PixelFormatToString(surface_color_format)
+      << ", so they will be compiled again. Reevaluate the call to "
+         "ContentContext::WarmDefaultPipelines in "
+         "PlatformViewAndroid::SetupImpellerContext.";
 }
 
 // |PlatformView|
@@ -578,8 +603,11 @@ void PlatformViewAndroid::SetupImpellerContext() {
   // The pipelines are keyed on the context's default color format, which the
   // Vulkan swapchain may change once a surface exists. On Android it is always
   // R8G8B8A8, so the pipelines warmed here are the ones the surface uses.
+  // |CheckWarmedColorFormat| asserts that this stays true.
   if (std::shared_ptr<impeller::Context> impeller_context =
           android_context_->GetImpellerContext()) {
+    warmed_color_format_ =
+        impeller_context->GetCapabilities()->GetDefaultColorFormat();
     impeller::ContentContext::WarmDefaultPipelines(*impeller_context);
   }
 }
