@@ -12,12 +12,15 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -25,11 +28,18 @@ import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart'
-    show FakeAndroidContext, FakeFlutterVersion, FakeToolContext, TestFeatureFlags;
+    show FakeAndroidContext, FakeBuildSystem, FakeFlutterVersion, FakeToolContext, TestFeatureFlags;
 import '../../src/test_flutter_command_runner.dart';
+
+final localFs = LocalFileSystem.test(signals: FakeSignals());
+const Platform localPlatform = LocalPlatform();
 
 void main() {
   Cache.disableLocking();
+
+  tearDownAll(() async {
+    await localFs.dispose();
+  });
 
   group('analytics', () {
     late Directory tempDir;
@@ -37,7 +47,7 @@ void main() {
     late FakeProcessInfo processInfo;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -211,7 +221,7 @@ void main() {
       final command = BuildAppBundleCommand(
         androidBuilder: FakeAndroidBuilder(),
         androidContext: FakeAndroidContext(),
-        buildSystem: globals.buildSystem,
+        buildSystem: FakeBuildSystem(),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
       );
@@ -296,12 +306,18 @@ void main() {
     testUsingContext(
       'logs success',
       () async {
+        final os = OperatingSystemUtils(
+          fileSystem: localFs,
+          logger: BufferLogger.test(),
+          platform: localPlatform,
+          processManager: const LocalProcessManager(),
+        );
         final String projectPath = await createProject(
           tempDir,
           arguments: <String>['--no-pub', '--template=app'],
         );
 
-        await runBuildAppBundleCommand(projectPath);
+        await runBuildAppBundleCommand(projectPath, processInfo: processInfo);
 
         expect(
           fakeAnalytics.sentEvents,
@@ -310,7 +326,7 @@ void main() {
               commandPath: 'create',
               result: 'success',
               commandHasTerminal: false,
-              hostArch: globals.os.hostPlatform.cliName,
+              hostArch: os.hostPlatform.cliName,
               maxRss: processInfo.maxRss,
             ),
           ),
@@ -319,6 +335,12 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        OperatingSystemUtils: () => OperatingSystemUtils(
+          fileSystem: localFs,
+          logger: BufferLogger.test(),
+          platform: localPlatform,
+          processManager: const LocalProcessManager(),
+        ),
         ProcessInfo: () => processInfo,
       },
     );
@@ -332,7 +354,7 @@ void main() {
         required String name,
         required String value,
       }) {
-        final String manifestPath = globals.fs.path.join(
+        final String manifestPath = localFs.path.join(
           projectPath,
           'android',
           'app',
@@ -344,7 +366,7 @@ void main() {
         // It would be unnecessarily complicated to parse this XML file and
         // insert the key-value pair, so we just insert it right before the
         // closing </application> tag.
-        final String oldManifest = globals.fs.file(manifestPath).readAsStringSync();
+        final String oldManifest = localFs.file(manifestPath).readAsStringSync();
         final String newManifest = oldManifest.replaceFirst(
           '</application>',
           '    <meta-data\n'
@@ -352,7 +374,7 @@ void main() {
               '        android:value="$value" />\n'
               '    </application>',
         );
-        globals.fs.file(manifestPath).writeAsStringSync(newManifest);
+        localFs.file(manifestPath).writeAsStringSync(newManifest);
       }
 
       testUsingContext(
@@ -363,14 +385,12 @@ void main() {
             arguments: <String>['--empty', '--no-pub', '--template=app'],
           );
 
-          final Directory oldCwd = globals.localFileSystem.currentDirectory;
+          final Directory oldCwd = localFs.currentDirectory;
           try {
-            globals.localFileSystem.currentDirectory = globals.localFileSystem.directory(
-              projectPath,
-            );
+            localFs.currentDirectory = localFs.directory(projectPath);
             await runBuildAppBundleCommand(projectPath);
           } finally {
-            globals.localFileSystem.currentDirectory = oldCwd;
+            localFs.currentDirectory = oldCwd;
           }
 
           expect(
@@ -401,14 +421,12 @@ void main() {
             value: 'true',
           );
 
-          final Directory oldCwd = globals.localFileSystem.currentDirectory;
+          final Directory oldCwd = localFs.currentDirectory;
           try {
-            globals.localFileSystem.currentDirectory = globals.localFileSystem.directory(
-              projectPath,
-            );
+            localFs.currentDirectory = localFs.directory(projectPath);
             await runBuildAppBundleCommand(projectPath);
           } finally {
-            globals.localFileSystem.currentDirectory = oldCwd;
+            localFs.currentDirectory = oldCwd;
           }
 
           expect(
@@ -439,14 +457,12 @@ void main() {
             value: 'false',
           );
 
-          final Directory oldCwd = globals.localFileSystem.currentDirectory;
+          final Directory oldCwd = localFs.currentDirectory;
           try {
-            globals.localFileSystem.currentDirectory = globals.localFileSystem.directory(
-              projectPath,
-            );
+            localFs.currentDirectory = localFs.directory(projectPath);
             await runBuildAppBundleCommand(projectPath);
           } finally {
-            globals.localFileSystem.currentDirectory = oldCwd;
+            localFs.currentDirectory = oldCwd;
           }
 
           expect(
@@ -473,9 +489,7 @@ void main() {
         );
 
         // Add deferred manifest.
-        final File pubspec = globals.localFileSystem
-            .directory(projectPath)
-            .childFile('pubspec.yaml');
+        final File pubspec = localFs.directory(projectPath).childFile('pubspec.yaml');
         final String modifiedContents = pubspec.readAsStringSync().replaceAll(
           'flutter:',
           'flutter:\n  deferred-components:',
@@ -483,12 +497,12 @@ void main() {
         pubspec.writeAsStringSync(modifiedContents);
         printOnFailure(pubspec.readAsStringSync());
 
-        final Directory oldCwd = globals.localFileSystem.currentDirectory;
+        final Directory oldCwd = localFs.currentDirectory;
         try {
-          globals.localFileSystem.currentDirectory = globals.localFileSystem.directory(projectPath);
+          localFs.currentDirectory = localFs.directory(projectPath);
           await runBuildAppBundleCommand(projectPath);
         } finally {
-          globals.localFileSystem.currentDirectory = oldCwd;
+          localFs.currentDirectory = oldCwd;
         }
 
         expect(
@@ -514,15 +528,17 @@ void main() {
     late FakeProcessManager processManager;
     late FakeAndroidSdk androidSdk;
     late FakeAnalytics analytics;
+    late BufferLogger logger;
 
     setUp(() {
       analytics = getInitializedFakeAnalyticsInstance(
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       processManager = FakeProcessManager.any();
-      androidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      androidSdk = FakeAndroidSdk(localFs.directory('irrelevant'));
+      logger = BufferLogger.test();
     });
 
     tearDown(() {
@@ -540,7 +556,14 @@ void main() {
 
           await expectLater(
             () async {
-              await runBuildAppBundleCommand(projectPath, arguments: <String>['--no-pub']);
+              await runBuildAppBundleCommand(
+                projectPath,
+                androidSdk: null,
+                arguments: <String>['--no-pub'],
+                logger: logger,
+                processManager: processManager,
+                projectFactory: FakeFlutterProjectFactory(tempDir),
+              );
             },
             throwsToolExit(
               message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
@@ -548,7 +571,6 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          AndroidSdk: () => null,
           FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
           ProcessManager: () => processManager,
         },
@@ -571,11 +593,17 @@ void main() {
 
         // The command throws a [ToolExit] because it expects an AAB in the file system.
         await expectLater(() async {
-          await runBuildAppBundleCommand(projectPath);
+          await runBuildAppBundleCommand(
+            projectPath,
+            androidSdk: androidSdk,
+            logger: logger,
+            processManager: processManager,
+            projectFactory: FakeFlutterProjectFactory(tempDir),
+          );
         }, throwsToolExit());
 
         expect(
-          testLogger.statusText,
+          logger.statusText,
           isNot(containsIgnoringWhitespace("Your app isn't using AndroidX")),
         );
 
@@ -593,6 +621,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidSdk: () => androidSdk,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        Logger: () => logger,
         ProcessManager: () => processManager,
         Analytics: () => analytics,
       },
@@ -608,15 +637,21 @@ void main() {
 
         // The command throws a [ToolExit] because it expects an AAB in the file system.
         await expectLater(() async {
-          await runBuildAppBundleCommand(projectPath);
+          await runBuildAppBundleCommand(
+            projectPath,
+            androidSdk: androidSdk,
+            logger: logger,
+            processManager: processManager,
+            projectFactory: FakeFlutterProjectFactory(tempDir),
+          );
         }, throwsToolExit());
 
         expect(
-          testLogger.statusText,
+          logger.statusText,
           isNot(containsIgnoringWhitespace("Your app isn't using AndroidX")),
         );
         expect(
-          testLogger.statusText,
+          logger.statusText,
           isNot(
             containsIgnoringWhitespace(
               'To avoid potential build failures, you can quickly migrate your app by '
@@ -639,6 +674,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidSdk: () => androidSdk,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        Logger: () => logger,
         ProcessManager: () => processManager,
         Analytics: () => analytics,
       },
@@ -649,21 +685,48 @@ void main() {
 Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
   AndroidBuilder? androidBuilder,
+  AndroidSdk? androidSdk = const _FakeAndroidSdk(),
   List<String>? arguments,
+  Logger? logger,
+  ProcessInfo? processInfo,
+  ProcessManager? processManager,
+  FlutterProjectFactory? projectFactory,
 }) async {
+  final Logger resolvedLogger = logger ?? BufferLogger.test();
+  final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+  final String flutterRoot = getFlutterRoot();
+  final os = OperatingSystemUtils(
+    fileSystem: localFs,
+    logger: resolvedLogger,
+    platform: localPlatform,
+    processManager: resolvedProcessManager,
+  );
+  final cache = Cache.test(
+    flutterRoot: flutterRoot,
+    rootOverride: localFs.directory(flutterRoot),
+    fileSystem: localFs,
+    logger: resolvedLogger,
+    platform: localPlatform,
+    processManager: resolvedProcessManager,
+  );
   final command = BuildAppBundleCommand(
     androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
-    androidContext: FakeAndroidContext(
-      androidSdk: globals.androidSdk ?? FakeAndroidSdk(globals.fs.directory('android-sdk')),
+    androidContext: FakeAndroidContext(androidSdk: androidSdk),
+    buildSystem: FlutterBuildSystem(
+      fileSystem: localFs,
+      logger: resolvedLogger,
+      platform: localPlatform,
     ),
-    buildSystem: globals.buildSystem,
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
-      fs: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      projectFactory: globals.projectFactory,
+      cache: cache,
+      fs: localFs,
+      logger: resolvedLogger,
+      os: os,
+      platform: localPlatform,
+      processInfo: processInfo,
+      processManager: resolvedProcessManager,
+      projectFactory: projectFactory,
     ),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -671,7 +734,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
     'appbundle',
     ...?arguments,
     '--no-pub',
-    globals.fs.path.join(target, 'lib', 'main.dart'),
+    localFs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
 }
@@ -681,6 +744,10 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   final Directory directory;
+}
+
+final class _FakeAndroidSdk with Fake implements AndroidSdk {
+  const _FakeAndroidSdk();
 }
 
 class FakeProcessInfo extends Fake implements ProcessInfo {

@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
@@ -18,6 +17,7 @@ import 'package:flutter_tools/src/android/gradle_utils.dart'
         templateDefaultGradleVersion;
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -38,11 +38,11 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -108,14 +108,86 @@ const samplesIndexJson = '''
 /// These files are generated for all project types.
 const flutterPluginsIgnores = <String>['.flutter-plugins-dependencies'];
 
+final localFs = LocalFileSystem.test(signals: FakeSignals());
+const Platform localPlatform = LocalPlatform();
+const ProcessManager localProcessManager = LocalProcessManager();
+const BotDetector fakeBotDetector = FakeBotDetector(true);
+late FakeFlutterVersion fakeFlutterVersion;
+late BufferLogger logger;
+late FakeStdio mockStdio;
+
+CachedArtifacts _createLocalArtifacts({Platform? platform}) {
+  final Platform resolvedPlatform = platform ?? localPlatform;
+  final String flutterRoot = getFlutterRoot();
+  final os = OperatingSystemUtils(
+    fileSystem: localFs,
+    logger: logger,
+    platform: resolvedPlatform,
+    processManager: localProcessManager,
+  );
+  final cache = Cache.test(
+    flutterRoot: flutterRoot,
+    rootOverride: localFs.directory(flutterRoot),
+    fileSystem: localFs,
+    logger: logger,
+    platform: resolvedPlatform,
+    processManager: localProcessManager,
+  );
+  return CachedArtifacts(
+    fileSystem: localFs,
+    platform: resolvedPlatform,
+    cache: cache,
+    operatingSystemUtils: os,
+  );
+}
+
+ToolContext _createToolContext({
+  FileSystem? fs,
+  Platform? platform,
+  ProcessManager? processManager,
+}) {
+  final FileSystem resolvedFs = fs ?? localFs;
+  final Platform resolvedPlatform = platform ?? localPlatform;
+  final ProcessManager resolvedProcessManager = processManager ?? localProcessManager;
+  final String flutterRoot = getFlutterRoot();
+  final os = OperatingSystemUtils(
+    fileSystem: resolvedFs,
+    logger: logger,
+    platform: resolvedPlatform,
+    processManager: resolvedProcessManager,
+  );
+  final cache = Cache.test(
+    flutterRoot: flutterRoot,
+    rootOverride: resolvedFs.directory(flutterRoot),
+    fileSystem: resolvedFs,
+    logger: logger,
+    platform: resolvedPlatform,
+    processManager: resolvedProcessManager,
+  );
+  return FakeToolContext(
+    artifacts: CachedArtifacts(
+      fileSystem: resolvedFs,
+      platform: resolvedPlatform,
+      cache: cache,
+      operatingSystemUtils: os,
+    ),
+    botDetector: fakeBotDetector,
+    cache: cache,
+    flutterVersion: fakeFlutterVersion,
+    fs: resolvedFs,
+    logger: logger,
+    os: os,
+    platform: resolvedPlatform,
+    processManager: resolvedProcessManager,
+    stdio: mockStdio,
+  );
+}
+
 void main() {
   late Directory tempDir;
   late Directory projectDir;
-  late FakeFlutterVersion fakeFlutterVersion;
   late LoggingProcessManager loggingProcessManager;
   late FakeProcessManager fakeProcessManager;
-  late BufferLogger logger;
-  late FakeStdio mockStdio;
   late FakeAnalytics fakeAnalytics;
 
   setUpAll(() async {
@@ -126,7 +198,7 @@ void main() {
   setUp(() {
     loggingProcessManager = LoggingProcessManager();
     logger = BufferLogger.test();
-    tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+    tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     projectDir = tempDir.childDirectory('flutter_project');
     fakeFlutterVersion = FakeFlutterVersion(
       frameworkRevision: frameworkRevision,
@@ -145,6 +217,7 @@ void main() {
   });
 
   tearDownAll(() async {
+    await localFs.dispose();
     await restoreFlutterToolsSnapshot();
   });
 
@@ -175,7 +248,7 @@ void main() {
     () async {
       // Must use LocalFileSystem as it is dependent on dart:io handling of
       // Windows paths, which the MemoryFileSystem does not implement
-      final Directory workingDir = globals.fs.directory(r'X:\path\to\working\dir');
+      final Directory workingDir = localFs.directory(r'X:\path\to\working\dir');
       // Must use [io.IOOverrides] as directory.absolute depends on Directory.current
       // from dart:io.
       await io.IOOverrides.runZoned<Future<void>>(() async {
@@ -190,7 +263,7 @@ void main() {
         );
       }, getCurrentDirectory: () => workingDir);
     },
-    overrides: {Logger: () => BufferLogger.test()},
+    overrides: {Logger: () => logger},
     skip: !io.Platform.isWindows, // [intended] relies on Windows file system
   );
 
@@ -239,11 +312,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
+        fileSystem: localFs,
         logger: logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
       Logger: () => logger,
@@ -272,11 +345,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -309,11 +382,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -330,6 +403,7 @@ void main() {
           <String>[],
           <String>[],
           unexpectedPaths: <String>['android/', 'ios/', '.android/', '.ios/'],
+          platform: _kNoColorTerminalPlatform(),
         ),
         throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'),
       );
@@ -337,11 +411,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: _kNoColorTerminalPlatform(),
         stdio: mockStdio,
       ),
       ...noColorTerminalOverride,
@@ -351,10 +425,10 @@ void main() {
   testUsingContext(
     'cannot create a project in flutter root',
     () async {
-      final String flutterBin = globals.fs.path.join(
+      final String flutterBin = localFs.path.join(
         getFlutterRoot(),
         'bin',
-        globals.platform.isWindows ? 'flutter.bat' : 'flutter',
+        localPlatform.isWindows ? 'flutter.bat' : 'flutter',
       );
       final ProcessResult exec = await Process.run(flutterBin, <String>[
         'create',
@@ -366,11 +440,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: _kNoColorTerminalPlatform(),
         stdio: mockStdio,
       ),
       ...noColorTerminalOverride,
@@ -386,33 +460,28 @@ void main() {
     testUsingContext(
       'can create a project in the $description directory',
       () async {
-        final String flutterBin = globals.fs.path.join(
+        final String flutterBin = localFs.path.join(
           getFlutterRoot(),
           'bin',
-          globals.platform.isWindows ? 'flutter.bat' : 'flutter',
+          localPlatform.isWindows ? 'flutter.bat' : 'flutter',
         );
-        final String examplesDirectory = globals.fs.path.joinAll([
-          getFlutterRoot(),
-          ...examplesPath,
-        ]);
+        final String examplesDirectory = localFs.path.joinAll([getFlutterRoot(), ...examplesPath]);
         const projectName = 'flutter_project';
         final ProcessResult exec = await Process.run(flutterBin, <String>[
           'create',
           projectName,
         ], workingDirectory: examplesDirectory);
         expect(exec.exitCode, 0);
-        globals.fs
-            .file(globals.fs.path.join(examplesDirectory, projectName))
-            .deleteSync(recursive: true);
+        localFs.file(localFs.path.join(examplesDirectory, projectName)).deleteSync(recursive: true);
       },
       overrides: {
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: localFs,
+          logger: logger,
+          processManager: localProcessManager,
+          botDetector: fakeBotDetector,
+          platform: _kNoColorTerminalPlatform(),
           stdio: mockStdio,
         ),
         ...noColorTerminalOverride,
@@ -442,11 +511,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -474,11 +543,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -503,11 +572,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -543,11 +612,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -577,11 +646,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -631,11 +700,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -667,11 +736,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -700,11 +769,11 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
       Logger: () => logger,
@@ -733,11 +802,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -756,11 +825,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -989,11 +1058,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -1006,12 +1075,12 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     void expectExists(String relPath) {
-      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
+      expect(localFs.isFileSync('${projectDir.path}/$relPath'), true);
     }
 
     expectExists('android/gradle.properties');
 
-    final String actualContents = await globals.fs
+    final String actualContents = await localFs
         .file('${projectDir.path}/android/gradle.properties')
         .readAsString();
 
@@ -1042,7 +1111,7 @@ void main() {
     // records the revisions for the project itself.
     final initialMetadata = FlutterProjectMetadata(
       metadataFile,
-      globals.logger,
+      testLogger,
       extensionTemplateManager: null,
     );
     const initialRevision = 'abcdef1234567890abcdef1234567890abcdef12';
@@ -1069,7 +1138,7 @@ void main() {
 
     final updatedMetadata = FlutterProjectMetadata(
       metadataFile,
-      globals.logger,
+      testLogger,
       extensionTemplateManager: null,
     );
     expect(
@@ -1118,9 +1187,7 @@ void main() {
 
     await runner.run(<String>['create', '--template=module', '--no-pub', projectDir.path]);
 
-    final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
-      projectDir,
-    );
+    final FlutterProject project = _createToolContext().projectFactory.fromDirectory(projectDir);
     expect(project.usesAndroidX, true);
   });
 
@@ -1130,13 +1197,13 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--platform', 'android', projectDir.path]);
 
-    final String androidManifest = await globals.fs
+    final String androidManifest = await localFs
         .file('${projectDir.path}/android/app/src/main/AndroidManifest.xml')
         .readAsString();
     expect(androidManifest.contains('android:name="flutterEmbedding"'), true);
     expect(androidManifest.contains('android:value="2"'), true);
 
-    final String mainActivity = await globals.fs
+    final String mainActivity = await localFs
         .file(
           '${projectDir.path}/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
         )
@@ -1415,7 +1482,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    final String pubspecContents = await globals.fs
+    final String pubspecContents = await localFs
         .directory(projectDir.path)
         .childFile('pubspec.yaml')
         .readAsString();
@@ -1424,7 +1491,11 @@ void main() {
   });
 
   testUsingContext('has correct content and formatting with module template', () async {
-    final CreateCommand command = createCreateCommand();
+    final Platform platform = _kNoColorTerminalPlatform();
+    final Artifacts artifacts = _createLocalArtifacts(platform: platform);
+    final CreateCommand command = createCreateCommand(
+      toolContext: _createToolContext(platform: platform),
+    );
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1437,13 +1508,13 @@ void main() {
     ]);
 
     void expectExists(String relPath, [bool expectation = true]) {
-      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), expectation);
+      expect(localFs.isFileSync('${projectDir.path}/$relPath'), expectation);
     }
 
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
 
-    final String actualContents = await globals.fs
+    final String actualContents = await localFs
         .file('${projectDir.path}/test/widget_test.dart')
         .readAsString();
 
@@ -1454,7 +1525,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+          artifacts.getArtifactPath(Artifact.engineDartBinary),
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -1466,15 +1537,13 @@ void main() {
 
     await _runFlutterTest(
       projectDir,
-      target: globals.fs.path.join(projectDir.path, 'test', 'widget_test.dart'),
+      target: localFs.path.join(projectDir.path, 'test', 'widget_test.dart'),
     );
 
     // Generated Xcode settings
-    final String xcodeConfigPath = globals.fs.path.join('.ios', 'Flutter', 'Generated.xcconfig');
+    final String xcodeConfigPath = localFs.path.join('.ios', 'Flutter', 'Generated.xcconfig');
     expectExists(xcodeConfigPath);
-    final File xcodeConfigFile = globals.fs.file(
-      globals.fs.path.join(projectDir.path, xcodeConfigPath),
-    );
+    final File xcodeConfigFile = localFs.file(localFs.path.join(projectDir.path, xcodeConfigPath));
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
@@ -1485,14 +1554,14 @@ void main() {
     expect(xcodeConfig, isNot(contains('SYMROOT')));
 
     // Generated export environment variables script
-    final String buildPhaseScriptPath = globals.fs.path.join(
+    final String buildPhaseScriptPath = localFs.path.join(
       '.ios',
       'Flutter',
       'flutter_export_environment.sh',
     );
     expectExists(buildPhaseScriptPath);
-    final File buildPhaseScriptFile = globals.fs.file(
-      globals.fs.path.join(projectDir.path, buildPhaseScriptPath),
+    final File buildPhaseScriptFile = localFs.file(
+      localFs.path.join(projectDir.path, buildPhaseScriptPath),
     );
     final String buildPhaseScript = buildPhaseScriptFile.readAsStringSync();
     expect(buildPhaseScript, contains('FLUTTER_ROOT='));
@@ -1503,56 +1572,56 @@ void main() {
     expect(buildPhaseScript, isNot(contains('SYMROOT')));
 
     // App identification
-    final String xcodeProjectPath = globals.fs.path.join(
+    final String xcodeProjectPath = localFs.path.join(
       '.ios',
       'Runner.xcodeproj',
       'project.pbxproj',
     );
     expectExists(xcodeProjectPath);
-    final File xcodeProjectFile = globals.fs.file(
-      globals.fs.path.join(projectDir.path, xcodeProjectPath),
+    final File xcodeProjectFile = localFs.file(
+      localFs.path.join(projectDir.path, xcodeProjectPath),
     );
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
     expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
     // Xcode workspace shared data
-    final Directory workspaceSharedData = globals.fs.directory(
-      globals.fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata'),
+    final Directory workspaceSharedData = localFs.directory(
+      localFs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata'),
     );
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
     expectExists(workspaceSharedData.childFile('IDEWorkspaceChecks.plist').path);
     // Xcode project shared data
-    final Directory projectSharedData = globals.fs.directory(
-      globals.fs.path.join('.ios', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
+    final Directory projectSharedData = localFs.directory(
+      localFs.path.join('.ios', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
     );
     expectExists(projectSharedData.childFile('WorkspaceSettings.xcsettings').path);
     expectExists(projectSharedData.childFile('IDEWorkspaceChecks.plist').path);
 
-    final String versionPath = globals.fs.path.join('.metadata');
+    final String versionPath = localFs.path.join('.metadata');
     expectExists(versionPath);
-    final String version = globals.fs
-        .file(globals.fs.path.join(projectDir.path, versionPath))
+    final String version = localFs
+        .file(localFs.path.join(projectDir.path, versionPath))
         .readAsStringSync();
     expect(version, contains('version:'));
     expect(version, contains('revision: "12345678"'));
     expect(version, contains('channel: "omega"'));
 
     // IntelliJ metadata
-    final String intelliJSdkMetadataPath = globals.fs.path.join(
-      '.idea',
-      'libraries',
-      'Dart_SDK.xml',
-    );
+    final String intelliJSdkMetadataPath = localFs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
     expectExists(intelliJSdkMetadataPath);
-    final String sdkMetaContents = globals.fs
-        .file(globals.fs.path.join(projectDir.path, intelliJSdkMetadataPath))
+    final String sdkMetaContents = localFs
+        .file(localFs.path.join(projectDir.path, intelliJSdkMetadataPath))
         .readAsStringSync();
     expect(sdkMetaContents, contains('<root url="file:/'));
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
   }, overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform});
 
   testUsingContext('has correct default content and formatting with app template', () async {
-    final CreateCommand command = createCreateCommand();
+    final Platform platform = _kNoColorTerminalPlatform();
+    final Artifacts artifacts = _createLocalArtifacts(platform: platform);
+    final CreateCommand command = createCreateCommand(
+      toolContext: _createToolContext(platform: platform),
+    );
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1565,7 +1634,7 @@ void main() {
     ]);
 
     void expectExists(String relPath) {
-      expect(globals.fs.file('${projectDir.path}/$relPath'), exists);
+      expect(localFs.file('${projectDir.path}/$relPath'), exists);
     }
 
     expectExists('lib/main.dart');
@@ -1576,7 +1645,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+          artifacts.getArtifactPath(Artifact.engineDartBinary),
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -1588,71 +1657,65 @@ void main() {
 
     await _runFlutterTest(
       projectDir,
-      target: globals.fs.path.join(projectDir.path, 'test', 'widget_test.dart'),
+      target: localFs.path.join(projectDir.path, 'test', 'widget_test.dart'),
     );
 
     // Generated Xcode settings
-    final String xcodeConfigPath = globals.fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
+    final String xcodeConfigPath = localFs.path.join('ios', 'Flutter', 'Generated.xcconfig');
     expectExists(xcodeConfigPath);
-    final File xcodeConfigFile = globals.fs.file(
-      globals.fs.path.join(projectDir.path, xcodeConfigPath),
-    );
+    final File xcodeConfigFile = localFs.file(localFs.path.join(projectDir.path, xcodeConfigPath));
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
     expect(xcodeConfig, contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
     // Xcode project
-    final String xcodeProjectPath = globals.fs.path.join(
-      'ios',
-      'Runner.xcodeproj',
-      'project.pbxproj',
-    );
+    final String xcodeProjectPath = localFs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
-    final File xcodeProjectFile = globals.fs.file(
-      globals.fs.path.join(projectDir.path, xcodeProjectPath),
+    final File xcodeProjectFile = localFs.file(
+      localFs.path.join(projectDir.path, xcodeProjectPath),
     );
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
     expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
     // Xcode workspace shared data
-    final Directory workspaceSharedData = globals.fs.directory(
-      globals.fs.path.join('ios', 'Runner.xcworkspace', 'xcshareddata'),
+    final Directory workspaceSharedData = localFs.directory(
+      localFs.path.join('ios', 'Runner.xcworkspace', 'xcshareddata'),
     );
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
     expectExists(workspaceSharedData.childFile('IDEWorkspaceChecks.plist').path);
     // Xcode project shared data
-    final Directory projectSharedData = globals.fs.directory(
-      globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
+    final Directory projectSharedData = localFs.directory(
+      localFs.path.join('ios', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
     );
     expectExists(projectSharedData.childFile('WorkspaceSettings.xcsettings').path);
     expectExists(projectSharedData.childFile('IDEWorkspaceChecks.plist').path);
 
-    final String versionPath = globals.fs.path.join('.metadata');
+    final String versionPath = localFs.path.join('.metadata');
     expectExists(versionPath);
-    final String version = globals.fs
-        .file(globals.fs.path.join(projectDir.path, versionPath))
+    final String version = localFs
+        .file(localFs.path.join(projectDir.path, versionPath))
         .readAsStringSync();
     expect(version, contains('version:'));
     expect(version, contains('revision: "12345678"'));
     expect(version, contains('channel: "omega"'));
 
     // IntelliJ metadata
-    final String intelliJSdkMetadataPath = globals.fs.path.join(
-      '.idea',
-      'libraries',
-      'Dart_SDK.xml',
-    );
+    final String intelliJSdkMetadataPath = localFs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
     expectExists(intelliJSdkMetadataPath);
-    final String sdkMetaContents = globals.fs
-        .file(globals.fs.path.join(projectDir.path, intelliJSdkMetadataPath))
+    final String sdkMetaContents = localFs
+        .file(localFs.path.join(projectDir.path, intelliJSdkMetadataPath))
         .readAsStringSync();
     expect(sdkMetaContents, contains('<root url="file:/'));
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
   }, overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform});
 
   testUsingContext('has correct content and formatting with plugin template', () async {
-    final CreateCommand command = createCreateCommand();
+    final Platform platform = _kNoColorTerminalPlatform();
+    final Artifacts artifacts = _createLocalArtifacts(platform: platform);
+    final CreateCommand command = createCreateCommand(
+      toolContext: _createToolContext(platform: platform),
+    );
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1676,7 +1739,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+          artifacts.getArtifactPath(Artifact.engineDartBinary),
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -1718,7 +1781,12 @@ void main() {
         completer.complete();
       });
 
-      final CreateCommand command = createCreateCommand();
+      final CreateCommand command = createCreateCommand(
+        toolContext: _createToolContext(
+          platform: _kNoColorTerminalMacOSPlatform(),
+          processManager: fakeProcessManager,
+        ),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -1730,13 +1798,13 @@ void main() {
         projectDir.path,
       ]);
 
-      final String xcodeProjectPath = globals.fs.path.join(
+      final String xcodeProjectPath = localFs.path.join(
         'ios',
         'Runner.xcodeproj',
         'project.pbxproj',
       );
-      final File xcodeProjectFile = globals.fs.file(
-        globals.fs.path.join(projectDir.path, xcodeProjectPath),
+      final File xcodeProjectFile = localFs.file(
+        localFs.path.join(projectDir.path, xcodeProjectPath),
       );
       expect(xcodeProjectFile, exists);
       final String xcodeProject = xcodeProjectFile.readAsStringSync();
@@ -1744,7 +1812,6 @@ void main() {
     },
     overrides: {
       FlutterVersion: () => fakeFlutterVersion,
-      Java: () => null,
       Platform: _kNoColorTerminalMacOSPlatform,
       ProcessManager: () => fakeProcessManager,
     },
@@ -1759,21 +1826,26 @@ void main() {
       frameworkChannel,
     );
     fakeFlutterVersion = mutableFlutterVersion;
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+    final Directory tempDir = localFs.systemTempDirectory.createTempSync(
       'flutter_create_overwrite_platform_',
     );
     final Directory projectDir = tempDir.childDirectory('myapp');
 
     try {
+      final Platform platform = _kNoColorTerminalPlatform();
       // Create a project that supports the android platform.
-      final CreateCommand command = createCreateCommand();
+      final CreateCommand command = createCreateCommand(
+        toolContext: _createToolContext(platform: platform),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
 
       // Re-create the same android platform, simulating a later run with a
       // newer Flutter SDK revision.
       mutableFlutterVersion.frameworkRevision = 'fedcba9876543210fedcba9876543210fedcba98';
-      final CreateCommand repeatCommand = createCreateCommand();
+      final CreateCommand repeatCommand = createCreateCommand(
+        toolContext: _createToolContext(platform: platform),
+      );
       final CommandRunner<void> repeatRunner = createTestCommandRunner(repeatCommand);
       await repeatRunner.run(<String>[
         'create',
@@ -1837,8 +1909,8 @@ void main() {
       projectDir.path,
     ]);
 
-    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    final String plistPath = localFs.path.join('ios', 'Runner', 'Info.plist');
+    final File plistFile = localFs.file(localFs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(
       plistFile: plistFile,
@@ -1872,8 +1944,8 @@ void main() {
         projectDir.path,
       ]);
 
-      final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
-      final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+      final String plistPath = localFs.path.join('.ios', 'Runner', 'Info.plist');
+      final File plistFile = localFs.file(localFs.path.join(projectDir.path, plistPath));
       expect(plistFile, exists);
       final bool disabled = _getBooleanValueFromPlist(
         plistFile: plistFile,
@@ -1894,11 +1966,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -1919,8 +1991,8 @@ void main() {
       projectDir.path,
     ]);
 
-    final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    final String plistPath = localFs.path.join('example', 'ios', 'Runner', 'Info.plist');
+    final File plistFile = localFs.file(localFs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(
       plistFile: plistFile,
@@ -1971,19 +2043,19 @@ void main() {
       ]);
 
       void expectExists(String relPath) {
-        expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
+        expect(localFs.isFileSync('${projectDir.path}/$relPath'), true);
       }
 
       // Generated Xcode settings
-      final String macosXcodeConfigPath = globals.fs.path.join(
+      final String macosXcodeConfigPath = localFs.path.join(
         'macos',
         'Runner',
         'Configs',
         'AppInfo.xcconfig',
       );
       expectExists(macosXcodeConfigPath);
-      final File macosXcodeConfigFile = globals.fs.file(
-        globals.fs.path.join(projectDir.path, macosXcodeConfigPath),
+      final File macosXcodeConfigFile = localFs.file(
+        localFs.path.join(projectDir.path, macosXcodeConfigPath),
       );
       final String macosXcodeConfig = macosXcodeConfigFile.readAsStringSync();
       expect(macosXcodeConfig, contains('PRODUCT_NAME = flutter_project'));
@@ -1991,27 +2063,27 @@ void main() {
       expect(macosXcodeConfig, contains('PRODUCT_COPYRIGHT ='));
 
       // Xcode project
-      final String xcodeProjectPath = globals.fs.path.join(
+      final String xcodeProjectPath = localFs.path.join(
         'macos',
         'Runner.xcodeproj',
         'project.pbxproj',
       );
       expectExists(xcodeProjectPath);
-      final File xcodeProjectFile = globals.fs.file(
-        globals.fs.path.join(projectDir.path, xcodeProjectPath),
+      final File xcodeProjectFile = localFs.file(
+        localFs.path.join(projectDir.path, xcodeProjectPath),
       );
       final String xcodeProject = xcodeProjectFile.readAsStringSync();
       expect(xcodeProject, contains('path = "flutter_project.app";'));
       expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
 
       // Xcode workspace shared data
-      final Directory workspaceSharedData = globals.fs.directory(
-        globals.fs.path.join('macos', 'Runner.xcworkspace', 'xcshareddata'),
+      final Directory workspaceSharedData = localFs.directory(
+        localFs.path.join('macos', 'Runner.xcworkspace', 'xcshareddata'),
       );
       expectExists(workspaceSharedData.childFile('IDEWorkspaceChecks.plist').path);
       // Xcode project shared data
-      final Directory projectSharedData = globals.fs.directory(
-        globals.fs.path.join('macos', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
+      final Directory projectSharedData = localFs.directory(
+        localFs.path.join('macos', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
       );
       expectExists(projectSharedData.childFile('IDEWorkspaceChecks.plist').path);
     },
@@ -2024,10 +2096,12 @@ void main() {
   testUsingContext(
     'has correct application id for android, bundle id for ios and application id for Linux',
     () async {
-      final CreateCommand command = createCreateCommand();
+      final ToolContext toolContext = _createToolContext(platform: _kNoColorTerminalPlatform());
+      final FlutterProjectFactory projectFactory = toolContext.projectFactory;
+      final CreateCommand command = createCreateCommand(toolContext: toolContext);
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      String tmpProjectDir = globals.fs.path.join(tempDir.path, 'hello_flutter');
+      String tmpProjectDir = localFs.path.join(tempDir.path, 'hello_flutter');
       await runner.run(<String>[
         'create',
         '--template=app',
@@ -2036,9 +2110,7 @@ void main() {
         'com.example',
         tmpProjectDir,
       ]);
-      FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
-        globals.fs.directory(tmpProjectDir),
-      );
+      FlutterProject project = projectFactory.fromDirectory(localFs.directory(tmpProjectDir));
       expect(
         await project.ios.productBundleIdentifier(BuildInfo.debug),
         'com.example.helloFlutter',
@@ -2055,7 +2127,7 @@ void main() {
       expect(project.android.applicationId, 'com.example.hello_flutter');
       expect(project.linux.applicationId, 'com.example.hello_flutter');
 
-      tmpProjectDir = globals.fs.path.join(tempDir.path, 'test_abc');
+      tmpProjectDir = localFs.path.join(tempDir.path, 'test_abc');
       await runner.run(<String>[
         'create',
         '--template=app',
@@ -2064,13 +2136,11 @@ void main() {
         'abc^*.1#@',
         tmpProjectDir,
       ]);
-      project = const DelegatingToolContext().projectFactory.fromDirectory(
-        globals.fs.directory(tmpProjectDir),
-      );
+      project = projectFactory.fromDirectory(localFs.directory(tmpProjectDir));
       expect(await project.ios.productBundleIdentifier(BuildInfo.debug), 'abc.1.testAbc');
       expect(project.android.applicationId, 'abc.u1.test_abc');
 
-      tmpProjectDir = globals.fs.path.join(tempDir.path, 'flutter_project');
+      tmpProjectDir = localFs.path.join(tempDir.path, 'flutter_project');
       await runner.run(<String>[
         'create',
         '--template=app',
@@ -2079,9 +2149,7 @@ void main() {
         '#+^%',
         tmpProjectDir,
       ]);
-      project = const DelegatingToolContext().projectFactory.fromDirectory(
-        globals.fs.directory(tmpProjectDir),
-      );
+      project = projectFactory.fromDirectory(localFs.directory(tmpProjectDir));
       expect(await project.ios.productBundleIdentifier(BuildInfo.debug), 'flutterProject.untitled');
       expect(project.android.applicationId, 'flutter_project.untitled');
       expect(project.linux.applicationId, 'flutter_project.untitled');
@@ -2101,8 +2169,8 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata = globals.fs
-        .file(globals.fs.path.join(projectDir.path, '.metadata'))
+    final String metadata = localFs
+        .file(localFs.path.join(projectDir.path, '.metadata'))
         .readAsStringSync();
     expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
@@ -2116,12 +2184,12 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
 
       // Remove the .metadata to simulate an older instantiation that didn't generate those.
-      globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).deleteSync();
+      localFs.file(localFs.path.join(projectDir.path, '.metadata')).deleteSync();
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata = globals.fs
-          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+      final String metadata = localFs
+          .file(localFs.path.join(projectDir.path, '.metadata'))
           .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: app'));
     },
@@ -2137,8 +2205,8 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata = globals.fs
-          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+      final String metadata = localFs
+          .file(localFs.path.join(projectDir.path, '.metadata'))
           .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: app'));
     },
@@ -2154,8 +2222,8 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata = globals.fs
-          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+      final String metadata = localFs
+          .file(localFs.path.join(projectDir.path, '.metadata'))
           .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: module'));
     },
@@ -2171,8 +2239,8 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata = globals.fs
-          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+      final String metadata = localFs
+          .file(localFs.path.join(projectDir.path, '.metadata'))
           .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: plugin'));
     },
@@ -2188,8 +2256,8 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata = globals.fs
-          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+      final String metadata = localFs
+          .file(localFs.path.join(projectDir.path, '.metadata'))
           .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: package'));
     },
@@ -2211,11 +2279,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -2231,9 +2299,7 @@ void main() {
       ], <String>[]);
       projectDir.childDirectory('.ios').deleteSync(recursive: true);
       await _createProject(projectDir, <String>[], <String>[]);
-      final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
-        projectDir,
-      );
+      final FlutterProject project = _createToolContext().projectFactory.fromDirectory(projectDir);
       expect(
         await project.ios.productBundleIdentifier(BuildInfo.debug),
         'com.bar.foo.flutterProject',
@@ -2242,11 +2308,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -2281,9 +2347,7 @@ void main() {
     ], <String>[]);
     projectDir.childDirectory('ios').deleteSync(recursive: true);
     await _createProject(projectDir, <String>['--no-pub'], <String>[]);
-    final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
-      projectDir,
-    );
+    final FlutterProject project = _createToolContext().projectFactory.fromDirectory(projectDir);
     expect(
       await project.ios.productBundleIdentifier(BuildInfo.debug),
       'com.bar.foo.flutterProject',
@@ -2320,9 +2384,7 @@ void main() {
           'ios/Classes/FlutterProjectPlugin.swift',
         ],
       );
-      final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
-        projectDir,
-      );
+      final FlutterProject project = _createToolContext().projectFactory.fromDirectory(projectDir);
       expect(
         await project.example.ios.productBundleIdentifier(BuildInfo.debug),
         'com.bar.foo.flutterProjectExample',
@@ -2364,9 +2426,7 @@ void main() {
           'ios/Classes/FlutterProjectPlugin.swift',
         ],
       );
-      final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
-        projectDir,
-      );
+      final FlutterProject project = _createToolContext().projectFactory.fromDirectory(projectDir);
       expect(
         await project.example.ios.productBundleIdentifier(BuildInfo.debug),
         'com.bar.foo.flutterProjectExample',
@@ -2419,7 +2479,7 @@ void main() {
       '--org',
       'com.bar.foo',
     ], <String>[]);
-    globals.fs.directory(globals.fs.path.join(projectDir.path, 'ios')).deleteSync(recursive: true);
+    localFs.directory(localFs.path.join(projectDir.path, 'ios')).deleteSync(recursive: true);
     await _createProject(projectDir, <String>[
       '--no-pub',
       '--template=app',
@@ -2435,7 +2495,7 @@ void main() {
   testUsingContext('fails when file exists where output directory should be', () async {
     final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    final File existingFile = globals.fs.file(globals.fs.path.join(projectDir.path, 'bad'));
+    final File existingFile = localFs.file(localFs.path.join(projectDir.path, 'bad'));
     if (!existingFile.existsSync()) {
       existingFile.createSync(recursive: true);
     }
@@ -2448,7 +2508,7 @@ void main() {
   testUsingContext('fails overwrite when file exists where output directory should be', () async {
     final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    final File existingFile = globals.fs.file(globals.fs.path.join(projectDir.path, 'bad'));
+    final File existingFile = localFs.file(localFs.path.join(projectDir.path, 'bad'));
     if (!existingFile.existsSync()) {
       existingFile.createSync(recursive: true);
     }
@@ -2461,18 +2521,18 @@ void main() {
   testUsingContext(
     'overwrites existing directory when requested',
     () async {
-      final Directory existingDirectory = globals.fs.directory(
-        globals.fs.path.join(projectDir.path, 'bad'),
+      final Directory existingDirectory = localFs.directory(
+        localFs.path.join(projectDir.path, 'bad'),
       );
       if (!existingDirectory.existsSync()) {
         existingDirectory.createSync(recursive: true);
       }
-      final File existingFile = globals.fs.file(
-        globals.fs.path.join(existingDirectory.path, 'lib', 'main.dart'),
+      final File existingFile = localFs.file(
+        localFs.path.join(existingDirectory.path, 'lib', 'main.dart'),
       );
       existingFile.createSync(recursive: true);
       await _createProject(
-        globals.fs.directory(existingDirectory.path),
+        localFs.directory(existingDirectory.path),
         <String>['--overwrite', '-a', 'java'],
         <String>[
           'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
@@ -2486,11 +2546,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -2499,7 +2559,9 @@ void main() {
   testUsingContext(
     'invokes pub in online and offline modes',
     () async {
-      final CreateCommand command = createCreateCommand();
+      final CreateCommand command = createCreateCommand(
+        toolContext: _createToolContext(processManager: loggingProcessManager),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       // Run pub online first in order to populate the pub cache.
@@ -2532,11 +2594,11 @@ void main() {
       ProcessManager: () => loggingProcessManager,
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: loggingProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -2571,7 +2633,7 @@ void main() {
   });
 
   testUsingContext("can't create an empty non-application project", () async {
-    final String outputDir = globals.fs.path.join(tempDir.path, 'test_project');
+    final String outputDir = localFs.path.join(tempDir.path, 'test_project');
     final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final args = <String>['create', '--no-pub', '--empty', '--template=plugin', outputDir];
@@ -2688,13 +2750,13 @@ void main() {
   testUsingContext(
     'can write samples index to disk',
     () async {
-      final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
+      final String outputFile = localFs.path.join(tempDir.path, 'flutter_samples.json');
       final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final args = <String>['create', '--list-samples', outputFile];
 
       await runner.run(args);
-      final File expectedFile = globals.fs.file(outputFile);
+      final File expectedFile = localFs.file(outputFile);
       expect(expectedFile, exists);
       expect(expectedFile.readAsStringSync(), equals(samplesIndexJson));
     },
@@ -2715,7 +2777,7 @@ void main() {
   testUsingContext(
     'Throws tool exit on empty samples index',
     () async {
-      final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
+      final String outputFile = localFs.path.join(tempDir.path, 'flutter_samples.json');
       final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final args = <String>['create', '--list-samples', outputFile];
@@ -2739,7 +2801,7 @@ void main() {
   testUsingContext(
     'provides an error to the user if samples json download fails',
     () async {
-      final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
+      final String outputFile = localFs.path.join(tempDir.path, 'flutter_samples.json');
       final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final args = <String>['create', '--list-samples', outputFile];
@@ -2748,7 +2810,7 @@ void main() {
         runner.run(args),
         throwsToolExit(exitCode: 2, message: 'Failed to write samples'),
       );
-      expect(globals.fs.file(outputFile), isNot(exists));
+      expect(localFs.file(outputFile), isNot(exists));
     },
     overrides: {
       HttpClientFactory: () {
@@ -3306,10 +3368,8 @@ void main() {
     expect(projectDir.childDirectory('android'), exists);
     expect(projectDir.childDirectory('example').childDirectory('android'), exists);
 
-    globals.fs.file(globals.fs.path.join(projectDir.path, 'android')).deleteSync(recursive: true);
-    globals.fs
-        .file(globals.fs.path.join(projectDir.path, 'example/android'))
-        .deleteSync(recursive: true);
+    localFs.file(localFs.path.join(projectDir.path, 'android')).deleteSync(recursive: true);
+    localFs.file(localFs.path.join(projectDir.path, 'example/android')).deleteSync(recursive: true);
     expect(projectDir.childDirectory('android'), isNot(exists));
     expect(projectDir.childDirectory('example').childDirectory('android'), isNot(exists));
 
@@ -3334,9 +3394,9 @@ void main() {
       expect(projectDir.childDirectory('android'), exists);
       expect(projectDir.childDirectory('example').childDirectory('android'), exists);
 
-      globals.fs.file(globals.fs.path.join(projectDir.path, 'android')).deleteSync(recursive: true);
-      globals.fs
-          .file(globals.fs.path.join(projectDir.path, 'example/android'))
+      localFs.file(localFs.path.join(projectDir.path, 'android')).deleteSync(recursive: true);
+      localFs
+          .file(localFs.path.join(projectDir.path, 'example/android'))
           .deleteSync(recursive: true);
       expect(projectDir.childDirectory('android'), isNot(exists));
       expect(projectDir.childDirectory('example').childDirectory('android'), isNot(exists));
@@ -3457,12 +3517,12 @@ void main() {
     () async {
       final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
-      final String relativePluginPath = globals.fs.path.normalize(
-        globals.fs.path.relative(projectDirPath),
+      final String projectDirPath = localFs.path.normalize(projectDir.absolute.path);
+      final String relativePluginPath = localFs.path.normalize(
+        localFs.path.relative(projectDirPath),
       );
-      final String relativeExamplePath = globals.fs.path.normalize(
-        globals.fs.path.join(relativePluginPath, 'example/lib/main.dart'),
+      final String relativeExamplePath = localFs.path.normalize(
+        localFs.path.join(relativePluginPath, 'example/lib/main.dart'),
       );
 
       await runner.run(<String>[
@@ -3501,9 +3561,9 @@ void main() {
         '--platform=android',
         projectDir.path,
       ]);
-      final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
-      final String relativePluginPath = globals.fs.path.normalize(
-        globals.fs.path.relative(projectDirPath),
+      final String projectDirPath = localFs.path.normalize(projectDir.absolute.path);
+      final String relativePluginPath = localFs.path.normalize(
+        localFs.path.relative(projectDirPath),
       );
       expect(
         logger.statusText,
@@ -3520,9 +3580,9 @@ void main() {
     () async {
       final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
-      final String relativePluginPath = globals.fs.path.normalize(
-        globals.fs.path.relative(projectDirPath),
+      final String projectDirPath = localFs.path.normalize(projectDir.absolute.path);
+      final String relativePluginPath = localFs.path.normalize(
+        localFs.path.relative(projectDirPath),
       );
       await runner.run(<String>[
         'create',
@@ -3562,20 +3622,20 @@ void main() {
   });
 
   testUsingContext('newly created iOS plugins has correct min iOS version', () async {
-    final String flutterToolsAbsolutePath = globals.fs.path.join(
+    final String flutterToolsAbsolutePath = localFs.path.join(
       getFlutterRoot(),
       'packages',
       'flutter_tools',
     );
     final iosPluginTemplates = <String>[
-      globals.fs.path.join(
+      localFs.path.join(
         flutterToolsAbsolutePath,
         'templates',
         'plugin',
         'ios.tmpl',
         'projectName.podspec.tmpl',
       ),
-      globals.fs.path.join(
+      localFs.path.join(
         flutterToolsAbsolutePath,
         'templates',
         'plugin_ffi',
@@ -3585,7 +3645,7 @@ void main() {
     ];
 
     for (final templatePath in iosPluginTemplates) {
-      final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
+      final String rawTemplate = localFs.file(templatePath).readAsStringSync();
       expect(rawTemplate, contains("s.platform = :ios, '15.0'"));
     }
 
@@ -3613,9 +3673,9 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle.kts'), true);
+    expect(localFs.isFileSync('${projectDir.path}/android/app/build.gradle.kts'), true);
 
-    final String buildContent = await globals.fs
+    final String buildContent = await localFs
         .file('${projectDir.path}/android/app/build.gradle.kts')
         .readAsString();
 
@@ -3642,7 +3702,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
+    final File buildGradleFile = localFs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -3666,7 +3726,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+    final File buildGradleFile = localFs.file('${projectDir.path}/android/build.gradle');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -3766,11 +3826,11 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -3929,7 +3989,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File cmakeLists = globals.fs.file('${projectDir.path}/src/CMakeLists.txt');
+    final File cmakeLists = localFs.file('${projectDir.path}/src/CMakeLists.txt');
 
     expect(cmakeLists.existsSync(), true);
 
@@ -3958,7 +4018,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
+    final File buildGradleFile = localFs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -3984,7 +4044,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
+    final File buildGradleFile = localFs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -4011,7 +4071,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
+    final File buildGradleFile = localFs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -4042,14 +4102,14 @@ void main() {
         ],
       );
 
-      final String moduleBuildGradleFileContent = await globals.fs
-          .file(globals.fs.path.join(projectDir.path, moduleBuildGradleFilePath))
+      final String moduleBuildGradleFileContent = await localFs
+          .file(localFs.path.join(projectDir.path, moduleBuildGradleFilePath))
           .readAsString();
-      final String moduleAppBuildGradleFileContent = await globals.fs
-          .file(globals.fs.path.join(projectDir.path, moduleAppBuildGradleFlePath))
+      final String moduleAppBuildGradleFileContent = await localFs
+          .file(localFs.path.join(projectDir.path, moduleAppBuildGradleFlePath))
           .readAsString();
-      final String moduleFlutterBuildGradleFileContent = await globals.fs
-          .file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath))
+      final String moduleFlutterBuildGradleFileContent = await localFs
+          .file(localFs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath))
           .readAsString();
 
       // Each build file should contain the expected namespace.
@@ -4062,11 +4122,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -4253,7 +4313,7 @@ void main() {
     expect(
       logger.statusText,
       contains(
-        'To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))},\n'
+        'To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${localFs.path.normalize(localFs.path.relative(projectDir.path))},\n'
         'then update pigeon/messages.dart and pubspec.yaml to include the new platforms.',
       ),
     );
@@ -4272,7 +4332,7 @@ void main() {
     expect(
       logger.statusText,
       contains(
-        'To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))},\n'
+        'To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${localFs.path.normalize(localFs.path.relative(projectDir.path))},\n'
         'then update pubspec.yaml to include the new platforms.',
       ),
     );
@@ -4380,7 +4440,7 @@ void main() {
     'default project has analysis_options.yaml set up correctly',
     () async {
       await _createProject(projectDir, <String>[], <String>['analysis_options.yaml']);
-      final String dataPath = globals.fs.path.join(
+      final String dataPath = localFs.path.join(
         getFlutterRoot(),
         'packages',
         'flutter_tools',
@@ -4389,10 +4449,10 @@ void main() {
         'permeable',
         'data',
       );
-      final File toAnalyze = await globals.fs
-          .file(globals.fs.path.join(dataPath, 'to_analyze.dart.test'))
-          .copy(globals.fs.path.join(projectDir.path, 'lib', 'to_analyze.dart'));
-      final String relativePath = globals.fs.path.join('lib', 'to_analyze.dart');
+      final File toAnalyze = await localFs
+          .file(localFs.path.join(dataPath, 'to_analyze.dart.test'))
+          .copy(localFs.path.join(projectDir.path, 'lib', 'to_analyze.dart'));
+      final String relativePath = localFs.path.join('lib', 'to_analyze.dart');
       final expectedFailures = <String>[
         '$relativePath:11:7: use_key_in_widget_constructors',
         '$relativePath:20:3: prefer_const_constructors_in_immutables',
@@ -4404,11 +4464,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -4469,11 +4529,11 @@ void main() {
     overrides: {
       Pub: () => Pub.test(
         flutterRoot: getFlutterRoot(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        fileSystem: localFs,
+        logger: logger,
+        processManager: localProcessManager,
+        botDetector: fakeBotDetector,
+        platform: localPlatform,
         stdio: mockStdio,
       ),
     },
@@ -4592,13 +4652,14 @@ void main() {
   );
 
   testUsingContext('should not show warning for incompatible Java/template Gradle versions when Java version not found', () async {
+    // createCreateCommand defaults java to null.
     final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
 
     expect(logger.warningText, isNot(contains(_kIncompatibleJavaVersionMessage)));
-  }, overrides: {Java: () => null, Logger: () => logger});
+  }, overrides: {Logger: () => logger});
 
   testUsingContext('should return correct warning for incompatible Gradle versions', () async {
     const projectType = 'app';
@@ -4638,315 +4699,282 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     );
   });
 
-  testUsingContext(
-    'should not show warning for incompatible Java/template Gradle versions when created project type is irrelevant',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('should not show warning for incompatible Java/template Gradle versions when created project type is irrelevant', () async {
+    final CreateCommand command = createCreateCommand(
+      // Too high a version for template Gradle versions.
+      java: FakeJava(version: const software.Version.withText(1000, 0, 0, '1000.0.0')),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      // Test not creating a project for Android.
+    // Test not creating a project for Android.
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=ios,windows,macos,linux',
+      projectDir.path,
+    ]);
+    tryToDelete(projectDir);
+    // Test creating a package (Dart-only code).
+    await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
+    tryToDelete(projectDir);
+    // Test creating project types without configured Gradle versions.
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    tryToDelete(projectDir);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
+
+    expect(
+      logger.warningText,
+      isNot(
+        contains(
+          getIncompatibleJavaGradleAgpMessageHeader(
+            false,
+            templateDefaultGradleVersion,
+            templateAndroidGradlePluginVersion,
+            'app',
+          ),
+        ),
+      ),
+    );
+    expect(
+      logger.warningText,
+      isNot(
+        contains(
+          getIncompatibleJavaGradleAgpMessageHeader(
+            false,
+            templateDefaultGradleVersion,
+            templateAndroidGradlePluginVersion,
+            'package',
+          ),
+        ),
+      ),
+    );
+    expect(
+      logger.warningText,
+      isNot(
+        contains(
+          getIncompatibleJavaGradleAgpMessageHeader(
+            false,
+            templateDefaultGradleVersion,
+            templateAndroidGradlePluginVersion,
+            'plugin',
+          ),
+        ),
+      ),
+    );
+    expect(
+      logger.warningText,
+      isNot(
+        contains(
+          getIncompatibleJavaGradleAgpMessageHeader(
+            false,
+            templateDefaultGradleVersion,
+            templateAndroidGradlePluginVersion,
+            'pluginFfi',
+          ),
+        ),
+      ),
+    );
+  }, overrides: {Logger: () => logger});
+
+  testUsingContext('should not show warning for incompatible Java/template AGP versions when project type unrelated', () async {
+    final CreateCommand command = createCreateCommand(
+      // Too low a version for template AGP versions.
+      java: FakeJava(version: const software.Version.withText(0, 0, 0, '0.0.0')),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    // Test not creating a project for Android.
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=ios,windows,macos,linux',
+      projectDir.path,
+    ]);
+    tryToDelete(projectDir);
+    // Test creating a package (Dart-only code).
+    await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
+
+    expect(
+      logger.warningText,
+      isNot(
+        contains(
+          getIncompatibleJavaGradleAgpMessageHeader(
+            false,
+            templateDefaultGradleVersion,
+            templateAndroidGradlePluginVersion,
+            'app',
+          ),
+        ),
+      ),
+    );
+    expect(
+      logger.warningText,
+      isNot(
+        contains(
+          getIncompatibleJavaGradleAgpMessageHeader(
+            false,
+            templateDefaultGradleVersion,
+            templateAndroidGradlePluginVersion,
+            'package',
+          ),
+        ),
+      ),
+    );
+  }, overrides: {Logger: () => logger});
+
+  testUsingContext('should show warning for incompatible Java/template Gradle versions when Java version is too high', () async {
+    final CreateCommand command = createCreateCommand(
+      // Too high a version for template Gradle versions.
+      java: FakeJava(version: const software.Version.withText(500, 0, 0, '500.0.0')),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final relevantProjectTypes = <FlutterTemplateType>[
+      FlutterTemplateType.app,
+      FlutterTemplateType.module,
+    ];
+
+    for (final projectType in relevantProjectTypes) {
+      final String relevantAgpVersion = projectType == FlutterTemplateType.module
+          ? _kIncompatibleAgpVersionForModule
+          : templateAndroidGradlePluginVersion;
+      final String expectedGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(
+        false,
+        templateDefaultGradleVersion,
+        relevantAgpVersion,
+        projectType.cliName,
+      );
+      final String unexpectedAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
+        true,
+        templateDefaultGradleVersion,
+        relevantAgpVersion,
+        projectType.cliName,
+      );
+
       await runner.run(<String>[
         'create',
         '--no-pub',
-        '--platforms=ios,windows,macos,linux',
+        '--template=${projectType.cliName}',
+        if (projectType != FlutterTemplateType.module) '--platforms=android',
         projectDir.path,
       ]);
-      tryToDelete(projectDir);
-      // Test creating a package (Dart-only code).
-      await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
-      tryToDelete(projectDir);
-      // Test creating project types without configured Gradle versions.
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-      tryToDelete(projectDir);
-      await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
 
+      // Check components of expected header warning message are printed.
+      expect(logger.warningText, contains(expectedGradleMessage));
+      expect(logger.warningText, isNot(contains(unexpectedAgpMessage)));
       expect(
         logger.warningText,
-        isNot(
-          contains(
-            getIncompatibleJavaGradleAgpMessageHeader(
-              false,
-              templateDefaultGradleVersion,
-              templateAndroidGradlePluginVersion,
-              'app',
-            ),
-          ),
-        ),
+        contains('./gradlew wrapper --gradle-version=<COMPATIBLE_GRADLE_VERSION>'),
       );
       expect(
         logger.warningText,
-        isNot(
-          contains(
-            getIncompatibleJavaGradleAgpMessageHeader(
-              false,
-              templateDefaultGradleVersion,
-              templateAndroidGradlePluginVersion,
-              'package',
-            ),
-          ),
-        ),
+        contains('https://docs.gradle.org/current/userguide/compatibility.html#java'),
       );
-      expect(
-        logger.warningText,
-        isNot(
-          contains(
-            getIncompatibleJavaGradleAgpMessageHeader(
-              false,
-              templateDefaultGradleVersion,
-              templateAndroidGradlePluginVersion,
-              'plugin',
-            ),
-          ),
-        ),
-      );
-      expect(
-        logger.warningText,
-        isNot(
-          contains(
-            getIncompatibleJavaGradleAgpMessageHeader(
-              false,
-              templateDefaultGradleVersion,
-              templateAndroidGradlePluginVersion,
-              'pluginFfi',
-            ),
-          ),
-        ),
-      );
-    },
-    overrides: {
-      Java: () => FakeJava(
-        version: const software.Version.withText(1000, 0, 0, '1000.0.0'),
-      ), // Too high a version for template Gradle versions.
-      Logger: () => logger,
-    },
-  );
 
-  testUsingContext(
-    'should not show warning for incompatible Java/template AGP versions when project type unrelated',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+      // Check expected file for updating Gradle version is present.
+      if (projectType == FlutterTemplateType.app) {
+        expect(
+          logger.warningText,
+          contains(
+            localFs.path.join(projectDir.path, 'android/gradle/wrapper/gradle-wrapper.properties'),
+          ),
+        );
+      } else {
+        // Project type is module.
+        expect(
+          logger.warningText,
+          contains(
+            localFs.path.join(projectDir.path, '.android/gradle/wrapper/gradle-wrapper.properties'),
+          ),
+        );
+      }
 
-      // Test not creating a project for Android.
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: {Logger: () => logger});
+
+  testUsingContext('should show warning for incompatible Java/template Gradle versions when Java version is too high', () async {
+    final CreateCommand command = createCreateCommand(
+      // Too low a version for template Gradle versions.
+      java: FakeJava(version: const software.Version.withText(1, 8, 0, '1.8.0')),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final relevantProjectTypes = <FlutterTemplateType>[
+      FlutterTemplateType.app,
+      FlutterTemplateType.module,
+    ];
+
+    for (final projectType in relevantProjectTypes) {
+      final String relevantAgpVersion = projectType == FlutterTemplateType.module
+          ? _kIncompatibleAgpVersionForModule
+          : templateAndroidGradlePluginVersion;
+      final String expectedGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(
+        false,
+        templateDefaultGradleVersion,
+        relevantAgpVersion,
+        projectType.cliName,
+      );
+      final String unexpectedAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
+        true,
+        templateDefaultGradleVersion,
+        relevantAgpVersion,
+        projectType.cliName,
+      );
+
       await runner.run(<String>[
         'create',
         '--no-pub',
-        '--platforms=ios,windows,macos,linux',
+        '--template=${projectType.cliName}',
+        if (projectType != FlutterTemplateType.module) '--platforms=android',
         projectDir.path,
       ]);
+
+      // Check components of expected header warning message are printed.
+      expect(logger.warningText, contains(expectedGradleMessage));
+      expect(logger.warningText, isNot(contains(unexpectedAgpMessage)));
+      expect(
+        logger.warningText,
+        contains('./gradlew wrapper --gradle-version=<COMPATIBLE_GRADLE_VERSION>'),
+      );
+      expect(
+        logger.warningText,
+        contains('https://docs.gradle.org/current/userguide/compatibility.html#java'),
+      );
+
+      // Check expected file for updating Gradle version is present.
+      if (projectType == FlutterTemplateType.app) {
+        expect(
+          logger.warningText,
+          contains(
+            localFs.path.join(projectDir.path, 'android/gradle/wrapper/gradle-wrapper.properties'),
+          ),
+        );
+      } else {
+        // Project type is module.
+        expect(
+          logger.warningText,
+          contains(
+            localFs.path.join(projectDir.path, '.android/gradle/wrapper/gradle-wrapper.properties'),
+          ),
+        );
+      }
+
+      // Cleanup to reuse projectDir and logger checks.
       tryToDelete(projectDir);
-      // Test creating a package (Dart-only code).
-      await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
-
-      expect(
-        logger.warningText,
-        isNot(
-          contains(
-            getIncompatibleJavaGradleAgpMessageHeader(
-              false,
-              templateDefaultGradleVersion,
-              templateAndroidGradlePluginVersion,
-              'app',
-            ),
-          ),
-        ),
-      );
-      expect(
-        logger.warningText,
-        isNot(
-          contains(
-            getIncompatibleJavaGradleAgpMessageHeader(
-              false,
-              templateDefaultGradleVersion,
-              templateAndroidGradlePluginVersion,
-              'package',
-            ),
-          ),
-        ),
-      );
-    },
-    overrides: {
-      Java: () => FakeJava(
-        version: const software.Version.withText(0, 0, 0, '0.0.0'),
-      ), // Too low a version for template AGP versions.
-      Logger: () => logger,
-    },
-  );
-
-  testUsingContext(
-    'should show warning for incompatible Java/template Gradle versions when Java version is too high',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      final relevantProjectTypes = <FlutterTemplateType>[
-        FlutterTemplateType.app,
-        FlutterTemplateType.module,
-      ];
-
-      for (final projectType in relevantProjectTypes) {
-        final String relevantAgpVersion = projectType == FlutterTemplateType.module
-            ? _kIncompatibleAgpVersionForModule
-            : templateAndroidGradlePluginVersion;
-        final String expectedGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(
-          false,
-          templateDefaultGradleVersion,
-          relevantAgpVersion,
-          projectType.cliName,
-        );
-        final String unexpectedAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
-          true,
-          templateDefaultGradleVersion,
-          relevantAgpVersion,
-          projectType.cliName,
-        );
-
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=${projectType.cliName}',
-          if (projectType != FlutterTemplateType.module) '--platforms=android',
-          projectDir.path,
-        ]);
-
-        // Check components of expected header warning message are printed.
-        expect(logger.warningText, contains(expectedGradleMessage));
-        expect(logger.warningText, isNot(contains(unexpectedAgpMessage)));
-        expect(
-          logger.warningText,
-          contains('./gradlew wrapper --gradle-version=<COMPATIBLE_GRADLE_VERSION>'),
-        );
-        expect(
-          logger.warningText,
-          contains('https://docs.gradle.org/current/userguide/compatibility.html#java'),
-        );
-
-        // Check expected file for updating Gradle version is present.
-        if (projectType == FlutterTemplateType.app) {
-          expect(
-            logger.warningText,
-            contains(
-              globals.fs.path.join(
-                projectDir.path,
-                'android/gradle/wrapper/gradle-wrapper.properties',
-              ),
-            ),
-          );
-        } else {
-          // Project type is module.
-          expect(
-            logger.warningText,
-            contains(
-              globals.fs.path.join(
-                projectDir.path,
-                '.android/gradle/wrapper/gradle-wrapper.properties',
-              ),
-            ),
-          );
-        }
-
-        // Cleanup to reuse projectDir and logger checks.
-        tryToDelete(projectDir);
-        logger.clear();
-      }
-    },
-    overrides: {
-      Java: () => FakeJava(
-        version: const software.Version.withText(500, 0, 0, '500.0.0'),
-      ), // Too high a version for template Gradle versions.
-      Logger: () => logger,
-    },
-  );
-
-  testUsingContext(
-    'should show warning for incompatible Java/template Gradle versions when Java version is too high',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      final relevantProjectTypes = <FlutterTemplateType>[
-        FlutterTemplateType.app,
-        FlutterTemplateType.module,
-      ];
-
-      for (final projectType in relevantProjectTypes) {
-        final String relevantAgpVersion = projectType == FlutterTemplateType.module
-            ? _kIncompatibleAgpVersionForModule
-            : templateAndroidGradlePluginVersion;
-        final String expectedGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(
-          false,
-          templateDefaultGradleVersion,
-          relevantAgpVersion,
-          projectType.cliName,
-        );
-        final String unexpectedAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
-          true,
-          templateDefaultGradleVersion,
-          relevantAgpVersion,
-          projectType.cliName,
-        );
-
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=${projectType.cliName}',
-          if (projectType != FlutterTemplateType.module) '--platforms=android',
-          projectDir.path,
-        ]);
-
-        // Check components of expected header warning message are printed.
-        expect(logger.warningText, contains(expectedGradleMessage));
-        expect(logger.warningText, isNot(contains(unexpectedAgpMessage)));
-        expect(
-          logger.warningText,
-          contains('./gradlew wrapper --gradle-version=<COMPATIBLE_GRADLE_VERSION>'),
-        );
-        expect(
-          logger.warningText,
-          contains('https://docs.gradle.org/current/userguide/compatibility.html#java'),
-        );
-
-        // Check expected file for updating Gradle version is present.
-        if (projectType == FlutterTemplateType.app) {
-          expect(
-            logger.warningText,
-            contains(
-              globals.fs.path.join(
-                projectDir.path,
-                'android/gradle/wrapper/gradle-wrapper.properties',
-              ),
-            ),
-          );
-        } else {
-          // Project type is module.
-          expect(
-            logger.warningText,
-            contains(
-              globals.fs.path.join(
-                projectDir.path,
-                '.android/gradle/wrapper/gradle-wrapper.properties',
-              ),
-            ),
-          );
-        }
-
-        // Cleanup to reuse projectDir and logger checks.
-        tryToDelete(projectDir);
-        logger.clear();
-      }
-    },
-    overrides: {
-      Java: () => FakeJava(
-        version: const software.Version.withText(1, 8, 0, '1.8.0'),
-      ), // Too low a version for template Gradle versions.
-      Logger: () => logger,
-    },
-  );
+      logger.clear();
+    }
+  }, overrides: {Logger: () => logger});
 
   // The Java versions configured in the following tests will need updates as more Java versions are supported by AGP/Gradle:
 
   testUsingContext(
     'should not show warning for incompatible Java/template AGP/Gradle versions when not detected',
     () async {
-      final CreateCommand command = createCreateCommand();
+      final CreateCommand command = createCreateCommand(
+        // Middle compatible Java version with current template AGP/Gradle versions.
+        java: FakeJava(version: const software.Version.withText(20, 0, 0, '20.0.0')),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final relevantProjectTypes = <FlutterTemplateType>[
         FlutterTemplateType.app,
@@ -4990,123 +5018,104 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         logger.clear();
       }
     },
-    overrides: {
-      Java: () => FakeJava(
-        version: const software.Version.withText(20, 0, 0, '20.0.0'),
-      ), // Middle compatible Java version with current template AGP/Gradle versions.
-      Logger: () => logger,
-    },
+    overrides: {Logger: () => logger},
   );
 
-  testUsingContext(
-    'should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- maximum compatible Java version',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      final relevantProjectTypes = <FlutterTemplateType>[
-        FlutterTemplateType.app,
-        FlutterTemplateType.pluginFfi,
-        FlutterTemplateType.module,
-        FlutterTemplateType.plugin,
-      ];
+  testUsingContext('should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- maximum compatible Java version', () async {
+    final CreateCommand command = createCreateCommand(
+      // Maximum compatible Java version with current template AGP/Gradle versions.
+      java: FakeJava(version: const software.Version.withText(17, 0, 0, '22.0.0')),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final relevantProjectTypes = <FlutterTemplateType>[
+      FlutterTemplateType.app,
+      FlutterTemplateType.pluginFfi,
+      FlutterTemplateType.module,
+      FlutterTemplateType.plugin,
+    ];
 
-      for (final projectType in relevantProjectTypes) {
-        final String relevantAgpVersion = projectType == FlutterTemplateType.module
-            ? _kIncompatibleAgpVersionForModule
-            : templateAndroidGradlePluginVersion;
-        final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
-          true,
-          templateDefaultGradleVersion,
-          relevantAgpVersion,
-          projectType.cliName,
-        );
-        final String unexpectedIncompatibleGradleMessage =
-            getIncompatibleJavaGradleAgpMessageHeader(
-              false,
-              templateDefaultGradleVersion,
-              relevantAgpVersion,
-              projectType.cliName,
-            );
+    for (final projectType in relevantProjectTypes) {
+      final String relevantAgpVersion = projectType == FlutterTemplateType.module
+          ? _kIncompatibleAgpVersionForModule
+          : templateAndroidGradlePluginVersion;
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
+        true,
+        templateDefaultGradleVersion,
+        relevantAgpVersion,
+        projectType.cliName,
+      );
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(
+        false,
+        templateDefaultGradleVersion,
+        relevantAgpVersion,
+        projectType.cliName,
+      );
 
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=${projectType.cliName}',
-          if (projectType != FlutterTemplateType.module) '--platforms=android',
-          projectDir.path,
-        ]);
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=${projectType.cliName}',
+        if (projectType != FlutterTemplateType.module) '--platforms=android',
+        projectDir.path,
+      ]);
 
-        // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
-        expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
-        expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+      // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
 
-        // Cleanup to reuse projectDir and logger checks.
-        tryToDelete(projectDir);
-        logger.clear();
-      }
-    },
-    overrides: {
-      Java: () => FakeJava(
-        version: const software.Version.withText(17, 0, 0, '22.0.0'),
-      ), // Maximum compatible Java version with current template AGP/Gradle versions.
-      Logger: () => logger,
-    },
-  );
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: {Logger: () => logger});
 
-  testUsingContext(
-    'should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- minimum compatible Java version',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      final relevantProjectTypes = <FlutterTemplateType>[
-        FlutterTemplateType.app,
-        FlutterTemplateType.pluginFfi,
-        FlutterTemplateType.module,
-        FlutterTemplateType.plugin,
-      ];
+  testUsingContext('should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- minimum compatible Java version', () async {
+    final CreateCommand command = createCreateCommand(
+      // Minimum compatible Java version with current template AGP/Gradle versions.
+      java: FakeJava(version: const software.Version.withText(17, 0, 0, '17.0.0')),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final relevantProjectTypes = <FlutterTemplateType>[
+      FlutterTemplateType.app,
+      FlutterTemplateType.pluginFfi,
+      FlutterTemplateType.module,
+      FlutterTemplateType.plugin,
+    ];
 
-      for (final projectType in relevantProjectTypes) {
-        final String relevantAgpVersion = projectType == FlutterTemplateType.module
-            ? _kIncompatibleAgpVersionForModule
-            : templateAndroidGradlePluginVersion;
-        final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
-          true,
-          templateDefaultGradleVersion,
-          relevantAgpVersion,
-          projectType.cliName,
-        );
-        final String unexpectedIncompatibleGradleMessage =
-            getIncompatibleJavaGradleAgpMessageHeader(
-              false,
-              templateDefaultGradleVersion,
-              relevantAgpVersion,
-              projectType.cliName,
-            );
+    for (final projectType in relevantProjectTypes) {
+      final String relevantAgpVersion = projectType == FlutterTemplateType.module
+          ? _kIncompatibleAgpVersionForModule
+          : templateAndroidGradlePluginVersion;
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
+        true,
+        templateDefaultGradleVersion,
+        relevantAgpVersion,
+        projectType.cliName,
+      );
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(
+        false,
+        templateDefaultGradleVersion,
+        relevantAgpVersion,
+        projectType.cliName,
+      );
 
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=${projectType.cliName}',
-          if (projectType != FlutterTemplateType.module) '--platforms=android',
-          projectDir.path,
-        ]);
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=${projectType.cliName}',
+        if (projectType != FlutterTemplateType.module) '--platforms=android',
+        projectDir.path,
+      ]);
 
-        // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
-        expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
-        expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+      // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
 
-        // Cleanup to reuse projectDir and logger checks.
-        tryToDelete(projectDir);
-        logger.clear();
-      }
-    },
-    overrides: {
-      Java: () => FakeJava(
-        version: const software.Version.withText(17, 0, 0, '17.0.0'),
-      ), // Minimum compatible Java version with current template AGP/Gradle versions.
-      Logger: () => logger,
-    },
-  );
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: {Logger: () => logger});
 
   testUsingContext('Does not double quote description in index.html on web', () async {
     await _createProject(
@@ -5143,9 +5152,16 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext(
     'flutter create should tool exit if the template manifest cannot be read',
     () async {
-      globals.fs
+      final fs = MemoryFileSystem.test(
+        opHandle: (String context, FileSystemOp operation) {
+          if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
+            throw io.PathNotFoundException(context, const OSError(), 'Cannot open file');
+          }
+        },
+      );
+      fs
           .file(
-            globals.fs.path.join(
+            fs.path.join(
               getFlutterRoot(),
               'packages',
               'flutter_tools',
@@ -5155,7 +5171,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
           )
           .createSync(recursive: true);
 
-      final CreateCommand command = createCreateCommand();
+      final CreateCommand command = createCreateCommand(
+        toolContext: _createToolContext(fs: fs, processManager: fakeProcessManager),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await expectLater(
@@ -5169,42 +5187,27 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         throwsToolExit(message: 'Unable to read the template manifest at path'),
       );
     },
-    overrides: {
-      FileSystem: () => MemoryFileSystem.test(
-        opHandle: (String context, FileSystemOp operation) {
-          if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
-            throw io.PathNotFoundException(context, const OSError(), 'Cannot open file');
-          }
-        },
-      ),
-      ProcessManager: () => fakeProcessManager,
-    },
+    overrides: {ProcessManager: () => fakeProcessManager},
   );
 
-  testUsingContext(
-    'flutter create should show the incompatible java AGP message',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('flutter create should show the incompatible java AGP message', () async {
+    final CreateCommand command = createCreateCommand(
+      // Too high a version for template Gradle versions.
+      java: FakeJava(version: const software.Version.withText(500, 0, 0, '500.0.0')),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
 
-      final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(
-        false,
-        templateDefaultGradleVersion,
-        templateAndroidGradlePluginVersion,
-        'app',
-      );
+    final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(
+      false,
+      templateDefaultGradleVersion,
+      templateAndroidGradlePluginVersion,
+      'app',
+    );
 
-      expect(logger.warningText, contains(expectedMessage));
-    },
-    overrides: {
-      Java: () => FakeJava(
-        version: const software.Version.withText(500, 0, 0, '500.0.0'),
-      ), // Too high a version for template Gradle versions.
-      Logger: () => logger,
-    },
-  );
+    expect(logger.warningText, contains(expectedMessage));
+  }, overrides: {Logger: () => logger});
 
   testUsingContext('flutter create --help hides --sample', () async {
     final CreateCommand command = createCreateCommand();
@@ -5232,7 +5235,8 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   }, overrides: {Logger: () => logger});
 
   testUsingContext('omits suggesting cd ... if flutter create . was run', () async {
-    final Directory tmp = globals.fs.systemTempDirectory..createTempSync();
+    final Directory tmp = localFs.systemTempDirectory.createTempSync('flutter_create_dot.');
+    addTearDown(() => tryToDelete(tmp));
     final Directory out = tmp.childDirectory('project')..createSync(recursive: true);
 
     // This is messier than the above test because:
@@ -5245,7 +5249,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           templateRenderer: const MustacheTemplateRenderer(),
-          toolContext: DelegatingToolContext(fs: globals.fs),
+          toolContext: _createToolContext(),
         ),
       );
       await runner.run(<String>['create', '--no-pub', '.']);
@@ -5264,7 +5268,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       expect(projectPackages, isNotEmpty);
 
       final flutterPubspecLock = loadYaml(
-        globals.fs.file(globals.fs.path.join(getFlutterRoot(), 'pubspec.lock')).readAsStringSync(),
+        localFs.file(localFs.path.join(getFlutterRoot(), 'pubspec.lock')).readAsStringSync(),
       ) as YamlMap;
       final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
       for (final MapEntry<Object?, Object?> p in projectPackages.entries) {
@@ -5293,14 +5297,17 @@ Future<void> _createProject(
   List<String> expectedPaths, {
   List<String> unexpectedPaths = const <String>[],
   List<String> expectedGitignoreLines = const <String>[],
+  Platform? platform,
 }) async {
-  final CreateCommand command = createCreateCommand();
+  final CreateCommand command = createCreateCommand(
+    toolContext: platform != null ? _createToolContext(platform: platform) : null,
+  );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...createArgs, dir.path]);
 
   bool pathExists(String path) {
-    final String fullPath = globals.fs.path.join(dir.path, path);
-    return globals.fs.typeSync(fullPath) != FileSystemEntityType.notFound;
+    final String fullPath = localFs.path.join(dir.path, path);
+    return localFs.typeSync(fullPath) != FileSystemEntityType.notFound;
   }
 
   final pathFailures = <String>[
@@ -5311,8 +5318,8 @@ Future<void> _createProject(
   ];
   expect(pathFailures, isEmpty, reason: pathFailures.join('\n'));
 
-  final String gitignorePath = globals.fs.path.join(dir.path, '.gitignore');
-  final List<String> gitignore = globals.fs.file(gitignorePath).readAsLinesSync();
+  final String gitignorePath = localFs.path.join(dir.path, '.gitignore');
+  final List<String> gitignore = localFs.file(gitignorePath).readAsLinesSync();
 
   final gitignoreFailures = <String>[
     for (final String line in expectedGitignoreLines)
@@ -5327,6 +5334,7 @@ Future<void> _createAndAnalyzeProject(
   List<String> expectedPaths, {
   List<String> unexpectedPaths = const <String>[],
   List<String> expectedGitignoreLines = const <String>[],
+  Platform? platform,
 }) async {
   await _createProject(
     dir,
@@ -5334,18 +5342,20 @@ Future<void> _createAndAnalyzeProject(
     expectedPaths,
     unexpectedPaths: unexpectedPaths,
     expectedGitignoreLines: expectedGitignoreLines,
+    platform: platform,
   );
   await analyzeProject(dir.path);
 }
 
 Future<void> _getPackages(Directory workingDir) async {
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+  final CachedArtifacts artifacts = _createLocalArtifacts();
+  final String flutterToolsSnapshotPath = localFs.path.absolute(
+    localFs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   // While flutter test does get packages, it doesn't write version
   // files anymore.
-  await Process.run(globals.artifacts!.getArtifactPath(Artifact.engineDartBinary), <String>[
+  await Process.run(artifacts.getArtifactPath(Artifact.engineDartBinary), <String>[
     flutterToolsSnapshotPath,
     'packages',
     'get',
@@ -5353,8 +5363,9 @@ Future<void> _getPackages(Directory workingDir) async {
 }
 
 Future<void> _runFlutterTest(Directory workingDir, {String? target}) async {
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+  final CachedArtifacts artifacts = _createLocalArtifacts();
+  final String flutterToolsSnapshotPath = localFs.path.absolute(
+    localFs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   await _getPackages(workingDir);
@@ -5362,7 +5373,7 @@ Future<void> _runFlutterTest(Directory workingDir, {String? target}) async {
   final args = <String>[flutterToolsSnapshotPath, 'test', '--no-color', ?target];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+    artifacts.getArtifactPath(Artifact.engineDartBinary),
     args,
     workingDirectory: workingDir.path,
   );
@@ -5390,22 +5401,14 @@ CreateCommand createCreateCommand({
   AndroidContext? androidContext,
   AppleContext? appleContext,
   ExtensionTemplateManager? extensionTemplateManager,
+  Java? java,
   Net? net,
   Pub? pub,
   TemplateRenderer? templateRenderer,
   ToolContext? toolContext,
   bool verboseHelp = false,
 }) {
-  final ToolContext resolvedToolContext =
-      toolContext ??
-      FakeToolContext(
-        fs: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-        processManager: globals.processManager,
-        cache: globals.cache,
-        flutterVersion: globals.flutterVersion,
-      );
+  final ToolContext resolvedToolContext = toolContext ?? _createToolContext();
   final ToolContext(:Cache cache, :Logger logger, :OperatingSystemUtils os, :Platform platform) =
       resolvedToolContext;
   return CreateCommand(
@@ -5418,7 +5421,7 @@ CreateCommand createCreateCommand({
             operatingSystemUtils: os,
             platform: platform,
           ),
-          javaBuilder: () => globals.java,
+          javaBuilder: () => java,
         ),
     appleContext:
         appleContext ??
@@ -5436,8 +5439,8 @@ CreateCommand createCreateCommand({
         net ??
         Net(
           httpClientFactory: context.get<HttpClientFactory>(),
-          logger: globals.logger,
-          platform: globals.platform,
+          logger: logger,
+          platform: platform,
         ),
     pub: pub,
     verboseHelp: verboseHelp,
