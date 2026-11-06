@@ -294,6 +294,57 @@ bundle_directory = rule(
     },
 )
 
+def _files_directory_impl(ctx):
+    prefix = ctx.attr.strip_prefix
+    placements = []
+    for file in ctx.files.srcs:
+        path = file.short_path
+        if path.startswith("../"):
+            path = path.split("/", 2)[2]
+        if prefix:
+            if not path.startswith(prefix + "/"):
+                fail("%s: %s is not under %s" % (ctx.label, path, prefix))
+            path = path[len(prefix) + 1:]
+        placements.append((file, file.path, path))
+    if not placements:
+        # An artifact set bin/cache does not hold (a profile or release
+        # engine `flutter precache` was not asked for): an empty directory,
+        # as the cache's would be absent.
+        output = ctx.actions.declare_directory(ctx.label.name)
+        args = ctx.actions.args()
+        args.add(output.path)
+        ctx.actions.run_shell(
+            outputs = [output],
+            command = "mkdir -p \"$1\"",
+            arguments = [args],
+            mnemonic = "AssembleDirectory",
+            progress_message = "Assembling %s of %s (empty)" % (ctx.label.name, ctx.label),
+        )
+        return [DefaultInfo(files = depset([output]))]
+    return [DefaultInfo(files = depset([_assemble_directory(ctx, ctx.label.name, placements)]))]
+
+files_directory = rule(
+    implementation = _files_directory_impl,
+    doc = "Some files laid as one directory artifact, each at its path less `strip_prefix` (and less its " +
+          "repository): bin/cache's engine directories under --config=prebuilt_engine on a Mac, whose " +
+          "FlutterMacOS.xcframework a glob through its directory links lays flat -- assemble_directory.py " +
+          "makes the bundle's links again, as it does for the tree's frameworks (bundle_directory).",
+    attrs = PYTHON_ATTRS | {
+        "srcs": attr.label_list(
+            allow_files = True,
+            mandatory = True,
+            doc = "The files; none is an empty directory.",
+        ),
+        "strip_prefix": attr.string(
+            doc = "The directory within the files' repository the paths are taken relative to.",
+        ),
+        "_assemble": attr.label(
+            default = "//build_defs/dist:assemble_directory.py",
+            allow_single_file = True,
+        ),
+    },
+)
+
 def local_engine(name, contents = [], files = {}, trees = [], assemble = [], **kwargs):
     """The manifest `local_engine.json` over a build's files, for `flutter --local-engine`.
 
