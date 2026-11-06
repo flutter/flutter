@@ -718,6 +718,12 @@ class RenderTable extends RenderBox {
     // an offset to their transforms. A child whose semantics have not been
     // rebuilt since then still has that transform, so the offset is taken off
     // again.
+    //
+    // TODO(hm21): A child that is rebuilt with exactly the transform that it
+    // was shifted to last time is taken for one that was not rebuilt. Give the
+    // rows and cell wrappers rects in the coordinates of the table instead of
+    // shifting the children, once desktop handles parents whose rect does not
+    // start at the origin, see https://github.com/flutter/flutter/issues/196135.
     Matrix4? tableTransform(SemanticsNode child) {
       final ({Matrix4? transform, Offset shift})? previous = _idToSemanticsShift[child.id];
       if (previous == null || !identical(child.transform, previous.transform)) {
