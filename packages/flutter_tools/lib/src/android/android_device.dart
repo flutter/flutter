@@ -82,6 +82,9 @@ class AndroidDevice extends Device {
   final ProcessUtils _processUtils;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
 
+  /// Whether a failed APK install can remove an existing app before retrying.
+  bool uninstallOnInstallFailure = true;
+
   final String? productID;
   final String modelID;
   final String? deviceCodeName;
@@ -404,6 +407,10 @@ class AndroidDevice extends Device {
     }
     _logger.printTrace('Warning: Failed to install APK.');
     if (!await isAppInstalled(app, userIdentifier: userIdentifier)) {
+      return false;
+    }
+    if (!uninstallOnInstallFailure) {
+      _logger.printError('Skipping uninstall of the existing app (--no-uninstall).');
       return false;
     }
     _logger.printStatus('Uninstalling old version...');
