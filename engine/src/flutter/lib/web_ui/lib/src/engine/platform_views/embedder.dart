@@ -310,23 +310,30 @@ class PlatformViewEmbedder {
 
   Future<void> submitFrame(FrameTimingRecorder? recorder) async {
     final Composition composition = _context.optimizedComposition!;
-    _updateDomForNewComposition(composition);
-    if (composition.equalsForCompositing(_activeComposition)) {
-      // Copy the display canvases to the new composition.
-      for (var i = 0; i < composition.canvases.length; i++) {
-        composition.canvases[i].displayCanvas = _activeComposition.canvases[i].displayCanvas;
-        _activeComposition.canvases[i].displayCanvas = null;
-      }
-    }
-    _activeComposition = composition;
-
-    final List<DisplayCanvas> displayCanvases = composition.canvases
-        .map((CompositionCanvas canvas) => canvas.displayCanvas!)
-        .toList();
     final List<ui.Picture> picturesToRasterize = _context.optimizedCanvasRecorders!
         .map((ui.PictureRecorder recorder) => recorder.endRecording())
         .toList();
-    await rasterizer.rasterize(displayCanvases, picturesToRasterize, recorder);
+
+    // The DOM is updated for the new composition only when the rasterizer is
+    // about to display the new pictures. If the DOM were updated before an
+    // asynchronous rasterization (for example, with multi-threaded Skwasm),
+    // the browser could paint a frame where canvases are added, removed, or
+    // reordered around platform views but still show the previous frame's
+    // pictures, which looks like a flash.
+    List<DisplayCanvas> prepareDisplayCanvases() {
+      _updateDomForNewComposition(composition);
+      if (composition.equalsForCompositing(_activeComposition)) {
+        // Copy the display canvases to the new composition.
+        for (var i = 0; i < composition.canvases.length; i++) {
+          composition.canvases[i].displayCanvas = _activeComposition.canvases[i].displayCanvas;
+          _activeComposition.canvases[i].displayCanvas = null;
+        }
+      }
+      _activeComposition = composition;
+      return composition.canvases.map((CompositionCanvas canvas) => canvas.displayCanvas!).toList();
+    }
+
+    await rasterizer.rasterize(prepareDisplayCanvases, picturesToRasterize, recorder);
     for (final picture in picturesToRasterize) {
       picture.dispose();
     }
@@ -356,11 +363,9 @@ class PlatformViewEmbedder {
           }
         }
       }
-      await rasterizer.rasterize(
-        <DisplayCanvas>[debugBoundsCanvas!],
-        <ui.Picture>[boundsRecorder.endRecording()],
-        null,
-      );
+      await rasterizer.rasterize(() => <DisplayCanvas>[debugBoundsCanvas!], <ui.Picture>[
+        boundsRecorder.endRecording(),
+      ], null);
       sceneHost.append(debugBoundsCanvas!.hostElement);
     }
 

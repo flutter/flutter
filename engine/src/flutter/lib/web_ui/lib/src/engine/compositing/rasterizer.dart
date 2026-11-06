@@ -104,12 +104,19 @@ abstract class ViewRasterizer {
   /// canvas is the correct size to draw the frame.
   Future<void> prepareToDraw();
 
-  /// Rasterizes the given [pictures] into the [displayCanvases].
+  /// Rasterizes the given [pictures] into the canvases returned by
+  /// [getDisplayCanvases].
   ///
-  /// Throws an [ArgumentError] if [displayCanvases] and [pictures] are not
+  /// [getDisplayCanvases] is called right before the canvases are updated
+  /// with the new content, so callers can make DOM changes for the new frame
+  /// in the same task. Otherwise, when rasterization finishes asynchronously
+  /// (for example, on a worker thread), the browser may paint the new DOM
+  /// with canvases that still show the previous frame.
+  ///
+  /// Throws an [ArgumentError] if the display canvases and [pictures] are not
   /// the same length.
   Future<void> rasterize(
-    List<DisplayCanvas> displayCanvases,
+    List<DisplayCanvas> Function() getDisplayCanvases,
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   );

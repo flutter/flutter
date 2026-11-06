@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
@@ -58,6 +61,47 @@ void testMain() {
         contentManager.clearPlatformView(viewId);
 
         expect(contentManager.knowsViewId(viewId), isFalse);
+        expect(view.parentNode, isNull);
+      });
+    });
+
+    group('clearPlatformView', () {
+      test('removes the content from the DOM once pending frames are rendered', () async {
+        contentManager.registerFactory(viewType, (int id) => createDomHTMLDivElement());
+        final DomElement view = contentManager.renderContent(viewType, viewId, null);
+        final DomElement host = createDomHTMLDivElement()..append(view);
+
+        // Pretend a frame is being rendered, like the frame without the
+        // platform view that the framework renders right before disposing it.
+        final flutterView = EngineFlutterView(
+          EnginePlatformDispatcher.instance,
+          createDomHTMLDivElement(),
+        );
+        addTearDown(flutterView.dispose);
+        final rasterizer = _FakeViewRasterizer(flutterView);
+        renderer.rasterizers[flutterView.viewId] = rasterizer;
+        addTearDown(() => renderer.rasterizers.remove(flutterView.viewId));
+        final RenderQueue queue = rasterizer.queue;
+        final ui.Scene scene = ui.SceneBuilder().build();
+        addTearDown(scene.dispose);
+        final completer = Completer<void>();
+        queue.current = (
+          scene: scene,
+          size: const ui.Size(10, 10),
+          completer: completer,
+          recorder: null,
+        );
+
+        contentManager.clearPlatformView(viewId);
+
+        expect(contentManager.knowsViewId(viewId), isFalse);
+        expect(view.parentNode, host);
+
+        // Finish the frame the same way the render loop does.
+        completer.complete();
+        queue.current = null;
+        await Future<void>.delayed(Duration.zero);
+
         expect(view.parentNode, isNull);
       });
     });
@@ -309,4 +353,21 @@ void testMain() {
       });
     });
   });
+}
+
+class _FakeViewRasterizer extends ViewRasterizer {
+  _FakeViewRasterizer(super.view);
+
+  @override
+  DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
+
+  @override
+  Future<void> prepareToDraw() async {}
+
+  @override
+  Future<void> rasterize(
+    List<DisplayCanvas> Function() getDisplayCanvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  ) async {}
 }

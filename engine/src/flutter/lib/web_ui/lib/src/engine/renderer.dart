@@ -379,6 +379,30 @@ abstract class Renderer {
     return completer.future;
   }
 
+  /// Whether any view has a scene that is waiting to be rendered or is being
+  /// rendered.
+  bool get hasPendingRenders =>
+      rasterizers.values.any((ViewRasterizer rasterizer) => rasterizer.queue.current != null);
+
+  /// Completes once all the scenes that are waiting to be rendered or are being
+  /// rendered are on screen, including scenes queued while waiting.
+  ///
+  /// Completes normally even if rendering a scene fails. The failure is still
+  /// reported to the caller of [renderScene].
+  Future<void> waitForPendingRenders() async {
+    while (hasPendingRenders) {
+      final pendingRenders = <Future<void>>[
+        for (final ViewRasterizer rasterizer in rasterizers.values)
+          if (rasterizer.queue.current != null) rasterizer.queue.current!.completer.future,
+      ];
+      try {
+        await Future.wait(pendingRenders);
+      } catch (_) {
+        // Ignore the error, it's reported to the caller of `renderScene`.
+      }
+    }
+  }
+
   Future<void> _kickRenderLoop(ViewRasterizer rasterizer) async {
     final RenderQueue renderQueue = rasterizer.queue;
     final RenderRequest current = renderQueue.current!;

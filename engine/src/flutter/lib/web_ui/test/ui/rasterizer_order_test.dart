@@ -34,7 +34,7 @@ class MockViewEmbedder extends PlatformViewEmbedder {
 
   @override
   Future<void> submitFrame(FrameTimingRecorder? recorder) async {
-    await rasterizer.rasterize(<DisplayCanvas>[], <ui.Picture>[], recorder);
+    await rasterizer.rasterize(() => <DisplayCanvas>[], <ui.Picture>[], recorder);
   }
 
   @override
@@ -70,7 +70,7 @@ class OrderVerifyingRasterizer extends ViewRasterizer {
 
   @override
   Future<void> rasterize(
-    List<DisplayCanvas> displayCanvases,
+    List<DisplayCanvas> Function() getDisplayCanvases,
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) async {
