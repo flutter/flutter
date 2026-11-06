@@ -296,7 +296,7 @@ robolectric_test = rule(
     },
 )
 
-def robolectric_tests(name, tests, classes, prefix = "test/", tags = [], size = "large", memory_mb = 12288, **kwargs):
+def robolectric_tests(name, tests, classes, prefix = "test/", tags = [], size = "large", memory_mb = 3072, **kwargs):
     """One robolectric_test per test file, and a test_suite over them.
 
     Args:
@@ -306,9 +306,13 @@ def robolectric_tests(name, tests, classes, prefix = "test/", tags = [], size = 
       prefix: the source root the class names start after.
       tags: each test's tags, and the suite's.
       size: each test's size.
-      memory_mb: what one test's JVM may take (an 8 GB heap, and a sandbox per SDK a class runs on),
-        told to Bazel's scheduler as `resources:memory:` so that it runs as many at once as the
-        machine holds (four at once on a 94 GB host left it swapping).
+      memory_mb: what one test's JVM takes, told to Bazel's scheduler as `resources:memory:` so
+        that it runs as many at once as the machine holds and no more. The embedding's classes
+        peak at 3.0 GB of resident memory (the five biggest, Robolectric's sandbox over the
+        activity and text-input tests; 0.9 GB on average; sampled every 2 s over the suite), under
+        the JVM's 8 GB cap that Gradle's forks have too: an 8-core, 30 GB bot runs six at once,
+        as Gradle ran eight. (12 GB here once ran them one at a time on such a bot: 23 minutes
+        for a suite Gradle finishes in four.)
       **kwargs: robolectric_test's other attributes, the same for every class.
     """
     names = []
