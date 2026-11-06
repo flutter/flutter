@@ -77,6 +77,31 @@ public class FlutterFragmentActivityTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
+  public void onCreatePreservesLightSystemBarFlags() {
+    Intent intent = FlutterFragmentActivity.withNewEngine().build(ctx);
+    FlutterFragmentActivity activity =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent).get();
+    View decorView = activity.getWindow().getDecorView();
+    int initialSystemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+      initialSystemUiVisibility |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+    }
+    decorView.setSystemUiVisibility(initialSystemUiVisibility);
+
+    activity.onCreate(null);
+
+    assertEquals(
+        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+        decorView.getSystemUiVisibility() & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+      assertEquals(
+          View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+          decorView.getSystemUiVisibility() & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+    }
+  }
+
+  @Test
   public void createFlutterFragment_defaultRenderModeSurface() {
     final FlutterFragmentActivity activity = new FakeFlutterFragmentActivity();
     assertEquals(RenderMode.surface, activity.createFlutterFragment().getRenderMode());
