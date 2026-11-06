@@ -2892,5 +2892,33 @@ TEST_P(AiksTest, DrawDisplayListInTranslatedSaveLayerIsNotCulled) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/195859.
+// Same as DrawDisplayListInTranslatedSaveLayerIsNotCulled, but the second
+// circle is drawn inside a nested SaveLayer. If only the left circle is
+// visible, the child SaveLayer's subpass was clamped to the root render target
+// and its off-screen content was dropped before the parent filter moved it.
+TEST_P(AiksTest, NestedSaveLayerInTranslatedSaveLayerIsNotCulled) {
+  DlPaint green;
+  green.setColor(DlColor::kGreen());
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({300, 0}), DlImageSampling::kLinear));
+  builder.SaveLayer(std::nullopt, &paint);
+  // Control: drawn directly into the parent layer.
+  builder.DrawCircle(DlPoint(-100, 100), 80, green);
+  DlPaint child_paint;
+  builder.SaveLayer(std::nullopt, &child_paint);
+  // Drawn inside the child SaveLayer; not visible when SaveLayer clamps.
+  builder.DrawCircle(DlPoint(-100, 300), 80, green);
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

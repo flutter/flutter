@@ -1790,7 +1790,7 @@ void Canvas::Save(uint32_t total_content_depth) {
   transform_stack_.push_back(entry);
 }
 
-std::optional<Rect> Canvas::GetLocalCoverageLimit(bool clamp_to_root) const {
+std::optional<Rect> Canvas::GetLocalCoverageLimit() const {
   if (!clip_coverage_stack_.HasCoverage()) {
     // The current clip is empty. This means the pass texture won't be
     // visible, so skip it.
@@ -1823,15 +1823,12 @@ std::optional<Rect> Canvas::GetLocalCoverageLimit(bool clamp_to_root) const {
     return std::nullopt;
   }
 
-  // Inside a subpass, content outside the root RT can still become visible
-  // (e.g. an ancestor image filter translates it on-screen), so callers that
-  // use this rect for culling pass clamp_to_root=false. On the root pass,
-  // pass_texture == root_RT and this intersection is a no-op either way.
-  if (!clamp_to_root) {
-    return maybe_coverage_limit;
-  }
-  return maybe_coverage_limit->Intersection(
-      Rect::MakeSize(render_target_.GetRenderTargetSize()));
+  // Do not intersect with the root render target. Inside a subpass, content
+  // outside the root RT can still end up on-screen (e.g. an ancestor image
+  // filter translates it), so both culling and nested subpass sizing must be
+  // bounded by the current pass texture and clip only. On the root pass the
+  // pass texture is the root RT, so the result is unchanged there.
+  return maybe_coverage_limit;
 }
 
 void Canvas::SaveLayer(const Paint& paint,
