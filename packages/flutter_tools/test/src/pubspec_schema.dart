@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -11,17 +10,18 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:yaml/yaml.dart';
 
 import 'common.dart';
+import 'context.dart' show FakeSignals;
 
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.
 void validatePubspecForPlugin({
   required String projectDir,
-  required List<String> expectedPlatforms,
-  String? androidIdentifier,
+  String? pluginClass,
   bool ffiPlugin = false,
+  required List<String> expectedPlatforms,
+  List<String> unexpectedPlatforms = const <String>[],
+  String? androidIdentifier,
   FileSystem? fileSystem,
   Logger? logger,
-  String? pluginClass,
-  List<String> unexpectedPlatforms = const <String>[],
   String? webFileName,
 }) {
   assert(pluginClass != null || ffiPlugin);
@@ -30,10 +30,10 @@ void validatePubspecForPlugin({
     fileSystem:
         fileSystem ??
         ErrorHandlingFileSystem(
-          delegate: context.get<FileSystem>()!,
-          platform: context.get<Platform>() ?? const LocalPlatform(),
+          delegate: LocalFileSystem.test(signals: FakeSignals()),
+          platform: const LocalPlatform(),
         ),
-    logger: logger ?? context.get<Logger>()!,
+    logger: logger ?? BufferLogger.test(),
   )!;
   final platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
   for (final platform in expectedPlatforms) {

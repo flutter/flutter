@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:io' hide Directory, File;
 
 import 'package:dwds/dwds.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -34,6 +34,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'fake_process_manager.dart';
 import 'fakes.dart';
+import 'testbed.dart';
 
 /// Helper function to create a [WebDevFS] with sensible testbed defaults.
 WebDevFS createWebDevFS({
@@ -71,23 +72,37 @@ WebDevFS createWebDevFS({
   final ToolContext resolvedToolContext =
       toolContext ??
       () {
+        final ToolContext? testBedContext = TestBed.activeToolContext;
         final Platform resolvedPlatform =
-            platform ?? context.get<Platform>() ?? const LocalPlatform();
+            platform ?? testBedContext?.platform ?? const LocalPlatform();
+        final Logger resolvedLogger = logger ?? testBedContext?.logger ?? BufferLogger.test();
+        final FileSystem? baseFileSystem = switch (testBedContext?.fs) {
+          final ErrorHandlingFileSystem errorHandlingFs => errorHandlingFs.fileSystem,
+          final FileSystem otherFs => otherFs,
+          null => null,
+        };
+        final FileSystem resolvedFileSystem =
+            fileSystem ??
+            ErrorHandlingFileSystem(
+              delegate: baseFileSystem ?? MemoryFileSystem.test(),
+              platform: resolvedPlatform,
+            );
         return FakeToolContext(
-          artifacts: artifacts ?? context.get<Artifacts>()!,
-          cache: cache ?? Cache.test(processManager: FakeProcessManager.any()),
-          config: config ?? context.get<Config>()!,
-          fs:
-              fileSystem ??
-              ErrorHandlingFileSystem(
-                delegate: context.get<FileSystem>()!,
-                platform: resolvedPlatform,
-              ),
-          flutterVersion: flutterVersion ?? context.get<FlutterVersion>()!,
-          logger: logger ?? context.get<Logger>()!,
+          artifacts:
+              artifacts ??
+              testBedContext?.artifacts ??
+              Artifacts.test(fileSystem: resolvedFileSystem),
+          cache:
+              cache ??
+              testBedContext?.cache ??
+              Cache.test(processManager: FakeProcessManager.any()),
+          config: config ?? testBedContext?.config ?? Config.test(logger: resolvedLogger),
+          fs: resolvedFileSystem,
+          flutterVersion: flutterVersion ?? testBedContext?.flutterVersion ?? FakeFlutterVersion(),
+          logger: resolvedLogger,
           platform: resolvedPlatform,
           processManager:
-              processManager ?? context.get<ProcessManager>() ?? const LocalProcessManager(),
+              processManager ?? testBedContext?.processManager ?? const LocalProcessManager(),
         );
       }();
   final FileSystem resolvedFileSystem = fileSystem ?? resolvedToolContext.fs;

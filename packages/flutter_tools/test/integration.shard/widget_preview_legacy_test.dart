@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:file/file.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 import 'widget_preview_test_helpers.dart';
@@ -25,7 +24,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testUsingContext('Newly added previews are detected (Legacy)', () async {
+  testWithoutContext('Newly added previews are detected (Legacy)', () async {
     final Stream<String> stream = await startWidgetPreview(
       tempDir: tempDir,
       legacyPreviewDetection: true,

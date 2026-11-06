@@ -6,7 +6,6 @@ import 'dart:io' hide Platform;
 
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as file_system;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -67,14 +66,16 @@ class FakeFlutterProjectFactory extends FlutterProjectFactory {
     file_system.FileSystem? fileSystem,
     Logger? logger,
   }) : super(
-         config: config ?? context.get<Config>()!,
+         config: config ?? Config.test(),
          fileSystem:
              fileSystem ??
-             ErrorHandlingFileSystem(
-               delegate: context.get<file_system.FileSystem>() ?? directoryOverride.fileSystem,
-               platform: context.get<Platform>() ?? const LocalPlatform(),
-             ),
-         logger: logger ?? context.get<Logger>()!,
+             (directoryOverride.fileSystem is ErrorHandlingFileSystem
+                 ? directoryOverride.fileSystem
+                 : ErrorHandlingFileSystem(
+                     delegate: directoryOverride.fileSystem,
+                     platform: const LocalPlatform(),
+                   )),
+         logger: logger ?? BufferLogger.test(),
        );
 
   final file_system.Directory directoryOverride;

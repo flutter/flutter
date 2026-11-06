@@ -6,10 +6,10 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -21,9 +21,8 @@ import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
 import '../../../../packages/flutter_tools/test/commands.shard/permeable/utils/project_testing_utils.dart';
 import '../../../../packages/flutter_tools/test/integration.shard/test_utils.dart'
-    show processManager;
+    show fileSystem, platform, processManager;
 import '../../../../packages/flutter_tools/test/src/common.dart';
-import '../../../../packages/flutter_tools/test/src/context.dart';
 import '../../../../packages/flutter_tools/test/src/fakes.dart';
 
 class FakeFlutterProject extends Fake implements FlutterProject {
@@ -50,8 +49,25 @@ void main() {
   });
 
   Future<WidgetPreviewDtdServices> launchDtdServer({
+    LoggingProcessManager? dtdProcessManager,
     void Function()? onHotRestartPreviewerRequest,
   }) async {
+    final resolvedProcessManager = dtdProcessManager ?? processManager;
+    final String flutterRoot = getFlutterRoot();
+    final cache = Cache.test(
+      rootOverride: fileSystem.directory(flutterRoot),
+      flutterRoot: flutterRoot,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: resolvedProcessManager,
+    );
+    final artifacts = CachedArtifacts(
+      fileSystem: fileSystem,
+      cache: cache,
+      platform: platform,
+      operatingSystemUtils: cache.osUtils,
+    );
     final server = WidgetPreviewDtdServices(
       previewAnalytics: WidgetPreviewAnalytics(
         analytics: getInitializedFakeAnalyticsInstance(
@@ -66,8 +82,8 @@ void main() {
       shutdownHooks: ShutdownHooks(),
       dtdLauncher: DtdLauncher(
         logger: logger,
-        artifacts: context.get<Artifacts>()!,
-        processManager: context.get<ProcessManager>() ?? processManager,
+        artifacts: artifacts,
+        processManager: resolvedProcessManager,
       ),
       onHotRestartPreviewerRequest: onHotRestartPreviewerRequest ?? () {},
       project: FakeFlutterProject(),
@@ -78,7 +94,7 @@ void main() {
   }
 
   group('$WidgetPreviewDtdServices', () {
-    testUsingContext(
+    testWithoutContext(
       'handles ${WidgetPreviewDtdServices.kHotRestartPreviewer} invocations',
       () async {
         // Start DTD and register the widget preview DTD services with a custom handler for hot
@@ -86,6 +102,7 @@ void main() {
         final hotRestartRequestCompleter = Completer<void>();
         dtdServer = await launchDtdServer(
           onHotRestartPreviewerRequest: hotRestartRequestCompleter.complete,
+          dtdProcessManager: loggingProcessManager,
         );
 
         // Connect to the DTD instance and invoke the hot restart endpoint.
@@ -97,14 +114,15 @@ void main() {
         // Ensure the custom handler is actually invoked.
         await hotRestartRequestCompleter.future;
       },
-      overrides: <Type, Generator>{ProcessManager: () => loggingProcessManager},
     );
 
-    testUsingContext(
+    testWithoutContext(
       'handles ${WidgetPreviewDtdServices.kGetDevToolsUri} invocation',
       () async {
         // Start DTD and register the widget preview DTD services.
-        dtdServer = await launchDtdServer();
+        dtdServer = await launchDtdServer(
+          dtdProcessManager: loggingProcessManager,
+        );
 
         // Connect to the DTD instance and invoke the getDevToolsUri endpoint.
         final dtd = WidgetPreviewScaffoldDtdServices();
@@ -119,10 +137,9 @@ void main() {
         final actualDevToolsUri = await dtdServer.devToolsServerAddress;
         expect(await devToolsUriResponseFuture, actualDevToolsUri);
       },
-      overrides: <Type, Generator>{ProcessManager: () => loggingProcessManager},
     );
 
-    testUsingContext(
+    testWithoutContext(
       'can set and retreive values from $PersistentPreferences',
       () async {
         dtdServer = await launchDtdServer();
