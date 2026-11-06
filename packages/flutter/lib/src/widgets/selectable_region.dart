@@ -3363,9 +3363,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     //
     // This can happen when there is a scrollable child and the edge being adjusted
     // has been scrolled out of view.
-    final isCurrentEdgeWithinViewport = isEnd
-        ? _selectionGeometry.endSelectionPoint != null
-        : _selectionGeometry.startSelectionPoint != null;
+    final bool isCurrentEdgeWithinViewport = isEnd
+        ? currentSelectionEndIndex != -1 && _selectionGeometry.endSelectionPoint != null
+        : currentSelectionStartIndex != -1 && _selectionGeometry.startSelectionPoint != null;
     final bool isOppositeEdgeWithinViewport = isEnd
         ? currentSelectionStartIndex != -1 && _selectionGeometry.startSelectionPoint != null
         : currentSelectionEndIndex != -1 && _selectionGeometry.endSelectionPoint != null;
