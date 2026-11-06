@@ -87,9 +87,7 @@ class DriveCommand extends RunCommandBase {
   static const _publishPort = FlagOptionDescriptor(
     name: 'publish-port',
     verboseOnly: true,
-    help:
-        'Publish the VM service port over mDNS. Disable to prevent the '
-        'local network permission app dialog in debug and profile build modes (iOS devices only).',
+    help: DebuggingOptionDescriptors.publishPortHelp,
   );
 
   static const _kKeepAppRunning = 'keep-app-running';

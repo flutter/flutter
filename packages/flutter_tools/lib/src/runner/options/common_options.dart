@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
-
 import '../../build_info.dart';
 import '../flutter_command.dart';
 import '../flutter_command_runner.dart';
@@ -563,36 +561,20 @@ class VmServicePortOptionsBundle extends OptionBundle {
 
 /// A bundle encapsulating DDS and DevTools options (`--dds`, `--dds-port`, `--disable-dds`, `--devtools`, `--devtools-server-address`).
 class DdsAndDevToolsOptionsBundle extends OptionBundle {
-  const DdsAndDevToolsOptionsBundle({
-    this.includeDevTools = true,
-    this.includeEnableDevTools = true,
-  });
+  const DdsAndDevToolsOptionsBundle({this.includeDevTools = true});
 
   final bool includeDevTools;
-  final bool includeEnableDevTools;
 
   @override
   List<OptionDescriptor<Object?>> get descriptors => <OptionDescriptor<Object?>>[
     DebuggingOptionDescriptors.ddsPort,
     DebuggingOptionDescriptors.dds,
     DebuggingOptionDescriptors.disableDds,
-    if (includeDevTools && includeEnableDevTools) DebuggingOptionDescriptors.enableDevTools,
+    if (includeDevTools) ...const <OptionDescriptor<Object?>>[
+      DebuggingOptionDescriptors.enableDevTools,
+      DebuggingOptionDescriptors.devToolsServerAddress,
+    ],
   ];
-
-  @override
-  void register(FlutterCommand command, ArgParser parser, {bool? verboseHelp, bool? hide}) {
-    super.register(command, parser, verboseHelp: verboseHelp, hide: hide);
-    if (includeDevTools) {
-      DebuggingOptionDescriptors.devToolsServerAddress.addTo(
-        parser,
-        verboseHelp: verboseHelp ?? command.verboseHelp,
-        hide: hide,
-        help: includeEnableDevTools
-            ? null
-            : DebuggingOptionDescriptors.devToolsServerAddressBaseHelp,
-      );
-    }
-  }
 }
 
 /// A bundle encapsulating resident compiler options (`--initialize-from-dill`, `--assume-initialize-from-dill-up-to-date`, `--native-assets-yaml-file`, and optional compiler flags).
@@ -893,13 +875,15 @@ abstract final class DebuggingOptionDescriptors {
         'Specifying port 0 (the default) will find a random free port.',
   );
 
+  static const publishPortHelp =
+      'Publish the VM service port over mDNS. Disable to prevent the '
+      'local network permission app dialog in debug and profile build modes (iOS devices only).';
+
   static const publishPort = FlagOptionDescriptor(
     name: 'publish-port',
     defaultsTo: true,
     verboseOnly: true,
-    help:
-        'Publish the VM service port over mDNS. Disable to prevent the '
-        'local network permission app dialog in debug and profile build modes (iOS devices only).',
+    help: publishPortHelp,
   );
 
   static const disableDds = FlagOptionDescriptor(

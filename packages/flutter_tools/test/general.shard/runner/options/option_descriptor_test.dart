@@ -933,17 +933,22 @@ void main() {
         expect(parser.options['custom-help-opt']!.help, 'Command-specific help text.');
         expect(descriptor.isRegisteredOnParser(parser), isTrue);
 
-        final command = _FakeCommand(
-          name: 'attach-like',
-          description: 'Registers DdsAndDevToolsOptionsBundle without --devtools',
-          verboseHelp: true,
-          bundles: const <OptionBundle>[DdsAndDevToolsOptionsBundle(includeEnableDevTools: false)],
+        expect(
+          const DdsAndDevToolsOptionsBundle().descriptors,
+          contains(DebuggingOptionDescriptors.devToolsServerAddress),
         );
+        expect(
+          const DdsAndDevToolsOptionsBundle(includeDevTools: false).descriptors,
+          isNot(contains(DebuggingOptionDescriptors.devToolsServerAddress)),
+        );
+
+        final command = _FakeCommand(
+          name: 'dds-only',
+          description: 'Registers addDdsOptions without --devtools',
+          verboseHelp: true,
+        )..addDdsOptions(verboseHelp: true);
         final CommandRunner<void> runner = createTestCommandRunner(command);
-        await runner.run(<String>[
-          'attach-like',
-          '--devtools-server-address=http://127.0.0.1:9100',
-        ]);
+        await runner.run(<String>['dds-only', '--devtools-server-address=http://127.0.0.1:9100']);
 
         expect(
           command.argParser.options[FlutterCommand.kDevToolsServerAddress]!.help,
