@@ -15,108 +15,31 @@ import '../run_command.dart';
 import '../utils.dart';
 import 'run_android_engine_tests.dart';
 
-typedef _SubprocessResult = ({int exitCode, String stdout, String stderr});
 typedef _DriveAttemptResult = ({int exitCode, String output, bool terminatedDeadDrive});
 
 const Duration _adbSlowWarningInterval = Duration(seconds: 30);
 
-Future<_SubprocessResult> _runAdb(
+/// Runs `adb` with [arguments] without recording a shard failure via [foundError]
+/// on non-zero exit codes, emitting periodic warnings if `adb` stalls.
+Future<CommandResult> _runAdb(
   List<String> arguments, {
   OutputMode outputMode = OutputMode.capture,
-}) => _runUncheckedSubprocess(
-  'adb',
-  arguments,
-  outputMode: outputMode,
-  slowWarningInterval: _adbSlowWarningInterval,
-);
-
-/// Runs [executable] without recording a shard error via [foundError] on
-/// non-zero exit codes, decoding output with malformed UTF-8 tolerance so
-/// native crash tombstones in `adb logcat` do not throw [FormatException].
-Future<_SubprocessResult> _runUncheckedSubprocess(
-  String executable,
-  List<String> arguments, {
-  String? workingDirectory,
-  OutputMode outputMode = OutputMode.print,
-  Duration? slowWarningInterval,
-  void Function(String line, io.Process process)? onLine,
 }) async {
-  final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
-  final commandDescription =
-      '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  if (dryRun) {
-    printProgress('|> $executable ${arguments.join(' ')}');
-    return (exitCode: 0, stdout: '', stderr: '');
-  }
-
-  print('RUNNING: cd $cyan$relativeWorkingDir$reset; $green$commandDescription$reset');
-  final time = Stopwatch()..start();
-  final io.Process process = await io.Process.start(
-    executable,
-    arguments,
-    workingDirectory: workingDirectory,
-  );
-
-  final Timer? slowWarningTimer = slowWarningInterval == null
+  final commandDescription = 'adb ${arguments.join(' ')}';
+  final stopwatch = Stopwatch()..start();
+  final Timer? slowWarningTimer = dryRun
       ? null
-      : Timer.periodic(slowWarningInterval, (_) {
+      : Timer.periodic(_adbSlowWarningInterval, (_) {
           io.stderr.writeln(
             'Warning: "$commandDescription" is taking longer than expected '
-            '(${prettyPrintDuration(time.elapsed)} elapsed)...',
+            '(${prettyPrintDuration(stopwatch.elapsed)} elapsed)...',
           );
         });
-
-  final void Function(String line)? lineCallback = onLine == null
-      ? null
-      : (String line) => onLine(line, process);
-  final Future<String> savedStdout = _collectProcessStream(
-    process.stdout,
-    outputMode: outputMode,
-    onLine: lineCallback,
-  );
-  final Future<String> savedStderr = _collectProcessStream(
-    process.stderr,
-    outputMode: outputMode,
-    onLine: lineCallback,
-  );
-
-  final int exitCode;
   try {
-    exitCode = await process.exitCode;
+    return await runCommand('adb', arguments, checkExitCode: false, outputMode: outputMode);
   } finally {
     slowWarningTimer?.cancel();
   }
-
-  final _SubprocessResult result = (
-    exitCode: exitCode,
-    stdout: await savedStdout,
-    stderr: await savedStderr,
-  );
-  print(
-    'ELAPSED TIME: ${prettyPrintDuration(time.elapsed)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset',
-  );
-  return result;
-}
-
-Future<String> _collectProcessStream(
-  Stream<List<int>> stream, {
-  required OutputMode outputMode,
-  void Function(String line)? onLine,
-}) {
-  return stream
-      .transform<String>(const Utf8Decoder(allowMalformed: true))
-      .transform(const LineSplitter())
-      .map<String>((String line) {
-        onLine?.call(line);
-        switch (outputMode) {
-          case OutputMode.print:
-            print(line);
-          case OutputMode.capture:
-            break;
-        }
-        return line;
-      })
-      .join('\n');
 }
 
 String _impellerBackendMetadata({required String value}) =>
@@ -209,7 +132,7 @@ Future<bool> _runRetryLoop(String testDir) async {
   const maxAttempts = 2;
 
   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
-    // Clear logcat using an unchecked subprocess so a transient offline device on attempt 1
+    // Clear logcat with checkExitCode: false so a transient offline device on attempt 1
     // does not call foundError and poison the global shard status.
     await _runAdb(<String>['logcat', '-c'], outputMode: OutputMode.print);
 
@@ -228,18 +151,18 @@ Future<bool> _runRetryLoop(String testDir) async {
       return true;
     }
 
-    io.stderr.writeln(
-      'flutter drive failed with exit code ${result.exitCode} on attempt $attempt/$maxAttempts.',
-    );
+    if (result.terminatedDeadDrive) {
+      io.stderr.writeln(
+        'flutter drive was terminated after target app crash on attempt $attempt/$maxAttempts '
+        '(exit code ${result.exitCode}).',
+      );
+    } else {
+      io.stderr.writeln(
+        'flutter drive failed with exit code ${result.exitCode} on attempt $attempt/$maxAttempts.',
+      );
+    }
 
-    // Intentionally scope retries strictly to blank-display compositor wedges, fatal
-    // graphics initialization errors, or early app process crashes during VM service connection.
-    // General test assertion or golden pixel mismatch failures must fail fast on attempt 1
-    // so real visual regressions are not masked.
-    final String? retryReason = await _detectRetryableFailureReason(
-      result.output,
-      terminatedDeadDrive: result.terminatedDeadDrive,
-    );
+    final String? retryReason = await _detectRetryableFailureReason(result);
     if (retryReason != null && attempt < maxAttempts) {
       // Restoring an emulator QuickBoot snapshot across a host renderer change can wedge
       // SurfaceFlinger into returning solid-black screencaps while offscreen app rendering
@@ -282,48 +205,55 @@ Future<_DriveAttemptResult> _runFlutterDrive(String testDir, List<String> driveA
   var checkingTargetProcess = false;
   var terminatedDeadDrive = false;
 
-  void checkTargetAliveOnSlowVmConnect(String line, io.Process process) {
-    if (terminatedDeadDrive || checkingTargetProcess || !slowVmConnectPatterns.any(line.contains)) {
+  Future<void> killDriveIfTargetExited(io.Process process) async {
+    if (terminatedDeadDrive || checkingTargetProcess) {
       return;
     }
     checkingTargetProcess = true;
-    unawaited(() async {
-      try {
-        final _SubprocessResult pidResult = await _runAdb(<String>[
-          'shell',
-          'pidof',
-          'com.example.android_hardware_smoke_test',
-        ]);
-        if (!terminatedDeadDrive && (pidResult.exitCode != 0 || pidResult.stdout.trim().isEmpty)) {
-          terminatedDeadDrive = true;
-          io.stderr.writeln(
-            'Target process com.example.android_hardware_smoke_test exited while '
-            'FlutterDriver was connecting. Terminating hung flutter drive...',
-          );
-          // Send SIGKILL on POSIX because flutter_tools catches SIGTERM and exits 0.
-          if (io.Platform.isWindows) {
-            process.kill();
-          } else {
-            process.kill(io.ProcessSignal.sigkill);
-          }
+    try {
+      final CommandResult pidResult = await _runAdb(<String>[
+        'shell',
+        'pidof',
+        'com.example.android_hardware_smoke_test',
+      ]);
+      final String pidStdout = pidResult.flattenedStdout ?? '';
+      if (!terminatedDeadDrive && (pidResult.exitCode != 0 || pidStdout.trim().isEmpty)) {
+        terminatedDeadDrive = true;
+        io.stderr.writeln(
+          'Target process com.example.android_hardware_smoke_test exited while '
+          'FlutterDriver was connecting. Terminating hung flutter drive...',
+        );
+        // Send SIGKILL on POSIX because flutter_tools catches SIGTERM and exits 0.
+        if (io.Platform.isWindows) {
+          process.kill();
+        } else {
+          process.kill(io.ProcessSignal.sigkill);
         }
-      } catch (e) {
-        io.stderr.writeln('Warning: Failed to check if target process is alive: $e');
-      } finally {
-        checkingTargetProcess = false;
       }
-    }());
+    } catch (e) {
+      io.stderr.writeln('Warning: Failed to check if target process is alive: $e');
+    } finally {
+      checkingTargetProcess = false;
+    }
   }
 
-  final _SubprocessResult result = await _runUncheckedSubprocess(
+  void onDriveOutputLine(String line, io.Process process) {
+    if (slowVmConnectPatterns.any(line.contains)) {
+      unawaited(killDriveIfTargetExited(process));
+    }
+  }
+
+  final CommandResult result = await runCommand(
     'flutter',
     driveArgs,
     workingDirectory: testDir,
-    onLine: checkTargetAliveOnSlowVmConnect,
+    checkExitCode: false,
+    outputListener: onDriveOutputLine,
+    stderrListener: onDriveOutputLine,
   );
   return (
     exitCode: result.exitCode,
-    output: '${result.stdout}\n${result.stderr}',
+    output: '${result.flattenedStdout ?? ''}\n${result.flattenedStderr ?? ''}',
     terminatedDeadDrive: terminatedDeadDrive,
   );
 }
@@ -334,9 +264,9 @@ Future<_DriveAttemptResult> _runFlutterDrive(String testDir, List<String> driveA
 /// Skips restarting without recording an error if the connected device does not support
 /// `adb root` (such as a production `user`-build physical device).
 Future<void> _restartAndroidUserspace() async {
-  final _SubprocessResult rootResult = await _runAdb(<String>['root']);
-  if (rootResult.exitCode != 0 ||
-      '${rootResult.stdout}\n${rootResult.stderr}'.contains('cannot run as root')) {
+  final CommandResult rootResult = await _runAdb(<String>['root']);
+  final rootOutput = '${rootResult.flattenedStdout ?? ''}\n${rootResult.flattenedStderr ?? ''}';
+  if (rootResult.exitCode != 0 || rootOutput.contains('cannot run as root')) {
     io.stderr.writeln(
       'Skipping Android userspace restart: adb root is not supported on this device.',
     );
@@ -354,21 +284,13 @@ Future<void> _restartAndroidUserspace() async {
     'sys.boot_completed',
     '0',
   ], description: 'sys.boot_completed reset');
-  await _pollAdbUntil(
-    <String>['shell', 'stop'],
-    description: 'adb shell stop',
-    outputMode: OutputMode.print,
-  );
-  await _pollAdbUntil(
-    <String>['shell', 'start'],
-    description: 'adb shell start',
-    outputMode: OutputMode.print,
-  );
+  await _runAdb(<String>['shell', 'stop'], outputMode: OutputMode.print);
+  await _runAdb(<String>['shell', 'start'], outputMode: OutputMode.print);
   await _pollAdbUntil(
     <String>['shell', 'getprop', 'sys.boot_completed'],
     description: 'sys.boot_completed=1 after Android userspace restart',
     pollInterval: const Duration(seconds: 1),
-    condition: (_SubprocessResult r) => r.stdout.trim() == '1',
+    condition: (CommandResult r) => (r.flattenedStdout ?? '').trim() == '1',
   );
 
   await _runAdb(<String>['shell', 'input', 'keyevent', 'KEYCODE_WAKEUP']);
@@ -382,12 +304,16 @@ Future<void> _pollAdbUntil(
   required String description,
   OutputMode outputMode = OutputMode.capture,
   Duration pollInterval = const Duration(milliseconds: 500),
-  bool Function(_SubprocessResult result)? condition,
+  bool Function(CommandResult result)? condition,
 }) async {
+  if (dryRun) {
+    await _runAdb(arguments, outputMode: outputMode);
+    return;
+  }
   final stopwatch = Stopwatch()..start();
   Duration nextWarning = _adbSlowWarningInterval;
   while (true) {
-    final _SubprocessResult result = await _runAdb(arguments, outputMode: outputMode);
+    final CommandResult result = await _runAdb(arguments, outputMode: outputMode);
     if (result.exitCode == 0 && (condition == null || condition(result))) {
       return;
     }
@@ -402,23 +328,28 @@ Future<void> _pollAdbUntil(
   }
 }
 
-Future<String?> _detectRetryableFailureReason(
-  String driverOutput, {
-  required bool terminatedDeadDrive,
-}) async {
+/// Returns a human-readable retry reason when [result] or `adb logcat` indicates a
+/// blank-display compositor wedge, fatal graphics initialization error, or early target
+/// app crash during VM service connection, or `null` if the failure is non-retryable.
+///
+/// Retries are intentionally scoped to these transient infrastructure failures so general
+/// test assertion or golden pixel mismatch failures fail fast on attempt 1 without masking
+/// real visual regressions.
+Future<String?> _detectRetryableFailureReason(_DriveAttemptResult result) async {
   final reasons = <String>[
-    if (terminatedDeadDrive) 'target app crash during VM service connection',
-    // Match blank-capture exceptions reported by driver_test.dart (errorBlankScreenshot
-    // in constants.dart). Keep this substring in sync with both files.
-    if (driverOutput.contains('Captured screenshot is blank/empty')) 'blank display capture',
+    if (result.terminatedDeadDrive) 'target app crash during VM service connection',
+    // Match errorBlankScreenshot in android_hardware_smoke_test/lib/constants.dart
+    // (duplicated here because standalone Dart package tests_on_bots cannot import
+    // Flutter app packages).
+    if (result.output.contains('Captured screenshot is blank/empty')) 'blank display capture',
   ];
 
   // Inspect logcat directly so fatal graphics errors are reported both when flutter drive
   // disconnects before Dart surfaces a test exception and alongside blank captures or crashes.
   try {
-    final _SubprocessResult logcatResult = await _runAdb(<String>['logcat', '-d']);
+    final CommandResult logcatResult = await _runAdb(<String>['logcat', '-d']);
     final String? fatalError = logcatResult.exitCode == 0
-        ? _firstFatalGraphicsLogcatError(logcatResult.stdout)
+        ? _firstFatalGraphicsLogcatError(logcatResult.flattenedStdout ?? '')
         : null;
     if (fatalError != null) {
       reasons.add('fatal graphics error in logcat ($fatalError)');
