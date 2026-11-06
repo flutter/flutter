@@ -104,6 +104,45 @@ void testMain() {
 
         expect(view.parentNode, isNull);
       });
+
+      test('does not wait for frames requested after the view is cleared', () async {
+        contentManager.registerFactory(viewType, (int id) => createDomHTMLDivElement());
+        final DomElement view = contentManager.renderContent(viewType, viewId, null);
+        final DomElement host = createDomHTMLDivElement()..append(view);
+
+        final flutterView = EngineFlutterView(
+          EnginePlatformDispatcher.instance,
+          createDomHTMLDivElement(),
+        );
+        addTearDown(flutterView.dispose);
+        final rasterizer = _FakeViewRasterizer(flutterView);
+        renderer.rasterizers[flutterView.viewId] = rasterizer;
+        addTearDown(() => renderer.rasterizers.remove(flutterView.viewId));
+        final RenderQueue queue = rasterizer.queue;
+        final ui.Scene scene = ui.SceneBuilder().build();
+        addTearDown(scene.dispose);
+        RenderRequest request() => (
+          scene: scene,
+          size: const ui.Size(10, 10),
+          completer: Completer<void>(),
+          recorder: null,
+        );
+
+        final RenderRequest pending = request();
+        queue.current = pending;
+
+        contentManager.clearPlatformView(viewId);
+        expect(view.parentNode, host);
+
+        // Keep rendering, like during an animation. The view is removed once
+        // the frame that was pending when it was cleared is on screen.
+        pending.completer.complete();
+        queue.current = request();
+        addTearDown(() => queue.current = null);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(view.parentNode, isNull);
+      });
     });
 
     group('registerFactory', () {

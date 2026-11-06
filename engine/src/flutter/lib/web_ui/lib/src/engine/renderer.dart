@@ -384,22 +384,37 @@ abstract class Renderer {
   bool get hasPendingRenders =>
       rasterizers.values.any((ViewRasterizer rasterizer) => rasterizer.queue.current != null);
 
-  /// Completes once all the scenes that are waiting to be rendered or are being
-  /// rendered are on screen, including scenes queued while waiting.
+  /// Completes once the scenes that are waiting to be rendered or are being
+  /// rendered when this is called are on screen.
+  ///
+  /// Scenes requested after this is called are not waited for, so this
+  /// completes even if new scenes keep being requested, for example during an
+  /// animation.
   ///
   /// Completes normally even if rendering a scene fails. The failure is still
   /// reported to the caller of [renderScene].
   Future<void> waitForPendingRenders() async {
-    while (hasPendingRenders) {
-      final pendingRenders = <Future<void>>[
-        for (final ViewRasterizer rasterizer in rasterizers.values)
-          if (rasterizer.queue.current != null) rasterizer.queue.current!.completer.future,
-      ];
-      try {
-        await Future.wait(pendingRenders);
-      } catch (_) {
-        // Ignore the error, it's reported to the caller of `renderScene`.
-      }
+    await Future.wait(<Future<void>>[
+      for (final ViewRasterizer rasterizer in rasterizers.values)
+        if (rasterizer.queue.current != null) _waitForQueuedScenes(rasterizer.queue),
+    ]);
+  }
+
+  Future<void> _waitForQueuedScenes(RenderQueue queue) async {
+    final hasNext = queue.next != null;
+    await _waitForScene(queue.current!);
+    // The scene that was queued next may have been replaced by a newer one,
+    // which has now taken its place as the current scene.
+    if (hasNext && queue.current != null) {
+      await _waitForScene(queue.current!);
+    }
+  }
+
+  Future<void> _waitForScene(RenderRequest request) async {
+    try {
+      await request.completer.future;
+    } catch (_) {
+      // Ignore the error, it's reported to the caller of `renderScene`.
     }
   }
 
