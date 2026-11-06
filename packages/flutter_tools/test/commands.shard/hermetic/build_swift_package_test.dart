@@ -78,7 +78,6 @@ void main() {
     Platform? platform,
   }) {
     return BuildSwiftPackage(
-      analytics: FakeAnalytics(),
       buildSystem: FakeBuildSystem(),
       cocoaPods: cocoaPods ?? FakeCocoaPods(),
       codesign: FakeDarwinAddToAppCodesigning(),
@@ -3430,6 +3429,7 @@ BuildSwiftPackageUtils _createTestUtils({
     analytics: FakeAnalytics(),
     buildSystem: buildSystem ?? FakeBuildSystem(),
     cocoaPods: cocoaPods ?? FakeCocoaPods(),
+    featureFlags: FakeFeatureFlags(),
     flutterRoot: _flutterRoot,
     project:
         project ?? FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: isModule),

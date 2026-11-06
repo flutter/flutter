@@ -27,6 +27,7 @@ void main() {
       final command = BuildIOSArchiveCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
+        featureFlags: TestFeatureFlags(),
         templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
@@ -52,6 +53,7 @@ void main() {
       final command = BuildIOSArchiveCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
+        featureFlags: TestFeatureFlags(),
         templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
@@ -84,6 +86,7 @@ void main() {
       final command = BuildIOSArchiveCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
+        featureFlags: TestFeatureFlags(),
         templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
@@ -107,6 +110,7 @@ void main() {
       final command = BuildIOSArchiveCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
+        featureFlags: TestFeatureFlags(),
         templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
@@ -131,6 +135,7 @@ void main() {
       final command = BuildIOSArchiveCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
+        featureFlags: TestFeatureFlags(),
         templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
