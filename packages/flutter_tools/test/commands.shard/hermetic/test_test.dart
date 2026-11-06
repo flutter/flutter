@@ -2330,6 +2330,8 @@ resolution: workspace
   });
 
   group('AppleDouble and non-UTF-8 test file handling', () {
+    // AppleDouble v2 header: magic number (0x00051607), version 2 (0x00020000),
+    // followed by invalid UTF-8 bytes (0xFF, 0xFE, 0x80, 0xC0).
     const appleDoubleBytes = <int>[
       0x00,
       0x05,
@@ -2344,6 +2346,7 @@ resolution: workspace
       0x80,
       0xC0,
     ];
+    // UTF-16 LE byte order mark (0xFF, 0xFE) followed by UTF-16 LE encoded "vo".
     const invalidUtf8Bytes = <int>[0xFF, 0xFE, 0x76, 0x00, 0x6F, 0x00];
 
     FakeToolContext createHermeticContext(MemoryFileSystem fileSystem, {Platform? platform}) {
@@ -2513,6 +2516,54 @@ resolution: workspace
       );
       expect(testRunner.lastTestFiles, isNull);
     });
+
+    testWithoutContext(
+      'throws ToolExit without UTF-8 hint when reading a test file fails with an OS error',
+      () async {
+        late String unreadableTestPath;
+        var failReads = false;
+        final fileSystem = MemoryFileSystem.test(
+          opHandle: (String context, FileSystemOp operation) {
+            if (failReads && operation == FileSystemOp.read && context == unreadableTestPath) {
+              throw FileSystemException(
+                'Cannot read file',
+                context,
+                const OSError('Input/output error', 5),
+              );
+            }
+          },
+        );
+        final Directory testDir = setUpPackage(fileSystem).childDirectory('test');
+        final File unreadableFile = testDir.childFile('io_error_test.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
+        unreadableTestPath = unreadableFile.path;
+        failReads = true;
+
+        final testRunner = FakeFlutterTestRunner(0);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: createHermeticContext(fileSystem),
+          testRunner: testRunner,
+        );
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await expectLater(
+          () => commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']),
+          throwsA(
+            isA<ToolExit>().having(
+              (ToolExit error) => error.message,
+              'message',
+              allOf(
+                contains('Failed to read test file "${unreadableFile.path}": Input/output error.'),
+                isNot(contains('UTF-8')),
+              ),
+            ),
+          ),
+        );
+        expect(testRunner.lastTestFiles, isNull);
+      },
+    );
   });
 }
 

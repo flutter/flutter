@@ -490,10 +490,21 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       } on FileSystemException catch (err) {
         final String? osMessage = err.osError?.message;
         final String details = osMessage != null && osMessage.isNotEmpty ? osMessage : err.message;
-        throwToolExit(
-          'Failed to read test file "$testPath": $details.\n'
-          'Ensure that the file is a valid UTF-8 encoded Dart test file.',
-        );
+        var isUtf8DecodingError = false;
+        if (err.osError == null) {
+          try {
+            testFile.readAsBytesSync();
+            isUtf8DecodingError = true;
+          } on FileSystemException {
+            isUtf8DecodingError = false;
+          }
+        }
+        if (isUtf8DecodingError) {
+          throwToolExit('''
+Failed to read test file "$testPath": $details.
+Ensure that the file is a valid UTF-8 encoded Dart test file.''');
+        }
+        throwToolExit('Failed to read test file "$testPath": $details.');
       }
     }
     _isIntegrationTest = _shouldRunAsIntegrationTests(
