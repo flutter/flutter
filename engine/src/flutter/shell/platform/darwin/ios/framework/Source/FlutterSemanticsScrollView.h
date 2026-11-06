@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
  * (`UIAccessibilityElement`), it creates this `UIScrollView` to represent
  * itself to iOS and forwards accessibility callbacks back to `semanticsObject`.
  *
- * When `semanticsObject` has children, this view also serves directly as its
+ * This view also serves directly as `semanticsObject`'s
  * `UIAccessibilityContainer` (instead of `SemanticsObjectContainer`) so that
  * child elements have this `UIScrollView` as their `accessibilityContainer`.
  */

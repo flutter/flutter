@@ -123,14 +123,8 @@ FLUTTER_ASSERT_ARC
   if (!semanticsObject.bridge) {
     return nil;
   }
-  if ([semanticsObject hasChildren]) {
-    // When `semanticsObject` has children, this scroll view itself serves as
-    // `semanticsObject.accessibilityContainer` (replacing `SemanticsObjectContainer`), so its own
-    // parent container in the accessibility hierarchy is `semanticsObject.parent`'s container.
-    return ([semanticsObject uid] == kRootNodeId) ? semanticsObject.bridgeView
-                                                  : semanticsObject.parent.accessibilityContainer;
-  }
-  return semanticsObject.accessibilityContainer;
+  return ([semanticsObject uid] == kRootNodeId) ? semanticsObject.bridgeView
+                                                : semanticsObject.parent.accessibilityContainer;
 }
 
 - (NSInteger)accessibilityElementCount {

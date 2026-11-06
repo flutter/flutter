@@ -196,16 +196,16 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (id)accessibilityContainer {
-  if ([self hasChildren]) {
-    if (!self.bridge) {
-      return nil;
-    }
-    // Expose `scrollView` directly as the container instead of wrapping it in a
-    // `SemanticsObjectContainer` so child elements have this `UIScrollView` as their
-    // `accessibilityContainer` ancestor.
-    return self.scrollView;
+  if (!self.bridge) {
+    return nil;
   }
-  return [super accessibilityContainer];
+  // `FlutterScrollableSemanticsObject` itself does not appear in the UIKit
+  // accessibility tree (`nativeAccessibility` is `self.scrollView`), so UIKit
+  // queries `[self.scrollView accessibilityContainer]` instead when this node is
+  // a leaf. This method is only called by the bridge when this node acts as a
+  // container for children or is the root semantics node.
+  FML_DCHECK([self hasChildren] || self.uid == kRootNodeId);
+  return self.scrollView;
 }
 
 // private methods

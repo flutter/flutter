@@ -970,14 +970,14 @@ const float kFloatCompareEpsilon = 0.001;
   FlutterScrollableSemanticsObject* scrollable =
       [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:1];
   [scrollable setSemanticsNode:&node];
-  UIScrollView* scrollView = [scrollable nativeAccessibility];
+  FlutterSemanticsScrollView* scrollView = [scrollable nativeAccessibility];
 
   parentObject.children = @[ scrollable ];
   [parentObject accessibilityBridgeDidFinishUpdate];
   [scrollable accessibilityBridgeDidFinishUpdate];
   XCTAssertTrue(scrollView.isAccessibilityElement);
   SemanticsObjectContainer* container =
-      static_cast<SemanticsObjectContainer*>(scrollable.accessibilityContainer);
+      static_cast<SemanticsObjectContainer*>([scrollView accessibilityContainer]);
   XCTAssertEqual(container.semanticsObject, parentObject);
 }
 
@@ -1427,6 +1427,12 @@ const float kFloatCompareEpsilon = 0.001;
   node2.scrollPosition = 0.0;
   parent.childrenInTraversalOrder.push_back(2);
 
+  flutter::SemanticsNode node3;
+  node3.id = 3;
+  node3.rect = SkRect::MakeXYWH(0, 0, 100, 50);
+  node3.label = "child";
+  node.childrenInTraversalOrder.push_back(3);
+
   {
     flutter::testing::MockAccessibilityBridge* mock =
         new flutter::testing::MockAccessibilityBridge();
@@ -1439,19 +1445,24 @@ const float kFloatCompareEpsilon = 0.001;
 
     scrollable = [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:1];
     [scrollable setSemanticsNode:&node];
-    [scrollable accessibilityBridgeDidFinishUpdate];
 
     object2 = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:2];
     [object2 setSemanticsNode:&node2];
 
+    FlutterSemanticsObject* object3 = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:3];
+    [object3 setSemanticsNode:&node3];
+
+    scrollable.children = @[ object3 ];
     parentObject.children = @[ scrollable, object2 ];
     [parentObject accessibilityBridgeDidFinishUpdate];
     [scrollable accessibilityBridgeDidFinishUpdate];
     [object2 accessibilityBridgeDidFinishUpdate];
+    [object3 accessibilityBridgeDidFinishUpdate];
 
     // Returns the correct container if the bridge is alive.
-    SemanticsObjectContainer* container =
-        static_cast<SemanticsObjectContainer*>(scrollable.accessibilityContainer);
+    XCTAssertEqual(scrollable.accessibilityContainer, scrollable.nativeAccessibility);
+    SemanticsObjectContainer* container = static_cast<SemanticsObjectContainer*>(
+        [scrollable.nativeAccessibility accessibilityContainer]);
     XCTAssertEqual(container.semanticsObject, parentObject);
     SemanticsObjectContainer* container2 =
         static_cast<SemanticsObjectContainer*>(object2.accessibilityContainer);
@@ -1460,6 +1471,7 @@ const float kFloatCompareEpsilon = 0.001;
   // The bridge pointer went out of scope and was deallocated.
 
   XCTAssertNil(scrollable.accessibilityContainer);
+  XCTAssertNil([scrollable.nativeAccessibility accessibilityContainer]);
   XCTAssertNil(object2.accessibilityContainer);
 }
 
