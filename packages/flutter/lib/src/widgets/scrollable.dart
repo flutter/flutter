@@ -750,6 +750,15 @@ class ScrollableState extends State<Scrollable>
 
   final GlobalKey _scrollSemanticsKey = GlobalKey();
 
+  late final _ScrollableSemanticsGestureDelegate _semanticsGestureDelegate =
+      _ScrollableSemanticsGestureDelegate(state: this);
+
+  // The positions that a drag synthesized from a semantics scroll action can
+  // move, which stop at their bounds instead of overscrolling while it is
+  // replayed. Overridden where drag deltas are forwarded to another
+  // scrollable.
+  List<ScrollPosition> get _positionsMovedBySemanticsScroll => <ScrollPosition>[position];
+
   @override
   @protected
   void setSemanticsActions(Set<SemanticsAction> actions) {
@@ -1032,6 +1041,7 @@ class ScrollableState extends State<Scrollable>
           gestures: _gestureRecognizers,
           behavior: widget.hitTestBehavior,
           excludeFromSemantics: widget.excludeFromSemantics,
+          semantics: _semanticsGestureDelegate,
           child: Semantics(
             explicitChildNodes: !widget.excludeFromSemantics,
             child: IgnorePointer(
@@ -1766,6 +1776,81 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }
 }
 
+// The [SemanticsGestureDelegate] for the [RawGestureDetector] of a
+// [Scrollable].
+//
+// Assistive technologies scroll a [Scrollable] by dispatching semantic scroll
+// actions, which [RenderSemanticsGestureHandler] turns into a synthesized drag
+// whose length is a fixed fraction of the viewport, regardless of how much
+// scrollable content is left. Near the edge of the content such a drag
+// overshoots the scrollable's bounds, which physics like
+// [BouncingScrollPhysics] turn into an overscroll followed by a bounce back,
+// instead of a scroll that stops at the boundary.
+//
+// This delegate replays the same drag sequence that the default delegate of
+// [RawGestureDetector] would, but marks the scroll positions the drag can
+// move with [ScrollPosition.semanticsScrollInProgress] for its duration. The
+// drag flows through the regular drag pipeline, so physics, overscroll
+// notifications, and the drag distribution of nested and two dimensional
+// scrollables are unaffected, but each position stops at its bounds instead
+// of moving further out of range. Drags from real pointer gestures are
+// unaffected.
+class _ScrollableSemanticsGestureDelegate extends SemanticsGestureDelegate {
+  _ScrollableSemanticsGestureDelegate({required this.state});
+
+  final ScrollableState state;
+
+  @override
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+    // Mirrors the default delegate: a drag handler is only exposed while the
+    // corresponding gesture recognizer is registered (see [setCanDrag]), so
+    // that exactly the same semantic scroll actions are available as with the
+    // default delegate. A pan recognizer (used by [TwoDimensionalScrollable]
+    // for diagonal scrolling) handles both axes.
+    final Map<Type, GestureRecognizerFactory> recognizers = state._gestureRecognizers;
+    final bool canPan = recognizers.containsKey(PanGestureRecognizer);
+    final bool canDragHorizontally =
+        canPan || recognizers.containsKey(HorizontalDragGestureRecognizer);
+    final bool canDragVertically = canPan || recognizers.containsKey(VerticalDragGestureRecognizer);
+    renderObject.onHorizontalDragUpdate = canDragHorizontally
+        ? (DragUpdateDetails details) => _performSemanticDrag(renderObject, details)
+        : null;
+    renderObject.onVerticalDragUpdate = canDragVertically
+        ? (DragUpdateDetails details) => _performSemanticDrag(renderObject, details)
+        : null;
+  }
+
+  // Replays the drag sequence that the default delegate produces for a
+  // semantic scroll: down, start, a single update, and an end without
+  // velocity.
+  void _performSemanticDrag(RenderSemanticsGestureHandler renderObject, DragUpdateDetails details) {
+    final Offset localCenter = renderObject.size.center(Offset.zero);
+    final Offset globalCenter = renderObject.localToGlobal(localCenter);
+    final Offset localEnd = localCenter + details.delta;
+    final Offset globalEnd = renderObject.localToGlobal(localEnd);
+    final List<ScrollPosition> positions = state._positionsMovedBySemanticsScroll;
+    for (final position in positions) {
+      position.semanticsScrollInProgress = true;
+    }
+    try {
+      state._handleDragDown(
+        DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+      );
+      state._handleDragStart(
+        DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+      );
+      state._handleDragUpdate(details);
+      state._handleDragEnd(
+        DragEndDetails(primaryVelocity: 0.0, localPosition: localEnd, globalPosition: globalEnd),
+      );
+    } finally {
+      for (final position in positions) {
+        position.semanticsScrollInProgress = false;
+      }
+    }
+  }
+}
+
 // Not using a RestorableDouble because we want to allow null values and override
 // [enabled].
 class _RestorableScrollOffset extends RestorableValue<double?> {
@@ -2203,6 +2288,14 @@ class _VerticalOuterDimensionState extends ScrollableState {
       (widget as _VerticalOuterDimension).diagonalDragBehavior;
   ScrollableState get horizontalScrollable =>
       (widget as _VerticalOuterDimension).horizontalKey.currentState!;
+
+  // This dimension forwards the horizontal deltas of diagonal drags to the
+  // horizontal scrollable, so its position is included as well.
+  @override
+  List<ScrollPosition> get _positionsMovedBySemanticsScroll => <ScrollPosition>[
+    position,
+    horizontalScrollable.position,
+  ];
 
   Axis? lockedAxis;
   Offset? lastDragOffset;
