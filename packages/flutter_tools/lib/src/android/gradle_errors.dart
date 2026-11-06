@@ -18,14 +18,15 @@ import 'java.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
-typedef GradleErrorHandler = Future<GradleBuildStatus> Function({
-  required utils.GradleUtils gradleUtils,
-  required String line,
-  required FlutterProject project,
-  required ToolContext toolContext,
-  required bool usesAndroidX,
-  Java? java,
-});
+typedef GradleErrorHandler =
+    Future<GradleBuildStatus> Function({
+      required utils.GradleUtils gradleUtils,
+      required String line,
+      required FlutterProject project,
+      required ToolContext toolContext,
+      required bool usesAndroidX,
+      Java? java,
+    });
 
 /// A Gradle error handled by the tool.
 class GradleHandledError {
@@ -267,6 +268,8 @@ final _undefinedTaskPattern = RegExp(r'Task .+ not found in root project.');
 
 final _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
+const _defaultBuildTypes = <String>{'debug', 'profile', 'release'};
+
 /// Handler when a flavor is undefined.
 @visibleForTesting
 final flavorUndefinedHandler = GradleHandledError(
@@ -301,14 +304,16 @@ final flavorUndefinedHandler = GradleHandledError(
             }
           }
         }
-        for (final variant1 in variants) {
-          for (final variant2 in variants) {
-            if (variant2.startsWith(variant1) && variant2 != variant1) {
-              final String buildType = variant2.substring(variant1.length);
-              if (variants.contains(buildType)) {
-                productFlavors.add(variant1);
-              }
-            }
+        for (final variant in variants) {
+          if (_defaultBuildTypes.contains(variant)) {
+            continue;
+          }
+          // In multi-dimension setups, Gradle only generates assemble<Flavor><BuildType>
+          // tasks for complete flavor combinations, filtering out intermediate dimension tasks.
+          if (_defaultBuildTypes.any(
+            (String buildType) => variants.contains('$variant$buildType'),
+          )) {
+            productFlavors.add(variant);
           }
         }
         final errorMessage =
