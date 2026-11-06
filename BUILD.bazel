@@ -23,7 +23,8 @@ exports_files([
     "dev/README.md",
     "examples/README.md",
     # The repository's license, which the tool's cache copies into the iOS
-    # engine directories (the facsimile's ios_engine_*_directory).
+    # engine directories (the facsimile's ios_engine_*_directory) and into
+    # every engine directory it downloads (from the facsimile's root).
     "LICENSE",
 ])
 
