@@ -603,7 +603,7 @@ targets:
   # (we do not deploy docs for beta).
   - name: Linux docs_publish
     recipe: flutter/docs
-    presubmit: false
+    presubmit: true
     backfill: false
     enabled_branches:
       - master
@@ -620,7 +620,7 @@ targets:
       tags: >
         ["framework", "hostonly", "linux"]
       docs: >
-        {"build": "master", "deploy": "main-docs-flutter-prod"}
+        {"post_process": "master"}
     drone_dimensions:
       - os=Linux
 
