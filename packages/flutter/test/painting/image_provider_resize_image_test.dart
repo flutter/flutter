@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
+import 'image_test_utils.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
@@ -892,6 +893,21 @@ void main() {
       isAsync = true;
       await completer.future;
       expect(isAsync, true);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/107000
+    test('delegates createStream to the wrapped provider', () {
+      final resizeImage = ResizeImage(CustomStreamImageProvider(), width: 10);
+      const configuration = ImageConfiguration(size: Size(20, 30), devicePixelRatio: 2.0);
+
+      expect(
+        resizeImage.resolve(configuration),
+        isA<CustomImageStream>().having(
+          (CustomImageStream s) => s.configuration,
+          'configuration',
+          same(configuration),
+        ),
+      );
     });
   });
 }

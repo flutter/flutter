@@ -39,7 +39,7 @@ void testMain() {
             values.add(value);
           }
         };
-        final Future<void> draw = rasterizer.draw(scene.layerTree, null);
+        final Future<void> draw = rasterizer.draw(scene.layerTree, view.physicalSize, null);
         await rasterizer.preparing.future;
         expect(values, isEmpty);
         rasterizer.prepared.complete();
