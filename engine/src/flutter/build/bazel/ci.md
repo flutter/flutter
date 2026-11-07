@@ -195,14 +195,19 @@ the test for real, and so does the command from `engine/src`.
   cannot work here, the database naming the builder's own execution root,
   so the four host shards' work runs on one drone and the Android build lints
   every file of its own database rather than its share of the host's
-  intersection -- more files, one drone fewer; NEED_DECISION Q44. On a
-  24-core workstation the host variant's step is the database in 7 min and
-  clang-tidy over 1,252 files in 44, 715 CPU-minutes: about 24 on a 32-core
-  drone, where GN's four shards summed to 18; the database is GN's default
-  target's closure in the build's own configuration, 546), `mac_clang_tidy`
+  intersection -- more files, one drone fewer; NEED_DECISION Q44. On the
+  bots at 546: the host drone 16:39 (the install 0:55 from the remote cache,
+  the lint step 12:14 -- the database in 1:34, clang-tidy the rest on 32
+  cores), the Android drone 8:48 (the lint step 3:54), the builder 17:53
+  against GN's 15–22; the database is GN's default target's closure in the
+  build's own configuration, 546), `mac_clang_tidy`
   (547, the same shape for the macOS host and iOS simulator variants; the
   Apple toolchains' remote-compile wrapper in the commands resolves to the
-  Mac's clang, where clang-tidy is), and
+  Mac's clang, where clang-tidy is; 548 lints the drones' arm64 rather than
+  tools/gn's x64 default -- on a 16-core Mac the host variant's lint is 9:07
+  over 1,077 files and the simulator's 2:17 over 491 -- which turned up one
+  arm64-only analyzer report in a vendored header, off for its directory
+  since 550, NEED_DECISION Q45), and
   `linux_unopt`'s builds but one. A try build's
   archives go where they always went for a try build (the recipe's archives
   module routes the try bucket to `flutter_archives_v2`, never to the release
