@@ -78,6 +78,88 @@ import java.util.regex.Pattern;
  * IDs".
  */
 public class AccessibilityBridge extends AccessibilityNodeProvider {
+
+  /**
+   * Represents a pending text change from the IME. This bridges the synchronous IME input with the
+   * asynchronous framework semantics update, allowing us to attach the correct change type to the
+   * accessibility event when the framework eventually processes the text change.
+   */
+  private static class ImeTextChange {
+    final String text;
+    final int type;
+
+    ImeTextChange(String text, int type) {
+      this.text = text;
+      this.type = type;
+    }
+  }
+
+  /**
+   * IME text changes to the input-focused text field that the framework has not reported back in a
+   * semantics update yet, oldest first.
+   *
+   * <p>The IME edits the text on the platform side first; the framework then updates its {@code
+   * TextEditingValue} and, in a later frame, sends a semantics update with the new value. When that
+   * update arrives, {@link #createTextChangedEvent} matches its value against this queue to find
+   * the change types to report.
+   */
+  private final Queue<ImeTextChange> imeTextChanges = new ArrayDeque<>();
+
+  // Caps imeTextChanges to avoid unbounded growth when entries never match a semantics update,
+  // e.g. when Dart text formatters rewrite the text. Large enough to hold several keystrokes that
+  // are batched into a single frame.
+  private static final int MAX_IME_TEXT_CHANGES = 20;
+
+  /**
+   * Records the type of a text change the IME just made to the input-focused text field.
+   *
+   * <p>Normally the change is queued in {@link #imeTextChanges}, and its type is attached to the
+   * {@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED} event this bridge already sends when the
+   * framework's semantics update for {@code text} arrives.
+   *
+   * <p>The exception is an IME that commits text, or selects a suggestion, without changing it,
+   * e.g. committing the composing text 漢字 as 漢字. The framework's semantics are then unchanged, so
+   * no semantics update and no text change event would follow. Android expects an event in this
+   * case, so it is sent right away instead.
+   *
+   * <p>This is internal to the embedding and is only public because {@link
+   * io.flutter.plugin.editing.InputConnectionAdaptor} is in another package.
+   *
+   * @param text the full text of the field after the change.
+   * @param types a bit mask of {@code AccessibilityEvent.TEXT_CHANGE_TYPE_*} values.
+   */
+  public void addImeTextChange(@NonNull String text, int types) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_37) {
+      return;
+    }
+    final SemanticsNode node = inputFocusedSemanticsNode;
+    if (node == null || !node.hasFlag(Flag.IS_FOCUSED) || node.hasFlag(Flag.IS_OBSCURED)) {
+      // No focused field to attach the change to. Obscured fields report a masked value, so
+      // the text would never match.
+      return;
+    }
+    final String currentValue = node.value != null ? node.value : "";
+    final int finalizingTypes =
+        AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME
+            | AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
+    // If the IME finalized text that matches what the framework already reports, no semantics
+    // update will follow, so send the event now. It is not queued, so no second event is sent if
+    // a later semantics update for this field arrives.
+    if ((types & finalizingTypes) != 0 && text.equals(currentValue)) {
+      AccessibilityEvent event =
+          obtainAccessibilityEvent(node.id, AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+      event.setBeforeText(currentValue);
+      event.getText().add(currentValue);
+      event.setTextChangeTypes(types);
+      sendAccessibilityEvent(event);
+      return;
+    }
+    if (imeTextChanges.size() >= MAX_IME_TEXT_CHANGES) {
+      imeTextChanges.poll();
+    }
+    imeTextChanges.add(new ImeTextChange(text, types));
+  }
+
   private static final String TAG = "AccessibilityBridge";
 
   // Constants from higher API levels.
@@ -1701,6 +1783,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         sendAccessibilityEvent(event);
       }
 
+      if (object.hadFlag(Flag.IS_FOCUSED) && !object.hasFlag(Flag.IS_FOCUSED)) {
+        // The field lost input focus. inputFocusedSemanticsNode is not reset in this case, so
+        // clear pending IME changes here; they no longer apply to any field.
+        imeTextChanges.clear();
+      }
+
       // If the object is the input-focused node, then tell the reader about it, but only if
       // it has changed since the last update.
       if (inputFocusedSemanticsNode != null
@@ -1708,6 +1796,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           && (lastInputFocusedSemanticsNode == null
               || lastInputFocusedSemanticsNode.id != inputFocusedSemanticsNode.id)) {
         lastInputFocusedSemanticsNode = inputFocusedSemanticsNode;
+        // Focus just shifted to a new text field. Clear the queue to prevent stale
+        // IME events from the previous text field from bleeding into the new one.
+        imeTextChanges.clear();
         sendAccessibilityEvent(
             obtainAccessibilityEvent(object.id, AccessibilityEvent.TYPE_VIEW_FOCUSED));
       } else if (inputFocusedSemanticsNode == null) {
@@ -1715,6 +1806,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         // null, then we just set the last one to null too, so that it sends the event again
         // when something regains focus.
         lastInputFocusedSemanticsNode = null;
+        // Focus was lost completely. Clear the queue because there is no longer a valid
+        // text field to receive the pending IME events.
+        imeTextChanges.clear();
       }
 
       if (inputFocusedSemanticsNode != null
@@ -1753,6 +1847,28 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     AccessibilityEvent e = obtainAccessibilityEvent(id, AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
     e.setBeforeText(oldValue);
     e.getText().add(newValue);
+
+    // Attach the types of the IME changes that led to this value. The framework sends at most one
+    // semantics update per frame, so several IME changes can be folded into one update (e.g. an
+    // IME that commits text and starts a new composition in one batch edit). Combine the types of
+    // every queued change up to and including the last one that matches the new value.
+    int changeTypes = 0;
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
+      int elementsToPoll = 0;
+      int index = 0;
+      for (ImeTextChange change : imeTextChanges) {
+        index++;
+        if (change.text.equals(newValue)) {
+          elementsToPoll = index;
+        }
+      }
+      for (int j = 0; j < elementsToPoll; j++) {
+        changeTypes |= imeTextChanges.poll().type;
+      }
+      if (changeTypes != 0) {
+        e.setTextChangeTypes(changeTypes);
+      }
+    }
 
     int i;
     for (i = 0; i < oldValue.length() && i < newValue.length(); ++i) {
