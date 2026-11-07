@@ -250,6 +250,23 @@ void mockGenBuffers(GLsizei n, GLuint* buffers) {
   CallMockMethod(&IMockGLESImpl::GenBuffers, n, buffers);
 }
 
+void mockBindBuffer(GLenum target, GLuint buffer) {
+  CallMockMethod(&IMockGLESImpl::BindBuffer, target, buffer);
+}
+
+static_assert(CheckSameSignature<decltype(mockBindBuffer),  //
+                                 decltype(glBindBuffer)>::value);
+
+void mockBufferData(GLenum target,
+                    GLsizeiptr size,
+                    const void* data,
+                    GLenum usage) {
+  CallMockMethod(&IMockGLESImpl::BufferData, target, size, data, usage);
+}
+
+static_assert(CheckSameSignature<decltype(mockBufferData),  //
+                                 decltype(glBufferData)>::value);
+
 void mockBufferSubData(GLenum target,
                        GLintptr offset,
                        GLsizeiptr size,
@@ -259,6 +276,33 @@ void mockBufferSubData(GLenum target,
 
 static_assert(CheckSameSignature<decltype(mockBufferSubData),  //
                                  decltype(glBufferSubData)>::value);
+
+void mockEnableVertexAttribArray(GLuint index) {
+  CallMockMethod(&IMockGLESImpl::EnableVertexAttribArray, index);
+}
+
+static_assert(CheckSameSignature<decltype(mockEnableVertexAttribArray),  //
+                                 decltype(glEnableVertexAttribArray)>::value);
+
+void mockDisableVertexAttribArray(GLuint index) {
+  CallMockMethod(&IMockGLESImpl::DisableVertexAttribArray, index);
+}
+
+static_assert(CheckSameSignature<decltype(mockDisableVertexAttribArray),  //
+                                 decltype(glDisableVertexAttribArray)>::value);
+
+void mockVertexAttribPointer(GLuint index,
+                             GLint size,
+                             GLenum type,
+                             GLboolean normalized,
+                             GLsizei stride,
+                             const void* pointer) {
+  CallMockMethod(&IMockGLESImpl::VertexAttribPointer, index, size, type,
+                 normalized, stride, pointer);
+}
+
+static_assert(CheckSameSignature<decltype(mockVertexAttribPointer),  //
+                                 decltype(glVertexAttribPointer)>::value);
 
 static_assert(CheckSameSignature<decltype(mockGenTextures),  //
                                  decltype(glGenTextures)>::value);
@@ -824,6 +868,16 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockStencilOpSeparate);
   } else if (strcmp(name, "glStencilMaskSeparate") == 0) {
     return reinterpret_cast<void*>(mockStencilMaskSeparate);
+  } else if (strcmp(name, "glBindBuffer") == 0) {
+    return reinterpret_cast<void*>(mockBindBuffer);
+  } else if (strcmp(name, "glBufferData") == 0) {
+    return reinterpret_cast<void*>(mockBufferData);
+  } else if (strcmp(name, "glEnableVertexAttribArray") == 0) {
+    return reinterpret_cast<void*>(mockEnableVertexAttribArray);
+  } else if (strcmp(name, "glDisableVertexAttribArray") == 0) {
+    return reinterpret_cast<void*>(mockDisableVertexAttribArray);
+  } else if (strcmp(name, "glVertexAttribPointer") == 0) {
+    return reinterpret_cast<void*>(mockVertexAttribPointer);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }
