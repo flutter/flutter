@@ -16,6 +16,14 @@ enum SwipeEdge {
 
   /// Indicates that the swipe gesture starts from the right edge of the screen.
   right,
+
+  /// Indicates that there was no swipe edge at all.
+  ///
+  /// This corresponds to Android's `BackEvent.EDGE_NONE` and is used when
+  /// the back gesture is triggered by a button press rather than a swipe.
+  ///
+  /// See also: https://developer.android.com/reference/android/window/BackEvent#EDGE_NONE
+  none,
 }
 
 /// Object used to report back gesture progress in Android.
@@ -40,7 +48,11 @@ final class PredictiveBackEvent {
           ? null
           : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
       progress: (map['progress']! as num).toDouble(),
-      swipeEdge: SwipeEdge.values[map['swipeEdge']! as int],
+      swipeEdge: switch (map['swipeEdge']) {
+        0 => SwipeEdge.left,
+        1 => SwipeEdge.right,
+        2 || _ => SwipeEdge.none,
+      },
     );
   }
 
@@ -50,6 +62,15 @@ final class PredictiveBackEvent {
   /// This represents the touch location that initiates or interacts with the
   /// back gesture. When `null`, it indicates the gesture was not started by a
   /// touch event, such as a back button press in devices with hardware buttons.
+  ///
+  /// The Android `BackEvent` API (`BackEvent.getTouchX()` and
+  /// `BackEvent.getTouchY()`) specifies that these values return `NaN` for
+  /// button-triggered events. The engine maps those `NaN` values to `null`
+  /// here.
+  ///
+  /// See also:
+  ///
+  ///  * https://developer.android.com/reference/android/window/BackEvent#getTouchX()
   final Offset? touchOffset;
 
   /// Returns a value between 0.0 and 1.0 representing how far along the back
@@ -86,7 +107,9 @@ final class PredictiveBackEvent {
       // back button is pressed, but in practice it seems to return 0.0, hence
       // the check for Offset.zero here. This was tested directly in the engine
       // on Android emulator running API 34.
-      touchOffset == null || (progress == 0.0 && touchOffset == Offset.zero);
+      swipeEdge == SwipeEdge.none ||
+      touchOffset == null ||
+      (progress == 0.0 && touchOffset == Offset.zero);
 
   @override
   bool operator ==(Object other) {
