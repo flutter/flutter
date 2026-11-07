@@ -5,9 +5,11 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -120,6 +122,52 @@ class MacOSDevice extends DesktopDevice {
   @override
   String? executablePathForDevice(covariant MacOSApp package, BuildInfo buildInfo) {
     return package.executable(buildInfo);
+  }
+
+  @override
+  bool get supportsScreenshot => true;
+
+  @override
+  bool get supportsScreenRecording => true;
+
+  // macOS `screencapture` captures the entire screen, not just the app window.
+  // There is no reliable cross-version API to capture a single window by PID.
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    final ProcessResult result = await toolContext.processManager.run(<String>[
+      'screencapture',
+      '-x',
+      outputFile.path,
+    ]);
+    if (result.exitCode != 0) {
+      throwToolExit('screencapture failed: ${result.stderr}');
+    }
+  }
+
+  @override
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async {
+    final args = <String>[
+      'screencapture',
+      '-v',
+      if (duration != null) ...['-V', '${duration.inSeconds}'],
+      outputFile.path,
+    ];
+    final Process process = await toolContext.processManager.start(args);
+    unawaited(process.stdout.drain<void>());
+    final stderrBuf = StringBuffer();
+
+    Future<void> runRecording() async {
+      final (int exitCode, _) = await (
+        process.exitCode,
+        process.stderr.transform(utf8AllowMalformed.decoder).forEach(stderrBuf.write),
+      ).wait;
+
+      if (!ScreenRecording.stoppedExitCodes.contains(exitCode)) {
+        throwToolExit('screencapture failed (exit $exitCode): $stderrBuf');
+      }
+    }
+
+    return ScreenRecording(process, runRecording());
   }
 
   @override
