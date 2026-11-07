@@ -213,6 +213,42 @@ void main() {
         expect(builderDelegate.shouldRebuild(builderDelegate), isTrue);
       }, variant: TargetPlatformVariant.all());
 
+      testWidgets('kept alive children are not detached twice when the viewport is removed', (
+        WidgetTester tester,
+      ) async {
+        // Regression test for https://github.com/flutter/flutter/issues/194718
+        final verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final checkBoxKey = UniqueKey();
+        final builderDelegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 5,
+          maxYIndex: 5,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            return SizedBox.square(
+              dimension: 200,
+              child: vicinity == const ChildVicinity(xIndex: 0, yIndex: 0)
+                  ? KeepAliveCheckBox(key: checkBoxKey)
+                  : const Text('cell'),
+            );
+          },
+        );
+        addTearDown(builderDelegate.dispose);
+
+        await tester.pumpWidget(
+          simpleBuilderTest(
+            delegate: builderDelegate,
+            verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+          ),
+        );
+        await tester.tap(find.byKey(checkBoxKey));
+        await tester.pump();
+        verticalController.jumpTo(verticalController.position.maxScrollExtent);
+        await tester.pump();
+
+        await tester.pumpWidget(const SizedBox());
+        expect(tester.takeException(), isNull);
+      });
+
       testWidgets('builder delegate supports automatic keep alive - default true', (
         WidgetTester tester,
       ) async {
