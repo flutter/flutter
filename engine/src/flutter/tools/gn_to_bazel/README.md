@@ -28,7 +28,10 @@ build and the oracle.
 
 Each input is written next to it as `BUILD.bazel` (or under `--out-dir`, laid
 out by GN package). `--check` compares with the existing file instead and
-fails on a difference. The output is piped through `buildifier` when one is
+fails on a difference; `ci/check_generated_bazel_files.sh` runs it on every
+PR (a step of `Linux linux_unopt`, on the checkout's prebuilt Dart SDK and
+without buildifier), so a `BUILD.gn` or builder-file change lands with its
+regeneration or not at all. The output is piped through `buildifier` when one is
 on `PATH` (or named by `--buildifier`; `--buildifier=none` for none); the
 emitter already writes buildifier's format, so the result is the same either
 way -- it sorts the lists buildifier sorts (`srcs`, `deps`, `data`, ...),

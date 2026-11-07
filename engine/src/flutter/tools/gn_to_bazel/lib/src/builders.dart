@@ -1684,10 +1684,15 @@ void _testSuiteInto(
     convertedTests,
     packageConditions: packageConditions,
   );
-  final suites = <String>[...scripts];
-  for (final label in <String>[...binaries, for (final List<String> t in types.values) ...t]) {
-    if (!suites.contains(label)) {
-      suites.add(label);
+  final suites = <String>[];
+  for (final label in <String>[
+    ...scripts,
+    ...binaries,
+    for (final List<String> t in types.values) ...t,
+  ]) {
+    final String written = buildifierLabel(label);
+    if (!suites.contains(written)) {
+      suites.add(written);
     }
   }
   out.writeln();
