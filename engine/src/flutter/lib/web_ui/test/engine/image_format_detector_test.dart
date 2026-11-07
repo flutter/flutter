@@ -91,13 +91,107 @@ Future<void> testMain() async {
   test('can decode GIF with many nonstandard Special Purpose Blocks', () async {
     expect(detectImageType(_createTestGif()), ImageType.animatedGif);
   });
+
+  group('detects image type of a Uint8List view into a larger buffer', () {
+    Future<Uint8List> fetchBytes(String url) async {
+      final HttpFetchResponse response = await httpFetch(url);
+      if (!response.hasPayload) {
+        throw Exception('Unable to fetch() image test file "$url"');
+      }
+      return response.asUint8List();
+    }
+
+    Future<Uint8List> animatedWebp() => fetchBytes('/test_images/stoplight.webp');
+    Future<Uint8List> staticWebp() => fetchBytes('/test_images/baby_tux.webp');
+    Future<Uint8List> animatedGif() async => _createTestGif();
+    Future<Uint8List> staticGif() async => _createTestGif(numFrames: 1);
+
+    final fixtures = <(String, Future<Uint8List> Function(), ImageType)>[
+      ('animated WebP', animatedWebp, ImageType.animatedWebp),
+      ('static WebP', staticWebp, ImageType.webp),
+      ('animated GIF', animatedGif, ImageType.animatedGif),
+      ('static GIF', staticGif, ImageType.gif),
+      // The test server does not serve .avif files, so use an in-memory 'ftyp'
+      // box, which is all that AVIF detection looks at.
+      (
+        'AVIF',
+        () async => Uint8List.fromList(<int>[
+          ...<int>[0x00, 0x00, 0x00, 0x14],
+          ...'ftypavif'.codeUnits,
+          ...<int>[0x00, 0x00, 0x00, 0x00],
+          ...'avif'.codeUnits,
+        ]),
+        ImageType.avif,
+      ),
+    ];
+
+    // (leading, trailing) padding byte counts. (3, 1) places the view at an
+    // offset that is not 4-byte aligned within its buffer.
+    const paddings = <(int, int)>[(32, 0), (0, 16), (32, 16), (48, 16), (3, 1)];
+
+    for (final (String name, Future<Uint8List> Function() loadBytes, ImageType expected)
+        in fixtures) {
+      for (final (int leading, int trailing) in paddings) {
+        test('$name with $leading leading and $trailing trailing padding bytes', () async {
+          final Uint8List source = await loadBytes();
+          final Uint8List view = _createPaddedSubview(
+            source,
+            leadingPadding: leading,
+            trailingPadding: trailing,
+          );
+          expect(detectImageType(view), expected);
+        });
+      }
+    }
+
+    final staticAfterAnimated =
+        <(String, Future<Uint8List> Function(), Future<Uint8List> Function(), ImageType)>[
+          ('static WebP', animatedWebp, staticWebp, ImageType.webp),
+          ('static GIF', animatedGif, staticGif, ImageType.gif),
+        ];
+
+    for (final (
+          String name,
+          Future<Uint8List> Function() loadPreceding,
+          Future<Uint8List> Function() loadBytes,
+          ImageType expected,
+        )
+        in staticAfterAnimated) {
+      test('$name stored right after an animated image in the same buffer', () async {
+        final Uint8List preceding = await loadPreceding();
+        final Uint8List source = await loadBytes();
+        final backing = Uint8List(preceding.length + source.length)
+          ..setAll(0, preceding)
+          ..setAll(preceding.length, source);
+        final view = Uint8List.sublistView(backing, preceding.length);
+        expect(detectImageType(view), expected);
+      });
+    }
+  });
 }
 
-/// Generates a blank GIF to be used in tests.
-Uint8List _createTestGif() {
+/// Copies [source] into a larger buffer, surrounded by [leadingPadding] and
+/// [trailingPadding] bytes set to 0xFF, and returns a view of just the copied
+/// bytes.
+Uint8List _createPaddedSubview(
+  Uint8List source, {
+  required int leadingPadding,
+  required int trailingPadding,
+}) {
+  const sentinel = 0xFF;
+  final int totalLength = leadingPadding + source.length + trailingPadding;
+  final backing = Uint8List(totalLength)
+    ..fillRange(0, totalLength, sentinel)
+    ..setAll(leadingPadding, source);
+  return Uint8List.sublistView(backing, leadingPadding, leadingPadding + source.length);
+}
+
+/// Generates a blank GIF with [numFrames] frames to be used in tests.
+///
+/// Pass `numFrames: 1` for a static GIF.
+Uint8List _createTestGif({int numFrames = 2}) {
   const width = 1;
   const height = 1;
-  const numFrames = 2;
   final bytes = <int>[];
   // Generate header.
   bytes.addAll('GIF'.codeUnits);
