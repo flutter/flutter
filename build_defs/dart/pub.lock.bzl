@@ -649,9 +649,9 @@ PUB_HOSTED = {
         ],
     ),
     "googleapis_auth": struct(
-        version = "2.3.5",
-        sha256 = "e15d48204e2f3c852dc1091a49705a163a8ba5897823f9abe1c0795e512357c4",
-        url = "https://pub.dev/api/archives/googleapis_auth-2.3.5.tar.gz",
+        version = "2.3.6",
+        sha256 = "408a3d067edfcef95d784003f9f761f9535d9ddabf682cfc804c2b238a7648f6",
+        url = "https://pub.dev/api/archives/googleapis_auth-2.3.6.tar.gz",
         deps = [
             "crypto",
             "google_cloud",

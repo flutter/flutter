@@ -538,6 +538,9 @@ build:ios_debug_sim_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/co
 #   linux_fuchsia_tests.json: ci/fuchsia_profile_x64_tester -- a platform the Bazel build has none for yet (--fuchsia)
 #   linux_fuchsia_tests.json: ci/fuchsia_release_x64_tester -- a platform the Bazel build has none for yet (--fuchsia)
 #   linux_fuchsia_tests.json: ci/fuchsia_debug_x64_tester -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_riscv_host_engine.json: ci/linux_profile_riscv64 -- a platform the Bazel build has none for yet (--linux-cpu=riscv64)
+#   linux_riscv_host_engine.json: ci/linux_debug_riscv64 -- a platform the Bazel build has none for yet (--linux-cpu=riscv64)
+#   linux_riscv_host_engine.json: ci/linux_release_riscv64 -- a platform the Bazel build has none for yet (--linux-cpu=riscv64)
 #   linux_web_engine_test.json: web_tests/test_bundles/dart2js-canvaskit-webparagraph -- no tools/gn step: not a build
 #   linux_web_engine_test.json: web_tests/test_bundles/dart2wasm-skwasm-ui -- no tools/gn step: not a build
 #   linux_web_engine_test.json: web_tests/test_bundles/dart2wasm-skwasm-skwasm -- no tools/gn step: not a build
