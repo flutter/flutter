@@ -110,10 +110,16 @@ test_suite(
 # simulators from the host, outside Bazel's sandbox (xcodebuild runs
 # sandbox-exec itself), and the network (the pod specs, pub). A suite of its
 # own for that; compatible with macOS alone, skipped elsewhere
-# (packages/flutter_tools/BUILD.bazel's apple_shard; NEED_DECISION Q31).
+# (packages/flutter_tools/BUILD.bazel's apple_shard; NEED_DECISION Q31) --
+# with the macOS and iOS cases of two of the Android shard's files
+# (apple_cases_shard), which build hello_world and a created project with
+# Xcode the same way.
 test_suite(
     name = "apple_tool_tests",
-    tests = ["//packages/flutter_tools:apple_shard"],
+    tests = [
+        "//packages/flutter_tools:apple_cases_shard",
+        "//packages/flutter_tools:apple_shard",
+    ],
 )
 
 # The Apple tests that sign for an iOS device (`flutter build ios` without
