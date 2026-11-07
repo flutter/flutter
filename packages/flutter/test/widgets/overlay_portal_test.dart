@@ -667,80 +667,137 @@ void main() {
     expect(tester.getSize(find.byKey(overlayChildKey)), size);
   });
 
-  testWidgets('root overlay child waits for an offstage anchor that was never laid out', (
-    WidgetTester tester,
-  ) async {
-    final controller = OverlayPortalController()..show();
-    OverlayChildLayoutInfo? layoutInfo;
-    final bottom = OverlayEntry(
-      maintainState: true,
-      builder: (BuildContext context) => Center(
-        child: OverlayPortal.overlayChildLayoutBuilder(
-          controller: controller,
-          overlayLocation: OverlayChildLocation.rootOverlay,
-          overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
-            layoutInfo = info;
-            return const SizedBox.shrink();
-          },
-          child: const SizedBox.square(dimension: 10.0),
-        ),
-      ),
-    );
-    final top = OverlayEntry(
-      opaque: true,
-      builder: (BuildContext context) => const SizedBox.expand(),
-    );
-    final root = OverlayEntry(
-      builder: (BuildContext context) => Overlay(initialEntries: <OverlayEntry>[bottom, top]),
-    );
-    var topRemoved = false;
-    addTearDown(() {
-      if (!topRemoved) {
-        top.remove();
-      }
-      for (final entry in <OverlayEntry>[bottom, root]) {
-        entry.remove();
-      }
-      for (final entry in <OverlayEntry>[bottom, top, root]) {
-        entry.dispose();
-      }
-    });
+  for (final useLayoutBuilder in <bool>[false, true]) {
+    for (final semanticsEnabled in <bool>[false, true]) {
+      testWidgets('root overlay child waits for an offstage anchor that was never laid out, '
+          'layoutBuilder: $useLayoutBuilder, semantics: $semanticsEnabled', (
+        WidgetTester tester,
+      ) async {
+        final SemanticsTester? semantics = semanticsEnabled ? SemanticsTester(tester) : null;
+        try {
+          final controller = OverlayPortalController()..show();
+          const overlayKey = ValueKey<String>('offstage overlay child');
+          const overlayLabel = 'offstage overlay child';
+          var overlayHitCount = 0;
+          OverlayChildLayoutInfo? layoutInfo;
+          Widget buildOverlayChild() => Positioned(
+            left: 0.0,
+            top: 0.0,
+            width: 50.0,
+            height: 50.0,
+            child: Semantics(
+              container: true,
+              excludeSemantics: true,
+              label: overlayLabel,
+              child: Listener(
+                key: overlayKey,
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (PointerDownEvent event) {
+                  overlayHitCount += 1;
+                },
+                child: const SizedBox.expand(),
+              ),
+            ),
+          );
+          final bottom = OverlayEntry(
+            maintainState: true,
+            builder: (BuildContext context) => Center(
+              child: useLayoutBuilder
+                  ? OverlayPortal.overlayChildLayoutBuilder(
+                      controller: controller,
+                      overlayLocation: OverlayChildLocation.rootOverlay,
+                      overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
+                        layoutInfo = info;
+                        return buildOverlayChild();
+                      },
+                      child: const SizedBox.square(dimension: 10.0),
+                    )
+                  : OverlayPortal.targetsRootOverlay(
+                      controller: controller,
+                      overlayChildBuilder: (BuildContext context) => buildOverlayChild(),
+                      child: const SizedBox.square(dimension: 10.0),
+                    ),
+            ),
+          );
+          final top = OverlayEntry(
+            opaque: true,
+            builder: (BuildContext context) => const SizedBox.expand(),
+          );
+          final root = OverlayEntry(
+            builder: (BuildContext context) => Overlay(initialEntries: <OverlayEntry>[bottom, top]),
+          );
+          var topRemoved = false;
+          addTearDown(() {
+            if (!topRemoved) {
+              top.remove();
+            }
+            for (final entry in <OverlayEntry>[bottom, root]) {
+              entry.remove();
+            }
+            for (final entry in <OverlayEntry>[bottom, top, root]) {
+              entry.dispose();
+            }
+          });
 
-    // The anchor starts offstage in the inner Overlay, but its deferred child
-    // is attached to the onstage root Overlay.
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(initialEntries: <OverlayEntry>[root]),
-      ),
-    );
-    expect(tester.takeException(), isNull);
-    final RenderBox surrogate = tester.renderObject(
-      find.byType(OverlayPortal, skipOffstage: false),
-    );
-    expect(surrogate.attached, isTrue);
-    expect(surrogate.hasSize, isFalse);
-    final RenderObject rootTheater = tester.renderObject(find.byType(Overlay).first);
-    final deferredChildren = <RenderBox>[];
-    rootTheater.visitChildren((RenderObject child) {
-      if (child.runtimeType.toString() == '_RenderDeferredLayoutBox') {
-        deferredChildren.add(child as RenderBox);
-      }
-    });
-    expect(deferredChildren, hasLength(1));
-    final RenderBox deferredChild = deferredChildren.single;
-    expect(deferredChild.attached, isTrue);
-    expect(deferredChild.hasSize, isFalse);
-    expect(layoutInfo, isNull);
+          // The anchor starts offstage in the inner Overlay, but its deferred
+          // child is attached to the onstage root Overlay.
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Overlay(initialEntries: <OverlayEntry>[root]),
+            ),
+          );
+          expect(tester.takeException(), isNull);
+          final RenderBox surrogate = tester.renderObject(
+            find.byType(OverlayPortal, skipOffstage: false),
+          );
+          expect(surrogate.attached, isTrue);
+          expect(surrogate.hasSize, isFalse);
+          final RenderObject rootTheater = tester.renderObject(find.byType(Overlay).first);
+          final deferredChildren = <RenderBox>[];
+          rootTheater.visitChildren((RenderObject child) {
+            if (child.runtimeType.toString() == '_RenderDeferredLayoutBox') {
+              deferredChildren.add(child as RenderBox);
+            }
+          });
+          expect(deferredChildren, hasLength(1));
+          final RenderBox deferredChild = deferredChildren.single;
+          expect(deferredChild.attached, isTrue);
+          expect(deferredChild.hasSize, isFalse);
+          if (useLayoutBuilder) {
+            expect(layoutInfo, isNull);
+          }
+          await tester.tapAt(const Offset(25.0, 25.0));
+          expect(tester.takeException(), isNull);
+          expect(overlayHitCount, 0);
+          if (semantics != null) {
+            expect(semantics.nodesWith(label: overlayLabel), isEmpty);
+          }
 
-    top.remove();
-    topRemoved = true;
-    await tester.pump();
-    expect(tester.takeException(), isNull);
-    expect(layoutInfo?.childSize, const Size.square(10.0));
-    expect(deferredChild.hasSize, isTrue);
-    expect(deferredChild.debugNeedsLayout, isFalse);
-  });
+          top.remove();
+          topRemoved = true;
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+          expect(surrogate.hasSize, isTrue);
+          if (useLayoutBuilder) {
+            expect(layoutInfo?.childSize, const Size.square(10.0));
+          }
+          expect(deferredChild.hasSize, isTrue);
+          expect(deferredChild.debugNeedsLayout, isFalse);
+          // The recovery tap uses the same coordinates as the pending tap.
+          expect(tester.getCenter(find.byKey(overlayKey)), const Offset(25.0, 25.0));
+          await tester.tapAt(const Offset(25.0, 25.0));
+          expect(tester.takeException(), isNull);
+          expect(overlayHitCount, 1);
+          if (semantics != null) {
+            expect(semantics.nodesWith(label: overlayLabel), hasLength(1));
+          }
+        } finally {
+          semantics?.dispose();
+        }
+      }, semanticsEnabled: semanticsEnabled);
+    }
+  }
 
   for (final bounded in <bool>[false, true]) {
     for (final useLayoutBuilder in <bool>[false, true]) {
