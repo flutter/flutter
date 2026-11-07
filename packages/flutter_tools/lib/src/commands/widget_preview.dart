@@ -22,7 +22,6 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/analysis.dart';
 import '../device.dart';
@@ -76,8 +75,6 @@ class WidgetPreviewCommand extends FlutterCommand {
     );
     addSubcommand(WidgetPreviewCleanCommand(toolContext: toolContext));
   }
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description => 'Manage the widget preview environment.';
@@ -95,9 +92,6 @@ class WidgetPreviewCommand extends FlutterCommand {
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   WidgetPreviewSubCommandBase({required super.toolContext});
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   FileSystem get fs => toolContext.fs;
   Logger get logger => toolContext.logger;
@@ -160,10 +154,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
     _analysisServerFactoryOverride = analysisServerFactoryOverride;
     addPubOptions();
-    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.machine,
       DebuggingOptionDescriptors.enableDevTools,
-      DebuggingOptionDescriptors.devToolsServerAddress(),
+      DebuggingOptionDescriptors.devToolsServerAddress,
     ], verboseHelp: verbose);
     argParser
       ..addFlag(
