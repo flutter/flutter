@@ -104,6 +104,53 @@ Future<void> testMain() async {
     expect(decoder.debugCachedWebDecoder, isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/160600
+  test('ImageDecoder-based codec decodes still AVIF images', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/dog.avif');
+    final Uint8List avifBytes = (await response.payload.asByteBuffer()).asUint8List();
+
+    final ui.Codec codec = await renderer.instantiateImageCodec(avifBytes);
+    addTearDown(codec.dispose);
+    expect(codec.frameCount, 1);
+
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    addTearDown(frame.image.dispose);
+    expect(frame.image.width, 180);
+    expect(frame.image.height, 180);
+  }, skip: !browserSupportsImageDecoder);
+
+  test('ImageDecoder-based codec reports multiple frames for animated AVIF images', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/alphabetAnim.avif');
+    final Uint8List avifBytes = (await response.payload.asByteBuffer()).asUint8List();
+
+    final ui.Codec codec = await renderer.instantiateImageCodec(avifBytes);
+    addTearDown(codec.dispose);
+    expect(codec.frameCount, greaterThan(1));
+  }, skip: !browserSupportsImageDecoder);
+
+  test('ImageDecoder-based codec decodes still AVIF images loaded from a URL', () async {
+    // The test server serves .avif files as image/avif, so the response body
+    // is streamed directly to ImageDecoder instead of being sniffed.
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/dog.avif'),
+    );
+    addTearDown(codec.dispose);
+    expect(codec.frameCount, 1);
+
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    addTearDown(frame.image.dispose);
+    expect(frame.image.width, 180);
+    expect(frame.image.height, 180);
+  }, skip: !browserSupportsImageDecoder);
+
+  test('ImageDecoder-based codec decodes animated AVIF images loaded from a URL', () async {
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/alphabetAnim.avif'),
+    );
+    addTearDown(codec.dispose);
+    expect(codec.frameCount, greaterThan(1));
+  }, skip: !browserSupportsImageDecoder);
+
   test(
     '_BrowserEngineCodec.getNextFrame() throws StateError and cleans up if disposed during decode',
     () async {

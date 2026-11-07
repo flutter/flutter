@@ -465,6 +465,7 @@ class BrowserPlatform extends PlatformPlugin {
     '.gif': 'image/gif',
     '.webp': 'image/webp',
     '.bmp': 'image/bmp',
+    '.avif': 'image/avif',
     '.svg': 'image/svg+xml',
     '.json': 'application/json',
     '.map': 'application/json',
