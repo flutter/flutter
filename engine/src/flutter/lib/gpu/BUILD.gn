@@ -102,6 +102,8 @@ if (enable_unittests && !is_fuchsia) {
     testonly = true
 
     sources = [
+      "allocation_counter.cc",
+      "allocation_counter.h",
       "binding_set_unittests.cc",
       "command_buffer_unittests.cc",
       "compute_pass_unittests.cc",

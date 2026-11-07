@@ -4,10 +4,8 @@
 
 #include "flutter/lib/gpu/recording.h"
 
-#include <cstdlib>
 #include <future>
 #include <memory>
-#include <new>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -16,6 +14,7 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
+#include "flutter/lib/gpu/allocation_counter.h"
 #include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/context.h"
@@ -37,45 +36,6 @@
 #include "impeller/renderer/shader_library.h"
 #include "impeller/renderer/testing/mocks.h"
 
-// Counts this thread's heap allocations while a test asks it to. This is what
-// lets the tests below hold the recording and replay paths to zero, rather than
-// trusting a reading of the code.
-namespace {
-thread_local bool count_allocations = false;
-thread_local size_t allocation_count = 0;
-
-void* CountedAllocate(size_t size) {
-  if (count_allocations) {
-    allocation_count++;
-  }
-  return std::malloc(size ? size : 1);
-}
-}  // namespace
-
-void* operator new(size_t size) {
-  return CountedAllocate(size);
-}
-
-void* operator new[](size_t size) {
-  return CountedAllocate(size);
-}
-
-void operator delete(void* memory) noexcept {
-  std::free(memory);
-}
-
-void operator delete[](void* memory) noexcept {
-  std::free(memory);
-}
-
-void operator delete(void* memory, size_t) noexcept {
-  std::free(memory);
-}
-
-void operator delete[](void* memory, size_t) noexcept {
-  std::free(memory);
-}
-
 namespace flutter::gpu {
 namespace {
 
@@ -88,24 +48,8 @@ using ::impeller::testing::MockSampler;
 using ::impeller::testing::MockSamplerLibrary;
 using ::impeller::testing::MockTexture;
 using ::testing::_;
-using ::testing::Invoke;
 using ::testing::NiceMock;
 using ::testing::Return;
-
-class AllocationCounter {
- public:
-  AllocationCounter() {
-    allocation_count = 0;
-    count_allocations = true;
-  }
-
-  ~AllocationCounter() { count_allocations = false; }
-
-  size_t Stop() {
-    count_allocations = false;
-    return allocation_count;
-  }
-};
 
 class FakeShaderFunction : public impeller::ShaderFunction {
  public:
@@ -283,16 +227,16 @@ class FlutterGpuRecordingTest : public ::testing::Test {
         .WillByDefault(Return(impeller_command_buffer_));
     ON_CALL(*impeller_command_buffer_, IsValid).WillByDefault(Return(true));
     ON_CALL(*impeller_command_buffer_, OnCreateRenderPass)
-        .WillByDefault(Invoke([this](const impeller::RenderTarget& target) {
+        .WillByDefault([this](const impeller::RenderTarget& target) {
           last_pass_ = std::make_shared<FakeRenderPass>(context_, target);
           return last_pass_;
-        }));
+        });
     ON_CALL(*sampler_library_, GetSampler)
         .WillByDefault(
             Return(impeller::raw_ptr<const impeller::Sampler>(sampler_)));
     ON_CALL(*pipeline_library_, GetPipeline(_, _, _))
-        .WillByDefault(Invoke([this](impeller::PipelineDescriptor descriptor,
-                                     bool async, bool threadsafe) {
+        .WillByDefault([this](impeller::PipelineDescriptor descriptor,
+                              bool async, bool threadsafe) {
           pipeline_builds_++;
           std::promise<
               std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>>
@@ -302,17 +246,17 @@ class FlutterGpuRecordingTest : public ::testing::Test {
                                 : std::make_shared<FakePipeline>(descriptor));
           return impeller::PipelineFuture<impeller::PipelineDescriptor>{
               descriptor, promise.get_future().share()};
-        }));
+        });
     // The GPU finishes immediately.
     ON_CALL(*command_queue_, Submit(_, _))
-        .WillByDefault(Invoke(
+        .WillByDefault(
             [](const std::vector<std::shared_ptr<impeller::CommandBuffer>>&,
                const impeller::CommandQueue::CompletionCallback& callback) {
               if (callback) {
                 callback(impeller::CommandBuffer::Status::kCompleted);
               }
               return absl::OkStatus();
-            }));
+            });
 
     vertex_ = MakeShader(impeller::ShaderStage::kVertex);
     fragment_ = MakeShader(impeller::ShaderStage::kFragment);
@@ -408,9 +352,11 @@ class FlutterGpuRecordingTest : public ::testing::Test {
 // The tests below are only as good as the counter.
 TEST(FlutterGpuAllocationCounterTest, SeesAllocations) {
   AllocationCounter counter;
-  auto allocated = std::make_unique<int>(0);
-  std::vector<int> grown;
-  grown.push_back(*allocated);
+  // Volatile, or the optimizer may remove these allocations.
+  int* volatile single = new int(0);
+  int* volatile array = new int[2];
+  delete single;
+  delete[] array;
   EXPECT_GE(counter.Stop(), 2u);
 }
 
@@ -707,11 +653,11 @@ TEST_F(FlutterGpuRecordingTest, EndedPassesEncodeBeforeSubmit) {
   fml::AutoResetWaitableEvent encoded;
   std::thread::id encoded_on;
   ON_CALL(*impeller_command_buffer_, OnCreateRenderPass)
-      .WillByDefault(Invoke([&](const impeller::RenderTarget& target) {
+      .WillByDefault([&](const impeller::RenderTarget& target) {
         encoded_on = std::this_thread::get_id();
         encoded.Signal();
         return std::make_shared<FakeRenderPass>(context_, target);
-      }));
+      });
 
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_, queue);
   auto pass = MakePass();
