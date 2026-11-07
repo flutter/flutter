@@ -645,9 +645,13 @@ class ImageFilter {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     TileMode? tileMode,
-    // ignore: avoid_unused_constructor_parameters
     Rect? bounds,
-  }) => engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  }) => engine.EngineImageFilter.blur(
+    sigmaX: sigmaX,
+    sigmaY: sigmaY,
+    tileMode: tileMode,
+    bounds: bounds,
+  );
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
       engine.EngineImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
