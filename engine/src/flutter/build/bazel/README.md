@@ -2090,7 +2090,16 @@ project signed automatically), which wants an Apple development certificate
 and a provisioning profile in the keychain: those files are
 `//:apple_signed_tool_tests` (manual; targets `<file>_signed`), and the apple
 shard keeps the two files whose other cases sign nothing with `dart test
---name` (`cases`). Two of the android shard's files build for macOS and
+--name` (`cases`). The test's home is its own (`$TEST_TMPDIR/home`, for
+the tool's settings), and on a Mac `security` reads the keychain search
+list from the home's preferences: the launcher of an unsandboxed tool test
+copies the developer's list into the test's home (`security list-keychains
+-d user -s`; the keychains stay where they are), or the login keychain and
+its code-signing identity are invisible -- `flutter create` then writes no
+DEVELOPMENT_TEAM, a device build has nothing to sign with, and a failed
+device build is explained by the missing team rather than by Xcode's output
+(the Mac tester's T86/T87, 560; T50/T51's "no valid code signing
+certificates" was the same thing). Two of the android shard's files build for macOS and
 iOS as well on a Mac (analyze_size_test's iOS and macOS cases on
 hello_world, flutter_build_with_compilation_error_test's macos and ios
 targets; `skip: !platform.isMacOS` elsewhere): the android shard runs their

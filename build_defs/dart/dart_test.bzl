@@ -379,6 +379,39 @@ trap 'kill "$display_pid" 2>/dev/null' EXIT
         run = "exec "
 
     launcher = ctx.actions.declare_file(ctx.label.name + ".launcher.sh")
+
+    # On a Mac, `security` (and so codesign, xcodebuild, and the tool's
+    # code-signing lookup) reads the user's keychain search list from
+    # ~/Library/Preferences/com.apple.security.plist: under a home of the
+    # test's own it sees the System keychain alone, never the login keychain
+    # with the developer's identity, so `flutter create` writes no
+    # DEVELOPMENT_TEAM and a device build has nothing to sign with (the Mac
+    # tester's T86/T87: flutter_build_with_compilation_error_test's ios case
+    # passes from the checkout and failed in the facsimile -- the tool, finding
+    # no team, printed its development-team hint in place of Xcode's output).
+    # The developer's search list, copied into the test's home, for the tests
+    # that build with Xcode outside the sandbox; the keychains themselves stay
+    # where they are. Bazel's test environment carries no HOME, so the
+    # developer's home is the account's (dscl's NFSHomeDirectory), and
+    # `security` writes the list into an existing ~/Library/Preferences only.
+    keychain_env = ""
+    if HOST_OS == "mac" and "no-sandbox" in ctx.attr.tags:
+        keychain_env = (
+            "# The developer's keychain search list, in the test's home (see dart_test.bzl).\n" +
+            "if [ -z \"$real_home\" ]; then\n" +
+            "  real_home=\"$(/usr/bin/dscl . -read \"/Users/$(/usr/bin/id -un)\" NFSHomeDirectory 2>/dev/null | /usr/bin/sed -e 's/^NFSHomeDirectory: //' || true)\"\n" +
+            "fi\n" +
+            "if [ -n \"$real_home\" ] && [ -d \"$real_home\" ]; then\n" +
+            "  keychains=()\n" +
+            "  while IFS= read -r keychain; do\n" +
+            "    if [ -n \"$keychain\" ]; then keychains+=(\"$keychain\"); fi\n" +
+            "  done < <(HOME=\"$real_home\" /usr/bin/security list-keychains -d user 2>/dev/null | sed -e 's/^[[:space:]]*\"//' -e 's/\"[[:space:]]*$//' || true)\n" +
+            "  if [ -n \"${keychains[@]+x}\" ]; then\n" +
+            "    mkdir -p \"$HOME/Library/Preferences\"\n" +
+            "    /usr/bin/security list-keychains -d user -s \"${keychains[@]}\" 2>/dev/null || true\n" +
+            "  fi\n" +
+            "fi\n"
+        )
     ctx.actions.write(
         output = launcher,
         content = """#!/bin/bash
@@ -420,9 +453,11 @@ fi
             # neither) -- and a home of the test's own for the tool's
             # settings and analytics (`flutter config --enable-...` writes
             # them there; the developer's are not read).
-            tool_env = ("export PATH=\"$root/bin:$PATH%s\"\n" % (":/opt/homebrew/bin:/usr/local/bin" if HOST_OS == "mac" else "") +
+            tool_env = (("export PATH=\"$root/bin:$PATH%s\"\n" % (":/opt/homebrew/bin:/usr/local/bin" if HOST_OS == "mac" else "")) +
+                        "real_home=\"${HOME:-}\"\n" +
                         "export HOME=\"${TEST_TMPDIR:-$(mktemp -d)}/home\"\n" +
-                        "mkdir -p \"$HOME\"\n") if [p for p in ctx.attr.sdk_files.values() if p.startswith("bin/")] else "",
+                        "mkdir -p \"$HOME\"\n" +
+                        keychain_env) if [p for p in ctx.attr.sdk_files.values() if p.startswith("bin/")] else "",
             # The temporary directory with its symbolic links resolved, for
             # the tests that want it so (resolved_tmpdir); the others get the
             # host's as Bazel passes it.
