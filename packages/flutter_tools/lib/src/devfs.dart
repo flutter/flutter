@@ -526,11 +526,11 @@ class DevFS {
     } on vm_service.RPCError catch (rpcException) {
       // The VM service reports temporary directory failures in the message or,
       // on older runtimes, as an internal error with file system error details.
+      const temporaryDirectoryFailureMessage = 'Creation of temporary directory failed';
       if ((rpcException.code == vm_service.RPCErrorKind.kInternalError.code ||
               rpcException.code == vm_service.RPCErrorKind.kServerError.code) &&
-          (rpcException.message.contains('Creation of temporary directory failed') ||
-              (rpcException.details?.contains('Creation of temporary directory failed') ??
-                  false))) {
+          (rpcException.message.contains(temporaryDirectoryFailureMessage) ||
+              (rpcException.details?.contains(temporaryDirectoryFailureMessage) ?? false))) {
         throwToolExit(
           'Failed to create a temporary directory on the device for DevFS.\n'
           '$rpcException\n'
