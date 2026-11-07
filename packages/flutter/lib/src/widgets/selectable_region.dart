@@ -518,7 +518,8 @@ class SelectableRegionState extends State<SelectableRegion>
         oldWidget.focusNode!.removeListener(_handleFocusChanged);
       }
       _focusNode.addListener(_handleFocusChanged);
-      if (_focusNode.hasFocus != oldWidget.focusNode?.hasFocus) {
+      if (_focusNode.hasFocus != oldWidget.focusNode?.hasFocus ||
+          _focusNode.hasPrimaryFocus != oldWidget.focusNode?.hasPrimaryFocus) {
         _handleFocusChanged();
       }
     }
@@ -549,8 +550,14 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
       }
+    } else if (!_focusNode.hasPrimaryFocus) {
+      if (kIsWeb) {
+        PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
+      }
     } else if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
+      // There may already be a selection, so copy it into the hidden element.
+      PlatformSelectableRegionContextMenu.synchronizeSelection(_selectionDelegate);
     }
   }
 
@@ -603,6 +610,11 @@ class SelectableRegionState extends State<SelectableRegion>
       return;
     }
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+    if (_webContextMenuEnabled) {
+      // Sync the hidden element whenever selection is finalized.
+      // If we don't do this immediately, Safari's Edit->Copy will remain disabled.
+      PlatformSelectableRegionContextMenu.synchronizeSelection(_selectionDelegate);
+    }
   }
 
   // Converts the details.consecutiveTapCount from a TapAndDrag*Details object,
@@ -1583,6 +1595,9 @@ class SelectableRegionState extends State<SelectableRegion>
     _adjustingSelectionEnd = null;
     _selectable?.dispatchSelectionEvent(const ClearSelectionEvent());
     _updateSelectedContentIfNeeded();
+    if (_webContextMenuEnabled) {
+      PlatformSelectableRegionContextMenu.synchronizeSelection(_selectionDelegate);
+    }
   }
 
   Future<void> _copy() async {
@@ -1969,7 +1984,7 @@ class SelectableRegionState extends State<SelectableRegion>
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
     if (_webContextMenuEnabled) {
-      result = PlatformSelectableRegionContextMenu(child: result);
+      result = PlatformSelectableRegionContextMenu(client: _selectionDelegate, child: result);
     }
     return TapRegion(
       groupId: SelectableRegion,
