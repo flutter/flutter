@@ -45,12 +45,15 @@ packages' `tests`, GN's `foreach` over it being what keeps those files
 hand-written) against the GN assignment, and fails on a test the two do not
 both name -- the one way a test added to GN's list could go missing here.
 A run over the manifest also reads the builder files
-(`ci/builders/linux_*.json` and `local_engine.json`'s `linux/` builds, the
-developer's, through `package:engine_build_configs`) and
+(`ci/builders/{linux,mac}_*.json` and `standalone/*.json`, and
+`local_engine.json`'s and `local_engine_common.json`'s `linux/` and
+`macos/` builds, the developer's, through `package:engine_build_configs`) and
 generates, beside them, `configs.bazelrc` -- a `--config=<build>` per Linux
-build, the x64 host's own, the web's, the arm64 cross builds' and Android's
+and Mac build, the x64 host's own, the web's, the arm64 cross builds',
+Android's and the Mac's for either CPU
 (`--web` is the wasm platform, `--target-os=linux --linux-cpu=arm64` the arm64
-one, `--android --android-cpu=<cpu>` the Android ones),
+one, `--android --android-cpu=<cpu>` the Android ones, `--mac-cpu` the
+macOS one and `--ios`/`--simulator` the iOS ones),
 whose `tools/gn` flags the Bazel build can express (`gnFlags`
 in `lib/src/builders.dart` says what each flag amounts to: a setting, the
 platform, an assumption, infrastructure, or nothing yet, in which case the
@@ -72,17 +75,18 @@ and suite, and the suites; `--check` covers it too.
 By default the converter assumes the Linux x64 *host* and leaves the
 *target* open (`generationAssumptions` in `bazel_mapping.dart`): the host
 itself (`host_os`, `host_cpu`, its platform names, the prebuilt Dart SDK),
-the OSes the engine does not build for from this host (`is_win`, `is_mac`,
-`is_ios`, `is_fuchsia`, `is_qnx`) and the arguments `tools/gn` passes in,
+the OSes the engine does not build for from this host (`is_win`,
+`is_fuchsia`, `is_qnx`) and the arguments `tools/gn` passes in,
 which GN derives from nothing (`is_official_build`, the Skia feature flags
 -- at the host's value where the web build passes the same, as a formula
 over the target OS where the two differ, `perTargetOsArguments`), are
 decided the way GN would decide them, and the items they guard are emitted
 with the condition as a comment; what GN derives from the target -- `is_linux`,
-`is_android`, `is_wasm`, `current_cpu`, the toolchains and their names, the
+`is_android`, `is_wasm`, `is_mac`, `is_ios`, `current_cpu`, the toolchains
+and their names, the
 `.gni` arguments computed from them -- stays a `select()` over the platform
-settings, so that one generated file serves the host, the web and the
-Android builds. `--assume name=value` replaces the defaults;
+settings, so that one generated file serves the host, the web, the
+Android and the Apple builds. `--assume name=value` replaces the defaults;
 `--assume=none` keeps every condition and renders it as a `select()`, which
 needs a `config_setting` for each variable involved (see `conditionSettings`).
 What the defaults leave open on purpose -- `is_debug`, the runtime mode,
@@ -450,7 +454,7 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    that constant, as they come before every config's flags on GN's command
    line (lib/ui's `-Wimplicit-float-conversion` is followed, and partly
    undone, by `default_warning_flags`). `action()` becomes a `gn_action`
-   (`build/bazel/gn_action`): GN's build-directory variables evaluate to
+   (`build_defs/gn/gn_action.bzl`): GN's build-directory variables evaluate to
    paths under `//@gen` and `//@out`, `rebase_path(x, root_build_dir)`
    becomes a marked path that only an action's `args` may carry, and the
    emitter writes it as the rule's token -- `$(execpath label)` for a source
@@ -477,10 +481,14 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    action known by its script (`scriptMappings`:
    `build/dart/tools/dart_pkg.py`, which assembles sky_engine's package
    directory) is converted as a template invocation would be, its
-   variables the macro's arguments (`dart_pkg` in `build/bazel/dart`).
+   variables the macro's arguments (`dart_pkg` in
+   `build_defs/dart/dart_pkg.bzl`).
    `generated_file()` with `contents` becomes a `gn_generated_file` writing
    the lines, named after GN's output path under the build directory; the
-   `metadata`-walking form is not converted. Each of these rules, and
+   `metadata`-walking form (`data_keys`, the macOS archives' entitlements
+   lists) has its walk done at conversion time, each line under the
+   condition of the dependency path that reaches it; `walk_keys`,
+   `output_conversion` and `rebase` are not converted. Each of these rules, and
    `copy()`'s, says where GN's build directory holds its files
    (`BuildDirectoryInfo`), which `install` reads. A dependency on an action of the same file becomes a
    source of the dependent, since the outputs are inputs of its compile in
@@ -533,7 +541,8 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    bundle's -- is a `zip_tree` of the copy's files, rooted where the copy's
    `$root_out_dir/<dir>/{{source_file_part}}` outputs say);
    the template's body is the macro's (`flatbuffers()` in
-   `build/bazel/flatbuffers`), and the targets it expands to in GN are the
+   `build_defs/flatbuffers/flatbuffers.bzl`), and the targets it expands to
+   in GN are the
    mapping's `innerTargets`, which the oracle expects. A variable of a
    target's block that is neither one of GN's target variables nor a
    template's argument, and that the block itself read (`exe = ""`, then
