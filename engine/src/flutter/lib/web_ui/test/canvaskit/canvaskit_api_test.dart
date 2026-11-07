@@ -1637,7 +1637,10 @@ void _paragraphTests() {
     // (https://github.com/flutter/flutter/issues/184815). Skia now caps the shift by the half
     // spacing of the visually last cluster, which is 0 here. Both values pass until that Skia
     // change rolls in.
-    expect(lineMetrics.left, anyOf(within<double>(distance: 0.025, from: 2.5), 0.0));
+    expect(
+      lineMetrics.left,
+      anyOf(within<double>(distance: 0.025, from: 2.5), within<double>(distance: 0.025, from: 0)),
+    );
     expectAlmost(lineMetrics.width, 263);
     expect(lineMetrics.lineNumber, 0);
 
