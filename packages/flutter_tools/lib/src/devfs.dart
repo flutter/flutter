@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/common.dart';
 import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -494,7 +495,7 @@ class DevFS {
     final Logger logger = _toolContext.logger;
     logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
-      final vm_service.Response response = await _vmService.createDevFS(fsName);
+      final vm_service.Response response = await _createDevFS();
       _baseUri = Uri.parse(response.json!['uri'] as String);
     } on vm_service.RPCError catch (rpcException) {
       if (rpcException.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
@@ -512,11 +513,32 @@ class DevFS {
       }
       logger.printTrace('DevFS: Creating failed. Destroying and trying again');
       await destroy();
-      final vm_service.Response response = await _vmService.createDevFS(fsName);
+      final vm_service.Response response = await _createDevFS();
       _baseUri = Uri.parse(response.json!['uri'] as String);
     }
     logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
     return _baseUri!;
+  }
+
+  Future<vm_service.Response> _createDevFS() async {
+    try {
+      return await _vmService.createDevFS(fsName);
+    } on vm_service.RPCError catch (rpcException) {
+      // The VM service reports temporary directory failures in the message or,
+      // on older runtimes, as an internal error with file system error details.
+      if ((rpcException.code == vm_service.RPCErrorKind.kInternalError.code ||
+              rpcException.code == vm_service.RPCErrorKind.kServerError.code) &&
+          (rpcException.message.contains('Creation of temporary directory failed') ||
+              (rpcException.details?.contains('Creation of temporary directory failed') ??
+                  false))) {
+        throwToolExit(
+          'Failed to create a temporary directory on the device for DevFS.\n'
+          '$rpcException\n'
+          'Ensure that the device has free disk space and that its temporary directory is writable.',
+        );
+      }
+      rethrow;
+    }
   }
 
   Future<void> destroy() async {

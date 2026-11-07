@@ -171,6 +171,160 @@ void main() {
     },
   );
 
+  for (final (String description, String exceptionType, String failure)
+      in <(String, String, String)>[
+        (
+          'access denied',
+          'PathAccessException',
+          'Creation of temporary directory failed, '
+              r"path = 'C:\Users\user\AppData\Local\Temp' (OS Error: Access is denied, errno = 5)",
+        ),
+        (
+          'disk full',
+          'FileSystemException',
+          'Creation of temporary directory failed, '
+              "path = '/tmp' (OS Error: No space left on device, errno = 28)",
+        ),
+        (
+          'missing directory',
+          'PathNotFoundException',
+          'Creation of temporary directory failed, '
+              "path = '/missing' (OS Error: No such file or directory, errno = 2)",
+        ),
+      ]) {
+    for (final rpcError in <FakeRPCError>[
+      FakeRPCError(
+        code: vm_service.RPCErrorKind.kInternalError.code,
+        error: 'Internal error',
+        details: '_createDevFS: Unexpected exception:$exceptionType: $failure',
+      ),
+      FakeRPCError(code: vm_service.RPCErrorKind.kServerError.code, error: failure),
+    ]) {
+      for (final retry in <bool>[false, true]) {
+        testWithoutContext(
+          'DevFS create reports $description (${rpcError.code}, retry: $retry)',
+          () async {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final fakeVmServiceHost = FakeVmServiceHost(
+              requests: <VmServiceExpectation>[
+                if (retry) ...<VmServiceExpectation>[
+                  const FakeVmServiceRequest(
+                    method: '_createDevFS',
+                    args: <String, Object>{'fsName': 'test'},
+                    error: FakeRPCError(code: 1001), // kFileSystemAlreadyExists
+                  ),
+                  const FakeVmServiceRequest(
+                    method: '_deleteDevFS',
+                    args: <String, Object>{'fsName': 'test'},
+                  ),
+                ],
+                FakeVmServiceRequest(
+                  method: '_createDevFS',
+                  args: <String, Object>{'fsName': 'test'},
+                  error: rpcError,
+                ),
+              ],
+              httpAddress: Uri.parse('http://localhost'),
+            );
+            final devFS = DevFS(
+              fakeVmServiceHost.vmService,
+              'test',
+              fileSystem.currentDirectory,
+              buildMode: BuildMode.debug,
+              toolContext: FakeToolContext(
+                artifacts: Artifacts.test(),
+                fs: fileSystem,
+                logger: BufferLogger.test(),
+                os: FakeOperatingSystemUtils(),
+                processManager: FakeProcessManager.empty(),
+              ),
+              httpClient: FakeHttpClient.any(),
+            );
+
+            final errorText =
+                '_createDevFS: (${rpcError.code}) ${rpcError.error}'
+                '${rpcError.details == null ? '' : '\n${rpcError.details}'}';
+            await expectLater(
+              devFS.create(),
+              throwsToolExit(
+                message:
+                    'Failed to create a temporary directory on the device for DevFS.\n'
+                    '$errorText\n'
+                    'Ensure that the device has free disk space and that its temporary directory is writable.',
+              ),
+            );
+            expect(devFS.baseUri, isNull);
+            expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+          },
+        );
+      }
+    }
+  }
+
+  for (final (String description, FakeRPCError error) in <(String, FakeRPCError)>[
+    ('an unrelated server error', FakeRPCError(code: vm_service.RPCErrorKind.kServerError.code)),
+    (
+      'an unrelated internal error',
+      FakeRPCError(
+        code: vm_service.RPCErrorKind.kInternalError.code,
+        details: '_createDevFS: Unexpected exception: Bad state: unexpected failure',
+      ),
+    ),
+    (
+      'an internal error without details',
+      FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
+    ),
+    (
+      'an unexpected error code',
+      FakeRPCError(
+        code: vm_service.RPCErrorKind.kInvalidParams.code,
+        details: 'Creation of temporary directory failed',
+      ),
+    ),
+  ]) {
+    testWithoutContext('DevFS create rethrows $description', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          FakeVmServiceRequest(
+            method: '_createDevFS',
+            args: <String, Object>{'fsName': 'test'},
+            error: error,
+          ),
+        ],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+      final devFS = DevFS(
+        fakeVmServiceHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        buildMode: BuildMode.debug,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.empty(),
+        ),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      await expectLater(
+        devFS.create(),
+        throwsA(
+          isA<vm_service.RPCError>()
+              .having((vm_service.RPCError exception) => exception.code, 'code', error.code)
+              .having(
+                (vm_service.RPCError exception) => exception.details,
+                'details',
+                error.details,
+              ),
+        ),
+      );
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+    });
+  }
+
   testWithoutContext('DevFS destroy is resilient to vmservice disconnection', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
