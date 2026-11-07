@@ -1380,16 +1380,19 @@ void main() {
 
   group('showDateRangePicker avoids overlapping display features', () {
     testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1600, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
             return MediaQuery(
               // Display has a vertical hinge down the middle
               data: const MediaQueryData(
-                size: Size(800, 600),
+                size: Size(1600, 600),
                 displayFeatures: <DisplayFeature>[
                   DisplayFeature(
-                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    bounds: Rect.fromLTRB(790, 0, 810, 600),
                     type: DisplayFeatureType.hinge,
                     state: DisplayFeatureState.unknown,
                   ),
@@ -1407,26 +1410,32 @@ void main() {
         context: context,
         firstDate: DateTime(2018),
         lastDate: DateTime(2030),
-        anchorPoint: const Offset(1000, 0),
+        anchorPoint: const Offset(2000, 0),
       );
       await tester.pumpAndSettle();
 
       // Should take the right side of the screen
-      expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), const Offset(410.0, 0.0));
-      expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(800.0, 600.0));
+      expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), const Offset(810.0, 0.0));
+      expect(
+        tester.getBottomRight(find.byType(DateRangePickerDialog)),
+        const Offset(1600.0, 600.0),
+      );
     });
 
     testWidgets('positioning with Directionality', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1600, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
             return MediaQuery(
               // Display has a vertical hinge down the middle
               data: const MediaQueryData(
-                size: Size(800, 600),
+                size: Size(1600, 600),
                 displayFeatures: <DisplayFeature>[
                   DisplayFeature(
-                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    bounds: Rect.fromLTRB(790, 0, 810, 600),
                     type: DisplayFeatureType.hinge,
                     state: DisplayFeatureState.unknown,
                   ),
@@ -1444,26 +1453,32 @@ void main() {
         context: context,
         firstDate: DateTime(2018),
         lastDate: DateTime(2030),
-        anchorPoint: const Offset(1000, 0),
+        anchorPoint: const Offset(2000, 0),
       );
       await tester.pumpAndSettle();
 
       // By default it should place the dialog on the right screen
-      expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), const Offset(410.0, 0.0));
-      expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(800.0, 600.0));
+      expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), const Offset(810.0, 0.0));
+      expect(
+        tester.getBottomRight(find.byType(DateRangePickerDialog)),
+        const Offset(1600.0, 600.0),
+      );
     });
 
     testWidgets('positioning with defaults', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1600, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
             return MediaQuery(
               // Display has a vertical hinge down the middle
               data: const MediaQueryData(
-                size: Size(800, 600),
+                size: Size(1600, 600),
                 displayFeatures: <DisplayFeature>[
                   DisplayFeature(
-                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    bounds: Rect.fromLTRB(790, 0, 810, 600),
                     type: DisplayFeatureType.hinge,
                     state: DisplayFeatureState.unknown,
                   ),
@@ -1482,7 +1497,7 @@ void main() {
 
       // By default it should place the dialog on the left screen
       expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), Offset.zero);
-      expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(390.0, 600.0));
+      expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(790.0, 600.0));
     });
   });
 
