@@ -68,7 +68,8 @@ class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
       sk_sp<DlRuntimeEffect> runtime_effect,
       std::vector<std::shared_ptr<DlColorSource>> samplers,
       std::shared_ptr<std::vector<uint8_t>> uniform_data,
-      DlImageSampling input_sampling = DlImageSampling::kNearestNeighbor);
+      DlImageSampling input_sampling = DlImageSampling::kNearestNeighbor,
+      bool unclipped_input = false);
 
   static std::shared_ptr<DlImageFilter> MakeColorFilter(
       const std::shared_ptr<const DlColorFilter>& filter);

@@ -145,9 +145,9 @@ std::shared_ptr<FilterContents> WrapInput(ContentContext& renderer,
             .texture = std::move(texture),
         });
       }
-      return FilterContents::MakeRuntimeEffect(input, std::move(runtime_stage),
-                                               runtime_filter->uniform_data(),
-                                               std::move(texture_inputs));
+      return FilterContents::MakeRuntimeEffect(
+          input, std::move(runtime_stage), runtime_filter->uniform_data(),
+          std::move(texture_inputs), runtime_filter->unclipped_input());
     }
   }
   FML_UNREACHABLE();
