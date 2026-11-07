@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/android/image_external_texture_gl_skia.h"
 
 #include "flutter/display_list/image/dl_image_skia.h"
+#include "flutter/third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 
@@ -53,6 +54,9 @@ sk_sp<flutter::DlImage> ImageExternalTextureGLSkia::CreateDlImage(
   unique_texture.reset(gl_texture);
 
   BindImageToTexture(egl_image, unique_texture.get().texture_name);
+  if (context.gr_context) {
+    context.gr_context->resetContext(kTextureBinding_GrGLBackendState);
+  }
   GrGLTextureInfo textureInfo = {
       GL_TEXTURE_EXTERNAL_OES, unique_texture.get().texture_name, GL_RGBA8_OES};
   auto backendTexture =
