@@ -78,6 +78,11 @@ class ThrowingObserver with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeAlwaysUse24HourFormat() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
   void didChangeAccessibilityFeatures() {
     throw Exception('Intentional test exception from observer');
   }
@@ -193,6 +198,11 @@ class LoggingObserver with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeAlwaysUse24HourFormat() {
+    log.add('didChangeAlwaysUse24HourFormat');
+  }
+
+  @override
   void didChangeAccessibilityFeatures() {
     log.add('didChangeAccessibilityFeatures');
   }
@@ -295,6 +305,12 @@ class RentrantObserver implements WidgetsBindingObserver {
 
   @override
   void didChangeTextScaleFactor() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAlwaysUse24HourFormat() {
     assert(active);
     WidgetsBinding.instance.addObserver(this);
   }
@@ -1006,6 +1022,37 @@ void main() {
 
       WidgetsBinding.instance.handlePlatformBrightnessChanged();
       expect(log, contains('didChangePlatformBrightness'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didChangeAlwaysUse24HourFormat', (WidgetTester tester) async {
+      addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      tester.platformDispatcher.alwaysUse24HourFormatTestValue =
+          !tester.platformDispatcher.alwaysUse24HourFormat;
+      expect(log, contains('didChangeAlwaysUse24HourFormat'));
+      expect(errors, hasLength(1));
+
+      log.clear();
+      errors.clear();
+      WidgetsBinding.instance.handleAlwaysUse24HourFormatChanged();
+      expect(log, contains('didChangeAlwaysUse24HourFormat'));
       expect(errors, hasLength(1));
     });
 
