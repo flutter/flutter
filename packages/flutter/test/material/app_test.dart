@@ -1240,6 +1240,47 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
+  testWidgets('MaterialApp.router router config handles back without an explicit dispatcher', (
+    WidgetTester tester,
+  ) async {
+    var systemPopCount = 0;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+      MethodCall call,
+    ) async {
+      if (call.method == 'SystemNavigator.pop') {
+        systemPopCount += 1;
+      }
+      return null;
+    });
+    final delegate = _BackButtonRouterDelegate();
+    addTearDown(delegate.dispose);
+
+    Widget buildApp() =>
+        MaterialApp.router(routerConfig: RouterConfig<RouteInformation>(routerDelegate: delegate));
+
+    await tester.pumpWidget(buildApp());
+    final BackButtonDispatcher? defaultDispatcher = tester
+        .widget<Router<Object>>(find.byType(Router<Object>))
+        .backButtonDispatcher;
+    expect(defaultDispatcher, isA<RootBackButtonDispatcher>());
+    await tester.pumpWidget(buildApp());
+    expect(
+      tester.widget<Router<Object>>(find.byType(Router<Object>)).backButtonDispatcher,
+      same(defaultDispatcher),
+    );
+    expect(find.text('initial'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('initial'), findsNothing);
+    expect(find.text('popped'), findsOneWidget);
+    expect(systemPopCount, 0);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(systemPopCount, 1);
+  });
+
   testWidgets('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
     Widget? builderChild;
     await tester.pumpWidget(
@@ -1744,6 +1785,30 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
   RouteInformation restoreRouteInformation(RouteInformation configuration) {
     return configuration;
   }
+}
+
+class _BackButtonRouterDelegate extends RouterDelegate<RouteInformation>
+    with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
+  @override
+  final navigatorKey = GlobalKey<NavigatorState>();
+  bool _showInitialPage = true;
+
+  @override
+  Future<void> setNewRoutePath(RouteInformation configuration) => SynchronousFuture<void>(null);
+
+  @override
+  Widget build(BuildContext context) => Navigator(
+    key: navigatorKey,
+    pages: <Page<void>>[
+      const MaterialPage<void>(child: Text('popped')),
+      if (_showInitialPage)
+        const MaterialPage<void>(key: ValueKey<String>('initial'), child: Text('initial')),
+    ],
+    onDidRemovePage: (Page<Object?> page) {
+      _showInitialPage = false;
+      notifyListeners();
+    },
+  );
 }
 
 class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>

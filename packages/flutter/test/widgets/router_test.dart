@@ -1106,6 +1106,58 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
+  for (final keepRootCallback in <bool>[false, true]) {
+    testWidgets('Grandchild removal preserves an active ancestor callback and allows reuse '
+        '(root: $keepRootCallback)', (WidgetTester tester) async {
+      final dispatcher = RootBackButtonDispatcher();
+      final ChildBackButtonDispatcher child = dispatcher.createChildBackButtonDispatcher();
+      final ChildBackButtonDispatcher grandchild = child.createChildBackButtonDispatcher();
+      final calls = <String>[];
+      Future<bool> record(String name) {
+        calls.add(name);
+        return SynchronousFuture<bool>(false);
+      }
+
+      Future<bool> rootCallback() => record('root');
+      Future<bool> childCallback() => record('child');
+      Future<bool> grandchildCallback() => record('grandchild');
+      void attach() {
+        dispatcher.addCallback(rootCallback);
+        child.addCallback(childCallback);
+        grandchild.addCallback(grandchildCallback);
+        grandchild.takePriority();
+      }
+
+      attach();
+      if (keepRootCallback) {
+        child.removeCallback(childCallback);
+      } else {
+        dispatcher.removeCallback(rootCallback);
+      }
+      grandchild.removeCallback(grandchildCallback);
+      expect(child.hasCallbacks, !keepRootCallback);
+      expect(dispatcher.hasCallbacks, isTrue);
+      await tester.binding.handlePopRoute();
+      expect(calls, <String>[if (keepRootCallback) 'root' else 'child']);
+
+      dispatcher.removeCallback(rootCallback);
+      child.removeCallback(childCallback);
+      expect(child.hasCallbacks, isFalse);
+      expect(dispatcher.hasCallbacks, isFalse);
+      expect(tester.binding.removeObserver(dispatcher), isFalse);
+
+      // The same dispatchers can handle back again after being detached.
+      calls.clear();
+      attach();
+      await tester.binding.handlePopRoute();
+      expect(calls, <String>['grandchild', 'child', 'root']);
+      dispatcher.removeCallback(rootCallback);
+      child.removeCallback(childCallback);
+      grandchild.removeCallback(grandchildCallback);
+      expect(tester.binding.removeObserver(dispatcher), isFalse);
+    });
+  }
+
   testWidgets('BackButtonListener takes priority over root back dispatcher', (
     WidgetTester tester,
   ) async {
