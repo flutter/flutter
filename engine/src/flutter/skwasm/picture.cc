@@ -17,7 +17,8 @@ class PictureRecorder {
   flutter::DisplayListBuilder* BeginRecording(
       const flutter::DlRect& cull_rect) {
     assert(!builder_);
-    builder_ = std::make_unique<flutter::DisplayListBuilder>(cull_rect);
+    builder_ = std::make_unique<flutter::DisplayListBuilder>(
+        cull_rect, /*prepare_rtree=*/true);
     return builder_.get();
   }
 
