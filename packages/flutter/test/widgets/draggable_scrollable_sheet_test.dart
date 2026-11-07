@@ -1969,4 +1969,72 @@ void main() {
       expect(lastExtent, 1.0);
     },
   );
+
+  testWidgets('A touch lifted while the sheet snaps does not assert _hold == null', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/195744
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: GestureDetector(
+          // A competing gesture recognizer ensures that the drag recognizer
+          // does not win the arena unconditionally on pointer down, reproducing
+          // _handleDragCancel when a touch lifts without dragging.
+          onTap: () {},
+          child: DraggableScrollableSheet(
+            controller: controller,
+            initialChildSize: 2 / 3,
+            minChildSize: 1 / 3,
+            snap: true,
+            snapSizes: const <double>[2 / 3],
+            builder: (BuildContext context, ScrollController scrollController) {
+              return SingleChildScrollView(
+                controller: scrollController,
+                child: Column(children: <Widget>[for (int i = 0; i < 40; i++) Text('Line $i')]),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.size, 2 / 3);
+
+    final Finder line = find.text('Line 3');
+    final TestGesture drag = await tester.startGesture(tester.getCenter(line));
+    await drag.moveBy(const Offset(0.0, -60.0));
+    await tester.pump();
+    await drag.moveBy(const Offset(0.0, -60.0));
+    await tester.pump();
+    await drag.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+
+    // Assert mid-snap state: sheet has started snapping towards 1.0.
+    final double midSnapSize = controller.size;
+    expect(midSnapSize, greaterThan(2 / 3));
+    expect(midSnapSize, lessThan(1.0));
+
+    // Touch the sheet while it is snapping, then lift without dragging.
+    final TestGesture touch = await tester.startGesture(tester.getCenter(line));
+    await tester.pump();
+
+    // Assert hold callback contract: touching the sheet halts the snap animation
+    // and holds the position stationary.
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(controller.size, midSnapSize);
+
+    // Lifting touch releases the hold.
+    await touch.up();
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+
+    // Let the sheet finish settling to its final snapped size.
+    await tester.pumpAndSettle();
+    expect(controller.size, 2 / 3);
+  });
 }
