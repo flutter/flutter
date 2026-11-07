@@ -104,10 +104,15 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 @property(nonatomic) FlutterEngineProcTable& embedderAPI;
 
 /**
- * True if the semantics is enabled. The Flutter framework starts sending
- * semantics update through the embedder as soon as it is set to YES.
+ * Whether the operating system requests semantics. Changes are sent to Dart.
  */
 @property(nonatomic) BOOL semanticsEnabled;
+
+/** Whether the framework is generating semantics trees. */
+@property(nonatomic, readonly) BOOL semanticsTreeEnabled;
+
+/** Receives framework generation changes from the embedder callback. */
+- (void)setSemanticsTreeEnabled:(BOOL)enabled;
 
 /**
  * The executable name for the current process.
