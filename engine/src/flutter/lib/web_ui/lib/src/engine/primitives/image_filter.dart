@@ -123,9 +123,12 @@ class EngineBlurImageFilter extends EngineImageFilter {
 
   /// The optional bounds passed to [ui.ImageFilter.blur].
   ///
-  /// This is currently only kept for [operator ==], [hashCode] and
-  /// [debugShortDescription]. It is not yet used for rendering, so the
-  /// backends fall back to an unbounded blur, as native Skia does.
+  /// When non-null, enables "bounded blur": samples outside [bounds] are
+  /// treated as transparent. [bounds] is in the canvas's local coordinate
+  /// space. It is part of [operator ==], [hashCode] and
+  /// [debugShortDescription], and is passed to the renderer. Only wimp renders
+  /// it; CanvasKit and skwasm-Skia fall back to an unbounded blur, as native
+  /// Skia does.
   final ui.Rect? bounds;
 
   BackendImageFilter? _cachedFilter;
@@ -154,7 +157,12 @@ class EngineBlurImageFilter extends EngineImageFilter {
 
     _cachedTileMode = mode;
     return _cachedFilter = _cacheAndAttach(
-      renderer.createBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: mode),
+      renderer.createBlurImageFilter(
+        sigmaX: sigmaX,
+        sigmaY: sigmaY,
+        tileMode: mode,
+        bounds: bounds,
+      ),
     );
   }
 

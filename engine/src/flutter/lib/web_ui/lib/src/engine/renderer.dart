@@ -156,6 +156,7 @@ abstract class Renderer {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   });
   BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY});
   BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY});

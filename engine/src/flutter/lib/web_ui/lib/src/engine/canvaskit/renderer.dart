@@ -184,7 +184,11 @@ class CanvasKitRenderer extends Renderer {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   }) {
+    // TODO(harryterkelsen): CanvasKit cannot express bounded blur; falls back
+    // to unbounded like native Skia.
+    // https://github.com/flutter/flutter/issues/175899
     return CkBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
   }
 
