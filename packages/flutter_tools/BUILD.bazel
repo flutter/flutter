@@ -925,15 +925,23 @@ dart_package_tests(
 # from FLUTTER_STORAGE_BASE_URL.
 android_build_tools(
     name = "android_build_tools",
-    maven = "//engine/src/flutter/build/archives:android_engine_maven",
+    # The build's embedding as a Maven repository; under the prebuilt
+    # engine none, and the Gradle plugin fetches bin/cache's engine's from
+    # the storage (its version from the facsimile's engine.stamp, its realm
+    # from engine.realm, both bin/cache's).
+    maven = select({
+        "//build_defs/engine:prebuilt": None,
+        "//conditions:default": "//engine/src/flutter/build/archives:android_engine_maven",
+    }),
 )
 
 # The Android gen_snapshot artifacts in the facsimile's cache: what `flutter
 # precache --android` downloads (AndroidGenSnapshotArtifacts, stamp
 # android-sdk), built here for the three CPUs `flutter build apk` builds
-# for by default in the two AOT modes (build/archives' android_engine_*).
+# for by default in the two AOT modes (build/archives' android_engine_*),
+# under the host's directory the tool looks in (darwin-x64 on every Mac).
 _ANDROID_ENGINE_CACHE_FILES = {
-    "//engine/src/flutter/build/archives:android_engine_%s_%s_gen_snapshot" % (cpu, mode): "artifacts/engine/android-%s-%s/linux-x64" % (cpu, mode)
+    "//engine/src/flutter/build/archives:android_engine_%s_%s_gen_snapshot" % (cpu, mode): "artifacts/engine/android-%s-%s/%s" % (cpu, mode, _HOST_ENGINE)
     for cpu in [
         "arm",
         "arm64",
@@ -949,12 +957,23 @@ _ANDROID_CACHE_FILES = _ANDROID_ENGINE_CACHE_FILES | {
     "//bin/internal:android_sdk_stamp": "android-sdk.stamp",
 }
 
-# Under the prebuilt engine the gen_snapshots still come from the tree, and
-# their stamp says bin/cache's revision (the facsimile's engine.stamp,
-# among @flutter_bin_cache's stamps) so that the tool takes them as current.
-_PREBUILT_ANDROID_CACHE_FILES = _ANDROID_ENGINE_CACHE_FILES | {
-    "//bin/internal:prebuilt_android_sdk_stamp": "android-sdk.stamp",
+# Under the prebuilt engine the Android gen_snapshots are bin/cache's own
+# (`flutter precache --android`: each CPU's and AOT mode's under the host's
+# directory, and the set's stamp, android-sdk, among @flutter_bin_cache's
+# stamps), laid at their paths; a cache without them lays nothing, and the
+# test's tool fetches the set as the checkout's would (the shard has the
+# network).
+_PREBUILT_ANDROID_CACHE = {
+    "@flutter_bin_cache//:android_engine": "",
 }
+
+# The Android shard's `cache`: the tool's, with bin/cache's Android
+# artifacts under the prebuilt engine (the tree's go through `cache_files`,
+# _ANDROID_CACHE_FILES).
+_ANDROID_TOOL_CACHE = select({
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_BASE | _PREBUILT_PUB_CACHE | _PREBUILT_ENGINE_CACHE | _PREBUILT_ANDROID_CACHE,
+    "//conditions:default": _TOOL_CACHE_BASE,
+})
 
 # The Android shard: the integration shard's files that build an app, a
 # plugin or a module for Android through the tool (_INTEGRATION_ANDROID) --
@@ -967,8 +986,12 @@ _PREBUILT_ANDROID_CACHE_FILES = _ANDROID_ENGINE_CACHE_FILES | {
 # depends on from Google's and Maven Central's repositories at build time
 # -- nothing of that is in the checkout, and a pinned mirror of it would be
 # a gigabyte, an order of magnitude beyond the Java tests' Maven lock
-# (build_defs/java). The engine itself does not come from the network: its
-# artifacts are the build's, served to Gradle from a file: URL. Each test
+# (build_defs/java). With the engine from the tree, the engine itself does
+# not come from the network: its artifacts are the build's, served to Gradle
+# from a file: URL. Under the prebuilt engine the embedding comes from the
+# storage, as it does for a developer's `flutter build apk` (the facsimile's
+# engine.stamp and engine.realm are bin/cache's), and the gen_snapshots are
+# bin/cache's where `flutter precache --android` has laid them. Each test
 # downloads into a Gradle home of its own under TEST_TMPDIR (the tool's
 # HOME is the test's), so the first minutes of each are Gradle's, and their
 # timing and reliability depend on the network.
@@ -976,12 +999,9 @@ dart_package_tests(
     name = "android_shard",
     size = "enormous",
     srcs = _HARNESS,
-    cache = _TOOL_CACHE,
-    # (The Android gen_snapshots come from the tree under either
-    # configuration for now: bin/cache's, `flutter precache --android`, is a
-    # later step.)
+    cache = _ANDROID_TOOL_CACHE,
     cache_files = select({
-        "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_COMMON | _PREBUILT_ENGINE_CACHE_FILES | _PREBUILT_ANDROID_CACHE_FILES,
+        "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_COMMON | _PREBUILT_ENGINE_CACHE_FILES,
         "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _ANDROID_CACHE_FILES,
     }),
     data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
