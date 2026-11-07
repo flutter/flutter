@@ -728,7 +728,7 @@ void main() {
     tester.route(downB);
     tester.route(pointer.move(const Offset(28.1, 10.0)));
     tester.route(pointer.up());
-    expect(events, <String>['basichorizontalstart', 'basichorizontalend']);
+    expect(events, <String>['longpresscancel', 'basichorizontalstart', 'basichorizontalend']);
 
     final PointerDownEvent downC = pointer.down(const Offset(10.0, 10.0));
     tapAndDrag.addPointer(downC);
@@ -787,6 +787,7 @@ void main() {
       'down#1',
       'up#1',
       'down#2',
+      'longpresscancel',
       'panstart#2',
       'panupdate#2',
       'panend#2',

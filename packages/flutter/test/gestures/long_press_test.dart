@@ -185,6 +185,82 @@ void main() {
       drag.dispose();
     });
 
+    testGesture('Should call cancel when another recognizer wins the arena', (
+      GestureTester tester,
+    ) {
+      final drag = HorizontalDragGestureRecognizer()
+        ..onStart = (DragStartDetails details) {
+          recognized.add('drag_start');
+        };
+
+      drag.addPointer(down);
+      gesture.addPointer(down);
+      tester.closeArena(5);
+      tester.route(down);
+      expect(recognized, const <String>['down']);
+      tester.route(
+        const PointerMoveEvent(pointer: 5, position: Offset(100, 10), delta: Offset(90, 0)),
+      );
+      expect(recognized, const <String>['down', 'cancel', 'drag_start']);
+      tester.async.elapse(const Duration(milliseconds: 700));
+      tester.route(const PointerUpEvent(pointer: 5, position: Offset(100, 10)));
+      expect(recognized, const <String>['down', 'cancel', 'drag_start']);
+      drag.dispose();
+    });
+
+    testGesture('Should call cancel once when up before deadline with a competitor', (
+      GestureTester tester,
+    ) {
+      final drag = HorizontalDragGestureRecognizer();
+
+      drag.addPointer(down);
+      gesture.addPointer(down);
+      tester.closeArena(5);
+      tester.route(down);
+      tester.route(up);
+      expect(recognized, const <String>['down', 'cancel']);
+      drag.dispose();
+    });
+
+    testGesture('Rejection after an accepted long press in a team does not assert', (
+      GestureTester tester,
+    ) {
+      final team = GestureArenaTeam();
+      final drag = HorizontalDragGestureRecognizer()
+        ..team = team
+        ..onStart = (_) {};
+      gesture.team = team;
+      team.captain = drag;
+      // Keeps the arena open until the long press deadline.
+      final scroll = VerticalDragGestureRecognizer()..onStart = (_) {};
+
+      drag.addPointer(down);
+      gesture.addPointer(down);
+      scroll.addPointer(down);
+      tester.closeArena(5);
+      tester.route(down);
+      tester.async.elapse(const Duration(milliseconds: 700));
+      tester.route(up);
+      // The captain wins, so the long press ends defunct without seeing the up.
+      // The long press accepted first, so it must not also report a cancel.
+      expect(recognized, const <String>['down', 'start']);
+      recognized.clear();
+
+      drag.addPointer(down2);
+      gesture.addPointer(down2);
+      scroll.addPointer(down2);
+      tester.closeArena(6);
+      tester.route(down2);
+      tester.route(
+        const PointerMoveEvent(pointer: 6, position: Offset(10, 110), delta: Offset(0, 100)),
+      );
+      tester.route(const PointerUpEvent(pointer: 6, position: Offset(10, 110)));
+      // Rejecting the next press must not assert on stale state from the first.
+      expect(recognized, const <String>['down']);
+      drag.dispose();
+      scroll.dispose();
+    });
+
     testGesture('Should recognize long press up', (GestureTester tester) {
       gesture.addPointer(down);
       tester.closeArena(5);

@@ -640,8 +640,9 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void didExceedDeadline() {
     // Exceeding the deadline puts the gesture in the accepted state.
-    resolve(GestureDisposition.accepted);
+    // Set first so a team captain winning during resolve does not send a cancel.
     _longPressAccepted = true;
+    resolve(GestureDisposition.accepted);
     super.acceptGesture(primaryPointer!);
     _checkLongPressStart();
   }
@@ -859,22 +860,33 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   void resolve(GestureDisposition disposition) {
+    final bool wasAccepted = _longPressAccepted;
+    super.resolve(disposition);
     if (disposition == GestureDisposition.rejected) {
-      if (_longPressAccepted) {
+      if (wasAccepted) {
         // This can happen if the gesture has been canceled. For example when
         // the buttons have changed.
         _reset();
       } else {
+        // No-op if rejectGesture already sent the cancel.
         _checkLongPressCancel();
       }
     }
-    super.resolve(disposition);
   }
 
   @override
   void acceptGesture(int pointer) {
     // Winning the arena isn't important here since it may happen from a sweep.
     // Explicitly exceeding the deadline puts the gesture in accepted state.
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    if (pointer == primaryPointer && !_longPressAccepted) {
+      // Another recognizer won the arena.
+      _checkLongPressCancel();
+    }
+    super.rejectGesture(pointer);
   }
 
   @override
