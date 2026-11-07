@@ -1055,6 +1055,10 @@ TEST_F(WindowsTest, EngineId) {
   }
 
   auto engine = FlutterDesktopViewControllerGetEngine(first_controller.get());
+  FlutterDesktopPluginRegistrarRef registrar =
+      FlutterDesktopEngineGetPluginRegistrar(engine, "foo_bar");
+  EXPECT_EQ(FlutterDesktopPluginRegistrarGetEngineId(registrar), *engineId);
+  EXPECT_EQ(FlutterDesktopPluginRegistrarGetEngineId(nullptr), 0);
   EXPECT_EQ(engine, FlutterDesktopEngineForId(*engineId));
 }
 
