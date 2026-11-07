@@ -195,6 +195,26 @@ void main() {
     expect(hoverEvent!.position, location);
   });
 
+  testWidgets('cancelPointer dispatches a cancel for a test pointer', (WidgetTester tester) async {
+    PointerCancelEvent? cancelEvent;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Listener(
+          onPointerCancel: (PointerCancelEvent event) {
+            cancelEvent = event;
+          },
+          child: const Text('Test'),
+        ),
+      ),
+    );
+
+    await tester.startGesture(tester.getCenter(find.text('Test')), pointer: 1);
+    binding.cancelPointer(1);
+    await tester.pump();
+
+    expect(cancelEvent?.pointer, 1);
+  });
+
   testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
     var invocations = 0;
     await tester.pumpWidget(
