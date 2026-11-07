@@ -54,20 +54,21 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
     BuildOwner owner, [
     RenderObjectToWidgetElement<T>? element,
   ]) {
-    if (element == null) {
+    var effectiveElement = element;
+    if (effectiveElement == null) {
       owner.lockState(() {
-        element = createElement();
-        assert(element != null);
-        element!.assignOwner(owner);
+        effectiveElement = createElement();
+        assert(effectiveElement != null);
+        effectiveElement!.assignOwner(owner);
       });
-      owner.buildScope(element!, () {
-        element!.mount(null, null);
+      owner.buildScope(effectiveElement!, () {
+        effectiveElement!.mount(null, null);
       });
     } else {
-      element._newWidget = this;
-      element.markNeedsBuild();
+      effectiveElement._newWidget = this;
+      effectiveElement.markNeedsBuild();
     }
-    return element!;
+    return effectiveElement!;
   }
 
   @override

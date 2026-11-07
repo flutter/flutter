@@ -1155,11 +1155,11 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
     assert(!name.contains(','));
     assert(!name.startsWith('r-'));
     final List<String> routes = _routes.value.split(',');
-    name = restoreState ? 'r-$name' : name;
+    final effectiveName = restoreState ? 'r-$name' : name;
     if (index != null) {
-      routes.insert(index, name);
+      routes.insert(index, effectiveName);
     } else {
-      routes.add(name);
+      routes.add(effectiveName);
     }
     setState(() {
       _routes.value = routes.join(',');
@@ -1192,12 +1192,12 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
           ? const <Page<Object?>>[]
           : _routes.value.split(',').map((String name) {
               if (name.startsWith('r-')) {
-                name = name.substring(2);
+                final String effectiveName = name.substring(2);
                 return TestPage<void>(
-                  name: name,
-                  restorationId: name,
-                  key: ValueKey<String>(name),
-                  child: RouteWidget(name: name),
+                  name: effectiveName,
+                  restorationId: effectiveName,
+                  key: ValueKey<String>(effectiveName),
+                  child: RouteWidget(name: effectiveName),
                 );
               }
               return TestPage<void>(

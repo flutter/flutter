@@ -819,10 +819,11 @@ mixin SchedulerBinding on BindingBase {
   ///    for those apps that use Flutter widgets (and where post frame
   ///    callbacks fit into those phases).
   void addPostFrameCallback(FrameCallback callback, {String debugLabel = 'callback'}) {
+    var effectiveCallback = callback;
     assert(() {
       if (debugTracePostFrameCallbacks) {
         final originalCallback = callback;
-        callback = (Duration timeStamp) {
+        effectiveCallback = (Duration timeStamp) {
           Timeline.startSync(debugLabel);
           try {
             originalCallback(timeStamp);
@@ -833,7 +834,7 @@ mixin SchedulerBinding on BindingBase {
       }
       return true;
     }());
-    _postFrameCallbacks.add(callback);
+    _postFrameCallbacks.add(effectiveCallback);
   }
 
   Completer<void>? _nextFrameCompleter;
