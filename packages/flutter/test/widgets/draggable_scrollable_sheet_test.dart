@@ -2037,4 +2037,164 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.size, 2 / 3);
   });
+
+  testWidgets('position.hold callback is called once when superseded by snap and drag', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    late ScrollController innerController;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: DraggableScrollableSheet(
+          controller: controller,
+          snap: true,
+          snapSizes: const <double>[0.5, 1.0],
+          builder: (BuildContext context, ScrollController sc) {
+            innerController = sc;
+            return SingleChildScrollView(controller: sc, child: const SizedBox(height: 1000));
+          },
+        ),
+      ),
+    );
+
+    var holdCanceledCount = 0;
+    innerController.position.hold(() {
+      holdCanceledCount++;
+    });
+    expect(holdCanceledCount, 0);
+
+    // Cancelled when superseded by snap (goBallistic):
+    (innerController.position as ScrollPositionWithSingleContext).goBallistic(0.0);
+    expect(holdCanceledCount, 1);
+
+    // Re-register hold callback:
+    innerController.position.hold(() {
+      holdCanceledCount++;
+    });
+    expect(holdCanceledCount, 1);
+
+    // Cancelled when superseded by drag:
+    innerController.position.drag(DragStartDetails(), () {});
+    expect(holdCanceledCount, 2);
+  });
+
+  testWidgets('snapAnimationDuration settles within the specified duration without pumpAndSettle', (
+    WidgetTester tester,
+  ) async {
+    const snapDuration = Duration(milliseconds: 500);
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: DraggableScrollableSheet(
+          controller: controller,
+          snap: true,
+          snapAnimationDuration: snapDuration,
+          snapSizes: const <double>[0.5, 1.0],
+          builder: (BuildContext context, ScrollController scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Column(children: <Widget>[for (var i = 0; i < 40; i++) Text('Item $i')]),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(controller.size, 0.5);
+
+    // Drag up past the midpoint (0.75) and release to trigger snap towards 1.0.
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 0')));
+    await drag.moveBy(const Offset(0.0, -100.0));
+    await tester.pump();
+    await drag.moveBy(const Offset(0.0, -100.0));
+    await tester.pump();
+    await drag.up();
+    await tester.pump();
+
+    // Pump 16ms frames covering snapDuration (32 frames * 16ms = 512ms >= 500ms).
+    for (var i = 0; i < 32; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    // Must be fully settled at 1.0 without pumpAndSettle().
+    expect(controller.size, 1.0);
+  });
+
+  testWidgets(
+    'Tapping child during snap halts sheet without firing child onTap, and fires onTap once settled',
+    (WidgetTester tester) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      var childTaps = 0;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: DraggableScrollableSheet(
+            controller: controller,
+            snap: true,
+            snapSizes: const <double>[0.5, 1.0],
+            builder: (BuildContext context, ScrollController scrollController) {
+              return SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  children: <Widget>[
+                    GestureDetector(
+                      onTap: () {
+                        childTaps++;
+                      },
+                      child: const SizedBox(height: 100, child: Text('Tap Target')),
+                    ),
+                    for (var i = 0; i < 40; i++) Text('Item $i'),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      expect(controller.size, 0.5);
+
+      // Drag up and release to trigger snap towards 1.0.
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 5')));
+      await drag.moveBy(const Offset(0.0, -60.0));
+      await tester.pump();
+      await drag.moveBy(const Offset(0.0, -60.0));
+      await tester.pump();
+      await drag.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 32)); // In flight
+
+      final double midSnapSize = controller.size;
+      expect(midSnapSize, greaterThan(0.5));
+      expect(midSnapSize, lessThan(1.0));
+
+      // Touch child while sheet is snapping.
+      final TestGesture touch = await tester.startGesture(
+        tester.getCenter(find.text('Tap Target')),
+      );
+      await tester.pump();
+
+      // Sheet animation is halted while held.
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.size, midSnapSize);
+
+      // Lifting touch does not fire child onTap because pointer events were ignored during snap.
+      await touch.up();
+      await tester.pump();
+      expect(childTaps, 0);
+
+      // Let sheet settle.
+      await tester.pumpAndSettle();
+
+      // Once settled, tapping child triggers onTap.
+      await tester.tap(find.text('Tap Target'));
+      await tester.pump();
+      expect(childTaps, 1);
+    },
+  );
 }

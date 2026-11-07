@@ -905,7 +905,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   @override
   void goBallistic(double velocity) {
     if ((velocity == 0.0 && !_shouldSnap()) ||
-        (velocity < 0.0 && (listShouldScroll || extent.isAtMin)) ||
+        (velocity < 0.0 && listShouldScroll) ||
         (velocity > 0.0 && extent.isAtMax)) {
       super.goBallistic(velocity);
       return;
@@ -932,7 +932,9 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       );
     }
 
-    beginActivity(_DraggableSheetBallisticScrollActivity(this, simulation, context.vsync));
+    beginActivity(
+      _DraggableSheetBallisticScrollActivity(this, simulation, context.vsync, shouldIgnorePointer),
+    );
   }
 }
 
@@ -941,6 +943,7 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
     _DraggableScrollableSheetScrollPosition super.delegate,
     Simulation simulation,
     TickerProvider vsync,
+    this.shouldIgnorePointer,
   ) {
     _controller =
         AnimationController.unbounded(
@@ -950,7 +953,7 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
             vsync: vsync,
           )
           ..addListener(_tick)
-          ..animateWith(simulation).whenCompleteOrCancel(_end);
+          ..animateWith(simulation).whenComplete(_end);
   }
 
   late final AnimationController _controller;
@@ -959,15 +962,8 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
   late double _lastPosition = _position.extent.currentPixels;
   bool _disposed = false;
 
-  @override
-  void resetActivity() {
-    delegate.goBallistic(velocity);
-  }
-
-  @override
-  void applyNewDimensions() {
-    delegate.goBallistic(velocity);
-  }
+  // Intentionally do not override resetActivity() or applyNewDimensions()
+  // so that layout changes during snapping do not restart the simulation.
 
   void _tick() {
     final double delta = _controller.value - _lastPosition;
@@ -1002,7 +998,7 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => false;
+  final bool shouldIgnorePointer;
 
   @override
   bool get isScrolling => true;
