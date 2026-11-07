@@ -1080,8 +1080,9 @@ apk|appbundle|aar` in every mode, the Gradle plugin's own tests. What
 own (`@android_tools`, `ANDROID_HOME`); a JDK, the engine's (`@openjdk`,
 `JAVA_HOME`); the engine's Android artifacts in the facsimile's cache --
 gen_snapshot for each CPU `flutter build apk` builds for by default (arm,
-arm64, x64) in each AOT mode (`artifacts/engine/android-<cpu>-<mode>/linux-x64`,
-what `flutter precache --android` downloads), and the embedding as the
+arm64, x64) in each AOT mode (`artifacts/engine/android-<cpu>-<mode>/<host>`,
+what `flutter precache --android` downloads; `darwin-x64` on every Mac,
+as the tool looks there), and the embedding as the
 Maven artifacts the Gradle plugin resolves, `io.flutter:flutter_embedding_<mode>`
 and `io.flutter:<abi>_<mode>` at `1.0.0-<engine.stamp>`. The facsimile's
 stamp is the engine's revision (bin/internal's versioned stamps, since 418;
@@ -1101,7 +1102,9 @@ distribution, the Android Gradle plugin, Kotlin and the libraries an app
 depends on from Google's and Maven Central's repositories at build time;
 nothing of that is in the checkout, and a pinned mirror of it would be a
 gigabyte, an order of magnitude beyond the Java tests' Maven lock. The
-engine itself does not come from the network. Each test downloads into a
+engine itself does not come from the network with the tree's engine; under
+the prebuilt engine (below) Gradle fetches the embedding from the storage,
+as a developer's `flutter build apk` does. Each test downloads into a
 Gradle home of its own under `TEST_TMPDIR` (the tool's HOME is the
 test's), so the first minutes of each are Gradle's. Two things of the
 sandbox: a JVM takes `user.home` from the password database, not from
@@ -1185,6 +1188,7 @@ kernels `flutter test` runs them with. `--config=prebuilt_engine` (the root
 ```sh
 bin/flutter precache                       # the default artifact sets: the framework's tests
 bin/flutter precache --linux --web         # and the host desktop's profile/release engines and the web SDK: the tool's shards
+bin/flutter precache --android             # and the Android gen_snapshots: the tool's android shard (--ios on a Mac: the apple shard)
 bazelisk test --config=prebuilt_engine //packages/flutter/test/widgets:widgets //dev/bots:tests
 bazelisk test --config=prebuilt_engine //packages/flutter_tools:general_shard
 ```
@@ -1212,24 +1216,35 @@ entries in place -- `pkg/sky_engine` and `pkg/flutter_gpu` one level down,
 with a `package` filegroup each, since a package's files are laid relative
 to it -- behind a check of the stamps the tool writes beside each artifact
 set: `flutter_sdk.stamp`, `engine-dart-sdk.stamp` and `font-subset.stamp`
-must be there and equal `engine.stamp`, `linux-sdk.stamp`, `macos-sdk.stamp`
-and `flutter_web_sdk.stamp` must equal it when there (their filegroups are
-empty otherwise), or the fetch fails and says which `flutter precache` flag
-to run -- a stale cache is never an engine of another version by mistake.
+must be there and equal `engine.stamp`, `linux-sdk.stamp`, `macos-sdk.stamp`,
+`flutter_web_sdk.stamp` and `android-sdk.stamp` must equal it when there
+(their filegroups are empty otherwise), or the fetch fails and says which
+`flutter precache` flag to run -- a stale cache is never an engine of
+another version by mistake.
 The rules take the prebuilt plain files where the tree gives built targets
 (`allow_single_file` on the executable attributes, the source-file
 executables added to runfiles by hand, cache paths relativized by package
 for an external repository), and the shader include root is found from
 `flutter/runtime_effect.glsl` wherever shader_lib lives.
 
-Limits. The android shard's gen_snapshots still come from the tree under
-either configuration (`flutter precache --android` would serve them the
-same way; not done): that shard wants an engine checkout. The apple shard
-does not, since 538: on a Mac after `flutter precache --macos --ios` its
-facsimile takes the iOS engine directories from `bin/cache`
-(`@flutter_bin_cache//:ios_engine*` through
+Neither of the tool's platform shards wants an engine checkout under the
+prebuilt engine. The apple shard, since 538: on a Mac after `flutter
+precache --macos --ios` its facsimile takes the iOS engine directories from
+`bin/cache` (`@flutter_bin_cache//:ios_engine*` through
 `//build_defs/engine:prebuilt_ios_engine_*_directory`; where the tool has
-not fetched them it fetches them at run time), and under the prebuilt
+not fetched them it fetches them at run time). The android shard, since
+556: after `flutter precache --android` its facsimile lays `bin/cache`'s
+gen_snapshot set as it is (`@flutter_bin_cache//:android_engine`:
+`artifacts/engine/android-<cpu>-<mode>/<host>/` for the three CPUs in the
+two AOT modes; not the flutter.jar beside them, the internal-build set no
+command asks for) with `android-sdk.stamp` among the stamps below, and
+its Gradle builds fetch the embedding from the storage at the facsimile's
+`engine.stamp` and `engine.realm`, as a developer's `flutter build apk`
+does (`android_build_tools` sets no `FLUTTER_STORAGE_BASE_URL` then; with
+the tree's engine it is a `file:` URL at the build's Maven repository) --
+the shard has the network for Gradle's own downloads in any case. A cache
+without the Android set lays nothing for it, and the test's tool fetches
+the set as the checkout's would. Under the prebuilt
 engine every facsimile's bookkeeping is bin/cache's own
 (`@flutter_bin_cache//:stamps`: the artifact sets' stamps, `engine.stamp`,
 `engine_stamp.json`, `flutter.version.json`, `engine.realm`, laid with the
@@ -1238,10 +1253,8 @@ directories), so that its stamps describe the engine the tool downloaded
 commit that built it, not the checkout's HEAD -- and the content
 validation tests compare a framework's embedded revision with the stamp
 of the same download (T78/T79 found them differing when the facsimile
-stamped HEAD). The tree's facsimile stamps HEAD, which is what it built;
-the Android gen_snapshots under the prebuilt engine carry bin/cache's
-revision (`//bin/internal:prebuilt_android_sdk_stamp`, from
-`@engine_version`'s `PREBUILT_ENGINE_VERSION`). The prebuilt Mac host
+stamped HEAD). The tree's facsimile stamps HEAD, which is what it built.
+The prebuilt Mac host
 engine's `FlutterMacOS.xcframework` is assembled with its links made
 again (532; the repository's globs follow the bundle's directory links,
 and a flat copy fails `codesign`).

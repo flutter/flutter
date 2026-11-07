@@ -194,20 +194,25 @@ def android_engine_artifacts(name, cpus = CPUS, modes = MODES, target_compatible
 def _android_build_tools_impl(ctx):
     java_home = _repository_root(ctx.files.java_home[0])
     maven = ctx.file.maven
+    values = {}
+    if maven != None:
+        # The Gradle plugin's Maven repository for the embedding:
+        # `$FLUTTER_STORAGE_BASE_URL/download.flutter.io` (FlutterPlugin.kt),
+        # the directory engine_maven_repository lays. Without one (the
+        # prebuilt engine: bin/cache's, published), the plugin fetches the
+        # embedding of the facsimile's engine.stamp and engine.realm from the
+        # storage, as a developer's build does; the shard has the network.
+        values["FLUTTER_STORAGE_BASE_URL"] = "file://$root/" + maven.short_path
     return [
         DefaultInfo(
-            runfiles = ctx.runfiles(files = [ctx.file.sdk, maven] + ctx.files.java_home),
+            runfiles = ctx.runfiles(files = [ctx.file.sdk] + ([maven] if maven != None else []) + ctx.files.java_home),
         ),
         ToolEnvironmentInfo(
             directories = {},
-            values = {
+            values = values | {
                 "JAVA_HOME": "$root/" + java_home,
                 # The SDK's writable view, laid by the setup lines below.
                 "ANDROID_HOME": "$HOME/android-sdk",
-                # The Gradle plugin's Maven repository for the embedding:
-                # `$FLUTTER_STORAGE_BASE_URL/download.flutter.io` (FlutterPlugin.kt),
-                # the directory engine_maven_repository lays.
-                "FLUTTER_STORAGE_BASE_URL": "file://$root/" + maven.short_path,
                 # A JVM takes `user.home` from the password database, not
                 # from $HOME, and the Gradle wrapper (its distributions, the
                 # dependency cache, the daemon) and the Android tools (the
@@ -248,8 +253,8 @@ def _android_build_tools_impl(ctx):
 android_build_tools = rule(
     implementation = _android_build_tools_impl,
     doc = "The environment of a test that runs `flutter build apk`: ANDROID_HOME at a writable view of the checkout's " +
-          "SDK, JAVA_HOME at the engine's JDK, FLUTTER_STORAGE_BASE_URL at the build's embedding (a file: URL), " +
-          "GRADLE_USER_HOME and ANDROID_USER_HOME under the test's home; for dart_test's `tools`.",
+          "SDK, JAVA_HOME at the engine's JDK, FLUTTER_STORAGE_BASE_URL at the build's embedding (a file: URL) when " +
+          "there is one, GRADLE_USER_HOME and ANDROID_USER_HOME under the test's home; for dart_test's `tools`.",
     attrs = {
         "sdk": attr.label(
             default = "@android_tools//:android_sdk",
@@ -263,8 +268,8 @@ android_build_tools = rule(
         ),
         "maven": attr.label(
             allow_single_file = True,
-            mandatory = True,
-            doc = "The engine's Maven repository (engine_maven_repository), one directory holding download.flutter.io/.",
+            doc = "The engine's Maven repository (engine_maven_repository), one directory holding download.flutter.io/; " +
+                  "none for the prebuilt engine, whose embedding the Gradle plugin fetches from the storage.",
         ),
     },
 )
