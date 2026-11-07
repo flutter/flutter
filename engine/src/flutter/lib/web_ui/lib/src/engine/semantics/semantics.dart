@@ -965,7 +965,7 @@ abstract class SemanticRole {
   }
 
   void _updateLocale() {
-    final String locale = semanticsObject.locale?.toString() ?? '';
+    final String locale = semanticsObject.locale?.toLanguageTag() ?? '';
     final isSameAsParent = semanticsObject.locale == semanticsObject.parent?.locale;
     if (locale.isEmpty || isSameAsParent) {
       removeAttribute('lang');
