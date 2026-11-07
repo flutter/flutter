@@ -12,10 +12,13 @@
     "the build's action graph (tools/gn_to_bazel/tool/compile_commands.py: the generated file",
     "clangd_check reads, the assets fixtures' source, built for it), as GN's gn gen wrote it.",
     "--mac-cpu arm64 names the drone's CPU (cpu=arm64 in the Mac builders' dimensions), as the other Mac files do; tools/gn's x64 default",
-    "would make the database's query read an x64 build whose host tools are no build of this platform's (clangd_check reads one generated file of it)."
+    "would make the database's query read an x64 build whose host tools are no build of this platform's (clangd_check reads one generated file of it).",
+    "use_rbe: true syncs reclient and its configurations, which the wrapped GN builds (the GL backends') name among their inputs",
+    "whether or not they run on RBE; --no-rbe keeps the recipe from starting a proxy, and the Bazel build runs no remote action here."
   ],
   "cas_archive": false,
   "gclient_variables": {
+    "use_rbe": true,
     "download_bazelisk": true
   },
   "gn": [
