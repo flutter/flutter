@@ -111,6 +111,13 @@ class CupertinoTabController extends ChangeNotifier {
 /// ** See code in examples/api/lib/cupertino/tab_scaffold/cupertino_tab_scaffold.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// A sample demonstrating how to pop to the root of the active tab or scroll to
+/// the top when the active tab is re-tapped.
+///
+/// ** See code in examples/api/lib/cupertino/tab_scaffold/cupertino_tab_scaffold.1.dart **
+/// {@end-tool}
+///
 /// To push a route above all tabs instead of inside the currently selected one
 /// (such as when showing a dialog on top of this scaffold), use
 /// `Navigator.of(rootNavigator: true)` from inside the [BuildContext] of a
