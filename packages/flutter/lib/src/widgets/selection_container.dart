@@ -272,9 +272,9 @@ class SelectionRegistrarScope extends InheritedWidget {
 abstract class SelectionContainerDelegate implements SelectionHandler, SelectionRegistrar {
   BuildContext? _selectionContainerContext;
 
-  /// Whether this delegate is attached to a [SelectionContainer].
+  /// Whether this delegate is attached to an active [SelectionContainer].
   @protected
-  bool get isAttached => _selectionContainerContext != null;
+  bool get isAttached => _selectionContainerContext?.mounted ?? false;
 
   /// Gets the paint transform from the [Selectable] child to
   /// [SelectionContainer] of this delegate.
@@ -317,8 +317,11 @@ abstract class SelectionContainerDelegate implements SelectionHandler, Selection
   ///
   ///  * [RenderBox.hasSize], which is used internally by this method.
   bool get hasSize {
-    if (_selectionContainerContext?.findRenderObject() case final RenderBox box) {
-      return box.hasSize;
+    final BuildContext? context = _selectionContainerContext;
+    if (context != null && context.mounted) {
+      if (context.findRenderObject() case final RenderBox box) {
+        return box.hasSize;
+      }
     }
     return false;
   }
