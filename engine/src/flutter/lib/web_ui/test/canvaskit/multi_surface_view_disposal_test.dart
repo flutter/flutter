@@ -100,7 +100,7 @@ void testMain() {
     Future<void> renderBlueBox(EngineFlutterView view) async {
       final ui.Scene scene = buildBlueScene();
       try {
-        await renderer.renderScene(scene, view);
+        await renderer.renderScene(scene, view, size: view.physicalSize);
       } finally {
         scene.dispose();
       }
@@ -392,10 +392,10 @@ void testMain() {
           scene2.dispose();
         });
 
-        final Future<void> render1 = renderer.renderScene(scene1, view);
+        final Future<void> render1 = renderer.renderScene(scene1, view, size: view.physicalSize);
         expect(viewRasterizer.displayFactory.hasBaseCanvas, isTrue);
         final baseSurface = viewRasterizer.displayFactory.baseCanvas as CkOnscreenSurface;
-        final Future<void> render2 = renderer.renderScene(scene2, view);
+        final Future<void> render2 = renderer.renderScene(scene2, view, size: view.physicalSize);
         expect(viewRasterizer.queue.current, isNotNull);
         expect(viewRasterizer.queue.next, isNotNull);
 
