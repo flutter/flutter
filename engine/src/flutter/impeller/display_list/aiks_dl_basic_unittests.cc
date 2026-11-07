@@ -849,6 +849,82 @@ TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Renders stroked and filled circles whose radii exceed 256, the distance at
+// which squaring coordinates overflows 16-bit floats. Shaders that compute
+// circle distances in mediump precision render these incorrectly on drivers
+// that implement mediump as fp16.
+// See https://github.com/flutter/flutter/issues/195208
+TEST_P(AiksTest, LargeCirclesRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlack());
+  builder.DrawPaint(paint);
+
+  const DlPoint center(512, 384);
+
+  // A filled circle with a hole in its interior.
+  paint.setColor(DlColor::kBlue());
+  builder.DrawCircle(center, 300, paint);
+  paint.setColor(DlColor::kBlack());
+  builder.DrawCircle(center, 270, paint);
+
+  // Stroked circles, including a hairline, that just fit within the window.
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setColor(DlColor::kWhite());
+  paint.setStrokeWidth(4);
+  builder.DrawCircle(center, 380, paint);
+  paint.setColor(DlColor::kRed());
+  paint.setStrokeWidth(1);
+  builder.DrawCircle(center, 340, paint);
+  paint.setColor(DlColor::kGreen());
+  paint.setStrokeWidth(0);
+  builder.DrawCircle(center, 320, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Renders stroked and filled ovals whose semi-axes exceed 256, the distance
+// at which squaring coordinates overflows 16-bit floats. Shaders that compute
+// oval distances in mediump precision render these incorrectly on drivers
+// that implement mediump as fp16.
+// See https://github.com/flutter/flutter/issues/195208
+TEST_P(AiksTest, LargeOvalsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlack());
+  builder.DrawPaint(paint);
+
+  const DlPoint center(512, 384);
+  auto oval = [&center](DlScalar radius_x, DlScalar radius_y) {
+    return DlRect::MakeLTRB(center.x - radius_x, center.y - radius_y,
+                            center.x + radius_x, center.y + radius_y);
+  };
+
+  // A filled oval with a hole in its interior.
+  paint.setColor(DlColor::kBlue());
+  builder.DrawOval(oval(420, 300), paint);
+  paint.setColor(DlColor::kBlack());
+  builder.DrawOval(oval(390, 270), paint);
+
+  // Stroked ovals, including a hairline, that just fit within the window.
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setColor(DlColor::kWhite());
+  paint.setStrokeWidth(4);
+  builder.DrawOval(oval(500, 370), paint);
+  paint.setColor(DlColor::kRed());
+  paint.setStrokeWidth(1);
+  builder.DrawOval(oval(470, 340), paint);
+  paint.setColor(DlColor::kGreen());
+  paint.setStrokeWidth(0);
+  builder.DrawOval(oval(450, 320), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 namespace {
 DlPath ManuallyConstructCirclePath(Scalar radius) {
   DlPathBuilder path_builder;
