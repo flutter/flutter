@@ -188,10 +188,11 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// Apply a layout-time correction to the scroll offset.
   ///
   /// This method should change the [pixels] value by `correction`, but without
-  /// calling [notifyListeners]. It is called during layout by the
-  /// [RenderViewport], before [applyContentDimensions]. After this method is
-  /// called, the layout will be recomputed and that may result in this method
-  /// being called again, though this should be very rare.
+  /// calling [notifyListeners]. It is called during layout, before
+  /// [applyContentDimensions]. When a [RenderViewport] or a
+  /// [RenderShrinkWrappingViewport] calls this method, it then recomputes its
+  /// layout, which may result in this method being called again, though this
+  /// should be very rare.
   ///
   /// See also:
   ///

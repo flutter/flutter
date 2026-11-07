@@ -9,6 +9,7 @@
 /// @docImport 'scroll_position.dart';
 /// @docImport 'scroll_position_with_single_context.dart';
 /// @docImport 'scrollable.dart';
+/// @docImport 'single_child_scroll_view.dart';
 library;
 
 import 'dart:async';
@@ -133,6 +134,36 @@ abstract class ScrollActivity {
 
   /// Called when the scroll view that is performing this activity changes its metrics.
   void applyNewDimensions() {}
+
+  /// Called when the scroll offset has been changed by [correction] during
+  /// layout.
+  ///
+  /// An activity that holds absolute scroll offsets, such as the target offset
+  /// of an animation, must shift them by [correction] as well, otherwise its
+  /// next update undoes the correction and the content visibly jumps by that
+  /// amount.
+  ///
+  /// Implementations must not change the scroll offset or start another
+  /// activity from this method. An activity that needs to start another
+  /// activity in response to a correction can do so from [applyNewDimensions],
+  /// which is also called after every correction, once the new scroll extents
+  /// are known.
+  ///
+  /// The default implementation does nothing, which is correct for activities
+  /// that operate on relative offsets, and for activities such as
+  /// [BallisticScrollActivity] that restart from the corrected position in
+  /// [applyNewDimensions].
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.correctBy], which calls this method.
+  ///  * [SliverGeometry.scrollOffsetCorrection], the usual origin of such a
+  ///    correction, which a sliver reports when the positions of its children
+  ///    turn out to be inconsistent, for example because content before the
+  ///    viewport has changed size.
+  ///  * [SingleChildScrollView], which corrects the scroll offset during layout
+  ///    when it is out of range for the new scroll extents.
+  void correctBy(double correction) {}
 
   /// Whether the scroll view should ignore pointer events while performing this
   /// activity.
@@ -685,7 +716,8 @@ class BallisticScrollActivity extends ScrollActivity {
 ///
 /// Unlike a [BallisticScrollActivity], if a [DrivenScrollActivity] is
 /// in progress when the scroll metrics change, the activity will continue
-/// with its original animation.
+/// with its original animation, only shifted by the scroll offset corrections
+/// it receives through [correctBy].
 ///
 /// See also:
 ///
@@ -744,13 +776,29 @@ class DrivenScrollActivity extends ScrollActivity {
   /// animation to stop before it reaches the end.
   Future<void> get done => _completer.future;
 
+  /// Sum of the corrections received through [correctBy].
+  ///
+  /// [_controller] keeps producing offsets in the coordinate system the
+  /// animation started in. [_tick] translates each offset into the current
+  /// coordinate system by adding this sum to it, otherwise the next tick would
+  /// undo the corrections.
+  double _correction = 0.0;
+
+  @override
+  void correctBy(double correction) {
+    _correction += correction;
+  }
+
   void _tick() {
-    if (!applyMoveTo(_controller.value)) {
+    if (!applyMoveTo(_controller.value + _correction)) {
       delegate.goIdle();
     }
   }
 
   /// Move the position to the given location.
+  ///
+  /// Called on every tick of the animation with the animation's current value
+  /// plus the corrections received through [correctBy], if any.
   ///
   /// If the new position was fully applied, returns true. If there was any
   /// overflow, returns false.
@@ -802,6 +850,6 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($_controller)';
+    return '${describeIdentity(this)}($_controller, correction: ${_correction.toStringAsFixed(1)})';
   }
 }
