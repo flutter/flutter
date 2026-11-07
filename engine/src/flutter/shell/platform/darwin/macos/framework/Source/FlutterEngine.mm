@@ -838,6 +838,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   // Send the initial user settings such as brightness and text scale factor
   // to the engine.
   [self sendInitialSettings];
+  [self updateAccessibilityFeatures];
   return YES;
 }
 
@@ -1437,6 +1438,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
              selector:@selector(updateDisplayConfig:)
                  name:NSApplicationDidChangeScreenParametersNotification
                object:nil];
+  [center addObserver:self
+             selector:@selector(onScrollerStyleChanged:)
+                 name:NSPreferredScrollerStyleDidChangeNotification
+               object:nil];
 }
 
 - (void)addInternalPlugins {
@@ -1562,6 +1567,22 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
 
   self.semanticsEnabled = enabled;
+  [self updateAccessibilityFeatures];
+}
+
+- (void)onScrollerStyleChanged:(NSNotification*)notification {
+  [self updateAccessibilityFeatures];
+}
+
+- (void)updateAccessibilityFeatures {
+  if (!_engine) {
+    return;
+  }
+  int32_t flags = 0;
+  if ([NSScroller preferredScrollerStyle] == NSScrollerStyleLegacy) {
+    flags |= kFlutterAccessibilityFeaturePersistentScrollbars;
+  }
+  _embedderAPI.UpdateAccessibilityFeatures(_engine, (FlutterAccessibilityFeature)flags);
 }
 - (void)handleAccessibilityEvent:(NSDictionary<NSString*, id>*)annotatedEvent {
   NSString* type = annotatedEvent[@"type"];

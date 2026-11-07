@@ -24,6 +24,7 @@ struct AccessibilityFeatureFlag: OptionSet {
     static let noAutoPlayAnimatedImages = AccessibilityFeatureFlag(rawValue: 1 << 8)
     static let noAutoPlayVideos = AccessibilityFeatureFlag(rawValue: 1 << 9)
     static let deterministicCursor = AccessibilityFeatureFlag(rawValue: 1 << 10)
+    static let persistentScrollbars = AccessibilityFeatureFlag(rawValue: 1 << 11)
 }
 
 /// A wrapper for native iOS accessibility settings.
