@@ -414,16 +414,21 @@ the test for real, and so does the command from `engine/src`.
   four), six abreast since 530 (3 GB declared, measured 3.0 GB peak;
   11–13.5 minutes), and with the C1 compiler alone and the serial
   collector since 533 (a class-loading-bound JVM that lives seconds; 2.5×
-  faster at six abreast on eight cores in a measurement here). The other
-  drones are at GN's times: `ci/host_debug_unopt` builds in 3:15 (GN 2:20)
-  and runs its host tests in 4:43 (GN 5:30).
+  faster at six abreast on eight cores in a measurement here, and on the
+  bots the step went from 1,398 s to 342–454 s: `linux_unopt` 17:31–17:58
+  at 534 and 536, GN's 16–17). The other drones are at GN's times:
+  `ci/host_debug_unopt` builds in 3:15 (GN 2:20) and runs its host tests
+  in 4:43 (GN 5:30); the standalone `linux_license` builder's Bazel steps
+  take 84 s (a build of remote cache hits, the runner's tests, the license
+  run) under a twelve-minute checkout.
 - Presubmit: the switched builders run on every PR as they did under GN,
   which is the point. A new `.ci.yaml` target cannot do that: cocoon admits
   it only as `bringup: true`, which runs in postsubmit on the staging pool
-  until the usual promotion. **The presubmit at 531 (`2f1e2923442`,
-  11-05) was 338/338 green: the Linux and Mac engine builders, the
-  standalone Mac test builders, the Linux test drones and every framework
-  and tool shard on Bazel through the unchanged recipes.**
+  until the usual promotion. **The presubmits at 531 (`2f1e2923442`,
+  11-05) and 536 (`c070fe38b22`, 11-06) were 338/338 green: the Linux and
+  Mac engine builders, the standalone Mac test builders and the Linux
+  licenses builder, the Linux test drones and every framework and tool
+  shard on Bazel through the unchanged recipes.**
 
 ## What a recipe change would do differently
 
