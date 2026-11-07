@@ -3143,3 +3143,40 @@ class _ConstantVelocitySimulation extends Simulation {
     return nowX > 1.0 || nowX < 0;
   }
 }
+
+// Regression test for https://github.com/flutter/flutter/issues/184653.
+// Committing a predictive back gesture must continue the route's transition
+// animation from its current value instead of snapping to 1.0 first.
+testWidgets(
+  'Committing a predictive back gesture continues the animation from its current value',
+  (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(home: CupertinoPageScaffold(child: Container())),
+    );
+
+    final CupertinoPageRoute<void> route = CupertinoPageRoute<void>(
+      builder: (BuildContext context) => const CupertinoPageScaffold(child: Text('2')),
+    );
+    tester.state<NavigatorState>(find.byType(Navigator)).push(route);
+    await tester.pumpAndSettle();
+
+    // Simulate a predictive back gesture that has progressed to 60%.
+    route.handleStartBackGesture(progress: 0.6);
+    route.handleUpdateBackGestureProgress(progress: 0.6);
+    expect(route.animation!.value, moreOrLessEquals(0.6));
+
+    // Commit the gesture. The animation must continue from 0.6 down to 0 and
+    // must never jump to 1.0 (the value it had before the fix).
+    route.handleCommitBackGesture();
+    expect(route.animation!.value, lessThan(1.0));
+    expect(route.animation!.value, lessThanOrEqualTo(0.6 + 1e-6));
+
+    await tester.pumpAndSettle();
+    expect(route.animation!.value, 0.0);
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
+      false,
+    );
+  },
+);
+
