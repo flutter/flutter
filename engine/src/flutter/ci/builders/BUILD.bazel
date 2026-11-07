@@ -467,10 +467,42 @@ install(
 # Nothing to run.
 
 # linux_clang_tidy.json: ci/android_debug_arm64_clang_tidy
-#   ninja's default target, everything: bazel build --config=android_debug_arm64_clang_tidy //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=android_debug_arm64_clang_tidy :android_debug_arm64_clang_tidy
+install(
+    name = "android_debug_arm64_clang_tidy",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/android_debug_arm64_clang_tidy",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
+
+# Other steps, scripts of the checkout: test: lint android_debug_arm64.
+# Nothing to run.
 
 # linux_clang_tidy.json: ci/host_debug_clang_tidy
-#   ninja's default target, everything: bazel build --config=host_debug_clang_tidy //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=host_debug_clang_tidy :host_debug_clang_tidy
+install(
+    name = "host_debug_clang_tidy",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/host_debug_clang_tidy",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
+
+# Other steps, scripts of the checkout: test: lint host_debug.
+# Nothing to run.
 
 # linux_clangd.json: ci/linux_unopt_debug_no_rbe
 #   bazel run --config=linux_unopt_debug_no_rbe :linux_unopt_debug_no_rbe

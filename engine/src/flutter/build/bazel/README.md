@@ -2262,8 +2262,21 @@ read, comes from `tools/gn_to_bazel/tool/compile_commands.py` over
 graph); its entries run from the execution root, where Bazel's relative
 include paths resolve, but name the source and the compiler as the
 checkout spells them, so that `tools/clang_tidy`'s file selection and its
-search for `clang-tidy` beside the compiler work on it as they do on GN's
-(`ci/clang_tidy.sh --variant <build directory>`). The builder-specific
+search for `clang-tidy` beside the compiler work on it as they do on GN's.
+For a `tools/gn --bazel` build directory, `compile_commands.py
+--build-directory=out/<name> --build` runs through the directory's own
+Bazel commands (bazel.json's: the same server, output base and
+configuration as the build), first a build of the query's universe that
+fetches the generated sources and headers a remote build leaves on the
+workers (`--remote_download_regex`, the manual tests included), then the
+query; `ci/clang_tidy.sh --variant <name>` does that itself when it finds a
+bazel.json, and the clang-tidy builders run the script as the build's own
+test step (`ci.md`). Entries whose compiler is not clang -- Emscripten's
+under the wasm transitions -- are left out, as the tool could not find a
+clang-tidy for them; `tools/clang_tidy` reads an entry's `arguments` when
+there is one, so Bazel's quoted defines reach clang-tidy whole, and
+`.clang-tidy`'s header filter knows the execution root's spelling of the
+engine's headers beside GN's. The builder-specific
 targets below install the archives alone.
 
 ## A local engine without the copy: `local_engine.json`

@@ -59,8 +59,57 @@ if command -v arch &> /dev/null && [[ $(arch) == "arm64" ]]; then
   CLANG_TIDY_PATH="flutter/buildtools/mac-arm64/clang/bin/clang-tidy"
 fi
 
+# The build directories this run reads: --variant (or --target-variant), the
+# lint's own, and --shard-variants, the ones its shards are computed against.
+# Read here only to find them; the arguments go to the tool as they are.
+variants=()
+args=("$@")
+for ((i = 0; i < ${#args[@]}; i++)); do
+  case "${args[$i]}" in
+    --variant|--target-variant)
+      variants+=("${args[$((i + 1))]}")
+      ;;
+    --variant=*|--target-variant=*)
+      variants+=("${args[$i]#*=}")
+      ;;
+    --shard-variants)
+      IFS=',' read -r -a shard_variants <<< "${args[$((i + 1))]}"
+      variants+=("${shard_variants[@]}")
+      ;;
+    --shard-variants=*)
+      IFS=',' read -r -a shard_variants <<< "${args[$i]#*=}"
+      variants+=("${shard_variants[@]}")
+      ;;
+  esac
+done
+
+# A build directory tools/gn --bazel wrote (bazel.json in it) has no
+# compile_commands.json: GN writes one at gn gen, Bazel none. It is made here
+# from the build's own action graph (bazel aquery on the build's server and
+# configuration; tools/gn_to_bazel/tool/compile_commands.py), after a build
+# of the targets the query covers (--build), so that the generated headers
+# the commands include are on disk even when the build's actions ran
+# remotely. The database names the execution root of the machine that
+# built: the recipe runs this script as a build-local test step on the
+# drone that built, not as a global test over an archive of the directory.
+# A failed database fails the step (set -e). The GN fallback below (a
+# throwaway `tools/gn` when out/host_debug has no database) is for GN
+# directories alone.
+bazel_variants=()
+for variant in "${variants[@]}"; do
+  if [ -n "$variant" ] && [ -f "$SRC_DIR/out/$variant/bazel.json" ] \
+      && [[ " ${bazel_variants[*]} " != *" $variant "* ]]; then
+    bazel_variants+=("$variant")
+  fi
+done
+for variant in "${bazel_variants[@]}"; do
+  echo "$(date +%T) Writing out/$variant/compile_commands.json from the Bazel build"
+  python3 "$SRC_DIR/flutter/tools/gn_to_bazel/tool/compile_commands.py" \
+    --build-directory="$SRC_DIR/out/$variant" --build
+done
+
 COMPILE_COMMANDS="$SRC_DIR/out/host_debug/compile_commands.json"
-if [ ! -f "$COMPILE_COMMANDS" ]; then
+if [ ${#bazel_variants[@]} -eq 0 ] && [ ! -f "$COMPILE_COMMANDS" ]; then
   (cd "$SRC_DIR"; ./flutter/tools/gn)
 fi
 
