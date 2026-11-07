@@ -810,5 +810,47 @@ TEST_F(RenderPassGLESCommandTest,
   EXPECT_TRUE(reactor->React());
 }
 
+// A texture created with TextureGLES::WrapTexture wraps a texture name, not a
+// framebuffer. Rendering into a texture the caller owns is not supported on
+// the GLES backend, so the pass is refused instead of drawing into whatever
+// framebuffer happens to be bound.
+TEST(RenderPassGLESTest, RefusesWrappedTextureNameAsColorAttachment) {
+  auto mock_gl_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  auto& mock_gl_impl_ref = *mock_gl_impl;
+  auto mock_gl =
+      MockGLES::Init(std::move(mock_gl_impl), std::nullopt, "OpenGL ES 3.0");
+
+  auto context = CreateFakeGLESContext();
+  auto dummy_worker = std::make_shared<MockWorker>();
+  context->AddReactorWorker(dummy_worker);
+  auto reactor = context->GetReactor();
+
+  const auto command_buffer =
+      std::static_pointer_cast<Context>(context)->CreateCommandBuffer();
+  const auto description =
+      TextureDescriptor{.storage_mode = StorageMode::kDevicePrivate,
+                        .format = PixelFormat::kR8G8B8A8UNormInt,
+                        .size = {10, 10},
+                        .usage = TextureUsage::kRenderTarget};
+  auto wrapped_texture = TextureGLES::WrapTexture(
+      reactor, description, reactor->CreateHandle(HandleType::kTexture, 7));
+  ASSERT_TRUE(wrapped_texture);
+
+  auto render_target = RenderTarget{};
+  render_target.SetColorAttachment(
+      ColorAttachment{Attachment{.texture = wrapped_texture,
+                                 .load_action = LoadAction::kClear,
+                                 .store_action = StoreAction::kStore}},
+      0);
+  const auto render_pass = command_buffer->CreateRenderPass(render_target);
+  ASSERT_TRUE(render_pass);
+
+  // Nothing is encoded for the pass.
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
+
+  EXPECT_FALSE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
 }  // namespace testing
 }  // namespace impeller
