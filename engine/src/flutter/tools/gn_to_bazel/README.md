@@ -317,12 +317,12 @@ as the action runs it, from the execution root, so that external
 repositories and generated headers under `bazel-out` resolve as they do for
 the build. A source compiled in several configurations gets the command
 line's own -- `--config=<name>`'s, the output directory `bazel-bin` names
--- or a transition of it (`-ST-`, the platform kept) or the exec
-configuration's, in that order; a source compiled under another platform
-or runtime mode alone (the profile and release engines a debug build's
-install reaches, the Android compiles a host build's tests do) is left
-out: its database is that build's, as under GN. Entries whose compiler is
-not a clang (Emscripten's, under the wasm transitions) are left out too.
+-- or a transition of it (`-ST-`, the platform kept), in that order; a
+source compiled under another configuration alone (the exec one's host
+tools, the profile and release engines a debug build's install reaches,
+the Android compiles a host build's tests do) is left out: its database
+is that build's, as under GN. Entries whose compiler is not a clang
+(Emscripten's, under the wasm transitions) are left out too.
 Two things the whole execution root does differently from the sandbox the
 compiles ran in are undone in the entries: the virtual include directories
 (`_virtual_includes/`, a `cc_library`'s declared mapping) are repeated as
