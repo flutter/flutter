@@ -514,9 +514,13 @@ abstract class CkSurface extends Surface {
   @override
   Future<void> triggerContextLoss() async {
     _handledContextLostEvent = Completer<void>();
-    final WebGLContext gl = _webGlContextOf(canvas);
-    if (!gl.isContextLost()) {
-      gl.loseContextExtension.loseContext();
+    try {
+      final WebGLContext gl = _webGlContextOf(canvas);
+      if (!gl.isContextLost()) {
+        gl.loseContextExtension.loseContext();
+      }
+    } catch (_) {
+      // The context may already be lost, destroyed, or lacks WEBGL_lose_context.
     }
   }
 
