@@ -92,7 +92,7 @@ build:android_debug_arm64_ddm --compilation_mode=opt --//engine/src/flutter/comm
 build:android_debug_x64_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64_debug --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_emulator.json: ci/android_emulator_debug_x64
-#   --android --android-cpu=x64 --no-lto --rbe --no-goma --target-dir ci/android_emulator_debug_x64
+#   --android --android-cpu=x64 --no-lto --no-rbe --no-goma --target-dir ci/android_emulator_debug_x64 --bazel
 build:android_emulator_debug_x64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64_debug --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_arm_host_desktop_engine.json: ci/linux_debug_arm64_desktop

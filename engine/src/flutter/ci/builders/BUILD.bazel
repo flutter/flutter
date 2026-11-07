@@ -370,9 +370,16 @@ install(
 )
 
 # ci/android_emulator_debug_x64's tests: run_tests.py --type android.
-# Not run, no Bazel test yet: the android type.
 # Other steps, scripts of the checkout: skia_gold_client/e2e_test.
-# Nothing to run.
+test_suite(
+    name = "android_emulator_debug_x64_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter/impeller/renderer/backend/vulkan:impeller_vulkan_android_unittests",
+        "//engine/src/flutter/impeller/toolkit/android:impeller_toolkit_android_unittests",
+        "//engine/src/flutter/shell/platform/android:flutter_shell_native_unittests",
+    ],
+)
 
 # linux_arm_host_desktop_engine.json: ci/linux_debug_arm64_desktop
 #   bazel run --config=linux_debug_arm64_desktop :linux_debug_arm64_desktop
