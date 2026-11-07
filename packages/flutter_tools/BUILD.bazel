@@ -459,6 +459,14 @@ dart_package_tests(
     # widget_preview tests analyze projects that depend on the SDK's packages
     # and two of them resolve such a project with the real pub.
     data = glob(["test/data/**"]) + ["//dev/integration_tests/flutter_gallery:project"] + _SDK_PACKAGES,
+    # preview_detector_graph_test writes a project to the real file system
+    # and expects each step's change event in turn; a write's second event
+    # (macOS FSEvents) can arrive under the next step's expectation when the
+    # machine is loaded, which the test's own note anticipates. dev/bots runs
+    # the shard one file at a time; here eight ran beside it on the Mac bot
+    # when it failed once (11-06; once before on a Mac of its own, 11-01),
+    # and the next run passed.
+    flaky = ["test/commands.shard/hermetic/widget_preview/preview_detector_graph_test.dart"],
     imports = _IMPORTS,
     large = _LARGE_HERMETIC,
     # update_packages_test fetches the coverage data from storage.googleapis.com;
