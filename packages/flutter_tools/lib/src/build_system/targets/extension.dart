@@ -10,7 +10,11 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../experimental/extension_build_manager.dart';
 import '../build_system.dart';
+import '../depfile.dart';
 import '../exceptions.dart';
+
+/// Host-owned build environment define keys that extension targets cannot set.
+const _reservedEnvironmentDefines = <String>{kBuildMode, kTargetFile, kTargetPlatform};
 
 /// Resolves a build target dependency by its [dependency] name.
 typedef DependencyResolverCallback = Target Function(String dependency);
@@ -111,11 +115,15 @@ class ExtensionTarget extends Target {
   }
 
   @override
+  List<String> get depfiles => assembleTarget.depfiles;
+
+  @override
   Future<void> build(Environment environment) async {
     final Environment(
       :Artifacts artifacts,
       :Directory buildDir,
       :Map<String, String> defines,
+      :DepfileService depFileService,
       :FileSystem fileSystem,
       :Directory outputDir,
       :Directory projectDir,
@@ -147,6 +155,38 @@ class ExtensionTarget extends Target {
     if (!result.success) {
       throw ExtensionAssembleException(assembleTarget.name, errorMessage: result.errorMessage);
     }
+
+    for (final String depfileName in depfiles) {
+      final File depfileFile = buildDir.childFile(depfileName);
+      if (!depfileFile.existsSync()) {
+        throw ExtensionAssembleException(
+          assembleTarget.name,
+          errorMessage: 'Declared depfile "$depfileName" was not written to the build directory.',
+        );
+      }
+      final ExtensionDepfile parsed;
+      try {
+        parsed = ExtensionDepfile.parse(depfileFile.readAsStringSync());
+      } on FormatException catch (e) {
+        throw ExtensionAssembleException(
+          assembleTarget.name,
+          errorMessage: 'Invalid depfile "$depfileName": ${e.message}',
+        );
+      }
+      final Depfile depfile = depFileService.resolve(parsed, projectDir);
+      depFileService.writeToFile(depfile, depfileFile, writeEmpty: true);
+    }
+
+    for (final MapEntry(:String key, :String value) in result.extraDefines.entries) {
+      if (_reservedEnvironmentDefines.contains(key) || defines.containsKey(key)) {
+        environment.logger.printTrace(
+          'Ignoring extraDefine "$key" from extension assemble target "${assembleTarget.name}" '
+          'because it is reserved or already defined.',
+        );
+        continue;
+      }
+      defines[key] = value;
+    }
   }
 }
 
@@ -164,7 +204,8 @@ const _supportedOutputDirPlaceholders = <String>{
 ///
 /// Relative paths are resolved relative to [projectDir].
 /// Throws a [ToolExit] if [ExtensionBuildTarget.outputDir] contains an
-/// unsupported `{...}` placeholder.
+/// unsupported `{...}` placeholder or uses `{TARGET_PLATFORM}` when
+/// [ExtensionBuildTarget.targetPlatform] is `null`.
 Directory resolveExtensionOutputDir({
   required BuildMode buildMode,
   required Directory buildOutputDir,
@@ -179,12 +220,20 @@ Directory resolveExtensionOutputDir({
         'Unsupported placeholder "$placeholder" in outputDir "${target.outputDir}" for build target "${target.name}".',
       );
     }
+    if (placeholder == BuiltInPlaceholders.targetPlatform && target.targetPlatform == null) {
+      throwToolExit(
+        'Placeholder "${BuiltInPlaceholders.targetPlatform}" in outputDir "${target.outputDir}" '
+        'requires targetPlatform to be set on build target "${target.name}".',
+      );
+    }
   }
   String outputPath = target.outputDir
       .replaceAll(BuiltInPlaceholders.outputDir, buildOutputDir.path)
       .replaceAll(BuiltInPlaceholders.projectDir, projectDir.path)
-      .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName)
-      .replaceAll(BuiltInPlaceholders.targetPlatform, target.targetPlatform);
+      .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName);
+  if (target.targetPlatform case final String targetPlatform) {
+    outputPath = outputPath.replaceAll(BuiltInPlaceholders.targetPlatform, targetPlatform);
+  }
   if (fileSystem.path.isRelative(outputPath)) {
     outputPath = fileSystem.path.join(projectDir.path, outputPath);
   }
@@ -203,7 +252,7 @@ const _targetPlatformIndependentArtifacts = <ExtensionArtifact>{
 ///
 /// Throws a [ToolExit] if any requested artifact name is invalid or unsupported,
 /// or if a target-platform-specific artifact is requested on an out-of-tree
-/// target platform.
+/// or unspecified target platform.
 // TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
@@ -215,9 +264,12 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   for (final ExtensionArtifact artifact in target.artifacts) {
     final Artifact resolvedArtifact = _resolveArtifact(artifact);
     if (targetPlatform == null && !_targetPlatformIndependentArtifacts.contains(artifact)) {
+      final reason = target.targetPlatform != null
+          ? 'targets out-of-tree platform "${target.targetPlatform}"'
+          : 'does not specify a targetPlatform';
       throwToolExit(
         'Artifact "${artifact.name}" requires a built-in target platform, '
-        'but build target "${target.name}" targets out-of-tree platform "${target.targetPlatform}".',
+        'but build target "${target.name}" $reason.',
       );
     }
     resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
@@ -312,8 +364,8 @@ TargetPlatform? _resolveArtifactTargetPlatform({
   return resolvedPlatform;
 }
 
-TargetPlatform? _tryResolveTargetPlatform(String platformName) {
-  if (platformName.isEmpty) {
+TargetPlatform? _tryResolveTargetPlatform(String? platformName) {
+  if (platformName == null || platformName.isEmpty) {
     return null;
   }
   try {
