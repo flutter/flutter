@@ -12,7 +12,7 @@ import 'binary_messenger.dart';
 import 'binding.dart';
 
 /// A [BinaryMessenger] for use on background (non-root) isolates.
-class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
+final class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
   BackgroundIsolateBinaryMessenger._();
 
   final ReceivePort _receivePort = ReceivePort();

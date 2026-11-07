@@ -634,7 +634,7 @@ abstract final class AutofillHints {
 ///
 /// Typically used in [TextInputConfiguration.autofillConfiguration].
 @immutable
-class AutofillConfiguration {
+final class AutofillConfiguration {
   /// Creates autofill related configuration information that can be sent to the
   /// platform.
   const AutofillConfiguration({
@@ -750,9 +750,6 @@ class AutofillConfiguration {
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
     }
     return other is AutofillConfiguration &&
         other.enabled == enabled &&

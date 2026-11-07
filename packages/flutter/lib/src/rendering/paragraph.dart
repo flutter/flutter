@@ -55,7 +55,7 @@ const String _kEllipsis = '\u2026';
 /// The [RichText] uses this to tag the relation between its placeholder spans
 /// and their semantics nodes.
 @immutable
-class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
+final class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
   /// Creates a semantics tag with the input `index`.
   ///
   /// Different [PlaceholderSpanIndexSemanticsTag]s with the same `index` are

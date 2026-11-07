@@ -7,7 +7,7 @@ import 'dart:js_interop';
 import '../web.dart' as web;
 
 /// Dumps error messages to the console.
-class ErrorToConsoleDumper {
+abstract final class ErrorToConsoleDumper {
   static final _listeners = <void Function(String message)>[];
 
   /// Dumps the given error [message] to the console.
