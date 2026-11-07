@@ -1074,7 +1074,8 @@ the longest at 336 s), on a host with no cmake, clang or GTK of its own.
 The Android shard (`//packages/flutter_tools:android_shard`, 25 files; the
 root's `//:android_tool_tests`) builds apps, plugins and modules for
 Android through the tool -- `flutter create`, `flutter build
-apk|appbundle|aar` in every mode, the Gradle plugin's own tests. What
+apk|appbundle|aar` in every mode, the Gradle plugin's own tests (two files'
+macOS and iOS cases excepted: the apple cases shard's, below). What
 `flutter build apk` needs, and where it comes from
 (`build_defs/android/build_tools.bzl`): the Android SDK, the checkout's
 own (`@android_tools`, `ANDROID_HOME`); a JDK, the engine's (`@openjdk`,
@@ -2089,7 +2090,16 @@ project signed automatically), which wants an Apple development certificate
 and a provisioning profile in the keychain: those files are
 `//:apple_signed_tool_tests` (manual; targets `<file>_signed`), and the apple
 shard keeps the two files whose other cases sign nothing with `dart test
---name` (`cases`). The host's TMPDIR reaches these tests as Bazel passes it
+--name` (`cases`). Two of the android shard's files build for macOS and
+iOS as well on a Mac (analyze_size_test's iOS and macOS cases on
+hello_world, flutter_build_with_compilation_error_test's macos and ios
+targets; `skip: !platform.isMacOS` elsewhere): the android shard runs their
+other cases with `--name` on every host, and `apple_cases_shard`, of the
+apple shard's shape and in `//:apple_tool_tests`, runs those (targets
+`<file>_apple`; hello_world's Xcode projects copied writable like the
+gallery's) -- the Mac tester's T85 found them failing in the android shard,
+whose facsimile has neither the iOS engine nor the writable scripts (559).
+The host's TMPDIR reaches these tests as Bazel passes it
 (`/var/folders/...`, which the tool's tests expect); only the widget_preview
 watchers of the hermetic shard get it resolved (`resolved_tmpdir`).
 
