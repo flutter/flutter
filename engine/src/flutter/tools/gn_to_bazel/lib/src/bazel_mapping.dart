@@ -831,6 +831,27 @@ final class BazelLabel {
   String toString() => '$repository//$package:$name';
 }
 
+/// [label] as buildifier rewrites it: a name that repeats its package's last
+/// segment is dropped (`//a/b:b` is `//a/b`, `@icu//:icu` is `@icu`). The
+/// hand-assembled files (the builders' suites) write labels this way so that
+/// they read the same with and without buildifier -- the bots' check of the
+/// generated files runs without one.
+String buildifierLabel(String label) {
+  final int colon = label.lastIndexOf(':');
+  if (colon < 0 || !label.contains('//')) {
+    return label;
+  }
+  final String prefix = label.substring(0, colon);
+  final String name = label.substring(colon + 1);
+  final String last = prefix.endsWith('//')
+      ? (prefix.startsWith('@') ? prefix.substring(1, prefix.length - 2) : '')
+      : prefix.substring(prefix.lastIndexOf('/') + 1);
+  if (last.isEmpty || name != last) {
+    return label;
+  }
+  return prefix.endsWith('//') ? prefix.substring(0, prefix.length - 2) : prefix;
+}
+
 /// Where a generated file lives: in the main repository (an engine package
 /// such as `//engine/src/flutter/fml`), or in an external repository made
 /// from a synced tree at fetch time (`@skia`, whose root is the GN directory

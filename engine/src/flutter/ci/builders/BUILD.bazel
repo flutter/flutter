@@ -760,7 +760,7 @@ install(
 
 # ci/host_debug_unopt's tests: run_tests.py --type dart,dart-host,engine,font-subset.
 # ci/host_debug_unopt's steps that run a script of the checkout, as Bazel tests: //engine/src/flutter/ci:ban_generated_plugin_registrant_java, //engine/src/flutter/ci:ban_generated_plugin_registrant_java_test, //engine/src/flutter/shell/testing/vm_service:service_protocol_test, //engine/src/flutter/tools/pkg/engine_build_configs:check_build_configs, //engine/src/flutter:gn_test.
-# Other steps, scripts of the checkout: test: Check formatting; analyze_dart_ui; pylint; test: Lint android host.
+# Other steps, scripts of the checkout: test: Check formatting; analyze_dart_ui; pylint; test: Lint android host; Check generated Bazel files.
 test_suite(
     name = "ci_host_debug_unopt_tests",
     tags = ["manual"],
