@@ -178,7 +178,11 @@ the test for real, and so does the command from `engine/src`.
   (`ci/wasm_release`), and `linux_unopt`'s builds but one. A try build's
   archives go where they always went for a try build (the recipe's archives
   module routes the try bucket to `flutter_archives_v2`, never to the release
-  bucket the tool downloads from).
+  bucket the tool downloads from). `linux_unopt`'s first build also carries
+  the step that keeps the generated files honest, "Check generated Bazel
+  files" (`ci/check_generated_bazel_files.sh`: `gn_to_bazel --check` on the
+  checkout's prebuilt Dart SDK, without buildifier, about a minute; a
+  `BUILD.gn` or builder-file change that was not regenerated fails there).
 - Still GN, and why: `linux_unopt`'s `ci/host_debug_no_prebuilt_dart_sdk`
   (the Dart SDK from source; `--config=host_debug_no_prebuilt_dart_sdk`
   exists for a developer, a cold bot has no time for it); `linux_clang_tidy`
