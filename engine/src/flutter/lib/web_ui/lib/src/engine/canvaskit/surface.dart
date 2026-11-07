@@ -496,27 +496,21 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     }
   }
 
-  /// Replaces the current canvas with a new one of [size] and attempts to
-  /// create a fresh WebGL context for it, falling back to software rendering
-  /// if that fails.
-  ///
-  /// The old canvas is released and its WebGL context is explicitly lost so
-  /// the browser frees the context slot immediately, and the Skia objects
-  /// bound to it are torn down before the new canvas is acquired.
-  ///
-  /// This also records [size] as the current size, because the new Skia
-  /// surface is created at [_currentSize].
-  void _replaceCanvas(BitmapSize size) {
-    _currentSize = size;
-    final DomEventTarget oldCanvas = canvas;
-    final WebGLContext gl = (oldCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
-
+  /// Releases the current canvas, explicitly loses its WebGL context so the
+  /// browser frees the context slot immediately, and tears down the Skia
+  /// objects bound to it.
+  void _releaseCanvasAndContext() {
+    final offscreenCanvas = canvas as DomOffscreenCanvas;
     // Release the canvas first so that its `webglcontextlost` listener is
     // removed and [onContextLost] does not fire for the deliberate loss below.
-    _canvasProvider.releaseCanvas(oldCanvas);
-    // An already-lost context holds no slot to free and exposes no extensions.
-    if (!gl.isContextLost()) {
-      gl.loseContextExtension.loseContext();
+    _canvasProvider.releaseCanvas(offscreenCanvas);
+    if (supportsWebGl) {
+      final WebGLContext gl = offscreenCanvas.getGlContext(webGLVersion);
+      // An already-lost context holds no slot to free and exposes no
+      // extensions.
+      if (!gl.isContextLost()) {
+        gl.loseContextExtension.loseContext();
+      }
     }
 
     // Unlike `_adoptCanvas`, which only drops its references,
@@ -527,6 +521,20 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     _grContext?.releaseResourcesAndAbandonContext();
     _grContext?.delete();
     _grContext = null;
+  }
+
+  /// Replaces the current canvas with a new one of [size] and attempts to
+  /// create a fresh WebGL context for it, falling back to software rendering
+  /// if that fails.
+  ///
+  /// The old canvas and its context are torn down by
+  /// [_releaseCanvasAndContext] before the new canvas is acquired.
+  ///
+  /// This also records [size] as the current size, because the new Skia
+  /// surface is created at [_currentSize].
+  void _replaceCanvas(BitmapSize size) {
+    _currentSize = size;
+    _releaseCanvasAndContext();
 
     final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
       size,
@@ -550,17 +558,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     if (_isDisposed) {
       return;
     }
-    final DomEventTarget currentCanvas = canvas;
-    _canvasProvider.releaseCanvas(currentCanvas as DomOffscreenCanvas);
-    if (supportsWebGl) {
-      final WebGLContext gl = currentCanvas.getGlContext(webGLVersion);
-      if (!gl.isContextLost()) {
-        gl.loseContextExtension.loseContext();
-      }
-    }
-    _grContext?.releaseResourcesAndAbandonContext();
-    _grContext?.delete();
-    _grContext = null;
+    _releaseCanvasAndContext();
     super.dispose();
   }
 }

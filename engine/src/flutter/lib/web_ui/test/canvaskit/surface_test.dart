@@ -477,6 +477,21 @@ void testMain() {
         expect(onscreenSurface.skSurface, isNull);
       });
 
+      test('context loss after dispose does not replace the canvas', () async {
+        // The onscreen canvas keeps its context loss listener after dispose,
+        // so only the disposed check in onContextLost prevents a new canvas
+        // from being acquired.
+        final surface = CkOnscreenSurface(OnscreenCanvasProvider());
+        await surface.initialized;
+        surface.setSize(const BitmapSize(100, 100));
+        final DomEventTarget disposedCanvas = surface.canvas;
+        surface.dispose();
+
+        await surface.triggerContextLoss();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(identical(surface.canvas, disposedCanvas), isTrue);
+      });
+
       test('context loss after already completed triggerContextLoss does not throw', () async {
         final surface = CkOffscreenSurface(OffscreenCanvasProvider());
         await surface.initialized;
