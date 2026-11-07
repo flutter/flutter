@@ -397,6 +397,12 @@ enum WidgetInspectorServiceExtensions {
   /// for [Element]s with a corresponding [RenderObject] of type
   /// [RenderParagraph].
   ///
+  /// If the parameter `fullDetails` is false, a reduced set of properties is
+  /// included for each node. In that case, the parameter
+  /// `withCreationLocations` can be set to true to include the location in
+  /// source code where each widget was created. Creation locations are always
+  /// included when `fullDetails` is true.
+  ///
   /// See also:
   ///
   /// * [WidgetInspectorService.initServiceExtensions], where the service
