@@ -279,6 +279,10 @@ build:mac_android_release_x64 --compilation_mode=opt --//engine/src/flutter/comm
 #   --runtime-mode debug --prebuilt-dart-sdk --no-lto --target-dir ci/host_debug_clang_tidy --mac-cpu arm64 --no-rbe --no-goma --xcode-symlinks --bazel
 build:mac_host_debug_clang_tidy --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64_debug
 
+# mac_clang_tidy.json: ci/mac_host_debug_clang_tidy_1
+#   --runtime-mode debug --prebuilt-dart-sdk --no-lto --target-dir ci/mac_host_debug_clang_tidy_1 --mac-cpu arm64 --no-rbe --no-goma --xcode-symlinks --bazel
+build:mac_host_debug_clang_tidy_1 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64_debug
+
 # mac_clang_tidy.json: ci/ios_debug_sim_clang_tidy
 #   --ios --runtime-mode debug --simulator --no-lto --target-dir ci/ios_debug_sim_clang_tidy --simulator-cpu arm64 --no-rbe --no-goma --xcode-symlinks --bazel
 build:ios_debug_sim_clang_tidy --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug

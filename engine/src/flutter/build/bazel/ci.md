@@ -207,7 +207,12 @@ the test for real, and so does the command from `engine/src`.
   tools/gn's x64 default -- on a 16-core Mac the host variant's lint is 9:07
   over 1,077 files and the simulator's 2:17 over 491 -- which turned up one
   arm64-only analyzer report in a vendored header, off for its directory
-  since 550, NEED_DECISION Q45), and
+  since 550, NEED_DECISION Q45. On the bots at 551 the host drone took 31
+  min, its lint 23 of them on the Mac bot's cores, against GN's 25–28 for
+  the whole builder with four tester drones; 555 builds the host variant on
+  two drones that each lint one half of the same database --
+  `--shard-id`, `--shard-variants` naming the drone's own -- the second's
+  install from the remote cache), and
   `linux_unopt`'s builds but one. A try build's
   archives go where they always went for a try build (the recipe's archives
   module routes the try bucket to `flutter_archives_v2`, never to the release
