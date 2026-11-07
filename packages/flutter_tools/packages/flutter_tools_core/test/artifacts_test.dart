@@ -8,6 +8,58 @@ import 'package:test/test.dart';
 void main() {
   const validSha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
+  group('CpuArch', () {
+    test('round-trips canonical built-in architectures', () {
+      for (final CpuArch arch in CpuArch.values) {
+        expect(CpuArch.fromName(arch.name), same(arch));
+        expect(CpuArch.tryFromName(arch.name), same(arch));
+      }
+      expect(CpuArch.fromName('x86_64'), same(CpuArch.x64));
+      expect(CpuArch.tryFromName('x86_64'), same(CpuArch.x64));
+      expect(CpuArch.x64.toString(), 'CpuArch.x64');
+    });
+
+    test('parses and compares custom architectures', () {
+      final customArch = CpuArch('ppc64le');
+      expect(customArch.name, 'ppc64le');
+      expect(CpuArch.fromName('ppc64le'), equals(customArch));
+      expect(CpuArch.fromName('ppc64le').hashCode, equals(customArch.hashCode));
+    });
+
+    test('exposes platform-specific architecture names', () {
+      expect(CpuArch.armv7.dartName, 'armv7');
+      expect(CpuArch.arm64.dartName, 'arm64');
+      expect(CpuArch.x86.dartName, 'x86');
+      expect(CpuArch.x64.dartName, 'x64');
+      expect(CpuArch.riscv64.dartName, 'riscv64');
+      expect(() => CpuArch.unknown.dartName, throwsUnsupportedError);
+      expect(() => CpuArch('ppc64le').dartName, throwsUnsupportedError);
+
+      expect(CpuArch.armv7.darwinArchName, 'armv7');
+      expect(CpuArch.arm64.darwinArchName, 'arm64');
+      expect(CpuArch.x64.darwinArchName, 'x86_64');
+      expect(() => CpuArch.riscv64.darwinArchName, throwsUnsupportedError);
+
+      expect(CpuArch.armv7.androidArchName, 'armeabi-v7a');
+      expect(CpuArch.arm64.androidArchName, 'arm64-v8a');
+      expect(CpuArch.x64.androidArchName, 'x86_64');
+      expect(() => CpuArch.riscv64.androidArchName, throwsUnsupportedError);
+
+      expect(CpuArch.armv7.androidPlatformName, 'android-arm');
+      expect(CpuArch.arm64.androidPlatformName, 'android-arm64');
+      expect(CpuArch.x64.androidPlatformName, 'android-x64');
+      expect(() => CpuArch.riscv64.androidPlatformName, throwsUnsupportedError);
+    });
+
+    test('rejects malformed CPU architecture strings', () {
+      for (final invalid in <String>['', '   ', 'invalid-arch', 'UpperCase', 'arch_1']) {
+        expect(CpuArch.tryFromName(invalid), isNull, reason: 'Expected "$invalid" to be null');
+        expect(() => CpuArch.fromName(invalid), throwsFormatException);
+        expect(() => CpuArch(invalid), throwsA(isA<AssertionError>()));
+      }
+    });
+  });
+
   group('HostPlatform', () {
     test('round-trips canonical built-in platforms', () {
       for (final HostPlatform platform in HostPlatform.values) {
@@ -15,10 +67,13 @@ void main() {
         expect(HostPlatform.fromName(platform.name), same(platform));
         expect(HostPlatform.tryFromName(platform.cliName), same(platform));
       }
+      expect(HostPlatform.linux_x64.osName, 'linux');
+      expect(HostPlatform.linux_x64.cpuArch, CpuArch.x64);
+      expect(HostPlatform.linux_x64.cpuArchName, 'x64');
       expect(HostPlatform.linux_x64.cliName, 'linux-x64');
       expect(HostPlatform.linux_x64.name, 'linux_x64');
-      expect(HostPlatform.darwin_arm64.platformName, 'arm64');
-      expect(HostPlatform.linux_riscv64.platformName, 'riscv64');
+      expect(HostPlatform.darwin_arm64.cpuArchName, 'arm64');
+      expect(HostPlatform.linux_riscv64.cpuArchName, 'riscv64');
       expect(HostPlatform.linux_x64.toString(), 'HostPlatform.linux_x64');
       expect(HostPlatform.fromOsAndArch('macos', 'arm64'), HostPlatform.darwin_arm64);
       expect(HostPlatform.fromOsAndArch('linux', 'riscv64'), HostPlatform.linux_riscv64);
@@ -26,14 +81,18 @@ void main() {
     });
 
     test('parses and compares custom <os>-<arch> platforms', () {
-      final customHost = HostPlatform('freebsd-x64', 'x64');
+      final customHost = HostPlatform('freebsd', .x64);
+      expect(customHost.osName, 'freebsd');
+      expect(customHost.cpuArch, same(CpuArch.x64));
+      expect(customHost.cpuArchName, 'x64');
       expect(customHost.cliName, 'freebsd-x64');
       expect(customHost.name, 'freebsd_x64');
-      expect(customHost.platformName, 'x64');
       expect(HostPlatform.fromName('freebsd-x64'), equals(customHost));
       expect(HostPlatform.fromName('freebsd_x64'), equals(customHost));
       expect(HostPlatform.fromName('freebsd-x64').hashCode, equals(customHost.hashCode));
-      expect(() => HostPlatform('freebsd-x64', 'arm64'), throwsA(isA<AssertionError>()));
+
+      final customArchHost = HostPlatform('freebsd', CpuArch('ppc64le'));
+      expect(HostPlatform.fromName('freebsd-ppc64le'), equals(customArchHost));
     });
 
     test('rejects malformed host platform strings', () {
@@ -49,6 +108,9 @@ void main() {
       ]) {
         expect(HostPlatform.tryFromName(invalid), isNull, reason: 'Expected "$invalid" to be null');
         expect(() => HostPlatform.fromName(invalid), throwsFormatException);
+      }
+      for (final invalidOs in <String>['', 'free-bsd', 'free_bsd', 'FreeBSD']) {
+        expect(() => HostPlatform(invalidOs, .x64), throwsA(isA<AssertionError>()));
       }
     });
   });
@@ -87,7 +149,7 @@ void main() {
         name: 'custom-bsd-bin',
         sha256: validSha256,
         url: Uri.parse('https://example.com/artifacts/bsd.zip'),
-        hostPlatform: HostPlatform('freebsd-x64', 'x64'),
+        hostPlatform: HostPlatform('freebsd', .x64),
         targetPlatform: 'freebsd-x64',
       );
       expect(ArtifactDependency.fromJson(customHostDep.toMap()), equals(customHostDep));
