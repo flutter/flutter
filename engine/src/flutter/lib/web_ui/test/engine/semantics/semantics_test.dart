@@ -983,6 +983,12 @@ class MockSemanticsEnabler implements SemanticsEnabler {
   bool tryEnableSemantics(DomEvent event) {
     throw UnimplementedError();
   }
+
+  @override
+  bool shouldForwardTab(DomKeyboardEvent event) => throw UnimplementedError();
+
+  @override
+  bool shouldDeferViewFocus(DomElement? activeElement) => false;
 }
 
 void _testHeader() {
