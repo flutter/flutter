@@ -624,6 +624,87 @@ void main() {
     expect(command.tidyArgs.trim(), 'filename');
   });
 
+  test('Command reads an arguments list as it is: no splitting, no unquoting', () {
+    // As compile_commands.py writes a Bazel build's entry: `arguments` as the
+    // action runs them, `command` as their shell quoting.
+    const compiler = '/path/to/buildtools/linux-x64/clang/bin/clang++';
+    final command = Command.fromMap(<String, Object?>{
+      'directory': '/unused',
+      'arguments': <String>[
+        '/path/to/reclient/rewrapper',
+        '--cfg=/path/to/rewrapper-linux.cfg',
+        '--exec_root=/path/to/',
+        compiler,
+        '-MD',
+        '-MF',
+        'x.d',
+        '-DDART_LEGACY_API=[[deprecated]]',
+        '-Iengine/src',
+        '-c',
+        'engine/src/flutter/fml/x.cc',
+        '-o',
+        'x.o',
+      ],
+      'command':
+          '/path/to/reclient/rewrapper --cfg=/path/to/rewrapper-linux.cfg '
+          '--exec_root=/path/to/ $compiler -MD -MF x.d '
+          "'-DDART_LEGACY_API=[[deprecated]]' -Iengine/src -c engine/src/flutter/fml/x.cc -o x.o",
+      'file': 'engine/src/flutter/fml/x.cc',
+    });
+    expect(command.tidyArguments, <String>[
+      '-MD',
+      '-DDART_LEGACY_API=[[deprecated]]',
+      '-Iengine/src',
+      '-c',
+      'engine/src/flutter/fml/x.cc',
+      '-o',
+      'x.o',
+    ]);
+    expect(command.tidyPath, '/path/to/buildtools/linux-x64/clang/bin/clang-tidy');
+
+    final WorkerJob job = command.createLintJob(Options(buildCommandsPath: io.File('.')));
+    expect(job.command[0], command.tidyPath);
+    expect(job.command.sublist(job.command.indexOf('--') + 1), command.tidyArguments);
+  });
+
+  test('Command reads an entry that has an arguments list and no command', () {
+    final command = Command.fromMap(<String, Object?>{
+      'directory': '/unused',
+      'arguments': <String>['../../buildtools/mac-x64/clang/bin/clang', '-MF', 'stuff', 'filename'],
+      'file': 'unused',
+    });
+    expect(command.tidyArguments, <String>['filename']);
+    expect(command.tidyPath, '../../buildtools/mac-x64/clang/bin/clang-tidy');
+  });
+
+  test('Command filters out a command appended to an arguments list', () {
+    final command = Command.fromMap(<String, Object?>{
+      'directory': '/unused',
+      'arguments': <String>[
+        '../../buildtools/mac-x64/clang/bin/clang',
+        'filename',
+        '&&',
+        'sed',
+        '-i',
+        's@/b/f/w@../..@g',
+        'filename',
+      ],
+      'file': 'unused',
+    });
+    expect(command.tidyArguments, <String>['filename']);
+  });
+
+  test('Command splits a command string on spaces when there is no arguments list', () {
+    final command = Command.fromMap(<String, String>{
+      'directory': '/unused',
+      'command': '../../buildtools/mac-x64/clang/bin/clang -MF stuff filename',
+      'file': 'unused',
+    });
+    expect(command.arguments, isNull);
+    expect(command.tidyArguments, command.tidyArgs.split(' '));
+    expect(command.tidyArguments, <String>['', 'filename']);
+  });
+
   test('Files that cause clang-tidy to segfault are skipped', () async {
     final fileListFixture = Fixture.fromOptions(
       Options(buildCommandsPath: io.File(buildCommands), lintTarget: const LintAll()),

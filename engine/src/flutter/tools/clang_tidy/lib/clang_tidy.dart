@@ -320,11 +320,15 @@ class ClangTidy {
       ]);
     }
     return () async {
+      // The files by canonical path, once: with --lint-all the list is the
+      // whole engine tree (hundreds of thousands of files, third_party's
+      // among them), and a search of it per command -- thousands of
+      // commands -- took longer than the lint itself.
+      final filePaths = <String>{for (final io.File file in files) path.canonicalize(file.path)};
       final result = <Command>[];
       for (final command in totalCommands) {
         final LintAction lintAction = await command.lintAction;
-        // Short-circuit the expensive containsAny call for the many third_party files.
-        if (lintAction != LintAction.skipThirdParty && command.containsAny(files)) {
+        if (lintAction != LintAction.skipThirdParty && command.isAnyOf(filePaths)) {
           result.add(command);
         }
       }

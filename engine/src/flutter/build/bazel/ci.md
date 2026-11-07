@@ -184,7 +184,21 @@ the test for real, and so does the command from `engine/src`.
   through the install, and `run_tests.py --type android` as the suite of
   three `flutter_android_device_test`s, each pushed to the emulator the
   recipe's `android_virtual_device` context boots before the step and run
-  there whole, as `run_android_tests` did -- README, "Android"), and
+  there whole, as `run_android_tests` did -- README, "Android"),
+  `linux_clang_tidy` (545: each of its two builds lints itself -- the
+  install of everything, then `ci/clang_tidy.sh --variant <build>
+  --lint-all` as the build's own test step on a 32-core drone, which makes
+  the compile database from the build's action graph
+  (`compile_commands.py --build-directory --build`: the generated headers
+  the remote actions left on the workers fetched first) and lints the whole
+  variant; GN's five tester drones over a CAS archive of the build directory
+  cannot work here, the database naming the builder's own execution root,
+  so the four host shards' work runs on one drone and the Android build lints
+  every file of its own database rather than its share of the host's
+  intersection -- more files, one drone fewer; NEED_DECISION Q44. On a
+  24-core workstation the host variant's step is the database in 7 min and
+  clang-tidy over 1,252 files in 44, 715 CPU-minutes: about 24 on a 32-core
+  drone, where GN's four shards summed to 18), and
   `linux_unopt`'s builds but one. A try build's
   archives go where they always went for a try build (the recipe's archives
   module routes the try bucket to `flutter_archives_v2`, never to the release
@@ -195,10 +209,15 @@ the test for real, and so does the command from `engine/src`.
   `BUILD.gn` or builder-file change that was not regenerated fails there).
 - Still GN, and why: `linux_unopt`'s `ci/host_debug_no_prebuilt_dart_sdk`
   (the Dart SDK from source; `--config=host_debug_no_prebuilt_dart_sdk`
-  exists for a developer, a cold bot has no time for it); `linux_clang_tidy`
-  (clang-tidy over GN's compile database); `local_engine_builds` (local_engine.json's builds
+  exists for a developer, a cold bot has no time for it); `mac_clang_tidy`
+  (the Linux file's shape, once the Linux builder is green: the Mac's
+  compiles under `rbe_mac` go through `apple_clang_wrapper.sh`, which the
+  database leaves out, so its clang-tidy builds run `--no-bazel-rbe` or the
+  wrapper's host clang is named instead); `local_engine_builds` (local_engine.json's builds
   are `bazel build` targets without installs); the Fuchsia builders; the
-  standalone files `linux_benchmarks` and `linux_clangd` (`linux_license`
+  standalone files `linux_benchmarks` and `linux_clangd` (`clangd_check`
+  looks for GN's gen-time `_fl__fl_assets_fixtures.cc` entry in the database;
+  Bazel writes `_fl_assets_fixtures.cc` from a build action) (`linux_license`
   builds with Bazel since 536: its `--enable-minimal-linux`, which only
   spares GN's pkg-config on a bot without the desktop's packages, asks for
   what the sysroot-based build has already, and its test runner runs as
