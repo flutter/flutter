@@ -637,4 +637,34 @@ void main() {
     );
     expect(tester.getSize(find.byType(SelectionArea)), Size.zero);
   });
+
+  testWidgets(
+    'SelectionArea in an offstage MaterialPage with multiple Text children does not crash',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/195912.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Navigator(
+              pages: const <Page<void>>[
+                MaterialPage<void>(
+                  child: SelectionArea(
+                    child: Column(children: <Widget>[Text('Offstage 1'), Text('Offstage 2')]),
+                  ),
+                ),
+                MaterialPage<void>(
+                  child: SelectionArea(
+                    child: Center(child: Text('Onstage', key: Key('CountText'))),
+                  ),
+                ),
+              ],
+              onDidRemovePage: (_) {},
+            ),
+          ),
+        ),
+      );
+      expect(find.byKey(const Key('CountText')), findsOneWidget);
+    },
+  );
 }
