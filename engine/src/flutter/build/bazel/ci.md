@@ -221,7 +221,14 @@ the test for real, and so does the command from `engine/src`.
   exists for a developer, a cold bot has no time for it);
   `local_engine_builds` (local_engine.json's builds
   are `bazel build` targets without installs); the Fuchsia builders; the
-  standalone file `linux_benchmarks` (`linux_clangd` and `mac_clangd`
+  standalone file `linux_benchmarks` -- deliberately: it is postsubmit
+  only and uploads the engine's benchmark series (`generate_metrics.sh`
+  over nine executables of the build directory, `upload_metrics.sh` to
+  Datastore); another toolchain configuration under them is a baseline
+  change for the perf owners to want, and a first run on Bazel would be a
+  real upload with no presubmit before it (a dry run needs a bringup
+  builder or `led`), so it waits for that conversation (NEED_DECISION Q46)
+  (`linux_clangd` and `mac_clangd`
   build with Bazel since 548: the install lays font_subset, and a
   `compile_commands.py --build-targets=//engine/src/flutter/assets:assets_fixtures`
   step writes the database and the one generated source `clangd_check`
