@@ -107,6 +107,10 @@
                     "script": "flutter/ci/check_build_configs.sh"
                 },
                 {
+                    "name": "Check generated Bazel files",
+                    "script": "flutter/ci/check_generated_bazel_files.sh"
+                },
+                {
                     "name": "Tests of tools/gn",
                     "language": "python3",
                     "script": "flutter/tools/gn_test.py"

@@ -8530,6 +8530,27 @@ cc_library(
   });
 
   group('builders', () {
+    test('buildifierLabel writes a label as buildifier would', () {
+      // The name is dropped when it repeats the package's last segment, the
+      // repository's name for a root package; nothing else changes.
+      expect(
+        buildifierLabel('//engine/src/flutter/testing/dart:dart'),
+        '//engine/src/flutter/testing/dart',
+      );
+      expect(
+        buildifierLabel('//engine/src/flutter/testing/dart:other'),
+        '//engine/src/flutter/testing/dart:other',
+      );
+      expect(
+        buildifierLabel('//engine/src/flutter/testing/dart'),
+        '//engine/src/flutter/testing/dart',
+      );
+      expect(buildifierLabel('@icu//:icu'), '@icu');
+      expect(buildifierLabel('@icu//:data'), '@icu//:data');
+      expect(buildifierLabel('//:flutter'), '//:flutter');
+      expect(buildifierLabel(':dart'), ':dart');
+    });
+
     // Builder files of the shapes ci/builders/linux_*.json has: a build
     // whose flags all map, one with a flag the Bazel build cannot express,
     // one of another platform, and ninja targets in each of GN's spellings.
@@ -9002,9 +9023,9 @@ test_suite(
         "//engine/src/flutter:gn_test",
         "//engine/src/flutter/fml:fml_unittests",
         "//engine/src/flutter/impeller/golden_tests:impeller_golden_tests",
-        "//engine/src/flutter/testing/dart:dart",
-        "//engine/src/flutter/testing/dart/vm_service:vm_service",
-        "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
         "//engine/src/flutter/txt:txt_unittests",
     ],
 )
@@ -9512,9 +9533,9 @@ test_suite(
     tests = [
         "//engine/src/flutter/fml:fml_unittests",
         "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
-        "//engine/src/flutter/testing/dart:dart",
-        "//engine/src/flutter/testing/dart/vm_service:vm_service",
-        "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
     ],
 )
 '''),
