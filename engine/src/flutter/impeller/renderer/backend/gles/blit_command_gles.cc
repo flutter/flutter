@@ -29,7 +29,8 @@ static void DeleteFBO(const ProcTableGLES& gl, GLuint fbo, GLenum type) {
 static std::optional<GLuint> ConfigureFBO(
     const ProcTableGLES& gl,
     const std::shared_ptr<Texture>& texture,
-    GLenum fbo_type) {
+    GLenum fbo_type,
+    bool for_reading) {
   auto handle = TextureGLES::Cast(texture.get())->GetGLHandle();
   if (!handle.has_value()) {
     return std::nullopt;
@@ -47,7 +48,8 @@ static std::optional<GLuint> ConfigureFBO(
   gl.BindFramebuffer(fbo_type, fbo);
 
   if (!TextureGLES::Cast(*texture).SetAsFramebufferAttachment(
-          fbo_type, TextureGLES::AttachmentType::kColor0)) {
+          fbo_type, TextureGLES::AttachmentType::kColor0, /*mip_level=*/0,
+          /*slice=*/0, for_reading)) {
     VALIDATION_LOG << "Could not attach texture to framebuffer.";
     DeleteFBO(gl, fbo, fbo_type);
     return std::nullopt;
@@ -91,7 +93,8 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
   });
 
   {
-    auto read = ConfigureFBO(gl, source, GL_READ_FRAMEBUFFER);
+    auto read =
+        ConfigureFBO(gl, source, GL_READ_FRAMEBUFFER, /*for_reading=*/true);
     if (!read.has_value()) {
       return false;
     }
@@ -99,7 +102,8 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
   }
 
   {
-    auto draw = ConfigureFBO(gl, destination, GL_DRAW_FRAMEBUFFER);
+    auto draw = ConfigureFBO(gl, destination, GL_DRAW_FRAMEBUFFER,
+                             /*for_reading=*/false);
     if (!draw.has_value()) {
       return false;
     }
@@ -367,7 +371,9 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
       [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_FRAMEBUFFER); });
 
   {
-    auto read = ConfigureFBO(gl, source, GL_FRAMEBUFFER);
+    // OpenGL ES 2 reads pixels through GL_FRAMEBUFFER, so the attachment has
+    // to be told it is only read from.
+    auto read = ConfigureFBO(gl, source, GL_FRAMEBUFFER, /*for_reading=*/true);
     if (!read.has_value()) {
       return false;
     }
@@ -431,7 +437,8 @@ bool BlitResizeTextureCommandGLES::Encode(const ReactorGLES& reactor) const {
   });
 
   {
-    auto read = ConfigureFBO(gl, source, GL_READ_FRAMEBUFFER);
+    auto read =
+        ConfigureFBO(gl, source, GL_READ_FRAMEBUFFER, /*for_reading=*/true);
     if (!read.has_value()) {
       return false;
     }
@@ -439,7 +446,8 @@ bool BlitResizeTextureCommandGLES::Encode(const ReactorGLES& reactor) const {
   }
 
   {
-    auto draw = ConfigureFBO(gl, destination, GL_DRAW_FRAMEBUFFER);
+    auto draw = ConfigureFBO(gl, destination, GL_DRAW_FRAMEBUFFER,
+                             /*for_reading=*/false);
     if (!draw.has_value()) {
       return false;
     }

@@ -95,10 +95,24 @@ class TextureGLES final : public Texture,
     kDepth,
     kStencil,
   };
+  //----------------------------------------------------------------------------
+  /// @brief      Attaches the texture to the framebuffer bound to `target`.
+  ///
+  /// @param[in]  for_reading  Whether the framebuffer is only read from, as
+  ///                          for a readback or the source of a blit. A
+  ///                          multisampled texture is then attached single
+  ///                          sampled: its texture level holds the resolved
+  ///                          samples, and some drivers fail when a
+  ///                          multisampled attachment is read rather than
+  ///                          drawn into. Binding GL_READ_FRAMEBUFFER implies
+  ///                          this; OpenGL ES 2 only has GL_FRAMEBUFFER, so a
+  ///                          readback must say so.
+  ///
   [[nodiscard]] bool SetAsFramebufferAttachment(GLenum target,
                                                 AttachmentType attachment_type,
                                                 uint32_t mip_level = 0,
-                                                uint32_t slice = 0);
+                                                uint32_t slice = 0,
+                                                bool for_reading = false);
 
   Type GetType() const;
 
@@ -178,7 +192,7 @@ class TextureGLES final : public Texture,
   std::optional<HandleGLES> GetSyncFence() const;
 
   // visible for testing
-  Type ComputeTypeForBinding(GLenum target) const;
+  Type ComputeTypeForBinding(GLenum target, bool for_reading = false) const;
 
  private:
   std::shared_ptr<ReactorGLES> reactor_;
