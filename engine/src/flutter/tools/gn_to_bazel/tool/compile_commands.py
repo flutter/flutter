@@ -421,7 +421,8 @@ def compile_commands(aquery, execution_root, output_base, own_configuration):
     # (configuration_ranks); another configuration's not at all.
     rank = ranks.get(action.get("configurationId"))
     if rank is None:
-      other_configurations.setdefault(source, set()).add(mnemonics.get(action.get("configurationId"), "?"))
+      other_configurations.setdefault(source,
+                                      set()).add(mnemonics.get(action.get("configurationId"), "?"))
       continue
     if source in best and best[source][0] <= rank:
       continue
@@ -522,7 +523,9 @@ def main(argv):
     out = args.out
   aquery = _aquery(bazel, args.targets)
   execution_root, output_base, own_configuration = _info(bazel)
-  entries, left_out, owners = compile_commands(aquery, execution_root, output_base, own_configuration)
+  entries, left_out, owners = compile_commands(
+      aquery, execution_root, output_base, own_configuration
+  )
   os.makedirs(out, exist_ok=True)
   if args.build:
     _build(bazel, args.build_targets or owners, out)
