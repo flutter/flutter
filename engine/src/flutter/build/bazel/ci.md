@@ -198,7 +198,11 @@ the test for real, and so does the command from `engine/src`.
   intersection -- more files, one drone fewer; NEED_DECISION Q44. On a
   24-core workstation the host variant's step is the database in 7 min and
   clang-tidy over 1,252 files in 44, 715 CPU-minutes: about 24 on a 32-core
-  drone, where GN's four shards summed to 18), and
+  drone, where GN's four shards summed to 18; the database is GN's default
+  target's closure in the build's own configuration, 546), `mac_clang_tidy`
+  (547, the same shape for the macOS host and iOS simulator variants; the
+  Apple toolchains' remote-compile wrapper in the commands resolves to the
+  Mac's clang, where clang-tidy is), and
   `linux_unopt`'s builds but one. A try build's
   archives go where they always went for a try build (the recipe's archives
   module routes the try bucket to `flutter_archives_v2`, never to the release
@@ -209,11 +213,8 @@ the test for real, and so does the command from `engine/src`.
   `BUILD.gn` or builder-file change that was not regenerated fails there).
 - Still GN, and why: `linux_unopt`'s `ci/host_debug_no_prebuilt_dart_sdk`
   (the Dart SDK from source; `--config=host_debug_no_prebuilt_dart_sdk`
-  exists for a developer, a cold bot has no time for it); `mac_clang_tidy`
-  (the Linux file's shape, once the Linux builder is green: the Mac's
-  compiles under `rbe_mac` go through `apple_clang_wrapper.sh`, which the
-  database leaves out, so its clang-tidy builds run `--no-bazel-rbe` or the
-  wrapper's host clang is named instead); `local_engine_builds` (local_engine.json's builds
+  exists for a developer, a cold bot has no time for it);
+  `local_engine_builds` (local_engine.json's builds
   are `bazel build` targets without installs); the Fuchsia builders; the
   standalone files `linux_benchmarks` and `linux_clangd` (`clangd_check`
   looks for GN's gen-time `_fl__fl_assets_fixtures.cc` entry in the database;
