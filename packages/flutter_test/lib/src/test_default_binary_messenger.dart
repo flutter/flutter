@@ -366,15 +366,6 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     }
 
     final controller = StreamController<Object?>();
-    addTearDown(() {
-      // If the handler already closed the stream (for example with
-      // MockStreamHandlerEventSink.endOfStream inside a testWidgets body), the
-      // done future belongs to the test's fake async zone. Tear down does not
-      // run that zone, so awaiting the done future again does not return.
-      if (!controller.isClosed) {
-        return controller.close();
-      }
-    });
 
     setMockMethodCallHandler(
       MethodChannel(channel.name, channel.codec),
@@ -389,7 +380,16 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       (Object? e) =>
           handlePlatformMessage(channel.name, channel.codec.encodeSuccessEnvelope(e), null),
     );
-    addTearDown(sub.cancel);
+    addTearDown(() async {
+      await sub.cancel();
+      // If the handler already closed the stream (for example with
+      // MockStreamHandlerEventSink.endOfStream inside a testWidgets body), the
+      // done future belongs to the test's fake async zone. Tear down does not
+      // run that zone, so awaiting the done future again does not return.
+      if (!controller.isClosed) {
+        await controller.close();
+      }
+    });
     sub.onError((Object? e) {
       if (e is! PlatformException) {
         throw ArgumentError('Stream error must be a PlatformException');

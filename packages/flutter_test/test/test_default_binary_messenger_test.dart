@@ -120,6 +120,12 @@ void main() {
     WidgetTester tester,
   ) async {
     const channel = EventChannel('test_default_binary_messenger_test');
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
+        channel,
+        null,
+      ),
+    );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
       channel,
       MockStreamHandler.inline(
