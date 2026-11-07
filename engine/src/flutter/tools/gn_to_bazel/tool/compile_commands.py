@@ -38,6 +38,14 @@ remote by default (--remote_download_toplevel).
     python3 engine/src/flutter/tools/gn_to_bazel/tool/compile_commands.py \\
         --build-directory=engine/src/out/ci/host_debug_clang_tidy --build
 
+With a build directory the query's universe is the root group
+//engine/src/flutter:flutter -- GN's default target, what `ninja` with no
+target built for the clang-tidy builders and what GN's database listed,
+the platform's unittests included -- rather than every target under
+//engine/src/flutter/..., which reaches targets no build of the platform
+makes (a host tool configured for Android, whose compile fails under the
+NDK's flags; a host-only test's).
+
 Each entry carries the command both as `arguments` (what clangd prefers)
 and as a `command` string (what tools/clang_tidy reads). Paths are written
 to last: a path under `external/` -- a repository's headers, the sysroot,
@@ -53,19 +61,22 @@ clang++`; the repository symlink resolved, the name kept, since the binary
 is a multicall that reads its name).
 
 A source compiled in several configurations gets the command of the one
-the command line names -- the target configuration of `--config=<name>`,
-whose output directory carries no transition suffix (`k8-opt`) -- before
-a transition's (`k8-opt-ST-<hash>`: a wasm module's compile of a Skia
-source under `module_platform_transition`, an API-26 dependency's under
-gn_action's platform_deps), and either before the exec configuration's
-(`k8-opt-exec-ST-<hash>`: a host tool's, built -c opt); one compiled for
-the exec configuration alone (impellerc, the shader compiler, built only as
-a tool) gets that. clang-tidy reads the one entry per file, and must find
-the build's own compiler flags there rather than em++'s. A source no
-clang compiles -- skwasm's, and what else only a wasm module's em++.sh or
-emcc.sh builds -- gets no entry: tools/clang_tidy derives clang-tidy from
-the compiler's path (`clang/bin/clang++` -> `clang/bin/clang-tidy`) and
-has none for those; how many are left out is printed.
+the command line names -- the configuration of `--config=<name>`, whose
+output directory `bazel-bin` names (`linux_x64_debug-opt`) -- before a
+transition of it (`linux_x64_debug-opt-ST-<hash>`: a setting changed, the
+platform kept). Any other configuration's compile -- the exec one's (a host
+tool's, impellerc, under the host's flags), another platform's or runtime
+mode's (the profile and release engines a debug build's install reaches,
+the Android ones a host build's tests do, the wasm modules' em++ compiles
+of Skia's sources) -- is left out: it belongs to that build's database, as
+GN's other toolchains' compiles did to theirs; its generated headers are
+not this build's to fetch; and its owner could not be built in this
+build's configuration. clang-tidy reads the one entry per file, and must
+find the build's own compiler flags there. A source no clang compiles --
+skwasm's, and what else only a wasm module's em++.sh or emcc.sh builds --
+gets no entry either: tools/clang_tidy derives clang-tidy from the
+compiler's path (`clang/bin/clang++` -> `clang/bin/clang-tidy`) and has
+none for those. How many are left out, and why, is printed.
 """
 
 import argparse
@@ -177,6 +188,11 @@ def _info(bazel):
   return info["execution_root"], info["output_base"], mnemonic
 
 
+# GN's default target, converted: the root group, whose closure under a
+# configuration is what `ninja` with no target built and GN's compile
+# database listed (the unittests among them, by platform).
+ROOT_GROUP = "//engine/src/flutter:flutter"
+
 # What `--build` downloads of a remote build's outputs besides the top-level
 # ones (Bazel's default, --remote_download_toplevel): the generated sources
 # and headers a compile command names, which clang-tidy opens on disk.
@@ -197,7 +213,10 @@ def _build(bazel, owners, out_dir):
   not; --skip_incompatible_explicit_targets, since an owner compiled under
   a transition's configuration alone (an Android library reached from a
   host build) may not be buildable in the build's own, and its entries
-  stand as GN's other toolchains' did.
+  stand as GN's other toolchains' did; and the compiles alone
+  (--output_groups=compilation_outputs), not the links: a host-only test
+  reached by an Android build's graph compiles under it and does not link
+  (-lpthread), and the database has no use for the link.
   """
   pattern_file = os.path.join(out_dir, "compile_commands.targets")
   with open(pattern_file, "w", encoding="utf-8") as f:
@@ -208,6 +227,7 @@ def _build(bazel, owners, out_dir):
           "--remote_download_regex=" + GENERATED_SOURCE_REGEX,
           "--build_manual_tests",
           "--skip_incompatible_explicit_targets",
+          "--output_groups=compilation_outputs",
           "--target_pattern_file=" + pattern_file,
       ],
   )
@@ -273,22 +293,25 @@ _CLANG = re.compile(r"clang/bin/clang(\+\+)?$")
 
 
 def configuration_ranks(aquery, own):
-  """Configuration id -> 0 for the build's own configuration, 1 for a transition of it, 2 for an exec one; else None.
+  """Configuration id -> 0 for the build's own configuration, 1 for a transition of it; else None.
 
     The aquery's `configuration` list names each with its output directory
     (`mnemonic`); `own` is the build's (_info). A transition of it carries
-    `-ST-<hash>` after it (a setting changed, the platform kept); an exec
-    configuration says `-exec-` (and `isTool`). A configuration of another
-    platform or runtime mode -- the profile and release engines a debug
-    build's install reaches, the Android ones a host build's tests do -- is
-    none of these: its compiles belong to another build's database, as GN's
-    did, and its generated headers are not this build's to fetch.
+    `-ST-<hash>` after it (a setting changed, the platform kept). Any other
+    configuration -- the exec one (the host tools: impellerc, built for the
+    machine, under the host's flags), another platform's or runtime mode's
+    (the profile and release engines a debug build's install reaches, the
+    Android ones a host build's tests do) -- is none of these: its compiles
+    belong to another build's database, as GN's other toolchains' did to
+    its, its generated headers are not this build's to fetch, and its
+    owners could not be built in this build's configuration (impellerc under
+    the NDK's flags fails on nlohmann's literal operators).
     """
   ranks = {}
   for c in aquery.get("configuration", []):
     mnemonic = c.get("mnemonic", "")
     if c.get("isTool") or "-exec" in mnemonic:
-      ranks[c["id"]] = 2
+      ranks[c["id"]] = None
     elif mnemonic == own:
       ranks[c["id"]] = 0
     elif mnemonic.startswith(own + "-ST-"):
@@ -378,8 +401,8 @@ def compile_commands(aquery, execution_root, output_base, own_configuration):
     if not sources:
       continue
     source = sources[-1]
-    # The build's own configuration before a transition of it, that before
-    # an exec one's (configuration_ranks); another configuration's not at all.
+    # The build's own configuration before a transition of it
+    # (configuration_ranks); another configuration's not at all.
     rank = ranks.get(action.get("configurationId"))
     if rank is None:
       other_configurations.setdefault(source, set()).add(mnemonics.get(action.get("configurationId"), "?"))
@@ -447,10 +470,15 @@ def main(argv):
   parser.add_argument(
       "targets",
       nargs="*",
-      default=["//engine/src/flutter/..."],
-      help="The targets whose compiles to list."
+      help="The targets whose compiles to list (default: every target under "
+      "//engine/src/flutter/...; with --build-directory, the root group "
+      "//engine/src/flutter:flutter -- GN's default target, what `ninja` with no target builds, "
+      "which is what the builder's lint read: the wildcard reaches targets no build of the "
+      "platform makes, a host tool configured for Android).",
   )
   args = parser.parse_args(argv)
+  if not args.targets:
+    args.targets = [ROOT_GROUP] if args.build_directory else ["//engine/src/flutter/..."]
   if args.build_directory:
     if args.config or args.bazel or args.workspace:
       parser.error(
