@@ -62,7 +62,7 @@ class DriveCommand extends RunCommandBase {
   }) {
     requiresPubspecYaml();
 
-    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.enableExperiment,
       // By default, the drive app should not publish the VM service port over mDNS
       // to prevent a local network permission dialog on iOS 14+,
@@ -85,8 +85,10 @@ class DriveCommand extends RunCommandBase {
     ], verboseHelp: verboseHelp);
   }
 
-  static final FlagOptionDescriptor _publishPort = DebuggingOptionDescriptors.publishPortOption(
-    enabledByDefault: false,
+  static const _publishPort = FlagOptionDescriptor(
+    name: 'publish-port',
+    verboseOnly: true,
+    help: DebuggingOptionDescriptors.publishPortHelp,
   );
 
   static const _kKeepAppRunning = 'keep-app-running';

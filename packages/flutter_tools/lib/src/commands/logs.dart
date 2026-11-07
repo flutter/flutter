@@ -31,7 +31,7 @@ class LogsCommand extends FlutterCommand {
       help: 'Clear log history before reading from logs.',
     );
     registerOptionBundle(const DeviceDiscoveryOptionsBundle());
-    DebuggingOptionDescriptors.adbLogFiltering.addTo(argParser, hideOverride: false);
+    DebuggingOptionDescriptors.adbLogFiltering.addTo(argParser, hide: false);
   }
 
   final ProcessSignal _sigint;
