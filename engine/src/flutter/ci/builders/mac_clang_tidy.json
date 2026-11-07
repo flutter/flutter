@@ -7,7 +7,10 @@
         "the lint over the whole variant. The database names the drone's own execution root, so GN's tester",
         "drones over a CAS archive -- which re-ran tools/gn for a database of their own -- cannot work here;",
         "the host variant's four shards' work runs on one drone, and the iOS simulator variant lints every",
-        "file of its own database rather than its share of the host's intersection."
+        "file of its own database rather than its share of the host's intersection.",
+        "The builds name the drones' CPU (--mac-cpu arm64, --simulator-cpu arm64), as the other Mac files do:",
+        "tools/gn's x64 default would have the lint read an x64 build on an arm64 drone, whose host tools",
+        "(flutter_tester_opengles) are then no build of the platform's."
     ],
     "builds": [
         {
@@ -30,6 +33,8 @@
                 "--no-lto",
                 "--target-dir",
                 "ci/host_debug_clang_tidy",
+                "--mac-cpu",
+                "arm64",
                 "--no-rbe",
                 "--no-goma",
                 "--xcode-symlinks",
@@ -78,6 +83,8 @@
                 "--no-lto",
                 "--target-dir",
                 "ci/ios_debug_sim_clang_tidy",
+                "--simulator-cpu",
+                "arm64",
                 "--no-rbe",
                 "--no-goma",
                 "--xcode-symlinks",

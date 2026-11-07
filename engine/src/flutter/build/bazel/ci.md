@@ -216,9 +216,11 @@ the test for real, and so does the command from `engine/src`.
   exists for a developer, a cold bot has no time for it);
   `local_engine_builds` (local_engine.json's builds
   are `bazel build` targets without installs); the Fuchsia builders; the
-  standalone files `linux_benchmarks` and `linux_clangd` (`clangd_check`
-  looks for GN's gen-time `_fl__fl_assets_fixtures.cc` entry in the database;
-  Bazel writes `_fl_assets_fixtures.cc` from a build action) (`linux_license`
+  standalone file `linux_benchmarks` (`linux_clangd` and `mac_clangd`
+  build with Bazel since 548: the install lays font_subset, and a
+  `compile_commands.py --build-targets=//engine/src/flutter/assets:assets_fixtures`
+  step writes the database and the one generated source `clangd_check`
+  reads; `linux_license`
   builds with Bazel since 536: its `--enable-minimal-linux`, which only
   spares GN's pkg-config on a bot without the desktop's packages, asks for
   what the sysroot-based build has already, and its test runner runs as
