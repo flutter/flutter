@@ -154,6 +154,7 @@ export 'src/widgets/sliver_layout_builder.dart';
 export 'src/widgets/sliver_persistent_header.dart';
 export 'src/widgets/sliver_prototype_extent_list.dart';
 export 'src/widgets/sliver_resizing_header.dart';
+export 'src/widgets/sliver_transform.dart';
 export 'src/widgets/sliver_tree.dart';
 export 'src/widgets/slotted_render_object_widget.dart';
 export 'src/widgets/snapshot_widget.dart';

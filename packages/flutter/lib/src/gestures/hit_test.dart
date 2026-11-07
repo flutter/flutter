@@ -120,6 +120,12 @@ class _OffsetTransformPart extends _TransformPart {
   }
 }
 
+/// Method signature for hit testing a child with a manually managed position
+/// (one that is passed out-of-band).
+///
+/// Used by [HitTestResult.addWithOutOfBandPosition].
+typedef HitTestWithOutOfBandPosition<T extends HitTestResult> = bool Function(T result);
+
 /// The result of performing a hit test.
 class HitTestResult {
   /// Creates an empty hit test result.
@@ -286,6 +292,63 @@ class HitTestResult {
       _transforms.removeLast();
     }
     assert(_transforms.isNotEmpty);
+  }
+
+  /// Pass-through method for adding a hit test while manually managing
+  /// the position transformation logic.
+  ///
+  /// The actual hit testing of the child needs to be implemented in the
+  /// provided [hitTest] callback. The position needs to be handled by
+  /// the caller.
+  ///
+  /// The function returns the return value of the [hitTest] callback.
+  ///
+  /// Exactly one of `paintOffset`, `paintTransform`, or `rawTransform` should
+  /// be passed to the method to update the hit test stack.
+  ///
+  ///  * `paintOffset` has the semantics of the `offset` passed to
+  ///    [pushOffset], negated.
+  ///
+  ///  * `paintTransform` is processed by
+  ///    [PointerEvent.removePerspectiveTransform] to remove the perspective
+  ///    component and inverted before being passed to [pushTransform]. It must
+  ///    be invertible; it is the responsibility of the caller to ensure this.
+  ///
+  ///  * `rawTransform` is passed directly to [pushTransform].
+  ///
+  /// Exactly one of these must be non-null.
+  ///
+  /// See also:
+  ///
+  ///  * [pushTransform] and [pushOffset], which update the hit test transform stack.
+  ///  * [BoxHitTestResult.addWithPaintTransform], which takes a generic paint transform matrix and
+  ///    documents the intended usage of this API in more detail.
+  bool addWithOutOfBandPosition<T extends HitTestResult>({
+    Offset? paintOffset,
+    Matrix4? paintTransform,
+    Matrix4? rawTransform,
+    required HitTestWithOutOfBandPosition<T> hitTest,
+  }) {
+    assert(
+      (paintOffset == null && paintTransform == null && rawTransform != null) ||
+          (paintOffset == null && paintTransform != null && rawTransform == null) ||
+          (paintOffset != null && paintTransform == null && rawTransform == null),
+      'Exactly one transform or offset argument must be provided.',
+    );
+    assert(this is T);
+    if (paintOffset != null) {
+      pushOffset(-paintOffset);
+    } else if (rawTransform != null) {
+      pushTransform(rawTransform);
+    } else {
+      assert(paintTransform != null);
+      paintTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform!));
+      assert(paintTransform != null, 'paintTransform must be invertible.');
+      pushTransform(paintTransform!);
+    }
+    final bool isHit = hitTest(this as T);
+    popTransform();
+    return isHit;
   }
 
   bool _debugVectorMoreOrLessEquals(
