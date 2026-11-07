@@ -34,18 +34,11 @@ TEST(JsonMessageCodec, EncodeDecode) {
   array.PushBack("string", allocator);
 
   rapidjson::Value map(rapidjson::kObjectType);
-  // Analyzing an arm64 build (not an x64 one), clang-analyzer-security.
-  // ArrayBound reports an out-of-bounds write inside rapidjson's AddMember on
-  // the paths through these calls -- a false positive in the vendored header,
-  // which a NOLINT here cannot reach; the attribute suppresses the analyzer on
-  // these statements.
-  [[clang::suppress]] {
-    map.AddMember("a", -7, allocator);
-    map.AddMember("b", std::numeric_limits<int>::max(), allocator);
-    map.AddMember("c", 3.14159, allocator);
-    map.AddMember("d", true, allocator);
-    map.AddMember("e", rapidjson::Value(), allocator);
-  }
+  map.AddMember("a", -7, allocator);
+  map.AddMember("b", std::numeric_limits<int>::max(), allocator);
+  map.AddMember("c", 3.14159, allocator);
+  map.AddMember("d", true, allocator);
+  map.AddMember("e", rapidjson::Value(), allocator);
   array.PushBack(map, allocator);
 
   CheckEncodeDecode(array);
