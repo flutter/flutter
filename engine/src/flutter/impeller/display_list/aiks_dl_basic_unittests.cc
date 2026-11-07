@@ -2862,12 +2862,12 @@ TEST_P(AiksTest, DrawImageFromYUVTextures) {
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/195859.
-// Renders two green circles side by side. Both are drawn at x=-100 inside a
-// SaveLayer whose image filter translates them +300 on-screen. The left one
-// is drawn directly; the right one is drawn through DrawDisplayList (a nested
-// DisplayList with an RTree, like a dart:ui Picture). If only the left circle
-// is visible, the nested DisplayList was culled against the root render
-// target instead of the subpass.
+// Renders two green circles, one above the other. Both are drawn at x=-100
+// inside a SaveLayer whose image filter translates them +300 on-screen. The
+// top one is drawn directly; the bottom one is drawn through DrawDisplayList
+// (a nested DisplayList with an RTree, like a dart:ui Picture). If only the
+// top circle is visible, the nested DisplayList was culled against the root
+// render target instead of the subpass.
 TEST_P(AiksTest, DrawDisplayListInTranslatedSaveLayerIsNotCulled) {
   DlPaint green;
   green.setColor(DlColor::kGreen());
@@ -2893,8 +2893,8 @@ TEST_P(AiksTest, DrawDisplayListInTranslatedSaveLayerIsNotCulled) {
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/195859.
-// Same as DrawDisplayListInTranslatedSaveLayerIsNotCulled, but the second
-// circle is drawn inside a nested SaveLayer. If only the left circle is
+// Same as DrawDisplayListInTranslatedSaveLayerIsNotCulled, but the bottom
+// circle is drawn inside a nested SaveLayer. If only the top circle is
 // visible, the child SaveLayer's subpass was clamped to the root render target
 // and its off-screen content was dropped before the parent filter moved it.
 TEST_P(AiksTest, NestedSaveLayerInTranslatedSaveLayerIsNotCulled) {
