@@ -11,6 +11,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -106,11 +107,13 @@ void main() {
   late FakeWebServerDevice webServerDevice;
   late FakeDevice mockDevice;
   late FakeVmServiceHost fakeVmServiceHost;
+  late Config config;
   late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
+    config = Config.test();
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.any();
     debugConnection = FakeDebugConnection();
@@ -156,16 +159,25 @@ name: my_app
     BuildSystem? buildSystem,
     DebuggingOptions? debuggingOptions,
   }) {
-    final toolContext = test_fakes.DelegatingToolContext(logger: logger, systemClock: systemClock);
-    final FileSystem fs = toolContext.fs;
+    final toolContext = test_fakes.FakeToolContext(
+      config: config,
+      fs: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      systemClock: systemClock,
+    );
     return ResidentWebRunner(
       flutterDevice,
-      flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
       analytics: fakeAnalytics,
       buildSystem:
           buildSystem ??
-          FlutterBuildSystem(fileSystem: fs, platform: FakePlatform(), logger: BufferLogger.test()),
+          FlutterBuildSystem(
+            fileSystem: fileSystem,
+            platform: FakePlatform(),
+            logger: BufferLogger.test(),
+          ),
       buildTargets: const BuildTargetsImpl(),
       toolContext: toolContext,
     );
@@ -368,7 +380,7 @@ name: my_app
       final String expectedPath = getDefaultCachedKernelPath(
         trackWidgetCreation: false,
         dartDefines: const <String>[],
-        config: const test_fakes.DelegatingToolContext().config,
+        config: config,
         fileSystem: fileSystem,
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
@@ -397,7 +409,7 @@ name: my_app
       final String expectedPath = getDefaultCachedKernelPath(
         trackWidgetCreation: true,
         dartDefines: const <String>[],
-        config: const test_fakes.DelegatingToolContext().config,
+        config: config,
         fileSystem: fileSystem,
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: kDdcLibraryBundleFlags,
@@ -442,7 +454,7 @@ name: my_app
         platform: FakePlatform(),
         fileSystem: fileSystem,
         shutdownHooks: test_fakes.FakeShutdownHooks(),
-        config: const test_fakes.DelegatingToolContext().config,
+        config: config,
       ) as DefaultResidentCompiler;
       expect(await fileSystem.file(compiler.initializeFromDill).readAsString(), 'ABC');
     },

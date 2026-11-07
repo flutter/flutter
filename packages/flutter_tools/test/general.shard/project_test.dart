@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -38,6 +39,8 @@ import '../src/fakes.dart';
 import '../src/package_config.dart';
 import '../src/throwing_pub.dart';
 
+late ToolContext _testToolContext;
+
 void main() {
   // TODO(zanderso): remove once FlutterProject is fully refactored.
   // this is safe since no tests have expectations on the test logger.
@@ -59,91 +62,89 @@ void main() {
         expect(() => projectFactory.fromDirectory(fileSystem.currentDirectory), throwsToolExit());
       });
 
-      _testInMemory('fails on invalid pubspec.yaml', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('fails on invalid pubspec.yaml', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
 
-        expect(() => FlutterProject.fromDirectory(directory, logger: testLogger), throwsToolExit());
+        expect(() => FlutterProject.fromDirectory(directory, logger: logger), throwsToolExit());
       });
 
-      _testInMemory('fails on pubspec.yaml parse failure', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('fails on pubspec.yaml parse failure', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(parseErrorPubspec);
 
-        expect(() => FlutterProject.fromDirectory(directory, logger: testLogger), throwsToolExit());
+        expect(() => FlutterProject.fromDirectory(directory, logger: logger), throwsToolExit());
       });
 
-      _testInMemory('fails on invalid example/pubspec.yaml', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('fails on invalid example/pubspec.yaml', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childDirectory('example').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
 
-        expect(() => FlutterProject.fromDirectory(directory, logger: testLogger), throwsToolExit());
+        expect(() => FlutterProject.fromDirectory(directory, logger: logger), throwsToolExit());
       });
 
-      _testInMemory('treats missing pubspec.yaml as empty', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('treats missing pubspec.yaml as empty', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject')..createSync(recursive: true);
-        expect(FlutterProject.fromDirectory(directory, logger: testLogger).manifest.isEmpty, true);
+        expect(FlutterProject.fromDirectory(directory, logger: logger).manifest.isEmpty, true);
       });
 
-      _testInMemory('reads valid pubspec.yaml', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('reads valid pubspec.yaml', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(validPubspec);
-        expect(
-          FlutterProject.fromDirectory(directory, logger: testLogger).manifest.appName,
-          'hello',
-        );
+        expect(FlutterProject.fromDirectory(directory, logger: logger).manifest.appName, 'hello');
       });
 
-      _testInMemory('reads dependencies from pubspec.yaml', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('reads dependencies from pubspec.yaml', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(validPubspecWithDependencies);
         expect(
-          FlutterProject.fromDirectory(directory, logger: testLogger).manifest.dependencies,
+          FlutterProject.fromDirectory(directory, logger: logger).manifest.dependencies,
           <String>{'plugin_a', 'plugin_b'},
         );
       });
 
-      _testInMemory('sets up location', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('sets up location', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         expect(
-          FlutterProject.fromDirectory(directory, logger: testLogger).directory.absolute.path,
+          FlutterProject.fromDirectory(directory, logger: logger).directory.absolute.path,
           directory.absolute.path,
         );
         expect(
-          FlutterProject.fromDirectoryTest(directory, testLogger).directory.absolute.path,
+          FlutterProject.fromDirectoryTest(directory, logger).directory.absolute.path,
           directory.absolute.path,
         );
         expect(
-          FlutterProject.current(fs, logger: testLogger).directory.absolute.path,
+          FlutterProject.current(fs, logger: logger).directory.absolute.path,
           fs.currentDirectory.absolute.path,
         );
       });
 
-      _testInMemory('buildDirectory uses configured build-dir', () async {
-        final ToolContext(:Config config, :FileSystem fs) = const DelegatingToolContext();
+      testWithoutContext('buildDirectory uses configured build-dir', () {
+        final config = Config.test();
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         config.setValue('build-dir', 'custom_build');
         final FlutterProject project = FlutterProject.fromDirectory(
           directory,
           config: config,
-          logger: testLogger,
+          logger: logger,
         );
         expect(project.buildDirectory.path, fs.path.join(directory.path, 'custom_build'));
         expect(
@@ -155,7 +156,7 @@ void main() {
 
     group('ensure ready for platform-specific tooling', () {
       _testInMemory('does nothing, if project is not created', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+        final FileSystem fs = _testToolContext.fs;
         final project = FlutterProject(
           fs.directory('not_created'),
           FlutterManifest.empty(logger: logger),
@@ -187,7 +188,7 @@ void main() {
         // dependency below ensures the file would be written without the
         // early-return.
         await aPluginProject(legacy: false);
-        final FileSystem fs = const DelegatingToolContext().fs;
+        final ToolContext(:FileSystem fs, :Logger logger) = _testToolContext;
         final Directory directory = fs.directory('some_project');
         writePackageConfigFiles(
           directory: directory,
@@ -204,7 +205,7 @@ dependencies:
   my_plugin:
     sdk: flutter
 ''');
-        final FlutterProject project = FlutterProject.fromDirectory(directory, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(directory, logger: logger);
 
         await regeneratePlatformSpecificTooling(project, releaseMode: false);
 
@@ -338,163 +339,156 @@ dependencies:
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
 
-      testUsingContext(
-        'determines dev dependencies',
-        () async {
-          // Create a plugin.
-          await aPluginProject(legacy: false);
-          // Create a project that depends on that plugin.
-          final FlutterProject project = await projectWithPluginDependency();
-          // Don't bother with Android, we just want the manifest.
-          project.directory.childDirectory('android').deleteSync(recursive: true);
+      testWithoutContext('determines dev dependencies', () async {
+        final toolContext = FakeToolContext(logger: logger);
+        // Create a plugin.
+        await aPluginProject(legacy: false, toolContext: toolContext);
+        // Create a project that depends on that plugin.
+        final FlutterProject project = await projectWithPluginDependency(toolContext: toolContext);
+        // Don't bother with Android, we just want the manifest.
+        project.directory.childDirectory('android').deleteSync(recursive: true);
 
-          await regeneratePlatformSpecificTooling(project, releaseMode: false);
-          expect(
-            project.flutterPluginsDependenciesFile.readAsStringSync(),
-            contains('"dev_dependency":true'),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-          FlutterProjectFactory: () {
-            const toolContext = DelegatingToolContext();
-            return FlutterProjectFactory(
-              logger: logger,
-              fileSystem: toolContext.fs,
-              config: toolContext.config,
-            );
-          },
-        },
-      );
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
+        expect(
+          project.flutterPluginsDependenciesFile.readAsStringSync(),
+          contains('"dev_dependency":true'),
+        );
+      });
 
-      testUsingContext(
-        'releaseMode: false retains dev plugins',
-        () async {
-          // Create a plugin.
-          await aPluginProject(includeAndroidMain: true, legacy: false);
-          // Create a project that depends on that plugin.
-          final FlutterProject project = await projectWithPluginDependency();
+      testWithoutContext('releaseMode: false retains dev plugins', () async {
+        final toolContext = FakeToolContext(logger: logger);
+        // Create a plugin.
+        await aPluginProject(includeAndroidMain: true, legacy: false, toolContext: toolContext);
+        // Create a project that depends on that plugin.
+        final FlutterProject project = await projectWithPluginDependency(toolContext: toolContext);
 
-          await regeneratePlatformSpecificTooling(project, releaseMode: false);
-          expect(
-            project.android.generatedPluginRegistrantFile.readAsStringSync(),
-            contains('MyPlugin'),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-          FlutterProjectFactory: () {
-            const toolContext = DelegatingToolContext();
-            return FlutterProjectFactory(
-              logger: logger,
-              fileSystem: toolContext.fs,
-              config: toolContext.config,
-            );
-          },
-        },
-      );
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
+        expect(
+          project.android.generatedPluginRegistrantFile.readAsStringSync(),
+          contains('MyPlugin'),
+        );
+      });
 
-      testUsingContext(
-        'releaseMode: true omits dev plugins',
-        () async {
-          // Create a plugin.
-          await aPluginProject(includeAndroidMain: true, legacy: false);
-          // Create a project that depends on that plugin.
-          final FlutterProject project = await projectWithPluginDependency();
+      testWithoutContext('releaseMode: true omits dev plugins', () async {
+        final toolContext = FakeToolContext(logger: logger);
+        // Create a plugin.
+        await aPluginProject(includeAndroidMain: true, legacy: false, toolContext: toolContext);
+        // Create a project that depends on that plugin.
+        final FlutterProject project = await projectWithPluginDependency(toolContext: toolContext);
 
-          await regeneratePlatformSpecificTooling(project, releaseMode: true);
-          expect(
-            project.android.generatedPluginRegistrantFile.readAsStringSync(),
-            isNot(contains('MyPlugin')),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-          FlutterProjectFactory: () {
-            const toolContext = DelegatingToolContext();
-            return FlutterProjectFactory(
-              logger: logger,
-              fileSystem: toolContext.fs,
-              config: toolContext.config,
-            );
-          },
-        },
-      );
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: true,
+          toolContext: toolContext,
+        );
+        expect(
+          project.android.generatedPluginRegistrantFile.readAsStringSync(),
+          isNot(contains('MyPlugin')),
+        );
+      });
 
-      testUsingContext(
-        'injects plugins for macOS',
-        () async {
-          final FlutterProject project = await someProject();
-          project.macos.managedDirectory.createSync(recursive: true);
-          await regeneratePlatformSpecificTooling(project, releaseMode: false);
-          expectExists(project.macos.pluginRegistrantImplementation);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory: () {
-            const toolContext = DelegatingToolContext();
-            return FlutterProjectFactory(
-              logger: logger,
-              fileSystem: toolContext.fs,
-              config: toolContext.config,
-            );
-          },
-        },
-      );
-      testUsingContext(
-        'generates Xcode configuration for macOS',
-        () async {
-          final FlutterProject project = await someProject();
-          project.macos.managedDirectory.createSync(recursive: true);
-          await regeneratePlatformSpecificTooling(project, releaseMode: false);
-          expectExists(project.macos.generatedXcodePropertiesFile);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-        },
-      );
-      testUsingContext(
-        'injects plugins for Linux',
-        () async {
-          final FlutterProject project = await someProject();
-          project.linux.cmakeFile.createSync(recursive: true);
-          await regeneratePlatformSpecificTooling(project, releaseMode: false);
-          expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
-          expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-        },
-      );
-      testUsingContext(
-        'injects plugins for Windows',
-        () async {
-          final FlutterProject project = await someProject();
-          project.windows.cmakeFile.createSync(recursive: true);
-          await regeneratePlatformSpecificTooling(project, releaseMode: false);
-          expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
-          expectExists(
-            project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-        },
-      );
+      testWithoutContext('injects plugins for macOS', () async {
+        final fs = MemoryFileSystem.test();
+        final macOSFeatureFlags = TestFeatureFlags(isMacOSEnabled: true);
+        final toolContext = FakeToolContext(
+          fs: fs,
+          logger: logger,
+          projectFactory: FlutterProjectFactory(
+            config: FakeConfig(),
+            featureFlags: macOSFeatureFlags,
+            fileSystem: fs,
+            logger: logger,
+          ),
+        );
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.macos.managedDirectory.createSync(recursive: true);
+        await regeneratePlatformSpecificTooling(
+          project,
+          featureFlagsOverride: macOSFeatureFlags,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
+        expectExists(project.macos.pluginRegistrantImplementation);
+      });
+      testWithoutContext('generates Xcode configuration for macOS', () async {
+        final fs = MemoryFileSystem.test();
+        final macOSFeatureFlags = TestFeatureFlags(isMacOSEnabled: true);
+        final toolContext = FakeToolContext(
+          fs: fs,
+          logger: logger,
+          projectFactory: FlutterProjectFactory(
+            config: FakeConfig(),
+            featureFlags: macOSFeatureFlags,
+            fileSystem: fs,
+            logger: logger,
+          ),
+        );
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.macos.managedDirectory.createSync(recursive: true);
+        await regeneratePlatformSpecificTooling(
+          project,
+          featureFlagsOverride: macOSFeatureFlags,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
+        expectExists(project.macos.generatedXcodePropertiesFile);
+      });
+      testWithoutContext('injects plugins for Linux', () async {
+        final fs = MemoryFileSystem.test();
+        final linuxFeatureFlags = TestFeatureFlags(isLinuxEnabled: true);
+        final toolContext = FakeToolContext(
+          fs: fs,
+          logger: logger,
+          projectFactory: FlutterProjectFactory(
+            config: FakeConfig(),
+            featureFlags: linuxFeatureFlags,
+            fileSystem: fs,
+            logger: logger,
+          ),
+        );
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.linux.cmakeFile.createSync(recursive: true);
+        await regeneratePlatformSpecificTooling(
+          project,
+          featureFlagsOverride: linuxFeatureFlags,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
+        expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
+        expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
+      });
+      testWithoutContext('injects plugins for Windows', () async {
+        final fs = MemoryFileSystem.test();
+        final windowsFeatureFlags = TestFeatureFlags(isWindowsEnabled: true);
+        final toolContext = FakeToolContext(
+          fs: fs,
+          logger: logger,
+          projectFactory: FlutterProjectFactory(
+            config: FakeConfig(),
+            featureFlags: windowsFeatureFlags,
+            fileSystem: fs,
+            logger: logger,
+          ),
+        );
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.windows.cmakeFile.createSync(recursive: true);
+        await regeneratePlatformSpecificTooling(
+          project,
+          featureFlagsOverride: windowsFeatureFlags,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
+        expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
+        expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
+      });
       _testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
         await regeneratePlatformSpecificTooling(project, releaseMode: false);
@@ -991,6 +985,11 @@ dependencies {
           logger: logger,
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
+        _testToolContext = FakeToolContext(
+          fs: fs,
+          logger: logger,
+          projectFactory: flutterProjectFactory,
+        );
       });
 
       _testInMemory('default host app language', () async {
@@ -1239,6 +1238,11 @@ android {
           logger: logger,
           plistParser: testPlistUtils,
           xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
+        _testToolContext = FakeToolContext(
+          fs: fs,
+          logger: logger,
+          projectFactory: flutterProjectFactory,
         );
       });
 
@@ -1634,6 +1638,13 @@ android {
       setUp(() {
         fs = MemoryFileSystem.test();
         mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+        final projectFactory = FlutterProjectFactory(
+          config: FakeConfig(),
+          fileSystem: fs,
+          logger: logger,
+          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+        );
+        _testToolContext = FakeToolContext(fs: fs, logger: logger, projectFactory: projectFactory);
       });
 
       testUsingContext(
@@ -1784,8 +1795,8 @@ android {
     });
 
     group('Android project file getters', () {
-      _testInMemory('Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
@@ -1797,12 +1808,12 @@ android {
                 .childFile('gradle-wrapper.properties')
               ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
         expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
       });
-      _testInMemory('Project.android.appGradleFile resolves to app/build.gradle', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('Project.android.appGradleFile resolves to app/build.gradle', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
         );
@@ -1811,12 +1822,12 @@ android {
 
         final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
         expect(project.android.appGradleFile.path, expected.path);
       });
-      _testInMemory('Project.android.appGradleFile resolves to app/build.gradle.kts', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('Project.android.appGradleFile resolves to app/build.gradle.kts', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
         );
@@ -1825,14 +1836,14 @@ android {
 
         final File expected = androidDir.childFile('build.gradle.kts')..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
         expect(project.android.appGradleFile.path, expected.path);
       });
-      _testInMemory(
+      testWithoutContext(
         'Project.android.appGradleFile prefers app/build.gradle over app/build.gradle.kts',
-        () async {
-          final FileSystem fs = const DelegatingToolContext().fs;
+        () {
+          final FileSystem fs = getFileSystemForPlatform();
           final Directory tempDir = fs.systemTempDirectory.createTempSync(
             'flutter_project_build_files',
           );
@@ -1841,33 +1852,29 @@ android {
           androidDir.childFile('build.gradle.kts').createSync(recursive: true);
           final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
           expect(project.android.appGradleFile.path, expected.path);
         },
       );
 
-      _testInMemory(
-        'Project.android.hostAppGradleFile resolves to android/build.gradle ',
-        () async {
-          final FileSystem fs = const DelegatingToolContext().fs;
-          final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+      testWithoutContext('Project.android.hostAppGradleFile resolves to android/build.gradle ', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
+        final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.hostAppGradleFile.path, expected.path);
-        },
-      );
-      _testInMemory(
+        expect(project.android.hostAppGradleFile.path, expected.path);
+      });
+      testWithoutContext(
         'Project.android.hostAppGradleFile resolves to android/build.gradle.kts',
-        () async {
-          final FileSystem fs = const DelegatingToolContext().fs;
+        () {
+          final FileSystem fs = getFileSystemForPlatform();
           final Directory tempDir = fs.systemTempDirectory.createTempSync(
             'flutter_project_build_files',
           );
@@ -1877,13 +1884,13 @@ android {
           final File expected = androidDir.childFile('build.gradle.kts')
             ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
           expect(project.android.hostAppGradleFile.path, expected.path);
         },
       );
-      _testInMemory('Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
         );
@@ -1891,14 +1898,14 @@ android {
         androidDir.childFile('build.gradle.kts').createSync(recursive: true);
         final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
         expect(project.android.hostAppGradleFile.path, expected.path);
       });
-      _testInMemory(
+      testWithoutContext(
         'Project.android.settingsGradleFile resolves to android/settings.gradle',
-        () async {
-          final FileSystem fs = const DelegatingToolContext().fs;
+        () {
+          final FileSystem fs = getFileSystemForPlatform();
           final Directory tempDir = fs.systemTempDirectory.createTempSync(
             'flutter_project_build_files',
           );
@@ -1908,15 +1915,15 @@ android {
           final File expected = androidDir.childFile('settings.gradle')
             ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
           expect(project.android.settingsGradleFile.path, expected.path);
         },
       );
-      _testInMemory(
+      testWithoutContext(
         'Project.android.settingsGradleFile resolves to android/settings.gradle.kts',
-        () async {
-          final FileSystem fs = const DelegatingToolContext().fs;
+        () {
+          final FileSystem fs = getFileSystemForPlatform();
           final Directory tempDir = fs.systemTempDirectory.createTempSync(
             'flutter_project_build_files',
           );
@@ -1926,13 +1933,13 @@ android {
           final File expected = androidDir.childFile('settings.gradle.kts')
             ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
           expect(project.android.settingsGradleFile.path, expected.path);
         },
       );
-      _testInMemory('Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
         );
@@ -1940,12 +1947,12 @@ android {
         androidDir.childFile('settings.gradle.kts').createSync(recursive: true);
         final File expected = androidDir.childFile('settings.gradle')..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
         expect(project.android.settingsGradleFile.path, expected.path);
       });
-      _testInMemory('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
@@ -1959,12 +1966,12 @@ android {
                 .childFile('AndroidManifest.xml')
               ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      _testInMemory('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
@@ -1978,12 +1985,12 @@ android {
                 .childFile('AndroidManifest.xml')
               ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      _testInMemory('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
@@ -1998,26 +2005,26 @@ android {
                 .childFile('AndroidManifest.xml')
               ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      _testInMemory('Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
         final File expected = androidDir.childFile('AndroidManifest.xml')
           ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      _testInMemory(
+      testWithoutContext(
         'Project.android.localPropertiesFile resolves to android/local.properties',
-        () async {
-          final FileSystem fs = const DelegatingToolContext().fs;
+        () {
+          final FileSystem fs = getFileSystemForPlatform();
           final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
           final Directory androidDir = tempDir.childDirectory('android')
             ..createSync(recursive: true);
@@ -2025,7 +2032,7 @@ android {
           final File expected = androidDir.childFile('local.properties')
             ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: testLogger);
+          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
           expect(project.android.localPropertiesFile.path, expected.path);
         },
@@ -2033,8 +2040,8 @@ android {
     });
 
     group('workspaces', () {
-      _testInMemory('fails on invalid pubspec.yaml', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('fails on invalid pubspec.yaml', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
@@ -2069,15 +2076,15 @@ resolution: workspace
 ''');
 
         expect(
-          FlutterProject.fromDirectory(directory, logger: testLogger).workspaceProjects
+          FlutterProject.fromDirectory(directory, logger: logger).workspaceProjects
               .map((FlutterProject subproject) => subproject.manifest.appName)
               .toList(),
           <String>['child1', 'child2', 'child2_example'],
         );
       });
 
-      _testInMemory('supports glob patterns in workspace entries', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('supports glob patterns in workspace entries', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
@@ -2103,15 +2110,15 @@ resolution: workspace
 ''');
 
         expect(
-          FlutterProject.fromDirectory(directory, logger: testLogger).workspaceProjects
+          FlutterProject.fromDirectory(directory, logger: logger).workspaceProjects
               .map((FlutterProject subproject) => subproject.manifest.appName)
               .toList(),
           <String>['child1', 'child2'],
         );
       });
 
-      _testInMemory('supports recursive glob pattern ** in workspace entries', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('supports recursive glob pattern ** in workspace entries', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
@@ -2141,15 +2148,15 @@ resolution: workspace
 ''');
 
         expect(
-          FlutterProject.fromDirectory(directory, logger: testLogger).workspaceProjects
+          FlutterProject.fromDirectory(directory, logger: logger).workspaceProjects
               .map((FlutterProject subproject) => subproject.manifest.appName)
               .toSet(),
           <String>{'child1', 'child2'},
         );
       });
 
-      _testInMemory('handles empty workspace entries gracefully', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('handles empty workspace entries gracefully', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
@@ -2159,14 +2166,11 @@ flutter:
 workspace:
 - ''
 ''');
-        expect(
-          FlutterProject.fromDirectory(directory, logger: testLogger).workspaceProjects,
-          isEmpty,
-        );
+        expect(FlutterProject.fromDirectory(directory, logger: logger).workspaceProjects, isEmpty);
       });
 
-      _testInMemory('handles Windows backslash separators in workspace entries', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('handles Windows backslash separators in workspace entries', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
@@ -2193,67 +2197,64 @@ resolution: workspace
 ''');
 
         expect(
-          FlutterProject.fromDirectory(directory, logger: testLogger).workspaceProjects
+          FlutterProject.fromDirectory(directory, logger: logger).workspaceProjects
               .map((FlutterProject subproject) => subproject.manifest.appName)
               .toSet(),
           <String>{'child1', 'child2'},
         );
       });
 
-      _testInMemory(
-        'ignores build and .dart_tool directories during workspace discovery',
-        () async {
-          final FileSystem fs = const DelegatingToolContext().fs;
-          final Directory directory = fs.directory('myproject');
-          directory.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      testWithoutContext('ignores build and .dart_tool directories during workspace discovery', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory directory = fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: parent
 flutter:
 workspace:
 - '*'
 ''');
-          directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+        directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: child1
 flutter:
 resolution: workspace
 ''');
-          directory.childDirectory('other').childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+        directory.childDirectory('other').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: other
 flutter:
 resolution: workspace
 ''');
-          // A nested pubspec inside build/ or .dart_tool/ should be ignored when wildcard matching
-          directory.childDirectory('build').childDirectory('nested').childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+        // A nested pubspec inside build/ or .dart_tool/ should be ignored when wildcard matching
+        directory.childDirectory('build').childDirectory('nested').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: build_child
 flutter:
 resolution: workspace
 ''');
-          directory.childDirectory('.dart_tool').childDirectory('nested').childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+        directory.childDirectory('.dart_tool').childDirectory('nested').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: dart_tool_child
 flutter:
 resolution: workspace
 ''');
 
-          expect(
-            FlutterProject.fromDirectory(directory, logger: testLogger).workspaceProjects
-                .map((FlutterProject subproject) => subproject.manifest.appName)
-                .toSet(),
-            <String>{'other'},
-          );
-        },
-      );
+        expect(
+          FlutterProject.fromDirectory(directory, logger: logger).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toSet(),
+          <String>{'other'},
+        );
+      });
 
-      _testInMemory('workspaceRoot returns root project for member projects', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('workspaceRoot returns root project for member projects', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
@@ -2274,12 +2275,9 @@ resolution: workspace
 
         final FlutterProject parentProject = FlutterProject.fromDirectory(
           directory,
-          logger: testLogger,
+          logger: logger,
         );
-        final FlutterProject childProject = FlutterProject.fromDirectory(
-          child1Dir,
-          logger: testLogger,
-        );
+        final FlutterProject childProject = FlutterProject.fromDirectory(child1Dir, logger: logger);
 
         expect(
           fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
@@ -2288,8 +2286,8 @@ resolution: workspace
         expect(parentProject.workspaceRoot, null);
       });
 
-      _testInMemory('workspaceRoot works with relative paths', () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
+      testWithoutContext('workspaceRoot works with relative paths', () {
+        final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject')..createSync(recursive: true);
         directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: parent
@@ -2309,7 +2307,7 @@ resolution: workspace
           fs.currentDirectory = directory;
           final FlutterProject childProject = FlutterProject.fromDirectory(
             fs.directory('child1'),
-            logger: testLogger,
+            logger: logger,
           );
           expect(
             fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
@@ -2320,10 +2318,10 @@ resolution: workspace
         }
       });
 
-      _testInMemory(
+      testWithoutContext(
         'workspaceRoot is resilient to malformed sibling packages in workspace',
-        () async {
-          final FileSystem fs = const DelegatingToolContext().fs;
+        () {
+          final FileSystem fs = getFileSystemForPlatform();
           final Directory directory = fs.directory('myproject');
           directory.childFile('pubspec.yaml')
             ..createSync(recursive: true)
@@ -2352,11 +2350,11 @@ resolution: workspace
 
           final FlutterProject parentProject = FlutterProject.fromDirectory(
             directory,
-            logger: testLogger,
+            logger: logger,
           );
           final FlutterProject childProject = FlutterProject.fromDirectory(
             validChildDir,
-            logger: testLogger,
+            logger: logger,
           );
 
           expect(
@@ -2383,6 +2381,11 @@ resolution: workspace
         logger: logger,
         plistParser: testPlistParser,
         xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+      );
+      _testToolContext = FakeToolContext(
+        fs: fs,
+        logger: logger,
+        projectFactory: flutterProjectFactory,
       );
       const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
       mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -2683,23 +2686,25 @@ resolution: workspace
 Future<void> regeneratePlatformSpecificTooling(
   FlutterProject project, {
   required bool releaseMode,
+  FeatureFlags? featureFlagsOverride,
+  ToolContext? toolContext,
 }) {
   const analytics = NoOpAnalytics();
-  const toolContext = DelegatingToolContext();
+  final ToolContext resolvedToolContext = toolContext ?? _testToolContext;
   return project.regeneratePlatformSpecificTooling(
-    toolContext: toolContext,
+    toolContext: resolvedToolContext,
     analytics: analytics,
     cocoaPods: CocoaPods(
       analytics: analytics,
-      toolContext: toolContext,
+      toolContext: resolvedToolContext,
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     ),
-    featureFlags: featureFlags,
+    featureFlags: featureFlagsOverride ?? TestFeatureFlags(),
     gradleUtils: gradle_utils.GradleUtils(
-      operatingSystemUtils: toolContext.os,
-      logger: toolContext.logger,
-      platform: toolContext.platform,
-      cache: toolContext.cache,
+      operatingSystemUtils: resolvedToolContext.os,
+      logger: resolvedToolContext.logger,
+      platform: resolvedToolContext.platform,
+      cache: resolvedToolContext.cache,
     ),
     plistParser: FakePlistParser(),
     releaseMode: releaseMode,
@@ -2710,9 +2715,10 @@ Future<void> regeneratePlatformSpecificTooling(
 Future<FlutterProject> someProject({
   String? androidManifestOverride,
   bool includePubspec = true,
+  ToolContext? toolContext,
 }) async {
-  const toolContext = DelegatingToolContext();
-  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) =
+      toolContext ?? _testToolContext;
   final Directory directory = fs.directory('some_project');
   writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'hello');
   if (includePubspec) {
@@ -2729,9 +2735,9 @@ Future<FlutterProject> someProject({
   return projectFactory.fromDirectory(directory);
 }
 
-Future<FlutterProject> projectWithPluginDependency() async {
-  const toolContext = DelegatingToolContext();
-  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+Future<FlutterProject> projectWithPluginDependency({ToolContext? toolContext}) async {
+  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) =
+      toolContext ?? _testToolContext;
   final Directory directory = fs.directory('some_project');
   writePackageConfigFiles(
     directory: directory,
@@ -2756,9 +2762,13 @@ dev_dependencies:
   return projectFactory.fromDirectory(directory);
 }
 
-Future<FlutterProject> aPluginProject({bool legacy = true, bool includeAndroidMain = false}) async {
-  const toolContext = DelegatingToolContext();
-  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+Future<FlutterProject> aPluginProject({
+  bool includeAndroidMain = false,
+  bool legacy = true,
+  ToolContext? toolContext,
+}) async {
+  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) =
+      toolContext ?? _testToolContext;
   final Directory directory = fs.directory('plugin_project');
   directory.childDirectory('ios').createSync(recursive: true);
   directory.childDirectory('android').createSync(recursive: true);
@@ -2806,9 +2816,9 @@ class MyPlugin extends FluttPlugin { /* ... */ }
   return projectFactory.fromDirectory(directory);
 }
 
-Future<FlutterProject> aModuleProject() async {
-  const toolContext = DelegatingToolContext();
-  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+Future<FlutterProject> aModuleProject({ToolContext? toolContext}) async {
+  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) =
+      toolContext ?? _testToolContext;
   final Directory directory = fs.directory('module_project');
   writePackageConfigFiles(mainLibName: 'my_module', directory: directory);
   directory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -2869,6 +2879,28 @@ void _testInMemory(
   final String flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
   final hostFileSystem = LocalFileSystem.test(signals: FakeSignals());
+  final testBufferLogger = BufferLogger.test();
+  final testConfig = Config.test();
+  final osUtils = FakeOperatingSystemUtils();
+  const platform = LocalPlatform();
+  final ProcessManager testProcessManager = processManager ?? FakeProcessManager.any();
+  final cache = Cache(
+    flutterRoot: flutterRoot,
+    logger: testBufferLogger,
+    fileSystem: testFileSystem,
+    osUtils: osUtils,
+    platform: platform,
+    artifacts: <ArtifactSet>[],
+  );
+  final toolContext = FakeToolContext(
+    cache: cache,
+    config: testConfig,
+    fs: testFileSystem,
+    logger: testBufferLogger,
+    os: osUtils,
+    platform: platform,
+    processManager: testProcessManager,
+  );
 
   final Directory fakeFlutterRoot = testFileSystem.directory(flutterRoot);
   _insertFakeGradleArtifactDir(flutterRoot: fakeFlutterRoot);
@@ -2896,25 +2928,21 @@ void _testInMemory(
 
   testUsingContext(
     description,
-    testMethod,
+    () async {
+      _testToolContext = toolContext;
+      await testMethod();
+    },
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => processManager ?? FakeProcessManager.any(),
+      ProcessManager: () => testProcessManager,
       Java: () => java,
       AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
       // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
-      Cache: () {
-        const toolContext = DelegatingToolContext();
-        return Cache(
-          flutterRoot: flutterRoot,
-          logger: toolContext.logger,
-          fileSystem: testFileSystem,
-          osUtils: toolContext.os,
-          platform: toolContext.platform,
-          artifacts: <ArtifactSet>[],
-        );
-      },
+      Cache: () => cache,
+      Config: () => testConfig,
+      Logger: () => testBufferLogger,
+      OperatingSystemUtils: () => osUtils,
       Pub: ThrowingPub.new,
     },
   );

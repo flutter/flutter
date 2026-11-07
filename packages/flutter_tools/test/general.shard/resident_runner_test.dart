@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -44,6 +43,8 @@ import 'resident_runner_helpers.dart';
 
 void main() {
   late TestBed testbed;
+  late Config config;
+  late FileSystem fs;
   late FakeFlutterDevice flutterDevice;
   late FakeDevFS devFS;
   late ResidentRunner residentRunner;
@@ -52,13 +53,14 @@ void main() {
   FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
+    config = Config.test();
+    fs = MemoryFileSystem.test();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fakeFlutterVersion: FakeFlutterVersion(),
       fs: MemoryFileSystem.test(),
     );
     testbed = TestBed(
       setup: () {
-        final FileSystem fs = const DelegatingToolContext().fs;
         fs.file(fs.path.join('build', 'app.dill'))
           ..createSync(recursive: true)
           ..writeAsStringSync('ABC');
@@ -70,7 +72,11 @@ void main() {
           analytics: fakeAnalytics,
         );
       },
-      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        Config: () => config,
+        FileSystem: () => fs,
+      },
     );
     device = FakeDevice();
     devFS = FakeDevFS();
@@ -113,7 +119,6 @@ void main() {
   testUsingContext(
     'ResidentRunner suppresses errors for the initial compilation',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       final residentCompiler = FakeResidentCompiler()
@@ -137,7 +142,6 @@ void main() {
   testUsingContext(
     'ResidentRunner calls appFailedToStart if initial compilation fails',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       final residentCompiler = FakeResidentCompiler()
@@ -161,7 +165,6 @@ void main() {
   testUsingContext(
     'ResidentRunner calls appFailedToStart if initial compilation fails - cold mode',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       residentRunner = createColdRunner(
@@ -182,7 +185,6 @@ void main() {
   testUsingContext(
     'ResidentRunner calls appFailedToStart if exception is thrown - cold mode',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       residentRunner = createColdRunner(
@@ -202,7 +204,6 @@ void main() {
   testUsingContext(
     'ResidentRunner does not suppressErrors if running with an applicationBinary',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       final residentCompiler = FakeResidentCompiler()
@@ -469,7 +470,6 @@ void main() {
       flutterDevice.report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
 
       final OperationResult result = await residentRunner.restart();
-      final FileSystem fs = const DelegatingToolContext().fs;
 
       expect(fs.file(fs.path.join('lib', 'main.dart')), isNot(exists));
       expect(testLogger.errorText, contains('The entrypoint file (i.e. the file with main())'));
@@ -969,7 +969,6 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       expect(residentRunner.artifactDirectory.path, contains('flutter_tool.'));
 
-      final FileSystem fs = const DelegatingToolContext().fs;
       final ResidentRunner otherRunner = createHotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
@@ -996,7 +995,6 @@ void main() {
   testUsingContext(
     'ResidentRunner can run source generation',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       final File arbFile = fs.file(fs.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
       arbFile.writeAsStringSync('''
@@ -1036,7 +1034,6 @@ flutter:
   testUsingContext(
     'generated main uses correct target',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       final File arbFile = fs.file(fs.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
       arbFile.writeAsStringSync('''
@@ -1103,7 +1100,6 @@ flutter:
   testUsingContext(
     'ResidentRunner can run source generation - generation fails',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       // Intentionally define arb file with wrong name. generate_localizations defaults
       // to app_en.arb.
       final File arbFile = fs.file(fs.path.join('lib', 'l10n', 'foo.arb'))
@@ -1128,7 +1124,6 @@ flutter:
   testUsingContext(
     'ResidentRunner generates files when l10n.yaml exists',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       final File arbFile = fs.file(fs.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
@@ -1395,7 +1390,6 @@ flutter:
   testUsingContext(
     'HotRunner writes vm service file when providing debugging option',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews],
         wsAddress: testUri,
@@ -1419,7 +1413,6 @@ flutter:
   testUsingContext(
     'HotRunner copies compiled app.dill to cache during startup',
     () => testbed.run(() async {
-      final ToolContext(:Config config, :FileSystem fs) = const DelegatingToolContext();
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews],
         wsAddress: testUri,
@@ -1458,7 +1451,6 @@ flutter:
   testUsingContext(
     'HotRunner copies compiled app.dill to cache during startup with dart defines',
     () => testbed.run(() async {
-      final ToolContext(:Config config, :FileSystem fs) = const DelegatingToolContext();
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews],
         wsAddress: testUri,
@@ -1498,7 +1490,6 @@ flutter:
   testUsingContext(
     'HotRunner copies compiled app.dill to cache during startup with null safety',
     () => testbed.run(() async {
-      final ToolContext(:Config config, :FileSystem fs) = const DelegatingToolContext();
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews],
         wsAddress: testUri,
@@ -1538,7 +1529,6 @@ flutter:
   testUsingContext(
     'HotRunner copies compiled app.dill to cache during startup with track-widget-creation',
     () => testbed.run(() async {
-      final ToolContext(:Config config, :FileSystem fs) = const DelegatingToolContext();
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews],
         wsAddress: testUri,
@@ -1570,7 +1560,6 @@ flutter:
   testUsingContext(
     'HotRunner does not copy app.dill if a dillOutputPath is given',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews],
         wsAddress: testUri,
@@ -1595,7 +1584,6 @@ flutter:
   testUsingContext(
     'HotRunner copies compiled app.dill to cache during startup with --track-widget-creation',
     () => testbed.run(() async {
-      final ToolContext(:Config config, :FileSystem fs) = const DelegatingToolContext();
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews],
         wsAddress: testUri,
@@ -1635,7 +1623,6 @@ flutter:
   testUsingContext(
     'HotRunner calls device dispose',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews],
         wsAddress: testUri,
@@ -1656,36 +1643,27 @@ flutter:
 
   testUsingContext(
     'HotRunner handles failure to write vmservice file',
-    () => testbed.run(
-      () async {
-        final FileSystem fs = const DelegatingToolContext().fs;
-        fakeVmServiceHost = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[listViews, listViews],
-        );
-        fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-        residentRunner = createHotRunner(
-          <FlutterDevice>[flutterDevice],
-          stayResident: false,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
-          target: 'main.dart',
-          analytics: fakeAnalytics,
-        );
+    () => testbed.run(() async {
+      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
+      fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      residentRunner = createHotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
 
-        await residentRunner.run();
+      await residentRunner.run();
 
-        expect(testLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
-        expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem.test()),
-      },
-    ),
+      expect(testLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
+      expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+    }, overrides: <Type, Generator>{FileSystem: () => ThrowingForwardingFileSystem(fs)}),
   );
 
   testUsingContext(
     'ColdRunner writes vm service file when providing debugging option',
     () => testbed.run(() async {
-      final FileSystem fs = const DelegatingToolContext().fs;
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews],
         wsAddress: testUri,
@@ -1705,56 +1683,53 @@ flutter:
     }),
   );
 
-  testUsingContext(
-    'FlutterDevice uses dartdevc configuration when targeting web',
-    () async {
-      const toolContext = DelegatingToolContext();
-      final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
-      final residentCompiler =
-          (await FlutterDevice.create(
-                device,
-                toolContext: toolContext,
-                buildInfo: const BuildInfo(
-                  BuildMode.debug,
-                  '',
-                  treeShakeIcons: false,
-                  packageConfigPath: '.dart_tool/package_config.json',
-                ),
-                target: null,
-              )).generator
-              as DefaultResidentCompiler?;
+  testUsingContext('FlutterDevice uses dartdevc configuration when targeting web', () async {
+    final artifacts = Artifacts.test();
+    final toolContext = FakeToolContext(
+      artifacts: artifacts,
+      config: config,
+      fs: fs,
+      processManager: FakeProcessManager.any(),
+    );
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
+    final residentCompiler =
+        (await FlutterDevice.create(
+              device,
+              toolContext: toolContext,
+              buildInfo: const BuildInfo(
+                BuildMode.debug,
+                '',
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+              target: null,
+            )).generator
+            as DefaultResidentCompiler?;
 
-      final String expectedPath = getDefaultCachedKernelPath(
-        fileSystem: fs,
-        trackWidgetCreation: false,
-        dartDefines: const <String>[],
-        config: config,
-        targetModel: TargetModel.dartdevc,
-        extraFrontEndOptions: kDdcLibraryBundleFlags,
-      );
-      expect(residentCompiler!.initializeFromDill, expectedPath);
-      expect(
-        residentCompiler.librariesSpec,
-        fs.file(artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson)).uri.toString(),
-      );
-      expect(residentCompiler.targetModel, TargetModel.dartdevc);
-      expect(
-        residentCompiler.sdkRoot,
-        '${artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path}/',
-      );
-      expect(
-        residentCompiler.platformDill,
-        'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
-      );
-    },
-    overrides: <Type, Generator>{
-      Artifacts: () => Artifacts.test(),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    final String expectedPath = getDefaultCachedKernelPath(
+      fileSystem: fs,
+      trackWidgetCreation: false,
+      dartDefines: const <String>[],
+      config: config,
+      targetModel: TargetModel.dartdevc,
+      extraFrontEndOptions: kDdcLibraryBundleFlags,
+    );
+    expect(residentCompiler!.initializeFromDill, expectedPath);
+    expect(
+      residentCompiler.librariesSpec,
+      fs.file(artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson)).uri.toString(),
+    );
+    expect(residentCompiler.targetModel, TargetModel.dartdevc);
+    expect(
+      residentCompiler.sdkRoot,
+      '${artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path}/',
+    );
+    expect(
+      residentCompiler.platformDill,
+      'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
+    );
+  });
 
   testUsingContext(
     'FlutterDevice passes alternative-invalidation-strategy flag',
@@ -2221,7 +2196,6 @@ flutter:
         ..targetPlatform = TargetPlatform.darwin
         ..generator = residentCompiler;
 
-      final FileSystem fs = const DelegatingToolContext().fs;
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       residentRunner = createHotRunner(
@@ -2269,20 +2243,22 @@ flutter:
   );
   group('ResidentRunner cached Initial Dill Compilation', () {
     late TestBed testbed;
+    late Config localConfig;
+    late FileSystem localFs;
     late FakeFlutterDevice flutterDevice;
     late FakeDevFS devFS;
     late TestHotRunner residentRunner;
     late FakeDevice device;
-    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
-      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      localConfig = Config.test();
+      localFs = MemoryFileSystem.test();
+      final FakeAnalytics localAnalytics = getInitializedFakeAnalyticsInstance(
         fakeFlutterVersion: FakeFlutterVersion(),
         fs: MemoryFileSystem.test(),
       );
       testbed = TestBed(
         setup: () {
-          const toolContext = DelegatingToolContext();
           residentRunner = TestHotRunner(
             <FlutterDevice>[flutterDevice],
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -2290,16 +2266,16 @@ flutter:
             stayResident: false,
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
             target: 'main.dart',
-            toolContext: toolContext,
+            toolContext: FakeToolContext(config: localConfig, fs: localFs),
             xcode: null,
-            analytics: fakeAnalytics,
+            analytics: localAnalytics,
           );
           // Write the source dill file
-          toolContext.fs.file(residentRunner.dillOutputPath)
+          localFs.file(residentRunner.dillOutputPath)
             ..createSync(recursive: true)
             ..writeAsStringSync('ABC');
         },
-        overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
+        overrides: <Type, Generator>{FileSystem: () => localFs},
       );
       device = FakeDevice();
       devFS = FakeDevFS();
@@ -2312,63 +2288,60 @@ flutter:
     testUsingContext(
       'correctly caches Web Device compilation',
       () => testbed.run(() {
-        final ToolContext(:Config config, :FileSystem fs) = const DelegatingToolContext();
         flutterDevice.targetPlatform = TargetPlatform.web_javascript;
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
-          fileSystem: fs,
+          fileSystem: localFs,
           trackWidgetCreation: residentRunner.trackWidgetCreation,
           dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
           extraFrontEndOptions: kDdcLibraryBundleFlags,
-          config: config,
+          config: localConfig,
           targetModel: TargetModel.dartdevc,
         );
 
-        expect(fs.file(expectedPath), exists);
-        expect(fs.file(expectedPath).readAsStringSync(), 'ABC');
+        expect(localFs.file(expectedPath), exists);
+        expect(localFs.file(expectedPath).readAsStringSync(), 'ABC');
       }),
     );
 
     testUsingContext(
       'correctly caches Fuchsia Device compilation',
       () => testbed.run(() {
-        final ToolContext(:Config config, :FileSystem fs) = const DelegatingToolContext();
         flutterDevice.targetPlatform = TargetPlatform.fuchsia_arm64;
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
-          fileSystem: fs,
+          fileSystem: localFs,
           trackWidgetCreation: residentRunner.trackWidgetCreation,
           dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
           extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
-          config: config,
+          config: localConfig,
           targetModel: TargetModel.flutterRunner,
         );
 
-        expect(fs.file(expectedPath), exists);
-        expect(fs.file(expectedPath).readAsStringSync(), 'ABC');
+        expect(localFs.file(expectedPath), exists);
+        expect(localFs.file(expectedPath).readAsStringSync(), 'ABC');
       }),
     );
 
     testUsingContext(
       'correctly caches Android Device compilation',
       () => testbed.run(() {
-        final ToolContext(:Config config, :FileSystem fs) = const DelegatingToolContext();
         flutterDevice.targetPlatform = TargetPlatform.android_arm;
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
-          fileSystem: fs,
+          fileSystem: localFs,
           trackWidgetCreation: residentRunner.trackWidgetCreation,
           dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
           extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
-          config: config,
+          config: localConfig,
           targetModel: TargetModel.flutter,
         );
 
-        expect(fs.file(expectedPath), exists);
-        expect(fs.file(expectedPath).readAsStringSync(), 'ABC');
+        expect(localFs.file(expectedPath), exists);
+        expect(localFs.file(expectedPath).readAsStringSync(), 'ABC');
       }),
     );
   });

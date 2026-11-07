@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -49,13 +48,12 @@ void main() {
     test('Can provide default interfaces', () async {
       final testbed = TestBed();
 
-      late FileSystem localFileSystem;
+      FileSystem? localFileSystem;
       await testbed.run(() {
-        localFileSystem = const DelegatingToolContext().fs;
+        localFileSystem = context.resolveOverride<FileSystem>();
       });
 
-      expect(localFileSystem, isA<ErrorHandlingFileSystem>());
-      expect((localFileSystem as ErrorHandlingFileSystem).fileSystem, isA<MemoryFileSystem>());
+      expect(localFileSystem, isA<MemoryFileSystem>());
     });
 
     test('Can provide setup interfaces', () async {
