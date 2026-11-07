@@ -385,6 +385,110 @@ extension on BuildInput {
   await builderFile.writeAsString(builderSource);
 }
 
+/// Links the main library of the package from [addDynamicallyLinkedNativeLibrary]
+/// like a vendor's prebuilt dylib often is: with plain `clang`, a short install
+/// name, and no `-headerpad_max_install_names`, so its header keeps the
+/// default 32 free bytes. (`CBuilder` links with `-encryptable`, which leaves
+/// plenty of room.)
+///
+/// The library depends on `add`, which `CBuilder` links without an install
+/// name, so `add` is referenced by its long path in the hook's output
+/// directory, and rewriting that to the shorter path under `build/` frees
+/// about 40 bytes. The install name is `@rpath/m.dylib`, so short that the
+/// absolute path `flutter test` gives code assets on macOS still does not fit
+/// for any package root. (A vendor's library that references its siblings by
+/// `@rpath/` names grows on that rewrite instead, and fails.) Only works on
+/// macOS.
+Future<void> linkMainLibraryWithoutHeaderRoom(
+  String packageName,
+  Directory packageDirectory,
+) async {
+  const builderSource = r'''
+import 'dart:io';
+
+import 'package:code_assets/code_assets.dart';
+import 'package:hooks/hooks.dart';
+import 'package:logging/logging.dart';
+import 'package:native_toolchain_c/native_toolchain_c.dart';
+
+void main(List<String> args) async {
+  await build(args, (input, output) async {
+    if (!input.config.buildCodeAssets) {
+      return;
+    }
+    final packageName = input.packageName;
+    await CBuilder.library(
+      name: 'add',
+      assetName: 'add',
+      sources: ['src/add.c'],
+    ).run(input: input, output: output, logger: Logger(''));
+
+    final Uri source = input.packageRoot.resolve('src/$packageName.c');
+    final Uri library = input.outputDirectory.resolve('lib$packageName.dylib');
+    final ProcessResult result = await Process.run('xcrun', [
+      'clang',
+      '-arch',
+      switch (input.config.code.targetArchitecture) {
+        Architecture.arm64 => 'arm64',
+        Architecture.x64 => 'x86_64',
+        final architecture => throw UnsupportedError('$architecture'),
+      },
+      '-dynamiclib',
+      '-mmacos-version-min=${input.config.code.macOS.targetVersion}',
+      source.toFilePath(),
+      '-L${input.outputDirectory.toFilePath()}',
+      '-ladd',
+      '-install_name',
+      '@rpath/m.dylib',
+      '-o',
+      library.toFilePath(),
+    ]);
+    if (result.exitCode != 0) {
+      throw Exception('clang failed:\n${result.stdout}\n${result.stderr}');
+    }
+    output.assets.code.add(
+      CodeAsset(
+        package: packageName,
+        name: '${packageName}_bindings_generated.dart',
+        linkMode: DynamicLoadingBundled(),
+        file: library,
+      ),
+    );
+    output.dependencies.add(source);
+  });
+}
+''';
+  final File builderFile = packageDirectory.childDirectory('hook').childFile('build.dart');
+  expect(builderFile, exists);
+  await builderFile.writeAsString(builderSource);
+}
+
+/// Checks that `flutter test` kept the short install name of the main library
+/// from [linkMainLibraryWithoutHeaderRoom], and still pointed the main library
+/// at `add` by its absolute path.
+void expectTesterKeptInstallName(String packageName, Directory packageDirectory) {
+  final Directory assetsDirectory = packageDirectory.childDirectory('build/native_assets/macos');
+  final File mainLibrary = assetsDirectory.childFile('lib$packageName.dylib');
+  final ProcessResult installName = processManager.runSync(<String>[
+    'otool',
+    '-D',
+    mainLibrary.path,
+  ]);
+  expect(installName.stdout.toString(), contains('@rpath/m.dylib'));
+  final ProcessResult dependencies = processManager.runSync(<String>[
+    'otool',
+    '-L',
+    mainLibrary.path,
+  ]);
+  expect(dependencies.stdout.toString(), contains(assetsDirectory.childFile('libadd.dylib').path));
+  final ProcessResult signature = processManager.runSync(<String>[
+    'codesign',
+    '--verify',
+    mainLibrary.path,
+  ]);
+  expect(signature, const ProcessResultMatcher());
+}
+
 /// Adds a pair of native functions that share state through a heap allocation
 /// the native library holds on to.
 ///
