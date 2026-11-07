@@ -28,7 +28,6 @@
 .classpath
 .project
 .settings/
-.vscode/*
 .ccls-cache
 
 # This file, on the master branch, should never exist or be checked-in.
@@ -171,3 +170,5 @@ app.*.symbols
 .agents/rules/personal-*
 .agents/skills/personal-*
 /.agent-shell/
+config.bat
+node_modules
