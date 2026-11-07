@@ -617,8 +617,6 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     _maybeAttachCanvasToDom();
     _createSkiaObjects();
   }
-
-
 }
 
 /// The CanvasKit implementation of [OnscreenSurface].
