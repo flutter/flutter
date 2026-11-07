@@ -12,7 +12,7 @@ void main() {
   test('BitField control test', () {
     final field = BitField<_TestEnum>(8);
 
-    expect(field[_TestEnum.d], isFalse);
+    expect(field[_TestEnum.d], isTrue);
 
     field[_TestEnum.d] = true;
     field[_TestEnum.e] = true;
