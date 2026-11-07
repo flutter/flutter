@@ -23,6 +23,9 @@ class RuntimeEffectFilterContents final : public FilterContents {
   void SetTextureInputs(
       std::vector<RuntimeEffectContents::TextureInput> texture_inputs);
 
+  // |FilterContents|
+  bool RequiresFullSourceCoverage() const override;
+
  private:
   std::shared_ptr<RuntimeStage> runtime_stage_;
   std::shared_ptr<std::vector<uint8_t>> uniforms_;
