@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
@@ -67,5 +67,36 @@ void failingTestTestRun() {
     expect(errors, hasLength(1));
     expect(errors.single.toString(), contains('Expected: <2>'));
     expect(errors.single.toString(), contains('Actual: <1>'));
+  });
+}
+
+void disposedInAddTearDownTestRun() {
+  testWidgets('SemanticsHandle disposed in addTearDown passes test', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    addTearDown(handle.dispose);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  tearDown(() {
+    expect(errors, isEmpty);
+  });
+}
+
+void openHandleWithAddTearDownTestRun() {
+  testWidgets('open SemanticsHandle fails test after addTearDown callbacks', (
+    WidgetTester tester,
+  ) async {
+    tester.ensureSemantics();
+    // SemanticsHandle is not disposed on purpose to verify in tearDown that
+    // the test failed due to an active SemanticsHandle.
+    addTearDown(() {
+      // The check for active SemanticsHandles runs after this callback.
+      expect(errors, isEmpty);
+    });
+  });
+
+  tearDown(() {
+    expect(errors, hasLength(1));
+    expect(errors.single.toString(), contains('SemanticsHandle was active at the end of the test'));
   });
 }
