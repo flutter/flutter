@@ -219,7 +219,7 @@ void main() {
       ),
     );
 
-    expect(log, equals(<int>[0, 1, 2, 3, 4]));
+    expect(log, equals(<int>[0, 1, 2, 3, 4, 5]));
     log.clear();
 
     final ScrollableState state = tester.state(find.byType(Scrollable));
@@ -229,7 +229,7 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[8, 9, 10, 11, 12, 13, 14]));
+    expect(log, equals(<int>[7, 8, 9, 10, 11, 12, 13, 14, 15]));
     log.clear();
 
     position.jumpTo(975.0);
@@ -237,7 +237,7 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[7, 6, 5, 4, 3]));
+    expect(log, equals(<int>[6, 5, 4, 3, 2]));
     log.clear();
   });
 
@@ -466,7 +466,7 @@ void main() {
       ),
     );
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=7']));
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=9']));
     delegate.log.clear();
 
     await tester.pumpWidget(
@@ -476,7 +476,7 @@ void main() {
       ),
     );
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=4']));
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=5']));
     delegate.log.clear();
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -600.0));
@@ -485,7 +485,7 @@ void main() {
 
     await tester.pump();
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=1 lastIndex=6']));
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=7']));
     delegate.log.clear();
   });
 
@@ -1032,9 +1032,9 @@ void main() {
       ),
     );
     // viewport(600.0) + cache extent after(250.0)
-    expect(buildLog.length, 9);
+    expect(buildLog.length, 11);
     expect(buildLog.min, 0);
-    expect(buildLog.max, 8);
+    expect(buildLog.max, 10);
 
     buildLog.clear();
 
@@ -1057,9 +1057,9 @@ void main() {
     );
     // Scrolling drastically only loading the visible and cached area items.
     // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
-    expect(buildLog.length, 12);
-    expect(buildLog.min, 97);
-    expect(buildLog.max, 108);
+    expect(buildLog.length, 16);
+    expect(buildLog.min, 95);
+    expect(buildLog.max, 110);
 
     buildLog.clear();
     controller.jumpTo(5000.0);
@@ -1079,9 +1079,9 @@ void main() {
       ),
     );
     // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
-    expect(buildLog.length, 12);
-    expect(buildLog.min, 47);
-    expect(buildLog.max, 58);
+    expect(buildLog.length, 16);
+    expect(buildLog.min, 45);
+    expect(buildLog.max, 60);
 
     buildLog.clear();
     controller.jumpTo(4700.0);
@@ -1102,8 +1102,8 @@ void main() {
     );
     // Only newly entered cached area items need to be loaded.
     expect(buildLog.length, 3);
-    expect(buildLog.min, 44);
-    expect(buildLog.max, 46);
+    expect(buildLog.min, 42);
+    expect(buildLog.max, 44);
 
     buildLog.clear();
     controller.jumpTo(5300.0);
@@ -1124,8 +1124,8 @@ void main() {
     );
     // Only newly entered cached area items need to be loaded.
     expect(buildLog.length, 6);
-    expect(buildLog.min, 56);
-    expect(buildLog.max, 61);
+    expect(buildLog.min, 58);
+    expect(buildLog.max, 63);
   });
 
   testWidgets('itemExtent, prototypeItem and itemExtentBuilder conflicts test', (

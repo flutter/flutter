@@ -115,11 +115,11 @@ void main() {
     expect(controller.offset, equals(1000.0));
     expect(tester.getTopLeft(find.text('4')).dy, equals(200.0));
 
-    controller.jumpTo(300.0);
+    controller.jumpTo(550.0);
     await tester.pump();
 
-    expect(controller.offset, equals(250.0));
-    expect(tester.getTopLeft(find.text('2')).dy, equals(-50.0));
+    expect(controller.offset, equals(480.0));
+    expect(tester.getTopLeft(find.text('2')).dy, equals(-280.0));
 
     controller.jumpTo(50.0);
     await tester.pump();

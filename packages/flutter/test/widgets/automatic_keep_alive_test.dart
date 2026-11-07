@@ -547,7 +547,7 @@ void main() {
         findsOneWidget,
       );
 
-      expect(find.text('keep me alive', skipOffstage: false), findsNWidgets(23));
+      expect(find.text('keep me alive', skipOffstage: false), findsNWidgets(29));
       expect(find.text('FooBar 1'), findsNothing);
       expect(find.text('FooBar 3'), findsNothing);
       expect(find.text('FooBar 73'), findsOneWidget);
