@@ -105,6 +105,7 @@ class SpellCheckConfiguration {
     return other is SpellCheckConfiguration &&
         other.spellCheckService == spellCheckService &&
         other.misspelledTextStyle == misspelledTextStyle &&
+        other.misspelledSelectionColor == misspelledSelectionColor &&
         other.spellCheckSuggestionsToolbarBuilder == spellCheckSuggestionsToolbarBuilder &&
         other._spellCheckEnabled == _spellCheckEnabled;
   }
@@ -113,6 +114,7 @@ class SpellCheckConfiguration {
   int get hashCode => Object.hash(
     spellCheckService,
     misspelledTextStyle,
+    misspelledSelectionColor,
     spellCheckSuggestionsToolbarBuilder,
     _spellCheckEnabled,
   );

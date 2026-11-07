@@ -460,4 +460,53 @@ void main() {
       TargetPlatform.iOS,
     }),
   );
+
+  test('SpellCheckConfiguration equality includes misspelledSelectionColor', () {
+    const red = SpellCheckConfiguration(misspelledSelectionColor: Color(0xFFFF0000));
+    const blue = SpellCheckConfiguration(misspelledSelectionColor: Color(0xFF0000FF));
+
+    expect(red, isNot(blue));
+    expect(red, const SpellCheckConfiguration(misspelledSelectionColor: Color(0xFFFF0000)));
+    expect(
+      red.hashCode,
+      const SpellCheckConfiguration(misspelledSelectionColor: Color(0xFFFF0000)).hashCode,
+    );
+  });
+
+  testWidgets('EditableText picks up a changed misspelledSelectionColor', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final spellCheckService = DefaultSpellCheckService();
+
+    Widget buildEditableText(Color misspelledSelectionColor) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF000000),
+            backgroundCursorColor: const Color(0xFF808080),
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: spellCheckService,
+              misspelledTextStyle: misspelledTextStyle,
+              misspelledSelectionColor: misspelledSelectionColor,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildEditableText(const Color(0xFFFF0000)));
+    await tester.pumpWidget(buildEditableText(const Color(0xFF0000FF)));
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.spellCheckConfiguration.misspelledSelectionColor, const Color(0xFF0000FF));
+  });
 }
