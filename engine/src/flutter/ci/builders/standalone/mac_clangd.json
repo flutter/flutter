@@ -10,7 +10,9 @@
     "The build runs under Bazel (--bazel among the tools/gn flags; flutter/build/bazel/ci.md):",
     "the install lays font_subset, and the compile_commands.json step makes the database from",
     "the build's action graph (tools/gn_to_bazel/tool/compile_commands.py: the generated file",
-    "clangd_check reads, the assets fixtures' source, built for it), as GN's gn gen wrote it."
+    "clangd_check reads, the assets fixtures' source, built for it), as GN's gn gen wrote it.",
+    "--mac-cpu arm64 names the drone's CPU (cpu=arm64 in the Mac builders' dimensions), as the other Mac files do; tools/gn's x64 default",
+    "would make the database's query read an x64 build whose host tools are no build of this platform's (clangd_check reads one generated file of it)."
   ],
   "cas_archive": false,
   "gclient_variables": {
@@ -25,6 +27,8 @@
     "--no-rbe",
     "--no-goma",
     "--xcode-symlinks",
+    "--mac-cpu",
+    "arm64",
     "--target-dir",
     "ci/mac_unopt_debug_no_rbe",
     "--bazel"

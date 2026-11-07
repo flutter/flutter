@@ -284,8 +284,8 @@ build:mac_host_debug_clang_tidy --compilation_mode=opt --//engine/src/flutter/co
 build:ios_debug_sim_clang_tidy --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug
 
 # mac_clangd.json: ci/mac_unopt_debug_no_rbe
-#   --runtime-mode debug --unoptimized --prebuilt-dart-sdk --no-lto --no-rbe --no-goma --xcode-symlinks --target-dir ci/mac_unopt_debug_no_rbe --bazel
-build:mac_unopt_debug_no_rbe --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64_debug
+#   --runtime-mode debug --unoptimized --prebuilt-dart-sdk --no-lto --no-rbe --no-goma --xcode-symlinks --mac-cpu arm64 --target-dir ci/mac_unopt_debug_no_rbe --bazel
+build:mac_unopt_debug_no_rbe --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64_debug
 
 # mac_host_debug_arm64_tests.json: ci/host_debug_arm64_tests
 #   --target-dir ci/host_debug_arm64_tests --runtime-mode debug --mac-cpu arm64 --no-lto --prebuilt-dart-sdk --build-embedder-examples --use-glfw-swiftshader --no-rbe --no-goma --xcode-symlinks --bazel
