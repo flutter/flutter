@@ -1073,20 +1073,27 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     _verifySemanticsHandlesWereDisposed();
   }
 
-  // Used by testWidgets instead of _endOfTestVerifications. The check for
-  // active SemanticsHandles is deferred to
-  // _verifySemanticsHandlesWereDisposedAfterTearDowns, so that tests can
-  // dispose their SemanticsHandle with addTearDown.
+  /// Used by [testWidgets] instead of [_endOfTestVerifications].
+  ///
+  /// The check for active [SemanticsHandle]s is deferred to
+  /// [_verifySemanticsHandlesWereDisposedAfterTearDowns], so that tests can
+  /// dispose their [SemanticsHandle] with `addTearDown`.
   void _endOfTestBodyVerifications() {
     verifyTickersWereDisposed('at the end of the test');
     _shouldVerifySemanticsHandles = true;
   }
 
-  // Whether the test body completed without errors. If it did not, the check
-  // for active SemanticsHandles is skipped to avoid reporting spurious errors
-  // in addition to the actual failure.
+  /// Whether the test body completed without errors.
+  ///
+  /// If it did not, the check for active [SemanticsHandle]s is skipped to avoid
+  /// reporting spurious errors in addition to the actual failure.
   bool _shouldVerifySemanticsHandles = false;
 
+  /// Verifies that all [SemanticsHandle]s created by the test were disposed.
+  ///
+  /// [testWidgets] runs this as a tear-down after the tear-downs added by the
+  /// test itself, so that tests can dispose their [SemanticsHandle] with
+  /// `addTearDown`. Failures are reported through [reportTestException].
   void _verifySemanticsHandlesWereDisposedAfterTearDowns() {
     if (!_shouldVerifySemanticsHandles) {
       return;
