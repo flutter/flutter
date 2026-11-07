@@ -5,10 +5,14 @@
 #ifndef FLUTTER_SKWASM_TEXT_TEXT_TYPES_H_
 #define FLUTTER_SKWASM_TEXT_TEXT_TYPES_H_
 
+#include <cstdint>
+#include <memory>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/dl_text.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 #include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
 
@@ -48,6 +52,7 @@ struct ParagraphBuilder {
 struct Paragraph {
   std::unique_ptr<skia::textlayout::Paragraph> skia_paragraph;
   std::vector<flutter::DlPaint> paints;
+  std::unordered_map<uint32_t, std::shared_ptr<flutter::DlText>> dl_text_cache;
 };
 }  // namespace Skwasm
 

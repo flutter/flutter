@@ -49,6 +49,9 @@ class DlOpRecorder final : public virtual DlOpReceiver,
   int pathCount() const { return paths_.size(); }
   int textFrameCount() const { return text_frames_.size(); }
   int blobCount() const { return blobs_.size(); }
+  const std::vector<std::shared_ptr<impeller::TextFrame>>& textFrames() const {
+    return text_frames_;
+  }
 
  private:
   void drawLine(const DlPoint& p0, const DlPoint& p1) override {
@@ -154,6 +157,12 @@ class PainterTestBase : public CanvasTestBase<T> {
     return builder.Build();
   }
 
+  txt::ParagraphBuilderSkia makeParagraphBuilder() const {
+    auto p_style = txt::ParagraphStyle();
+    auto f_collection = makeFontCollection();
+    return txt::ParagraphBuilderSkia(p_style, f_collection, impeller_);
+  }
+
  private:
   std::shared_ptr<txt::FontCollection> makeFontCollection() const {
     auto f_collection = std::make_shared<txt::FontCollection>();
@@ -173,12 +182,6 @@ class PainterTestBase : public CanvasTestBase<T> {
     auto manager = sk_make_sp<txt::AssetFontManager>(std::move(font_provider));
     f_collection->SetAssetFontManager(manager);
     return f_collection;
-  }
-
-  txt::ParagraphBuilderSkia makeParagraphBuilder() const {
-    auto p_style = txt::ParagraphStyle();
-    auto f_collection = makeFontCollection();
-    return txt::ParagraphBuilderSkia(p_style, f_collection, impeller_);
   }
 
   bool impeller_ = false;
@@ -243,6 +246,45 @@ TEST_F(PainterTest, DrawTextImpeller) {
 
   EXPECT_EQ(recorder.textFrameCount(), 1);
   EXPECT_EQ(recorder.blobCount(), 0);
+}
+
+TEST_F(PainterTest,
+       DrawTextImpellerCachesTextFrameAcrossPaintsAndInvalidatesOnRelayout) {
+  PretendImpellerIsEnabled(true);
+
+  auto pb_skia = makeParagraphBuilder();
+  pb_skia.PushStyle(makeStyle());
+  pb_skia.AddText(u"Hello World!");
+  pb_skia.Pop();
+
+  auto paragraph = pb_skia.Build();
+  paragraph->Layout(10000);
+
+  DlOpRecorder recorder;
+  {
+    DisplayListBuilder builder;
+    paragraph->Paint(&builder, 0, 0);
+    builder.Build()->Dispatch(recorder);
+  }
+  {
+    DisplayListBuilder builder;
+    paragraph->Paint(&builder, 10, 20);
+    builder.Build()->Dispatch(recorder);
+  }
+
+  ASSERT_EQ(recorder.textFrameCount(), 2);
+  // Painting the same laid-out Paragraph reuses the cached TextFrame.
+  EXPECT_EQ(recorder.textFrames()[0], recorder.textFrames()[1]);
+
+  // Re-laying out the Paragraph invalidates the cached TextFrame.
+  paragraph->Layout(5000);
+  {
+    DisplayListBuilder builder;
+    paragraph->Paint(&builder, 0, 0);
+    builder.Build()->Dispatch(recorder);
+  }
+  ASSERT_EQ(recorder.textFrameCount(), 3);
+  EXPECT_NE(recorder.textFrames()[0], recorder.textFrames()[2]);
 }
 
 TEST_F(PainterTest, DrawStrokedTextImpeller) {
