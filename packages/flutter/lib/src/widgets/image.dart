@@ -1163,6 +1163,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   /// true.
   bool _isPaused = false;
 
+  /// The [ImageConfiguration] that [_imageStream] was last resolved against.
+  ImageConfiguration? _resolvedConfiguration;
+
   @override
   void initState() {
     super.initState();
@@ -1184,7 +1187,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     _updateInvertColors();
-    _resolveImage();
+    _resolveImage(onlyIfConfigurationChanged: true);
 
     _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
@@ -1232,20 +1235,28 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         SemanticsBinding.instance.accessibilityFeatures.invertColors;
   }
 
-  void _resolveImage() {
+  void _resolveImage({bool onlyIfConfigurationChanged = false}) {
+    final ImageConfiguration configuration = createLocalImageConfiguration(
+      context,
+      size: widget.width != null && widget.height != null
+          ? Size(widget.width!, widget.height!)
+          : null,
+    );
+    // Resolving asks the image cache for the image again. While the image is
+    // paused this state is not listening to the stream, so the image cache no
+    // longer tracks it as a live image and may start a second, redundant load
+    // of the same image, discarding the frame that is currently displayed.
+    // Only resolve again when the configuration the image is resolved against
+    // has actually changed.
+    if (onlyIfConfigurationChanged && configuration == _resolvedConfiguration) {
+      return;
+    }
+    _resolvedConfiguration = configuration;
     final provider = ScrollAwareImageProvider<Object>(
       context: _scrollAwareContext,
       imageProvider: widget.image,
     );
-    final ImageStream newStream = provider.resolve(
-      createLocalImageConfiguration(
-        context,
-        size: widget.width != null && widget.height != null
-            ? Size(widget.width!, widget.height!)
-            : null,
-      ),
-    );
-    _updateSourceStream(newStream);
+    _updateSourceStream(provider.resolve(configuration));
   }
 
   ImageStreamListener? _imageStreamListener;
