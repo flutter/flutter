@@ -82,6 +82,9 @@ FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
   engine_properties.ui_thread_policy = ui_thread_policy_;
   engine_properties.accessibility_mode = accessibility_mode_;
 
+  // Test engines keep no compiled programs in the user's folders.
+  engine_properties.program_cache_path = L"";
+
   return engine_properties;
 }
 

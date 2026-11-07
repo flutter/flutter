@@ -102,6 +102,12 @@ class FlutterProjectBundle {
   // Returns whether the Flutter GPU API is enabled.
   bool enable_flutter_gpu() const { return enable_flutter_gpu_; }
 
+  // Returns the folder for compiled GPU programs, if the app set one. An
+  // empty path turns the cache off.
+  const std::optional<std::wstring>& program_cache_path() const {
+    return program_cache_path_;
+  }
+
   // Returns the cap on the D3D11 feature level that ANGLE may use, if set.
   std::optional<egl::D3DFeatureLevel> max_d3d_feature_level() const {
     return max_d3d_feature_level_;
@@ -137,6 +143,9 @@ class FlutterProjectBundle {
 
   // Whether the Flutter GPU API is enabled.
   bool enable_flutter_gpu_ = false;
+
+  // The folder for compiled GPU programs, if the app set one.
+  std::optional<std::wstring> program_cache_path_;
 
   // Cap on the D3D11 feature level that ANGLE may use. Set from the
   // FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL environment variable in debug and
