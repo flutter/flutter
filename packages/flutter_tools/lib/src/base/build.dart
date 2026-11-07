@@ -9,6 +9,7 @@ import '../build_info.dart';
 import '../darwin/darwin.dart';
 import '../macos/xcode.dart';
 
+import 'error_handling_io.dart';
 import 'file_system.dart';
 import 'logger.dart';
 import 'process.dart';
@@ -54,6 +55,18 @@ class GenSnapshot {
     '         See dartbug.com/30524 for more information.',
   };
 
+  /// Ignored two-line warning messages from gen_snapshot, mapped from their
+  /// first line to their second line.
+  ///
+  /// The second line is only ignored right after the first one, because
+  /// warnings that are not ignored share it.
+  static const kIgnoredTwoLineWarnings = <String, String>{
+    // --obfuscate without --strip on pecoff object. The linker moves the
+    // debugging information into the PDB, so the DLL contains none of it.
+    'Warning: The generated PE/COFF object contains unobfuscated DWARF debugging information.':
+        '         To avoid this, use --strip to remove it.',
+  };
+
   Future<int> run({
     required SnapshotType snapshotType,
     // TODO(chingjun): The [CpuArch] parameter is only used for iOS builds (to
@@ -81,10 +94,20 @@ class GenSnapshot {
 
     final String snapshotterPath = getSnapshotterPath(snapshotType, genSnapshotArtifact);
 
-    return _processUtils.stream(<String>[
-      snapshotterPath,
-      ...args,
-    ], mapFunction: (String line) => kIgnoredWarnings.contains(line) ? null : line);
+    // The second line of the ignored two-line warning whose first line was the
+    // previous line, if any.
+    String? ignoredSecondLine;
+    return _processUtils.stream(
+      <String>[snapshotterPath, ...args],
+      mapFunction: (String line) {
+        final isIgnoredSecondLine = line == ignoredSecondLine;
+        ignoredSecondLine = kIgnoredTwoLineWarnings[line];
+        if (isIgnoredSecondLine || ignoredSecondLine != null || kIgnoredWarnings.contains(line)) {
+          return null;
+        }
+        return line;
+      },
+    );
   }
 }
 
@@ -206,6 +229,8 @@ class AOTSnapshotter {
       genSnapshotArgs.addAll(<String>['--snapshot_kind=app-aot-elf', '--elf=$aotSharedLibrary']);
     }
 
+    final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
+
     // When building for iOS and splitting out debug info, we want to strip
     // manually after the dSYM export, instead of in the `gen_snapshot`.
     final bool stripAfterBuild;
@@ -217,6 +242,12 @@ class AOTSnapshotter {
     } else if (targetingAndroidPlatform) {
       stripAfterBuild = false;
       // When building for Android, we let AGP handle stripping of debug symbols.
+    } else if (targetingWindowsX64 && shouldSplitDebugInfo) {
+      stripAfterBuild = false;
+      // When building for Windows x64 and splitting out debug info, the
+      // debugging information is written to the object file, and the linker
+      // moves it into the PDB in the split debug info directory, so the DLL
+      // contains none of it.
     } else {
       stripAfterBuild = false;
       if (shouldStrip) {
@@ -235,7 +266,6 @@ class AOTSnapshotter {
     // multiple debug files.
     final String archName = platform.getName(cpuArch: cpuArch);
     final debugFilename = 'app.$archName.symbols';
-    final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
     final String? windowsSplitDebugInfoPdb = shouldSplitDebugInfo && targetingWindowsX64
         ? _fileSystem.path.join(splitDebugInfo!, 'app.$archName.pdb')
         : null;
@@ -243,21 +273,19 @@ class AOTSnapshotter {
     if (shouldSplitDebugInfo) {
       _fileSystem.directory(splitDebugInfo).createSync(recursive: true);
       if (windowsSplitDebugInfoPdb != null) {
-        final File staleDefaultWindowsPdb = _fileSystem.file(defaultWindowsPdbFile);
-        if (staleDefaultWindowsPdb.existsSync()) {
-          staleDefaultWindowsPdb.deleteSync();
-        }
+        ErrorHandlingFileSystem.deleteIfExists(_fileSystem.file(defaultWindowsPdbFile));
         _logger.printTrace('Windows AOT PE/COFF uses PDB for split debug info.');
       }
     }
-    final bool emitDwarfDebugInfo = shouldSplitDebugInfo && !targetingWindowsX64;
 
     // Debugging information.
     genSnapshotArgs.addAll(<String>[
-      if (emitDwarfDebugInfo) ...<String>[
+      if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
         '--resolve-dwarf-paths',
-        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
+        // On Windows x64, the debugging information goes into the PDB.
+        if (!targetingWindowsX64)
+          '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
       ],
       if (dartObfuscation) '--obfuscate',
     ]);
@@ -281,6 +309,9 @@ class AOTSnapshotter {
         _logger.printError('Unable to find Visual Studio link.exe required to build Windows AOT.');
         return 1;
       }
+      // The linker updates an existing PDB instead of replacing it, which
+      // changes the PDB signature recorded in the DLL.
+      ErrorHandlingFileSystem.deleteIfExists(_fileSystem.file(windowsPdbFile));
       final int linkerExitCode = await _processUtils.stream(<String>[
         linkerPath,
         '/NOLOGO',
@@ -289,8 +320,12 @@ class AOTSnapshotter {
         '/MACHINE:X64',
         '/DEBUG',
         '/INCREMENTAL:NO',
+        // Make the DLL reproducible, and record only the file name of the PDB
+        // in it instead of its absolute path.
+        '/Brepro',
         '/OUT:$aotSharedLibrary',
         '/PDB:$windowsPdbFile',
+        '/PDBALTPATH:%_PDB%',
         '/EXPORT:_kDartSnapshotData,DATA',
         '/EXPORT:_kDartSnapshotText,DATA',
         windowsAotObject,
