@@ -209,6 +209,7 @@ class BorderSide with Diagnosticable {
       color: color,
       width: math.max(0.0, width * t),
       style: t <= 0.0 ? BorderStyle.none : style,
+      strokeAlign: strokeAlign,
     );
   }
 

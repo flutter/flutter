@@ -6,6 +6,18 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('BorderSide scaling preserves stroke alignment', () {
+    for (final alignment in <double>[-1.0, 0.0, 1.0, 2.0]) {
+      final side = BorderSide(width: 4.0, strokeAlign: alignment);
+      for (final factor in <double>[0.5, 1.0, 2.0]) {
+        expect(side.scale(factor), side.copyWith(width: side.width * factor));
+      }
+      for (final factor in <double>[0.0, -1.0]) {
+        expect(side.scale(factor), side.copyWith(width: 0.0, style: BorderStyle.none));
+      }
+    }
+  });
+
   test('BorderSide - asserts when constructed incorrectly', () {
     expect(const BorderSide(), const BorderSide());
     expect(() => BorderSide(width: nonconst(-1.0)), throwsAssertionError);
