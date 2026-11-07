@@ -57,6 +57,11 @@ _ARTIFACT_SETS = [
     struct(stamp = "linux-sdk", required = False, precache = "--linux"),
     struct(stamp = "macos-sdk", required = False, precache = "--macos"),
     struct(stamp = "flutter_web_sdk", required = False, precache = "--web"),
+    # The Android gen_snapshots (artifacts/engine/android-<cpu>-<mode>/<host>):
+    # what the Android tool shard's `flutter build apk` needs of the engine
+    # besides the Maven embedding, which the Gradle plugin fetches from the
+    # storage.
+    struct(stamp = "android-sdk", required = False, precache = "--android"),
 ]
 
 # The Dart packages the flutter_sdk artifact set lays under bin/cache/pkg
@@ -255,10 +260,31 @@ filegroup(
     srcs = glob(["artifacts/engine/ios-release/**"], allow_empty = True),
 )
 
+# The Android gen_snapshot artifacts (`flutter precache --android`'s
+# android-sdk set, AndroidGenSnapshotArtifacts: artifacts/engine/
+# android-<cpu>-<mode>/{host}/, the gen_snapshot and its LICENSE, for the
+# three CPUs in the two AOT modes), empty when the tool has not fetched
+# them; the Android tool shard's facsimile lays them under the prebuilt
+# engine, where the tree's would be the Android engine built for three CPUs
+# in two modes. Not the directories' flutter.jar beside them (the
+# android-internal-build-artifacts set, which no command of the tool asks
+# for) nor the debug sets' directories (the same set).
+filegroup(
+    name = "android_engine",
+    srcs = glob(
+        [
+            "artifacts/engine/android-*-profile/{host}/**",
+            "artifacts/engine/android-*-release/{host}/**",
+        ],
+        allow_empty = True,
+    ),
+)
+
 # The engine's bookkeeping as the tool left it: the engine's stamp and its
 # JSON, the version file, the storage realm, and the stamps of the engine
 # artifact sets a facsimile takes from here (the host engine and the
-# desktop's, the Dart SDK, font-subset, the web SDK, the iOS engines). A
+# desktop's, the Dart SDK, font-subset, the web SDK, the iOS engines, the
+# Android gen_snapshots). A
 # facsimile under the prebuilt engine lays these as they are (`cache` with
 # an empty directory), so that its stamps say what its artifacts are -- the
 # engine the tool downloaded, which on a developer's machine is the content
@@ -266,8 +292,8 @@ filegroup(
 # re-downloads a set nor finds a framework stamped with another revision
 # than the cache's. Not the other stamps: the tool rewrites the iOS USB
 # artifacts' on Linux (it lays no artifacts there) and would find a
-# read-only file; the fonts', the Gradle wrapper's and the Android
-# gen_snapshots' the facsimile writes itself.
+# read-only file; the fonts' and the Gradle wrapper's the facsimile writes
+# itself.
 filegroup(
     name = "stamps",
     srcs = glob(
@@ -284,6 +310,7 @@ filegroup(
             "macos-sdk.stamp",
             "ios-sdk.stamp",
             "flutter_web_sdk.stamp",
+            "android-sdk.stamp",
         ],
         allow_empty = True,
     ),
