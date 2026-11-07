@@ -244,6 +244,12 @@ class LinuxWindowRegistrar {
   /// [viewHandle] must be a pointer to an
   /// [FlView](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/linux/public/flutter_linux/fl_view.h).
   ///
+  /// This contract is specific to the GTK3 implementation: a generic native
+  /// popup host is not necessarily a GtkWindow. For example, GTK4's GtkPopover
+  /// is a GtkWidget with its own native surface, but is not a GtkWindow.
+  /// Supporting such hosts requires adapting the registrar and its consumers,
+  /// not passing a different widget type through [windowHandle].
+  ///
   /// The handles must remain valid until the window is unregistered via
   /// [unregister].
   ///
@@ -395,7 +401,9 @@ abstract mixin class BaseWindowControllerLinux {
     );
   }
 
-  /// Returns pointer to the underlying [GtkWindow](https://docs.gtk.org/gtk3/class.Window.html).
+  /// Returns pointer to the underlying GTK3 [GtkWindow](https://docs.gtk.org/gtk3/class.Window.html).
+  ///
+  /// This is a toolkit-specific handle, not a portable native surface handle.
   ///
   /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
   ///
@@ -446,6 +454,9 @@ abstract mixin class BaseWindowControllerLinux {
   /// Sets whether the contents of this window paint its background, rather
   /// than GTK filling it with the background color of the current theme.
   ///
+  /// This exposes GTK3's app-paintable widget behavior. It is not a portable
+  /// request for surface transparency or client-side decorations.
+  ///
   /// Anything an app paintable window does not paint is left transparent, so a
   /// client side decorated window can draw rounded corners and a shadow around
   /// itself. This requires a compositing window manager, without one the window
@@ -477,6 +488,11 @@ abstract mixin class BaseWindowControllerLinux {
   /// are the position of that button press in root window co-ordinates and
   /// [timestamp] is the time of that button press.
   ///
+  /// These arguments follow GTK3's native drag API. GTK4 instead requires the
+  /// initiating native device and surface-relative coordinates. A portable
+  /// request must preserve the initiating input context in the embedder;
+  /// root coordinates and a timestamp alone do not describe that context.
+  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void beginMoveDrag({required int button, int rootX = 0, int rootY = 0, int timestamp = 0}) {
@@ -490,6 +506,9 @@ abstract mixin class BaseWindowControllerLinux {
   /// [button] is the pointer button that started the drag, [rootX] and [rootY]
   /// are the position of that button press in root window co-ordinates and
   /// [timestamp] is the time of that button press.
+  ///
+  /// This uses the same GTK3-specific input convention as [beginMoveDrag];
+  /// other toolkit backends can require additional native input context.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -1668,7 +1687,11 @@ class _FlEngine extends _GObject {
   factory _FlEngine.current() => _FlEngine(WidgetsBinding.instance.platformDispatcher.engineId!);
 }
 
-/// Matches the GdkRGBA struct in gdk/gdkrgba.h.
+/// Matches GTK3's GdkRGBA struct in gdk/gdkrgba.h.
+///
+/// GTK4 uses float components instead of double components. The identical
+/// native type name does not imply a compatible FFI layout; this structure
+/// must match the toolkit used by the native background-color setter.
 final class _GdkRGBA extends ffi.Struct {
   @ffi.Double()
   external double red;
