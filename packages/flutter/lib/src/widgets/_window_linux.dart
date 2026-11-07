@@ -461,9 +461,7 @@ mixin _ToplevelWindowControllerLinux on BaseWindowControllerLinux {
     _viewMonitor.close();
     _viewMonitor.unref();
     if (_LinuxWindowing.gtkMajorVersion >= 4) {
-      // GTK4 closes windows through close-request. Disconnect the monitor
-      // before asking GTK to close so a programmatic destroy does not re-enter
-      // the Dart close delegate. GTK3 can retain its destroy signal path.
+      _window.disconnectHandlersByData(_windowMonitor.instance);
       _windowMonitor.close();
       _windowMonitor.unref();
       _destroyed = true;
@@ -1660,6 +1658,32 @@ class _GObject {
     _unref(instance);
   }
 
+  void disconnectHandlersByData(ffi.Pointer<ffi.NativeType> data) {
+    const int matchData = 1 << 4;
+    _disconnectHandlers(instance, matchData, 0, 0, ffi.nullptr, ffi.nullptr, data);
+  }
+
+  @ffi.Native<
+    ffi.UnsignedInt Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.UnsignedInt,
+      ffi.UnsignedInt,
+      ffi.UnsignedInt,
+      ffi.Pointer<ffi.Void>,
+      ffi.Pointer<ffi.Void>,
+      ffi.Pointer<ffi.NativeType>,
+    )
+  >(symbol: 'g_signal_handlers_disconnect_matched')
+  external static int _disconnectHandlers(
+    ffi.Pointer<ffi.NativeType> instance,
+    int mask,
+    int signalId,
+    int detail,
+    ffi.Pointer<ffi.Void> closure,
+    ffi.Pointer<ffi.Void> function,
+    ffi.Pointer<ffi.NativeType> data,
+  );
+
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'g_object_unref')
   external static void _unref(ffi.Pointer<ffi.NativeType> widget);
 }
@@ -1757,7 +1781,7 @@ class _GtkWidget extends _GObject {
   /// Destroy the widget.
   void destroy() {
     if (_LinuxWindowing.gtkMajorVersion >= 4) {
-      _gtkWindowClose(instance);
+      _gtkWindowDestroy(instance);
     } else {
       _gtkWidgetDestroy(instance);
     }
@@ -1816,8 +1840,8 @@ class _GtkWidget extends _GObject {
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_destroy')
   external static void _gtkWidgetDestroy(ffi.Pointer<ffi.NativeType> widget);
 
-  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_close')
-  external static void _gtkWindowClose(ffi.Pointer<ffi.NativeType> window);
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_destroy')
+  external static void _gtkWindowDestroy(ffi.Pointer<ffi.NativeType> window);
 
   @ffi.Native<ffi.Int Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_get_scale_factor')
   external static int _gtkWidgetGetScaleFactor(ffi.Pointer<ffi.NativeType> widget);
