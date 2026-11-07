@@ -10,10 +10,13 @@
     "The build runs under Bazel (--bazel among the tools/gn flags; flutter/build/bazel/ci.md):",
     "the install lays font_subset, and the compile_commands.json step makes the database from",
     "the build's action graph (tools/gn_to_bazel/tool/compile_commands.py: the generated file",
-    "clangd_check reads, the assets fixtures' source, built for it), as GN's gn gen wrote it."
+    "clangd_check reads, the assets fixtures' source, built for it), as GN's gn gen wrote it.",
+    "use_rbe: true syncs reclient and its configurations, which the wrapped GN builds (the GL backends') name among their inputs",
+    "whether or not they run on RBE; --no-rbe keeps the recipe from starting a proxy, and the Bazel build runs no remote action here."
   ],
   "cas_archive": false,
   "gclient_variables": {
+    "use_rbe": true,
     "download_bazelisk": true
   },
   "gn": [
