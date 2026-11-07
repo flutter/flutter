@@ -171,6 +171,17 @@ class ClangTidy {
     );
 
     if (changedFileBuildCommands.isEmpty) {
+      if (options.lintTarget is LintAll) {
+        // Every file of the repository and not one compile command for any
+        // of them: the database does not describe this checkout (a database
+        // from another checkout, or one whose files are spelled otherwise),
+        // and a pass would say nothing.
+        _errSink.writeln(
+          'No compile command in ${options.buildCommandsPath.path} names a file of '
+          '${options.repoPath.path}; nothing would be linted.',
+        );
+        return 1;
+      }
       _outSink.writeln(
         'No changed files that have build commands associated with them were '
         'found.',

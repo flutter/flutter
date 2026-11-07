@@ -288,8 +288,24 @@ def _compiler_path(execution_root, output_base, compiler):
 # The compilers tools/clang_tidy can lint with: a toolchain's clang or
 # clang++ under its `clang/bin/`, where the tool's `_pathRegex` finds the
 # compiler and `clang-tidy` beside it. Emscripten's em++.sh and emcc.sh (a
-# wasm module's transition) and the Mac remote-compile wrapper are not.
+# wasm module's transition) are not.
 _CLANG = re.compile(r"clang/bin/clang(\+\+)?$")
+
+# The Apple toolchains' remote-compile mode (--config=rbe_mac) compiles
+# through this wrapper, which runs the Mac's clang (FLUTTER_CLANG_HOST in
+# the action's environment) or the workers' Linux one; the database names
+# the Mac's, where clang-tidy is.
+_APPLE_WRAPPER = "apple_clang_wrapper.sh"
+
+
+def _host_compiler(action, compiler):
+  """`compiler`, or the host clang the Apple remote-compile wrapper stands for."""
+  if os.path.basename(compiler) != _APPLE_WRAPPER:
+    return compiler
+  for variable in action.get("environmentVariables", []):
+    if variable.get("key") == "FLUTTER_CLANG_HOST" and variable.get("value"):
+      return variable["value"]
+  return compiler
 
 
 def configuration_ranks(aquery, own):
@@ -409,7 +425,7 @@ def compile_commands(aquery, execution_root, output_base, own_configuration):
       continue
     if source in best and best[source][0] <= rank:
       continue
-    compiler = _compiler_path(execution_root, output_base, arguments[0])
+    compiler = _compiler_path(execution_root, output_base, _host_compiler(action, arguments[0]))
     if not _CLANG.search(compiler):
       other_compilers[source] = os.path.basename(compiler)
       continue
