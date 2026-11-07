@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 #import "SemanticsObject.h"
+
+#include <cmath>
+
 #include "flutter/lib/ui/semantics/semantics_node.h"
-#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h"
 
@@ -37,6 +39,136 @@ FLUTTER_ASSERT_ARC
 - (id<UIFocusItem>)focusItem;
 @end
 
+@interface FlutterScrollableSemanticsObject (UIFocusSystem)
+/// The scroll offset last reported by the framework, in the scroll view's
+/// coordinate space. Implemented in SemanticsObject.mm.
+- (CGPoint)contentOffsetInternal;
+@end
+
+// Whether the nearest scroll container above `object` supports implicit
+// scrolling.
+//
+// The framework sets `hasImplicitScrolling` on the scrollable's node rather
+// than on its children. Stop at the nearest scroll container so that, for
+// example, pages of a PageView (which disallows implicit scrolling) nested in
+// a ListView are not treated as reachable.
+static BOOL IsInImplicitlyScrollingContainer(SemanticsObject* object) {
+  for (SemanticsObject* ancestor = object.parent; ancestor; ancestor = ancestor.parent) {
+    const flutter::SemanticsNode& node = ancestor.node;
+    if (node.flags.hasImplicitScrolling) {
+      return YES;
+    }
+    // Scrollables report a scroll position once laid out, even when they do
+    // not allow implicit scrolling.
+    if (!std::isnan(node.scrollPosition)) {
+      return NO;
+    }
+  }
+  return NO;
+}
+
+#pragma mark - Tab navigation
+
+// The focus engine only considers items that are roughly on screen. With Tab
+// and Shift+Tab, it therefore skips offscreen items in a scrollable and wraps
+// around before reaching the end of the list. To fix that, the object losing
+// focus checks the proposed item against the framework's semantics traversal
+// order (see -shouldUpdateFocusInContext:). If they differ, it rejects the
+// update and requests a focus update to the correct item instead.
+
+static SemanticsObject* RootOf(SemanticsObject* object) {
+  SemanticsObject* root = object;
+  while (root.parent) {
+    root = root.parent;
+  }
+  return root;
+}
+
+static void ClearPendingFocusTarget(SemanticsObject* object) {
+  flutter::AccessibilityBridgeIos* bridge = object.bridge;
+  if (bridge) {
+    bridge->SetPendingFocusTarget(nil);
+  }
+}
+
+// Whether `object` is still attached to the semantics tree of its bridge.
+static BOOL IsAttached(SemanticsObject* object) {
+  return object.bridge && RootOf(object).uid == kRootNodeId;
+}
+
+// The pending Tab navigation target of `object`'s bridge, or nil if there is
+// none or it was removed from the semantics tree.
+static SemanticsObject* PendingFocusTarget(SemanticsObject* object) {
+  flutter::AccessibilityBridgeIos* bridge = object.bridge;
+  SemanticsObject* target = bridge ? bridge->GetPendingFocusTarget() : nil;
+  if (target && !IsAttached(target)) {
+    ClearPendingFocusTarget(object);
+    return nil;
+  }
+  return target;
+}
+
+static void CollectFocusable(SemanticsObject* object, NSMutableArray<SemanticsObject*>* result) {
+  // A scrollable is represented in the focus system by its scroll view, which
+  // cannot be focused, so it is never a valid Tab target.
+  if (object.focusItem == object && [object canBecomeFocused]) {
+    [result addObject:object];
+  }
+  for (SemanticsObject* child in object.children) {
+    CollectFocusable(child, result);
+  }
+}
+
+// The next (or previous) focusable object after `object` in the framework's
+// semantics traversal order, wrapping around at either end.
+static SemanticsObject* FocusableNeighbor(SemanticsObject* object, BOOL forward) {
+  NSMutableArray<SemanticsObject*>* focusable = [NSMutableArray array];
+  CollectFocusable(RootOf(object), focusable);
+  NSUInteger index = [focusable indexOfObjectIdenticalTo:object];
+  if (index == NSNotFound) {
+    return nil;
+  }
+  NSUInteger count = focusable.count;
+  return focusable[(index + (forward ? 1 : count - 1)) % count];
+}
+
+// Requests a focus update to the pending target.
+static void RequestFocusToPendingTarget(SemanticsObject* target) {
+  if (target != PendingFocusTarget(target)) {
+    return;  // Superseded, completed, or removed.
+  }
+  // A focus update request only takes effect if the requesting environment
+  // contains the focused item. Request it from the root, whose
+  // preferredFocusEnvironments returns the pending target.
+  SemanticsObject* root = RootOf(target);
+  UIFocusSystem* focusSystem = [UIFocusSystem focusSystemForEnvironment:root];
+  [focusSystem requestFocusUpdateToEnvironment:root];
+  [focusSystem updateFocusIfNeeded];
+  // The focus update has been committed (or refused), so do not keep
+  // redirecting later focus updates to the target.
+  ClearPendingFocusTarget(target);
+}
+
+// Records `target` and requests a focus update to it. The target may still be
+// offscreen; once it is focused, -didUpdateFocusInContext: asks the framework
+// to scroll it into view.
+static void MoveFocusTo(SemanticsObject* target) {
+  flutter::AccessibilityBridgeIos* bridge = target.bridge;
+  if (!bridge) {
+    return;
+  }
+  bridge->SetPendingFocusTarget(target);
+  // Wait until the focus engine has finished rejecting the current update.
+  // Capture weakly so a torn-down tree is not kept alive by the block.
+  __weak SemanticsObject* weakTarget = target;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    SemanticsObject* strongTarget = weakTarget;
+    if (strongTarget) {
+      RequestFocusToPendingTarget(strongTarget);
+    }
+  });
+}
+
 @implementation SemanticsObject (UIFocusSystem)
 
 - (id<UIFocusItem>)focusItem {
@@ -52,11 +184,83 @@ FLUTTER_ASSERT_ARC
 }
 
 - (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext*)context {
-  return YES;
+  flutter::AccessibilityBridgeIos* bridge = self.bridge;
+  if (context.previouslyFocusedItem != self || !bridge || bridge->isVoiceOverRunning()) {
+    return YES;
+  }
+
+  UIFocusHeading heading = context.focusHeading;
+  // One of them will be yes if this is a tab navigation.
+  BOOL forward = (heading & (UIFocusHeadingNext | UIFocusHeadingFirst)) != 0;
+  BOOL backward = (heading & (UIFocusHeadingPrevious | UIFocusHeadingLast)) != 0;
+  if (forward == backward) {
+    // This is not a tab or shift-tab command. Let system handle it.
+    return YES;
+  }
+  id<UIFocusItem> proposed = context.nextFocusedItem;
+  if (proposed && !([(NSObject*)proposed isKindOfClass:[SemanticsObject class]] &&
+                    ((SemanticsObject*)proposed).bridge == bridge)) {
+    // The next focus is not in the same flutter view. Let system handle it.
+    return YES;
+  }
+
+  SemanticsObject* pending = PendingFocusTarget(self);
+  SemanticsObject* expected = FocusableNeighbor(pending ?: self, forward);
+  if (!expected || (!pending && proposed == expected)) {
+    // System picked the same target as we expected. Let system handle it.
+    return YES;
+  }
+
+  // FKA tabs picked a wrong item. This can happen if it think the next
+  // item is too far off the screen and would wrap around to the beginning
+  // or end of the focusable items on screen.
+  //
+  // Veto the update and manually shift focus to the correct target.
+  MoveFocusTo(expected);
+  return NO;
 }
 
+// Forwards focus changes made by the iOS focus system (for example, Full
+// Keyboard Access) to the framework, mirroring what
+// -[SemanticsObject accessibilityElementDidBecomeFocused] does for VoiceOver.
+//
+// UIKit calls this on every environment in both the previous and the next
+// focus chain, so only act when this object is the item that gained or lost
+// focus.
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext*)context
        withAnimationCoordinator:(UIFocusAnimationCoordinator*)coordinator {
+  flutter::AccessibilityBridgeIos* bridge = self.bridge;
+  // When VoiceOver is running, the UIAccessibility focus callbacks already
+  // dispatch these actions. Avoid duplicates and conflicting focus-loss events
+  // when the two focuses diverge.
+  if (!bridge || bridge->isVoiceOverRunning()) {
+    return;
+  }
+  // Any completed focus change ends a pending Tab redirect, including focus
+  // moving elsewhere by other means (for example, a click).
+  if (context.nextFocusedItem == self || context.previouslyFocusedItem == self) {
+    ClearPendingFocusTarget(self);
+  }
+  if (context.nextFocusedItem == self) {
+    // The framework scrolls the focused item into view; the focus engine's own
+    // scrolling is cancelled (see FlutterSemanticsScrollView). The framework
+    // ignores the request if the item is already fully visible.
+    if (IsInImplicitlyScrollingContainer(self)) {
+      bridge->DispatchSemanticsAction(self.uid, flutter::SemanticsAction::kShowOnScreen);
+    }
+    if (self.node.HasAction(flutter::SemanticsAction::kFocus)) {
+      bridge->DispatchSemanticsAction(self.uid, flutter::SemanticsAction::kFocus);
+    }
+    if (self.node.HasAction(flutter::SemanticsAction::kDidGainAccessibilityFocus)) {
+      bridge->DispatchSemanticsAction(self.uid,
+                                      flutter::SemanticsAction::kDidGainAccessibilityFocus);
+    }
+  } else if (context.previouslyFocusedItem == self) {
+    if (self.node.HasAction(flutter::SemanticsAction::kDidLoseAccessibilityFocus)) {
+      bridge->DispatchSemanticsAction(self.uid,
+                                      flutter::SemanticsAction::kDidLoseAccessibilityFocus);
+    }
+  }
 }
 
 - (id<UIFocusEnvironment>)parentFocusEnvironment {
@@ -65,7 +269,10 @@ FLUTTER_ASSERT_ARC
 }
 
 - (NSArray<id<UIFocusEnvironment>>*)preferredFocusEnvironments {
-  return nil;
+  // The root directs a requested focus update to the pending Tab target (see
+  // RequestFocusToPendingTarget).
+  SemanticsObject* pending = self.parent ? nil : PendingFocusTarget(self);
+  return pending ? @[ pending ] : nil;
 }
 
 - (id<UIFocusItemContainer>)focusItemContainer {
@@ -75,12 +282,19 @@ FLUTTER_ASSERT_ARC
 #pragma mark - UIFocusItem Conformance
 
 - (BOOL)canBecomeFocused {
-  if (self.node.flags.isHidden) {
+  // Hidden nodes inside an implicitly scrolling container are clipped,
+  // offscreen items. Keep them focusable so keyboard navigation can reach
+  // them; focusing one scrolls it into view (see
+  // -didUpdateFocusInContext:withAnimationCoordinator:).
+  // Nodes clipped by any other container (e.g. a PageView that disallows
+  // implicit scrolling) must not receive focus.
+  if (self.node.flags.isHidden && !IsInImplicitlyScrollingContainer(self)) {
     return NO;
   }
-  // Currently only supports SemanticsObjects that handle
-  // -[NSObject accessibilityActivate].
-  return self.node.HasAction(flutter::SemanticsAction::kTap);
+  // Supports SemanticsObjects that handle -[NSObject accessibilityActivate] or
+  // that explicitly opt in to focus.
+  return self.node.HasAction(flutter::SemanticsAction::kTap) ||
+         self.node.HasAction(flutter::SemanticsAction::kFocus);
 }
 
 // The frame is described in the `coordinateSpace` of the
@@ -98,10 +312,10 @@ FLUTTER_ASSERT_ARC
                      SkPoint::Make(self.node.rect.right(), self.node.rect.bottom())};
 
   SkM44 transform = self.node.transform;
-  FlutterSemanticsScrollView* scrollView;
+  FlutterScrollableSemanticsObject* scrollable;
   for (SemanticsObject* ancestor = self.parent; ancestor; ancestor = ancestor.parent) {
     if ([ancestor isKindOfClass:[FlutterScrollableSemanticsObject class]]) {
-      scrollView = ((FlutterScrollableSemanticsObject*)ancestor).scrollView;
+      scrollable = (FlutterScrollableSemanticsObject*)ancestor;
       break;
     }
     transform = ancestor.node.transform * transform;
@@ -115,18 +329,23 @@ FLUTTER_ASSERT_ARC
   SkRect rect;
   rect.setBounds({quad, 4});
   // If this UIFocusItemContainer's coordinateSpace is a UIScrollView, offset
-  // the rect by `contentOffset` because the contentOffset translation is
+  // the rect by the content offset because the content offset translation is
   // incorporated into the paint transform at different node depth in UIKit
   // and Flutter. In Flutter, the translation is added to the cells
   // while in UIKit the viewport's bounds is manipulated (IOW, each cell's frame
   // in the UIScrollView coordinateSpace does not change when the UIScrollView
   // scrolls).
-  CGRect unscaledRect =
-      CGRectMake(rect.x() + scrollView.bounds.origin.x, rect.y() + scrollView.bounds.origin.y,
-                 rect.width(), rect.height());
-  if (scrollView) {
-    return unscaledRect;
+  //
+  // Use the scroll offset reported by the framework rather than the
+  // UIScrollView's live `contentOffset`. The cell translations come from the
+  // same framework update, so the frame stays correct even if UIKit moves the
+  // UIScrollView before the next update.
+  if (scrollable) {
+    CGPoint contentOffset = scrollable.contentOffsetInternal;
+    return CGRectMake(rect.x() + contentOffset.x, rect.y() + contentOffset.y, rect.width(),
+                      rect.height());
   }
+  CGRect unscaledRect = CGRectMake(rect.x(), rect.y(), rect.width(), rect.height());
   // `rect` could be in physical pixels since the root RenderObject ("RenderView")
   // applies a transform that turns logical pixels to physical pixels. Undo the
   // transform by dividing the coordinates by the screen's scale factor, if this
@@ -208,24 +427,6 @@ FLUTTER_ASSERT_ARC
 
 - (CGSize)visibleSize {
   return self.frame.size;
-}
-
-- (void)setContentOffset:(CGPoint)contentOffset {
-  [super setContentOffset:contentOffset];
-  // Do no send flutter::SemanticsAction::kScrollToOffset if it's triggered
-  // by a framework update.
-  flutter::AccessibilityBridgeIos* bridge = self.semanticsObject.bridge;
-  if (!bridge || !self.isDoingSystemScrolling) {
-    return;
-  }
-
-  double offset[2] = {contentOffset.x, contentOffset.y};
-  FlutterStandardTypedData* offsetData = [FlutterStandardTypedData
-      typedDataWithFloat64:[NSData dataWithBytes:&offset length:sizeof(offset)]];
-  NSData* encoded = [[FlutterStandardMessageCodec sharedInstance] encode:offsetData];
-  bridge->DispatchSemanticsAction(self.semanticsObject.uid,
-                                  flutter::SemanticsAction::kScrollToOffset,
-                                  fml::MallocMapping::Copy(encoded.bytes, encoded.length));
 }
 
 - (BOOL)canBecomeFocused {
