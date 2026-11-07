@@ -85,7 +85,6 @@ class Frame {
       layerTree.preroll(this);
       layerTree.measure(this, size);
       viewEmbedder?.optimizeComposition();
-      recorder?.recordBuildFinish();
     });
     timeAction<void>(kProfileApplyFrame, () {
       layerTree.paint(this);
