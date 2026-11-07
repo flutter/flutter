@@ -89,6 +89,8 @@ abstract class GestureRecognizerFactory<T extends GestureRecognizer> {
     );
     return true;
   }
+
+  bool _debugIsInstanceOfType(GestureRecognizer recognizer) => recognizer is T;
 }
 
 /// Signature for closures that implement [GestureRecognizerFactory.constructor].
@@ -1543,8 +1545,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       assert(!_recognizers!.containsKey(type));
       _recognizers![type] = oldRecognizers[type] ?? gestures[type]!.constructor();
       assert(
-        _recognizers![type].runtimeType == type,
-        'GestureRecognizerFactory of type $type created a GestureRecognizer of type ${_recognizers![type].runtimeType}. The GestureRecognizerFactory must be specialized with the type of the class that it returns from its constructor method.',
+        gestures[type]!._debugIsInstanceOfType(_recognizers![type]!),
+        'GestureRecognizerFactory of type $type created a GestureRecognizer of type ${_recognizers![type].runtimeType}. The GestureRecognizerFactory must be specialized with the type of the class that it returns from its constructor method, or with one of its supertypes.',
       );
       gestures[type]!.initializer(_recognizers![type]!);
     }
