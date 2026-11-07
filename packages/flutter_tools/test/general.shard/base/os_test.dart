@@ -328,6 +328,35 @@ void main() {
       expect(utils.name, 'Pretty Name 1.2.3-abcd');
     });
 
+    for (final MapEntry<String, String> osRelease in <String, String>{
+      'PRETTY_NAME="Example=Linux=1"': 'Example=Linux=1',
+      "PRETTY_NAME='Example=Linux=1'": 'Example=Linux=1',
+      'PRETTY_NAME=Example=Linux=1': 'Example=Linux=1',
+      'PRETTY_NAME=': 'Linux',
+      'PRETTY_NAME=""': 'Linux',
+      "PRETTY_NAME=''": 'Linux',
+      'PRETTY_NAME': 'Linux',
+      'PRETTY_NAME="': '"',
+      'PRETTY_NAME="Example': '"Example',
+      'PRETTY_NAME="Example\'': '"Example\'',
+      '# comment\nPRETTY_NAME="Example Linux"': 'Example Linux',
+    }.entries) {
+      testWithoutContext('Linux name parses os-release: ${osRelease.key}', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        fileSystem.directory('/etc').createSync();
+        fileSystem.file('/etc/os-release').writeAsStringSync(osRelease.key);
+
+        final utils = OperatingSystemUtils(
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(operatingSystemVersion: 'Linux 1.2.3 build'),
+          processManager: fakeProcessManager,
+        );
+
+        expect(utils.name, '${osRelease.value} 1.2.3');
+      });
+    }
+
     testWithoutContext(
       'Linux name reads from "/usr/lib/os-release" if "/etc/os-release" is missing',
       () async {
