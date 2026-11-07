@@ -2,41 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/template.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('LinuxTemplateService', () {
-    test('projectTemplates returns custom-linux-app template', () {
+    test('appPlatformTemplates returns custom_linux mapping', () {
       final service = LinuxTemplateService();
-      final Set<ProjectTemplate> templates = service.projectTemplates;
 
-      expect(templates, hasLength(1));
-      final ProjectTemplate template = templates.first;
-      expect(template.name, 'custom-linux-app');
-      expect(template.hidden, isFalse);
-      expect(template.templateDependencies, <String>{'app'});
       expect(
-        template.templateSources,
-        unorderedEquals(<String>[
-          'pubspec.yaml.tmpl',
-          'lib/main.dart.tmpl',
-          '.custom_device_extension_info.copy.tmpl',
-        ]),
+        service.appPlatformTemplates,
+        equals(<String, String>{
+          LinuxTemplateService.customLinuxPlatformName: LinuxTemplateService.customLinuxTemplateUri,
+        }),
       );
-      expect(
-        template.templatePath,
-        'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app',
-      );
+      expect(service.pluginPlatformTemplates, isEmpty);
     });
 
-    test('generateTemplateParameters returns toolParameters unchanged', () async {
-      final template = LinuxProjectTemplate();
+    test('generatePlatformTemplateParameters augments custom_linux parameters', () async {
+      final service = LinuxTemplateService();
       final inputParams = <String, Object?>{'projectName': 'my_app', 'org': 'com.example'};
 
-      final Map<String, Object?> result = await template.generateTemplateParameters(inputParams);
-      expect(result, equals(inputParams));
+      final Map<String, Object?> result = await service.generatePlatformTemplateParameters(
+        platformName: LinuxTemplateService.customLinuxPlatformName,
+        toolParameters: inputParams,
+      );
+      expect(result, equals(<String, Object?>{...inputParams, 'customLinux': true}));
     });
+
+    test(
+      'generatePlatformTemplateParameters returns toolParameters unchanged for unknown platforms',
+      () async {
+        final service = LinuxTemplateService();
+        final inputParams = <String, Object?>{'projectName': 'my_app', 'org': 'com.example'};
+
+        final Map<String, Object?> result = await service.generatePlatformTemplateParameters(
+          platformName: 'unknown_platform',
+          toolParameters: inputParams,
+        );
+        expect(result, equals(inputParams));
+      },
+    );
   });
 }
