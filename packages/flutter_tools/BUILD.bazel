@@ -591,6 +591,28 @@ _INTEGRATION_ANDROID = [
     "test/integration.shard/gradle_non_android_plugin_test.dart",
 ]
 
+# Two of the Android files build for macOS and iOS as well on a Mac host
+# (`skip: !platform.isMacOS` elsewhere): analyze_size_test's iOS and macOS
+# cases build hello_world with Xcode, flutter_build_with_compilation_error_test's
+# macos and ios targets a created project. Those cases want the apple
+# shard's arrangement -- xcodebuild outside the sandbox, the iOS engine, the
+# engine directories and the Xcode build-phase scripts writable -- which
+# the android shard has no reason to carry (the Mac tester's T85: the iOS
+# case fetched the engine into the read-only cache, the macOS case's build
+# phase bootstrapped the checkout's own tool). So the android shard runs
+# the files' other cases on every host (_INTEGRATION_ANDROID_CASES, `dart
+# test --name`) and a shard of the apple shard's shape runs these on a Mac
+# (apple_cases_shard, below).
+_INTEGRATION_ANDROID_APPLE_CASES = {
+    "test/integration.shard/analyze_size_test.dart": "hello_world for (iOS|macOS)",
+    "test/integration.shard/flutter_build_with_compilation_error_test.dart": "flutter build (macos|ios) ",
+}
+
+_INTEGRATION_ANDROID_CASES = {
+    "test/integration.shard/analyze_size_test.dart": "^(?!.*hello_world for (iOS|macOS))",
+    "test/integration.shard/flutter_build_with_compilation_error_test.dart": "flutter build (apk|web) ",
+}
+
 # The integration shard's files a Linux host cannot run from the facsimile.
 _INTEGRATION_EXCLUDED = [
     # macOS and iOS frameworks only: declares no test on Linux (and builds
@@ -922,6 +944,37 @@ dart_package_tests(
     writable = _APPLE_WRITABLE,
 )
 
+# The apple cases of two Android files (_INTEGRATION_ANDROID_APPLE_CASES):
+# the apple shard's arrangement over the files the android shard runs for
+# their other cases, their targets named with `_apple` (the android shard
+# has the files' names). hello_world is built in place, as the gallery is
+# in the apple shard: its Xcode projects are copied writable.
+dart_package_tests(
+    name = "apple_cases_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _APPLE_CACHE_FILES,
+    cases = _INTEGRATION_ANDROID_APPLE_CASES,
+    data = _APPLE_DATA + ["//examples/hello_world:project"],
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    suffix = "_apple",
+    tags = ["cpu:4"],
+    target_compatible_with = ["@platforms//os:macos"],
+    tests = _INTEGRATION_ANDROID_APPLE_CASES.keys(),
+    unsandboxed = _INTEGRATION_ANDROID_APPLE_CASES.keys(),
+    writable = _APPLE_WRITABLE + [
+        "examples/hello_world/ios",
+        "examples/hello_world/macos",
+    ],
+)
+
 # What `flutter build apk` needs of the build and the machine
 # (//build_defs/android:build_tools.bzl): ANDROID_HOME at the checkout's SDK,
 # JAVA_HOME at the engine's JDK, and the embedding's Maven artifacts from the
@@ -1008,6 +1061,8 @@ dart_package_tests(
         "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_COMMON | _PREBUILT_ENGINE_CACHE_FILES,
         "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _ANDROID_CACHE_FILES,
     }),
+    # Two files' macOS and iOS cases are the apple cases shard's.
+    cases = _INTEGRATION_ANDROID_CASES,
     data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
         # analyze_size_test builds hello_world for Android.
         "//examples/hello_world:project",
