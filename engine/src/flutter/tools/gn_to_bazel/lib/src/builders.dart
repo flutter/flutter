@@ -365,7 +365,10 @@ const String ltoSetting = '//engine/src/flutter/build/bazel:lto';
 /// run_impeller_golden_tests runs it (a Mac's: `--working_dir` into the
 /// test's own directory, the Metal and Vulkan validation environments, ANGLE
 /// and SwiftShader beside it -- testRuns; the Skia Gold comparison that
-/// follows is CI's step, which no Bazel test makes). `engine` is
+/// follows is CI's step, which no Bazel test makes), `android` the three
+/// suites run_android_tests pushes to the connected device and runs there
+/// (the Android emulator builder's; bazel_mapping.dart's androidDeviceTests,
+/// each a flutter_android_device_test of its output name). `engine` is
 /// [runTestsEngineSuites], resolved among the converted targets.
 const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'dart': <String>[
@@ -383,6 +386,11 @@ const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'impeller-golden': <String>['//engine/src/flutter/impeller/golden_tests:impeller_golden_tests'],
   'java': <String>['//engine/src/flutter/shell/platform/android:java_tests'],
   'objc': <String>['//engine/src/flutter/testing/ios:ios_unit_tests'],
+  'android': <String>[
+    '//engine/src/flutter/shell/platform/android:flutter_shell_native_unittests',
+    '//engine/src/flutter/impeller/toolkit/android:impeller_toolkit_android_unittests',
+    '//engine/src/flutter/impeller/renderer/backend/vulkan:impeller_vulkan_android_unittests',
+  ],
 };
 
 /// The test steps that run a script of the checkout (not run_tests.py, not

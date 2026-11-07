@@ -175,7 +175,12 @@ the test for real, and so does the command from `engine/src`.
   as Bazel suites), `linux_host_desktop_engine`, `linux_arm_host_engine`,
   `linux_arm_host_desktop_engine`, `linux_android_aot_engine` (and `_ddm`,
   `_size_exp`), `linux_android_debug_engine` (and `_ddm`), `linux_web_engine`
-  (`ci/wasm_release`), and `linux_unopt`'s builds but one. A try build's
+  (`ci/wasm_release`), `linux_android_emulator_tests` (543: the build's APK
+  through the install, and `run_tests.py --type android` as the suite of
+  three `flutter_android_device_test`s, each pushed to the emulator the
+  recipe's `android_virtual_device` context boots before the step and run
+  there whole, as `run_android_tests` did -- README, "Android"), and
+  `linux_unopt`'s builds but one. A try build's
   archives go where they always went for a try build (the recipe's archives
   module routes the try bucket to `flutter_archives_v2`, never to the release
   bucket the tool downloads from). `linux_unopt`'s first build also carries
@@ -186,9 +191,7 @@ the test for real, and so does the command from `engine/src`.
 - Still GN, and why: `linux_unopt`'s `ci/host_debug_no_prebuilt_dart_sdk`
   (the Dart SDK from source; `--config=host_debug_no_prebuilt_dart_sdk`
   exists for a developer, a cold bot has no time for it); `linux_clang_tidy`
-  (clang-tidy over GN's compile database); `linux_android_emulator_tests`
-  (`run_tests.py --type android` runs the C++ suites on the emulator: no
-  Bazel counterpart yet); `local_engine_builds` (local_engine.json's builds
+  (clang-tidy over GN's compile database); `local_engine_builds` (local_engine.json's builds
   are `bazel build` targets without installs); the Fuchsia builders; the
   standalone files `linux_benchmarks` and `linux_clangd` (`linux_license`
   builds with Bazel since 536: its `--enable-minimal-linux`, which only

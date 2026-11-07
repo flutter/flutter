@@ -622,10 +622,11 @@
           "--android",
           "--android-cpu=x64",
           "--no-lto",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--target-dir",
-          "ci/android_emulator_debug_x64"
+          "ci/android_emulator_debug_x64",
+          "--bazel"
         ],
         "build_directory": "ci/android_emulator_debug_x64",
         "config": "android_emulator_debug_x64",
@@ -644,13 +645,17 @@
           "flutter/shell/platform/android:flutter_shell_native_unittests"
         ],
         "tests": {
-          "suite": null,
-          "types": {},
+          "suite": "//engine/src/flutter/ci/builders:android_emulator_debug_x64_tests",
+          "types": {
+            "android": [
+              "//engine/src/flutter/shell/platform/android:flutter_shell_native_unittests",
+              "//engine/src/flutter/impeller/toolkit/android:impeller_toolkit_android_unittests",
+              "//engine/src/flutter/impeller/renderer/backend/vulkan:impeller_vulkan_android_unittests"
+            ]
+          },
           "binaries": [],
           "scripts": [],
-          "missing": [
-            "the android type"
-          ]
+          "missing": []
         }
       },
       {
