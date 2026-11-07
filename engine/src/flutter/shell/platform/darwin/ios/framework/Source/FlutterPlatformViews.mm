@@ -182,6 +182,8 @@ static BOOL _preparedOnce = NO;
 @property(nonatomic, copy) NSArray<PlatformViewFilter*>* filters;
 @property(nonatomic) NSMutableArray<UIVisualEffectView*>* backdropFilterSubviews;
 
+- (BOOL)maskContainsPoint:(CGPoint)point;
+
 @end
 
 @implementation ChildClippingView
@@ -189,13 +191,32 @@ static BOOL _preparedOnce = NO;
 // The ChildClippingView's frame is the bounding rect of the platform view. we only want touches to
 // be hit tested and consumed by this view if they are inside the embedded platform view which could
 // be smaller the embedded platform view is rotated.
+//
+// That frame is the bounding rect before any clip, so the point is also tested against the clips
+// held by the maskView: a clip that removed an area from the screen must remove it from hit
+// testing too. See https://github.com/flutter/flutter/issues/195738
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent*)event {
+  if (![self maskContainsPoint:point]) {
+    return NO;
+  }
   for (UIView* view in self.subviews) {
     if ([view pointInside:[self convertPoint:point toView:view] withEvent:event]) {
       return YES;
     }
   }
   return NO;
+}
+
+// Whether `point`, in this view's coordinate space, survives the clips in the maskView.
+- (BOOL)maskContainsPoint:(CGPoint)point {
+  if (![self.maskView isKindOfClass:[FlutterClippingMaskView class]]) {
+    return YES;
+  }
+  // The maskView spans the FlutterView, offset by this view's origin, see |clipViewSetMaskView:|.
+  // It is not in the view hierarchy, so -convertPoint:toView: cannot be used.
+  CGRect maskFrame = self.maskView.frame;
+  CGPoint pointInMask = CGPointMake(point.x - maskFrame.origin.x, point.y - maskFrame.origin.y);
+  return [(FlutterClippingMaskView*)self.maskView containsPoint:pointInMask];
 }
 
 - (void)applyBlurBackdropFilters:(NSArray<PlatformViewFilter*>*)filters {
@@ -290,6 +311,17 @@ static BOOL _preparedOnce = NO;
 // See https://github.com/flutter/flutter/issues/66044
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent*)event {
   return NO;
+}
+
+- (BOOL)containsPoint:(CGPoint)point {
+  for (const auto& path : paths_) {
+    // TODO(flar): https://github.com/flutter/flutter/issues/164826
+    // CGPaths do not carry a fill type, so an even-odd path is tested as if it was non-zero.
+    if (!CGPathContainsPoint(path, nil, point, /*eoFill=*/NO)) {
+      return NO;
+    }
+  }
+  return YES;
 }
 
 - (void)drawRect:(CGRect)rect {
