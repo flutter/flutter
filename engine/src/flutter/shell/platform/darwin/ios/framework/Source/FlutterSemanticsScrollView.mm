@@ -17,6 +17,17 @@ FLUTTER_ASSERT_ARC
     _semanticsObject = semanticsObject;
     _isDoingSystemScrolling = NO;
     self.delegate = self;
+    // This view mirrors the Dart scroll position for assistive technology and
+    // draws nothing itself. iOS 26 paints a scroll-edge effect (a blur and a
+    // light wash under the status bar) over any scrolled UIScrollView, which
+    // would frost whatever Flutter rendered beneath this one as soon as the
+    // Dart scrollable moves.
+#if defined(__IPHONE_26_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_26_0
+    if (@available(iOS 26.0, *)) {
+      self.topEdgeEffect.hidden = YES;
+      self.bottomEdgeEffect.hidden = YES;
+    }
+#endif
   }
   return self;
 }
