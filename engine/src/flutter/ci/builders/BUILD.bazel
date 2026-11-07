@@ -1137,10 +1137,42 @@ install(
 )
 
 # mac_clang_tidy.json: ci/host_debug_clang_tidy
-#   ninja's default target, everything: bazel build --config=mac_host_debug_clang_tidy //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=mac_host_debug_clang_tidy :mac_host_debug_clang_tidy
+install(
+    name = "mac_host_debug_clang_tidy",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/host_debug_clang_tidy",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
+
+# Other steps, scripts of the checkout: test: lint host_debug.
+# Nothing to run.
 
 # mac_clang_tidy.json: ci/ios_debug_sim_clang_tidy
-#   ninja's default target, everything: bazel build --config=ios_debug_sim_clang_tidy //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=ios_debug_sim_clang_tidy :ios_debug_sim_clang_tidy
+install(
+    name = "ios_debug_sim_clang_tidy",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/ios_debug_sim_clang_tidy",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
+
+# Other steps, scripts of the checkout: test: lint ios_debug_sim.
+# Nothing to run.
 
 # mac_clangd.json: ci/mac_unopt_debug_no_rbe
 #   bazel run --config=mac_unopt_debug_no_rbe :mac_unopt_debug_no_rbe

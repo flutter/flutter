@@ -319,6 +319,30 @@ void main() {
     );
   });
 
+  test('lintAll fails when no compile command names a file of the repository', () async {
+    // A database of another tree: --lint-all over it would lint nothing and
+    // pass, which on a bot would hide a database that does not describe the
+    // checkout.
+    final io.Directory tmp = io.Directory.systemTemp.createTempSync('clang_tidy_elsewhere');
+    addTearDown(() => tmp.deleteSync(recursive: true));
+    final elsewhere = io.File(path.join(tmp.path, 'compile_commands.json'))
+      ..writeAsStringSync(
+        jsonEncode(<Object?>[
+          <String, Object?>{
+            'directory': tmp.path,
+            'command': '/usr/bin/clang/bin/clang++ -c elsewhere.cc',
+            'file': 'elsewhere.cc',
+          },
+        ]),
+      );
+    final fixture = Fixture.fromOptions(
+      Options(buildCommandsPath: elsewhere, lintTarget: const LintAll()),
+    );
+    final int result = await fixture.tool.run();
+    expect(result, equals(1));
+    expect(fixture.errBuffer.toString(), contains('names a file of'));
+  });
+
   test('lintAll=true checks all files', () async {
     final fixture = Fixture.fromOptions(
       Options(buildCommandsPath: io.File(buildCommands), lintTarget: const LintAll()),
