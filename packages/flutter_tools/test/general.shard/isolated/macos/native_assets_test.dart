@@ -323,20 +323,31 @@ void main() {
           ];
           final buildRunner = FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
-            onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-              codeAssets: buildMode == BuildMode.debug
-                  ? codeAssets(input.config.code.targetOS, input.config.code)
-                  : <CodeAsset>[],
-            ),
-            onLink: (LinkInput input) => buildMode == BuildMode.debug
-                ? null
-                : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                    codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-                  ),
+            onBuild: (BuildInput input) {
+              expect(
+                input.config.code.macOS.deploymentVersion,
+                flutterTester ? AppleVersion(13) : AppleVersion(14, minor: 4, patch: 1),
+              );
+              return FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                codeAssets: buildMode == BuildMode.debug
+                    ? codeAssets(input.config.code.targetOS, input.config.code)
+                    : <CodeAsset>[],
+              );
+            },
+            onLink: (LinkInput input) {
+              expect(
+                input.config.code.macOS.deploymentVersion,
+                AppleVersion(14, minor: 4, patch: 1),
+              );
+              return FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+              );
+            },
           );
           final environmentDefines = <String, String>{
             kBuildMode: buildMode.cliName,
             kDarwinArchs: 'arm64 x86_64',
+            if (!flutterTester) kMacOSDeploymentTarget: '14.4.1',
           };
           final TargetPlatform targetPlatform = flutterTester
               ? TargetPlatform.tester

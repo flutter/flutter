@@ -8,12 +8,19 @@ import '../../../base/file_system.dart';
 import '../../../base/logger.dart';
 import '../../../base/process.dart';
 import '../../../build_info.dart';
+import '../apple_deployment_version.dart';
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
 import 'native_assets_host.dart';
 
-// TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
 const targetMacOSVersion = 13;
+
+/// The deployment version supplied to assemble, or the native-assets default.
+AppleVersion macOSDeploymentVersion(Map<String, String> defines) => parseAppleDeploymentVersion(
+  defines[kMacOSDeploymentTarget],
+  platform: 'macOS',
+  minimumVersion: targetMacOSVersion,
+);
 
 /// Extract the [Architecture] from a [CpuArch].
 Architecture getNativeMacOSArchitecture(CpuArch cpuArch) {

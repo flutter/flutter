@@ -26,9 +26,9 @@ import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import '../../windows/visual_studio.dart';
 import 'android/native_assets.dart'
     show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
-import 'ios/native_assets.dart' show getIOSSdk, getNativeIOSArchitecture, targetIOSVersion;
+import 'ios/native_assets.dart' show getIOSSdk, getNativeIOSArchitecture, iosDeploymentVersion;
 import 'linux/native_assets.dart';
-import 'macos/native_assets.dart' show getNativeMacOSArchitecture, targetMacOSVersion;
+import 'macos/native_assets.dart' show getNativeMacOSArchitecture, macOSDeploymentVersion;
 import 'macos/native_assets_host.dart';
 import 'native_assets.dart';
 import 'windows/native_assets.dart';
@@ -155,6 +155,7 @@ sealed class AssetBuildTarget {
           (Architecture architecture) => MacOSAssetTarget(
             architecture: architecture,
             supportedAssetTypes: supportedAssetTypes,
+            environmentDefines: environmentDefines,
           ),
         )
         .toList();
@@ -359,7 +360,10 @@ final class IOSAssetTarget extends CodeAssetTarget {
       throw MissingDefineException(kSdkRoot, 'native_assets');
     }
     final EnvironmentType environmentType = xcode.environmentTypeFromSdkroot(sdkRoot, fileSystem);
-    return IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType));
+    return IOSCodeConfig(
+      deploymentVersion: iosDeploymentVersion(environmentDefines),
+      targetSdk: getIOSSdk(environmentType),
+    );
   }
 
   @override
@@ -379,8 +383,13 @@ final class IOSAssetTarget extends CodeAssetTarget {
 }
 
 final class MacOSAssetTarget extends CodeAssetTarget {
-  MacOSAssetTarget({required super.supportedAssetTypes, required super.architecture})
-    : super(os: OS.macOS);
+  MacOSAssetTarget({
+    required super.supportedAssetTypes,
+    required super.architecture,
+    required this.environmentDefines,
+  }) : super(os: OS.macOS);
+
+  final Map<String, String> environmentDefines;
 
   @override
   List<ProtocolExtension> get extensions {
@@ -391,7 +400,7 @@ final class MacOSAssetTarget extends CodeAssetTarget {
           linkModePreference: LinkModePreference.dynamic,
           cCompiler: cCompilerConfigSync,
           targetOS: OS.macOS,
-          macOS: MacOSCodeConfig(targetVersion: targetMacOSVersion),
+          macOS: MacOSCodeConfig(deploymentVersion: macOSDeploymentVersion(environmentDefines)),
         ),
       ...dataAssetExtensions,
     ];
@@ -460,6 +469,7 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
       OS.macOS => MacOSAssetTarget(
         supportedAssetTypes: supportedAssetTypes,
         architecture: architecture,
+        environmentDefines: const <String, String>{},
       ),
       OS() => throw UnsupportedError('Flutter tester supports only Linux, Windows and MacOS.'),
     };
