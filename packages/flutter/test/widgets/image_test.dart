@@ -881,6 +881,60 @@ void main() {
   });
 
   testWidgets(
+    'Changing TickerMode does not rebuild Image',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    (WidgetTester tester) async {
+      final imageStreamCompleter = _TestImageStreamCompleter();
+      var buildCount = 0;
+      int? lastFrame;
+      bool? lastWasSynchronouslyLoaded;
+      final imageProvider = _TestImageProvider(streamCompleter: imageStreamCompleter);
+      Widget frameBuilder(
+        BuildContext context,
+        Widget child,
+        int? frame,
+        bool wasSynchronouslyLoaded,
+      ) {
+        buildCount += 1;
+        lastFrame = frame;
+        lastWasSynchronouslyLoaded = wasSynchronouslyLoaded;
+        return child;
+      }
+
+      Image buildImage() =>
+          Image(excludeFromSemantics: true, image: imageProvider, frameBuilder: frameBuilder);
+      // The same Image instance in every pump, so that only TickerMode can rebuild it.
+      final Image image = buildImage();
+
+      await tester.pumpWidget(TickerMode(enabled: true, child: image));
+      final ui.Image frame = (await tester.runAsync(() => createTestImage()))!;
+      imageStreamCompleter.setData(imageInfo: ImageInfo(image: frame));
+      await tester.pump();
+      expect(buildCount, 2);
+      expect(lastFrame, 0);
+      expect(lastWasSynchronouslyLoaded, isFalse);
+      expect(imageStreamCompleter.listeners.length, 1);
+
+      await tester.pumpWidget(TickerMode(enabled: false, child: image));
+      expect(buildCount, 2);
+      expect(imageStreamCompleter.listeners.length, 0);
+
+      // Listening again sends the frame that is already shown. It is not a
+      // new frame, so the Image does not rebuild.
+      await tester.pumpWidget(TickerMode(enabled: true, child: image));
+      expect(buildCount, 2);
+      expect(imageStreamCompleter.listeners.length, 1);
+
+      // The frame is still the first one when the Image rebuilds.
+      await tester.pumpWidget(TickerMode(enabled: true, child: buildImage()));
+      expect(buildCount, 3);
+      expect(lastFrame, 0);
+      expect(lastWasSynchronouslyLoaded, isFalse);
+    },
+  );
+
+  testWidgets(
     'TickerMode controls stream registration',
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
@@ -1649,17 +1703,17 @@ void main() {
           disableAnimations = false;
         });
         await tester.pump();
-        expect(lastFrame1, 1);
+        expect(lastFrame1, 0);
         expect(lastFrame2, 0);
         expect(buildCount, 7);
         streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
         await tester.pump();
-        expect(lastFrame1, 2);
+        expect(lastFrame1, 1);
         expect(lastFrame2, 0);
         expect(buildCount, 8);
         streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
         await tester.pump();
-        expect(lastFrame1, 3);
+        expect(lastFrame1, 2);
         expect(lastFrame2, 0);
         expect(buildCount, 9);
       },
