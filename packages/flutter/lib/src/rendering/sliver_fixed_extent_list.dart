@@ -264,8 +264,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ///
   /// This is used to determine the dimensions of the child when laying it out.
   ///
-  /// Returns null if [index] is past the end of the list. Only valid during
-  /// layout (uses [layoutDimensions]). Subclasses may override to memoize.
+  /// Returns null if [index] is negative or past the end of the list. Only valid
+  /// during layout (uses [layoutDimensions]). Subclasses may override to memoize.
   @visibleForTesting
   @protected
   double? itemExtentOf(int index) {
@@ -396,6 +396,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
       final BoxConstraints? childConstraints = _getChildConstraints(index);
+      if (childConstraints == null) {
+        childManager.setDidUnderflow(true);
+      }
       final RenderBox? child = childConstraints == null
           ? null
           : insertAndLayoutLeadingChild(childConstraints);
@@ -435,7 +438,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       final BoxConstraints? childConstraints = _getChildConstraints(index);
       if (childConstraints == null) {
         // We have run out of children.
-        collectGarbage(0, calculateTrailingGarbage(lastIndex: index - 1));
+        childManager.setDidUnderflow(true);
+        final int trailingGarbage = calculateTrailingGarbage(lastIndex: index - 1);
+        if (trailingGarbage > 0) {
+          collectGarbage(0, trailingGarbage);
+        }
         estimatedMaxScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
         break;
       }
