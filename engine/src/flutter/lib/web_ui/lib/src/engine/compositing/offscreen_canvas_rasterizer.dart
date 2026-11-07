@@ -72,21 +72,27 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
 
   @override
   Future<void> rasterize(
-    List<DisplayCanvas> displayCanvases,
+    List<DisplayCanvas> Function() getDisplayCanvases,
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) async {
-    if (displayCanvases.length != pictures.length) {
-      throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
-    }
     recorder?.recordRasterStart();
     if (browserSupportsCreateImageBitmap) {
       final List<DomImageBitmap> bitmaps = await rasterizer.offscreenSurface
           .rasterizeToImageBitmaps(currentFrameSize, pictures);
+      // Get the canvases only once the bitmaps are ready, so that the DOM
+      // changes for this frame and the new canvas contents are painted
+      // together.
+      final List<DisplayCanvas> displayCanvases = getDisplayCanvases();
+      _checkCanvasCount(displayCanvases, pictures);
       for (var i = 0; i < displayCanvases.length; i++) {
         (displayCanvases[i] as RenderCanvas).render(bitmaps[i]);
       }
     } else {
+      // The canvases are drawn into synchronously as each picture is
+      // rendered, so they must be ready before rendering starts.
+      final List<DisplayCanvas> displayCanvases = getDisplayCanvases();
+      _checkCanvasCount(displayCanvases, pictures);
       await rasterizer.offscreenSurface.rasterizeToCanvasSource(currentFrameSize, pictures, (
         int index,
         DomCanvasImageSource source,
@@ -99,5 +105,11 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
       });
     }
     recorder?.recordRasterFinish();
+  }
+
+  void _checkCanvasCount(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures) {
+    if (displayCanvases.length != pictures.length) {
+      throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
+    }
   }
 }

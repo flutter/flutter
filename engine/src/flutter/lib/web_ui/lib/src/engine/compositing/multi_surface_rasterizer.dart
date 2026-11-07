@@ -77,10 +77,13 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
 
   @override
   Future<void> rasterize(
-    List<DisplayCanvas> displayCanvases,
+    List<DisplayCanvas> Function() getDisplayCanvases,
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) async {
+    // Each picture is rasterized directly into its on-screen canvas, so the
+    // canvases are needed up front.
+    final List<DisplayCanvas> displayCanvases = getDisplayCanvases();
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
