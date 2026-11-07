@@ -2492,6 +2492,13 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     var existingIndex = 0;
     int selectionStartIndex = currentSelectionStartIndex;
     int selectionEndIndex = currentSelectionEndIndex;
+    // Selectables that fall inside the previous selection and need their
+    // selection events replayed once the merge below has finished. They must
+    // not be updated while `selectables` is only partly rebuilt: replaying
+    // the cached selection edges then runs `_initSelection` against a
+    // half-built list whose indices still refer to the old list, which
+    // corrupts the delegate (see https://github.com/flutter/flutter/issues/195521).
+    final selectablesToUpdate = <Selectable>[];
     // Merge two sorted lists.
     while (mergingIndex < mergingSelectables.length || existingIndex < existingSelectables.length) {
       if (mergingIndex >= mergingSelectables.length ||
@@ -2514,7 +2521,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final Selectable mergingSelectable = mergingSelectables[mergingIndex];
       if (existingIndex < max(currentSelectionStartIndex, currentSelectionEndIndex) &&
           existingIndex > min(currentSelectionStartIndex, currentSelectionEndIndex)) {
-        ensureChildUpdated(mergingSelectable);
+        selectablesToUpdate.add(mergingSelectable);
       }
       mergingSelectable.addListener(_handleSelectableGeometryChange);
       selectables.add(mergingSelectable);
@@ -2532,6 +2539,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     assert((currentSelectionEndIndex == -1) == (selectionEndIndex == -1));
     currentSelectionEndIndex = selectionEndIndex;
     currentSelectionStartIndex = selectionStartIndex;
+    for (final Selectable selectable in selectablesToUpdate) {
+      ensureChildUpdated(selectable);
+    }
     _additions = <Selectable>{};
   }
 
