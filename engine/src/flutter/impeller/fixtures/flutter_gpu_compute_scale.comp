@@ -1,0 +1,20 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Doubles each of three vertex positions in place, so a dispatch reads what
+// the dispatch before it wrote. Dispatched as one workgroup.
+
+layout(local_size_x = 3) in;
+
+layout(std430) buffer;
+
+layout(binding = 0) buffer Vertices {
+  vec2 positions[];
+}
+vertices;
+
+void main() {
+  uint index = gl_GlobalInvocationID.x;
+  vertices.positions[index] = vertices.positions[index] * 2.0;
+}

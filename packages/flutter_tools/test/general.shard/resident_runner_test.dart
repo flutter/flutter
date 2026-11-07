@@ -26,6 +26,7 @@ import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -1708,59 +1709,7 @@ flutter:
         dartDefines: const <String>[],
         config: globals.config,
         targetModel: TargetModel.dartdevc,
-      );
-      expect(residentCompiler!.initializeFromDill, expectedPath);
-      expect(
-        residentCompiler.librariesSpec,
-        globals.fs
-            .file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
-            .uri
-            .toString(),
-      );
-      expect(residentCompiler.targetModel, TargetModel.dartdevc);
-      expect(
-        residentCompiler.sdkRoot,
-        '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/',
-      );
-      expect(
-        residentCompiler.platformDill,
-        'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
-      );
-    },
-    overrides: <Type, Generator>{
-      Artifacts: () => Artifacts.test(),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
-
-  testUsingContext(
-    'FlutterDevice uses dartdevc configuration when targeting web with null-safety autodetected',
-    () async {
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
-
-      final residentCompiler =
-          (await FlutterDevice.create(
-                device,
-                toolContext: const DelegatingToolContext(),
-                buildInfo: const BuildInfo(
-                  BuildMode.debug,
-                  '',
-                  treeShakeIcons: false,
-                  extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
-                  packageConfigPath: '.dart_tool/package_config.json',
-                ),
-                target: null,
-              )).generator
-              as DefaultResidentCompiler?;
-
-      final String expectedPath = getDefaultCachedKernelPath(
-        fileSystem: globals.fs,
-        trackWidgetCreation: false,
-        dartDefines: const <String>[],
-        config: globals.config,
-        targetModel: TargetModel.dartdevc,
+        extraFrontEndOptions: kDdcLibraryBundleFlags,
       );
       expect(residentCompiler!.initializeFromDill, expectedPath);
       expect(
@@ -1961,6 +1910,7 @@ flutter:
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               io.CompressionOptions? compression,
               Device? device,
@@ -2033,6 +1983,7 @@ flutter:
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               io.CompressionOptions? compression,
               Device? device,
@@ -2346,7 +2297,7 @@ flutter:
           fileSystem: globals.fs,
           trackWidgetCreation: residentRunner.trackWidgetCreation,
           dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
-          extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
+          extraFrontEndOptions: kDdcLibraryBundleFlags,
           config: globals.config,
           targetModel: TargetModel.dartdevc,
         );

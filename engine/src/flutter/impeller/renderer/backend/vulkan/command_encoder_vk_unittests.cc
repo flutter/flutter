@@ -45,12 +45,13 @@ TEST(CommandEncoderVKTest, CleanupAfterSubmit) {
     auto context = MockVulkanContextBuilder().Build();
     std::thread thread([&] {
       auto buffer = context->CreateCommandBuffer();
-      context->GetCommandQueue()->Submit(
+      absl::Status submit_status = context->GetCommandQueue()->Submit(
           {buffer}, [&](CommandBuffer::Status status) {
             ASSERT_EQ(status, CommandBuffer::Status::kCompleted);
             wait_for_thread_join.Wait();
             wait_for_submit.Signal();
           });
+      EXPECT_TRUE(submit_status.ok());
     });
     thread.join();
     wait_for_thread_join.Signal();
