@@ -1795,7 +1795,8 @@ class TextInputConnection {
   }
 
   /// Sends the coordinates of caret rect. This is used on macOS for positioning
-  /// the accent selection menu.
+  /// the accent selection menu, and on Android for reporting the caret location
+  /// to the input method, for example to position its candidate window.
   void setCaretRect(Rect rect) {
     if (rect == _cachedCaretRect) {
       return;
