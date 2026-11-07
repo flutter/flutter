@@ -420,17 +420,18 @@ class Visibility extends StatelessWidget {
   /// is set to true, then focus events will reach the child subtree.
   final bool maintainFocusability;
 
-  /// Tells the visibility state of an element in the tree based off its
-  /// ancestor [Visibility] elements.
+  /// Whether the given context is visible according to its ancestor
+  /// [Visibility] and [IndexedStack] widgets.
   ///
-  /// If there's one or more [Visibility] widgets in the ancestor tree, this
-  /// will return true if and only if all of those widgets have [visible] set
-  /// to true. If there is no [Visibility] widget in the ancestor tree of the
-  /// specified build context, this will return true.
+  /// Returns false if an ancestor hides the subtree containing the context.
+  /// A [Visibility] widget hides its [child] when [visible] is false, but does
+  /// not hide its [replacement]. A hidden child can remain in the tree when
+  /// [maintainState] is true. An [IndexedStack] hides its unselected children.
+  /// If no ancestor hides the context, returns true.
   ///
   /// This will register a dependency from the specified context on any
-  /// [Visibility] elements in the ancestor tree, such that if any of their
-  /// visibilities changes, the specified context will be rebuilt.
+  /// [Visibility] and [IndexedStack] elements in the ancestor tree, such that
+  /// when their visibility changes, the specified context will be rebuilt.
   static bool of(BuildContext context) {
     var isVisible = true;
     var ancestorContext = context;
@@ -472,7 +473,7 @@ class Visibility extends StatelessWidget {
         result = visible ? child : replacement;
       }
     }
-    return _VisibilityScope(isVisible: visible, child: result);
+    return _VisibilityScope(isVisible: visible || !maintainState, child: result);
   }
 
   @override
