@@ -4,63 +4,77 @@
 
 #include "flutter/shell/platform/android/image_lru.h"
 
+#include <utility>
+
 namespace flutter {
 
 sk_sp<flutter::DlImage> ImageLRU::FindImage(
-    std::optional<HardwareBufferKey> key) {
-  if (!key.has_value()) {
-    return nullptr;
-  }
-  auto key_value = key.value();
-  for (size_t i = 0u; i < kImageReaderSwapchainSize; i++) {
-    if (images_[i].key == key_value) {
-      auto result = images_[i].value;
-      UpdateKey(result, key_value);
-      return result;
+    std::optional<HardwareBufferKey> key,
+    const AHardwareBuffer_Desc& descriptor,
+    const std::function<void(HardwareBufferKey)>& on_evict) {
+  frame_++;
+  sk_sp<flutter::DlImage> result;
+  if (key.has_value()) {
+    for (size_t i = 0u; i < kImageReaderSwapchainSize; i++) {
+      const auto& entry = images_[i];
+      if (entry.key == key.value()) {
+        result = entry.value;
+        UpdateKey(i);
+        break;
+      }
     }
   }
-  return nullptr;
-}
-
-void ImageLRU::UpdateKey(const sk_sp<flutter::DlImage>& image,
-                         HardwareBufferKey key) {
-  if (images_[0].key == key) {
-    return;
+  if (!result) {
+    if (descriptor.width != descriptor_.width ||
+        descriptor.height != descriptor_.height ||
+        descriptor.format != descriptor_.format) {
+      Clear(on_evict);
+    }
+    descriptor_ = descriptor;
   }
-  size_t i = 1u;
-  for (; i < kImageReaderSwapchainSize; i++) {
-    if (images_[i].key == key) {
+  // Entries are ordered from most to least recently used.
+  for (auto it = images_.rbegin(); it != images_.rend(); ++it) {
+    if (!it->value) {
+      continue;
+    }
+    if (frame_ - it->last_used_frame < 2 * kImageReaderSwapchainSize) {
       break;
     }
+    if (on_evict) {
+      on_evict(it->key);
+    }
+    *it = {};
   }
-  for (auto j = i; j > 0; j--) {
-    images_[j] = images_[j - 1];
+  return result;
+}
+
+void ImageLRU::UpdateKey(size_t index) {
+  if (index > 0u) {
+    auto entry = std::move(images_[index]);
+    for (auto j = index; j > 0; j--) {
+      images_[j] = std::move(images_[j - 1]);
+    }
+    images_[0] = std::move(entry);
   }
-  images_[0] = Data{.key = key, .value = image};
+  images_[0].last_used_frame = frame_;
 }
 
 HardwareBufferKey ImageLRU::AddImage(const sk_sp<flutter::DlImage>& image,
                                      HardwareBufferKey key) {
-  HardwareBufferKey lru_key = images_[kImageReaderSwapchainSize - 1].key;
-  bool updated_image = false;
-  for (size_t i = 0u; i < kImageReaderSwapchainSize; i++) {
-    if (images_[i].key == lru_key) {
-      updated_image = true;
-      images_[i] = Data{.key = key, .value = image};
-      break;
-    }
-  }
-  if (!updated_image) {
-    images_[0] = Data{.key = key, .value = image};
-  }
-  UpdateKey(image, key);
+  HardwareBufferKey lru_key = images_.back().key;
+  images_.back() = Data{.key = key, .value = image};
+  UpdateKey(images_.size() - 1);
   return lru_key;
 }
 
-void ImageLRU::Clear() {
-  for (size_t i = 0u; i < kImageReaderSwapchainSize; i++) {
-    images_[i] = Data{.key = 0u, .value = nullptr};
+void ImageLRU::Clear(const std::function<void(HardwareBufferKey)>& on_evict) {
+  for (auto& entry : images_) {
+    if (entry.value && on_evict) {
+      on_evict(entry.key);
+    }
+    entry = {};
   }
+  descriptor_ = {};
 }
 
 }  // namespace flutter

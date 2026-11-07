@@ -53,8 +53,12 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
   std::optional<HardwareBufferKey> key =
       impeller::android::HardwareBuffer::GetSystemUniqueID(
           latest_hardware_buffer);
-  auto existing_image = image_lru_.FindImage(key);
-  if (existing_image != nullptr || !hb_desc.has_value()) {
+  if (!hb_desc.has_value()) {
+    CloseHardwareBuffer(hardware_buffer);
+    return;
+  }
+  auto existing_image = image_lru_.FindImage(key, hb_desc.value());
+  if (existing_image != nullptr) {
     dl_image_ = existing_image;
 
     CloseHardwareBuffer(hardware_buffer);

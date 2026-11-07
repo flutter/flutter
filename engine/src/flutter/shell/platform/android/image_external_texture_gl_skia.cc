@@ -58,11 +58,16 @@ sk_sp<flutter::DlImage> ImageExternalTextureGLSkia::CreateDlImage(
   auto backendTexture =
       GrBackendTextures::MakeGL(1, 1, skgpu::Mipmapped::kNo, textureInfo);
 
-  gl_entries_[id.value_or(0)] = GlEntry{.egl_image = std::move(egl_image),
-                                        .texture = std::move(unique_texture)};
+  // The displayed image can outlive its cache entry when a replacement import
+  // fails. Keep its resources until Skia has finished using the borrowed
+  // texture.
+  auto entry = std::make_unique<GlEntry>(GlEntry{
+      .egl_image = std::move(egl_image), .texture = std::move(unique_texture)});
   return DlImageSkia::Make(SkImages::BorrowTextureFrom(
       context.gr_context, backendTexture, kTopLeft_GrSurfaceOrigin,
-      kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr));
+      kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr,
+      [](void* context) { delete static_cast<GlEntry*>(context); },
+      entry.release()));
 }
 
 }  // namespace flutter

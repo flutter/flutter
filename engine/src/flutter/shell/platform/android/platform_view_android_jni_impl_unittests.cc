@@ -32,11 +32,11 @@ class PlatformViewAndroidJNIImplTest : public ::testing::Test {
 
  private:
   friend class MockJNIEnvProvider;
-  static MockJavaVM jvm_;
+  static MockJavaVM& jvm_;
   static void SetUpJVM();
 };
 
-MockJavaVM PlatformViewAndroidJNIImplTest::jvm_;
+MockJavaVM& PlatformViewAndroidJNIImplTest::jvm_ = MockJavaVM::GetInstance();
 
 class MockJNIEnvProvider {
  public:
@@ -53,8 +53,6 @@ class MockJNIEnvProvider {
 };
 
 void PlatformViewAndroidJNIImplTest::SetUpJVM() {
-  fml::jni::InitJavaVM(&jvm_);
-
   MockJNIEnvProvider env_provider;
   MockJNIEnv& mock_env = env_provider.env();
 
