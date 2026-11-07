@@ -1428,7 +1428,49 @@ void main() {
       expect(log, <String>['double-tap-down']);
     });
   });
+
+  testWidgets('RawGestureDetector accepts a recognizer that is a subtype of its key', (
+    WidgetTester tester,
+  ) async {
+    var tapCount = 0;
+    await tester.pumpWidget(
+      RawGestureDetector(
+        gestures: <Type, GestureRecognizerFactory>{
+          TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            () => _TapGestureRecognizerSubclass(),
+            (TapGestureRecognizer instance) {
+              instance.onTap = () => tapCount += 1;
+            },
+          ),
+        },
+        child: Container(width: 100.0, height: 100.0, color: const Color(0xFF00FF00)),
+      ),
+    );
+
+    await tester.tap(find.byType(Container));
+    expect(tester.takeException(), isNull);
+    expect(tapCount, 1);
+
+    // The existing recognizer is reused when the widget is rebuilt.
+    await tester.pumpWidget(
+      RawGestureDetector(
+        gestures: <Type, GestureRecognizerFactory>{
+          TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            () => _TapGestureRecognizerSubclass(),
+            (TapGestureRecognizer instance) {
+              instance.onTap = () => tapCount += 10;
+            },
+          ),
+        },
+        child: Container(width: 100.0, height: 100.0, color: const Color(0xFF00FF00)),
+      ),
+    );
+    await tester.tap(find.byType(Container));
+    expect(tapCount, 11);
+  });
 }
+
+class _TapGestureRecognizerSubclass extends TapGestureRecognizer {}
 
 class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
   @override
