@@ -294,6 +294,19 @@ Future<void> testMain() async {
         ],
         ImageType.animatedGif,
       ),
+      (
+        // Extension introducer, Graphic Control label, a 5-byte data sub-block
+        // instead of the usual 4 bytes, and the block terminator.
+        'a 5-byte graphic control extension in the first frame',
+        <int>[
+          ...gifPrefix(13),
+          ...<int>[0x21, 0xf9, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+          ...imageFrame,
+          ...imageFrame,
+          0x3b,
+        ],
+        ImageType.animatedGif,
+      ),
     ];
     for (final (String name, List<int> bytes, ImageType? expected) in gifCases) {
       test('GIF with $name is detected as $expected', () {

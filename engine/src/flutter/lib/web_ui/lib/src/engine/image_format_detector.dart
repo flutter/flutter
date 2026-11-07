@@ -480,14 +480,18 @@ class GifHeaderReader {
 
   /// Skip past the Graphic Control Extension block.
   ///
+  /// The data sub-blocks are skipped by their declared sizes rather than
+  /// assuming the usual 4-byte block, so a nonstandard block size does not
+  /// throw off the rest of the parse.
+  ///
   /// Returns [false] if the block is truncated.
   bool _skipGraphicControlExtension() {
-    // The Graphic Control Extension block is 8 bytes.
-    if (!_checkForGraphicControlExtension() || !_hasBytes(8)) {
+    if (!_checkForGraphicControlExtension()) {
       return false;
     }
-    _position += 8;
-    return true;
+    // Skip the introducer and label, then the data sub-blocks.
+    _position += 2;
+    return _skipDataBlocks();
   }
 
   /// Check if the next block is a Plain Text Extension block.
