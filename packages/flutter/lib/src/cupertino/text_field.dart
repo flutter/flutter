@@ -276,6 +276,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
+    this.onDeleteBackward,
     this.onTapUpOutside,
     this.inputFormatters,
     this.enabled = true,
@@ -416,6 +417,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
+    this.onDeleteBackward,
     this.onTapUpOutside,
     this.inputFormatters,
     this.enabled = true,
@@ -695,6 +697,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.onTapOutside}
   final TapRegionCallback? onTapOutside;
+
+  /// {@macro flutter.widgets.editableText.onDeleteBackward}
+  final DeleteBackwardCallback? onDeleteBackward;
 
   /// {@macro flutter.widgets.editableText.onTapUpOutside}
   final TapRegionCallback? onTapUpOutside;
@@ -1602,6 +1607,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             onEditingComplete: widget.onEditingComplete,
             onSubmitted: widget.onSubmitted,
             onTapOutside: widget.onTapOutside,
+            onDeleteBackward: widget.onDeleteBackward,
             inputFormatters: formatters,
             rendererIgnoresPointer: true,
             cursorWidth: widget.cursorWidth,
