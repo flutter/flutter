@@ -315,7 +315,7 @@ class ChromiumLauncher {
       url,
     ];
 
-    final _SpawnResult(:Process process, :int port, :String host, :List<String> logBuffer) =
+    final _SpawnResult(:Process process, :int port, :String host, :Iterable<String> logBuffer) =
         await _spawnChromiumProcess(buildArgs, debugPort);
 
     // When the process exits, copy the user settings back to the provided data-dir.
@@ -470,7 +470,7 @@ class ChromiumLauncher {
 
       if (!hitGlibcBug && !shouldRetry && boundAddress != null) {
         final (:String host, :int port) = boundAddress;
-        return _SpawnResult(process, port, host, logBuffer.toList());
+        return _SpawnResult(process, port, host, logBuffer);
       }
 
       retry += 1;
@@ -635,7 +635,7 @@ class Chromium {
   final ChromeConnection chromeConnection;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
-  final List<String> _logBuffer;
+  final Iterable<String> _logBuffer;
   var _hasValidChromeConnection = false;
   var _didClose = false;
 
@@ -799,5 +799,5 @@ class _SpawnResult {
   final Process process;
   final int port;
   final String host;
-  final List<String> logBuffer;
+  final Iterable<String> logBuffer;
 }
