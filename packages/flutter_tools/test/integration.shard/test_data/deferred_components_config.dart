@@ -95,9 +95,12 @@ abstract class DeferredComponentsConfig {
 }
 
 class DeferredComponentModule {
-  DeferredComponentModule(this.name);
+  DeferredComponentModule(this.name, {this.androidBlockExtras = ''});
 
   String name;
+
+  /// Gradle DSL added inside the module's `android {}` block.
+  final String androidBlockExtras;
 
   void setUpIn(Directory dir) {
     writeFile(
@@ -130,22 +133,84 @@ class DeferredComponentModule {
 "
         compileSdk 35
 
-        sourceSets {
-            applicationVariants.all { variant ->
-                main.assets.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_assets")
-                main.jniLibs.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_libs")
-            }
-        }
-
         defaultConfig {
-            minSdkVersion 24
-            targetSdkVersion 35
-            versionCode flutterVersionCode.toInteger()
-            versionName flutterVersionName
+            minSdk = 24
+            targetSdk = 35
+            versionCode = flutterVersionCode.toInteger()
+            versionName = flutterVersionName
         }
         compileOptions {
-            sourceCompatibility 1.8
-            targetCompatibility 1.8
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        }
+''' +
+          androidBlockExtras +
+          r'''
+    }
+
+    // Copies staged deferred component outputs written by the app's
+    // compileFlutterBuild<Variant> task into per-variant output directories so
+    // dynamic-feature merge tasks run after the app's Flutter build and multiple
+    // variants in one Gradle invocation do not share a single output directory.
+    @org.gradle.work.DisableCachingByDefault(because = "Syncs local Flutter deferred component outputs")
+    abstract class FlutterDeferredComponentFiles extends DefaultTask {
+        @InputFiles
+        @Optional
+        @PathSensitive(PathSensitivity.RELATIVE)
+        abstract DirectoryProperty getStagedAssetsDir()
+
+        @InputFiles
+        @Optional
+        @PathSensitive(PathSensitivity.RELATIVE)
+        abstract DirectoryProperty getStagedLibsDir()
+
+        @OutputDirectory
+        abstract DirectoryProperty getAssetsDir()
+
+        @OutputDirectory
+        abstract DirectoryProperty getLibsDir()
+
+        @javax.inject.Inject
+        abstract org.gradle.api.file.FileSystemOperations getFileSystemOperations()
+
+        @TaskAction
+        void syncFiles() {
+            syncDirectory(stagedAssetsDir, assetsDir)
+            syncDirectory(stagedLibsDir, libsDir)
+        }
+
+        private void syncDirectory(DirectoryProperty sourceProperty, DirectoryProperty targetProperty) {
+            def target = targetProperty.get().asFile
+            def source = sourceProperty.orNull?.asFile
+            if (source != null && source.exists()) {
+                fileSystemOperations.sync { spec ->
+                    spec.from(source)
+                    spec.into(target)
+                }
+            } else {
+                fileSystemOperations.delete { spec ->
+                    spec.delete(target)
+                }
+                target.mkdirs()
+            }
+        }
+    }
+
+    androidComponents {
+        onVariants(selector().all()) { variant ->
+            // Flutter stages deferred component outputs by Flutter build mode,
+            // matching the mode selection in FlutterPluginUtils.buildModeFor.
+            def flutterBuildMode = variant.buildType == "profile" ? "profile" : (variant.debuggable ? "debug" : "release")
+            def variantName = variant.name.capitalize()
+            def deferredFiles = tasks.register("flutterDeferredComponentFiles${variantName}", FlutterDeferredComponentFiles) {
+                stagedAssetsDir.set(layout.buildDirectory.dir("intermediates/flutter/${flutterBuildMode}/deferred_assets"))
+                stagedLibsDir.set(layout.buildDirectory.dir("intermediates/flutter/${flutterBuildMode}/deferred_libs"))
+                assetsDir.set(layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_assets"))
+                libsDir.set(layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_libs"))
+                dependsOn(project(":app").tasks.matching { it.name == "compileFlutterBuild${variantName}" })
+            }
+            variant.sources.assets?.addGeneratedSourceDirectory(deferredFiles) { it.assetsDir }
+            variant.sources.jniLibs?.addGeneratedSourceDirectory(deferredFiles) { it.libsDir }
         }
     }
 

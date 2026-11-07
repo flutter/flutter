@@ -15,6 +15,14 @@ import 'test_data/deferred_components_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 
+File _builtAabFromStdout(Directory projectDir, String stdout, String bundleFileName) {
+  final pattern = RegExp('Built\\s+(.+?${RegExp.escape(bundleFileName)})');
+  final RegExpMatch? match = pattern.firstMatch(stdout);
+  expect(match, isNotNull, reason: 'Expected Built .../$bundleFileName in:\n$stdout');
+  final String outputFilePath = match?.group(1)?.trim() ?? '';
+  return fileSystem.file(fileSystem.path.join(projectDir.path, outputFilePath));
+}
+
 void main() {
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
@@ -47,26 +55,66 @@ void main() {
       contains('Deferred components gen_snapshot validation passed.'),
     );
 
-    final String line = result.stdout
-        .toString()
-        .split('\n')
-        .firstWhere((String line) => line.contains('app-release.aab'));
+    final String gradlePropertiesAfterBuild = tempDir
+        .childDirectory('android')
+        .childFile('gradle.properties')
+        .readAsStringSync();
+    expect(gradlePropertiesAfterBuild, isNot(contains('android.newDsl')));
 
-    final String outputFilePath = line.split(' ')[2].trim();
-    final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+    final File outputFile = _builtAabFromStdout(
+      tempDir,
+      result.stdout.toString(),
+      'app-release.aab',
+    );
     expect(outputFile, exists);
 
     final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
 
-    expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
-    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
-    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, true);
+    expect(archive.findFile('base/lib/arm64-v8a/libapp.so'), isNotNull);
+    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so'), isNotNull);
+    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so'), isNotNull);
 
-    expect(
-      archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null,
-      true,
-    );
-    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
+    expect(archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt'), isNotNull);
+    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt'), isNotNull);
+  });
+
+  testWithoutContext('flavored build appbundle includes the deferred component files', () async {
+    final project = DeferredComponentsProject(FlavoredDeferredComponentsConfig());
+    await project.setUpIn(tempDir);
+    for (final flavor in <String>['free', 'paid']) {
+      final bundleName = 'app-$flavor-release.aab';
+      final ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'build',
+        'appbundle',
+        '--flavor',
+        flavor,
+        '--target-platform=android-arm64',
+      ], workingDirectory: tempDir.path);
+
+      printOnFailure('stdout ($flavor):\n${result.stdout}');
+      printOnFailure('stderr ($flavor):\n${result.stderr}');
+      expect(result, ProcessResultMatcher(stdoutPattern: bundleName));
+
+      final String gradlePropertiesAfterBuild = tempDir
+          .childDirectory('android')
+          .childFile('gradle.properties')
+          .readAsStringSync();
+      expect(gradlePropertiesAfterBuild, isNot(contains('android.newDsl')));
+
+      final File outputFile = _builtAabFromStdout(tempDir, result.stdout.toString(), bundleName);
+      expect(outputFile, exists);
+
+      final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
+
+      expect(archive.findFile('base/lib/arm64-v8a/libapp.so'), isNotNull);
+      expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so'), isNotNull);
+      expect(
+        archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt'),
+        isNotNull,
+      );
+    }
   });
 
   testWithoutContext('simple build appbundle all targets succeeds', () async {
@@ -88,34 +136,29 @@ void main() {
       contains('Deferred components gen_snapshot validation passed.'),
     );
 
-    final String line = result.stdout
-        .toString()
-        .split('\n')
-        .firstWhere((String line) => line.contains('app-release.aab'));
-
-    final String outputFilePath = line.split(' ')[2].trim();
-    final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+    final File outputFile = _builtAabFromStdout(
+      tempDir,
+      result.stdout.toString(),
+      'app-release.aab',
+    );
     expect(outputFile, exists);
 
     final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
 
-    expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
-    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
-    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, true);
+    expect(archive.findFile('base/lib/arm64-v8a/libapp.so'), isNotNull);
+    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so'), isNotNull);
+    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so'), isNotNull);
 
-    expect(archive.findFile('base/lib/armeabi-v7a/libapp.so') != null, true);
-    expect(archive.findFile('base/lib/armeabi-v7a/libflutter.so') != null, true);
-    expect(archive.findFile('component1/lib/armeabi-v7a/libapp.so-2.part.so') != null, true);
+    expect(archive.findFile('base/lib/armeabi-v7a/libapp.so'), isNotNull);
+    expect(archive.findFile('base/lib/armeabi-v7a/libflutter.so'), isNotNull);
+    expect(archive.findFile('component1/lib/armeabi-v7a/libapp.so-2.part.so'), isNotNull);
 
-    expect(archive.findFile('base/lib/x86_64/libapp.so') != null, true);
-    expect(archive.findFile('base/lib/x86_64/libflutter.so') != null, true);
-    expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so') != null, true);
+    expect(archive.findFile('base/lib/x86_64/libapp.so'), isNotNull);
+    expect(archive.findFile('base/lib/x86_64/libflutter.so'), isNotNull);
+    expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so'), isNotNull);
 
-    expect(
-      archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null,
-      true,
-    );
-    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
+    expect(archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt'), isNotNull);
+    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt'), isNotNull);
 
     expect(result, const ProcessResultMatcher());
   });
@@ -141,36 +184,31 @@ void main() {
       isNot(contains('Deferred components gen_snapshot validation passed.')),
     );
 
-    final String line = result.stdout
-        .toString()
-        .split('\n')
-        .firstWhere((String line) => line.contains('app-release.aab'));
-
-    final String outputFilePath = line.split(' ')[2].trim();
-    final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+    final File outputFile = _builtAabFromStdout(
+      tempDir,
+      result.stdout.toString(),
+      'app-release.aab',
+    );
     expect(outputFile, exists);
 
     final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
 
-    expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
-    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
-    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, false);
+    expect(archive.findFile('base/lib/arm64-v8a/libapp.so'), isNotNull);
+    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so'), isNotNull);
+    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so'), isNull);
 
-    expect(archive.findFile('base/lib/armeabi-v7a/libapp.so') != null, true);
-    expect(archive.findFile('base/lib/armeabi-v7a/libflutter.so') != null, true);
-    expect(archive.findFile('component1/lib/armeabi-v7a/libapp.so-2.part.so') != null, false);
+    expect(archive.findFile('base/lib/armeabi-v7a/libapp.so'), isNotNull);
+    expect(archive.findFile('base/lib/armeabi-v7a/libflutter.so'), isNotNull);
+    expect(archive.findFile('component1/lib/armeabi-v7a/libapp.so-2.part.so'), isNull);
 
-    expect(archive.findFile('base/lib/x86_64/libapp.so') != null, true);
-    expect(archive.findFile('base/lib/x86_64/libflutter.so') != null, true);
-    expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so') != null, false);
+    expect(archive.findFile('base/lib/x86_64/libapp.so'), isNotNull);
+    expect(archive.findFile('base/lib/x86_64/libflutter.so'), isNotNull);
+    expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so'), isNull);
 
     // Asset 2 is merged into the base module assets.
-    expect(
-      archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null,
-      false,
-    );
-    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset2.txt') != null, true);
-    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
+    expect(archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt'), isNull);
+    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset2.txt'), isNotNull);
+    expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt'), isNotNull);
   });
 
   testWithoutContext(
@@ -203,34 +241,32 @@ void main() {
         isNot(contains('Previously existing loading units no longer exist:')),
       );
 
-      final String line = result.stdout
-          .toString()
-          .split('\n')
-          .firstWhere((String line) => line.contains('app-release.aab'));
-
-      final String outputFilePath = line.split(' ')[2].trim();
-      final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+      final File outputFile = _builtAabFromStdout(
+        tempDir,
+        result.stdout.toString(),
+        'app-release.aab',
+      );
       expect(outputFile, exists);
 
       final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
 
-      expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
-      expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
-      expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, true);
+      expect(archive.findFile('base/lib/arm64-v8a/libapp.so'), isNotNull);
+      expect(archive.findFile('base/lib/arm64-v8a/libflutter.so'), isNotNull);
+      expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so'), isNotNull);
 
-      expect(archive.findFile('base/lib/armeabi-v7a/libapp.so') != null, true);
-      expect(archive.findFile('base/lib/armeabi-v7a/libflutter.so') != null, true);
-      expect(archive.findFile('component1/lib/armeabi-v7a/libapp.so-2.part.so') != null, true);
+      expect(archive.findFile('base/lib/armeabi-v7a/libapp.so'), isNotNull);
+      expect(archive.findFile('base/lib/armeabi-v7a/libflutter.so'), isNotNull);
+      expect(archive.findFile('component1/lib/armeabi-v7a/libapp.so-2.part.so'), isNotNull);
 
-      expect(archive.findFile('base/lib/x86_64/libapp.so') != null, true);
-      expect(archive.findFile('base/lib/x86_64/libflutter.so') != null, true);
-      expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so') != null, true);
+      expect(archive.findFile('base/lib/x86_64/libapp.so'), isNotNull);
+      expect(archive.findFile('base/lib/x86_64/libflutter.so'), isNotNull);
+      expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so'), isNotNull);
 
       expect(
-        archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null,
-        true,
+        archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt'),
+        isNotNull,
       );
-      expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
+      expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt'), isNotNull);
     },
   );
 
