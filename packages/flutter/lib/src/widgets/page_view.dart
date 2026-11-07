@@ -147,10 +147,39 @@ class PageController extends ScrollController {
   final bool keepPage;
 
   /// {@template flutter.widgets.pageview.viewportFraction}
-  /// The fraction of the viewport that each page should occupy.
+  /// The fraction of the viewport that each page should occupy in the scrolling
+  /// direction.
   ///
   /// Defaults to 1.0, which means each page fills the viewport in the scrolling
   /// direction.
+  ///
+  /// When [viewportFraction] is less than 1.0, each page occupies
+  /// `viewportDimension * viewportFraction` along the scroll axis, allowing
+  /// multiple pages (or portions of adjacent pages) to be visible simultaneously.
+  ///
+  /// By default, when [PageView.padEnds] is true, padding of
+  /// `(1.0 - viewportFraction) / 2 * viewportDimension` is added to both the
+  /// leading and trailing ends of the scroll view. This ensures that the
+  /// active page is centered within the viewport with equal margins on either
+  /// side, allowing preceding and succeeding pages to peek in symmetrically,
+  /// and ensures the first and last pages can be centered when scrolled all
+  /// the way to the start or end, respectively. If [PageView.padEnds] is false,
+  /// no leading padding is added, causing pages to align to the leading edge of
+  /// the viewport (top for vertical scrolling, leading edge for horizontal
+  /// scrolling) instead of being centered.
+  ///
+  /// When [viewportFraction] is greater than 1.0, each page is larger than the
+  /// viewport along the scrolling axis, and pages are centered within the
+  /// viewport when snapped.
+  ///
+  /// See also:
+  ///
+  ///  * [PageView.padEnds], which controls whether edge padding is added to center
+  ///    pages when [viewportFraction] is less than 1.0.
+  ///  * [PageView.pageSnapping], which controls whether pages snap to the center
+  ///    or beginning of the viewport.
+  ///  * [SliverFillViewport.viewportFraction], the underlying sliver property
+  ///    that implements fractional sizing for sliver children.
   /// {@endtemplate}
   final double viewportFraction;
 
