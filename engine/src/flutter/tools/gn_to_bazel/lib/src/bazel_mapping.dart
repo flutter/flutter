@@ -384,6 +384,20 @@ const Set<String> sessionBusTests = <String>{
   '//flutter/shell/platform/linux:flutter_linux_unittests',
 };
 
+/// The suites run_tests.py's `android` type runs on the connected Android
+/// device (run_android_tests: each pushed to /data/local/tmp and run there
+/// whole, by its output name), by GN label. These become
+/// flutter_android_device_test (build_defs/testing/android_device_test.bzl):
+/// a cc_binary of the Android target configuration and a host launcher that
+/// pushes and runs it, and the `android` type's suite names them
+/// (builders.dart's runTestsTypeSuites). The list is run_tests.py's, which
+/// GN cannot say: a suite added there is added here.
+const Set<String> androidDeviceTests = <String>{
+  '//flutter/shell/platform/android:flutter_shell_native_unittests',
+  '//flutter/impeller/toolkit/android:unittests',
+  '//flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests',
+};
+
 /// The suites that render through the GPU test backends -- ANGLE on
 /// SwiftShader (//flutter/testing:opengl), SwiftShader through the Vulkan
 /// loader (:vulkan) -- by GN label. GN's data_deps put the backends'

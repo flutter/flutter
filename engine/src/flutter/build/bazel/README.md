@@ -279,10 +279,25 @@ three targets: the manifest from its template, the library as a
 zipalign and apksigner with `@openjdk`'s java, the APK at the build root
 (`impeller_vulkan_android_unittests.apk`, 144 MB unstripped under the
 emulator builder's configuration, signed by the checked-in debug keystore;
-the emulator builder's install lays it). What is not here: *running* the
-three device suites the emulator builder's `run_tests.py --type android`
-pushes and the APKs it installs (they build for `android_x64`; an emulator
-is the next phase), and x86, which no builder builds.
+the emulator builder's install lays it). The three device suites the
+emulator builder's `run_tests.py --type android` pushes are
+`flutter_android_device_test` (`build_defs/testing/android_device_test.bzl`;
+`androidDeviceTests` in bazel_mapping.dart names them, run_tests.py's
+`run_android_tests` list): a `cc_binary` of the Android configuration
+(`<name>_binary`) and a host launcher that `adb push`es it to
+`/data/local/tmp/<name>` and runs it there whole, with no arguments and no
+environment, adb's exit status the verdict and `adb logcat -d` into the
+test's undeclared outputs on a failure -- `run_android_unittest`, step for
+step. The launcher takes `adb` from `PATH` and starts neither emulator nor
+adb server: on the bot the recipe's `android_virtual_device` context has
+booted the device before the step (the suite is
+`//engine/src/flutter/ci/builders:android_emulator_debug_x64_tests` under
+`--config=android_emulator_debug_x64`); on a workstation, an emulator or
+device connected to the host's adb server. The tests are `local`, `exclusive`
+(one device, fixed paths) and `external`, and compatible with Android target
+configurations only, so a host configuration's wildcard run skips them. The
+APKs are built and installed, as under GN, and run by nothing (run_tests.py
+never launched them). Not here: x86, which no builder builds.
 
 **Android from a Mac host** (450–452, NEED_DECISION Q32): the Android
 toolchains take the host's clang and constraints (`HOST_CLANG`,

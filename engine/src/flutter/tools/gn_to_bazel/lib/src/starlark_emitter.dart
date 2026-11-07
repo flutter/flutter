@@ -3476,19 +3476,26 @@ final class _Emitter {
     // A suite that opens a window (displayTests) runs under a display:
     // testing.bzl's macro, with cc_test's attributes. A suite run_tests.py
     // runs through gtest-parallel (gtestParallelSuites) is the macro that
-    // does the same, or the display macro told to.
+    // does the same, or the display macro told to. A suite it runs on the
+    // Android device (androidDeviceTests) is android_device_test.bzl's
+    // macro: the executable, and a launcher that pushes and runs it.
     final gnLabel = '$gnPackage:${target.name}';
     final bool display = kind == 'cc_test' && displayTests.contains(gnLabel);
     final bool gtestParallel = kind == 'cc_test' && gtestParallelSuites.contains(gnLabel);
+    final bool androidDevice = kind == 'cc_test' && androidDeviceTests.contains(gnLabel);
     final ruleKind = display
         ? 'flutter_display_test'
         : gtestParallel
         ? 'flutter_cc_test'
+        : androidDevice
+        ? 'flutter_android_device_test'
         : shared
         ? 'flutter_shared_library'
         : kind;
     if (display || gtestParallel) {
       _use('//build_defs/testing:testing.bzl', ruleKind);
+    } else if (androidDevice) {
+      _use('//build_defs/testing:android_device_test.bzl', ruleKind);
     } else if (shared) {
       _use('//build_defs/cc:shared_library.bzl', ruleKind);
     } else {
@@ -3509,7 +3516,11 @@ final class _Emitter {
       rule.scalars['output_name'] = '"${outputName ?? target.name}"';
     }
     if (kind == 'cc_test') {
-      rule.scalars['size'] = '"${testSizes[target.name] ?? defaultTestSize}"';
+      // A device suite is pushed unstripped and run whole on an emulator:
+      // large, whatever the table says of the suite's own time.
+      rule.scalars['size'] = androidDevice
+          ? '"large"'
+          : '"${testSizes[target.name] ?? defaultTestSize}"';
       final int? shards = testShardCounts[target.name];
       if (shards != null) {
         if (!display && !gtestParallel) {

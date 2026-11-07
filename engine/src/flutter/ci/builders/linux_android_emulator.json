@@ -1,4 +1,12 @@
 {
+    "_comment": [
+        "The build runs under Bazel (--bazel among the tools/gn flags; flutter/build/bazel/ci.md):",
+        "`ninja -C out/ci/android_emulator_debug_x64` runs the build's Bazel install target (the APK) instead",
+        "of GN, and run_tests.py --type android runs the three device suites as the build's Bazel suite",
+        "(ci/builders/BUILD.bazel: each pushed to the emulator the android_virtual_device context boots",
+        "and run there, as run_android_tests does). --variant names the same directory as",
+        "--android-variant: run_tests.py's Bazel mode reads the build's bazel.json from every directory named."
+    ],
     "builds": [
         {
             "drone_dimensions": [
@@ -8,15 +16,18 @@
                 "cores=8"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--android",
                 "--android-cpu=x64",
                 "--no-lto",
-                "--rbe",
+                "--no-rbe",
+                "--no-goma",
                 "--target-dir",
-                "ci/android_emulator_debug_x64"
+                "ci/android_emulator_debug_x64",
+                "--bazel"
             ],
             "dependencies": [
                 {
@@ -58,6 +69,8 @@
                     ],
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
+                        "--variant",
+                        "ci/android_emulator_debug_x64",
                         "--android-variant",
                         "ci/android_emulator_debug_x64",
                         "--type",

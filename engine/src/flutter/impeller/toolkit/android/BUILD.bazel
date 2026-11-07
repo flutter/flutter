@@ -4,9 +4,10 @@
 
 # Generated from //flutter/impeller/toolkit/android/BUILD.gn by gn_to_bazel; do not edit.
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/android:native_activity_apk.bzl", "native_activity_apk")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/testing:android_device_test.bzl", "flutter_android_device_test")
 load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -90,9 +91,9 @@ cc_library(
     alwayslink = True,
 )
 
-cc_test(
+flutter_android_device_test(
     name = "impeller_toolkit_android_unittests",
-    size = "small",
+    size = "large",
     target_compatible_with = select({
         "@platforms//os:android": [],
         "//conditions:default": ["@platforms//:incompatible"],
