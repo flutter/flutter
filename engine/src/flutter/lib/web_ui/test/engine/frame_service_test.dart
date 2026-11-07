@@ -158,6 +158,18 @@ void testMain() {
       expect(valueInOnFinishedRenderingFrame, isFalse);
     });
 
+    test('registers and unregisters windows', () {
+      final FrameService instance = FrameService.instance;
+      final int originalWindowCount = instance.debugRegisteredWindows.length;
+
+      instance.registerWindow(domWindow);
+      expect(instance.debugRegisteredWindows, contains(domWindow));
+
+      instance.unregisterWindow(domWindow);
+      expect(instance.debugRegisteredWindows, isNot(contains(domWindow)));
+      expect(instance.debugRegisteredWindows.length, originalWindowCount);
+    });
+
     test('Frame is cancelled after a hot restart', () async {
       final FrameService instance = FrameService.instance;
 
