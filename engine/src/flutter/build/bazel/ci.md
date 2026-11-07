@@ -2,7 +2,10 @@
 
 How a LUCI builder builds and tests the engine with Bazel through the
 unchanged `engine_v2` recipe, what that costs, and what a recipe change would
-buy. Everything here lives in this repository.
+buy. Everything here lives in this repository. (Bare numbers like "since 510"
+or "at 531" are commits of the migration branch's own sequence, "Qnn" entries
+of its decision log, both kept outside the tree as the work's record; they
+date a statement and can be read past.)
 
 ## What the recipe does, and where this repository gets a word in
 
@@ -49,13 +52,15 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   Bazel test of the same executable. A `--type` the build runs no Bazel test
   for is an error, not a silent pass.
 - **The builder files** carry `--bazel` among each build's flags (and
-  `--no-rbe` in place of `--rbe`, with `use_rbe: false` and
-  `download_bazelisk: true` among the gclient variables: Bazel's actions run
-  on the bot). The Linux engine builders build this way themselves, in
+  `--no-rbe` in place of `--rbe`, so the recipe starts no reproxy -- Bazel
+  speaks to RBE itself -- with `use_rbe: true` kept among the gclient
+  variables for the reclient and cfgs the wrapped GN builds' compiles use,
+  and `download_bazelisk: true`). The Linux engine builders build this way
+  themselves, in
   place: cocoon admits a new `.ci.yaml` target only as `bringup: true`, which
   never runs in presubmit, so a build that is to be tested on a PR has to be
-  an existing builder's. A `<file>_bazel.json` variant beside an original (a
-  Mac's, when it comes) is still accepted and checked the same way. The
+  an existing builder's. A `<file>_bazel.json` variant beside an original is
+  still accepted and checked the same way. The
   converter refuses a build with `--bazel` that has no configuration or
   install, and a variant's build that is not, infrastructure flags apart, a
   build of the original -- which is what `tools/gn --bazel` would refuse on
@@ -204,8 +209,8 @@ the test for real, and so does the command from `engine/src`.
   `mac_unopt.json` (#195868, #196027: `ci/builders/standalone/mac_*.json`,
   one build a file, which the converter reads as builder files of one
   build -- `withStandaloneBuilds` -- since 524; `mac_clangd` stays GN).
-  `tools/gn --bazel` knows the host: a Mac builder
-  switches as the Linux ones did, or as a `mac_*_bazel.json` variant first.
+  `tools/gn --bazel` knows the host: the Mac builders switched as the Linux
+  ones did, in place.
 - Steps left out of a Bazel build: the malioc diff (GN's Mali offline
   compiler analysis), and `linux_host_engine_test`'s benchmark-metrics dry
   runs (`generate_metrics.sh` and `upload_metrics.sh --no-upload` run
@@ -345,8 +350,9 @@ the test for real, and so does the command from `engine/src`.
   not a route. What would take the wraps off a cold bot: reclient inside
   the wrap (the GN build's compiles on the workers, as the recipe ran them
   before), prebuilts of the engine's Dart runtime per roll, or the Dart
-  runtime and the GL stack built by Bazel. No reclient: the
-  Bazel builds carry `--no-rbe` and `use_rbe: false`, so the recipe starts
+  runtime and the GL stack built by Bazel. No reclient of the recipe's: the
+  Bazel builds carry `--no-rbe` (with `use_rbe: true` kept for the sync, the
+  wraps' reclient and cfgs), so the recipe starts
   no reproxy; Bazel speaks to RBE itself. Two timeouts apply: the target's in
   `.ci.yaml` (the orchestrator's; 240 for the switched targets) and each
   build's own `timeout` key in the builder file, which the recipe gives the
@@ -411,7 +417,12 @@ the test for real, and so does the command from `engine/src`.
   mac_host_debug_arm64_tests 15–16 (GN 20–35), host_debug_unopt_arm64 24–25
   (GN 38–40), the iOS simulator unopt builders 18–22, the licenses builder
   7–8. The test targets whose copts name the Xcode's platform directories
-  (XCTest, Testing: 15 rules) compile on the Mac (`no-remote-exec`, from
+  (XCTest, Testing) compile on the workers too: the converter turns those
+  `-F`/`-I` flags into a dependency on `@macos_sdk`'s `platform_developer`
+  targets (`:macos_developer`, `:ios_developer`,
+  `:ios_simulator_developer`), views of the platform's frameworks and
+  `usr/lib` the compile gets as inputs; only the Swift modules whose
+  swiftflags still name the Xcode stay on the Mac (`no-remote-exec`, from
   the converter): a worker has no Xcode.
 - The Linux test drones (`linux_unopt`, eight builds, each with its tests
   on the bot): 25:54 at 531 against GN's 16–17, the difference the Android
@@ -481,7 +492,7 @@ simpler, faster and better reported:
    builds taken out of the bot's critical path (a named cache for the
    output root, or the Dart runtime as a prebuilt the recipe fetches); and
    the Mac builders' remaining local actions (links, lipo, dsymutil,
-   codesign, the test targets that read the Xcode by absolute path) on a
+   codesign, the Swift modules) on a
    Mac pool of the instance -- their compiles already run on the Linux
    workers (519). The Robolectric tests stay on the bot by measurement: the
    instance's 2-vCPU workers run a class 7–10× slower than a bot's eight
@@ -508,8 +519,8 @@ simpler, faster and better reported:
    developer's `host_debug`): under a recipe that names configurations, the
    directory name stops mattering and `configs.bazelrc` shrinks to the
    configurations proper.
-8. **The Mac and Windows hosts.** A Mac bot runs the same sequence once its
-   builder file carries `--bazel`; with the recipe driving Bazel, the Xcode
+8. **The Mac and Windows hosts.** A Mac bot runs the same sequence since its
+   builder files took `--bazel` (509); with the recipe driving Bazel, the Xcode
    selection (`osx_sdk`) and the code-signing step work on files Bazel
    names. Windows has no Bazel build yet; the recipe change is not the gate
    there.
