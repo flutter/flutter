@@ -219,10 +219,12 @@ void main() {
     owner.flushSemantics();
     counter.ownerReads = 0;
 
+    // flushSemantics reads each queued render object's owner. Count these reads
+    // to detect repeated visits to the excluded branch without exposing the queue.
     for (var frame = 0; frame < 100; frame += 1) {
       owner.flushSemantics();
     }
-    expect(counter.ownerReads, 0, reason: 'An excluded branch has no geometry work to retry.');
+    expect(counter.ownerReads, 0, reason: 'Geometry updates must wait until the branch rejoins.');
 
     await tester.pumpWidget(buildExcluded(excluding: false, offset: 50));
     expect(
