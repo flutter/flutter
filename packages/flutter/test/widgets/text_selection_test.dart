@@ -1446,6 +1446,99 @@ void main() {
     },
   );
 
+  testWidgets('dragging selection handles across each other preserves the selection endpoints', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/193270.
+    final controller = TextEditingController(text: 'abc d efghi');
+    addTearDown(controller.dispose);
+
+    final editableTextKey = GlobalKey<EditableTextState>();
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: provider.buildGestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: EditableText(
+              key: editableTextKey,
+              controller: controller,
+              focusNode: focusNode,
+              backgroundCursorColor: _white,
+              cursorColor: _white,
+              style: const TextStyle(),
+              dragStartBehavior: DragStartBehavior.down,
+              selectionControls: _IosLikeTextSelectionControls(),
+              showSelectionHandles: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Future<void> selectD() async {
+      final EditableTextState state = tester.state<EditableTextState>(find.byKey(editableTextKey));
+
+      state.userUpdateTextEditingValue(
+        controller.value.copyWith(selection: const TextSelection(baseOffset: 4, extentOffset: 5)),
+        SelectionChangedCause.tap,
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(controller.selection, const TextSelection(baseOffset: 4, extentOffset: 5));
+      expect(state.selectionOverlay?.handlesAreVisible, isTrue);
+    }
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+
+    // Select "d" and drag the start handle past the end handle.
+    await selectD();
+
+    List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints, hasLength(2));
+
+    final TestGesture startHandleGesture = await tester.startGesture(endpoints.first.point);
+    await tester.pump();
+    await startHandleGesture.moveTo(textOffsetToPosition(tester, 9));
+    await tester.pump();
+    await startHandleGesture.up();
+    await tester.pumpAndSettle();
+
+    // The selection should extend from the original end offset (5) to offset 9.
+    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 9));
+
+    // Select "d" again and drag the end handle past the start handle.
+    await selectD();
+
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints, hasLength(2));
+
+    final TestGesture endHandleGesture = await tester.startGesture(endpoints.last.point);
+    await tester.pump();
+    await endHandleGesture.moveTo(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    await endHandleGesture.up();
+    await tester.pumpAndSettle();
+
+    // The selection should extend from offset 4 back to offset 0.
+    expect(controller.selection, const TextSelection(baseOffset: 4, extentOffset: 0));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
   group('SelectionOverlay', () {
     Future<SelectionOverlay> pumpApp(
       WidgetTester tester, {
@@ -2253,6 +2346,44 @@ void main() {
     expect(customControls.builtHandleTypes.first, TextSelectionHandleType.left);
     expect(customControls.builtHandleTypes.last, TextSelectionHandleType.right);
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+}
+
+class _IosLikeTextSelectionControls extends TextSelectionControls with TextSelectionHandleControls {
+  static const double _handleRadius = 6.0;
+  static const double _handleOverlap = 1.5;
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size(_handleRadius * 2, textLineHeight + _handleRadius * 2 - _handleOverlap);
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    final Size size = getHandleSize(textLineHeight);
+
+    switch (type) {
+      case TextSelectionHandleType.left:
+        return Offset(size.width / 2, size.height);
+      case TextSelectionHandleType.right:
+        return Offset(size.width / 2, size.height - 2 * _handleRadius + _handleOverlap);
+      case TextSelectionHandleType.collapsed:
+        return Offset(size.width / 2, size.height / 2);
+    }
+  }
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return ColoredBox(
+      key: ValueKey<TextSelectionHandleType>(type),
+      color: const Color(0x00000000),
+      child: SizedBox.fromSize(size: getHandleSize(textLineHeight)),
+    );
+  }
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate
