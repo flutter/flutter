@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
@@ -13,7 +14,6 @@ import 'test_utils.dart';
 
 void main() {
   group('pass analyze template:', () {
-    final templates = <String>['app', 'module', 'package', 'plugin', 'plugin_ffi'];
     late Directory tempDir;
 
     setUp(() {
@@ -26,11 +26,13 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    for (final template in templates) {
-      testUsingContext('analysis for $template', () async {
+    // Iterate the enum rather than a hand-written list, so templates added
+    // later (such as package_ffi) are analyzed without updating this test.
+    for (final FlutterTemplateType template in FlutterTemplateType.values) {
+      testUsingContext('analysis for ${template.cliName}', () async {
         final String projectPath = await createProject(
           tempDir,
-          arguments: <String>['--no-pub', '--template', template],
+          arguments: <String>['--no-pub', '--template', template.cliName],
         );
         final ProcessResult result = await globals.processManager.run(<String>[
           'flutter',
