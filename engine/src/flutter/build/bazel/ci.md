@@ -212,7 +212,9 @@ the test for real, and so does the command from `engine/src`.
   the whole builder with four tester drones; 555 builds the host variant on
   two drones that each lint one half of the same database --
   `--shard-id`, `--shard-variants` naming the drone's own -- the second's
-  install from the remote cache), and
+  install from the remote cache: on the bots at 555 each host drone 22:11
+  (the build 3:38, its half of the lint 12:33), the builder 23:27; the
+  Linux builder 15:56 the same run), and
   `linux_unopt`'s builds but one. A try build's
   archives go where they always went for a try build (the recipe's archives
   module routes the try bucket to `flutter_archives_v2`, never to the release
@@ -237,7 +239,8 @@ the test for real, and so does the command from `engine/src`.
   build with Bazel since 548: the install lays font_subset, and a
   `compile_commands.py --build-targets=//engine/src/flutter/assets:assets_fixtures`
   step writes the database and the one generated source `clangd_check`
-  reads; `linux_license`
+  reads; on the bots the Linux builder 6:21–6:40 and the Mac 7:26–7:57 at
+  554–555; `linux_license`
   builds with Bazel since 536: its `--enable-minimal-linux`, which only
   spares GN's pkg-config on a bot without the desktop's packages, asks for
   what the sysroot-based build has already, and its test runner runs as
@@ -247,7 +250,7 @@ the test for real, and so does the command from `engine/src`.
   `_ddm`), and so do the eight standalone Mac test builders that replaced
   `mac_unopt.json` (#195868, #196027: `ci/builders/standalone/mac_*.json`,
   one build a file, which the converter reads as builder files of one
-  build -- `withStandaloneBuilds` -- since 524; `mac_clangd` stays GN).
+  build -- `withStandaloneBuilds` -- since 524).
   `tools/gn --bazel` knows the host: the Mac builders switched as the Linux
   ones did, in place.
 - Steps left out of a Bazel build: the malioc diff (GN's Mali offline
