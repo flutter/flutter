@@ -183,5 +183,30 @@ TEST_P(RenderTargetCacheTest, ClearDropsAllCachedTextures) {
   EXPECT_EQ(render_target_cache.CachedTextureCount(), 0u);
 }
 
+TEST_P(RenderTargetCacheTest, RemovedTextureIsNotReused) {
+  auto render_target_cache = RenderTargetCache(
+      GetContext()->GetResourceAllocator(), /*keep_alive_frame_count=*/4);
+
+  render_target_cache.Start();
+  RenderTarget removed =
+      render_target_cache.CreateOffscreen(*GetContext(), {100, 100}, 1);
+  RenderTarget kept =
+      render_target_cache.CreateOffscreen(*GetContext(), {100, 100}, 1);
+  render_target_cache.RemoveFromCache(removed.GetRenderTargetTexture());
+  render_target_cache.End();
+
+  EXPECT_EQ(render_target_cache.CachedTextureCount(), 1u);
+
+  render_target_cache.Start();
+  RenderTarget first =
+      render_target_cache.CreateOffscreen(*GetContext(), {100, 100}, 1);
+  RenderTarget second =
+      render_target_cache.CreateOffscreen(*GetContext(), {100, 100}, 1);
+  render_target_cache.End();
+
+  EXPECT_EQ(first.GetRenderTargetTexture(), kept.GetRenderTargetTexture());
+  EXPECT_NE(second.GetRenderTargetTexture(), removed.GetRenderTargetTexture());
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
+#include <set>
+
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -19,9 +22,14 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/text_contents.h"
+#include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/render_target_cache.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 
@@ -882,6 +890,196 @@ TEST_P(AiksTest, TextWithShadowCache) {
                 .GetTextShadowCache()
                 .GetCacheSizeForTesting(),
             1u);
+}
+
+// Frames that only differ in `color` miss the text shadow cache but need
+// render targets of the same sizes.
+bool RenderShadowedTextFrame(
+    const std::shared_ptr<Context>& context,
+    AiksContext& aiks_context,
+    DlColor color,
+    std::map<std::string, sk_sp<SkTypeface>>* typeface_cache,
+    const std::string& text = "Hello World") {
+  DisplayListBuilder builder;
+  if (!RenderTextInCanvasSkia(
+          context, builder, text, kFontFixture,
+          TextRenderOptions{
+              .color = color,
+              .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)},
+          /*font=*/std::nullopt, typeface_cache)) {
+    return false;
+  }
+  return DisplayListToTexture(builder.Build(), {400, 400}, aiks_context) !=
+         nullptr;
+}
+
+TEST_P(AiksTest, TextShadowCacheMissReusesBlurRenderTargets) {
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  auto render_target_cache = std::static_pointer_cast<RenderTargetCache>(
+      aiks_context.GetContentContext().GetRenderTargetCache());
+  const TextShadowCache& shadow_cache =
+      aiks_context.GetContentContext().GetTextShadowCache();
+  std::map<std::string, sk_sp<SkTypeface>> typeface_cache;
+  auto cached_textures = [&render_target_cache]() {
+    std::set<std::shared_ptr<Texture>> textures;
+    for (auto it = render_target_cache->GetRenderTargetDataBegin();
+         it != render_target_cache->GetRenderTargetDataEnd(); ++it) {
+      textures.insert(it->render_target.GetRenderTargetTexture());
+    }
+    return textures;
+  };
+
+  // A shadow texture left in the render target cache gets overwritten.
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kRed(), &typeface_cache));
+  EXPECT_EQ(render_target_cache->CachedTextureCount(), 2u);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 1u);
+
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kGreen(), &typeface_cache));
+  EXPECT_EQ(render_target_cache->CachedTextureCount(), 2u);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 2u);
+
+  // A miss here would replace the blur Y target.
+  std::set<std::shared_ptr<Texture>> before_hit = cached_textures();
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kRed(), &typeface_cache));
+  EXPECT_EQ(render_target_cache->CachedTextureCount(), 2u);
+  EXPECT_EQ(cached_textures(), before_hit);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 2u);
+
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kBlue(), &typeface_cache));
+  EXPECT_EQ(render_target_cache->CachedTextureCount(), 2u);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 3u);
+}
+
+TEST_P(AiksTest, TextShadowCacheEntrySurvivesKeepAliveFrames) {
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  TextShadowCache& shadow_cache =
+      aiks_context.GetContentContext().GetTextShadowCache();
+  std::map<std::string, sk_sp<SkTypeface>> typeface_cache;
+
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kRed(), &typeface_cache));
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kGreen(), &typeface_cache));
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 2u);
+
+  // Rendering green was red's first unused frame.
+  for (int i = 0; i < 239; i++) {
+    shadow_cache.MarkFrameStart();
+    shadow_cache.MarkFrameEnd();
+  }
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 2u);
+
+  shadow_cache.MarkFrameStart();
+  shadow_cache.MarkFrameEnd();
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 1u);
+}
+
+TEST_P(AiksTest, TextShadowCacheHitsCyclingTextOfDifferentSizes) {
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  const ContentContext& content_context = aiks_context.GetContentContext();
+  auto render_target_cache = std::static_pointer_cast<RenderTargetCache>(
+      content_context.GetRenderTargetCache());
+  const TextShadowCache& shadow_cache = content_context.GetTextShadowCache();
+  std::map<std::string, sk_sp<SkTypeface>> typeface_cache;
+  // A typing indicator: each state returns after 12 unused frames.
+  const std::array<std::string, 4> states = {"Typing", "Typing.", "Typing..",
+                                             "Typing..."};
+  auto render_cycle = [&](bool expect_hits) {
+    for (const std::string& state : states) {
+      for (int frame = 0; frame < 4; frame++) {
+        ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                            DlColor::kBlue(), &typeface_cache,
+                                            state));
+        if (!expect_hits) {
+          continue;
+        }
+        // Only a shadow cache miss would use a render target in this frame.
+        for (auto it = render_target_cache->GetRenderTargetDataBegin();
+             it != render_target_cache->GetRenderTargetDataEnd(); ++it) {
+          EXPECT_FALSE(it->used_this_frame) << state;
+        }
+        EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 4u);
+      }
+    }
+  };
+
+  render_cycle(/*expect_hits=*/false);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 4u);
+  const size_t cached_textures_after_first_cycle =
+      render_target_cache->CachedTextureCount();
+
+  render_cycle(/*expect_hits=*/true);
+  EXPECT_LE(render_target_cache->CachedTextureCount(),
+            cached_textures_after_first_cycle);
+}
+
+// Entries with different `hash` values have the same byte size.
+void LookupBlurredRect(TextShadowCache& cache,
+                       const ContentContext& renderer,
+                       size_t hash) {
+  std::unique_ptr<Geometry> geometry =
+      Geometry::MakeRect(Rect::MakeXYWH(10, 10, 100, 100));
+  auto contents = std::make_shared<SolidColorContents>(geometry.get());
+  contents->SetColor(Color::Black());
+  std::shared_ptr<FilterContents> blur = FilterContents::MakeGaussianBlur(
+      FilterInput::Make(contents), Sigma(4), Sigma(4));
+  TextShadowCache::TextShadowCacheKey key(
+      /*p_max_basis=*/1.0f, /*p_sigma=*/Sigma(4), /*p_color=*/Color::Black(),
+      /*p_fingerprint=*/TextFrameFingerprint{.full_hash = hash});
+  ASSERT_TRUE(cache.Lookup(renderer, Entity(), blur, key).has_value());
+  // Outside a Canvas nothing else submits the blur passes.
+  ASSERT_TRUE(renderer.GetContext()->FlushCommandBuffers());
+}
+
+TEST_P(AiksTest, TextShadowCacheEvictsLeastRecentlyUsedOverBudget) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  const ContentContext& renderer = aiks_context.GetContentContext();
+
+  TextShadowCache measure;
+  LookupBlurredRect(measure, renderer, 1);
+  const size_t entry_bytes = measure.GetCacheBytesForTesting();
+  ASSERT_GT(entry_bytes, 0u);
+
+  // Room for two entries.
+  TextShadowCache cache(entry_bytes * 5 / 2);
+  for (size_t hash : {1u, 2u, 3u}) {
+    cache.MarkFrameStart();
+    LookupBlurredRect(cache, renderer, hash);
+    cache.MarkFrameEnd();
+  }
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 2u);
+
+  cache.MarkFrameStart();
+  LookupBlurredRect(cache, renderer, 2);
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 2u);
+  LookupBlurredRect(cache, renderer, 1);
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 3u);
+  cache.MarkFrameEnd();
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 2u);
+}
+
+TEST_P(AiksTest, TextShadowCacheKeepsEntriesUsedThisFrameOverBudget) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  const ContentContext& renderer = aiks_context.GetContentContext();
+  TextShadowCache cache(/*byte_budget=*/0);
+
+  cache.MarkFrameStart();
+  LookupBlurredRect(cache, renderer, 1);
+  LookupBlurredRect(cache, renderer, 2);
+  cache.MarkFrameEnd();
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 2u);
+
+  cache.MarkFrameStart();
+  LookupBlurredRect(cache, renderer, 1);
+  cache.MarkFrameEnd();
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 1u);
 }
 
 TEST_P(AiksTest, MultipleTextWithShadowCache) {
