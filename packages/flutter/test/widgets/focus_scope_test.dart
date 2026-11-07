@@ -1904,6 +1904,76 @@ void main() {
   });
 
   group('ExcludeFocus', () {
+    for (final externalFocusNode in <bool>[false, true]) {
+      testWidgets('Descendant semantics respect ExcludeFocus (external: $externalFocusNode)', (
+        WidgetTester tester,
+      ) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        final focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+        const key = ValueKey<String>('child');
+
+        for (final excluding in <bool>[true, false, true]) {
+          await tester.pumpWidget(
+            ExcludeFocus(
+              excluding: excluding,
+              child: externalFocusNode
+                  ? Focus.withExternalFocusNode(
+                      focusNode: focusNode,
+                      child: const SizedBox(key: key),
+                    )
+                  : Focus(
+                      focusNode: focusNode,
+                      child: const SizedBox(key: key),
+                    ),
+            ),
+          );
+          await tester.pump();
+
+          final SemanticsData data = tester.getSemantics(find.byKey(key)).getSemanticsData();
+          expect(focusNode.canRequestFocus, !excluding);
+          expect(data.flagsCollection.isFocused, excluding ? Tristate.none : Tristate.isFalse);
+          expect(data.hasAction(SemanticsAction.focus), !excluding);
+        }
+        handle.dispose();
+      });
+    }
+
+    testWidgets('Reparented descendants update ExcludeFocus semantics', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final GlobalKey key = GlobalKey();
+      final child = Focus(
+        key: key,
+        focusNode: focusNode,
+        child: Semantics(container: true, child: const SizedBox()),
+      );
+
+      for (final excluded in <bool>[false, true, false]) {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              children: <Widget>[
+                ExcludeFocus(child: excluded ? child : const SizedBox()),
+                if (!excluded) child,
+              ],
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final SemanticsData data = tester.getSemantics(find.byKey(key)).getSemanticsData();
+        expect(focusNode.canRequestFocus, !excluded);
+        expect(data.flagsCollection.isFocused, excluded ? Tristate.none : Tristate.isFalse);
+        expect(data.hasAction(SemanticsAction.focus), !excluded);
+      }
+      handle.dispose();
+    });
+
     testWidgets("Descendants of ExcludeFocus aren't focusable.", (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
