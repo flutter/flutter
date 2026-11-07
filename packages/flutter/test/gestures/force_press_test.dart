@@ -425,6 +425,70 @@ void main() {
     expect(didStartPan, 1);
   });
 
+  testGesture('A force press is not rejected by movement within the hit slop', (
+    GestureTester tester,
+  ) {
+    final drag = PanGestureRecognizer();
+    addTearDown(drag.dispose);
+
+    // Device specific constants that represent those from the iPhone X
+    const double pressureMin = 0;
+    const pressureMax = 6.66;
+
+    var started = 0;
+
+    final force = ForcePressGestureRecognizer();
+    addTearDown(force.dispose);
+
+    force.onStart = (_) => started += 1;
+
+    var didStartPan = 0;
+    drag.onStart = (_) => didStartPan += 1;
+
+    const pointerValue = 1;
+    final pointer = TestPointer();
+    const down = PointerDownEvent(
+      pointer: pointerValue,
+      position: Offset(10.0, 10.0),
+      pressureMin: pressureMin,
+      pressureMax: pressureMax,
+    );
+    pointer.setDownInfo(down, const Offset(10.0, 10.0));
+    force.addPointer(down);
+    drag.addPointer(down);
+    tester.closeArena(pointerValue);
+
+    // Move by less than the touch slop (18.0) at a pressure below the start
+    // pressure. This should not reject the force press.
+    tester.route(
+      const PointerMoveEvent(
+        pointer: pointerValue,
+        position: Offset(20.0, 10.0),
+        delta: Offset(10.0, 0.0),
+        pressure: 2.5,
+        pressureMin: pressureMin,
+        pressureMax: pressureMax,
+      ),
+    );
+
+    expect(started, 0);
+    expect(didStartPan, 0);
+
+    // Crossing the start pressure should now accept the force press.
+    tester.route(
+      const PointerMoveEvent(
+        pointer: pointerValue,
+        position: Offset(20.0, 10.0),
+        pressure: 2.8,
+        pressureMin: pressureMin,
+        pressureMax: pressureMax,
+      ),
+    );
+
+    expect(started, 1);
+    expect(didStartPan, 0);
+  });
+
   testGesture('Should not call ended on pointer up if the gesture was never accepted', (
     GestureTester tester,
   ) {
