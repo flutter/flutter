@@ -54,6 +54,36 @@ Future<void> testMain() async {
     expect(xor.getBounds(), equals(c1UnionC2));
   });
 
+  for (final PathFillType outerFillType in PathFillType.values) {
+    for (final PathFillType innerFillType in PathFillType.values) {
+      for (final operation in <PathOperation>[
+        PathOperation.difference,
+        PathOperation.reverseDifference,
+        PathOperation.xor,
+      ]) {
+        test('path combine nested rects $operation $outerFillType $innerFillType', () {
+          final outer = Path()
+            ..fillType = outerFillType
+            ..addRect(const Rect.fromLTWH(0, 0, 200, 200));
+          final inner = Path()
+            ..fillType = innerFillType
+            ..addRect(const Rect.fromLTWH(2, 2, 196, 196));
+          final reverse = operation == PathOperation.reverseDifference;
+          final Path ring = Path.combine(
+            operation,
+            reverse ? inner : outer,
+            reverse ? outer : inner,
+          );
+
+          expect(ring.contains(const Offset(1, 1)), isTrue);
+          expect(ring.contains(const Offset(100, 100)), isFalse);
+          expect(ring.contains(const Offset(201, 201)), isFalse);
+          expect(Path.from(ring).contains(const Offset(100, 100)), isFalse);
+        });
+      }
+    }
+  }
+
   test('path combine oval', () {
     final c1 = Rect.fromCircle(center: const Offset(10.0, 10.0), radius: 10.0);
     final c2 = Rect.fromCircle(center: const Offset(5.0, 5.0), radius: 10.0);
