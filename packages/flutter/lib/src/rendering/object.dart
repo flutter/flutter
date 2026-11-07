@@ -5583,9 +5583,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   _SemanticsParentData? parentData;
   _SemanticsGeometry? geometry;
 
-  /// A geometry update received while this branch was excluded or blocked.
-  /// Requeue it when parent data is restored, including for render objects
-  /// that do not form semantics nodes but transform or clip their children.
+  /// Whether a geometry update was deferred because [parentDataDirty] was true.
+  ///
+  /// [_didUpdateParentData] requeues the update when parent data is restored.
+  /// This also applies to render objects that transform or clip their children
+  /// without forming semantics nodes themselves.
   bool _geometryUpdateDeferred = false;
 
   final _SemanticsConfigurationProvider configProvider;
@@ -5883,9 +5885,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         // in the semantics tree. We will run into this situation where C's geometry
         // is dirty but it is not in the _nodesNeedingSemanticsGeometryUpdate.
         //
-        // A node that moved while its branch was blocked has stale, not
-        // dirty, geometry, so this check misses it. _didUpdateParentData
-        // requeues that node's deferred geometry update when it rejoins.
+        // _didUpdateParentData also requeues deferred geometry updates for
+        // render objects that do not form semantics nodes, whose transforms
+        // or clips may affect their children's geometry.
         if (childSemantics.geometryDirty) {
           renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(childSemantics.renderObject);
         }
@@ -6082,10 +6084,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   void _didUpdateParentData(_SemanticsParentData newParentData) {
-    if (_geometryUpdateDeferred) {
-      _geometryUpdateDeferred = false;
-      renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(renderObject);
-    }
     if (parentData == newParentData) {
       return;
     }
@@ -6095,6 +6093,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     parentData = newParentData;
     if (wasParentDataDirty) {
       geometry = null;
+      if (_geometryUpdateDeferred) {
+        _geometryUpdateDeferred = false;
+        renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(renderObject);
+      }
     }
     updateChildren();
   }
