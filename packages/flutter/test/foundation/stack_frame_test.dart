@@ -150,6 +150,9 @@ void main() {
 
   test('Parses to null for wrong format.', () {
     expect(StackFrame.fromStackTraceLine('wrong stack trace format'), null);
+    // Regression test for https://github.com/flutter/flutter/issues/166572
+    expect(StackFrame.fromStackTraceLine('#0 Eval ()'), null);
+    expect(StackFrame.fromStackTraceLine('#0'), null);
   });
 }
 
