@@ -1152,7 +1152,26 @@ install(
     trees = everything_trees(),
 )
 
-# Other steps, scripts of the checkout: test: lint host_debug.
+# Other steps, scripts of the checkout: test: lint host_debug 0.
+# Nothing to run.
+
+# mac_clang_tidy.json: ci/mac_host_debug_clang_tidy_1
+#   ninja's default target, everything:
+#   bazel run --config=mac_host_debug_clang_tidy_1 :mac_host_debug_clang_tidy_1
+install(
+    name = "mac_host_debug_clang_tidy_1",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/mac_host_debug_clang_tidy_1",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
+
+# Other steps, scripts of the checkout: test: lint host_debug 1.
 # Nothing to run.
 
 # mac_clang_tidy.json: ci/ios_debug_sim_clang_tidy
