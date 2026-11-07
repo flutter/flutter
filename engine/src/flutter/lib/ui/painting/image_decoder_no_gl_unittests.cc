@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "flutter/fml/endianness.h"
+#include "flutter/lib/ui/painting/image_generator_registry_test_utils.h"
 #include "impeller/renderer/capabilities.h"
 
 #if IMPELLER_SUPPORTS_RENDERING
@@ -167,9 +168,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
 
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> generator =
-      registry.CreateCompatibleGenerator(data);
+  std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
   ASSERT_TRUE(generator);
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
@@ -234,9 +233,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
 
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> generator =
-      registry.CreateCompatibleGenerator(data);
+  std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
   ASSERT_TRUE(generator);
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
@@ -418,9 +415,7 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(11, 11), image->dimensions());
 
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> generator =
-      registry.CreateCompatibleGenerator(data);
+  std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
   ASSERT_TRUE(generator);
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
