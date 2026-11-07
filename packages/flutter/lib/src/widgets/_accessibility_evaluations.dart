@@ -262,8 +262,14 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
       return violations;
     }
     final SemanticsData data = node.getSemanticsData();
-    // Skip node if it has no actions, or is marked as hidden.
-    if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap)) {
+    // Skip node if it has no actions and is not a link with a URL. A link
+    // node with a URL is treated like a tappable node because it renders as
+    // <a href> on the web and needs an accessible name (WCAG SC 4.1.2).
+    final bool isLinkNode =
+        data.flagsCollection.isLink && (data.linkUrl?.toString().isNotEmpty ?? false);
+    if (!isLinkNode &&
+        !data.hasAction(ui.SemanticsAction.longPress) &&
+        !data.hasAction(ui.SemanticsAction.tap)) {
       return violations;
     }
     if ((data.label.isEmpty) && (data.tooltip.isEmpty)) {

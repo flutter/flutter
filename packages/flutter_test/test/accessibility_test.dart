@@ -944,6 +944,96 @@ void main() {
       expect(result.passed, true);
       handle.dispose();
     });
+
+    testWidgets('Fails when link has no label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(
+            container: true,
+            link: true,
+            linkUrl: Uri.parse('https://flutter.dev'),
+            child: const SizedBox(width: 10.0, height: 10.0),
+          ),
+        ),
+      );
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, false);
+      handle.dispose();
+    });
+
+    testWidgets('Passes when link is labeled', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(
+            container: true,
+            link: true,
+            linkUrl: Uri.parse('https://flutter.dev'),
+            label: 'Flutter website',
+            child: const SizedBox(width: 10.0, height: 10.0),
+          ),
+        ),
+      );
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Passes when link has no linkUrl', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(container: true, link: true, child: const SizedBox(width: 10.0, height: 10.0)),
+        ),
+      );
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Passes when link merges labeled descendant', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(
+            container: true,
+            link: true,
+            linkUrl: Uri.parse('https://flutter.dev'),
+            child: Semantics(
+              label: 'Flutter website',
+              child: const SizedBox(width: 10.0, height: 10.0),
+            ),
+          ),
+        ),
+      );
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Fails when link name only comes from unmerged descendants', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(
+            container: true,
+            link: true,
+            linkUrl: Uri.parse('https://flutter.dev'),
+            explicitChildNodes: true,
+            child: Semantics(
+              label: 'Flutter website',
+              child: const SizedBox(width: 10.0, height: 10.0),
+            ),
+          ),
+        ),
+      );
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, false);
+      handle.dispose();
+    });
   });
 
   testWidgets('regression test for material widget', (WidgetTester tester) async {
