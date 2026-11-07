@@ -142,6 +142,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // |FlutterWindowBindingHandler|
   virtual void OnResetImeComposing() override;
 
+  // |FlutterWindowBindingHandler|
+  virtual void OnTextInputClientChanged(bool active) override;
+
   // Called when accessibility support is enabled or disabled.
   virtual void OnUpdateSemanticsEnabled(bool enabled);
 
@@ -339,6 +342,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // proper application lifecycle state can be updated once the view is set.
   bool restored_ = false;
   bool focused_ = false;
+
+  // True while the framework has an active text input client for this view.
+  bool text_input_client_active_ = false;
 
   int current_dpi_ = 0;
   int current_width_ = 0;

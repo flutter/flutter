@@ -266,6 +266,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Notifies the delegate that the system IME composing state should be reset.
   virtual void OnResetImeComposing();
 
+  // Notifies the delegate that this view gained or lost a text input client.
+  virtual void OnTextInputClientChanged(bool active);
+
   // Called when a WM_ONCOMPOSITIONCHANGED message is received.
   void OnDwmCompositionChanged();
 
