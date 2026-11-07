@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -263,6 +265,38 @@ void main() {
 
     paragraph = tester.renderObject(find.byType(RichText));
     expect(paragraph.devicePixelRatio, 4.0);
+  });
+
+  testWidgets('RichText propagates selection styles', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: const TextSpan(text: 'Hello'),
+          selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+          selectionWidthStyle: ui.BoxWidthStyle.max,
+        ),
+      ),
+    );
+
+    RenderParagraph paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingTop);
+    expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.max);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: const TextSpan(text: 'Hello'),
+          selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+          selectionWidthStyle: ui.BoxWidthStyle.tight,
+        ),
+      ),
+    );
+
+    paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingBottom);
+    expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.tight);
   });
 
   testWidgets('RichText propagates devicePixelRatio from View', (WidgetTester tester) async {

@@ -13,7 +13,7 @@
 library;
 
 import 'dart:math';
-import 'dart:ui' as ui show Hyphens, TextHeightBehavior;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Hyphens, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -478,9 +478,13 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// ## Selection
 ///
 /// [Text] is not selectable by default. To make a [Text] selectable, one can
-/// wrap a subtree with a [SelectionArea] widget. To exclude a part of a subtree
-/// under [SelectionArea] from selection, one can also wrap that part of the
-/// subtree with [SelectionContainer.disabled].
+/// wrap a subtree with a [SelectionArea] widget.
+///
+/// The [selectionHeightStyle] and [selectionWidthStyle] properties can be used
+/// to customize the shape of the selection highlight.
+///
+/// To exclude a part of a subtree under [SelectionArea] from selection, one
+/// can also wrap that part of the subtree with [SelectionContainer.disabled].
 ///
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text under a
@@ -528,6 +532,8 @@ class Text extends StatelessWidget {
     this.textHeightBehavior,
     this.hyphens,
     this.selectionColor,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
   }) : textSpan = null,
        assert(
          textScaler == null || textScaleFactor == null,
@@ -566,6 +572,8 @@ class Text extends StatelessWidget {
     this.textHeightBehavior,
     this.hyphens,
     this.selectionColor,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
   }) : data = null,
        assert(
          textScaler == null || textScaleFactor == null,
@@ -719,6 +727,25 @@ class Text extends StatelessWidget {
   /// (semi-transparent grey).
   final Color? selectionColor;
 
+  /// {@macro flutter.widgets.DefaultSelectionStyle.selectionHeightStyle}
+  ///
+  /// This is ignored if [SelectionContainer.maybeOf] returns null in the
+  /// [BuildContext] of the [Text] widget.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to customize the height of a text selection
+  /// highlight.
+  ///
+  /// ** See code in examples/api/lib/widgets/text/text.selection_height_style.0.dart **
+  /// {@end-tool}
+  final ui.BoxHeightStyle? selectionHeightStyle;
+
+  /// {@macro flutter.widgets.DefaultSelectionStyle.selectionWidthStyle}
+  ///
+  /// This is ignored if [SelectionContainer.maybeOf] returns null in the
+  /// [BuildContext] of the [Text] widget.
+  final ui.BoxWidthStyle? selectionWidthStyle;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -757,9 +784,10 @@ class Text extends StatelessWidget {
       (null, null) => MediaQuery.textScalerOf(context),
     };
     late Widget result;
+    final DefaultSelectionStyle defaultSelectionStyle = DefaultSelectionStyle.of(context);
     if (registrar != null) {
       result = MouseRegion(
-        cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
+        cursor: defaultSelectionStyle.mouseCursor ?? SystemMouseCursors.text,
         child: _SelectableTextContainer(
           textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
           textDirection:
@@ -779,8 +807,10 @@ class Text extends StatelessWidget {
           hyphens: hyphens ?? ui.Hyphens.manual,
           selectionColor:
               selectionColor ??
-              DefaultSelectionStyle.of(context).selectionColor ??
+              defaultSelectionStyle.selectionColor ??
               DefaultSelectionStyle.defaultColor,
+          selectionHeightStyle: selectionHeightStyle ?? defaultSelectionStyle.selectionHeightStyle,
+          selectionWidthStyle: selectionWidthStyle ?? defaultSelectionStyle.selectionWidthStyle,
           text: effectiveTextSpan,
         ),
       );
@@ -803,8 +833,10 @@ class Text extends StatelessWidget {
         hyphens: hyphens ?? ui.Hyphens.manual,
         selectionColor:
             selectionColor ??
-            DefaultSelectionStyle.of(context).selectionColor ??
+            defaultSelectionStyle.selectionColor ??
             DefaultSelectionStyle.defaultColor,
+        selectionHeightStyle: selectionHeightStyle ?? defaultSelectionStyle.selectionHeightStyle,
+        selectionWidthStyle: selectionWidthStyle ?? defaultSelectionStyle.selectionWidthStyle,
         text: effectiveTextSpan,
       );
     }
@@ -855,6 +887,20 @@ class Text extends StatelessWidget {
       ),
     );
     properties.add(EnumProperty<ui.Hyphens>('hyphens', hyphens, defaultValue: null));
+    properties.add(
+      EnumProperty<ui.BoxHeightStyle>(
+        'selectionHeightStyle',
+        selectionHeightStyle,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      EnumProperty<ui.BoxWidthStyle>(
+        'selectionWidthStyle',
+        selectionWidthStyle,
+        defaultValue: null,
+      ),
+    );
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }
@@ -879,6 +925,8 @@ class _SelectableTextContainer extends StatefulWidget {
     this.textHeightBehavior,
     required this.hyphens,
     required this.selectionColor,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
   });
 
   final TextSpan text;
@@ -894,6 +942,8 @@ class _SelectableTextContainer extends StatefulWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
   final ui.Hyphens hyphens;
   final Color selectionColor;
+  final ui.BoxHeightStyle? selectionHeightStyle;
+  final ui.BoxWidthStyle? selectionWidthStyle;
 
   @override
   State<_SelectableTextContainer> createState() => _SelectableTextContainerState();
@@ -935,6 +985,8 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
         textHeightBehavior: widget.textHeightBehavior,
         hyphens: widget.hyphens,
         selectionColor: widget.selectionColor,
+        selectionHeightStyle: widget.selectionHeightStyle,
+        selectionWidthStyle: widget.selectionWidthStyle,
         text: widget.text,
       ),
     );
@@ -957,6 +1009,8 @@ class _RichText extends StatelessWidget {
     this.textHeightBehavior,
     required this.hyphens,
     required this.selectionColor,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
   });
 
   final GlobalKey? textKey;
@@ -973,6 +1027,8 @@ class _RichText extends StatelessWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
   final ui.Hyphens hyphens;
   final Color selectionColor;
+  final ui.BoxHeightStyle? selectionHeightStyle;
+  final ui.BoxWidthStyle? selectionWidthStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -992,6 +1048,8 @@ class _RichText extends StatelessWidget {
       hyphens: hyphens,
       selectionRegistrar: registrar,
       selectionColor: selectionColor,
+      selectionHeightStyle: selectionHeightStyle,
+      selectionWidthStyle: selectionWidthStyle,
       text: text,
     );
   }
