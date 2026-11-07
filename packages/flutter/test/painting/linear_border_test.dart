@@ -20,6 +20,61 @@ final List<Offset> topRectIncludes = rectIncludes(const Rect.fromLTWH(0, 0, 100,
 final List<Offset> bottomRectIncludes = rectIncludes(const Rect.fromLTWH(0, 96, 100, 4));
 
 void main() {
+  test('LinearBorder scaling preserves its edges', () {
+    const border = LinearBorder(
+      side: borderSide,
+      start: LinearBorderEdge(size: 0.5, alignment: -0.5),
+      end: LinearBorderEdge(size: 0.75, alignment: 0.5),
+      top: LinearBorderEdge(),
+      bottom: LinearBorderEdge(size: 0.25),
+    );
+    for (final factor in <double>[0.0, 0.5, 1.0, 2.0]) {
+      expect(border.scale(factor), border.copyWith(side: borderSide.scale(factor)));
+      expect(ShapeBorder.lerp(null, border, factor), border.scale(factor));
+      expect(ShapeBorder.lerp(border, null, 1.0 - factor), border.scale(factor));
+    }
+  });
+
+  for (final TextDirection direction in TextDirection.values) {
+    test('LinearBorder paints translated edges in $direction', () {
+      const rect = Rect.fromLTWH(30.0, 40.0, 100.0, 100.0);
+      final rtl = direction == TextDirection.rtl;
+      void expectEdge(LinearBorder border, Offset point) {
+        expect(
+          (Canvas canvas) => border.paint(canvas, rect, textDirection: direction),
+          paints..path(includes: <Offset>[point]),
+        );
+      }
+
+      expectEdge(
+        const LinearBorder(
+          side: borderSide,
+          start: LinearBorderEdge(size: 0.5, alignment: -1.0),
+          top: LinearBorderEdge(size: 0.0),
+          bottom: LinearBorderEdge(size: 0.0),
+        ),
+        Offset(rtl ? 128.0 : 32.0, 66.0),
+      );
+      expectEdge(
+        const LinearBorder(
+          side: borderSide,
+          end: LinearBorderEdge(size: 0.5, alignment: 1.0),
+          top: LinearBorderEdge(size: 0.0),
+          bottom: LinearBorderEdge(size: 0.0),
+        ),
+        Offset(rtl ? 32.0 : 128.0, 114.0),
+      );
+      expectEdge(
+        LinearBorder.top(side: borderSide, size: 0.5, alignment: -1.0),
+        Offset(rtl ? 105.0 : 55.0, 42.0),
+      );
+      expectEdge(
+        LinearBorder.bottom(side: borderSide, size: 0.5, alignment: 1.0),
+        Offset(rtl ? 55.0 : 105.0, 138.0),
+      );
+    });
+  }
+
   test('LinearBorderEdge defaults', () {
     expect(const LinearBorderEdge().size, 1);
     expect(const LinearBorderEdge().alignment, 0);
