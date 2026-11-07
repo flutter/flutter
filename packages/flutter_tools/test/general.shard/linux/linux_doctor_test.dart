@@ -52,6 +52,17 @@ FakeCommand _pkgConfigPresentCommand(String version) {
   return FakeCommand(command: const <String>['pkg-config', '--version'], stdout: version);
 }
 
+// A command that will return 'clang++ -print-file-name=libstdc++.so' output.
+//
+// clang++ prints the full path when it can find the library, and only the bare
+// file name when it cannot.
+FakeCommand _libstdcxxCheckCommand({bool present = true}) {
+  return FakeCommand(
+    command: const <String>['clang++', '-print-file-name=libstdc++.so'],
+    stdout: present ? '/usr/bin/../lib/gcc/x86_64-linux-gnu/14/libstdc++.so\n' : 'libstdc++.so\n',
+  );
+}
+
 /// A command that returns either success or failure for a pkg-config query
 /// for [library], depending on [exists].
 FakeCommand _libraryCheckCommand(String library, {bool exists = true}) {
@@ -202,6 +213,7 @@ void main() {
         _cmakePresentCommand('3.16.3'),
         _ninjaPresentCommand('1.10.0'),
         _pkgConfigPresentCommand('0.29'),
+        _libstdcxxCheckCommand(),
         ..._gtkLibrariesPresentCommands(),
         _eglinfoPresentCommand(),
       ]);
@@ -235,6 +247,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -268,6 +281,7 @@ void main() {
       _cmakePresentCommand('3.2.0'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -301,6 +315,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('0.8.1'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -334,6 +349,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.27.0'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -368,6 +384,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _missingBinaryException('pkg-config'),
+      _libstdcxxCheckCommand(),
       // We never check libraries because pkg-config is not present
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -391,6 +408,7 @@ void main() {
       _missingBinaryCommand('cmake'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -426,6 +444,7 @@ void main() {
       _cmakePresentCommand('bogus'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -531,6 +550,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _missingBinaryCommand('ninja'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -566,6 +586,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('bogus'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -601,6 +622,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _missingBinaryCommand('pkg-config'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -626,6 +648,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('bogus'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -651,6 +674,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesMissingCommands(),
       _eglinfoPresentCommand(),
     ]);
@@ -668,6 +692,43 @@ void main() {
       const ValidationMessage('ninja version 1.10.0'),
       const ValidationMessage('pkg-config version 0.29'),
       ValidationMessage.error(userMessages.gtkLibrariesMissing),
+      const ValidationMessage('OpenGL core renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
+      const ValidationMessage(
+        'OpenGL core version: 4.6 (Core Profile) Mesa 24.2.8-1ubuntu1~24.10.1',
+      ),
+      const ValidationMessage('OpenGL core shading language version: 4.60'),
+      const ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
+      const ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
+      const ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
+      const ValidationMessage('GL_EXT_framebuffer_blit: yes'),
+      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+    ]);
+  });
+
+  testWithoutContext('Missing validation when clang++ cannot find libstdc++', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('1.10.0'),
+      _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(present: false),
+      ..._gtkLibrariesPresentCommands(),
+      _eglinfoPresentCommand(),
+    ]);
+    final userMessages = UserMessages();
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: userMessages,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.missing);
+    expect(result.messages, <ValidationMessage>[
+      const ValidationMessage('clang version 4.0.1-6+build1'),
+      ValidationMessage.error(userMessages.libstdcxxMissing),
+      const ValidationMessage('cmake version 3.16.3'),
+      const ValidationMessage('ninja version 1.10.0'),
+      const ValidationMessage('pkg-config version 0.29'),
       const ValidationMessage('OpenGL core renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       const ValidationMessage(
         'OpenGL core version: 4.6 (Core Profile) Mesa 24.2.8-1ubuntu1~24.10.1',
@@ -706,6 +767,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoMissingCommand(),
     ]);
@@ -731,6 +793,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(x11: false),
     ]);
@@ -765,6 +828,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(wayland: false),
     ]);
@@ -799,6 +863,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(es: false),
     ]);
@@ -828,6 +893,7 @@ void main() {
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),
+      _libstdcxxCheckCommand(),
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(core: false),
     ]);
