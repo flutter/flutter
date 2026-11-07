@@ -2300,6 +2300,38 @@
       },
       {
         "file": "mac_clang_tidy.json",
+        "name": "ci/mac_host_debug_clang_tidy_1",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--target-dir",
+          "ci/mac_host_debug_clang_tidy_1",
+          "--mac-cpu",
+          "arm64",
+          "--no-rbe",
+          "--no-goma",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_host_debug_clang_tidy_1",
+        "config": "mac_host_debug_clang_tidy_1",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_host_debug_clang_tidy_1",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_clang_tidy.json",
         "name": "ci/ios_debug_sim_clang_tidy",
         "gn": [
           "--ios",
