@@ -7,11 +7,16 @@
 
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
 
+class SkPathBuilder;
+
 namespace Skwasm {
+
+flutter::DlPath SnapshotPath(const SkPathBuilder* path);
 
 template <typename T>
 class sp_wrapper {
