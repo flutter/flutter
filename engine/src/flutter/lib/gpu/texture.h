@@ -7,6 +7,7 @@
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/retain_stamp.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "impeller/core/formats.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
@@ -23,7 +24,12 @@ class Texture : public RefCountedDartWrappable<Texture> {
 
   ~Texture() override;
 
-  std::shared_ptr<impeller::Texture> GetTexture();
+  const std::shared_ptr<impeller::Texture>& GetTexture() const {
+    return texture_;
+  }
+
+  /// Tracks which recording last retained this texture.
+  const RetainStamp& GetRetainStamp() const { return retain_stamp_; }
 
   bool Overwrite(Context& gpu_context,
                  const tonic::DartByteData& source_bytes,
@@ -34,6 +40,7 @@ class Texture : public RefCountedDartWrappable<Texture> {
 
  private:
   std::shared_ptr<impeller::Texture> texture_;
+  RetainStamp retain_stamp_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Texture);
 };

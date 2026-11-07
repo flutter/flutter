@@ -763,6 +763,11 @@ base class RenderPass extends NativeFieldWrapperClass1
   /// instance receives the same vertex buffer data. This is valid, but every
   /// instance will produce the same geometry unless the shader varies its output
   /// another way.
+  ///
+  /// Throws when the draw cannot be recorded. Whether the backend can build
+  /// the pipeline for the current state is only known once the pass is
+  /// encoded, so a draw whose pipeline fails to build is dropped and logged
+  /// then, and later draws with that state throw here.
   void draw(int vertexCount, {int instanceCount = 1}) {
     _checkNotEnded();
     RangeError.checkNotNegative(vertexCount, 'vertexCount');
@@ -794,6 +799,8 @@ base class RenderPass extends NativeFieldWrapperClass1
   /// instance receives the same vertex and index buffer data. This is valid, but
   /// every instance will produce the same geometry unless the shader varies its
   /// output another way.
+  ///
+  /// Failures are reported as for [draw].
   void drawIndexed(int indexCount, {int instanceCount = 1}) {
     _checkNotEnded();
     RangeError.checkNotNegative(indexCount, 'indexCount');
@@ -902,11 +909,13 @@ base class RenderPass extends NativeFieldWrapperClass1
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindPipeline',
+    isLeaf: true,
   )
   external void _bindPipeline(RenderPipeline pipeline);
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindVertexBufferDevice',
+    isLeaf: true,
   )
   external void _bindVertexBufferDevice(
     DeviceBuffer buffer,
@@ -917,6 +926,7 @@ base class RenderPass extends NativeFieldWrapperClass1
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindIndexBufferDevice',
+    isLeaf: true,
   )
   external void _bindIndexBufferDevice(
     DeviceBuffer buffer,
@@ -927,7 +937,9 @@ base class RenderPass extends NativeFieldWrapperClass1
 
   @Native<
     Bool Function(Pointer<Void>, Pointer<Void>, Int, Pointer<Void>, Int, Int)
-  >(symbol: 'InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed')
+  >(symbol: 'InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed',
+    isLeaf: true,
+  )
   external bool _bindUniformDeviceIndexed(
     Shader shader,
     int uniformStructIndex,
@@ -938,6 +950,7 @@ base class RenderPass extends NativeFieldWrapperClass1
 
   @Native<Void Function(Pointer<Void>, Int, Int, Int, Int, Float, Float)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetViewport',
+    isLeaf: true,
   )
   external void _setViewport(
     int x,
@@ -961,7 +974,9 @@ base class RenderPass extends NativeFieldWrapperClass1
       Int,
       Int,
     )
-  >(symbol: 'InternalFlutterGpu_RenderPass_BindTextureIndexed')
+  >(symbol: 'InternalFlutterGpu_RenderPass_BindTextureIndexed',
+    isLeaf: true,
+  )
   external bool _bindTextureIndexed(
     Shader shader,
     int uniformTextureIndex,
@@ -976,21 +991,25 @@ base class RenderPass extends NativeFieldWrapperClass1
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindSet',
+    isLeaf: true,
   )
   external void _bindSet(BindingSet bindingSet, int slot);
 
   @Native<Void Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_RenderPass_ClearBindings',
+    isLeaf: true,
   )
   external void _clearBindings();
 
   @Native<Void Function(Pointer<Void>, Int, Bool)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetColorBlendEnable',
+    isLeaf: true,
   )
   external void _setColorBlendEnable(int colorAttachmentIndex, bool enable);
 
   @Native<Void Function(Pointer<Void>, Int, Int, Int, Int, Int, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetColorBlendEquation',
+    isLeaf: true,
   )
   external void _setColorBlendEquation(
     int colorAttachmentIndex,
@@ -1004,21 +1023,25 @@ base class RenderPass extends NativeFieldWrapperClass1
 
   @Native<Void Function(Pointer<Void>, Bool)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetDepthWriteEnable',
+    isLeaf: true,
   )
   external void _setDepthWriteEnable(bool enable);
 
   @Native<Void Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetDepthCompareOperation',
+    isLeaf: true,
   )
   external void _setDepthCompareOperation(int compareOperation);
 
   @Native<Void Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetStencilReference',
+    isLeaf: true,
   )
   external void _setStencilReference(int referenceValue);
 
   @Native<Void Function(Pointer<Void>, Int, Int, Int, Int, Int, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetStencilConfig',
+    isLeaf: true,
   )
   external void _setStencilConfig(
     int compareFunction,
@@ -1032,36 +1055,43 @@ base class RenderPass extends NativeFieldWrapperClass1
 
   @Native<Void Function(Pointer<Void>, Int, Int, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetScissor',
+    isLeaf: true,
   )
   external void _setScissor(int x, int y, int width, int height);
 
   @Native<Void Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetCullMode',
+    isLeaf: true,
   )
   external void _setCullMode(int cullMode);
 
   @Native<Void Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetPrimitiveType',
+    isLeaf: true,
   )
   external void _setPrimitiveType(int primitiveType);
 
   @Native<Void Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetWindingOrder',
+    isLeaf: true,
   )
   external void _setWindingOrder(int windingOrder);
 
   @Native<Void Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_SetPolygonMode',
+    isLeaf: true,
   )
   external void _setPolygonMode(int polygonMode);
 
   @Native<Bool Function(Pointer<Void>, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_Draw',
+    isLeaf: true,
   )
   external bool _draw(int vertexCount, int instanceCount);
 
   @Native<Bool Function(Pointer<Void>, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_DrawIndexed',
+    isLeaf: true,
   )
   external bool _drawIndexed(int indexCount, int instanceCount);
 }

@@ -5,20 +5,21 @@
 #ifndef FLUTTER_LIB_GPU_BINDING_SET_H_
 #define FLUTTER_LIB_GPU_BINDING_SET_H_
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/device_buffer.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/retain_stamp.h"
 #include "flutter/lib/gpu/shader.h"
 #include "flutter/lib/gpu/texture.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/device_buffer.h"
-#include "impeller/core/raw_ptr.h"
-#include "impeller/core/sampler.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/core/texture.h"
 
@@ -54,10 +55,20 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
     impeller::SampledImageSlot slot{};
     const impeller::ShaderMetadata* metadata = nullptr;
     std::shared_ptr<const impeller::Texture> texture;
-    /// Owned by the context's sampler library, which caches it for the
-    /// context's lifetime. The Dart wrapper holds the context that resolved
-    /// this binding, so the sampler outlives the set.
-    impeller::raw_ptr<const impeller::Sampler> sampler;
+    /// A `SamplerDescriptor::ToKey` key, resolved through the context's
+    /// sampler library when the set is encoded, on the thread that encodes.
+    uint64_t sampler_key = 0;
+  };
+
+  /// An immutable copy of the set's bindings, plus the shader reflections
+  /// their metadata points into. Recordings hold this, so a set mutated
+  /// after it was bound cannot change a draw already recorded.
+  struct Contents {
+    std::vector<BufferBinding> buffer_bindings;
+    std::vector<TextureBinding> texture_bindings;
+    std::vector<BufferBinding> storage_buffer_bindings;
+    std::vector<std::shared_ptr<const Shader::Reflection>> reflections;
+    RetainStamp retain_stamp;
   };
 
   BindingSet();
@@ -88,7 +99,7 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
   bool AddTexture(Shader& shader,
                   int uniform_texture_index,
                   std::shared_ptr<const impeller::Texture> texture,
-                  impeller::raw_ptr<const impeller::Sampler> sampler);
+                  const impeller::SamplerDescriptor& sampler);
 
   /// Drops every binding so the set can be repopulated. Used when a shader
   /// reload replaces the reflection data the bindings resolved against.
@@ -100,15 +111,16 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
 
   const std::vector<BufferBinding>& GetStorageBufferBindings() const;
 
- private:
-  /// Keeps `shader` alive for this set's lifetime, since the bindings point
-  /// into reflection data the shader owns.
-  void RetainShader(Shader& shader);
+  /// The current contents, shared until the next mutation.
+  const std::shared_ptr<const Contents>& Snapshot();
 
-  std::vector<BufferBinding> buffer_bindings_;
-  std::vector<TextureBinding> texture_bindings_;
-  std::vector<BufferBinding> storage_buffer_bindings_;
-  std::vector<fml::RefPtr<Shader>> shaders_;
+ private:
+  /// Keeps the reflection `shader`'s bindings point into alive for as long
+  /// as the bindings are.
+  void RetainReflection(Shader& shader);
+
+  Contents contents_;
+  std::shared_ptr<const Contents> snapshot_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(BindingSet);
 };

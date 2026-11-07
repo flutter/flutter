@@ -456,17 +456,16 @@ bool BufferBindingsGLES::BindUniformBufferV2(
     // When binding uniform arrays, the elements must be contiguous. Copy
     // the uniforms to a temp buffer to eliminate any padding needed by the
     // other backends if the array elements have padding.
-    std::vector<uint8_t> array_element_buffer;
     if (element_count > 1 && element_stride != member.size) {
-      array_element_buffer.resize(member.size * element_count);
+      array_element_scratch_.resize(member.size * element_count);
       for (size_t element_i = 0; element_i < element_count; element_i++) {
-        std::memcpy(array_element_buffer.data() + element_i * member.size,
+        std::memcpy(array_element_scratch_.data() + element_i * member.size,
                     reinterpret_cast<const char*>(buffer_data) +
                         element_i * element_stride,
                     member.size);
       }
       buffer_data =
-          reinterpret_cast<const GLfloat*>(array_element_buffer.data());
+          reinterpret_cast<const GLfloat*>(array_element_scratch_.data());
     }
 
     if (member.type != ShaderType::kFloat) {

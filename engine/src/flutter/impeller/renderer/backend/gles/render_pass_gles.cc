@@ -600,8 +600,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     }
 #endif  // IMPELLER_DEBUG
     const auto& pipeline = PipelineGLES::Cast(*command.pipeline);
-    impeller_context->GetPipelineLibrary()->LogPipelineUsage(
-        pipeline.GetDescriptor());
     const auto* color_attachment =
         pipeline.GetDescriptor().GetLegacyCompatibleColorAttachment();
     if (!color_attachment) {
@@ -925,6 +923,17 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 #endif  // IMPELLER_DEBUG
 
   return true;
+}
+
+// |RenderPass|
+void RenderPassGLES::ReserveCommands(size_t draws,
+                                     size_t bound_buffers,
+                                     size_t bound_textures,
+                                     size_t vertex_buffers) {
+  commands_.reserve(draws);
+  bound_buffers_.reserve(bound_buffers);
+  bound_textures_.reserve(bound_textures);
+  vertex_buffers_.reserve(vertex_buffers);
 }
 
 // |RenderPass|

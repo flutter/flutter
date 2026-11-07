@@ -121,6 +121,8 @@ class BufferBindingsGLES {
     GLuint vertex_attrib_divisor = 0u;
   };
   std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
+  // Holds a uniform array with its padding removed while it is uploaded.
+  std::vector<uint8_t> array_element_scratch_;
 
   absl::flat_hash_map<std::string, GLint> uniform_locations_;
   struct UBOInfo {

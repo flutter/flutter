@@ -7,6 +7,7 @@
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/retain_stamp.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 
 #include "third_party/tonic/typed_data/dart_byte_data.h"
@@ -23,13 +24,19 @@ class DeviceBuffer : public RefCountedDartWrappable<DeviceBuffer> {
 
   ~DeviceBuffer() override;
 
-  std::shared_ptr<impeller::DeviceBuffer> GetBuffer();
+  const std::shared_ptr<impeller::DeviceBuffer>& GetBuffer() const {
+    return device_buffer_;
+  }
+
+  /// Tracks which recording last retained this buffer.
+  const RetainStamp& GetRetainStamp() const { return retain_stamp_; }
 
   bool Overwrite(const tonic::DartByteData& source_bytes,
                  size_t destination_offset_in_bytes);
 
  private:
   std::shared_ptr<impeller::DeviceBuffer> device_buffer_;
+  RetainStamp retain_stamp_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DeviceBuffer);
 };

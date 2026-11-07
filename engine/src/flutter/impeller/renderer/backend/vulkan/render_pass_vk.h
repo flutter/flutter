@@ -50,6 +50,8 @@ class RenderPassVK final : public RenderPass {
   bool has_index_buffer_ = false;
   bool has_label_ = false;
   PipelineRef pipeline_ = PipelineRef(nullptr);
+  // The pipeline bound on the command buffer, which persists across draws.
+  vk::Pipeline bound_pipeline_;
   bool pipeline_uses_input_attachments_ = false;
   std::shared_ptr<SamplerVK> immutable_sampler_;
 

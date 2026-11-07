@@ -31,6 +31,7 @@ using ::impeller::testing::MockDeviceBuffer;
 using ::impeller::testing::MockImpellerContext;
 using ::impeller::testing::MockRenderPass;
 using ::impeller::testing::MockSampler;
+using ::impeller::testing::MockSamplerLibrary;
 using ::impeller::testing::MockTexture;
 using ::testing::_;
 using ::testing::InSequence;
@@ -92,13 +93,23 @@ class FlutterGpuComputePassTest : public ::testing::Test {
         .WillByDefault(Return(impeller::Context::BackendType::kMetal));
     ON_CALL(*context_, GetCommandQueue).WillByDefault(Return(command_queue_));
     ON_CALL(*impeller_command_buffer_, IsValid).WillByDefault(Return(true));
-    command_buffer_ =
-        fml::MakeRefCounted<CommandBuffer>(context_, impeller_command_buffer_);
+    ON_CALL(*context_, CreateCommandBuffer)
+        .WillByDefault(Return(impeller_command_buffer_));
+    ON_CALL(*context_, GetSamplerLibrary)
+        .WillByDefault(Return(sampler_library_));
+    command_buffer_ = fml::MakeRefCounted<CommandBuffer>(context_);
 
     impeller::TextureDescriptor texture_desc;
     texture_desc.size = impeller::ISize(1, 1);
     texture_ = std::make_shared<NiceMock<MockTexture>>(texture_desc);
     sampler_ = std::make_shared<MockSampler>(impeller::SamplerDescriptor{});
+    ON_CALL(*sampler_library_, GetSampler).WillByDefault(Return(Sampler()));
+  }
+
+  // Default actions can form a cycle through the context.
+  void TearDown() override {
+    ::testing::Mock::VerifyAndClear(impeller_command_buffer_.get());
+    ::testing::Mock::VerifyAndClear(context_.get());
   }
 
   std::shared_ptr<MockComputePass> MakeImpellerComputePass() {
@@ -107,11 +118,11 @@ class FlutterGpuComputePassTest : public ::testing::Test {
     return pass;
   }
 
-  /// Begins a compute pass that records into `impeller_pass`.
+  /// Begins a compute pass that replays into `impeller_pass` when it ends.
   fml::RefPtr<ComputePass> BeginComputePass(
       const std::shared_ptr<MockComputePass>& impeller_pass) {
-    EXPECT_CALL(*impeller_command_buffer_, OnCreateComputePass)
-        .WillOnce(Return(impeller_pass));
+    ON_CALL(*impeller_command_buffer_, OnCreateComputePass)
+        .WillByDefault(Return(impeller_pass));
     auto pass = fml::MakeRefCounted<ComputePass>();
     EXPECT_TRUE(pass->Begin(*command_buffer_).ok());
     return pass;
@@ -124,6 +135,8 @@ class FlutterGpuComputePassTest : public ::testing::Test {
   std::shared_ptr<NiceMock<MockImpellerContext>> context_;
   std::shared_ptr<NiceMock<MockCommandBuffer>> impeller_command_buffer_;
   std::shared_ptr<NiceMock<MockCommandQueue>> command_queue_;
+  std::shared_ptr<NiceMock<MockSamplerLibrary>> sampler_library_ =
+      std::make_shared<NiceMock<MockSamplerLibrary>>();
   fml::RefPtr<CommandBuffer> command_buffer_;
   std::shared_ptr<impeller::Texture> texture_;
   std::shared_ptr<const impeller::Sampler> sampler_;
@@ -151,15 +164,18 @@ TEST_F(FlutterGpuComputePassTest, CreatingAndEndingFollowsThePassLifecycle) {
     EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(absl::OkStatus()));
   }
 
-  ASSERT_TRUE(command_buffer_->CreateRenderPass(impeller::RenderTarget()));
+  int render_pass_owner = 0;
+  PassRecording* recording = command_buffer_->BeginPass(
+      PassRecording::Kind::kRender, &render_pass_owner);
+  ASSERT_NE(recording, nullptr);
   auto pass_a = fml::MakeRefCounted<ComputePass>();
   ASSERT_TRUE(pass_a->Begin(*command_buffer_).ok());
   auto pass_b = fml::MakeRefCounted<ComputePass>();
   ASSERT_TRUE(pass_b->Begin(*command_buffer_).ok());
   // pass_b is still open, so this must not end it.
-  EXPECT_TRUE(pass_a->End().ok());
-  EXPECT_TRUE(pass_b->End().ok());
-  EXPECT_TRUE(pass_b->End().ok());
+  pass_a->End();
+  pass_b->End();
+  pass_b->End();
   EXPECT_TRUE(command_buffer_->Submit());
 }
 
@@ -181,7 +197,7 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsBindsTheShadersBindings) {
                                       particles, 16, 32)
                   .ok());
   ASSERT_TRUE(pass->BindTexture(*shader, shader->GetUniformTexture("tex"),
-                                texture_, Sampler())
+                                texture_, impeller::SamplerDescriptor{})
                   .ok());
   ASSERT_TRUE(
       pass->BindStorageBuffer(*other_shader,
@@ -215,6 +231,7 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsBindsTheShadersBindings) {
       .WillOnce(Return(true));
 
   EXPECT_TRUE(pass->ApplyBindings(*shader).ok());
+  pass->End();
 }
 
 // Precedence matches render passes: an individual bind overrides a binding
@@ -230,8 +247,9 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsPrefersBindsThenHigherSets) {
       *shader, shader->GetUniformStructIndex("Params"), buffer, 0, 16));
   ASSERT_TRUE(low_set->AddStorageBuffer(
       *shader, shader->GetStorageBufferIndex("Particles"), buffer, 0, 16));
-  ASSERT_TRUE(low_set->AddTexture(
-      *shader, shader->GetUniformTextureIndex("tex"), texture_, Sampler()));
+  ASSERT_TRUE(low_set->AddTexture(*shader,
+                                  shader->GetUniformTextureIndex("tex"),
+                                  texture_, impeller::SamplerDescriptor{}));
   auto high_set = fml::MakeRefCounted<BindingSet>();
   ASSERT_TRUE(high_set->AddStorageBuffer(
       *shader, shader->GetStorageBufferIndex("Particles"), buffer, 64, 16));
@@ -260,6 +278,7 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsPrefersBindsThenHigherSets) {
       .WillOnce(Return(true));
 
   EXPECT_TRUE(pass->ApplyBindings(*shader).ok());
+  pass->End();
 }
 
 // Dispatching with a binding left empty would read whatever the backend has
@@ -273,7 +292,7 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsNamesAMissingBinding) {
                                 buffer, 0, 16)
                   .ok());
   ASSERT_TRUE(pass->BindTexture(*shader, shader->GetUniformTexture("tex"),
-                                texture_, Sampler())
+                                texture_, impeller::SamplerDescriptor{})
                   .ok());
 
   absl::Status error = pass->ApplyBindings(*shader);
@@ -332,6 +351,7 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsRequiresButSkipsOptimizedOut) {
                                       MakeBuffer(16), 0, 16)
                   .ok());
   EXPECT_TRUE(pass->ApplyBindings(*shader).ok());
+  pass->End();
 }
 
 // Only compute shaders take bindings from a compute pass, and a view must lie
@@ -352,7 +372,7 @@ TEST_F(FlutterGpuComputePassTest, BindRejectsInvalidBindings) {
                                        nullptr, 0, 16)
                    .ok());
   EXPECT_FALSE(pass->BindTexture(*shader, shader->GetUniformTexture("tex"),
-                                 nullptr, Sampler())
+                                 nullptr, impeller::SamplerDescriptor{})
                    .ok());
 
   auto fragment =
@@ -378,6 +398,7 @@ TEST_F(FlutterGpuComputePassTest, DispatchNeedsAPipelineUnlessTheGridIsEmpty) {
   absl::Status error = pass->Dispatch({1, 1, 1});
   ASSERT_FALSE(error.ok());
   EXPECT_EQ(error.message(), "No ComputePipeline is bound.");
+  pass->End();
 }
 
 }  // namespace
