@@ -5,9 +5,17 @@
     "",
     "Note the `flutter/tools/font_subset` target is only used because if no ",
     "targets are specified, the build will fail, and if an empty list of ",
-    "targets are specified, all targets are built (wasteful/slow)"
+    "targets are specified, all targets are built (wasteful/slow)",
+    "",
+    "The build runs under Bazel (--bazel among the tools/gn flags; flutter/build/bazel/ci.md):",
+    "the install lays font_subset, and the compile_commands.json step makes the database from",
+    "the build's action graph (tools/gn_to_bazel/tool/compile_commands.py: the generated file",
+    "clangd_check reads, the assets fixtures' source, built for it), as GN's gn gen wrote it."
   ],
   "cas_archive": false,
+  "gclient_variables": {
+    "download_bazelisk": true
+  },
   "gn": [
     "--runtime-mode",
     "debug",
@@ -17,15 +25,28 @@
     "--no-rbe",
     "--no-goma",
     "--target-dir",
-    "ci/linux_unopt_debug_no_rbe"
+    "ci/linux_unopt_debug_no_rbe",
+    "--bazel"
   ],
   "name": "ci/linux_unopt_debug_no_rbe",
   "description": "Tests clangd on Linux.",
   "ninja": {
     "config": "ci/linux_unopt_debug_no_rbe",
-    "targets": ["flutter/tools/font_subset"]
+    "targets": [
+      "flutter/tools/font_subset"
+    ]
   },
   "tests": [
+    {
+      "language": "python3",
+      "name": "compile_commands.json",
+      "script": "flutter/tools/gn_to_bazel/tool/compile_commands.py",
+      "parameters": [
+        "--build-directory=../out/ci/linux_unopt_debug_no_rbe",
+        "--build",
+        "--build-targets=//engine/src/flutter/assets:assets_fixtures"
+      ]
+    },
     {
       "language": "dart",
       "name": "clangd",
