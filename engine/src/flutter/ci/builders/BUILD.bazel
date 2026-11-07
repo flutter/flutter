@@ -517,7 +517,7 @@ install(
     }),
 )
 
-# Other steps, scripts of the checkout: clangd.
+# Other steps, scripts of the checkout: compile_commands.json; clangd.
 # Nothing to run.
 
 # linux_host_desktop_engine.json: ci/host_debug_desktop
@@ -1187,7 +1187,7 @@ install(
     }),
 )
 
-# Other steps, scripts of the checkout: clangd.
+# Other steps, scripts of the checkout: compile_commands.json; clangd.
 # Nothing to run.
 
 # mac_host_debug_arm64_tests.json: ci/host_debug_arm64_tests

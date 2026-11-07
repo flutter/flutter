@@ -918,7 +918,8 @@
           "--no-rbe",
           "--no-goma",
           "--target-dir",
-          "ci/linux_unopt_debug_no_rbe"
+          "ci/linux_unopt_debug_no_rbe",
+          "--bazel"
         ],
         "build_directory": "ci/linux_unopt_debug_no_rbe",
         "config": "linux_unopt_debug_no_rbe",
@@ -2275,6 +2276,8 @@
           "--no-lto",
           "--target-dir",
           "ci/host_debug_clang_tidy",
+          "--mac-cpu",
+          "arm64",
           "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
@@ -2306,6 +2309,8 @@
           "--no-lto",
           "--target-dir",
           "ci/ios_debug_sim_clang_tidy",
+          "--simulator-cpu",
+          "arm64",
           "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
@@ -2339,7 +2344,8 @@
           "--no-goma",
           "--xcode-symlinks",
           "--target-dir",
-          "ci/mac_unopt_debug_no_rbe"
+          "ci/mac_unopt_debug_no_rbe",
+          "--bazel"
         ],
         "build_directory": "ci/mac_unopt_debug_no_rbe",
         "config": "mac_unopt_debug_no_rbe",

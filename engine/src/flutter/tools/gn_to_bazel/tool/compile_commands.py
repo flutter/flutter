@@ -477,6 +477,15 @@ def main(argv):
       "Stands in for --out, --config, --bazel and --workspace.",
   )
   parser.add_argument(
+      "--build-targets",
+      action="append",
+      default=[],
+      metavar="LABEL",
+      help="With --build: build these targets' compilation outputs instead of every command's "
+      "owner's (a check that reads one generated file needs that file's target alone, not the "
+      "engine's objects).",
+  )
+  parser.add_argument(
       "--build",
       action="store_true",
       help="With --build-directory: build the targets whose compiles the database lists, "
@@ -504,7 +513,7 @@ def main(argv):
     bazel = Bazel.of_build_directory(out_dir)
     out = args.out or out_dir
   else:
-    if args.build:
+    if args.build or args.build_targets:
       parser.error("--build needs --build-directory")
     if not args.out:
       parser.error("--out is required without --build-directory")
@@ -516,7 +525,7 @@ def main(argv):
   entries, left_out, owners = compile_commands(aquery, execution_root, output_base, own_configuration)
   os.makedirs(out, exist_ok=True)
   if args.build:
-    _build(bazel, owners, out)
+    _build(bazel, args.build_targets or owners, out)
   path = os.path.join(out, "compile_commands.json")
   with open(path, "w", encoding="utf-8") as f:
     json.dump(entries, f, indent=2)

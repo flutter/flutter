@@ -49,12 +49,14 @@ void main(List<String> args) {
   }
 
   var clangd = results['clangd'] as String?;
-  // To improve determinism, check the first clangd item that matches the asset fixture file.
+  // To improve determinism, check the first clangd item that matches the asset fixture file:
+  // GN's gen-time `_fl__fl_assets_fixtures.cc`, or the Bazel build's `_fl_assets_fixtures.cc`
+  // (a generated source either way, which is the point of the check).
   Map<String, Object?>? selectedEntry;
   for (final entry in compileCommands) {
     if (entry is Map<String, Object?>) {
       final file = entry['file'] as String?;
-      if (file != null && file.endsWith('_fl__fl_assets_fixtures.cc')) {
+      if (file != null && file.endsWith('_fl_assets_fixtures.cc')) {
         selectedEntry = entry;
         break;
       }
@@ -66,7 +68,10 @@ void main(List<String> args) {
     }
   }
   if (selectedEntry == null) {
-    io.stderr.writeln('No compile_commands.json entry found for _fl__fl_assets_fixtures.cc');
+    io.stderr.writeln(
+      'No compile_commands.json entry found for _fl__fl_assets_fixtures.cc (GN) or '
+      '_fl_assets_fixtures.cc (Bazel)',
+    );
     io.exitCode = 1;
     return;
   }
