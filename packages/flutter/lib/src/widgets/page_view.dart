@@ -153,13 +153,13 @@ class PageController extends ScrollController {
   /// Defaults to 1.0, which means each page fills the viewport in the scrolling
   /// direction.
   ///
-  /// When [viewportFraction] is less than 1.0, each page occupies
-  /// `viewportDimension * viewportFraction` along the scroll axis, allowing
-  /// multiple pages (or portions of adjacent pages) to be visible simultaneously.
+  /// When [viewportFraction] is less than 1.0, each page occupies a fraction of
+  /// the viewport's size in the scrolling direction, allowing multiple pages
+  /// (or portions of adjacent pages) to be visible simultaneously.
   ///
-  /// By default, when [PageView.padEnds] is true, padding of
-  /// `(1.0 - viewportFraction) / 2 * viewportDimension` is added to both the
-  /// leading and trailing ends of the scroll view. This ensures that the
+  /// By default, when [PageView.padEnds] is true, padding equal to
+  /// `(1.0 - viewportFraction) / 2` times the viewport's size is added to both
+  /// the leading and trailing ends of the scroll view. This ensures that the
   /// active page is centered within the viewport with equal margins on either
   /// side, allowing preceding and succeeding pages to peek in symmetrically,
   /// and ensures the first and last pages can be centered when scrolled all
