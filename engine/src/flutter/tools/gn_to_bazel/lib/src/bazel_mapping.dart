@@ -79,9 +79,12 @@ const Map<String, String> testSizes = <String, String>{
   // each test twice and shuffled (testRuns), on a Mac.
   'flutter_desktop_darwin_unittests': 'large',
   // 56 tests, each initializing a git repository and committing to it:
-  // ~2 s a test, 54 of them inside small's 60 s on a machine building the
-  // GPU backends at the same time.
-  'licenses_cpp_testrunner': 'medium',
+  // ~2 s a test on Linux (54 of them inside small's 60 s on a machine
+  // building the GPU backends at the same time), 10–13 s on a Mac
+  // (medium's 300 s stopped it twice on a Mac running the engine wildcard,
+  // the Mac tester's T73 and T81; the licenses builder's bot, with the
+  // machine to itself, is well inside).
+  'licenses_cpp_testrunner': 'large',
   // 77 s alone (195 tests: the embedder on the software, GL and Vulkan
   // surfaces, each a Dart VM).
   'embedder_unittests': 'medium',

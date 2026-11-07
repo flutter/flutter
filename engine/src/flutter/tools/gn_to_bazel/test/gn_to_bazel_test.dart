@@ -3971,10 +3971,16 @@ config("config") {
       // read from a local. GN hands compiles `-I` for include_dirs and the
       // cflags; links get lib_dirs as `-L` and framework_dirs as `-F` among
       // the ldflags. Bazel's `includes` name directories of the tree alone,
-      // so the include directory is a compile flag: on the targets that
-      // list the config (inlined, publicly or privately), forwarded to the
-      // dependents of a public listing, on a Swift module's swiftflags; the
-      // link flags sit on the config's library and on whatever inlines it.
+      // so the include directory is a compile flag -- and the two compile
+      // flags of the platform path (`-F.../Developer/Library/Frameworks`,
+      // `-I.../Developer/usr/lib`) become a dependency on @macos_sdk's
+      // `:macos_developer` (the same flags on views of the directories,
+      // exec-root paths, the directories as inputs, so that a worker can
+      // compile): on the targets that list the config (inlined, publicly
+      // or privately), forwarded to the dependents of a public listing; a
+      // Swift module keeps them as swiftflags, and the tag that keeps its
+      // compile on the Mac; the link flags sit on the config's library and
+      // on whatever inlines it.
       const commonGn = r'''
 config("test_config") {
   _platform_path = mac_platform_path
@@ -4019,24 +4025,22 @@ executable("common_unittests") {
           ')\n',
         ),
       );
-      // A public listing: the flags inlined, the library a dependency.
-      // A compile that reads the Xcode by absolute path is the Mac's
-      // (no-remote-exec: the Apple toolchains' remote mode would send it
-      // to a Linux worker, which has no Xcode).
+      // A public listing: the flags inlined, the library a dependency, the
+      // platform's Developer directories a dependency in place of their two
+      // compile flags (no tag: the compile may run on a worker, which has
+      // the views as inputs).
       expect(
         output,
         contains(
           '    name = "helper",\n'
           '    srcs = ["helper.cc"],\n'
-          '    copts = CHROMIUM_CODE_COPTS + [\n'
-          '        "-fvisibility=default",\n'
-          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
-          '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
-          '    ],\n'
+          '    copts = CHROMIUM_CODE_COPTS + ["-fvisibility=default"],\n'
           '    local_defines = FLUTTER_LOCAL_DEFINES,\n'
-          '    tags = ["no-remote-exec"],\n'
           '    deps = [\n'
-          '        ":test_config",\n',
+          '        ":test_config",\n'
+          '        "//engine/src:include_root",\n'
+          '        "@macos_sdk//:macos_developer",\n'
+          '    ],\n',
         ),
       );
       // The config's own library reads nothing: no tag.
@@ -4051,27 +4055,31 @@ executable("common_unittests") {
           ')\n',
         ),
       );
-      // A private listing inlines everything: the compile flags, the link
-      // flags.
+      // A private listing inlines everything: the compile flags (the
+      // platform's as the dependency), the link flags.
       expect(
         output,
         contains(
           '    name = "common_unittests",\n'
           '    size = "small",\n'
           '    srcs = ["common_unittests.cc"],\n'
-          '    copts = CHROMIUM_CODE_COPTS + [\n'
-          '        "-fvisibility=default",\n'
-          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
-          '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
-          '    ],\n'
+          '    copts = CHROMIUM_CODE_COPTS + ["-fvisibility=default"],\n'
           '    linkopts = [\n'
           '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
           '        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
+          '    ],\n'
+          '    local_defines = FLUTTER_LOCAL_DEFINES,\n'
+          '    deps = [\n'
+          '        ":helper",\n'
+          '        "//engine/src:include_root",\n'
+          '        "@macos_sdk//:macos_developer",\n'
           '    ],\n',
         ),
       );
       // A Swift module: the swiftflags and the include directory as -I
-      // (GN's swift tool takes {{include_dirs}}), the link flags.
+      // (GN's swift tool takes {{include_dirs}}), the link flags; it keeps
+      // the flags around the constant (the swift rules take no CcInfo for
+      // `-F`) and so the tag that keeps its compile on the Mac.
       expect(
         output,
         contains(
@@ -4111,12 +4119,14 @@ executable("other_unittests") {
         contains(
           '    copts = CHROMIUM_CODE_COPTS + [\n'
           '        "-fvisibility=default",  # from //flutter/common:helper\n'
-          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/common:helper\n'
-          '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/common:helper\n'
           '    ],\n',
         ),
       );
-      expect(user, contains('load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")'));
+      expect(
+        user,
+        contains('        "@macos_sdk//:macos_developer",  # from //flutter/common:helper\n'),
+      );
+      expect(user, isNot(contains('no-remote-exec')));
       // A framework directory of the tree waits for a rule that takes the
       // bundle as a link input.
       await expectLater(
@@ -6184,7 +6194,7 @@ executable("runner") {
       final String output = emitBuildFile(evaluation, gnPackage: '//flutter/tools/licenses_cpp');
       expect(
         output,
-        contains('cc_test(\n    name = "licenses_cpp_testrunner",\n    size = "medium",'),
+        contains('cc_test(\n    name = "licenses_cpp_testrunner",\n    size = "large",'),
       );
       expect(output, contains('cc_binary(\n    name = "runner",'));
     });
