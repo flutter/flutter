@@ -72,6 +72,11 @@ final class AndroidNativeDriver implements NativeDriver {
   }
 
   @override
+  Future<void> tapAt(int x, int y) async {
+    await _adb.tap(x, y);
+  }
+
+  @override
   Future<int> get sdkVersion async {
     final Map<String, Object?> result = await _driver.sendCommand(NativeCommand.getSdkVersion);
     return result['version']! as int;
@@ -81,6 +86,14 @@ final class AndroidNativeDriver implements NativeDriver {
   Future<bool> get isEmulator async {
     final Map<String, Object?> result = await _driver.sendCommand(NativeCommand.getIsEmulator);
     return result['emulator']! as bool;
+  }
+
+  @override
+  Future<bool> get isCrossWindowBlurEnabled async {
+    final Map<String, Object?> result = await _driver.sendCommand(
+      NativeCommand.getIsCrossWindowBlurEnabled,
+    );
+    return result['enabled']! as bool;
   }
 
   @override
