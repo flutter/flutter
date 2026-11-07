@@ -1846,6 +1846,17 @@ class RenderTable extends RenderBox {
     // Publish the spanning cells for use during painting and hit testing, or
     // clear them when the table has no spanning cells.
     _cachedSpannedCells = spannedCells.spans.isEmpty ? null : spannedCells;
+
+    // The cells may have moved, so the transforms that assembleSemanticsNode
+    // shifted no longer tell where they are. Forget the shifts and rebuild the
+    // semantics of the cells, which gives them their transforms relative to the
+    // table again.
+    if (_idToSemanticsShift.isNotEmpty) {
+      _idToSemanticsShift.clear();
+      for (final RenderBox? child in _children) {
+        child?.markNeedsSemanticsUpdate();
+      }
+    }
   }
 
   @override

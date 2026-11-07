@@ -1031,6 +1031,151 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Table semantics of cells without TableCell are where the cells are laid out', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/194546.
+    final SemanticsHandle handle = tester.ensureSemantics();
+    // The second column is wider than the first one, and the second row is
+    // taller than the first one.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Table(
+            columnWidths: const <int, TableColumnWidth>{
+              0: FixedColumnWidth(36.0),
+              1: FixedColumnWidth(72.0),
+            },
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  SizedBox(height: 20.0, child: Text('A')),
+                  SizedBox(height: 20.0, child: Text('B')),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  SizedBox(height: 200.0, child: Text('C')),
+                  SizedBox(height: 200.0),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    for (final label in <String>['A', 'B', 'C']) {
+      expect(
+        rectInTable(tester.getSemantics(find.text(label))),
+        tester.getRect(find.text(label)),
+        reason: label,
+      );
+    }
+
+    handle.dispose();
+  });
+
+  testWidgets('Table semantics follow the cells when a row above them changes its height', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final height = ValueNotifier<double>(40.0);
+    addTearDown(height.dispose);
+    Widget buildTable({required Widget cell, required bool tight}) {
+      Widget table = Table(
+        defaultColumnWidth: const FixedColumnWidth(100.0),
+        children: <TableRow>[
+          TableRow(
+            children: <Widget>[
+              ValueListenableBuilder<double>(
+                valueListenable: height,
+                builder: (BuildContext context, double value, Widget? child) {
+                  return SizedBox(height: value);
+                },
+              ),
+              const SizedBox.shrink(),
+            ],
+          ),
+          TableRow(children: <Widget>[cell, const SizedBox(height: 20.0)]),
+        ],
+      );
+      if (tight) {
+        // A table with tight constraints is a relayout boundary.
+        table = SizedBox(width: 200.0, height: 200.0, child: table);
+      }
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(alignment: Alignment.topLeft, child: table),
+      );
+    }
+
+    for (final tight in <bool>[false, true]) {
+      for (final cell in <Widget>[
+        const TableCell(child: SizedBox(height: 20.0, child: Text('B'))),
+        const SizedBox(height: 20.0, child: Text('B')),
+      ]) {
+        height.value = 40.0;
+        await tester.pumpWidget(buildTable(cell: cell, tight: tight));
+        // Only the first row is built again, so the cell below it moves while
+        // its semantics stay the same.
+        for (final rowHeight in <double>[0.0, 70.0]) {
+          height.value = rowHeight;
+          await tester.pump();
+          expect(
+            rectInTable(tester.getSemantics(find.text('B'))),
+            tester.getRect(find.text('B')),
+            reason: 'tight: $tight, ${cell.runtimeType}, row height: $rowHeight',
+          );
+        }
+      }
+    }
+
+    handle.dispose();
+  });
+
+  testWidgets('Table semantics follow keyed rows that move up', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/194545.
+    final SemanticsHandle handle = tester.ensureSemantics();
+    Widget buildTable(List<String> lines) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Table(
+            defaultColumnWidth: const FixedColumnWidth(100.0),
+            children: <TableRow>[
+              for (final line in lines)
+                TableRow(
+                  key: ValueKey<String>(line),
+                  children: <Widget>[
+                    SizedBox(height: 20.0, child: Text('$line 1')),
+                    SizedBox(height: 20.0, child: Text('$line 2')),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTable(<String>['a', 'b', 'c']));
+    await tester.pumpWidget(buildTable(<String>['b', 'c']));
+
+    for (final label in <String>['b 1', 'b 2', 'c 1', 'c 2']) {
+      expect(find.semantics.byLabel(label), findsOne, reason: label);
+      expect(
+        rectInTable(tester.getSemantics(find.text(label))),
+        tester.getRect(find.text(label)),
+        reason: label,
+      );
+    }
+
+    handle.dispose();
+  });
+
   testWidgets('Single-row Table does not crash when a cell child paints below the row bottom', (
     WidgetTester tester,
   ) async {
@@ -2365,21 +2510,6 @@ void main() {
         handle.dispose();
       });
 
-      // The rect of `node` in the coordinates of the table that it is in.
-      Rect rectInTable(SemanticsNode node) {
-        Rect rect = node.rect;
-        for (
-          SemanticsNode? current = node;
-          current != null && current.role != SemanticsRole.table;
-          current = current.parent
-        ) {
-          if (current.transform != null) {
-            rect = MatrixUtils.transformRect(current.transform!, rect);
-          }
-        }
-        return rect;
-      }
-
       testWidgets('have their semantics in the row they start in', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(
@@ -2577,4 +2707,19 @@ void main() {
     );
     expect(tester.getSize(find.byType(Table)), Size.zero);
   });
+}
+
+// The rect of `node` in the coordinates of the table that it is in.
+Rect rectInTable(SemanticsNode node) {
+  Rect rect = node.rect;
+  for (
+    SemanticsNode? current = node;
+    current != null && current.role != SemanticsRole.table;
+    current = current.parent
+  ) {
+    if (current.transform != null) {
+      rect = MatrixUtils.transformRect(current.transform!, rect);
+    }
+  }
+  return rect;
 }
