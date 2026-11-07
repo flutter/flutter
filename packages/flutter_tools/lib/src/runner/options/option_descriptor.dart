@@ -78,7 +78,7 @@ abstract class OptionDescriptor<T> {
   String get flag => '--$name';
 
   /// Registers this option with [parser], maintaining descriptor identity per parser.
-  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride});
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hide, String? help});
 
   /// Checks if this option was explicitly provided on the command line.
   bool wasProvided(ArgResults? results, {ArgResults? globalResults}) {
@@ -120,8 +120,8 @@ abstract class OptionDescriptor<T> {
     };
   }
 
-  bool _computeEffectiveHide({required bool verboseHelp, bool? hideOverride}) =>
-      hideOverride ?? (hide || (verboseOnly && !verboseHelp));
+  bool _computeEffectiveHide({required bool verboseHelp, bool? hide}) =>
+      hide ?? (this.hide || (verboseOnly && !verboseHelp));
 
   bool _isAlreadyRegistered(ArgParser parser) {
     final ArgParserRegistry registry = _registryFor(parser);
@@ -171,7 +171,7 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
   final List<String> aliases;
 
   @override
-  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hide, String? help}) {
     if (_isAlreadyRegistered(parser)) {
       return;
     }
@@ -180,12 +180,12 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
       name,
       abbr: abbr,
       aliases: aliases,
-      help: help,
+      help: help ?? this.help,
       valueHelp: valueHelp,
       defaultsTo: defaultsTo,
       allowed: allowed,
       allowedHelp: allowedHelp,
-      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hide: hide),
     );
     _recordRegistration(parser);
   }
@@ -220,7 +220,7 @@ class DefaultedStringOptionDescriptor extends OptionDescriptor<String> {
   final List<String> aliases;
 
   @override
-  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hide, String? help}) {
     if (_isAlreadyRegistered(parser)) {
       return;
     }
@@ -229,12 +229,12 @@ class DefaultedStringOptionDescriptor extends OptionDescriptor<String> {
       name,
       abbr: abbr,
       aliases: aliases,
-      help: help,
+      help: help ?? this.help,
       valueHelp: valueHelp,
       defaultsTo: defaultsTo,
       allowed: allowed,
       allowedHelp: allowedHelp,
-      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hide: hide),
     );
     _recordRegistration(parser);
   }
@@ -270,7 +270,7 @@ abstract class _IntOptionDescriptorBase<R> extends OptionDescriptor<R> {
   final List<String> aliases;
 
   @override
-  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hide, String? help}) {
     if (_isAlreadyRegistered(parser)) {
       return;
     }
@@ -279,12 +279,12 @@ abstract class _IntOptionDescriptorBase<R> extends OptionDescriptor<R> {
       name,
       abbr: abbr,
       aliases: aliases,
-      help: help,
+      help: help ?? this.help,
       valueHelp: valueHelp,
       defaultsTo: defaultsTo?.toString(),
       allowed: allowed,
       allowedHelp: allowedHelp,
-      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hide: hide),
     );
     _recordRegistration(parser);
   }
@@ -367,17 +367,17 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
   final bool negatable;
 
   @override
-  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hide, String? help}) {
     if (_isAlreadyRegistered(parser)) {
       return;
     }
     parser.addFlag(
       name,
       abbr: abbr,
-      help: help,
+      help: help ?? this.help,
       defaultsTo: defaultsTo ?? false,
       negatable: negatable,
-      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hide: hide),
     );
     _recordRegistration(parser);
   }
@@ -410,17 +410,17 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
   final bool negatable;
 
   @override
-  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hide, String? help}) {
     if (_isAlreadyRegistered(parser)) {
       return;
     }
     parser.addFlag(
       name,
       abbr: abbr,
-      help: help,
+      help: help ?? this.help,
       defaultsTo: null,
       negatable: negatable,
-      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hide: hide),
     );
     _recordRegistration(parser);
   }
@@ -459,7 +459,7 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
   final List<String> aliases;
 
   @override
-  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hide, String? help}) {
     if (_isAlreadyRegistered(parser)) {
       return;
     }
@@ -467,13 +467,13 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       name,
       abbr: abbr,
       aliases: aliases,
-      help: help,
+      help: help ?? this.help,
       valueHelp: valueHelp,
       defaultsTo: defaultsTo,
       splitCommas: splitCommas,
       allowed: allowed,
       allowedHelp: allowedHelp,
-      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hide: hide),
     );
     _recordRegistration(parser);
   }
@@ -537,7 +537,7 @@ abstract class _EnumOptionDescriptorBase<T extends Enum, R> extends OptionDescri
   List<String> get allowed => values.map(_formatName).toList();
 
   @override
-  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hide, String? help}) {
     if (_isAlreadyRegistered(parser)) {
       return;
     }
@@ -555,12 +555,12 @@ abstract class _EnumOptionDescriptorBase<T extends Enum, R> extends OptionDescri
       name,
       abbr: abbr,
       aliases: aliases,
-      help: help,
+      help: help ?? this.help,
       valueHelp: valueHelp,
       defaultsTo: defaultString,
       allowed: allowed,
       allowedHelp: effectiveAllowedHelp,
-      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hide: hide),
     );
     _recordRegistration(parser);
   }
@@ -651,19 +651,20 @@ extension ArgParserDescriptorExtension on ArgParser {
   void addDescriptor(
     OptionDescriptor<Object?> descriptor, {
     bool verboseHelp = false,
-    bool? hideOverride,
+    bool? hide,
+    String? help,
   }) {
-    descriptor.addTo(this, verboseHelp: verboseHelp, hideOverride: hideOverride);
+    descriptor.addTo(this, verboseHelp: verboseHelp, hide: hide, help: help);
   }
 
   /// Registers multiple [descriptors] with this parser.
   void addDescriptors(
     Iterable<OptionDescriptor<Object?>> descriptors, {
     bool verboseHelp = false,
-    bool? hideOverride,
+    bool? hide,
   }) {
     for (final descriptor in descriptors) {
-      descriptor.addTo(this, verboseHelp: verboseHelp, hideOverride: hideOverride);
+      descriptor.addTo(this, verboseHelp: verboseHelp, hide: hide);
     }
   }
 }
