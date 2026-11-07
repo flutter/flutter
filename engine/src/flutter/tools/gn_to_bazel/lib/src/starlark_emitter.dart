@@ -331,18 +331,65 @@ final class _ListAttribute {
     }
     sequence.removeWhere(((Condition, _Item) entry) => entry.$1 == condition);
   }
+
+  /// Removes [item] (that very object) from under [condition] and from the
+  /// order; an emptied condition goes with it.
+  void remove(Condition condition, _Item item) {
+    if (condition == Condition.always) {
+      always.removeWhere((_Item existing) => identical(existing, item));
+    } else {
+      final List<_Item>? items = conditional[condition];
+      if (items != null) {
+        items.removeWhere((_Item existing) => identical(existing, item));
+        if (items.isEmpty) {
+          conditional.remove(condition);
+        }
+      }
+    }
+    sequence.removeWhere(
+      ((Condition, _Item) entry) => entry.$1 == condition && identical(entry.$2, item),
+    );
+  }
 }
 
 /// A generated rule.
 /// The constants of @macos_sdk's sdk.bzl that name the host's Xcode by
 /// absolute path (bazel_mapping.dart's referenceConstants for darwin_sdk.gni's
-/// platform paths): a compile flag around one of them reads the Xcode, so
-/// the compile is the Mac's (render's `no-remote-exec`).
-const List<String> _xcodePlatformConstants = <String>[
-  'MACOS_PLATFORM_PATH',
-  'IPHONESIMULATOR_PLATFORM_PATH',
-  'IPHONEOS_PLATFORM_PATH',
+/// platform paths), each with the @macos_sdk target that gives a compile
+/// the platform's Developer directories as inputs instead
+/// (`platform_developer`, macos_sdk.bzl): a compile flag around one of them
+/// reads the Xcode, which a remote worker has not, so render() turns the
+/// two flags darwin/common's test_config makes of the platform path --
+/// `-F<platform>/Developer/Library/Frameworks`, `-I<platform>/Developer/usr/lib`
+/// -- into a dependency on that target, and marks a rule whose remaining
+/// flags (a Swift module's swiftflags) still name the Xcode `no-remote-exec`.
+const Map<String, String> _xcodePlatformConstants = <String, String>{
+  'MACOS_PLATFORM_PATH': '@macos_sdk//:macos_developer',
+  'IPHONESIMULATOR_PLATFORM_PATH': '@macos_sdk//:ios_simulator_developer',
+  'IPHONEOS_PLATFORM_PATH': '@macos_sdk//:ios_developer',
+};
+
+/// The compile flags test_config makes of a platform path, as the emitter
+/// spells them around the constant: what [_xcodePlatformConstants]'
+/// targets stand in for.
+const List<(String, String)> _platformDeveloperFlags = <(String, String)>[
+  ('"-F" + ', ' + "/Developer/Library/Frameworks"'),
+  ('"-I" + ', ' + "/Developer/usr/lib"'),
 ];
+
+/// The @macos_sdk target a compile flag around a platform-path constant
+/// stands for, or null when [text] is not one of the two
+/// ([_platformDeveloperFlags]).
+String? _platformDeveloperTarget(String text) {
+  for (final MapEntry<String, String> constant in _xcodePlatformConstants.entries) {
+    for (final (String prefix, String suffix) in _platformDeveloperFlags) {
+      if (text == '$prefix${constant.key}$suffix') {
+        return constant.value;
+      }
+    }
+  }
+  return null;
+}
 
 final class _Rule {
   _Rule(this.kind, this.name, List<String> comments) : comments = List<String>.of(comments);
@@ -6066,19 +6113,40 @@ final class _Emitter {
       }
     }
     // A target whose compiles read the host's Xcode by absolute path --
-    // darwin/common's test_config and swift_testing_config name the
-    // platform's Developer directories (XCTest, the Testing framework) as
-    // `-F`/`-I` flags around the platform-path constants of @macos_sdk's
-    // sdk.bzl -- compiles on the Mac: a worker has no Xcode (the Apple
-    // toolchains' remote-compile mode, build/bazel:apple_remote_compiles,
-    // sends the compiles to Linux workers; the first iOS test build there
-    // stopped at `'XCTest/XCTest.h' file not found`, 11-05). The tag reaches
-    // the rule's actions (Bazel propagates tags to actions).
+    // darwin/common's test_config names the platform's Developer
+    // directories (XCTest, the Testing framework) as `-F`/`-I` flags around
+    // the platform-path constants of @macos_sdk's sdk.bzl -- would compile
+    // on the Mac alone: a worker has no Xcode (the Apple toolchains'
+    // remote-compile mode, build/bazel:apple_remote_compiles, sends the
+    // compiles to Linux workers; the first iOS test build there stopped at
+    // `'XCTest/XCTest.h' file not found`, 11-05). The two flags become a
+    // dependency on the platform's `:..._developer` (macos_sdk.bzl's
+    // platform_developer: the same `-F` and `-I` on views of the
+    // directories, exec-root paths, the directories as inputs), under the
+    // flags' own conditions; a rule whose Swift flags still name the Xcode
+    // (the swift rules take no CcInfo for `-F`) keeps `no-remote-exec`,
+    // which reaches its actions (Bazel propagates tags to actions) -- Swift
+    // compiles run on the Mac in any case.
     for (final _Rule rule in rules) {
+      final _ListAttribute? copts = rule.lists['copts'];
+      if (copts != null) {
+        final _ListAttribute deps = rule.list('deps');
+        final replaced = <(Condition, _Item)>[];
+        for (final (Condition condition, _Item item) in copts.sequence) {
+          final String? target = _platformDeveloperTarget(item.text);
+          if (target != null) {
+            replaced.add((condition, item));
+            deps.addUnique(condition, _Item(target, comment: item.comment));
+          }
+        }
+        for (final (Condition condition, _Item item) in replaced) {
+          copts.remove(condition, item);
+        }
+      }
       final bool readsXcode = <String>['copts', 'swiftflags'].any(
         (String attribute) =>
             rule.lists[attribute]?.items.any(
-              (_Item item) => _xcodePlatformConstants.any(item.text.contains),
+              (_Item item) => _xcodePlatformConstants.keys.any(item.text.contains),
             ) ??
             false,
       );
