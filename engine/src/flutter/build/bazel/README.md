@@ -13,8 +13,17 @@ in this directory is used by the GN build.
 | `dart_wrap/` | The Dart SDK, built with `gn_build`: `BUILD.gn` lists the GN targets, `BUILD.bazel` the args, the inputs and the `cc_library` facades; `tests/` starts the VM from the archive. |
 | `gl_wrap/` | The GPU test backends -- ANGLE, SwiftShader, the Vulkan loader -- built with `gn_build` the same way; `stubs/` holds the stand-in GN files for the engine directories ANGLE's GN reaches; `tests/` renders through both. See below. |
 | `web/` | The web build's configuration targets (the module variants' settings). |
+| `bazel_ci.py` | The CI module: what `tools/gn --bazel`, ninja's install step and `run_tests.py` call to run a builder file's build and tests through Bazel (`ci.md`). |
+| `bazel_ci_test.py` | Its tests. |
+| `builds.json` | The converter's table of the builder files' builds -- each build's configuration, install target and suites -- which `bazel_ci.py` reads. Generated; do not edit. |
+| `ci.md` | The CI path: how a LUCI builder builds and tests the engine with Bazel through the unchanged recipe, and what a recipe change would do differently. |
 | `README.md` | This file: the design of the whole, rules included. |
 | **`//build_defs/`** (the repository root) | **The rules** (`.bzl`) the `BUILD` files load, by subject -- `cc/`, `config/`, `gn/`, `dart/`, `dist/`, `testing/`, `web/`, `flatbuffers/`, `impeller/`, `repositories/` -- with their scripts and helper targets; `build_defs/README.md` is the index, the sections below the design. Rules relevant to one directory stay with it: the toolchain configurations (`toolchains/`), `packages/flutter/test/framework_tests.bzl`. |
+
+Numbers like "450–452" or "since 448" are commits of the migration branch's
+own sequence, "Qnn"/"Dnn" entries of its decision log, "Tnn" the Mac
+tester's tasks and `research/NN` its notes -- all kept outside the tree as
+the work's record. They date a statement and can be read past.
 
 ## How dependencies reach Bazel during the transition
 
@@ -114,7 +123,8 @@ and `-g0`: BUILDCONFIG.gn's `symbol_level` for an optimized Linux build is
 0, so GN's `host_debug`, `host_profile` and `host_release` carry no debug
 info; `--copt=-g2` puts it back for a profile)
 without LTO -- `tools/gn --no-lto`, which every host builder in
-`ci/builders` and `et`'s `local_engine.json` pass; the wrapped GN builds
+`ci/builders` but linux_benchmarks' `ci/host_release_benchmarks` and `et`'s
+`local_engine.json` pass; the wrapped GN builds
 set `enable_lto = false` in both modes for the same reason, so an optimized
 build is one build without LTO rather than an engine without and a VM with.
 There is no component build: `.bazelrc` sets `--force_pic` and
@@ -204,11 +214,13 @@ the library exported neither `JNI_OnLoad` nor the ICU data. LTO is a
 setting for the Android toolchains (`--//engine/src/flutter/build/bazel:lto`,
 which CI's AOT builds set: `ci_android_profile_arm64`,
 `ci_android_release_arm64`; the developer's configurations of the same names
-have none), and `--stripped` defaults off for them, as `tools/gn`'s
+have none), and the Android configurations set `stripped` off
+(`stripped=false`; the flag's own default is on, so a bare
+`--platforms=...:android_*` build strips), as `tools/gn`'s
 `stripped_symbols = target_os != "android"` has it: the build root holds the
 unstripped library and the install's aspect writes GN's android toolchain's
 strip step beside it as `lib.stripped/<name>` (and `shipped/<name>` where
-`--stripped` holds, which the size-experiment builders' jars pack). The Dart
+`--stripped` holds). The Dart
 wrap reads the platform: `target_os = "android"` and
 `dart_use_compressed_pointers` from the CPU, `gen_snapshot` built for the
 host targeting Android (`clang_x64/gen_snapshot`, the host toolchain's
@@ -332,8 +344,11 @@ which the toolchain configuration sets), so that nothing in the toolchain
 names a repository or a machine; `emscripten_config` is the Python
 configuration emcc reads in place of the SDK's `.emscripten`, with the
 same roles resolved against the execution root and the SDK's prebuilt
-cache **frozen** -- a system library variant the cache lacks (LTO
-variants, say: `lto/libembind.a`) is an error, where GN's emcc would
+cache **frozen** -- the LTO variants GN's links build on the spot come
+from `@emsdk_lto` (`lto_libraries.bzl`: built at fetch time by the SDK's
+own embuilder into a cache of this repository's own, linked into the
+view), and a system library variant neither holds (one outside
+`LTO_LIBRARIES`, say `lto/libembind.a`) is an error, where GN's emcc would
 build it into the shared tree on the spot. The SDK reaches every action
 as directory inputs. `emscripten_cc_toolchain_config.bzl` holds the
 flags of `out/wasm_release`'s and `out/wasm_debug_unopt`'s compile and
@@ -533,10 +548,8 @@ target's `cflags_objc`/`cflags_objcc` (one list, `MACOS_CFLAGS_OBJC`
 under `is_mac`) besides, alwayslink as the target is, compatible where the
 sources are listed -- which the target depends on under the same
 conditions; a target with Objective-C flags and no Objective-C sources
-gets neither, as GN applies them to no compile. Three files keep `is_mac`
-false for now (the manifest's `assume`, `macosDeferred`): the archives'
-and font-subset's entitlements lists and the Impeller SDK's dylib are the
-Apple products' phase's. And the host itself is a repository,
+gets neither, as GN applies them to no compile. And the host itself is a
+repository,
 `@host_platform//:host.bzl` (`HOST_OS`, `HOST_CPU`, their constraints,
 `HOST_PREBUILTS`, `HOST_DART_SDK`, `HOST_CLANG`), from which
 `build/bazel`'s `host_toolchain` group takes the host's CPU -- an
@@ -546,7 +559,8 @@ Apple-silicon Mac is its own host, where x86_64 was assumed.
 
 The Dart SDK (VM, `gen_snapshot`, the frontend server, ...) is not converted
 to Bazel rules; the engine's GN build of it runs as one Bazel action, the
-`gn_build` rule in `gn_build/`. The action builds a GN source root out of
+`gn_build` rule (`build_defs/gn/gn_build.bzl`). The action builds a GN
+source root out of
 symlinks to its declared inputs -- one link per file, so the GN build sees
 nothing else whether or not it is sandboxed -- runs `gn gen` with
 `--root-target` on `dart_wrap/BUILD.gn` (which loads only the Dart targets
@@ -612,9 +626,8 @@ the GN root and build directory in
 (a regular GN build directory: `gn args`, `ninja -t ...` and
 `compile_commands.json` all work there).
 
-Known limits: zlib and BoringSSL
-have no Bazel targets yet and stay inside `libcommon_embedder_dart_io.a`;
-`bootstrap_compile_platform.exe`, which the prebuilt SDK's `dart compile exe`
+Known limits: `bootstrap_compile_platform.exe`, which the prebuilt SDK's
+`dart compile exe`
 produces, embeds the absolute path of the build directory (as the GN build's
 does), so it differs between sandboxed runs; and the Dart version script
 looks for `git` on `PATH` at `gn gen` time (and copes without it).
@@ -664,7 +677,7 @@ the generated files keep `flutter_prebuilt_dart_sdk` assumed on), the
 install (`build/dart:dart_sdk` lays the prebuilt's there, where GN's is
 `create_sdk`'s; the built tree as a directory product of `gn_build` is
 research/22's N2), and
-the `dart_test`/`dart_binary` rules and the package tests, which run on the
+the `dart_test`/`dart_vm_kernel` rules and the package tests, which run on the
 prebuilt SDK (the builder runs no tests).
 
 ## The Dart platform, the core snapshot and the test fixtures
@@ -734,9 +747,11 @@ rules in `dart/`:
 Two configuration choices are deliberate. The wrapped build's tools run from
 the *target* configuration (`cfg = "target"`), because GN builds `gen_snapshot`
 in the host toolchain, which for a host build is the default toolchain, and
-the core snapshot must match the VM it is linked with; cross builds, where
-`gen_snapshot` is a host binary targeting another architecture, are a later
-phase. And kernels are compiled under a virtual root (`--filesystem-root .`
+the core snapshot must match the VM it is linked with; in a cross build the
+tool is the wrap's `gen_snapshot_host`, the host's `gen_snapshot` targeting
+the build's CPU, which the wrap places under `clang_<host cpu>/` as GN's
+build directory does. And kernels are compiled under a virtual root
+(`--filesystem-root .`
 `--filesystem-scheme org-dartlang-root`), so that a source's URI in the
 kernel is `org-dartlang-root:///engine/src/flutter/...` on every machine
 rather than the sandbox's path; a test that needs a library's URI asks
@@ -1019,7 +1034,8 @@ CI's `chrome_and_driver` dependency holds -- as `CHROME_EXECUTABLE`, and
 `browser_driver` puts the driver's directory on PATH, so the tests drive the
 pinned browser wherever they run and not the host's; Chrome's system
 libraries (X11, NSS, GTK, ...) come from the runtime sysroot through the
-same launcher the web engine's tests use (the next section).
+same launcher the web engine's tests use (see "The web engine's unit
+tests").
 The desktop shard (`//packages/flutter_tools:desktop_shard`, 13 files)
 builds and runs Linux desktop apps through the tool: `flutter build linux`
 (`--config-only` and whole), the native-asset and data-asset tests,
@@ -1078,7 +1094,7 @@ and Gradle reads Maven repositories from `file:` URLs as from https ones.
 `android_engine_artifacts` (in `build/archives`) declares all of it: the
 engine for three CPUs in three modes through `in_configuration` -- the
 Android builders' configurations, `-c opt` in debug too (`compilation_mode`),
-so that a debug build shares `bazel-out/android_<cpu>-opt/` with
+so that a debug build shares `bazel-out/android_<cpu>_debug-opt/` with
 `--config=android_debug_<cpu>` -- hours the first time, cached afterwards.
 **These tests reach the network, by decision (10-26):** Gradle fetches its
 distribution, the Android Gradle plugin, Kotlin and the libraries an app
@@ -1234,7 +1250,8 @@ engine `c5ec59d0…` from `flutter precache --linux --web`): the three root
 suites analyze under the config (2,557 targets; the tree's 2,799);
 `//packages/flutter/test/animation:animation //dev/bots:tests` 24 of 24
 pass; the tool's general and commands shards and the widgets tree:
-**745 of 745 pass** (277 general, 68 hermetic, 10 permeable, 390 widgets;
+**745 of 745 pass** (277 general, 68 hermetic, 10 of the permeable half's
+11, 390 widgets;
 37 min at `--local_test_jobs=4`, create_test's 18 min the critical path);
 the tool's integration and desktop shards (11-03): **74 of 74 pass** in
 36 min. On a Mac
@@ -1443,7 +1460,7 @@ felt suite, `:chrome_tests` over the sixteen Chrome suites -- the CanvasKit
 `chromium` and `full` variants, skwasm's cross-origin-isolated and
 single-threaded runs, wimp, WebParagraph, dart2wasm's engine suite, the
 three fallbacks suites (whose bundle compiles a file twice, dart2wasm-skwasm
-and dart2js-canvaskit side by side) -- `:firefox_tests` over the eight
+and dart2js-canvaskit side by side) -- `:firefox_tests` over the nine
 Firefox suites (`@firefox`, the release the lock pins, through
 `FIREFOX_EXECUTABLE`; felt starts an X display itself, the host's Xvfb,
 inside the sandbox) and `:tests` over both; the files run in parallel
@@ -1592,7 +1609,7 @@ path; 5.1 before). The sysroot's Xvfb loads 29 libraries from the sysroot
 and glibc's 6 from the host.
 
 ```sh
-bazel test //engine/src/flutter/lib/web_ui:tests                              # Chrome's sixteen suites and Firefox's eight: 923 tests
+bazel test //engine/src/flutter/lib/web_ui:tests                              # Chrome's sixteen suites and Firefox's nine (923 tests with the eight before the roll)
 bazel test --//build_defs/web:browser_libraries=//build_defs/web:host_libraries //engine/src/flutter/lib/web_ui:tests   # the host's libraries
 bazel test //engine/src/flutter/lib/web_ui:chrome_tests                       # 546 tests
 bazel test //engine/src/flutter/lib/web_ui:chrome-dart2js-canvaskit-engine   # 86 files; felt's suite of that name
@@ -1604,7 +1621,8 @@ bazel build //engine/src/flutter/lib/web_ui:bundles/dart2js-canvaskit-engine   #
 skipped, in 4m18s from cold (the compiles included) -- what `felt test
 --suite=chrome-dart2js-canvaskit-engine` counts. Chrome's sixteen: 546
 files, 10,448 cases and 121 skipped, 19 minutes from cold with the 336
-compiles; Firefox's eight: 377 files, 6,504 cases and 247 skipped, 19
+compiles; Firefox's eight before the roll (nine since, with
+`firefox-dart2wasm-wimp-ui`): 377 files, 6,504 cases and 247 skipped, 19
 minutes of runs. Safari and Edge (other hosts) stay felt's.
 
 ## Wrapped GN builds: the GPU test backends
@@ -1681,7 +1699,7 @@ bazelisk test  //engine/src/flutter/build/bazel/gl_wrap/tests:gl_backends_smoke_
 
 The smoke test clears and reads back a pixel through EGL on ANGLE and
 SwiftShader, and opens SwiftShader as a Vulkan driver. As with the Dart SDK,
-host linux-x64 only for now, and `--strategy=GnBuild=local` keeps a regular
+`--strategy=GnBuild=local` keeps a regular
 GN build directory under `bazel-bin/.../gl_wrap/gl_backends.gn/root/out/bazel`
 for iterating.
 
@@ -1861,7 +1879,7 @@ each at first use; `maven_lock.py` pins each file (the `.aar` or the
 `.jar`, maven.google.com first, Maven Central second) by sha256 into
 `maven.lock.bzl` (99 files; the three BOMs have none), and `maven.bzl`'s
 `maven_artifacts` repository rule fetches them into
-`@maven_android_tests` (1.9 GB, the android-all jars most of it; AARs
+`@maven_android_tests` (2.2 GB, the android-all jars most of it; AARs
 unpacked, `classes.jar` and `res/` apart; the android-all jars in one
 directory of their own, never on a class path) -- Maven Central's files
 from Google's copy of it on Cloud Storage first
@@ -2139,12 +2157,14 @@ under `exe.unstripped/` or `lib.unstripped/`; a shared library under
 otherwise. `--no-stripped` in a builder configuration is that flag off
 (the developer's `host_debug`, `host_debug_unopt`, `host_profile`,
 `host_release`); for the web it is nothing, as GN's wasm toolchain strips
-nothing; for Android it is the default, and the aspect adds GN's android
+nothing; for Android the generated configurations set it off (the flag
+itself defaults on), and the aspect adds GN's android
 toolchain's `--strip-unneeded` copy as `lib.stripped/<name>` (see the
 Android section); on the macOS platforms the aspect strips nothing and
 writes no `exe.unstripped/`, as GN's mac toolchain links into the build
-root as is (the frameworks' packaging strips and writes dSYMs: the Apple
-products' phase). The objcopy is the host's clang's (`@host_platform`). The
+root as is (the frameworks' packaging strips and writes dSYMs:
+`apple_universal`, above). The objcopy is the host's clang's
+(`@host_platform`). The
 Dart wrap's `gen_snapshot` is already GN's stripped file.
 
 The root package had `//engine/src/flutter:install` for the developer's
@@ -2233,7 +2253,8 @@ downloads no engine artifacts, and pub resolves `sky_engine` from
 run one plain `flutter test` first, or the first local-engine run fails in
 pub with "could not find package sky_engine".
 
-Neither an install nor the manifest carries the web SDK (the wasm builds'),
+Neither the manifest nor a host builder's install carries the web SDK (the
+wasm builders' installs lay it),
 or GN's own bookkeeping (`args.gn`,
 depfiles). `compile_commands.json`, which `tools/clang_tidy` and clangd
 read, comes from `tools/gn_to_bazel/tool/compile_commands.py` over
@@ -2368,8 +2389,8 @@ bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine
 bazel build --config=host_debug //engine/src/flutter:local_engine
 cd examples/hello_world
 ../../bin/flutter build apk --debug --target-platform android-arm64 \
-    --local-engine=$PWD/../../engine/src/out/bazel-out/android_arm64-opt/bin/engine/src/flutter \
-    --local-engine-host=$PWD/../../engine/src/out/bazel-out/k8-opt/bin/engine/src/flutter
+    --local-engine=$PWD/../../engine/src/out/bazel-out/android_arm64_debug-opt/bin/engine/src/flutter \
+    --local-engine-host=$PWD/../../engine/src/out/bazel-out/linux_x64_debug-opt/bin/engine/src/flutter
 ```
 
 builds hello_world's `app-debug.apk` (69.9 MB, 191 s with pub and the
@@ -2386,8 +2407,7 @@ kernel with the Bazel Dart SDK's `dartaotruntime` and frontend server in
 which this host lacks). The Android manifest names 380 entries: the root
 group's files -- the embedding's jars and poms, `libflutter.so` with its
 `lib.stripped/` copy, `clang_x64/gen_snapshot`, the snapshots, the
-archives, ICU's data file for the target. The Xcode side (macOS, iOS) is
-the Apple phase's.
+archives, ICU's data file for the target.
 
 ## The builders: `--config=<build>` and their install targets
 
@@ -2414,7 +2434,8 @@ for the CPU (`toolchains:android_arm64`, `android_x64`, `android_arm` --
 the reason), `--lto`/`--no-lto` the `lto` setting
 (`//engine/src/flutter/build/bazel:lto`: `-flto` on the compiles and links
 of the clang toolchains, Linux and Android; on in an optimized build
-without `--no-lto`, as `tools/gn` has it, which is CI's Android AOT builds),
+without `--no-lto`, as `tools/gn` has it, which is CI's Android AOT builds
+and linux_benchmarks' `ci/host_release_benchmarks`),
 `--no-dart-secure-socket` the Dart wrap's `dart_disable_secure_socket` flag
 (the size-experiment builds; the archives take their `-size-exp` names from
 it), `--enable-vulkan-validation-layers` nothing where GN's default formula
@@ -2443,11 +2464,14 @@ the Dart wrap's `dart_debug` flag (a Debug VM), `--gn-args=dart_dynamic_modules=
 the wrap's `dart_dynamic_modules` flag (a VM with dynamic modules; the
 archives take their `-ddm` names from it), `--prebuilt-dart-sdk` and
 `--use-glfw-swiftshader` what the generated files assume,
+`--no-prebuilt-dart-sdk` the Dart wrap's `flutter_prebuilt_dart_sdk`
+setting off (the Dart SDK from source, above),
 `--rbe`/`--no-goma` where the build runs and `--build-embedder-examples` a
 target list, neither a flag -- and, for a build with a flag the Bazel build
-has no setting for yet, the reason and no configuration:
-`--no-prebuilt-dart-sdk`. The developer's own configurations,
-`local_engine.json`'s `linux/` builds (what `et build --config <name>` runs:
+has no setting for yet, the reason and no configuration (no Linux or Mac
+build is in that case today). The developer's own configurations,
+`local_engine.json`'s and `local_engine_common.json`'s `linux/` builds
+(what `et build --config <name>` runs:
 `host_debug`, `host_debug_unopt`, `host_profile`, `host_release`,
 `wasm_release`, `wasm_debug_unopt`, `android_debug_arm64`,
 `android_debug_riscv64`, `android_debug_unopt_arm64`,
@@ -2465,14 +2489,16 @@ prefix as its build directory does: `ci_host_debug` and `ci_host_release`
 (`out/ci/host_debug_unopt`, asan and a Debug VM) beside `host_debug_unopt`,
 `ci_android_profile_arm64` and `ci_android_release_arm64` (LTO) beside
 `android_profile_arm64` and `android_release_arm64`.
-Of the fifty-five Linux builds, fifty-four have a configuration, fifty-one
+Of the fifty-eight Linux builds, every one has a configuration, fifty-five
 distinct: the host's `host_debug`, `ci_host_debug`,
 `host_debug_unopt`, `host_profile`, `host_release`, `ci_host_release`,
 `host_debug_desktop`,
 `host_profile_desktop`, `host_release_desktop`, `host_debug_test`,
 `host_profile_test`, `host_release_test`, `ci_host_debug_unopt`,
 `host_debug_unopt_impeller_tests`, `host_debug_ddm`,
-`host_release_licenses`, `host_debug_clang_tidy`; the web's `wasm_release`,
+`host_release_licenses`, `licenses` (the standalone `linux_license.json`'s),
+`host_debug_no_prebuilt_dart_sdk`, `host_release_benchmarks`,
+`linux_unopt_debug_no_rbe`, `host_debug_clang_tidy`; the web's `wasm_release`,
 `wasm_debug_unopt`; the arm64 cross builds' `linux_debug_arm64`, `linux_debug_arm64_desktop`,
 `linux_profile_arm64_desktop`, `linux_release_arm64_desktop`; and
 Android's `android_debug`, `android_profile`, `android_release` (arm),
@@ -2487,17 +2513,21 @@ Android's `android_debug`, `android_profile`, `android_release` (arm),
 `android_debug_arm64_size_exp`, `android_release_arm64_size_exp`,
 `android_debug_arm64_validation_layers`, `android_debug_arm64_clang_tidy`,
 `android_debug_test`, `android_emulator_debug_x64`,
-`android_embedder_debug_unopt`. The one without is
-`ci/host_debug_no_prebuilt_dart_sdk`. The file ends by naming the builds of
+`android_embedder_debug_unopt`. The file ends by naming the builds of
 those files that are not configurations at all, each with its reason --
-the twelve Fuchsia builds (a platform the Bazel build has none for yet)
-and the eight web test bundles (no `tools/gn` step) -- so that every build
+the twelve Fuchsia builds and the three riscv64 Linux builds
+(`--linux-cpu=riscv64`), platforms the Bazel build has none for yet, and
+the eight web test bundles (no `tools/gn` step) -- so that every build
 of the Linux builder files is in one place or the other, and one filed
 under the wrong reason shows.
 
-The Mac's builder files (`mac_*.json`, and `local_engine.json`'s `macos/`
-builds) are read the same way since the macOS port (research/20, M3), after
-the Linux ones: forty-four builds, thirty-six configurations distinct. A
+The Mac's builder files (`mac_*.json`, `standalone/mac_*.json`, and
+`local_engine.json`'s and `local_engine_common.json`'s `macos/` builds)
+are read the same way since the macOS port (research/20, M3), after
+the Linux ones: sixty-eight builds, sixty configurations distinct (the
+eight others are builds that share one, below: the developer's Android and
+web builds with the Linux builds of the same names,
+`macos/host_debug_unopt_arm64` with `ci/host_debug_unopt_arm64`). A
 Mac's build is always a platform of the Bazel build, since `tools/gn`'s
 target CPU on a Mac is `--mac-cpu` -- x64 unless given -- and not the Mac's
 own: `--mac --mac-cpu arm64` and a host build with `--mac-cpu arm64` are
@@ -2551,8 +2581,9 @@ directory for its target of the same name, a bare unique name, as GN's
 ninja files spell them), installing into GN's `--target-dir` -- or, for a
 build without one, the directory `tools/gn` names for its flags, which the
 install rule reads off its configuration (`checkout_view.bzl`'s
-`build_directory_attrs`: `host`, `wasm` or `linux`, the runtime mode,
-`_unopt`, `_arm64`) --
+`build_directory_attrs`: `host`, `wasm`, `linux`, `android` or `ios`, the
+runtime mode, `_sim`, `_unopt`, and the CPU where it is not the target's
+default -- `_arm64`, `_x64`, `_x86`, `_riscv64`) --
 (a ninja
 target nothing converted answers to would be listed in a comment; since 448
 every builder's every target has its counterpart); the host test
@@ -2587,25 +2618,25 @@ tests under flutter_tester with the VM service's and the smoke test,
 Mac, each the converted test of that name -- `runTestsTypeSuites`,
 `runTestsEngineSuites` and `runTestsEngineSuitesMac` in `builders.dart`),
 with the build's other steps
-(the formatter, the linters, `generate_metrics.sh`) listed as what they
-are, scripts of the checkout:
+(the formatter, the linters, "Check generated Bazel files") listed as what
+they are, scripts of the checkout:
 `bazel test --config=host_debug_test //engine/src/flutter/ci/builders:host_debug_test_tests`
 runs what `Linux linux_host_engine_test`'s `host_debug_test` runs.
-`generated_file` over `metadata` (the macOS entitlements lists) is the
-Apple phase's.
 
 The whole engine tree is a wildcard on either host, each skipping the other
 platforms' targets as incompatible rather than failing on them (the
 toolchains' and system libraries' OS compatibility above; the files GN
 reaches under `is_android` or `build_glfw_shell` carry the same condition):
-`bazel test //engine/src/flutter/...` runs 1,345 targets on a Linux x64
-host (1,243 pass, 102 skipped -- Android's, Apple's) and 968 on an
+`bazel test //engine/src/flutter/...` runs 1,427 targets on a Linux x64
+host after the roll (1,345 before it: 1,243 pass, 102 skipped -- Android's,
+Apple's) and 968 on an
 Apple-silicon Mac (873 pass, 95 skipped -- Android's, iOS's, Linux's; the
 377 Firefox web suites are `manual` there until a Mac's run of them is on
 record), in an hour or two from a warm
 cache; `//:framework_tests //:tool_tests //:dart_tests` adds the framework's,
-the tool's and the repository's Dart tests on both (a Mac's `//:tool_tests`
-includes the apple shard and leaves out the Linux desktop shard).
+the tool's and the repository's Dart tests on both (on a Mac `//:tool_tests`
+skips the desktop shard, compatible with Linux alone; the apple shard is
+`//:apple_tool_tests`).
 
 ### CI on these configurations without a recipe change
 
@@ -2613,11 +2644,11 @@ A LUCI builder runs the same install and suites through the unchanged
 `engine_v2` recipe: `tools/gn --bazel` writes a `build.ninja` that runs the
 build's install target (the recipe's `ninja -C out/<dir> <targets>` runs the
 Bazel build), `testing/run_tests.py` runs each `--type` as the build's Bazel
-suites, and Bazel variants of the builder files (`linux_unopt_bazel.json`,
-`linux_host_engine_bazel.json`; `.ci.yaml`'s `Linux linux_unopt_bazel` and
-`Linux linux_host_engine_bazel`, bringup) name the builds. The converter
+suites, and the Linux and Mac builder files carry `--bazel` among their
+builds' flags, in place (the `*_bazel.json` variants they started as were
+folded into the originals). The converter
 writes the table the scripts read (`build/bazel/builds.json`) with the two
-files above and checks the variants against it. [ci.md](ci.md) has the
+files above. [ci.md](ci.md) has the
 design, the limits of the first version and what a recipe change would do
 differently.
 
@@ -2630,8 +2661,10 @@ of the same configuration instead of GN and ninja. `et` asks the converter's cod
 `builders.dart`, the same that generates `configs.bazelrc`) which
 `--config=<name>` the build has -- `host_debug_unopt` for the developer's
 `host_debug_unopt`, `ci_host_debug_unopt` for `ci/host_debug_unopt` -- and
-refuses, naming the flag, a build the Bazel build cannot express
-(`ci/host_debug_no_prebuilt_dart_sdk`). GN labels and patterns are spelled
+refuses, naming the flag, a build the Bazel build cannot express (the
+riscv64 Linux builds' `--linux-cpu=riscv64`, the Fuchsia builds'
+`--fuchsia`; every other Linux and Mac
+build has a configuration). GN labels and patterns are spelled
 the Bazel way through the converter's table: `//flutter/fml:fml_unittests`
 is `//engine/src/flutter/fml:fml_unittests`, `//flutter/shell/...` is
 `//engine/src/flutter/shell/...`, `//flutter/fml:all` is
@@ -2665,8 +2698,10 @@ Android build's names the host build to pair it with); for a CI build the
 install target run into its build directory
 (`//engine/src/flutter/ci/builders:<name>` over the build's ninja targets) --
 GN's layout from Bazel's outputs, in the directory GN would have used, which
-the recipes read. `et run` builds the host's local engine and, for another
-platform, the target's, and hands both directories to `flutter run`. `et test` with no patterns runs the build's `<name>_tests` suite, and
+the recipes read. `et run` builds the host's engine and, for another
+platform, the target's -- a developer's build through its `local_engine`
+manifest, a CI build through its install into its build directory -- and
+hands both directories to `flutter run --local-engine[-host]`. `et test` with no patterns runs the build's `<name>_tests` suite, and
 errors when the build has no `run_tests.py` step. `et query targets` is
 `bazel query 'kind(rule, <patterns>)'` (`tests(<patterns>)` with
 `--testonly`), printed as GN labels; it needs no build directory and no
@@ -2679,10 +2714,7 @@ writes the `--config` build's `compile_commands.json` into its build
 directory through `compile_commands.py` (the build must have been built:
 clang-tidy reads the generated headers) and runs `ci/clang_tidy.sh
 --variant <build directory>` against it; the Dart, Java and Python linters
-read no build and run as before. `et run` installs the host build (and
-the target build, when it is another one the Bazel build has a
-configuration for) into its build directory and hands over to `flutter
-run --local-engine` exactly as the GN path does. `--gn-args`
+read no build and run as before. `--gn-args`
 has no Bazel counterpart (the configuration is the whole of it) and is
 refused; `--rbe`, `--lto` and `--build-strategy` are GN's concerns and are
 ignored. `et stamp` and the rest stay on GN for now. bazelisk must
@@ -2828,7 +2860,8 @@ checkout; the disk cache holds both once built.
 ## What to run before landing: the suites no single wildcard covers
 
 `bazel test //engine/src/flutter/...` is the engine's gate on either host
-(1,345 tests on Linux x64, 968 declared on a Mac), but several suites are
+(1,427 tests on Linux x64 after the roll, 968 declared on a Mac), but
+several suites are
 outside it by design, and a change can break one of them without a wildcard
 noticing -- as 418 did to the Android tool tests (the facsimile's engine
 stamp changed under the Maven repository the Gradle plugin reads; found at
