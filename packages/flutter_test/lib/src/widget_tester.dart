@@ -27,6 +27,7 @@ import 'matchers.dart';
 import 'restoration.dart';
 import 'test_async_utils.dart';
 import 'test_compat.dart';
+import 'test_exception_reporter.dart';
 import 'test_pointer.dart';
 import 'test_text_input.dart';
 import 'tree_traversal.dart';
@@ -181,6 +182,11 @@ void testWidgets(
           semanticsHandle = tester.ensureSemantics();
         }
         test_package.addTearDown(binding.postTest);
+        // Tear-downs run in the reverse order in which they were added, so this
+        // runs after the tear-downs added by the test itself, but before
+        // postTest. This allows tests to dispose their SemanticsHandle with
+        // addTearDown.
+        test_package.addTearDown(tester._verifySemanticsHandlesWereDisposedAfterTearDowns);
         return binding.runTest(
           () async {
             debugResetSemanticsIdCounter();
@@ -199,7 +205,7 @@ void testWidgets(
               }
             }
           },
-          tester._endOfTestVerifications,
+          tester._endOfTestBodyVerifications,
           description: combinedDescription,
         );
       },
@@ -1065,6 +1071,47 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void _endOfTestVerifications() {
     verifyTickersWereDisposed('at the end of the test');
     _verifySemanticsHandlesWereDisposed();
+  }
+
+  /// Used by [testWidgets] instead of [_endOfTestVerifications].
+  ///
+  /// The check for active [SemanticsHandle]s is deferred to
+  /// [_verifySemanticsHandlesWereDisposedAfterTearDowns], so that tests can
+  /// dispose their [SemanticsHandle] with `addTearDown`.
+  void _endOfTestBodyVerifications() {
+    verifyTickersWereDisposed('at the end of the test');
+    _shouldVerifySemanticsHandles = true;
+  }
+
+  /// Whether the test body completed without errors.
+  ///
+  /// If it did not, the check for active [SemanticsHandle]s is skipped to avoid
+  /// reporting spurious errors in addition to the actual failure.
+  bool _shouldVerifySemanticsHandles = false;
+
+  /// Verifies that all [SemanticsHandle]s created by the test were disposed.
+  ///
+  /// [testWidgets] runs this as a tear-down after the tear-downs added by the
+  /// test itself, so that tests can dispose their [SemanticsHandle] with
+  /// `addTearDown`. Failures are reported through [reportTestException].
+  void _verifySemanticsHandlesWereDisposedAfterTearDowns() {
+    if (!_shouldVerifySemanticsHandles) {
+      return;
+    }
+    _shouldVerifySemanticsHandles = false;
+    try {
+      _verifySemanticsHandlesWereDisposed();
+    } catch (error, stack) {
+      reportTestException(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          context: ErrorDescription('running invariant verifications after a test'),
+          library: 'Flutter test framework',
+        ),
+        _testDescription,
+      );
+    }
   }
 
   void _verifySemanticsHandlesWereDisposed() {
