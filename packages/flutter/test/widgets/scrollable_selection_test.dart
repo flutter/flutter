@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_tester.dart' show testTextSelectionHandleControls;
 import 'keyboard_utils.dart';
+import 'two_dimensional_utils.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -1955,6 +1956,417 @@ void main() {
         TargetPlatform.linux,
         TargetPlatform.fuchsia,
       }),
+    );
+  });
+
+  group('auto scroll with nested scrollables', () {
+    // A scrollable auto scrolls a selection only if the drag started inside it,
+    // transitively: a nested scrollable must not scroll a selection that started
+    // above it, while one that started inside it still auto scrolls it. Every
+    // test drives the fixture built by pumpNestedScrollableFixture with a
+    // single-jump mouse drag.
+
+    const nestedFixtureTextStyle = TextStyle(fontSize: 14);
+    const Key nestedScrollableKey = ValueKey<String>('nested scrollable');
+
+    Widget nestedFixtureRow(String text) {
+      return SizedBox(height: 20, child: Text(text, style: nestedFixtureTextStyle));
+    }
+
+    // Pumps `SelectableRegion > CustomScrollView` with ten 'Above n' rows, then
+    // [nested] in a 300 tall box, then fifteen 'Below n' rows. Rows are 20 tall, so
+    // on the 800x600 test surface [nested] spans y 200..500 and the outer
+    // scrollable can scroll 200 pixels.
+    Future<void> pumpNestedScrollableFixture(
+      WidgetTester tester, {
+      required ScrollController outerController,
+      required Widget nested,
+    }) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: emptyTextSelectionControls,
+            child: CustomScrollView(
+              controller: outerController,
+              slivers: <Widget>[
+                for (var i = 0; i < 10; i += 1)
+                  SliverToBoxAdapter(child: nestedFixtureRow('Above $i')),
+                SliverToBoxAdapter(
+                  child: SizedBox(key: nestedScrollableKey, height: 300, child: nested),
+                ),
+                for (var i = 0; i < 15; i += 1)
+                  SliverToBoxAdapter(child: nestedFixtureRow('Below $i')),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    // A two-dimensional scrollable of 200x200 'Cell r<y> c<x>' cells.
+    Widget nestedTableView({
+      required ScrollController verticalController,
+      required ScrollController horizontalController,
+      int maxYIndex = 99,
+    }) {
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 99,
+        maxYIndex: maxYIndex,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return Center(
+            child: Text(
+              'Cell r${vicinity.yIndex} c${vicinity.xIndex}',
+              style: nestedFixtureTextStyle,
+            ),
+          );
+        },
+      );
+      addTearDown(delegate.dispose);
+      // The table lays its cells out at 200x200 only under loose constraints.
+      return Align(
+        alignment: Alignment.topLeft,
+        child: SimpleBuilderTableView(
+          verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+          horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+          delegate: delegate,
+        ),
+      );
+    }
+
+    // A vertical list whose first child is a 100 tall horizontal list of 100 wide
+    // 'H n' items, followed by sixty 20 tall 'V n' rows. When [horizontalWidth] is
+    // given, the horizontal list is that wide and left aligned.
+    Widget nestedListViews({
+      required ScrollController verticalController,
+      required ScrollController horizontalController,
+      double? horizontalWidth,
+    }) {
+      Widget horizontalList = SizedBox(
+        height: 100,
+        width: horizontalWidth,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          controller: horizontalController,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(width: 100, child: Text('H $index', style: nestedFixtureTextStyle));
+          },
+        ),
+      );
+      if (horizontalWidth != null) {
+        horizontalList = Align(alignment: Alignment.centerLeft, child: horizontalList);
+      }
+      return ListView(
+        controller: verticalController,
+        children: <Widget>[
+          horizontalList,
+          for (var i = 0; i < 60; i += 1) nestedFixtureRow('V $i'),
+        ],
+      );
+    }
+
+    RenderParagraph paragraphOf(WidgetTester tester, String text) {
+      return tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text(text), matching: find.byType(RichText)),
+      );
+    }
+
+    // A point inside [text], just after its second character.
+    Offset insideText(WidgetTester tester, String text) {
+      return textOffsetToPosition(paragraphOf(tester, text), 2) + const Offset(0, 5);
+    }
+
+    // Expects every text built inside [of], on stage or in the cache extent, to be
+    // selected in full.
+    void expectAllBuiltTextSelected(WidgetTester tester, Finder of) {
+      final List<RenderParagraph> paragraphs = tester
+          .renderObjectList<RenderParagraph>(
+            find.descendant(
+              of: of,
+              matching: find.byType(RichText, skipOffstage: false),
+              skipOffstage: false,
+            ),
+          )
+          .toList();
+      expect(paragraphs, isNotEmpty);
+      for (final paragraph in paragraphs) {
+        final String text = paragraph.text.toPlainText();
+        expect(paragraph.selections, <TextSelection>[
+          TextSelection(baseOffset: 0, extentOffset: text.length),
+        ], reason: '"$text" should be selected in full');
+      }
+    }
+
+    // Drags in one jump from inside 'Above 8' to inside 'Below 1', across the
+    // nested scrollable built by pumpNestedScrollableFixture, and expects the
+    // rows between and every text built in the nested scrollable to be selected.
+    Future<void> dragAcrossNestedScrollableAndExpectItSelected(WidgetTester tester) async {
+      final TestGesture gesture = await tester.startGesture(
+        insideText(tester, 'Above 8'),
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(insideText(tester, 'Below 1'));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(paragraphOf(tester, 'Above 8').selections, <TextSelection>[
+        const TextSelection(baseOffset: 2, extentOffset: 7),
+      ]);
+      expect(paragraphOf(tester, 'Above 9').selections, <TextSelection>[
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      ]);
+      expectAllBuiltTextSelected(tester, find.byKey(nestedScrollableKey));
+      expect(paragraphOf(tester, 'Below 0').selections, <TextSelection>[
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      ]);
+      expect(paragraphOf(tester, 'Below 1').selections, <TextSelection>[
+        const TextSelection(baseOffset: 0, extentOffset: 2),
+      ]);
+      expect(paragraphOf(tester, 'Below 2').selections, isEmpty);
+    }
+
+    // Regression test for https://github.com/flutter/flutter/issues/181169.
+    testWidgets(
+      'selection started above a nested two-dimensional scrollable and released below it selects its built cells without scrolling it',
+      (WidgetTester tester) async {
+        final outerController = ScrollController();
+        addTearDown(outerController.dispose);
+        final verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        await pumpNestedScrollableFixture(
+          tester,
+          outerController: outerController,
+          nested: nestedTableView(
+            verticalController: verticalController,
+            horizontalController: horizontalController,
+          ),
+        );
+
+        await dragAcrossNestedScrollableAndExpectItSelected(tester);
+        expect(outerController.offset, 0.0);
+        expect(verticalController.offset, 0.0);
+        expect(horizontalController.offset, 0.0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/181169.
+    testWidgets(
+      'selection started above a vertical list whose first child is a horizontal list and released below it selects their built items without scrolling them',
+      (WidgetTester tester) async {
+        final outerController = ScrollController();
+        addTearDown(outerController.dispose);
+        final verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        await pumpNestedScrollableFixture(
+          tester,
+          outerController: outerController,
+          nested: nestedListViews(
+            verticalController: verticalController,
+            horizontalController: horizontalController,
+          ),
+        );
+
+        await dragAcrossNestedScrollableAndExpectItSelected(tester);
+        expect(outerController.offset, 0.0);
+        expect(verticalController.offset, 0.0);
+        expect(horizontalController.offset, 0.0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/181169.
+    testWidgets(
+      'selection started above a nested two-dimensional scrollable auto scrolls only the outer scrollable',
+      (WidgetTester tester) async {
+        final outerController = ScrollController();
+        addTearDown(outerController.dispose);
+        final verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        await pumpNestedScrollableFixture(
+          tester,
+          outerController: outerController,
+          nested: nestedTableView(
+            verticalController: verticalController,
+            horizontalController: horizontalController,
+          ),
+        );
+
+        final TestGesture gesture = await tester.startGesture(
+          insideText(tester, 'Above 8'),
+          kind: ui.PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        // Over the table horizontally, 50 pixels past the bottom of the outer
+        // scrollable.
+        await gesture.moveTo(const Offset(300, 650));
+        await tester.pumpAndSettle();
+        await gesture.up();
+        await tester.pump();
+
+        // The outer scrollable reached the content after the table.
+        expect(outerController.offset, outerController.position.maxScrollExtent);
+        expect(paragraphOf(tester, 'Below 14').selections, <TextSelection>[
+          const TextSelection(baseOffset: 0, extentOffset: 8),
+        ]);
+        // The table never scrolled.
+        expect(verticalController.offset, 0.0);
+        expect(horizontalController.offset, 0.0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/181169.
+    testWidgets(
+      'selection started above a vertical list does not auto scroll the horizontal list at its start',
+      (WidgetTester tester) async {
+        final outerController = ScrollController();
+        addTearDown(outerController.dispose);
+        final verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        await pumpNestedScrollableFixture(
+          tester,
+          outerController: outerController,
+          nested: nestedListViews(
+            verticalController: verticalController,
+            horizontalController: horizontalController,
+            horizontalWidth: 400,
+          ),
+        );
+
+        final TestGesture gesture = await tester.startGesture(
+          insideText(tester, 'Above 8'),
+          kind: ui.PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        // Inside the vertical list, in the empty space to the right of the
+        // horizontal list (which spans x 0..400, y 200..300).
+        await gesture.moveTo(const Offset(600, 250));
+        await tester.pumpAndSettle();
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(horizontalController.offset, 0.0);
+        expect(outerController.offset, 0.0);
+        expect(verticalController.offset, 0.0);
+        expect(paragraphOf(tester, 'Above 8').selections, <TextSelection>[
+          const TextSelection(baseOffset: 2, extentOffset: 7),
+        ]);
+        expect(paragraphOf(tester, 'Above 9').selections, <TextSelection>[
+          const TextSelection(baseOffset: 0, extentOffset: 7),
+        ]);
+        expectAllBuiltTextSelected(
+          tester,
+          find.byWidgetPredicate(
+            (Widget widget) => widget is Scrollable && widget.axisDirection == AxisDirection.right,
+          ),
+        );
+        expect(paragraphOf(tester, 'V 0').selections, isEmpty);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'selection started inside a nested vertical list auto scrolls it and the outer scrollable to their ends',
+      (WidgetTester tester) async {
+        final outerController = ScrollController();
+        addTearDown(outerController.dispose);
+        final verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        await pumpNestedScrollableFixture(
+          tester,
+          outerController: outerController,
+          nested: nestedListViews(
+            verticalController: verticalController,
+            horizontalController: horizontalController,
+          ),
+        );
+
+        final TestGesture gesture = await tester.startGesture(
+          insideText(tester, 'V 3'),
+          kind: ui.PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        // Past the bottom of both the nested list (y 500) and the outer
+        // scrollable (y 600).
+        await gesture.moveTo(const Offset(300, 650));
+        await tester.pumpAndSettle();
+        await gesture.up();
+        await tester.pump();
+
+        expect(verticalController.offset, verticalController.position.maxScrollExtent);
+        expect(outerController.offset, outerController.position.maxScrollExtent);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'selection started inside a nested two-dimensional scrollable auto scrolls it and the outer scrollable to their ends',
+      (WidgetTester tester) async {
+        final outerController = ScrollController();
+        addTearDown(outerController.dispose);
+        final verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        await pumpNestedScrollableFixture(
+          tester,
+          outerController: outerController,
+          nested: nestedTableView(
+            verticalController: verticalController,
+            horizontalController: horizontalController,
+            maxYIndex: 3,
+          ),
+        );
+
+        final TestGesture gesture = await tester.startGesture(
+          insideText(tester, 'Cell r0 c1'),
+          kind: ui.PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        // Over the table horizontally, past the bottom of both the table
+        // (y 500) and the outer scrollable (y 600).
+        await gesture.moveTo(const Offset(300, 650));
+        await tester.pumpAndSettle();
+        await gesture.up();
+        await tester.pump();
+
+        expect(verticalController.offset, verticalController.position.maxScrollExtent);
+        expect(outerController.offset, outerController.position.maxScrollExtent);
+        expect(horizontalController.offset, 0.0);
+
+        // TODO(Renzo-Olivares): Remove this workaround once a two-dimensional
+        // viewport can be unmounted while it holds a kept-alive selected cell,
+        // https://github.com/flutter/flutter/issues/194718.
+        // Clear the selection by clicking on empty space to the right of the
+        // last 'Below' row; otherwise RenderTwoDimensionalViewport.detach
+        // asserts '_owner != null' on teardown because the kept-alive selected
+        // cell has been scrolled away.
+        await tester.tapAt(const Offset(790, 590), kind: ui.PointerDeviceKind.mouse);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+      },
     );
   });
 }
