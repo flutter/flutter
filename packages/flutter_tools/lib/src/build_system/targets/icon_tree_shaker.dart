@@ -138,11 +138,16 @@ class IconTreeShaker {
       familyKeys,
     );
 
+    // Do not warn about missing known fallback font families (e.g. CupertinoIcons or
+    // MaterialIcons), as apps may contain unused framework references to them.
     final Set<String> missingFonts = iconData.keys
-        .where((String key) => !fonts.containsKey(key))
+        .where(
+          (String key) =>
+              !fonts.containsKey(key) && !_kKnownIconFontFallbackCodePoints.containsKey(key),
+        )
         .toSet();
     if (missingFonts.isNotEmpty) {
-      environment.logger.printStatus(
+      _logger.printStatus(
         'Expected to find fonts for $missingFonts, but found '
         '${fonts.keys}. This usually means you are referring to '
         'font families in an IconData class but not including them '
