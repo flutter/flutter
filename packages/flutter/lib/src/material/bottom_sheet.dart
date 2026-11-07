@@ -1136,7 +1136,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
           final BottomSheetThemeData defaults = Theme.of(context).useMaterial3
               ? _BottomSheetDefaultsM3(context)
               : const BottomSheetThemeData();
-          return _ModalBottomSheet<T>(
+          // The SafeArea (or padding removal) is applied inside the
+          // DisplayFeatureSubScreen so that it reads the padding of the
+          // selected sub-screen only. Applied outside, it would subtract
+          // safe areas belonging to other sub-screens, in full-window
+          // coordinates, from this sub-screen as well.
+          final Widget sheet = _ModalBottomSheet<T>(
             route: this,
             animationStyle: sheetAnimationStyle,
             backgroundColor:
@@ -1157,16 +1162,18 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
             enableDrag: enableDrag,
             showDragHandle: showDragHandle ?? (enableDrag && (sheetTheme.showDragHandle ?? false)),
           );
+          return useSafeArea
+              ? SafeArea(bottom: false, child: sheet)
+              : MediaQuery.removePadding(context: context, removeTop: true, child: sheet);
         },
       ),
     );
 
-    Widget bottomSheet = useSafeArea
-        ? SafeArea(bottom: false, child: content)
-        : MediaQuery.removePadding(context: context, removeTop: true, child: content);
-
     // Prevent clicks inside the bottom sheet from passing through to the barrier
-    bottomSheet = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: bottomSheet);
+    final Widget bottomSheet = Semantics(
+      hitTestBehavior: SemanticsHitTestBehavior.opaque,
+      child: content,
+    );
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }
