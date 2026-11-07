@@ -1,0 +1,731 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Dart SDK, built by the engine's GN rules inside one Bazel action (see
+# ../gn_build/gn_build.bzl), and the targets through which the rest of the
+# engine consumes it: the executables and snapshots as files, the libraries
+# as cc_library facades around archives of their object files.
+#
+# The host is whatever runs the build (@host_platform: Linux x64 today, a
+# Mac of either CPU since the macOS port, research/20 M3): its clang, its
+# cpython3 and its prebuilt Dart SDK go into the GN tree at the paths GN's
+# host_os/host_cpu name them by. The targets are the host's own, Linux
+# arm64, Android's ABIs, the Mac's two CPUs and iOS's device and simulator
+# (the GN args select() on the platform). On a Mac the GN build takes the
+# SDKs, the platforms and the toolchain of the host's Xcode from @macos_sdk
+# (the same Xcode the Bazel toolchain's sysroot comes from) rather than
+# running xcrun itself.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load(
+    "@host_platform//:host.bzl",
+    "HOST_BUILDTOOLS",
+    "HOST_CLANG",
+    "HOST_CPU",
+    "HOST_CPU_CONSTRAINT",
+    "HOST_DART_SDK",
+    "HOST_OS",
+    "HOST_OS_CONSTRAINT",
+)
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/gn:gn_build.bzl", "gn_build")
+load(
+    "//build_defs/gn:macos_args.bzl",
+    "IOS_DEVICE_GN_ARGS",
+    "IOS_SIMULATOR_GN_ARGS",
+    "IOS_TARGET_GN_ARGS",
+    "MACOS_TARGET_GN_ARGS",
+    "MAC_HOST_GN_ARGS",
+)
+load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
+
+package(default_visibility = ["//visibility:public"])
+
+_DART_REVISION = GIT_DEPS["engine/src/flutter/third_party/dart"]["revision"]
+
+# tools/gn's --dart-debug: runtime_args.gni's dart_debug, a Debug build of
+# the VM (DEBUG rather than NDEBUG: its assertions on, at the same -O2 since
+# dart_debug_optimization_level stays "2") inside whatever build the engine
+# is. Off, as every builder but Linux's host_debug_unopt test builder has it
+# (ci/builders/configs.bazelrc); the engine's own one file under
+# runtime:dart_config (lib/io) follows through @dart//:dart_config.
+bool_flag(
+    name = "dart_debug",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "dart_debug_enabled",
+    flag_values = {":dart_debug": "True"},
+)
+
+# tools/gn's --gn-args=dart_dynamic_modules=true: runtime_args.gni's
+# dart_dynamic_modules, a VM with dynamic modules (DART_DYNAMIC_MODULES in
+# runtime:dart_config), which the `_ddm` builders build and the archives
+# name with a -ddm suffix (build/archives). Off everywhere else. Both
+# settings exist because the archives' select()s conjoin the denial with a
+# runtime mode.
+bool_flag(
+    name = "dart_dynamic_modules",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "dart_dynamic_modules_enabled",
+    flag_values = {":dart_dynamic_modules": "True"},
+)
+
+config_setting(
+    name = "dart_dynamic_modules_disabled",
+    flag_values = {":dart_dynamic_modules": "False"},
+)
+
+# tools/gn's --no-dart-secure-socket: runtime_args.gni's
+# dart_disable_secure_socket, a VM without the secure socket (BoringSSL)
+# implementation in dart:io, which the size-experiment builders build and
+# the archives name with a -size-exp suffix (build/zip_bundle.gni). Off
+# everywhere else; both settings for the archives' conjunctions.
+bool_flag(
+    name = "dart_disable_secure_socket",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "dart_disable_secure_socket_enabled",
+    flag_values = {":dart_disable_secure_socket": "True"},
+)
+
+config_setting(
+    name = "dart_disable_secure_socket_disabled",
+    flag_values = {":dart_disable_secure_socket": "False"},
+)
+
+# tools/gn's --no-prebuilt-dart-sdk: common/config.gni's
+# flutter_prebuilt_dart_sdk off, the engine built with a Dart SDK compiled
+# from the synced Dart tree instead of the prebuilt one of DEPS -- the Dart
+# roll's check that the engine builds against the tree it syncs (ci/builders'
+# linux_unopt host_debug_no_prebuilt_dart_sdk, which runs no tests and
+# ships nothing). On, as every other builder has it.
+bool_flag(
+    name = "flutter_prebuilt_dart_sdk",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "flutter_prebuilt_dart_sdk_enabled",
+    flag_values = {":flutter_prebuilt_dart_sdk": "True"},
+)
+
+config_setting(
+    name = "flutter_prebuilt_dart_sdk_disabled",
+    flag_values = {":flutter_prebuilt_dart_sdk": "False"},
+)
+
+# The build that compiles the SDK: the host's own with the flag off. GN
+# would build the SDK of whatever target the flag is set for, and run the
+# frontend server from source on the Dart tree's own prebuilt VM
+# (flutter_frontend_server.gni's prebuilt_dart_action); here the tools the
+# kernel compiles run are the built SDK's, which only the host's own build
+# can run, so a cross build keeps the prebuilt SDK whatever the flag says.
+selects.config_setting_group(
+    name = "dart_sdk_from_source",
+    match_all = [
+        ":flutter_prebuilt_dart_sdk_disabled",
+        ":host_own",
+    ],
+)
+
+# GN's prebuilt_dart_sdk outside the host toolchain (common/config.gni): the
+# prebuilt SDK of the *target* -- the host's own for the host's build,
+# linux-arm64's for the Linux arm64 cross build, the Mac's for the macOS
+# platforms (a Mac's host build is the platform of its --mac-cpu, x64 or
+# arm64, whichever Mac builds it: ci/builders) -- which build/dart lays
+# into the build directory as dart-sdk/ and build/archives ships as
+# dart-sdk-<platform>.zip. The tools that run at build time are always the
+# host's (@host_platform's HOST_DART_SDK, GN's host_prebuilt_dart_sdk).
+# A build for anything but the host's own OS and CPU GN builds in a
+# toolchain other than the host's, whose build-time tools land under
+# clang_<host cpu>/: Linux arm64 and the Android ABIs from a Linux x64 host,
+# the other CPU's build from a Mac (the wasm platform builds no VM).
+selects.config_setting_group(
+    name = "host_own",
+    match_all = [
+        HOST_OS_CONSTRAINT,
+        HOST_CPU_CONSTRAINT,
+    ],
+)
+
+# The macOS platforms (build/bazel/toolchains:macos_arm64, :macos_x64); each
+# a specialization of its CPU's constraint for select().
+config_setting(
+    name = "macos_arm64",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+config_setting(
+    name = "macos_x64",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# The iOS platforms (build/bazel/toolchains:ios_arm64, :ios_sim_arm64,
+# :ios_sim_x64), by CPU the same way.
+config_setting(
+    name = "ios_arm64",
+    constraint_values = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+config_setting(
+    name = "ios_x64",
+    constraint_values = [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# The Apple platforms, for the facades' frameworks and libraries (Dart's
+# runtime/bin/BUILD.gn and runtime/vm/BUILD.gn list them under `is_mac ||
+# is_ios`).
+selects.config_setting_group(
+    name = "apple",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:macos",
+    ],
+)
+
+# tools/gn's dart_force_simulator: a debug build for an arm64 device gets a
+# VM with the simulator in it, so that it can interpret where the device
+# forbids JIT code.
+selects.config_setting_group(
+    name = "ios_device_arm64_debug",
+    match_all = [
+        "//engine/src/flutter/build/bazel:ios_device_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# The 64-bit Android ABIs, for the VM's compressed pointers.
+selects.config_setting_group(
+    name = "android_64",
+    match_any = [
+        ":android_arm64",
+        ":android_x64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "android_arm64",
+    match_all = [
+        "@platforms//os:android",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "android_x64",
+    match_all = [
+        "@platforms//os:android",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# An Android target built on a Mac (mac_android_* in ci/builders), or an
+# iOS one: the universal gen_snapshot's halves come from the Mac toolchains,
+# neither of them the default toolchain.
+selects.config_setting_group(
+    name = "android_from_mac",
+    match_all = [
+        "@platforms//os:android",
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+    ],
+)
+
+selects.config_setting_group(
+    name = "target_from_mac_toolchains",
+    match_any = [
+        ":android_from_mac",
+        "@platforms//os:ios",
+    ],
+)
+
+filegroup(
+    name = "prebuilt_dart_sdk",
+    srcs = select({
+        ":macos_arm64": ["@dart_sdk_macos_arm64//:all_files"],
+        ":macos_x64": ["@dart_sdk_macos_x64//:all_files"],
+        # An iOS target ships no SDK (build_engine_artifacts is false there);
+        # the host's serves the build-time tools.
+        ":ios_arm64": [HOST_DART_SDK + "//:all_files"],
+        ":ios_x64": [HOST_DART_SDK + "//:all_files"],
+        "@platforms//cpu:aarch64": ["@dart_sdk_linux_arm64//:all_files"],
+        "//conditions:default": [HOST_DART_SDK + "//:all_files"],
+    }),
+)
+
+# What tools/gn would write to args.gn for this build, restricted to the
+# arguments the pruned GN graph declares (gn gen runs with
+# --fail-on-unused-args; dart_version, for one, belongs to
+# //flutter/shell/version). The SDK verification hash comes from the DEPS pin
+# rather than from git, as with tools/gn --no-dart-version-git-info.
+_GN_ARGS = {
+    "buildtools_path": '"//flutter/buildtools"',
+    "dart_component_kind": '"static_library"',
+    "dart_lib_export_symbols": "false",
+    "dart_sdk_verification_hash": '"%s"' % _DART_REVISION[:10],
+    "dart_version_git_info": "false",
+    # No LTO in either mode: every host builder in ci/builders passes
+    # tools/gn --no-lto (so does et's local_engine.json), and the Bazel
+    # toolchain compiles the engine without it, so a -c opt build is one
+    # build without LTO rather than an engine without and a VM with.
+    "enable_lto": "false",
+    "host_cpu": '"%s"' % HOST_CPU,
+    "host_os": '"%s"' % HOST_OS,
+    "is_clang": "true",
+    # No system libraries: keeps //build/config/linux from probing the
+    # sysroot with the host's pkg-config (nothing in this graph uses them).
+    # Declared in BUILDCONFIG.gn for every OS; read by Linux's alone.
+    "is_minimal_linux": "true",
+    "is_official_build": "true",
+    "stripped_symbols": "true",
+} | select({
+    # The target OS: Android for the Android platforms (tools/gn --android),
+    # where the VM's libraries are built against the NDK's sysroot and, on
+    # the 64-bit ABIs, with compressed pointers (tools/gn: android x64 and
+    # arm64); mac for the macOS platforms, with what tools/gn sets on a Mac
+    # and the host's Xcode (//build_defs/gn:macos_args.bzl); ios for the iOS
+    # platforms (tools/gn --ios), with the iPhone SDKs besides and the
+    # environment's flags below; Linux otherwise.
+    "@platforms//os:android": {"target_os": '"android"'},
+    "@platforms//os:ios": IOS_TARGET_GN_ARGS,
+    "@platforms//os:macos": MACOS_TARGET_GN_ARGS,
+    "//conditions:default": {"target_os": '"linux"'},
+}) | select({
+    # A Mac host's own settings, whatever the target (tools/gn's
+    # setup_apple_sdks runs on the host's OS): the host toolchain that
+    # compiles the build's host tools -- an Android target's gen_snapshot --
+    # wants the deployment target and the Mac SDK; the macOS and iOS
+    # targets' arguments above carry the same values.
+    "//engine/src/flutter/build/bazel:host_os_is_mac": MAC_HOST_GN_ARGS,
+    "//conditions:default": {},
+}) | select({
+    "//engine/src/flutter/build/bazel:ios_simulator_enabled": IOS_SIMULATOR_GN_ARGS,
+    "//engine/src/flutter/build/bazel:ios_device_enabled": IOS_DEVICE_GN_ARGS,
+    "//conditions:default": {},
+}) | select({
+    ":ios_device_arm64_debug": {"dart_force_simulator": "true"},
+    "//conditions:default": {},
+}) | select({
+    ":android_64": {"dart_use_compressed_pointers": "true"},
+    "//conditions:default": {},
+}) | select({
+    # The target CPU: the host's, or arm64 for the Linux arm64 cross build
+    # (tools/gn --target-os=linux --linux-cpu=arm64), in which GN builds the
+    # VM's libraries for arm64 and the build-time tools for the host; a
+    # Mac's --mac-cpu the same way.
+    "@platforms//cpu:aarch64": {
+        "dart_target_arch": '"arm64"',
+        "target_cpu": '"arm64"',
+    },
+    # 32-bit arm (tools/gn --android, its default CPU): a 32-bit VM without
+    # compressed pointers.
+    "@platforms//cpu:armv7": {
+        "dart_target_arch": '"arm"',
+        "target_cpu": '"arm"',
+    },
+    "@platforms//cpu:riscv64": {
+        "dart_target_arch": '"riscv64"',
+        "target_cpu": '"riscv64"',
+    },
+    "//conditions:default": {
+        "dart_target_arch": '"x64"',
+        "target_cpu": '"x64"',
+    },
+}) | select({
+    # -c opt is an optimized build (tools/gn without --unoptimized);
+    # anything else is --unoptimized.
+    "//engine/src/flutter/build/bazel:optimized": {"is_debug": "false"},
+    "//conditions:default": {"is_debug": "true"},
+}) | select({
+    "//engine/src/flutter/common:runtime_mode_debug": {"dart_runtime_mode": '"develop"'},
+    "//engine/src/flutter/common:runtime_mode_jit_release": {"dart_runtime_mode": '"release"'},
+    "//engine/src/flutter/common:runtime_mode_profile": {"dart_runtime_mode": '"profile"'},
+    "//engine/src/flutter/common:runtime_mode_release": {"dart_runtime_mode": '"release"'},
+}) | select({
+    # The flag above; runtime/BUILD.gn asserts it off in release mode, as
+    # tools/gn does for --dart-debug with --runtime-mode release.
+    ":dart_debug_enabled": {"dart_debug": "true"},
+    "//conditions:default": {},
+}) | select({
+    # GN's is_asan (the build-wide flag): the VM instrumented like the engine.
+    "//engine/src/flutter/build/bazel:asan_enabled": {"is_asan": "true"},
+    "//conditions:default": {},
+}) | select({
+    ":dart_dynamic_modules_enabled": {"dart_dynamic_modules": "true"},
+    "//conditions:default": {},
+}) | select({
+    ":dart_disable_secure_socket_enabled": {"dart_disable_secure_socket": "true"},
+    "//conditions:default": {},
+}) | select({
+    # The SDK from the Dart tree (BUILD.gn's flutter_build_dart_sdk), in the
+    # host's own build without the prebuilt SDK, as tools/gn configures it
+    # there: without wasm-opt ("it doesn't build properly with our gn
+    # configuration"). tools/gn's dart_platform_sdk no GN file declares any
+    # more (gn gen runs with --fail-on-unused-args here), and full_dart_sdk
+    # is the engine root's, outside this graph.
+    ":dart_sdk_from_source": {
+        "dart_include_wasm_opt": "false",
+        "flutter_build_dart_sdk": "true",
+    },
+    "//conditions:default": {},
+})
+
+gn_build(
+    name = "dart_sdk",
+    # Executables and snapshots. The build-time tools (analyze_snapshot_host,
+    # bootstrap_compile_platform, gen_snapshot_host: what the snapshot rules
+    # run and the Android shell archives) are the host toolchain's
+    # (BUILD.gn): in the build root when the host's toolchain is the
+    # default, under clang_<host cpu>/ in the cross builds (out_paths). gen_snapshot
+    # and analyze_snapshot are the target's own -- the binary artifacts.zip
+    # ships, and the one the root group lists where the engine artifacts are
+    # built -- which in the host's build are the tools' files.
+    outs = [
+        "analyze_snapshot",
+        "analyze_snapshot_host",
+        "bootstrap_compile_platform.exe",
+        "gen_snapshot",
+        "gen_snapshot_host",
+        # A Mac host's two halves of the universal gen_snapshot (BUILD.gn:
+        # lib/snapshot's build_mac_gen_snapshot): the tool as each Mac
+        # toolchain builds it for the target; nothing elsewhere.
+        "gen_snapshot_mac_arm64",
+        "gen_snapshot_mac_x64",
+        # The SDK compiled from the Dart tree (BUILD.gn's
+        # flutter_build_dart_sdk; tools/gn --no-prebuilt-dart-sdk), in the
+        # host's own build with :flutter_prebuilt_dart_sdk off; nothing
+        # otherwise (out_paths). The AOT runtime of the SDK's bin/ and the
+        # product frontend server snapshot its bin/snapshots carries, built
+        # for each other (kernel-service's frontend_server_aot_product): what
+        # the kernel compiles run, through :engine_dartaotruntime and
+        # :engine_frontend_server below. And kernel-service's
+        # frontend_server_aot, the release-mode snapshot GN's
+        # flutter_frontend_server copies into the build directory (the one
+        # the artifacts would ship); it runs on the release runtime, which
+        # the SDK does not carry.
+        "dartaotruntime",
+        "frontend_server_aot.dart.snapshot",
+        "frontend_server_aot_product.dart.snapshot",
+    ],
+    ar = HOST_CLANG + "//:bin/llvm-ar",
+    # Dependencies the Bazel side builds itself (the facades depend on them).
+    archive_boundaries = [
+        "//flutter/third_party/boringssl",
+        "//flutter/third_party/icu",
+        "//flutter/third_party/zlib",
+    ],
+    # Libraries. The facades below mirror the GN dependencies between them.
+    archives = {
+        "libcommon_embedder_dart_io.a": "//flutter/third_party/dart/runtime/bin:common_embedder_dart_io",
+        "libdart_aotruntime.a": "//flutter/third_party/dart/runtime:libdart_aotruntime",
+        "libdart_builtin.a": "//flutter/third_party/dart/runtime/bin:libdart_builtin",
+        "libdart_jit.a": "//flutter/third_party/dart/runtime:libdart_jit",
+        "libdouble_conversion.a": "//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion",
+        "libelf_loader.a": "//flutter/third_party/dart/runtime/bin:elf_loader",
+        "libnative_assets_api.a": "//flutter/third_party/dart/runtime/bin:native_assets_api",
+        "libprotozero.a": "//flutter/third_party/dart/third_party/perfetto:libprotozero",
+    },
+    build_file = "BUILD.gn",
+    gn_args = _GN_ARGS,
+    ninja_target = "dart_wrap",
+    out_paths = select({
+        ":host_own": {
+            "analyze_snapshot_host": "analyze_snapshot",
+            "gen_snapshot_host": "gen_snapshot",
+        },
+        "//conditions:default": {
+            "analyze_snapshot_host": "clang_%s/analyze_snapshot" % HOST_CPU,
+            "bootstrap_compile_platform.exe": "clang_%s/bootstrap_compile_platform.exe" % HOST_CPU,
+            "gen_snapshot_host": "clang_%s/gen_snapshot" % HOST_CPU,
+        },
+    }) | select({
+        # The analyze_snapshot tool is a 64-bit target's
+        # (runtime_args.gni's build_analyze_snapshot).
+        "@platforms//cpu:armv7": {
+            "analyze_snapshot": "",
+            "analyze_snapshot_host": "",
+        },
+        "//conditions:default": {},
+    }) | select({
+        # The universal gen_snapshot's halves on a Mac host: the toolchain
+        # of the target's own CPU builds gen_snapshot_host_targeting_host at
+        # the root (it is the default toolchain), the other Mac toolchain
+        # gen_snapshot under its directory; for an Android target both are
+        # under theirs (one of them the host's gen_snapshot_host, the same
+        # file under two names). Not a product on a Linux host.
+        ":macos_arm64": {
+            "gen_snapshot_mac_arm64": "gen_snapshot_host_targeting_host",
+            "gen_snapshot_mac_x64": "clang_x64/gen_snapshot",
+        },
+        ":macos_x64": {
+            "gen_snapshot_mac_arm64": "clang_arm64/gen_snapshot",
+            "gen_snapshot_mac_x64": "gen_snapshot_host_targeting_host",
+        },
+        ":target_from_mac_toolchains": {
+            "gen_snapshot_mac_arm64": "clang_arm64/gen_snapshot",
+            "gen_snapshot_mac_x64": "clang_x64/gen_snapshot",
+        },
+        "//conditions:default": {
+            "gen_snapshot_mac_arm64": "",
+            "gen_snapshot_mac_x64": "",
+        },
+    }) | select({
+        # The target's own analyze_snapshot is built where the engine
+        # artifacts are (common/config.gni's build_engine_artifacts), never
+        # for Android (BUILD.gn); nor is the target's own gen_snapshot for
+        # iOS, where no engine artifact is built (the host's universal
+        # gen_snapshot is the iOS build's only one).
+        "@platforms//os:android": {"analyze_snapshot": ""},
+        "@platforms//os:ios": {
+            "analyze_snapshot": "",
+            "gen_snapshot": "",
+        },
+        "//conditions:default": {},
+    }) | select({
+        # The built SDK's files: the AOT runtime where create_sdk lays the
+        # SDK out ($root_out_dir/dart-sdk); the two frontend server
+        # snapshots where kernel-service writes them (the build root, from
+        # where GN's flutter_frontend_server copies the release one and
+        # create_sdk the product one).
+        ":dart_sdk_from_source": {"dartaotruntime": "dart-sdk/bin/dartaotruntime"},
+        "//conditions:default": {
+            "dartaotruntime": "",
+            "frontend_server_aot.dart.snapshot": "",
+            "frontend_server_aot_product.dart.snapshot": "",
+        },
+    }),
+    root_target_dir = "flutter/build/bazel/dart_wrap",
+    # The GN source root: the engine's build configuration, the trees GN
+    # reads, and the toolchain, each at the path the engine's GN files expect.
+    tree = {
+        "//engine/src:gn_root_files": "",
+        "//engine/src/build:gn_files": "build",
+    } | select({
+        # The Linux sysroots, for the Linux and Android targets' host tools
+        # (a Mac's Xcode SDK is named in the GN args instead): the x64
+        # host's and the arm64 cross build's (sysroot.gni asserts the
+        # target CPU's exists; the host's own build does not read it). By
+        # the host: a Mac building for Android has no Linux sysroot to
+        # offer and no use for one (the Mac's T14).
+        "//engine/src/flutter/build/bazel:host_os_is_mac": {},
+        "//conditions:default": {
+            "@sysroot_linux_x64//:build_tree": "build/linux/debian_bullseye_amd64-sysroot",
+            "@sysroot_linux_arm64//:build_tree": "build/linux/debian_bullseye_arm64-sysroot",
+        },
+    }) | {
+        "//engine/src/flutter/build:gn_files": "flutter/build",
+    } | select({
+        # The NDK, for the Android platforms (build/config/android/config.gni's
+        # android_ndk_root; the toolchain's sysroot and runtime).
+        "@platforms//os:android": {
+            "@android_tools//:ndk_build_tree": "flutter/third_party/android_tools",
+            # zlib's Android branch reads cpu_features' NDK shim.
+            "@cpu_features//:build_tree": "flutter/third_party/cpu_features",
+        },
+        "//conditions:default": {},
+    }) | select({
+        # What the SDK's build reads beyond the engine's Dart targets
+        # (BUILD.dart.bazel's sdk_build_tree: the trees its layout copies
+        # in, wasm-opt's sources, the GN files the Dart root reaches).
+        ":dart_sdk_from_source": {"@dart//:sdk_build_tree": "flutter/third_party/dart"},
+        "//conditions:default": {},
+    }) | {
+        HOST_CLANG + "//:all_files": "flutter/buildtools/%s/clang" % HOST_BUILDTOOLS,
+        "@cpython3//:runtime": "flutter/buildtools/%s/cpython3" % HOST_BUILDTOOLS,
+        "//engine/src/flutter/third_party/boringssl:gn_files": "flutter/third_party/boringssl",
+        "@boringssl//:build_tree": "flutter/third_party/boringssl/src",
+        "@dart//:build_tree": "flutter/third_party/dart",
+        "@icu//:build_tree": "flutter/third_party/icu",
+        "@libcxx//:build_tree": "flutter/third_party/libcxx",
+        "@libcxxabi//:build_tree": "flutter/third_party/libcxxabi",
+        "@llvm_libc//:build_tree": "flutter/third_party/llvm_libc",
+        "@zlib//:build_tree": "flutter/third_party/zlib",
+    },
+)
+
+# The tools the engine's kernel compiles run (build_defs/dart/kernel.bzl's
+# KERNEL_TOOL_ATTRS): the prebuilt SDK's AOT runtime and frontend server
+# snapshot (GN's host_prebuilt_dart_sdk: flutter_frontend_server.gni with
+# flutter_prebuilt_dart_sdk), or the built SDK's own pair in the host's
+# build without it -- its product runtime and the product snapshot its
+# bin/snapshots carries, which an AOT runtime accepts only from its own
+# build (the release-mode frontend_server_aot.dart.snapshot GN's
+# flutter_frontend_server copies would not load on it: "the snapshot
+# requires 'release ...' but the VM has 'product ...'"). GN runs the
+# frontend server from source on the Dart tree's own prebuilt VM there
+# (prebuilt_dart_action); running the built snapshot on the built runtime
+# instead is the same check of the roll with the compiler compiled once
+# rather than per kernel. Taken in the target configuration (a kernel's
+# `cfg = "target"` tool), where the wrapped build is: an exec-configuration
+# dependency would build the SDK a second time.
+alias(
+    name = "engine_dartaotruntime",
+    actual = select({
+        ":dart_sdk_from_source": ":dartaotruntime",
+        "//conditions:default": HOST_DART_SDK + "//:dartaotruntime",
+    }),
+)
+
+alias(
+    name = "engine_frontend_server",
+    actual = select({
+        ":dart_sdk_from_source": ":frontend_server_aot_product.dart.snapshot",
+        "//conditions:default": HOST_DART_SDK + "//:frontend_server",
+    }),
+)
+
+# ---------------------------------------------------------------------------
+# Library facades: one per exported GN library, with the GN target's deps,
+# libs and the headers the engine includes from it. Each is an archive a
+# link takes members from by reference, as GN's links do (the libraries are
+# static_library targets there), so none is alwayslink, which buildifier
+# would otherwise ask of a library without headers of its own.
+# ---------------------------------------------------------------------------
+
+# runtime/vm/BUILD.gn's libdart_vm_config, the VM's public config: objc on
+# the Apple platforms, besides dl and pthread.
+_VM_MAC_LINKOPTS = select({
+    ":apple": ["-lobjc"],
+    "//conditions:default": [],
+})
+
+# //flutter/third_party/dart/runtime:libdart_jit -- the VM. Its GN deps are
+# the VM source sets (in the archive), double-conversion, protozero and ICU.
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "libdart_jit",
+    srcs = [":libdart_jit.a"],
+    # runtime/vm/BUILD.gn's libs: dl, and pthread except on Android, where
+    # bionic has it in libc -- which the Linux toolchains' -pthread link
+    # flag already names, so dl alone is listed; and objc on a Mac.
+    linkopts = ["-ldl"] + _VM_MAC_LINKOPTS,
+    deps = [
+        ":libdouble_conversion",
+        ":libprotozero",
+        "@dart//:dart_api_headers",
+        "@icu//:icuuc",
+    ],
+)
+
+# //flutter/third_party/dart/runtime:libdart_aotruntime -- the VM for AOT
+# snapshots (a second build of the VM's sources, DART_PRECOMPILED_RUNTIME),
+# which //flutter/runtime:libdart picks in the profile and release runtime
+# modes; the same GN deps as the JIT VM's.
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "libdart_aotruntime",
+    srcs = [":libdart_aotruntime.a"],
+    linkopts = ["-ldl"] + _VM_MAC_LINKOPTS,
+    deps = [
+        ":libdouble_conversion",
+        ":libprotozero",
+        "@dart//:dart_api_headers",
+        "@icu//:icuuc",
+    ],
+)
+
+# //flutter/third_party/dart/runtime/bin:libdart_builtin -- shared by the
+# dart:io glue and the ELF loader. On the Apple platforms its GN target
+# names Security.framework (runtime/bin/BUILD.gn's build_libdart_builtin).
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "libdart_builtin",
+    srcs = [":libdart_builtin.a"],
+    linkopts = ["-ldl"] + select({
+        ":apple": [
+            "-framework",
+            "Security",
+        ],
+        "//conditions:default": [],
+    }),
+    deps = ["@dart//:dart_api_headers"],
+)
+
+# //flutter/third_party/dart/runtime/bin:common_embedder_dart_io -- dart:io
+# for embedders, on BoringSSL and zlib. On the Apple platforms its GN target
+# (the dart_io template) names CoreFoundation, Security, Foundation and
+# CoreServices; without them a Mac's flutter_tester link fails on dart:io's
+# symbols (the Mac's T9 finding).
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "common_embedder_dart_io",
+    srcs = [":libcommon_embedder_dart_io.a"],
+    linkopts = ["-ldl"] + select({
+        ":apple": [
+            "-framework",
+            "CoreFoundation",
+            "-framework",
+            "Security",
+            "-framework",
+            "Foundation",
+            "-framework",
+            "CoreServices",
+        ],
+        "//conditions:default": [],
+    }),
+    deps = [
+        ":libdart_builtin",
+        "//engine/src/flutter/third_party/boringssl",
+        "@dart//:runtime_bin_headers",
+        "@zlib",
+    ],
+)
+
+# //flutter/third_party/dart/runtime/bin:elf_loader
+cc_library(
+    name = "elf_loader",
+    srcs = [":libelf_loader.a"],
+    linkopts = ["-ldl"],
+    deps = [
+        ":libdart_builtin",
+        "@dart//:runtime_bin_headers",
+    ],
+)
+
+# //flutter/third_party/dart/runtime/bin:native_assets_api (its header is
+# runtime/include/bin/native_assets_api.h, in dart_api_headers).
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "native_assets_api",
+    srcs = [":libnative_assets_api.a"],
+    deps = ["@dart//:dart_api_headers"],
+)
+
+# //flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion,
+# with its headers: the accessibility tree's string_utils.cc includes
+# double-conversion.h by its path under the Dart tree.
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "libdouble_conversion",
+    srcs = [":libdouble_conversion.a"],
+    deps = ["@dart//:double_conversion_headers"],
+)
+
+# //flutter/third_party/dart/third_party/perfetto:libprotozero. Only linked,
+# never included, by the engine.
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "libprotozero",
+    srcs = [":libprotozero.a"],
+)

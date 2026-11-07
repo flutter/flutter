@@ -1,0 +1,1992 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/build/archives/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/android:build_tools.bzl", "android_engine_artifacts")
+load("//build_defs/config:configuration.bzl", "in_configuration")
+load("//build_defs/dist:local_engine.bzl", "bundle_directory")
+load("//build_defs/dist:universal.bzl", "apple_universal")
+load("//build_defs/dist:zip_bundle.bzl", "zip_bundle", "zip_tree")
+load("//build_defs/gn:gn_action.bzl", "gn_generated_file")
+
+package(default_visibility = ["//visibility:public"])
+
+gn_generated_file(
+    name = "artifacts_entitlement_config",
+    out = "entitlements.txt",
+    content = ["gen_snapshot"] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "impellerc",
+            "libtessellator.dylib",
+            "flutter_tester",
+            "libpath_ops.dylib",
+        ],
+        "//conditions:default": [],
+    }),
+    outputs = ["$root_gen_dir/flutter/build/archives/entitlements.txt"],
+    # You may also need to update
+    # dev/bots/suite_runners/run_verify_binaries_codesigned_tests.dart
+    # when adding/removing binaries from the entitlement config.
+    deps = ["//engine/src/flutter/lib/snapshot:generate_snapshot_bin"] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "//engine/src/flutter/impeller/compiler:impellerc",  # flutter_runtime_mode == "debug"
+            "//engine/src/flutter/impeller/tessellator:tessellator_shared",  # flutter_runtime_mode == "debug"
+            "//engine/src/flutter/shell/testing",  # flutter_runtime_mode == "debug"
+            "//engine/src/flutter/tools/path_ops",  # flutter_runtime_mode == "debug"
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+gn_generated_file(
+    name = "artifacts_without_entitlement_config",
+    out = "without_entitlements.txt",
+    content = select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["frontend_server_aot.dart.snapshot"],
+        "//conditions:default": [],
+    }),
+    outputs = ["$root_gen_dir/flutter/build/archives/without_entitlements.txt"],
+    deps = select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "//engine/src/flutter/flutter_frontend_server:frontend_server",  # flutter_runtime_mode == "debug"
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# `is_mac && flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `is_mac && flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-arm" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x86",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x86",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-x86" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x86",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "ios-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_arm64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "ios-arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_arm64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "ios-arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_arm64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "ios-x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_x64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "ios-x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_x64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "ios-x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_x64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "linux-x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "linux-x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "linux-x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "android-arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_arm",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "android-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "android-riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_riscv64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "android-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "android-x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_x86",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x86",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "ios-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_arm64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "ios-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_x64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "linux-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_arm64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "linux-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_x64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && full_target_platform_name == "wasm-wasm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && flutter_runtime_mode == "debug" && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_flutter_runtime_mode_debug_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && flutter_runtime_mode == "debug" && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_flutter_runtime_mode_debug_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_arm",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_arm",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-arm" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_arm",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_arm64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_arm64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_arm64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_x64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_x64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_x64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_x86",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_x86",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-x86" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_x86",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "ios-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_ios_arm64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "ios-arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_ios_arm64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "ios-arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_ios_arm64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "ios-x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_ios_x64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "ios-x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_ios_x64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "ios-x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_ios_x64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "linux-x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "linux-x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "linux-x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "android-arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_android_arm",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "android-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_android_arm64",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "android-riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_android_riscv64",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "android-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_android_x64",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "android-x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_x86",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_android_x86",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "ios-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_ios_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_ios_arm64",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "ios-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_ios_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_ios_x64",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "linux-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_linux_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_linux_arm64",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "linux-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_linux_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_linux_x64",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug" && full_target_platform_name == "wasm-wasm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_wasm_wasm",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+    ],
+)
+
+zip_tree(
+    name = "artifacts_shader_lib",
+    srcs = ["//engine/src/flutter/impeller/compiler/shader_lib:all_files"],
+    destination = "shader_lib",
+    root = "engine/src/flutter/impeller/compiler/shader_lib",
+    target_compatible_with = select({
+        "//engine/src/flutter/common:engine_artifacts": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# `flutter_runtime_mode == "debug" && host_os != "mac"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_host_os_not_mac",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel:host_os_is_not_mac",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && host_os == "mac"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_host_os_mac",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+    ],
+)
+
+zip_bundle(
+    name = "artifacts",
+    files = {"gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot"} | select({
+        "//engine/src/flutter/common:runtime_mode_debug": {
+            "icudtl.dat": "@icu//:flutter/icudtl.dat",
+            "flutter_tester": "//engine/src/flutter/shell/testing:flutter_tester",
+            "impellerc": "//engine/src/flutter/impeller/compiler:impellerc",
+            "isolate_snapshot.bin": "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin",
+            "vm_isolate_snapshot.bin": "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin",
+            "frontend_server_aot.dart.snapshot": "//engine/src/flutter/flutter_frontend_server:frontend_server",
+        },
+        "//conditions:default": {},
+    }) | select({
+        ":when_flutter_runtime_mode_debug_and_host_os_not_mac": {
+            "libpath_ops.so": "//engine/src/flutter/tools/path_ops",
+            "libtessellator.so": "//engine/src/flutter/impeller/tessellator:tessellator_shared",
+        },
+        "//conditions:default": {},
+    }) | select({
+        ":when_flutter_runtime_mode_debug_and_host_os_mac": {
+            "libpath_ops.dylib": "//engine/src/flutter/tools/path_ops",
+            "libtessellator.dylib": "//engine/src/flutter/impeller/tessellator:tessellator_shared",
+        },
+        "//conditions:default": {},
+    }) | select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": {
+            "entitlements.txt": ":entitlements.txt",
+            "without_entitlements.txt": ":without_entitlements.txt",
+        },
+        "//conditions:default": {},
+    }),
+    output = select({
+        ":when_is_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "darwin-arm64/artifacts.zip",
+        ":when_is_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "darwin-x64/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "darwin-arm64-profile/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "darwin-arm64-release/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_jit_release": "darwin-arm64-jit_release/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "darwin-x64-profile/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "darwin-x64-release/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_jit_release": "darwin-x64-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_profile": "android-arm-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_release": "android-arm-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_jit_release": "android-arm-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_release": "android-arm64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_jit_release": "android-arm64-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_jit_release": "android-riscv64-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_profile": "android-x64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_release": "android-x64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_jit_release": "android-x64-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_profile": "android-x86-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_release": "android-x86-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_jit_release": "android-x86-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_profile": "ios-arm64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_release": "ios-arm64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_jit_release": "ios-arm64-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_profile": "ios-x64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_release": "ios-x64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_jit_release": "ios-x64-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_profile": "linux-arm64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_release": "linux-arm64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_jit_release": "linux-arm64-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_profile": "linux-x64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_release": "linux-x64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_jit_release": "linux-x64-jit_release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_profile": "wasm-wasm-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_release": "wasm-wasm-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_jit_release": "wasm-wasm-jit_release/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_arm": "android-arm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64": "android-arm64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64": "android-riscv64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_x64": "android-x64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_android_x86": "android-x86/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64": "ios-arm64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64": "ios-x64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64": "linux-arm64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64": "linux-x64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm": "wasm-wasm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_flutter_runtime_mode_debug_and_target_cpu_arm64": "darwin-arm64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_flutter_runtime_mode_debug_and_target_cpu_x64": "darwin-x64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "darwin-arm64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_release": "darwin-arm64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_jit_release": "darwin-arm64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_profile": "darwin-x64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_release": "darwin-x64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_jit_release": "darwin-x64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_jit_release": "android-arm-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm64_and_flutter_runtime_mode_jit_release": "android-arm64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_jit_release": "android-riscv64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_x64_and_flutter_runtime_mode_jit_release": "android-x64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_profile": "android-x86-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_release": "android-x86-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_x86_and_flutter_runtime_mode_jit_release": "android-x86-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_profile": "ios-arm64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_release": "ios-arm64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_ios_arm64_and_flutter_runtime_mode_jit_release": "ios-arm64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_profile": "ios-x64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_release": "ios-x64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_ios_x64_and_flutter_runtime_mode_jit_release": "ios-x64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_profile": "linux-arm64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_release": "linux-arm64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_jit_release": "linux-arm64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_profile": "linux-x64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_release": "linux-x64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_linux_x64_and_flutter_runtime_mode_jit_release": "linux-x64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_profile": "wasm-wasm-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_release": "wasm-wasm-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_jit_release": "wasm-wasm-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_arm": "android-arm-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_arm64": "android-arm64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_riscv64": "android-riscv64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_x64": "android-x64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_android_x86": "android-x86-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_ios_arm64": "ios-arm64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_ios_x64": "ios-x64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_linux_arm64": "linux-arm64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_linux_x64": "linux-x64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_wasm_wasm": "wasm-wasm-ddm/artifacts.zip",
+        "//conditions:default": None,
+    }),
+    sources = {"gen_snapshot": "gen_snapshot"} | select({
+        "//engine/src/flutter/common:runtime_mode_debug": {
+            "flutter_tester": "flutter_tester",
+            "impellerc": "impellerc",
+            "isolate_snapshot.bin": "gen/flutter/lib/snapshot/isolate_snapshot.bin",
+            "vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot/vm_isolate_snapshot.bin",
+            "frontend_server_aot.dart.snapshot": "gen/frontend_server_aot.dart.snapshot",
+        },
+        "//conditions:default": {},
+    }) | select({
+        ":when_flutter_runtime_mode_debug_and_host_os_not_mac": {
+            "libpath_ops.so": "libpath_ops.so",
+            "libtessellator.so": "libtessellator.so",
+        },
+        "//conditions:default": {},
+    }) | select({
+        ":when_flutter_runtime_mode_debug_and_host_os_mac": {
+            "libpath_ops.dylib": "libpath_ops.dylib",
+            "libtessellator.dylib": "libtessellator.dylib",
+        },
+        "//conditions:default": {},
+    }) | select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": {
+            "entitlements.txt": "gen/flutter/build/archives/entitlements.txt",
+            "without_entitlements.txt": "gen/flutter/build/archives/without_entitlements.txt",
+        },
+        "//conditions:default": {},
+    }),
+    target_compatible_with = select({
+        "//engine/src/flutter/common:engine_artifacts": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = select({
+        "//engine/src/flutter/common:runtime_mode_debug": [":artifacts_shader_lib"],
+        "//conditions:default": [],
+    }),
+    deps = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",
+        "//engine/src/flutter/flutter_frontend_server:frontend_server",
+        "//engine/src/flutter/impeller/compiler:impellerc",
+        "//engine/src/flutter/impeller/tessellator:tessellator_shared",
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bin",
+        "//engine/src/flutter/shell/testing",
+        "//engine/src/flutter/tools/path_ops",
+    ] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            ":artifacts_entitlement_config",  # host_os == "mac"
+            ":artifacts_without_entitlement_config",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+cc_library(
+    name = "embedder",
+    data = ["//engine/src/flutter/shell/platform/embedder:embedder-archive"],
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# Generates flutter_patched_sdk.zip for debug and profile runtime modes
+# and saves it in the zips_archive folder. For release runtime mode it
+# generates flutter_patched_sdk_product.zip and saves it to
+# zips_archive/flutter_patched_sdk_product/ folder.
+zip_bundle(
+    name = "flutter_patched_sdk",
+    files = select({
+        "//engine/src/flutter/common:runtime_mode_release": {
+            "flutter_patched_sdk_product/vm_outline_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill",
+            "flutter_patched_sdk_product/platform_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill",
+        },
+        "//conditions:default": {
+            "flutter_patched_sdk/vm_outline_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill",
+            "flutter_patched_sdk/platform_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill",
+        },
+    }),
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_release": "flutter_patched_sdk_product.zip",
+        "//conditions:default": "flutter_patched_sdk.zip",
+    }),
+    sources = select({
+        "//engine/src/flutter/common:runtime_mode_release": {
+            "flutter_patched_sdk_product/vm_outline_strong.dill": "flutter_patched_sdk/vm_outline_strong.dill",
+            "flutter_patched_sdk_product/platform_strong.dill": "flutter_patched_sdk/platform_strong.dill",
+        },
+        "//conditions:default": {
+            "flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk/vm_outline_strong.dill",
+            "flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk/platform_strong.dill",
+        },
+    }),
+    deps = ["//engine/src/flutter/lib/snapshot:strong_platform"],
+)
+
+gn_generated_file(
+    name = "dart_sdk_entitlement_config",
+    out = "dart_sdk_entitlements.txt",
+    # Dart SDK is a prebuilt archive. The rule for building
+    # Dart SDK is
+    # https://github.com/flutter/flutter/blob/e8f1e18166fa9610c6f4bfbefaf6a118a5eb4121/engine/src/flutter/build/dart/BUILD.gn
+    content = [
+        "dart-sdk/bin/dart",
+        "dart-sdk/bin/dartaotruntime",
+        "dart-sdk/bin/dartvm",
+        "dart-sdk/bin/utils/gen_snapshot",
+        "dart-sdk/bin/utils/wasm-opt",
+    ],
+    outputs = ["$root_gen_dir/flutter/build/archives/dart_sdk_entitlements.txt"],
+)
+
+gn_generated_file(
+    name = "dart_sdk_without_entitlement_config",
+    out = "dart_sdk_without_entitlements.txt",
+    content = [
+        "dart-sdk/bin/snapshots/analysis_server_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dart2bytecode.dart.snapshot",
+        "dart-sdk/bin/snapshots/dart2js_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dart2wasm_product.snapshot",
+        "dart-sdk/bin/snapshots/dart_runtime_service_vm_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dart_tooling_daemon_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dartdev_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dartdevc_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dds_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/frontend_server_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/gen_kernel_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/kernel_worker_aot.dart.snapshot",
+    ],
+    outputs = ["$root_gen_dir/flutter/build/archives/dart_sdk_without_entitlements.txt"],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_arm",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_arm64",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_riscv64",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_x64",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "android-x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_android_x86",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_android_x86",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "ios-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_ios_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_ios_arm64",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "ios-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_ios_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_ios_x64",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "linux-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_linux_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_linux_arm64",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "linux-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_linux_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_linux_x64",
+    ],
+)
+
+# `dart_dynamic_modules && full_target_platform_name == "wasm-wasm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_arm64",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_riscv64",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x64",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "android-x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_android_x86",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_android_x86",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "ios-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_arm64",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "ios-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_ios_x64",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "linux-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_arm64",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "linux-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_linux_x64",
+    ],
+)
+
+# `!dart_dynamic_modules && full_target_platform_name == "wasm-wasm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:platform_wasm_wasm",
+    ],
+)
+
+# `is_mac && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_target_cpu_arm64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `is_mac && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_target_cpu_x64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+zip_tree(
+    name = "dart_sdk_archive_dart-sdk",
+    srcs = ["//engine/src/flutter/build/bazel/dart_wrap:prebuilt_dart_sdk"],
+    destination = "dart-sdk",
+    root = "",
+    target_compatible_with = select({
+        "//engine/src/flutter/common:engine_artifacts": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+zip_bundle(
+    name = "dart_sdk_archive",
+    files = select({
+        "@platforms//os:macos": {
+            "entitlements.txt": ":dart_sdk_entitlements.txt",
+            "without_entitlements.txt": ":dart_sdk_without_entitlements.txt",
+        },
+        "//conditions:default": {},
+    }),
+    output = select({
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm": "dart-sdk-android-arm-ddm.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm64": "dart-sdk-android-arm64-ddm.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_riscv64": "dart-sdk-android-riscv64-ddm.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_x64": "dart-sdk-android-x64-ddm.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_android_x86": "dart-sdk-android-x86-ddm.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_ios_arm64": "dart-sdk-ios-arm64-ddm.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_ios_x64": "dart-sdk-ios-x64-ddm.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_linux_arm64": "dart-sdk-linux-arm64-ddm.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_linux_x64": "dart-sdk-linux-x64-ddm.zip",
+        ":when_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm": "dart-sdk-wasm-wasm-ddm.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm": "dart-sdk-android-arm.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm64": "dart-sdk-android-arm64.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_riscv64": "dart-sdk-android-riscv64.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_x64": "dart-sdk-android-x64.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_x86": "dart-sdk-android-x86.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_ios_arm64": "dart-sdk-ios-arm64.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_ios_x64": "dart-sdk-ios-x64.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64": "dart-sdk-linux-arm64.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64": "dart-sdk-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm": "dart-sdk-wasm-wasm.zip",
+        ":when_is_mac_and_target_cpu_arm64": "dart-sdk-darwin-arm64.zip",
+        ":when_is_mac_and_target_cpu_x64": "dart-sdk-darwin-x64.zip",
+        "//conditions:default": None,
+    }),
+    sources = select({
+        "@platforms//os:macos": {
+            "entitlements.txt": "gen/flutter/build/archives/dart_sdk_entitlements.txt",
+            "without_entitlements.txt": "gen/flutter/build/archives/dart_sdk_without_entitlements.txt",
+        },
+        "//conditions:default": {},
+    }),
+    target_compatible_with = select({
+        "//engine/src/flutter/common:engine_artifacts": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = [":dart_sdk_archive_dart-sdk"],
+    deps = [
+        ":dart_sdk_entitlement_config",
+        ":dart_sdk_without_entitlement_config",
+    ],
+)
+
+cc_library(
+    name = "flutter_embedder_framework",
+    data = ["//engine/src/flutter/shell/platform/embedder:flutter_embedder_framework_archive"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The GN file, for the wrapped GN builds that read //flutter/build
+# (//engine/src/flutter/build:gn_files; a glob does not enter a package).
+filegroup(
+    name = "gn_files",
+    srcs = ["BUILD.gn"],
+    visibility = ["//engine/src/flutter/build:__pkg__"],
+)
+
+# The host's development artifacts unpacked as the flutter tool's cache lays
+# them, for the tests' SDK facsimile (a dart_test's cache_files; what
+# `flutter precache` downloads for the host): bin/cache/artifacts/engine/<host>
+# is artifacts.zip and font-subset.zip unpacked together -- and the debug
+# desktop embedding's archives, which `flutter precache --linux|--macos`
+# adds: on Linux the GTK shell's, on a Mac the universal framework's and
+# gen_snapshots' below -- <host>-profile and <host>-release the other
+# modes' (gen_snapshot and the embedding, built under that mode's
+# configuration: in_configuration), common/ the patched SDK's debug and
+# product archives. The directories exist for the Linux and Mac hosts (the
+# Mac's T43); elsewhere they are incompatible rather than failing the
+# package's analysis.
+bundle_directory(
+    name = "host_engine_directory",
+    bundles = [
+        ":artifacts",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ] + select({
+        "@platforms//os:linux": ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
+        "@platforms//os:macos": [
+            ":macos_framework",
+            ":macos_gen_snapshot",
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# The recipe's other Mac archives, which the cache unpacks into the same
+# darwin-x64* directories: framework.zip (FlutterMacOS.xcframework) and
+# gen_snapshot.zip (gen_snapshot_arm64 and gen_snapshot_x64) are the Mac
+# builders' generators, not GN targets (ci/builders/mac_host_engine.json:
+# create_macos_framework.py lipos an arm64 and an x64 build's frameworks
+# into one xcframework -- with its dSYM, stripped, in release --,
+# create_macos_gen_snapshots.py gathers the two builds' universal
+# gen_snapshots). Here each is one target over both builds
+# (//build_defs/dist:universal.bzl: a split transition, in the current
+# runtime mode, the recipe's script over them) and the archive the recipe
+# uploads, under darwin-x64[-<mode>] -- the recipe's name for the universal
+# artifacts whatever the Mac ("until darwin artifacts are universal and
+# moved out of darwin-x64", artifacts.dart).
+apple_universal(
+    name = "universal_macos_framework",
+    args = [
+        "--dst",
+        "{dst}",
+        "--arm64-out-dir",
+        "{build:arm64}",
+        "--x64-out-dir",
+        "{build:x64}",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "--dsym",
+            "--strip",
+        ],
+        "//conditions:default": [],
+    }),
+    builds = {
+        "arm64": "macos_arm64",
+        "x64": "macos_x64",
+    },
+    directories = ["FlutterMacOS.xcframework"],
+    script = "//engine/src/flutter/sky:tools/create_macos_framework.py",
+    script_deps = [
+        "//engine/src/flutter/sky:tools/create_xcframework.py",
+        "//engine/src/flutter/sky:tools/sky_utils.py",
+    ],
+    stage = ["FlutterMacOS.framework"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src/flutter/shell/platform/darwin/macos:universal_flutter_framework"],
+)
+
+apple_universal(
+    name = "universal_macos_gen_snapshots",
+    args = [
+        "--dst",
+        "{dst}",
+        "--arm64-path",
+        "{build:arm64}/universal/gen_snapshot_arm64",
+        "--x64-path",
+        "{build:x64}/universal/gen_snapshot_x64",
+    ],
+    builds = {
+        "arm64": "macos_arm64",
+        "x64": "macos_x64",
+    },
+    files = [
+        "gen_snapshot_arm64",
+        "gen_snapshot_x64",
+    ],
+    script = "//engine/src/flutter/sky:tools/create_macos_gen_snapshots.py",
+    stage = ["universal"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src/flutter/lib/snapshot:create_macos_gen_snapshots"],
+)
+
+_MAC_DIRECTORY = {
+    "debug": "darwin-x64",
+    "profile": "darwin-x64-profile",
+    "release": "darwin-x64-release",
+    "jit_release": "darwin-x64-jit_release",
+}
+
+zip_bundle(
+    name = "macos_framework",
+    files = {"FlutterMacOS.xcframework": ":universal_macos_framework"},
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_" + mode: directory + "/framework.zip"
+        for mode, directory in _MAC_DIRECTORY.items()
+    }),
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+zip_bundle(
+    name = "macos_gen_snapshot",
+    files = {
+        "gen_snapshot_arm64": ":universal_macos_gen_snapshots",
+        "gen_snapshot_x64": ":universal_macos_gen_snapshots",
+    },
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_" + mode: directory + "/gen_snapshot.zip"
+        for mode, directory in _MAC_DIRECTORY.items()
+    }),
+    sources = {
+        "gen_snapshot_arm64": "universal_macos_gen_snapshots/gen_snapshot_arm64",
+        "gen_snapshot_x64": "universal_macos_gen_snapshots/gen_snapshot_x64",
+    },
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+[
+    in_configuration(
+        name = "%s_%s" % (bundle, mode),
+        runtime_mode = mode,
+        target = ":" + bundle,
+        target_compatible_with = ["@platforms//os:macos"],
+    )
+    for bundle in [
+        "macos_framework",
+        "macos_gen_snapshot",
+    ]
+    for mode in [
+        "profile",
+        "release",
+    ]
+]
+
+# The iOS counterpart: ios[-<mode>]/artifacts.zip is the Mac iOS builders'
+# generator (ci/builders/mac_ios_engine.json: create_ios_framework.py over
+# the device build of the mode and the two simulator builds -- the debug
+# ones whatever the mode --, the simulators' Flutter.framework lipo'd, the
+# xcframework over the device's and the simulator's, the extension-safe pair
+# the same (under Bazel the same builds: no GN file reads
+# darwin_extension_safe, build/bazel/README.md), the device build's
+# universal gen_snapshot_arm64; dSYM and stripped in release), unpacked by
+# `flutter precache --ios` as artifacts/engine/ios[-<mode>]. One target
+# over the three builds, and the archive; the directories for the
+# facsimile on a Mac host (the apple shard).
+apple_universal(
+    name = "universal_ios_framework",
+    aliases = {
+        "arm64_extension_safe": "arm64",
+        "sim_arm64_extension_safe": "sim_arm64",
+        "sim_x64_extension_safe": "sim_x64",
+    },
+    args = [
+        "--dst",
+        "{dst}",
+        "--arm64-out-dir",
+        "{build:arm64}",
+        "--simulator-x64-out-dir",
+        "{build:sim_x64}",
+        "--simulator-arm64-out-dir",
+        "{build:sim_arm64}",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "--dsym",
+            "--strip",
+        ],
+        "//conditions:default": [],
+    }),
+    builds = {
+        "arm64": "ios_arm64",
+        "sim_arm64": "ios_sim_arm64_debug",
+        "sim_x64": "ios_sim_x64_debug",
+    },
+    directories = [
+        "Flutter.xcframework",
+        "extension_safe/Flutter.xcframework",
+    ],
+    files = ["gen_snapshot_arm64"],
+    script = "//engine/src/flutter/sky:tools/create_ios_framework.py",
+    script_deps = [
+        "//engine/src/flutter/sky:tools/create_xcframework.py",
+        "//engine/src/flutter/sky:tools/sky_utils.py",
+    ],
+    stage = [
+        "Flutter.framework",
+        "universal",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src/flutter/lib/snapshot:create_macos_gen_snapshots",
+        "//engine/src/flutter/shell/platform/darwin/ios:universal_flutter_framework",
+    ],
+)
+
+_IOS_DIRECTORY = {
+    "debug": "ios",
+    "profile": "ios-profile",
+    "release": "ios-release",
+    "jit_release": "ios-jit_release",
+}
+
+zip_bundle(
+    name = "ios_artifacts",
+    files = {
+        "Flutter.xcframework": ":universal_ios_framework",
+        "extension_safe/Flutter.xcframework": ":universal_ios_framework",
+        "gen_snapshot_arm64": ":universal_ios_framework",
+    },
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_" + mode: directory + "/artifacts.zip"
+        for mode, directory in _IOS_DIRECTORY.items()
+    }),
+    sources = {
+        "Flutter.xcframework": "universal_ios_framework/Flutter.xcframework",
+        "extension_safe/Flutter.xcframework": "universal_ios_framework/extension_safe/Flutter.xcframework",
+        "gen_snapshot_arm64": "universal_ios_framework/gen_snapshot_arm64",
+    },
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# The cache copies the repository's LICENSE into each iOS directory after
+# unpacking (EngineCachedArtifact.updateInner over getLicenseDirs) and
+# checks it is there before it trusts the directory (isUpToDateInner): the
+# facsimile lays it too.
+bundle_directory(
+    name = "ios_engine_directory",
+    bundles = [":ios_artifacts"],
+    files = {"//:LICENSE": "LICENSE"},
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+[
+    in_configuration(
+        name = "ios_artifacts_" + mode,
+        runtime_mode = mode,
+        target = ":ios_artifacts",
+        target_compatible_with = ["@platforms//os:macos"],
+    )
+    for mode in [
+        "profile",
+        "release",
+    ]
+]
+
+[
+    bundle_directory(
+        name = "ios_engine_%s_directory" % mode,
+        bundles = [":ios_artifacts_" + mode],
+        files = {"//:LICENSE": "LICENSE"},
+        target_compatible_with = select({
+            "@platforms//os:macos": [],
+            "//conditions:default": ["@platforms//:incompatible"],
+        }),
+    )
+    for mode in [
+        "profile",
+        "release",
+    ]
+]
+
+in_configuration(
+    name = "artifacts_profile",
+    runtime_mode = "profile",
+    target = ":artifacts",
+)
+
+in_configuration(
+    name = "flutter_gtk_profile",
+    runtime_mode = "profile",
+    target = "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+bundle_directory(
+    name = "host_engine_profile_directory",
+    bundles = [":artifacts_profile"] + select({
+        "@platforms//os:linux": [":flutter_gtk_profile"],
+        "@platforms//os:macos": [
+            ":macos_framework_profile",
+            ":macos_gen_snapshot_profile",
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+in_configuration(
+    name = "artifacts_release",
+    runtime_mode = "release",
+    target = ":artifacts",
+)
+
+in_configuration(
+    name = "flutter_gtk_release",
+    runtime_mode = "release",
+    target = "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+bundle_directory(
+    name = "host_engine_release_directory",
+    bundles = [":artifacts_release"] + select({
+        "@platforms//os:linux": [":flutter_gtk_release"],
+        "@platforms//os:macos": [
+            ":macos_framework_release",
+            ":macos_gen_snapshot_release",
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+in_configuration(
+    name = "flutter_patched_sdk_release",
+    runtime_mode = "release",
+    target = ":flutter_patched_sdk",
+)
+
+bundle_directory(
+    name = "common_engine_directory",
+    bundles = [
+        ":flutter_patched_sdk",
+        ":flutter_patched_sdk_release",
+    ],
+)
+
+# The Android artifacts the same way, for the tests that run `flutter
+# build apk` (//build_defs/android:build_tools.bzl): gen_snapshot per CPU
+# and AOT mode as android-<cpu>-<mode>/linux-x64, and the embedding's Maven
+# artifacts as a repository (android_engine_maven) -- the engine built for
+# arm, arm64 and x64 in debug, profile and release, the Android builders'
+# configurations, through in_configuration.
+# The Linux host's for now: the JDK overlay (@openjdk) lays out a Linux
+# JDK, not a Mac's bundle (Contents/Home), so the jars' actions do not
+# analyze on a Mac (the Mac's T14).
+android_engine_artifacts(
+    name = "android_engine",
+    target_compatible_with = ["@platforms//os:linux"],
+)

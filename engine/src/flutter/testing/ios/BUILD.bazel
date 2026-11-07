@@ -1,0 +1,62 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The iOS embedding's Objective-C unit tests: run_tests.py --type objc.
+# Hand-written: the directory has no GN file; the script runs the Xcode
+# project IosUnitTests over the build directory of an iOS simulator build
+# (build_defs/testing/ios_xctest.bzl).
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("//build_defs/testing:ios_xctest.bzl", "ios_xctest")
+
+package(default_visibility = ["//visibility:public"])
+
+# The test app's delegate header, which the embedding's XCTest suite
+# includes (FlutterViewControllerTest.mm; the manifest's extraSources for
+# shell/platform/darwin/ios:ios_test_flutter).
+exports_files(["IosUnitTests/App/AppDelegate.h"])
+
+# A simulator build of the debug runtime mode: the one that builds the
+# XCTest library (ios_test_flutter, under enable_ios_unittests), and the
+# one a simulator runs (run_tests.py's --ios-variant names a `_sim` build).
+selects.config_setting_group(
+    name = "simulator_unittests_enabled",
+    match_all = [
+        "//engine/src/flutter/testing:ios_unittests_enabled",
+        "//engine/src/flutter/build/bazel:ios_simulator_enabled",
+    ],
+)
+
+# run_objc_tests: `xcodebuild -sdk iphonesimulator -scheme IosUnitTests
+# -destination id=<a fresh iPhone 11 simulator> test FLUTTER_ENGINE=<variant>`
+# in IosUnitTests, whose test bundle compiles FlutterChannelsTest.m against
+# the framework's common headers, the embedding's task queue header and
+# OCMock's, links the engine's XCTest library (libios_test_flutter.dylib,
+# the suites of shell/platform/darwin/ios) with OCMock's dylib and
+# Flutter.framework, and embeds the three out of the build directory.
+#
+#   bazel test --config=ios_debug_unopt_sim_arm64 //engine/src/flutter/testing/ios:ios_unit_tests
+#   bazel test --config=ios_debug_unopt_sim_arm64 //engine/src/flutter/testing/ios:ios_unit_tests \
+#       --test_arg=-only-testing:IosUnitTestsTests/FlutterChannelsTest
+ios_xctest(
+    name = "ios_unit_tests",
+    srcs = glob(["IosUnitTests/**"]),
+    data = [
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Source/FlutterChannelsTest.m",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_headers",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h",
+    ],
+    engine = [
+        "//engine/src/flutter/shell/platform/darwin/ios:ios_test_flutter",
+        "//engine/src/flutter/shell/platform/darwin/ios:universal_flutter_framework",
+        "@ocmock//:ocmock_shared",
+    ],
+    project = "IosUnitTests/IosUnitTests.xcodeproj/project.pbxproj",
+    scheme = "IosUnitTests",
+    target_compatible_with = select({
+        ":simulator_unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    tree = {"@ocmock//:headers": "flutter/third_party/ocmock"},
+)

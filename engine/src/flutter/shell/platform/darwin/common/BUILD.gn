@@ -108,7 +108,10 @@ source_set("common") {
 # See: Upstream clang change: https://reviews.llvm.org/D150397
 # See: https://github.com/flutter/flutter/issues/133777
 source_set("availability_version_check") {
-  sources = [ "availability_version_check.cc" ]
+  sources = [
+    "availability_version_check.cc",
+    "availability_version_check.h",
+  ]
 
   deps = [ "//flutter/fml" ]
 
@@ -187,12 +190,16 @@ source_set("framework_common") {
     "framework/Source/FlutterNSBundleUtils.mm",
     "framework/Source/FlutterStandardCodec.mm",
     "framework/Source/FlutterStandardCodecHelper.cc",
+    "framework/Source/FlutterStandardCodecHelper.h",
     "framework/Source/FlutterStandardCodec_Internal.h",
   ]
 
   public = framework_common_headers
 
-  public += [ "framework/Source/FlutterNSBundleUtils.h" ]
+  public += [
+    "framework/Source/FlutterBinaryMessengerRelay.h",
+    "framework/Source/FlutterNSBundleUtils.h",
+  ]
 
   defines = [ "FLUTTER_FRAMEWORK" ]
 
@@ -270,6 +277,7 @@ executable("framework_common_unittests") {
 
   sources = [
     "framework/Source/FlutterBinaryMessengerRelayTest.mm",
+    "framework/Source/FlutterTestUtils.h",
     "framework/Source/FlutterTestUtils.mm",
     "framework/Source/flutter_codecs_unittest.mm",
     "framework/Source/flutter_standard_codec_unittest.mm",

@@ -1,0 +1,25 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: bazel_tools
+description: Tooling that keeps the Bazel workspace in sync with DEPS and the GN build.
+
+# We don't publish packages to pub.dev from the engine repository.
+publish_to: none
+
+# Required for workspace support.
+environment:
+  sdk: ^3.13.0-0
+
+# This package is managed as part of the engine workspace.
+resolution: workspace
+
+dependencies:
+  args: any
+  meta: any
+  path: any
+  yaml: any
+
+dev_dependencies:
+  test: any

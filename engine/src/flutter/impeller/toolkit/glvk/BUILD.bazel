@@ -1,0 +1,51 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/toolkit/glvk/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "glvk",
+    srcs = [
+        "proc_table.cc",
+        "trampoline.cc",
+    ],
+    hdrs = [
+        "proc_table.h",
+        "trampoline.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from ../../renderer/backend/vulkan
+        "-Wno-c++98-compat-extra-semi",  # from ../../renderer/backend/vulkan
+        "-Wno-deprecated-copy",  # from ../../renderer/backend/vulkan
+        "-Wno-implicit-fallthrough",  # from ../../renderer/backend/vulkan
+        "-Wno-nullability-completeness",  # from ../../renderer/backend/vulkan
+        "-Wno-suggest-destructor-override",  # from ../../renderer/backend/vulkan
+        "-Wno-suggest-override",  # from ../../renderer/backend/vulkan
+        "-Wno-unused-private-field",  # from ../../renderer/backend/vulkan
+        "-Wno-unused-variable",  # from ../../renderer/backend/vulkan
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/renderer",
+        "//engine/src/flutter/impeller/renderer/backend/gles",
+        "//engine/src/flutter/impeller/renderer/backend/vulkan",
+        "//engine/src/flutter/impeller/toolkit/egl",
+        "//engine/src/flutter/impeller/toolkit/gles",
+    ],
+    alwayslink = True,
+)

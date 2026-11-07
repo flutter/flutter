@@ -171,6 +171,17 @@ class ClangTidy {
     );
 
     if (changedFileBuildCommands.isEmpty) {
+      if (options.lintTarget is LintAll) {
+        // Every file of the repository and not one compile command for any
+        // of them: the database does not describe this checkout (a database
+        // from another checkout, or one whose files are spelled otherwise),
+        // and a pass would say nothing.
+        _errSink.writeln(
+          'No compile command in ${options.buildCommandsPath.path} names a file of '
+          '${options.repoPath.path}; nothing would be linted.',
+        );
+        return 1;
+      }
       _outSink.writeln(
         'No changed files that have build commands associated with them were '
         'found.',
@@ -320,11 +331,15 @@ class ClangTidy {
       ]);
     }
     return () async {
+      // The files by canonical path, once: with --lint-all the list is the
+      // whole engine tree (hundreds of thousands of files, third_party's
+      // among them), and a search of it per command -- thousands of
+      // commands -- took longer than the lint itself.
+      final filePaths = <String>{for (final io.File file in files) path.canonicalize(file.path)};
       final result = <Command>[];
       for (final command in totalCommands) {
         final LintAction lintAction = await command.lintAction;
-        // Short-circuit the expensive containsAny call for the many third_party files.
-        if (lintAction != LintAction.skipThirdParty && command.containsAny(files)) {
+        if (lintAction != LintAction.skipThirdParty && command.isAnyOf(filePaths)) {
           result.add(command);
         }
       }

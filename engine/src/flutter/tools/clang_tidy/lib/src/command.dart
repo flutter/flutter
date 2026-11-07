@@ -37,17 +37,35 @@ enum LintAction {
 /// it.
 class Command {
   /// Generate a [Command] from a [Map].
+  ///
+  /// A compilation database entry carries its command either as a `command`
+  /// string or as an `arguments` list; this reads both, and takes the list
+  /// when there is one.
   Command.fromMap(Map<String, dynamic> map)
     : directory = io.Directory(map['directory'] as String).absolute,
-      command = map['command'] as String {
+      arguments = _argumentsOf(map),
+      command = map['command'] as String? ?? _argumentsOf(map)!.join(' ') {
     filePath = path.normalize(path.join(directory.path, map['file'] as String));
+  }
+
+  static List<String>? _argumentsOf(Map<String, dynamic> map) {
+    final arguments = map['arguments'] as List<Object?>?;
+    return arguments == null ? null : List<String>.from(arguments);
   }
 
   /// The working directory of the command.
   final io.Directory directory;
 
-  /// The compilation command.
+  /// The compilation command, as the entry's `command` string; the entry's
+  /// `arguments` joined by spaces when it has no `command`.
   final String command;
+
+  /// The compilation command, as the entry's `arguments` list; null when the
+  /// entry has a `command` string alone.
+  ///
+  /// Unlike [command], the list needs no shell unquoting: an argument such as
+  /// `-DDART_LEGACY_API=[[deprecated]]` is one element of it.
+  final List<String>? arguments;
 
   /// The file on which the command operates.
   late final String filePath;
@@ -60,7 +78,10 @@ class Command {
 
   String? _tidyArgs;
 
-  /// The command line arguments of the command.
+  /// The command line arguments of the command, from [command].
+  ///
+  /// The string is split on spaces, without shell unquoting, by
+  /// [tidyArguments], which reads [arguments] instead when the entry has them.
   String get tidyArgs {
     return _tidyArgs ??= (() {
       String result = command;
@@ -74,22 +95,71 @@ class Command {
     })();
   }
 
+  List<String>? _tidyArguments;
+
+  /// The command line arguments clang-tidy runs the compiler's front end with.
+  ///
+  /// From [arguments] when the entry has them: everything before the compiler
+  /// (a rewrapper prefix), the compiler itself, `-MF <path>` and anything from
+  /// an appended `&&` on are dropped, as [tidyArgs] drops them from the string.
+  /// Otherwise [tidyArgs] split on spaces.
+  List<String> get tidyArguments {
+    return _tidyArguments ??= (() {
+      final List<String>? arguments = this.arguments;
+      if (arguments == null) {
+        return tidyArgs.split(' ');
+      }
+      final List<String> fromCompiler = arguments
+          .skipWhile((String s) => !_pathRegex.hasMatch(s))
+          .skip(1)
+          .toList();
+      final result = <String>[];
+      for (var i = 0; i < fromCompiler.length; i++) {
+        final String argument = fromCompiler[i];
+        if (argument == '&&') {
+          break;
+        }
+        if (argument == '-MF') {
+          i++;
+          continue;
+        }
+        result.add(argument);
+      }
+      return result;
+    })();
+  }
+
+  /// The compiler of the command: the first token naming a `clang/bin/clang`
+  /// or `clang/bin/clang++`, or null when none does.
+  String? get _compiler {
+    final List<String>? arguments = this.arguments;
+    if (arguments == null) {
+      return _pathRegex.stringMatch(command);
+    }
+    for (final String argument in arguments) {
+      final String? match = _pathRegex.stringMatch(argument);
+      if (match != null) {
+        return match;
+      }
+    }
+    return null;
+  }
+
   String? _tidyPath;
 
   /// The command but with clang-tidy instead of clang.
   String get tidyPath {
     return _tidyPath ??=
-        _pathRegex
-            .stringMatch(command)
+        _compiler
             ?.replaceAll('clang/bin/clang', 'clang/bin/clang-tidy')
             .replaceAll('clang-tidy++', 'clang-tidy') ??
         '';
   }
 
   /// Whether this command operates on any of the files in `queries`.
-  bool containsAny(List<io.File> queries) {
-    return queries.indexWhere((io.File query) => path.equals(query.path, filePath)) != -1;
-  }
+  /// Whether this command's file is one of [canonicalPaths] (paths as
+  /// `path.canonicalize` writes them, the form `path.equals` compares).
+  bool isAnyOf(Set<String> canonicalPaths) => canonicalPaths.contains(path.canonicalize(filePath));
 
   static final RegExp _nolintRegex = RegExp(
     r'//\s*FLUTTER_NOLINT(: https://github.com/flutter/flutter/issues/\d+)?',
@@ -143,7 +213,7 @@ class Command {
       if (options.enableCheckProfile) '--enable-check-profile',
       '--',
     ];
-    args.addAll(tidyArgs.split(' '));
+    args.addAll(tidyArguments);
     final String clangTidyPath = options.clangTidyPath?.path ?? tidyPath;
     return WorkerJob(
       <String>[clangTidyPath, ...args],

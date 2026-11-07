@@ -11,7 +11,7 @@
         "definition files."
     ],
     "luci_flags": {
-      "upload_content_hash": true
+        "upload_content_hash": true
     },
     "builds": [
         {
@@ -22,7 +22,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -33,11 +34,13 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/host_debug_framework",
+            "timeout": 240,
             "description": "Produces the debug mode x64 macOS framework.",
             "ninja": {
                 "config": "ci/host_debug_framework",
@@ -57,15 +60,15 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "archives": [
@@ -88,7 +91,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -99,12 +103,13 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
-
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/host_debug",
+            "timeout": 240,
             "description": "Produces debug mode x64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/host_debug",
@@ -125,15 +130,15 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -143,7 +148,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -154,12 +160,13 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
-
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/host_debug_gen_snapshot",
+            "timeout": 240,
             "description": "Produces debug mode x64 macOS gen_snapshot.",
             "ninja": {
                 "config": "ci/host_debug_gen_snapshot",
@@ -178,15 +185,15 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "archives": [
@@ -207,7 +214,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -217,11 +225,13 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/host_profile",
+            "timeout": 240,
             "description": "Produces profile mode x64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/host_profile",
@@ -239,15 +249,15 @@
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -257,7 +267,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -267,11 +278,13 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/host_profile_framework",
+            "timeout": 240,
             "description": "Produces the profile mode x64 macOS framework.",
             "ninja": {
                 "config": "ci/host_profile_framework",
@@ -289,15 +302,15 @@
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -307,7 +320,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -317,11 +331,13 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/host_profile_gen_snapshot",
+            "timeout": 240,
             "description": "Produces profile mode x64 macOS gen_snapshot.",
             "ninja": {
                 "config": "ci/host_profile_gen_snapshot",
@@ -339,15 +355,15 @@
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "archives": [
@@ -369,7 +385,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -380,11 +397,13 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/host_release",
+            "timeout": 240,
             "description": "Produces release mode x64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/host_release",
@@ -404,15 +423,15 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -422,7 +441,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -433,11 +453,13 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/host_release_framework",
+            "timeout": 240,
             "description": "Produces the release mode x64 macOS framework.",
             "ninja": {
                 "config": "ci/host_release_framework",
@@ -456,15 +478,15 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -474,7 +496,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -485,11 +508,13 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/host_release_gen_snapshot",
+            "timeout": 240,
             "description": "Produces release mode x64 macOS gen_snapshot.",
             "ninja": {
                 "config": "ci/host_release_gen_snapshot",
@@ -508,15 +533,15 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "archives": [
@@ -539,7 +564,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -551,11 +577,13 @@
                 "debug",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/mac_debug_arm64",
+            "timeout": 240,
             "description": "Produces debug mode arm64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/mac_debug_arm64",
@@ -577,15 +605,15 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -595,7 +623,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -607,11 +636,13 @@
                 "debug",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/mac_debug_framework_arm64",
+            "timeout": 240,
             "description": "Produces the debug mode arm64 macOS framework.",
             "ninja": {
                 "config": "ci/mac_debug_framework_arm64",
@@ -632,15 +663,15 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -650,7 +681,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -662,11 +694,13 @@
                 "debug",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/mac_debug_gen_snapshot_arm64",
+            "timeout": 240,
             "description": "Produces the debug mode arm64 macOS gen_snapshot.",
             "ninja": {
                 "config": "ci/mac_debug_gen_snapshot_arm64",
@@ -686,15 +720,15 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "archives": [
@@ -715,7 +749,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -727,11 +762,13 @@
                 "profile",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/mac_profile_arm64",
+            "timeout": 240,
             "description": "Produces profile mode arm64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/mac_profile_arm64",
@@ -739,7 +776,7 @@
                     "flutter/build/archives:artifacts"
                 ]
             },
-           "postsubmit_overrides": {
+            "postsubmit_overrides": {
                 "gn": [
                     "--target-dir",
                     "ci/mac_profile_arm64",
@@ -751,15 +788,15 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -769,7 +806,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -781,11 +819,13 @@
                 "profile",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/mac_profile_framework_arm64",
+            "timeout": 240,
             "description": "Produces the profile mode arm64 macOS framework.",
             "ninja": {
                 "config": "ci/mac_profile_framework_arm64",
@@ -793,7 +833,7 @@
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
-           "postsubmit_overrides": {
+            "postsubmit_overrides": {
                 "gn": [
                     "--target-dir",
                     "ci/mac_profile_framework_arm64",
@@ -805,15 +845,15 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -823,7 +863,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -835,11 +876,13 @@
                 "profile",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/mac_profile_gen_snapshot_arm64",
+            "timeout": 240,
             "description": "Produces the profile mode arm64 macOS gen_snapshot.",
             "ninja": {
                 "config": "ci/mac_profile_gen_snapshot_arm64",
@@ -847,7 +890,7 @@
                     "flutter/lib/snapshot:create_macos_gen_snapshots"
                 ]
             },
-           "postsubmit_overrides": {
+            "postsubmit_overrides": {
                 "gn": [
                     "--target-dir",
                     "ci/mac_profile_gen_snapshot_arm64",
@@ -859,15 +902,15 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "archives": [
@@ -889,7 +932,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -901,12 +945,14 @@
                 "release",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
                 "--xcode-symlinks",
-                "--use-glfw-swiftshader"
+                "--use-glfw-swiftshader",
+                "--bazel"
             ],
             "name": "ci/mac_release_arm64",
+            "timeout": 240,
             "description": "Produces release mode arm64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/mac_release_arm64",
@@ -915,7 +961,7 @@
                     "flutter/tools/font_subset"
                 ]
             },
-           "postsubmit_overrides": {
+            "postsubmit_overrides": {
                 "gn": [
                     "--target-dir",
                     "ci/mac_release_arm64",
@@ -928,15 +974,15 @@
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
                     "--no-goma",
-                    "--use-glfw-swiftshader"
+                    "--use-glfw-swiftshader",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -946,7 +992,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -958,12 +1005,14 @@
                 "release",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
                 "--xcode-symlinks",
-                "--use-glfw-swiftshader"
+                "--use-glfw-swiftshader",
+                "--bazel"
             ],
             "name": "ci/mac_release_framework_arm64",
+            "timeout": 240,
             "description": "Produces the release mode arm64 macOS framework.",
             "ninja": {
                 "config": "ci/mac_release_framework_arm64",
@@ -971,7 +1020,7 @@
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
-           "postsubmit_overrides": {
+            "postsubmit_overrides": {
                 "gn": [
                     "--target-dir",
                     "ci/mac_release_framework_arm64",
@@ -984,15 +1033,15 @@
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
                     "--no-goma",
-                    "--use-glfw-swiftshader"
+                    "--use-glfw-swiftshader",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         },
         {
             "drone_dimensions": [
@@ -1002,7 +1051,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -1014,12 +1064,14 @@
                 "release",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
                 "--xcode-symlinks",
-                "--use-glfw-swiftshader"
+                "--use-glfw-swiftshader",
+                "--bazel"
             ],
             "name": "ci/mac_release_gen_snapshot_arm64",
+            "timeout": 240,
             "description": "Produces release mode arm64 macOS gen_snapshot.",
             "ninja": {
                 "config": "ci/mac_release_gen_snapshot_arm64",
@@ -1027,7 +1079,7 @@
                     "flutter/lib/snapshot:create_macos_gen_snapshots"
                 ]
             },
-           "postsubmit_overrides": {
+            "postsubmit_overrides": {
                 "gn": [
                     "--target-dir",
                     "ci/mac_release_gen_snapshot_arm64",
@@ -1040,15 +1092,15 @@
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
                     "--no-goma",
-                    "--use-glfw-swiftshader"
+                    "--use-glfw-swiftshader",
+                    "--bazel"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
                     "sdk_version": "17c52"
                 }
-            },
-            "timeout": 90
+            }
         }
     ],
     "generators": {

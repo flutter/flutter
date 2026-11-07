@@ -11,7 +11,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -21,10 +22,12 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/host_debug_test",
+            "timeout": 240,
             "description": "Builds host-side unit tests for Linux.",
             "ninja": {
                 "config": "ci/host_debug_test",
@@ -57,7 +60,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -67,10 +71,12 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/host_profile_test",
+            "timeout": 240,
             "description": "Builds host-side unit tests for Linux.",
             "ninja": {
                 "config": "ci/host_profile_test",
@@ -109,7 +115,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -119,10 +126,12 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/host_release_test",
+            "timeout": 240,
             "description": "Builds host-side unit tests and benchmarks for Linux.",
             "ninja": {
                 "config": "ci/host_release_test",
@@ -154,23 +163,6 @@
                         "--type",
                         "dart,dart-host,engine,benchmarks",
                         "--engine-capture-core-dump"
-                    ]
-                },
-                {
-                    "language": "bash",
-                    "name": "Generate metrics test",
-                    "script": "flutter/testing/benchmark/generate_metrics.sh",
-                    "parameters": [
-                        "ci/host_release_test"
-                    ]
-                },
-                {
-                    "language": "bash",
-                    "name": "Upload metrics dry-run",
-                    "script": "flutter/testing/benchmark/upload_metrics.sh",
-                    "parameters": [
-                        "ci/host_release_test",
-                        "--no-upload"
                     ]
                 }
             ]

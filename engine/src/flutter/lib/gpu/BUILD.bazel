@@ -1,0 +1,161 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/gpu/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: gpu_unittests_fixtures, gpu_unittests.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "gpu",
+    srcs = [
+        "binding_set.cc",  # !is_fuchsia
+        "command_buffer.cc",  # !is_fuchsia
+        "compute_pass.cc",  # !is_fuchsia
+        "compute_pipeline.cc",  # !is_fuchsia
+        "context.cc",  # !is_fuchsia
+        "device_buffer.cc",  # !is_fuchsia
+        "export.cc",  # !is_fuchsia
+        "formats.cc",  # !is_fuchsia
+        "render_pass.cc",  # !is_fuchsia
+        "render_pipeline.cc",  # !is_fuchsia
+        "shader.cc",  # !is_fuchsia
+        "shader_library.cc",  # !is_fuchsia
+        "surface.cc",  # !is_fuchsia
+        "texture.cc",  # !is_fuchsia
+    ],
+    hdrs = [
+        "binding_set.h",  # !is_fuchsia
+        "command_buffer.h",  # !is_fuchsia
+        "compute_pass.h",  # !is_fuchsia
+        "compute_pipeline.h",  # !is_fuchsia
+        "context.h",  # !is_fuchsia
+        "device_buffer.h",  # !is_fuchsia
+        "export.h",  # !is_fuchsia
+        "formats.h",  # !is_fuchsia
+        "render_pass.h",  # !is_fuchsia
+        "render_pipeline.h",  # !is_fuchsia
+        "shader.h",  # !is_fuchsia
+        "shader_library.h",  # !is_fuchsia
+        "surface.h",  # !is_fuchsia
+        "texture.h",  # !is_fuchsia
+    ],
+    copts = [
+        # Dart gives us doubles. Skia and Impeller work in floats.
+        # If Dart gives us a double > FLT_MAX or < -FLT_MAX, implicit conversion
+        # will convert it to either inf/-inf or FLT_MAX/-FLT_MAX (undefined
+        # behavior). This can result in surprising and difficult to debug behavior
+        # for Flutter application developers, so it should be explicitly handled
+        # via SafeNarrow.
+        "-Wimplicit-float-conversion",
+    ] + FLUTTER_COPTS + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list:skia_conversions
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list:skia_conversions
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/lib/ui
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/impeller",
+        "//engine/src/flutter/impeller/display_list:skia_conversions",
+        "//engine/src/flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/third_party/tonic",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `is_mac || is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)
+
+# The package directory as flutter_gpu.zip ships it (lib/gpu/dist; the
+# converter's directorySources names it): every file of this package and of
+# its dist subpackage, as zip.py's walk of //flutter/lib/gpu takes them.
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]) + ["//engine/src/flutter/lib/gpu/dist:all_files"],
+    visibility = ["//engine/src/flutter/lib/gpu/dist:__pkg__"],
+)

@@ -1,0 +1,36 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The hello_world example's sources, for the tests Bazel compiles and runs on
+# flutter_tester (build_defs/dart/flutter_test.bzl).
+
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob(["lib/**"]) + ["pubspec.yaml"],
+)
+
+# The tests run from the package's directory (test/BUILD.bazel).
+exports_files(["pubspec.yaml"])
+
+# The project whole, for the tool's tests that build it for a platform
+# (analyze_size_test: `flutter build apk --analyze-size` on hello_world).
+filegroup(
+    name = "project",
+    srcs = glob(
+        [
+            "android/**",
+            "ios/**",
+            "lib/**",
+            "linux/**",
+            "macos/**",
+            "web/**",
+            "windows/**",
+        ],
+        exclude = FLUTTER_PROJECT_GENERATED,
+    ) + ["pubspec.yaml"],
+)

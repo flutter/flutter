@@ -35,6 +35,26 @@ def main():
   parser.add_argument('--build-config-path', type=str)
   parser.add_argument('--src-dir', type=str, default='.')
   parser.add_argument('--quiet', default=False, action='store_true')
+  # The inputs the script otherwise finds by their paths in the source tree,
+  # for a build that lays them elsewhere (the Bazel build's sandbox).
+  parser.add_argument(
+      '--javadoc-bin',
+      type=str,
+      default=None,
+      help='The javadoc binary; the checkout\'s JDK by default.'
+  )
+  parser.add_argument(
+      '--android-jar',
+      type=str,
+      default=None,
+      help='The Android SDK\'s android.jar; the checkout\'s by default.'
+  )
+  parser.add_argument(
+      '--embedding-dependencies-dir',
+      type=str,
+      default=None,
+      help='The directory of the embedding\'s dependency jars; the checkout\'s by default.'
+  )
   args = parser.parse_args()
 
   if not os.path.exists(args.android_source_root):
@@ -47,7 +67,7 @@ def main():
   if not os.path.exists(args.out_dir):
     os.makedirs(args.out_dir)
 
-  android_jar_path = os.path.join(
+  android_jar_path = args.android_jar or os.path.join(
       args.src_dir, 'flutter', 'third_party', 'android_tools', 'sdk', 'platforms', 'android-37.0',
       'android.jar'
   )
@@ -55,14 +75,16 @@ def main():
     print('Android SDK not found at %s' % android_jar_path)
     return 1
 
+  embedding_dependencies_dir = args.embedding_dependencies_dir or os.path.join(
+      args.src_dir, 'flutter', 'third_party', 'android_embedding_dependencies', 'lib'
+  )
+
   classpath = [
       args.android_source_root,
       os.path.join(args.android_source_root, 'debug'),
       os.path.join(args.android_source_root, 'release'),
       android_jar_path,
-      os.path.join(
-          args.src_dir, 'flutter', 'third_party', 'android_embedding_dependencies', 'lib', '*'
-      ),
+      os.path.join(embedding_dependencies_dir, '*'),
   ]
   if args.build_config_path:
     classpath.append(args.build_config_path)
@@ -93,7 +115,7 @@ def main():
   android_package_list = os.path.join(SCRIPT_DIR, 'android_reference')
 
   command = [
-      JavadocBin(),
+      args.javadoc_bin or JavadocBin(),
       '-classpath',
       ':'.join(classpath),
       '-d',

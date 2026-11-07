@@ -1,0 +1,262 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/web_sdk/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/config:configuration.bzl", "in_configuration")
+load("//build_defs/dist:local_engine.bzl", "bundle_directory")
+load("//build_defs/dist:zip_bundle.bzl", "build_directory_tree", "zip_bundle_from_file")
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/web:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "ddc_sdk", "sdk_rewriter", "web_platform_dill", "web_sdk_root", "web_ui_ui_web_with_output")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "web_sdk",
+    deps = [
+        ":flutter_ddc_modules",
+        ":flutter_platform_dills",
+        "//engine/src/flutter/lib/web_ui/flutter_js",
+    ],
+)
+
+sdk_rewriter(
+    name = "web_ui_library_sources",
+    srcs = ["//engine/src/flutter/lib/web_ui:web_ui_sources"],
+    exclude = "engine/src/flutter/lib/web_ui/lib/src",
+    input_dir = "engine/src/flutter/lib/web_ui/lib",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/ui/",
+    ui = True,
+)
+
+web_ui_ui_web_with_output(
+    name = "web_ui_ui_web",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/ui_web/",
+)
+
+sdk_rewriter(
+    name = "web_engine_library",
+    srcs = ["//engine/src/flutter/lib/web_ui:web_engine_sources"],
+    api_file = "//engine/src/flutter/lib/web_ui:lib/src/engine.dart",
+    exclude = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm",
+    input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine",
+    library_name = "engine",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_engine/",
+)
+
+sdk_rewriter(
+    name = "skwasm_stub_library",
+    srcs = ["//engine/src/flutter/lib/web_ui:skwasm_stub_sources"],
+    api_file = "//engine/src/flutter/lib/web_ui:lib/src/engine/skwasm/skwasm_stub.dart",
+    input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_stub",
+    library_name = "skwasm_stub",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_skwasm_stub/",
+)
+
+sdk_rewriter(
+    name = "skwasm_impl_library",
+    srcs = ["//engine/src/flutter/lib/web_ui:skwasm_impl_sources"],
+    api_file = "//engine/src/flutter/lib/web_ui:lib/src/engine/skwasm/skwasm_impl.dart",
+    input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl",
+    library_name = "skwasm_impl",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_skwasm_impl/",
+)
+
+sdk_rewriter(
+    name = "web_test_fonts_library",
+    srcs = ["//engine/src/flutter/third_party:web_test_fonts_sources"],
+    api_file = "//engine/src/flutter/third_party:web_test_fonts/lib/web_test_fonts.dart",
+    input_dir = "engine/src/flutter/third_party/web_test_fonts/lib/web_test_fonts",
+    library_name = "web_test_fonts",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_web_test_fonts/",
+)
+
+sdk_rewriter(
+    name = "web_locale_keymap_library",
+    srcs = ["//engine/src/flutter/third_party:web_locale_keymap_sources"],
+    api_file = "//engine/src/flutter/third_party:web_locale_keymap/lib/web_locale_keymap.dart",
+    input_dir = "engine/src/flutter/third_party/web_locale_keymap/lib/web_locale_keymap",
+    library_name = "web_locale_keymap",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_web_locale_keymap/",
+)
+
+gn_copy(
+    name = "web_ui_library",
+    srcs = ["libraries.json"],
+    outputs = ["$root_out_dir/flutter_web_sdk/{{source_file_part}}"],
+)
+
+web_platform_dill(
+    name = "flutter_dartdevc_kernel_sdk_outline",
+    kernel_target = "ddc",
+    output_dill = "$root_out_dir/flutter_web_sdk/kernel/ddc_outline.dill",
+    summary_only = True,
+)
+
+web_platform_dill(
+    name = "flutter_dart2js_kernel_sdk_full",
+    kernel_target = "dart2js",
+    null_environment = True,
+    output_dill = "$root_out_dir/flutter_web_sdk/kernel/dart2js_platform.dill",
+    summary_only = False,
+)
+
+web_platform_dill(
+    name = "flutter_dart2wasm_kernel_sdk_full",
+    kernel_target = "dart2wasm",
+    null_environment = True,
+    output_dill = "$root_out_dir/flutter_web_sdk/kernel/dart2wasm_platform.dill",
+    summary_only = False,
+)
+
+cc_library(
+    name = "flutter_platform_dills",
+    data = [
+        ":flutter_dart2js_kernel_sdk_full",
+        ":flutter_dart2wasm_kernel_sdk_full",
+        ":flutter_dartdevc_kernel_sdk_outline",
+    ],
+)
+
+# Compile the SDK with the stable and canary versions of DDC.
+ddc_sdk(
+    name = "flutter_ddc_stable_sdk",
+    canary = False,
+)
+
+ddc_sdk(
+    name = "flutter_ddc_canary_sdk",
+    canary = True,
+)
+
+cc_library(
+    name = "flutter_ddc_modules",
+    data = [
+        ":flutter_ddc_canary_sdk",
+        ":flutter_ddc_stable_sdk",
+    ],
+)
+
+# `files`: what the deps place under flutter_web_sdk in the build directory, at
+# its path below it.
+build_directory_tree(
+    name = "flutter_web_sdk_archive_tree",
+    srcs = [
+        ":flutter_ddc_modules",
+        ":flutter_platform_dills",
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
+        ":web_locale_keymap_library",
+        ":web_test_fonts_library",
+        ":web_ui_library",
+        ":web_ui_library_sources",
+        ":web_ui_ui_web",
+        "//engine/src/flutter/lib/web_ui/flutter_js",
+    ] + select({
+        "@platforms//os:emscripten": [
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_chromium_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_webparagraph_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:skwasm_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:skwasm_heavy_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:wimp_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:wimp_heavy_group",  # is_wasm
+        ],
+        "//conditions:default": [],
+    }),
+    under = "flutter_web_sdk",
+)
+
+zip_bundle_from_file(
+    name = "flutter_web_sdk_archive",
+    output = "flutter-web-sdk.zip",
+    trees = [":flutter_web_sdk_archive_tree"],
+    deps = [
+        ":flutter_ddc_modules",
+        ":flutter_platform_dills",
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
+        ":web_locale_keymap_library",
+        ":web_test_fonts_library",
+        ":web_ui_library",
+        ":web_ui_library_sources",
+        ":web_ui_ui_web",
+        "//engine/src/flutter/lib/web_ui/flutter_js",
+    ] + select({
+        "@platforms//os:emscripten": [
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_chromium_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_webparagraph_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:skwasm_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:skwasm_heavy_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:wimp_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:wimp_heavy_group",  # is_wasm
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+exports_files(["sdk_rewriter.dart"])
+
+# The flutter_web_sdk tree the compilers above read, staged beside the
+# prebuilt SDK (BUILD.gn's web_engine_libraries; web_sdk.bzl).
+web_sdk_root(
+    name = "flutter_web_sdk_root",
+    libraries = WEB_ENGINE_LIBRARIES,
+)
+
+# The web SDK as the flutter tool's cache lays it (bin/cache/flutter_web_sdk:
+# flutter-web-sdk.zip unpacked), for the tests' SDK facsimile (a dart_test's
+# cache_files): the archive built as the web builder builds it, under the
+# release mode and the Emscripten platform (in_configuration).
+in_configuration(
+    name = "flutter_web_sdk_archive_release",
+    platform = "//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten",
+    runtime_mode = "release",
+    target = ":flutter_web_sdk_archive",
+)
+
+bundle_directory(
+    name = "web_sdk_directory",
+    bundles = [":flutter_web_sdk_archive_release"],
+)
+
+# The two Dart packages of this directory the web engine's unit tests and
+# felt reach (lib/web_ui's pubspec: web_engine_tester, the test harness's
+# host page and golden matcher; web_test_utils, the image comparison), each
+# as a pub package: its pubspec and library, for a pub_package_config.
+filegroup(
+    name = "web_engine_tester_package",
+    srcs = ["web_engine_tester/pubspec.yaml"] + glob(["web_engine_tester/lib/**"]),
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+filegroup(
+    name = "web_test_utils_package",
+    srcs = ["web_test_utils/pubspec.yaml"] + glob(["web_test_utils/lib/**"]),
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+# The test harness's host page -- its static files, and host.dart for the
+# dart2js compile the web engine's tests lay beside them (web_ui_tests.bzl).
+filegroup(
+    name = "web_engine_tester_host_files",
+    srcs = [
+        "web_engine_tester/lib/static/favicon.ico",
+        "web_engine_tester/lib/static/host.css",
+        "web_engine_tester/lib/static/index.html",
+    ],
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+exports_files(
+    ["web_engine_tester/lib/static/host.dart"],
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)

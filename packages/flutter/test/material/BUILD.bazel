@@ -1,0 +1,40 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# packages/flutter/test/material under Bazel: each *_test.dart compiled by the
+# frontend server from the test tree's prelude kernel and run on the
+# Bazel-built flutter_tester, as `flutter test` runs it (../framework_tests.bzl;
+# build_defs/dart/flutter_test.bzl; research/15).
+#
+#   bazel test //packages/flutter/test/material:material
+
+load("//packages/flutter/test:framework_tests.bzl", "framework_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+# The helpers beside the tests, for these tests and the other directories'
+# (//packages/flutter/test:helpers).
+filegroup(
+    name = "helpers",
+    srcs = glob(
+        ["**/*.dart"],
+        allow_empty = True,
+        exclude = ["**/*_test.dart"],
+    ),
+)
+
+framework_tests(
+    name = "material",
+    # Minutes under a full run's load: text_field_test's 412 cases took 128–221 s
+    # over three full runs and timed out at 300 s with the Impeller runs doubling
+    # the load; predictive_back_page_transitions_builder_test 192 s.
+    large = [
+        "predictive_back_page_transitions_builder_test.dart",
+        "text_field_test.dart",
+    ],
+    tests = glob([
+        "*_test.dart",
+        "cupertino/*_test.dart",
+    ]),
+)

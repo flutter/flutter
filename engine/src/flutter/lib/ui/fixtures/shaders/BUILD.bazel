@@ -1,0 +1,188 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/ui/fixtures/shaders/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/impeller:shaders.bzl", "impellerc")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "shaders",
+    testonly = True,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/general_shaders",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/supported_op_shaders",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/uniforms",
+    ],
+)
+
+impellerc(
+    name = "ink_sparkle",
+    intermediates_subdir = "iplr",
+    iplr = True,
+    shader_target_flags = [
+        "--sksl",
+        "--runtime-stage-metal",
+        "--runtime-stage-gles",
+        "--runtime-stage-gles3",
+        "--runtime-stage-vulkan",
+    ],
+    shaders = ["//engine/src/flutter/impeller/fixtures:ink_sparkle.frag"],
+    sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+impellerc(
+    name = "ink_sparkle_web",
+    intermediates_subdir = "iplr-json",
+    iplr = True,
+    json = True,
+    shader_target_flags = ["--sksl"],
+    shaders = ["//engine/src/flutter/impeller/fixtures:ink_sparkle.frag"],
+    sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+impellerc(
+    name = "sampler_order_fixture",
+    intermediates_subdir = "iplr-remap",
+    iplr = True,
+    shader_target_flags = [
+        "--runtime-stage-metal",
+        "--runtime-stage-gles",
+        "--runtime-stage-vulkan",
+    ],
+    shaders = [
+        "//engine/src/flutter/impeller/fixtures:ordering/shader_with_samplers.frag",
+        "//engine/src/flutter/third_party:test_shaders/selman/glow_shader.frag",
+    ],
+    sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+impellerc(
+    name = "flutter_gpu_shaders",
+    shader_bundle = "{\"InstancedFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_instanced.frag\"}, \"InstancedVertex\": {\"type\": \"vertex\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_instanced.vert\"}, \"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_unlit.vert\"}, \"UnlitFragmentAltInstance\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_unlit_alt_instance.frag\"}, \"OptimizedOutSamplerFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_optimized_out_sampler.frag\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_texture.vert\"}, \"ArrayTextureFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_array_texture.frag\"}, \"ComputeReflection\": {\"type\": \"compute\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_compute.comp\"}, \"ComputeOversized\": {\"type\": \"compute\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_compute_oversized.comp\"}, \"ComputeScale\": {\"type\": \"compute\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_compute_scale.comp\"}, \"ComputeTextureTriangle\": {\"type\": \"compute\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_compute_texture.comp\"}, \"ComputeTriangle\": {\"type\": \"compute\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_compute_triangle.comp\"}, \"ComputeScaleWithUnused\": {\"type\": \"compute\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_compute_unused.comp\"}}",
+    shader_bundle_output = "test.shaderbundle",
+    shaders = [
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_instanced.frag",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_instanced.vert",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit.frag",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit.vert",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit_alt_instance.frag",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_optimized_out_sampler.frag",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_texture.frag",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_texture.vert",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_array_texture.frag",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_compute.comp",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_compute_oversized.comp",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_compute_scale.comp",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_compute_texture.comp",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_compute_triangle.comp",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_compute_unused.comp",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# A second shader bundle that exposes the same entrypoint names as
+# `flutter_gpu_shaders` above. Used by `gpu_test.dart` to verify that two
+# user shader bundles with colliding entrypoint names register at distinct
+# scoped keys in the shared shader registry and can both be used in the
+# same process without one evicting the other.
+impellerc(
+    name = "flutter_gpu_shaders_alt",
+    shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_unlit.vert\"}}",
+    shader_bundle_output = "test_alt.shaderbundle",
+    shaders = [
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit.frag",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit.vert",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# Same entrypoint names as `flutter_gpu_shaders` but `UnlitFragment`,
+# `ComputeScale` and `ComputeScaleWithUnused` map to different sources. Used
+# by `shader_reload_test.dart` to reload a bundle in place and verify only
+# the changed shaders are marked dirty, and that a storage buffer the reload
+# removes (`Unused`) is reported as removed.
+impellerc(
+    name = "flutter_gpu_shaders_reload",
+    shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_unlit_reload.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_unlit.vert\"}, \"ComputeScale\": {\"type\": \"compute\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_compute_scale_reload.comp\"}, \"ComputeTriangle\": {\"type\": \"compute\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_compute_triangle.comp\"}, \"ComputeScaleWithUnused\": {\"type\": \"compute\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_compute_scale.comp\"}}",
+    shader_bundle_output = "test_reload.shaderbundle",
+    shaders = [
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit_reload.frag",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit.vert",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_compute_scale.comp",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_compute_scale_reload.comp",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_compute_triangle.comp",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+flutter_test_fixtures(
+    name = "fixtures",
+    dest = "//engine/src/flutter/lib/ui",
+    fixtures_targets = {
+        ":ink_sparkle": [],
+        ":flutter_gpu_shaders": [],
+        ":flutter_gpu_shaders_alt": [],
+        ":flutter_gpu_shaders_reload": [],
+    },
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_gpu_shaders",
+        ":flutter_gpu_shaders_alt",
+        ":flutter_gpu_shaders_reload",
+        ":ink_sparkle",
+        ":ink_sparkle_web",
+        ":sampler_order_fixture",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+filegroup(
+    name = "compiled",
+    testonly = True,
+    srcs = [
+        ":fixtures",
+        ":ink_sparkle_web",
+        ":sampler_order_fixture",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/general_shaders:fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders:fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/supported_op_shaders:fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/uniforms:fixtures",
+    ],
+)

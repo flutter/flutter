@@ -1,0 +1,1128 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# flutter_tools' sources and its tests under Bazel: each test compiled by
+# the frontend server for the VM and run by package:test's precompiled
+# runner from this directory, as `dart test` runs them
+# (build_defs/dart/dart_test.bzl; research/15).
+#
+#   bazel test //packages/flutter_tools:general_shard
+
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load(
+    "@host_platform//:host.bzl",
+    "HOST_CPU",
+    "HOST_DART_SDK",
+    "HOST_OS",
+)
+load("//build_defs/android:build_tools.bzl", "android_build_tools")
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
+load("//build_defs/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
+load("//build_defs/desktop:build_tools.bzl", "linux_build_tools")
+load("//build_defs/repositories:flutter_sdk_cache.bzl", "IOS_USB_ARTIFACTS", "ios_usb_repository")
+load("//build_defs/web:browser_launcher.bzl", "browser_launcher", "display_launcher")
+
+package(default_visibility = ["//visibility:public"])
+
+# The tool: its libraries and entry points, and what it reads of its own
+# tree at run time (the templates it copies, the Gradle scripts, the
+# analysis options it ships, package:test's configuration for its tests).
+# Not the state a Gradle build of gradle/ (the Flutter Gradle plugin, an
+# included build of every app's) leaves there: what gradle/.gitignore names
+# and Gradle's and Kotlin's own directories -- read-only in the sandbox,
+# they would break the next build's locks.
+filegroup(
+    name = "sources",
+    srcs = glob(
+        [
+            "bin/**",
+            "gradle/**",
+            "ide_templates/**",
+            "lib/**",
+            "static/**",
+            "templates/**",
+            "tool/**",
+        ],
+        exclude = [
+            "gradle/.gradle/**",
+            "gradle/.kotlin/**",
+            "gradle/bin/**",
+            "gradle/build/**",
+            "gradle/gradle/**",
+            "gradle/gradlew",
+            "gradle/gradlew.bat",
+        ],
+    ) + [
+        "analysis_options.yaml",
+        "dart_test.yaml",
+        "pubspec.yaml",
+    ],
+)
+
+# The test harness (test/src), which dev/bots' tests import too
+# (fake_process_manager.dart).
+filegroup(
+    name = "test_harness",
+    srcs = glob(["test/src/**/*.dart"]),
+)
+
+# The tool's own packages beside it.
+_PACKAGES = {
+    "//packages/flutter_tools/packages/flutter_tools_core:sources": "flutter_tools_core",
+    "//packages/flutter_tools/packages/flutter_tools_extension:sources": "flutter_tools_extension",
+    "//packages/flutter_tools/packages/flutter_tools_extension_linux_prototype:sources": "flutter_tools_extension_linux_prototype",
+}
+
+# The test harness (test/src) and every helper beside a test, whichever
+# shard's: the shards import each other's (the harness imports the
+# integration shard's test_utils.dart, the commands shard's build_ipa_test
+# the general shard's xcresult_test_data.dart).
+_HARNESS = glob(
+    ["test/**/*.dart"],
+    exclude = ["test/**/*_test.dart"],
+)
+
+# What the tests read of the SDK's cache under FLUTTER_ROOT: the Dart SDK
+# (cache_test reads DevTools' version from its resources) and the engine
+# stamp the tool's bootstrap writes (version_test) -- the fixed-word set
+# here, where no engine artifact is laid (bin/internal/BUILD.bazel); the
+# facsimiles with the engine's directories take the versioned set below.
+_CACHE = {
+    HOST_DART_SDK + "//:dart": "dart-sdk",
+    HOST_DART_SDK + "//:devtools": "dart-sdk",
+}
+
+_CACHE_FILES = {
+    "//bin/internal:engine_stamp": "engine.stamp",
+    "//bin/internal:engine_stamp_json": "engine_stamp.json",
+    "//bin/internal:engine_stamp_stamp": "engine_stamp.stamp",
+}
+
+# For the tests that run the real pub on a project of their own (the
+# widget_preview tests' projects depend on `flutter`, `flutter_localizations`
+# and `flutter_test` from the SDK): pub's view of the SDK -- its version file,
+# the packages under FLUTTER_ROOT/packages, the engine's sky_engine package
+# under bin/cache/pkg (the analyzer reads dart:ui from it) -- and a pub cache
+# of the hosted packages they reach.
+# The tree's package is a directory artifact (one entry of `cache_files`);
+# bin/cache's, under --config=prebuilt_engine, is its files, laid through
+# `cache` (flutter_bin_cache.bzl).
+_PUB_FILES = {
+    "//engine/src/flutter/sky/packages/sky_engine:package": "pkg/sky_engine",
+}
+
+_PREBUILT_PUB_CACHE = {
+    "@flutter_bin_cache//pkg/sky_engine:package": "pkg/sky_engine",
+}
+
+_PUB_CACHE_FILES_BASE = _CACHE_FILES | {
+    "//bin/internal:flutter_version_json": "flutter.version.json",
+}
+
+_PUB_CACHE_FILES = select({
+    "//build_defs/engine:prebuilt": _PUB_CACHE_FILES_BASE,
+    "//conditions:default": _PUB_CACHE_FILES_BASE | _PUB_FILES,
+})
+
+# The same with the engine's revision in the stamps and the version file,
+# for a facsimile that carries the engine's directories: the revision the
+# build stamps into them.
+_VERSIONED_CACHE_FILES = {
+    "//bin/internal:versioned_engine_stamp": "engine.stamp",
+    "//bin/internal:versioned_engine_stamp_json": "engine_stamp.json",
+    "//bin/internal:versioned_engine_stamp_stamp": "engine_stamp.stamp",
+    "//bin/internal:versioned_flutter_version_json": "flutter.version.json",
+}
+
+# The Gradle wrapper `flutter create` copies into an Android project.
+_PUB_CACHE_BASE = _CACHE | {"@gradle_wrapper//:wrapper": "artifacts/gradle_wrapper"}
+
+_PUB_CACHE = select({
+    "//build_defs/engine:prebuilt": _PUB_CACHE_BASE | _PREBUILT_PUB_CACHE,
+    "//conditions:default": _PUB_CACHE_BASE,
+})
+
+_SDK_PACKAGES = [
+    "//:pubspec.lock",
+    "//:pubspec.yaml",
+    "//packages/flutter:sources",
+    "//packages/flutter_driver:sources",
+    "//packages/flutter_goldens:sources",
+    "//packages/flutter_localizations:sources",
+    "//packages/flutter_test:sources",
+    "//packages/flutter_web_plugins:sources",
+    "//packages/fuchsia_remote_debug_protocol:sources",
+    "//packages/integration_test:sources",
+]
+
+# The hosted packages those projects reach: the SDK packages' dependencies
+# and what `flutter create`'s templates (a plugin's example depends on
+# integration_test and plugin_platform_interface) and the widget preview
+# scaffold add (pub asks pub.dev for the versions that exist and downloads
+# what the cache lacks -- webview_flutter_web is not in the workspace's lock).
+pub_cache(
+    name = "framework_pub_cache",
+    roots = [
+        "cupertino_icons",
+        "dtd",
+        "flutter",
+        "flutter_driver",
+        "flutter_goldens",
+        "flutter_lints",
+        "flutter_localizations",
+        "flutter_test",
+        "flutter_web_plugins",
+        "integration_test",
+        "plugin_platform_interface",
+        "stack_trace",
+        "url_launcher",
+        "webview_flutter",
+    ],
+)
+
+# The tests that run the analyzer over whole projects take minutes on a
+# loaded machine.
+_LARGE_HERMETIC = [
+    "test/commands.shard/hermetic/widget_preview/preview_code_generator_test.dart",
+    "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_test.dart",
+    "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_workspace_test.dart",
+]
+
+# The tool itself, for the tests that run it (create_test analyzes, resolves
+# and tests the projects it creates through bin/cache/flutter_tools.snapshot;
+# icon_tree_shaker_test spawns bin/flutter): its entry point compiled for the
+# VM, as the SDK's shell script compiles it on the first run, and launchers
+# in place of bin/flutter and bin/dart -- the repository's scripts would
+# bootstrap the tool from git and the network before running it.
+pub_package_config(
+    name = "tool_package_config",
+    out = "tool_package_config.json",
+    packages = {":sources": "flutter_tools"} | _PACKAGES,
+    roots = ["flutter_tools"],
+)
+
+dart_vm_kernel(
+    name = "flutter_tools_snapshot",
+    out = "flutter_tools.snapshot",
+    main = "bin/flutter_tools.dart",
+    package_config = ":tool_package_config",
+)
+
+write_file(
+    name = "flutter_launcher",
+    out = "flutter_launcher.sh",
+    content = [
+        "#!/bin/bash",
+        "# bin/flutter of the tests' SDK facsimile: the tool as Bazel compiled it",
+        "# (packages/flutter_tools/BUILD.bazel), run as bin/internal/shared.sh runs",
+        "# the snapshot it builds -- after the bootstrap hook shared.sh honours.",
+        "set -e",
+        "root=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\"",
+        "if [ -f \"$root/bin/internal/bootstrap.sh\" ]; then source \"$root/bin/internal/bootstrap.sh\"; fi",
+        "exec \"$root/bin/cache/dart-sdk/bin/dart\" --disable-dart-dev " +
+        "--packages=\"$root/packages/flutter_tools/.dart_tool/package_config.json\" " +
+        "\"$root/bin/cache/flutter_tools.snapshot\" \"$@\"",
+        "",
+    ],
+    is_executable = True,
+)
+
+write_file(
+    name = "dart_launcher",
+    out = "dart_launcher.sh",
+    content = [
+        "#!/bin/bash",
+        "# bin/dart of the tests' SDK facsimile: the cache's Dart SDK, no bootstrap.",
+        "set -e",
+        "root=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\"",
+        "exec \"$root/bin/cache/dart-sdk/bin/dart\" \"$@\"",
+        "",
+    ],
+    is_executable = True,
+)
+
+# What the tool, run from the facsimile, reads of the cache beyond pub's
+# view of it: the host's engine artifacts as `flutter precache --linux --web`
+# unpacks them (bundle_directory over the archives a host build uploads, in
+# the three runtime modes, and the web SDK's), the stamps Cache.updateAll
+# checks before it would download, the Material fonts and the flutter_gpu
+# package (the tool checks the directories exist).
+# The cache names the host's engine directory as the tool's
+# getNameForHostPlatform does on Linux (linux-x64, linux-arm64) and, on a
+# Mac of either CPU, darwin-x64 (flutter_cache.dart: `darwin-$arch/
+# artifacts.zip` unpacks into darwin-x64 -- "until darwin artifacts are
+# universal and moved out of darwin-x64", artifacts.dart); the desktop
+# stamp is the host's SDK's (linux-sdk, macos-sdk).
+_HOST_ENGINE = "darwin-x64" if HOST_OS == "mac" else HOST_OS + "-" + HOST_CPU
+
+_HOST_SDK_STAMP = {
+    "//bin/internal:macos_sdk_stamp": "macos-sdk.stamp",
+} if HOST_OS == "mac" else {
+    "//bin/internal:linux_sdk_stamp": "linux-sdk.stamp",
+}
+
+# The iOS USB dependencies (IosUsbArtifacts: libimobiledevice, libusbmuxd,
+# libplist, openssl, libimobiledeviceglue, ios-deploy), universal artifacts
+# the tool checks on every host. On Linux it skips their download and writes
+# their stamps and empty directories itself (the facsimile's directories are
+# the sandbox's, writable); on a Mac it would download them -- and its
+# "[1/6] iOS USB Artifact" progress lines break a debug adapter's protocol
+# (integration.shard/debug_adapter) -- so there the facsimile lays the
+# archives bin/internal/<name>.version pins (flutter_sdk_cache.bzl) with
+# their stamps.
+_IOS_USB_STAMPS = {
+    "//bin/internal:" + artifact.replace("-", "_") + "_stamp": artifact + ".stamp"
+    for artifact in IOS_USB_ARTIFACTS
+} if HOST_OS == "mac" else {}
+
+_IOS_USB_CACHE = {
+    "@" + ios_usb_repository(artifact) + "//:files": "artifacts/" + artifact
+    for artifact in IOS_USB_ARTIFACTS
+} if HOST_OS == "mac" else {}
+
+# The engine's directories in the facsimile's cache: the tree's archive
+# directories (build/archives; tree artifacts, one path each) -- or, under
+# --config=prebuilt_engine, bin/cache's own files at their paths
+# (flutter_bin_cache.bzl; laid through `cache` with no directory), except
+# a Mac's host engine directories, which hold FlutterMacOS.xcframework: a
+# versioned bundle of directory links that the repository's globs follow,
+# so that laid file by file it comes flat and a codesign refuses it;
+# //build_defs/engine's prebuilt_host_engine_*_directory lay those as
+# directory artifacts with the links made again (the Mac's T78).
+_TREE_ENGINE_CACHE_FILES = {
+    "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/" + _HOST_ENGINE,
+    "//engine/src/flutter/build/archives:host_engine_profile_directory": "artifacts/engine/" + _HOST_ENGINE + "-profile",
+    "//engine/src/flutter/build/archives:host_engine_release_directory": "artifacts/engine/" + _HOST_ENGINE + "-release",
+    "//engine/src/flutter/build/archives:common_engine_directory": "artifacts/engine/common",
+    "//engine/src/flutter/web_sdk:web_sdk_directory": "flutter_web_sdk",
+}
+
+# Under the prebuilt engine, bin/cache's own bookkeeping comes with its
+# artifacts (@flutter_bin_cache//:stamps: every artifact set's stamp, the
+# engine's stamp and its JSON, the version file, the storage realm), so that
+# the facsimile's stamps say what its artifacts are -- the engine the tool
+# downloaded, which on a developer's machine is the content hash's build,
+# not the checkout's HEAD (the tree's facsimile stamps HEAD, which is what
+# it built) -- and a framework's embedded revision agrees with
+# engine_stamp.json (the content validation tests). An artifact set the
+# tool has not fetched has no stamp here either, and the tool fetches it
+# as the checkout's would.
+_PREBUILT_ENGINE_CACHE = {
+    "@flutter_bin_cache//:common_engine": "",
+    "@flutter_bin_cache//:web_sdk": "",
+    "@flutter_bin_cache//:stamps": "",
+} | ({} if HOST_OS == "mac" else {
+    "@flutter_bin_cache//:host_engine": "",
+    "@flutter_bin_cache//:host_engine_profile": "",
+    "@flutter_bin_cache//:host_engine_release": "",
+})
+
+_PREBUILT_ENGINE_CACHE_FILES = {
+    "//build_defs/engine:prebuilt_host_engine_directory": "artifacts/engine/" + _HOST_ENGINE,
+    "//build_defs/engine:prebuilt_host_engine_profile_directory": "artifacts/engine/" + _HOST_ENGINE + "-profile",
+    "//build_defs/engine:prebuilt_host_engine_release_directory": "artifacts/engine/" + _HOST_ENGINE + "-release",
+} if HOST_OS == "mac" else {}
+
+# The facsimile's single files besides the engine's: the tool's snapshot,
+# the fonts' and the Gradle wrapper's stamps (the archive path their pin
+# names, as the tool writes them) and, on a Mac, the iOS USB artifacts'.
+_TOOL_CACHE_FILES_COMMON = {
+    ":flutter_tools_snapshot": "flutter_tools.snapshot",
+    # The engine artifacts' storage realm (the checkout's, through
+    # @engine_version): a test's tool that downloads an artifact at run
+    # time -- the integration shard's `flutter build ios` -- looks under it,
+    # as the checkout's tool does; without the file the realm is empty and
+    # a presubmit's engine is a 404 in the release bucket. Always present:
+    # the Gradle plugin reads the file whether or not it needs a realm.
+    "//bin/internal:engine_realm": "engine.realm",
+    "//bin/internal:material_fonts_stamp": "material_fonts.stamp",
+    "//bin/internal:gradle_wrapper_stamp": "gradle_wrapper.stamp",
+} | _IOS_USB_STAMPS
+
+# With the engine's directories from the tree: the stamps that vouch for
+# them carry the revision the build stamped into them.
+_TOOL_CACHE_FILES_BASE = _TOOL_CACHE_FILES_COMMON | _VERSIONED_CACHE_FILES | {
+    "//bin/internal:flutter_sdk_stamp": "flutter_sdk.stamp",
+    "//bin/internal:flutter_web_sdk_stamp": "flutter_web_sdk.stamp",
+    "//bin/internal:font_subset_stamp": "font-subset.stamp",
+} | _HOST_SDK_STAMP
+
+# The facsimile's single files: with the engine's directories from the tree
+# and the stamps that go with them, or with bin/cache's directories under
+# the prebuilt engine, whose stamps `cache` lays with them.
+_TOOL_CACHE_FILES = select({
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_COMMON | _PREBUILT_ENGINE_CACHE_FILES,
+    "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES,
+})
+
+_TOOL_CACHE_BASE = _PUB_CACHE_BASE | {
+    "@material_fonts//:fonts": "artifacts/material_fonts",
+    "//build_defs/engine:flutter_gpu": "pkg/flutter_gpu",
+} | _IOS_USB_CACHE
+
+_TOOL_CACHE = select({
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_BASE | _PREBUILT_PUB_CACHE | _PREBUILT_ENGINE_CACHE,
+    "//conditions:default": _TOOL_CACHE_BASE,
+})
+
+# The apple shard's facsimile adds the iOS engine artifacts on a Mac host
+# (`flutter precache --ios`: artifacts/engine/ios{,-profile,-release} --
+# Flutter.xcframework over the device and simulator builds, the extension-
+# safe one, gen_snapshot_arm64 -- and the ios-sdk stamp), which only its
+# tests ask the tool for (DevelopmentArtifact.iOS): from the tree, the
+# device and both simulator builds of the engine per mode, hours the first
+# time; under the prebuilt engine, bin/cache's directories
+# (//build_defs/engine's prebuilt_ios_engine_*_directory) with bin/cache's
+# ios-sdk.stamp among the stamps `cache` lays -- or, where the tool has not
+# fetched them, nothing, and the tool fetches them at run time.
+_IOS_ENGINE_CACHE_FILES = {
+    "//engine/src/flutter/build/archives:ios_engine_directory": "artifacts/engine/ios",
+    "//engine/src/flutter/build/archives:ios_engine_profile_directory": "artifacts/engine/ios-profile",
+    "//engine/src/flutter/build/archives:ios_engine_release_directory": "artifacts/engine/ios-release",
+    "//bin/internal:ios_sdk_stamp": "ios-sdk.stamp",
+} if HOST_OS == "mac" else {}
+
+_PREBUILT_IOS_ENGINE_CACHE_FILES = {
+    "//build_defs/engine:prebuilt_ios_engine_directory": "artifacts/engine/ios",
+    "//build_defs/engine:prebuilt_ios_engine_profile_directory": "artifacts/engine/ios-profile",
+    "//build_defs/engine:prebuilt_ios_engine_release_directory": "artifacts/engine/ios-release",
+} if HOST_OS == "mac" else {}
+
+_APPLE_CACHE_FILES = select({
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_COMMON | _PREBUILT_ENGINE_CACHE_FILES | _PREBUILT_IOS_ENGINE_CACHE_FILES,
+    "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _IOS_ENGINE_CACHE_FILES,
+})
+
+_TOOL_SDK_FILES = {
+    ":flutter_launcher": "bin/flutter",
+    ":dart_launcher": "bin/dart",
+    # The repository's license at the SDK's root: the tool's cache copies
+    # FLUTTER_ROOT/LICENSE into each engine artifact directory it downloads
+    # (EngineCachedArtifact.updateInner over getLicenseDirs) -- the
+    # integration shard's `flutter build ios` fetches the iOS engine at run
+    # time -- and fails the download without it.
+    "//:LICENSE": "LICENSE",
+}
+
+# The version pins the tool compares the stamps against (and the iOS USB
+# artifacts' it looks up before it skips them on Linux), the directories
+# create_test creates a project in -- examples/, dev/, the engine's and
+# packages/flutter's examples -- one file each so that they exist, and the
+# font a web build takes from the engine's tree.
+_TOOL_DATA = [
+    "//bin/internal:all_files",
+    "//:dev/README.md",
+    "//:examples/README.md",
+    "//engine/src/flutter:examples/glfw/README.md",
+    # A web build bundles the fallback Roboto from the engine's tree
+    # (build_system/targets/web.dart).
+    "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
+    "//packages/flutter/examples/api:pubspec.yaml",
+]
+
+# The tool's whole library, compiled once into each shard's prelude: a test's
+# compile starts from it instead of compiling the tool again.
+_IMPORTS = [
+    "package:flutter_tools/executable.dart",
+    "package:test/test.dart",
+]
+
+# The general shard: the unit tests dev/bots runs with `dart test
+# test/general.shard` (`flutter_tools_tests` is its own CI shard).
+dart_package_tests(
+    name = "general_shard",
+    srcs = _HARNESS,
+    cache = _CACHE,
+    cache_files = _CACHE_FILES,
+    # Fixtures the tests read relative to this directory.
+    data = glob(["test/data/**"]),
+    imports = _IMPORTS,
+    # Two tests reach the network: cache_test's China warning looks up
+    # storage.googleapis.com, ios_device_start_prebuilt_test's mDNS client
+    # sends to the multicast group.
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    tests = glob(["test/general.shard/**/*_test.dart"]),
+)
+
+# The commands shard's hermetic half: the commands against fakes (dev/bots
+# runs test/commands.shard on one core). The permeable half drives the real
+# file system, pub and git; the integration shard the built tool.
+dart_package_tests(
+    name = "commands_shard_hermetic",
+    srcs = _HARNESS,
+    cache = _PUB_CACHE,
+    cache_files = _PUB_CACHE_FILES,
+    # daemon_test asks the daemon for the gallery project's platforms; the
+    # widget_preview tests analyze projects that depend on the SDK's packages
+    # and two of them resolve such a project with the real pub.
+    data = glob(["test/data/**"]) + ["//dev/integration_tests/flutter_gallery:project"] + _SDK_PACKAGES,
+    # preview_detector_graph_test writes a project to the real file system
+    # and expects each step's change event in turn; a write's second event
+    # (macOS FSEvents) can arrive under the next step's expectation when the
+    # machine is loaded, which the test's own note anticipates. dev/bots runs
+    # the shard one file at a time; here eight ran beside it on the Mac bot
+    # when it failed once (11-06; once before on a Mac of its own, 11-01),
+    # and the next run passed.
+    flaky = ["test/commands.shard/hermetic/widget_preview/preview_detector_graph_test.dart"],
+    imports = _IMPORTS,
+    large = _LARGE_HERMETIC,
+    # update_packages_test fetches the coverage data from storage.googleapis.com;
+    # pub asks pub.dev which versions exist (the packages themselves are in the
+    # cache).
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":framework_pub_cache",
+    # The widget_preview tests watch a project they create under TMPDIR and
+    # compare the watcher's paths with their own, which a Mac's symlinked
+    # TMPDIR (/var/folders, /private/var there) tells apart: theirs is
+    # resolved (dart_test's resolved_tmpdir).
+    resolved_tmpdir = glob(["test/commands.shard/hermetic/widget_preview/**/*_test.dart"]),
+    tests = glob(["test/commands.shard/hermetic/**/*_test.dart"]),
+)
+
+# The commands shard's permeable half: commands against the real file
+# system and the real pub, on the same SDK facsimile with the tool itself in
+# it (create_test and icon_tree_shaker_test run it; the latter builds for
+# the host's desktop -- on a Mac a release App.framework for both CPUs, from
+# the facsimile's universal FlutterMacOS.xcframework and gen_snapshots).
+dart_package_tests(
+    name = "commands_shard_permeable",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES,
+    # script_test reads the SDK's Windows entrypoint scripts; create_test
+    # copies its data/ fixture into a project.
+    data = glob([
+        "test/data/**",
+        "test/commands.shard/permeable/data/**",
+    ]) + _SDK_PACKAGES + _TOOL_DATA + [
+        "//bin:dart.bat",
+        "//bin:flutter.bat",
+        "//bin/internal:shared.bat",
+    ],
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":framework_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    # create_test compiles the tool's snapshot itself first (the test
+    # renames the facsimile's aside and builds its own with the SDK's
+    # dart), then creates, analyzes and tests some hundred projects: 20
+    # minutes on a loaded machine. widget_preview_test creates a project
+    # and resolves it with the real pub for each of its cases: 45 s a
+    # case, 20 minutes a file.
+    sizes = {
+        "test/commands.shard/permeable/create_test.dart": "enormous",
+        "test/commands.shard/permeable/widget_preview/widget_preview_test.dart": "enormous",
+    },
+    tests = glob(["test/commands.shard/permeable/**/*_test.dart"]),
+)
+
+# The test files of the three shards the durations file covers, by name,
+# for dev/bots' tool_test_durations_test (which checks the file lists
+# exactly them).
+filegroup(
+    name = "durations_shard_test_files",
+    srcs = glob([
+        "test/commands.shard/**/*_test.dart",
+        "test/integration.shard/**/*_test.dart",
+        "test/web.shard/**/*_test.dart",
+    ]),
+)
+
+# The projects the integration shard's tests run the tool in or copy:
+# dev/automated_tests and dev/missing_dependency_tests (test_test), the
+# gallery (analyze_suggestions_integration_test), hello_world
+# (command_output_test, tool_backend_test), data_asset_app with its
+# package (the isolated data-asset tests, in the desktop shard).
+_INTEGRATION_PROJECTS = [
+    "//dev/automated_tests:project",
+    "//dev/integration_tests/data_asset_app:project",
+    "//dev/integration_tests/data_asset_package:project",
+    "//dev/integration_tests/flutter_gallery:project",
+    "//dev/missing_dependency_tests:project",
+    "//examples/hello_world:sources",
+    "//examples/hello_world/test:files",
+]
+
+# The projects the desktop shard's tests add to the ones they create or
+# copy besides those: the native-asset packages (link_hook,
+# hook_user_defines), the record_use app and package, and
+# dev/integration_tests/ui (overall_experience_test runs its commands.dart).
+_DESKTOP_PROJECTS = _INTEGRATION_PROJECTS + [
+    "//dev/integration_tests/hook_user_defines:project",
+    "//dev/integration_tests/link_hook:project",
+    "//dev/integration_tests/record_use_test_app:project",
+    "//dev/integration_tests/record_use_test_package:project",
+    "//dev/integration_tests/ui:assets",
+    "//dev/integration_tests/ui:sources",
+]
+
+# The integration shard's files that build for Android through the tool
+# (`flutter build apk|appbundle|aar`, Gradle, the Android SDK) -- a shard of
+# their own (android_shard, below), with the engine's Android artifacts,
+# the SDK and the JDK from the build, and the network.
+_INTEGRATION_ANDROID = [
+    "test/integration.shard/analyze_size_test.dart",
+    "test/integration.shard/android_e2e_api_test.dart",
+    "test/integration.shard/android_gradle_asset_merging_test.dart",
+    "test/integration.shard/android_gradle_daemon_cache_test.dart",
+    "test/integration.shard/android_gradle_flutter_source_path_test.dart",
+    "test/integration.shard/android_gradle_java_version_test.dart",
+    "test/integration.shard/android_gradle_legacy_flutter_plugins_strings_in_comments_test.dart",
+    "test/integration.shard/android_gradle_outputs_app_link_settings_test.dart",
+    "test/integration.shard/android_gradle_print_build_variants_test.dart",
+    "test/integration.shard/android_gradle_print_ndk_version_test.dart",
+    "test/integration.shard/android_obfuscate_test.dart",
+    "test/integration.shard/android_plugin_compilesdkversion_mismatch_test.dart",
+    "test/integration.shard/android_plugin_example_app_build_test.dart",
+    "test/integration.shard/android_plugin_ndkversion_mismatch_test.dart",
+    "test/integration.shard/android_plugin_new_output_dir_test.dart",
+    "test/integration.shard/android_run_flutter_gradle_plugin_tests_test.dart",
+    "test/integration.shard/deferred_components_assets_reproduce_test.dart",
+    "test/integration.shard/deferred_components_test.dart",
+    "test/integration.shard/flutter_build_apk_split_per_abi_test.dart",
+    "test/integration.shard/flutter_build_apk_verbose_test.dart",
+    "test/integration.shard/flutter_build_config_only_test.dart",
+    "test/integration.shard/flutter_build_with_compilation_error_test.dart",
+    "test/integration.shard/gradle_jni_packaging_test.dart",
+    "test/integration.shard/gradle_libapp_so_packaging_test.dart",
+    "test/integration.shard/gradle_non_android_plugin_test.dart",
+]
+
+# Two of the Android files build for macOS and iOS as well on a Mac host
+# (`skip: !platform.isMacOS` elsewhere): analyze_size_test's iOS and macOS
+# cases build hello_world with Xcode, flutter_build_with_compilation_error_test's
+# macos and ios targets a created project. Those cases want the apple
+# shard's arrangement -- xcodebuild outside the sandbox, the iOS engine, the
+# engine directories and the Xcode build-phase scripts writable -- which
+# the android shard has no reason to carry (the Mac tester's T85: the iOS
+# case fetched the engine into the read-only cache, the macOS case's build
+# phase bootstrapped the checkout's own tool). So the android shard runs
+# the files' other cases on every host (_INTEGRATION_ANDROID_CASES, `dart
+# test --name`) and a shard of the apple shard's shape runs these on a Mac
+# (apple_cases_shard, below).
+_INTEGRATION_ANDROID_APPLE_CASES = {
+    "test/integration.shard/analyze_size_test.dart": "hello_world for (iOS|macOS)",
+    "test/integration.shard/flutter_build_with_compilation_error_test.dart": "flutter build (macos|ios) ",
+}
+
+_INTEGRATION_ANDROID_CASES = {
+    "test/integration.shard/analyze_size_test.dart": "^(?!.*hello_world for (iOS|macOS))",
+    "test/integration.shard/flutter_build_with_compilation_error_test.dart": "flutter build (apk|web) ",
+}
+
+# The integration shard's files a Linux host cannot run from the facsimile.
+_INTEGRATION_EXCLUDED = [
+    # macOS and iOS frameworks only: declares no test on Linux (and builds
+    # them with Xcode on a Mac: _INTEGRATION_APPLE).
+    "test/integration.shard/isolated/native_assets_flutter_build_framework_test.dart",
+    # Tests of the repository's own scripts and resolution: bin/dart's
+    # bootstrap (the facsimile's launcher has none), the pub workspace's
+    # package_graph.json at the root.
+    "test/integration.shard/bash_entrypoint_test.dart",
+    "test/integration.shard/batch_entrypoint_test.dart",
+    "test/integration.shard/dependencies_test.dart",
+    # Wait 120 s of their own for the previewer's first load -- a DDC build
+    # of the scaffold and its browser start, which takes about that here --
+    # and overrun it nearly every time (the other previewer tests make it,
+    # retried).
+    "test/integration.shard/widget_preview_legacy_test.dart",
+    "test/integration.shard/widget_preview_pubspec_test.dart",
+]
+
+# The integration shard's files that build for macOS or iOS through the tool
+# (`flutter build macos|ios`, Xcode, Swift Package Manager, CocoaPods): a
+# shard of their own, the apple shard below, compatible with a Mac host
+# alone (NEED_DECISION Q31), from the facsimile's universal
+# FlutterMacOS.xcframework and gen_snapshots and its iOS engine artifacts.
+# On Linux each would only report itself skipped (`skip: !platform.isMacOS`).
+_INTEGRATION_APPLE_MACOS = [
+    "test/integration.shard/build_macos_arm64_only_test.dart",
+    "test/integration.shard/build_macos_config_only_test.dart",
+    "test/integration.shard/macos_content_validation_test.dart",
+]
+
+_INTEGRATION_APPLE_IOS = [
+    "test/integration.shard/build_ios_config_only_test.dart",
+    "test/integration.shard/build_without_xcworkspace_test.dart",
+    # `flutter build ios --no-codesign` of dev/integration_tests/
+    # ios_app_with_extensions (it checks the tool asks Xcode for the watch
+    # target's settings): a device build on the facsimile's iOS engine.
+    "test/integration.shard/ios_app_with_extensions_test.dart",
+    "test/integration.shard/ios_content_validation_test.dart",
+    "test/integration.shard/lldb_init_test.dart",
+    "test/integration.shard/swift_package_manager_add2app_test.dart",
+    "test/integration.shard/swift_package_manager_create_app_test.dart",
+    "test/integration.shard/swift_package_manager_create_plugin_test.dart",
+    "test/integration.shard/swift_package_manager_test.dart",
+    "test/integration.shard/uiscene_migration_test.dart",
+]
+
+_INTEGRATION_APPLE = _INTEGRATION_APPLE_MACOS + _INTEGRATION_APPLE_IOS
+
+# The Apple builds that sign for an iOS device: `flutter build ios` without
+# --no-codesign or --simulator (--config-only included), `flutter ipa`, an
+# add-to-app project's `xcodebuild -sdk iphoneos` with automatic signing.
+# They want an Apple development certificate in the host's keychain and a
+# provisioning profile for the app -- a CI Mac's, not every developer's
+# ("No valid code signing certificates were found", the Mac's T50 and T51)
+# -- so they are a shard of their own (apple_signed_shard, manual: run by
+# name on a Mac so provisioned). Two files sign in some of their cases only:
+# the apple shard runs their other cases (_INTEGRATION_APPLE_UNSIGNED_CASES),
+# the signed shard the files whole.
+_INTEGRATION_APPLE_SIGNED = [
+    "test/integration.shard/ios_content_validation_test.dart",
+    "test/integration.shard/lldb_init_test.dart",
+    "test/integration.shard/swift_package_manager_add2app_test.dart",
+    "test/integration.shard/swift_package_manager_create_app_test.dart",
+    "test/integration.shard/swift_package_manager_create_plugin_test.dart",
+    "test/integration.shard/swift_package_manager_test.dart",
+    "test/integration.shard/uiscene_migration_test.dart",
+]
+
+# The cases of two signing files that run on any Mac (`dart test --name`):
+# ios_content_validation_test's but for its archive (`flutter ipa`);
+# swift_package_manager_test's macOS cases -- its iOS ones build for a
+# device (three of its CocoaPods framework cases would pass too).
+_INTEGRATION_APPLE_UNSIGNED_CASES = {
+    "test/integration.shard/ios_content_validation_test.dart": "^iOS app validation (?!archive$)",
+    "test/integration.shard/swift_package_manager_test.dart": "macos|macOS",
+}
+
+_INTEGRATION_APPLE_UNSIGNED = [
+    test
+    for test in _INTEGRATION_APPLE
+    if test not in _INTEGRATION_APPLE_SIGNED or test in _INTEGRATION_APPLE_UNSIGNED_CASES
+]
+
+# The SDK's Xcode build-phase scripts resolve their own symlink first
+# (xcode_backend.sh's follow_links) and take FLUTTER_ROOT from where it
+# leads -- in the facsimile, the checkout, whose bin/dart bootstraps the
+# tool and writes bin/cache there (refused by the sandbox; macos_assemble_test
+# and xcode_backend_test on a Mac). Real copies in the facsimile stop the
+# walk there (`writable`, which copies a file over its link).
+_APPLE_SCRIPTS = [
+    "packages/flutter_tools/bin/macos_assemble.sh",
+    "packages/flutter_tools/bin/xcode_backend.sh",
+] if HOST_OS == "mac" else []
+
+# The integration shard's tests run pub in workspace members (hello_world,
+# dev/automated_tests), and pub resolves a member against the whole
+# workspace: every member's pubspec is in the facsimile (@pub_workspace),
+# and the cache holds every hosted package the workspace reaches.
+pub_cache(
+    name = "workspace_pub_cache",
+    dev_roots = PUB_WORKSPACE_PACKAGES,
+    roots = PUB_WORKSPACE_PACKAGES,
+)
+
+# The pinned Chrome for Testing and its chromedriver (the web engine's
+# version, @chrome), each through a launcher that gives it the build's
+# system libraries rather than the host's (//build_defs/web:browser_launcher.bzl;
+# --//build_defs/web:browser_libraries selects the host's).
+browser_launcher(
+    name = "chrome",
+    browser = "@chrome//:executable",
+    browser_files = ["@chrome//:chrome"],
+)
+
+browser_launcher(
+    name = "chromedriver",
+    browser = "@chrome//:chromedriver",
+)
+
+# The integration shard's files that build or run for the Linux desktop:
+# `flutter build linux` (CMake, ninja, pkg-config over GTK, clang) and the
+# native-asset builds (package:native_toolchain_c's clang), `flutter run -d
+# linux` on an X display, and the one that runs the tool under
+# /usr/bin/xvfb-run when it sees no DISPLAY (overall_experience_test) -- a
+# shard of their own (desktop_shard, below), with those programs from the
+# build and a display of each test's own.
+_INTEGRATION_DESKTOP = [
+    "test/integration.shard/build_linux_config_only_test.dart",
+    "test/integration.shard/overall_experience_test.dart",
+    "test/integration.shard/isolated/dart_data_asset_conflicting_assets_test.dart",
+    "test/integration.shard/isolated/dart_data_asset_flutter_build_test.dart",
+    "test/integration.shard/isolated/dart_data_asset_flutter_run_test.dart",
+    "test/integration.shard/isolated/record_use_caching_test.dart",
+    "test/integration.shard/isolated/record_use_flutter_build_test.dart",
+    "test/integration.shard/isolated/record_use_flutter_run_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_build_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_run_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_test_integration_test_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_test_test.dart",
+    "test/integration.shard/isolated/native_assets_without_cbuild_assemble_test.dart",
+]
+
+# The integration shard: the tool run as a process on projects of its own --
+# hot reload and restart on flutter_tester, the daemon, the debug adapter,
+# `flutter test`, `flutter analyze`, gen-l10n -- from the facsimile with the
+# tool in it (dev/bots runs it on one core from a bootstrapped checkout).
+dart_package_tests(
+    name = "integration_shard",
+    size = "large",
+    srcs = _HARNESS,
+    # The widget previewer's tests drive a headless Chrome.
+    browser = ":chrome",
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES,
+    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
+    # Each waits a minute or two of its own -- for `flutter run` to report
+    # the VM service, for the widget previewer's first load -- which a loaded
+    # machine overruns (a fresh project's resolution and compile come first).
+    flaky = [
+        "test/integration.shard/disable_service_origin_check_test.dart",
+        "test/integration.shard/widget_preview_detection_test.dart",
+        "test/integration.shard/widget_preview_machine_test.dart",
+        "test/integration.shard/widget_preview_smoke_test.dart",
+    ],
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The longest: many hot reloads, the debug adapter's whole protocol, web
+    # builds and the widget previewer (a web app in a browser).
+    sizes = {
+        "test/integration.shard/break_on_framework_exceptions_test.dart": "enormous",
+        "test/integration.shard/debug_adapter/flutter_adapter_test.dart": "enormous",
+        "test/integration.shard/expression_evaluation_test.dart": "enormous",
+        "test/integration.shard/web_plugin_registrant_test.dart": "enormous",
+        "test/integration.shard/widget_preview_detection_test.dart": "enormous",
+        "test/integration.shard/widget_preview_machine_test.dart": "enormous",
+        "test/integration.shard/widget_preview_smoke_test.dart": "enormous",
+    },
+    # Each test runs the tool, a frontend server and flutter_tester or a
+    # browser at once: four cores' worth, so that a loaded machine does not
+    # overrun the waits the tests keep for themselves.
+    tags = ["cpu:4"],
+    tests = glob(
+        ["test/integration.shard/**/*_test.dart"],
+        exclude = _INTEGRATION_EXCLUDED + _INTEGRATION_DESKTOP + _INTEGRATION_ANDROID + _INTEGRATION_APPLE,
+    ),
+    # pub touches the workspace's lock when it resolves a member.
+    writable = ["pubspec.lock"] + _APPLE_SCRIPTS,
+)
+
+# What `flutter build linux` runs, from the build (//build_defs/desktop:build_tools.bzl):
+# cmake, ninja, pkg-config answering for the build sysroot's GTK, the
+# engine's clang over that sysroot; and an X server for `flutter run -d
+# linux` (//build_defs/web:browser_launcher.bzl's display_launcher).
+linux_build_tools(name = "linux_build_tools")
+
+display_launcher(name = "Xvfb")
+
+# The desktop shard: the integration shard's files that build or run a
+# Linux desktop app (_INTEGRATION_DESKTOP), each on a display of its own,
+# with the build tools first on PATH and the built app's libraries from
+# the runtime sysroot. A Linux host's alone (the GTK embedding, an X
+# display, the Linux CMake and sysroot), as the apple shard below is a
+# Mac's: //:tool_tests skips it elsewhere.
+dart_package_tests(
+    name = "desktop_shard",
+    size = "large",
+    srcs = _HARNESS,
+    # The data-asset and record-use files run their app on chrome as well as
+    # on linux and flutter_tester (`flutter run -d chrome`): the pinned
+    # Chrome, as the integration shard has it. A machine with its own Chrome
+    # hid the want (the first presubmit run, 11-03).
+    browser = ":chrome",
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES,
+    # Two files build for Android as well as Linux: their linux (and bundle)
+    # cases run, the apk cases -- Android's artifacts, SDK and Gradle -- not.
+    cases = {
+        "test/integration.shard/isolated/native_assets_flutter_build_test.dart": "linux",
+        "test/integration.shard/isolated/native_assets_without_cbuild_assemble_test.dart": "linux",
+    },
+    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _DESKTOP_PROJECTS,
+    display = ":Xvfb",
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The tool, CMake and ninja's compiles, and the app at once.
+    tags = ["cpu:4"],
+    target_compatible_with = ["@platforms//os:linux"],
+    tests = _INTEGRATION_DESKTOP,
+    tools = [":linux_build_tools"],
+    # pub touches the workspace's lock when it resolves a member.
+    writable = ["pubspec.lock"],
+)
+
+# The apple shard: the integration shard's files that build for macOS and
+# iOS through the tool (_INTEGRATION_APPLE), on a Mac host -- the Linux
+# desktop shard's counterpart. Each runs xcodebuild, which runs sandbox-exec
+# itself and is refused inside Bazel's sandbox: unsandboxed, in the real
+# runfiles tree. The projects the tool migrates and builds in place are
+# copied writable there first (the gallery's macos/ and ios/: Runner.xcscheme,
+# Podfile, GeneratedPluginRegistrant; spell_check's iOS app delegate, which
+# uiscene_migration_test migrates); the add-to-app Swift package projects
+# are copied by the test itself. CocoaPods (`pod install`: the gallery has
+# a Podfile), Xcode, the simulators and the network (the pod specs, pub) are
+# the host's. Declared on every host, compatible with macOS alone: a Linux
+# analysis still checks it. The tests that sign for an iOS device are the
+# second shard, run by name (manual) on a Mac with a development certificate.
+_APPLE_DATA = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
+    "//dev/integration_tests/darwin_add2app_swiftpm:project",
+    "//dev/integration_tests/ios_app_with_extensions:project",
+    "//dev/integration_tests/spell_check:project",
+]
+
+_APPLE_WRITABLE = [
+    "pubspec.lock",
+    # The engine directories as the cache unpacks them -- writable, their
+    # directories 0755: ios_content_validation_test plants a stray
+    # ._Info.plist in ios/Flutter.xcframework and removes it again, and the
+    # content validation tests check the frameworks' and dSYMs' modes (the
+    # build's directories are read-only). Clones on APFS, not copies.
+    "bin/cache/artifacts/engine/darwin-x64",
+    "bin/cache/artifacts/engine/darwin-x64-profile",
+    "bin/cache/artifacts/engine/darwin-x64-release",
+    "bin/cache/artifacts/engine/ios",
+    "bin/cache/artifacts/engine/ios-profile",
+    "bin/cache/artifacts/engine/ios-release",
+    "dev/integration_tests/flutter_gallery/ios",
+    "dev/integration_tests/flutter_gallery/macos",
+    "dev/integration_tests/spell_check",
+] + _APPLE_SCRIPTS
+
+dart_package_tests(
+    name = "apple_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _APPLE_CACHE_FILES,
+    cases = _INTEGRATION_APPLE_UNSIGNED_CASES,
+    data = _APPLE_DATA,
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The tool, xcodebuild's compiles and gen_snapshot at once.
+    tags = ["cpu:4"],
+    target_compatible_with = ["@platforms//os:macos"],
+    tests = _INTEGRATION_APPLE_UNSIGNED,
+    unsandboxed = _INTEGRATION_APPLE_UNSIGNED,
+    writable = _APPLE_WRITABLE,
+)
+
+dart_package_tests(
+    name = "apple_signed_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _APPLE_CACHE_FILES,
+    data = _APPLE_DATA,
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # Its targets are the files' names with `_signed`: two of the files have
+    # targets in the apple shard too, for their cases that sign nothing.
+    suffix = "_signed",
+    tags = [
+        "cpu:4",
+        "manual",
+    ],
+    target_compatible_with = ["@platforms//os:macos"],
+    tests = _INTEGRATION_APPLE_SIGNED,
+    unsandboxed = _INTEGRATION_APPLE_SIGNED,
+    writable = _APPLE_WRITABLE,
+)
+
+# The apple cases of two Android files (_INTEGRATION_ANDROID_APPLE_CASES):
+# the apple shard's arrangement over the files the android shard runs for
+# their other cases, their targets named with `_apple` (the android shard
+# has the files' names). hello_world is built in place, as the gallery is
+# in the apple shard: its Xcode projects are copied writable.
+dart_package_tests(
+    name = "apple_cases_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _APPLE_CACHE_FILES,
+    cases = _INTEGRATION_ANDROID_APPLE_CASES,
+    data = _APPLE_DATA + ["//examples/hello_world:project"],
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    suffix = "_apple",
+    tags = ["cpu:4"],
+    target_compatible_with = ["@platforms//os:macos"],
+    tests = _INTEGRATION_ANDROID_APPLE_CASES.keys(),
+    unsandboxed = _INTEGRATION_ANDROID_APPLE_CASES.keys(),
+    writable = _APPLE_WRITABLE + [
+        "examples/hello_world/ios",
+        "examples/hello_world/macos",
+    ],
+)
+
+# What `flutter build apk` needs of the build and the machine
+# (//build_defs/android:build_tools.bzl): ANDROID_HOME at the checkout's SDK,
+# JAVA_HOME at the engine's JDK, and the embedding's Maven artifacts from the
+# build at the facsimile's engine version, which the Gradle plugin resolves
+# from FLUTTER_STORAGE_BASE_URL.
+android_build_tools(
+    name = "android_build_tools",
+    # The build's embedding as a Maven repository; under the prebuilt
+    # engine none, and the Gradle plugin fetches bin/cache's engine's from
+    # the storage (its version from the facsimile's engine.stamp, its realm
+    # from engine.realm, both bin/cache's).
+    maven = select({
+        "//build_defs/engine:prebuilt": None,
+        "//conditions:default": "//engine/src/flutter/build/archives:android_engine_maven",
+    }),
+)
+
+# The Android gen_snapshot artifacts in the facsimile's cache: what `flutter
+# precache --android` downloads (AndroidGenSnapshotArtifacts, stamp
+# android-sdk), built here for the three CPUs `flutter build apk` builds
+# for by default in the two AOT modes (build/archives' android_engine_*),
+# under the host's directory the tool looks in (darwin-x64 on every Mac).
+_ANDROID_ENGINE_CACHE_FILES = {
+    "//engine/src/flutter/build/archives:android_engine_%s_%s_gen_snapshot" % (cpu, mode): "artifacts/engine/android-%s-%s/%s" % (cpu, mode, _HOST_ENGINE)
+    for cpu in [
+        "arm",
+        "arm64",
+        "x64",
+    ]
+    for mode in [
+        "profile",
+        "release",
+    ]
+}
+
+_ANDROID_CACHE_FILES = _ANDROID_ENGINE_CACHE_FILES | {
+    "//bin/internal:android_sdk_stamp": "android-sdk.stamp",
+}
+
+# Under the prebuilt engine the Android gen_snapshots are bin/cache's own
+# (`flutter precache --android`: each CPU's and AOT mode's under the host's
+# directory, and the set's stamp, android-sdk, among @flutter_bin_cache's
+# stamps), laid at their paths; a cache without them lays nothing, and the
+# test's tool fetches the set as the checkout's would (the shard has the
+# network).
+_PREBUILT_ANDROID_CACHE = {
+    "@flutter_bin_cache//:android_engine": "",
+}
+
+# The Android shard's `cache`: the tool's, with bin/cache's Android
+# artifacts under the prebuilt engine (the tree's go through `cache_files`,
+# _ANDROID_CACHE_FILES).
+_ANDROID_TOOL_CACHE = select({
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_BASE | _PREBUILT_PUB_CACHE | _PREBUILT_ENGINE_CACHE | _PREBUILT_ANDROID_CACHE,
+    "//conditions:default": _TOOL_CACHE_BASE,
+})
+
+# The Android shard: the integration shard's files that build an app, a
+# plugin or a module for Android through the tool (_INTEGRATION_ANDROID) --
+# `flutter create` and `flutter build apk|appbundle|aar` in every mode, the
+# Gradle plugin's own tests -- from the facsimile with the engine's Android
+# artifacts, the checkout's SDK and the engine's JDK.
+#
+# These tests reach the network, by decision (10-26): Gradle fetches its
+# distribution, the Android Gradle plugin, Kotlin and the libraries an app
+# depends on from Google's and Maven Central's repositories at build time
+# -- nothing of that is in the checkout, and a pinned mirror of it would be
+# a gigabyte, an order of magnitude beyond the Java tests' Maven lock
+# (build_defs/java). With the engine from the tree, the engine itself does
+# not come from the network: its artifacts are the build's, served to Gradle
+# from a file: URL. Under the prebuilt engine the embedding comes from the
+# storage, as it does for a developer's `flutter build apk` (the facsimile's
+# engine.stamp and engine.realm are bin/cache's), and the gen_snapshots are
+# bin/cache's where `flutter precache --android` has laid them. Each test
+# downloads into a Gradle home of its own under TEST_TMPDIR (the tool's
+# HOME is the test's), so the first minutes of each are Gradle's, and their
+# timing and reliability depend on the network.
+dart_package_tests(
+    name = "android_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    cache = _ANDROID_TOOL_CACHE,
+    cache_files = select({
+        "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_COMMON | _PREBUILT_ENGINE_CACHE_FILES,
+        "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _ANDROID_CACHE_FILES,
+    }),
+    # Two files' macOS and iOS cases are the apple cases shard's.
+    cases = _INTEGRATION_ANDROID_CASES,
+    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
+        # analyze_size_test builds hello_world for Android.
+        "//examples/hello_world:project",
+    ],
+    # The one file with a timeout of its own (`@Timeout(Duration(minutes:
+    # 5))`): its app bundle build takes four and a half minutes on a machine
+    # of its own and overran the five with three other Gradle builds beside
+    # it (10-30); a retry lands after they finish.
+    flaky = ["test/integration.shard/deferred_components_assets_reproduce_test.dart"],
+    imports = _IMPORTS,
+    # Gradle's downloads: see above.
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The tool, a Gradle daemon (the template's gradle.properties allows it
+    # 8 GB), a Kotlin daemon and the dex compiler at once: four cores and
+    # the memory of a build machine each.
+    tags = [
+        "cpu:4",
+        "resources:memory:10240",
+    ],
+    tests = _INTEGRATION_ANDROID,
+    tools = [":android_build_tools"],
+    # pub touches the workspace's lock when it resolves a member.
+    writable = ["pubspec.lock"],
+)
+
+# The web shard: the tool's web support run as a process -- `flutter run -d
+# chrome` and `-d web-server`, hot reload and restart on the web, the DDC
+# library bundle's expression evaluation, the web driver service -- against
+# the pinned Chrome for Testing and its chromedriver (dev/bots'
+# web_tool_tests shard, whose builders carry the same `chrome_and_driver`).
+dart_package_tests(
+    name = "web_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    browser = ":chrome",
+    # The web-server device's tests connect a browser through `chromedriver`
+    # on PATH.
+    browser_driver = ":chromedriver",
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES,
+    data = glob(["test/web.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The tool, a frontend server, a web server and a browser at once.
+    tags = ["cpu:4"],
+    tests = glob(["test/web.shard/**/*_test.dart"]),
+    # pub touches the workspace's lock when it resolves a member.
+    writable = ["pubspec.lock"],
+)

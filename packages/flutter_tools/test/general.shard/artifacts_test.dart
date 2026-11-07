@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -501,10 +503,17 @@ void main() {
       fileSystem
           .file(fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'))
           .createSync(recursive: true);
+      fileSystem
+          .directory(fileSystem.path.join('/out', 'host_debug_unopt', 'shader_lib'))
+          .createSync(recursive: true);
 
       expect(
         artifacts.getHostArtifact(HostArtifact.impellerc).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.shaderLib).path,
+        fileSystem.path.join('/out', 'host_debug_unopt', 'shader_lib'),
       );
       expect(
         artifacts.getHostArtifact(HostArtifact.libtessellator).path,
@@ -543,6 +552,18 @@ void main() {
             'engine',
             'linux-x64',
             'libtessellator.so',
+          ),
+        );
+        expect(
+          artifacts.getHostArtifact(HostArtifact.shaderLib).path,
+          fileSystem.path.join(
+            'root',
+            'bin',
+            'cache',
+            'artifacts',
+            'engine',
+            'linux-x64',
+            'shader_lib',
           ),
         );
       },
@@ -908,6 +929,408 @@ void main() {
         fileSystem.path.join(targetEngine, 'icudtl.dat'),
       );
     });
+
+    testWithoutContext(
+      "names GN's build directories to a re-entrant build by name, with the engine source",
+      () {
+        localEngineInfo = LocalEngineInfo(
+          targetOutPath: '/engine/src/out/linux_debug_unopt',
+          hostOutPath: '/engine/src/out/host_debug_unopt',
+          fileSystem: fileSystem,
+        );
+        expect(
+          localEngineInfo.toReentrantBuildEnvironment(fileSystem: fileSystem),
+          <String, String>{
+            'FLUTTER_ENGINE': '/engine/src',
+            'LOCAL_ENGINE': 'linux_debug_unopt',
+            'LOCAL_ENGINE_HOST': 'host_debug_unopt',
+          },
+        );
+      },
+    );
+
+    testWithoutContext(
+      'names a Bazel build directory to a re-entrant build by its path, without a source',
+      () {
+        // A Bazel build directory is known by its manifest; its path is what
+        // --local-engine takes, and the tool finds the source as for any
+        // absolute path.
+        const bazelBin = '/checkout/engine/src/bazel-bin/engine/src/flutter';
+        fileSystem.file(fileSystem.path.join(bazelBin, 'local_engine.json'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"name": "host_debug_unopt", "entries": {}}');
+        localEngineInfo = LocalEngineInfo(
+          targetOutPath: bazelBin,
+          hostOutPath: bazelBin,
+          fileSystem: fileSystem,
+          targetName: 'host_debug_unopt',
+          hostName: 'host_debug_unopt',
+        );
+        expect(
+          localEngineInfo.toReentrantBuildEnvironment(fileSystem: fileSystem),
+          <String, String>{'LOCAL_ENGINE': bazelBin, 'LOCAL_ENGINE_HOST': bazelBin},
+        );
+      },
+    );
+  });
+
+  group('LocalEngineLayout', () {
+    late FileSystem fileSystem;
+    late Cache cache;
+    late Platform platform;
+    late FakeProcessManager processManager;
+    late String bazelBin;
+    late String execroot;
+
+    // A Bazel build's output directory, with the manifest local_engine
+    // writes beside its outputs: GN's paths to the files relative to the
+    // manifest's directory, through `..` for another repository's.
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      final Directory cacheRoot = fileSystem.directory('root')..createSync();
+      platform = FakePlatform();
+      cache = Cache(
+        rootOverride: cacheRoot,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
+        artifacts: <ArtifactSet>[],
+      );
+      processManager = FakeProcessManager.any();
+      execroot = fileSystem.path.join(fileSystem.currentDirectory.path, 'execroot', '_main');
+      bazelBin = fileSystem.path.join(
+        execroot,
+        'bazel-out',
+        'k8-dbg',
+        'bin',
+        'engine',
+        'src',
+        'flutter',
+      );
+      fileSystem.directory(bazelBin).createSync(recursive: true);
+      fileSystem
+          .directory(fileSystem.path.join(execroot, 'external', 'dart_sdk', 'bin'))
+          .createSync(recursive: true);
+      fileSystem
+          .file(fileSystem.path.join(bazelBin, 'local_engine.json'))
+          .writeAsStringSync(
+            json.encode(<String, Object>{
+              'name': 'host_debug_unopt',
+              'entries': <String, String>{
+                'flutter_tester': 'shell/testing/shipped/flutter_tester',
+                'gen_snapshot': 'build/bazel/dart_wrap/dart_sdk/gen_snapshot',
+                'icudtl.dat': '../../../../../../external/icu/common/icudtl.dat',
+                'flutter_patched_sdk': 'lib/snapshot/flutter_patched_sdk',
+                'flutter_patched_sdk/platform_strong.dill':
+                    'lib/snapshot/flutter_patched_sdk/platform_strong.dill',
+                'gen/flutter/lib/snapshot/isolate_snapshot.bin':
+                    'lib/snapshot/isolate_snapshot.bin',
+                'gen/dart-pkg/sky_engine': 'local_engine/sky_engine',
+                'dart-sdk': '../../../../../../external/dart_sdk',
+                'font-subset': 'tools/font_subset/shipped/font-subset',
+                'libflutter_linux_gtk.so': 'shell/platform/linux/shipped/libflutter_linux_gtk.so',
+                'flutter_linux': '../../../../../../engine/src/flutter/shell/platform/linux/public/flutter_linux',
+                'impellerc': 'impeller/compiler/shipped/impellerc',
+                'shader_lib': 'local_engine/shader_lib',
+              },
+            }),
+          );
+    });
+
+    Artifacts bazelArtifacts() => CachedLocalEngineArtifacts(
+      bazelBin,
+      engineOutPath: bazelBin,
+      toolContext: FakeToolContext(
+        cache: cache,
+        fs: fileSystem,
+        os: FakeOperatingSystemUtils(),
+        platform: platform,
+        processManager: processManager,
+      ),
+    );
+
+    testWithoutContext('resolves GN paths through the manifest', () {
+      final layout = LocalEngineLayout.of(bazelBin, fileSystem: fileSystem);
+      expect(layout.hasManifest, isTrue);
+      expect(layout.name, 'host_debug_unopt');
+      // A file of the build.
+      expect(
+        layout.resolve(<String>['flutter_tester']),
+        fileSystem.path.join(bazelBin, 'shell', 'testing', 'shipped', 'flutter_tester'),
+      );
+      // A file under a mapped directory, by the longest entry.
+      expect(
+        layout.resolve(<String>['gen', 'dart-pkg', 'sky_engine', 'lib', 'ui', 'ui.dart']),
+        fileSystem.path.join(bazelBin, 'local_engine', 'sky_engine', 'lib', 'ui', 'ui.dart'),
+      );
+      expect(
+        layout.resolve(<String>['flutter_patched_sdk', 'platform_strong.dill']),
+        fileSystem.path.join(
+          bazelBin,
+          'lib',
+          'snapshot',
+          'flutter_patched_sdk',
+          'platform_strong.dill',
+        ),
+      );
+      // Another repository's files, through `..` from the manifest's directory.
+      expect(
+        layout.resolve(<String>['dart-sdk', 'bin', 'dart']),
+        fileSystem.path.join(execroot, 'external', 'dart_sdk', 'bin', 'dart'),
+      );
+      expect(
+        layout.resolve(<String>['icudtl.dat']),
+        fileSystem.path.join(execroot, 'external', 'icu', 'common', 'icudtl.dat'),
+      );
+      // A path the manifest does not know stays where GN would have it.
+      expect(
+        layout.resolve(<String>['clang_x64', 'gen_snapshot']),
+        fileSystem.path.join(bazelBin, 'clang_x64', 'gen_snapshot'),
+      );
+    });
+
+    testWithoutContext("is GN's layout without a manifest", () {
+      final String gnOut = fileSystem.path.join('/out', 'host_debug_unopt');
+      final layout = LocalEngineLayout.of(gnOut, fileSystem: fileSystem);
+      expect(layout.hasManifest, isFalse);
+      expect(layout.name, isNull);
+      expect(
+        layout.resolve(<String>['gen', 'dart-pkg', 'sky_engine']),
+        fileSystem.path.join(gnOut, 'gen', 'dart-pkg', 'sky_engine'),
+      );
+    });
+
+    testWithoutContext('rejects a manifest without entries', () {
+      fileSystem.file(fileSystem.path.join(bazelBin, 'local_engine.json')).writeAsStringSync('{}');
+      expect(
+        () => LocalEngineLayout.of(bazelBin, fileSystem: fileSystem),
+        throwsToolExit(message: 'has no "entries" map'),
+      );
+    });
+
+    testWithoutContext('CachedLocalEngineArtifacts reads a Bazel build directory', () {
+      final Artifacts artifacts = bazelArtifacts();
+      expect(artifacts.localEngineInfo!.localTargetName, 'host_debug_unopt');
+      expect(artifacts.localEngineInfo!.localHostName, 'host_debug_unopt');
+      expect(artifacts.getEngineType(TargetPlatform.linux_x64), 'host_debug_unopt');
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        fileSystem.path.join(bazelBin, 'shell', 'testing', 'shipped', 'flutter_tester'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.genSnapshot),
+        fileSystem.path.join(bazelBin, 'build', 'bazel', 'dart_wrap', 'dart_sdk', 'gen_snapshot'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.icuData),
+        fileSystem.path.join(execroot, 'external', 'icu', 'common', 'icudtl.dat'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.platformKernelDill),
+        fileSystem.path.join(
+          bazelBin,
+          'lib',
+          'snapshot',
+          'flutter_patched_sdk',
+          'platform_strong.dill',
+        ),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        fileSystem.path.join(bazelBin, 'lib', 'snapshot', 'flutter_patched_sdk'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.isolateSnapshotData),
+        fileSystem.path.join(bazelBin, 'lib', 'snapshot', 'isolate_snapshot.bin'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.skyEnginePath),
+        fileSystem.path.join(bazelBin, 'local_engine', 'sky_engine'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.fontSubset),
+        fileSystem.path.join(bazelBin, 'tools', 'font_subset', 'shipped', 'font-subset'),
+      );
+      // The directory the GTK library is copied from.
+      expect(
+        artifacts.getArtifactPath(Artifact.linuxDesktopPath),
+        fileSystem.path.join(bazelBin, 'shell', 'platform', 'linux', 'shipped'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.linuxHeaders),
+        fileSystem.path.join(
+          execroot,
+          'engine',
+          'src',
+          'flutter',
+          'shell',
+          'platform',
+          'linux',
+          'public',
+          'flutter_linux',
+        ),
+      );
+      // The shader compiler, and the GLSL library it includes from: assembled
+      // as one directory by local_engine, not beside the compiler as GN lays it.
+      fileSystem
+          .file(fileSystem.path.join(bazelBin, 'impeller', 'compiler', 'shipped', 'impellerc'))
+          .createSync(recursive: true);
+      fileSystem
+          .directory(fileSystem.path.join(bazelBin, 'local_engine', 'shader_lib'))
+          .createSync(recursive: true);
+      expect(
+        artifacts.getHostArtifact(HostArtifact.impellerc).path,
+        fileSystem.path.join(bazelBin, 'impeller', 'compiler', 'shipped', 'impellerc'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.shaderLib).path,
+        fileSystem.path.join(bazelBin, 'local_engine', 'shader_lib'),
+      );
+      // The Dart SDK: the repository the manifest names, since it has a bin/.
+      final String dartSdk = fileSystem.path.join(execroot, 'external', 'dart_sdk');
+      expect(artifacts.getArtifactPath(Artifact.engineDartSdkPath), dartSdk);
+      expect(
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        fileSystem.path.join(dartSdk, 'bin', 'dart'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        fileSystem.path.join(dartSdk, 'bin', 'snapshots', 'frontend_server_aot.dart.snapshot'),
+      );
+    });
+
+    testWithoutContext(
+      'finds the Apple frameworks inside the xcframeworks the manifest places',
+      () {
+        // A Mac host build's and an iOS simulator build's manifests: each
+        // xcframework is one entry (a directory the build assembles), and the
+        // framework is its slice's, as in GN's build directory.
+        final String macosBin = fileSystem.path.join(
+          execroot,
+          'bazel-out',
+          'macos_arm64_debug-dbg',
+          'bin',
+          'engine',
+          'src',
+          'flutter',
+        );
+        final String iosBin = fileSystem.path.join(
+          execroot,
+          'bazel-out',
+          'ios_sim_arm64_debug-dbg',
+          'bin',
+          'engine',
+          'src',
+          'flutter',
+        );
+        final String macosFramework = fileSystem.path.join(
+          macosBin,
+          'shell',
+          'platform',
+          'darwin',
+          'macos',
+          'FlutterMacOS.xcframework',
+          'macos-arm64',
+          'FlutterMacOS.framework',
+        );
+        final String iosFramework = fileSystem.path.join(
+          iosBin,
+          'shell',
+          'platform',
+          'darwin',
+          'ios',
+          'Flutter.xcframework',
+          'ios-arm64-simulator',
+          'Flutter.framework',
+        );
+        fileSystem.directory(macosFramework).createSync(recursive: true);
+        fileSystem.directory(iosFramework).createSync(recursive: true);
+        fileSystem
+            .file(fileSystem.path.join(macosBin, 'local_engine.json'))
+            .writeAsStringSync(
+              json.encode(<String, Object>{
+                'name': 'host_debug_unopt_arm64',
+                'entries': <String, String>{
+                  'FlutterMacOS.xcframework':
+                      'shell/platform/darwin/macos/FlutterMacOS.xcframework',
+                  'flutter_tester': 'shell/testing/flutter_tester',
+                },
+              }),
+            );
+        fileSystem
+            .file(fileSystem.path.join(iosBin, 'local_engine.json'))
+            .writeAsStringSync(
+              json.encode(<String, Object>{
+                'name': 'ios_debug_sim_unopt_arm64',
+                'entries': <String, String>{
+                  'Flutter.xcframework': 'shell/platform/darwin/ios/Flutter.xcframework',
+                },
+              }),
+            );
+        final macPlatform = FakePlatform(operatingSystem: 'macos');
+        final Artifacts macos = CachedLocalEngineArtifacts(
+          macosBin,
+          engineOutPath: macosBin,
+          toolContext: FakeToolContext(
+            cache: cache,
+            fs: fileSystem,
+            os: FakeOperatingSystemUtils(),
+            platform: macPlatform,
+            processManager: processManager,
+          ),
+        );
+        expect(
+          macos.getArtifactPath(Artifact.flutterMacOSXcframework, platform: TargetPlatform.darwin),
+          fileSystem.path.dirname(fileSystem.path.dirname(macosFramework)),
+        );
+        expect(
+          macos.getArtifactPath(Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin),
+          macosFramework,
+        );
+        expect(
+          macos.getArtifactPath(
+            Artifact.flutterMacOSFrameworkDsym,
+            platform: TargetPlatform.darwin,
+          ),
+          fileSystem.path.join(
+            fileSystem.path.dirname(macosFramework),
+            'dSYMs',
+            'FlutterMacOS.framework.dSYM',
+          ),
+        );
+        final Artifacts ios = CachedLocalEngineArtifacts(
+          macosBin,
+          engineOutPath: iosBin,
+          toolContext: FakeToolContext(
+            cache: cache,
+            fs: fileSystem,
+            os: FakeOperatingSystemUtils(),
+            platform: macPlatform,
+            processManager: processManager,
+          ),
+        );
+        expect(ios.localEngineInfo!.localTargetName, 'ios_debug_sim_unopt_arm64');
+        expect(
+          ios.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios),
+          fileSystem.path.dirname(fileSystem.path.dirname(iosFramework)),
+        );
+        expect(
+          ios.getArtifactPath(
+            Artifact.flutterFramework,
+            platform: TargetPlatform.ios,
+            mode: BuildMode.debug,
+            environmentType: EnvironmentType.simulator,
+          ),
+          iosFramework,
+        );
+        // The host's tools come from the host build.
+        expect(
+          ios.getArtifactPath(Artifact.flutterTester),
+          fileSystem.path.join(macosBin, 'shell', 'testing', 'flutter_tester'),
+        );
+      },
+    );
   });
 
   group('DeferredArtifacts', () {

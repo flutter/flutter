@@ -1,0 +1,57 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @swiftshader: the tree as files, for the wrapped GN
+# build of the GPU test backends (//engine/src/flutter/build/bazel/gl_wrap),
+# which builds libvk_swiftshader.so from SwiftShader's own GN rules. No
+# Bazel rules of its own yet.
+
+package(default_visibility = ["//visibility:public"])
+
+# What the wrapped GN build of libvk_swiftshader.so reads of the tree
+# (measured on that build, with slack): the host build uses the Subzero
+# backend, so of the LLVM backend only third_party/llvm-16.0/BUILD.gn is
+# loaded (src/Reactor's GN names its target), and the LLVM sources and the
+# debugger stay out.
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+            "*.bzl",
+            # The checkout's git state is no input of the build.
+            "**/.git/**",
+            # Nor the bytecode caches a GN build in the same checkout
+            # leaves beside the Python scripts it runs (Bazel's own runs
+            # write none: PYTHONDONTWRITEBYTECODE).
+            "**/__pycache__/**",
+            "docs/**",
+            "tests/**",
+            "third_party/llvm-10.0/**",
+            "third_party/llvm-16.0/**",
+            "third_party/llvm-project/**",
+            "third_party/PowerVR_Examples/**",
+            "third_party/benchmark/**",
+            "third_party/boost/**",
+            "third_party/cppdap/**",
+            "third_party/googletest/**",
+        ],
+    ) + ["third_party/llvm-16.0/BUILD.gn"],
+)
+
+# Reactor's LLVM backend, which SwiftShader's GN build uses on arm64 (x64
+# has Subzero): the sources the arm64 cross build's wrap adds to its tree
+# (gl_wrap/BUILD.bazel), left out of :build_tree for the host's.
+filegroup(
+    name = "llvm_sources",
+    srcs = glob(
+        ["third_party/llvm-16.0/**"],
+        exclude = [
+            "**/.git/**",
+            "**/__pycache__/**",
+        ],
+    ),
+)

@@ -12,6 +12,7 @@
 #include "embedder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_metal.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"

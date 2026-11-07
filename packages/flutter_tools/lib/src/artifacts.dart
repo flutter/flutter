@@ -15,6 +15,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'context/tool_context.dart';
+import 'convert.dart';
 
 //////////////////////////////////////////////////////////////////////
 //                                                                  //
@@ -166,6 +167,9 @@ enum HostArtifact {
 
   // The Impeller shader compiler.
   impellerc('impellerc', isExecutable: true),
+  // The GLSL library impellerc includes from (`flutter/runtime_effect.glsl`),
+  // a directory the engine build lays beside the compiler.
+  shaderLib('shader_lib'),
   // Impeller's tessellation library.
   libtessellator('libtessellator', isDll: true);
 
@@ -246,12 +250,20 @@ class LocalEngineInfo {
   ///
   /// The [targetOutPath] and [hostOutPath] are assumed to be resolvable
   /// paths to the built engine artifacts for the target (device) and host
-  /// (build) platforms, respectively.
+  /// (build) platforms, respectively. A Bazel build directory names its build
+  /// in its manifest ([LocalEngineLayout]); [targetName] and [hostName] carry
+  /// those names, where GN's directory is named for its build.
   const LocalEngineInfo({
     required this.fileSystem,
     required this.hostOutPath,
     required this.targetOutPath,
-  });
+    String? targetName,
+    String? hostName,
+  }) : // The names are optional, the fields private: no initializing formal.
+       // ignore: prefer_initializing_formals
+       _targetName = targetName,
+       // ignore: prefer_initializing_formals
+       _hostName = hostName;
 
   /// The path to the engine artifacts for the target (device) platform.
   ///
@@ -270,11 +282,151 @@ class LocalEngineInfo {
   /// The [FileSystem] used to resolve paths.
   final FileSystem fileSystem;
 
+  final String? _targetName;
+  final String? _hostName;
+
   /// The name of the target (device) platform, i.e. `android_debug_unopt`.
-  String get localTargetName => fileSystem.path.basename(targetOutPath);
+  String get localTargetName => _targetName ?? fileSystem.path.basename(targetOutPath);
 
   /// The name of the host (build) platform, e.g. `host_debug_unopt`.
-  String get localHostName => fileSystem.path.basename(hostOutPath);
+  String get localHostName => _hostName ?? fileSystem.path.basename(hostOutPath);
+
+  /// The variables a re-entrant build (the desktop CMake projects'
+  /// `flutter assemble`, through bin/tool_backend.dart) names the local engine
+  /// by: `LOCAL_ENGINE` and `LOCAL_ENGINE_HOST`, and the engine source as
+  /// `FLUTTER_ENGINE`.
+  ///
+  /// GN's build directories are named by their build under `<engine>/src/out`,
+  /// so the names and the source go; a Bazel build directory, which the tool
+  /// knows by its manifest ([LocalEngineLayout]), goes as its own path, which
+  /// `--local-engine` takes as it is, and the source is found as the tool
+  /// finds it for any absolute path.
+  Map<String, String> toReentrantBuildEnvironment({required FileSystem fileSystem}) {
+    final environment = <String, String>{};
+    final bool targetIsBazel = LocalEngineLayout.of(
+      targetOutPath,
+      fileSystem: fileSystem,
+    ).hasManifest;
+    final bool hostIsBazel = LocalEngineLayout.of(hostOutPath, fileSystem: fileSystem).hasManifest;
+    if (!targetIsBazel) {
+      // $ENGINE/src/out/foo_bar_baz -> $ENGINE/src
+      environment['FLUTTER_ENGINE'] = fileSystem.path.dirname(
+        fileSystem.path.dirname(targetOutPath),
+      );
+    }
+    environment['LOCAL_ENGINE'] = targetIsBazel ? targetOutPath : localTargetName;
+    environment['LOCAL_ENGINE_HOST'] = hostIsBazel ? hostOutPath : localHostName;
+    return environment;
+  }
+}
+
+/// How a local engine build directory lays out the artifacts the tool reads.
+///
+/// GN's build directory (`engine/src/out/<build>/`) holds them at fixed paths:
+/// `flutter_tester`, `gen_snapshot`, `icudtl.dat`, `flutter_patched_sdk/`,
+/// `gen/dart-pkg/sky_engine/`, `dart-sdk/`, ... A Bazel build leaves each
+/// where it built it and writes [manifestFileName] in the directory named to
+/// `--local-engine` (`bazel-bin/engine/src/flutter`), mapping those GN paths
+/// to its files -- relative to the manifest's own directory, through `..` for
+/// another repository's files -- and naming the build:
+///
+///     {"name": "host_debug_unopt",
+///      "entries": {"flutter_tester": "shell/testing/shipped/flutter_tester",
+///                  "gen/dart-pkg/sky_engine": "local_engine/sky_engine",
+///                  "dart-sdk": "../../../../../../external/+synced_deps+dart_sdk_linux_x64",
+///                  ...}}
+///
+/// [resolve] gives the path of what GN's directory would hold at a relative
+/// path: through the manifest's longest entry that is the path or a parent of
+/// it when there is a manifest, else the path under the directory as is. The
+/// manifest's directory is taken with its symbolic links resolved (bazel-bin
+/// is one), so that its `..` entries lead where they do on disk.
+class LocalEngineLayout {
+  LocalEngineLayout._(this.directory, this._fileSystem, this._entries, this.name);
+
+  /// The layout of the engine build at [directory]: a Bazel build's when the
+  /// directory holds [manifestFileName], GN's otherwise.
+  factory LocalEngineLayout.of(String directory, {required FileSystem fileSystem}) {
+    final File manifest = fileSystem.file(fileSystem.path.join(directory, manifestFileName));
+    if (!manifest.existsSync()) {
+      return LocalEngineLayout._(directory, fileSystem, null, null);
+    }
+    final Object? document;
+    try {
+      document = json.decode(manifest.readAsStringSync());
+    } on FormatException catch (e) {
+      throwToolExit('${manifest.path} is not valid JSON: $e');
+    }
+    if (document is! Map<String, Object?> || document['entries'] is! Map<String, Object?>) {
+      throwToolExit('${manifest.path} has no "entries" map.');
+    }
+    final String base = fileSystem.directory(directory).resolveSymbolicLinksSync();
+    final entries = <String, String>{};
+    for (final MapEntry<String, Object?> entry
+        in (document['entries']! as Map<String, Object?>).entries) {
+      final Object? value = entry.value;
+      if (value is! String) {
+        throwToolExit('${manifest.path}: the entry for "${entry.key}" is not a path.');
+      }
+      entries[entry.key] = fileSystem.path.normalize(fileSystem.path.join(base, value));
+    }
+    final Object? name = document['name'];
+    return LocalEngineLayout._(directory, fileSystem, entries, name is String ? name : null);
+  }
+
+  /// The manifest a Bazel build writes beside its outputs.
+  static const String manifestFileName = 'local_engine.json';
+
+  /// The engine build directory, as given.
+  final String directory;
+
+  /// The build's name from the manifest (`host_debug_unopt`); null without one.
+  final String? name;
+
+  final FileSystem _fileSystem;
+  final Map<String, String>? _entries;
+
+  /// Whether the directory holds a manifest.
+  bool get hasManifest => _entries != null;
+
+  /// The path of what GN's build directory holds at [parts] under [directory].
+  String resolve(List<String> parts) {
+    final String relative = _fileSystem.path.joinAll(parts);
+    final Map<String, String>? entries = _entries;
+    if (entries != null) {
+      final String key = _fileSystem.path.split(_fileSystem.path.normalize(relative)).join('/');
+      String? best;
+      for (final String candidate in entries.keys) {
+        if ((key == candidate || key.startsWith('$candidate/')) &&
+            (best == null || candidate.length > best.length)) {
+          best = candidate;
+        }
+      }
+      if (best != null) {
+        final String mapped = entries[best]!;
+        final String rest = key.substring(best.length);
+        if (rest.isEmpty) {
+          return mapped;
+        }
+        return _fileSystem.path.normalize(
+          _fileSystem.path.joinAll(<String>[mapped, ...rest.substring(1).split('/')]),
+        );
+      }
+    }
+    return _fileSystem.path.join(directory, relative);
+  }
+
+  /// The directory GN's build directory holds at [parts] (its root for none),
+  /// known by [containing], a file under it: for a Bazel build, whose manifest
+  /// maps files, the directory of that file.
+  String resolveDirectory(List<String> parts, {required String containing}) {
+    if (_entries == null) {
+      return parts.isEmpty
+          ? directory
+          : _fileSystem.path.join(directory, _fileSystem.path.joinAll(parts));
+    }
+    return _fileSystem.path.dirname(resolve(<String>[...parts, containing]));
+  }
 }
 
 // Manages the engine artifacts of Flutter.
@@ -466,6 +618,13 @@ class CachedArtifacts implements Artifacts {
           _currentHostPlatform(_platform, _operatingSystemUtils),
         )!;
         return _fileSystem.file(_fileSystem.path.join(engineDir, artifactFileName));
+      case HostArtifact.shaderLib:
+        final String engineDir = _getEngineArtifactsPath(
+          _currentHostPlatform(_platform, _operatingSystemUtils),
+        )!;
+        return _fileSystem.directory(
+          _fileSystem.path.join(engineDir, artifact.getFileName(_platform)),
+        );
     }
   }
 
@@ -885,11 +1044,16 @@ Directory _getIosFlutterFrameworkPlatformDirectory(
   String engineDirectory,
   EnvironmentType? environmentType,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
-  final Directory xcframeworkDirectory = fileSystem
-      .directory(engineDirectory)
-      .childDirectory(Artifact.flutterXcframework.getFileName(hostPlatform));
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
+  // The xcframework sits at the engine directory's root, or where a Bazel
+  // build's manifest places it (LocalEngineLayout).
+  final Directory xcframeworkDirectory = xcframeworkPath != null
+      ? fileSystem.directory(xcframeworkPath)
+      : fileSystem
+            .directory(engineDirectory)
+            .childDirectory(Artifact.flutterXcframework.getFileName(hostPlatform));
 
   if (!xcframeworkDirectory.existsSync()) {
     throwToolExit(
@@ -919,13 +1083,15 @@ String _getIosFrameworkPath(
   String engineDirectory,
   EnvironmentType? environmentType,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
   final Directory platformDir = _getIosFlutterFrameworkPlatformDirectory(
     engineDirectory,
     environmentType,
     fileSystem,
     hostPlatform,
+    xcframeworkPath: xcframeworkPath,
   );
   return platformDir.childDirectory(Artifact.flutterFramework.getFileName(hostPlatform)).path;
 }
@@ -935,13 +1101,15 @@ String _getIosFrameworkDsymPath(
   String engineDirectory,
   EnvironmentType? environmentType,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
   final Directory platformDir = _getIosFlutterFrameworkPlatformDirectory(
     engineDirectory,
     environmentType,
     fileSystem,
     hostPlatform,
+    xcframeworkPath: xcframeworkPath,
   );
   return platformDir
       .childDirectory('dSYMs')
@@ -958,11 +1126,16 @@ String _getIosFrameworkDsymPath(
 Directory _getMacOSFrameworkPlatformDirectory(
   String engineDirectory,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
-  final Directory xcframeworkDirectory = fileSystem
-      .directory(engineDirectory)
-      .childDirectory(Artifact.flutterMacOSXcframework.getFileName(hostPlatform));
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
+  // The xcframework sits at the engine directory's root, or where a Bazel
+  // build's manifest places it (LocalEngineLayout).
+  final Directory xcframeworkDirectory = xcframeworkPath != null
+      ? fileSystem.directory(xcframeworkPath)
+      : fileSystem
+            .directory(engineDirectory)
+            .childDirectory(Artifact.flutterMacOSXcframework.getFileName(hostPlatform));
 
   if (!xcframeworkDirectory.existsSync()) {
     throwToolExit(
@@ -986,12 +1159,14 @@ Directory _getMacOSFrameworkPlatformDirectory(
 String _getMacOSFrameworkPath(
   String engineDirectory,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
   final Directory platformDirectory = _getMacOSFrameworkPlatformDirectory(
     engineDirectory,
     fileSystem,
     hostPlatform,
+    xcframeworkPath: xcframeworkPath,
   );
   return platformDirectory
       .childDirectory(Artifact.flutterMacOSFramework.getFileName(hostPlatform))
@@ -1002,12 +1177,14 @@ String _getMacOSFrameworkPath(
 String _getMacOSFrameworkDsymPath(
   String engineDirectory,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
   final Directory platformDirectory = _getMacOSFrameworkPlatformDirectory(
     engineDirectory,
     fileSystem,
     hostPlatform,
+    xcframeworkPath: xcframeworkPath,
   );
   return platformDirectory
       .childDirectory('dSYMs')
@@ -1025,10 +1202,14 @@ class CachedLocalEngineArtifacts implements Artifacts {
   }) {
     final ToolContext(:Cache cache, :FileSystem fs, :OperatingSystemUtils os, :Platform platform) =
         _toolContext;
+    _target = LocalEngineLayout.of(engineOutPath, fileSystem: fs);
+    _host = LocalEngineLayout.of(_hostEngineOutPath, fileSystem: fs);
     localEngineInfo = LocalEngineInfo(
       fileSystem: fs,
       hostOutPath: _hostEngineOutPath,
       targetOutPath: engineOutPath,
+      targetName: _target.name,
+      hostName: _host.name,
     );
     _backupCache =
         parent ??
@@ -1042,6 +1223,11 @@ class CachedLocalEngineArtifacts implements Artifacts {
   final ToolContext _toolContext;
   late final Artifacts _backupCache;
 
+  /// The target (device) and host (build) engine directories' layouts: GN's,
+  /// or a Bazel build's by its manifest.
+  late final LocalEngineLayout _target;
+  late final LocalEngineLayout _host;
+
   @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) {
     final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
@@ -1049,11 +1235,19 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = artifact.getFileName(platform);
-        final File file = fs.file(fs.path.join(_hostEngineOutPath, artifactFileName));
+        final File file = fs.file(_host.resolve(<String>[artifactFileName]));
         if (!file.existsSync()) {
           return _backupCache.getHostArtifact(artifact);
         }
         return file;
+      case HostArtifact.shaderLib:
+        final Directory directory = fs.directory(
+          _host.resolve(<String>[artifact.getFileName(platform)]),
+        );
+        if (!directory.existsSync()) {
+          return _backupCache.getHostArtifact(artifact);
+        }
+        return directory;
       case HostArtifact.flutterWebSdk:
       case HostArtifact.flutterWebLibrariesJson:
       case HostArtifact.flutterJsDirectory:
@@ -1098,35 +1292,33 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _flutterTesterPath(platform!);
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
-        return fs.path.join(
-          localEngineInfo.targetOutPath,
-          'gen',
-          'flutter',
-          'lib',
-          'snapshot',
-          artifactFileName,
-        );
+        return _target.resolve(<String>['gen', 'flutter', 'lib', 'snapshot', artifactFileName!]);
       case Artifact.icuData:
       case Artifact.flutterXcframework:
       case Artifact.flutterMacOSXcframework:
-        return fs.path.join(localEngineInfo.targetOutPath, artifactFileName);
+        return _target.resolve(<String>[artifactFileName!]);
       case Artifact.platformKernelDill:
         if (platform?.os == .fuchsia) {
-          return fs.path.join(
-            localEngineInfo.targetOutPath,
-            'flutter_runner_patched_sdk',
-            artifactFileName,
-          );
+          return _target.resolve(<String>['flutter_runner_patched_sdk', artifactFileName!]);
         }
-        return fs.path.join(_getFlutterPatchedSdkPath(mode), artifactFileName);
+        return _target.resolve(<String>[_flutterPatchedSdkDirectory(mode), artifactFileName!]);
       case Artifact.platformLibrariesJson:
-        return fs.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
+        return _target.resolve(<String>[
+          _flutterPatchedSdkDirectory(mode),
+          'lib',
+          artifactFileName!,
+        ]);
+      // The frameworks inside the xcframeworks, which a Bazel build's
+      // manifest places (the xcframework is one entry).
       case Artifact.flutterFramework:
         return _getIosFrameworkPath(
           localEngineInfo.targetOutPath,
           environmentType,
           fs,
           hostPlatform,
+          xcframeworkPath: _target.resolve(<String>[
+            Artifact.flutterXcframework.getFileName(hostPlatform),
+          ]),
         );
       case Artifact.flutterFrameworkDsym:
         return _getIosFrameworkDsymPath(
@@ -1134,22 +1326,39 @@ class CachedLocalEngineArtifacts implements Artifacts {
           environmentType,
           fs,
           hostPlatform,
+          xcframeworkPath: _target.resolve(<String>[
+            Artifact.flutterXcframework.getFileName(hostPlatform),
+          ]),
         );
       case Artifact.flutterMacOSFramework:
-        return _getMacOSFrameworkPath(localEngineInfo.targetOutPath, fs, hostPlatform);
+        return _getMacOSFrameworkPath(
+          localEngineInfo.targetOutPath,
+          fs,
+          hostPlatform,
+          xcframeworkPath: _target.resolve(<String>[
+            Artifact.flutterMacOSXcframework.getFileName(hostPlatform),
+          ]),
+        );
       case Artifact.flutterMacOSFrameworkDsym:
-        return _getMacOSFrameworkDsymPath(localEngineInfo.targetOutPath, fs, hostPlatform);
+        return _getMacOSFrameworkDsymPath(
+          localEngineInfo.targetOutPath,
+          fs,
+          hostPlatform,
+          xcframeworkPath: _target.resolve(<String>[
+            Artifact.flutterMacOSXcframework.getFileName(hostPlatform),
+          ]),
+        );
       case Artifact.flutterPatchedSdkPath:
         // When using local engine always use [BuildMode.debug] regardless of
         // what was specified in [mode] argument because local engine will
         // have only one flutter_patched_sdk in standard location, that
         // is happen to be what debug(non-release) mode is using.
         if (platform?.os == .fuchsia) {
-          return fs.path.join(localEngineInfo.targetOutPath, 'flutter_runner_patched_sdk');
+          return _target.resolve(<String>['flutter_runner_patched_sdk']);
         }
-        return _getFlutterPatchedSdkPath(BuildMode.debug);
+        return _target.resolve(<String>[_flutterPatchedSdkDirectory(BuildMode.debug)]);
       case Artifact.skyEnginePath:
-        return fs.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
+        return _host.resolve(<String>['gen', 'dart-pkg', artifactFileName!]);
       case Artifact.fuchsiaKernelCompiler:
         final String currentHostPlatform = getCurrentHostPlatform(
           operatingSystemUtils: os,
@@ -1171,12 +1380,16 @@ class CachedLocalEngineArtifacts implements Artifacts {
           'flutter$jitOrAot${productOrNo}_runner-0.far',
         );
       case Artifact.fontSubset:
-        return fs.path.join(_hostEngineOutPath, artifactFileName);
+        return _host.resolve(<String>[artifactFileName!]);
       case Artifact.linuxDesktopPath:
-      case Artifact.linuxHeaders:
+        // The directory holding the GTK library (unpackDesktopArtifacts
+        // copies it from there): GN's build root.
+        return _host.resolveDirectory(<String>[], containing: 'libflutter_linux_gtk.so');
       case Artifact.windowsDesktopPath:
+        return _host.resolveDirectory(<String>[], containing: 'flutter_windows.dll');
+      case Artifact.linuxHeaders:
       case Artifact.windowsCppClientWrapper:
-        return fs.path.join(_hostEngineOutPath, artifactFileName);
+        return _host.resolve(<String>[artifactFileName!]);
       case Artifact.engineDartSdkPath:
         return _getDartSdkPath();
       case Artifact.engineDartBinary:
@@ -1191,26 +1404,23 @@ class CachedLocalEngineArtifacts implements Artifacts {
 
   @override
   String getEngineType(TargetPlatform platform, [BuildMode? mode]) {
-    return _toolContext.fs.path.basename(localEngineInfo.targetOutPath);
+    return _target.name ?? _toolContext.fs.path.basename(_target.directory);
   }
 
-  String _getFlutterPatchedSdkPath(BuildMode? buildMode) {
-    return _toolContext.fs.path.join(
-      localEngineInfo.targetOutPath,
-      buildMode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk',
-    );
+  String _flutterPatchedSdkDirectory(BuildMode? buildMode) {
+    return buildMode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk';
   }
 
   String _getDartSdkPath() {
     final ToolContext(:FileSystem fs, :OperatingSystemUtils os, :Platform platform) = _toolContext;
-    final String builtPath = fs.path.join(_hostEngineOutPath, 'dart-sdk');
+    final String builtPath = _host.resolve(<String>['dart-sdk']);
     if (fs.isDirectorySync(fs.path.join(builtPath, 'bin'))) {
       return builtPath;
     }
 
     // If we couldn't find a built dart sdk, let's look for a prebuilt one.
     final String prebuiltPath = fs.path.join(
-      _getFlutterPrebuiltsPath(_hostEngineOutPath, fs),
+      _getFlutterPrebuiltsPath(localEngineInfo.hostOutPath, fs),
       _getPrebuiltTarget(platform, os),
       'dart-sdk',
     );
@@ -1237,11 +1447,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         _toolContext;
     final String genSnapshotName = artifact.getFileName(platform);
     for (final clangDir in clangDirs) {
-      final String genSnapshotPath = fs.path.join(
-        localEngineInfo.targetOutPath,
-        clangDir,
-        genSnapshotName,
-      );
+      final String genSnapshotPath = _target.resolve(<String>[clangDir, genSnapshotName]);
       if (processManager.canRun(genSnapshotPath)) {
         return genSnapshotPath;
       }
@@ -1251,10 +1457,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
 
   String _flutterTesterPath(TargetPlatform platform) {
     final ToolContext(:FileSystem fs, platform: Platform hostPlatform) = _toolContext;
-    return fs.path.join(
-      localEngineInfo.hostOutPath,
-      Artifact.flutterTester.getFileName(hostPlatform),
-    );
+    return _host.resolve(<String>[Artifact.flutterTester.getFileName(hostPlatform)]);
   }
 
   @override
@@ -1362,6 +1565,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.iproxy:
       case HostArtifact.skyEnginePath:
       case HostArtifact.impellerc:
+      case HostArtifact.shaderLib:
       case HostArtifact.libtessellator:
         return _parent.getHostArtifact(artifact);
     }
@@ -1456,6 +1660,9 @@ class _TestLocalEngine extends _TestArtifacts {
         targetOutPath: engineOutPath,
         hostOutPath: engineHostOutPath,
         fileSystem: fileSystem,
+        // As CachedLocalEngineArtifacts: a Bazel directory's manifest names the build.
+        targetName: LocalEngineLayout.of(engineOutPath, fileSystem: fileSystem).name,
+        hostName: LocalEngineLayout.of(engineHostOutPath, fileSystem: fileSystem).name,
       );
 
   @override
@@ -1518,6 +1725,7 @@ FileSystemEntity _resolveWebArtifact(
     case HostArtifact.iproxy:
     case HostArtifact.skyEnginePath:
     case HostArtifact.impellerc:
+    case HostArtifact.shaderLib:
     case HostArtifact.libtessellator:
       throw ArgumentError('Not a web artifact: $artifact');
   }

@@ -1,0 +1,270 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/renderer/backend/metal/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# `is_ios || is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_or_is_mac",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:macos",
+    ],
+)
+
+# `impeller_enable_metal && (is_ios || is_mac)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_is_ios_or_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        ":when_is_ios_or_is_mac",
+    ],
+)
+
+# The Objective-C(++) sources of metal, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); metal links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "metal_objc",
+    srcs = [
+        "allocator_mtl.mm",
+        "blit_pass_mtl.mm",
+        "command_buffer_mtl.mm",
+        "compute_pass_bindings_cache_mtl.mm",
+        "compute_pass_mtl.mm",
+        "compute_pipeline_mtl.mm",
+        "context_mtl.mm",
+        "device_buffer_mtl.mm",
+        "formats_mtl.mm",
+        "gpu_tracer_mtl.mm",
+        "pass_bindings_cache_mtl.mm",
+        "pipeline_library_mtl.mm",
+        "pipeline_mtl.mm",
+        "render_pass_mtl.mm",
+        "sampler_library_mtl.mm",
+        "sampler_mtl.mm",
+        "shader_function_mtl.mm",
+        "shader_library_mtl.mm",
+        "surface_mtl.mm",
+        "swapchain_transients_mtl.mm",
+        "texture_mtl.mm",
+        "texture_wrapper_mtl.mm",
+        "vertex_descriptor_mtl.mm",
+    ],
+    hdrs = [
+        "allocator_mtl.h",
+        "blit_pass_mtl.h",
+        "command_buffer_mtl.h",
+        "compute_pass_bindings_cache_mtl.h",
+        "compute_pass_mtl.h",
+        "compute_pipeline_mtl.h",
+        "context_mtl.h",
+        "device_buffer_mtl.h",
+        "formats_mtl.h",
+        "gpu_tracer_mtl.h",
+        "pass_bindings_cache_mtl.h",
+        "pending_image_upload_schedule_tracker.h",
+        "pipeline_library_mtl.h",
+        "pipeline_mtl.h",
+        "render_pass_mtl.h",
+        "sampler_library_mtl.h",
+        "sampler_mtl.h",
+        "shader_function_mtl.h",
+        "shader_library_mtl.h",
+        "surface_mtl.h",
+        "swapchain_transients_mtl.h",
+        "texture_mtl.h",
+        "texture_wrapper_mtl.h",
+        "vertex_descriptor_mtl.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_impeller_enable_metal_and_is_ios_or_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/renderer",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "metal",
+    srcs = ["pending_image_upload_schedule_tracker.cc"],
+    hdrs = [
+        "allocator_mtl.h",
+        "blit_pass_mtl.h",
+        "command_buffer_mtl.h",
+        "compute_pass_bindings_cache_mtl.h",
+        "compute_pass_mtl.h",
+        "compute_pipeline_mtl.h",
+        "context_mtl.h",
+        "device_buffer_mtl.h",
+        "formats_mtl.h",
+        "gpu_tracer_mtl.h",
+        "pass_bindings_cache_mtl.h",
+        "pending_image_upload_schedule_tracker.h",
+        "pipeline_library_mtl.h",
+        "pipeline_mtl.h",
+        "render_pass_mtl.h",
+        "sampler_library_mtl.h",
+        "sampler_mtl.h",
+        "shader_function_mtl.h",
+        "shader_library_mtl.h",
+        "surface_mtl.h",
+        "swapchain_transients_mtl.h",
+        "texture_mtl.h",
+        "texture_wrapper_mtl.h",
+        "vertex_descriptor_mtl.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS,
+    linkopts = [
+        "-framework",
+        "Metal",
+        "-framework",
+        "MetalPerformanceShaders",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/impeller/tools:metal": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":metal_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/renderer",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+    alwayslink = True,
+)
+
+# `impeller_enable_metal && enable_unittests && (is_ios || is_mac)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_enable_unittests_and_is_ios_or_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/testing:unittests_enabled",
+        ":when_is_ios_or_is_mac",
+    ],
+)
+
+# The Objective-C(++) sources of metal_unittests, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); metal_unittests links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "metal_unittests_objc",
+    testonly = True,
+    srcs = [
+        "allocator_mtl_unittests.mm",
+        "context_mtl_unittests.mm",
+        "swapchain_transients_mtl_unittests.mm",
+        "texture_mtl_unittests.mm",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_impeller_enable_metal_and_enable_unittests_and_is_ios_or_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":metal",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "metal_unittests",
+    testonly = True,
+    srcs = ["pending_image_upload_schedule_tracker_unittests.cc"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = [
+        "-framework",
+        "AppKit",
+        "-framework",
+        "QuartzCore",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_impeller_enable_metal_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":metal",
+        ":metal_unittests_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+# `impeller_enable_metal && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_enable_unittests",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
+)

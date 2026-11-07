@@ -1,0 +1,400 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/display_list/testing/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "display_list_testing",
+    testonly = True,
+    srcs = ["dl_test_snippets.cc"],
+    hdrs = [
+        "dl_test_equality.h",
+        "dl_test_mock_path_receiver.h",
+        "dl_test_snippets.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/testing:testing_lib",
+        "//engine/src/flutter/txt",
+        "@skia",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "surface_provider_config",
+    defines = select({
+        "@platforms//os:android": [],
+        "@platforms//os:ios": [],
+        "//conditions:default": [
+            "ENABLE_SOFTWARE_BENCHMARKS",  # surface_provider_include_software
+        ],
+    }) + select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//engine/src/flutter/impeller/tools:vulkan": [],
+        "//conditions:default": [
+            "ENABLE_OPENGL_BENCHMARKS",  # surface_provider_include_gl
+        ],
+    }) + select({
+        "@platforms//os:macos": [
+            "ENABLE_METAL_BENCHMARKS",  # surface_provider_include_metal
+        ],
+        "@platforms//os:ios": [
+            "ENABLE_METAL_BENCHMARKS",  # surface_provider_include_metal
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# The Objective-C(++) sources of display_list_surface_provider, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); display_list_surface_provider links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "display_list_surface_provider_objc",
+    testonly = True,
+    srcs = select({
+        "@platforms//os:macos": [
+            "skia/dl_test_surface_provider_skia_metal.mm",  # surface_provider_include_metal
+        ],
+        "@platforms//os:ios": [
+            "skia/dl_test_surface_provider_skia_metal.mm",  # surface_provider_include_metal
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "dl_test_surface_provider.h",
+        "skia/dl_test_surface_instance_skia.h",
+    ] + select({
+        "@platforms//os:android": [],
+        "@platforms//os:ios": [],
+        "//conditions:default": [
+            "skia/dl_test_surface_software.h",  # surface_provider_include_software
+        ],
+    }) + select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//engine/src/flutter/impeller/tools:vulkan": [],
+        "//conditions:default": [
+            "dl_test_surface_gl.h",  # surface_provider_include_gl
+        ],
+    }) + select({
+        "@platforms//os:macos": [
+            "skia/dl_test_surface_provider_skia_metal.h",  # surface_provider_include_metal
+        ],
+        "@platforms//os:ios": [
+            "skia/dl_test_surface_provider_skia_metal.h",  # surface_provider_include_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
+            "impeller/dl_test_surface_instance_impeller.h",  # surface_provider_include_metal && impeller_enable_metal
+            "impeller/dl_test_surface_provider_impeller.h",  # surface_provider_include_metal && impeller_enable_metal
+            "impeller/dl_test_surface_provider_impeller_metal.h",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/common/graphics
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_mac_or_is_ios_and_shell_enable_metal": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:metal
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":surface_provider_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/testing:testing_lib",
+    ] + select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//engine/src/flutter/impeller/tools:vulkan": [],
+        "//conditions:default": [
+            "//engine/src/flutter/testing:opengl",  # surface_provider_include_gl
+        ],
+    }) + select({
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
+            "//engine/src/flutter/impeller/display_list",  # surface_provider_include_metal && impeller_enable_metal
+            "//engine/src/flutter/impeller/playground",  # surface_provider_include_metal && impeller_enable_metal
+            "//engine/src/flutter/impeller/testing:screenshot",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_impeller_enable_metal": [
+            "//engine/src/flutter/impeller/testing:metal_screenshot",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "@platforms//os:macos": [
+            "//engine/src/flutter/impeller/testing:metal_screenshot",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
+        ],
+        "@platforms//os:ios": [
+            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "display_list_surface_provider",
+    testonly = True,
+    srcs = [
+        "dl_test_surface_provider.cc",
+        "skia/dl_test_surface_instance_skia.cc",
+    ] + select({
+        "@platforms//os:android": [],
+        "@platforms//os:ios": [],
+        "//conditions:default": [
+            "skia/dl_test_surface_provider_skia_software.cc",  # surface_provider_include_software
+            "skia/dl_test_surface_software.cc",  # surface_provider_include_software
+        ],
+    }) + select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//engine/src/flutter/impeller/tools:vulkan": [],
+        "//conditions:default": [
+            "dl_test_surface_gl.cc",  # surface_provider_include_gl
+            "dl_test_surface_provider_gl.cc",  # surface_provider_include_gl
+        ],
+    }) + select({
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
+            "impeller/dl_test_surface_instance_impeller.cc",  # surface_provider_include_metal && impeller_enable_metal
+            "impeller/dl_test_surface_provider_impeller.cc",  # surface_provider_include_metal && impeller_enable_metal
+            "impeller/dl_test_surface_provider_impeller_metal.cc",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "dl_test_surface_provider.h",
+        "skia/dl_test_surface_instance_skia.h",
+    ] + select({
+        "@platforms//os:android": [],
+        "@platforms//os:ios": [],
+        "//conditions:default": [
+            "skia/dl_test_surface_software.h",  # surface_provider_include_software
+        ],
+    }) + select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//engine/src/flutter/impeller/tools:vulkan": [],
+        "//conditions:default": [
+            "dl_test_surface_gl.h",  # surface_provider_include_gl
+        ],
+    }) + select({
+        "@platforms//os:macos": [
+            "skia/dl_test_surface_provider_skia_metal.h",  # surface_provider_include_metal
+        ],
+        "@platforms//os:ios": [
+            "skia/dl_test_surface_provider_skia_metal.h",  # surface_provider_include_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
+            "impeller/dl_test_surface_instance_impeller.h",  # surface_provider_include_metal && impeller_enable_metal
+            "impeller/dl_test_surface_provider_impeller.h",  # surface_provider_include_metal && impeller_enable_metal
+            "impeller/dl_test_surface_provider_impeller_metal.h",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/common/graphics
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_mac_or_is_ios_and_shell_enable_metal": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:metal
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = select({
+        "@platforms//os:android": [
+            "-landroid",  # is_android
+            "-lEGL",  # is_android
+            "-lGLESv2",  # is_android
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":surface_provider_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/testing:testing_lib",
+    ] + select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//engine/src/flutter/impeller/tools:vulkan": [],
+        "//conditions:default": [
+            "//engine/src/flutter/testing:opengl",  # surface_provider_include_gl
+        ],
+    }) + select({
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
+            "//engine/src/flutter/impeller/display_list",  # surface_provider_include_metal && impeller_enable_metal
+            "//engine/src/flutter/impeller/playground",  # surface_provider_include_metal && impeller_enable_metal
+            "//engine/src/flutter/impeller/testing:screenshot",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_impeller_enable_metal": [
+            "//engine/src/flutter/impeller/testing:metal_screenshot",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "@platforms//os:macos": [
+            "//engine/src/flutter/impeller/testing:metal_screenshot",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            ":display_list_surface_provider_objc",
+            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
+        ],
+        "@platforms//os:ios": [
+            ":display_list_surface_provider_objc",
+            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `is_mac || is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `(is_mac || is_ios) && impeller_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios_and_impeller_enable_metal",
+    match_all = [
+        ":when_is_mac_or_is_ios",
+        "//engine/src/flutter/impeller/tools:metal",
+    ],
+)
+
+# `(is_mac || is_ios) && shell_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios_and_shell_enable_metal",
+    match_all = [
+        ":when_is_mac_or_is_ios",
+        "//engine/src/flutter/shell:enable_metal",
+    ],
+)
+
+# `is_ios && impeller_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_impeller_enable_metal",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/impeller/tools:metal",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+exports_files(["dl_rendering_unittests.cc"])

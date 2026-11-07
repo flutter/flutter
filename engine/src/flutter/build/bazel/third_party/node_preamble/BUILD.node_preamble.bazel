@@ -1,0 +1,15 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @node_preamble: package:node_preamble (a DEPS tree), one of the
+# packages of the engine's pub workspace that its Dart tools and their tests
+# import; staged by dart_package_test at the path the package configuration
+# names it by (build_defs/dart/package_test.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)

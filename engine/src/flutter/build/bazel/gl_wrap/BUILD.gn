@@ -1,0 +1,54 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The root target of the Bazel-wrapped GN build of the GPU test backends:
+# ANGLE (GL on Vulkan) and SwiftShader (Vulkan on the CPU), with the Vulkan
+# loader ANGLE opens (see BUILD.bazel next to this file). Not part of the
+# engine's own GN build, which never references this directory: gn_build
+# runs GN with `--root-target=//flutter/build/bazel/gl_wrap`, so that only
+# this file, the targets below and their dependencies are loaded.
+
+group("gl_wrap") {
+  testonly = true
+  deps = [
+    ":angle",
+    ":swiftshader_static",
+    "//flutter/third_party/swiftshader",
+    "//flutter/third_party/vulkan-deps/vulkan-loader/src:libvulkan",
+
+    # The Khronos validation layer and its manifest: the Vulkan playground
+    # requires validation (impeller/playground/playground_impl.cc), and
+    # testing/run_tests.py points the loader at them (vulkan_validation_env).
+    "//third_party/vulkan_validation_layers:VkLayer_khronos_validation",
+    "//third_party/vulkan_validation_layers:vulkan_gen_json_files",
+  ]
+  if (is_mac) {
+    # ANGLE's shared libraries: the Impeller playground on a Mac opens
+    # libGLESv2.dylib by name for its OpenGLES variants (use_angle,
+    # playground_impl_gles.cc), where the other hosts link ANGLE in; the
+    # golden suite depends on both in the engine's GN build.
+    deps += [
+      "//flutter/third_party/angle:libEGL",
+      "//flutter/third_party/angle:libGLESv2",
+    ]
+  }
+}
+
+# The objects of this group's closure, minus the archive boundaries, make
+# the libangle.a archive.
+group("angle") {
+  deps = [
+    "//flutter/third_party/angle:libEGL_static",
+    "//flutter/third_party/angle:libGLESv2_static",
+  ]
+}
+
+# Likewise libvk_swiftshader_static.a: the driver as a static library (GN's
+# complete_static_lib), which the Vulkan surface's suite links directly
+# rather than opening the shared one. The same objects as the driver's.
+group("swiftshader_static") {
+  deps = [
+    "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
+  ]
+}

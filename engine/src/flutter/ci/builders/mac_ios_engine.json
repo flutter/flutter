@@ -8,7 +8,7 @@
         "definition files."
     ],
     "luci_flags": {
-      "upload_content_hash": true
+        "upload_content_hash": true
     },
     "builds": [
         {
@@ -19,7 +19,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -29,11 +30,13 @@
                 "debug",
                 "--simulator",
                 "--no-lto",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_debug_sim",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target the x64 iOS simulator.",
             "ninja": {
                 "config": "ci/ios_debug_sim"
@@ -48,7 +51,8 @@
                     "--simulator",
                     "--no-lto",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
@@ -65,7 +69,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -76,11 +81,13 @@
                 "--simulator",
                 "--simulator-cpu=arm64",
                 "--no-lto",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_debug_sim_arm64",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target the arm64 iOS simulator.",
             "ninja": {
                 "config": "ci/ios_debug_sim_arm64"
@@ -96,7 +103,8 @@
                     "--simulator-cpu=arm64",
                     "--no-lto",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
@@ -113,7 +121,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -121,11 +130,13 @@
                 "--ios",
                 "--runtime-mode",
                 "debug",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_debug",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_debug",
@@ -142,7 +153,8 @@
                     "--runtime-mode",
                     "debug",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
@@ -159,7 +171,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -167,11 +180,13 @@
                 "--ios",
                 "--runtime-mode",
                 "profile",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_profile",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_profile",
@@ -188,7 +203,8 @@
                     "--runtime-mode",
                     "profile",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
@@ -205,7 +221,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -213,11 +230,13 @@
                 "--ios",
                 "--runtime-mode",
                 "release",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_release",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_release",
@@ -234,7 +253,8 @@
                     "--runtime-mode",
                     "release",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
@@ -251,7 +271,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -262,11 +283,13 @@
                 "--simulator",
                 "--no-lto",
                 "--darwin-extension-safe",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_debug_sim_extension_safe",
+            "timeout": 240,
             "description": "Produces extension safe debug mode artifacts to target the x64 iOS simulator.",
             "ninja": {
                 "config": "ci/ios_debug_sim_extension_safe"
@@ -282,7 +305,8 @@
                     "--no-lto",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
@@ -299,7 +323,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -311,11 +336,13 @@
                 "--simulator-cpu=arm64",
                 "--no-lto",
                 "--darwin-extension-safe",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_debug_sim_arm64_extension_safe",
+            "timeout": 240,
             "description": "Produces extension safe debug mode artifacts to target the arm64 iOS simulator.",
             "ninja": {
                 "config": "ci/ios_debug_sim_arm64_extension_safe"
@@ -332,7 +359,8 @@
                     "--no-lto",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
@@ -349,7 +377,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -358,11 +387,13 @@
                 "--runtime-mode",
                 "debug",
                 "--darwin-extension-safe",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_debug_extension_safe",
+            "timeout": 240,
             "description": "Produces extension safe debug mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_debug_extension_safe",
@@ -380,7 +411,8 @@
                     "debug",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
@@ -397,7 +429,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -406,11 +439,13 @@
                 "--runtime-mode",
                 "profile",
                 "--darwin-extension-safe",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_profile_extension_safe",
+            "timeout": 240,
             "description": "Produces extension safe profile mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_profile_extension_safe",
@@ -428,7 +463,8 @@
                     "profile",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {
@@ -445,7 +481,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -454,11 +491,13 @@
                 "--runtime-mode",
                 "release",
                 "--darwin-extension-safe",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--xcode-symlinks"
+                "--xcode-symlinks",
+                "--bazel"
             ],
             "name": "ci/ios_release_extension_safe",
+            "timeout": 240,
             "description": "Produces extension safe release mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_release_extension_safe",
@@ -476,7 +515,8 @@
                     "release",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma"
+                    "--no-goma",
+                    "--bazel"
                 ]
             },
             "properties": {

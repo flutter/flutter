@@ -1,0 +1,126 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/tessellator/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "tessellator",
+    srcs = [
+        "path_tessellator.cc",
+        "tessellator.cc",
+    ],
+    hdrs = [
+        "path_tessellator.h",
+        "tessellator.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS,
+    linkstatic = True,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/core",
+        "//engine/src/flutter/impeller/geometry",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "tessellator_libtess",
+    srcs = ["tessellator_libtess.cc"],
+    hdrs = ["tessellator_libtess.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":tessellator",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/core",
+        "//engine/src/flutter/impeller/geometry",
+        "@libtess2",
+    ],
+    alwayslink = True,
+)
+
+flutter_shared_library(
+    name = "tessellator_shared",
+    srcs = [
+        "c/tessellator.cc",
+        "c/tessellator.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }),
+    interface_deps = ["//engine/src/flutter/impeller:impeller_public_config"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    output_name = "tessellator",
+    deps = [
+        ":tessellator_libtess",
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/core",
+        "//engine/src/flutter/impeller/geometry",
+        "@libtess2",
+    ],
+)
+
+cc_library(
+    name = "tessellator_unittests",
+    testonly = True,
+    srcs = [
+        "path_tessellator_unittests.cc",
+        "tessellator_playground_unittests.cc",
+        "tessellator_unittests.cc",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":tessellator_libtess",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/geometry:geometry_asserts",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)

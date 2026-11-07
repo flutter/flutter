@@ -29,7 +29,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -38,10 +39,12 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--gn-args=dart_dynamic_modules=true",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_arm64_ddm",
+            "timeout": 240,
             "description": "Produces experimental debug mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
             "ninja": {
                 "config": "ci/android_debug_arm64_ddm",
@@ -68,7 +71,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -77,10 +81,12 @@
                 "--android-cpu=x64",
                 "--no-lto",
                 "--gn-args=dart_dynamic_modules=true",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_x64_ddm",
+            "timeout": 240,
             "description": "Produces experimental debug mode artifacts to target x64 Android from a Linux host with dynamic modules enabled.",
             "ninja": {
                 "config": "ci/android_debug_x64_ddm",

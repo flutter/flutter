@@ -229,15 +229,30 @@ class FlutterPlugin : Plugin<Project> {
             if (!engineOut.isDirectory) {
                 throw GradleException("local-engine-out must point to a local engine build")
             }
-            localEngine = engineOut.name
-            localEngineSrcPath = engineOut.parentFile.parent
+            // GN's build directory is named for its build under <engine>/src/out,
+            // which the flutter tool takes as `--local-engine <name>` with the
+            // source as `--local-engine-src-path`; a Bazel build directory, known
+            // by its manifest, has no such name or place, and the tool takes its
+            // path as it is.
+            if (FlutterPluginUtils.isBazelLocalEngine(engineOut)) {
+                localEngine = engineOut.absolutePath
+                localEngineSrcPath = null
+            } else {
+                localEngine = engineOut.name
+                localEngineSrcPath = engineOut.parentFile.parent
+            }
 
             val engineHostOutPath: String = project.properties["local-engine-host-out"] as String
             val engineHostOut: File = project.file(engineHostOutPath)
             if (!engineHostOut.isDirectory) {
                 throw GradleException("local-engine-host-out must point to a local engine host build")
             }
-            localEngineHost = engineHostOut.name
+            localEngineHost =
+                if (FlutterPluginUtils.isBazelLocalEngine(engineHostOut)) {
+                    engineHostOut.absolutePath
+                } else {
+                    engineHostOut.name
+                }
         }
         FlutterPluginUtils.getAndroidExtension(project).buildTypes.all {
             addFlutterDependencies(this)

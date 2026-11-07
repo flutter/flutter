@@ -1,0 +1,9 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The desktop embeddings' rules: build_tools.bzl (the programs `flutter
+# build linux` runs -- cmake, ninja, pkg-config, the compilers -- from the
+# build, for the PATH of a test that runs the tool).
+
+package(default_visibility = ["//visibility:public"])

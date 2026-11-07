@@ -100,6 +100,53 @@ void enableDryRun() {
 
 bool? _dryRun;
 
+/// Whether the shards run their tests under Bazel where they can.
+///
+/// When `true`, the framework_tests and tool shards compile and run the tests
+/// that have Bazel targets with `bazelisk test --config=prebuilt_engine` --
+/// the repository's Bazel rules against the engine artifacts in bin/cache --
+/// in place of `flutter test` and `dart test`, and run the rest as they do
+/// otherwise. See bazel.dart.
+///
+/// On by default on a Linux or macOS host (`test.dart --no-bazel` turns it
+/// off; `--bazel` and a [kShardKey] or [kSubshardKey] value ending in
+/// [kBazelSuffix] turn it on): the hosts the prebuilt engine, bazelisk's
+/// release and the test rules are proven on. Off on Windows, and for a shard
+/// run with `REDUCED_TEST_SET` (the recipe's tag filter, which Bazel's
+/// targets cannot honor).
+bool get useBazel => _useBazel ?? _useBazelByDefault;
+bool? _useBazel;
+final bool _useBazelByDefault =
+    (Platform.isLinux || Platform.isMacOS) && Platform.environment['REDUCED_TEST_SET'] != 'True';
+
+/// Switches [useBazel] to `true`.
+void enableBazel() {
+  _useBazel = true;
+}
+
+/// Switches [useBazel] to `false` (`--no-bazel`).
+void disableBazel() {
+  _useBazel = false;
+}
+
+/// The suffix of a [kShardKey] or [kSubshardKey] value that asks for the
+/// shard under Bazel: `SUBSHARD=widgets_bazel` runs the widgets subshard as
+/// `--bazel` would, whatever the default. A .ci.yaml target can opt in
+/// that way: the flutter_drone recipe passes the names through as they are,
+/// and nothing else.
+const String kBazelSuffix = '_bazel';
+
+/// The shard or subshard name the environment variable [key] holds, with
+/// [kBazelSuffix] stripped (and [useBazel] enabled) when it ends in it.
+String? shardNameFromEnvironment(String key) {
+  final String? name = Platform.environment[key];
+  if (name == null || !name.endsWith(kBazelSuffix)) {
+    return name;
+  }
+  enableBazel();
+  return name.substring(0, name.length - kBazelSuffix.length);
+}
+
 const int kESC = 0x1B;
 const int kOpenSquareBracket = 0x5B;
 const int kCSIParameterRangeStart = 0x30;
@@ -392,6 +439,10 @@ String get shuffleSeed {
 // properly when overriding the local engine (for example, because some platform
 // dependent targets are only built on some engines).
 // See https://github.com/flutter/flutter/issues/72368
+/// package:test's exit code when no test ran: every file given was one the
+/// platform does not run (`@TestOn('browser')` under the VM).
+const int kNoTestsRanExitCode = 79;
+
 Future<void> runDartTest(
   String workingDirectory, {
   List<String>? testPaths,
@@ -406,6 +457,7 @@ Future<void> runDartTest(
   bool collectMetrics = false,
   List<String>? tags,
   bool runSkipped = false,
+  bool allowNoTests = false,
 }) async {
   // TODO(matanlurey): Consider Platform.numberOfProcessors instead.
   // See https://github.com/flutter/flutter/issues/161399.
@@ -454,10 +506,14 @@ Future<void> runDartTest(
     args,
     workingDirectory: workingDirectory,
     environment: environment,
+    acceptedExitCodes: allowNoTests ? const <int>{kNoTestsRanExitCode} : const <int>{},
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
   if (dryRun) {
+    return;
+  }
+  if (allowNoTests && !metricFile.existsSync()) {
     return;
   }
 
@@ -491,6 +547,10 @@ Future<void> runDartTest(
   metricFile.deleteSync();
 }
 
+/// `flutter test` in [workingDirectory]. With [allowNoTests], a run that
+/// finds no test is not a failure (package:test's [kNoTestsRanExitCode]):
+/// for a list of [tests] that may all be files the host skips whole, as a
+/// shard's remainder under `--bazel` can be (bazel.dart).
 Future<void> runFlutterTest(
   String workingDirectory, {
   String? script,
@@ -502,6 +562,7 @@ Future<void> runFlutterTest(
   List<String> tests = const <String>[],
   bool shuffleTests = true,
   bool fatalWarnings = true,
+  bool allowNoTests = false,
 }) async {
   assert(
     !printOutput || outputChecker == null,
@@ -554,6 +615,7 @@ Future<void> runFlutterTest(
     args,
     workingDirectory: workingDirectory,
     expectNonZeroExit: expectFailure,
+    acceptedExitCodes: allowNoTests ? const <int>{kNoTestsRanExitCode} : const <int>{},
     outputMode: outputMode,
     environment: environment,
   );
@@ -572,8 +634,8 @@ Future<void> runFlutterTest(
         workingDirectory: workingDirectory,
         expectFailure: expectFailure,
       );
+      metricFile.deleteSync();
     }
-    metricFile.deleteSync();
   }
 
   if (outputChecker != null) {
@@ -766,12 +828,12 @@ List<T> _selectSubshard<T>(
   String subshardKey,
   List<T> Function(int index, int total) select,
 ) {
-  final String? subshardName = Platform.environment[subshardKey];
+  final String? subshardName = shardNameFromEnvironment(subshardKey);
   if (subshardName == null) {
     print('$subshardKey environment variable is missing, skipping sharding');
     return tests;
   }
-  printProgress('$bold$subshardKey=$subshardName$reset');
+  printProgress('$bold$subshardKey=${Platform.environment[subshardKey]}$reset');
   final Match? match = RegExp(r'^(\d+)_(\d+)$').firstMatch(subshardName);
   if (match == null) {
     foundError(<String>[
@@ -797,14 +859,14 @@ Future<void> _runFromList(
   int positionInTaskName,
 ) async {
   try {
-    final String? item = Platform.environment[key];
+    final String? item = shardNameFromEnvironment(key);
     if (item == null) {
       for (final String currentItem in items.keys) {
         printProgress('$bold$key=$currentItem$reset');
         await items[currentItem]!();
       }
     } else {
-      printProgress('$bold$key=$item$reset');
+      printProgress('$bold$key=${Platform.environment[key]}$reset');
       if (!items.containsKey(item)) {
         foundError(<String>[
           '${red}Invalid $name: $item$reset',

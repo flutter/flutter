@@ -1,0 +1,71 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @angle: ANGLE's headers, and the tree as files.
+#
+# Impeller's GLES backend compiles against the Khronos headers ANGLE ships
+# (GLES2/gl2ext.h, GLES3/gl3.h and what they include) on every platform --
+# GN's gles_config names `//flutter/third_party/angle/include` as an include
+# directory, and the backend resolves the GL functions at run time, so no
+# ANGLE library is linked. ANGLE as a GL implementation (libEGL_static and
+# libGLESv2_static for the test surfaces) is built by its own GN rules
+# inside the wrapped build of //engine/src/flutter/build/bazel/gl_wrap, from
+# `build_tree`; a conversion of its 2,000-line BUILD.gn is a later phase.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# gles_config's include directory, as a library for its dependents; also
+# config("external_config") of ANGLE's BUILD.gn, the same directory.
+cc_library(
+    name = "headers",
+    hdrs = glob(["include/**/*.h"]),
+    includes = ["include"],
+)
+
+# config("gl_prototypes") of ANGLE's BUILD.gn: the Khronos headers declare
+# the GL and EGL entry points as functions (rather than as function pointer
+# types alone), for code that links ANGLE statically and calls them directly.
+cc_library(
+    name = "gl_prototypes",
+    defines = [
+        "GL_GLES_PROTOTYPES=1",
+        "EGL_EGL_PROTOTYPES=1",
+        "GL_GLEXT_PROTOTYPES",
+        "EGL_EGLEXT_PROTOTYPES",
+    ],
+)
+
+# For the GN targets that list ANGLE's headers among their sources.
+exports_files(glob(["include/**/*.h"]))
+
+# What the wrapped GN build of libEGL_static and libGLESv2_static reads of
+# the tree (measured on that build: GN's inputs, the compiler's dependency
+# output and the explicit inputs of the build graph), with slack. Of
+# third_party/, whose directories are mostly empty here (the engine's DEPS
+# does not fetch ANGLE's own copies of its dependencies), only rapidjson's
+# GN file is loaded.
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+            "*.bzl",
+            # The checkout's git state is no input of the build.
+            "**/.git/**",
+            # Nor the bytecode caches a GN build in the same checkout
+            # leaves beside the Python scripts it runs (Bazel's own runs
+            # write none: PYTHONDONTWRITEBYTECODE).
+            "**/__pycache__/**",
+            "doc/**",
+            "infra/**",
+            "samples/**",
+            "src/tests/**",
+            "third_party/**",
+        ],
+    ) + glob(["third_party/rapidjson/**"]),
+)

@@ -1,0 +1,91 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""The rules_fuchsia spike's own Bazel module (metric 0.7).
+
+A module of its own, beside the engine's rather than inside it (the user's
+call, 2026-10-20): the Fuchsia Bazel SDK rules bring rules_python, protobuf
+and rules_java into whichever module graph declares them (5 modules → 22,
+with the fetches and host probes those entail), and nothing in the engine's
+default build needs them. The engine is this module's dependency
+(`local_path_override` to the checkout root), so the spike builds with the
+engine's clang, its Python interpreter and its googletest, resolved through
+the engine's own module extensions; the engine's `.bazelignore` keeps this
+directory out of the engine's package space, as the engine's wildcard would
+otherwise load packages that need rules it does not declare.
+
+Build from this directory, with the same bazelisk and `.bazelversion`
+(bazelisk finds the checkout's):
+
+    cd engine/src/flutter/build/bazel/toolchains/fuchsia
+    bazelisk build //spike:spike_test_package
+
+See README.md.
+"""
+
+module(
+    name = "flutter_fuchsia_spike",
+    bazel_compatibility = [">=8.3.0"],
+)
+
+# The engine: its toolchains (registered by its MODULE.bazel, after this
+# module's), its settings and its synced dependencies.
+bazel_dep(name = "flutter")
+local_path_override(
+    module_name = "flutter",
+    path = "../../../../../../..",
+)
+
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_cc", version = "0.1.5")
+
+# rules_python, as rules_fuchsia's tools are py_binaries: declared for the
+# toolchain below (the version is the one the module graph resolves to
+# through rules_fuchsia).
+bazel_dep(name = "rules_python", version = "0.40.0")
+
+# The Fuchsia Bazel SDK rules, pinned to the IDK's own revision: DEPS syncs
+# fuchsia/sdk/core/linux-amd64 at an instance tagged
+# git_revision:1463df67e630ab75428ad5731ab1c24dd5dce1a9, and
+# fuchsia/development/rules_fuchsia carries the same tag; the two move
+# together. The URL is CIPD's download of that instance and the integrity
+# hash is the instance id's (base64url(sha256 + 0x02)), as for the other
+# CIPD downloads in the engine's extensions.bzl.
+bazel_dep(name = "rules_fuchsia", version = "0.0.1")
+archive_override(
+    module_name = "rules_fuchsia",
+    integrity = "sha256-jTRrmiGmw8DU5v/EDp7w+B6VRd11BAsGjU+gnXT1SEU=",
+    type = "zip",
+    urls = ["https://chrome-infra-packages.appspot.com/dl/fuchsia/development/rules_fuchsia/+/jTRrmiGmw8DU5v_EDp7w-B6VRd11BAsGjU-gnXT1SEUC"],
+)
+
+# The engine's synced dependencies this module reaches directly: the CIPD
+# CPython for the Python toolchain, googletest for the test.
+synced_deps = use_extension("@flutter//build_defs/repositories:extensions.bzl", "synced_deps")
+use_repo(synced_deps, "cpython3", "googletest")
+
+# The Python toolchain comes first so that it is the one resolved ahead of
+# rules_python's own (which download an interpreter); the engine's C/C++
+# toolchains follow from its MODULE.bazel.
+register_toolchains("//python:cpython3_toolchain")
+
+# @fuchsia_sdk is generated over the IDK gclient syncs (the same tree GN's
+# Fuchsia build reads, 13 GB, consumed in place); @fuchsia_clang is the
+# engine's own clang, which is Fuchsia's toolchain build and carries the
+# Fuchsia target runtimes. The rules take the paths relative to the main
+# module's directory: this one.
+fuchsia_sdk_ext = use_extension("@rules_fuchsia//fuchsia/workspace:fuchsia_sdk_repository.bzl", "fuchsia_sdk_ext")
+fuchsia_sdk_ext.local(path = "../../../../../third_party/fuchsia-sdk/sdk")
+use_repo(fuchsia_sdk_ext, "fuchsia_sdk", "fuchsia_sdk_toolchain_decl")
+
+fuchsia_clang_ext = use_extension("@rules_fuchsia//fuchsia/workspace:fuchsia_clang_repository.bzl", "fuchsia_clang_ext")
+fuchsia_clang_ext.local(local_path = "../../../../buildtools/linux-x64/clang")
+use_repo(fuchsia_clang_ext, "fuchsia_clang")
+
+# googletest's upstream build files name `@fuchsia_sdk//pkg/zx` and
+# `pkg/fdio` for Fuchsia (gtest's death tests spawn through fdio): the
+# repository is the engine's extension's, so it sees the engine module's
+# imports, not this module's -- inject_repo makes this module's @fuchsia_sdk
+# visible to the extension's repositories.
+inject_repo(synced_deps, "fuchsia_sdk")

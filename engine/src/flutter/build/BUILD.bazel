@@ -1,0 +1,70 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's additions to the GN build configuration: templates, and the
+# secondary source tree (//flutter/build/secondary) that supplies BUILD.gn
+# files for dependencies which ship none. Inputs of the rules that wrap a GN
+# build of part of the tree. The bazel/ subdirectory is its own package, as
+# are archives/ and dart/ (converted from their BUILD.gn files).
+
+# zip_bundle.gni's script, which build_defs/dist's zip_bundle runs the same
+# way, the Android embedding's Maven layout script (shell/platform/android/
+# BUILD.gn's embedding_jars and abi_jars), and the Info.plist copy of the
+# macOS frameworks (the embedder's FlutterEmbedder.framework, a gn_action).
+# The dart_pkg action's script is the dart package's (dart/tools/dart_pkg.py).
+exports_files([
+    "android_artifacts.py",
+    "copy_info_plist.py",
+    "zip.py",
+])
+
+# What a wrapped GN build reads here. The build configuration (config/, dart/,
+# the .gni files) is in whole, with slack: it is small and changes rarely. The
+# secondary tree is not: a wrapped build loads only the BUILD.gn files of its
+# own dependencies (for the Dart SDK: the C++ runtime, zlib, BoringSSL, ICU,
+# perfetto, gtest -- `gn gen --root-target=//flutter/build/bazel/dart_wrap`
+# reads 10 files under flutter/build, and ninja none; for the GPU test
+# backends, the allocator and jsoncpp besides), and listing the whole tree
+# would make every edit to flatbuffers' or harfbuzz's BUILD.gn rebuild the
+# Dart SDK from scratch. A wrapped build that starts reading from a new
+# directory fails with a missing file in the sandbox; the fix is a line here.
+filegroup(
+    name = "gn_files",
+    srcs = glob(
+        [
+            "*.gni",
+            "*.py",
+            "*.sh",
+            "config/**",
+            "esbuild/**",
+            "secondary/flutter/third_party/libcxxabi/**",
+            "secondary/flutter/third_party/llvm_libc/**",
+            "secondary/flutter/third_party/vulkan_memory_allocator/**",
+            "secondary/testing/**",
+            "secondary/third_party/boringssl/**",
+            # The forwarder zlib's Android branch names (cpu_features'
+            # NDK compatibility shim), for the Android Dart wrap.
+            "secondary/third_party/cpu_features/**",
+            "secondary/third_party/dart/**",
+            "secondary/third_party/icu/**",
+            "secondary/third_party/jsoncpp/**",
+            "secondary/third_party/perfetto/**",
+            "secondary/third_party/vulkan_validation_layers/**",
+            "secondary/third_party/zlib/**",
+        ],
+        exclude = [
+            # Bazel's own files are not GN inputs.
+            "**/BUILD.bazel",
+            "**/*.bzl",
+            "**/__pycache__/**",
+            "**/*.pyc",
+        ],
+    ) + [
+        # Subpackages the glob does not enter.
+        "//engine/src/flutter/build/archives:gn_files",
+        "//engine/src/flutter/build/dart:gn_files",
+        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:gn_files",
+    ],
+    visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
+)

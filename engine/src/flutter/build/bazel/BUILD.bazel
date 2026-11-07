@@ -1,0 +1,432 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine build's settings and configuration targets: the build-wide
+# config_settings the generated BUILD files select() on and the flags the
+# builders set (.bazelrc, ci/builders/configs.bazelrc). The rules are in
+# //build_defs; the toolchains, the wrapped GN builds and the third-party
+# overlays are in the subdirectories here.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+load("@host_platform//:host.bzl", "HOST_CPU_CONSTRAINT", "HOST_OS")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# GN's `is_debug` is "unoptimized", which Bazel spells -c dbg or -c fastbuild;
+# `optimized` is the complement (tools/gn without --unoptimized) and
+# `unoptimized` is `is_debug` itself, for the generated files that select()
+# on it.
+config_setting(
+    name = "optimized",
+    values = {"compilation_mode": "opt"},
+)
+
+config_setting(
+    name = "dbg",
+    values = {"compilation_mode": "dbg"},
+)
+
+config_setting(
+    name = "fastbuild",
+    values = {"compilation_mode": "fastbuild"},
+)
+
+selects.config_setting_group(
+    name = "unoptimized",
+    match_any = [
+        ":dbg",
+        ":fastbuild",
+    ],
+)
+
+# `is_debug && flutter_runtime_mode == "debug"`: an unoptimized build of the
+# debug runtime mode, where flutter_snapshot's JIT application snapshot
+# enables asserts (build/dart/internal/flutter_snapshot.gni).
+selects.config_setting_group(
+    name = "unoptimized_debug",
+    match_all = [
+        ":unoptimized",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# The complements of BUILDCONFIG.gn's OS predicates. `!is_wasm` on its own
+# is a select() with the wasm key empty, but inside a conjunction
+# (`impeller_enable_opengles && !is_wasm`) a config_setting_group needs a
+# setting that *holds* when the OS is another one -- which, the predicates
+# being mutually exclusive, is any of the other seven. The converter names
+# these for the negated terms of the groups it generates.
+_OS_CONSTRAINTS = {
+    "android": "@platforms//os:android",
+    "fuchsia": "@platforms//os:fuchsia",
+    "ios": "@platforms//os:ios",
+    "linux": "@platforms//os:linux",
+    "mac": "@platforms//os:macos",
+    "qnx": "@platforms//os:qnx",
+    "wasm": "@platforms//os:emscripten",
+    "win": "@platforms//os:windows",
+}
+
+[
+    selects.config_setting_group(
+        name = "not_" + os,
+        match_any = [
+            constraint
+            for other, constraint in _OS_CONSTRAINTS.items()
+            if other != os
+        ],
+    )
+    for os in _OS_CONSTRAINTS
+]
+
+# The complements of BUILDCONFIG.gn's CPU names (target_cpu, current_cpu),
+# the same way: `target_cpu != "x64"` inside a disjunction or conjunction
+# (skcms's `target_cpu != "x64" || target_os == "android"`) needs a setting
+# that holds when the CPU is another one. The names are GN's.
+_CPU_CONSTRAINTS = {
+    "arm": "@platforms//cpu:armv7",
+    "arm64": "@platforms//cpu:aarch64",
+    "mips": "@platforms//cpu:mips64",
+    "ppc": "@platforms//cpu:ppc",
+    "riscv64": "@platforms//cpu:riscv64",
+    "wasm": "@platforms//cpu:wasm32",
+    "x64": "@platforms//cpu:x86_64",
+    "x86": "@platforms//cpu:x86_32",
+}
+
+[
+    selects.config_setting_group(
+        name = "not_cpu_" + cpu,
+        match_any = [
+            constraint
+            for other, constraint in _CPU_CONSTRAINTS.items()
+            if other != cpu
+        ],
+    )
+    for cpu in _CPU_CONSTRAINTS
+]
+
+# iOS's environment, a device or the simulator: GN's use_ios_simulator
+# (darwin_sdk.gni; tools/gn's --simulator), which picks the SDK, the
+# deployment-target flag and the Dart VM's configuration. A constraint of
+# the iOS platforms (build/bazel/toolchains: ios_arm64 is a device's,
+# ios_sim_arm64 and ios_sim_x64 the simulator's), so that the toolchains
+# resolve by it; the settings are what the converter maps
+# `use_ios_simulator` to.
+constraint_setting(
+    name = "ios_environment",
+    default_constraint_value = ":ios_device",
+)
+
+constraint_value(
+    name = "ios_device",
+    constraint_setting = ":ios_environment",
+)
+
+constraint_value(
+    name = "ios_simulator",
+    constraint_setting = ":ios_environment",
+)
+
+config_setting(
+    name = "ios_simulator_enabled",
+    constraint_values = [
+        "@platforms//os:ios",
+        ":ios_simulator",
+    ],
+)
+
+config_setting(
+    name = "ios_device_enabled",
+    constraint_values = [
+        "@platforms//os:ios",
+        ":ios_device",
+    ],
+)
+
+# The iOS device's arm64 build, tools/gn's default --ios-cpu: a
+# specialization of @platforms//cpu:aarch64 for the build directory's name
+# (build_defs/config/checkout_view.bzl), which names the simulator's arm64
+# build and not the device's.
+config_setting(
+    name = "ios_device_arm64",
+    constraint_values = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+        ":ios_device",
+    ],
+)
+
+# `!use_ios_simulator` for the denied term of a conjunction: a device, or
+# not iOS at all (GN reads the predicate under is_ios alone).
+selects.config_setting_group(
+    name = "ios_simulator_disabled",
+    match_any = [
+        ":ios_device_enabled",
+        ":not_ios",
+    ],
+)
+
+# GN's `current_toolchain == host_toolchain`, which the engine's files test
+# for "the host's own build" (testing.gni's enable_unittests, the shell's
+# tester, glfw's shell), read in Bazel's terms: the target OS is one a host
+# runs and the target CPU is the host's (x64, the converter's host_cpu) --
+# a cross-compile for the host's own OS and another CPU, the Linux arm64
+# build, is GN's clang_arm64 toolchain and not the host's, so its tests and
+# host-only targets drop out as GN's do. The converter names the predicate
+# is_host_toolchain (gn_eval's hostToolchainPredicate); the complement is
+# the OSes only a target runs, or a CPU other than the host's.
+_HOST_OSES = [
+    "linux",
+    "mac",
+    "win",
+]
+
+# The CPU of the host that runs the build (@host_platform, laid by the
+# synced_deps extension from the machine): x86_64 on this Linux host,
+# aarch64 on an Apple-silicon Mac.
+_HOST_CPU = HOST_CPU_CONSTRAINT
+
+# The other CPUs the engine builds for (BUILDCONFIG.gn's target_cpu values,
+# as the converter's CPU settings spell them; not mips or ppc, which
+# nothing builds for).
+_OTHER_CPUS = [
+    constraint
+    for cpu, constraint in _CPU_CONSTRAINTS.items()
+    if cpu not in ("mips", "ppc") and constraint != _HOST_CPU
+]
+
+selects.config_setting_group(
+    name = "host_os",
+    match_any = [_OS_CONSTRAINTS[os] for os in _HOST_OSES],
+)
+
+selects.config_setting_group(
+    name = "host_toolchain",
+    match_all = [
+        ":host_os",
+        _HOST_CPU,
+    ],
+)
+
+selects.config_setting_group(
+    name = "not_host_toolchain",
+    match_any = [
+        constraint
+        for os, constraint in _OS_CONSTRAINTS.items()
+        if os not in _HOST_OSES
+    ] + _OTHER_CPUS,
+)
+
+# GN's `host_os == "mac"` and the rest: the OS of the machine that builds,
+# whatever the target (the text tests' fixtures take a Mac's emoji font).
+# Known when this file loads (@host_platform), it is a setting that holds
+# or not for the whole build: a flag whose default is the host's name,
+# which no builder sets, and a config_setting per host OS GN names. The
+# converter's comparisonSettings name these for `host_os` comparisons
+# where a file's assumptions make host_os a cased value (its hostOsCases).
+string_flag(
+    name = "host_os_name",
+    build_setting_default = HOST_OS,
+)
+
+[
+    config_setting(
+        name = "host_os_is_" + os,
+        flag_values = {":host_os_name": os},
+    )
+    for os in _HOST_OSES
+]
+
+# `host_os != "mac"` and the rest: any of the other hosts (the converter's
+# comparisonNegatedSettings, for the branch a `host_os == ...` overrides).
+[
+    selects.config_setting_group(
+        name = "host_os_is_not_" + os,
+        match_any = [":host_os_is_" + other for other in _HOST_OSES if other != os],
+    )
+    for os in _HOST_OSES
+]
+
+# BUILDCONFIG.gn's use_flutter_cxx, `is_clang && (is_linux || is_android ||
+# is_mac || is_ios)`: where the engine builds and links its own libc++
+# (toolchains:cxx_runtime selects on it); elsewhere the toolchain's serves.
+_FLUTTER_CXX_OSES = [
+    "android",
+    "ios",
+    "linux",
+    "mac",
+]
+
+selects.config_setting_group(
+    name = "flutter_cxx",
+    match_any = [_OS_CONSTRAINTS[os] for os in _FLUTTER_CXX_OSES],
+)
+
+selects.config_setting_group(
+    name = "not_flutter_cxx",
+    match_any = [
+        constraint
+        for os, constraint in _OS_CONSTRAINTS.items()
+        if os not in _FLUTTER_CXX_OSES
+    ],
+)
+
+# GN's is_asan (build/config/sanitizers/sanitizers.gni; tools/gn --asan,
+# which Linux's host_debug_unopt test builder passes): AddressSanitizer on
+# every compile and link. The toolchain's `asan` feature selects on it
+# (toolchains/BUILD.bazel), the wrapped GN builds pass it on as is_asan, and
+# the test launchers export CI's sanitizer environment under it
+# (sanitizers.bzl). Nothing else: the engine's GN links no sanitizer options
+# of its own (//build/config/sanitizers:deps comes only with BUILDCONFIG.gn's
+# component() template, which no engine target uses), so the runtime's
+# defaults stand there as here, qualified by that environment.
+bool_flag(
+    name = "asan",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "asan_enabled",
+    flag_values = {":asan": "True"},
+)
+
+config_setting(
+    name = "asan_disabled",
+    flag_values = {":asan": "False"},
+)
+
+# GN's embedder_for_target (shell/platform/embedder/embedder.gni; tools/gn
+# --embedder-for-target): the embedder API's shared library and header are
+# built for the target as well as for the host, for embedders of their own
+# on a platform the engine has an embedding for. ci/android_embedder_debug_unopt
+# is the one Linux builder that sets it (flutter_engine for Android arm,
+# unoptimized); every other build leaves it off, as tools/gn does.
+bool_flag(
+    name = "embedder_for_target",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "embedder_for_target_enabled",
+    flag_values = {":embedder_for_target": "True"},
+)
+
+config_setting(
+    name = "embedder_for_target_disabled",
+    flag_values = {":embedder_for_target": "False"},
+)
+
+# GN's enable_lto (tools/gn: on unless --no-lto, and never in an unoptimized
+# build): link-time optimization, -flto on every compile and link of an
+# optimized build (//build/config/compiler:optimize). The Android AOT
+# builders are the ones that build with it; every other Linux builder says
+# --no-lto. Off by default, as the developer's configurations have it.
+bool_flag(
+    name = "lto",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "lto_enabled",
+    flag_values = {":lto": "True"},
+)
+
+# The wrapped GN builds' compiles on Flutter's RBE workers through reclient
+# (build_defs/gn/gn_build.bzl's rbe: @reclient and @reclient_cfgs laid under
+# the GN root, GN's use_rbe, gn_build.py's reproxy around ninja), what the
+# recipe did around a GN build on a bot. Off by default: bazel_ci.py turns
+# it on with --config=rbe (a Linux bot, or --bazel-rbe), and gives the proxy
+# its credentials -- a bot's emulated metadata server through the file
+# bazel_ci.py writes beside the caches (wrap_rbe_env.json; the action sees
+# none of the task's environment); a developer's sandbox through
+# --action_env=GOOGLE_APPLICATION_CREDENTIALS=<gcloud's ADC file> (not HOME:
+# the Dart SDK's own `dart compile` would write telemetry into it). Without
+# either the wrap goes on locally and says so.
+bool_flag(
+    name = "wrap_rbe",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "wrap_rbe_enabled",
+    flag_values = {":wrap_rbe": "True"},
+)
+
+# The Apple toolchains' C/C++/Objective-C compiles on Flutter's RBE workers,
+# which are Linux x64 (toolchains/macos_toolchain.bzl, the root .bazelrc's
+# build:rbe_mac): the compiler tool becomes a wrapper that runs the Mac's
+# clang on a Mac and the Linux x64 clang of the same version where it
+# executes on a worker (buildtools/linux-x64/clang, which a Mac checkout
+# syncs for exactly this -- GN's reclient build does the same through
+# build/rbe/remote_wrapper.sh), the Linux clang joins the compiler's inputs,
+# and the Xcode SDK view already reaches every compile as a directory
+# input. Links, archives, lipo, dsymutil, codesign and Swift stay on the
+# Mac (build:rbe_mac's strategies). Off by default; bazel_ci.py turns it on
+# with --config=rbe_mac on a Mac bot.
+bool_flag(
+    name = "apple_remote_compiles",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "apple_remote_compiles_enabled",
+    flag_values = {":apple_remote_compiles": "True"},
+)
+
+# tools/gn's stripped_symbols: on unless --no-stripped, which only the
+# developer's local_engine.json configurations pass (and off for Android,
+# where GN strips elsewhere). GN's Linux toolchains write every executable
+# to exe.unstripped/ and `llvm-objcopy --strip-all` it into the build root
+# regardless, and do the same for a shared library through lib.unstripped/
+# under the argument. The Bazel build's binaries in bazel-bin stay as linked
+# -- its tests run them, and GN keeps the unstripped copies to be run under
+# a debugger -- and the stripping happens where GN's layout is produced:
+# build_directory_aspect (build_directory.bzl) strips what an install or an
+# archive ships, executables always and shared libraries under this flag.
+bool_flag(
+    name = "stripped",
+    build_setting_default = True,
+)
+
+# For the select()s over stripped_symbols (the Android embedding's jar packs
+# lib.stripped/libflutter.so under it, libflutter.so otherwise).
+config_setting(
+    name = "stripped_enabled",
+    flag_values = {":stripped": "True"},
+)
+
+config_setting(
+    name = "stripped_disabled",
+    flag_values = {":stripped": "False"},
+)
+
+# //build/config/ios:ios_application_extension: the iOS embedding is built
+# app-extension-safe (-fapplication-extension on its Objective-C compiles
+# and its links). A GN config of flags alone, which the converter inlines
+# as copts on the target listing it and carries through this library's
+# linkopts to its link (configEffects).
+cc_library(
+    name = "ios_application_extension",
+    linkopts = ["-fapplication-extension"],
+    target_compatible_with = ["@platforms//os:ios"],
+)
+
+# bazel_ci.py's unit tests (ci.md: `tools/gn --bazel` and run_tests.py on a
+# CI bot): the match of a build's flags against builds.json, the build.ninja
+# and bazel.json written. The real table is read too, so the test runs in
+# the checkout like tools/gn's.
+checkout_script_test(
+    name = "bazel_ci_test",
+    srcs = [
+        "bazel_ci.py",
+        "bazel_ci_test.py",
+        "builds.json",
+    ],
+    in_checkout = True,
+    script = "bazel_ci_test.py",
+)

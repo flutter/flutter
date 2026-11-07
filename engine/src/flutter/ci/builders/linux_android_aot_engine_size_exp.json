@@ -31,7 +31,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -42,10 +43,12 @@
                 "--android-cpu",
                 "arm64",
                 "--no-dart-secure-socket",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_release_arm64_size_exp",
+            "timeout": 240,
             "description": "Produces experimental release mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
             "ninja": {
                 "config": "ci/android_release_arm64_size_exp",
@@ -85,7 +88,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -94,10 +98,12 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--no-dart-secure-socket",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_arm64_size_exp",
+            "timeout": 240,
             "description": "Produces experimental debug mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
             "ninja": {
                 "config": "ci/android_debug_arm64_size_exp",

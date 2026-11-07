@@ -119,6 +119,7 @@ source_set("common") {
     "snapshot_controller_skia.cc",
     "snapshot_controller_skia.h",
     "snapshot_surface_producer.h",
+    "switch_defs.h",
     "switches.cc",
     "switches.h",
     "thread_host.cc",

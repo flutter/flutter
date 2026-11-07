@@ -1,0 +1,57 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @abseil_cpp_tree: the abseil-cpp tree as files (its
+# Chromium-style GN files included), for the wrapped GN build of the GPU
+# test backends (//engine/src/flutter/build/bazel/gl_wrap), whose ANGLE
+# depends on abseil. Bazel's own abseil is @abseil-cpp, upstream's rules
+# over the same tree; the wrap's archive stops at abseil, which the facades
+# take from there.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Abseil's headers under the engine's root-relative spelling,
+# "third_party/abseil-cpp/absl/<path>.h", which GN's root include directory
+# (-I../..) resolves beside the canonical "absl/<path>.h" that abseil's own
+# Bazel build exposes: a view of the same files under that prefix, so that
+# no engine include changes for Bazel. The converter lists it beside every
+# @abseil-cpp dependency (bazel_mapping's rootIncludeViews).
+cc_library(
+    name = "root_includes",
+    hdrs = glob(
+        [
+            "absl/**/*.h",
+            "absl/**/*.inc",
+        ],
+        exclude = [
+            "**/*_test.h",
+            "**/*_testing.h",
+            "**/testdata/**",
+        ],
+    ),
+    include_prefix = "third_party/abseil-cpp",
+)
+
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+            "*.bzl",
+            # The checkout's git state is no input of the build.
+            "**/.git/**",
+            # Nor the bytecode caches a GN build in the same checkout
+            # leaves beside the Python scripts it runs (Bazel's own runs
+            # write none: PYTHONDONTWRITEBYTECODE).
+            "**/__pycache__/**",
+            "**/*_test.cc",
+            "**/*_benchmark.cc",
+            "absl/time/internal/cctz/testdata/**",
+        ],
+    ),
+)

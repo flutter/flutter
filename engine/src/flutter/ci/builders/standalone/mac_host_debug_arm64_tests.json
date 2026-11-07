@@ -7,7 +7,8 @@
     ],
     "gclient_variables": {
         "download_android_deps": false,
-        "use_rbe": true
+        "use_rbe": true,
+        "download_bazelisk": true
     },
     "gn": [
         "--target-dir",
@@ -20,9 +21,10 @@
         "--prebuilt-dart-sdk",
         "--build-embedder-examples",
         "--use-glfw-swiftshader",
-        "--rbe",
+        "--no-rbe",
         "--no-goma",
-        "--xcode-symlinks"
+        "--xcode-symlinks",
+        "--bazel"
     ],
     "name": "ci/host_debug_arm64_tests",
     "description": "Produces debug mode arm64 macOS host-side tooling and builds host-side unit tests for arm64 macOS.",

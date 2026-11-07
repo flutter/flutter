@@ -1,4 +1,12 @@
 {
+    "_comment": [
+        "The builds run under Bazel (--bazel among the tools/gn flags; flutter/build/bazel/ci.md):",
+        "`ninja -C out/<dir>` runs the build's Bazel install target instead of GN, and run_tests.py",
+        "runs each --type as the Bazel suites of the build (ci/builders/BUILD.bazel). Not yet:",
+        "ci/host_debug_no_prebuilt_dart_sdk (the Dart SDK from source: too slow for a cold bot),",
+        "and the malioc diff (GN's Mali offline compiler analysis has no Bazel counterpart).",
+        "Bazel's actions run on the bot (--no-rbe, use_rbe false); a remote cache is for later."
+    ],
     "builds": [
         {
             "drone_dimensions": [
@@ -7,7 +15,8 @@
                 "cores=32"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -18,8 +27,9 @@
                 "--prebuilt-dart-sdk",
                 "--asan",
                 "--dart-debug",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/host_debug_unopt",
             "description": "Builds a debug mode unopt Linux engine. Builds and runs many tests and lints.",
@@ -97,12 +107,16 @@
                     "script": "flutter/ci/check_build_configs.sh"
                 },
                 {
+                    "name": "Check generated Bazel files",
+                    "script": "flutter/ci/check_generated_bazel_files.sh"
+                },
+                {
                     "name": "Tests of tools/gn",
                     "language": "python3",
                     "script": "flutter/tools/gn_test.py"
                 }
             ],
-            "timeout": 120
+            "timeout": 240
         },
         {
             "archives": [],
@@ -113,7 +127,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--runtime-mode",
@@ -122,11 +137,13 @@
                 "--prebuilt-dart-sdk",
                 "--target-dir",
                 "ci/host_debug_unopt_impeller_tests",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--use-glfw-swiftshader"
+                "--use-glfw-swiftshader",
+                "--bazel"
             ],
             "name": "ci/host_debug_unopt_impeller_tests",
+            "timeout": 240,
             "description": "Builds a debug mode unopt Linux engine with swiftshader. Runs Impeller unit tests.",
             "ninja": {
                 "config": "ci/host_debug_unopt_impeller_tests",
@@ -170,7 +187,8 @@
             ],
             "dependencies": [],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--android",
@@ -178,10 +196,12 @@
                 "--target-dir",
                 "ci/android_embedder_debug_unopt",
                 "--unoptimized",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_embedder_debug_unopt",
+            "timeout": 240,
             "description": "Builds embedder artifacts targeting 32-bit arm Android.",
             "ninja": {
                 "config": "ci/android_embedder_debug_unopt",
@@ -197,7 +217,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -206,10 +227,12 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--enable-vulkan-validation-layers",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_arm64_validation_layers",
+            "timeout": 240,
             "description": "Builds a debug mode engine targeting 64-bit arm Android with Vulkan validation layers.",
             "ninja": {
                 "config": "ci/android_debug_arm64_validation_layers",
@@ -231,17 +254,20 @@
                 }
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
                 "ci/android_debug_unopt",
                 "--android",
                 "--unoptimized",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_unopt",
+            "timeout": 240,
             "description": "Builds a debug mode unopt engine targeting 32-bit arm Android. Runs host-side Java unit tests and malioc.",
             "ninja": {
                 "config": "ci/android_debug_unopt",
@@ -264,17 +290,49 @@
                         "--android-variant",
                         "ci/android_debug_unopt"
                     ]
-                },
+                }
+            ]
+        },
+        {
+            "cas_archive": false,
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "use_rbe": true,
+                "download_bazelisk": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/host_release_licenses",
+                "--runtime-mode",
+                "release",
+                "--no-lto",
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
+            ],
+            "name": "ci/host_release_licenses",
+            "timeout": 240,
+            "description": "Runs the license_cpp script.",
+            "ninja": {
+                "config": "ci/host_release_licenses",
+                "targets": [
+                    "flutter/tools/licenses_cpp",
+                    "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+                ]
+            },
+            "tests": [
                 {
                     "language": "python3",
-                    "name": "malioc diff",
-                    "script": "flutter/impeller/tools/malioc_diff.py",
+                    "name": "Run license_cpp unittests",
+                    "script": "flutter/testing/run_tests.py",
                     "parameters": [
-                        "--before-relative-to-src",
-                        "flutter/impeller/tools/malioc.json",
-                        "--after-relative-to-src",
-                        "out/ci/android_debug_unopt/gen/malioc",
-                        "--print-diff"
+                        "--variant",
+                        "ci/host_release_licenses",
+                        "--type",
+                        "binaries"
                     ]
                 }
             ]
@@ -286,41 +344,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
-            },
-            "gn": [
-                "--target-dir",
-                "ci/host_release_licenses",
-                "--runtime-mode",
-                "release",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
-            ],
-            "name": "ci/host_release_licenses",
-            "description": "Runs the license_cpp script.",
-            "ninja": {
-                "config": "ci/host_release_licenses",
-                "targets": [
-                    "flutter/tools/licenses_cpp",
-                    "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
-                ]
-            },
-            "tests": [
-                {
-                    "name": "Run license_cpp unittests",
-                    "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"
-                }
-            ]
-        },
-        {
-            "cas_archive": false,
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Linux"
-            ],
-            "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -328,10 +353,12 @@
                 "--android",
                 "--android-cpu=arm",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_test",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target 32-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug_test",

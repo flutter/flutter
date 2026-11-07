@@ -1,0 +1,126 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @clang_linux_x64, @clang_mac_arm64 and @clang_mac_x64:
+# the CIPD `fuchsia/third_party/clang` package pinned in DEPS
+# (`clang_version`), the host's. Only the pieces a C/C++ toolchain needs
+# are exposed, grouped the way `cc_toolchain` consumes them.
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(glob(["bin/*"]))
+
+# Nearly every tool in `bin/` (clang, clang++, lld, llvm-ar, llvm-objcopy, ...)
+# is a symlink to this multicall binary, so it belongs to every tool group.
+_MULTICALL = ["bin/llvm"]
+
+# The targets the toolchains build for, each with its compiler-rt, libunwind
+# and crt objects under these two directories: the Linux x64 host's own and
+# the arm64 cross build's (toolchains:linux_arm64), and Apple's, which the
+# package keeps under one `darwin` directory for every CPU. A package holds
+# the runtimes of its host's targets and not the others' (the Mac's has no
+# Linux ones), so the globs may come up empty.
+_TARGETS = [
+    "x86_64-unknown-linux-gnu",
+    "aarch64-unknown-linux-gnu",
+    "darwin",
+]
+
+_RUNTIME_PATTERNS = [
+    pattern
+    for target in _TARGETS
+    for pattern in [
+        "lib/clang/*/lib/" + target + "/**",
+        "lib/" + target + "/**",
+    ]
+]
+
+# A file in the builtin include directory, lib/clang/<version>/include; the
+# toolchain takes its directory as a builtin include directory (found by
+# glob, since the version changes with every roll).
+filegroup(
+    name = "resource_include_marker",
+    srcs = glob(["lib/clang/*/include/stddef.h"]),
+)
+
+# The compiler driver plus everything it reads implicitly: the resource
+# directory (builtin headers, compiler-rt, sanitizer ignorelists) and the
+# per-target runtime directory (libunwind, the bundled libc++). The builtin
+# headers are one directory input (a glob of directories, since the version
+# in the path changes with every roll) rather than ~200 files per action;
+# the root .bazelrc enables sound directory tracking.
+filegroup(
+    name = "compiler_files",
+    srcs = [
+        "bin/clang",
+        "bin/clang++",
+    ] + _MULTICALL + glob(
+        ["lib/clang/*/include"],
+        exclude_directories = 0,
+    ) + glob(
+        ["lib/clang/*/share/**"] + _RUNTIME_PATTERNS,
+        allow_empty = True,
+    ),
+)
+
+# The linkers: ld.lld for ELF, ld64.lld for Mach-O (the driver's default on
+# a Mac, as GN links there), each a symlink into the multicall binary.
+filegroup(
+    name = "linker_files",
+    srcs = [
+        "bin/clang",
+        "bin/clang++",
+        "bin/llvm-ar",
+    ] + _MULTICALL + glob(
+        [
+            "bin/ld.lld",
+            "bin/ld64.lld",
+            "bin/lld",
+        ] + _RUNTIME_PATTERNS,
+        allow_empty = True,
+    ),
+)
+
+# llvm-ar, and for the Mac llvm-libtool-darwin (Bazel's archive action
+# speaks libtool there).
+filegroup(
+    name = "ar_files",
+    srcs = ["bin/llvm-ar"] + _MULTICALL + glob(
+        ["bin/llvm-libtool-*"],
+        allow_empty = True,
+    ),
+)
+
+filegroup(
+    name = "objcopy_files",
+    srcs = ["bin/llvm-objcopy"] + _MULTICALL,
+)
+
+# llvm-nm, for the forbidden-symbol check of the shared libraries
+# (build_defs/testing/native_symbols.bzl).
+filegroup(
+    name = "nm_files",
+    srcs = ["bin/llvm-nm"] + _MULTICALL,
+)
+
+filegroup(
+    name = "strip_files",
+    srcs = [
+        "bin/llvm-objcopy",
+        "bin/llvm-strip",
+    ] + _MULTICALL,
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        "bin/llvm-symbolizer",
+        ":ar_files",
+        ":compiler_files",
+        ":linker_files",
+        ":nm_files",
+        ":objcopy_files",
+        ":strip_files",
+    ],
+)

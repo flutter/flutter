@@ -1,0 +1,52 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @vulkan_deps_tree: the vulkan-deps directory -- the
+# Khronos trees (headers, loader, tools, SPIRV-Tools, SPIRV-Headers, glslang,
+# ...) as DEPS lays them out -- as files, for the wrapped GN build of the GPU
+# test backends (//engine/src/flutter/build/bazel/gl_wrap). The repositories
+# Bazel builds from the same trees (@vulkan-headers, @spirv-tools, ...) are
+# separate, over the subdirectories.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The Vulkan headers under the engine's root-relative spelling: the Android
+# swapchain includes
+# "third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_enums.hpp"
+# through //flutter:config's `include_dirs = [ ".." ]` (GN's //flutter as an
+# include root), where the Linux code includes <vulkan/vulkan.h> through
+# @vulkan-headers' own include directory. A dependency on @vulkan-headers
+# brings this view along (the converter's rootIncludeViews).
+cc_library(
+    name = "root_includes",
+    hdrs = glob([
+        "vulkan-headers/src/include/**/*.h",
+        "vulkan-headers/src/include/**/*.hpp",
+    ]),
+    include_prefix = "third_party/vulkan-deps",
+)
+
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+            "*.bzl",
+            # The checkout's git state is no input of the build.
+            "**/.git/**",
+            # Nor the bytecode caches a GN build in the same checkout
+            # leaves beside the Python scripts it runs (Bazel's own runs
+            # write none: PYTHONDONTWRITEBYTECODE).
+            "**/__pycache__/**",
+            "**/test/**",
+            "**/tests/**",
+            "**/docs/**",
+            "spirv-cross/**",
+        ],
+    ),
+)

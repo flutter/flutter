@@ -4,6 +4,7 @@
 
 #include "flutter/impeller/geometry/geometry_asserts.h"
 #include "flutter/impeller/renderer/testing/mocks.h"
+#include "flutter/testing/sk_data_fixtures.h"
 #include "flutter/testing/testing.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/playground/playground_test.h"
