@@ -73,6 +73,7 @@ class WebServerDeviceTestRunner {
   /// `IPv4 port not available. Exiting...` (or `IPv6 ...` on macOS) and exits.
   /// Each new attempt gets a fresh OS-assigned port.
   Future<int> _startChromeDriverProcess() async {
+    // TODO(mdebbar): Remove the retry once https://issues.chromium.org/issues/582923020 is fixed.
     const maxAttempts = 3;
     for (var attempt = 1; ; attempt++) {
       try {
