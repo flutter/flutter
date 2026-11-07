@@ -90,9 +90,12 @@ class EngineColorFilterImageFilter extends EngineImageFilter {
     if (cached != null) {
       return cached;
     }
-    final BackendImageFilter backendFilter = _cacheAndAttach(
-      renderer.createColorFilterImageFilter(filter: colorFilter.backendFilter),
+    final BackendImageFilter backendFilter = renderer.createColorFilterImageFilter(
+      filter: colorFilter.backendFilter,
     );
+    // The backend filter is cached on, and must live as long as, the color
+    // filter rather than this throwaway wrapper.
+    _imageFilterFinalizer.attach(colorFilter, backendFilter, detach: backendFilter);
     _colorFilterImageFilters[colorFilter] = backendFilter;
     return backendFilter;
   }
