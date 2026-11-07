@@ -471,20 +471,15 @@ flutter_objc_library(
     copts = FLUTTER_COPTS + ["-fvisibility=default"] + select({
         ":when_is_ios_and_use_ios_simulator": [
             "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
-            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
-            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
         ],
         "//conditions:default": [],
     }) + select({
         ":when_is_ios_and_not_use_ios_simulator": [
             "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
-            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
-            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
         ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
-    tags = ["no-remote-exec"],
     target_compatible_with = select({
         ":when_is_ios_and_enable_ios_unittests": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -494,7 +489,17 @@ flutter_objc_library(
         "//engine/src:include_root",
         "//engine/src/flutter/fml",
         "//engine/src/flutter/shell/platform/darwin/common:test_config",
-    ],
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
@@ -507,21 +512,16 @@ cc_library(
     copts = FLUTTER_COPTS + ["-fvisibility=default"] + select({
         ":when_is_ios_and_use_ios_simulator": [
             "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
-            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
-            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
         ],
         "//conditions:default": [],
     }) + select({
         ":when_is_ios_and_not_use_ios_simulator": [
             "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
-            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
-            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
         ],
         "//conditions:default": [],
     }),
     implementation_deps = ["//engine/src/flutter/shell/platform/darwin/common:test_config"],
     local_defines = FLUTTER_LOCAL_DEFINES,
-    tags = ["no-remote-exec"],
     target_compatible_with = select({
         ":when_is_ios_and_enable_ios_unittests": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -531,7 +531,17 @@ cc_library(
         ":flutter_engine_bindings_test_helpers_objc",
         "//engine/src:include_root",
         "//engine/src/flutter/fml",
-    ],
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
@@ -740,26 +750,17 @@ flutter_objc_library(
     }) + select({
         ":when_is_ios_and_use_ios_simulator": [
             "-mios-simulator-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
             "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
-            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
-            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
         ],
         "//conditions:default": [],
     }) + select({
         ":when_is_ios_and_not_use_ios_simulator": [
             "-miphoneos-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
             "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
-            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
-            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
         ],
         "//conditions:default": [],
     }) + FLUTTER_CFLAGS_OBJC,
     local_defines = FLUTTER_LOCAL_DEFINES,
-    tags = ["no-remote-exec"],
     target_compatible_with = select({
         ":when_is_ios_and_enable_ios_unittests": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -789,7 +790,17 @@ flutter_objc_library(
         "//engine/src/flutter/txt",
         "@ocmock//:ocmock_shared_import",
         "@rapidjson",
-    ],
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
@@ -845,21 +856,13 @@ flutter_shared_library(
     }) + select({
         ":when_is_ios_and_use_ios_simulator": [
             "-mios-simulator-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
             "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
-            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
-            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
         ],
         "//conditions:default": [],
     }) + select({
         ":when_is_ios_and_not_use_ios_simulator": [
             "-miphoneos-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
             "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
-            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
-            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
         ],
         "//conditions:default": [],
     }),
@@ -875,7 +878,6 @@ flutter_shared_library(
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     output_name = "ios_test_flutter",
-    tags = ["no-remote-exec"],
     target_compatible_with = select({
         ":when_is_ios_and_enable_ios_unittests": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -906,7 +908,17 @@ flutter_shared_library(
         "//engine/src/flutter/txt",
         "@ocmock//:ocmock_shared_import",
         "@rapidjson",
-    ],
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # The Objective-C(++) sources of flutter_engine_bindings, which cc_library takes none of

@@ -468,11 +468,8 @@ cc_test(
         "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:swift_testing_main
         "-fvisibility=default",
         "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:swift_testing_main
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:swift_testing_main
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:swift_testing_main
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
-    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -486,6 +483,7 @@ cc_test(
         "//engine/src/flutter/shell/platform/darwin/common:swift_testing_main",
         "//engine/src/flutter/shell/platform/darwin/common:test_config",
         "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
+        "@macos_sdk//:macos_developer",  # from //flutter/shell/platform/darwin/common:swift_testing_main
     ],
 )
 
@@ -531,8 +529,6 @@ flutter_objc_library(
         "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "-Wno-unguarded-availability",  # from //flutter/shell/platform/darwin/graphics
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -541,7 +537,6 @@ flutter_objc_library(
         "//conditions:default": [],
     }) + MACOS_CFLAGS_OBJC,
     local_defines = FLUTTER_LOCAL_DEFINES,
-    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -574,6 +569,7 @@ flutter_objc_library(
         "//engine/src/flutter/testing:dart",
         "//engine/src/flutter/testing:skia",
         "//engine/src/flutter/testing:testing_lib",
+        "@macos_sdk//:macos_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "@ocmock",
     ],
     alwayslink = True,
@@ -595,8 +591,6 @@ cc_test(
         "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "-Wno-unguarded-availability",  # from //flutter/shell/platform/darwin/graphics
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -607,7 +601,6 @@ cc_test(
     flaky = True,
     linkopts = ["-ObjC"],
     local_defines = FLUTTER_LOCAL_DEFINES,
-    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -641,6 +634,7 @@ cc_test(
         "//engine/src/flutter/testing:dart",
         "//engine/src/flutter/testing:skia",
         "//engine/src/flutter/testing:testing_lib",
+        "@macos_sdk//:macos_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "@ocmock",
     ],
 )
