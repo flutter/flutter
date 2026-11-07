@@ -290,6 +290,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     String? target,
     EnvironmentType environmentType = EnvironmentType.physical,
     String? deviceId,
+    String? destination,
     bool isWatch = false,
   }) async {
     if (!existsSync()) {
@@ -323,6 +324,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         sdk: sdk,
         target: target,
         deviceId: deviceId,
+        destination: destination,
       ),
     );
   }

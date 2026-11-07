@@ -68,6 +68,8 @@ class CommandArguments {
     );
     this.workspacePath = this.validatedStringArgument('--workspace-path', parsedArguments['--workspace-path']);
     this.targetDestinationId = this.validatedStringArgument('--device-id', parsedArguments['--device-id']);
+    this.targetDestinationPlatform = this.validatedStringArgument('--device-platform', parsedArguments['--device-platform']);
+    this.targetDestinationArchitecture = this.validatedStringArgument('--device-architecture', parsedArguments['--device-architecture']);
     this.targetSchemeName = this.validatedStringArgument('--scheme', parsedArguments['--scheme']);
     this.skipBuilding = this.validatedBoolArgument('--skip-building', parsedArguments['--skip-building']);
     this.launchArguments = this.validatedJsonArgument('--launch-args', parsedArguments['--launch-args']);
@@ -119,6 +121,8 @@ class CommandArguments {
         '--project-name': true,
         '--expected-configuration-build-dir': false,
         '--device-id': true,
+        '--device-platform': false,
+        '--device-architecture': false,
         '--scheme': true,
         '--skip-building': true,
         '--launch-args': true,
@@ -378,6 +382,8 @@ function debugApp(xcode, args) {
     targetWorkspace,
     args.targetDestinationId,
     args.verbose,
+    args.targetDestinationPlatform,
+    args.targetDestinationArchitecture,
   );
   if (destinationResult.error != null) {
     return new FunctionResult(null, destinationResult.error)
@@ -441,17 +447,21 @@ function debugApp(xcode, args) {
  *     Scripting class).
  * @param {!string} deviceId
  * @param {?bool=} verbose Defaults to false.
+ * @param {?string=} platform Optional Xcode platform identifier.
+ * @param {?string=} architecture Optional destination architecture.
  * @returns {!FunctionResult} Return either a `RunDestination` (Xcode Mac
  *     Scripting class) or null as the `result`.
  */
-function getTargetDestination(targetWorkspace, deviceId, verbose = false) {
+function getTargetDestination(targetWorkspace, deviceId, verbose = false, platform = null, architecture = null) {
   try {
     for (let destination of targetWorkspace.runDestinations()) {
       const device = destination.device();
       if (verbose === true && device != null) {
         console.log(`Device: ${device.name()} (${device.deviceIdentifier()})`);
       }
-      if (device != null && device.deviceIdentifier() === deviceId) {
+      if (device != null && device.deviceIdentifier() === deviceId &&
+          (platform == null || destination.platform() === platform) &&
+          (architecture == null || destination.architecture() === architecture)) {
         return new FunctionResult(destination);
       }
     }

@@ -2121,6 +2121,7 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     String applicationId,
     Device device, {
     int? deviceVmservicePort,
+    String? deviceName,
     int? hostVmservicePort,
     bool throwOnError = true,
     Duration timeout = Duration.zero,
@@ -2166,6 +2167,10 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     required TemplateRenderer templateRenderer,
     Directory? projectDestination,
     bool verboseLogging = false,
+    BuildMode buildMode = BuildMode.debug,
+    bool copyApplicationBundle = false,
+    bool debuggerEnabled = true,
+    String? lldbInitFile,
   }) async {
     if (expectedBundlePath != null) {
       expect(expectedBundlePath, deviceBundlePath);
@@ -2181,6 +2186,8 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     required XcodeDebugProject project,
     required String deviceId,
     required List<String> launchArguments,
+    String? devicePlatform,
+    String? deviceArchitecture,
   }) async {
     if (expectedProject != null) {
       expect(project.scheme, expectedProject!.scheme);
