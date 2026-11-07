@@ -7,6 +7,7 @@
 #include "flutter/shell/platform/windows/testing/mock_direct_manipulation.h"
 #include "flutter/shell/platform/windows/testing/mock_text_input_manager.h"
 #include "flutter/shell/platform/windows/testing/mock_window.h"
+#include "flutter/shell/platform/windows/testing/mock_window_binding_handler_delegate.h"
 #include "flutter/shell/platform/windows/testing/mock_windows_proc_table.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -15,6 +16,7 @@ using testing::_;
 using testing::Eq;
 using testing::InSequence;
 using testing::Invoke;
+using testing::NiceMock;
 using testing::Return;
 
 namespace flutter {
@@ -209,6 +211,38 @@ TEST(MockWindow, OnImeCompositionClearChange) {
   // send an IME_COMPOSITION event that contains both the result string and the
   // composition string.
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, 0);
+}
+
+TEST(MockWindow, TsfSuppressesImm32CompositionMessages) {
+  MockWindow window;
+  NiceMock<MockWindowBindingHandlerDelegate> delegate;
+  window.SetView(&delegate);
+
+  EXPECT_CALL(delegate, IsTsfImeActive()).WillRepeatedly(Return(true));
+  EXPECT_CALL(window, OnImeStartComposition(_, _, _)).Times(0);
+  EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(0);
+  EXPECT_CALL(window, OnImeEndComposition(_, _, _)).Times(0);
+
+  EXPECT_EQ(window.InjectWindowMessage(WM_IME_STARTCOMPOSITION, 0, 0), TRUE);
+  EXPECT_EQ(window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR),
+            TRUE);
+  EXPECT_EQ(window.InjectWindowMessage(WM_IME_ENDCOMPOSITION, 0, 0), TRUE);
+}
+
+TEST(MockWindow, TsfSuppressesImm32SetContext) {
+  MockWindow window;
+  NiceMock<MockWindowBindingHandlerDelegate> delegate;
+  window.SetView(&delegate);
+  const LPARAM lparam =
+      ISC_SHOWUICOMPOSITIONWINDOW | ISC_SHOWUIALLCANDIDATEWINDOW;
+
+  EXPECT_CALL(delegate, IsTsfImeActive()).WillOnce(Return(true));
+  EXPECT_CALL(window, OnImeSetContext(_, _, _)).Times(0);
+  EXPECT_CALL(window,
+              Win32DefWindowProc(_, WM_IME_SETCONTEXT, _,
+                                 lparam & ~ISC_SHOWUICOMPOSITIONWINDOW));
+
+  window.InjectWindowMessage(WM_IME_SETCONTEXT, TRUE, lparam);
 }
 
 TEST(MockWindow, HorizontalScroll) {
