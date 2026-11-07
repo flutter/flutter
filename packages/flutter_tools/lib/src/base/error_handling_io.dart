@@ -1177,6 +1177,88 @@ T _runSync<T>(
 ///
 /// See also:
 ///   * [ErrorHandlingFileSystem], for a similar file system strategy.
+/// `cmd.exe` metacharacters that can break out of argument parsing and inject
+/// additional commands when a batch file (`.bat`/`.cmd`) is executed on Windows,
+/// or when a command is run through a shell on Windows.
+///
+/// This is Flutter's exposure to the "BatBadBut" class of vulnerability
+/// (CVE-2024-24576 and related). On Windows, launching a `.bat`/`.cmd` file
+/// implicitly runs it through `cmd.exe`, but `dart:io` escapes process
+/// arguments only for the C runtime's `CommandLineToArgvW` rules, never for
+/// `cmd.exe`. As a result these characters in an argument are interpreted by
+/// `cmd.exe` as command syntax rather than as literal data.
+bool _isWindowsBatchFile(String executable) {
+  // Strip surrounding quotes/whitespace first: a quoted path such as
+  // `"C:\dir with space\gradlew.bat"` ends in `"`, which would otherwise hide
+  // the `.bat`/`.cmd` extension and bypass this guard.
+  final String sanitized = executable.trim().replaceAll('"', '');
+  final String lower = sanitized.toLowerCase();
+  return lower.endsWith('.bat') || lower.endsWith('.cmd');
+}
+
+/// Fails closed if [command] would pass `cmd.exe` metacharacters into a Windows
+/// batch file or a Windows shell invocation.
+///
+/// Flutter's own batch invocations (`gradlew.bat`, `apkanalyzer.bat`,
+/// `sdkmanager.bat`, `avdmanager.bat`, `flutter.bat`) only ever receive file
+/// paths, numeric values and base64-encoded blobs as arguments, none of which
+/// legitimately contain these characters. The check therefore has effectively
+/// no false positives while closing the injection vector until the underlying
+/// `dart:io` behavior is fixed upstream.
+void _checkForWindowsBatchInjection(
+  List<Object> command, {
+  required Platform platform,
+  required bool runInShell,
+}) {
+  if (!platform.isWindows || command.isEmpty) {
+    return;
+  }
+  final executable = command.first.toString();
+  // The implicit `cmd.exe` only happens for batch targets, or when the caller
+  // asked for a shell (which on Windows is `cmd.exe`).
+  if (!runInShell && !_isWindowsBatchFile(executable)) {
+    return;
+  }
+  for (final Object argument in command.skip(1)) {
+    final value = argument.toString();
+    // All cmd.exe metacharacters of concern are single ASCII code units, so
+    // iterate code units with a switch to avoid rune decoding and per-character
+    // String allocations on this hot path.
+    for (var i = 0; i < value.length; i++) {
+      final int codeUnit = value.codeUnitAt(i);
+      switch (codeUnit) {
+        case 0x0a: // \n
+        case 0x0d: // \r
+        case 0x21: // !
+        case 0x22: // "
+        case 0x25: // %
+        case 0x26: // &
+        case 0x28: // (
+        case 0x29: // )
+        case 0x3c: // <
+        case 0x3e: // >
+        case 0x5e: // ^
+        case 0x7c: // |
+          final String shown = switch (codeUnit) {
+            0x0a => r'\n',
+            0x0d => r'\r',
+            _ => String.fromCharCode(codeUnit),
+          };
+          throwToolExit(
+            'Refusing to run "$executable": the argument "$value" contains a '
+            'character ("$shown") that is unsafe to pass to a Windows batch file '
+            'or shell.\n'
+            'On Windows, batch files run through cmd.exe, which would interpret '
+            'this character as a command rather than as text — a command-injection '
+            'risk (the "BatBadBut" issue, CVE-2024-24576). Remove the character '
+            'from the offending input (for example a project path, --target, or '
+            'build name) and try again.',
+          );
+      }
+    }
+  }
+}
+
 class ErrorHandlingProcessManager extends ProcessManager {
   ErrorHandlingProcessManager({
     required this._delegate,
@@ -1269,6 +1351,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding? stdoutEncoding = io.systemEncoding,
     Encoding? stderrEncoding = io.systemEncoding,
   }) {
+    _checkForWindowsBatchInjection(command, platform: _platform, runInShell: runInShell);
     return _run(
       () {
         return _delegate.run(
@@ -1295,6 +1378,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
     bool runInShell = false,
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
   }) {
+    _checkForWindowsBatchInjection(command, platform: _platform, runInShell: runInShell);
     return _run(
       () {
         return _delegate.start(
@@ -1321,6 +1405,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding? stdoutEncoding = io.systemEncoding,
     Encoding? stderrEncoding = io.systemEncoding,
   }) {
+    _checkForWindowsBatchInjection(command, platform: _platform, runInShell: runInShell);
     return _runSync(
       () {
         return _delegate.runSync(
