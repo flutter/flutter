@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Locale;
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -86,6 +88,82 @@ void main() {
       );
 
       expect(client2.currentTextEditingValue, text2);
+    });
+
+    test('AutofillScope.attach forwards every TextInputConfiguration field', () async {
+      // Regression test for https://github.com/flutter/flutter/issues/192340.
+      final client = FakeAutofillClient(const TextEditingValue(text: 'test'));
+
+      // Every field is deliberately set to a non-default value. If a field is
+      // not forwarded by the autofill scope, it falls back to its constructor
+      // default and the comparison below fails. When adding a new field to
+      // TextInputConfiguration, add it here too.
+      client.textInputConfiguration = TextInputConfiguration(
+        viewId: 7,
+        inputType: TextInputType.emailAddress,
+        readOnly: true,
+        obscureText: true,
+        autocorrect: false,
+        // Non-default given obscureText: true, which would otherwise disable both.
+        smartDashesType: SmartDashesType.enabled,
+        smartQuotesType: SmartQuotesType.enabled,
+        enableSuggestions: false,
+        enableInteractiveSelection: false,
+        actionLabel: 'action',
+        inputAction: TextInputAction.next,
+        keyboardAppearance: Brightness.dark,
+        textCapitalization: TextCapitalization.words,
+        autofillConfiguration: AutofillConfiguration(
+          uniqueIdentifier: client.autofillId,
+          autofillHints: const <String>[AutofillHints.email],
+          currentEditingValue: client.currentTextEditingValue,
+        ),
+        enableIMEPersonalizedLearning: false,
+        allowedMimeTypes: const <String>['image/gif', 'image/png'],
+        enableDeltaModel: true,
+        hintLocales: const <Locale>[Locale('ja', 'JP')],
+        enableInlinePrediction: true,
+      );
+
+      scope.register(client);
+      client.currentAutofillScope = scope;
+
+      scope.attach(client, client.textInputConfiguration);
+
+      final Map<String, dynamic> expectedConfiguration = client.textInputConfiguration.toJson();
+      expectedConfiguration['fields'] = <Map<String, dynamic>>[
+        client.textInputConfiguration.toJson(),
+      ];
+
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, expectedConfiguration]),
+      ]);
+    });
+
+    test('AutofillScope.attach sends the payload from the client configuration toJson', () async {
+      final client = FakeAutofillClient(const TextEditingValue(text: 'test'));
+      client.textInputConfiguration = ExtraFieldTextInputConfiguration(
+        autofillConfiguration: AutofillConfiguration(
+          uniqueIdentifier: client.autofillId,
+          autofillHints: const <String>[AutofillHints.email],
+          currentEditingValue: client.currentTextEditingValue,
+        ),
+      );
+
+      scope.register(client);
+      client.currentAutofillScope = scope;
+
+      scope.attach(client, client.textInputConfiguration);
+
+      final Map<String, dynamic> expectedConfiguration = client.textInputConfiguration.toJson();
+      expect(expectedConfiguration['extraField'], 'extraValue');
+      expectedConfiguration['fields'] = <Map<String, dynamic>>[
+        client.textInputConfiguration.toJson(),
+      ];
+
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, expectedConfiguration]),
+      ]);
     });
   });
 
@@ -257,5 +335,14 @@ class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {
 
   void register(AutofillClient client) {
     clients.putIfAbsent(client.autofillId, () => client);
+  }
+}
+
+class ExtraFieldTextInputConfiguration extends TextInputConfiguration {
+  const ExtraFieldTextInputConfiguration({super.autofillConfiguration});
+
+  @override
+  Map<String, dynamic> toJson() {
+    return super.toJson()..['extraField'] = 'extraValue';
   }
 }
