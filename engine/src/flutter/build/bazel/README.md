@@ -1273,7 +1273,11 @@ the tool's integration and desktop shards (11-03): **74 of 74 pass** in
 `darwin-x64` universal engine directory, the arm64 Dart SDK): animation,
 dev/bots and the general shard **303 of 303** in 5 min 51, the widgets tree
 **390 of 390** in 3 min 05, and `test.dart --bazel` of the general shard
-end to end -- the repository rules fetched without a complaint.
+end to end -- the repository rules fetched without a complaint. The two
+platform shards on the same Mac from `bin/cache` alone (11-07, after
+`--android --ios`): the android shard's 23 Android targets in 23 min and
+its two filtered files (556, 559: T85/T86), and `//:apple_tool_tests`
+**10 of 10** in 15 min 46 (560: T90).
 
 ### `dev/bots/test.dart`: the shards under Bazel
 
@@ -2922,7 +2926,7 @@ set, per host, with what each takes from a warm cache on a 24-core machine:
 | Linux | `bazel test --config=android_debug_test //engine/src/flutter/ci/builders:android_debug_test_tests` | the embedding's 87 Robolectric classes, under an Android configuration | 45 min (the Android debug engine's build included); 36 min at 464 |
 | Mac | `bazel test //engine/src/flutter/...` | the engine on a Mac: the macOS shell and its suites, the Metal backends, the golden suite, Chrome's web suites | 2 h 20 |
 | Mac | `bazel test //:framework_tests //:tool_tests //:dart_tests` | as Linux's, on a Mac -- **one suite at a time on a 1 TB Mac**: the three in one invocation lay more than 500 runfiles trees at once (`--jobs=200`), 160 GB of APFS metadata and links, which emptied a 208 GB disk (11-06); `//:framework_tests` alone, then the others, or `--jobs=32` | 67 min |
-| Mac | `bazel test //:apple_tool_tests` | `flutter build macos\|ios`, SwiftPM and the Xcode migrations through the tool against the universal frameworks | 15 min once the frameworks are built |
+| Mac | `bazel test //:apple_tool_tests` | `flutter build macos\|ios`, SwiftPM and the Xcode migrations through the tool against the universal frameworks, and the two Android files' macOS/iOS cases (`apple_cases_shard`) | 15 min once the frameworks are built; **10/10 in 15:46 at 560 under `--config=prebuilt_engine`** (11-07, Apple silicon; swift_package_manager_test 7:14, ios_content_validation_test 3:46 the long ones) |
 | Mac | `for c in mac_android_profile mac_android_profile_arm64 mac_android_profile_x64 mac_android_release mac_android_release_arm64 mac_android_release_x64; do bazel run --config=$c //engine/src/flutter/ci/builders:$c -- /tmp/$c; done` | Android from a Mac host (Q32): the six Android AOT builders' installs -- the universal gen_snapshot in `darwin-x64.zip`, lib/snapshot's blobs | 3 min each once the Dart wrap's halves are built (12 min the first) |
 
 A change to the tool tests' facsimile (`packages/flutter_tools/BUILD.bazel`'s
