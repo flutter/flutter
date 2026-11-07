@@ -354,6 +354,7 @@ class RenderParagraph extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
     ui.Hyphens hyphens = ui.Hyphens.manual,
+    String? hyphenCharacter,
     List<RenderBox>? children,
     this._selectionColor,
     SelectionRegistrar? registrar,
@@ -379,6 +380,7 @@ class RenderParagraph extends RenderBox
          textWidthBasis: textWidthBasis,
          textHeightBehavior: textHeightBehavior,
          hyphens: hyphens,
+         hyphenCharacter: hyphenCharacter,
        ) {
     addAll(children);
     this.registrar = registrar;
@@ -410,7 +412,8 @@ class RenderParagraph extends RenderBox
       ..strutStyle = _textPainter.strutStyle
       ..textWidthBasis = _textPainter.textWidthBasis
       ..textHeightBehavior = _textPainter.textHeightBehavior
-      ..hyphens = _textPainter.hyphens;
+      ..hyphens = _textPainter.hyphens
+      ..hyphenCharacter = _textPainter.hyphenCharacter;
   }
 
   List<AttributedString>? _cachedAttributedLabels;
@@ -774,6 +777,19 @@ class RenderParagraph extends RenderBox
     // The rendered hyphen doesn't change where lines break, but it makes its
     // line wider, which changes the paragraph's longest line and so its size
     // with TextWidthBasis.longestLine. Hence markNeedsLayout, not markNeedsPaint.
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.painting.textPainter.hyphenCharacter}
+  String? get hyphenCharacter => _textPainter.hyphenCharacter;
+
+  set hyphenCharacter(String? value) {
+    if (_textPainter.hyphenCharacter == value) {
+      return;
+    }
+    _textPainter.hyphenCharacter = value;
+    _overflowShader = null;
+    // Line breaking leaves room for the string, so it can change where lines break.
     markNeedsLayout();
   }
 

@@ -1829,6 +1829,35 @@ void main() {
     expect(paragraph.hyphens, Hyphens.hidden);
   });
 
+  testWidgets('Text forwards hyphenCharacter to RenderParagraph', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text('hy\u00ADphenation', hyphenCharacter: '\u2010'),
+      ),
+    );
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    expect(paragraph.hyphenCharacter, '\u2010');
+  });
+
+  testWidgets('Selectable Text forwards hyphenCharacter to RenderParagraph', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          focusNode: focusNode,
+          child: const Text('hy\u00ADphenation', hyphenCharacter: '\u2010'),
+        ),
+      ),
+    );
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    expect(paragraph.hyphenCharacter, '\u2010');
+  });
+
   testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (
     WidgetTester tester,
   ) async {

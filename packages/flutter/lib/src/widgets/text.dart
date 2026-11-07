@@ -527,6 +527,7 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.hyphens,
+    this.hyphenCharacter,
     this.selectionColor,
   }) : textSpan = null,
        assert(
@@ -565,6 +566,7 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.hyphens,
+    this.hyphenCharacter,
     this.selectionColor,
   }) : data = null,
        assert(
@@ -709,6 +711,9 @@ class Text extends StatelessWidget {
   /// If null, [Hyphens.manual] is used.
   final ui.Hyphens? hyphens;
 
+  /// {@macro flutter.painting.textPainter.hyphenCharacter}
+  final String? hyphenCharacter;
+
   /// The color to use when painting the selection.
   ///
   /// This is ignored if [SelectionContainer.maybeOf] returns null
@@ -777,6 +782,7 @@ class Text extends StatelessWidget {
               defaultTextStyle.textHeightBehavior ??
               DefaultTextHeightBehavior.maybeOf(context),
           hyphens: hyphens ?? ui.Hyphens.manual,
+          hyphenCharacter: hyphenCharacter,
           selectionColor:
               selectionColor ??
               DefaultSelectionStyle.of(context).selectionColor ??
@@ -801,6 +807,7 @@ class Text extends StatelessWidget {
             defaultTextStyle.textHeightBehavior ??
             DefaultTextHeightBehavior.maybeOf(context),
         hyphens: hyphens ?? ui.Hyphens.manual,
+        hyphenCharacter: hyphenCharacter,
         selectionColor:
             selectionColor ??
             DefaultSelectionStyle.of(context).selectionColor ??
@@ -855,6 +862,7 @@ class Text extends StatelessWidget {
       ),
     );
     properties.add(EnumProperty<ui.Hyphens>('hyphens', hyphens, defaultValue: null));
+    properties.add(StringProperty('hyphenCharacter', hyphenCharacter, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }
@@ -878,6 +886,7 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.textWidthBasis,
     this.textHeightBehavior,
     required this.hyphens,
+    this.hyphenCharacter,
     required this.selectionColor,
   });
 
@@ -893,6 +902,7 @@ class _SelectableTextContainer extends StatefulWidget {
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
   final ui.Hyphens hyphens;
+  final String? hyphenCharacter;
   final Color selectionColor;
 
   @override
@@ -934,6 +944,7 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
         textWidthBasis: widget.textWidthBasis,
         textHeightBehavior: widget.textHeightBehavior,
         hyphens: widget.hyphens,
+        hyphenCharacter: widget.hyphenCharacter,
         selectionColor: widget.selectionColor,
         text: widget.text,
       ),
@@ -956,6 +967,7 @@ class _RichText extends StatelessWidget {
     required this.textWidthBasis,
     this.textHeightBehavior,
     required this.hyphens,
+    this.hyphenCharacter,
     required this.selectionColor,
   });
 
@@ -972,6 +984,7 @@ class _RichText extends StatelessWidget {
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
   final ui.Hyphens hyphens;
+  final String? hyphenCharacter;
   final Color selectionColor;
 
   @override
@@ -990,6 +1003,7 @@ class _RichText extends StatelessWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       hyphens: hyphens,
+      hyphenCharacter: hyphenCharacter,
       selectionRegistrar: registrar,
       selectionColor: selectionColor,
       text: text,
