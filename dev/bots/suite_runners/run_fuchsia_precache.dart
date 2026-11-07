@@ -14,10 +14,9 @@ Future<void> fuchsiaPrecacheRunner() async {
   ], workingDirectory: flutterRoot);
   await runCommand('flutter', const <String>[
     'precache',
+    '--all-platforms',
     '--flutter_runner',
     '--fuchsia',
-    '--no-android',
-    '--no-ios',
     '--force',
   ], workingDirectory: flutterRoot);
 }
