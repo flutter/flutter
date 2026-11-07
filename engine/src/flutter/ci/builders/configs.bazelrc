@@ -116,11 +116,11 @@ build:linux_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:run
 build:host_release_benchmarks --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release --//engine/src/flutter/build/bazel:lto
 
 # linux_clang_tidy.json: ci/android_debug_arm64_clang_tidy
-#   --android --android-cpu arm64 --no-lto --target-dir ci/android_debug_arm64_clang_tidy --rbe --no-goma
+#   --android --android-cpu arm64 --no-lto --target-dir ci/android_debug_arm64_clang_tidy --no-rbe --no-goma --bazel
 build:android_debug_arm64_clang_tidy --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_clang_tidy.json: ci/host_debug_clang_tidy
-#   --runtime-mode debug --prebuilt-dart-sdk --no-lto --target-dir ci/host_debug_clang_tidy --rbe --no-goma
+#   --runtime-mode debug --prebuilt-dart-sdk --no-lto --target-dir ci/host_debug_clang_tidy --no-rbe --no-goma --bazel
 build:host_debug_clang_tidy --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug
 
 # linux_clangd.json: ci/linux_unopt_debug_no_rbe

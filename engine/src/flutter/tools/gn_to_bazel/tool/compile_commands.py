@@ -20,6 +20,24 @@ resolve as they do for the build.
     python3 engine/src/flutter/tools/gn_to_bazel/tool/compile_commands.py \\
         --out=engine/src/out/host_debug_unopt_bazel --config=host_debug_unopt
 
+For a build directory tools/gn --bazel wrote (bazel.json in it; see
+build/bazel/bazel_ci.py), `--build-directory=<dir>` stands in for `--out`,
+`--config` and `--bazel`: the `bazel info` and the aquery run as the
+directory's description says -- its bazelisk and startup options,
+`--config=ci`, its build options, configuration and options
+(bazel_ci.described_command) -- on the same server, in the same output
+base and configuration as the build itself, so that the action graph
+queried is the one built (a transition's output directory is named by a
+hash of its options). `--build`, with it, builds the targets whose compiles
+the database lists (their labels in `compile_commands.targets` beside it),
+with every C/C++ source and header among their outputs downloaded:
+clang-tidy opens the generated headers a command includes, and a build
+whose actions ran remotely (--config=rbe) keeps its intermediate outputs
+remote by default (--remote_download_toplevel).
+
+    python3 engine/src/flutter/tools/gn_to_bazel/tool/compile_commands.py \\
+        --build-directory=engine/src/out/ci/host_debug_clang_tidy --build
+
 Each entry carries the command both as `arguments` (what clangd prefers)
 and as a `command` string (what tools/clang_tidy reads). Paths are written
 to last: a path under `external/` -- a repository's headers, the sysroot,
@@ -43,19 +61,30 @@ gn_action's platform_deps), and either before the exec configuration's
 (`k8-opt-exec-ST-<hash>`: a host tool's, built -c opt); one compiled for
 the exec configuration alone (impellerc, the shader compiler, built only as
 a tool) gets that. clang-tidy reads the one entry per file, and must find
-the build's own compiler flags there rather than em++'s.
+the build's own compiler flags there rather than em++'s. A source no
+clang compiles -- skwasm's, and what else only a wasm module's em++.sh or
+emcc.sh builds -- gets no entry: tools/clang_tidy derives clang-tidy from
+the compiler's path (`clang/bin/clang++` -> `clang/bin/clang-tidy`) and
+has none for those; how many are left out is printed.
 """
 
 import argparse
 import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+_TOOL_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _TOOL_DIR)
 import compile_command_diff  # pylint: disable=wrong-import-position
+
+# build/bazel/bazel_ci.py: the description of a build directory tools/gn
+# --bazel wrote (bazel.json) and the Bazel command lines of its build.
+sys.path.insert(0, os.path.join(_TOOL_DIR, "..", "..", "..", "build", "bazel"))
+import bazel_ci  # pylint: disable=wrong-import-position
 
 
 def _bazel(option):
@@ -68,25 +97,120 @@ def _bazel(option):
   sys.exit("no bazel on PATH; pass --bazel")
 
 
-def _aquery(bazel, workspace, config, targets):
+class Bazel:
+  """The Bazel commands of this run: their command lines, working directory and environment.
+
+    Of a build directory tools/gn --bazel wrote (`--build-directory`), what
+    its description (bazel.json) says: `bazelisk <startup options>
+    <command> --config=ci <build options> --config=<name> <options>
+    <arguments>` (bazel_ci.described_command) from the checkout, with the
+    description's environment -- the server, output base and
+    configuration of the build's own install and tests. Otherwise
+    (`--config`, `--bazel`): `bazel <command> [--config=<name>]
+    <arguments>` from the workspace.
+    """
+
+  def __init__(self, bazel=None, workspace=None, config=None, description=None):
+    self._bazel = bazel
+    self._workspace = workspace
+    self._config = config
+    self._description = description
+
+  @classmethod
+  def of_build_directory(cls, out_dir):
+    """The Bazel of the build directory `out_dir`; exits unless tools/gn --bazel wrote it."""
+    description = bazel_ci.read_build_directory(out_dir)
+    if description is None:
+      sys.exit(
+          f"{out_dir} has no {bazel_ci.BAZEL_JSON}: not a build directory tools/gn --bazel wrote"
+      )
+    return cls(workspace=description["repo_root"], description=description)
+
+  def command_line(self, command, arguments):
+    """The command line of Bazel `command` with `arguments`."""
+    if self._description is not None:
+      return bazel_ci.described_command(self._description, command, arguments)
+    options = ["--config=" + self._config] if self._config else []
+    return [self._bazel, command] + options + list(arguments)
+
+  def run(self, command, arguments, capture_output=False):
+    """Runs Bazel `command` with `arguments`; its stdout when captured. Exits when it fails.
+
+      stderr -- Bazel's progress and errors -- goes to this process's either
+      way, for the log.
+      """
+    command_line = self.command_line(command, arguments)
+    print(shlex.join(command_line), flush=True)
+    environment = dict(os.environ)
+    if self._description is not None:
+      environment.update(self._description["environment"])
+      bazel_ci.write_wrap_rbe_env()
+    result = subprocess.run(
+        command_line,
+        cwd=self._workspace,
+        env=environment,
+        stdout=subprocess.PIPE if capture_output else None,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+      sys.exit(f"bazel {command} failed with exit status {result.returncode}")
+    return result.stdout
+
+
+def _aquery(bazel, targets):
   query = 'mnemonic("CppCompile", deps(%s))' % " + ".join(targets)
-  command = [bazel, "aquery", "--output=jsonproto"]
-  if config:
-    command.append("--config=" + config)
-  command.append(query)
-  result = subprocess.run(command, cwd=workspace, check=True, capture_output=True, text=True)
-  return json.loads(result.stdout)
+  return json.loads(bazel.run("aquery", ["--output=jsonproto", query], capture_output=True))
 
 
-def _info(bazel, workspace):
-  """`bazel info`'s execution_root and output_base."""
-  result = subprocess.run([bazel, "info"],
-                          cwd=workspace,
-                          check=True,
-                          capture_output=True,
-                          text=True)
-  info = dict(line.split(": ", 1) for line in result.stdout.splitlines() if ": " in line)
-  return info["execution_root"], info["output_base"]
+def _info(bazel):
+  """`bazel info`'s execution_root, output_base, and the build's own output directory name.
+
+    The last is the `<mnemonic>` of `bazel-bin`'s `bazel-out/<mnemonic>/bin`
+    (`linux_x64_debug-opt`): the configuration the command line names, as
+    the aquery's `configuration` list spells it.
+    """
+  output = bazel.run("info", [], capture_output=True)
+  info = dict(line.split(": ", 1) for line in output.splitlines() if ": " in line)
+  parts = info["bazel-bin"].split("/")
+  mnemonic = parts[parts.index("bazel-out") + 1] if "bazel-out" in parts else ""
+  return info["execution_root"], info["output_base"], mnemonic
+
+
+# What `--build` downloads of a remote build's outputs besides the top-level
+# ones (Bazel's default, --remote_download_toplevel): the generated sources
+# and headers a compile command names, which clang-tidy opens on disk.
+GENERATED_SOURCE_REGEX = r".*\.(h|hh|hpp|inc|ipp|def|c|cc|cpp|cxx|m|mm)$"
+
+
+def _build(bazel, owners, out_dir):
+  """Builds the targets whose compiles the database lists, their generated sources and headers downloaded.
+
+  Building the owners of the compile commands (not the query's patterns:
+  those reach the Dart, Java and web targets too, a whole test tree for
+  nothing) runs every compile the database names, and so builds every
+  generated header those compiles include; GENERATED_SOURCE_REGEX fetches
+  the ones remote actions made. The labels go through a file
+  (`compile_commands.targets`, beside the database), since there are
+  hundreds; --build_manual_tests, since the query's `deps(...)` reaches
+  the manual tests (the benchmarks) and a pattern file's wildcards would
+  not; --skip_incompatible_explicit_targets, since an owner compiled under
+  a transition's configuration alone (an Android library reached from a
+  host build) may not be buildable in the build's own, and its entries
+  stand as GN's other toolchains' did.
+  """
+  pattern_file = os.path.join(out_dir, "compile_commands.targets")
+  with open(pattern_file, "w", encoding="utf-8") as f:
+    f.write("".join(owner + "\n" for owner in owners))
+  bazel.run(
+      "build",
+      [
+          "--remote_download_regex=" + GENERATED_SOURCE_REGEX,
+          "--build_manual_tests",
+          "--skip_incompatible_explicit_targets",
+          "--target_pattern_file=" + pattern_file,
+      ],
+  )
 
 
 _EXTERNAL = "external/"
@@ -141,30 +265,108 @@ def _compiler_path(execution_root, output_base, compiler):
   return os.path.join(os.path.realpath(_lasting_path(execution_root, output_base, directory)), name)
 
 
-def configuration_ranks(aquery):
-  """Configuration id -> 0 for the command line's own configuration, 1 for a transition's, 2 for an exec one.
+# The compilers tools/clang_tidy can lint with: a toolchain's clang or
+# clang++ under its `clang/bin/`, where the tool's `_pathRegex` finds the
+# compiler and `clang-tidy` beside it. Emscripten's em++.sh and emcc.sh (a
+# wasm module's transition) and the Mac remote-compile wrapper are not.
+_CLANG = re.compile(r"clang/bin/clang(\+\+)?$")
+
+
+def configuration_ranks(aquery, own):
+  """Configuration id -> 0 for the build's own configuration, 1 for a transition of it, 2 for an exec one; else None.
 
     The aquery's `configuration` list names each with its output directory
-    (`mnemonic`): the top-level configuration has none of the suffixes,
-    a Starlark transition's carries `-ST-<hash>`, and an exec configuration
-    `-exec-` (and `isTool`).
+    (`mnemonic`); `own` is the build's (_info). A transition of it carries
+    `-ST-<hash>` after it (a setting changed, the platform kept); an exec
+    configuration says `-exec-` (and `isTool`). A configuration of another
+    platform or runtime mode -- the profile and release engines a debug
+    build's install reaches, the Android ones a host build's tests do -- is
+    none of these: its compiles belong to another build's database, as GN's
+    did, and its generated headers are not this build's to fetch.
     """
   ranks = {}
   for c in aquery.get("configuration", []):
     mnemonic = c.get("mnemonic", "")
-    if c.get("isTool") or "exec" in mnemonic:
+    if c.get("isTool") or "-exec" in mnemonic:
       ranks[c["id"]] = 2
-    elif "-ST-" in mnemonic:
+    elif mnemonic == own:
+      ranks[c["id"]] = 0
+    elif mnemonic.startswith(own + "-ST-"):
       ranks[c["id"]] = 1
     else:
-      ranks[c["id"]] = 0
+      ranks[c["id"]] = None
   return ranks
 
 
-def compile_commands(aquery, execution_root, output_base):
-  """The compile_commands.json entries of an aquery result: source -> entry, the command line's configuration first."""
-  ranks = configuration_ranks(aquery)
+def _hoisted(arguments):
+  """`arguments` with the virtual include directories searched before the external repositories' roots, for quoted includes.
+
+    The command runs from the execution root, where every external
+    repository is whole, not the sandbox's view of the action's inputs; and
+    Bazel searches the repositories' roots (`-iquote external/<repo>`) before
+    the `-I` directories. A quoted include of an engine-root-relative path
+    (`"third_party/benchmark/include/benchmark/benchmark.h"`) that the
+    sandbox resolves through a virtual include directory (the mapping a
+    `cc_library` declares, `_virtual_includes/`) can, from the whole
+    execution root, land in a repository that vendors a tree of that name
+    (BoringSSL's third_party/benchmark) -- an older copy, or one whose own
+    includes are not on the path. The virtual include directories are
+    repeated as `-iquote`, ahead of the repositories' roots: what they map
+    is declared, so the sandbox resolves the same way.
+    """
+  virtual = [a[2:] for a in arguments if a.startswith("-I") and "/_virtual_includes/" in a]
+  if not virtual:
+    return arguments
+  for i, a in enumerate(arguments):
+    if a == "-iquote" and i + 1 < len(arguments) and _EXTERNAL_ROOT.search(arguments[i + 1]):
+      hoisted = [w for d in virtual for w in ("-iquote", d)]
+      return arguments[:i] + hoisted + arguments[i:]
+  return arguments
+
+
+# An external repository's root as a quote include directory: `external/<repo>`
+# (spelled through the output base, _lasting_path) or its bazel-out twin.
+_EXTERNAL_ROOT = re.compile(r"(^|/)external/[^/]+$")
+
+# An include directory inside a sysroot repository (the Linux sysroot's
+# /usr/include/gtk-3.0 and the like; its bazel-out twin too).
+_SYSROOT_INCLUDE = re.compile(r"(^|/)external/[^/]*sysroot[^/]*/")
+
+
+def _system_includes(arguments):
+  """`arguments` with the sysroot's include directories as `-isystem`, as GN's compile commands have them.
+
+    The toolchain writes every `includes` as `-I` (the engine's own have to
+    keep their order ahead of the system's), the sysroot repository's
+    among them; GN's commands name the same directories, pkg-config's
+    under `--sysroot`, with `-isystem`. clang-tidy keeps quiet about a
+    system header's macro expanded in the engine's code (g_clear_object's
+    `_pp`, cppcoreguidelines-pro-type-member-init) and says so of a `-I`
+    directory's; the lint reads them as GN's did.
+    """
+  return [
+      "-isystem" + a[2:] if a.startswith("-I") and _SYSROOT_INCLUDE.search(a[2:]) else a
+      for a in arguments
+  ]
+
+
+def compile_commands(aquery, execution_root, output_base, own_configuration):
+  """The compile_commands.json entries of an aquery result, the sources left out, the entries' owners.
+
+    Source -> entry, the build's own configuration first (configuration_ranks;
+    a compile under another platform's or mode's alone leaves the source
+    out: it is another build's); of the sources whose every compile is by a
+    compiler other than a clang (_CLANG), the compilers' names: those get no
+    entry, since the lint tool has no clang-tidy for them; and the labels of
+    the targets whose compiles the entries are, sorted (what `--build`
+    builds).
+    """
+  ranks = configuration_ranks(aquery, own_configuration)
+  labels = {t["id"]: t["label"] for t in aquery.get("targets", []) if "id" in t and "label" in t}
   best = {}
+  other_compilers = {}
+  other_configurations = {}
+  mnemonics = {c["id"]: c.get("mnemonic", "") for c in aquery.get("configuration", [])}
   for action in aquery.get("actions", []):
     if action.get("mnemonic") != "CppCompile":
       continue
@@ -175,14 +377,22 @@ def compile_commands(aquery, execution_root, output_base):
     ]
     if not sources:
       continue
-    # A transition's configuration before an exec one's; the command
-    # line's own before both (configuration_ranks); an unlisted one last.
-    rank = ranks.get(action.get("configurationId"), 3)
     source = sources[-1]
+    # The build's own configuration before a transition of it, that before
+    # an exec one's (configuration_ranks); another configuration's not at all.
+    rank = ranks.get(action.get("configurationId"))
+    if rank is None:
+      other_configurations.setdefault(source, set()).add(mnemonics.get(action.get("configurationId"), "?"))
+      continue
     if source in best and best[source][0] <= rank:
       continue
-    arguments[0] = _compiler_path(execution_root, output_base, arguments[0])
+    compiler = _compiler_path(execution_root, output_base, arguments[0])
+    if not _CLANG.search(compiler):
+      other_compilers[source] = os.path.basename(compiler)
+      continue
+    arguments[0] = compiler
     arguments[1:] = [_lasting_argument(a, execution_root, output_base) for a in arguments[1:]]
+    arguments = _system_includes(_hoisted(arguments))
     best[source] = (
         rank,
         {
@@ -191,23 +401,48 @@ def compile_commands(aquery, execution_root, output_base):
             "arguments": arguments,
             "command": shlex.join(arguments),
         },
+        labels.get(action.get("targetId")),
     )
-  return [best[source][1] for source in sorted(best)]
+  left_out = {source: name for source, name in other_compilers.items() if source not in best}
+  others = set()
+  for source, names in other_configurations.items():
+    if source not in best and source not in left_out:
+      left_out[source] = "another configuration"
+      others.update(names)
+  if others:
+    print(
+        f"{sum(1 for v in left_out.values() if v == 'another configuration')} sources compiled "
+        f"under other configurations alone ({', '.join(sorted(others))}): another build's database"
+    )
+  owners = sorted({best[source][2] for source in best if best[source][2]})
+  return [best[source][1] for source in sorted(best)], left_out, owners
 
 
 def main(argv):
   parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
   parser.add_argument(
-      "--out", required=True, help="The build directory to write compile_commands.json into."
+      "--out",
+      help="The build directory to write compile_commands.json into "
+      "(default with --build-directory: that directory).",
   )
   parser.add_argument("--config", help="The Bazel configuration (--config=<name>) the build uses.")
   parser.add_argument("--bazel", help="The bazel (or bazelisk) binary; default: the one on PATH.")
   parser.add_argument(
       "--workspace",
-      default=os.path.normpath(
-          os.path.join(os.path.dirname(os.path.abspath(__file__)), *[".."] * 6)
-      ),
-      help="The Bazel workspace (the checkout's root).",
+      help="The Bazel workspace (the checkout's root); default: this checkout.",
+  )
+  parser.add_argument(
+      "--build-directory",
+      help="A build directory tools/gn --bazel wrote: its bazel.json says which bazelisk, "
+      "options and configuration the build used, and this runs Bazel the same way. "
+      "Stands in for --out, --config, --bazel and --workspace.",
+  )
+  parser.add_argument(
+      "--build",
+      action="store_true",
+      help="With --build-directory: build the targets whose compiles the database lists, "
+      "their generated sources and headers downloaded, so that the files the compile "
+      "commands include exist.",
   )
   parser.add_argument(
       "targets",
@@ -216,15 +451,39 @@ def main(argv):
       help="The targets whose compiles to list."
   )
   args = parser.parse_args(argv)
-  bazel = _bazel(args.bazel)
-  aquery = _aquery(bazel, args.workspace, args.config, args.targets)
-  execution_root, output_base = _info(bazel, args.workspace)
-  entries = compile_commands(aquery, execution_root, output_base)
-  os.makedirs(args.out, exist_ok=True)
-  path = os.path.join(args.out, "compile_commands.json")
+  if args.build_directory:
+    if args.config or args.bazel or args.workspace:
+      parser.error(
+          "--build-directory's bazel.json says what --config, --bazel and --workspace would"
+      )
+    out_dir = os.path.abspath(args.build_directory)
+    bazel = Bazel.of_build_directory(out_dir)
+    out = args.out or out_dir
+  else:
+    if args.build:
+      parser.error("--build needs --build-directory")
+    if not args.out:
+      parser.error("--out is required without --build-directory")
+    workspace = args.workspace or os.path.normpath(os.path.join(_TOOL_DIR, *[".."] * 6))
+    bazel = Bazel(_bazel(args.bazel), workspace, args.config)
+    out = args.out
+  aquery = _aquery(bazel, args.targets)
+  execution_root, output_base, own_configuration = _info(bazel)
+  entries, left_out, owners = compile_commands(aquery, execution_root, output_base, own_configuration)
+  os.makedirs(out, exist_ok=True)
+  if args.build:
+    _build(bazel, owners, out)
+  path = os.path.join(out, "compile_commands.json")
   with open(path, "w", encoding="utf-8") as f:
     json.dump(entries, f, indent=2)
     f.write("\n")
+  compilers = sorted({v for v in left_out.values() if v != "another configuration"})
+  if compilers:
+    print(
+        f"{sum(1 for v in left_out.values() if v != 'another configuration')} sources left out, "
+        f"compiled by {', '.join(compilers)} alone: tools/clang_tidy finds clang-tidy beside a "
+        "clang/bin/clang++ and has none for them"
+    )
   print(f"{len(entries)} compile commands into {path}")
   return 0
 

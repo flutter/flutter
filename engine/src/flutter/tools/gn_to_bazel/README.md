@@ -315,17 +315,36 @@ writes the build directory's `compile_commands.json` from `bazel aquery`,
 in the form clang's tools read: an entry per source with the command line
 as the action runs it, from the execution root, so that external
 repositories and generated headers under `bazel-out` resolve as they do for
-the build (a source compiled in several configurations gets the command
-line's own -- `--config=<name>`'s, the output directory without a suffix
--- before a transition's, the wasm modules' `-ST-` compiles of Skia's
-sources with em++, and either before the exec configuration's; so a
-`--config=android_debug_arm64_clang_tidy` database carries the NDK
-command for a source the web build also compiles). GN writes the file on request
+the build. A source compiled in several configurations gets the command
+line's own -- `--config=<name>`'s, the output directory `bazel-bin` names
+-- or a transition of it (`-ST-`, the platform kept) or the exec
+configuration's, in that order; a source compiled under another platform
+or runtime mode alone (the profile and release engines a debug build's
+install reaches, the Android compiles a host build's tests do) is left
+out: its database is that build's, as under GN. Entries whose compiler is
+not a clang (Emscripten's, under the wasm transitions) are left out too.
+Two things the whole execution root does differently from the sandbox the
+compiles ran in are undone in the entries: the virtual include directories
+(`_virtual_includes/`, a `cc_library`'s declared mapping) are repeated as
+`-iquote` ahead of the external repositories' roots, since a quoted
+engine-root-relative include could otherwise land in a tree a repository
+vendors (BoringSSL's `third_party/benchmark`); and the sysroot's include
+directories are `-isystem`, as GN's pkg-config ones are, so that
+clang-tidy keeps quiet about a system header's macros as it does on GN's
+commands. For a `tools/gn --bazel` build directory,
+`--build-directory=<out dir> --build` runs the query through the
+directory's own Bazel commands (bazel.json's: the same server, output base
+and configuration as the build) after building the targets that own the
+commands with their generated sources and headers downloaded
+(`--remote_download_regex`), so that a remote build's generated headers
+exist for clang-tidy; `ci/clang_tidy.sh` does so for the clang-tidy
+builders, and `et lint --backend bazel` for a developer. GN writes the file on request
 (`--export-compile-commands`, which `tools/gn` passes for the clang-tidy
 builder) and `tools/clang_tidy` and clangd read it; the checkout's
-`clang-tidy -p <dir>` runs over the Bazel file as over GN's. 4,281 entries
-for the engine's targets, against GN's 13,634 with the Dart runtime and the
-GPU test backends that Bazel compiles inside their wrapped GN builds.
+`clang-tidy -p <dir>` runs over the Bazel file as over GN's. 4,350 entries
+for the host debug build's own configuration (545), against GN's 9,426 with
+every toolchain, the Dart runtime and the GPU test backends that Bazel
+compiles inside their wrapped GN builds.
 
 ## How it works
 

@@ -61,14 +61,41 @@ void main() {
       rootDirs.add(name);
     }
 
-    // Create a fake file in that path, and assert that it matches the regex.
+    // Create a fake file in that path, and assert that it matches the regex,
+    // as GN's compile commands spell it (from the build directory) and as
+    // Bazel's do (from the execution root).
     for (final rootDir in rootDirs) {
-      final String file = path.join('..', '..', 'flutter', rootDir, 'foo');
-      expect(
-        file,
-        matches(regexValue),
-        reason: '$rootDir/foo should be allowed by the regex but was not.',
-      );
+      for (final file in <String>[
+        path.join('..', '..', 'flutter', rootDir, 'foo'),
+        path.join('engine', 'src', 'flutter', rootDir, 'foo'),
+      ]) {
+        expect(
+          file,
+          matches(regexValue),
+          reason: '$rootDir/foo should be allowed by the regex but was not ($file).',
+        );
+      }
     }
+  });
+
+  test("matches the engine's headers under either build system's spelling", () {
+    // GN: from the build directory.
+    expect('../../flutter/fml/foo.h', matches(regexValue));
+    // Bazel: from the execution root.
+    expect('engine/src/flutter/fml/foo.h', matches(regexValue));
+    // A header included relative to the main file is spelled under the
+    // checkout's absolute path and matches under neither build system (GN
+    // never linted those; the Bazel alternative is anchored so that the
+    // generated headers under bazel-out/ stay out).
+    expect('/abs/path/engine/src/flutter/impeller/x.h', isNot(matches(regexValue)));
+  });
+
+  test('does not match third_party or generated headers', () {
+    expect('../../flutter/third_party/x/y.h', isNot(matches(regexValue)));
+    expect('engine/src/flutter/third_party/x/y.h', isNot(matches(regexValue)));
+    // GN's generated headers are under the build directory's gen/, Bazel's
+    // under bazel-out/<configuration>/bin/.
+    expect('gen/flutter/fml/gen.h', isNot(matches(regexValue)));
+    expect('bazel-out/k8-opt/bin/engine/src/flutter/fml/gen.h', isNot(matches(regexValue)));
   });
 }
