@@ -1753,6 +1753,9 @@ DomFontFace createDomFontFace(String family, Object source, [Map<Object?, Object
 @JS('FontFaceSet')
 extension type DomFontFaceSet._(JSObject _) implements DomEventTarget {
   external DomFontFaceSet? add(DomFontFace font);
+  @JS('ready')
+  external JSPromise<JSAny?> get _ready;
+  Future<void> get ready => _ready.toDart;
   external void clear();
 
   @JS('forEach')
