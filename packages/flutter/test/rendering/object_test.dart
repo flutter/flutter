@@ -125,6 +125,52 @@ void main() {
     expect(renderObject.describeSemanticsConfigurationCallCount, 0);
   });
 
+  test('dropChild visits cached semantics below an uninitialized child', () {
+    final parent = TestRenderObject();
+    final child = TestRenderObject();
+    final grandchild = TestRenderObject();
+    parent.add(child);
+    child.add(grandchild);
+    // Initialize the grandchild's semantics without initializing the child's.
+    expect(grandchild.debugSemantics, isNull);
+    child.visitChildrenCallCount = 0;
+    grandchild.visitChildrenCallCount = 0;
+
+    parent.remove(child);
+
+    expect(child.visitChildrenCallCount, 1);
+    expect(grandchild.visitChildrenCallCount, 1);
+    parent.dispose();
+    child.dispose();
+    grandchild.dispose();
+  });
+
+  test('dropChild visits cached semantics below an uninitialized descendant', () {
+    final parent = TestRenderObject();
+    final child = TestRenderObject();
+    final grandchild = TestRenderObject();
+    final greatGrandchild = TestRenderObject();
+    parent.add(child);
+    child.add(grandchild);
+    grandchild.add(greatGrandchild);
+    // Leave the grandchild's semantics uninitialized between two cached wrappers.
+    expect(child.debugSemantics, isNull);
+    expect(greatGrandchild.debugSemantics, isNull);
+    child.visitChildrenCallCount = 0;
+    grandchild.visitChildrenCallCount = 0;
+    greatGrandchild.visitChildrenCallCount = 0;
+
+    parent.remove(child);
+
+    expect(child.visitChildrenCallCount, 1);
+    expect(grandchild.visitChildrenCallCount, 1);
+    expect(greatGrandchild.visitChildrenCallCount, 1);
+    parent.dispose();
+    child.dispose();
+    grandchild.dispose();
+    greatGrandchild.dispose();
+  });
+
   test('ensure errors processing render objects are well formatted', () {
     late FlutterErrorDetails errorDetails;
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
@@ -641,6 +687,14 @@ class TestRenderObject extends RenderObject
 
   @override
   Rect get semanticBounds => const Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
+
+  int visitChildrenCallCount = 0;
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    visitChildrenCallCount++;
+    super.visitChildren(visitor);
+  }
 
   int describeSemanticsConfigurationCallCount = 0;
 
