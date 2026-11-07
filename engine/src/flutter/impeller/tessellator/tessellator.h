@@ -387,6 +387,9 @@ class Tessellator {
   /// Retrieve a pre-allocated arena of kPointArenaSize points.
   std::vector<Point>& GetStrokePointCache();
 
+  /// Visible for testing.
+  size_t GetFillTessellationCacheSizeForTesting() const;
+
   /// Return a vector of Trig (cos, sin pairs) structs for a 90 degree
   /// circle quadrant of the specified pixel radius
   Trigs GetTrigsForDeviceRadius(Scalar pixel_radius);
@@ -401,6 +404,7 @@ class Tessellator {
                                           Scalar tolerance,
                                           bool supports_primitive_restart,
                                           bool supports_triangle_fan) = 0;
+    virtual size_t GetCacheSizeForTesting() const = 0;
   };
   template <typename IndexT>
   friend class ConvexTessellatorImpl;
