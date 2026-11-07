@@ -1428,6 +1428,53 @@ void main() {
       expect(log, <String>['double-tap-down']);
     });
   });
+
+  testWidgets('onTapCancel can call setState when the gesture detector is removed', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/160508
+    late StateSetter setState;
+    var visible = true;
+    var cancelCount = 0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return Center(
+              child: visible
+                  ? GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (TapDownDetails details) {},
+                      onTapCancel: () {
+                        cancelCount += 1;
+                        setState(() {});
+                      },
+                      child: const SizedBox(width: 100.0, height: 100.0),
+                    )
+                  : const SizedBox(width: 100.0, height: 100.0),
+            );
+          },
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SizedBox)));
+    addTearDown(() => gesture.up());
+
+    // Removing the gesture detector disposes its recognizers, which cancels the
+    // in-progress tap. The callback is invoked while the widget tree is being
+    // unmounted, but is still allowed to mark other widgets as needing build.
+    setState(() {
+      visible = false;
+    });
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(cancelCount, 1);
+  });
 }
 
 class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
