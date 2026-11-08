@@ -50,7 +50,6 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    Cache.flutterRoot = _kTestFlutterRoot;
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -130,7 +129,11 @@ void main() {
       os: osUtils ?? FakeOperatingSystemUtils(),
       platform: platform ?? linuxPlatform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: resolvedLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: resolvedLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildCommand(
       androidContext: FakeAndroidContext(),
@@ -163,7 +166,11 @@ void main() {
       os: osUtils ?? FakeOperatingSystemUtils(),
       platform: platform ?? linuxPlatform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: resolvedLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: resolvedLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildLinuxCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),

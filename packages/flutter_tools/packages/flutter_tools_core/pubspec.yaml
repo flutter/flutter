@@ -6,9 +6,10 @@ environment:
   sdk: ^3.13.0-0
 
 dependencies:
+  collection: 1.19.1
   meta: 1.19.0
 
 dev_dependencies:
   test: 1.33.0
 
-# PUBSPEC CHECKSUM: fdrigi
+# PUBSPEC CHECKSUM: 6d3rih

@@ -166,10 +166,10 @@ packages:
     dependency: "direct main"
     description:
       name: code_assets
-      sha256: "828110d598123b5ea96c00c9f3c72105bf79f8ee36c20a39b26209ade421ec57"
+      sha256: "1ef22a0be3af9370bd9481ac76db114db92bfe75d5ca2b2d7bc911764478a4d9"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.2.0"
   code_builder:
     dependency: transitive
     description:
@@ -214,10 +214,10 @@ packages:
     dependency: "direct main"
     description:
       name: crypto
-      sha256: c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf
+      sha256: e3626ae6270383c9e3a549f34c9e4cd26c09ae6a9adaab2bf4737a00340efdc4
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.7"
+    version: "3.0.8"
   csslib:
     dependency: "direct main"
     description:
@@ -238,10 +238,10 @@ packages:
     dependency: "direct main"
     description:
       name: cupertino_ui
-      sha256: a47c4e7c66fd7444a063a602597fceb238f705c3f6b1322bc0053d0a2638ee6e
+      sha256: "369e39a1c5c030a6212589c3da1809920b1c2cfade7b02aade7695bfa4b88c3a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.4"
+    version: "1.1.6"
   dap:
     dependency: transitive
     description:
@@ -318,18 +318,18 @@ packages:
     dependency: transitive
     description:
       name: dwds
-      sha256: b23d026f3f27d8446d9978836356a7025f32e9e8102a53143b86af53b7dad76e
+      sha256: "6d7b931386a211398f6173ab2d29a8c45d48b1c54fa050a47b901d04ec1aacb8"
       url: "https://pub.dev"
     source: hosted
-    version: "27.2.0"
+    version: "27.2.1"
   extension_discovery:
     dependency: transitive
     description:
       name: extension_discovery
-      sha256: de1fce715ab013cdfb00befc3bdf0914bea5e409c3a567b7f8f144bc061611a7
+      sha256: "45bcb4c7a1de1b9beb82b38a7157b0e5ef967081a744de9a92f1e29c343e7ac8"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   fake_async:
     dependency: "direct main"
     description:
@@ -514,10 +514,10 @@ packages:
     dependency: "direct main"
     description:
       name: googleapis_auth
-      sha256: e15d48204e2f3c852dc1091a49705a163a8ba5897823f9abe1c0795e512357c4
+      sha256: "6c37e60a7e9139b6cb143615b740663f427ffd5162f47c06eb8b9632fc217520"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.5"
+    version: "2.3.7"
   graphs:
     dependency: transitive
     description:
@@ -706,10 +706,10 @@ packages:
     dependency: "direct main"
     description:
       name: material_ui
-      sha256: e4031746f96c8316864d9b92bce375f1320a36ed56e166307e1e1bda9d90b4ab
+      sha256: a30f5d0625b6b83770f53ca3f7aafd6fd9d147cb3853f54a70668541046fe5d6
       url: "https://pub.dev"
     source: hosted
-    version: "1.8.0"
+    version: "1.10.0"
   meta:
     dependency: "direct main"
     description:
@@ -762,10 +762,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_toolchain_c
-      sha256: "90eaad8059ebc2004a63810a4696ea9acdb02473e47ed3b6b3bafb100ac77e31"
+      sha256: "120b6fc66acd8a5ddeaeb1e59b78836bb3ec9919bd9d9dfb1e2401985710c2c0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.5"
+    version: "0.19.6"
   nested:
     dependency: "direct main"
     description:
@@ -1018,10 +1018,10 @@ packages:
     dependency: transitive
     description:
       name: skills_lint
-      sha256: "5daeff89c8c9d812cfa811e119ae88a32bb81d28c73aa7e899155885b2e63a63"
+      sha256: b7af62b95189d9f80c397c13133bb9a5dfae079cc18a7e3236ab3ea2d79edc41
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.1"
+    version: "0.5.3"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -1107,6 +1107,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.1"
+  tar:
+    dependency: transitive
+    description:
+      name: tar
+      sha256: af61a6382fb7a702b93a7b400492405793e0ebf3d2bea5d698d5ca39823ca46f
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.3"
   term_glyph:
     dependency: "direct main"
     description:
@@ -1151,10 +1159,10 @@ packages:
     dependency: transitive
     description:
       name: unified_analytics
-      sha256: f4405e1c205ef4ec54e428cae6c32cf1f9dab67e13cf7b82560ab50ac6e04dbc
+      sha256: "4013958a461aafcd9b80baf96b85e1537ae10991a05e7b05f34e4bee6202dfb0"
       url: "https://pub.dev"
     source: hosted
-    version: "8.3.0"
+    version: "8.4.0"
   url_launcher:
     dependency: "direct main"
     description:
@@ -1231,10 +1239,10 @@ packages:
     dependency: "direct main"
     description:
       name: vector_math
-      sha256: "92b9910f66ed1057fd4da7b040ae7c74cafacf885bdc81be496928d5049b032d"
+      sha256: fa49e1674cb84acb900141714e6c6e1f9ae099827c24d141430ff6819db4e1bc
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.3"
+    version: "2.4.4"
   video_player:
     dependency: "direct main"
     description:
@@ -1255,10 +1263,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_avfoundation
-      sha256: "7dde83dd04ac987be0c9134692ba07d8c105824760675e0b9f68e67e447bbf88"
+      sha256: "7d620d8c69d00c158a5c57bf3d2a051833b547631203ff724664fbf301024bc1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.12.2"
+    version: "2.12.3"
   video_player_platform_interface:
     dependency: "direct main"
     description:
@@ -1311,10 +1319,10 @@ packages:
     dependency: "direct main"
     description:
       name: web
-      sha256: "868d88a33d8a87b18ffc05f9f030ba328ffefba92d6c127917a2ba740f9cfe4a"
+      sha256: e119e82ac4795c7925103b7cf3768191f33941b99e7ccffbd6c645201d9f606b
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.1.2"
   web_socket:
     dependency: "direct main"
     description:

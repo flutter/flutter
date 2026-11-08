@@ -16,6 +16,10 @@ class SkwasmRenderer extends Renderer {
   bool get supportsResizingAnimatedImages =>
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
+  @override
+  bool get supportsAnimatedImages =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
+
   bool get isWimp => false;
 
   @override
@@ -195,7 +199,7 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  Future<void> renderScene(ui.Scene scene, ui.FlutterView view) {
+  Future<void> renderScene(ui.Scene scene, EngineFlutterView view, {required ui.Size size}) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 

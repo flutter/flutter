@@ -77,9 +77,9 @@ class WebDevFS implements DevFS {
     required this.isWasm,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
-    this.useDwdsWebSocketConnection = false,
     required this.webCrossOriginIsolation,
     required this._toolContext,
+    this.useDwdsWebSocketConnection = false,
     this.testMode = false,
     this._webDefines = const <String, String>{},
   }) {
@@ -307,10 +307,9 @@ class WebDevFS implements DevFS {
       webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile(
-        'flutter_service_worker.js',
-        '// Service worker not loaded in run mode.',
+        'version.json',
+        FlutterProject.current(fs, logger: logger).getVersionInfo(),
       );
-      webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
       webAssetServer.writeFile(
         'main.dart.js',
         generateDDCLibraryBundleBootstrapScript(

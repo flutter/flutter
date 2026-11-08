@@ -9,13 +9,10 @@ import 'package:ui/ui.dart' as ui;
 
 SkStrutStyleProperties _toSkStrutStyleProperties(
   EngineStrutStyle style,
-  ui.TextHeightBehavior? paragraphHeightBehavior,
+  CkFontCollection fontCollection,
 ) {
   final skStrutStyle = SkStrutStyleProperties();
-  skStrutStyle.fontFamilies = _computeCombinedFontFamilies(
-    style.effectiveFontFamily,
-    style.effectiveFontFamilyFallback,
-  );
+  skStrutStyle.fontFamilies = fontCollection.withFallbackFontFamilies(style.effectiveFontFamilies);
 
   if (style.fontSize != null) {
     skStrutStyle.fontSize = style.fontSize;
@@ -25,15 +22,8 @@ SkStrutStyleProperties _toSkStrutStyleProperties(
     skStrutStyle.heightMultiplier = style.height;
   }
 
-  final ui.TextLeadingDistribution? effectiveLeadingDistribution =
-      style.leadingDistribution ?? paragraphHeightBehavior?.leadingDistribution;
-  switch (effectiveLeadingDistribution) {
-    case null:
-      break;
-    case ui.TextLeadingDistribution.even:
-      skStrutStyle.halfLeading = true;
-    case ui.TextLeadingDistribution.proportional:
-      skStrutStyle.halfLeading = false;
+  if (style.halfLeading != null) {
+    skStrutStyle.halfLeading = style.halfLeading;
   }
 
   if (style.leading != null) {
@@ -53,7 +43,7 @@ SkStrutStyleProperties _toSkStrutStyleProperties(
   return skStrutStyle;
 }
 
-SkParagraphStyle _toSkParagraphStyle(EngineParagraphStyle style) {
+SkParagraphStyle _toSkParagraphStyle(EngineParagraphStyle style, CkFontCollection fontCollection) {
   final properties = SkParagraphStyleProperties();
 
   final ui.TextAlign? textAlign = style.textAlign;
@@ -86,21 +76,28 @@ SkParagraphStyle _toSkParagraphStyle(EngineParagraphStyle style) {
     properties.ellipsis = ellipsis;
   }
 
-  final EngineStrutStyle? strutStyle = style.strutStyle;
+  final EngineStrutStyle? strutStyle = style.effectiveStrutStyle;
   if (strutStyle != null) {
-    properties.strutStyle = _toSkStrutStyleProperties(strutStyle, textHeightBehavior);
+    properties.strutStyle = _toSkStrutStyleProperties(strutStyle, fontCollection);
   }
 
   properties.replaceTabCharacters = true;
-  properties.textStyle = _toSkTextStyleProperties(style.getTextStyle());
+  properties.textStyle = _toSkTextStyleProperties(style.getTextStyle(), fontCollection);
   properties.applyRoundingHack = false;
   // Like the native engine, render soft hyphens unless they are hidden.
   properties.renderSoftHyphens = style.hyphens != ui.Hyphens.hidden;
+  final String? hyphenCharacter = style.hyphenCharacter;
+  if (hyphenCharacter != null) {
+    properties.softHyphenString = hyphenCharacter;
+  }
 
   return canvasKit.ParagraphStyle(properties);
 }
 
-SkTextStyleProperties _toSkTextStyleProperties(EngineTextStyle style) {
+SkTextStyleProperties _toSkTextStyleProperties(
+  EngineTextStyle style,
+  CkFontCollection fontCollection,
+) {
   final ui.Color? color = style.color;
   final ui.TextDecoration? decoration = style.decoration;
   final ui.Color? decorationColor = style.decorationColor;
@@ -175,23 +172,15 @@ SkTextStyleProperties _toSkTextStyleProperties(EngineTextStyle style) {
     properties.heightMultiplier = height;
   }
 
-  switch (style.leadingDistribution) {
-    case null:
-      break;
-    case ui.TextLeadingDistribution.even:
-      properties.halfLeading = true;
-    case ui.TextLeadingDistribution.proportional:
-      properties.halfLeading = false;
+  if (style.halfLeading != null) {
+    properties.halfLeading = style.halfLeading;
   }
 
   if (locale != null) {
     properties.locale = locale.toLanguageTag();
   }
 
-  properties.fontFamilies = _computeCombinedFontFamilies(
-    style.effectiveFontFamily,
-    style.effectiveFontFamilyFallback,
-  );
+  properties.fontFamilies = fontCollection.withFallbackFontFamilies(style.effectiveFontFamilies);
 
   if (fontWeight != null || fontStyle != null) {
     properties.fontStyle = _toSkFontStyle(fontWeight, fontStyle);
@@ -236,8 +225,8 @@ SkTextStyleProperties _toSkTextStyleProperties(EngineTextStyle style) {
   return properties;
 }
 
-SkTextStyle _toSkTextStyle(EngineTextStyle style) {
-  return canvasKit.TextStyle(_toSkTextStyleProperties(style));
+SkTextStyle _toSkTextStyle(EngineTextStyle style, CkFontCollection fontCollection) {
+  return canvasKit.TextStyle(_toSkTextStyleProperties(style, fontCollection));
 }
 
 SkFontStyle _toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
@@ -439,15 +428,17 @@ class CkParagraph implements BackendParagraph {
 }
 
 class CkParagraphBuilder implements BackendParagraphBuilder {
-  CkParagraphBuilder(EngineParagraphStyle style)
+  CkParagraphBuilder(EngineParagraphStyle style, CkFontCollection fontCollection)
     : _style = style,
+      _fontCollection = fontCollection,
       _paragraphBuilder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
-        _toSkParagraphStyle(style),
-        (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
+        _toSkParagraphStyle(style, fontCollection),
+        fontCollection.skFontCollection,
       );
 
   final SkParagraphBuilder _paragraphBuilder;
   final EngineParagraphStyle _style;
+  final CkFontCollection _fontCollection;
 
   @override
   void addPlaceholder(
@@ -508,7 +499,7 @@ class CkParagraphBuilder implements BackendParagraphBuilder {
 
   @override
   void pushStyle(EngineTextStyle mergedStyle) {
-    final SkTextStyle skTextStyle = _toSkTextStyle(mergedStyle);
+    final SkTextStyle skTextStyle = _toSkTextStyle(mergedStyle, _fontCollection);
     if (mergedStyle.foreground != null || mergedStyle.background != null) {
       final SkPaint foreground = _createForegroundPaint(mergedStyle);
       final SkPaint background = _createBackgroundPaint(mergedStyle);
@@ -519,17 +510,4 @@ class CkParagraphBuilder implements BackendParagraphBuilder {
       _paragraphBuilder.pushStyle(skTextStyle);
     }
   }
-}
-
-List<String> _computeCombinedFontFamilies(String? fontFamily, [List<String>? fontFamilyFallback]) {
-  final fontFamilies = <String>[];
-  if (fontFamily != null) {
-    fontFamilies.add(fontFamily);
-  }
-  if (fontFamilyFallback != null &&
-      !fontFamilyFallback.every((String font) => fontFamily == font)) {
-    fontFamilies.addAll(fontFamilyFallback);
-  }
-  fontFamilies.addAll(renderer.fontCollection.fontFallbackManager.globalFontFallbacks);
-  return fontFamilies;
 }
