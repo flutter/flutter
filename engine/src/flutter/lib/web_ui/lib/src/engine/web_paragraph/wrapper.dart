@@ -31,8 +31,17 @@ class TextWrapper {
   double get height => _height;
   double _height = 0.0;
 
-  bool _isSoftLineBreak(WebCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.softLineBreak);
+  bool _isSoftLineBreak(int index) {
+    // A soft break after a clusterless character (such as U+200B or U+00AD) may land on a
+    // subsequent clusterless code unit (such as U+200E or U+200F) before the next cluster starts.
+    final int end = _layout.allClusters[index].start;
+    final int start = index > 0 ? _layout.allClusters[index - 1].end : end;
+    for (var i = start; i <= end; ++i) {
+      if (_layout.codeUnitFlags.hasFlag(i, CodeUnitFlag.softLineBreak)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   bool _isHardLineBreak(WebCluster cluster) {
@@ -71,7 +80,7 @@ class TextWrapper {
         } else {
           continue;
         }
-      } else if (_isSoftLineBreak(cluster) && line.isNotEmpty) {
+      } else if (_isSoftLineBreak(index) && line.isNotEmpty) {
         // Mark the potential line break and then continue with the current cluster as usual
         if (line.hasLeadingWhitespaces) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
@@ -365,12 +374,20 @@ class _LineBuilder {
       _widthConsumedText + _widthWhitespaces,
     );
 
+    final int? maxLines = _layout.paragraph.paragraphStyle.maxLines;
+    // Check + 1 because this line has not been appended to _layout.lines yet.
+    final bool willReachMaxLines = maxLines != null && _layout.lines.length + 1 >= maxLines;
+    // This content line is the last line when it hits maxLines or reaches the
+    // artificial EOF cluster without a trailing newline.
+    final bool isLastLine =
+        willReachMaxLines || (!hasTrailingNewline && _newlineEnd == _layout.allClusters.length - 1);
     final double height = _layout.addLine(
       ClusterRange(start: start, end: _whitespaceStart),
       ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
       ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
       _top,
       isSyntheticEmptyLine: false,
+      isLastLine: isLastLine,
     );
     _top += height;
 
@@ -385,6 +402,9 @@ class _LineBuilder {
           ClusterRange(start: _newlineEnd, end: _newlineEnd),
           _top,
           isSyntheticEmptyLine: true,
+          // A trailing newline occurs only at the end of the text, so this
+          // synthetic empty line is always the last line of the paragraph.
+          isLastLine: true,
         );
       } else {
         _layout.paragraph.didExceedMaxLines = true;

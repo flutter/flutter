@@ -355,7 +355,12 @@ class SkwasmCanvas implements LayerCanvas {
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
     // Note: Skwasm paragraphs are pre-built via ParagraphBuilder and their
     // paint styles/shaders are managed directly by Skwasm's native paragraph.
-    canvasDrawParagraph(_handle, (paragraph as SkwasmParagraph).handle, offset.dx, offset.dy);
+    canvasDrawParagraph(
+      _handle,
+      ((paragraph as EngineParagraph).backendParagraph as SkwasmParagraph).handle,
+      offset.dx,
+      offset.dy,
+    );
   }
 
   /// Draws a sequence of points according to [pointMode].
