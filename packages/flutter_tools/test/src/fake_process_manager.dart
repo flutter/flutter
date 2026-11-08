@@ -26,6 +26,7 @@ class FakeCommand {
     required this.command,
     this.workingDirectory,
     this.environment,
+    this.includeParentEnvironment,
     this.encoding,
     this.duration = Duration.zero,
     this.onRun,
@@ -57,6 +58,11 @@ class FakeCommand {
   /// Otherwise, each key in this environment must be present and must have a
   /// value that matches the one given here for the [FakeCommand] to match.
   final Map<String, String>? environment;
+
+  /// Whether the child inherits its parent's environment.
+  ///
+  /// If this is null, the inheritance flag is ignored.
+  final bool? includeParentEnvironment;
 
   /// The stdout and stderr encoding that must be matched for this [FakeCommand]
   /// to be considered correct.
@@ -328,6 +334,7 @@ abstract class FakeProcessManager implements ProcessManager {
     List<String> command, {
     String? workingDirectory,
     Map<String, String>? environment,
+    required bool includeParentEnvironment,
     Encoding? encoding,
     io.ProcessStartMode? mode,
   }) {
@@ -339,6 +346,9 @@ abstract class FakeProcessManager implements ProcessManager {
       encoding,
       mode,
     );
+    if (fakeCommand.includeParentEnvironment != null) {
+      expect(includeParentEnvironment, fakeCommand.includeParentEnvironment);
+    }
     if (fakeCommand.exception != null) {
       assert(fakeCommand.exception is Exception || fakeCommand.exception is Error);
       throw fakeCommand.exception!; // ignore: only_throw_errors
@@ -367,7 +377,7 @@ abstract class FakeProcessManager implements ProcessManager {
     List<dynamic> command, {
     String? workingDirectory,
     Map<String, String>? environment,
-    bool includeParentEnvironment = true, // ignored
+    bool includeParentEnvironment = true,
     bool runInShell = false, // ignored
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
   }) {
@@ -375,6 +385,7 @@ abstract class FakeProcessManager implements ProcessManager {
       command.cast<String>(),
       workingDirectory: workingDirectory,
       environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
       encoding: io.systemEncoding,
       mode: mode,
     );
@@ -392,7 +403,7 @@ abstract class FakeProcessManager implements ProcessManager {
     List<dynamic> command, {
     String? workingDirectory,
     Map<String, String>? environment,
-    bool includeParentEnvironment = true, // ignored
+    bool includeParentEnvironment = true,
     bool runInShell = false, // ignored
     Encoding? stdoutEncoding = io.systemEncoding,
     Encoding? stderrEncoding = io.systemEncoding,
@@ -401,6 +412,7 @@ abstract class FakeProcessManager implements ProcessManager {
       command.cast<String>(),
       workingDirectory: workingDirectory,
       environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
       encoding: stdoutEncoding,
     );
     await process.exitCode;
@@ -417,7 +429,7 @@ abstract class FakeProcessManager implements ProcessManager {
     List<dynamic> command, {
     String? workingDirectory,
     Map<String, String>? environment,
-    bool includeParentEnvironment = true, // ignored
+    bool includeParentEnvironment = true,
     bool runInShell = false, // ignored
     Encoding? stdoutEncoding = io.systemEncoding,
     Encoding? stderrEncoding = io.systemEncoding,
@@ -426,6 +438,7 @@ abstract class FakeProcessManager implements ProcessManager {
       command.cast<String>(),
       workingDirectory: workingDirectory,
       environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
       encoding: stdoutEncoding,
     );
     return io.ProcessResult(
