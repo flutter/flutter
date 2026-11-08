@@ -1081,6 +1081,60 @@ TEST_F(AXPositionTest, GetMaxTextOffsetUpdate) {
   AssertTextLengthEquals(GetTree(), root_data.id, 24);
 }
 
+TEST_F(AXPositionTest, LineBoundariesInLongMultilingualText) {
+  // "abc", a Hebrew word, an emoji (a surrogate pair) and a euro sign: 13
+  // UTF-16 code units.
+  const std::string chunk =
+      "abc \xD7\xA9\xD7\x9C\xD7\x95\xD7\x9D \xF0\x9F\x98\x80 \xE2\x82\xAC";
+  constexpr int kChunkLength = 13;
+  constexpr int kChunksPerLine = 40;
+  constexpr int kLineCount = 50;
+  constexpr int kLineLength = kChunkLength * kChunksPerLine;
+
+  std::string line_text;
+  for (int i = 0; i < kChunksPerLine; ++i) {
+    line_text += chunk;
+  }
+
+  AXNodeData root_data;
+  root_data.id = 1;
+  root_data.role = ax::mojom::Role::kRootWebArea;
+  std::vector<AXNodeData> nodes = {root_data};
+  for (int i = 0; i < kLineCount; ++i) {
+    AXNodeData line_data;
+    line_data.id = i + 2;
+    line_data.role = ax::mojom::Role::kStaticText;
+    line_data.SetName(line_text);
+    nodes[0].child_ids.push_back(line_data.id);
+    nodes.push_back(line_data);
+  }
+  SetTree(CreateAXTree(nodes));
+
+  AssertTextLengthEquals(GetTree(), 2, kLineLength);
+  AssertTextLengthEquals(GetTree(), root_data.id, kLineCount * kLineLength);
+
+  TestPositionType start = AXNodePosition::CreateTextPosition(
+      GetTreeID(), root_data.id, 0 /* text_offset */,
+      ax::mojom::TextAffinity::kDownstream);
+  TestPositionType end = start->CreatePositionAtEndOfAnchor();
+  ASSERT_EQ(kLineCount * kLineLength, end->text_offset());
+
+  // Walks the lines the way ITextProvider::GetVisibleRanges does.
+  int line_count = 0;
+  TestPositionType line_start = start->Clone();
+  while (!line_start->IsNullPosition() && *line_start < *end) {
+    TestPositionType line_end = line_start->CreateNextLineEndPosition(
+        AXBoundaryBehavior::CrossBoundary);
+    ASSERT_FALSE(line_end->IsNullPosition());
+    EXPECT_EQ(line_count * kLineLength, line_start->text_offset());
+    EXPECT_EQ((line_count + 1) * kLineLength, line_end->text_offset());
+    ++line_count;
+    line_start = line_start->CreateNextLineStartPosition(
+        AXBoundaryBehavior::CrossBoundary);
+  }
+  EXPECT_EQ(kLineCount, line_count);
+}
+
 TEST_F(AXPositionTest, GetMaxTextOffsetAndGetTextWithGeneratedContent) {
   // ++1 kRootWebArea
   // ++++2 kTextField

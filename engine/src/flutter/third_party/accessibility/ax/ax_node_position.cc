@@ -258,19 +258,20 @@ int AXNodePosition::MaxTextOffset() const {
 
   const AXNode* anchor = GetAnchor();
   BASE_DCHECK(anchor);
+  // Text boundary walks call this at every step, so the text is measured
+  // without converting it to UTF-16.
   // TODO(nektar): Replace with PlatformChildCount when AXNodePosition and
   // BrowserAccessibilityPosition will make one.
   if (!AnchorChildCount()) {
-    std::u16string value =
-        anchor->data().GetString16Attribute(ax::mojom::StringAttribute::kValue);
-    if (!value.empty())
-      return value.length();
+    const size_t value_length = base::UTF16LengthOfUTF8(
+        anchor->data().GetStringAttribute(ax::mojom::StringAttribute::kValue));
+    if (value_length > 0)
+      return value_length;
   }
 
   if (anchor->IsText()) {
-    return anchor->data()
-        .GetString16Attribute(ax::mojom::StringAttribute::kName)
-        .length();
+    return base::UTF16LengthOfUTF8(
+        anchor->data().GetStringAttribute(ax::mojom::StringAttribute::kName));
   }
 
   int text_length = 0;
