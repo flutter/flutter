@@ -1309,46 +1309,14 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// asynchronous. Asynchronous cleanup can be started, without being awaited,
   /// before calling `super.dispose()`. Any such cleanup continues after the
   /// [State] is unmounted, so it must not access [context] or call [setState]
-  /// after an asynchronous gap, and it should handle its own errors:
+  /// after an asynchronous gap, and it should handle its own errors.
   ///
-  /// {@tool snippet}
-  /// ```dart
-  /// class CountDisplay extends StatefulWidget {
-  ///   const CountDisplay({super.key, required this.counts});
+  /// {@tool dartpad}
+  /// This example shows a [StatefulWidget] that listens to a [Stream]. Its
+  /// [State] cancels the subscription in [dispose] without awaiting the
+  /// returned [Future].
   ///
-  ///   final Stream<int> counts;
-  ///
-  ///   @override
-  ///   State<CountDisplay> createState() => _CountDisplayState();
-  /// }
-  ///
-  /// class _CountDisplayState extends State<CountDisplay> {
-  ///   late final StreamSubscription<int> _subscription;
-  ///   int _count = 0;
-  ///
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     _subscription = widget.counts.listen((int count) {
-  ///       if (mounted) {
-  ///         setState(() {
-  ///           _count = count;
-  ///         });
-  ///       }
-  ///     });
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     // Starts the cancellation without waiting for it to complete.
-  ///     unawaited(_subscription.cancel());
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) => Text('$_count');
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/framework/state.dispose.0.dart **
   /// {@end-tool}
   ///
   /// ## Caveats
