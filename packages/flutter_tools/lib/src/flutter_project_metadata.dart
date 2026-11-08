@@ -393,7 +393,10 @@ class MigrateConfig {
     bool update = true,
     required Logger logger,
   }) {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      projectDirectory,
+      logger: logger,
+    );
     platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
 
     for (final SupportedPlatform platform in platforms) {

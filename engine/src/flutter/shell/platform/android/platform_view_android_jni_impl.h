@@ -131,6 +131,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   ASurfaceTransaction* createTransaction(
       std::function<void()>& out_publish_callback) override;
 
+  void sealFrameTransactions() override;
+
   void swapTransaction() override;
 
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
