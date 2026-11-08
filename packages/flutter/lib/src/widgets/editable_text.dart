@@ -5273,8 +5273,14 @@ class EditableTextState extends State<EditableText>
 
   @override
   void hideToolbar([bool hideHandles = true]) {
-    // Stop listening to parent scroll events when toolbar is hidden.
-    _disposeScrollNotificationObserver();
+    // On platforms that fade the toolbar on scroll (iOS), the system hides the
+    // context menu as soon as a scroll begins. If we stop listening to parent
+    // scroll events here, we never receive the ScrollEndNotification that should
+    // bring the toolbar back, so keep the observer alive until the scroll ends.
+    // See https://github.com/flutter/flutter/issues/185230.
+    if (!_platformSupportsFadeOnScroll) {
+      _disposeScrollNotificationObserver();
+    }
     if (hideHandles) {
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
