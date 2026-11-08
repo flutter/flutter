@@ -674,7 +674,7 @@ bool Canvas::AttemptColorFilterOptimization(
     auto atlas_contents = std::make_shared<ColorFilterAtlasContents>();
     atlas_contents->SetGeometry(&geometry);
     atlas_contents->SetAlpha(paint.color.alpha);
-    impeller::ColorMatrix color_matrix;
+    impeller::ColorMatrix color_matrix{};
     matrix_filter->get_matrix(color_matrix.array);
     atlas_contents->SetMatrix(color_matrix);
 
@@ -2254,7 +2254,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
   if (max_scale * text_frame->GetRuns()[0].GetFont().GetMetrics().point_size >
       kMaxTextScale) {
-    fml::StatusOr<flutter::DlPath> path = text_frame->GetPath();
+    absl::StatusOr<flutter::DlPath> path = text_frame->GetPath();
     if (path.ok()) {
       Save(1);
       Concat(Matrix::MakeTranslation(position));

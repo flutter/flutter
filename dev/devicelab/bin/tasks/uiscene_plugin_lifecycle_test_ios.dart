@@ -82,7 +82,7 @@ Future<void> main(List<String> args) async {
       var testFailedCount = 0;
       await testWithNewIOSSimulator(
         'TestAdd2AppSim',
-        deviceTypeId: 'com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-3rd-generation',
+        deviceTypeId: 'com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M4-8GB',
         (String deviceId) async {
           for (final xcodeProjectType in projectTypesToTest) {
             final (String xcodeProjectName, Directory xcodeProjectDir) = await _createNativeApp(
