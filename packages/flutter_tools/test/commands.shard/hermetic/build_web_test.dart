@@ -33,7 +33,6 @@ void main() {
   late ProcessManager processManager;
 
   setUpAll(() {
-    Cache.flutterRoot = '';
     Cache.disableLocking();
   });
 
@@ -710,6 +709,7 @@ void main() {
           projectFactory: FlutterProjectFactory(
             fileSystem: fileSystem,
             logger: BufferLogger.test(),
+            config: FakeConfig(),
           ),
         ),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -1183,6 +1183,7 @@ class TestWebBuildCommand extends FlutterCommand {
                projectFactory: FlutterProjectFactory(
                  fileSystem: fileSystem,
                  logger: logger ?? BufferLogger.test(),
+                 config: FakeConfig(),
                ),
              ),
          verboseHelp: verboseHelp,
@@ -1191,15 +1192,14 @@ class TestWebBuildCommand extends FlutterCommand {
   TestWebBuildCommand._({
     required BuildSystem buildSystem,
     required FeatureFlags featureFlags,
-    required ToolContext toolContext,
+    required super.toolContext,
     required bool verboseHelp,
   }) : webCommand = BuildWebCommand(
          buildSystem: buildSystem,
          featureFlags: featureFlags,
          toolContext: toolContext,
          verboseHelp: verboseHelp,
-       ),
-       super(toolContext: toolContext) {
+       ) {
     addSubcommand(webCommand);
   }
 

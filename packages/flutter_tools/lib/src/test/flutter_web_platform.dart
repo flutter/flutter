@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
+import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
@@ -26,7 +27,6 @@ import '../base/logger.dart';
 import '../base/template.dart';
 import '../base/time.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
@@ -98,7 +98,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(
           createDirectoryHandler(
             _fileSystem.directory(
-              _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
+              _fileSystem.path.join(_toolContext.cache.flutterRoot, 'packages', 'flutter_tools'),
             ),
             crossOriginIsolated: crossOriginIsolation,
           ),
@@ -131,7 +131,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         'FLUTTER_TEST_BROWSER': 'chrome',
         'FLUTTER_WEB_RENDERER': webRenderer.name,
         // Pass FLUTTER_ROOT so flutter_goldens can locate the cache directory and resolve repo paths.
-        if (Cache.flutterRoot case final String flutterRoot) 'FLUTTER_ROOT': flutterRoot,
+        'FLUTTER_ROOT': _toolContext.cache.flutterRoot,
       },
     );
   }
@@ -232,7 +232,13 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ahem text file.
   File get _ahem => _fileSystem.file(
-    _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'static', 'Ahem.ttf'),
+    _fileSystem.path.join(
+      _toolContext.cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      'static',
+      'Ahem.ttf',
+    ),
   );
 
   /// The ddc module loader js binary.
@@ -276,14 +282,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   File get _dartSdkSourcemaps =>
       _fileSystem.file(_artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!));
 
-  File _canvasKitFile(String relativePath) {
-    final String canvasKitPath = _fileSystem.path.join(
-      _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
-      'canvaskit',
-    );
-    final File canvasKitFile = _fileSystem.file(_fileSystem.path.join(canvasKitPath, relativePath));
-    return canvasKitFile;
-  }
+  String get _canvasKitPath => _fileSystem.path.join(
+    _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
+    'canvaskit',
+  );
 
   Future<shelf.Response> _handleTestRequest(shelf.Request request) async {
     if (request.url.path.endsWith('main.dart.browser_test.dart.js')) {
@@ -475,13 +477,19 @@ window.\$dartLoader.loader.nextAttempt();
   /// Serves a local build of CanvasKit, replacing the CDN build, which can
   /// cause test flakiness due to reliance on network.
   shelf.Response _localCanvasKitHandler(shelf.Request request) {
-    final String fullPath = _fileSystem.path.fromUri(request.url);
-    if (!fullPath.startsWith('canvaskit/')) {
+    final List<String> pathSegments = request.url.pathSegments;
+    final String canvasKitPath = _canvasKitPath;
+    final String filePath = _fileSystem.path.joinAll(<String>[
+      canvasKitPath,
+      ...pathSegments.skip(1),
+    ]);
+    if (pathSegments.firstOrNull != 'canvaskit' ||
+        !_fileSystem.path.isWithin(canvasKitPath, filePath) ||
+        !_fileSystem.isFileSync(filePath)) {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
-    final String relativePath = fullPath.replaceFirst('canvaskit/', '');
-    final String extension = _fileSystem.path.extension(relativePath);
+    final String extension = _fileSystem.path.extension(filePath);
     String contentType;
     switch (extension) {
       case '.js':
@@ -494,7 +502,7 @@ window.\$dartLoader.loader.nextAttempt();
         return shelf.Response.internalServerError(body: error);
     }
 
-    final File canvasKitFile = _canvasKitFile(relativePath);
+    final File canvasKitFile = _fileSystem.file(filePath);
     return shelf.Response.ok(
       canvasKitFile.openRead(),
       headers: <String, Object>{
@@ -804,7 +812,14 @@ class BrowserManager {
 
     unawaited(
       _browser.onExit.then((int exitCode) {
-        if (!_closed) {
+        if (_unexpectedDisconnect) {
+          if (exitCode != 0) {
+            _logger.printError(
+              'Chrome browser process (PID: ${_browser.pid}) '
+              'exited with code $exitCode after disconnecting from the test host.',
+            );
+          }
+        } else if (!_closed) {
           _logger.printError(
             'Chrome browser process (PID: ${_browser.pid}) '
             'exited unexpectedly with code $exitCode during test execution.',
@@ -852,8 +867,19 @@ class BrowserManager {
     );
 
     _environment = _loadBrowserEnvironment();
-    _channel.stream.listen(_onMessage, onDone: close);
+    _channel.stream.listen(_onMessage, onDone: _onDisconnect);
   }
+
+  /// Creates a manager for an already-running [browser] connected over
+  /// [webSocket].
+  @visibleForTesting
+  factory BrowserManager.test(
+    Chromium browser,
+    Runtime runtime,
+    WebSocketChannel webSocket,
+    Logger logger,
+    SystemClock systemClock,
+  ) = BrowserManager._;
 
   /// The browser instance that this is connected to via [_channel].
   final Chromium _browser;
@@ -877,6 +903,9 @@ class BrowserManager {
 
   /// Whether the channel to the browser has closed.
   var _closed = false;
+
+  /// Whether the browser disconnected before this manager started closing it.
+  var _unexpectedDisconnect = false;
 
   /// The completer for [_BrowserEnvironment.displayPause].
   ///
@@ -1193,6 +1222,25 @@ class BrowserManager {
     report.write('[flutter_tools] ---------------------------------------------');
 
     return report.toString();
+  }
+
+  /// Handles the browser closing its end of the channel.
+  ///
+  /// Report an unexpected disconnect before cleanup starts. Keep reporting the
+  /// process exit code after cleanup starts, because the exit notification can
+  /// arrive after the connection closes. This does not imply that the process
+  /// crashed: cleanup may have closed a browser whose page or renderer died.
+  Future<void> _onDisconnect() {
+    if (!_closed) {
+      _unexpectedDisconnect = true;
+      _logger.printError(
+        'The ${_runtime.name} browser closed its connection to the test host '
+        'unexpectedly, so any unfinished test suites are reported as '
+        '"did not complete". The browser process, page, or renderer may have '
+        'crashed or been terminated, for example after running out of memory.',
+      );
+    }
+    return close();
   }
 
   /// Closes the manager and releases any resources it owns, including closing
