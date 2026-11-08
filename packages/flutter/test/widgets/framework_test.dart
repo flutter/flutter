@@ -1271,9 +1271,10 @@ void main() {
           '_AsyncDisposeWidgetState.dispose failed to call super.dispose.\n'
           'dispose() implementations must always call their superclass dispose() method, to '
           'ensure that all the resources used by the widget are fully released.\n'
-          'The framework does not await dispose(), so super.dispose() must be called '
-          'synchronously, not after an await. Consider making dispose() synchronous and '
-          'starting any asynchronous cleanup without awaiting it.',
+          '_AsyncDisposeWidgetState.dispose() returned a Future, but the framework does not '
+          'await dispose(), so super.dispose() must be called synchronously, not after an '
+          'await. Consider making dispose() synchronous and starting any asynchronous cleanup '
+          'without awaiting it.',
         ),
       ),
     );

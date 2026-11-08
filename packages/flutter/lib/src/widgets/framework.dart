@@ -6091,7 +6091,7 @@ class StatefulElement extends ComponentElement {
   @override
   void unmount() {
     super.unmount();
-    state.dispose();
+    final Object? debugCheckForReturnedFuture = state.dispose() as dynamic;
     assert(() {
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         return true;
@@ -6102,11 +6102,13 @@ class StatefulElement extends ComponentElement {
           'dispose() implementations must always call their superclass dispose() method, to ensure '
           'that all the resources used by the widget are fully released.',
         ),
-        ErrorHint(
-          'The framework does not await dispose(), so super.dispose() must be called '
-          'synchronously, not after an await. Consider making dispose() synchronous and '
-          'starting any asynchronous cleanup without awaiting it.',
-        ),
+        if (debugCheckForReturnedFuture is Future)
+          ErrorHint(
+            '${state.runtimeType}.dispose() returned a Future, but the framework does not await '
+            'dispose(), so super.dispose() must be called synchronously, not after an await. '
+            'Consider making dispose() synchronous and starting any asynchronous cleanup '
+            'without awaiting it.',
+          ),
       ]);
     }());
     state._element = null;
