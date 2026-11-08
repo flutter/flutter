@@ -194,6 +194,8 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   static bool _isAtScrollableBoundary(Rect child, SemanticsNode parent) {
     final SemanticsData data = parent.getSemanticsData();
     final Rect bounds = parent.rect;
+    // Scroll actions describe finger movement, not viewport movement. For
+    // example, scrollRight reveals content clipped at the left edge.
     return (child.left - bounds.left <= _kMinimumGapToBoundary &&
             data.hasAction(ui.SemanticsAction.scrollRight)) ||
         (bounds.right - child.right <= _kMinimumGapToBoundary &&
