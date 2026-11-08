@@ -503,13 +503,16 @@ void main() {
       await tester.pumpWidget(build(100.0));
       expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(100.0));
 
+      final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
       await tester.pumpWidget(build(200.0));
       expect(tester.takeException(), isNull);
       expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(200.0));
+      expect(box.state, RenderAnimatedSizeState.stable);
 
       await tester.pumpWidget(build(50.0));
       expect(tester.takeException(), isNull);
       expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(50.0));
+      expect(box.state, RenderAnimatedSizeState.stable);
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/71227
@@ -628,6 +631,128 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(sizesAtEnd, <Size>[const Size.square(200.0)]);
       expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(200.0));
+    });
+
+    testWidgets('works wrapped in IntrinsicHeight and Wrap with zero duration', (
+      WidgetTester tester,
+    ) async {
+      Widget build(Size size) {
+        return Center(
+          child: IntrinsicHeight(
+            child: Wrap(
+              textDirection: TextDirection.ltr,
+              children: <Widget>[
+                AnimatedSize(
+                  duration: Duration.zero,
+                  child: SizedBox.fromSize(size: size),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(const Size(100.0, 100.0)));
+      expect(tester.getSize(find.byType(IntrinsicHeight)), const Size(100.0, 100.0));
+
+      await tester.pumpWidget(build(const Size(150.0, 200.0)));
+      expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(IntrinsicHeight)), const Size(150.0, 200.0));
+    });
+
+    for (final state in <RenderAnimatedSizeState>[
+      RenderAnimatedSizeState.changed,
+      RenderAnimatedSizeState.stable,
+    ]) {
+      testWidgets('dry layout matches layout when a stopped animation resumes with zero '
+          'duration in the ${state.name} state', (WidgetTester tester) async {
+        Widget build(double size) {
+          return Center(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              child: SizedBox.square(dimension: size),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(build(100.0));
+        await tester.pumpWidget(build(200.0));
+        if (state == RenderAnimatedSizeState.stable) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
+        expect(box.state, state);
+
+        // A detach stops the animation. The duration then changes to zero
+        // before the next layout resumes it.
+        box.debugController!.stop();
+        box.duration = Duration.zero;
+        final Size drySize = box.getDryLayout(box.constraints);
+        box.markNeedsLayout();
+        await tester.pump();
+        expect(box.size, const Size.square(200.0));
+        expect(drySize, box.size);
+      });
+    }
+
+    group('with zero duration, onEnd after a layout outside a frame', () {
+      late int onEndCount;
+      late RenderAnimatedSize box;
+      late RenderConstrainedBox parent;
+
+      Future<void> setUpTree(WidgetTester tester) async {
+        onEndCount = 0;
+        await tester.pumpWidget(
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(),
+              child: AnimatedSize(
+                duration: Duration.zero,
+                onEnd: () => onEndCount += 1,
+                child: const SizedBox.square(dimension: 100.0),
+              ),
+            ),
+          ),
+        );
+        box = tester.renderObject(find.byType(AnimatedSize));
+        parent = tester.renderObject(find.byType(ConstrainedBox));
+      }
+
+      // The layout completes the animation and waits for the next frame to
+      // call onEnd.
+      void layOutWithChildSize(double dimension) {
+        (box.child! as RenderConstrainedBox).additionalConstraints = BoxConstraints.tight(
+          Size.square(dimension),
+        );
+        box.owner!.flushLayout();
+      }
+
+      testWidgets('is called once for two layouts', (WidgetTester tester) async {
+        await setUpTree(tester);
+        layOutWithChildSize(200.0);
+        layOutWithChildSize(300.0);
+        expect(onEndCount, 0);
+        await tester.pump();
+        expect(onEndCount, 1);
+      });
+
+      testWidgets('is not called after a detach', (WidgetTester tester) async {
+        await setUpTree(tester);
+        layOutWithChildSize(200.0);
+        await tester.pumpWidget(const SizedBox());
+        expect(onEndCount, 0);
+      });
+
+      testWidgets('is not called after a layout with tight constraints', (
+        WidgetTester tester,
+      ) async {
+        await setUpTree(tester);
+        layOutWithChildSize(200.0);
+        parent.additionalConstraints = BoxConstraints.tight(const Size.square(50.0));
+        box.owner!.flushLayout();
+        await tester.pump();
+        expect(onEndCount, 0);
+      });
     });
   });
 
