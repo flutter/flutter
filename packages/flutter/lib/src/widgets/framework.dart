@@ -1314,7 +1314,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// {@tool dartpad}
   /// This example shows a [StatefulWidget] that listens to a [Stream]. Its
   /// [State] cancels the subscription in [dispose] without awaiting the
-  /// returned [Future].
+  /// returned [Future], and resubscribes in [didUpdateWidget] when the
+  /// widget is given a different stream.
   ///
   /// ** See code in examples/api/lib/widgets/framework/state.dispose.0.dart **
   /// {@end-tool}

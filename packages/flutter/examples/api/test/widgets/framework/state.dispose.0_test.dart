@@ -21,6 +21,21 @@ void main() {
     expect(find.text('Count: 3'), findsOne);
   });
 
+  testWidgets('CountDisplay resubscribes when given a new stream', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.StateDisposeExampleApp());
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('Count: 3'), findsOne);
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Restart'));
+    await tester.pump();
+    expect(find.text('Count: 0'), findsOne);
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Count: 1'), findsOne);
+  });
+
   testWidgets('CountDisplay cancels its subscription when disposed', (
     WidgetTester tester,
   ) async {

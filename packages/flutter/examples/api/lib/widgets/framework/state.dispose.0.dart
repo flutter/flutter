@@ -23,7 +23,8 @@ class StateDisposeExampleApp extends StatelessWidget {
   }
 }
 
-/// Shows a [CountDisplay] along with a button that removes it from the tree.
+/// Shows a [CountDisplay] along with buttons that give it a new stream or
+/// remove it from the tree.
 class CountDisplayControls extends StatefulWidget {
   const CountDisplayControls({super.key});
 
@@ -49,6 +50,18 @@ class _CountDisplayControlsState extends State<CountDisplayControls> {
           CountDisplay(counts: _counts)
         else
           const Text('Counter removed'),
+        ElevatedButton(
+          onPressed: _showCount
+              ? () {
+                  // Passes a new stream to CountDisplay, which calls
+                  // didUpdateWidget on its State.
+                  setState(() {
+                    _counts = _createCounts();
+                  });
+                }
+              : null,
+          child: const Text('Restart'),
+        ),
         ElevatedButton(
           onPressed: () {
             setState(() {
@@ -77,12 +90,26 @@ class CountDisplay extends StatefulWidget {
 }
 
 class _CountDisplayState extends State<CountDisplay> {
-  late final StreamSubscription<int> _subscription;
+  late StreamSubscription<int> _subscription;
   int _count = 0;
 
   @override
   void initState() {
     super.initState();
+    _subscribe();
+  }
+
+  @override
+  void didUpdateWidget(CountDisplay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.counts != oldWidget.counts) {
+      unawaited(_subscription.cancel());
+      _count = 0;
+      _subscribe();
+    }
+  }
+
+  void _subscribe() {
     _subscription = widget.counts.listen((int count) {
       if (mounted) {
         setState(() {
