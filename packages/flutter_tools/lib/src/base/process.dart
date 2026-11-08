@@ -175,8 +175,9 @@ abstract class ProcessUtils {
   /// When [allowReentrantFlutter] is set to `true`, the child process is
   /// permitted to call the Flutter tool. By default it is not.
   ///
-  /// When [environment] is supplied, it is used as the environment for the child
-  /// process.
+  /// When [includeParentEnvironment] is true (the default), [environment]
+  /// overrides the inherited parent environment. Otherwise, only [environment]
+  /// and process-specific variables are supplied to the child.
   ///
   /// When [timeout] is supplied, kills the child process and
   /// throws a [ProcessException] when it doesn't finish in time.
@@ -201,6 +202,8 @@ abstract class ProcessUtils {
   });
 
   /// Run the command and block waiting for its result.
+  ///
+  /// [environment] and [includeParentEnvironment] behave as in [run].
   RunResult runSync(
     List<String> cmd, {
     bool throwOnError = false,
@@ -216,6 +219,8 @@ abstract class ProcessUtils {
 
   /// This runs the command in the background from the specified working
   /// directory. Completes when the process has been started.
+  ///
+  /// [environment] and [includeParentEnvironment] behave as in [run].
   Future<Process> start(
     List<String> cmd, {
     String? workingDirectory,
@@ -236,6 +241,8 @@ abstract class ProcessUtils {
   ///
   /// If [stdoutErrorMatcher] is non-null, matching lines from stdout will be
   /// treated as errors, just as if they had been logged to stderr instead.
+  ///
+  /// [environment] and [includeParentEnvironment] behave as in [run].
   Future<int> stream(
     List<String> cmd, {
     String? workingDirectory,

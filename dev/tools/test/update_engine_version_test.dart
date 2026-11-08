@@ -264,6 +264,21 @@ void main() {
       externalGit = localFs.systemTempDirectory.createTempSync('GIT_DIR_test.');
       initGitRepoWithBlankInitialCommit(workingPath: externalGit.path);
       setupRemote(remote: 'upstream', rootPath: externalGit.path);
+      final File externalEngineVersion = externalGit
+          .childDirectory('bin')
+          .childDirectory('internal')
+          .childFile('engine.version');
+      externalEngineVersion.createSync(recursive: true);
+      externalEngineVersion.writeAsStringSync('external-engine');
+      run('git', <String>['add', 'bin/internal/engine.version'], workingPath: externalGit.path);
+      run('git', <String>['commit', '-m', 'track external engine'], workingPath: externalGit.path);
+      // Leave the external commit tracking the file, but remove it from the
+      // index so that using this repository or index changes the ls-files result.
+      run('git', <String>[
+        'rm',
+        '--cached',
+        'bin/internal/engine.version',
+      ], workingPath: externalGit.path);
 
       externalHead =
           (run('git', <String>['rev-parse', 'HEAD'], workingPath: externalGit.path).stdout
@@ -279,12 +294,79 @@ void main() {
       environment['GIT_DIR'] = '${externalGit.path}/.git';
       environment['GIT_INDEX_FILE'] = '${externalGit.path}/.git/index';
       environment['GIT_WORK_TREE'] = externalGit.path;
+      environment['GIT_OBJECT_DIRECTORY'] = '${externalGit.path}/.git/objects';
+      environment['GIT_ALTERNATE_OBJECT_DIRECTORIES'] = '${externalGit.path}/.git/objects';
+      environment['GIT_QUARANTINE_PATH'] = '${externalGit.path}/.git/objects';
+      environment['GIT_COMMON_DIR'] = '${externalGit.path}/.git';
 
       runUpdateEngineVersion();
 
       final String engineStamp = testRoot.binCacheEngineStamp.readAsStringSync().trim();
       expect(engineStamp, isNot(equals(externalHead)));
     });
+
+    test(
+      'clears object and common directory variables before invoking git',
+      () {
+        initGitRepoWithBlankInitialCommit();
+        pinEngineVersionForReleaseBranch(engineHash: 'local-engine');
+
+        // Resolve git before putting the shim on PATH, so it can delegate to
+        // the real executable without recursively invoking itself.
+        environment['PATH'] = io.Platform.environment['PATH'] ?? '/usr/bin:/bin';
+        final String realGit = (run('/bin/sh', <String>['-c', 'command -v git']).stdout as String)
+            .trim();
+        final Directory shimDir = externalGit.childDirectory('git-shim')..createSync();
+        final File capture = externalGit.childFile('git-environment');
+        final File shim = shimDir.childFile('git')
+          ..writeAsStringSync(r'''#!/bin/sh
+printf '%s\n' "${GIT_OBJECT_DIRECTORY+set}" \
+  "${GIT_ALTERNATE_OBJECT_DIRECTORIES+set}" \
+  "${GIT_QUARANTINE_PATH+set}" "${GIT_COMMON_DIR+set}" > "$GIT_SHIM_CAPTURE"
+exec "$GIT_SHIM_REAL_GIT" "$@"
+''');
+        run('chmod', <String>['+x', shim.path]);
+        environment['PATH'] = '${shimDir.path}:${environment['PATH']}';
+        environment['GIT_SHIM_CAPTURE'] = capture.path;
+        environment['GIT_SHIM_REAL_GIT'] = realGit;
+        for (final variable in <String>[
+          'GIT_OBJECT_DIRECTORY',
+          'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+          'GIT_QUARANTINE_PATH',
+          'GIT_COMMON_DIR',
+        ]) {
+          environment[variable] = localFs.path.join(externalGit.path, '.git', 'objects');
+        }
+
+        // Prove the shim sees the injected environment before the script runs.
+        run(shim.path, <String>['--version']);
+        expect(capture.readAsLinesSync(), <String>['set', 'set', 'set', 'set']);
+        capture.deleteSync();
+
+        runUpdateEngineVersion();
+
+        expect(capture.readAsLinesSync(), <String>['', '', '', '']);
+        expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('local-engine'));
+      },
+      skip: const LocalPlatform().isWindows || usePowershellOnPosix
+          ? 'The executable shell shim tests update_engine_version.sh only'
+          : null,
+    );
+
+    for (final variable in <String>['GIT_DIR', 'GIT_INDEX_FILE']) {
+      test('ignores $variable when checking the tracked engine version', () {
+        initGitRepoWithBlankInitialCommit();
+        setupRemote(remote: 'upstream');
+        pinEngineVersionForReleaseBranch(engineHash: 'local-engine');
+
+        environment[variable] = variable == 'GIT_DIR'
+            ? localFs.path.join(externalGit.path, '.git')
+            : localFs.path.join(externalGit.path, '.git', 'index');
+        runUpdateEngineVersion();
+
+        expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('local-engine'));
+      });
+    }
 
     tearDown(() {
       externalGit.deleteSync(recursive: true);

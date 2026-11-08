@@ -20,6 +20,10 @@ void main() {
     processManager = FakeProcessManager.empty();
   });
 
+  tearDown(() {
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   group('repository environment isolation', () {
     setUp(() {
       git = Git(
@@ -37,26 +41,32 @@ void main() {
         ),
         runProcessWith: ProcessUtils(processManager: processManager, logger: logger),
       );
-      processManager.addCommand(
-        const FakeCommand(
-          command: ['git', 'rev-parse', 'HEAD'],
-          environment: {'PATH': '/usr/bin', 'CUSTOM': 'value'},
-          includeParentEnvironment: false,
-        ),
-      );
     });
 
     const environment = {'CUSTOM': 'value', 'GIT_DIR': '/another/repository'};
 
-    test('runSync does not re-inherit removed variables', () {
+    void expectCommand({bool withOverrides = true}) {
+      processManager.addCommand(
+        FakeCommand(
+          command: const ['git', 'rev-parse', 'HEAD'],
+          environment: {'PATH': '/usr/bin', if (withOverrides) 'CUSTOM': 'value'},
+          includeParentEnvironment: false,
+        ),
+      );
+    }
+
+    testWithoutContext('runSync does not re-inherit removed variables', () {
+      expectCommand();
       git.runSync(['rev-parse', 'HEAD'], environment: environment);
     });
 
-    test('run does not re-inherit removed variables', () async {
+    testWithoutContext('run does not re-inherit removed variables', () async {
+      expectCommand();
       await git.run(['rev-parse', 'HEAD'], environment: environment);
     });
 
-    test('run with a timeout does not re-inherit removed variables', () async {
+    testWithoutContext('run with a timeout does not re-inherit removed variables', () async {
+      expectCommand();
       await git.run(
         ['rev-parse', 'HEAD'],
         environment: environment,
@@ -64,8 +74,20 @@ void main() {
       );
     });
 
-    test('stream does not re-inherit removed variables', () async {
+    testWithoutContext('stream does not re-inherit removed variables', () async {
+      expectCommand();
       await git.stream(['rev-parse', 'HEAD'], environment: environment);
+    });
+
+    testWithoutContext('omitted environment preserves the filtered parent environment', () async {
+      expectCommand(withOverrides: false);
+      git.runSync(['rev-parse', 'HEAD']);
+      expectCommand(withOverrides: false);
+      await git.run(['rev-parse', 'HEAD']);
+      expectCommand(withOverrides: false);
+      await git.run(['rev-parse', 'HEAD'], timeout: const Duration(minutes: 1));
+      expectCommand(withOverrides: false);
+      await git.stream(['rev-parse', 'HEAD']);
     });
   });
 
@@ -80,14 +102,14 @@ void main() {
       );
     });
 
-    test('git.runSync passes ENV=noglob if environment is omitted', () {
+    testWithoutContext('git.runSync passes ENV=noglob if environment is omitted', () {
       processManager.addCommand(
         const FakeCommand(command: ['git', 'foo', 'bar'], environment: expectedCygwinEnvVars),
       );
       git.runSync(['foo', 'bar']);
     });
 
-    test('git.runSync passes ENV=noglob if environment is present', () {
+    testWithoutContext('git.runSync passes ENV=noglob if environment is present', () {
       processManager.addCommand(
         const FakeCommand(
           command: ['git', 'foo', 'bar'],
@@ -97,14 +119,14 @@ void main() {
       git.runSync(['foo', 'bar'], environment: {'baz': 'BAZ'});
     });
 
-    test('git.run passes ENV=noglob if environment is omitted', () async {
+    testWithoutContext('git.run passes ENV=noglob if environment is omitted', () async {
       processManager.addCommand(
         const FakeCommand(command: ['git', 'foo', 'bar'], environment: expectedCygwinEnvVars),
       );
       await git.run(['foo', 'bar']);
     });
 
-    test('git.run passes ENV=noglob if environment is present', () async {
+    testWithoutContext('git.run passes ENV=noglob if environment is present', () async {
       processManager.addCommand(
         const FakeCommand(
           command: ['git', 'foo', 'bar'],
@@ -114,14 +136,14 @@ void main() {
       await git.run(['foo', 'bar'], environment: {'baz': 'BAZ'});
     });
 
-    test('git.stream passes ENV=noglob if environment is omitted', () async {
+    testWithoutContext('git.stream passes ENV=noglob if environment is omitted', () async {
       processManager.addCommand(
         const FakeCommand(command: ['git', 'foo', 'bar'], environment: expectedCygwinEnvVars),
       );
       await git.stream(['foo', 'bar']);
     });
 
-    test('git.stream passes ENV=noglob if environment is present', () async {
+    testWithoutContext('git.stream passes ENV=noglob if environment is present', () async {
       processManager.addCommand(
         const FakeCommand(
           command: ['git', 'foo', 'bar'],

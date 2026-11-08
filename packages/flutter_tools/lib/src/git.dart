@@ -55,6 +55,8 @@ interface class Git {
   };
 
   Map<String, String> _filterEnvironment(Map<String, String>? environment) {
+    // Inheritance is disabled for Git processes, so retain the parent
+    // environment and apply caller overrides before removing Git context.
     final result = <String, String>{..._platform.environment, ...?environment};
     result.removeWhere(
       // Doing toUpperCase because windows environment vars are case-insensitive
