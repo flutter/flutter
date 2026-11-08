@@ -1312,7 +1312,25 @@ void main() {
         ),
         phase: EnginePhase.build,
       );
-      expect(tester.takeException(), isAssertionError);
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(
+        (exception! as FlutterError).toStringDeep(),
+        'FlutterError\n'
+        '   DraggableScrollableController is already attached to a sheet.\n'
+        '   A DraggableScrollableController can only be attached to one\n'
+        '   DraggableScrollableSheet at a time, but it was given to a new\n'
+        '   sheet while it was still attached to another one.\n'
+        '   This can also happen when a single DraggableScrollableSheet is\n'
+        '   recreated instead of updated because its key, or the key of one\n'
+        '   of its ancestors in a Row, Column, Stack or similar, changed. The\n'
+        '   new sheet attaches to the controller before the old sheet is\n'
+        '   removed from the tree.\n'
+        '   Use a separate DraggableScrollableController for each sheet. If a\n'
+        '   single sheet is being recreated, keep its key and the keys of its\n'
+        '   ancestors stable, or, as a last resort, give the sheet a\n'
+        '   GlobalKey so that its State is reused when it moves.\n',
+      );
     },
   );
 
@@ -1517,10 +1535,9 @@ void main() {
     );
   });
 
-  group('DraggableScrollableController attached to more than one sheet', () {
-    Widget sheet({Key? key, required DraggableScrollableController controller}) {
+  group('DraggableScrollableSheet recreated with the same controller', () {
+    Widget sheet(DraggableScrollableController controller) {
       return DraggableScrollableSheet(
-        key: key,
         controller: controller,
         builder: (BuildContext context, ScrollController scrollController) {
           return SingleChildScrollView(
@@ -1531,94 +1548,55 @@ void main() {
       );
     }
 
-    Widget column({required bool insertSibling, required Widget child}) {
+    Widget column({
+      required bool insertSibling,
+      required DraggableScrollableController controller,
+    }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
           children: <Widget>[
             if (insertSibling) const Expanded(child: SizedBox.expand()),
-            Expanded(child: child),
+            Expanded(child: sheet(controller)),
           ],
         ),
       );
     }
 
-    testWidgets('throws a descriptive error when two sheets share a controller', (
+    testWidgets('stays attached when an un-keyed sibling is inserted before the sheet', (
       WidgetTester tester,
     ) async {
       final controller = DraggableScrollableController();
       addTearDown(controller.dispose);
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Column(
-            children: <Widget>[
-              Expanded(child: sheet(controller: controller)),
-              Expanded(child: sheet(controller: controller)),
-            ],
-          ),
-        ),
-      );
+      await tester.pumpWidget(column(insertSibling: false, controller: controller));
+      expect(controller.isAttached, isTrue);
 
-      final Object? exception = tester.takeException();
-      expect(exception, isFlutterError);
-      final error = exception! as FlutterError;
-      expect(
-        error.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   DraggableScrollableController is already attached to a sheet.\n'
-          '   A DraggableScrollableController can only be attached to one\n'
-          '   DraggableScrollableSheet at a time, but it was given to a new\n'
-          '   sheet while it was still attached to another one.\n'
-          '   This can also happen when a single DraggableScrollableSheet is\n'
-          '   recreated instead of updated, for example because its key changed\n'
-          '   or because a widget was inserted before it in the tree. The new\n'
-          '   sheet attaches to the controller before the old sheet is\n'
-          '   disposed.\n'
-          '   Use a separate DraggableScrollableController for each sheet. If\n'
-          '   the sheet is being recreated, give it a GlobalKey so that it\n'
-          '   keeps its state when it moves in the tree, or avoid changing its\n'
-          '   key.\n',
-        ),
-      );
-    });
-
-    testWidgets('throws when a sheet is recreated because a sibling is inserted before it', (
-      WidgetTester tester,
-    ) async {
-      final controller = DraggableScrollableController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(column(insertSibling: false, child: sheet(controller: controller)));
+      // The sibling makes the sheet's State be recreated: the new State
+      // attaches before the old one is disposed.
+      await tester.pumpWidget(column(insertSibling: true, controller: controller));
       expect(tester.takeException(), isNull);
+      // Disposing the old State must not detach the new one.
+      expect(controller.isAttached, isTrue);
 
-      await tester.pumpWidget(column(insertSibling: true, child: sheet(controller: controller)));
-      final Object? exception = tester.takeException();
-      expect(exception, isFlutterError);
-      expect(
-        (exception! as FlutterError).message,
-        startsWith('DraggableScrollableController is already attached to a sheet.'),
-      );
+      var notifications = 0;
+      controller.addListener(() => notifications++);
+      controller.jumpTo(0.3);
+      await tester.pump();
+      expect(controller.size, moreOrLessEquals(0.3));
+      expect(notifications, greaterThan(0));
     });
 
-    testWidgets('a GlobalKey lets a moved sheet keep its controller, as the error suggests', (
+    testWidgets('can be reattached after the recreated sheet is removed', (
       WidgetTester tester,
     ) async {
       final controller = DraggableScrollableController();
       addTearDown(controller.dispose);
-      final GlobalKey sheetKey = GlobalKey();
-      await tester.pumpWidget(
-        column(
-          insertSibling: false,
-          child: sheet(key: sheetKey, controller: controller),
-        ),
-      );
-      await tester.pumpWidget(
-        column(
-          insertSibling: true,
-          child: sheet(key: sheetKey, controller: controller),
-        ),
-      );
+      await tester.pumpWidget(column(insertSibling: false, controller: controller));
+      await tester.pumpWidget(column(insertSibling: true, controller: controller));
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(controller.isAttached, isFalse);
+
+      await tester.pumpWidget(column(insertSibling: false, controller: controller));
       expect(tester.takeException(), isNull);
       expect(controller.isAttached, isTrue);
     });
