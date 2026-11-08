@@ -111,17 +111,17 @@ class _CountDisplayState extends State<CountDisplay> {
 
   void _subscribe() {
     _subscription = widget.counts.listen((int count) {
-      if (mounted) {
-        setState(() {
-          _count = count;
-        });
-      }
+      setState(() {
+        _count = count;
+      });
     });
   }
 
   @override
   void dispose() {
-    // Starts the cancellation without waiting for it to complete.
+    // Starts the cancellation without waiting for it to complete. The
+    // subscription stops delivering events as soon as cancel() is called, so
+    // setState is never called after this State is unmounted.
     unawaited(_subscription.cancel());
     super.dispose();
   }
