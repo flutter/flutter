@@ -666,32 +666,42 @@ void main() {
     ]) {
       testWidgets('dry layout matches layout when a stopped animation resumes with zero '
           'duration in the ${state.name} state', (WidgetTester tester) async {
-        Widget build(double size) {
+        final GlobalKey key = GlobalKey();
+        Widget build({required bool wrapped, required Duration duration, required double size}) {
+          final Widget animatedSize = AnimatedSize(
+            key: key,
+            duration: duration,
+            child: SizedBox.square(dimension: size),
+          );
+          // IntrinsicHeight reads the dry layout of AnimatedSize before
+          // AnimatedSize lays out.
           return Center(
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              child: SizedBox.square(dimension: size),
-            ),
+            child: wrapped
+                ? IntrinsicHeight(
+                    child: Wrap(textDirection: TextDirection.ltr, children: <Widget>[animatedSize]),
+                  )
+                : animatedSize,
           );
         }
 
-        await tester.pumpWidget(build(100.0));
-        await tester.pumpWidget(build(200.0));
+        const duration = Duration(milliseconds: 200);
+        await tester.pumpWidget(build(wrapped: false, duration: duration, size: 100.0));
+        await tester.pumpWidget(build(wrapped: false, duration: duration, size: 200.0));
         if (state == RenderAnimatedSizeState.stable) {
           await tester.pump(const Duration(milliseconds: 100));
         }
         final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
         expect(box.state, state);
+        expect(box.isAnimating, isTrue);
 
-        // A detach stops the animation. The duration then changes to zero
-        // before the next layout resumes it.
-        box.debugController!.stop();
-        box.duration = Duration.zero;
-        final Size drySize = box.getDryLayout(box.constraints);
-        box.markNeedsLayout();
-        await tester.pump();
+        // The move to a new parent detaches and attaches the render object,
+        // which stops the animation. The next layout resumes it with a zero
+        // duration.
+        await tester.pumpWidget(build(wrapped: true, duration: Duration.zero, size: 200.0));
+        expect(tester.renderObject(find.byType(AnimatedSize)), same(box));
+        expect(tester.takeException(), isNull);
         expect(box.size, const Size.square(200.0));
-        expect(drySize, box.size);
+        expect(tester.getSize(find.byType(IntrinsicHeight)), const Size.square(200.0));
       });
     }
 
