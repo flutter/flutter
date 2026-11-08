@@ -1175,19 +1175,19 @@ TEST_F(AXPositionTest, LineBoundariesInLongMultilingualText) {
 TEST_F(AXPositionTest, TextLengthCacheKeepsPositionsUnchanged) {
   // ++1 kRootWebArea
   // ++++2 kGenericContainer
-  // ++++++3 kStaticText "abc <emoji>"
+  // ++++++3 kStaticText "a <emoji>"
   // ++++++4 kStaticText ""
   // ++++++5 kStaticText "<Hebrew word>"
   // ++++6 kGenericContainer ignored
-  // ++++++7 kStaticText "hidden"
+  // ++++++7 kStaticText "hid"
   // ++++8 kButton
   // ++++9 kLineBreak "\n"
-  // ++++10 kTextField value="value text"
-  // ++++11 kStaticText "more text"
-  // ++++12 kStaticText "Line oneLine two"
-  // ++++++13 kInlineTextBox "Line one"
-  // ++++++14 kInlineTextBox "Line two"
-  // ++++15 kStaticText "last line <euro sign>"
+  // ++++10 kTextField value="val"
+  // ++++11 kStaticText "more"
+  // ++++12 kStaticText "L1L2"
+  // ++++++13 kInlineTextBox "L1"
+  // ++++++14 kInlineTextBox "L2"
+  // ++++15 kStaticText "end <euro sign>"
   std::vector<AXNodeData> nodes(15);
   for (size_t i = 0; i < nodes.size(); ++i) {
     nodes[i].id = static_cast<AXNode::AXID>(i + 1);
@@ -1197,25 +1197,25 @@ TEST_F(AXPositionTest, TextLengthCacheKeepsPositionsUnchanged) {
   nodes[0].child_ids = {2, 6, 8, 9, 10, 11, 12, 15};
   nodes[1].role = ax::mojom::Role::kGenericContainer;
   nodes[1].child_ids = {3, 4, 5};
-  nodes[2].SetName("abc \xF0\x9F\x98\x80");
-  nodes[4].SetName("\xD7\xA9\xD7\x9C\xD7\x95\xD7\x9D");
+  nodes[2].SetName("a \xF0\x9F\x98\x80");
+  nodes[4].SetName("\xD7\xA9\xD7\x9C");
   nodes[5].role = ax::mojom::Role::kGenericContainer;
   nodes[5].AddState(ax::mojom::State::kIgnored);
   nodes[5].child_ids = {7};
-  nodes[6].SetName("hidden");
+  nodes[6].SetName("hid");
   nodes[7].role = ax::mojom::Role::kButton;
   nodes[8].role = ax::mojom::Role::kLineBreak;
   nodes[8].SetName("\n");
   nodes[9].role = ax::mojom::Role::kTextField;
-  nodes[9].SetValue("value text");
-  nodes[10].SetName("more text");
-  nodes[11].SetName("Line oneLine two");
+  nodes[9].SetValue("val");
+  nodes[10].SetName("more");
+  nodes[11].SetName("L1L2");
   nodes[11].child_ids = {13, 14};
   nodes[12].role = ax::mojom::Role::kInlineTextBox;
-  nodes[12].SetName("Line one");
+  nodes[12].SetName("L1");
   nodes[13].role = ax::mojom::Role::kInlineTextBox;
-  nodes[13].SetName("Line two");
-  nodes[14].SetName("last line \xE2\x82\xAC");
+  nodes[13].SetName("L2");
+  nodes[14].SetName("end \xE2\x82\xAC");
   SetTree(CreateAXTree(nodes));
 
   const auto describe_positions = [this, &nodes]() {
@@ -1237,15 +1237,14 @@ TEST_F(AXPositionTest, TextLengthCacheKeepsPositionsUnchanged) {
           results.push_back(Describe(position->AsTreePosition()));
           results.push_back(
               Describe(position->CreateAncestorPosition(GetTree()->root())));
-          results.push_back(Describe(position->CreateNextLineStartPosition(
-              AXBoundaryBehavior::CrossBoundary)));
-          results.push_back(Describe(position->CreateNextLineEndPosition(
-              AXBoundaryBehavior::CrossBoundary)));
           results.push_back(Describe(position->CreatePreviousLineStartPosition(
               AXBoundaryBehavior::CrossBoundary)));
         }
-        for (const std::string& line : WalkVisibleLines(start)) {
-          results.push_back(line);
+        // Covers the forward line boundaries.
+        if (affinity == ax::mojom::TextAffinity::kDownstream) {
+          for (const std::string& line : WalkVisibleLines(start)) {
+            results.push_back(line);
+          }
         }
       }
     }

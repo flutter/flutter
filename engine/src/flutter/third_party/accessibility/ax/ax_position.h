@@ -120,14 +120,23 @@ class AX_EXPORT ScopedAXEmbeddedObjectBehaviorSetter {
 // affects them, e.g. the tree, may change meanwhile: keep it to one API call.
 class ScopedAXPositionTextLengthCache {
  public:
-  ScopedAXPositionTextLengthCache() : previous_(current_) { current_ = this; }
+  ScopedAXPositionTextLengthCache()
+      : previous_(current_),
+        embedded_object_behavior_(g_ax_embedded_object_behavior) {
+    current_ = this;
+  }
   ~ScopedAXPositionTextLengthCache() { current_ = previous_; }
   ScopedAXPositionTextLengthCache(const ScopedAXPositionTextLengthCache&) =
       delete;
   ScopedAXPositionTextLengthCache& operator=(
       const ScopedAXPositionTextLengthCache&) = delete;
 
-  static ScopedAXPositionTextLengthCache* current() { return current_; }
+  static ScopedAXPositionTextLengthCache* current() {
+    // The cached lengths depend on the embedded object behavior.
+    BASE_DCHECK(!current_ || current_->embedded_object_behavior_ ==
+                                 g_ax_embedded_object_behavior);
+    return current_;
+  }
 
   // Anchor to its MaxTextOffset().
   std::unordered_map<const void*, int> max_text_offsets;
@@ -138,6 +147,7 @@ class ScopedAXPositionTextLengthCache {
   static inline thread_local ScopedAXPositionTextLengthCache* current_ =
       nullptr;
   ScopedAXPositionTextLengthCache* const previous_;
+  const AXEmbeddedObjectBehavior embedded_object_behavior_;
 };
 
 // Forward declarations.

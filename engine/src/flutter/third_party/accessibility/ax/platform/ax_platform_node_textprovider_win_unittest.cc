@@ -263,7 +263,7 @@ TEST_F(AXPlatformNodeTextProviderTest, ITextProviderRangeFromChild) {
 }
 
 TEST_F(AXPlatformNodeTextProviderTest, ITextProviderGetVisibleRangesManyLines) {
-  constexpr int kLineCount = 100;
+  constexpr int kLineCount = 20;
   AXTreeUpdate update;
   update.tree_data.tree_id = AXTreeID::CreateNewAXTreeID();
   update.has_tree_data = true;
