@@ -1081,6 +1081,39 @@ TEST_F(AXPositionTest, GetMaxTextOffsetUpdate) {
   AssertTextLengthEquals(GetTree(), root_data.id, 24);
 }
 
+namespace {
+
+// Unlike ToString(), does not include the text, which may split a surrogate
+// pair.
+std::string Describe(const TestPositionType& position) {
+  return std::to_string(static_cast<int>(position->kind())) + ":" +
+         std::to_string(position->anchor_id()) + ":" +
+         std::to_string(position->child_index()) + ":" +
+         std::to_string(position->text_offset()) + ":" +
+         std::to_string(static_cast<int>(position->affinity()));
+}
+
+// The line ranges that ITextProvider::GetVisibleRanges walks through, before
+// it filters them by bounds.
+std::vector<std::string> WalkVisibleLines(const TestPositionType& start) {
+  std::vector<std::string> lines;
+  TestPositionType end = start->CreatePositionAtEndOfAnchor();
+  TestPositionType line_start = start->Clone();
+  while (!line_start->IsNullPosition() && *line_start < *end) {
+    TestPositionType line_end = line_start->CreateNextLineEndPosition(
+        AXBoundaryBehavior::CrossBoundary);
+    if (line_end->IsNullPosition() || *line_end > *end) {
+      line_end = end->Clone();
+    }
+    lines.push_back(Describe(line_start) + " - " + Describe(line_end));
+    line_start = line_start->CreateNextLineStartPosition(
+        AXBoundaryBehavior::CrossBoundary);
+  }
+  return lines;
+}
+
+}  // namespace
+
 TEST_F(AXPositionTest, LineBoundariesInLongMultilingualText) {
   // "abc", a Hebrew word, an emoji (a surrogate pair) and a euro sign: 13
   // UTF-16 code units.
@@ -1133,6 +1166,100 @@ TEST_F(AXPositionTest, LineBoundariesInLongMultilingualText) {
         AXBoundaryBehavior::CrossBoundary);
   }
   EXPECT_EQ(kLineCount, line_count);
+
+  const std::vector<std::string> lines = WalkVisibleLines(start);
+  ScopedAXPositionTextLengthCache text_length_cache;
+  EXPECT_EQ(lines, WalkVisibleLines(start));
+}
+
+TEST_F(AXPositionTest, TextLengthCacheKeepsPositionsUnchanged) {
+  // ++1 kRootWebArea
+  // ++++2 kGenericContainer
+  // ++++++3 kStaticText "abc <emoji>"
+  // ++++++4 kStaticText ""
+  // ++++++5 kStaticText "<Hebrew word>"
+  // ++++6 kGenericContainer ignored
+  // ++++++7 kStaticText "hidden"
+  // ++++8 kButton
+  // ++++9 kLineBreak "\n"
+  // ++++10 kTextField value="value text"
+  // ++++11 kStaticText "more text"
+  // ++++12 kStaticText "Line oneLine two"
+  // ++++++13 kInlineTextBox "Line one"
+  // ++++++14 kInlineTextBox "Line two"
+  // ++++15 kStaticText "last line <euro sign>"
+  std::vector<AXNodeData> nodes(15);
+  for (size_t i = 0; i < nodes.size(); ++i) {
+    nodes[i].id = static_cast<AXNode::AXID>(i + 1);
+    nodes[i].role = ax::mojom::Role::kStaticText;
+  }
+  nodes[0].role = ax::mojom::Role::kRootWebArea;
+  nodes[0].child_ids = {2, 6, 8, 9, 10, 11, 12, 15};
+  nodes[1].role = ax::mojom::Role::kGenericContainer;
+  nodes[1].child_ids = {3, 4, 5};
+  nodes[2].SetName("abc \xF0\x9F\x98\x80");
+  nodes[4].SetName("\xD7\xA9\xD7\x9C\xD7\x95\xD7\x9D");
+  nodes[5].role = ax::mojom::Role::kGenericContainer;
+  nodes[5].AddState(ax::mojom::State::kIgnored);
+  nodes[5].child_ids = {7};
+  nodes[6].SetName("hidden");
+  nodes[7].role = ax::mojom::Role::kButton;
+  nodes[8].role = ax::mojom::Role::kLineBreak;
+  nodes[8].SetName("\n");
+  nodes[9].role = ax::mojom::Role::kTextField;
+  nodes[9].SetValue("value text");
+  nodes[10].SetName("more text");
+  nodes[11].SetName("Line oneLine two");
+  nodes[11].child_ids = {13, 14};
+  nodes[12].role = ax::mojom::Role::kInlineTextBox;
+  nodes[12].SetName("Line one");
+  nodes[13].role = ax::mojom::Role::kInlineTextBox;
+  nodes[13].SetName("Line two");
+  nodes[14].SetName("last line \xE2\x82\xAC");
+  SetTree(CreateAXTree(nodes));
+
+  const auto describe_positions = [this, &nodes]() {
+    std::vector<std::string> results;
+    for (const AXNodeData& node : nodes) {
+      for (ax::mojom::TextAffinity affinity :
+           {ax::mojom::TextAffinity::kDownstream,
+            ax::mojom::TextAffinity::kUpstream}) {
+        TestPositionType start = AXNodePosition::CreateTextPosition(
+            GetTreeID(), node.id, 0 /* text_offset */, affinity);
+        const int max_text_offset = start->MaxTextOffset();
+        results.push_back(Describe(start) + " max " +
+                          std::to_string(max_text_offset));
+        for (int offset = 0; offset <= max_text_offset; ++offset) {
+          TestPositionType position = AXNodePosition::CreateTextPosition(
+              GetTreeID(), node.id, offset, affinity);
+          results.push_back(Describe(position));
+          results.push_back(Describe(position->AsLeafTextPosition()));
+          results.push_back(Describe(position->AsTreePosition()));
+          results.push_back(
+              Describe(position->CreateAncestorPosition(GetTree()->root())));
+          results.push_back(Describe(position->CreateNextLineStartPosition(
+              AXBoundaryBehavior::CrossBoundary)));
+          results.push_back(Describe(position->CreateNextLineEndPosition(
+              AXBoundaryBehavior::CrossBoundary)));
+          results.push_back(Describe(position->CreatePreviousLineStartPosition(
+              AXBoundaryBehavior::CrossBoundary)));
+        }
+        for (const std::string& line : WalkVisibleLines(start)) {
+          results.push_back(line);
+        }
+      }
+    }
+    return results;
+  };
+
+  for (AXEmbeddedObjectBehavior behavior :
+       {AXEmbeddedObjectBehavior::kSuppressCharacter,
+        AXEmbeddedObjectBehavior::kExposeCharacter}) {
+    ScopedAXEmbeddedObjectBehaviorSetter behavior_setter(behavior);
+    const std::vector<std::string> expected = describe_positions();
+    ScopedAXPositionTextLengthCache text_length_cache;
+    EXPECT_EQ(expected, describe_positions());
+  }
 }
 
 TEST_F(AXPositionTest, GetMaxTextOffsetAndGetTextWithGeneratedContent) {

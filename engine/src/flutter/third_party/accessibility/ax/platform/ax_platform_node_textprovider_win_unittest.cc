@@ -262,6 +262,61 @@ TEST_F(AXPlatformNodeTextProviderTest, ITextProviderRangeFromChild) {
       other_root_node_raw.Get(), &text_range_provider));
 }
 
+TEST_F(AXPlatformNodeTextProviderTest, ITextProviderGetVisibleRangesManyLines) {
+  constexpr int kLineCount = 100;
+  AXTreeUpdate update;
+  update.tree_data.tree_id = AXTreeID::CreateNewAXTreeID();
+  update.has_tree_data = true;
+  update.root_id = 1;
+  AXNodeData root_data;
+  root_data.id = 1;
+  root_data.role = ax::mojom::Role::kRootWebArea;
+  root_data.relative_bounds.bounds = gfx::RectF(0, 0, 400, 20 * kLineCount);
+  std::vector<std::wstring> line_texts;
+  for (int i = 0; i < kLineCount; ++i) {
+    AXNodeData line_data;
+    line_data.id = i + 2;
+    line_data.role = ax::mojom::Role::kStaticText;
+    // A Hebrew word and an emoji (a surrogate pair) after the line number.
+    line_data.SetName(std::to_string(i) +
+                      " \xD7\xA9\xD7\x9C\xD7\x95\xD7\x9D \xF0\x9F\x98\x80");
+    line_data.relative_bounds.bounds = gfx::RectF(0, 20 * i, 400, 20);
+    line_texts.push_back(std::to_wstring(i) + L" שלום " + L"\U0001F600");
+    root_data.child_ids.push_back(line_data.id);
+    update.nodes.push_back(line_data);
+  }
+  update.nodes.insert(update.nodes.begin(), root_data);
+  Init(update);
+
+  AXNode* root_node = GetRootAsAXNode();
+  AXPlatformNodeWin* owner =
+      static_cast<AXPlatformNodeWin*>(AXPlatformNodeFromNode(root_node));
+  ComPtr<IRawElementProviderSimple> root_node_raw =
+      QueryInterfaceFromNode<IRawElementProviderSimple>(root_node);
+  ComPtr<ITextProvider> text_provider;
+  EXPECT_HRESULT_SUCCEEDED(
+      root_node_raw->GetPatternProvider(UIA_TextPatternId, &text_provider));
+
+  base::win::ScopedSafearray visible_ranges;
+  EXPECT_HRESULT_SUCCEEDED(
+      text_provider->GetVisibleRanges(visible_ranges.Receive()));
+  LONG upper_bound = -1;
+  ASSERT_HRESULT_SUCCEEDED(
+      SafeArrayGetUBound(visible_ranges.Get(), 1, &upper_bound));
+  ASSERT_EQ(kLineCount - 1, upper_bound);
+
+  for (LONG i = 0; i < kLineCount; ++i) {
+    ComPtr<ITextRangeProvider> range;
+    ASSERT_HRESULT_SUCCEEDED(
+        SafeArrayGetElement(visible_ranges.Get(), &i,
+                            reinterpret_cast<void**>(range.GetAddressOf())));
+    SetOwner(owner, range.Get());
+    base::win::ScopedBstr text;
+    EXPECT_HRESULT_SUCCEEDED(range->GetText(-1, text.Receive()));
+    EXPECT_EQ(line_texts[i], std::wstring(text.Get())) << "line " << i;
+  }
+}
+
 TEST_F(AXPlatformNodeTextProviderTest,
        ITextProviderRangeFromChildMultipleChildren) {
   const int ROOT_ID = 1;

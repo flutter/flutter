@@ -180,6 +180,8 @@ gfx::Rect TestAXNodeWrapper::GetBoundsRect(
     const AXClippingBehavior clipping_behavior,
     AXOffscreenResult* offscreen_result) const {
   switch (coordinate_system) {
+    // For unit testing purposes, assume a single frame filling the screen.
+    case AXCoordinateSystem::kFrame:
     case AXCoordinateSystem::kScreenPhysicalPixels:
       // For unit testing purposes, assume a device scale factor of 1 and fall
       // through.
@@ -198,7 +200,6 @@ gfx::Rect TestAXNodeWrapper::GetBoundsRect(
       return gfx::ToEnclosingRect(bounds);
     }
     case AXCoordinateSystem::kRootFrame:
-    case AXCoordinateSystem::kFrame:
       BASE_UNREACHABLE();
       return gfx::Rect();
   }
@@ -211,6 +212,8 @@ gfx::Rect TestAXNodeWrapper::GetInnerTextRangeBoundsRect(
     const AXClippingBehavior clipping_behavior,
     AXOffscreenResult* offscreen_result) const {
   switch (coordinate_system) {
+    // For unit testing purposes, assume a single frame filling the screen.
+    case AXCoordinateSystem::kFrame:
     case AXCoordinateSystem::kScreenPhysicalPixels:
     // For unit testing purposes, assume a device scale factor of 1 and fall
     // through.
@@ -243,7 +246,6 @@ gfx::Rect TestAXNodeWrapper::GetInnerTextRangeBoundsRect(
       return gfx::ToEnclosingRect(bounds);
     }
     case AXCoordinateSystem::kRootFrame:
-    case AXCoordinateSystem::kFrame:
       BASE_UNREACHABLE();
       return gfx::Rect();
   }

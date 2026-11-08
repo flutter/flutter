@@ -250,6 +250,21 @@ bool AXNodePosition::IsInWhiteSpace() const {
 // strings first and then taking their length, especially when the process
 // is recursive.
 int AXNodePosition::MaxTextOffset() const {
+  ScopedAXPositionTextLengthCache* cache =
+      ScopedAXPositionTextLengthCache::current();
+  if (!cache || IsNullPosition())
+    return ComputeMaxTextOffset();
+
+  const AXNode* anchor = GetAnchor();
+  auto iter = cache->max_text_offsets.find(anchor);
+  if (iter != cache->max_text_offsets.end())
+    return iter->second;
+  const int max_text_offset = ComputeMaxTextOffset();
+  cache->max_text_offsets.emplace(anchor, max_text_offset);
+  return max_text_offset;
+}
+
+int AXNodePosition::ComputeMaxTextOffset() const {
   if (IsNullPosition())
     return INVALID_OFFSET;
 
