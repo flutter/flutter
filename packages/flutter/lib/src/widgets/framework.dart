@@ -1307,7 +1307,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// [Future] returned by this method, and checks that `super.dispose()` was
   /// called as soon as this method returns, so this method should not be
   /// asynchronous. Asynchronous cleanup can be started, without being awaited,
-  /// before calling `super.dispose()`:
+  /// before calling `super.dispose()`. Any such cleanup continues after the
+  /// [State] is unmounted, so it must not access [context] or call [setState]
+  /// after an asynchronous gap, and it should handle its own errors:
   ///
   /// {@tool snippet}
   /// ```dart
