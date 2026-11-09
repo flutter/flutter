@@ -340,6 +340,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 @property(nonatomic, assign) BOOL awokenFromNib;
+@property(nonatomic, strong) UIScrollView* scrollView;
 
 - (void)surfaceUpdated:(BOOL)appeared;
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
@@ -1612,6 +1613,18 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   }
   XCTAssertNil(weakViewController);
   XCTAssertNil(weakView);
+}
+
+- (void)testLoadViewHidesScrollEdgeEffectsOnScrollToTopHelper {
+  if (@available(iOS 26.0, *)) {
+    FlutterViewController* viewController =
+        [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
+    [viewController loadView];
+    XCTAssertTrue(viewController.scrollView.topEdgeEffect.hidden);
+    XCTAssertTrue(viewController.scrollView.bottomEdgeEffect.hidden);
+    XCTAssertTrue(viewController.scrollView.leftEdgeEffect.hidden);
+    XCTAssertTrue(viewController.scrollView.rightEdgeEffect.hidden);
+  }
 }
 
 #pragma mark - Platform Brightness
