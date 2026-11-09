@@ -150,7 +150,7 @@ class TestBed {
 
   /// Returns a [ToolContext] backed by the active [TestBed] zone, or `null`
   /// when called outside [TestBed.run].
-  static ToolContext? get activeToolContext {
+  static ToolContext? createToolContext() {
     if (Zone.current[_inTestBedKey] != true || Zone.current[contextKey] == null) {
       return null;
     }
@@ -163,7 +163,7 @@ class TestBed {
       flutterVersion: context.get<FlutterVersion>(),
       logger: context.get<Logger>(),
       platform: platform,
-      processManager: context.get<ProcessManager>() ?? const LocalProcessManager(),
+      processManager: context.get<ProcessManager>(),
     );
   }
 

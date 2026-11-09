@@ -6,46 +6,36 @@ import 'dart:async';
 import 'dart:io' hide Directory, File;
 
 import 'package:dwds/dwds.dart';
-import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
-import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import 'fake_process_manager.dart';
 import 'fakes.dart';
 import 'testbed.dart';
 
 /// Helper function to create a [WebDevFS] with sensible testbed defaults.
 WebDevFS createWebDevFS({
-  Artifacts? artifacts,
   String packagesFilePath = '.dart_tool/package_config.json',
   UrlTunneller? urlTunneller,
   bool useSseForDebugProxy = false,
   bool useSseForDebugBackend = false,
   bool useSseForInjectedClient = false,
   BuildInfo buildInfo = BuildInfo.debug,
-  Config? config,
   bool enableDwds = false,
   DartDevelopmentServiceConfiguration ddsConfig = const DartDevelopmentServiceConfiguration(),
   Uri? entrypoint,
@@ -59,53 +49,23 @@ WebDevFS createWebDevFS({
   Directory? rootDirectory,
   bool useDwdsWebSocketConnection = false,
   bool webCrossOriginIsolation = false,
-  FileSystem? fileSystem,
-  FlutterVersion? flutterVersion,
   Logger? logger,
   Platform? platform,
-  Cache? cache,
-  ProcessManager? processManager,
-  ToolContext? toolContext,
   bool testMode = true,
   Map<String, String> webDefines = const <String, String>{},
 }) {
-  final ToolContext resolvedToolContext =
-      toolContext ??
-      () {
-        final ToolContext? testBedContext = TestBed.activeToolContext;
-        final Platform resolvedPlatform =
-            platform ?? testBedContext?.platform ?? const LocalPlatform();
-        final Logger resolvedLogger = logger ?? testBedContext?.logger ?? BufferLogger.test();
-        final FileSystem? baseFileSystem = switch (testBedContext?.fs) {
-          final ErrorHandlingFileSystem errorHandlingFs => errorHandlingFs.fileSystem,
-          final FileSystem otherFs => otherFs,
-          null => null,
-        };
-        final FileSystem resolvedFileSystem =
-            fileSystem ??
-            ErrorHandlingFileSystem(
-              delegate: baseFileSystem ?? MemoryFileSystem.test(),
-              platform: resolvedPlatform,
-            );
-        return FakeToolContext(
-          artifacts:
-              artifacts ??
-              testBedContext?.artifacts ??
-              Artifacts.test(fileSystem: resolvedFileSystem),
-          cache:
-              cache ??
-              testBedContext?.cache ??
-              Cache.test(processManager: FakeProcessManager.any()),
-          config: config ?? testBedContext?.config ?? Config.test(logger: resolvedLogger),
-          fs: resolvedFileSystem,
-          flutterVersion: flutterVersion ?? testBedContext?.flutterVersion ?? FakeFlutterVersion(),
-          logger: resolvedLogger,
-          platform: resolvedPlatform,
-          processManager:
-              processManager ?? testBedContext?.processManager ?? const LocalProcessManager(),
-        );
-      }();
-  final FileSystem resolvedFileSystem = fileSystem ?? resolvedToolContext.fs;
+  final ToolContext? testBedContext = TestBed.createToolContext();
+  final ToolContext toolContext = FakeToolContext(
+    artifacts: testBedContext?.artifacts,
+    cache: testBedContext?.cache,
+    config: testBedContext?.config,
+    fs: testBedContext?.fs,
+    flutterVersion: testBedContext?.flutterVersion,
+    logger: logger ?? testBedContext?.logger,
+    platform: platform ?? testBedContext?.platform,
+    processManager: testBedContext?.processManager,
+  );
+  final FileSystem fs = toolContext.fs;
   return WebDevFS(
     packagesFilePath: packagesFilePath,
     urlTunneller: urlTunneller,
@@ -115,7 +75,7 @@ WebDevFS createWebDevFS({
     buildInfo: buildInfo,
     enableDwds: enableDwds,
     ddsConfig: ddsConfig,
-    entrypoint: entrypoint ?? resolvedFileSystem.file('lib/main.dart').uri,
+    entrypoint: entrypoint ?? fs.file('lib/main.dart').uri,
     expressionCompiler: expressionCompiler,
     chromiumLauncher: chromiumLauncher,
     nativeNullAssertions: nativeNullAssertions,
@@ -123,10 +83,10 @@ WebDevFS createWebDevFS({
     webRenderer: webRenderer,
     isWasm: isWasm,
     useLocalCanvasKit: useLocalCanvasKit,
-    rootDirectory: rootDirectory ?? resolvedFileSystem.currentDirectory,
+    rootDirectory: rootDirectory ?? fs.currentDirectory,
     useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     webCrossOriginIsolation: webCrossOriginIsolation,
-    toolContext: resolvedToolContext,
+    toolContext: toolContext,
     testMode: testMode,
     webDefines: webDefines,
   );
