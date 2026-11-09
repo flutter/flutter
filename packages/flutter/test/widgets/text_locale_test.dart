@@ -224,6 +224,31 @@ void main() {
     expect(paragraphLocale(tester), isNull);
   });
 
+  // Only isDefaultLocale changes here; the resolved locale stays en_US and the
+  // localized resources aren't reloaded, so text must be updated by the
+  // Localizations dependency notifying.
+  testWidgets('RichText updates when only isDefaultLocale changes', (WidgetTester tester) async {
+    setDeviceLocales(tester, const <Locale>[zhCN]);
+    // Reuse a single instance so that the Text is not rebuilt by its parent.
+    // (Widget creation tracking makes const widgets from different call sites
+    // distinct instances.)
+    const Widget text = Text('你好');
+    await tester.pumpWidget(buildApp(child: text));
+    expect(Localizations.localeOf(tester.element(find.byType(RichText))), enUS);
+    expect(paragraphLocale(tester), isNull);
+
+    await tester.pumpWidget(
+      // A non-const list, so it is not the default supportedLocales.
+      // ignore: prefer_const_literals_to_create_immutables
+      buildApp(supportedLocales: <Locale>[enUS], child: text),
+    );
+    expect(Localizations.localeOf(tester.element(find.byType(RichText))), enUS);
+    expect(paragraphLocale(tester), enUS);
+
+    await tester.pumpWidget(buildApp(child: text));
+    expect(paragraphLocale(tester), isNull);
+  });
+
   testWidgets('EditableText uses no locale when the app uses the default locale', (
     WidgetTester tester,
   ) async {
