@@ -245,18 +245,15 @@ void AndroidExternalViewEmbedder::PrepareFlutterView(
     double device_pixel_ratio) {
   Reset();
 
-  // Overlay layers allocated for a previous frame size can't be recycled, but
-  // they must not be destroyed here. Destroying them requires the platform
-  // thread, and this runs on the raster thread, which is only merged into the
-  // platform thread while platform views are in the scene. Waiting for the
-  // platform thread from an unmerged raster thread deadlocks if the platform
-  // thread is waiting for the raster thread, for example in
-  // `PlatformViewAndroid::NotifyChanged` during `surfaceChanged`.
-  //
-  // Instead, |SurfacePool::GetLayer| replaces stale layers the next time an
-  // overlay is needed, which only happens on the platform thread, and
-  // |Teardown| releases any that remain.
+  // Overlay layers are allocated for the current frame size, so the layers in
+  // the pool can't be recycled after the size changes. Release them without
+  // waiting for the platform thread: this runs on the raster thread, which is
+  // only merged into the platform thread while platform views are in the
+  // scene, and the platform thread may be waiting for the raster thread, for
+  // example in `PlatformViewAndroid::NotifyChanged` during `surfaceChanged`.
   if (frame_size_ != frame_size) {
+    ReleaseOverlayLayers();
+
     // This should not block to prevent deadlocks with
     // setViewportMetrics.
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
@@ -309,6 +306,24 @@ void AndroidExternalViewEmbedder::DestroySurfaces() {
                                       latch.Signal();
                                     });
   latch.Wait();
+}
+
+void AndroidExternalViewEmbedder::ReleaseOverlayLayers() {
+  std::vector<std::shared_ptr<OverlayLayer>> layers =
+      surface_pool_->TakeLayers();
+  if (layers.empty()) {
+    return;
+  }
+  // Release the rendering surfaces on the thread that renders into them.
+  layers.clear();
+
+  // Destroy the overlay views on the platform thread without waiting. Tasks run
+  // in the order they were posted, so this runs before a later frame can
+  // allocate new overlay surfaces, which only happens on the platform thread.
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(), [jni_facade = jni_facade_]() {
+        jni_facade->FlutterViewDestroyOverlaySurfaces();
+      });
 }
 
 }  // namespace flutter

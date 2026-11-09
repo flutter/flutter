@@ -68,6 +68,11 @@ class SurfacePool {
   // Destroys all the layers in the pool.
   void DestroyLayers(const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
+  // Removes all the layers from the pool and returns them without calling into
+  // Java. The caller owns the returned layers and is responsible for destroying
+  // their overlay surfaces on the platform thread.
+  std::vector<std::shared_ptr<OverlayLayer>> TakeLayers();
+
   // Sets the frame size used by the layers in the pool.
   // If the current layers in the pool have a different frame size,
   // then they are deallocated as soon as |GetLayer| is called.

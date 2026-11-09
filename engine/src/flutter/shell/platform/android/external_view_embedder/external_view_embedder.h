@@ -137,6 +137,12 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // on the platform thread. Never call it from the raster thread.
   void DestroySurfaces();
 
+  // Takes the overlay layers out of the pool and releases them without waiting
+  // for the platform thread. The rendering surfaces are released on the
+  // calling thread, and the overlay views are destroyed on the platform
+  // thread.
+  void ReleaseOverlayLayers();
+
   // Resets the state.
   void Reset();
 
