@@ -665,8 +665,8 @@ class FakeDeviceLogReader implements DeviceLogReader {
   }
 
   @override
-  void dispose() {
-    _logLinesController.close();
+  Future<void> dispose() async {
+    await _logLinesController.close();
   }
 
   @override
