@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
@@ -16,6 +17,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
 import 'test_data/integration_tests_project.dart';
+import 'test_utils.dart';
 
 /// Tests that [`TestGoldenComparator`] is working end-to-end-ish.
 ///
@@ -24,7 +26,7 @@ import 'test_data/integration_tests_project.dart';
 /// that is very different.
 void main() {
   final (File testPng1, File testPng2) = () {
-    final Directory testData = globals.localFileSystem
+    final Directory testData = fileSystem
         .directory(getFlutterRoot())
         .childDirectory('packages')
         .childDirectory('flutter_tools')
@@ -34,15 +36,13 @@ void main() {
     return (testData.childFile('test_1.png'), testData.childFile('test_2.png'));
   }();
 
-  late LocalFileSystem fs;
   late Directory tmpDir;
   late BufferLogger logger;
   late IntegrationTestsProject testProject;
   late FlutterProject project;
 
   setUp(() async {
-    fs = globals.localFileSystem;
-    tmpDir = fs.systemTempDirectory.createTempSync();
+    tmpDir = fileSystem.systemTempDirectory.createTempSync();
     logger = BufferLogger.test();
 
     testProject = IntegrationTestsProject();
@@ -73,7 +73,7 @@ void main() {
     );
     return TestGoldenComparator(
       compilerFactory: () => compiler,
-      flutterTesterBinPath: globals.artifacts!.getArtifactPath(.flutterTester),
+      flutterTesterBinPath: context.get<Artifacts>()!.getArtifactPath(.flutterTester),
       toolContext: DelegatingToolContext(logger: logger),
     );
   }

@@ -5,15 +5,18 @@
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 final Platform windowsPlatform = FakePlatform(operatingSystem: 'windows');
@@ -22,20 +25,30 @@ void main() {
   late TestBed testbed;
   late SourceVisitor visitor;
   late Environment environment;
+  late FileSystem fileSystem;
+  late Cache cache;
 
   setUp(() {
     testbed = TestBed(
       setup: () {
-        globals.fs.directory('cache').createSync();
-        final Directory outputs = globals.fs.directory('outputs')..createSync();
+        final ToolContext(
+          :Artifacts artifacts,
+          cache: Cache contextCache,
+          :FileSystem fs,
+          :Logger logger,
+        ) = const DelegatingToolContext();
+        cache = contextCache;
+        fileSystem = fs;
+        fileSystem.directory('cache').createSync();
+        final Directory outputs = fileSystem.directory('outputs')..createSync();
         environment = Environment.test(
-          globals.fs.currentDirectory,
+          fileSystem.currentDirectory,
           outputDir: outputs,
-          artifacts: globals.artifacts!, // using real artifacts
+          artifacts: artifacts, // using real artifacts
           processManager: FakeProcessManager.any(),
-          fileSystem: globals.fs,
+          fileSystem: fileSystem,
           // engineVersion being null simulates a local engine.
-          logger: globals.logger,
+          logger: logger,
         );
         visitor = SourceVisitor(environment);
         environment.buildDir.createSync(recursive: true);
@@ -54,24 +67,24 @@ void main() {
   test(
     'can substitute {PROJECT_DIR}/foo',
     () => testbed.run(() {
-      globals.fs.file('foo').createSync();
+      fileSystem.file('foo').createSync();
       const fooSource = Source.pattern('{PROJECT_DIR}/foo');
       fooSource.accept(visitor);
 
-      expect(visitor.sources.single.path, globals.fs.path.absolute('foo'));
+      expect(visitor.sources.single.path, fileSystem.path.absolute('foo'));
     }),
   );
 
   test(
     'can substitute {OUTPUT_DIR}/foo',
     () => testbed.run(() {
-      globals.fs.file('foo').createSync();
+      fileSystem.file('foo').createSync();
       const fooSource = Source.pattern('{OUTPUT_DIR}/foo');
       fooSource.accept(visitor);
 
       expect(
         visitor.sources.single.path,
-        globals.fs.path.absolute(globals.fs.path.join('outputs', 'foo')),
+        fileSystem.path.absolute(fileSystem.path.join('outputs', 'foo')),
       );
     }),
   );
@@ -79,43 +92,43 @@ void main() {
   test(
     'can substitute {BUILD_DIR}/bar',
     () => testbed.run(() {
-      final String path = globals.fs.path.join(environment.buildDir.path, 'bar');
-      globals.fs.file(path).createSync();
+      final String path = fileSystem.path.join(environment.buildDir.path, 'bar');
+      fileSystem.file(path).createSync();
       const barSource = Source.pattern('{BUILD_DIR}/bar');
       barSource.accept(visitor);
 
-      expect(visitor.sources.single.path, globals.fs.path.absolute(path));
+      expect(visitor.sources.single.path, fileSystem.path.absolute(path));
     }),
   );
 
   test(
     'can substitute {FLUTTER_ROOT}/foo',
     () => testbed.run(() {
-      final String path = globals.fs.path.join(environment.flutterRootDir.path, 'foo');
-      globals.fs.file(path).createSync();
+      final String path = fileSystem.path.join(environment.flutterRootDir.path, 'foo');
+      fileSystem.file(path).createSync();
       const barSource = Source.pattern('{FLUTTER_ROOT}/foo');
       barSource.accept(visitor);
 
-      expect(visitor.sources.single.path, globals.fs.path.absolute(path));
+      expect(visitor.sources.single.path, fileSystem.path.absolute(path));
     }),
   );
 
   test(
     'can substitute Artifact',
     () => testbed.run(() {
-      final String path = globals.fs.path.join(
-        globals.cache.getArtifactDirectory('engine').path,
+      final String path = fileSystem.path.join(
+        cache.getArtifactDirectory('engine').path,
         'windows-x64',
         'foo',
       );
-      globals.fs.file(path).createSync(recursive: true);
+      fileSystem.file(path).createSync(recursive: true);
       const fizzSource = Source.artifact(
         Artifact.windowsDesktopPath,
         platform: TargetPlatform.windows_x64,
       );
       fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.resolveSymbolicLinksSync(), globals.fs.path.absolute(path));
+      expect(visitor.sources.single.resolveSymbolicLinksSync(), fileSystem.path.absolute(path));
     }),
   );
 
@@ -127,12 +140,12 @@ void main() {
 
       expect(visitor.sources, isEmpty);
 
-      globals.fs.file('foo.fizz').createSync();
-      globals.fs.file('foofizz').createSync();
+      fileSystem.file('foo.fizz').createSync();
+      fileSystem.file('foofizz').createSync();
 
       fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.path, globals.fs.path.absolute('foo.fizz'));
+      expect(visitor.sources.single.path, fileSystem.path.absolute('foo.fizz'));
     }),
   );
 
@@ -144,12 +157,12 @@ void main() {
 
       expect(visitor.sources, isEmpty);
 
-      globals.fs.file('fizz.foo').createSync();
-      globals.fs.file('fizz').createSync();
+      fileSystem.file('fizz.foo').createSync();
+      fileSystem.file('fizz').createSync();
 
       fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.path, globals.fs.path.absolute('fizz.foo'));
+      expect(visitor.sources.single.path, fileSystem.path.absolute('fizz.foo'));
     }),
   );
 
@@ -161,12 +174,12 @@ void main() {
 
       expect(visitor.sources, isEmpty);
 
-      globals.fs.file('bcbc').createSync();
-      globals.fs.file('bc').createSync();
+      fileSystem.file('bcbc').createSync();
+      fileSystem.file('bc').createSync();
 
       fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.path, globals.fs.path.absolute('bcbc'));
+      expect(visitor.sources.single.path, fileSystem.path.absolute('bcbc'));
     }),
   );
 
@@ -175,7 +188,7 @@ void main() {
     () => testbed.run(() {
       const fizzSource = Source.pattern('{PROJECT_DIR}/*.*bar');
 
-      globals.fs.file('abcd.bar').createSync();
+      fileSystem.file('abcd.bar').createSync();
 
       expect(() => fizzSource.accept(visitor), throwsA(isA<InvalidPatternException>()));
     }),
@@ -195,7 +208,7 @@ void main() {
     () => testbed.run(() {
       const missingSource = Source.pattern('{PROJECT_DIR}/foo', optional: true);
 
-      expect(globals.fs.file('foo').existsSync(), false);
+      expect(fileSystem.file('foo').existsSync(), false);
       missingSource.accept(visitor);
       expect(visitor.sources, isEmpty);
     }),
@@ -265,15 +278,15 @@ void main() {
     'Non-local engine builds use the engine.stamp file as an Artifact dependency',
     () => testbed.run(() {
       final artifacts = Artifacts.test();
-      final environment = Environment.test(
-        globals.fs.currentDirectory,
+      final versionedEnvironment = Environment.test(
+        fileSystem.currentDirectory,
         artifacts: artifacts,
         processManager: FakeProcessManager.any(),
-        fileSystem: globals.fs,
-        logger: globals.logger,
+        fileSystem: fileSystem,
+        logger: environment.logger,
         engineVersion: 'abcdefghijklmon', // Use a versioned engine.
       );
-      visitor = SourceVisitor(environment);
+      visitor = SourceVisitor(versionedEnvironment);
 
       const fizzSource = Source.artifact(
         Artifact.windowsDesktopPath,
@@ -288,8 +301,8 @@ void main() {
   test(
     'can substitute project file',
     () => testbed.run(() {
-      final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
-      globals.fs.file(path).createSync(recursive: true);
+      final String path = fileSystem.file('.flutter-plugins-dependencies').absolute.path;
+      fileSystem.file(path).createSync(recursive: true);
       final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
       );
@@ -303,7 +316,7 @@ void main() {
   test(
     'can substitute nonexistent project file',
     () => testbed.run(() {
-      final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
+      final String path = fileSystem.file('.flutter-plugins-dependencies').absolute.path;
       final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
       );
@@ -317,8 +330,8 @@ void main() {
   test(
     'can substitute optional project file',
     () => testbed.run(() {
-      final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
-      globals.fs.file(path).createSync(recursive: true);
+      final String path = fileSystem.file('.flutter-plugins-dependencies').absolute.path;
+      fileSystem.file(path).createSync(recursive: true);
       final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
         optional: true,

@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -22,7 +23,6 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -132,7 +132,7 @@ void main() {
           featureFlags: featureFlags,
         );
         // Use the flutter_gallery project which has a known set of supported platforms.
-        final String projectPath = globals.fs.path.join(
+        final String projectPath = context.get<FileSystem>()!.path.join(
           getFlutterRoot(),
           'dev',
           'integration_tests',
@@ -235,18 +235,18 @@ void main() {
       },
     );
 
-    testUsingContext('printError should send daemon.logMessage event', () async {
+    testWithoutContext('printError should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: const DelegatingToolContext(),
+        toolContext: FakeToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
-      globals.printError('daemon.logMessage test');
+      notifyingLogger.printError('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
         DaemonMessage message,
       ) {
@@ -259,20 +259,20 @@ void main() {
           .cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
-    }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
+    });
 
-    testUsingContext('printWarning should send daemon.logMessage event', () async {
+    testWithoutContext('printWarning should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: const DelegatingToolContext(),
+        toolContext: FakeToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
-      globals.printWarning('daemon.logMessage test');
+      notifyingLogger.printWarning('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
         DaemonMessage message,
       ) {
@@ -285,49 +285,49 @@ void main() {
           .cast<String, String>();
       expect(logMessage['level'], 'warning');
       expect(logMessage['message'], 'daemon.logMessage test');
-    }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
+    });
 
-    testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
+    testWithoutContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
+          toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
-        globals.printStatus('daemon.logMessage test');
+        notifyingLogger.printStatus('daemon.logMessage test');
         return Future<void>.value();
       });
 
       expect(buffer.toString().trim(), 'daemon.logMessage test');
-    }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
+    });
 
-    testUsingContext('printBox should log to stdout when logToStdout is enabled', () async {
+    testWithoutContext('printBox should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
+          toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
-        globals.printBox('This is the box message', title: 'Sample title');
+        notifyingLogger.printBox('This is the box message', title: 'Sample title');
         return Future<void>.value();
       });
 
       expect(buffer.toString().trim(), contains('Sample title: This is the box message'));
-    }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'printTrace should send daemon.logMessage event when notifyVerbose is enabled',
       () async {
         daemon = Daemon(
@@ -335,15 +335,15 @@ void main() {
           analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
+          toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         notifyingLogger.notifyVerbose = false;
-        globals.printTrace('daemon.logMessage test 1');
+        notifyingLogger.printTrace('daemon.logMessage test 1');
         notifyingLogger.notifyVerbose = true;
-        globals.printTrace('daemon.logMessage test 2');
+        notifyingLogger.printTrace('daemon.logMessage test 2');
         final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
           DaemonMessage message,
         ) {
@@ -357,7 +357,6 @@ void main() {
         expect(logMessage['level'], 'trace');
         expect(logMessage['message'], 'daemon.logMessage test 2');
       },
-      overrides: <Type, Generator>{Logger: () => notifyingLogger},
     );
 
     testUsingContext(
@@ -1266,7 +1265,7 @@ void main() {
             device,
             null, // projectDirectory
             false, // enableHotReload
-            globals.fs.directory('/'), // cwd
+            context.get<FileSystem>()!.directory('/'), // cwd
             LaunchMode.run,
             MachineOutputLogger(parent: notifyingLogger),
           ),
@@ -1315,7 +1314,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          context.get<FileSystem>()!.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );
@@ -1377,7 +1376,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          context.get<FileSystem>()!.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );
@@ -1442,7 +1441,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          context.get<FileSystem>()!.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );
@@ -1505,7 +1504,7 @@ void main() {
           FakeAndroidDevice(),
           null, // projectDirectory
           true, // enableHotReload
-          globals.fs.directory('/'), // cwd
+          context.get<FileSystem>()!.directory('/'), // cwd
           LaunchMode.run,
           MachineOutputLogger(parent: notifyingLogger),
         );

@@ -57,6 +57,7 @@ class BuildHooks extends Target {
       :SerializedBuildResults results,
       :DartHooksResult buildResult,
     ) = await runFlutterSpecificBuildHooks(
+      androidSdkBuilder: () => environment.androidSdk,
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
@@ -65,6 +66,7 @@ class BuildHooks extends Target {
       logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
+      visualStudio: environment.visualStudio,
     );
 
     final File dartBuildOutputJsonFile = environment.buildDir.childFile(resultFilename);
@@ -218,6 +220,7 @@ class LinkHooks extends Target {
     final DartHooksResult linkResult;
     if (linkingEnabled) {
       linkResult = await runFlutterSpecificLinkHooks(
+        androidSdkBuilder: () => environment.androidSdk,
         environmentDefines: environment.defines,
         buildRunner: buildRunner,
         targetPlatform: targetPlatform,
@@ -228,6 +231,7 @@ class LinkHooks extends Target {
         buildDataAssets: true,
         buildResults: buildResults,
         recordedUsesFile: recordedUsesFileToPass,
+        visualStudio: environment.visualStudio,
       );
     } else {
       linkResult = DartHooksResult.empty();
@@ -423,10 +427,8 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
     environment.processManager,
     runPackageName,
     pubspecPath,
-    androidSdkBuilder: () => environment.androidSdk,
     flutterRoot: environment.flutterRootDir.path,
     includeDevDependencies: includeDevDependencies,
-    visualStudio: environment.visualStudio,
   );
 }
 

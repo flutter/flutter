@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:yaml/yaml.dart';
 
 import 'common.dart';
@@ -11,18 +15,25 @@ import 'common.dart';
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.
 void validatePubspecForPlugin({
   required String projectDir,
-  String? pluginClass,
-  bool ffiPlugin = false,
   required List<String> expectedPlatforms,
-  List<String> unexpectedPlatforms = const <String>[],
   String? androidIdentifier,
+  bool ffiPlugin = false,
+  FileSystem? fileSystem,
+  Logger? logger,
+  String? pluginClass,
+  List<String> unexpectedPlatforms = const <String>[],
   String? webFileName,
 }) {
   assert(pluginClass != null || ffiPlugin);
   final FlutterManifest manifest = FlutterManifest.createFromPath(
     '$projectDir/pubspec.yaml',
-    fileSystem: globals.fs,
-    logger: globals.logger,
+    fileSystem:
+        fileSystem ??
+        ErrorHandlingFileSystem(
+          delegate: context.get<FileSystem>()!,
+          platform: context.get<Platform>() ?? const LocalPlatform(),
+        ),
+    logger: logger ?? context.get<Logger>()!,
   )!;
   final platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
   for (final platform in expectedPlatforms) {

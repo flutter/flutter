@@ -16,11 +16,12 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/context/tool_context.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
 void main() {
@@ -65,7 +66,7 @@ flutter:
     'includes LICENSE file inputs in dependencies',
     () async {
       writePackageConfigFiles(
-        directory: globals.fs.currentDirectory,
+        directory: fileSystem.currentDirectory,
         mainLibName: 'example',
         packages: <String, String>{'foo': 'bar'},
       );
@@ -95,7 +96,7 @@ flutter:
   testUsingContext(
     'Copies files to correct asset directory',
     () async {
-      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       await const CopyAssets().build(environment);
 
       expect(
@@ -140,7 +141,7 @@ flutter:
         flavors:
           - strawberry
   ''');
-          writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+          writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
           fileSystem.file('assets/common/image.png').createSync(recursive: true);
           fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
@@ -201,7 +202,7 @@ flutter:
         flavors:
           - strawberry
   ''');
-          writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+          writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
           fileSystem.file('assets/common/image.png').createSync(recursive: true);
           fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
@@ -249,7 +250,7 @@ flutter:
         // Re-create the environment with the correct process manager for this test.
         environment = Environment.test(
           fileSystem.currentDirectory,
-          processManager: globals.processManager,
+          processManager: FakeProcessManager.any(),
           artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
@@ -272,7 +273,7 @@ flutter:
       flavors:
         - premium
 ''');
-        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
         fileSystem.file('shaders/common.frag').createSync(recursive: true);
         fileSystem.file('shaders/premium.frag').createSync(recursive: true);
@@ -305,7 +306,7 @@ flutter:
         // Re-create the environment with the correct process manager for this test.
         environment = Environment.test(
           fileSystem.currentDirectory,
-          processManager: globals.processManager,
+          processManager: FakeProcessManager.any(),
           artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
@@ -329,7 +330,7 @@ flutter:
       flavors:
         - premium
 ''');
-        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
         fileSystem.file('shaders/common.frag').createSync(recursive: true);
         fileSystem.file('shaders/premium.frag').createSync(recursive: true);
@@ -365,7 +366,7 @@ flutter:
         // Re-create the environment with the correct process manager for this test.
         environment = Environment.test(
           fileSystem.currentDirectory,
-          processManager: globals.processManager,
+          processManager: FakeProcessManager.any(),
           artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
@@ -389,7 +390,7 @@ flutter:
       flavors:
         - premium
 ''');
-        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
         fileSystem.file('shaders/common.frag').createSync(recursive: true);
         fileSystem.file('shaders/premium.frag').createSync(recursive: true);
@@ -420,13 +421,15 @@ flutter:
   testUsingContext(
     'transforms assets declared with transformers',
     () async {
+      final ToolContext(:Platform platform, :ProcessManager processManager) =
+          const DelegatingToolContext();
       final environment = Environment.test(
         fileSystem.currentDirectory,
-        processManager: globals.processManager,
+        processManager: processManager,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: logger,
-        platform: globals.platform,
+        platform: platform,
         defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
 
@@ -442,7 +445,7 @@ flutter:
           args: ["-a", "-b", "--color", "green"]
 ''');
 
-      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       fileSystem.file('input.txt')
         ..createSync(recursive: true)
@@ -451,7 +454,7 @@ flutter:
       await const CopyAssets().build(environment);
 
       expect(logger.errorText, isEmpty);
-      expect(globals.processManager, hasNoRemainingExpectations);
+      expect(processManager, hasNoRemainingExpectations);
       expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/input.txt'), exists);
     },
     overrides: <Type, Generator>{
@@ -501,13 +504,15 @@ flutter:
   testUsingContext(
     'transforms shaders declared with transformers before compilation',
     () async {
+      final ToolContext(:Platform platform, :ProcessManager processManager) =
+          const DelegatingToolContext();
       final environment = Environment.test(
         fileSystem.currentDirectory,
-        processManager: globals.processManager,
+        processManager: processManager,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: logger,
-        platform: globals.platform,
+        platform: platform,
         defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
 
@@ -526,7 +531,7 @@ flutter:
         - package: my_capitalizer_transformer
 ''');
 
-      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       fileSystem.file('shaders/test.frag')
         ..createSync(recursive: true)
@@ -535,7 +540,7 @@ flutter:
       await const CopyAssets().build(environment);
 
       expect(logger.errorText, isEmpty);
-      expect(globals.processManager, hasNoRemainingExpectations);
+      expect(processManager, hasNoRemainingExpectations);
       expect(
         fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/test.frag'),
         exists,
@@ -613,13 +618,15 @@ flutter:
   testUsingContext(
     'exits tool if an asset transformation fails',
     () async {
+      final ToolContext(:Platform platform, :ProcessManager processManager) =
+          const DelegatingToolContext();
       final environment = Environment.test(
         fileSystem.currentDirectory,
-        processManager: globals.processManager,
+        processManager: processManager,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: logger,
-        platform: globals.platform,
+        platform: platform,
         defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
 
@@ -635,7 +642,7 @@ flutter:
           args: ["-a", "-b", "--color", "green"]
 ''');
 
-      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       await fileSystem.file('input.txt').create(recursive: true);
 
@@ -643,7 +650,7 @@ flutter:
         const CopyAssets().build(environment),
         startsWith('User-defined transformation of asset "input.txt" failed.\n'),
       );
-      expect(globals.processManager, hasNoRemainingExpectations);
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       Logger: () => logger,
@@ -710,7 +717,7 @@ flutter:
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: logger,
-        platform: globals.platform,
+        platform: const DelegatingToolContext().platform,
         defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
 
@@ -725,7 +732,7 @@ flutter:
           - package: my_capitalizer_transformer
   ''');
 
-      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       fileSystem.file('input.txt')
         ..createSync(recursive: true)
@@ -783,7 +790,7 @@ flutter:
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(pubspec);
-      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       fileSystem.file(filePath).createSync(recursive: true);
 
       await const CopyAssets().build(environment, targetPlatform: targetPlatform);
@@ -876,7 +883,7 @@ flutter:
       platforms: [${targetPlatforms.join(',')}]
 ''');
 
-            writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+            writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
             fileSystem.file(filePath).createSync(recursive: true);
 
             final TargetPlatform targetPlatform = targetFor(platform);
@@ -952,7 +959,7 @@ flutter:
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: logger,
-        platform: globals.platform,
+        platform: const DelegatingToolContext().platform,
         defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
 
@@ -967,7 +974,7 @@ flutter:
           - package: my_capitalizer_transformer
   ''');
 
-      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       fileSystem.file('input.txt')
         ..createSync(recursive: true)

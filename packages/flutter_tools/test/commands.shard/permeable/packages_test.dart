@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
@@ -16,7 +17,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:yaml/yaml.dart';
 
@@ -29,6 +29,7 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  const delegatingContext = DelegatingToolContext();
   late FakeStdio mockStdio;
 
   setUp(() {
@@ -40,11 +41,14 @@ void main() {
   });
 
   group('packages get/upgrade', () {
+    final localFs = LocalFileSystem.test(signals: FakeSignals());
     late Directory tempDir;
     late FakeAnalytics fakeAnalytics;
 
+    tearDownAll(localFs.dispose);
+
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -57,7 +61,7 @@ void main() {
 
     Future<String> createProjectWithPlugin(String plugin, {List<String>? arguments}) async {
       final String projectPath = await createProject(tempDir, arguments: arguments);
-      final File pubspec = globals.fs.file(globals.fs.path.join(projectPath, 'pubspec.yaml'));
+      final File pubspec = localFs.file(localFs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       final List<String> contentLines = LineSplitter.split(content).toList();
       final int depsIndex = contentLines.indexOf('dependencies:');
@@ -75,7 +79,7 @@ void main() {
       List<String>? globalArgs,
     }) async {
       final command = PackagesCommand(
-        buildSystem: globals.buildSystem,
+        buildSystem: context.get<BuildSystem>()!,
         toolContext: const DelegatingToolContext(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -92,7 +96,7 @@ void main() {
 
     void expectExists(String projectPath, String relPath) {
       expect(
-        globals.fs.isFileSync(globals.fs.path.join(projectPath, relPath)),
+        localFs.isFileSync(localFs.path.join(projectPath, relPath)),
         true,
         reason: '$projectPath/$relPath should exist, but does not',
       );
@@ -101,7 +105,7 @@ void main() {
     void expectContains(String projectPath, String relPath, String substring) {
       expectExists(projectPath, relPath);
       expect(
-        globals.fs.file(globals.fs.path.join(projectPath, relPath)).readAsStringSync(),
+        localFs.file(localFs.path.join(projectPath, relPath)).readAsStringSync(),
         contains(substring),
         reason: '$projectPath/$relPath has unexpected content',
       );
@@ -109,7 +113,7 @@ void main() {
 
     void expectNotExists(String projectPath, String relPath) {
       expect(
-        globals.fs.isFileSync(globals.fs.path.join(projectPath, relPath)),
+        localFs.isFileSync(localFs.path.join(projectPath, relPath)),
         false,
         reason: '$projectPath/$relPath should not exist, but does',
       );
@@ -118,14 +122,14 @@ void main() {
     void expectNotContains(String projectPath, String relPath, String substring) {
       expectExists(projectPath, relPath);
       expect(
-        globals.fs.file(globals.fs.path.join(projectPath, relPath)).readAsStringSync(),
+        localFs.file(localFs.path.join(projectPath, relPath)).readAsStringSync(),
         isNot(contains(substring)),
         reason: '$projectPath/$relPath has unexpected content',
       );
     }
 
     final pubOutput = <String>[
-      globals.fs.path.join('.dart_tool', 'package_config.json'),
+      localFs.path.join('.dart_tool', 'package_config.json'),
       'pubspec.lock',
     ];
 
@@ -228,7 +232,7 @@ void main() {
         pluginWitnesses(includeLegacyPluginsList: true),
       ].expand<String>((List<String> list) => list);
       for (final path in allFiles) {
-        final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
+        final File file = localFs.file(localFs.path.join(projectPath, path));
         ErrorHandlingFileSystem.deleteIfExists(file);
       }
     }
@@ -271,11 +275,11 @@ void main() {
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
         Analytics: () => fakeAnalytics,
@@ -300,11 +304,11 @@ void main() {
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -375,11 +379,11 @@ workspace:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
         Analytics: () => fakeAnalytics,
@@ -453,11 +457,11 @@ workspace:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
         Analytics: () => fakeAnalytics,
@@ -500,11 +504,11 @@ workspace:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
         Analytics: () => fakeAnalytics,
@@ -518,7 +522,7 @@ workspace:
           tempDir,
           arguments: <String>['--no-pub', '--template=module'],
         );
-        final Directory projectDir = globals.fs.directory(projectPath);
+        final Directory projectDir = localFs.directory(projectPath);
         projectDir.childDirectory('lib').childDirectory('l10n').childFile('app_en.arb')
           ..createSync(recursive: true)
           ..writeAsStringSync('{ "hello": "Hello world!" }');
@@ -544,8 +548,8 @@ flutter:
           toolContext: DelegatingToolContext(
             cache: Cache.test(
               flutterRoot: getFlutterRoot(),
-              fileSystem: globals.fs,
-              processManager: globals.processManager,
+              fileSystem: delegatingContext.fs,
+              processManager: delegatingContext.processManager,
             ),
           ),
         ),
@@ -574,11 +578,11 @@ flutter:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -595,7 +599,7 @@ flutter:
             '--platforms=ios,android,macos,windows',
           ],
         );
-        final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
+        final String exampleProjectPath = localFs.path.join(projectPath, 'example');
 
         final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
@@ -611,11 +615,11 @@ flutter:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -640,11 +644,11 @@ flutter:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -672,11 +676,11 @@ flutter:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -701,11 +705,11 @@ flutter:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -729,11 +733,11 @@ flutter:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -757,11 +761,11 @@ flutter:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -774,7 +778,7 @@ flutter:
           tempDir,
           arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
         );
-        final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
+        final String exampleProjectPath = localFs.path.join(projectPath, 'example');
         removeGeneratedFiles(projectPath);
         removeGeneratedFiles(exampleProjectPath);
 
@@ -791,11 +795,11 @@ flutter:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -808,7 +812,7 @@ flutter:
           tempDir,
           arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
         );
-        final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
+        final String exampleProjectPath = localFs.path.join(projectPath, 'example');
         removeGeneratedFiles(projectPath);
         removeGeneratedFiles(exampleProjectPath);
 
@@ -823,11 +827,11 @@ flutter:
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: getFlutterRoot(),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -846,8 +850,9 @@ flutter:
     testUsingContext(
       'test without bot',
       () async {
-        globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
-        globals.fs.file('pubspec.yaml').createSync();
+        final FileSystem fs = delegatingContext.fs;
+        fs.directory('/packages/flutter_tools').createSync(recursive: true);
+        fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -869,8 +874,11 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
-        Cache: () =>
-            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
+        Cache: () => Cache.test(
+          flutterRoot: '',
+          fileSystem: delegatingContext.fs,
+          processManager: processManager,
+        ),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
@@ -878,11 +886,11 @@ flutter:
         BotDetector: () => const FakeBotDetector(false),
         Pub: () => Pub.test(
           flutterRoot: '',
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -891,7 +899,7 @@ flutter:
     testUsingContext(
       'test with bot',
       () async {
-        globals.fs.file('pubspec.yaml').createSync();
+        delegatingContext.fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -914,8 +922,11 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
-        Cache: () =>
-            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
+        Cache: () => Cache.test(
+          flutterRoot: '',
+          fileSystem: delegatingContext.fs,
+          processManager: processManager,
+        ),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
@@ -923,11 +934,11 @@ flutter:
         BotDetector: () => const FakeBotDetector(true),
         Pub: () => Pub.test(
           flutterRoot: '',
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -936,7 +947,7 @@ flutter:
     testUsingContext(
       'run pass arguments through to pub',
       () async {
-        globals.fs.file('pubspec.yaml').createSync();
+        delegatingContext.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
           FakeCommand(
@@ -961,19 +972,22 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
-        Cache: () =>
-            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
+        Cache: () => Cache.test(
+          flutterRoot: '',
+          fileSystem: delegatingContext.fs,
+          processManager: processManager,
+        ),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: '',
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -982,7 +996,7 @@ flutter:
     testUsingContext(
       'token pass arguments through to pub',
       () async {
-        globals.fs.file('pubspec.yaml').createSync();
+        delegatingContext.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
           FakeCommand(
@@ -1006,19 +1020,22 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
-        Cache: () =>
-            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
+        Cache: () => Cache.test(
+          flutterRoot: '',
+          fileSystem: delegatingContext.fs,
+          processManager: processManager,
+        ),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: '',
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },
@@ -1049,19 +1066,22 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
-        Cache: () =>
-            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
+        Cache: () => Cache.test(
+          flutterRoot: '',
+          fileSystem: delegatingContext.fs,
+          processManager: processManager,
+        ),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
           flutterRoot: '',
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          fileSystem: delegatingContext.fs,
+          logger: delegatingContext.logger,
+          processManager: delegatingContext.processManager,
+          botDetector: delegatingContext.botDetector,
+          platform: delegatingContext.platform,
           stdio: mockStdio,
         ),
       },

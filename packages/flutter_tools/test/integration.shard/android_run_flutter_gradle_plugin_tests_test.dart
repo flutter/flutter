@@ -5,9 +5,9 @@
 import 'dart:io';
 
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -23,9 +23,9 @@ Future<void> runFlutterGradlePluginTests({
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('gradle');
-  globals.gradleUtils?.injectGradleWrapperIfNeeded(flutterGradlePluginDirectory);
+  context.get<GradleUtils>()?.injectGradleWrapperIfNeeded(flutterGradlePluginDirectory);
   makeExecutable(flutterGradlePluginDirectory.childFile(gradleFileName));
-  final RunResult runResult = await globals.processUtils.run(<String>[
+  final RunResult runResult = await context.get<ProcessUtils>()!.run(<String>[
     gradleExecutable,
     'test',
     ...extraGradleArguments,

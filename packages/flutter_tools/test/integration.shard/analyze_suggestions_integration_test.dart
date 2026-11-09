@@ -5,12 +5,15 @@
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
@@ -21,31 +24,25 @@ import '../src/test_flutter_command_runner.dart';
 import 'test_utils.dart';
 
 void main() {
-  late FileSystem fileSystem;
-
   group('analyze --suggestions command integration', () {
-    setUp(() {
-      fileSystem = globals.localFileSystem;
-    });
-
     testUsingContext('General Info Project Validator', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[
           GeneralInfoProjectValidator(
-            androidContext: FakeAndroidContext(java: globals.java),
+            androidContext: FakeAndroidContext(java: context.get<Java>()),
             logger: loggerTest,
-            processManager: globals.processManager,
+            processManager: processManager,
           ),
         ],
         suppressAnalytics: true,
         toolContext: FakeToolContext(
-          artifacts: globals.artifacts,
+          artifacts: context.get<Artifacts>(),
           fs: fileSystem,
           logger: loggerTest,
-          platform: globals.platform,
-          processManager: globals.processManager,
-          terminal: globals.terminal,
+          platform: platform,
+          processManager: processManager,
+          terminal: context.get<AnsiTerminal>(),
         ),
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -81,7 +78,7 @@ void main() {
     setUpAll(() async {
       platform = const LocalPlatform();
       tempDir = createResolvedTempDirectorySync('run_test.');
-      await globals.processManager.run(<String>[
+      await processManager.run(<String>[
         'flutter',
         'create',
         'test_project',
@@ -93,7 +90,7 @@ void main() {
     });
 
     testUsingContext('analyze --suggestions --machine produces expected values', () async {
-      final ProcessResult result = await globals.processManager.run(<String>[
+      final ProcessResult result = await processManager.run(<String>[
         'flutter',
         'analyze',
         '--suggestions',

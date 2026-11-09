@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -20,7 +21,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -35,6 +35,7 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../bin/fuchsia_tester.dart' as fuchsia_tester;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -59,8 +60,9 @@ void main() {
   late FakeToolContext toolContext;
 
   setUp(() {
+    const hostPlatform = LocalPlatform();
     fs = MemoryFileSystem.test(
-      style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      style: hostPlatform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
 
     final Directory package = fs.directory('package');
@@ -101,7 +103,7 @@ void main() {
     toolContext = FakeToolContext(
       fs: fs,
       logger: logger,
-      platform: FakePlatform(operatingSystem: globals.platform.operatingSystem),
+      platform: FakePlatform(operatingSystem: hostPlatform.operatingSystem),
       processManager: FakeProcessManager.any(),
     );
   });
@@ -1467,7 +1469,7 @@ const List<String> packageTestArgs = <String>[
       await commandRunner.run(const <String>['test', '--no-pub']);
 
       final bool fileExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
       );
       expect(fileExists, true);
     },
@@ -1509,11 +1511,11 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub', '--flavor', 'vanilla']);
 
       final bool vanillaExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'vanilla.txt'),
+        fs.path.join('build', 'unit_test_assets', 'vanilla.txt'),
       );
       expect(vanillaExists, true, reason: 'vanilla.txt should be bundled');
       final bool orangeExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'orange.txt'),
+        fs.path.join('build', 'unit_test_assets', 'orange.txt'),
       );
       expect(orangeExists, false, reason: 'orange.txt should not be bundled');
     },
@@ -1593,7 +1595,7 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
 
       final bool fileExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
       );
       expect(fileExists, false);
     },
@@ -1633,7 +1635,7 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub']);
 
       final String fileContent = fs
-          .file(globals.fs.path.join('build', 'unit_test_assets', 'asset.txt'))
+          .file(fs.path.join('build', 'unit_test_assets', 'asset.txt'))
           .readAsStringSync();
       expect(fileContent, '2');
     },
@@ -1673,10 +1675,10 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub']);
 
       final File bundledDataAsset = fs.file(
-        globals.fs.path.join('build', 'unit_test_assets', 'packages/my_app/data/hook_asset.txt'),
+        fs.path.join('build', 'unit_test_assets', 'packages/my_app/data/hook_asset.txt'),
       );
       final File assetManifestBin = fs.file(
-        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
       );
       expect(bundledDataAsset, exists);
       expect(bundledDataAsset.readAsStringSync(), 'from_hook');
@@ -2134,7 +2136,12 @@ resolution: workspace
   testUsingContext(
     'throws ToolExit when test argument contains Windows reserved characters',
     () async {
-      final Directory package = globals.fs.directory('package');
+      final ToolContext(
+        fs: FileSystem windowsFs,
+        platform: Platform windowsPlatform,
+        processManager: ProcessManager windowsProcessManager,
+      ) = const DelegatingToolContext();
+      final Directory package = windowsFs.directory('package');
       package.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(_pubspecContents);
@@ -2147,16 +2154,16 @@ resolution: workspace
         mainLibName: 'my_app',
         devDependencies: <String>['test_api', 'integration_test'],
       );
-      globals.fs.currentDirectory = package.path;
+      windowsFs.currentDirectory = package.path;
 
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
-          fs: globals.fs,
+          fs: windowsFs,
           logger: logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
+          platform: windowsPlatform,
+          processManager: windowsProcessManager,
         ),
         testWrapper: fakePackageTest,
       );
@@ -2327,6 +2334,63 @@ resolution: workspace
       };
       expect(hiddenInVerboseMode, isEmpty);
     });
+
+    testWithoutContext(
+      'fuchsia_tester.run links artifacts and invokes testWrapper without AppContext',
+      () async {
+        final fileSystem = MemoryFileSystem.test();
+        fileSystem.file('/bin/flutter_tester').createSync(recursive: true);
+        fileSystem.file('/sdk_root/platform_strong.dill').createSync(recursive: true);
+        fileSystem.file('/icudtl.dat').createSync(recursive: true);
+        fileSystem.file('/.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"configVersion": 2, "packages": []}');
+        fileSystem.file('/test/foo_test.dart').createSync(recursive: true);
+        fileSystem.file('/out/foo_test.dart.dill').createSync(recursive: true);
+        fileSystem.file('/tests.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            '[{"source": "/test/foo_test.dart", "dill": "/out/foo_test.dart.dill"}]',
+          );
+
+        final artifacts = Artifacts.test(fileSystem: fileSystem);
+        final fakePackageTest = FakePackageTest();
+        final toolContext = FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(numberOfProcessors: 4),
+          processManager: FakeProcessManager.empty(),
+        );
+
+        await fuchsia_tester.run(
+          const <String>[
+            '--packages=/.dart_tool/package_config.json',
+            '--shell=/bin/flutter_tester',
+            '--sdk-root=/sdk_root',
+            '--icudtl=/icudtl.dat',
+            '--tests=/tests.json',
+          ],
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
+
+        expect(
+          fileSystem.link(artifacts.getArtifactPath(Artifact.flutterTester)).targetSync(),
+          '/bin/flutter_tester',
+        );
+        final String sdkDestPath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
+        expect(
+          fileSystem.link(fileSystem.path.join(sdkDestPath, 'platform_strong.dill')).targetSync(),
+          '/sdk_root/platform_strong.dill',
+        );
+        expect(
+          fileSystem.link(fileSystem.path.join(sdkDestPath, 'platform.dill')).targetSync(),
+          'platform_strong.dill',
+        );
+        expect(fakePackageTest.lastArgs, contains(Uri.file('/test/foo_test.dart').toString()));
+      },
+    );
   });
 }
 

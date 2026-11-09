@@ -7,10 +7,11 @@ import 'dart:async';
 import 'package:dtd/dtd.dart';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:process/process.dart';
 
@@ -99,8 +100,8 @@ void main() {
     testUsingContext('can connect to an existing DTD instance', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: context.get<Artifacts>()!,
+        processManager: processManager,
       );
 
       // Start a DTD instance.
@@ -135,7 +136,7 @@ void main() {
         processManager: processManager,
         logger: logger!,
         botDetector: const FakeBotDetector(true),
-        artifacts: globals.artifacts!,
+        artifacts: context.get<Artifacts>()!,
       );
 
       // Start a DevTools instance.
@@ -155,8 +156,8 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/175058.
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: context.get<Artifacts>()!,
+        processManager: processManager,
       );
 
       // Start a DTD instance.

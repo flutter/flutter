@@ -9,7 +9,9 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
+import 'android/java.dart';
 import 'artifacts.dart';
 import 'base/async_guard.dart';
 import 'base/file_system.dart';
@@ -23,6 +25,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
+import 'context/android_context.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device_workflow.dart';
@@ -46,6 +49,7 @@ import 'version.dart';
 import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
+import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_version_validator.dart';
 import 'windows/windows_workflow.dart';
@@ -58,6 +62,7 @@ const _kIntelMacWarning = ValidationMessage.hint(
 abstract class DoctorValidatorsProvider {
   /// Create a [DoctorValidatorsProvider] with explicit options.
   factory DoctorValidatorsProvider.create({
+    required AndroidContext androidContext,
     required AppleContext appleContext,
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
@@ -66,6 +71,7 @@ abstract class DoctorValidatorsProvider {
     HttpClientFactory? httpClientFactory,
   }) {
     return _DefaultDoctorValidatorsProvider(
+      androidContext: androidContext,
       appleContext: appleContext,
       deviceManager: deviceManager,
       extensionManager: extensionManager,
@@ -81,6 +87,7 @@ abstract class DoctorValidatorsProvider {
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   _DefaultDoctorValidatorsProvider({
+    required this._androidContext,
     required this._appleContext,
     required this.featureFlags,
     required this._toolContext,
@@ -91,6 +98,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
+  final AndroidContext _androidContext;
   final AppleContext _appleContext;
   final DeviceManager? _deviceManager;
   final FeatureFlags featureFlags;
@@ -98,17 +106,20 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   final HttpClientFactory? _httpClientFactory;
   final ToolContext _toolContext;
 
-  late final linuxWorkflow = LinuxWorkflow(
-    platform: _toolContext.platform,
+  Platform get _platform => _toolContext.platform;
+
+  late final androidWorkflow = AndroidWorkflow(
+    androidSdkBuilder: () => _androidContext.androidSdk,
     featureFlags: featureFlags,
   );
 
-  late final webWorkflow = WebWorkflow(platform: _toolContext.platform, featureFlags: featureFlags);
+  late final linuxWorkflow = LinuxWorkflow(platform: _platform, featureFlags: featureFlags);
 
-  late final macOSWorkflow = MacOSWorkflow(
-    platform: _toolContext.platform,
-    featureFlags: featureFlags,
-  );
+  late final webWorkflow = WebWorkflow(platform: _platform, featureFlags: featureFlags);
+
+  late final macOSWorkflow = MacOSWorkflow(platform: _platform, featureFlags: featureFlags);
+
+  late final windowsWorkflow = WindowsWorkflow(platform: _platform, featureFlags: featureFlags);
 
   late final customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags);
 
@@ -126,6 +137,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       :OperatingSystemUtils os,
       :Platform platform,
       :ProcessManager processManager,
+      :Stdio stdio,
       :SystemClock systemClock,
       :UserMessages userMessages,
     ) = _toolContext;
@@ -135,6 +147,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       :IOSWorkflow iosWorkflow,
       :Xcode xcode,
     ) = _appleContext;
+    final AndroidContext(:AndroidSdk? androidSdk, :Java? java) = _androidContext;
     final proxyValidator = ProxyValidator(platform: platform);
     return _validators = <DoctorValidator>[
       FlutterValidator(
@@ -154,8 +167,27 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           processLister: ProcessLister(processManager),
           versionExtractor: WindowsVersionExtractor(processManager: processManager, logger: logger),
         ),
-      if (androidWorkflow!.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
+      if (androidWorkflow.appliesToHostPlatform)
+        GroupedValidator(<DoctorValidator>[
+          AndroidValidator(
+            androidSdk: androidSdk,
+            java: java,
+            logger: logger,
+            osUtils: os,
+            platform: platform,
+            processManager: processManager,
+            userMessages: userMessages,
+          ),
+          AndroidLicenseValidator(
+            androidSdk: androidSdk,
+            java: java,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+            stdio: stdio,
+            userMessages: userMessages,
+          ),
+        ]),
       if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(
@@ -182,7 +214,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (extensionManager case final ExtensionManager manager)
         for (final DiagnosticsExtension extension in manager.diagnosticsExtensions)
           ExtensionDoctorValidator(extension: extension, logger: logger),
-      if (windowsWorkflow!.appliesToHostPlatform) visualStudioValidator!,
+      if (windowsWorkflow.appliesToHostPlatform)
+        VisualStudioValidator(
+          userMessages: userMessages,
+          visualStudio: VisualStudio(toolContext: _toolContext),
+        ),
       if (proxyValidator.shouldShow) proxyValidator,
       if (_deviceManager case final DeviceManager deviceManager when deviceManager.canListAnything)
         DeviceValidator(deviceManager: deviceManager),
@@ -199,10 +235,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     final IOSWorkflow iosWorkflow = _appleContext.iosWorkflow;
     return _workflows ??= <Workflow>[
       if (iosWorkflow.appliesToHostPlatform) iosWorkflow,
-      if (androidWorkflow?.appliesToHostPlatform ?? false) androidWorkflow!,
+      if (androidWorkflow.appliesToHostPlatform) androidWorkflow,
       if (linuxWorkflow.appliesToHostPlatform) linuxWorkflow,
       if (macOSWorkflow.appliesToHostPlatform) macOSWorkflow,
-      if (windowsWorkflow?.appliesToHostPlatform ?? false) windowsWorkflow!,
+      if (windowsWorkflow.appliesToHostPlatform) windowsWorkflow,
       if (webWorkflow.appliesToHostPlatform) webWorkflow,
       if (customDeviceWorkflow.appliesToHostPlatform) customDeviceWorkflow,
     ];
