@@ -412,6 +412,9 @@ abstract mixin class WidgetsBindingObserver {
 
   /// Called when the [PlatformDispatcher.alwaysUse24HourFormat] setting changes.
   ///
+  /// This method exposes notifications from
+  /// [dart:ui.PlatformDispatcher.onAlwaysUse24HourFormatChanged].
+  ///
   /// See also:
   ///
   ///  * [MediaQuery.alwaysUse24HourFormatOf], which provides a similar service with

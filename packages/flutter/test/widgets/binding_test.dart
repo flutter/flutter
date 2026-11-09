@@ -404,6 +404,7 @@ void main() {
     WidgetsBinding.instance.handleMetricsChanged();
     WidgetsBinding.instance.handlePlatformBrightnessChanged();
     WidgetsBinding.instance.handleTextScaleFactorChanged();
+    WidgetsBinding.instance.handleAlwaysUse24HourFormatChanged();
     WidgetsBinding.instance.handleMemoryPressure();
     await WidgetsBinding.instance.handlePopRoute();
     await WidgetsBinding.instance.handlePushRoute('/');
