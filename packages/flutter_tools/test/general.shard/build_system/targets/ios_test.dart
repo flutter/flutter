@@ -1508,16 +1508,9 @@ void main() {
     const vmServiceArtifact = 'Artifact.vmserviceFramework.TargetPlatform.ios.profile';
 
     testWithoutContext('declares expected inputs, outputs, and skips SwiftPM', () async {
-      expect(
-        target.inputs,
-        contains(
-          const Source.artifact(
-            Artifact.vmserviceFramework,
-            platform: TargetPlatform.ios,
-            mode: BuildMode.profile,
-          ),
-        ),
-      );
+      expect(target.inputs, const <Source>[
+        Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
+      ]);
       expect(
         target.resolveOutputs(environment).sources.map((File file) => file.path),
         containsAll(<String>[

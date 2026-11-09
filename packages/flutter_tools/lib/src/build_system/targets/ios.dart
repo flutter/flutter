@@ -384,7 +384,6 @@ class UnpackIosVmService extends UnpackDarwin {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
   ];
 
