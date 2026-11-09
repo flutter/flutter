@@ -598,6 +598,7 @@ void main() {
           '--native-null-assertions',
           '--enable-impeller',
           '--enable-flutter-gpu',
+          '--enable-skoretext',
           '--trace-systrace',
           '--profile-microtasks',
           '--profile-startup',
@@ -623,6 +624,7 @@ void main() {
       expect(options.nativeNullAssertions, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
       expect(options.enableFlutterGpu, true);
+      expect(options.enableSkoretext, true);
       expect(options.traceSystrace, true);
       expect(options.enableSoftwareRendering, true);
       expect(options.skiaDeterministicRendering, true);

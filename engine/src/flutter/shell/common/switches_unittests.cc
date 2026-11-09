@@ -156,6 +156,40 @@ TEST(SwitchesTest, NoEnableHcppAndSurfaceControl) {
   }
 }
 
+TEST(SwitchesTest, EnableSkoretext) {
+  {
+    // enable with value
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-skoretext=true"});
+    EXPECT_TRUE(command_line.HasOption("enable-skoretext"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_skoretext, true);
+  }
+  {
+    // enable without value
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command", "--enable-skoretext"});
+    EXPECT_TRUE(command_line.HasOption("enable-skoretext"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_skoretext, true);
+  }
+  {
+    // disable
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-skoretext=false"});
+    EXPECT_TRUE(command_line.HasOption("enable-skoretext"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_skoretext, false);
+  }
+  {
+    // default (absent)
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_skoretext, false);
+  }
+}
+
 TEST(SwitchesTest, ProfileStartup) {
   {
     fml::CommandLine command_line =

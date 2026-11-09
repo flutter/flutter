@@ -234,6 +234,10 @@ struct Settings {
 
   bool enable_flutter_gpu = false;
 
+  // Enable the CoreText paragraph layout pipeline and Apple Unicode on macOS
+  // and iOS. Ignored on other platforms.
+  bool enable_skoretext = false;
+
   // Enable android surface control swapchains where supported.
   bool enable_surface_control = false;
 

@@ -615,6 +615,7 @@ class EngineRenderingFlagsBundle extends OptionBundle {
     DebuggingOptionDescriptors.enableImpeller,
     DebuggingOptionDescriptors.enableFlutterGpu,
     DebuggingOptionDescriptors.enableHcpp,
+    DebuggingOptionDescriptors.enableSkoretext,
     if (includeVulkanAndEmbedder) ...const <OptionDescriptor<Object?>>[
       DebuggingOptionDescriptors.enableVulkanValidation,
       DebuggingOptionDescriptors.enableEmbedderApi,
@@ -837,6 +838,14 @@ abstract final class DebuggingOptionDescriptors {
         'produce, and "run", "test", and "drive" additionally apply it at launch. Without the '
         'flag, the manifest decides, and if the manifest does not set it either, the '
         'enable-hcpp feature flag does.',
+  );
+
+  static const enableSkoretext = NullableFlagOptionDescriptor(
+    name: FlutterOptions.kEnableSkoretext,
+    verboseOnly: true,
+    help:
+        'Whether to enable the SkoreText (CoreText + Apple Unicode) text layout '
+        'pipeline on iOS and macOS. Ignored on other platforms.',
   );
 
   static const testFlag = FlagOptionDescriptor(
