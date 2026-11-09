@@ -186,20 +186,15 @@ class WebpHeaderReader {
   /// The current position we are reading from in bytes.
   int _position = 0;
 
-  /// Returns [true] if there are at least [count] unread bytes left.
+  /// Returns `true` if there are at least [count] unread bytes left.
   bool _hasBytes(int count) => _position + count <= bytes.lengthInBytes;
 
-  /// Returns [true] if this WebP is animated.
+  /// Returns `true` if this WebP is animated.
   ///
-  /// Returns [false] if the header is truncated or malformed.
+  /// Returns `false` if the header is truncated or malformed.
   bool isAnimated() {
     // Always parse from the start so repeated calls give the same answer.
     _position = 0;
-    // An animated WebP needs at least the 12-byte RIFF/WEBP header, the
-    // 8-byte 'VP8X' chunk header and the 1-byte VP8X flags.
-    if (bytes.lengthInBytes < 21) {
-      return false;
-    }
     final bool isWebP = _readWebpHeader();
     if (!isWebP) {
       return false;
@@ -221,7 +216,7 @@ class WebpHeaderReader {
     return headerByte & animatedMask != 0;
   }
 
-  /// Reads a RIFF chunk header. Returns [false] if the header FourCC isn't
+  /// Reads a RIFF chunk header. Returns `false` if the header FourCC isn't
   /// [expectedHeader] or the chunk header is truncated.
   bool _readChunkHeader(String expectedHeader) {
     if (!_hasBytes(8)) {
@@ -233,7 +228,7 @@ class WebpHeaderReader {
     return chunkFourCC == expectedHeader;
   }
 
-  /// Reads the WebP header. Returns [false] if this is not a valid WebP header.
+  /// Reads the WebP header. Returns `false` if this is not a valid WebP header.
   bool _readWebpHeader() {
     if (!_hasBytes(12)) {
       return false;
@@ -284,28 +279,23 @@ class GifHeaderReader {
   /// The current position we are reading from in bytes.
   int _position = 0;
 
-  /// Returns [true] if there are at least [count] unread bytes left.
+  /// Returns `true` if there are at least [count] unread bytes left.
   bool _hasBytes(int count) => _position + count <= bytes.lengthInBytes;
 
-  /// Returns [true] if this GIF is animated.
+  /// Returns `true` if this GIF is animated.
   ///
   /// We say a GIF is animated if it has one complete image frame followed by
-  /// the start of another graphic block. Returns [false] if the GIF is
+  /// the start of another graphic block. Returns `false` if the GIF is
   /// truncated or malformed before that point.
   bool isAnimated() {
     // Always parse from the start so repeated calls give the same answer.
     _position = 0;
-    // A GIF needs at least the 6-byte header and the 7-byte logical screen
-    // descriptor.
-    if (bytes.lengthInBytes < 13) {
-      return false;
-    }
     final bool isGif = _readGifHeader();
     if (!isGif) {
       return false;
     }
 
-    // Read the logical screen descriptor block.
+    // Read the 7-byte logical screen descriptor block.
     if (!_hasBytes(7)) {
       return false;
     }
@@ -335,13 +325,13 @@ class GifHeaderReader {
     // Skip the first frame, then check whether a second one starts. Padding
     // bytes, garbage, the trailer or the end of the buffer do not count as
     // the start of a second frame.
-    if (!_skipGraphicBlock() || !_maybeSkipSpecialPurposeBlocks()) {
+    if (!_skipGraphicBlock() || !_maybeSkipNonGraphicExtensions()) {
       return false;
     }
     return _checkForGraphicBlockStart();
   }
 
-  /// Reads the GIF header. Returns [false] if this is not a valid GIF header.
+  /// Reads the GIF header. Returns `false` if this is not a valid GIF header.
   bool _readGifHeader() {
     if (!_hasBytes(6)) {
       return false;
@@ -355,24 +345,24 @@ class GifHeaderReader {
   /// Skip extensions that are not part of a graphic block, such as Comment and
   /// Application Extensions (they do not affect decoding).
   ///
-  /// Returns [false] if one of these extensions is truncated, in which case the
+  /// Returns `false` if one of these extensions is truncated, in which case the
   /// read position is no longer at a block boundary.
-  bool _maybeSkipSpecialPurposeBlocks() {
-    while (_checkForSpecialPurposeBlock()) {
-      if (!_skipSpecialPurposeBlock()) {
+  bool _maybeSkipNonGraphicExtensions() {
+    while (_isNonGraphicExtension()) {
+      if (!_skipNonGraphicExtension()) {
         return false;
       }
     }
     return true;
   }
 
-  /// Returns [true] if the next block is an extension that is not part of a
+  /// Returns `true` if the next block is an extension that is not part of a
   /// graphic block: anything other than a Graphic Control Extension (0xF9) or
   /// a Plain Text Extension (0x01).
   ///
   /// This covers the Special Purpose Blocks (Comment and Application
   /// Extensions) as well as reserved and unknown extension labels.
-  bool _checkForSpecialPurposeBlock() {
+  bool _isNonGraphicExtension() {
     if (!_hasBytes(2) || bytes.getUint8(_position) != 0x21) {
       return false;
     }
@@ -387,10 +377,10 @@ class GifHeaderReader {
   /// Extension, the 11-byte application identifier block is skipped as a data
   /// sub-block.
   ///
-  /// Returns [false] if the next block is not such an extension or is
+  /// Returns `false` if the next block is not such an extension or is
   /// truncated.
-  bool _skipSpecialPurposeBlock() {
-    if (!_checkForSpecialPurposeBlock()) {
+  bool _skipNonGraphicExtension() {
+    if (!_isNonGraphicExtension()) {
       return false;
     }
     // Skip the introducer and label, then the data sub-blocks.
@@ -398,7 +388,7 @@ class GifHeaderReader {
     return _skipDataBlocks();
   }
 
-  /// Returns [true] if the next block starts a graphic block: a Graphic
+  /// Returns `true` if the next block starts a graphic block: a Graphic
   /// Control Extension, a Plain Text Extension, or an Image Descriptor.
   bool _checkForGraphicBlockStart() {
     return _checkForGraphicControlExtension() ||
@@ -408,9 +398,9 @@ class GifHeaderReader {
 
   /// Skip past the graphic block.
   ///
-  /// Returns [false] if the graphic block is truncated or malformed.
+  /// Returns `false` if the graphic block is truncated or malformed.
   bool _skipGraphicBlock() {
-    if (!_maybeSkipSpecialPurposeBlocks()) {
+    if (!_maybeSkipNonGraphicExtensions()) {
       return false;
     }
     // Check for the optional Graphic Control Extension.
@@ -420,7 +410,7 @@ class GifHeaderReader {
       }
     }
 
-    if (!_maybeSkipSpecialPurposeBlocks()) {
+    if (!_maybeSkipNonGraphicExtensions()) {
       return false;
     }
     // Check if the Graphic Block is a Plain Text Extension.
@@ -428,7 +418,7 @@ class GifHeaderReader {
       return _skipPlainTextExtension();
     }
 
-    if (!_maybeSkipSpecialPurposeBlocks()) {
+    if (!_maybeSkipNonGraphicExtensions()) {
       return false;
     }
 
@@ -462,7 +452,7 @@ class GifHeaderReader {
     return _skipDataBlocks();
   }
 
-  /// Returns [true] if the next block is a Graphic Control Extension block.
+  /// Returns `true` if the next block is a Graphic Control Extension block.
   bool _checkForGraphicControlExtension() {
     if (!_hasBytes(2)) {
       return false;
@@ -484,7 +474,7 @@ class GifHeaderReader {
   /// assuming the usual 4-byte block, so a nonstandard block size does not
   /// throw off the rest of the parse.
   ///
-  /// Returns [false] if the block is truncated.
+  /// Returns `false` if the block is truncated.
   bool _skipGraphicControlExtension() {
     if (!_checkForGraphicControlExtension()) {
       return false;
@@ -512,7 +502,7 @@ class GifHeaderReader {
 
   /// Skip the Plain Text Extension block.
   ///
-  /// Returns [false] if the block is truncated.
+  /// Returns `false` if the block is truncated.
   bool _skipPlainTextExtension() {
     // Skip the 15 bytes before the data sub-blocks.
     if (!_checkForPlainTextExtension() || !_hasBytes(15)) {
@@ -525,7 +515,7 @@ class GifHeaderReader {
 
   /// Skip past any data sub-blocks and the block terminator.
   ///
-  /// Returns [false] if a sub-block or the block terminator is missing.
+  /// Returns `false` if a sub-block or the block terminator is missing.
   bool _skipDataBlocks() {
     while (true) {
       if (!_hasBytes(1)) {
