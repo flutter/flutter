@@ -16,7 +16,8 @@ import '../dart/package_map.dart';
 typedef _RawExtension = ({String package, Uri rootUri, Uri packageUri, Object? config});
 
 /// Metadata for a project-scoped tool extension discovered via
-/// `.dart_tool/package_config.json` and `extension/flutter_tools/config.yaml`.
+/// the project's `.dart_tool/package_config.json` and
+/// tool extensions' `extension/flutter_tools/config.yaml`.
 @immutable
 final class DiscoveredProjectExtension {
   const DiscoveredProjectExtension({
@@ -43,7 +44,7 @@ final class DiscoveredProjectExtension {
   /// File system path of the workspace or project root containing `.dart_tool/package_config.json`.
   final String workspaceRootPath;
 
-  /// Parsed static metadata from `extension/flutter_tools/config.yaml`.
+  /// Parsed static metadata from the extension's `extension/flutter_tools/config.yaml`.
   final ExtensionPackageConfig config;
 
   /// Absolute file URI of the extension's isolate entrypoint script.
@@ -64,7 +65,7 @@ class ProjectExtensionFinder {
   final FileSystem _fileSystem;
   final Logger _logger;
 
-  /// Discovers tool extensions starting from [startDirectory] (defaults to
+  /// Discovers tool extensions starting from [startDirectory] (if null, falls back to
   /// `fileSystem.currentDirectory`).
   ///
   /// Returns an empty list if `.dart_tool/package_config.json` does not exist
