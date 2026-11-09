@@ -121,7 +121,7 @@ dependencies:
   google_identity_services_web: 0.3.3+1
   google_mobile_ads: 8.0.0
   googleapis: 14.0.0
-  googleapis_auth: 2.3.5
+  googleapis_auth: 2.3.7
   hooks: 2.2.0
   data_assets: 0.20.0
   record_use: 1.1.1
@@ -223,4 +223,4 @@ dependencies:
 dev_dependencies:
   ffigen: 23.0.0
 
-# PUBSPEC CHECKSUM: 3j7j1i
+# PUBSPEC CHECKSUM: 1sc2nd

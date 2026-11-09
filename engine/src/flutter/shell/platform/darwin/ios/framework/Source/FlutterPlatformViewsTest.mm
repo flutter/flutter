@@ -3765,14 +3765,20 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       compositeView:2
          withParams:[flutterPlatformViewsController compositionParamsForView:2]];
 
+  // A frame whose encode fails is not submitted.
+  auto encode_failed_frame_submitted = std::make_shared<bool>(false);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return false; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      [encode_failed_frame_submitted](const flutter::SurfaceFrame& surface_frame) {
+        *encode_failed_frame_submitted = true;
+        return true;
+      },
       /*frame_size=*/flutter::DlISize(800, 600));
-  XCTAssertFalse([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                              withIosContext:std::make_shared<FakeIOSContext>()]);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
+  XCTAssertFalse(*encode_failed_frame_submitted);
 
   auto embeddedViewParams_2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(300, 300), stack);
@@ -3782,13 +3788,19 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       compositeView:2
          withParams:[flutterPlatformViewsController compositionParamsForView:2]];
 
+  // A frame whose encode succeeds is submitted.
+  auto encode_succeeded_frame_submitted = std::make_shared<bool>(false);
   auto mock_surface_submit_true = std::make_unique<flutter::SurfaceFrame>(
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      [encode_succeeded_frame_submitted](const flutter::SurfaceFrame& surface_frame) {
+        *encode_succeeded_frame_submitted = true;
+        return true;
+      },
       /*frame_size=*/flutter::DlISize(800, 600));
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface_submit_true)
-                                             withIosContext:std::make_shared<FakeIOSContext>()]);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface_submit_true)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
+  XCTAssertTrue(*encode_succeeded_frame_submitted);
 }
 
 - (void)
@@ -3937,8 +3949,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                                     withParams:std::move(embeddedViewParams2)];
 
   auto mock_surface = CreateTestSurfaceFrame();
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                             withIosContext:std::make_shared<FakeIOSContext>()]);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -3961,8 +3973,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                                     withParams:std::move(embeddedViewParams1)];
 
   mock_surface = CreateTestSurfaceFrame();
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                             withIosContext:std::make_shared<FakeIOSContext>()]);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] >
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -4019,8 +4031,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                                     withParams:std::move(embeddedViewParams2)];
 
   auto mock_surface = CreateTestSurfaceFrame();
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                             withIosContext:std::make_shared<FakeIOSContext>()]);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -4043,8 +4055,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                                     withParams:std::move(embeddedViewParams2)];
 
   mock_surface = CreateTestSurfaceFrame();
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                             withIosContext:std::make_shared<FakeIOSContext>()]);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] <
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -4444,8 +4456,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     [self waitForExpectationsWithTimeout:30 handler:nil];
 
     auto mock_surface = CreateTestSurfaceFrame();
-    XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                               withIosContext:std::make_shared<FakeIOSContext>()]);
+    [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                                 withIosContext:std::make_shared<FakeIOSContext>()];
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
@@ -4465,8 +4477,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                                       withParams:std::move(embeddedViewParams1)];
 
     auto mock_surface = CreateTestSurfaceFrame();
-    XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                               withIosContext:std::make_shared<FakeIOSContext>()]);
+    [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                                 withIosContext:std::make_shared<FakeIOSContext>()];
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
