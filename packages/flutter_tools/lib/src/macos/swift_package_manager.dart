@@ -389,6 +389,10 @@ class SwiftPackageManager {
   /// ]
   /// ```
   ///
+  /// The override is the highest minimum deployment target declared by any of the plugin
+  /// dependencies. It is `null` if none of the plugin dependencies declare a minimum deployment
+  /// target for [platform], if the plugin's own [manifest] fails to parse, or if the plugin's own
+  /// minimum deployment target is already greater than or equal to the override.
   Future<(List<Plugin>, SwiftPackageSupportedPlatform?)> _getPluginDependencies(
     File manifest,
     List<Plugin> plugins,
@@ -397,15 +401,10 @@ class SwiftPackageManager {
     final FileSystem fileSystem = _toolContext.fs;
     final Logger logger = _toolContext.logger;
     final String manifestContent = manifest.readAsStringSync();
+    // Matches relative paths to sibling packages, such as "../plugin_1", capturing the package name.
     final dependencyPattern = RegExp(r'"\.\.\/([^"]+)"');
     final Iterable<Match> matches = dependencyPattern.allMatches(manifestContent);
     final List<Plugin> pluginDependencies = [];
-
-    // The plugin's manifest is only parsed once a plugin dependency is found. If it fails to parse,
-    // the plugin's own minimum deployment target is unknown, so no override is determined.
-    var pluginManifestParsed = false;
-    var canOverride = false;
-    SwiftPackageSupportedPlatform? pluginSupportedVersion;
     SwiftPackageSupportedPlatform? highestDependencyVersion;
 
     for (final match in matches) {
@@ -432,22 +431,7 @@ class SwiftPackageManager {
       }
       pluginDependencies.add(pluginDependency);
 
-      if (!pluginManifestParsed) {
-        pluginManifestParsed = true;
-        final Map<String, Object?>? manifestAsJson = await _parseSwiftPackage(
-          swiftPackageManifest: manifest,
-          processManager: _toolContext.processManager,
-          logger: logger,
-        );
-        if (manifestAsJson != null) {
-          canOverride = true;
-          pluginSupportedVersion = parseSwiftPackageSupportedPlatform(manifestAsJson, platform);
-        }
-      }
-      if (!canOverride) {
-        continue;
-      }
-
+      // Track the highest minimum deployment target required by any plugin dependency.
       final Map<String, Object?>? dependencyManifestAsJson = await _parseSwiftPackage(
         swiftPackageManifest: dependencyManifest,
         processManager: _toolContext.processManager,
@@ -464,10 +448,28 @@ class SwiftPackageManager {
       }
     }
 
+    // No plugin dependency declares a minimum deployment target, so no override is needed. Return
+    // early to avoid parsing the plugin's own manifest unnecessarily.
+    if (highestDependencyVersion == null) {
+      return (pluginDependencies, null);
+    }
+
+    // If the plugin's manifest fails to parse, the plugin's own minimum deployment target is
+    // unknown, so no override is determined.
+    final Map<String, Object?>? manifestAsJson = await _parseSwiftPackage(
+      swiftPackageManifest: manifest,
+      processManager: _toolContext.processManager,
+      logger: logger,
+    );
+    if (manifestAsJson == null) {
+      return (pluginDependencies, null);
+    }
+    final SwiftPackageSupportedPlatform? pluginSupportedVersion =
+        parseSwiftPackageSupportedPlatform(manifestAsJson, platform);
+
     // Only override when a plugin dependency requires a higher minimum deployment target.
-    if (highestDependencyVersion != null &&
-        (pluginSupportedVersion == null ||
-            highestDependencyVersion.version > pluginSupportedVersion.version)) {
+    if (pluginSupportedVersion == null ||
+        highestDependencyVersion.version > pluginSupportedVersion.version) {
       return (pluginDependencies, highestDependencyVersion);
     }
     return (pluginDependencies, null);

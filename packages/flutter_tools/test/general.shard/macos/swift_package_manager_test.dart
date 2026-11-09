@@ -465,7 +465,6 @@ let package = Package(
                 .createSync(recursive: true);
 
             final processManager = FakeProcessManager.list([
-              _dumpPackageCommand('${validPlugin1.path}/${platform.name}/valid_plugin_1'),
               _dumpPackageCommand('${validPlugin2.path}/${platform.name}/valid_plugin_2'),
               _dumpPackageCommand('${validPlugin3.path}/${platform.name}/valid_plugin_3'),
               FakeCommand(
@@ -741,10 +740,6 @@ let package = Package(
               );
 
               final processManager = FakeProcessManager.list([
-                _dumpPackageCommand(
-                  '${validPlugin1.path}/${platform.name}/valid_plugin_1',
-                  stdout: _platformsJson(platform, lowVersion),
-                ),
                 // The highest deployment target is not the last dependency processed.
                 _dumpPackageCommand(
                   '${validPlugin2.path}/${platform.name}/valid_plugin_2',
@@ -753,6 +748,10 @@ let package = Package(
                 _dumpPackageCommand(
                   '${validPlugin3.path}/${platform.name}/valid_plugin_3',
                   stdout: _platformsJson(platform, midVersion),
+                ),
+                _dumpPackageCommand(
+                  '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+                  stdout: _platformsJson(platform, lowVersion),
                 ),
                 _rsyncCommand(
                   source: validPlugin1.path,
@@ -854,11 +853,11 @@ let package = Package(
               );
 
               final processManager = FakeProcessManager.list([
-                _dumpPackageCommand('${validPlugin1.path}/${platform.name}/valid_plugin_1'),
                 _dumpPackageCommand(
                   '${validPlugin2.path}/${platform.name}/valid_plugin_2',
                   stdout: _platformsJson(platform, highVersion),
                 ),
+                _dumpPackageCommand('${validPlugin1.path}/${platform.name}/valid_plugin_1'),
                 _rsyncCommand(
                   source: validPlugin1.path,
                   destination: '$buildSourcePackagesPath/valid_plugin_1-1.0.0',
@@ -925,11 +924,13 @@ let package = Package(
 
               final processManager = FakeProcessManager.list([
                 _dumpPackageCommand(
+                  '${validPlugin2.path}/${platform.name}/valid_plugin_2',
+                  stdout: _platformsJson(platform, highVersion),
+                ),
+                _dumpPackageCommand(
                   '${validPlugin1.path}/${platform.name}/valid_plugin_1',
                   stdout: 'not json',
                 ),
-                // valid_plugin_2's manifest is not parsed since valid_plugin_1's minimum
-                // deployment target is unknown.
                 _rsyncCommand(
                   source: validPlugin2.path,
                   destination: '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
@@ -1021,10 +1022,6 @@ let package = Package(
               );
 
               final processManager = FakeProcessManager.list([
-                _dumpPackageCommand(
-                  '${validPlugin1.path}/${platform.name}/valid_plugin_1',
-                  stdout: _platformsJson(platform, midVersion),
-                ),
                 // Equal to valid_plugin_1's deployment target.
                 _dumpPackageCommand(
                   '${validPlugin2.path}/${platform.name}/valid_plugin_2',
@@ -1034,6 +1031,10 @@ let package = Package(
                 _dumpPackageCommand(
                   '${validPlugin3.path}/${platform.name}/valid_plugin_3',
                   stdout: _platformsJson(platform, lowVersion),
+                ),
+                _dumpPackageCommand(
+                  '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+                  stdout: _platformsJson(platform, midVersion),
                 ),
                 _rsyncCommand(
                   source: validPlugin2.path,
@@ -1118,11 +1119,11 @@ var package=Package (
               );
 
               final processManager = FakeProcessManager.list([
-                _dumpPackageCommand('${validPlugin1.path}/${platform.name}/valid_plugin_1'),
                 _dumpPackageCommand(
                   '${validPlugin2.path}/${platform.name}/valid_plugin_2',
                   stdout: _platformsJson(platform, lowVersion),
                 ),
+                _dumpPackageCommand('${validPlugin1.path}/${platform.name}/valid_plugin_1'),
                 _rsyncCommand(
                   source: validPlugin1.path,
                   destination: '$buildSourcePackagesPath/valid_plugin_1-1.0.0',
@@ -1210,15 +1211,15 @@ let package = Package(
               );
 
               final processManager = FakeProcessManager.list([
-                // valid_plugin_1's dependencies.
-                _dumpPackageCommand('${validPlugin1.path}/${platform.name}/valid_plugin_1'),
+                // valid_plugin_1's dependencies. valid_plugin_1's manifest is not parsed since
+                // none of its dependencies declare a deployment target.
                 _dumpPackageCommand('${validPlugin2.path}/${platform.name}/valid_plugin_2'),
                 // valid_plugin_2's dependencies.
-                _dumpPackageCommand('${validPlugin2.path}/${platform.name}/valid_plugin_2'),
                 _dumpPackageCommand(
                   '${validPlugin3.path}/${platform.name}/valid_plugin_3',
                   stdout: _platformsJson(platform, highVersion),
                 ),
+                _dumpPackageCommand('${validPlugin2.path}/${platform.name}/valid_plugin_2'),
                 _rsyncCommand(
                   source: validPlugin2.path,
                   destination: '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
