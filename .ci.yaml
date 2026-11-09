@@ -597,7 +597,6 @@ targets:
   # The DevTools tests build DevTools from source and take as long as the rest
   # of the registry, and their test step only runs on Linux.
   - name: Linux customer_testing_devtools
-    bringup: true
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
@@ -607,7 +606,6 @@ targets:
       shard: customer_testing_devtools
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   # Despite the name, this really means "generate api_docs.zip", and "upload zip
   # to GCS", and conditionally on the "master" channel will also deploy the docs
