@@ -8,13 +8,15 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:process/process.dart';
 
 import '../../../src/common.dart';
+import '../../../src/fakes.dart';
+
+final _fs = LocalFileSystem.test(signals: Signals.test());
 
 /// A ProcessManager that invokes a real process manager, but keeps
 /// track of all commands sent to it.
@@ -72,136 +74,115 @@ Future<void> analyzeProject(
   String workingDir, {
   List<String> expectedFailures = const <String>[],
 }) async {
-  final fs = LocalFileSystem.test(signals: Signals.test());
-  try {
-    const Platform platform = LocalPlatform();
-    const ProcessManager processManager = LocalProcessManager();
-    final logger = BufferLogger.test();
-    final String flutterRoot = getFlutterRoot();
-    final os = OperatingSystemUtils(
-      fileSystem: fs,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-    );
-    final cache = Cache.test(
-      flutterRoot: flutterRoot,
-      rootOverride: fs.directory(flutterRoot),
-      fileSystem: fs,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-    );
-    final artifacts = CachedArtifacts(
-      fileSystem: fs,
-      platform: platform,
-      cache: cache,
-      operatingSystemUtils: os,
-    );
-    final String flutterToolsSnapshotPath = fs.path.absolute(
-      fs.path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'),
-    );
+  const Platform platform = LocalPlatform();
+  const ProcessManager processManager = LocalProcessManager();
+  final logger = BufferLogger.test();
+  final String flutterRoot = getFlutterRoot();
+  final cache = Cache.test(
+    flutterRoot: flutterRoot,
+    rootOverride: _fs.directory(flutterRoot),
+    fileSystem: _fs,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
+  final artifacts = CachedArtifacts(
+    fileSystem: _fs,
+    platform: platform,
+    cache: cache,
+    operatingSystemUtils: FakeOperatingSystemUtils(),
+  );
+  final String flutterToolsSnapshotPath = _fs.path.absolute(
+    _fs.path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'),
+  );
 
-    final args = <String>[flutterToolsSnapshotPath, 'analyze'];
+  final args = <String>[flutterToolsSnapshotPath, 'analyze'];
 
-    final ProcessResult exec = await Process.run(
-      artifacts.getArtifactPath(Artifact.engineDartBinary),
-      args,
-      workingDirectory: workingDir,
-    );
-    if (expectedFailures.isEmpty) {
-      printOnFailure('Results of running analyzer:');
-      printOnFailure(exec.stdout.toString());
-      printOnFailure(exec.stderr.toString());
-      expect(exec.exitCode, 0);
-      return;
-    }
-    expect(exec.exitCode, isNot(0));
-    String lineParser(String line) {
-      try {
-        final analyzerSeparator = platform.isWindows ? ' - ' : ' • ';
-        final List<String> lineComponents = line.trim().split(analyzerSeparator);
-        final String lintName = lineComponents.removeLast();
-        final String location = lineComponents.removeLast();
-        return '$location: $lintName';
-      } on RangeError catch (err) {
-        throw RangeError('Received "$err" while trying to parse: "$line".');
-      }
-    }
-
-    final stdout = exec.stdout.toString();
-    final errors = <String>[];
-    try {
-      var analyzeLineFound = false;
-      const LineSplitter().convert(stdout).forEach((String line) {
-        // Conditional to filter out any stdout from `pub get`
-        if (!analyzeLineFound && line.startsWith('Analyzing')) {
-          analyzeLineFound = true;
-          return;
-        }
-
-        if (analyzeLineFound && line.trim().isNotEmpty) {
-          errors.add(lineParser(line.trim()));
-        }
-      });
-    } on Exception catch (err) {
-      fail('$err\n\nComplete STDOUT was:\n\n$stdout');
-    }
-    expect(errors, unorderedEquals(expectedFailures), reason: 'Failed with stdout:\n\n$stdout');
-  } finally {
-    await fs.dispose();
+  final ProcessResult exec = await Process.run(
+    artifacts.getArtifactPath(Artifact.engineDartBinary),
+    args,
+    workingDirectory: workingDir,
+  );
+  if (expectedFailures.isEmpty) {
+    printOnFailure('Results of running analyzer:');
+    printOnFailure(exec.stdout.toString());
+    printOnFailure(exec.stderr.toString());
+    expect(exec.exitCode, 0);
+    return;
   }
+  expect(exec.exitCode, isNot(0));
+  String lineParser(String line) {
+    try {
+      final analyzerSeparator = platform.isWindows ? ' - ' : ' • ';
+      final List<String> lineComponents = line.trim().split(analyzerSeparator);
+      final String lintName = lineComponents.removeLast();
+      final String location = lineComponents.removeLast();
+      return '$location: $lintName';
+    } on RangeError catch (err) {
+      throw RangeError('Received "$err" while trying to parse: "$line".');
+    }
+  }
+
+  final stdout = exec.stdout.toString();
+  final errors = <String>[];
+  try {
+    var analyzeLineFound = false;
+    const LineSplitter().convert(stdout).forEach((String line) {
+      // Conditional to filter out any stdout from `pub get`
+      if (!analyzeLineFound && line.startsWith('Analyzing')) {
+        analyzeLineFound = true;
+        return;
+      }
+
+      if (analyzeLineFound && line.trim().isNotEmpty) {
+        errors.add(lineParser(line.trim()));
+      }
+    });
+  } on Exception catch (err) {
+    fail('$err\n\nComplete STDOUT was:\n\n$stdout');
+  }
+  expect(errors, unorderedEquals(expectedFailures), reason: 'Failed with stdout:\n\n$stdout');
 }
 
 Future<void> ensureFlutterToolsSnapshot() async {
-  final fs = LocalFileSystem.test(signals: Signals.test());
-  try {
-    final String flutterToolsPath = fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart'));
-    final String flutterToolsSnapshotPath = fs.path.absolute(
-      fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
-    );
-    final String packageConfig = fs.path.absolute(
-      fs.path.join('.dart_tool', 'package_config.json'),
-    );
+  final String flutterToolsPath = _fs.path.absolute(_fs.path.join('bin', 'flutter_tools.dart'));
+  final String flutterToolsSnapshotPath = _fs.path.absolute(
+    _fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+  );
+  final String packageConfig = _fs.path.absolute(
+    _fs.path.join('.dart_tool', 'package_config.json'),
+  );
 
-    final File snapshotFile = fs.file(flutterToolsSnapshotPath);
-    if (snapshotFile.existsSync()) {
-      snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
-    }
-
-    final snapshotArgs = <String>[
-      '--snapshot=$flutterToolsSnapshotPath',
-      '--packages=$packageConfig',
-      flutterToolsPath,
-    ];
-    final ProcessResult snapshotResult = await Process.run(
-      '../../bin/cache/dart-sdk/bin/dart',
-      snapshotArgs,
-    );
-    printOnFailure('Results of generating snapshot:');
-    printOnFailure(snapshotResult.stdout.toString());
-    printOnFailure(snapshotResult.stderr.toString());
-    expect(snapshotResult.exitCode, 0);
-  } finally {
-    await fs.dispose();
+  final File snapshotFile = _fs.file(flutterToolsSnapshotPath);
+  if (snapshotFile.existsSync()) {
+    snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
   }
+
+  final snapshotArgs = <String>[
+    '--snapshot=$flutterToolsSnapshotPath',
+    '--packages=$packageConfig',
+    flutterToolsPath,
+  ];
+  final ProcessResult snapshotResult = await Process.run(
+    '../../bin/cache/dart-sdk/bin/dart',
+    snapshotArgs,
+  );
+  printOnFailure('Results of generating snapshot:');
+  printOnFailure(snapshotResult.stdout.toString());
+  printOnFailure(snapshotResult.stderr.toString());
+  expect(snapshotResult.exitCode, 0);
 }
 
 Future<void> restoreFlutterToolsSnapshot() async {
-  final fs = LocalFileSystem.test(signals: Signals.test());
-  try {
-    final String flutterToolsSnapshotPath = fs.path.absolute(
-      fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
-    );
+  final String flutterToolsSnapshotPath = _fs.path.absolute(
+    _fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+  );
 
-    final File snapshotBackup = fs.file('$flutterToolsSnapshotPath.bak');
-    if (!snapshotBackup.existsSync()) {
-      // No backup to restore.
-      return;
-    }
-
-    snapshotBackup.renameSync(flutterToolsSnapshotPath);
-  } finally {
-    await fs.dispose();
+  final File snapshotBackup = _fs.file('$flutterToolsSnapshotPath.bak');
+  if (!snapshotBackup.existsSync()) {
+    // No backup to restore.
+    return;
   }
+
+  snapshotBackup.renameSync(flutterToolsSnapshotPath);
 }

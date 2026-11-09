@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -28,7 +27,13 @@ import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart'
-    show FakeAndroidContext, FakeBuildSystem, FakeFlutterVersion, FakeToolContext, TestFeatureFlags;
+    show
+        FakeAndroidContext,
+        FakeBuildSystem,
+        FakeFlutterVersion,
+        FakeOperatingSystemUtils,
+        FakeToolContext,
+        TestFeatureFlags;
 import '../../src/test_flutter_command_runner.dart';
 
 final localFs = LocalFileSystem.test(signals: FakeSignals());
@@ -306,18 +311,12 @@ void main() {
     testUsingContext(
       'logs success',
       () async {
-        final os = OperatingSystemUtils(
-          fileSystem: localFs,
-          logger: BufferLogger.test(),
-          platform: localPlatform,
-          processManager: const LocalProcessManager(),
-        );
         final String projectPath = await createProject(
           tempDir,
           arguments: <String>['--no-pub', '--template=app'],
         );
 
-        await runBuildAppBundleCommand(projectPath, processInfo: processInfo);
+        await runBuildAppBundleCommand(projectPath);
 
         expect(
           fakeAnalytics.sentEvents,
@@ -326,7 +325,7 @@ void main() {
               commandPath: 'create',
               result: 'success',
               commandHasTerminal: false,
-              hostArch: os.hostPlatform.cliName,
+              hostArch: FakeOperatingSystemUtils().hostPlatform.cliName,
               maxRss: processInfo.maxRss,
             ),
           ),
@@ -335,12 +334,6 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
-        OperatingSystemUtils: () => OperatingSystemUtils(
-          fileSystem: localFs,
-          logger: BufferLogger.test(),
-          platform: localPlatform,
-          processManager: const LocalProcessManager(),
-        ),
         ProcessInfo: () => processInfo,
       },
     );
@@ -688,19 +681,12 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   AndroidSdk? androidSdk = const _FakeAndroidSdk(),
   List<String>? arguments,
   Logger? logger,
-  ProcessInfo? processInfo,
   ProcessManager? processManager,
   FlutterProjectFactory? projectFactory,
 }) async {
   final Logger resolvedLogger = logger ?? BufferLogger.test();
   final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
   final String flutterRoot = getFlutterRoot();
-  final os = OperatingSystemUtils(
-    fileSystem: localFs,
-    logger: resolvedLogger,
-    platform: localPlatform,
-    processManager: resolvedProcessManager,
-  );
   final cache = Cache.test(
     flutterRoot: flutterRoot,
     rootOverride: localFs.directory(flutterRoot),
@@ -722,9 +708,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
       cache: cache,
       fs: localFs,
       logger: resolvedLogger,
-      os: os,
       platform: localPlatform,
-      processInfo: processInfo,
       processManager: resolvedProcessManager,
       projectFactory: projectFactory,
     ),

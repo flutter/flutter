@@ -14,12 +14,10 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -52,7 +50,6 @@ void main() {
     late Directory tempDir;
     late FakeAnalytics fakeAnalytics;
     late BufferLogger logger;
-    late OperatingSystemUtils localOs;
     late Cache localCache;
     late CachedArtifacts localArtifacts;
 
@@ -61,12 +58,6 @@ void main() {
     setUp(() {
       final String flutterRoot = getFlutterRoot();
       logger = BufferLogger.test();
-      localOs = OperatingSystemUtils(
-        fileSystem: localFs,
-        logger: logger,
-        platform: localPlatform,
-        processManager: localProcessManager,
-      );
       localCache = Cache.test(
         flutterRoot: flutterRoot,
         rootOverride: localFs.directory(flutterRoot),
@@ -79,7 +70,7 @@ void main() {
         fileSystem: localFs,
         platform: localPlatform,
         cache: localCache,
-        operatingSystemUtils: localOs,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -123,7 +114,6 @@ void main() {
           cache: localCache,
           fs: localFs,
           logger: logger,
-          os: localOs,
           platform: localPlatform,
           processManager: localProcessManager,
           projectFactory: FlutterProjectFactory(
@@ -293,236 +283,169 @@ void main() {
       }
     }
 
-    testUsingContext(
-      'get fetches packages and has output from pub',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module'],
-        );
-        removeGeneratedFiles(projectPath);
+    testUsingContext('get fetches packages and has output from pub', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      removeGeneratedFiles(projectPath);
 
-        await runCommandIn(projectPath, 'get');
+      await runCommandIn(projectPath, 'get');
 
-        expect(
-          mockStdio.stdout.writes.map(utf8.decode),
-          allOf(
-            // The output of pub changed, adding backticks around the directory name.
-            // These regexes are tolerant of the backticks being present or absent.
-            contains(matches(RegExp(r'Resolving dependencies in .+flutter_project`?\.\.\.'))),
-            contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
-            contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project`?!'))),
-          ),
-        );
-
-        expectDependenciesResolved(projectPath);
-        expectZeroPluginsInjected(projectPath);
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'pub',
-            variableName: 'get',
-            label: 'success',
-          ),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
+      expect(
+        mockStdio.stdout.writes.map(utf8.decode),
+        allOf(
+          // The output of pub changed, adding backticks around the directory name.
+          // These regexes are tolerant of the backticks being present or absent.
+          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project`?\.\.\.'))),
+          contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
+          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project`?!'))),
         ),
-        Analytics: () => fakeAnalytics,
-      },
-    );
+      );
 
-    testUsingContext(
-      'get --offline fetches packages',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module'],
-        );
-        removeGeneratedFiles(projectPath);
-
-        await runCommandIn(projectPath, 'get', args: <String>['--offline']);
-
-        expectDependenciesResolved(projectPath);
-        expectZeroPluginsInjected(projectPath);
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'pub',
+          variableName: 'get',
+          label: 'success',
         ),
-      },
-    );
+        true,
+      );
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Analytics: () => fakeAnalytics});
 
-    testUsingContext(
-      'get fetches packages for a workspace',
-      () async {
-        tempDir.childFile('pubspec.yaml').writeAsStringSync('''
+    testUsingContext('get --offline fetches packages', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get', args: <String>['--offline']);
+
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+
+    testUsingContext('get fetches packages for a workspace', () async {
+      tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: workspace
 environment:
   sdk: ^3.7.0-0
 workspace:
   - flutter_project
 ''');
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module'],
-        );
-        final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
-        final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
-        final pubspec = <String, Object?>{
-          ...pubspecYaml.value.cast<String, Object?>(),
-          'resolution': 'workspace',
-          'environment': <String, Object?>{
-            ...(pubspecYaml['environment'] as YamlMap).value.cast<String, Object?>(),
-            'sdk': '^3.5.0-0',
-          },
-        };
-        pubspecFile.writeAsStringSync(jsonEncode(pubspec));
-        await runCommandIn(projectPath, 'get');
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
+      final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+      final pubspec = <String, Object?>{
+        ...pubspecYaml.value.cast<String, Object?>(),
+        'resolution': 'workspace',
+        'environment': <String, Object?>{
+          ...(pubspecYaml['environment'] as YamlMap).value.cast<String, Object?>(),
+          'sdk': '^3.5.0-0',
+        },
+      };
+      pubspecFile.writeAsStringSync(jsonEncode(pubspec));
+      await runCommandIn(projectPath, 'get');
 
-        expect(
-          mockStdio.stdout.writes.map(utf8.decode),
-          allOf(
-            // The output of pub changed, adding backticks around the directory name.
-            // These regexes are tolerant of the backticks being present or absent.
-            contains(
-              matches(
-                RegExp(
-                  r'Resolving dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?\.\.\.',
-                ),
-              ),
-            ),
-            contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
-            contains(
-              matches(
-                RegExp(
-                  r'Changed \d+ dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?!',
-                ),
+      expect(
+        mockStdio.stdout.writes.map(utf8.decode),
+        allOf(
+          // The output of pub changed, adding backticks around the directory name.
+          // These regexes are tolerant of the backticks being present or absent.
+          contains(
+            matches(
+              RegExp(
+                r'Resolving dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?\.\.\.',
               ),
             ),
           ),
-        );
-        expectDependenciesResolved(tempDir.path);
-        expectZeroPluginsInjected(projectPath);
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'pub',
-            variableName: 'get',
-            label: 'success',
+          contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
+          contains(
+            matches(
+              RegExp(r'Changed \d+ dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?!'),
+            ),
           ),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
         ),
-        Analytics: () => fakeAnalytics,
-      },
-    );
+      );
+      expectDependenciesResolved(tempDir.path);
+      expectZeroPluginsInjected(projectPath);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'pub',
+          variableName: 'get',
+          label: 'success',
+        ),
+        true,
+      );
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Analytics: () => fakeAnalytics});
 
-    testUsingContext(
-      'get creates plugin registrants for each app in workspace',
-      () async {
-        tempDir.childFile('pubspec.yaml').writeAsStringSync('''
+    testUsingContext('get creates plugin registrants for each app in workspace', () async {
+      tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: workspace
 environment:
   sdk: ^3.7.0-0
 workspace:
   - flutter_project
 ''');
-        await createProject(
-          tempDir,
-          name: 'plugin',
-          arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
-        );
-        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
-        final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
-        final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
-        final pubspec = <String, Object?>{
-          ...pubspecYaml.value.cast<String, Object?>(),
-          'resolution': 'workspace',
-          'environment': <String, Object?>{'sdk': '^3.5.0-0'},
-          'dependencies': <String, Object?>{
-            'plugin': <String, Object?>{'path': '../plugin'},
-          },
-        };
-        pubspecFile.writeAsStringSync(jsonEncode(pubspec));
-        await runCommandIn(tempDir.path, 'get');
+      await createProject(
+        tempDir,
+        name: 'plugin',
+        arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
+      );
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
+      final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
+      final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+      final pubspec = <String, Object?>{
+        ...pubspecYaml.value.cast<String, Object?>(),
+        'resolution': 'workspace',
+        'environment': <String, Object?>{'sdk': '^3.5.0-0'},
+        'dependencies': <String, Object?>{
+          'plugin': <String, Object?>{'path': '../plugin'},
+        },
+      };
+      pubspecFile.writeAsStringSync(jsonEncode(pubspec));
+      await runCommandIn(tempDir.path, 'get');
 
-        expect(
-          mockStdio.stdout.writes.map(utf8.decode),
-          allOf(
-            // The output of pub changed, adding backticks around the directory name.
-            // These regexes are tolerant of the backticks being present or absent.
-            contains(
-              matches(
-                RegExp(
-                  r'Resolving dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?\.\.\.',
-                ),
-              ),
-            ),
-            contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
-            contains(
-              matches(
-                RegExp(
-                  r'Changed \d+ dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?!',
-                ),
+      expect(
+        mockStdio.stdout.writes.map(utf8.decode),
+        allOf(
+          // The output of pub changed, adding backticks around the directory name.
+          // These regexes are tolerant of the backticks being present or absent.
+          contains(
+            matches(
+              RegExp(
+                r'Resolving dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?\.\.\.',
               ),
             ),
           ),
-        );
-        expectDependenciesResolved(tempDir.path);
-        expectPluginInjected(projectPath, includeLegacyPluginsList: false);
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'pub',
-            variableName: 'get',
-            label: 'success',
+          contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
+          contains(
+            matches(
+              RegExp(r'Changed \d+ dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?!'),
+            ),
           ),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
         ),
-        Analytics: () => fakeAnalytics,
-      },
-    );
+      );
+      expectDependenciesResolved(tempDir.path);
+      expectPluginInjected(projectPath, includeLegacyPluginsList: false);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'pub',
+          variableName: 'get',
+          label: 'success',
+        ),
+        true,
+      );
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Analytics: () => fakeAnalytics});
 
     testUsingContext(
       'get does not generate platform tooling for a non-Flutter workspace root',
@@ -556,359 +479,197 @@ workspace:
         // The Flutter app member of the workspace is still processed.
         expectExists(projectPath, 'ios/Flutter/Generated.xcconfig');
       },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-        Analytics: () => fakeAnalytics,
-      },
+      overrides: <Type, Generator>{Stdio: () => mockStdio, Analytics: () => fakeAnalytics},
     );
 
-    testUsingContext(
-      'get generates files into lib/l10n',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module'],
-        );
-        final Directory projectDir = localFs.directory(projectPath);
-        projectDir.childDirectory('lib').childDirectory('l10n').childFile('app_en.arb')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{ "hello": "Hello world!" }');
-        String pubspecFileContent = projectDir.childFile('pubspec.yaml').readAsStringSync();
-        pubspecFileContent = pubspecFileContent.replaceFirst(RegExp(r'\nflutter\:'), '''
+    testUsingContext('get generates files into lib/l10n', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      final Directory projectDir = localFs.directory(projectPath);
+      projectDir.childDirectory('lib').childDirectory('l10n').childFile('app_en.arb')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "hello": "Hello world!" }');
+      String pubspecFileContent = projectDir.childFile('pubspec.yaml').readAsStringSync();
+      pubspecFileContent = pubspecFileContent.replaceFirst(RegExp(r'\nflutter\:'), '''
 flutter:
   generate: true
 ''');
-        projectDir.childFile('pubspec.yaml').writeAsStringSync(pubspecFileContent);
-        projectDir.childFile('l10n.yaml').createSync();
-        await runCommandIn(projectPath, 'get');
-        expect(
-          projectDir
-              .childDirectory('lib')
-              .childDirectory('l10n')
-              .childFile('app_localizations.dart')
-              .existsSync(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Pub: () => Pub(
-          toolContext: FakeToolContext(
-            botDetector: fakeBotDetector,
-            cache: localCache,
-            fs: localFs,
-            logger: logger,
-            platform: localPlatform,
-            processManager: localProcessManager,
-          ),
-        ),
-      },
-    );
+      projectDir.childFile('pubspec.yaml').writeAsStringSync(pubspecFileContent);
+      projectDir.childFile('l10n.yaml').createSync();
+      await runCommandIn(projectPath, 'get');
+      expect(
+        projectDir
+            .childDirectory('lib')
+            .childDirectory('l10n')
+            .childFile('app_localizations.dart')
+            .existsSync(),
+        true,
+      );
+    });
 
-    testUsingContext(
-      'set no plugins as usage value',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module'],
-        );
-        removeGeneratedFiles(projectPath);
+    testUsingContext('set no plugins as usage value', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      removeGeneratedFiles(projectPath);
 
-        final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-        expect(
-          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-              .eventData['packagesNumberPlugins'],
-          0,
-        );
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesNumberPlugins'],
+        0,
+      );
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
-    testUsingContext(
-      'set the number of plugins as usage value',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>[
-            '--template=plugin',
-            '--no-pub',
-            '--platforms=ios,android,macos,windows',
-          ],
-        );
-        final String exampleProjectPath = localFs.path.join(projectPath, 'example');
+    testUsingContext('set the number of plugins as usage value', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>[
+          '--template=plugin',
+          '--no-pub',
+          '--platforms=ios,android,macos,windows',
+        ],
+      );
+      final String exampleProjectPath = localFs.path.join(projectPath, 'example');
 
-        final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+      final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
+      final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-        // A plugin example depends on the plugin itself, and integration_test.
-        expect(
-          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-              .eventData['packagesNumberPlugins'],
-          2,
-        );
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      // A plugin example depends on the plugin itself, and integration_test.
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesNumberPlugins'],
+        2,
+      );
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
-    testUsingContext(
-      'indicate that the project is not a module in usage value',
-      () async {
-        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
-        removeGeneratedFiles(projectPath);
+    testUsingContext('indicate that the project is not a module in usage value', () async {
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
+      removeGeneratedFiles(projectPath);
 
-        final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-        expect(
-          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-              .eventData['packagesProjectModule'],
-          false,
-        );
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesProjectModule'],
+        false,
+      );
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
-    testUsingContext(
-      'indicate that the project is a module in usage value',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module'],
-        );
-        removeGeneratedFiles(projectPath);
+    testUsingContext('indicate that the project is a module in usage value', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      removeGeneratedFiles(projectPath);
 
-        final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-        expect(
-          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-              .eventData['packagesProjectModule'],
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesProjectModule'],
+        true,
+      );
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
-    testUsingContext(
-      'indicate that Android project reports v2 in usage value',
-      () async {
-        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
-        removeGeneratedFiles(projectPath);
+    testUsingContext('indicate that Android project reports v2 in usage value', () async {
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
+      removeGeneratedFiles(projectPath);
 
-        final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-        expect(
-          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-              .eventData['packagesAndroidEmbeddingVersion'],
-          'v2',
-        );
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesAndroidEmbeddingVersion'],
+        'v2',
+      );
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
-    testUsingContext(
-      'upgrade fetches packages',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module'],
-        );
-        removeGeneratedFiles(projectPath);
+    testUsingContext('upgrade fetches packages', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      removeGeneratedFiles(projectPath);
 
-        await runCommandIn(projectPath, 'upgrade');
+      await runCommandIn(projectPath, 'upgrade');
 
-        expectDependenciesResolved(projectPath);
-        expectZeroPluginsInjected(projectPath);
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
-    testUsingContext(
-      'get fetches packages and injects plugin',
-      () async {
-        final String projectPath = await createProjectWithPlugin(
-          'path_provider',
-          arguments: <String>['--no-pub', '--template=module'],
-        );
-        removeGeneratedFiles(projectPath);
+    testUsingContext('get fetches packages and injects plugin', () async {
+      final String projectPath = await createProjectWithPlugin(
+        'path_provider',
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      removeGeneratedFiles(projectPath);
 
-        await runCommandIn(projectPath, 'get');
+      await runCommandIn(projectPath, 'get');
 
-        expectDependenciesResolved(projectPath);
-        expectModulePluginInjected(projectPath, includeLegacyPluginsList: false);
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      expectDependenciesResolved(projectPath);
+      expectModulePluginInjected(projectPath, includeLegacyPluginsList: false);
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
-    testUsingContext(
-      'get fetches packages and injects plugin in plugin project',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
-        );
-        final String exampleProjectPath = localFs.path.join(projectPath, 'example');
-        removeGeneratedFiles(projectPath);
-        removeGeneratedFiles(exampleProjectPath);
+    testUsingContext('get fetches packages and injects plugin in plugin project', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
+      );
+      final String exampleProjectPath = localFs.path.join(projectPath, 'example');
+      removeGeneratedFiles(projectPath);
+      removeGeneratedFiles(exampleProjectPath);
 
-        await runCommandIn(projectPath, 'get');
+      await runCommandIn(projectPath, 'get');
 
-        expectDependenciesResolved(projectPath);
+      expectDependenciesResolved(projectPath);
 
-        await runCommandIn(exampleProjectPath, 'get');
+      await runCommandIn(exampleProjectPath, 'get');
 
-        expectDependenciesResolved(exampleProjectPath);
-        expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      expectDependenciesResolved(exampleProjectPath);
+      expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
-    testUsingContext(
-      'get explicit-packages-resolution omits ".flutter-plugins"',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
-        );
-        final String exampleProjectPath = localFs.path.join(projectPath, 'example');
-        removeGeneratedFiles(projectPath);
-        removeGeneratedFiles(exampleProjectPath);
+    testUsingContext('get explicit-packages-resolution omits ".flutter-plugins"', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
+      );
+      final String exampleProjectPath = localFs.path.join(projectPath, 'example');
+      removeGeneratedFiles(projectPath);
+      removeGeneratedFiles(exampleProjectPath);
 
-        // Running flutter packages get also resolves the dependencies in the example/ project.
-        await runCommandIn(projectPath, 'get');
+      // Running flutter packages get also resolves the dependencies in the example/ project.
+      await runCommandIn(projectPath, 'get');
 
-        expectDependenciesResolved(projectPath);
-        expectDependenciesResolved(exampleProjectPath);
-        expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
-      },
-      overrides: <Type, Generator>{
-        Stdio: () => mockStdio,
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: localPlatform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      expectDependenciesResolved(projectPath);
+      expectDependenciesResolved(exampleProjectPath);
+      expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
+    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
   });
 
   group('packages test/pub', () {
+    late MemoryFileSystem fs;
     late FakeProcessManager processManager;
     late FakeStdio mockStdio;
 
     setUp(() {
+      fs = MemoryFileSystem.test();
       processManager = FakeProcessManager.empty();
       mockStdio = FakeStdio()..stdout.terminalColumns = 80;
     });
 
-    testWithoutContext('test without bot', () async {
-      final fs = MemoryFileSystem.test();
+    PackagesCommand createCommand({required bool isBot}) {
       final logger = BufferLogger.test();
       final platform = FakePlatform(environment: <String, String>{});
-      const BotDetector botDetector = FakeBotDetector(false);
       final cache = Cache.test(
         flutterRoot: '',
         fileSystem: fs,
@@ -916,6 +677,21 @@ flutter:
         platform: platform,
         processManager: processManager,
       );
+      return PackagesCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        toolContext: FakeToolContext(
+          botDetector: FakeBotDetector(isBot),
+          cache: cache,
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+          stdio: mockStdio,
+        ),
+      );
+    }
+
+    testWithoutContext('test without bot', () async {
       fs.directory('/packages/flutter_tools').createSync(recursive: true);
       fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
@@ -929,36 +705,12 @@ flutter:
           ],
         ),
       );
-      await createTestCommandRunner(
-        PackagesCommand(
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          toolContext: FakeToolContext(
-            botDetector: botDetector,
-            cache: cache,
-            fs: fs,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
-            stdio: mockStdio,
-          ),
-        ),
-      ).run(<String>['packages', 'test']);
+      await createTestCommandRunner(createCommand(isBot: false)).run(<String>['packages', 'test']);
 
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('test with bot', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final platform = FakePlatform(environment: <String, String>{});
-      const BotDetector botDetector = FakeBotDetector(true);
-      final cache = Cache.test(
-        flutterRoot: '',
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      );
       fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
         const FakeCommand(
@@ -972,36 +724,12 @@ flutter:
           ],
         ),
       );
-      await createTestCommandRunner(
-        PackagesCommand(
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          toolContext: FakeToolContext(
-            botDetector: botDetector,
-            cache: cache,
-            fs: fs,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
-            stdio: mockStdio,
-          ),
-        ),
-      ).run(<String>['packages', 'test']);
+      await createTestCommandRunner(createCommand(isBot: true)).run(<String>['packages', 'test']);
 
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('run pass arguments through to pub', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final platform = FakePlatform(environment: <String, String>{});
-      const BotDetector botDetector = FakeBotDetector(true);
-      final cache = Cache.test(
-        flutterRoot: '',
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      );
       fs.file('pubspec.yaml').createSync();
       final stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
@@ -1017,36 +745,13 @@ flutter:
           stdin: stdin,
         ),
       );
-      await createTestCommandRunner(
-        PackagesCommand(
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          toolContext: FakeToolContext(
-            botDetector: botDetector,
-            cache: cache,
-            fs: fs,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
-            stdio: mockStdio,
-          ),
-        ),
-      ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
+      await createTestCommandRunner(createCommand(isBot: true))
+          .run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('token pass arguments through to pub', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final platform = FakePlatform(environment: <String, String>{});
-      const BotDetector botDetector = FakeBotDetector(true);
-      final cache = Cache.test(
-        flutterRoot: '',
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      );
       fs.file('pubspec.yaml').createSync();
       final stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
@@ -1061,36 +766,13 @@ flutter:
           stdin: stdin,
         ),
       );
-      await createTestCommandRunner(
-        PackagesCommand(
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          toolContext: FakeToolContext(
-            botDetector: botDetector,
-            cache: cache,
-            fs: fs,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
-            stdio: mockStdio,
-          ),
-        ),
-      ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
+      await createTestCommandRunner(createCommand(isBot: true))
+          .run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('upgrade does not check for pubspec.yaml if -h/--help is passed', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final platform = FakePlatform(environment: <String, String>{});
-      const BotDetector botDetector = FakeBotDetector(true);
-      final cache = Cache.test(
-        flutterRoot: '',
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      );
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
@@ -1103,20 +785,8 @@ flutter:
           stdin: IOSink(StreamController<List<int>>().sink),
         ),
       );
-      await createTestCommandRunner(
-        PackagesCommand(
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          toolContext: FakeToolContext(
-            botDetector: botDetector,
-            cache: cache,
-            fs: fs,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
-            stdio: mockStdio,
-          ),
-        ),
-      ).run(<String>['pub', 'upgrade', '-h']);
+      await createTestCommandRunner(createCommand(isBot: true))
+          .run(<String>['pub', 'upgrade', '-h']);
 
       expect(processManager, hasNoRemainingExpectations);
     });

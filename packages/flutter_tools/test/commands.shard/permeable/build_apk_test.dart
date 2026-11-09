@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -1162,12 +1161,6 @@ Future<BuildApkCommand> runBuildApkCommand(
   final Logger resolvedLogger = logger ?? BufferLogger.test();
   final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
   final String flutterRoot = getFlutterRoot();
-  final os = OperatingSystemUtils(
-    fileSystem: localFs,
-    logger: resolvedLogger,
-    platform: localPlatform,
-    processManager: resolvedProcessManager,
-  );
   final cache = Cache.test(
     flutterRoot: flutterRoot,
     rootOverride: localFs.directory(flutterRoot),
@@ -1190,7 +1183,6 @@ Future<BuildApkCommand> runBuildApkCommand(
       cache: cache,
       fs: localFs,
       logger: resolvedLogger,
-      os: os,
       platform: localPlatform,
       processManager: resolvedProcessManager,
       projectFactory: projectFactory,

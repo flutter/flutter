@@ -119,12 +119,6 @@ late FakeStdio mockStdio;
 CachedArtifacts _createLocalArtifacts({Platform? platform}) {
   final Platform resolvedPlatform = platform ?? localPlatform;
   final String flutterRoot = getFlutterRoot();
-  final os = OperatingSystemUtils(
-    fileSystem: localFs,
-    logger: logger,
-    platform: resolvedPlatform,
-    processManager: localProcessManager,
-  );
   final cache = Cache.test(
     flutterRoot: flutterRoot,
     rootOverride: localFs.directory(flutterRoot),
@@ -137,7 +131,7 @@ CachedArtifacts _createLocalArtifacts({Platform? platform}) {
     fileSystem: localFs,
     platform: resolvedPlatform,
     cache: cache,
-    operatingSystemUtils: os,
+    operatingSystemUtils: FakeOperatingSystemUtils(),
   );
 }
 
@@ -150,12 +144,6 @@ ToolContext _createToolContext({
   final Platform resolvedPlatform = platform ?? localPlatform;
   final ProcessManager resolvedProcessManager = processManager ?? localProcessManager;
   final String flutterRoot = getFlutterRoot();
-  final os = OperatingSystemUtils(
-    fileSystem: resolvedFs,
-    logger: logger,
-    platform: resolvedPlatform,
-    processManager: resolvedProcessManager,
-  );
   final cache = Cache.test(
     flutterRoot: flutterRoot,
     rootOverride: resolvedFs.directory(flutterRoot),
@@ -169,14 +157,13 @@ ToolContext _createToolContext({
       fileSystem: resolvedFs,
       platform: resolvedPlatform,
       cache: cache,
-      operatingSystemUtils: os,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     ),
     botDetector: fakeBotDetector,
     cache: cache,
     flutterVersion: fakeFlutterVersion,
     fs: resolvedFs,
     logger: logger,
-    os: os,
     platform: resolvedPlatform,
     processManager: resolvedProcessManager,
     stdio: mockStdio,
@@ -269,128 +256,84 @@ void main() {
 
   // Verify that we create a default project ('app') that is
   // well-formed.
-  testUsingContext(
-    'can create a default project',
-    () async {
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['-a', 'java'],
-        <String>[
-          'analysis_options.yaml',
-          'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-          'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-          'flutter_project.iml',
-          'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.swift',
-          'ios/Runner/GeneratedPluginRegistrant.h',
-          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png',
-          'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png',
-          'lib/main.dart',
-        ],
-        expectedGitignoreLines: flutterPluginsIgnores,
-      );
-      expect(logger.statusText, contains('In order to run your application, type:'));
-      // Check that we're telling them about documentation
-      expect(logger.statusText, contains('https://docs.flutter.dev/'));
-      expect(logger.statusText, contains('https://api.flutter.dev/'));
+  testUsingContext('can create a default project', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['-a', 'java'],
+      <String>[
+        'analysis_options.yaml',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.swift',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png',
+        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png',
+        'lib/main.dart',
+      ],
+      expectedGitignoreLines: flutterPluginsIgnores,
+    );
+    expect(logger.statusText, contains('In order to run your application, type:'));
+    // Check that we're telling them about documentation
+    expect(logger.statusText, contains('https://docs.flutter.dev/'));
+    expect(logger.statusText, contains('https://api.flutter.dev/'));
 
-      // Check for usage values sent in analytics
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(
-          Event.commandUsageValues(
-            workflow: 'create',
-            commandHasTerminal: false,
-            createAndroidLanguage: 'java',
-          ),
+    // Check for usage values sent in analytics
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'create',
+          commandHasTerminal: false,
+          createAndroidLanguage: 'java',
         ),
-      );
-
-      // Check that the tests run clean
-      return _runFlutterTest(projectDir);
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
       ),
-      Logger: () => logger,
-      Analytics: () => fakeAnalytics,
-    },
-  );
+    );
 
-  testUsingContext(
-    'can create a default project if empty directory exists',
-    () async {
-      await projectDir.create(recursive: true);
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['-a', 'java'],
-        <String>[
-          'analysis_options.yaml',
-          'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-          'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-          'flutter_project.iml',
-          'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.swift',
-          'ios/Runner/GeneratedPluginRegistrant.h',
-        ],
-      );
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+    // Check that the tests run clean
+    return _runFlutterTest(projectDir);
+  }, overrides: {Logger: () => logger, Analytics: () => fakeAnalytics});
 
-  testUsingContext(
-    'creates a module project correctly',
-    () async {
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['--template=module'],
-        <String>[
-          '.android/app/',
-          '.gitignore',
-          '.ios/Flutter',
-          '.ios/Runner/AppDelegate.h',
-          '.ios/Runner/AppDelegate.m',
-          '.metadata',
-          'analysis_options.yaml',
-          'lib/main.dart',
-          'pubspec.yaml',
-          'README.md',
-          'test/widget_test.dart',
-        ],
-        unexpectedPaths: <String>['android/', 'ios/'],
-        expectedGitignoreLines: flutterPluginsIgnores,
-      );
-      return _runFlutterTest(projectDir);
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('can create a default project if empty directory exists', () async {
+    await projectDir.create(recursive: true);
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['-a', 'java'],
+      <String>[
+        'analysis_options.yaml',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.swift',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+    );
+  });
+
+  testUsingContext('creates a module project correctly', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--template=module'],
+      <String>[
+        '.android/app/',
+        '.gitignore',
+        '.ios/Flutter',
+        '.ios/Runner/AppDelegate.h',
+        '.ios/Runner/AppDelegate.m',
+        '.metadata',
+        'analysis_options.yaml',
+        'lib/main.dart',
+        'pubspec.yaml',
+        'README.md',
+        'test/widget_test.dart',
+      ],
+      unexpectedPaths: <String>['android/', 'ios/'],
+      expectedGitignoreLines: flutterPluginsIgnores,
+    );
+    return _runFlutterTest(projectDir);
+  });
 
   testUsingContext(
     'cannot create a project if non-empty non-project directory exists with .metadata',
@@ -408,48 +351,22 @@ void main() {
         throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'),
       );
     },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: _kNoColorTerminalPlatform(),
-        stdio: mockStdio,
-      ),
-      ...noColorTerminalOverride,
-    },
+    overrides: noColorTerminalOverride,
   );
 
-  testUsingContext(
-    'cannot create a project in flutter root',
-    () async {
-      final String flutterBin = localFs.path.join(
-        getFlutterRoot(),
-        'bin',
-        localPlatform.isWindows ? 'flutter.bat' : 'flutter',
-      );
-      final ProcessResult exec = await Process.run(flutterBin, <String>[
-        'create',
-        'flutter_project',
-      ], workingDirectory: getFlutterRoot());
-      expect(exec.exitCode, 2);
-      expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: _kNoColorTerminalPlatform(),
-        stdio: mockStdio,
-      ),
-      ...noColorTerminalOverride,
-    },
-  );
+  testUsingContext('cannot create a project in flutter root', () async {
+    final String flutterBin = localFs.path.join(
+      getFlutterRoot(),
+      'bin',
+      localPlatform.isWindows ? 'flutter.bat' : 'flutter',
+    );
+    final ProcessResult exec = await Process.run(flutterBin, <String>[
+      'create',
+      'flutter_project',
+    ], workingDirectory: getFlutterRoot());
+    expect(exec.exitCode, 2);
+    expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
+  }, overrides: noColorTerminalOverride);
 
   for (final (String description, List<String> examplesPath) in [
     ('examples', ['examples']),
@@ -457,36 +374,21 @@ void main() {
     ('package examples', ['packages', 'flutter', 'examples']),
     ('dev', ['dev']),
   ]) {
-    testUsingContext(
-      'can create a project in the $description directory',
-      () async {
-        final String flutterBin = localFs.path.join(
-          getFlutterRoot(),
-          'bin',
-          localPlatform.isWindows ? 'flutter.bat' : 'flutter',
-        );
-        final String examplesDirectory = localFs.path.joinAll([getFlutterRoot(), ...examplesPath]);
-        const projectName = 'flutter_project';
-        final ProcessResult exec = await Process.run(flutterBin, <String>[
-          'create',
-          projectName,
-        ], workingDirectory: examplesDirectory);
-        expect(exec.exitCode, 0);
-        localFs.file(localFs.path.join(examplesDirectory, projectName)).deleteSync(recursive: true);
-      },
-      overrides: {
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: localFs,
-          logger: logger,
-          processManager: localProcessManager,
-          botDetector: fakeBotDetector,
-          platform: _kNoColorTerminalPlatform(),
-          stdio: mockStdio,
-        ),
-        ...noColorTerminalOverride,
-      },
-    );
+    testUsingContext('can create a project in the $description directory', () async {
+      final String flutterBin = localFs.path.join(
+        getFlutterRoot(),
+        'bin',
+        localPlatform.isWindows ? 'flutter.bat' : 'flutter',
+      );
+      final String examplesDirectory = localFs.path.joinAll([getFlutterRoot(), ...examplesPath]);
+      const projectName = 'flutter_project';
+      final ProcessResult exec = await Process.run(flutterBin, <String>[
+        'create',
+        projectName,
+      ], workingDirectory: examplesDirectory);
+      expect(exec.exitCode, 0);
+      localFs.file(localFs.path.join(examplesDirectory, projectName)).deleteSync(recursive: true);
+    }, overrides: noColorTerminalOverride);
   }
 
   testUsingContext(
@@ -508,332 +410,192 @@ void main() {
         unexpectedPaths: <String>['.android/', '.ios/'],
       );
     },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
   );
 
-  testUsingContext(
-    'detects and recreates an app project correctly',
-    () async {
-      await projectDir.absolute.childDirectory('lib').create(recursive: true);
-      await projectDir.absolute.childDirectory('ios').create(recursive: true);
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['-a', 'java'],
-        <String>[
-          'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-          'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-          'flutter_project.iml',
-          'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.swift',
-          'ios/Runner/GeneratedPluginRegistrant.h',
-        ],
-        unexpectedPaths: <String>['.android/', '.ios/'],
-      );
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('detects and recreates an app project correctly', () async {
+    await projectDir.absolute.childDirectory('lib').create(recursive: true);
+    await projectDir.absolute.childDirectory('ios').create(recursive: true);
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['-a', 'java'],
+      <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.swift',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+      unexpectedPaths: <String>['.android/', '.ios/'],
+    );
+  });
 
-  testUsingContext(
-    'detects and recreates a plugin project correctly',
-    () async {
-      await projectDir.create(recursive: true);
-      await projectDir.absolute.childFile('.metadata').writeAsString('project_type: plugin\n');
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>[],
-        <String>['example/lib/main.dart', 'flutter_project.iml', 'lib/flutter_project.dart'],
-        unexpectedPaths: <String>[
-          'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-          'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
-          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-        ],
-      );
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('detects and recreates a plugin project correctly', () async {
+    await projectDir.create(recursive: true);
+    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: plugin\n');
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>[],
+      <String>['example/lib/main.dart', 'flutter_project.iml', 'lib/flutter_project.dart'],
+      unexpectedPaths: <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+      ],
+    );
+  });
 
-  testUsingContext(
-    'detects and recreates a package project correctly',
-    () async {
-      await projectDir.create(recursive: true);
-      await projectDir.absolute.childFile('.metadata').writeAsString('project_type: package\n');
-      return _createAndAnalyzeProject(
-        projectDir,
-        <String>[],
-        <String>['lib/flutter_project.dart', 'test/flutter_project_test.dart'],
-        unexpectedPaths: <String>[
-          'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-          'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
-          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-          'example/ios/Runner/AppDelegate.h',
-          'example/ios/Runner/AppDelegate.swift',
-          'example/ios/Runner/main.m',
-          'example/lib/main.dart',
-          'ios/Classes/FlutterProjectPlugin.h',
-          'ios/Classes/FlutterProjectPlugin.m',
-          'ios/Runner/AppDelegate.h',
-          'ios/Runner/AppDelegate.swift',
-          'ios/Runner/main.m',
-          'lib/main.dart',
-          'test/widget_test.dart',
-        ],
-      );
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('detects and recreates a package project correctly', () async {
+    await projectDir.create(recursive: true);
+    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: package\n');
+    return _createAndAnalyzeProject(
+      projectDir,
+      <String>[],
+      <String>['lib/flutter_project.dart', 'test/flutter_project_test.dart'],
+      unexpectedPaths: <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+        'example/ios/Runner/AppDelegate.h',
+        'example/ios/Runner/AppDelegate.swift',
+        'example/ios/Runner/main.m',
+        'example/lib/main.dart',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
+        'ios/Runner/AppDelegate.h',
+        'ios/Runner/AppDelegate.swift',
+        'ios/Runner/main.m',
+        'lib/main.dart',
+        'test/widget_test.dart',
+      ],
+    );
+  });
 
-  testUsingContext(
-    'kotlin legacy app project',
-    () async {
-      return _createProject(
-        projectDir,
-        <String>['--no-pub', '--template=app', '--android-language=kotlin'],
-        <String>[
-          'android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
-          'ios/Runner/AppDelegate.swift',
-          'ios/Runner/Runner-Bridging-Header.h',
-          'lib/main.dart',
-          '.idea/libraries/KotlinJavaRuntime.xml',
-        ],
-        unexpectedPaths: <String>[
-          'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-          'ios/Runner/AppDelegate.h',
-          'ios/Runner/AppDelegate.m',
-          'ios/Runner/main.m',
-        ],
-      );
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('kotlin legacy app project', () async {
+    return _createProject(
+      projectDir,
+      <String>['--no-pub', '--template=app', '--android-language=kotlin'],
+      <String>[
+        'android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
+        'ios/Runner/AppDelegate.swift',
+        'ios/Runner/Runner-Bridging-Header.h',
+        'lib/main.dart',
+        '.idea/libraries/KotlinJavaRuntime.xml',
+      ],
+      unexpectedPaths: <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'ios/Runner/AppDelegate.h',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/main.m',
+      ],
+    );
+  });
 
-  testUsingContext(
-    'can create a package project',
-    () async {
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['--template=package'],
-        <String>[
-          'analysis_options.yaml',
-          'lib/flutter_project.dart',
-          'test/flutter_project_test.dart',
-        ],
-        unexpectedPaths: <String>[
-          'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-          'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
-          'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-          'example/ios/Runner/AppDelegate.h',
-          'example/ios/Runner/AppDelegate.m',
-          'example/ios/Runner/main.m',
-          'example/lib/main.dart',
-          'ios/Classes/FlutterProjectPlugin.h',
-          'ios/Classes/FlutterProjectPlugin.m',
-          'ios/Runner/AppDelegate.h',
-          'ios/Runner/AppDelegate.m',
-          'ios/Runner/GeneratedPluginRegistrant.h',
-          'ios/Runner/GeneratedPluginRegistrant.m',
-          'ios/Runner/main.m',
-          'lib/main.dart',
-          'test/widget_test.dart',
-          'windows/flutter/generated_plugin_registrant.cc',
-          'windows/flutter/generated_plugin_registrant.h',
-          'windows/flutter/generated_plugins.cmake',
-          'linux/flutter/generated_plugin_registrant.cc',
-          'linux/flutter/generated_plugin_registrant.h',
-          'linux/flutter/generated_plugins.cmake',
-          'macos/Flutter/GeneratedPluginRegistrant.swift',
-        ],
-        expectedGitignoreLines: flutterPluginsIgnores,
-      );
-      return _runFlutterTest(projectDir);
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('can create a package project', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--template=package'],
+      <String>[
+        'analysis_options.yaml',
+        'lib/flutter_project.dart',
+        'test/flutter_project_test.dart',
+      ],
+      unexpectedPaths: <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+        'example/ios/Runner/AppDelegate.h',
+        'example/ios/Runner/AppDelegate.m',
+        'example/ios/Runner/main.m',
+        'example/lib/main.dart',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
+        'ios/Runner/AppDelegate.h',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+        'ios/Runner/GeneratedPluginRegistrant.m',
+        'ios/Runner/main.m',
+        'lib/main.dart',
+        'test/widget_test.dart',
+        'windows/flutter/generated_plugin_registrant.cc',
+        'windows/flutter/generated_plugin_registrant.h',
+        'windows/flutter/generated_plugins.cmake',
+        'linux/flutter/generated_plugin_registrant.cc',
+        'linux/flutter/generated_plugin_registrant.h',
+        'linux/flutter/generated_plugins.cmake',
+        'macos/Flutter/GeneratedPluginRegistrant.swift',
+      ],
+      expectedGitignoreLines: flutterPluginsIgnores,
+    );
+    return _runFlutterTest(projectDir);
+  });
 
-  testUsingContext(
-    'can create a plugin project',
-    () async {
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['--template=plugin', '-a', 'java'],
-        <String>[
-          'analysis_options.yaml',
-          'LICENSE',
-          'README.md',
-          'example/lib/main.dart',
-          'flutter_project.iml',
-          'lib/flutter_project.dart',
-        ],
-        unexpectedPaths: <String>[
-          'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
-          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-          'lib/flutter_project_web.dart',
-        ],
-        expectedGitignoreLines: flutterPluginsIgnores,
-      );
-      return _runFlutterTest(projectDir.childDirectory('example'));
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('can create a plugin project', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--template=plugin', '-a', 'java'],
+      <String>[
+        'analysis_options.yaml',
+        'LICENSE',
+        'README.md',
+        'example/lib/main.dart',
+        'flutter_project.iml',
+        'lib/flutter_project.dart',
+      ],
+      unexpectedPaths: <String>[
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+        'lib/flutter_project_web.dart',
+      ],
+      expectedGitignoreLines: flutterPluginsIgnores,
+    );
+    return _runFlutterTest(projectDir.childDirectory('example'));
+  });
 
-  testUsingContext(
-    'plugin project supports web',
-    () async {
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['--template=plugin', '--platform=web'],
-        <String>['lib/flutter_project.dart', 'lib/flutter_project_web.dart'],
-      );
-      final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
-      final pubspec = Pubspec.parse(rawPubspec);
-      // Expect the dependency on flutter_web_plugins exists
-      expect(pubspec.dependencies, contains('flutter_web_plugins'));
-      // The platform is correctly registered
-      final web =
-          ((pubspec.flutter!['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
-      expect(web['pluginClass'], 'FlutterProjectWeb');
-      expect(web['fileName'], 'flutter_project_web.dart');
-      expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
-    },
-    overrides: {
-      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-      Logger: () => logger,
-    },
-  );
+  testUsingContext('plugin project supports web', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--template=plugin', '--platform=web'],
+      <String>['lib/flutter_project.dart', 'lib/flutter_project_web.dart'],
+    );
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final pubspec = Pubspec.parse(rawPubspec);
+    // Expect the dependency on flutter_web_plugins exists
+    expect(pubspec.dependencies, contains('flutter_web_plugins'));
+    // The platform is correctly registered
+    final web = ((pubspec.flutter!['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
+    expect(web['pluginClass'], 'FlutterProjectWeb');
+    expect(web['fileName'], 'flutter_project_web.dart');
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+  }, overrides: {FeatureFlags: () => TestFeatureFlags(isWebEnabled: true), Logger: () => logger});
 
-  testUsingContext(
-    'plugin example app depends on plugin',
-    () async {
-      await _createProject(
-        projectDir,
-        <String>['--template=plugin', '-a', 'java'],
-        <String>['example/pubspec.yaml'],
-      );
-      final String rawPubspec = await projectDir
-          .childDirectory('example')
-          .childFile('pubspec.yaml')
-          .readAsString();
-      final pubspec = Pubspec.parse(rawPubspec);
-      final String pluginName = projectDir.basename;
-      expect(pubspec.dependencies, contains(pluginName));
-      expect(pubspec.dependencies[pluginName] is PathDependency, isTrue);
-      final pathDependency = pubspec.dependencies[pluginName]! as PathDependency;
-      expect(pathDependency.path, '../');
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('plugin example app depends on plugin', () async {
+    await _createProject(
+      projectDir,
+      <String>['--template=plugin', '-a', 'java'],
+      <String>['example/pubspec.yaml'],
+    );
+    final String rawPubspec = await projectDir
+        .childDirectory('example')
+        .childFile('pubspec.yaml')
+        .readAsString();
+    final pubspec = Pubspec.parse(rawPubspec);
+    final String pluginName = projectDir.basename;
+    expect(pubspec.dependencies, contains(pluginName));
+    expect(pubspec.dependencies[pluginName] is PathDependency, isTrue);
+    final pathDependency = pubspec.dependencies[pluginName]! as PathDependency;
+    expect(pathDependency.path, '../');
+  });
 
-  testUsingContext(
-    'plugin example app includes an integration test',
-    () async {
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['--template=plugin'],
-        <String>['example/integration_test/plugin_integration_test.dart'],
-      );
-      return _runFlutterTest(projectDir.childDirectory('example'));
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('plugin example app includes an integration test', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--template=plugin'],
+      <String>['example/integration_test/plugin_integration_test.dart'],
+    );
+    return _runFlutterTest(projectDir.childDirectory('example'));
+  });
 
   testUsingContext(
     'plugin project supports both SwiftPM and CocoaPods',
@@ -1017,56 +779,42 @@ void main() {
     expect(webOutputFile.readAsStringSync(), contains('<title>valid_name</title>'));
   });
 
-  testUsingContext(
-    'module project with pub',
-    () async {
-      return _createProject(
-        projectDir,
-        <String>['--template=module'],
-        <String>[
-          '.android/build.gradle',
-          '.android/Flutter/build.gradle',
-          '.android/Flutter/flutter.iml',
-          '.android/Flutter/src/main/AndroidManifest.xml',
-          '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-          '.android/gradle.properties',
-          '.android/gradle/wrapper/gradle-wrapper.jar',
-          '.android/gradle/wrapper/gradle-wrapper.properties',
-          '.android/gradlew',
-          '.android/gradlew.bat',
-          '.android/include_flutter.groovy',
-          '.android/local.properties',
-          '.android/settings.gradle',
-          '.gitignore',
-          '.metadata',
-          '.dart_tool/package_config.json',
-          'analysis_options.yaml',
-          'lib/main.dart',
-          'pubspec.lock',
-          'pubspec.yaml',
-          'README.md',
-          'test/widget_test.dart',
-        ],
-        unexpectedPaths: <String>[
-          'android/',
-          'ios/',
-          '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
-          '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
-        ],
-      );
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('module project with pub', () async {
+    return _createProject(
+      projectDir,
+      <String>['--template=module'],
+      <String>[
+        '.android/build.gradle',
+        '.android/Flutter/build.gradle',
+        '.android/Flutter/flutter.iml',
+        '.android/Flutter/src/main/AndroidManifest.xml',
+        '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        '.android/gradle.properties',
+        '.android/gradle/wrapper/gradle-wrapper.jar',
+        '.android/gradle/wrapper/gradle-wrapper.properties',
+        '.android/gradlew',
+        '.android/gradlew.bat',
+        '.android/include_flutter.groovy',
+        '.android/local.properties',
+        '.android/settings.gradle',
+        '.gitignore',
+        '.metadata',
+        '.dart_tool/package_config.json',
+        'analysis_options.yaml',
+        'lib/main.dart',
+        'pubspec.lock',
+        'pubspec.yaml',
+        'README.md',
+        'test/widget_test.dart',
+      ],
+      unexpectedPaths: <String>[
+        'android/',
+        'ios/',
+        '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
+        '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
+      ],
+    );
+  });
 
   testUsingContext('androidx is used by default in an app project', () async {
     final CreateCommand command = createCreateCommand();
@@ -1111,7 +859,7 @@ void main() {
     // records the revisions for the project itself.
     final initialMetadata = FlutterProjectMetadata(
       metadataFile,
-      testLogger,
+      logger,
       extensionTemplateManager: null,
     );
     const initialRevision = 'abcdef1234567890abcdef1234567890abcdef12';
@@ -1138,7 +886,7 @@ void main() {
 
     final updatedMetadata = FlutterProjectMetadata(
       metadataFile,
-      testLogger,
+      logger,
       extensionTemplateManager: null,
     );
     expect(
@@ -1929,52 +1677,38 @@ void main() {
     expect(displayName, 'My Project');
   });
 
-  testUsingContext(
-    'Correct info.plist key-value pairs for iOS module.',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('Correct info.plist key-value pairs for iOS module.', () async {
+    final CreateCommand command = createCreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>[
-        'create',
-        '--template=module',
-        '--org',
-        'com.foo.bar',
-        '--project-name=my_project',
-        projectDir.path,
-      ]);
+    await runner.run(<String>[
+      'create',
+      '--template=module',
+      '--org',
+      'com.foo.bar',
+      '--project-name=my_project',
+      projectDir.path,
+    ]);
 
-      final String plistPath = localFs.path.join('.ios', 'Runner', 'Info.plist');
-      final File plistFile = localFs.file(localFs.path.join(projectDir.path, plistPath));
-      expect(plistFile, exists);
-      final bool disabled = _getBooleanValueFromPlist(
-        plistFile: plistFile,
-        key: 'CADisableMinimumFrameDurationOnPhone',
-      );
-      expect(disabled, isTrue);
-      final bool indirectInput = _getBooleanValueFromPlist(
-        plistFile: plistFile,
-        key: 'UIApplicationSupportsIndirectInputEvents',
-      );
-      expect(indirectInput, isTrue);
-      final String displayName = _getStringValueFromPlist(
-        plistFile: plistFile,
-        key: 'CFBundleDisplayName',
-      );
-      expect(displayName, 'My Project');
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+    final String plistPath = localFs.path.join('.ios', 'Runner', 'Info.plist');
+    final File plistFile = localFs.file(localFs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final bool disabled = _getBooleanValueFromPlist(
+      plistFile: plistFile,
+      key: 'CADisableMinimumFrameDurationOnPhone',
+    );
+    expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(
+      plistFile: plistFile,
+      key: 'UIApplicationSupportsIndirectInputEvents',
+    );
+    expect(indirectInput, isTrue);
+    final String displayName = _getStringValueFromPlist(
+      plistFile: plistFile,
+      key: 'CFBundleDisplayName',
+    );
+    expect(displayName, 'My Project');
+  });
 
   testUsingContext('Correct info.plist key-value pairs for iOS plugin.', () async {
     final CreateCommand command = createCreateCommand();
@@ -2263,60 +1997,32 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'can re-gen module .android/ folder, reusing custom org',
-    () async {
-      await _createProject(projectDir, <String>[
-        '--template=module',
-        '--org',
-        'com.bar.foo',
-      ], <String>[]);
-      projectDir.childDirectory('.android').deleteSync(recursive: true);
-      return _createProject(projectDir, <String>[], <String>[
-        '.android/app/src/main/java/com/bar/foo/flutter_project/host/MainActivity.java',
-      ]);
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('can re-gen module .android/ folder, reusing custom org', () async {
+    await _createProject(projectDir, <String>[
+      '--template=module',
+      '--org',
+      'com.bar.foo',
+    ], <String>[]);
+    projectDir.childDirectory('.android').deleteSync(recursive: true);
+    return _createProject(projectDir, <String>[], <String>[
+      '.android/app/src/main/java/com/bar/foo/flutter_project/host/MainActivity.java',
+    ]);
+  });
 
-  testUsingContext(
-    'can re-gen module .ios/ folder, reusing custom org',
-    () async {
-      await _createProject(projectDir, <String>[
-        '--template=module',
-        '--org',
-        'com.bar.foo',
-      ], <String>[]);
-      projectDir.childDirectory('.ios').deleteSync(recursive: true);
-      await _createProject(projectDir, <String>[], <String>[]);
-      final FlutterProject project = _createToolContext().projectFactory.fromDirectory(projectDir);
-      expect(
-        await project.ios.productBundleIdentifier(BuildInfo.debug),
-        'com.bar.foo.flutterProject',
-      );
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('can re-gen module .ios/ folder, reusing custom org', () async {
+    await _createProject(projectDir, <String>[
+      '--template=module',
+      '--org',
+      'com.bar.foo',
+    ], <String>[]);
+    projectDir.childDirectory('.ios').deleteSync(recursive: true);
+    await _createProject(projectDir, <String>[], <String>[]);
+    final FlutterProject project = _createToolContext().projectFactory.fromDirectory(projectDir);
+    expect(
+      await project.ios.productBundleIdentifier(BuildInfo.debug),
+      'com.bar.foo.flutterProject',
+    );
+  });
 
   testUsingContext('can re-gen app android/ folder, reusing custom org', () async {
     await _createProject(projectDir, <String>[
@@ -2518,91 +2224,62 @@ void main() {
     );
   });
 
-  testUsingContext(
-    'overwrites existing directory when requested',
-    () async {
-      final Directory existingDirectory = localFs.directory(
-        localFs.path.join(projectDir.path, 'bad'),
-      );
-      if (!existingDirectory.existsSync()) {
-        existingDirectory.createSync(recursive: true);
-      }
-      final File existingFile = localFs.file(
-        localFs.path.join(existingDirectory.path, 'lib', 'main.dart'),
-      );
-      existingFile.createSync(recursive: true);
-      await _createProject(
-        localFs.directory(existingDirectory.path),
-        <String>['--overwrite', '-a', 'java'],
-        <String>[
-          'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-          'lib/main.dart',
-          'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.swift',
-          'ios/Runner/GeneratedPluginRegistrant.h',
-        ],
-      );
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('overwrites existing directory when requested', () async {
+    final Directory existingDirectory = localFs.directory(
+      localFs.path.join(projectDir.path, 'bad'),
+    );
+    if (!existingDirectory.existsSync()) {
+      existingDirectory.createSync(recursive: true);
+    }
+    final File existingFile = localFs.file(
+      localFs.path.join(existingDirectory.path, 'lib', 'main.dart'),
+    );
+    existingFile.createSync(recursive: true);
+    await _createProject(
+      localFs.directory(existingDirectory.path),
+      <String>['--overwrite', '-a', 'java'],
+      <String>[
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'lib/main.dart',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.swift',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+    );
+  });
 
-  testUsingContext(
-    'invokes pub in online and offline modes',
-    () async {
-      final CreateCommand command = createCreateCommand(
-        toolContext: _createToolContext(processManager: loggingProcessManager),
-      );
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('invokes pub in online and offline modes', () async {
+    final CreateCommand command = createCreateCommand(
+      toolContext: _createToolContext(processManager: loggingProcessManager),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      // Run pub online first in order to populate the pub cache.
-      await runner.run(<String>['create', '--pub', projectDir.path]);
-      final dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
-      expect(
-        loggingProcessManager.commands,
-        contains(
-          predicate(
-            (List<String> c) =>
-                dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline'),
-          ),
+    // Run pub online first in order to populate the pub cache.
+    await runner.run(<String>['create', '--pub', projectDir.path]);
+    final dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
+    expect(
+      loggingProcessManager.commands,
+      contains(
+        predicate(
+          (List<String> c) =>
+              dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline'),
         ),
-      );
-
-      // Run pub offline.
-      loggingProcessManager.clear();
-      await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      expect(
-        loggingProcessManager.commands,
-        contains(
-          predicate(
-            (List<String> c) =>
-                dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline'),
-          ),
-        ),
-      );
-    },
-    overrides: {
-      ProcessManager: () => loggingProcessManager,
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: loggingProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
       ),
-    },
-  );
+    );
+
+    // Run pub offline.
+    loggingProcessManager.clear();
+    await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
+    expect(
+      loggingProcessManager.commands,
+      contains(
+        predicate(
+          (List<String> c) =>
+              dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline'),
+        ),
+      ),
+    );
+  }, overrides: {ProcessManager: () => loggingProcessManager});
 
   testUsingContext('can create an empty application project', () async {
     await _createAndAnalyzeProject(
@@ -3793,48 +3470,33 @@ void main() {
     expect(packageSwift.existsSync(), isTrue, reason: 'Package.swift should exist');
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)});
 
-  testUsingContext(
-    'can create a darwin plugin project',
-    () async {
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['--template=plugin', '--platforms=darwin'],
-        <String>[
-          'pubspec.yaml',
-          'darwin/flutter_project.podspec',
-          'darwin/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
-          'darwin/flutter_project/Package.swift',
-          'example/ios/Runner.xcworkspace',
-          'example/macos/Runner.xcworkspace',
-        ],
-        unexpectedPaths: <String>[
-          'ios/flutter_project.podspec',
-          'macos/flutter_project.podspec',
-          'darwin/Classes/FlutterProjectPlugin.swift',
-        ],
-      );
-      final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
-      final pubspec = Pubspec.parse(rawPubspec);
-      final platforms = (pubspec.flutter!['plugin'] as YamlMap)['platforms'] as YamlMap;
+  testUsingContext('can create a darwin plugin project', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--template=plugin', '--platforms=darwin'],
+      <String>[
+        'pubspec.yaml',
+        'darwin/flutter_project.podspec',
+        'darwin/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+        'darwin/flutter_project/Package.swift',
+        'example/ios/Runner.xcworkspace',
+        'example/macos/Runner.xcworkspace',
+      ],
+      unexpectedPaths: <String>[
+        'ios/flutter_project.podspec',
+        'macos/flutter_project.podspec',
+        'darwin/Classes/FlutterProjectPlugin.swift',
+      ],
+    );
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final pubspec = Pubspec.parse(rawPubspec);
+    final platforms = (pubspec.flutter!['plugin'] as YamlMap)['platforms'] as YamlMap;
 
-      expect(platforms, contains('ios'));
-      expect(platforms, contains('macos'));
-      expect((platforms['ios'] as YamlMap)['sharedDarwinSource'], true);
-      expect((platforms['macos'] as YamlMap)['sharedDarwinSource'], true);
-    },
-    overrides: {
-      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+    expect(platforms, contains('ios'));
+    expect(platforms, contains('macos'));
+    expect((platforms['ios'] as YamlMap)['sharedDarwinSource'], true);
+    expect((platforms['macos'] as YamlMap)['sharedDarwinSource'], true);
+  }, overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)});
 
   testUsingContext(
     'creates a plugin with shared darwin implementation with both SwiftPM and CocoaPods',
@@ -4086,51 +3748,37 @@ void main() {
     );
   });
 
-  testUsingContext(
-    'Flutter module Android project contains namespace',
-    () async {
-      const moduleBuildGradleFilePath = '.android/build.gradle';
-      const moduleAppBuildGradleFlePath = '.android/app/build.gradle';
-      const moduleFlutterBuildGradleFilePath = '.android/Flutter/build.gradle';
-      await _createProject(
-        projectDir,
-        <String>['--template=module', '--org', 'com.bar.foo'],
-        <String>[
-          moduleBuildGradleFilePath,
-          moduleAppBuildGradleFlePath,
-          moduleFlutterBuildGradleFilePath,
-        ],
-      );
+  testUsingContext('Flutter module Android project contains namespace', () async {
+    const moduleBuildGradleFilePath = '.android/build.gradle';
+    const moduleAppBuildGradleFlePath = '.android/app/build.gradle';
+    const moduleFlutterBuildGradleFilePath = '.android/Flutter/build.gradle';
+    await _createProject(
+      projectDir,
+      <String>['--template=module', '--org', 'com.bar.foo'],
+      <String>[
+        moduleBuildGradleFilePath,
+        moduleAppBuildGradleFlePath,
+        moduleFlutterBuildGradleFilePath,
+      ],
+    );
 
-      final String moduleBuildGradleFileContent = await localFs
-          .file(localFs.path.join(projectDir.path, moduleBuildGradleFilePath))
-          .readAsString();
-      final String moduleAppBuildGradleFileContent = await localFs
-          .file(localFs.path.join(projectDir.path, moduleAppBuildGradleFlePath))
-          .readAsString();
-      final String moduleFlutterBuildGradleFileContent = await localFs
-          .file(localFs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath))
-          .readAsString();
+    final String moduleBuildGradleFileContent = await localFs
+        .file(localFs.path.join(projectDir.path, moduleBuildGradleFilePath))
+        .readAsString();
+    final String moduleAppBuildGradleFileContent = await localFs
+        .file(localFs.path.join(projectDir.path, moduleAppBuildGradleFlePath))
+        .readAsString();
+    final String moduleFlutterBuildGradleFileContent = await localFs
+        .file(localFs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath))
+        .readAsString();
 
-      // Each build file should contain the expected namespace.
-      const expectedNameSpace = 'namespace = "com.bar.foo.flutter_project"';
-      expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
-      expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
-      const expectedHostNameSpace = 'namespace = "com.bar.foo.flutter_project.host"';
-      expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+    // Each build file should contain the expected namespace.
+    const expectedNameSpace = 'namespace = "com.bar.foo.flutter_project"';
+    expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
+    expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
+    const expectedHostNameSpace = 'namespace = "com.bar.foo.flutter_project.host"';
+    expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
+  });
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
     final CreateCommand command = createCreateCommand();
@@ -4436,43 +4084,29 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'default project has analysis_options.yaml set up correctly',
-    () async {
-      await _createProject(projectDir, <String>[], <String>['analysis_options.yaml']);
-      final String dataPath = localFs.path.join(
-        getFlutterRoot(),
-        'packages',
-        'flutter_tools',
-        'test',
-        'commands.shard',
-        'permeable',
-        'data',
-      );
-      final File toAnalyze = await localFs
-          .file(localFs.path.join(dataPath, 'to_analyze.dart.test'))
-          .copy(localFs.path.join(projectDir.path, 'lib', 'to_analyze.dart'));
-      final String relativePath = localFs.path.join('lib', 'to_analyze.dart');
-      final expectedFailures = <String>[
-        '$relativePath:11:7: use_key_in_widget_constructors',
-        '$relativePath:20:3: prefer_const_constructors_in_immutables',
-        '$relativePath:31:26: use_full_hex_values_for_flutter_colors',
-      ];
-      expect(expectedFailures.length, '// LINT:'.allMatches(toAnalyze.readAsStringSync()).length);
-      await analyzeProject(projectDir.path, expectedFailures: expectedFailures);
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('default project has analysis_options.yaml set up correctly', () async {
+    await _createProject(projectDir, <String>[], <String>['analysis_options.yaml']);
+    final String dataPath = localFs.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'test',
+      'commands.shard',
+      'permeable',
+      'data',
+    );
+    final File toAnalyze = await localFs
+        .file(localFs.path.join(dataPath, 'to_analyze.dart.test'))
+        .copy(localFs.path.join(projectDir.path, 'lib', 'to_analyze.dart'));
+    final String relativePath = localFs.path.join('lib', 'to_analyze.dart');
+    final expectedFailures = <String>[
+      '$relativePath:11:7: use_key_in_widget_constructors',
+      '$relativePath:20:3: prefer_const_constructors_in_immutables',
+      '$relativePath:31:26: use_full_hex_values_for_flutter_colors',
+    ];
+    expect(expectedFailures.length, '// LINT:'.allMatches(toAnalyze.readAsStringSync()).length);
+    await analyzeProject(projectDir.path, expectedFailures: expectedFailures);
+  });
 
   testUsingContext('analysis_options.yaml only excludes platforms that were generated', () async {
     await _createProject(
@@ -4516,28 +4150,14 @@ void main() {
     );
   });
 
-  testUsingContext(
-    'show an error message for removed --template=skeleton',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await expectLater(
-        runner.run(<String>['create', '--no-pub', '--template=skeleton', projectDir.path]),
-        throwsToolExit(message: 'The template skeleton is no longer available'),
-      );
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        flutterRoot: getFlutterRoot(),
-        fileSystem: localFs,
-        logger: logger,
-        processManager: localProcessManager,
-        botDetector: fakeBotDetector,
-        platform: localPlatform,
-        stdio: mockStdio,
-      ),
-    },
-  );
+  testUsingContext('show an error message for removed --template=skeleton', () async {
+    final CreateCommand command = createCreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await expectLater(
+      runner.run(<String>['create', '--no-pub', '--template=skeleton', projectDir.path]),
+      throwsToolExit(message: 'The template skeleton is no longer available'),
+    );
+  });
 
   testUsingContext('create an FFI plugin with ios, then add macos', () async {
     final CreateCommand command = createCreateCommand();
@@ -5300,7 +4920,7 @@ Future<void> _createProject(
   Platform? platform,
 }) async {
   final CreateCommand command = createCreateCommand(
-    toolContext: platform != null ? _createToolContext(platform: platform) : null,
+    toolContext: _createToolContext(platform: platform),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...createArgs, dir.path]);
