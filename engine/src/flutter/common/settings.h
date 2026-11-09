@@ -236,7 +236,12 @@ struct Settings {
 
   // Enable the CoreText paragraph layout pipeline and Apple Unicode on macOS
   // and iOS. Ignored on other platforms.
+#if defined(FML_OS_MACOSX) || defined(FML_OS_IOS) || \
+    defined(FML_OS_IOS_SIMULATOR)
+  bool enable_skoretext = true;
+#else
   bool enable_skoretext = false;
+#endif
 
   // Enable android surface control swapchains where supported.
   bool enable_surface_control = false;

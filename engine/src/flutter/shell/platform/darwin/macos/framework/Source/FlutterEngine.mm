@@ -712,6 +712,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     // Already explicitly enabled via CLI switches.
   } else if (_project.enableSkoreText) {
     switches.push_back("--enable-skoretext=true");
+  } else {
+    switches.push_back("--enable-skoretext=false");
   }
 
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),

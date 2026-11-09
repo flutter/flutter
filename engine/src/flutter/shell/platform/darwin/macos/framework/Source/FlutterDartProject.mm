@@ -102,7 +102,7 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   if (enableSkoreText != nil) {
     return enableSkoreText.boolValue;
   }
-  return NO;
+  return YES;
 }
 
 - (BOOL)enableSDFs {

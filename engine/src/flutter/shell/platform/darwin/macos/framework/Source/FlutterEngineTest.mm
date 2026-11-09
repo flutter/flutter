@@ -195,7 +195,7 @@ TEST_F(FlutterEngineTest, EnableSDFsAlwaysReturnsYes) {
   EXPECT_TRUE([project enableSDFs]);
 }
 
-TEST_F(FlutterEngineTest, EnableSkoreTextDefaultsToNo) {
+TEST_F(FlutterEngineTest, EnableSkoreTextDefaultsToYes) {
   id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkoreText"]).andReturn(nil);
 
@@ -203,7 +203,7 @@ TEST_F(FlutterEngineTest, EnableSkoreTextDefaultsToNo) {
   FlutterDartProject* project = [[FlutterDartProject alloc]
       initWithAssetsPath:fixtures
              ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
-  EXPECT_FALSE([project enableSkoreText]);
+  EXPECT_TRUE([project enableSkoreText]);
 
   FlutterEngine* engine = GetFlutterEngine();
   std::vector<std::string> captured_args;
@@ -218,9 +218,36 @@ TEST_F(FlutterEngineTest, EnableSkoreTextDefaultsToNo) {
         return original_init(version, config, args, user_data, engine_out);
       }));
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
-  EXPECT_EQ(std::find(captured_args.begin(), captured_args.end(), "--enable-skoretext=true"),
+  EXPECT_NE(std::find(captured_args.begin(), captured_args.end(), "--enable-skoretext=true"),
             captured_args.end());
   EXPECT_EQ(std::find(captured_args.begin(), captured_args.end(), "--enable-skoretext=false"),
+            captured_args.end());
+
+  [mockMainBundle stopMocking];
+}
+
+TEST_F(FlutterEngineTest, EnableSkoreTextDisabledFromInfoPlist) {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkoreText"]).andReturn(@NO);
+
+  FlutterEngine* engine = GetFlutterEngine();
+  EXPECT_FALSE([engine.project enableSkoreText]);
+
+  std::vector<std::string> captured_args;
+  auto original_init = engine.embedderAPI.Initialize;
+  engine.embedderAPI.Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&captured_args, &original_init](
+                       size_t version, const FlutterRendererConfig* config,
+                       const FlutterProjectArgs* args, void* user_data, auto engine_out) {
+        for (int i = 0; i < args->command_line_argc; ++i) {
+          captured_args.emplace_back(args->command_line_argv[i]);
+        }
+        return original_init(version, config, args, user_data, engine_out);
+      }));
+  EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
+  EXPECT_NE(std::find(captured_args.begin(), captured_args.end(), "--enable-skoretext=false"),
+            captured_args.end());
+  EXPECT_EQ(std::find(captured_args.begin(), captured_args.end(), "--enable-skoretext=true"),
             captured_args.end());
 
   [mockMainBundle stopMocking];

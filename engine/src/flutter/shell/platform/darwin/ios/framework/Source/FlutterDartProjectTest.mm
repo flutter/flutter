@@ -252,23 +252,9 @@ FLUTTER_ASSERT_ARC
   [mockMainBundle stopMocking];
 }
 
-- (void)testEnableSkoreTextDefaultsToFalse {
+- (void)testEnableSkoreTextDefaultsToTrue {
   id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkoreText"]).andReturn(nil);
-  id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
-  NSArray* arguments = @[ @"process_name" ];
-  OCMStub([mockProcessInfo arguments]).andReturn(arguments);
-
-  auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
-
-  XCTAssertFalse(settings.enable_skoretext);
-  [mockProcessInfo stopMocking];
-  [mockMainBundle stopMocking];
-}
-
-- (void)testEnableSkoreTextFromInfoPlist {
-  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkoreText"]).andReturn(@YES);
   id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
   NSArray* arguments = @[ @"process_name" ];
   OCMStub([mockProcessInfo arguments]).andReturn(arguments);
@@ -278,6 +264,35 @@ FLUTTER_ASSERT_ARC
   XCTAssertTrue(settings.enable_skoretext);
   [mockProcessInfo stopMocking];
   [mockMainBundle stopMocking];
+}
+
+- (void)testEnableSkoreTextFromInfoPlist {
+  {
+    id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+    OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkoreText"]).andReturn(@YES);
+    id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+    NSArray* arguments = @[ @"process_name" ];
+    OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+    auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+
+    XCTAssertTrue(settings.enable_skoretext);
+    [mockProcessInfo stopMocking];
+    [mockMainBundle stopMocking];
+  }
+  {
+    id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+    OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkoreText"]).andReturn(@NO);
+    id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+    NSArray* arguments = @[ @"process_name" ];
+    OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+    auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+
+    XCTAssertFalse(settings.enable_skoretext);
+    [mockProcessInfo stopMocking];
+    [mockMainBundle stopMocking];
+  }
 }
 
 - (void)testEnableSkoreTextCommandLineOverridesInfoPlist {
