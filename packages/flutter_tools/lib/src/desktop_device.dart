@@ -330,6 +330,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.enableFlutterGpu) {
       addFlag('enable-flutter-gpu=true');
     }
+    if (debuggingOptions.enableSkoretext != null) {
+      addFlag('enable-skoretext=${debuggingOptions.enableSkoretext}');
+    }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.
     if (debuggingOptions.debuggingEnabled) {

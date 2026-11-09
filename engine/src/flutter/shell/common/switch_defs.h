@@ -288,6 +288,10 @@ DEF_SWITCH(kEnableAndroidHcppAndSurfaceControl,
 DEF_SWITCH(kEnableFlutterGpu,
            "enable-flutter-gpu",
            "Whether Flutter GPU is enabled.")
+DEF_SWITCH(kEnableSkoretext,
+           "enable-skoretext",
+           "Enable the CoreText paragraph layout pipeline and Apple Unicode "
+           "on macOS and iOS. Ignored on other platforms.")
 DEF_SWITCH(kImpellerLazyShaderMode,
            "impeller-lazy-shader-mode",
            "Whether to defer initialization of all required PSOs for the "

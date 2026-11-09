@@ -114,6 +114,8 @@ class FlutterTesterTestDevice extends TestDevice {
         '--enable-impeller'
       else ...<String>['--enable-software-rendering', '--skia-deterministic-rendering'],
       if (debuggingOptions.enableFlutterGpu) '--enable-flutter-gpu',
+      if (debuggingOptions.enableSkoretext != null)
+        '--enable-skoretext=${debuggingOptions.enableSkoretext}',
       if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',

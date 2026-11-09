@@ -562,6 +562,14 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
 
   settings.enable_flutter_gpu =
       command_line.HasOption(FlagForSwitch(Switch::kEnableFlutterGpu));
+  {
+    std::string enable_skoretext_value;
+    if (command_line.GetOptionValue(FlagForSwitch(Switch::kEnableSkoretext),
+                                    &enable_skoretext_value)) {
+      settings.enable_skoretext =
+          enable_skoretext_value.empty() || "true" == enable_skoretext_value;
+    }
+  }
   settings.impeller_enable_lazy_shader_mode =
       command_line.HasOption(FlagForSwitch(Switch::kImpellerLazyShaderMode));
   settings.impeller_use_sdfs =

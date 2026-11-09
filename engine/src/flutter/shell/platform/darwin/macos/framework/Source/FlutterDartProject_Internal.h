@@ -42,6 +42,11 @@
 @property(nonatomic, readonly) BOOL enableFlutterGPU;
 
 /**
+ * Whether the SkoreText (CoreText + Apple Unicode) text layout pipeline is enabled.
+ */
+@property(nonatomic, readonly) BOOL enableSkoreText;
+
+/**
  * Whether the Signed Distance Fields are enabled for rendering.
  */
 @property(nonatomic, readonly) BOOL enableSDFs;

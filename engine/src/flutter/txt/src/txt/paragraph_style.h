@@ -101,6 +101,10 @@ class ParagraphStyle {
   // true. Unset keeps Skia's default, "-"; the empty string draws nothing.
   std::optional<std::u16string> soft_hyphen_string;
 
+  // Whether to use the CoreText paragraph layout pipeline and Apple Unicode
+  // on macOS and iOS. Ignored on non-Apple platforms.
+  bool enable_skoretext = false;
+
   TextStyle GetTextStyle() const;
 
   bool unlimited_lines() const;

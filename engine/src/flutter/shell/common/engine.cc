@@ -101,7 +101,8 @@ Engine::Engine(Delegate& delegate,
           vm.GetConcurrentWorkerTaskRunner(),        // concurrent task runner
           runtime_stage_backend,                     // runtime stage
           settings_.enable_impeller,                 // enable impeller
-          settings_.enable_flutter_gpu               // enable impeller
+          settings_.enable_flutter_gpu,              // enable flutter_gpu
+          settings_.enable_skoretext                 // enable skoretext
       });
 }
 
