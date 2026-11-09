@@ -282,6 +282,22 @@ Future<void> testMain() async {
     },
   );
 
+  test('a ColorFilter image filter is finalized with its ColorFilter', () {
+    final Finalizer originalFinalizer = EngineImageFilter.finalizer;
+    final mockFinalizer = _MockFinalizer();
+    EngineImageFilter.finalizer = mockFinalizer;
+    addTearDown(() => EngineImageFilter.finalizer = originalFinalizer);
+
+    final EngineColorFilter colorFilter = _freshColorFilter(_green);
+    final BackendImageFilter backendFilter = EngineColorFilterImageFilter(colorFilter: colorFilter)
+        .getBackendFilter(defaultBlurTileMode: ui.TileMode.decal);
+
+    // The wrapper is thrown away every frame, so the backend filter must be
+    // tied to the lifetime of the ColorFilter it is cached on.
+    expect(mockFinalizer.registeredPairs.single.target, same(colorFilter));
+    expect(mockFinalizer.registeredPairs.single.value, same(backendFilter));
+  });
+
   test('paragraph styles with only a foreground or only a background paint draw both', () async {
     final cases = <({String reason, ui.TextStyle style, int glyph, int space})>[
       (
@@ -322,4 +338,20 @@ Future<void> testMain() async {
       expect(pixels, <int>[glyph, space], reason: reason);
     }
   });
+}
+
+class _MockFinalizer implements Finalizer {
+  final List<({Object target, Object value, Object? detach})> _registeredPairs = [];
+
+  List<({Object target, Object value, Object? detach})> get registeredPairs => _registeredPairs;
+
+  @override
+  void attach(Object target, Object value, {Object? detach}) {
+    _registeredPairs.add((target: target, value: value, detach: detach));
+  }
+
+  @override
+  void detach(Object detach) {
+    _registeredPairs.removeWhere((pair) => pair.detach == detach);
+  }
 }
