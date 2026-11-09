@@ -299,15 +299,6 @@ abstract class UnpackIOS extends UnpackDarwin {
     await thinFramework(environment, frameworkBinaryPath, archs);
 
     await _signFramework(environment, frameworkBinary, buildMode);
-
-    if (buildMode != .profile) {
-      final Directory vmServiceFrameworkDir = environment.outputDir.childDirectory(
-        _kVmServiceFrameworkName,
-      );
-      if (vmServiceFrameworkDir.existsSync()) {
-        vmServiceFrameworkDir.deleteSync(recursive: true);
-      }
-    }
   }
 
   Future<void> _copyFrameworkDysm(

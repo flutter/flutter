@@ -84,15 +84,6 @@ abstract class UnpackMacOS extends UnpackDarwin {
       frameworkBinaryPath,
       environment.defines[kDarwinArchs] ?? 'x86_64 arm64',
     );
-
-    if (buildMode != .profile) {
-      final Directory vmServiceFrameworkDir = environment.outputDir.childDirectory(
-        _kVmServiceFrameworkName,
-      );
-      if (vmServiceFrameworkDir.existsSync()) {
-        vmServiceFrameworkDir.deleteSync(recursive: true);
-      }
-    }
   }
 
   /// Files that should not be copied to build output directory if found during framework copy step.
