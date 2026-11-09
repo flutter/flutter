@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/toolchain/rbe.gni")
+import("//build/toolchain/siso.gni")
 import("//build/toolchain/toolchain.gni")
 import("//build/toolchain/win/win_toolchain_data.gni")
 
@@ -34,7 +35,7 @@ assert(is_win)
 # This tool will is used as a wrapper for various commands below.
 tool_wrapper_path = rebase_path("tool_wrapper.py", root_build_dir)
 
-if (use_rbe) {
+if (use_rbe && !use_siso) {
   compiler_args = rewrapper_command +
                   [ "--labels=type=compile,compiler=clang-cl,lang=cpp " ]
   compiler_prefix = string_join(" ", compiler_args)

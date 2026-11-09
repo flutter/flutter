@@ -42,7 +42,12 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
 
     final List<String> commandLineTargets = argResults!.rest;
     if (commandLineTargets.isNotEmpty &&
-        !await ensureBuildDir(environment, plan.build, enableRbe: plan.useRbe)) {
+        !await ensureBuildDir(
+          environment,
+          plan.build,
+          useSiso: plan.useSiso,
+          enableRbe: plan.useRbe,
+        )) {
       return 1;
     }
 
@@ -76,6 +81,7 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       concurrency: plan.concurrency ?? 0,
       extraGnArgs: plan.toGnArgs(),
       targets: allTargets.toList(),
+      useSiso: plan.useSiso,
       enableRbe: plan.useRbe,
       rbeConfig: plan.toRbeConfig(),
     );
