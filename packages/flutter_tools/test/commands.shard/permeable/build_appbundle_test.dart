@@ -102,7 +102,10 @@ void main() {
           arguments: <String>['--no-pub', '--template=app'],
         );
 
-        await runBuildAppBundleCommand(projectPath);
+        await runBuildAppBundleCommand(
+          projectPath,
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
 
         expect(
           fakeAnalytics.sentEvents,
@@ -121,7 +124,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -135,7 +137,10 @@ void main() {
 
         // The manifest does not set EnableHcpp, so the build injects the feature flag value
         // and the packaged app has HCPP on.
-        await runBuildAppBundleCommand(projectPath);
+        await runBuildAppBundleCommand(
+          projectPath,
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -153,7 +158,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -168,7 +172,11 @@ void main() {
         // The manifest does not set EnableHcpp, so the build injects the flag value and the
         // packaged app has HCPP on. Analytics has to report what was packaged, not what the
         // source manifest happened to say.
-        await runBuildAppBundleCommand(projectPath, arguments: <String>['--enable-hcpp']);
+        await runBuildAppBundleCommand(
+          projectPath,
+          arguments: <String>['--enable-hcpp'],
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
 
         expect(
           fakeAnalytics.sentEvents,
@@ -187,7 +195,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -199,7 +206,11 @@ void main() {
           arguments: <String>['--no-pub', '--template=app'],
         );
 
-        await runBuildAppBundleCommand(projectPath, arguments: <String>['--no-enable-hcpp']);
+        await runBuildAppBundleCommand(
+          projectPath,
+          arguments: <String>['--no-enable-hcpp'],
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
 
         expect(
           fakeAnalytics.sentEvents,
@@ -218,7 +229,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 

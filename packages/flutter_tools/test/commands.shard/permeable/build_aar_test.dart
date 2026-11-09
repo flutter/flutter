@@ -34,10 +34,11 @@ import '../../src/fakes.dart' hide FakeFlutterProjectFactory;
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+final localFs = LocalFileSystem.test(signals: FakeSignals());
+const Platform localPlatform = LocalPlatform();
+
 void main() {
   Cache.disableLocking();
-  final localFs = LocalFileSystem.test(signals: FakeSignals());
-  const Platform localPlatform = LocalPlatform();
 
   tearDownAll(() async {
     await localFs.dispose();
@@ -600,7 +601,6 @@ void main() {
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
           AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
 
@@ -669,7 +669,6 @@ void main() {
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
           AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
 
@@ -738,7 +737,6 @@ void main() {
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
           AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
     });

@@ -1760,72 +1760,67 @@ void main() {
     );
   }, overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
-  testUsingContext(
-    'has correct content and formatting with macOS app template',
-    () async {
-      final CreateCommand command = createCreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('has correct content and formatting with macOS app template', () async {
+    final CreateCommand command = createCreateCommand(
+      toolContext: _createToolContext(platform: _kNoColorTerminalPlatform()),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>[
-        'create',
-        '--template=app',
-        '--platforms=macos',
-        '--no-pub',
-        '--org',
-        'com.foo.bar',
-        projectDir.path,
-      ]);
+    await runner.run(<String>[
+      'create',
+      '--template=app',
+      '--platforms=macos',
+      '--no-pub',
+      '--org',
+      'com.foo.bar',
+      projectDir.path,
+    ]);
 
-      void expectExists(String relPath) {
-        expect(localFs.isFileSync('${projectDir.path}/$relPath'), true);
-      }
+    void expectExists(String relPath) {
+      expect(localFs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
 
-      // Generated Xcode settings
-      final String macosXcodeConfigPath = localFs.path.join(
-        'macos',
-        'Runner',
-        'Configs',
-        'AppInfo.xcconfig',
-      );
-      expectExists(macosXcodeConfigPath);
-      final File macosXcodeConfigFile = localFs.file(
-        localFs.path.join(projectDir.path, macosXcodeConfigPath),
-      );
-      final String macosXcodeConfig = macosXcodeConfigFile.readAsStringSync();
-      expect(macosXcodeConfig, contains('PRODUCT_NAME = flutter_project'));
-      expect(macosXcodeConfig, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-      expect(macosXcodeConfig, contains('PRODUCT_COPYRIGHT ='));
+    // Generated Xcode settings
+    final String macosXcodeConfigPath = localFs.path.join(
+      'macos',
+      'Runner',
+      'Configs',
+      'AppInfo.xcconfig',
+    );
+    expectExists(macosXcodeConfigPath);
+    final File macosXcodeConfigFile = localFs.file(
+      localFs.path.join(projectDir.path, macosXcodeConfigPath),
+    );
+    final String macosXcodeConfig = macosXcodeConfigFile.readAsStringSync();
+    expect(macosXcodeConfig, contains('PRODUCT_NAME = flutter_project'));
+    expect(macosXcodeConfig, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
+    expect(macosXcodeConfig, contains('PRODUCT_COPYRIGHT ='));
 
-      // Xcode project
-      final String xcodeProjectPath = localFs.path.join(
-        'macos',
-        'Runner.xcodeproj',
-        'project.pbxproj',
-      );
-      expectExists(xcodeProjectPath);
-      final File xcodeProjectFile = localFs.file(
-        localFs.path.join(projectDir.path, xcodeProjectPath),
-      );
-      final String xcodeProject = xcodeProjectFile.readAsStringSync();
-      expect(xcodeProject, contains('path = "flutter_project.app";'));
-      expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
+    // Xcode project
+    final String xcodeProjectPath = localFs.path.join(
+      'macos',
+      'Runner.xcodeproj',
+      'project.pbxproj',
+    );
+    expectExists(xcodeProjectPath);
+    final File xcodeProjectFile = localFs.file(
+      localFs.path.join(projectDir.path, xcodeProjectPath),
+    );
+    final String xcodeProject = xcodeProjectFile.readAsStringSync();
+    expect(xcodeProject, contains('path = "flutter_project.app";'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
 
-      // Xcode workspace shared data
-      final Directory workspaceSharedData = localFs.directory(
-        localFs.path.join('macos', 'Runner.xcworkspace', 'xcshareddata'),
-      );
-      expectExists(workspaceSharedData.childFile('IDEWorkspaceChecks.plist').path);
-      // Xcode project shared data
-      final Directory projectSharedData = localFs.directory(
-        localFs.path.join('macos', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
-      );
-      expectExists(projectSharedData.childFile('IDEWorkspaceChecks.plist').path);
-    },
-    overrides: {
-      Platform: _kNoColorTerminalPlatform,
-      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-    },
-  );
+    // Xcode workspace shared data
+    final Directory workspaceSharedData = localFs.directory(
+      localFs.path.join('macos', 'Runner.xcworkspace', 'xcshareddata'),
+    );
+    expectExists(workspaceSharedData.childFile('IDEWorkspaceChecks.plist').path);
+    // Xcode project shared data
+    final Directory projectSharedData = localFs.directory(
+      localFs.path.join('macos', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
+    );
+    expectExists(projectSharedData.childFile('IDEWorkspaceChecks.plist').path);
+  }, overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)});
 
   testUsingContext(
     'has correct application id for android, bundle id for ios and application id for Linux',

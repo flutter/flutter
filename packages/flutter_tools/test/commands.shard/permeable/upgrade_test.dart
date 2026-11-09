@@ -22,9 +22,9 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-void main() {
-  final localFs = LocalFileSystem.test(signals: FakeSignals());
+final localFs = LocalFileSystem.test(signals: FakeSignals());
 
+void main() {
   setUpAll(() {
     Cache.disableLocking();
   });

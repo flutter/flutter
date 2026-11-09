@@ -314,7 +314,7 @@ void main() {
         ),
         true,
       );
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Analytics: () => fakeAnalytics});
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
     testUsingContext('get --offline fetches packages', () async {
       final String projectPath = await createProject(
@@ -327,7 +327,7 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
 
     testUsingContext('get fetches packages for a workspace', () async {
       tempDir.childFile('pubspec.yaml').writeAsStringSync('''
@@ -385,7 +385,7 @@ workspace:
         ),
         true,
       );
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Analytics: () => fakeAnalytics});
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
     testUsingContext('get creates plugin registrants for each app in workspace', () async {
       tempDir.childFile('pubspec.yaml').writeAsStringSync('''
@@ -445,7 +445,7 @@ workspace:
         ),
         true,
       );
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Analytics: () => fakeAnalytics});
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
     testUsingContext(
       'get does not generate platform tooling for a non-Flutter workspace root',
@@ -479,7 +479,7 @@ workspace:
         // The Flutter app member of the workspace is still processed.
         expectExists(projectPath, 'ios/Flutter/Generated.xcconfig');
       },
-      overrides: <Type, Generator>{Stdio: () => mockStdio, Analytics: () => fakeAnalytics},
+      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
     );
 
     testUsingContext('get generates files into lib/l10n', () async {
@@ -524,7 +524,7 @@ flutter:
             .eventData['packagesNumberPlugins'],
         0,
       );
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
 
     testUsingContext('set the number of plugins as usage value', () async {
       final String projectPath = await createProject(
@@ -546,7 +546,7 @@ flutter:
             .eventData['packagesNumberPlugins'],
         2,
       );
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
 
     testUsingContext('indicate that the project is not a module in usage value', () async {
       final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
@@ -560,7 +560,7 @@ flutter:
             .eventData['packagesProjectModule'],
         false,
       );
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
 
     testUsingContext('indicate that the project is a module in usage value', () async {
       final String projectPath = await createProject(
@@ -577,7 +577,7 @@ flutter:
             .eventData['packagesProjectModule'],
         true,
       );
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
 
     testUsingContext('indicate that Android project reports v2 in usage value', () async {
       final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
@@ -591,7 +591,7 @@ flutter:
             .eventData['packagesAndroidEmbeddingVersion'],
         'v2',
       );
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
 
     testUsingContext('upgrade fetches packages', () async {
       final String projectPath = await createProject(
@@ -604,7 +604,7 @@ flutter:
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
 
     testUsingContext('get fetches packages and injects plugin', () async {
       final String projectPath = await createProjectWithPlugin(
@@ -617,7 +617,7 @@ flutter:
 
       expectDependenciesResolved(projectPath);
       expectModulePluginInjected(projectPath, includeLegacyPluginsList: false);
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
 
     testUsingContext('get fetches packages and injects plugin in plugin project', () async {
       final String projectPath = await createProject(
@@ -636,7 +636,7 @@ flutter:
 
       expectDependenciesResolved(exampleProjectPath);
       expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
 
     testUsingContext('get explicit-packages-resolution omits ".flutter-plugins"', () async {
       final String projectPath = await createProject(
@@ -653,23 +653,18 @@ flutter:
       expectDependenciesResolved(projectPath);
       expectDependenciesResolved(exampleProjectPath);
       expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+    });
   });
 
   group('packages test/pub', () {
-    late MemoryFileSystem fs;
-    late FakeProcessManager processManager;
-    late FakeStdio mockStdio;
-
-    setUp(() {
-      fs = MemoryFileSystem.test();
-      processManager = FakeProcessManager.empty();
-      mockStdio = FakeStdio()..stdout.terminalColumns = 80;
-    });
-
-    PackagesCommand createCommand({required bool isBot}) {
+    PackagesCommand createCommand({
+      required FileSystem fs,
+      required bool isBot,
+      required ProcessManager processManager,
+    }) {
       final logger = BufferLogger.test();
       final platform = FakePlatform(environment: <String, String>{});
+      final stdio = FakeStdio()..stdout.terminalColumns = 80;
       final cache = Cache.test(
         flutterRoot: '',
         fileSystem: fs,
@@ -686,12 +681,14 @@ flutter:
           logger: logger,
           platform: platform,
           processManager: processManager,
-          stdio: mockStdio,
+          stdio: stdio,
         ),
       );
     }
 
     testWithoutContext('test without bot', () async {
+      final fs = MemoryFileSystem.test();
+      final processManager = FakeProcessManager.empty();
       fs.directory('/packages/flutter_tools').createSync(recursive: true);
       fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
@@ -705,12 +702,16 @@ flutter:
           ],
         ),
       );
-      await createTestCommandRunner(createCommand(isBot: false)).run(<String>['packages', 'test']);
+      await createTestCommandRunner(
+        createCommand(fs: fs, isBot: false, processManager: processManager),
+      ).run(<String>['packages', 'test']);
 
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('test with bot', () async {
+      final fs = MemoryFileSystem.test();
+      final processManager = FakeProcessManager.empty();
       fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
         const FakeCommand(
@@ -724,12 +725,16 @@ flutter:
           ],
         ),
       );
-      await createTestCommandRunner(createCommand(isBot: true)).run(<String>['packages', 'test']);
+      await createTestCommandRunner(
+        createCommand(fs: fs, isBot: true, processManager: processManager),
+      ).run(<String>['packages', 'test']);
 
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('run pass arguments through to pub', () async {
+      final fs = MemoryFileSystem.test();
+      final processManager = FakeProcessManager.empty();
       fs.file('pubspec.yaml').createSync();
       final stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
@@ -745,13 +750,16 @@ flutter:
           stdin: stdin,
         ),
       );
-      await createTestCommandRunner(createCommand(isBot: true))
-          .run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
+      await createTestCommandRunner(
+        createCommand(fs: fs, isBot: true, processManager: processManager),
+      ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('token pass arguments through to pub', () async {
+      final fs = MemoryFileSystem.test();
+      final processManager = FakeProcessManager.empty();
       fs.file('pubspec.yaml').createSync();
       final stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
@@ -766,13 +774,15 @@ flutter:
           stdin: stdin,
         ),
       );
-      await createTestCommandRunner(createCommand(isBot: true))
-          .run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
+      await createTestCommandRunner(
+        createCommand(fs: fs, isBot: true, processManager: processManager),
+      ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('upgrade does not check for pubspec.yaml if -h/--help is passed', () async {
+      final processManager = FakeProcessManager.empty();
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
@@ -785,8 +795,9 @@ flutter:
           stdin: IOSink(StreamController<List<int>>().sink),
         ),
       );
-      await createTestCommandRunner(createCommand(isBot: true))
-          .run(<String>['pub', 'upgrade', '-h']);
+      await createTestCommandRunner(
+        createCommand(fs: MemoryFileSystem.test(), isBot: true, processManager: processManager),
+      ).run(<String>['pub', 'upgrade', '-h']);
 
       expect(processManager, hasNoRemainingExpectations);
     });

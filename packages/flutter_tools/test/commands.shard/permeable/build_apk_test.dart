@@ -159,7 +159,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=app'],
         );
 
-        await runBuildApkCommand(projectPath);
+        await runBuildApkCommand(projectPath, projectFactory: FakeFlutterProjectFactory(tempDir));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -178,7 +178,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -192,7 +191,7 @@ void main() {
 
         // The manifest does not set EnableHcpp, so the build injects the feature flag value
         // and the packaged app has HCPP on.
-        await runBuildApkCommand(projectPath);
+        await runBuildApkCommand(projectPath, projectFactory: FakeFlutterProjectFactory(tempDir));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -211,7 +210,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -223,7 +221,11 @@ void main() {
           arguments: <String>['--no-pub', '--template=app'],
         );
 
-        await runBuildApkCommand(projectPath, arguments: <String>['--no-enable-hcpp']);
+        await runBuildApkCommand(
+          projectPath,
+          arguments: <String>['--no-enable-hcpp'],
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -242,7 +244,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -257,7 +258,11 @@ void main() {
         // The manifest does not set EnableHcpp, so the build injects the flag value and the
         // packaged app has HCPP on. Analytics has to report what was packaged, not what the
         // source manifest happened to say.
-        await runBuildApkCommand(projectPath, arguments: <String>['--enable-hcpp']);
+        await runBuildApkCommand(
+          projectPath,
+          arguments: <String>['--enable-hcpp'],
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -276,7 +281,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -301,7 +305,11 @@ void main() {
 
         // The flag is passed at invocation time, so it wins over the checked in manifest value
         // and gradle writes true into the merged manifest. Analytics reports what is packaged.
-        await runBuildApkCommand(projectPath, arguments: <String>['--enable-hcpp']);
+        await runBuildApkCommand(
+          projectPath,
+          arguments: <String>['--enable-hcpp'],
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -320,7 +328,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -573,7 +580,6 @@ void main() {
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
           AndroidBuilder: () => FakeAndroidBuilder(),
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
 
@@ -603,7 +609,6 @@ void main() {
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
           AndroidBuilder: () => FakeAndroidBuilder(),
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
 
@@ -633,7 +638,6 @@ void main() {
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
           AndroidBuilder: () => FakeAndroidBuilder(),
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
     });
