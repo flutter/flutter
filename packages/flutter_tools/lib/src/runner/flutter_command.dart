@@ -1176,7 +1176,7 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    if (_os.hostPlatform == HostPlatform.darwin_x64) {
+    if (_os.hostPlatform == .darwin_x64) {
       // This is about the host machine rather than the project, so it should
       // not fail commands that treat warnings as fatal.
       _logger.printWarning(
