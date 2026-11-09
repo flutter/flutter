@@ -1632,11 +1632,9 @@ void _paragraphTests() {
     expect(lineMetrics.isHardBreak, isTrue);
     expectAlmost(lineMetrics.baseline, 78.6);
     expectAlmost(lineMetrics.height, 108);
-    // The line starts with letterSpacing 5 and ends with an unspaced "!". Skia used to shift such
-    // a line right by half the first spacing (2.5), which pushed the "!" past the line width
-    // (https://github.com/flutter/flutter/issues/184815). Skia now caps the shift by the half
-    // spacing of the visually last cluster, which is 0 here. Both values pass until that Skia
-    // change rolls in.
+    // The line starts with letterSpacing 5 and ends with an unspaced "!", so capping the line
+    // shift by the half spacing of the visually last cluster reduces left from 2.5 to 0.
+    // TODO(Rusino): Expect only 0 once https://github.com/flutter/flutter/issues/184815 rolls in.
     expect(
       lineMetrics.left,
       anyOf(within<double>(distance: 0.025, from: 2.5), within<double>(distance: 0.025, from: 0)),
