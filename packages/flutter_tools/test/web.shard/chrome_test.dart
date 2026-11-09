@@ -1202,44 +1202,50 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     },
   );
 
-  testWithoutContext('Chromium close does not hang when Browser.close never replies', () async {
+  testWithoutContext('Chromium close does not hang when Browser.close never replies', () {
     final logger = BufferLogger.test();
-    final fakeAsync = FakeAsync();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      // Process outlives the Browser.close timeout (6s > 5s), so the
+      // timeout must fire and escalate to SIGTERM. Without the timeout,
+      // close() would wait here forever.
+      final process = FakeProcess(duration: const Duration(seconds: 6));
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
 
-    fakeAsync.run((_) {
-      () async {
-        final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
-        final chromiumLauncher = ChromiumLauncher(
-          fileSystem: fileSystem,
-          platform: platform,
-          processManager: processManager,
-          operatingSystemUtils: operatingSystemUtils,
-          browserFinder: findChromeExecutable,
-          logger: logger,
-        );
-        // Process outlives the Browser.close timeout (6s > 5s), so the
-        // timeout must fire and escalate to SIGTERM. Without the timeout,
-        // close() would wait here forever.
-        final process = FakeProcess(duration: const Duration(seconds: 6));
-        final chrome = Chromium(
-          0,
-          chromeConnection,
-          chromiumLauncher: chromiumLauncher,
-          process: process,
-          logger: logger,
-        );
-        expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
-        final Future<void> closeFuture = chrome.close();
-        fakeAsync.flushMicrotasks();
-        // 5s timeout + wait up to 5s more for the 6s process to exit.
-        fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
-        await closeFuture;
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
 
-        expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
-      }();
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+
+      // 5s timeout + wait up to 5s more for the 6s process to exit.
+      fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
+      expect(closeCompleted, isTrue);
+      expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
     });
 
-    fakeAsync.flushTimers();
     expect(logger.warningText, isEmpty);
   });
 
