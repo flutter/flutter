@@ -537,7 +537,7 @@ class AndroidDevice extends Device {
       case .x64:
         break;
       default:
-        _logger.printError('Android platforms are only supported.');
+        _logger.printError('Unsupported Android CPU architecture: $cpuArch');
         return LaunchResult.failed();
     }
 

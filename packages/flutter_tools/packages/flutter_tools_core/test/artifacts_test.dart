@@ -26,31 +26,6 @@ void main() {
       expect(CpuArch.fromName('ppc64le').hashCode, equals(customArch.hashCode));
     });
 
-    test('exposes platform-specific architecture names', () {
-      expect(CpuArch.armv7.dartName, 'armv7');
-      expect(CpuArch.arm64.dartName, 'arm64');
-      expect(CpuArch.x86.dartName, 'x86');
-      expect(CpuArch.x64.dartName, 'x64');
-      expect(CpuArch.riscv64.dartName, 'riscv64');
-      expect(() => CpuArch.unknown.dartName, throwsUnsupportedError);
-      expect(() => CpuArch('ppc64le').dartName, throwsUnsupportedError);
-
-      expect(CpuArch.armv7.darwinArchName, 'armv7');
-      expect(CpuArch.arm64.darwinArchName, 'arm64');
-      expect(CpuArch.x64.darwinArchName, 'x86_64');
-      expect(() => CpuArch.riscv64.darwinArchName, throwsUnsupportedError);
-
-      expect(CpuArch.armv7.androidArchName, 'armeabi-v7a');
-      expect(CpuArch.arm64.androidArchName, 'arm64-v8a');
-      expect(CpuArch.x64.androidArchName, 'x86_64');
-      expect(() => CpuArch.riscv64.androidArchName, throwsUnsupportedError);
-
-      expect(CpuArch.armv7.androidPlatformName, 'android-arm');
-      expect(CpuArch.arm64.androidPlatformName, 'android-arm64');
-      expect(CpuArch.x64.androidPlatformName, 'android-x64');
-      expect(() => CpuArch.riscv64.androidPlatformName, throwsUnsupportedError);
-    });
-
     test('rejects malformed CPU architecture strings', () {
       for (final invalid in <String>['', '   ', 'invalid-arch', 'UpperCase', 'arch_1']) {
         expect(CpuArch.tryFromName(invalid), isNull, reason: 'Expected "$invalid" to be null');

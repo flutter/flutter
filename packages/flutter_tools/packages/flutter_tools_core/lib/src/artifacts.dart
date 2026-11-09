@@ -49,7 +49,7 @@ final class CpuArch {
   /// 64-bit RISC-V (RV64GC) architecture.
   static const riscv64 = CpuArch._('riscv64');
 
-  /// Standard built-in CPU architectures supported by the Flutter tool.
+  /// Standard built-in CPU architectures available in the Flutter tool.
   static const values = <CpuArch>[.unknown, .armv7, .arm64, .x86, .x64, .riscv64];
 
   static final RegExp _validNameRegExp = RegExp(r'^[a-z0-9]+$');
@@ -73,51 +73,6 @@ final class CpuArch {
       _ => null,
     };
   }
-
-  /// Returns the Dart SDK's name for the specified target architecture.
-  ///
-  /// When building for Darwin platforms, the tool invokes architecture-specific
-  /// variants of `gen_snapshot`, one for each target architecture. The output
-  /// instructions are then built into architecture-specific binaries, which are
-  /// merged into a universal binary using the `lipo` tool.
-  String get dartName => switch (this) {
-    .armv7 => 'armv7',
-    .arm64 => 'arm64',
-    .x86 => 'x86',
-    .x64 => 'x64',
-    .riscv64 => 'riscv64',
-    _ => throw UnsupportedError('Unexpected CPU arch $this'),
-  };
-
-  /// The Apple architecture name for this architecture.
-  ///
-  /// This is the name understood by the Darwin toolchain (e.g. `lipo`, `clang`,
-  /// and the `-arch` flag) and used for architecture-specific build output
-  /// directories on iOS and macOS. This differs from [dartName] for [x64],
-  /// which maps to `x86_64` here.
-  String get darwinArchName => switch (this) {
-    .armv7 => 'armv7',
-    .arm64 => 'arm64',
-    .x64 => 'x86_64',
-    _ => throw UnsupportedError('Unexpected Darwin CPU arch $this'),
-  };
-
-  /// The name of the Android ABI (as used in `jniLibs` directories) for this
-  /// architecture.
-  String get androidArchName => switch (this) {
-    .armv7 => 'armeabi-v7a',
-    .arm64 => 'arm64-v8a',
-    .x64 => 'x86_64',
-    _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
-  };
-
-  /// The `TargetPlatform` name of the Android platform for this architecture.
-  String get androidPlatformName => switch (this) {
-    .armv7 => 'android-arm',
-    .arm64 => 'android-arm64',
-    .x64 => 'android-x64',
-    _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
-  };
 
   @override
   bool operator ==(Object other) =>
