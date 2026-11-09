@@ -15,25 +15,8 @@ import 'protocol_base/service.dart';
 /// Extensions implement this service to provide platform templates
 /// ([appPlatformTemplates] and [pluginPlatformTemplates]) when scaffolding
 /// custom platform implementations (e.g. via
-/// `flutter create . --platforms=<custom>`).
-///
-/// Standalone project templates (`flutter create -t <template>`) are not
-/// supported by tool extensions at this time for several reasons:
-///
-/// 1. **Project-Scoped Discovery**: Under project-scoped `dev_dependencies`
-///    discovery, the project (an app or a plugin) already exists before the
-///    extension is discovered in `.dart_tool/package_config.json`. Creating an
-///    entire project from scratch via `-t <template>` would be either redundant
-///    or destructive (`--overwrite`).
-/// 2. **Archetype vs. Platform Separation**: In `flutter create`, `-t`
-///    (`--template`) selects the project archetype (`app`, `module`, `package`,
-///    `plugin`, `plugin_ffi`), whereas `--platforms` selects the target
-///    platforms (`android`, `ios`, `linux`, etc.). Custom platforms are
-///    scaffolded into an existing project via `--platforms`.
-/// 3. **Non-Breaking Evolution**: Because [TemplateService] is an `abstract base
-///    class`, standalone project templates can be added in the future as a
-///    defaulted getter without breaking existing extensions if a workspace- or
-///    multi-package scaffolding use case arises.
+/// `flutter create --platforms=<custom> .`; `flutter create` integration is
+/// tracked in https://github.com/flutter/flutter/issues/190749).
 abstract base class TemplateService extends ToolExtensionService {
   /// Service namespace identifier for templates.
   static const String serviceNamespace = 'template';
@@ -64,16 +47,55 @@ abstract base class TemplateService extends ToolExtensionService {
   @override
   String get namespace => serviceNamespace;
 
-  /// The map of platform name to package template URI to be initialized when
-  /// adding custom platform support to an app project.
+  /// Templates this extension provides to add custom platform support to an
+  /// app project.
+  ///
+  /// When a user runs `flutter create --platforms=<custom> .`, the tool looks
+  /// up `<custom>` in this map. If it finds an entry, it renders that template
+  /// into the project.
+  ///
+  /// The map's values are `package:` URIs pointing to a directory of template
+  /// files inside this extension's `lib/` folder.
+  ///
+  /// Files ending in `.tmpl` are rendered with Mustache using the values from
+  /// [generatePlatformTemplateParameters] and written to the same relative path
+  /// inside the project without the `.tmpl` suffix. Files ending in
+  /// `.copy.tmpl` are copied without Mustache rendering, with the `.copy.tmpl`
+  /// suffix stripped. Files without `.tmpl` in their path are ignored.
+  ///
+  /// The template should contain only the files needed for this platform. It is
+  /// added to a project that already exists, so it should not include
+  /// project-wide files such as `lib/main.dart` or `pubspec.yaml`.
+  ///
+  /// For example, this maps `--platforms=custom_linux` to the template files in
+  /// `lib/templates/custom_linux/` of the `my_linux_extension` package:
+  ///
+  /// ```dart
+  /// @override
+  /// Map<String, String> get appPlatformTemplates => const <String, String>{
+  ///   'custom_linux': 'package:my_linux_extension/templates/custom_linux',
+  /// };
+  /// ```
   Map<String, String> get appPlatformTemplates => const <String, String>{};
 
-  /// The map of platform name to package template URI for platform templates
-  /// for `plugin` projects.
+  /// Templates this extension provides to add custom platform support to a
+  /// `plugin` project.
+  ///
+  /// When a user runs `flutter create --template=plugin --platforms=<custom> .`,
+  /// the tool looks up `<custom>` in this map. If it finds an entry, it renders
+  /// that template into the project.
+  ///
+  /// The map's values are `package:` URIs pointing to a directory of `.tmpl`
+  /// and `.copy.tmpl` template files inside this extension's `lib/` folder,
+  /// rendered using the values from [generatePlatformTemplateParameters].
+  ///
+  /// See [appPlatformTemplates] for details on how platform template files are
+  /// structured and rendered.
   Map<String, String> get pluginPlatformTemplates => const <String, String>{};
 
-  /// Generates custom template parameters for a platform template (for example,
-  /// when scaffolding platform files via `flutter create --platforms=<platform>`).
+  /// Generates custom template parameters for both [appPlatformTemplates] and
+  /// [pluginPlatformTemplates] (for example, when scaffolding platform files via
+  /// `flutter create --platforms=<platform>`).
   ///
   /// Defaults to returning [toolParameters] unchanged. Extensions can override
   /// this method to supply custom template variables to Mustache templates.
