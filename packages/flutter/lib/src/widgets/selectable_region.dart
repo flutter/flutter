@@ -548,6 +548,10 @@ class SelectableRegionState extends State<SelectableRegion>
         clearSelection();
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
+      } else {
+        // Keep the selection, but dismiss a context menu that would otherwise
+        // stay visible over the unfocused window.
+        hideToolbar(false);
       }
     } else if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);

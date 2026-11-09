@@ -26,6 +26,8 @@ static constexpr char kRequestAppExitMethod[] = "System.requestAppExit";
 static constexpr char kInitializationCompleteMethod[] =
     "System.initializationComplete";
 static constexpr char kPlaySoundMethod[] = "SystemSound.play";
+static constexpr char kDismissContextMenuMethod[] =
+    "ContextMenu.onDismissContextMenu";
 
 static constexpr char kExitCodeKey[] = "exitCode";
 
@@ -408,6 +410,11 @@ void PlatformHandler::SystemExitApplication(
 // These values must be kept in sync with ExitType in platform_handler.h
 static constexpr const char* kExitTypeNames[] = {
     PlatformHandler::kExitTypeRequired, PlatformHandler::kExitTypeCancelable};
+
+void PlatformHandler::DismissContextMenu() {
+  channel_->InvokeMethod(kDismissContextMenuMethod,
+                         std::unique_ptr<rapidjson::Document>());
+}
 
 void PlatformHandler::RequestAppExit(std::optional<HWND> hwnd,
                                      std::optional<WPARAM> wparam,

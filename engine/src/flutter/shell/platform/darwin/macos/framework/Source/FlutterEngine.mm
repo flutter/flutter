@@ -1437,6 +1437,20 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
              selector:@selector(updateDisplayConfig:)
                  name:NSApplicationDidChangeScreenParametersNotification
                object:nil];
+  // Opening the menu bar or dragging the window does not make the app
+  // inactive, but a Flutter context menu should still close.
+  [center addObserver:self
+             selector:@selector(dismissFlutterContextMenu:)
+                 name:NSMenuDidBeginTrackingNotification
+               object:nil];
+  [center addObserver:self
+             selector:@selector(dismissFlutterContextMenu:)
+                 name:NSWindowWillMoveNotification
+               object:nil];
+}
+
+- (void)dismissFlutterContextMenu:(NSNotification*)notification {
+  [_platformChannel invokeMethod:@"ContextMenu.onDismissContextMenu" arguments:nil];
 }
 
 - (void)addInternalPlugins {

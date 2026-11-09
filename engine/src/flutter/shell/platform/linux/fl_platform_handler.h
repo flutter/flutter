@@ -47,6 +47,14 @@ FlPlatformHandler* fl_platform_handler_new(FlBinaryMessenger* messenger);
  */
 void fl_platform_handler_request_app_exit(FlPlatformHandler* handler);
 
+/**
+ * fl_platform_handler_dismiss_context_menu:
+ * @handler: an #FlPlatformHandler
+ *
+ * Asks the framework to close an open context menu.
+ */
+void fl_platform_handler_dismiss_context_menu(FlPlatformHandler* handler);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_PLATFORM_HANDLER_H_

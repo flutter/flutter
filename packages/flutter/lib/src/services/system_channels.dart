@@ -169,6 +169,10 @@ abstract final class SystemChannels {
   ///    [SystemChrome.setSystemUIChangeCallback] to respond to this change in
   ///    application state.
   ///
+  ///  * `ContextMenu.onDismissContextMenu`: The user opened a platform menu
+  ///    or started dragging a window. Desktop embedders send this so a Flutter
+  ///    context menu can close without the application becoming inactive.
+  ///
   ///  * `System.requestAppExit`: The application has requested that it be
   ///    terminated. See [ServicesBinding.exitApplication].
   ///

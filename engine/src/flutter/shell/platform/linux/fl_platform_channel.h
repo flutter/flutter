@@ -77,6 +77,15 @@ FlPlatformChannel* fl_platform_channel_new(FlBinaryMessenger* messenger,
  * "System.initializationComplete" method call on the platform channel. Calls
  * before initialization is complete will result in an immediate exit.
  */
+/**
+ * fl_platform_channel_dismiss_context_menu:
+ * @channel: an #FlPlatformChannel
+ *
+ * Asks the framework to close an open context menu. Sent when a platform menu
+ * opens or the window starts moving.
+ */
+void fl_platform_channel_dismiss_context_menu(FlPlatformChannel* channel);
+
 void fl_platform_channel_system_request_app_exit(FlPlatformChannel* channel,
                                                  FlPlatformChannelExitType type,
                                                  GCancellable* cancellable,

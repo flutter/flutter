@@ -54,6 +54,10 @@ class PlatformHandler {
                               AppExitType exit_type,
                               UINT exit_code);
 
+  // Asks the framework to close an open context menu. Sent when the user
+  // opens a native menu or starts dragging the window.
+  void DismissContextMenu();
+
  protected:
   // Gets plain text from the clipboard and provides it to |result| as the
   // value in a dictionary with the given |key|.

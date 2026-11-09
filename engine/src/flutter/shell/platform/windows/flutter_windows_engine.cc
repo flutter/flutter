@@ -1125,6 +1125,12 @@ void FlutterWindowsEngine::RequestApplicationQuit(HWND hwnd,
   platform_handler_->RequestAppExit(hwnd, wparam, lparam, exit_type, 0);
 }
 
+void FlutterWindowsEngine::DismissContextMenu() {
+  if (platform_handler_) {
+    platform_handler_->DismissContextMenu();
+  }
+}
+
 void FlutterWindowsEngine::OnQuit(std::optional<HWND> hwnd,
                                   std::optional<WPARAM> wparam,
                                   std::optional<LPARAM> lparam,

@@ -20,6 +20,8 @@ static constexpr char kInitializationCompleteMethod[] =
     "System.initializationComplete";
 static constexpr char kPlaySoundMethod[] = "SystemSound.play";
 static constexpr char kSystemNavigatorPopMethod[] = "SystemNavigator.pop";
+static constexpr char kDismissContextMenuMethod[] =
+    "ContextMenu.onDismissContextMenu";
 static constexpr char kTextKey[] = "text";
 static constexpr char kValueKey[] = "value";
 
@@ -238,6 +240,13 @@ FlPlatformChannel* fl_platform_channel_new(FlBinaryMessenger* messenger,
                                             nullptr);
 
   return self;
+}
+
+void fl_platform_channel_dismiss_context_menu(FlPlatformChannel* self) {
+  g_return_if_fail(FL_IS_PLATFORM_CHANNEL(self));
+
+  fl_method_channel_invoke_method(self->channel, kDismissContextMenuMethod,
+                                  nullptr, nullptr, nullptr, nullptr);
 }
 
 void fl_platform_channel_system_request_app_exit(FlPlatformChannel* self,
