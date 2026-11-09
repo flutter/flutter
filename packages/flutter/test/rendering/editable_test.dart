@@ -1402,6 +1402,38 @@ void main() {
         expect((target as TextSpan).text, 'B');
       });
 
+      test('hit testing recomputes text metrics invalidated by a system fonts change', () {
+        final editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          offset: ViewportOffset.fixed(0.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        // Discards the text layout until the next layout pass. A pointer event
+        // can be hit tested before that pass runs.
+        // ignore: invalid_use_of_protected_member
+        editable.systemFontsDidChange();
+
+        final result = BoxHitTestResult();
+        editable.hitTest(result, position: const Offset(15.0, 0.0));
+        expect(result.path, hasLength(2));
+        final HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B');
+      });
+
       test('hits correct TextSpan when scrolled vertically', () {
         final TextSelectionDelegate delegate = _FakeEditableTextState();
         final editable = RenderEditable(
