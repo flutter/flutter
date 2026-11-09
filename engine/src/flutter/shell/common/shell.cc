@@ -27,6 +27,8 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/runtime/dart_isolate.h"
+#include "flutter/runtime/dart_isolate_group_data.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/base64.h"
 #include "flutter/shell/common/engine.h"
@@ -623,9 +625,25 @@ Shell::~Shell() {
       }));
   platiso_latch.Wait();
 
+#if !FLUTTER_RELEASE
+  std::weak_ptr<const DartIsolateGroupData> weak_isolate_group_data;
+#endif  // !FLUTTER_RELEASE
+
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
-      fml::MakeCopyable([this, &ui_latch]() mutable {
+      fml::MakeCopyable([this,
+#if !FLUTTER_RELEASE
+                         &weak_isolate_group_data,
+#endif  // !FLUTTER_RELEASE
+                         &ui_latch]() mutable {
+#if !FLUTTER_RELEASE
+        if (engine_ && engine_->GetRuntimeController()) {
+          if (auto isolate =
+                  engine_->GetRuntimeController()->GetRootIsolate().lock()) {
+            weak_isolate_group_data = isolate->GetWeakIsolateGroupData();
+          }
+        }
+#endif  // !FLUTTER_RELEASE
         engine_.reset();
         ui_latch.Signal();
       }));
@@ -641,17 +659,19 @@ Shell::~Shell() {
           }));
   gpu_latch.Wait();
 
+  bool is_last_shell_in_group = false;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetIOTaskRunner(),
       fml::MakeCopyable([io_manager = std::move(io_manager_),
                          platform_view = platform_view_.get(),
-                         &io_latch]() mutable {
+                         &is_last_shell_in_group, &io_latch]() mutable {
         std::weak_ptr<ShellIOManager> weak_io_manager(io_manager);
         io_manager.reset();
 
+        is_last_shell_in_group = weak_io_manager.expired();
         // If the IO manager is not being used by any other spawned shells,
         // then detach the resource context from the IO thread.
-        if (platform_view && weak_io_manager.expired()) {
+        if (platform_view && is_last_shell_in_group) {
           platform_view->ReleaseResourceContext();
         }
         io_latch.Signal();
@@ -670,6 +690,19 @@ Shell::~Shell() {
         platform_latch.Signal();
       }));
   platform_latch.Wait();
+
+#if !FLUTTER_RELEASE
+  if (is_last_shell_in_group && !weak_isolate_group_data.expired()) {
+    FML_LOG(IMPORTANT)
+        << "Warning: The engine's Dart isolate group still has active child "
+           "isolates after engine shutdown. Surviving isolates spawned via "
+           "Isolate.spawn prevent the isolate group heap and native GPU "
+           "resources from being released cleanly and can cause memory leaks "
+           "or crashes. Terminate spawned isolates before destroying the "
+           "engine, or cache and reuse the engine (for example with "
+           "FlutterEngineCache on Android).";
+  }
+#endif  // !FLUTTER_RELEASE
 
   if (settings_.merged_platform_ui_thread ==
       Settings::MergedPlatformUIThread::kMergeAfterLaunch) {

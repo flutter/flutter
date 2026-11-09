@@ -654,3 +654,24 @@ void hitTestOutsidePlatformViewMain() {
     return HitTestResponse.empty;
   };
 }
+
+@Native<Void Function(Int64)>(symbol: 'RegisterChildShutdownPort')
+external void _registerChildShutdownPort(int port);
+
+void _persistentChildIsolateMain(void _) {
+  late final RawReceivePort keepAlivePort;
+  keepAlivePort = RawReceivePort((_) {
+    keepAlivePort.close();
+  });
+  _registerChildShutdownPort(keepAlivePort.sendPort.nativePort);
+}
+
+@pragma('vm:entry-point')
+void spawnPersistentChildIsolate() {
+  final onExitPort = RawReceivePort();
+  onExitPort.handler = (_) {
+    onExitPort.close();
+    notifyNative();
+  };
+  unawaited(Isolate.spawn(_persistentChildIsolateMain, null, onExit: onExitPort.sendPort));
+}

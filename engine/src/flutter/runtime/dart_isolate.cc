@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/posix_wrappers.h"
@@ -1061,6 +1062,20 @@ DartIsolateGroupData& DartIsolate::GetIsolateGroupData() {
 const DartIsolateGroupData& DartIsolate::GetIsolateGroupData() const {
   DartIsolate* non_const_this = const_cast<DartIsolate*>(this);
   return non_const_this->GetIsolateGroupData();
+}
+
+std::weak_ptr<const DartIsolateGroupData> DartIsolate::GetWeakIsolateGroupData()
+    const {
+  if (isolate() == nullptr) {
+    return {};
+  }
+  auto* isolate_group_data =
+      static_cast<std::shared_ptr<DartIsolateGroupData>*>(
+          Dart_IsolateGroupData(isolate()));
+  if (isolate_group_data == nullptr) {
+    return {};
+  }
+  return *isolate_group_data;
 }
 
 // |Dart_IsolateGroupCreateCallback|
