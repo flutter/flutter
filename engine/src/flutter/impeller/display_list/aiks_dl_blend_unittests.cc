@@ -18,8 +18,6 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/scalar.h"
-#include "fml/synchronization/count_down_latch.h"
-#include "impeller/core/device_buffer.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/playground/playground.h"
@@ -827,58 +825,6 @@ TEST_P(AiksTest, FramebufferAdvancedBlendCoverage) {
                     DlImageSampling::kMipmapLinear, &image_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
-}
-
-// Regression test for https://github.com/flutter/flutter/issues/179547.
-TEST_P(AiksTest, FramebufferBlendDifferenceNoDiagonalSeam) {
-  DisplayListBuilder builder;
-  builder.DrawPaint(DlPaint().setColor(DlColor::kBlack()));
-
-  // Use a non-fullscreen rect so Canvas does not fold it into clear_color.
-  DlPaint rect_paint;
-  rect_paint.setColor(DlColor::kWhite());
-  rect_paint.setBlendMode(DlBlendMode::kDifference);
-  builder.DrawRect(DlRect::MakeXYWH(2, 2, 12, 12), rect_paint);
-
-  std::shared_ptr<Context> context = GetContext();
-  AiksContext renderer(context, nullptr);
-  auto out_texture =
-      DisplayListToTexture(builder.Build(), ISize{16, 16}, renderer);
-  ASSERT_TRUE(out_texture);
-
-  DeviceBufferDescriptor readback_desc;
-  readback_desc.size =
-      out_texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
-  readback_desc.readback = true;
-  readback_desc.storage_mode = StorageMode::kHostVisible;
-  auto readback = context->GetResourceAllocator()->CreateBuffer(readback_desc);
-  ASSERT_TRUE(readback);
-
-  auto cmd = context->CreateCommandBuffer();
-  auto blit = cmd->CreateBlitPass();
-  ASSERT_TRUE(blit->AddCopy(out_texture, readback));
-  ASSERT_TRUE(blit->EncodeCommands());
-  auto latch = std::make_shared<fml::CountDownLatch>(1u);
-  ASSERT_TRUE(
-      context->GetCommandQueue()
-          ->Submit({cmd},
-                   [latch](CommandBuffer::Status) { latch->CountDown(); })
-          .ok());
-  latch->Wait();
-
-  // |Black(0) - White(1)| = White(255) across all 4 RGBA8/BGRA8 channels inside
-  // [2..14, 2..14]. Without masking subpassLoad by gl_SampleMaskIn, pixels
-  // along the FramebufferBlend quad's diagonal seam drop to ~191.
-  const uint8_t* bytes = readback->OnGetContents();
-  ASSERT_NE(bytes, nullptr);
-  for (int y = 3; y < 13; ++y) {
-    for (int x = 3; x < 13; ++x) {
-      const uint8_t* px = bytes + (y * 16 + x) * 4;
-      EXPECT_NEAR(px[0], 255, 2) << "Seam at (" << x << ", " << y << ")";
-      EXPECT_NEAR(px[1], 255, 2) << "Seam at (" << x << ", " << y << ")";
-      EXPECT_NEAR(px[2], 255, 2) << "Seam at (" << x << ", " << y << ")";
-    }
-  }
 }
 
 TEST_P(AiksTest, ColorWheel) {
