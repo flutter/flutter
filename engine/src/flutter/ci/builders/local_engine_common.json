@@ -20,8 +20,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe",
-        "--no-goma"
+        "--rbe"
       ],
       "name": "macos/ios_debug_sim_unopt_arm64",
       "description": "Builds an unoptimized debug mode engine that targets the arm64 iOS simulator from a macOS host.",
@@ -52,8 +51,7 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
-        "--rbe",
-        "--no-goma"
+        "--rbe"
       ],
       "name": "linux/android_debug_unopt_arm64",
       "description": "Builds an unoptimized debug mode engine that targets 64-bit arm Android from a Linux host.",
@@ -79,8 +77,7 @@
         "--mac-cpu",
         "arm64",
         "--xcode-symlinks",
-        "--rbe",
-        "--no-goma"
+        "--rbe"
       ],
       "name": "macos/host_debug_unopt_arm64",
       "description": "Builds a debug mode engine for a macOS host on arm64.",
@@ -110,8 +107,7 @@
         "--unoptimized",
         "--no-stripped",
         "--no-lto",
-        "--rbe",
-        "--no-goma"
+        "--rbe"
       ],
       "name": "linux/host_debug_unopt",
       "description": "Builds an unoptimized debug mode engine for a Linux host.",
@@ -136,8 +132,7 @@
         "--unoptimized",
         "--no-stripped",
         "--no-lto",
-        "--rbe",
-        "--no-goma"
+        "--rbe"
       ],
       "name": "windows/host_debug_unopt",
       "description": "Builds an unoptimized debug mode engine for a Windows host.",
@@ -160,8 +155,7 @@
         "--web",
         "--runtime-mode=debug",
         "--unoptimized",
-        "--no-rbe",
-        "--no-goma"
+        "--no-rbe"
       ],
       "ninja": {
         "config": "wasm_debug_unopt",

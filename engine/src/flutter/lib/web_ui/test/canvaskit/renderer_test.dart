@@ -62,7 +62,7 @@ class TestViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> draw(LayerTree tree, FrameTimingRecorder? recorder) async {
+  Future<void> draw(LayerTree tree, ui.Size frameSize, FrameTimingRecorder? recorder) async {
     treesRendered.add(tree);
     return Future<void>.value();
   }
@@ -112,7 +112,9 @@ void testMain() {
         builder.addPicture(ui.Offset.zero, picture);
         final ui.Scene scene = builder.build();
         treesToRender.add((scene as LayerScene).layerTree);
-        renderFutures.add(CanvasKitRenderer.instance.renderScene(scene, testView));
+        renderFutures.add(
+          CanvasKitRenderer.instance.renderScene(scene, testView, size: testView.physicalSize),
+        );
       }
       await Future.wait(renderFutures);
 
@@ -164,7 +166,9 @@ void testMain() {
           builder.addPicture(ui.Offset.zero, picture);
           final ui.Scene scene = builder.build();
           treesToRender[testView]!.add((scene as LayerScene).layerTree);
-          renderFutures.add(CanvasKitRenderer.instance.renderScene(scene, testView));
+          renderFutures.add(
+            CanvasKitRenderer.instance.renderScene(scene, testView, size: testView.physicalSize),
+          );
         }
       }
       await Future.wait(renderFutures);
