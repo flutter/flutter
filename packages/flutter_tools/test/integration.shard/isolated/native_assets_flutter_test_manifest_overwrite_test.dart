@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('posix')
+@Timeout(Duration(minutes: 5))
 library;
 
 import 'dart:convert';
@@ -10,6 +11,7 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:package_config/package_config.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart';
@@ -24,43 +26,14 @@ const _packageGraphFileName = 'package_graph.json';
 const _pubspecFileName = 'pubspec.yaml';
 const _readExecuteDirMode = '0555';
 const _readWriteExecuteDirMode = '0755';
-const _toolSnapshotFileName = 'flutter_tools.dill';
 
 void main() {
-  final String flutterRoot = getFlutterRoot();
-  final Directory flutterToolsDir = fileSystem
-      .directory(flutterRoot)
+  final File flutterToolsPackageConfigFile = fileSystem
+      .directory(getFlutterRoot())
       .childDirectory('packages')
-      .childDirectory('flutter_tools');
-  final Directory flutterToolsDartToolDir = flutterToolsDir.childDirectory(_dartToolDirName);
-  final File flutterToolsPackageConfigFile = flutterToolsDartToolDir.childFile(
-    _packageConfigFileName,
-  );
-  final File flutterToolsScript = flutterToolsDir
-      .childDirectory('bin')
-      .childFile('flutter_tools.dart');
-
-  late Directory snapshotDir;
-  late File toolSnapshotFile;
-
-  setUpAll(() async {
-    snapshotDir = createResolvedTempDirectorySync('flutter_tools_snapshot.');
-    toolSnapshotFile = snapshotDir.childFile(_toolSnapshotFileName);
-    final ProcessResult compileResult = await processManager.run(<String>[
-      platform.resolvedExecutable,
-      '--verbosity=error',
-      '--snapshot=${toolSnapshotFile.path}',
-      '--snapshot-kind=kernel',
-      '--packages=${flutterToolsPackageConfigFile.path}',
-      '--no-enable-mirrors',
-      flutterToolsScript.path,
-    ]);
-    expect(compileResult, const ProcessResultMatcher());
-  });
-
-  tearDownAll(() {
-    tryToDelete(snapshotDir);
-  });
+      .childDirectory('flutter_tools')
+      .childDirectory(_dartToolDirName)
+      .childFile(_packageConfigFileName);
 
   testWithoutContext(
     'flutter test overwrites existing native_assets.json in place without unlinking it '
@@ -85,28 +58,23 @@ void main() {
         tryToDelete(tempDir);
       });
 
-      _writeOfflineProject(
-        projectDir: tempDir,
-        flutterToolsDartToolDir: flutterToolsDartToolDir,
+      await _writeOfflineProject(
         flutterToolsPackageConfigFile: flutterToolsPackageConfigFile,
+        projectDir: tempDir,
       );
 
       Future<ProcessResult> runFlutterTest() {
         return processManager.run(
           <String>[
-            platform.resolvedExecutable,
-            toolSnapshotFile.path,
+            flutterBin,
             '--suppress-analytics',
             '--no-version-check',
+            ...getLocalEngineArguments(),
             'test',
             '--no-pub',
           ],
           workingDirectory: tempDir.path,
-          environment: <String, String>{
-            ...platform.environment,
-            'FLUTTER_ROOT': flutterRoot,
-            'BOT': 'true',
-          },
+          environment: <String, String>{...platform.environment, 'BOT': 'true'},
         );
       }
 
@@ -143,43 +111,25 @@ void main() {
   );
 }
 
-void _writeOfflineProject({
-  required Directory projectDir,
-  required Directory flutterToolsDartToolDir,
+Future<void> _writeOfflineProject({
   required File flutterToolsPackageConfigFile,
-}) {
-  final decoded =
-      json.decode(flutterToolsPackageConfigFile.readAsStringSync()) as Map<String, Object?>;
-  final rawPackages = decoded['packages']! as List<Object?>;
-  final resolvedPackages = <Map<String, Object?>>[
-    for (final Object? entry in rawPackages)
-      if (entry
-          case {
-            'name': final String name,
-            'rootUri': final String rootUri,
-            'packageUri': final String packageUri,
-            'languageVersion': final String languageVersion,
-          }
-          when !name.startsWith('flutter_tools') && name != _appName)
-        <String, Object?>{
-          'name': name,
-          'rootUri': flutterToolsDartToolDir.uri.resolve(rootUri).toString(),
-          'packageUri': packageUri,
-          'languageVersion': languageVersion,
-        },
-    <String, Object?>{
-      'name': _appName,
-      'rootUri': '../',
-      'packageUri': 'lib/',
-      'languageVersion': '3.7',
-    },
+  required Directory projectDir,
+}) async {
+  final PackageConfig flutterToolsPackageConfig = await loadPackageConfig(
+    flutterToolsPackageConfigFile,
+  );
+  final packages = <Package>[
+    for (final Package package in flutterToolsPackageConfig.packages)
+      if (!package.name.startsWith('flutter_tools') && package.name != _appName) package,
+    Package(
+      _appName,
+      projectDir.uri,
+      packageUriRoot: Uri(path: 'lib/'),
+      languageVersion: LanguageVersion(3, 7),
+    ),
   ];
 
-  projectDir.childDirectory(_dartToolDirName).childFile(_packageConfigFileName)
-    ..createSync(recursive: true)
-    ..writeAsStringSync(
-      json.encode(<String, Object?>{'configVersion': 2, 'packages': resolvedPackages}),
-    );
+  await savePackageConfig(PackageConfig(packages), projectDir);
 
   projectDir
       .childDirectory(_dartToolDirName)
@@ -188,14 +138,13 @@ void _writeOfflineProject({
         json.encode(<String, Object?>{
           'roots': <String>[_appName],
           'packages': <Map<String, Object?>>[
-            for (final Map<String, Object?> pkg in resolvedPackages)
-              if (pkg['name'] case final String pkgName)
-                <String, Object?>{
-                  'name': pkgName,
-                  'version': '0.0.0',
-                  'dependencies': const <String>[],
-                  if (pkgName == _appName) 'devDependencies': const <String>['test'],
-                },
+            for (final Package package in packages)
+              <String, Object?>{
+                'name': package.name,
+                'version': '0.0.0',
+                'dependencies': const <String>[],
+                if (package.name == _appName) 'devDependencies': const <String>['test'],
+              },
           ],
           'configVersion': 1,
         }),
