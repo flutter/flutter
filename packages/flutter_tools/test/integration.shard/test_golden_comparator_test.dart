@@ -5,15 +5,20 @@
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:flutter_tools/src/test/test_golden_comparator.dart';
+import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/fakes.dart';
@@ -37,13 +42,17 @@ void main() {
     return (testData.childFile('test_1.png'), testData.childFile('test_2.png'));
   }();
 
+  late LocalFileSystem localFs;
+  late FileSystem fs;
   late Directory tmpDir;
   late BufferLogger logger;
   late IntegrationTestsProject testProject;
   late FlutterProject project;
 
   setUp(() async {
-    tmpDir = fileSystem.systemTempDirectory.createTempSync();
+    localFs = LocalFileSystem.test(signals: LocalSignals.instance);
+    fs = ErrorHandlingFileSystem(delegate: localFs, platform: const LocalPlatform());
+    tmpDir = fs.systemTempDirectory.createTempSync();
     logger = BufferLogger.test();
 
     testProject = IntegrationTestsProject();
@@ -52,8 +61,9 @@ void main() {
     testPng1.copySync(tmpDir.childDirectory('integration_test').childFile('test.png').path);
   });
 
-  tearDown(() {
+  tearDown(() async {
     tryToDelete(tmpDir);
+    await localFs.dispose();
     printOnFailure(logger.warningText);
     printOnFailure(logger.errorText);
   });
@@ -63,16 +73,17 @@ void main() {
     expect(packageConfig, exists);
 
     final String flutterRoot = getFlutterRoot();
+    final testProcessManager = _TestProcessManager();
     final cache = Cache.test(
-      rootOverride: fileSystem.directory(flutterRoot),
+      rootOverride: fs.directory(flutterRoot),
       flutterRoot: flutterRoot,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       logger: logger,
       platform: platform,
-      processManager: processManager,
+      processManager: testProcessManager,
     );
     final artifacts = CachedArtifacts(
-      fileSystem: fileSystem,
+      fileSystem: fs,
       cache: cache,
       platform: platform,
       operatingSystemUtils: cache.osUtils,
@@ -81,10 +92,10 @@ void main() {
       artifacts: artifacts,
       cache: cache,
       config: Config.test(logger: logger),
-      fs: fileSystem,
+      fs: fs,
       logger: logger,
       platform: platform,
-      processManager: processManager,
+      processManager: testProcessManager,
       shutdownHooks: ShutdownHooks(),
     );
     final compiler = TestCompiler(
@@ -105,6 +116,11 @@ void main() {
     );
     addTearDown(() async {
       await toolContext.shutdownHooks.runShutdownHooks(logger);
+      await compiler.dispose();
+      for (final Process process in testProcessManager.startedProcesses) {
+        process.kill();
+        await process.exitCode;
+      }
       await comparator.close();
     });
     return comparator;
@@ -137,4 +153,29 @@ void main() {
       ),
     );
   });
+}
+
+class _TestProcessManager extends LocalProcessManager {
+  final startedProcesses = <Process>[];
+
+  @override
+  Future<Process> start(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) async {
+    final Process process = await super.start(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      mode: mode,
+    );
+    startedProcesses.add(process);
+    return process;
+  }
 }
