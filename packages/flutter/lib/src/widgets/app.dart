@@ -16,7 +16,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import '_text_locale.dart';
 import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
@@ -1021,6 +1020,12 @@ class WidgetsApp extends StatefulWidget {
   /// omitted.
   /// {@endtemplate}
   ///
+  /// If the app doesn't set [supportedLocales], [locale],
+  /// [localeResolutionCallback], or [localeListResolutionCallback], its locale
+  /// is always the default `en_US`. In that case text widgets don't pass the
+  /// locale to the text engine, so the platform's default locale is used for
+  /// font fallback. See [Localizations.isDefaultLocale].
+  ///
   /// See also:
   ///
   ///  * [MaterialApp.supportedLocales], which sets the `supportedLocales`
@@ -1678,6 +1683,20 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     }
   }
 
+  // Whether the app left its locale configuration at the defaults, so the
+  // resolved locale is always the default en_US rather than a locale the app
+  // chose for its content.
+  //
+  // The default supportedLocales of WidgetsApp, MaterialApp, and CupertinoApp
+  // is a const list, so it is canonicalized and can be detected with
+  // identical().
+  bool get _usesDefaultLocale {
+    return widget.locale == null &&
+        widget.localeListResolutionCallback == null &&
+        widget.localeResolutionCallback == null &&
+        identical(widget.supportedLocales, const <Locale>[Locale('en', 'US')]);
+  }
+
   // BUILDER
 
   @override
@@ -1838,16 +1857,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                       child: ListenableBuilder(
                         listenable: _localizationsResolver,
                         builder: (BuildContext context, _) {
-                          final Locale appLocale = _localizationsResolver.locale;
                           return Localizations(
                             isApplicationLevel: true,
-                            locale: appLocale,
+                            isDefaultLocale: _usesDefaultLocale,
+                            locale: _localizationsResolver.locale,
                             delegates: _localizationsResolver.localizationsDelegates.toList(),
-                            child: TextLocaleScope(
-                              applicationLocale: appLocale,
-                              explicitLocale: widget.locale,
-                              child: title ?? result,
-                            ),
+                            child: title ?? result,
                           );
                         },
                       ),

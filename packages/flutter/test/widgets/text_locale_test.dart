@@ -6,9 +6,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// Tests for https://github.com/flutter/flutter/issues/194931: when the user's
-// preferred locale is not supported by the app, text widgets should not pass
-// the app's fallback locale to the engine, so that the operating system's
+// Tests for https://github.com/flutter/flutter/issues/194931: when the app
+// does not configure its locales, its locale is always the default en_US. Text
+// widgets should not pass that default to the engine, so that the platform's
 // default locale is used for font fallback.
 
 const Locale enUS = Locale('en', 'US');
@@ -23,12 +23,23 @@ void main() {
 
   Widget buildApp({
     Locale? locale,
-    Iterable<Locale> supportedLocales = const <Locale>[enUS],
+    Iterable<Locale>? supportedLocales,
+    LocaleResolutionCallback? localeResolutionCallback,
     required Widget child,
   }) {
+    if (supportedLocales == null) {
+      // Use WidgetsApp's default supportedLocales.
+      return WidgetsApp(
+        color: const Color(0xFF000000),
+        locale: locale,
+        localeResolutionCallback: localeResolutionCallback,
+        builder: (BuildContext context, Widget? _) => Center(child: child),
+      );
+    }
     return WidgetsApp(
       color: const Color(0xFF000000),
       locale: locale,
+      localeResolutionCallback: localeResolutionCallback,
       supportedLocales: supportedLocales,
       builder: (BuildContext context, Widget? _) => Center(child: child),
     );
@@ -38,47 +49,61 @@ void main() {
     return tester.renderObject<RenderParagraph>(find.byType(RichText)).locale;
   }
 
-  testWidgets('RichText uses no locale when the preferred locale is unsupported', (
+  bool isDefaultLocale(WidgetTester tester) {
+    return Localizations.isDefaultLocaleOf(tester.element(find.byType(RichText)));
+  }
+
+  testWidgets('RichText uses no locale when the app uses the default locale', (
     WidgetTester tester,
   ) async {
     setDeviceLocales(tester, const <Locale>[zhCN]);
     await tester.pumpWidget(buildApp(child: const Text('你好')));
 
     expect(Localizations.localeOf(tester.element(find.byType(RichText))), enUS);
+    expect(isDefaultLocale(tester), isTrue);
     expect(paragraphLocale(tester), isNull);
   });
 
-  testWidgets('RichText uses no locale when only a lower preference is supported', (
+  testWidgets('RichText uses no locale for the default locale regardless of device locale', (
     WidgetTester tester,
   ) async {
-    setDeviceLocales(tester, const <Locale>[zhCN, enUS]);
+    setDeviceLocales(tester, const <Locale>[enUS]);
     await tester.pumpWidget(buildApp(child: const Text('你好')));
+    expect(paragraphLocale(tester), isNull);
 
-    expect(Localizations.localeOf(tester.element(find.byType(RichText))), enUS);
+    tester.platformDispatcher.localesTestValue = const <Locale>[zhCN];
+    await tester.pump();
     expect(paragraphLocale(tester), isNull);
   });
 
-  // Only the user's first preferred locale is considered. When the app matches
-  // a lower preference instead, the app locale is still treated as a fallback.
-  //
-  // This is a deliberate trade-off. Here the app's own strings are Chinese, but
-  // text will render with the operating system's default locale (likely
-  // Japanese for this user), so Han characters in the app's strings may use
-  // Japanese glyph variants. Considering secondary preferences would avoid that,
-  // but it would also bring back the original bug for the more common case of
-  // a user with `[zh_CN, en_US]` using an English-only app: the app resolves to
-  // `en_US`, a secondary preference, and Han characters would again render with
-  // Japanese fonts. Apps can opt out with an explicit `WidgetsApp.locale` or
-  // `TextStyle.locale`.
-  testWidgets('RichText uses no locale when only a lower preference matches a CJK app locale', (
+  testWidgets('RichText uses the resolved locale when the app sets supportedLocales', (
     WidgetTester tester,
   ) async {
-    setDeviceLocales(tester, const <Locale>[jaJP, zhCN]);
+    setDeviceLocales(tester, const <Locale>[zhCN]);
     await tester.pumpWidget(
-      buildApp(supportedLocales: const <Locale>[enUS, zhCN], child: const Text('你好')),
+      // A non-const list, so it is not the default supportedLocales.
+      // ignore: prefer_const_literals_to_create_immutables
+      buildApp(supportedLocales: <Locale>[enUS], child: const Text('你好')),
     );
 
-    expect(Localizations.localeOf(tester.element(find.byType(RichText))), zhCN);
+    // The app is rendered in en_US, so en_US is used for text.
+    expect(Localizations.localeOf(tester.element(find.byType(RichText))), enUS);
+    expect(isDefaultLocale(tester), isFalse);
+    expect(paragraphLocale(tester), enUS);
+  });
+
+  // The default supportedLocales is detected by identity. A const list equal to
+  // the default is canonicalized to the same object, so it is treated as the
+  // default too.
+  testWidgets('A const supportedLocales equal to the default is treated as the default', (
+    WidgetTester tester,
+  ) async {
+    setDeviceLocales(tester, const <Locale>[zhCN]);
+    await tester.pumpWidget(
+      buildApp(supportedLocales: const <Locale>[enUS], child: const Text('你好')),
+    );
+
+    expect(isDefaultLocale(tester), isTrue);
     expect(paragraphLocale(tester), isNull);
   });
 
@@ -93,26 +118,43 @@ void main() {
     expect(paragraphLocale(tester), zhCN);
   });
 
-  testWidgets('RichText uses a supported explicit WidgetsApp.locale', (WidgetTester tester) async {
-    setDeviceLocales(tester, const <Locale>[zhCN]);
-    await tester.pumpWidget(
-      buildApp(locale: jaJP, supportedLocales: const <Locale>[enUS, jaJP], child: const Text('你好')),
-    );
-
-    expect(paragraphLocale(tester), jaJP);
-  });
-
-  testWidgets('RichText uses no locale for an unsupported explicit WidgetsApp.locale', (
+  testWidgets('RichText uses the app locale when a secondary preferred locale is supported', (
     WidgetTester tester,
   ) async {
-    setDeviceLocales(tester, const <Locale>[enUS]);
-    await tester.pumpWidget(buildApp(locale: jaJP, child: const Text('你好')));
+    setDeviceLocales(tester, const <Locale>[jaJP, zhCN]);
+    await tester.pumpWidget(
+      buildApp(supportedLocales: const <Locale>[enUS, zhCN], child: const Text('你好')),
+    );
 
-    expect(Localizations.localeOf(tester.element(find.byType(RichText))), enUS);
-    expect(paragraphLocale(tester), isNull);
+    expect(paragraphLocale(tester), zhCN);
   });
 
-  testWidgets('Explicit locales are respected when the preferred locale is unsupported', (
+  testWidgets('RichText uses the resolved locale when WidgetsApp.locale is set', (
+    WidgetTester tester,
+  ) async {
+    setDeviceLocales(tester, const <Locale>[zhCN]);
+    await tester.pumpWidget(buildApp(locale: enUS, child: const Text('你好')));
+
+    expect(isDefaultLocale(tester), isFalse);
+    expect(paragraphLocale(tester), enUS);
+  });
+
+  testWidgets('RichText uses the resolved locale when a localeResolutionCallback is set', (
+    WidgetTester tester,
+  ) async {
+    setDeviceLocales(tester, const <Locale>[zhCN]);
+    await tester.pumpWidget(
+      buildApp(
+        localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => enUS,
+        child: const Text('你好'),
+      ),
+    );
+
+    expect(isDefaultLocale(tester), isFalse);
+    expect(paragraphLocale(tester), enUS);
+  });
+
+  testWidgets('Explicit locales are respected when the app uses the default locale', (
     WidgetTester tester,
   ) async {
     setDeviceLocales(tester, const <Locale>[zhCN]);
@@ -121,12 +163,13 @@ void main() {
         child: Column(
           children: <Widget>[
             const Text('a', locale: jaJP),
+            const Text('b', style: TextStyle(locale: jaJP)),
             Builder(
               builder: (BuildContext context) {
                 return Localizations.override(
                   context: context,
                   locale: jaJP,
-                  child: const Text('b'),
+                  child: const Text('c'),
                 );
               },
             ),
@@ -138,20 +181,32 @@ void main() {
     final List<RenderParagraph> paragraphs = tester
         .renderObjectList<RenderParagraph>(find.byType(RichText))
         .toList();
-    expect(paragraphs.map((RenderParagraph p) => p.locale), <Locale>[jaJP, jaJP]);
+    expect(paragraphs[0].locale, jaJP);
+    expect(paragraphs[1].text.style?.locale, jaJP);
+    expect(paragraphs[2].locale, jaJP);
   });
 
-  testWidgets('RichText updates when the device locales change', (WidgetTester tester) async {
+  testWidgets('Localizations.override without a locale inherits isDefaultLocale', (
+    WidgetTester tester,
+  ) async {
     setDeviceLocales(tester, const <Locale>[zhCN]);
-    await tester.pumpWidget(buildApp(child: const Text('你好')));
-    expect(paragraphLocale(tester), isNull);
+    await tester.pumpWidget(
+      buildApp(
+        child: Builder(
+          builder: (BuildContext context) {
+            return Localizations.override(
+              context: context,
+              delegates: const <LocalizationsDelegate<dynamic>>[
+                DefaultWidgetsLocalizations.delegate,
+              ],
+              child: const Text('你好'),
+            );
+          },
+        ),
+      ),
+    );
 
-    tester.platformDispatcher.localesTestValue = const <Locale>[enUS];
-    await tester.pump();
-    expect(paragraphLocale(tester), enUS);
-
-    tester.platformDispatcher.localesTestValue = const <Locale>[jaJP, enUS];
-    await tester.pump();
+    expect(isDefaultLocale(tester), isTrue);
     expect(paragraphLocale(tester), isNull);
   });
 
@@ -164,9 +219,12 @@ void main() {
       buildApp(supportedLocales: const <Locale>[enUS, zhCN], child: const Text('你好')),
     );
     expect(paragraphLocale(tester), zhCN);
+
+    await tester.pumpWidget(buildApp(child: const Text('你好')));
+    expect(paragraphLocale(tester), isNull);
   });
 
-  testWidgets('EditableText uses no locale when the preferred locale is unsupported', (
+  testWidgets('EditableText uses no locale when the app uses the default locale', (
     WidgetTester tester,
   ) async {
     setDeviceLocales(tester, const <Locale>[zhCN]);
@@ -177,7 +235,7 @@ void main() {
 
     RenderEditable renderEditable() => tester.allRenderObjects.whereType<RenderEditable>().single;
 
-    Widget buildEditable(Iterable<Locale> supportedLocales) {
+    Widget buildEditable(Iterable<Locale>? supportedLocales) {
       return buildApp(
         supportedLocales: supportedLocales,
         child: EditableText(
@@ -190,7 +248,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildEditable(const <Locale>[enUS]));
+    await tester.pumpWidget(buildEditable(null));
     expect(renderEditable().locale, isNull);
 
     await tester.pumpWidget(buildEditable(const <Locale>[enUS, zhCN]));
@@ -207,6 +265,40 @@ void main() {
       ),
     );
 
+    expect(isDefaultLocale(tester), isFalse);
     expect(paragraphLocale(tester), enUS);
+  });
+
+  testWidgets('Localizations.isDefaultLocaleOf is false without a Localizations ancestor', (
+    WidgetTester tester,
+  ) async {
+    late bool result;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          result = Localizations.isDefaultLocaleOf(context);
+          return const SizedBox();
+        },
+      ),
+    );
+
+    expect(result, isFalse);
+  });
+
+  testWidgets('Localizations reports isDefaultLocale in its diagnostics', (
+    WidgetTester tester,
+  ) async {
+    final builder = DiagnosticPropertiesBuilder();
+    Localizations(
+      locale: enUS,
+      isDefaultLocale: true,
+      delegates: const <LocalizationsDelegate<dynamic>>[DefaultWidgetsLocalizations.delegate],
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+    expect(description, contains('default locale'));
   });
 }
