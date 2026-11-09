@@ -269,3 +269,8 @@ void fl_platform_handler_request_app_exit(FlPlatformHandler* self) {
   // Request a cancellable exit.
   request_app_exit(self, FL_PLATFORM_CHANNEL_EXIT_TYPE_CANCELABLE);
 }
+
+void fl_platform_handler_dismiss_context_menu(FlPlatformHandler* self) {
+  g_return_if_fail(FL_IS_PLATFORM_HANDLER(self));
+  fl_platform_channel_dismiss_context_menu(self->channel);
+}

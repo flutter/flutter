@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -341,6 +342,101 @@ void main() {
     controller.remove();
     await tester.pump();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/111054.
+  testWidgets('EditableText context menu hides when the platform asks it to dismiss', (
+    WidgetTester tester,
+  ) async {
+    final textEditingController = TextEditingController(text: 'How are you');
+    addTearDown(textEditingController.dispose);
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final toolbarKey = UniqueKey();
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: EditableText(
+          controller: textEditingController,
+          backgroundCursorColor: kGreyColor,
+          focusNode: focusNode,
+          style: const TextStyle(),
+          cursorColor: kRedColor,
+          selectionControls: testTextSelectionHandleControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return SizedBox.shrink(key: toolbarKey);
+          },
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    expect(state.showToolbar(), isTrue);
+    await tester.pump();
+    expect(find.byKey(toolbarKey), findsOneWidget);
+
+    // Opening the platform menu bar or dragging the window sends this.
+    await _sendDismissContextMenu();
+    await tester.pump();
+
+    expect(find.byKey(toolbarKey), findsNothing);
+    expect(focusNode.hasFocus, isTrue);
+  }, skip: isContextMenuProvidedByPlatform);
+
+  // Regression test for https://github.com/flutter/flutter/issues/111054.
+  testWidgets(
+    'SelectableRegion context menu hides when the platform asks it to dismiss',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final toolbarKey = UniqueKey();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: testTextSelectionHandleControls,
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  return SizedBox.shrink(key: toolbarKey);
+                },
+            child: const Center(child: Text('How are you')),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.text('How are you')),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(find.byKey(toolbarKey), findsOneWidget);
+
+      await _sendDismissContextMenu();
+      await tester.pump();
+
+      expect(find.byKey(toolbarKey), findsNothing);
+      expect(focusNode.hasFocus, isTrue);
+    },
+    variant: TargetPlatformVariant.desktop(),
+    skip: isContextMenuProvidedByPlatform,
+  );
+}
+
+Future<void> _sendDismissContextMenu() {
+  final ByteData message = const JSONMethodCodec().encodeMethodCall(
+    const MethodCall('ContextMenu.onDismissContextMenu'),
+  );
+  return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    'flutter/platform',
+    message,
+    (_) {},
+  );
 }
 
 class _StatefulMenu extends StatefulWidget {

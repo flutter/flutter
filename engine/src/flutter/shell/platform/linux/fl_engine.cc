@@ -1625,6 +1625,14 @@ void fl_engine_request_app_exit(FlEngine* self) {
   fl_platform_handler_request_app_exit(self->platform_handler);
 }
 
+void fl_engine_dismiss_context_menu(FlEngine* self) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+  if (self->platform_handler == nullptr) {
+    return;
+  }
+  fl_platform_handler_dismiss_context_menu(self->platform_handler);
+}
+
 FlKeyboardManager* fl_engine_get_keyboard_manager(FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
   return self->keyboard_manager;
