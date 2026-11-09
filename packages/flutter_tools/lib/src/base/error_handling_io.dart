@@ -123,15 +123,13 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     }
 
     final FileSystemEntity actualEntity = switch (type) {
-      .file ||
-      .unixDomainSock ||
-      .pipe => entity is File ? entity : entity.fileSystem.file(entity.path),
+      .file => entity is File ? entity : entity.fileSystem.file(entity.path),
       .directory => entity is Directory ? entity : entity.fileSystem.directory(entity.path),
       .link => entity is Link ? entity : entity.fileSystem.link(entity.path),
       _ => entity,
     };
     try {
-      actualEntity.deleteSync(recursive: type == .directory && recursive);
+      actualEntity.deleteSync(recursive: recursive);
     } on FileSystemException catch (err) {
       // Certain error codes indicate the file could not be found. It could have
       // been deleted by a different program while the tool was running.

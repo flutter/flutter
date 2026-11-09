@@ -769,33 +769,40 @@ void main() {
 
     testWithoutContext('when a cross-device link error occurs (exdev)', () async {
       final fileSystem = ErrorHandlingFileSystem(
-        delegate: _ThrowingRenameFileSystem(
-          MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
-          errorCode: exdev,
-        ),
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
       );
       final Directory directory = fileSystem.directory('dir')..createSync();
       final File file = directory.childFile('file')..createSync();
 
-      exceptionHandler.addError(
-        file,
-        FileSystemOp.delete,
-        FileSystemException(
-          'Cannot delete file',
-          file.path,
-          const OSError('Cross-device link', exdev),
-        ),
-      );
-      exceptionHandler.addError(
-        file,
-        FileSystemOp.copy,
-        FileSystemException(
-          'Cannot copy file',
-          file.path,
-          const OSError('Cross-device link', exdev),
-        ),
-      );
+      exceptionHandler
+        ..addError(
+          file,
+          FileSystemOp.delete,
+          FileSystemException(
+            'Cannot delete file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.copy,
+          FileSystemException(
+            'Cannot copy file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.write,
+          FileSystemException(
+            'Cannot write file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        );
 
       const expectedCrossDeviceMessage =
           'A file system operation failed across different volumes or mount points.';
@@ -809,14 +816,7 @@ void main() {
         () => file.copy('dir/copied'),
         throwsToolExit(message: expectedCrossDeviceMessage),
       );
-      await expectLater(
-        () => file.rename('dir/renamed'),
-        throwsToolExit(message: expectedCrossDeviceMessage),
-      );
-      expect(
-        () => file.renameSync('dir/renamed'),
-        throwsToolExit(message: expectedCrossDeviceMessage),
-      );
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedCrossDeviceMessage));
       expect(
         () => ErrorHandlingFileSystem.noExitOnFailure(() => file.deleteSync()),
         throwsFileSystemException(),
@@ -1114,24 +1114,31 @@ void main() {
 
     testWithoutContext('when a cross-device link error occurs (exdev)', () async {
       final fileSystem = ErrorHandlingFileSystem(
-        delegate: _ThrowingRenameFileSystem(
-          MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
-          errorCode: exdev,
-        ),
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
       );
       final Directory directory = fileSystem.directory('dir')..createSync();
       final File file = directory.childFile('file')..createSync();
 
-      exceptionHandler.addError(
-        file,
-        FileSystemOp.delete,
-        FileSystemException(
-          'Cannot delete file',
-          file.path,
-          const OSError('Cross-device link', exdev),
-        ),
-      );
+      exceptionHandler
+        ..addError(
+          file,
+          FileSystemOp.delete,
+          FileSystemException(
+            'Cannot delete file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.write,
+          FileSystemException(
+            'Cannot write file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        );
 
       const expectedDeleteMessage =
           'Flutter failed to delete file at "dir/file".\n'
@@ -1143,14 +1150,14 @@ void main() {
         throwsToolExit(message: expectedDeleteMessage),
       );
 
-      const expectedRenameMessage =
-          'Flutter failed to rename file at "dir/file" to "dir/renamed".\n'
+      const expectedWriteMessage =
+          'Flutter failed to write to a file at "dir/file".\n'
           'A file system operation failed across different volumes or mount points.';
       await expectLater(
-        () => file.rename('dir/renamed'),
-        throwsToolExit(message: expectedRenameMessage),
+        () => file.writeAsString(''),
+        throwsToolExit(message: expectedWriteMessage),
       );
-      expect(() => file.renameSync('dir/renamed'), throwsToolExit(message: expectedRenameMessage));
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedWriteMessage));
     });
   });
 
@@ -2161,63 +2168,6 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
       expect(fileSystem.typeSync(file.path, followLinks: false), FileSystemEntityType.notFound);
     });
-
-    testWithoutContext('only passes recursive: true when deleting directories', () {
-      final delegate = MemoryFileSystem.test();
-      final recordingFs = _DeleteRecordingFileSystem(delegate);
-
-      final File regularFile = recordingFs.file('/regular.txt')..createSync();
-      final File socketFile = recordingFs.file('/socket.sock')..createSync();
-      final File pipeFile = recordingFs.file('/fifo.pipe')..createSync();
-      recordingFs.typeOverrides[socketFile.path] = .unixDomainSock;
-      recordingFs.typeOverrides[pipeFile.path] = .pipe;
-      final Directory targetDir = recordingFs.directory('/target_dir')..createSync();
-      final File targetChild = targetDir.childFile('keep.txt')..createSync();
-      final Link dirLink = recordingFs.link('/dir_link')..createSync(targetDir.path);
-      final Directory nonEmptyDir = recordingFs.directory('/non_empty_dir')..createSync();
-      nonEmptyDir.childFile('nested.txt').createSync();
-
-      // Even when recursive: true is requested and a Directory or Link handle
-      // is passed for a file, socket, pipe, or symlink on disk, deleteSync must
-      // receive recursive: false on the matching entity type.
-      expect(
-        ErrorHandlingFileSystem.deleteIfExists(
-          recordingFs.directory(regularFile.path),
-          recursive: true,
-        ),
-        isTrue,
-      );
-      expect(
-        ErrorHandlingFileSystem.deleteIfExists(
-          recordingFs.directory(socketFile.path),
-          recursive: true,
-        ),
-        isTrue,
-      );
-      expect(
-        ErrorHandlingFileSystem.deleteIfExists(recordingFs.link(pipeFile.path), recursive: true),
-        isTrue,
-      );
-      expect(
-        ErrorHandlingFileSystem.deleteIfExists(
-          recordingFs.directory(dirLink.path),
-          recursive: true,
-        ),
-        isTrue,
-      );
-      expect(targetChild, exists);
-
-      expect(ErrorHandlingFileSystem.deleteIfExists(nonEmptyDir, recursive: true), isTrue);
-      expect(nonEmptyDir, isNot(exists));
-
-      expect(recordingFs.recordedDeletes, <(String, FileSystemEntityType, bool)>[
-        ('/regular.txt', .file, false),
-        ('/socket.sock', .file, false),
-        ('/fifo.pipe', .file, false),
-        ('/dir_link', .link, false),
-        ('/non_empty_dir', .directory, true),
-      ]);
-    });
   });
 }
 
@@ -2262,195 +2212,4 @@ class FakeFileSystem extends Fake implements FileSystem {
 
   @override
   set currentDirectory(dynamic path) {}
-}
-
-class _ThrowingRenameFileSystem extends ForwardingFileSystem {
-  _ThrowingRenameFileSystem(super.delegate, {required this.errorCode});
-
-  final int errorCode;
-
-  @override
-  File file(Object? path) => _ThrowingRenameFile(this, delegate.file(path));
-
-  @override
-  Directory directory(Object? path) => _ThrowingRenameDirectory(this, delegate.directory(path));
-}
-
-class _ThrowingRenameFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
-  _ThrowingRenameFile(this.fileSystem, this.delegate);
-
-  @override
-  final _ThrowingRenameFileSystem fileSystem;
-
-  @override
-  final io.File delegate;
-
-  @override
-  File wrapFile(io.File delegate) => _ThrowingRenameFile(fileSystem, delegate);
-
-  @override
-  Directory wrapDirectory(io.Directory delegate) =>
-      _ThrowingRenameDirectory(fileSystem, delegate as Directory);
-
-  @override
-  Link wrapLink(io.Link delegate) => fileSystem.link(delegate.path);
-
-  @override
-  Future<File> rename(String newPath) {
-    throw FileSystemException(
-      'Cannot rename file',
-      path,
-      OSError('Cross-device link', fileSystem.errorCode),
-    );
-  }
-
-  @override
-  File renameSync(String newPath) {
-    throw FileSystemException(
-      'Cannot rename file',
-      path,
-      OSError('Cross-device link', fileSystem.errorCode),
-    );
-  }
-}
-
-class _ThrowingRenameDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
-    with ForwardingDirectory<Directory> {
-  _ThrowingRenameDirectory(this.fileSystem, this.delegate);
-
-  @override
-  final _ThrowingRenameFileSystem fileSystem;
-
-  @override
-  final Directory delegate;
-
-  @override
-  File wrapFile(io.File delegate) => _ThrowingRenameFile(fileSystem, delegate);
-
-  @override
-  Directory wrapDirectory(io.Directory delegate) =>
-      _ThrowingRenameDirectory(fileSystem, delegate as Directory);
-
-  @override
-  Link wrapLink(io.Link delegate) => fileSystem.link(delegate.path);
-
-  @override
-  Directory childDirectory(String basename) =>
-      fileSystem.directory(fileSystem.path.join(path, basename));
-
-  @override
-  File childFile(String basename) => fileSystem.file(fileSystem.path.join(path, basename));
-
-  @override
-  Link childLink(String basename) => fileSystem.link(fileSystem.path.join(path, basename));
-}
-
-class _DeleteRecordingFileSystem extends ForwardingFileSystem {
-  _DeleteRecordingFileSystem(super.delegate);
-
-  final recordedDeletes = <(String, FileSystemEntityType, bool)>[];
-  final typeOverrides = <String, FileSystemEntityType>{};
-
-  @override
-  FileSystemEntityType typeSync(String path, {bool followLinks = true}) {
-    return typeOverrides[path] ?? super.typeSync(path, followLinks: followLinks);
-  }
-
-  @override
-  File file(Object? path) => _DeleteRecordingFile(this, delegate.file(path));
-
-  @override
-  Directory directory(Object? path) => _DeleteRecordingDirectory(this, delegate.directory(path));
-
-  @override
-  Link link(Object? path) => _DeleteRecordingLink(this, delegate.link(path));
-}
-
-class _DeleteRecordingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
-  _DeleteRecordingFile(this.fileSystem, this.delegate);
-
-  @override
-  final _DeleteRecordingFileSystem fileSystem;
-
-  @override
-  final io.File delegate;
-
-  @override
-  File wrapFile(io.File delegate) => _DeleteRecordingFile(fileSystem, delegate);
-
-  @override
-  Directory wrapDirectory(io.Directory delegate) =>
-      _DeleteRecordingDirectory(fileSystem, delegate as Directory);
-
-  @override
-  Link wrapLink(io.Link delegate) => _DeleteRecordingLink(fileSystem, delegate);
-
-  @override
-  void deleteSync({bool recursive = false}) {
-    fileSystem.recordedDeletes.add((path, .file, recursive));
-    delegate.deleteSync(recursive: recursive);
-  }
-}
-
-class _DeleteRecordingDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
-    with ForwardingDirectory<Directory> {
-  _DeleteRecordingDirectory(this.fileSystem, this.delegate);
-
-  @override
-  final _DeleteRecordingFileSystem fileSystem;
-
-  @override
-  final Directory delegate;
-
-  @override
-  File wrapFile(io.File delegate) => _DeleteRecordingFile(fileSystem, delegate);
-
-  @override
-  Directory wrapDirectory(io.Directory delegate) =>
-      _DeleteRecordingDirectory(fileSystem, delegate as Directory);
-
-  @override
-  Link wrapLink(io.Link delegate) => _DeleteRecordingLink(fileSystem, delegate);
-
-  @override
-  Directory childDirectory(String basename) =>
-      fileSystem.directory(fileSystem.path.join(path, basename));
-
-  @override
-  File childFile(String basename) => fileSystem.file(fileSystem.path.join(path, basename));
-
-  @override
-  Link childLink(String basename) => fileSystem.link(fileSystem.path.join(path, basename));
-
-  @override
-  void deleteSync({bool recursive = false}) {
-    fileSystem.recordedDeletes.add((path, .directory, recursive));
-    delegate.deleteSync(recursive: recursive);
-  }
-}
-
-class _DeleteRecordingLink extends ForwardingFileSystemEntity<Link, io.Link> with ForwardingLink {
-  _DeleteRecordingLink(this.fileSystem, this.delegate);
-
-  @override
-  final _DeleteRecordingFileSystem fileSystem;
-
-  @override
-  final io.Link delegate;
-
-  @override
-  File wrapFile(io.File delegate) => _DeleteRecordingFile(fileSystem, delegate);
-
-  @override
-  Directory wrapDirectory(io.Directory delegate) =>
-      _DeleteRecordingDirectory(fileSystem, delegate as Directory);
-
-  @override
-  Link wrapLink(io.Link delegate) => _DeleteRecordingLink(fileSystem, delegate);
-
-  @override
-  void deleteSync({bool recursive = false}) {
-    fileSystem.recordedDeletes.add((path, .link, recursive));
-    delegate.deleteSync(recursive: recursive);
-  }
 }

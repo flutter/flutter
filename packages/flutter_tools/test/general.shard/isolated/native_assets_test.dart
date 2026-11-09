@@ -536,12 +536,32 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
     },
   );
 
-  testWithoutContext(
-    'installCodeAssets overwrites existing native_assets.json in place without deleting it '
-    'while still deleting stale code assets '
-    '(regression test for https://github.com/flutter/flutter/issues/196121)',
-    () async {
-      const exdev = 18;
+  group('installCodeAssets manifest overwrite', () {
+    const exdev = 18;
+
+    Future<List<File>> runInstall({
+      required FileSystem fileSystem,
+      required Directory targetDirectory,
+      Uri? nativeAssetsFileUri,
+    }) {
+      return installCodeAssets(
+        dartHookResult: DartHooksResult.empty(),
+        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+        targetPlatform: .tester,
+        projectUri: fileSystem.directory('/project').uri,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.empty(),
+        nativeAssetsFileUri:
+            nativeAssetsFileUri ??
+            targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename).uri,
+        targetUri: targetDirectory.uri,
+      );
+    }
+
+    testWithoutContext('overwrites existing native_assets.json in place without deleting it '
+        'while still deleting stale code assets '
+        '(regression test for https://github.com/flutter/flutter/issues/196121)', () async {
       final exceptionHandler = FileExceptionHandler();
       final errorHandlingFs = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
@@ -556,8 +576,8 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       final File staleDylib = targetDirectory.childFile('libstale.dylib')
         ..writeAsBytesSync(<int>[1, 2, 3]);
 
-      // Simulate macOS external volume failure if installCodeAssets attempts to
-      // unlink native_assets.json before overwriting it.
+      // Simulate macOS external volume failure if installCodeAssets attempts
+      // to unlink native_assets.json before overwriting it.
       exceptionHandler.addError(
         existingManifest,
         FileSystemOp.delete,
@@ -568,76 +588,48 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         ),
       );
 
-      await installCodeAssets(
-        dartHookResult: DartHooksResult.empty(),
-        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        targetPlatform: TargetPlatform.tester,
-        projectUri: errorHandlingFs.directory('/project').uri,
+      await runInstall(
         fileSystem: errorHandlingFs,
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.empty(),
+        targetDirectory: targetDirectory,
         nativeAssetsFileUri: existingManifest.uri,
-        targetUri: targetDirectory.uri,
       );
 
       expect(staleDylib, isNot(exists));
       expect(existingManifest, exists);
       expect(existingManifest.readAsStringSync(), isNot(contains('"stale"')));
-    },
-  );
+    });
 
-  testWithoutContext(
-    'installCodeAssets replaces native_assets.json if it is a directory or symlink on disk',
-    () async {
-      final FileSystem fs = MemoryFileSystem.test();
-      final Directory targetDirectory = fs.directory('/project/build/native_assets/macos')
-        ..createSync(recursive: true);
-      final Uri manifestUri = targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
+    testWithoutContext(
+      'replaces native_assets.json if it is a directory or symlink on disk',
+      () async {
+        final FileSystem fs = MemoryFileSystem.test();
+        final Directory targetDirectory = fs.directory('/project/build/native_assets/macos')
+          ..createSync(recursive: true);
+        final File manifestFile = targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename);
 
-      // Case 1: native_assets.json is unexpectedly a non-empty directory.
-      targetDirectory
-          .childDirectory(InstallCodeAssets.nativeAssetsFilename)
-          .childFile('unexpected.txt')
-          .createSync(recursive: true);
+        // Case 1: native_assets.json is unexpectedly a non-empty directory.
+        targetDirectory
+            .childDirectory(InstallCodeAssets.nativeAssetsFilename)
+            .childFile('unexpected.txt')
+            .createSync(recursive: true);
 
-      await installCodeAssets(
-        dartHookResult: DartHooksResult.empty(),
-        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        targetPlatform: TargetPlatform.tester,
-        projectUri: fs.directory('/project').uri,
-        fileSystem: fs,
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.empty(),
-        nativeAssetsFileUri: manifestUri,
-        targetUri: targetDirectory.uri,
-      );
-      expect(fs.typeSync(fs.file(manifestUri).path, followLinks: false), FileSystemEntityType.file);
+        await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
+        expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
 
-      // Case 2: native_assets.json is a symlink.
-      fs.file(manifestUri).deleteSync();
-      final File linkTarget = fs.file('/project/other.json')..writeAsStringSync('{}');
-      targetDirectory.childLink(InstallCodeAssets.nativeAssetsFilename).createSync(linkTarget.path);
+        // Case 2: native_assets.json is a symlink.
+        manifestFile.deleteSync();
+        final File linkTarget = fs.file('/project/other.json')..writeAsStringSync('{}');
+        targetDirectory
+            .childLink(InstallCodeAssets.nativeAssetsFilename)
+            .createSync(linkTarget.path);
 
-      await installCodeAssets(
-        dartHookResult: DartHooksResult.empty(),
-        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        targetPlatform: TargetPlatform.tester,
-        projectUri: fs.directory('/project').uri,
-        fileSystem: fs,
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.empty(),
-        nativeAssetsFileUri: manifestUri,
-        targetUri: targetDirectory.uri,
-      );
-      expect(fs.typeSync(fs.file(manifestUri).path, followLinks: false), FileSystemEntityType.file);
-      expect(linkTarget.readAsStringSync(), '{}');
-    },
-  );
+        await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
+        expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
+        expect(linkTarget.readAsStringSync(), '{}');
+      },
+    );
 
-  testWithoutContext(
-    'installCodeAssets throws ToolExit when deleting a stale asset fails with EXDEV',
-    () async {
-      const exdev = 18;
+    testWithoutContext('throws ToolExit when deleting a stale asset fails with EXDEV', () async {
       final exceptionHandler = FileExceptionHandler();
       final errorHandlingFs = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
@@ -660,25 +652,13 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       );
 
       await expectLater(
-        () => installCodeAssets(
-          dartHookResult: DartHooksResult.empty(),
-          environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-          targetPlatform: TargetPlatform.tester,
-          projectUri: errorHandlingFs.directory('/project').uri,
-          fileSystem: errorHandlingFs,
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.empty(),
-          nativeAssetsFileUri: targetDirectory
-              .childFile(InstallCodeAssets.nativeAssetsFilename)
-              .uri,
-          targetUri: targetDirectory.uri,
-        ),
+        () => runInstall(fileSystem: errorHandlingFs, targetDirectory: targetDirectory),
         throwsToolExit(
           message: 'A file system operation failed across different volumes or mount points.',
         ),
       );
-    },
-  );
+    });
+  });
 
   group('findRunPackageName', () {
     testWithoutContext('prefers direct root URI match over manifestAppName', () {
