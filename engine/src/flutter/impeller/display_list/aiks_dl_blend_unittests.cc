@@ -856,8 +856,10 @@ TEST_P(AiksTest,
   const std::vector<uint8_t> mip1_white(4 * 4 * 4, 255);
   auto buf0 = context->GetResourceAllocator()->CreateBufferWithCopy(
       mip0_clear.data(), mip0_clear.size());
+  ASSERT_TRUE(buf0);
   auto buf1 = context->GetResourceAllocator()->CreateBufferWithCopy(
       mip1_white.data(), mip1_white.size());
+  ASSERT_TRUE(buf1);
   {
     auto cmd = context->CreateCommandBuffer();
     auto blit = cmd->CreateBlitPass();
@@ -904,7 +906,9 @@ TEST_P(AiksTest,
     latch->Wait();
   }
 
-  const uint8_t* pixel = readback->OnGetContents() + (2 * 4 + 2) * 4;
+  const uint8_t* contents = readback->OnGetContents();
+  ASSERT_TRUE(contents);
+  const uint8_t* pixel = contents + (2 * 4 + 2) * 4;
   EXPECT_GE(pixel[0], 253u);
   EXPECT_GE(pixel[1], 253u);
   EXPECT_GE(pixel[2], 253u);
