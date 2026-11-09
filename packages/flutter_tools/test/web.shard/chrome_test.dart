@@ -1202,6 +1202,47 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     },
   );
 
+  testWithoutContext('Chromium close does not hang when Browser.close never replies', () async {
+    final logger = BufferLogger.test();
+    final fakeAsync = FakeAsync();
+
+    fakeAsync.run((_) {
+      () async {
+        final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
+        final chromiumLauncher = ChromiumLauncher(
+          fileSystem: fileSystem,
+          platform: platform,
+          processManager: processManager,
+          operatingSystemUtils: operatingSystemUtils,
+          browserFinder: findChromeExecutable,
+          logger: logger,
+        );
+        // Process outlives the Browser.close timeout (6s > 5s), so the
+        // timeout must fire and escalate to SIGTERM. Without the timeout,
+        // close() would wait here forever.
+        final process = FakeProcess(duration: const Duration(seconds: 6));
+        final chrome = Chromium(
+          0,
+          chromeConnection,
+          chromiumLauncher: chromiumLauncher,
+          process: process,
+          logger: logger,
+        );
+        expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
+        final Future<void> closeFuture = chrome.close();
+        fakeAsync.flushMicrotasks();
+        // 5s timeout + wait up to 5s more for the 6s process to exit.
+        fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
+        await closeFuture;
+
+        expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
+      }();
+    });
+
+    fakeAsync.flushTimers();
+    expect(logger.warningText, isEmpty);
+  });
+
   testWithoutContext(
     'Chromium close handles a WebSocketException when closing the WipConnection',
     () async {
@@ -1300,7 +1341,8 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
     OnSendCommand? onSendCommand,
     this.onGetTab,
     bool throwWebSocketException = false,
-  }) : _tab = FakeChromeTab(onSendCommand, throwWebSocketException);
+    bool hangBrowserClose = false,
+  }) : _tab = FakeChromeTab(onSendCommand, throwWebSocketException, hangBrowserClose);
 
   final FakeChromeTab _tab;
   void Function()? onGetTab;
@@ -1328,27 +1370,36 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.onSendCommand, this.throwWebSocketException);
+  FakeChromeTab(this.onSendCommand, this.throwWebSocketException, this.hangBrowserClose);
 
   final OnSendCommand? onSendCommand;
   final bool throwWebSocketException;
+  final bool hangBrowserClose;
 
   @override
   Future<WipConnection> connect({Function? onError}) async {
-    return FakeWipConnection(onSendCommand, throwWebSocketException);
+    return FakeWipConnection(onSendCommand, throwWebSocketException, hangBrowserClose);
   }
 }
 
 class FakeWipConnection extends Fake implements WipConnection {
-  FakeWipConnection(this.onSendCommand, this.throwWebSocketException);
+  FakeWipConnection(this.onSendCommand, this.throwWebSocketException, this.hangBrowserClose);
 
   final OnSendCommand? onSendCommand;
   final bool throwWebSocketException;
+  final bool hangBrowserClose;
 
   @override
-  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) async {
+  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) {
     onSendCommand?.call(method);
-    return WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}});
+    if (hangBrowserClose && method == 'Browser.close') {
+      // Simulate Chrome exiting before its Browser.close reply arrives,
+      // so the pending future in webkit_inspection_protocol never completes.
+      return Completer<WipResponse>().future;
+    }
+    return Future<WipResponse>.value(
+      WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}}),
+    );
   }
 
   @override

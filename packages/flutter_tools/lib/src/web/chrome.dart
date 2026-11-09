@@ -69,6 +69,18 @@ const _kDevToolsServerFailure = 'Cannot start http server for devtools';
 @visibleForTesting
 const kDevToolsListeningTimeout = Duration(seconds: 30);
 
+/// How long to wait for a `Browser.close` response before giving up on a clean
+/// shutdown and escalating to SIGTERM/SIGKILL.
+///
+/// If Chrome exits before its `Browser.close` reply arrives, the pending
+/// command future in `webkit_inspection_protocol` never completes (its
+/// `_handleClose` closes the streams without completing pending completers),
+/// so an unbounded wait would hang [Chromium.close] forever.
+///
+/// See: https://github.com/flutter/flutter/issues/196191
+@visibleForTesting
+const kBrowserCloseTimeout = Duration(seconds: 5);
+
 /// Filters out non-fatal D-Bus connection error messages emitted by Chromium.
 ///
 /// Headless Linux Chrome attempts to query Linux D-Bus desktop services (such as
@@ -716,7 +728,7 @@ class Chromium {
         );
         if (tab != null) {
           final WipConnection wipConnection = await tab.connect();
-          await wipConnection.sendCommand('Browser.close');
+          await wipConnection.sendCommand('Browser.close').timeout(kBrowserCloseTimeout);
           await wipConnection.close();
           sigtermDelay = const Duration(seconds: 1);
         }
