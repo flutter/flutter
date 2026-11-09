@@ -569,6 +569,28 @@ void main() {
       imageCache.maximumSize = oldSize;
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/107000
+  testWidgets('ScrollAwareImageProvider delegates createStream to the wrapped provider', (
+    WidgetTester tester,
+  ) async {
+    final DisposableBuildContext context = await createContext(tester);
+    final imageProvider = ScrollAwareImageProvider<Object>(
+      context: context,
+      imageProvider: CustomStreamImageProvider(),
+    );
+
+    const configuration = ImageConfiguration(size: Size(20, 30), devicePixelRatio: 2.0);
+
+    expect(
+      imageProvider.resolve(configuration),
+      isA<CustomImageStream>().having(
+        (CustomImageStream s) => s.configuration,
+        'configuration',
+        same(configuration),
+      ),
+    );
+  });
 }
 
 class TestWidget extends StatefulWidget {

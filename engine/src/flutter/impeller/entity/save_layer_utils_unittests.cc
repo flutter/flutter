@@ -120,6 +120,21 @@ TEST(SaveLayerUtilsTest, DisjointCoverageTransformedByImageFilter) {
   EXPECT_EQ(coverage.value(), Rect::MakeLTRB(200, 200, 210, 210));
 }
 
+TEST(SaveLayerUtilsTest, DilateRetainsContentOutsideCoverageLimit) {
+  auto image_filter = FilterContents::MakeMorphology(
+      FilterInput::Make(Rect()), Radius{10}, Radius{10},
+      FilterContents::MorphType::kDilate);
+
+  // The source lies outside the clip, but dilation brings it into view.
+  Rect content_coverage = Rect::MakeXYWH(15, 45, 4, 10);
+  auto coverage = ComputeSaveLayerCoverage(
+      content_coverage, /*effect_transform=*/{},
+      /*coverage_limit=*/Rect::MakeXYWH(20, 20, 100, 60), image_filter);
+
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), content_coverage);
+}
+
 TEST(SaveLayerUtilsTest, DisjointCoveragTransformedByCTM) {
   // Coverage disjoint from parent coverage.
   Matrix ctm = Matrix::MakeTranslation({-200, -200, 0});
