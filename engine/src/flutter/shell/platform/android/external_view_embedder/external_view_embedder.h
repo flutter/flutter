@@ -132,7 +132,9 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for
-  // the task until it completes.
+  // the task until it completes. Only call it where the platform thread can't
+  // be waiting for the caller, such as from |Teardown|, which the shell calls
+  // on the platform thread. Never call it from the raster thread.
   void DestroySurfaces();
 
   // Resets the state.

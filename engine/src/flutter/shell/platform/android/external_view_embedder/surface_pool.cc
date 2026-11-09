@@ -37,7 +37,10 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
         layer->android_surface->OnScreenSurfaceResize(requested_frame_size_);
       }
     } else {
-      // Destroy current layers in the pool if the frame size has changed.
+      // Layers can't be recycled across frame sizes, so destroy the current
+      // ones. Hybrid composition only acquires layers while the raster thread
+      // is merged into the platform thread, so this runs on the platform
+      // thread, which the JNI calls require.
       DestroyLayersLocked(jni_facade);
     }
   }

@@ -245,11 +245,18 @@ void AndroidExternalViewEmbedder::PrepareFlutterView(
     double device_pixel_ratio) {
   Reset();
 
-  // The surface size changed. Therefore, destroy existing surfaces as
-  // the existing surfaces in the pool can't be recycled.
+  // Overlay layers allocated for a previous frame size can't be recycled, but
+  // they must not be destroyed here. Destroying them requires the platform
+  // thread, and this runs on the raster thread, which is only merged into the
+  // platform thread while platform views are in the scene. Waiting for the
+  // platform thread from an unmerged raster thread deadlocks if the platform
+  // thread is waiting for the raster thread, for example in
+  // `PlatformViewAndroid::NotifyChanged` during `surfaceChanged`.
+  //
+  // Instead, |SurfacePool::GetLayer| replaces stale layers the next time an
+  // overlay is needed, which only happens on the platform thread, and
+  // |Teardown| releases any that remain.
   if (frame_size_ != frame_size) {
-    DestroySurfaces();
-
     // This should not block to prevent deadlocks with
     // setViewportMetrics.
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
