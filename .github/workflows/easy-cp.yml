@@ -220,7 +220,7 @@ jobs:
         run: |
           PR_TITLE=$(cat "$RUNNER_TEMP/cp/title.txt")
           git show upstream/master:.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md \
-            | sed "s/< Replace with PR number >/${PR_NUMBER}/g" > "$RUNNER_TEMP/cp/body.md"
+            | sed "s/<ORIGINAL_PR_NUMBER>/${PR_NUMBER}/g" > "$RUNNER_TEMP/cp/body.md"
           git push origin "cp-${CHANNEL}-${MERGE_COMMIT_SHA}"
           pr_url=$(gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file "$RUNNER_TEMP/cp/body.md" --base "${RELEASE_BRANCH}" --label "cp: review" --repo flutter/flutter --head "flutteractionsbot:cp-${CHANNEL}-${MERGE_COMMIT_SHA}")
           echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
