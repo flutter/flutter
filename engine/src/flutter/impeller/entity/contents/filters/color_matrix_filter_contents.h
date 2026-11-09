@@ -33,7 +33,7 @@ class ColorMatrixFilterContents final : public ColorFilterContents {
       const Rect& coverage,
       const std::optional<Rect>& coverage_hint) const override;
 
-  ColorMatrix matrix_;
+  ColorMatrix matrix_{};
 
   ColorMatrixFilterContents(const ColorMatrixFilterContents&) = delete;
 

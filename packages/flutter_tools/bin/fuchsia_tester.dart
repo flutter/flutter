@@ -12,16 +12,14 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
@@ -47,43 +45,55 @@ const _kOptionCoverage = 'coverage';
 const _kOptionCoveragePath = 'coverage-path';
 
 void main(List<String> args) {
-  runInContext<void>(
-    () => run(args),
-    overrides: <Type, Generator>{Analytics: () => const NoOpAnalytics()},
-  );
-}
-
-Future<void> run(List<String> args) async {
-  final parser = ArgParser()
-    ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config.json file')
-    ..addOption(_kOptionShell, help: 'The flutter_tester binary')
-    ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
-    ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
-    ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
-    ..addOption(
-      _kOptionTests,
-      help: 'Path to json file that maps Dart test files to precompiled dill files',
-    )
-    ..addOption(
-      _kOptionCoverageDirectory,
-      help: 'The path to the directory that will have coverage collected',
-    )
-    ..addFlag(_kOptionCoverage, negatable: false, help: 'Whether to collect coverage information.')
-    ..addOption(
-      _kOptionCoveragePath,
-      defaultsTo: 'coverage/lcov.info',
-      help: 'Where to store coverage information (if coverage is enabled).',
-    );
-  final ArgResults argResults = parser.parse(args);
-  if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
-    throwToolExit('Missing option! All options must be specified.');
-  }
   final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
     'flutter_fuchsia_tester.',
   );
-  try {
-    Cache.flutterRoot = tempDir.path;
+  runInContext<void>(
+    () => run(args, tempDir),
+    overrides: <Type, Generator>{
+      Analytics: () => const NoOpAnalytics(),
+      Cache: () => FlutterCache(
+        flutterRoot: tempDir.path,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        osUtils: globals.os,
+        platform: globals.platform,
+        projectFactory: globals.projectFactory,
+      ),
+    },
+  );
+}
 
+Future<void> run(List<String> args, Directory tempDir) async {
+  try {
+    final parser = ArgParser()
+      ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config.json file')
+      ..addOption(_kOptionShell, help: 'The flutter_tester binary')
+      ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
+      ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
+      ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
+      ..addOption(
+        _kOptionTests,
+        help: 'Path to json file that maps Dart test files to precompiled dill files',
+      )
+      ..addOption(
+        _kOptionCoverageDirectory,
+        help: 'The path to the directory that will have coverage collected',
+      )
+      ..addFlag(
+        _kOptionCoverage,
+        negatable: false,
+        help: 'Whether to collect coverage information.',
+      )
+      ..addOption(
+        _kOptionCoveragePath,
+        defaultsTo: 'coverage/lcov.info',
+        help: 'Where to store coverage information (if coverage is enabled).',
+      );
+    final ArgResults argResults = parser.parse(args);
+    if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
+      throwToolExit('Missing option! All options must be specified.');
+    }
     final String flutterTesterBinPath = globals.fs
         .file(argResults[_kOptionShell])
         .resolveSymbolicLinksSync();
@@ -121,6 +131,16 @@ Future<void> run(List<String> args) async {
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
     globals.fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
+    final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+      artifacts: globals.artifacts,
+      cache: globals.cache,
+      fs: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      templateRenderer: const MustacheTemplateRenderer(),
+    );
+
     Directory? testDirectory;
     CoverageCollector? collector;
     if (argResults['coverage'] as bool? ?? false) {
@@ -128,7 +148,7 @@ Future<void> run(List<String> args) async {
       // setting libraryNames to null.
       final Set<String>? libraryNames = coverageDirectory != null
           ? null
-          : <String>{FlutterProject.current().manifest.appName};
+          : <String>{FlutterProject.current(globals.fs, logger: globals.logger).manifest.appName};
       final String packagesPath = globals.fs.path.normalize(
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       );
@@ -136,7 +156,7 @@ Future<void> run(List<String> args) async {
         libraryNames: libraryNames,
         packagesPath: packagesPath,
         resolver: await CoverageCollector.getResolver(packagesPath),
-        toolContext: _FuchsiaToolContext(),
+        toolContext: dependencies.toolContext,
       );
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
@@ -164,18 +184,26 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       ),
     );
-    exitCode = await const FlutterTestRunner().runTests(
+    final debuggingOptions = DebuggingOptions.enabled(buildInfo);
+    final testRunner = FlutterTestRunner(
+      analytics: dependencies.analytics,
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: dependencies.toolContext,
+    );
+    exitCode = await testRunner.runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),
-      debuggingOptions: DebuggingOptions.enabled(buildInfo),
-      buildInfo: buildInfo,
-      watcher: collector,
-      enableVmService: collector != null,
-      precompiledDillFiles: tests,
-      concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
-      icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
-      coverageDirectory: coverageDirectory,
-      nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
+      TestExecutionSpecification(
+        debuggingOptions: debuggingOptions,
+        buildInfo: buildInfo,
+        watcher: collector,
+        enableVmService: collector != null,
+        precompiledDillFiles: tests,
+        concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
+        icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
+        coverageDirectory: coverageDirectory,
+        nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
+      ),
     );
 
     if (collector != null) {
@@ -200,24 +228,4 @@ Future<void> run(List<String> args) async {
   // TODO(ianh): There's apparently some sort of lost async task keeping the
   // process open. Remove the next line once that's been resolved.
   exit(exitCode);
-}
-
-class _FuchsiaToolContext implements ToolContext {
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-
-  @override
-  FileSystem get fs => globals.fs;
-
-  @override
-  Logger get logger => globals.logger;
-
-  @override
-  OperatingSystemUtils get os => globals.os;
-
-  @override
-  Platform get platform => globals.platform;
-
-  @override
-  ProcessUtils get processUtils => globals.processUtils;
 }

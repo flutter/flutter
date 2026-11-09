@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -227,6 +228,22 @@ void main() {
       equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryThemeM3)),
     );
   });
+
+  testWidgets('Fallback theme updates platform when defaultTargetPlatform changes', (
+    WidgetTester tester,
+  ) async {
+    late BuildContext capturedContext;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          capturedContext = context;
+          return Container();
+        },
+      ),
+    );
+
+    expect(Theme.of(capturedContext).platform, defaultTargetPlatform);
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
     final light = ThemeData();
@@ -1335,6 +1352,7 @@ class _TextStyleProxy implements TextStyle {
     String? ellipsis,
     int? maxLines,
     ui.TextHeightBehavior? textHeightBehavior,
+    Hyphens? hyphens,
     Locale? locale,
     String? fontFamily,
     double? fontSize,

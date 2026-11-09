@@ -333,6 +333,7 @@ void testMain() {
     });
 
     test('works even if focus is changed in the middle of a blur call', () {
+      debugViewFocusDocumentHasFocusOverride = true;
       final DomElement input1 = createDomElement('input');
       final DomElement input2 = createDomElement('input');
       final EngineFlutterView view = createAndRegisterView(dispatcher);

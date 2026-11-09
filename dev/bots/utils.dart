@@ -82,7 +82,7 @@ final List<String> flutterTestArgs = <String>[];
 
 /// Whether execution should be simulated for debugging purposes.
 ///
-/// When `true`, calls to [runCommand] print to [io.stdout] instead of running
+/// When `true`, calls to [runCommand] print to [stdout] instead of running
 /// the process. This is useful for determining what an invocation of `test.dart`
 /// _might_ due if not invoked with `--dry-run`, or otherwise determine what the
 /// different test shards and sub-shards are configured as.
@@ -315,34 +315,6 @@ void _printLoudly(String message) {
     stdout.writeln('\r\x1B[2K$reset${message.trimRight()}');
   } else {
     stdout.writeln(message);
-  }
-}
-
-// THE FOLLOWING CODE IS A VIOLATION OF OUR STYLE GUIDE
-// BECAUSE IT INTRODUCES A VERY FLAKY RACE CONDITION
-// https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#never-check-if-a-port-is-available-before-using-it-never-add-timeouts-and-other-race-conditions
-// DO NOT USE THE FOLLOWING FUNCTIONS
-// DO NOT WRITE CODE LIKE THE FOLLOWING FUNCTIONS
-// https://github.com/flutter/flutter/issues/109474
-
-int _portCounter = 8080;
-
-/// Finds the next available local port.
-Future<int> findAvailablePortAndPossiblyCauseFlakyTests() async {
-  while (!await _isPortAvailable(_portCounter)) {
-    _portCounter += 1;
-  }
-  return _portCounter++;
-}
-
-Future<bool> _isPortAvailable(int port) async {
-  try {
-    final RawSocket socket = await RawSocket.connect('localhost', port);
-    socket.shutdown(SocketDirection.both);
-    await socket.close();
-    return false;
-  } on SocketException {
-    return true;
   }
 }
 
@@ -694,39 +666,15 @@ Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
 /// 2_3
 /// 3_3
 List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubshardKey}) {
-  // Example: "1_3" means the first (one-indexed) shard of three total shards.
-  final String? subshardName = Platform.environment[subshardKey];
-  if (subshardName == null) {
-    print('$kSubshardKey environment variable is missing, skipping sharding');
-    return tests;
-  }
-  printProgress('$bold$subshardKey=$subshardName$reset');
-
-  final pattern = RegExp(r'^(\d+)_(\d+)$');
-  final Match? match = pattern.firstMatch(subshardName);
-  if (match == null || match.groupCount != 2) {
-    foundError(<String>[
-      '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"',
-    ]);
-    throw Exception('Invalid subshard name: $subshardName');
-  }
-  // One-indexed.
-  final int index = int.parse(match.group(1)!);
-  final int total = int.parse(match.group(2)!);
-  if (index > total) {
-    foundError(<String>[
-      '${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.',
-    ]);
-    return <T>[];
-  }
-
-  final (int start, int end) = selectTestsForSubShard(
-    testCount: tests.length,
-    subShardIndex: index,
-    subShardCount: total,
-  );
-  print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
-  return tests.sublist(start, end);
+  return _selectSubshard(tests, subshardKey, (int index, int total) {
+    final (int start, int end) = selectTestsForSubShard(
+      testCount: tests.length,
+      subShardIndex: index,
+      subShardCount: total,
+    );
+    print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
+    return tests.sublist(start, end);
+  });
 }
 
 /// Finds the interval of tests that a subshard is responsible for testing.
@@ -762,6 +710,84 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   final int end = start + buckets[subShardIndex - 1];
 
   return (start, end);
+}
+
+/// Like [selectIndexOfTotalSubshard], but balances by [weight] instead of count.
+List<T> selectWeightedSubshard<T>(
+  List<T> tests, {
+  required int Function(T test) weight,
+  String subshardKey = kSubshardKey,
+}) {
+  return _selectSubshard(tests, subshardKey, (int index, int total) {
+    final List<T> selected = partitionByWeight<T>(tests, total, weight)[index - 1];
+    print(
+      'Selecting subshard $index of $total '
+      '(${selected.length} of ${tests.length} tests, estimated weight ${selected.map(weight).sum})',
+    );
+    return selected;
+  });
+}
+
+/// Splits [items] into [bucketCount] buckets of roughly equal total [weight],
+/// heaviest item first into the lightest bucket. Buckets keep input order.
+@visibleForTesting
+List<List<T>> partitionByWeight<T>(List<T> items, int bucketCount, int Function(T item) weight) {
+  assert(bucketCount > 0);
+  final buckets = List<_Bucket>.generate(bucketCount, (_) => _Bucket());
+  final Iterable<(int, T)> heaviestFirst = items.indexed.sorted(((int, T) a, (int, T) b) {
+    final int byWeight = weight(b.$2).compareTo(weight(a.$2));
+    return byWeight != 0 ? byWeight : a.$1.compareTo(b.$1); // Ties keep input order.
+  });
+  for (final (int index, T item) in heaviestFirst) {
+    assert(weight(item) >= 0, 'Negative weight for $item');
+    buckets.reduce((_Bucket a, _Bucket b) => b.isLighterThan(a) ? b : a)
+      ..weight += weight(item)
+      ..indices.add(index);
+  }
+  return <List<T>>[
+    for (final _Bucket bucket in buckets) <T>[for (final int i in bucket.indices..sort()) items[i]],
+  ];
+}
+
+class _Bucket {
+  int weight = 0;
+  final List<int> indices = <int>[];
+
+  bool isLighterThan(_Bucket other) =>
+      weight < other.weight || (weight == other.weight && indices.length < other.indices.length);
+}
+
+/// Reads "{index}_{total}" from [subshardKey] and returns `select(index, total)`.
+///
+/// Returns all [tests] if the variable is unset, throws if it is malformed, and
+/// reports an error and returns nothing if the index is out of range.
+List<T> _selectSubshard<T>(
+  List<T> tests,
+  String subshardKey,
+  List<T> Function(int index, int total) select,
+) {
+  final String? subshardName = Platform.environment[subshardKey];
+  if (subshardName == null) {
+    print('$subshardKey environment variable is missing, skipping sharding');
+    return tests;
+  }
+  printProgress('$bold$subshardKey=$subshardName$reset');
+  final Match? match = RegExp(r'^(\d+)_(\d+)$').firstMatch(subshardName);
+  if (match == null) {
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"',
+    ]);
+    throw Exception('Invalid subshard name: $subshardName');
+  }
+  final int index = int.parse(match.group(1)!);
+  final int total = int.parse(match.group(2)!);
+  if (index < 1 || index > total) {
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Index must be between 1 and $total.',
+    ]);
+    return <T>[];
+  }
+  return select(index, total);
 }
 
 Future<void> _runFromList(
