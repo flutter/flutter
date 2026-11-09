@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
+import 'dart:io' as io show Directory, File, IOSink, Link, ProcessSignal, Stdout, StdoutException;
 
 import 'package:dds/dds_launcher.dart';
 import 'package:file/memory.dart';
@@ -1754,4 +1754,50 @@ class FakeAppleContext extends Fake implements AppleContext {
   @override
   late final XcodeProjectInterpreter xcodeProjectInterpreter =
       _xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter();
+}
+
+/// A [ForwardingFileSystem] that invokes [onRename] before delegating file renames.
+class RenameInterceptingFileSystem extends ForwardingFileSystem {
+  RenameInterceptingFileSystem(super.delegate, {this.onRename});
+
+  final void Function(String oldPath, String newPath)? onRename;
+
+  @override
+  File file(Object? path) =>
+      _RenameInterceptingFile(delegate: delegate.file(path), fileSystem: this, onRename: onRename);
+}
+
+class _RenameInterceptingFile extends ForwardingFileSystemEntity<File, io.File>
+    with ForwardingFile {
+  _RenameInterceptingFile({required this.delegate, required this.fileSystem, this.onRename});
+
+  @override
+  final io.File delegate;
+
+  @override
+  final FileSystem fileSystem;
+
+  final void Function(String oldPath, String newPath)? onRename;
+
+  @override
+  File wrapFile(io.File delegate) =>
+      _RenameInterceptingFile(delegate: delegate, fileSystem: fileSystem, onRename: onRename);
+
+  @override
+  Directory wrapDirectory(io.Directory delegate) => fileSystem.directory(delegate.path);
+
+  @override
+  Link wrapLink(io.Link delegate) => fileSystem.link(delegate.path);
+
+  @override
+  Future<File> rename(String newPath) async {
+    onRename?.call(path, newPath);
+    return wrapFile(await delegate.rename(newPath));
+  }
+
+  @override
+  File renameSync(String newPath) {
+    onRename?.call(path, newPath);
+    return wrapFile(delegate.renameSync(newPath));
+  }
 }

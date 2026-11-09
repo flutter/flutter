@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -393,6 +394,162 @@ environment:
       Pub: ThrowingPub.new,
     },
   );
+
+  testWithoutContext('TestCompiler moves compiled dill instead of copying and still updates test_cache before moving', () async {
+    final copiedPaths = <String>[];
+    final renamedPairs = <(String, String)>[];
+    final memoryFileSystem = MemoryFileSystem.test(
+      opHandle: (String path, FileSystemOp op) {
+        if (op == FileSystemOp.copy) {
+          copiedPaths.add(path);
+        }
+      },
+    );
+    final renameFs = RenameInterceptingFileSystem(
+      memoryFileSystem,
+      onRename: (String oldPath, String newPath) {
+        renamedPairs.add((oldPath, newPath));
+      },
+    );
+    final errorHandlingFs = ErrorHandlingFileSystem(delegate: renameFs, platform: linuxPlatform);
+    errorHandlingFs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('name: foo\n');
+    errorHandlingFs.file('test/first_test.dart').createSync(recursive: true);
+    errorHandlingFs.file('test/second_test.dart').createSync(recursive: true);
+    errorHandlingFs.file('test/third_test.dart').createSync(recursive: true);
+    writePackageConfigFiles(mainLibName: 'foo', directory: errorHandlingFs.currentDirectory);
+
+    const firstDillBytes = <int>[1, 2, 3];
+    const secondDillBytes = <int>[1, 2, 3, 4, 5, 6];
+    const thirdDillBytes = <int>[9, 9];
+    final dillBytesByUri = <Uri, List<int>>{
+      Uri.parse('test/first_test.dart'): firstDillBytes,
+      Uri.parse('test/second_test.dart'): secondDillBytes,
+      Uri.parse('test/third_test.dart'): thirdDillBytes,
+    };
+
+    final compiler = FakeResidentCompiler(errorHandlingFs)
+      ..onRecompile = (Uri mainUri, String outputPath) {
+        final File outputFile = errorHandlingFs.file(outputPath);
+        expect(outputFile, isNot(exists));
+        outputFile
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(dillBytesByUri[mainUri]!);
+        return CompilerOutput(outputPath, 0, const <Uri>[]);
+      };
+    final toolContext = FakeToolContext(
+      fs: errorHandlingFs,
+      logger: BufferLogger.test(),
+      platform: linuxPlatform,
+      processManager: FakeProcessManager.empty(),
+    );
+    final FlutterProject project = toolContext.projectFactory.fromDirectory(
+      errorHandlingFs.currentDirectory,
+    );
+    final testCompiler = FakeTestCompiler(debugBuild, project, compiler, toolContext: toolContext);
+
+    final Uri firstUri = Uri.parse('test/first_test.dart');
+    final Uri secondUri = Uri.parse('test/second_test.dart');
+    final Uri thirdUri = Uri.parse('test/third_test.dart');
+
+    expect(
+      await testCompiler.compile(firstUri),
+      TestCompilerComplete(outputPath: 'test/first_test.dart.dill', mainUri: firstUri),
+    );
+    final File testCache = errorHandlingFs.file(testCompiler.testFilePath);
+    expect(testCache, exists);
+    expect(testCache.readAsBytesSync(), firstDillBytes);
+    expect(errorHandlingFs.file('test/first_test.dart.dill').readAsBytesSync(), firstDillBytes);
+    expect(testCompiler.outputDill, isNot(exists));
+
+    expect(
+      await testCompiler.compile(secondUri),
+      TestCompilerComplete(outputPath: 'test/second_test.dart.dill', mainUri: secondUri),
+    );
+    expect(testCache.readAsBytesSync(), secondDillBytes);
+    expect(errorHandlingFs.file('test/second_test.dart.dill').readAsBytesSync(), secondDillBytes);
+    expect(testCompiler.outputDill, isNot(exists));
+
+    expect(
+      await testCompiler.compile(thirdUri),
+      TestCompilerComplete(outputPath: 'test/third_test.dart.dill', mainUri: thirdUri),
+    );
+    expect(testCache.readAsBytesSync(), secondDillBytes);
+    expect(errorHandlingFs.file('test/third_test.dart.dill').readAsBytesSync(), thirdDillBytes);
+    expect(testCompiler.outputDill, isNot(exists));
+
+    expect(renamedPairs, <(String, String)>[
+      (testCompiler.outputDill.path, 'test/first_test.dart.dill'),
+      (testCompiler.outputDill.path, 'test/second_test.dart.dill'),
+      (testCompiler.outputDill.path, 'test/third_test.dart.dill'),
+    ]);
+    expect(copiedPaths, <String>[testCompiler.outputDill.path, testCompiler.outputDill.path]);
+  });
+
+  testWithoutContext(
+    'TestCompiler falls back to copying dill when cross-volume rename fails with EXDEV',
+    () async {
+      const exdev = 18;
+      const compiledBytes = <int>[4, 5, 6, 7];
+      final copiedPaths = <String>[];
+      final memoryFileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (op == FileSystemOp.copy) {
+            copiedPaths.add(path);
+          }
+        },
+      );
+      final renameFs = RenameInterceptingFileSystem(
+        memoryFileSystem,
+        onRename: (String oldPath, String newPath) {
+          throw FileSystemException(
+            'Cannot rename file',
+            oldPath,
+            const OSError('Invalid cross-device link', exdev),
+          );
+        },
+      );
+      final errorHandlingFs = ErrorHandlingFileSystem(delegate: renameFs, platform: linuxPlatform);
+      errorHandlingFs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('name: foo\n');
+      errorHandlingFs.file('test/foo.dart').createSync(recursive: true);
+      writePackageConfigFiles(mainLibName: 'foo', directory: errorHandlingFs.currentDirectory);
+
+      final compiler = FakeResidentCompiler(errorHandlingFs)
+        ..onRecompile = (Uri mainUri, String outputPath) {
+          errorHandlingFs.file(outputPath)
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(compiledBytes);
+          return CompilerOutput(outputPath, 0, const <Uri>[]);
+        };
+      final toolContext = FakeToolContext(
+        fs: errorHandlingFs,
+        logger: BufferLogger.test(),
+        platform: linuxPlatform,
+        processManager: FakeProcessManager.empty(),
+      );
+      final FlutterProject project = toolContext.projectFactory.fromDirectory(
+        errorHandlingFs.currentDirectory,
+      );
+      final testCompiler = FakeTestCompiler(
+        debugBuild,
+        project,
+        compiler,
+        toolContext: toolContext,
+      );
+
+      final Uri input = Uri.parse('test/foo.dart');
+      expect(
+        await testCompiler.compile(input),
+        TestCompilerComplete(outputPath: 'test/foo.dart.dill', mainUri: input),
+      );
+      expect(errorHandlingFs.file('test/foo.dart.dill').readAsBytesSync(), compiledBytes);
+      expect(errorHandlingFs.file(testCompiler.testFilePath).readAsBytesSync(), compiledBytes);
+      expect(copiedPaths, <String>[testCompiler.outputDill.path, testCompiler.outputDill.path]);
+    },
+  );
 }
 
 class FakeTestCompiler extends TestCompiler {
@@ -442,6 +599,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   final FileSystem? fileSystem;
 
   CompilerOutput? compilerOutput;
+  CompilerOutput? Function(Uri mainUri, String outputPath)? onRecompile;
   bool didShutdown = false;
   final invalidatedFilesPerCall = <List<Uri>>[];
 
@@ -460,6 +618,9 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool recompileRestart = false,
   }) async {
     invalidatedFilesPerCall.add(invalidatedFiles ?? <Uri>[]);
+    if (onRecompile != null) {
+      return onRecompile!(mainUri, outputPath!);
+    }
     if (compilerOutput != null) {
       fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);
     }

@@ -18,6 +18,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show RenameInterceptingFileSystem;
 
 final _FakeAnalytics fakeAnalytics = _FakeAnalytics();
 
@@ -2061,6 +2062,196 @@ Please ensure that the SDK and/or project is installed in a location that has re
       // Calling deleteIfExists should return true and clear the link entity
       expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
       expect(fileSystem.typeSync(file.path, followLinks: false), FileSystemEntityType.notFound);
+    });
+  });
+
+  group('moveOrCopy', () {
+    const exdev = 18;
+    const enospc = 28;
+
+    testWithoutContext(
+      'moveOrCopy renames without copying when delegate rename succeeds',
+      () async {
+        final copiedPaths = <String>[];
+        final renamedPairs = <(String, String)>[];
+        final memoryFileSystem = MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (op == FileSystemOp.copy) {
+              copiedPaths.add(path);
+            }
+          },
+        );
+        final renameFs = RenameInterceptingFileSystem(
+          memoryFileSystem,
+          onRename: (String oldPath, String newPath) {
+            renamedPairs.add((oldPath, newPath));
+          },
+        );
+        final fileSystem = ErrorHandlingFileSystem(delegate: renameFs, platform: linuxPlatform);
+        final File source = fileSystem.file('source')..writeAsStringSync('kernel-bytes');
+
+        final File moved = await ErrorHandlingFileSystem.moveOrCopy(source, 'dest');
+
+        expect(moved, isA<ErrorHandlingFile>());
+        expect(moved.path, 'dest');
+        expect(moved.readAsStringSync(), 'kernel-bytes');
+        expect(source, isNot(exists));
+        expect(renamedPairs, const <(String, String)>[('source', 'dest')]);
+        expect(copiedPaths, isEmpty);
+      },
+    );
+
+    testWithoutContext(
+      'moveOrCopy falls back to copy without ToolExit on cross-device EXDEV',
+      () async {
+        final copiedPaths = <String>[];
+        final memoryFileSystem = MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (op == FileSystemOp.copy) {
+              copiedPaths.add(path);
+            }
+          },
+        );
+        final renameFs = RenameInterceptingFileSystem(
+          memoryFileSystem,
+          onRename: (String oldPath, String newPath) {
+            throw FileSystemException(
+              'Cannot rename file',
+              oldPath,
+              const OSError('Invalid cross-device link', exdev),
+            );
+          },
+        );
+        final fileSystem = ErrorHandlingFileSystem(delegate: renameFs, platform: linuxPlatform);
+        final File source = fileSystem.file('source')..writeAsStringSync('kernel-bytes');
+
+        final File result = await ErrorHandlingFileSystem.moveOrCopy(source, 'dest');
+
+        expect(result, isA<ErrorHandlingFile>());
+        expect(result.path, 'dest');
+        expect(result.readAsStringSync(), 'kernel-bytes');
+        expect(source, exists);
+        expect(copiedPaths, const <String>['source']);
+      },
+    );
+
+    testWithoutContext(
+      'moveOrCopy falls back immediately to copy without Windows retry delay on sharing violation',
+      () async {
+        final List<Duration>? previousBackoffs = overrideWindowsRetryBackoffs;
+        overrideWindowsRetryBackoffs = const <Duration>[
+          Duration.zero,
+          Duration.zero,
+          Duration.zero,
+          Duration.zero,
+          Duration.zero,
+        ];
+        addTearDown(() {
+          overrideWindowsRetryBackoffs = previousBackoffs;
+        });
+
+        var renameAttempts = 0;
+        final copiedPaths = <String>[];
+        final memoryFileSystem = MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (op == FileSystemOp.copy) {
+              copiedPaths.add(path);
+            }
+          },
+        );
+        final renameFs = RenameInterceptingFileSystem(
+          memoryFileSystem,
+          onRename: (String oldPath, String newPath) {
+            renameAttempts++;
+            throw FileSystemException(
+              'Cannot rename file',
+              oldPath,
+              const OSError('Sharing violation', kSystemCodeSharingViolation),
+            );
+          },
+        );
+        final fileSystem = ErrorHandlingFileSystem(delegate: renameFs, platform: windowsPlatform);
+        final File source = fileSystem.file('source')..writeAsStringSync('kernel-bytes');
+
+        final File result = await ErrorHandlingFileSystem.moveOrCopy(source, 'dest');
+
+        expect(renameAttempts, 1);
+        expect(copiedPaths, const <String>['source']);
+        expect(result, isA<ErrorHandlingFile>());
+        expect(result.readAsStringSync(), 'kernel-bytes');
+      },
+    );
+
+    testWithoutContext(
+      'moveOrCopy throws ToolExit via copy when both rename and copy fail',
+      () async {
+        final exceptionHandler = FileExceptionHandler();
+        final memoryFileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+        final renameFs = RenameInterceptingFileSystem(
+          memoryFileSystem,
+          onRename: (String oldPath, String newPath) {
+            throw FileSystemException(
+              'Cannot rename file',
+              oldPath,
+              const OSError('No space left on device', enospc),
+            );
+          },
+        );
+        final fileSystem = ErrorHandlingFileSystem(delegate: renameFs, platform: linuxPlatform);
+        final File source = fileSystem.file('source')..writeAsStringSync('kernel-bytes');
+        exceptionHandler.addError(
+          source,
+          FileSystemOp.copy,
+          FileSystemException(
+            'Cannot copy file',
+            source.path,
+            const OSError('No space left on device', enospc),
+          ),
+        );
+
+        await expectLater(
+          ErrorHandlingFileSystem.moveOrCopy(source, 'dest'),
+          throwsToolExit(message: 'The target device is full'),
+        );
+      },
+    );
+
+    testWithoutContext('moveOrCopy works when source is not an ErrorHandlingFile', () async {
+      final copiedPaths = <String>[];
+      final memoryFileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (op == FileSystemOp.copy) {
+            copiedPaths.add(path);
+          }
+        },
+      );
+      final File plainSource = memoryFileSystem.file('plain_source')..writeAsStringSync('plain');
+      expect(plainSource, isNot(isA<ErrorHandlingFile>()));
+
+      final File moved = await ErrorHandlingFileSystem.moveOrCopy(plainSource, 'plain_dest');
+
+      expect(moved.readAsStringSync(), 'plain');
+      expect(plainSource, isNot(exists));
+      expect(copiedPaths, isEmpty);
+
+      final failingRenameFs = RenameInterceptingFileSystem(
+        memoryFileSystem,
+        onRename: (String oldPath, String newPath) {
+          throw FileSystemException(
+            'Cannot rename file',
+            oldPath,
+            const OSError('Invalid cross-device link', exdev),
+          );
+        },
+      );
+      final File fallbackSource = failingRenameFs.file('fallback_source')
+        ..writeAsStringSync('fallback');
+      expect(fallbackSource, isNot(isA<ErrorHandlingFile>()));
+
+      final File copied = await ErrorHandlingFileSystem.moveOrCopy(fallbackSource, 'fallback_dest');
+
+      expect(copied.readAsStringSync(), 'fallback');
+      expect(copiedPaths, const <String>['fallback_source']);
     });
   });
 }

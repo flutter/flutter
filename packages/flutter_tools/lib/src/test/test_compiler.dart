@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/config.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -125,7 +126,7 @@ class TestCompiler {
     this.buildInfo = buildInfo.copyWith(initializeFromDill: testFilePath);
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     // Compiler maintains and updates single incremental dill file.
-    // Incremental compilation requests done for each test copy that file away
+    // Incremental compilation requests done for each test move that file away
     // for independent execution.
     final Directory outputDillDirectory = fs.systemTempDirectory.createTempSync(
       'flutter_test_compiler.',
@@ -312,9 +313,7 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: platform.isWindows);
           final File outputFile = fs.file(outputPath);
-          final File kernelReadyToRun = await outputFile.copy('$path.dill');
           final File testCache = fs.file(testFilePath);
           if (firstCompile ||
               !testCache.existsSync() ||
@@ -327,6 +326,11 @@ class TestCompiler {
             }
             await outputFile.copy(testFilePath);
           }
+          final String path = request.mainUri.toFilePath(windows: platform.isWindows);
+          final File kernelReadyToRun = await ErrorHandlingFileSystem.moveOrCopy(
+            outputFile,
+            '$path.dill',
+          );
           request._result.complete(
             TestCompilerComplete(outputPath: kernelReadyToRun.path, mainUri: request.mainUri),
           );
