@@ -870,6 +870,7 @@ TEST_P(AiksTest, FramebufferBlendDifferenceNoDiagonalSeam) {
   // [2..14, 2..14]. Without masking subpassLoad by gl_SampleMaskIn, pixels
   // along the FramebufferBlend quad's diagonal seam drop to ~191.
   const uint8_t* bytes = readback->OnGetContents();
+  ASSERT_NE(bytes, nullptr);
   for (int y = 3; y < 13; ++y) {
     for (int x = 3; x < 13; ++x) {
       const uint8_t* px = bytes + (y * 16 + x) * 4;
