@@ -15,6 +15,7 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
@@ -602,6 +603,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         CGFloat blurRadius = (*iter)->GetFilterMutation().GetFilter().asBlur()->sigma_x();
         UIVisualEffectView* visualEffectView = [[UIVisualEffectView alloc]
             initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+        // The visual effect shouldn't swallow touches.
+        // See: https://github.com/flutter/flutter/issues/191203
+        visualEffectView.userInteractionEnabled = NO;
 
         // TODO(https://github.com/flutter/flutter/issues/179126)
         CGFloat cornerRadius = 0.0;
@@ -639,7 +643,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         PendingRRectClip* clip = [[PendingRRectClip alloc] init];
         DlRoundRect rrect = (*iter)->GetBackdropClipRRect().rrect;
 
-        clip.rect = boundingRect;
         impeller::RoundingRadii radii = rrect.GetRadii();
         clip.topLeftRadius = radii.top_left.width;
         clip.topRightRadius = radii.top_right.width;
@@ -652,7 +655,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         PendingRRectClip* clip = [[PendingRRectClip alloc] init];
         flutter::DlRoundSuperellipse rse = (*iter)->GetBackdropClipRSuperellipse().rse;
 
-        clip.rect = boundingRect;
         impeller::RoundingRadii radii = rse.GetRadii();
         clip.topLeftRadius = radii.top_left.width;
         clip.topRightRadius = radii.top_right.width;
@@ -742,7 +744,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.visitedPlatformViews.clear();
 }
 
-- (BOOL)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)background_frame
+- (void)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)background_frame
      withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext {
   TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
 
@@ -764,11 +766,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     }
 
     self.hadPlatformViews = NO;
-    return background_frame->Submit();
+    background_frame->Submit();
+    return;
   }
   self.hadPlatformViews = !self.compositionOrder.empty();
 
-  bool didEncode = true;
   LayersMap platformViewLayers;
   std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
   surfaceFrames.reserve(self.compositionOrder.size());
@@ -822,9 +824,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     // This flutter view is never the last in a frame, since we always submit the
     // underlay view last.
     frame->set_submit_info({.frame_boundary = false, .present_with_transaction = true});
-    layer->did_submit_last_frame = frame->Encode();
-
-    didEncode &= layer->did_submit_last_frame;
+    frame->Encode();
     platformViewLayers[viewId] = LayerData{
         .rect = overlay->second,  //
         .view_id = viewId,        //
@@ -866,7 +866,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   [self.taskRunner runNowOrPostTask:^{
     task();
   }];
-  return didEncode;
 }
 
 - (void)createMissingOverlays:(size_t)requiredOverlayLayers

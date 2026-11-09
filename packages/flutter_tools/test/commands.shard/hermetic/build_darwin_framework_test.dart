@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
@@ -35,7 +36,6 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = getFlutterRoot();
   });
 
   const storageBaseUrl = 'https://fake.googleapis.com';
@@ -54,6 +54,47 @@ void main() {
   });
 
   group('build ios-framework', () {
+    testUsingContext(
+      'prints migration warning',
+      () async {
+        memoryFileSystem.currentDirectory
+            .childFile('pubspec.yaml')
+            .writeAsStringSync('name: project');
+        memoryFileSystem.currentDirectory
+            .childDirectory('lib')
+            .childFile('main.dart')
+            .createSync(recursive: true);
+        final logger = BufferLogger.test();
+        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: logger,
+          platform: fakePlatform,
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await expectLater(
+          () => runner.run(<String>['ios-framework', '--no-pub']),
+          throwsToolExit(message: 'Project does not support iOS'),
+        );
+        expect(
+          logger.warningText,
+          contains(
+            'The "flutter build ios-framework" command is deprecated and has been replaced by '
+            '"flutter build swift-package --platform ios".',
+          ),
+        );
+        expect(
+          logger.warningText,
+          contains('https://docs.flutter.dev/add-to-app/ios/project-setup'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
+      },
+    );
+
     group('podspec', () {
       const engineRevision = '0123456789abcdef';
       late Cache cache;
@@ -163,8 +204,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -510,6 +549,47 @@ void main() {
   });
 
   group('build macos-framework', () {
+    testUsingContext(
+      'prints migration warning',
+      () async {
+        memoryFileSystem.currentDirectory
+            .childFile('pubspec.yaml')
+            .writeAsStringSync('name: project');
+        memoryFileSystem.currentDirectory
+            .childDirectory('lib')
+            .childFile('main.dart')
+            .createSync(recursive: true);
+        final logger = BufferLogger.test();
+        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: logger,
+          platform: fakePlatform,
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await expectLater(
+          () => runner.run(<String>['macos-framework', '--no-pub']),
+          throwsToolExit(message: 'Project does not support macOS'),
+        );
+        expect(
+          logger.warningText,
+          contains(
+            'The "flutter build macos-framework" command is deprecated and has been replaced by '
+            '"flutter build swift-package --platform macos".',
+          ),
+        );
+        expect(
+          logger.warningText,
+          contains('https://docs.flutter.dev/add-to-app/macos/project-setup'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
+      },
+    );
+
     group('podspec', () {
       const engineRevision = '0123456789abcdef';
       late Cache cache;
@@ -619,8 +699,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -1792,6 +1870,7 @@ BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: artifacts,
       flutterVersion: flutterVersion,
@@ -1840,6 +1919,7 @@ BuildMacOSFrameworkCommand createBuildMacOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: artifacts,
       flutterVersion: flutterVersion,

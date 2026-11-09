@@ -11,9 +11,13 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
@@ -40,16 +44,20 @@ import io.flutter.util.ViewUtils;
 public class PlatformViewWrapper extends FrameLayout {
   private static final String TAG = "PlatformViewWrapper";
 
-  private int prevLeft;
-  private int prevTop;
-  private int left;
-  private int top;
   private AndroidTouchProcessor touchProcessor;
   private PlatformViewRenderTarget renderTarget;
 
   private final PlatformViewGestureTracker gestureTracker = new PlatformViewGestureTracker();
 
   private ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener;
+
+  private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+  // The render target surface and canvas of a frame that has been recorded in draw(), but not yet
+  // posted to the render target. See draw().
+  @Nullable private Surface pendingFrameSurface;
+  @Nullable private Canvas pendingFrameCanvas;
+  private final Runnable postPendingFrameRunnable = () -> postPendingFrame(true);
 
   public PlatformViewWrapper(@NonNull Context context) {
     super(context);
@@ -82,18 +90,46 @@ public class PlatformViewWrapper extends FrameLayout {
   }
 
   /**
-   * Sets the layout parameters for this view.
+   * Moves this view to the given position, in the parent's coordinate space.
    *
-   * @param params The new parameters.
+   * <p>Only the position of the wrapper changes, which never affects the content rendered into the
+   * {@link PlatformViewRenderTarget}. To avoid re-rendering the embedded view every frame while
+   * scrolling, this doesn't request a layout pass (which would also force this view's display list
+   * to be re-recorded). Instead, the view is translated directly, which only updates its {@code
+   * RenderNode} properties.
+   *
+   * <p>The layout params are kept in sync so that any later layout pass keeps the view at the same
+   * position.
+   *
+   * @param newLeft The new left position, in physical pixels.
+   * @param newTop The new top position, in physical pixels.
    */
-  public void setLayoutParams(@NonNull FrameLayout.LayoutParams params) {
-    super.setLayoutParams(params);
-
-    left = params.leftMargin;
-    top = params.topMargin;
+  public void setOffset(int newLeft, int newTop) {
+    final ViewGroup.LayoutParams params = getLayoutParams();
+    if (params instanceof FrameLayout.LayoutParams) {
+      final FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams) params;
+      frameParams.leftMargin = newLeft;
+      frameParams.topMargin = newTop;
+      frameParams.gravity = Gravity.LEFT | Gravity.TOP;
+    }
+    // If the view hasn't been laid out yet, the initial layout pass will position the view using
+    // the layout params.
+    if (isLaidOut()) {
+      final int dx = newLeft - getLeft();
+      final int dy = newTop - getTop();
+      if (dx != 0 || dy != 0) {
+        offsetLeftAndRight(dx);
+        offsetTopAndBottom(dy);
+        // Notify ViewTreeObserver.OnScrollChangedListeners (e.g., PopupWindow, AdMob viewability)
+        // that this view moved without a layout pass, matching RecyclerView.dispatchOnScrolled.
+        onScrollChanged(getScrollX(), getScrollY(), getScrollX(), getScrollY());
+      }
+    }
   }
 
   public void resizeRenderTarget(int width, int height) {
+    // Post any frame recorded at the old size before the render target switches surfaces.
+    postPendingFrame(true);
     if (renderTarget != null) {
       renderTarget.resize(width, height);
     }
@@ -113,8 +149,21 @@ public class PlatformViewWrapper extends FrameLayout {
     return 0;
   }
 
+  @Override
+  protected void onWindowVisibilityChanged(int visibility) {
+    super.onWindowVisibilityChanged(visibility);
+    if (visibility != View.VISIBLE) {
+      // Flush any pending frame so the render target surface does not remain locked while
+      // backgrounded.
+      postPendingFrame(true);
+    }
+  }
+
   /** Releases resources. */
   public void release() {
+    // Unlock any pending canvas without scheduling a redundant engine frame for a texture that is
+    // about to be released.
+    postPendingFrame(false);
     if (renderTarget != null) {
       renderTarget.release();
       renderTarget = null;
@@ -164,6 +213,10 @@ public class PlatformViewWrapper extends FrameLayout {
       return;
     }
 
+    // A frame recorded by a previous draw() in this same traversal must be posted before
+    // querying or locking the render target's surface again.
+    postPendingFrame(true);
+
     final Surface targetSurface = renderTarget.getSurface();
     if (!targetSurface.isValid()) {
       Log.e(TAG, "Platform view cannot be composed without a valid RenderTarget surface.");
@@ -184,8 +237,44 @@ public class PlatformViewWrapper extends FrameLayout {
       // Override the canvas that this subtree of views will use to draw.
       super.draw(targetCanvas);
     } finally {
+      // Don't post the frame to the render target synchronously here.
+      //
+      // draw() runs while the window's ThreadedRenderer records its display list, i.e. before the
+      // window syncs its own frame with the RenderThread in this same traversal. In observed
+      // traces (e.g. scrolling a WebView with a heavy draw functor), calling unlockCanvasAndPost()
+      // inline hands the render target's frame to the process-wide RenderThread ahead of the
+      // window's sync, stalling the UI thread (also Flutter's UI thread) on that RenderThread
+      // submission during traversal.
+      //
+      // Posting at the front of the main thread queue defers unlockCanvasAndPost() until
+      // immediately after the current traversal completes (after the window's frame sync),
+      // avoiding that inline UI-thread stall during traversal. Note that this orders submission
+      // after the current traversal rather than providing a hard guarantee that the resulting
+      // buffer reaches the same display presentation deadline.
+      pendingFrameSurface = targetSurface;
+      pendingFrameCanvas = targetCanvas;
+      mainHandler.postAtFrontOfQueue(postPendingFrameRunnable);
+    }
+  }
+
+  /** Posts the frame recorded by the last {@link #draw(Canvas)} call to the render target. */
+  private void postPendingFrame(boolean scheduleFrame) {
+    final Surface surface = pendingFrameSurface;
+    final Canvas canvas = pendingFrameCanvas;
+    if (surface == null || canvas == null) {
+      return;
+    }
+    pendingFrameSurface = null;
+    pendingFrameCanvas = null;
+    mainHandler.removeCallbacks(postPendingFrameRunnable);
+    try {
+      surface.unlockCanvasAndPost(canvas);
+    } catch (IllegalStateException | IllegalArgumentException e) {
+      Log.e(TAG, "Failed to post platform view frame to the render target: " + e);
+      return;
+    }
+    if (scheduleFrame && renderTarget != null) {
       renderTarget.scheduleFrame();
-      targetSurface.unlockCanvasAndPost(targetCanvas);
     }
   }
 
@@ -229,26 +318,10 @@ public class PlatformViewWrapper extends FrameLayout {
       return super.onTouchEvent(event);
     }
     gestureTracker.onTouchEvent(event, this::requestUnbuffered);
+    // The parent transformed this event into this view's coordinate space using the view's current
+    // position, so the same position maps it back into the parent's (the FlutterView's) space.
     final Matrix screenMatrix = new Matrix();
-    switch (event.getAction()) {
-      case MotionEvent.ACTION_DOWN:
-        prevLeft = left;
-        prevTop = top;
-        screenMatrix.postTranslate(left, top);
-        break;
-      case MotionEvent.ACTION_MOVE:
-        // While the view is dragged, use the left and top positions as
-        // they were at the moment the touch event fired.
-        screenMatrix.postTranslate(prevLeft, prevTop);
-        prevLeft = left;
-        prevTop = top;
-        break;
-      case MotionEvent.ACTION_UP:
-      case MotionEvent.ACTION_CANCEL:
-      default:
-        screenMatrix.postTranslate(left, top);
-        break;
-    }
+    screenMatrix.postTranslate(getLeft(), getTop());
     return touchProcessor.onTouchEvent(event, screenMatrix);
   }
 

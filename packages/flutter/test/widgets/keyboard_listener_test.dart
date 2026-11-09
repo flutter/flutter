@@ -37,7 +37,7 @@ void main() {
     expect(events[0].logicalKey, LogicalKeyboardKey.metaLeft);
 
     await tester.pumpWidget(Container());
-  }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
+  });
 
   testWidgets('Web key event', (WidgetTester tester) async {
     final events = <KeyEvent>[];

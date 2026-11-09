@@ -12,8 +12,10 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
@@ -23,11 +25,13 @@ import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
+import '../../src/test_build_system.dart';
 
 void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> configs) {
   dir.createSync();
@@ -44,6 +48,7 @@ FlutterProject _setUpFlutterProject(Directory directory) {
   final flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
+    config: FakeConfig(),
   );
   return flutterProjectFactory.fromDirectory(directory);
 }
@@ -106,6 +111,9 @@ void main() {
   testWithoutContext('CustomDevice defaults', () async {
     final device = CustomDevice(
       config: testConfig,
+      analytics: const NoOpAnalytics(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const NoOpBuildTargets(),
       toolContext: FakeToolContext(
         processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
@@ -144,6 +152,9 @@ void main() {
       expect(
         await CustomDevices(
           featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+          analytics: const NoOpAnalytics(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const NoOpBuildTargets(),
           toolContext: FakeToolContext(
             logger: BufferLogger.test(),
             processManager: FakeProcessManager.any(),
@@ -151,6 +162,7 @@ void main() {
               fileSystem: fs,
               directory: dir,
               logger: BufferLogger.test(),
+              cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
             ),
           ),
         ).devices(),
@@ -170,6 +182,9 @@ void main() {
       expect(
         await CustomDevices(
           featureFlags: TestFeatureFlags(),
+          analytics: const NoOpAnalytics(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const NoOpBuildTargets(),
           toolContext: FakeToolContext(
             logger: BufferLogger.test(),
             processManager: FakeProcessManager.any(),
@@ -177,6 +192,7 @@ void main() {
               fileSystem: fs,
               directory: dir,
               logger: BufferLogger.test(),
+              cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
             ),
           ),
         ).devices(),
@@ -194,6 +210,9 @@ void main() {
     expect(
       await CustomDevices(
         featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const NoOpBuildTargets(),
         toolContext: FakeToolContext(
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -203,6 +222,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           ),
         ),
       ).devices(),
@@ -222,6 +242,9 @@ void main() {
 
       final discovery = CustomDevices(
         featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const NoOpBuildTargets(),
         toolContext: FakeToolContext(
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -235,6 +258,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           ),
         ),
       );
@@ -256,6 +280,9 @@ void main() {
 
       final discovery = CustomDevices(
         featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const NoOpBuildTargets(),
         toolContext: FakeToolContext(
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -269,6 +296,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           ),
         ),
       );
@@ -285,6 +313,9 @@ void main() {
 
     final discovery = CustomDevices(
       featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      analytics: const NoOpAnalytics(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const NoOpBuildTargets(),
       toolContext: FakeToolContext(
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -294,6 +325,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       ),
     );
@@ -310,6 +342,9 @@ void main() {
     final logger = BufferLogger.test();
     final discovery = CustomDevices(
       featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      analytics: const NoOpAnalytics(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const NoOpBuildTargets(),
       toolContext: FakeToolContext(
         logger: logger,
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -322,6 +357,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: logger,
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       ),
     );
@@ -339,6 +375,9 @@ void main() {
       final logger = BufferLogger.test();
       final device = CustomDevice(
         config: testConfig,
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const NoOpBuildTargets(),
         toolContext: FakeToolContext(
           logger: logger,
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -368,6 +407,9 @@ void main() {
     expect(
       CustomDevice(
         config: testConfig,
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const NoOpBuildTargets(),
         toolContext: FakeToolContext(
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -382,6 +424,9 @@ void main() {
 
     final device = CustomDevice(
       config: testConfig,
+      analytics: const NoOpAnalytics(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const NoOpBuildTargets(),
       toolContext: FakeToolContext(
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -452,6 +497,9 @@ void main() {
         name: 'testname',
         device: CustomDevice(
           config: testConfig,
+          analytics: const NoOpAnalytics(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const NoOpBuildTargets(),
           toolContext: FakeToolContext(logger: BufferLogger.test(), processManager: processManager),
         ),
         appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
@@ -489,6 +537,9 @@ void main() {
       name: 'testname',
       device: CustomDevice(
         config: testConfigNonForwarding,
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const NoOpBuildTargets(),
         toolContext: FakeToolContext(logger: BufferLogger.test(), processManager: processManager),
       ),
       appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
@@ -541,6 +592,9 @@ void main() {
     // finally start actually testing things
     final customDevices = CustomDevices(
       featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      analytics: const NoOpAnalytics(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const NoOpBuildTargets(),
       toolContext: FakeToolContext(
         fs: fs,
         processManager: processManager,
@@ -549,6 +603,7 @@ void main() {
           fileSystem: fs,
           directory: configFileDir,
           logger: BufferLogger.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       ),
     );
@@ -643,6 +698,9 @@ void main() {
     // finally start actually testing things
     final device = CustomDevice(
       config: config,
+      analytics: const NoOpAnalytics(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const NoOpBuildTargets(),
       toolContext: FakeToolContext(
         artifacts: artifacts,
         flutterVersion: flutterVersion,
@@ -677,6 +735,9 @@ void main() {
 
     final device = CustomDevice(
       config: testConfig,
+      analytics: const NoOpAnalytics(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const NoOpBuildTargets(),
       toolContext: FakeToolContext(logger: BufferLogger.test(), processManager: processManager),
     );
 
@@ -702,6 +763,9 @@ void main() {
 
     final device = CustomDevice(
       config: testConfig.copyWith(explicitScreenshotCommand: true),
+      analytics: const NoOpAnalytics(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const NoOpBuildTargets(),
       toolContext: FakeToolContext(logger: BufferLogger.test(), processManager: processManager),
     );
 
@@ -717,6 +781,9 @@ void main() {
   testWithoutContext('CustomDevice returns correct target platform', () async {
     final device = CustomDevice(
       config: testConfig.copyWith(platform: TargetPlatform.linux_x64),
+      analytics: const NoOpAnalytics(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const NoOpBuildTargets(),
       toolContext: FakeToolContext(
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.empty(),
