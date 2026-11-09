@@ -16,6 +16,7 @@ abstract class EngineImageFilter implements ui.ImageFilter {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode? tileMode,
+    ui.Rect? bounds,
   }) = EngineBlurImageFilter;
 
   factory EngineImageFilter.color({required EngineColorFilter colorFilter}) =
@@ -116,11 +117,23 @@ class EngineColorFilterImageFilter extends EngineImageFilter {
 }
 
 class EngineBlurImageFilter extends EngineImageFilter {
-  EngineBlurImageFilter({required this.sigmaX, required this.sigmaY, required this.tileMode});
+  EngineBlurImageFilter({
+    required this.sigmaX,
+    required this.sigmaY,
+    required this.tileMode,
+    this.bounds,
+  });
 
   final double sigmaX;
   final double sigmaY;
   final ui.TileMode? tileMode;
+
+  /// The optional bounds passed to [ui.ImageFilter.blur].
+  ///
+  /// This is currently only kept for [operator ==], [hashCode] and
+  /// [debugShortDescription]. It is not yet used for rendering, so the
+  /// backends fall back to an unbounded blur, as native Skia does.
+  final ui.Rect? bounds;
 
   BackendImageFilter? _cachedFilter;
   ui.TileMode? _cachedTileMode;
@@ -160,14 +173,18 @@ class EngineBlurImageFilter extends EngineImageFilter {
     return other is EngineBlurImageFilter &&
         other.sigmaX == sigmaX &&
         other.sigmaY == sigmaY &&
+        other.bounds == bounds &&
         other.tileMode == tileMode;
   }
 
   @override
-  int get hashCode => Object.hash(sigmaX, sigmaY, tileMode);
+  int get hashCode => Object.hash(sigmaX, sigmaY, bounds, tileMode);
 
   @override
-  String get debugShortDescription => 'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
+  String get debugShortDescription =>
+      'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)}${_boundsString()})';
+
+  String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
 }
 
 class EngineMatrixImageFilter extends EngineImageFilter {
