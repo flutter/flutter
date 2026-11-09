@@ -272,7 +272,7 @@ class Doctor {
               });
             },
             onError: (Object exception, StackTrace stackTrace) {
-              return ValidationResult.crash(exception, stackTrace);
+              return validator.createCrashResult(exception, stackTrace);
             },
           ),
         ),
@@ -333,7 +333,7 @@ class Doctor {
         result = await validatorTask.result;
         status.stop();
       } on Exception catch (exception, stackTrace) {
-        result = ValidationResult.crash(exception, stackTrace);
+        result = validator.createCrashResult(exception, stackTrace);
         status.cancel();
       }
 

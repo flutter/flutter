@@ -198,6 +198,28 @@ void main() {
     });
 
     group('ValidationResult', () {
+      test('crash creates neutral crash result without Flutter SDK issue URL', () {
+        final result = ValidationResult.crash(StateError('boom'), StackTrace.fromString('frame 0'));
+        expect(result.type, ValidationType.crash);
+        expect(result.statusInfo, 'the doctor check crashed');
+        expect(result.messages, const <ValidationMessage>[
+          ValidationMessage.error('Due to an error, the doctor check did not complete.'),
+          ValidationMessage.error('Bad state: boom'),
+          ValidationMessage('frame 0'),
+        ]);
+        expect(
+          result.messages.map((ValidationMessage m) => m.message),
+          everyElement(isNot(contains('flutter/flutter/issues'))),
+        );
+
+        final withoutStack = ValidationResult.crash(StateError('no stack'));
+        expect(withoutStack.messages, hasLength(2));
+        expect(
+          withoutStack.messages.map((ValidationMessage m) => m.message),
+          everyElement(isNot(contains('flutter/flutter/issues'))),
+        );
+      });
+
       test('serializes and deserializes correctly', () {
         final result = ValidationResult(ValidationType.success, const <ValidationMessage>[
           ValidationMessage('Check passed', piiStrippedMessage: 'Passed'),

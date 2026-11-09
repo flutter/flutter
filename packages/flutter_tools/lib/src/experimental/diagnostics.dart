@@ -15,12 +15,38 @@ class ExtensionDoctorValidator extends DoctorValidator {
   ExtensionDoctorValidator({required this.extension, required this._logger})
     : super(extension.title);
 
+  /// Creates a [ValidationResult] attributing a diagnostic crash to the
+  /// tool extension identified by [extensionIdentifier].
+  static ValidationResult createExtensionCrashResult(
+    String extensionIdentifier,
+    Object error, [
+    StackTrace? stackTrace,
+  ]) {
+    return ValidationResult(ValidationType.crash, <ValidationMessage>[
+      ValidationMessage.error(
+        'Due to an error in tool extension "$extensionIdentifier", the doctor check did not complete. '
+        'Please report this issue to the extension author.',
+      ),
+      ValidationMessage.error('$error'),
+      if (stackTrace != null) ValidationMessage('$stackTrace'),
+    ], statusInfo: 'the doctor check crashed');
+  }
+
   /// The active extension service executing diagnostic checks.
   final DiagnosticsExtension extension;
   final Logger _logger;
 
   @override
   String get title => extension.title;
+
+  @override
+  ValidationResult createCrashResult(Object error, [StackTrace? stackTrace]) {
+    final String extensionIdentifier = switch (extension) {
+      DiagnosticsExtensionClient(:final ExtensionConnection connection) => connection.extensionName,
+      _ => extension.title,
+    };
+    return createExtensionCrashResult(extensionIdentifier, error, stackTrace);
+  }
 
   @override
   Future<ValidationResult> validateImpl() async {
@@ -111,6 +137,9 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
     try {
       final Object? result = await connection.sendRequest(
         DiagnosticsExtension.runDiagnosticsMethod,
+        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+        // https://github.com/flutter/flutter/issues/193955.
+        timeout: null,
       );
       final List<ValidationResult> results = ValidationResult.listFromJson(result);
       _logger.printTrace(
@@ -122,7 +151,9 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
         'Failed to run diagnostics for extension "${connection.extensionName}": $err',
       );
       _logger.printTrace('$stack');
-      return <ValidationResult>[ValidationResult.crash(err, stack)];
+      return <ValidationResult>[
+        ExtensionDoctorValidator.createExtensionCrashResult(connection.extensionName, err, stack),
+      ];
     }
   }
 }

@@ -176,6 +176,7 @@ void main() {
         logger.statusText,
         contains('Stuck validator that never completes exceeded maximum allowed duration of '),
       );
+      expect(logger.statusText, contains('https://github.com/flutter/flutter/issues'));
     });
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
@@ -945,7 +946,43 @@ void main() {
       final ValidationResult presetResult = await PassingValidator('Preset').validate();
       expect(presetResult.executionTime, Duration.zero);
     });
+
+    testWithoutContext(
+      'GroupedValidator delegates sub-validator crashes to subValidator.createCrashResult',
+      () async {
+        final grouped = GroupedValidator(<DoctorValidator>[
+          PassingValidator('First'),
+          _CustomCrashMessageValidator(),
+        ]);
+        final ValidationResult merged = await grouped.validate();
+        expect(merged.type, ValidationType.partial);
+        expect(
+          merged.messages.map((ValidationMessage m) => m.message),
+          contains('Custom crash attribution: Exception: sub-validator failed'),
+        );
+        expect(
+          merged.messages.map((ValidationMessage m) => m.message),
+          everyElement(isNot(contains('flutter/flutter/issues'))),
+        );
+      },
+    );
   });
+}
+
+class _CustomCrashMessageValidator extends DoctorValidator {
+  _CustomCrashMessageValidator() : super('Custom Crash');
+
+  @override
+  Future<ValidationResult> validateImpl() async {
+    throw Exception('sub-validator failed');
+  }
+
+  @override
+  ValidationResult createCrashResult(Object error, [StackTrace? stackTrace]) {
+    return ValidationResult(ValidationType.crash, <ValidationMessage>[
+      ValidationMessage.error('Custom crash attribution: $error'),
+    ], statusInfo: 'the doctor check crashed');
+  }
 }
 
 class _UnmeasuredValidator extends DoctorValidator {
