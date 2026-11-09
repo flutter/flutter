@@ -38,6 +38,7 @@ static void fl_socket_accessible_initialize(AtkObject* object, gpointer data) {
   ATK_OBJECT_CLASS(fl_socket_accessible_parent_class)->initialize(object, data);
 
   self->accessible_socket = atk_socket_new();
+  atk_object_set_parent(self->accessible_socket, object);
 }
 
 static void fl_socket_accessible_class_init(FlSocketAccessibleClass* klass) {
