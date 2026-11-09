@@ -831,7 +831,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
     targetDir.createSync(recursive: true);
   }
   final String nativeAssetsFilePath = fileSystem.file(nativeAssetsFileUri).path;
-  await for (final FileSystemEntity entity in targetDir.list(followLinks: false)) {
+  for (final FileSystemEntity entity in await targetDir.list(followLinks: false).toList()) {
     if (entity is File && fileSystem.path.equals(entity.path, nativeAssetsFilePath)) {
       // _writeNativeAssetsJson immediately truncates and overwrites this
       // manifest file in place, so avoid unlinking it unnecessarily.
