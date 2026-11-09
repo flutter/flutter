@@ -351,7 +351,7 @@ class ToolDependencies {
 
     final BotDetector finalBotDetector = botDetector ?? BotDetector(platform: finalPlatform);
 
-    final bool isBot = await finalBotDetector.isRunningOnBot;
+    final bool isBot = finalBotDetector.isRunningOnBot;
 
     final Config finalConfig =
         config ??

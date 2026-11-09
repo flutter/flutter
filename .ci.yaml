@@ -594,6 +594,21 @@ targets:
       # tests are sharded.
       test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
+  # The DevTools tests build DevTools from source and take as long as the rest
+  # of the registry, and their test step only runs on Linux.
+  - name: Linux customer_testing_devtools
+    bringup: true
+    enabled_branches:
+      - master
+    recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
+    timeout: 60
+    properties:
+      shard: customer_testing_devtools
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
+
   # Despite the name, this really means "generate api_docs.zip", and "upload zip
   # to GCS", and conditionally on the "master" channel will also deploy the docs
   # to Firebase (https://main-api.flutter.dev/).
@@ -7052,6 +7067,411 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_1
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "1_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_2
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "2_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_3
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "3_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_4
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "4_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_5
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "5_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_6
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "6_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_7
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "7_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_8
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "8_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_9
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "9_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_10
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "10_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_11
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "11_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_12
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "12_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_13
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "13_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_14
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "14_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_integration_tests_15
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      shard: tool_integration_tests
+      subshard: "15_15"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
     runIf:
       - dev/**
       - packages/flutter_tools/**

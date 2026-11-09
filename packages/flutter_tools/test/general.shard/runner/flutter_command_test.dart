@@ -496,7 +496,7 @@ void main() {
         final command = DummyFlutterCommand();
         command.argParser.addDescriptors(<OptionDescriptor<Object?>>[
           DebuggingOptionDescriptors.enableDevTools,
-          DebuggingOptionDescriptors.devToolsServerAddress(),
+          DebuggingOptionDescriptors.devToolsServerAddress,
         ]);
         await createTestCommandRunner(command).run(<String>[
           'dummy',
@@ -517,7 +517,7 @@ void main() {
         final command = DummyFlutterCommand();
         command.argParser.addDescriptors(<OptionDescriptor<Object?>>[
           DebuggingOptionDescriptors.enableDevTools,
-          DebuggingOptionDescriptors.devToolsServerAddress(),
+          DebuggingOptionDescriptors.devToolsServerAddress,
         ]);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>[
@@ -1001,7 +1001,7 @@ void main() {
         flutterCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
           BuildInfoOptions.initializeFromDill,
           BuildInfoOptions.assumeInitializeFromDillUpToDate,
-        ], hideOverride: false);
+        ], hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--initialize-from-dill=/foo/bar.dill']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -1022,7 +1022,7 @@ void main() {
         flutterCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
           BuildInfoOptions.initializeFromDill,
           BuildInfoOptions.assumeInitializeFromDillUpToDate,
-        ], hideOverride: false);
+        ], hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -1043,7 +1043,7 @@ void main() {
         flutterCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
           BuildInfoOptions.initializeFromDill,
           BuildInfoOptions.assumeInitializeFromDillUpToDate,
-        ], hideOverride: false);
+        ], hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--no-assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
