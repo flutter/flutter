@@ -594,6 +594,21 @@ targets:
       # tests are sharded.
       test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
+  # The DevTools tests build DevTools from source and take as long as the rest
+  # of the registry, and their test step only runs on Linux.
+  - name: Linux customer_testing_devtools
+    bringup: true
+    enabled_branches:
+      - master
+    recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
+    timeout: 60
+    properties:
+      shard: customer_testing_devtools
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
+
   # Despite the name, this really means "generate api_docs.zip", and "upload zip
   # to GCS", and conditionally on the "master" channel will also deploy the docs
   # to Firebase (https://main-api.flutter.dev/).
@@ -5600,34 +5615,6 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_textfield
-
-  - name: Mac_x64 ios_app_with_extensions_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    enabled_branches:
-      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: ios_app_with_extensions_test
-
-  - name: Mac_arm64 ios_app_with_extensions_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac", "arm64"]
-      task_name: ios_app_with_extensions_test
 
   - name: Mac ios_defines_test
     recipe: devicelab/devicelab_drone
