@@ -374,8 +374,10 @@ void main() {
           () => _StubSatelliteWindowController(tester: tester),
         ];
         for (final createController in controllerBuilders) {
+          final BaseWindowController controller = createController();
+          addTearDown(controller.dispose);
           expect(
-            () => Window(controller: createController(), child: const Text('Test')),
+            () => Window(controller: controller, child: const Text('Test')),
             throwsUnsupportedError,
           );
         }

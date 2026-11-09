@@ -112,7 +112,7 @@ sealed class BaseWindowController extends ChangeNotifier {
 /// See also:
 ///
 ///  * [WindowController], the controller that creates and manages regular windows.
-///  * [Window], the widget for a regular window.
+///  * [Window], the widget to render content to a [WindowController].
 @internal
 mixin class WindowControllerDelegate {
   /// Invoked when the user attempts to close the window.
@@ -156,7 +156,7 @@ mixin class WindowControllerDelegate {
 /// platform with the provided properties.
 ///
 /// This class does not interact with the widget tree. Instead, it is typically
-/// provided to the [Window] widget, who does the work of rendering the
+/// provided to the [Window] widget, which does the work of rendering the
 /// content inside of this window.
 ///
 /// The user of this class is responsible for managing the lifecycle of the window.
@@ -444,7 +444,7 @@ abstract class WindowController extends BaseWindowController {
 /// See also:
 ///
 ///  * [DialogWindowController], the controller that creates and manages dialog windows.
-///  * [Window], the widget for a dialog window.
+///  * [Window], the widget to render content to a [DialogWindowController].
 ///  * [WindowControllerDelegate], the delegate for regular window controllers.
 @internal
 mixin class DialogWindowControllerDelegate {
@@ -737,7 +737,7 @@ abstract class DialogWindowController extends BaseWindowController {
 /// See also:
 ///
 /// * [TooltipWindowController], the controller that creates and manages tooltip windows.
-/// * [Window], the widget for a tooltip window.
+/// * [Window], the widget to render content to a [TooltipWindowController].
 /// * [WindowControllerDelegate], the delegate for regular window controllers.
 mixin class TooltipWindowControllerDelegate {
   /// Invoked after the window is closed.
@@ -882,7 +882,7 @@ abstract class TooltipWindowController extends BaseWindowController {
 /// See also:
 ///
 /// * [PopupWindowController], the controller that creates and manages popup windows.
-/// * [Window], the widget for a popup window.
+/// * [Window], the widget to render content to a [PopupWindowController].
 /// * [WindowControllerDelegate], the delegate for regular window controllers.
 mixin class PopupWindowControllerDelegate {
   /// Invoked after the window is closed.
@@ -1066,7 +1066,7 @@ abstract class PopupWindowController extends BaseWindowController {
 /// See also:
 ///
 ///  * [SatelliteWindowController], the controller that creates and manages a satellite window.
-///  * [Window], the widget for a satellite window.
+///  * [Window], the widget to render content to a [SatelliteWindowController].
 @internal
 mixin class SatelliteWindowControllerDelegate {
   /// Invoked when the user attempts to close the window.
@@ -1126,7 +1126,7 @@ mixin class SatelliteWindowControllerDelegate {
 /// properties.
 ///
 /// This class does not interact with the widget tree. Instead, it is typically
-/// provided to the [Window] widget, who does the work of rendering the
+/// provided to the [Window] widget, which does the work of rendering the
 /// content inside of this window.
 ///
 /// The user of this class is responsible for managing the lifecycle of the window.
@@ -1626,7 +1626,7 @@ enum _WindowControllerAspect {
 ///
 /// See also:
 ///
-///  * [Window], the widget to create a window.
+///  * [Window], the widget to render content to a [BaseWindowController].
 @internal
 class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// Creates a new [WindowScope].
@@ -1700,7 +1700,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// * [WindowController], the controller for regular top-level windows.
   /// * [DialogWindowController], the controller for dialog windows.
-  /// * [Window], the widget for a window.
+  /// * [Window], the widget to render content to a [BaseWindowController].
   /// * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///   [WindowScope] ancestor. It returns null instead.
   @internal
@@ -1716,7 +1716,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// * [WindowController], the controller for regular top-level windows.
   /// * [DialogWindowController], the controller for dialog windows.
-  /// * [Window], the widget for a window.
+  /// * [Window], the widget to render content to a [BaseWindowController].
   /// * [of], which will throw if it doesn't find a [WindowScope] ancestor,
   ///   instead of returning null.
   @internal
