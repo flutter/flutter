@@ -19,9 +19,29 @@ layout(constant_id = 1) const float supports_decal = 1;
 layout(input_attachment_index = 0) uniform subpassInputMS uSub;
 
 vec4 ReadDestination() {
+#ifdef IMPELLER_TARGET_VULKAN
+  // On Metal and OpenGL ES, SPIRV-Cross lowers `subpassInputMS` to native
+  // framebuffer fetch (`[[color(0)]]` and `gl_LastFragData[0]`), which the
+  // hardware/driver scopes to the current primitive's covered samples (and
+  // `gl_SampleMaskIn` is unavailable in unextended GLSL ES 1.00/3.00).
+  //
+  // On Vulkan, `subpassLoad(uSub, i)` remains an explicit pixel-rate MSAA
+  // input-attachment read of sample `i`. Unconditionally averaging samples 0..3
+  // reads samples outside this primitive's coverage, including samples along a
+  // triangle strip's shared edge already written by the adjacent triangle.
+  int mask = gl_SampleMaskIn[0] & 0xf;
+  vec4 result = vec4(0.0);
+  for (int i = 0; i < 4; i++) {
+    if ((mask & (1 << i)) != 0) {
+      result += subpassLoad(uSub, i);
+    }
+  }
+  return result / float(max(bitCount(mask), 1));
+#else
   return (subpassLoad(uSub, 0) + subpassLoad(uSub, 1) + subpassLoad(uSub, 2) +
           subpassLoad(uSub, 3)) /
          vec4(4.0);
+#endif
 }
 
 uniform sampler2D texture_sampler_src;
