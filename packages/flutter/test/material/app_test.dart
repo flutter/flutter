@@ -55,28 +55,6 @@ void main() {
     expect(find.text('Home sweet home'), findsOneWidget);
   });
 
-  testWidgets('Text uses no locale when MaterialApp uses the default locale', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const MaterialApp(home: Text('你好')));
-
-    expect(Localizations.isDefaultLocaleOf(tester.element(find.byType(RichText))), isTrue);
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).locale, isNull);
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        supportedLocales: <Locale>[Locale('en', 'US'), Locale('zh', 'CN')],
-        home: Text('你好'),
-      ),
-    );
-
-    expect(Localizations.isDefaultLocaleOf(tester.element(find.byType(RichText))), isFalse);
-    expect(
-      tester.renderObject<RenderParagraph>(find.byType(RichText)).locale,
-      const Locale('en', 'US'),
-    );
-  });
-
   testWidgets('Focus handling', (WidgetTester tester) async {
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);

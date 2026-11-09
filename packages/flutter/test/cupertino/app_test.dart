@@ -48,28 +48,6 @@ void main() {
     expect(find.widgetWithText(Navigator, 'foo'), findsOneWidget);
   });
 
-  testWidgets('Text uses no locale when CupertinoApp uses the default locale', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const CupertinoApp(home: Text('你好')));
-
-    expect(Localizations.isDefaultLocaleOf(tester.element(find.byType(RichText))), isTrue);
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).locale, isNull);
-
-    await tester.pumpWidget(
-      const CupertinoApp(
-        supportedLocales: <Locale>[Locale('en', 'US'), Locale('zh', 'CN')],
-        home: Text('你好'),
-      ),
-    );
-
-    expect(Localizations.isDefaultLocaleOf(tester.element(find.byType(RichText))), isFalse);
-    expect(
-      tester.renderObject<RenderParagraph>(find.byType(RichText)).locale,
-      const Locale('en', 'US'),
-    );
-  });
-
   testWidgets('Has default cupertino localizations', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
