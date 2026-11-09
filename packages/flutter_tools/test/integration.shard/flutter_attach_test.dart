@@ -5,13 +5,21 @@
 @Tags(<String>['flutter-test-driver'])
 library;
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
+import '../src/fakes.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
@@ -195,5 +203,173 @@ void main() {
       final Uri vmServiceUri = Uri.parse(vmServiceUriString);
       expect(vmServiceUri.port, equals(ddsPort));
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/196118.
+  testWithoutContext('exits gracefully with filesystem error details when target VM fails to create DevFS temp directory', () async {
+    final String flutterRoot = getFlutterRoot();
+    final logger = BufferLogger.test();
+    final cache = Cache.test(
+      rootOverride: fileSystem.directory(flutterRoot),
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+    );
+    final localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: flutterRoot,
+      logger: logger,
+      platform: platform,
+      userMessages: UserMessages(),
+    );
+    final EngineBuildPaths? engineBuildPaths = await localEngineLocator.findEnginePath(
+      engineSourcePath: platform.environment[kLocalEngineLocation],
+      localEngine: platform.environment[kLocalEngineEnvironment],
+      localHostEngine: platform.environment[kLocalEngineHostEnvironment],
+    );
+    final Artifacts artifacts = switch (engineBuildPaths) {
+      final EngineBuildPaths paths => Artifacts.getLocalEngine(
+        paths,
+        toolContext: FakeToolContext(
+          cache: cache,
+          fs: fileSystem,
+          logger: logger,
+          os: cache.osUtils,
+          platform: platform,
+          processManager: processManager,
+        ),
+      ),
+      null => CachedArtifacts(
+        fileSystem: fileSystem,
+        platform: platform,
+        cache: cache,
+        operatingSystemUtils: cache.osUtils,
+      ),
+    };
+    final Directory assetDir = tempDir.childDirectory('build').childDirectory('flutter_assets')
+      ..createSync(recursive: true);
+    final File testerMain = tempDir.childFile('tester_main.dart')
+      ..writeAsStringSync('void main() {}\n');
+    final String kernelPath = fileSystem.path.join(assetDir.path, 'kernel_blob.bin');
+    final String packageConfigPath = fileSystem.path.join(
+      tempDir.path,
+      '.dart_tool',
+      'package_config.json',
+    );
+    final ProcessResult compileResult = await processManager.run(<String>[
+      artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
+      artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+      '--sdk-root',
+      '${artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath)}/',
+      '--target=flutter',
+      '--packages=$packageConfigPath',
+      '--output-dill=$kernelPath',
+      testerMain.path,
+    ], workingDirectory: tempDir.path);
+    expect(
+      compileResult.exitCode,
+      0,
+      reason: 'Failed to compile kernel:\n${compileResult.stdout}\n${compileResult.stderr}',
+    );
+
+    // Point TMPDIR/TMP/TEMP for the target flutter_tester VM at a regular file so
+    // Directory.systemTemp.createTemp fails deterministically across Linux, macOS,
+    // Windows, and root containers while the host flutter_tools process retains a
+    // valid temporary directory.
+    final File blockedTempFile = tempDir.childFile('blocked_system_temp')
+      ..writeAsStringSync('not a directory');
+    final Process testerProcess = await processManager.start(
+      <String>[
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        '--run-forever',
+        '--non-interactive',
+        '--disable-service-auth-codes',
+        '--packages=$packageConfigPath',
+        '--flutter-assets-dir=${assetDir.path}',
+        '--vm-service-port=0',
+        kernelPath,
+      ],
+      workingDirectory: tempDir.path,
+      environment: <String, String>{
+        'TMPDIR': blockedTempFile.path,
+        'TMP': blockedTempFile.path,
+        'TEMP': blockedTempFile.path,
+      },
+    );
+
+    final vmServiceUriCompleter = Completer<Uri>();
+    final testerOutput = StringBuffer();
+    final vmServicePattern = RegExp(r'The Dart VM service is listening on (http://\S+)');
+    void parseLine(String line) {
+      testerOutput.writeln(line);
+      if (!vmServiceUriCompleter.isCompleted) {
+        final RegExpMatch? match = vmServicePattern.firstMatch(line);
+        if (match != null) {
+          vmServiceUriCompleter.complete(Uri.parse(match.group(1)!));
+        }
+      }
+    }
+
+    final StreamSubscription<String> stdoutSub = testerProcess.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(parseLine);
+    final StreamSubscription<String> stderrSub = testerProcess.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(parseLine);
+    addTearDown(() async {
+      testerProcess.kill();
+      await testerProcess.exitCode;
+      await stdoutSub.cancel();
+      await stderrSub.cancel();
+    });
+
+    final Uri vmServiceUri = await vmServiceUriCompleter.future.timeout(
+      const Duration(seconds: 30),
+      onTimeout: () => fail('Timed out waiting for VM service:\n$testerOutput'),
+    );
+
+    final String flutterToolsPackageConfig = fileSystem.path.join(
+      flutterRoot,
+      'packages',
+      'flutter_tools',
+      '.dart_tool',
+      'package_config.json',
+    );
+    final String flutterToolsEntryScript = fileSystem.path.join(
+      flutterRoot,
+      'packages',
+      'flutter_tools',
+      'bin',
+      'flutter_tools.dart',
+    );
+    final ProcessResult attachResult = await processManager.run(
+      <String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--packages=$flutterToolsPackageConfig',
+        flutterToolsEntryScript,
+        '--suppress-analytics',
+        '--no-version-check',
+        '-d',
+        'flutter-tester',
+        'attach',
+        '--debug-url=$vmServiceUri',
+        ...getLocalEngineArguments(),
+      ],
+      workingDirectory: tempDir.path,
+      environment: <String, String>{'BOT': 'true', 'FLUTTER_ROOT': flutterRoot},
+    );
+
+    final attachStdout = attachResult.stdout as String;
+    final attachStderr = attachResult.stderr as String;
+    expect(attachResult.exitCode, 3, reason: 'stdout:\n$attachStdout\nstderr:\n$attachStderr');
+    expect(attachStderr, contains('Error initializing DevFS:'));
+    expect(attachStderr, contains('Creation of temporary directory failed'));
+    expect(attachStderr, contains('blocked_system_temp'));
+    expect(attachStderr, isNot(contains('#0      ')));
+    expect(attachStderr, isNot(contains('Unhandled exception')));
+    expect(attachStdout, isNot(contains('flutter has exited unexpectedly')));
   });
 }

@@ -25,6 +25,7 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -170,6 +171,261 @@ void main() {
       expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
     },
   );
+
+  testWithoutContext('DevFS create throws a DevFSException with filesystem error details when target VM fails to create temporary directory', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final rpcHost = _RpcErrorWithDetailsHost(
+      calls: <_ExpectedRpcCall>[
+        _ExpectedRpcCall(
+          method: '_createDevFS',
+          args: const <String, Object>{'fsName': 'test'},
+          error: <String, Object?>{
+            'code': vm_service.RPCErrorKind.kInternalError.code,
+            'message': 'Internal error',
+            'data': const <String, Object?>{
+              'details':
+                  '_createDevFS: Unexpected exception:PathAccessException: '
+                  r"Creation of temporary directory failed, path = 'C:\Users\user\AppData\Local\Temp' "
+                  '(OS Error: Access is denied.\r\n, errno = 5)\n'
+                  '#0      _checkForErrorResponse (dart:io/common.dart:58:9)\n'
+                  '#1      _Directory.createTemp.<anonymous closure> (dart:io/directory_impl.dart:163:7)',
+            },
+          },
+        ),
+      ],
+    );
+    addTearDown(rpcHost.dispose);
+
+    final devFS = DevFS(
+      rpcHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: FakeHttpClient.any(),
+    );
+
+    await expectLater(
+      devFS.create(),
+      throwsA(
+        isA<DevFSException>()
+            .having((DevFSException e) => e.message, 'message', 'Failed to create DevFS on device')
+            .having(
+              (DevFSException e) => e.error,
+              'error',
+              allOf(
+                contains('PathAccessException: Creation of temporary directory failed'),
+                contains('Access is denied.'),
+                contains('errno = 5'),
+                isNot(contains('#0')),
+              ),
+            )
+            .having(
+              (DevFSException e) => e.toString(),
+              'toString',
+              allOf(
+                contains(
+                  'DevFSException(Failed to create DevFS on device, PathAccessException: '
+                  'Creation of temporary directory failed',
+                ),
+                contains('errno = 5'),
+                isNot(contains('null')),
+              ),
+            ),
+      ),
+    );
+    expect(rpcHost.hasRemainingExpectations, isFalse);
+  });
+
+  testWithoutContext(
+    'DevFS create throws a DevFSException for other target VM FileSystemException types',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final rpcHost = _RpcErrorWithDetailsHost(
+        calls: <_ExpectedRpcCall>[
+          _ExpectedRpcCall(
+            method: '_createDevFS',
+            args: const <String, Object>{'fsName': 'test'},
+            error: <String, Object?>{
+              'code': vm_service.RPCErrorKind.kInternalError.code,
+              'message': 'Internal error',
+              'data': const <String, Object?>{
+                'details':
+                    '_createDevFS: Unexpected exception:FileSystemException: '
+                    "Creation of temporary directory failed, path = '/tmp' "
+                    '(OS Error: No space left on device, errno = 28)\n'
+                    '#0      _checkForErrorResponse (dart:io/common.dart:58:9)',
+              },
+            },
+          ),
+        ],
+      );
+      addTearDown(rpcHost.dispose);
+
+      final devFS = DevFS(
+        rpcHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        buildMode: BuildMode.debug,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.empty(),
+        ),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      await expectLater(
+        devFS.create(),
+        throwsA(
+          isA<DevFSException>()
+              .having(
+                (DevFSException e) => e.message,
+                'message',
+                'Failed to create DevFS on device',
+              )
+              .having(
+                (DevFSException e) => e.error,
+                'error',
+                allOf(
+                  contains('FileSystemException: Creation of temporary directory failed'),
+                  contains('No space left on device, errno = 28'),
+                  isNot(contains('#0')),
+                ),
+              ),
+        ),
+      );
+      expect(rpcHost.hasRemainingExpectations, isFalse);
+    },
+  );
+
+  testWithoutContext(
+    'DevFS create throws a DevFSException when retry after existing filesystem error fails',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final rpcHost = _RpcErrorWithDetailsHost(
+        calls: <_ExpectedRpcCall>[
+          const _ExpectedRpcCall(
+            method: '_createDevFS',
+            args: <String, Object>{'fsName': 'test'},
+            error: <String, Object?>{'code': 1001, 'message': 'File system already exists'},
+          ),
+          const _ExpectedRpcCall(method: '_deleteDevFS', args: <String, Object>{'fsName': 'test'}),
+          _ExpectedRpcCall(
+            method: '_createDevFS',
+            args: const <String, Object>{'fsName': 'test'},
+            error: <String, Object?>{
+              'code': vm_service.RPCErrorKind.kInternalError.code,
+              'message': 'Internal error',
+              'data': const <String, Object?>{
+                'details':
+                    '_createDevFS: Unexpected exception:PathNotFoundException: '
+                    "Creation of temporary directory failed, path = '/missing/tmp' "
+                    '(OS Error: No such file or directory, errno = 2)\n'
+                    '#0      _checkForErrorResponse (dart:io/common.dart:58:9)',
+              },
+            },
+          ),
+        ],
+      );
+      addTearDown(rpcHost.dispose);
+
+      final devFS = DevFS(
+        rpcHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        buildMode: BuildMode.debug,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.empty(),
+        ),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      await expectLater(
+        devFS.create(),
+        throwsA(
+          isA<DevFSException>()
+              .having(
+                (DevFSException e) => e.message,
+                'message',
+                'Failed to create DevFS on device',
+              )
+              .having(
+                (DevFSException e) => e.error,
+                'error',
+                contains('PathNotFoundException: Creation of temporary directory failed'),
+              ),
+        ),
+      );
+      expect(rpcHost.hasRemainingExpectations, isFalse);
+    },
+  );
+
+  testWithoutContext(
+    'DevFS create rethrows RPCError when target VM returns non-filesystem internal error',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final rpcHost = _RpcErrorWithDetailsHost(
+        calls: <_ExpectedRpcCall>[
+          _ExpectedRpcCall(
+            method: '_createDevFS',
+            args: const <String, Object>{'fsName': 'test'},
+            error: <String, Object?>{
+              'code': vm_service.RPCErrorKind.kInternalError.code,
+              'message': 'Internal error',
+              'data': const <String, Object?>{
+                'details':
+                    '_createDevFS: Unexpected exception:Bad state: Unexpected VM state\n'
+                    '#0      DevFS._createDevFS (dart:_vmservice/devfs.dart:197:21)',
+              },
+            },
+          ),
+        ],
+      );
+      addTearDown(rpcHost.dispose);
+
+      final devFS = DevFS(
+        rpcHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        buildMode: BuildMode.debug,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.empty(),
+        ),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      await expectLater(devFS.create(), throwsA(isA<vm_service.RPCError>()));
+      expect(rpcHost.hasRemainingExpectations, isFalse);
+    },
+  );
+
+  testWithoutContext('DevFSException.toString omits null error and stackTrace', () {
+    expect(
+      DevFSException('Failed to create DevFS').toString(),
+      'DevFSException(Failed to create DevFS)',
+    );
+    expect(
+      DevFSException('Service disconnected', StateError('disconnected')).toString(),
+      'DevFSException(Service disconnected, Bad state: disconnected)',
+    );
+  });
 
   testWithoutContext('DevFS destroy is resilient to vmservice disconnection', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -1290,4 +1546,56 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   bool areDependenciesModified(DevFSContent shaderContent) => false;
+}
+
+class _RpcErrorWithDetailsHost {
+  _RpcErrorWithDetailsHost({required this._calls}) {
+    vmService = FlutterVmService(
+      vm_service.VmService(_input.stream, _output.add),
+      httpAddress: Uri.parse('http://localhost'),
+    );
+    _outputSubscription = _output.stream.listen((String data) {
+      final request = json.decode(data) as Map<String, Object?>;
+      expect(_calls, isNotEmpty, reason: 'Unexpected request: $request');
+      final _ExpectedRpcCall expected = _calls.removeAt(0);
+      expect(request['method'], expected.method);
+      expect(request['params'], expected.args);
+      if (expected.error case final Map<String, Object?> error) {
+        _input.add(
+          json.encode(<String, Object?>{'jsonrpc': '2.0', 'id': request['id'], 'error': error}),
+        );
+      } else {
+        _input.add(
+          json.encode(<String, Object?>{
+            'jsonrpc': '2.0',
+            'id': request['id'],
+            'result': const <String, Object>{'type': 'Success'},
+          }),
+        );
+      }
+    });
+  }
+
+  final List<_ExpectedRpcCall> _calls;
+  final _input = StreamController<String>();
+  final _output = StreamController<String>();
+  late final StreamSubscription<String> _outputSubscription;
+  late final FlutterVmService vmService;
+
+  bool get hasRemainingExpectations => _calls.isNotEmpty;
+
+  Future<void> dispose() async {
+    await vmService.dispose();
+    await _outputSubscription.cancel();
+    await _input.close();
+    await _output.close();
+  }
+}
+
+class _ExpectedRpcCall {
+  const _ExpectedRpcCall({required this.method, this.args = const <String, Object?>{}, this.error});
+
+  final String method;
+  final Map<String, Object?> args;
+  final Map<String, Object?>? error;
 }

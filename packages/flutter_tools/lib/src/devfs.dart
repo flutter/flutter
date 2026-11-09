@@ -246,11 +246,14 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 class DevFSException implements Exception {
   DevFSException(this.message, [this.error, this.stackTrace]);
   final String message;
-  final dynamic error;
+  final Object? error;
   final StackTrace? stackTrace;
 
   @override
-  String toString() => 'DevFSException($message, $error, $stackTrace)';
+  String toString() {
+    final parts = <Object>[message, ?error, ?stackTrace];
+    return 'DevFSException(${parts.join(', ')})';
+  }
 }
 
 /// Interface responsible for syncing asset files to a development device.
@@ -490,33 +493,72 @@ class DevFS {
     return deviceUri;
   }
 
+  // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h.
+  static const _kFileSystemAlreadyExistsCode = 1001;
+  static const _kServiceConnectionDisposedMessage = 'Service connection disposed';
+  static const _kCreateDevFSUnexpectedPrefix = '_createDevFS: Unexpected exception:';
+  static final _targetVmFileSystemErrorPrefix = RegExp(
+    r'^(?:FileSystemException|PathAccessException|PathExistsException|PathNotFoundException):',
+  );
+  static final _newlinePattern = RegExp(r'\r?\n');
+
+  static String? _extractTargetFileSystemError(vm_service.RPCError rpcException) {
+    if (rpcException.code != vm_service.RPCErrorKind.kInternalError.code) {
+      return null;
+    }
+    final String? details = rpcException.details;
+    if (details == null) {
+      return null;
+    }
+    String errorText = details.split('\n#0').first.trim();
+    if (errorText.startsWith(_kCreateDevFSUnexpectedPrefix)) {
+      errorText = errorText.substring(_kCreateDevFSUnexpectedPrefix.length).trim();
+    }
+    if (!_targetVmFileSystemErrorPrefix.hasMatch(errorText)) {
+      return null;
+    }
+    return errorText.replaceAll(_newlinePattern, ' ');
+  }
+
   Future<Uri> create() async {
     final Logger logger = _toolContext.logger;
     logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
+    final vm_service.Response response = await _createDevFSOnDevice(
+      logger: logger,
+      retryIfAlreadyExists: true,
+    );
+    _baseUri = Uri.parse(response.json!['uri'] as String);
+    logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
+    return _baseUri!;
+  }
+
+  Future<vm_service.Response> _createDevFSOnDevice({
+    required Logger logger,
+    required bool retryIfAlreadyExists,
+  }) async {
     try {
-      final vm_service.Response response = await _vmService.createDevFS(fsName);
-      _baseUri = Uri.parse(response.json!['uri'] as String);
+      return await _vmService.createDevFS(fsName);
     } on vm_service.RPCError catch (rpcException) {
       if (rpcException.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
           rpcException.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
-          rpcException.message.contains('Service connection disposed')) {
+          rpcException.message.contains(_kServiceConnectionDisposedMessage)) {
         // This can happen if the device has been disconnected, so translate to
         // a DevFSException, which the caller will handle.
         throw DevFSException('Service disconnected', rpcException);
       }
-      // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
-      if (rpcException.code != 1001) {
+      if (_extractTargetFileSystemError(rpcException) case final String fileSystemError) {
+        logger.printTrace('DevFS: Failed to create filesystem on device: $rpcException');
+        throw DevFSException('Failed to create DevFS on device', fileSystemError);
+      }
+      if (!retryIfAlreadyExists || rpcException.code != _kFileSystemAlreadyExistsCode) {
         // Other RPCErrors are unexpected. Rethrow so it will hit crash
         // logging.
         rethrow;
       }
       logger.printTrace('DevFS: Creating failed. Destroying and trying again');
       await destroy();
-      final vm_service.Response response = await _vmService.createDevFS(fsName);
-      _baseUri = Uri.parse(response.json!['uri'] as String);
+      return _createDevFSOnDevice(logger: logger, retryIfAlreadyExists: false);
     }
-    logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
-    return _baseUri!;
   }
 
   Future<void> destroy() async {
