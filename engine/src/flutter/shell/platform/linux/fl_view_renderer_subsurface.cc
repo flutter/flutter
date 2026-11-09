@@ -140,15 +140,14 @@ static void end_synchronized_resize(FlViewRendererSubsurface* self) {
   }
 
   if (self->synchronized && self->subsurface != nullptr) {
-    fl_subsurface_set_synchronized(self->subsurface, FALSE);
+    fl_subsurface_set_desync(self->subsurface);
   }
   self->synchronized = FALSE;
 }
 
 // Called after GTK has painted and committed the parent surface, which also
 // applied the frame held back by the subsurface being synchronized.
-static void after_paint_cb(GdkFrameClock* frame_clock, gpointer user_data) {
-  FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(user_data);
+static void after_paint_cb(FlViewRendererSubsurface* self) {
   end_synchronized_resize(self);
 }
 
@@ -175,15 +174,16 @@ static void begin_synchronized_resize(FlViewRendererSubsurface* self) {
     return;
   }
 
-  fl_subsurface_set_synchronized(self->subsurface, TRUE);
+  fl_subsurface_set_sync(self->subsurface);
   self->synchronized = TRUE;
   self->frame_clock = GDK_FRAME_CLOCK(g_object_ref(frame_clock));
   // GTK commits the parent surface from its own handler for this signal, so
   // connect after it to desynchronize once that commit has been made. GTK
   // skips the commit while the window is waiting for its initial configure
   // event, but the window isn't visible then so nothing is shown early.
-  self->after_paint_handler = g_signal_connect_after(
-      frame_clock, "after-paint", G_CALLBACK(after_paint_cb), self);
+  self->after_paint_handler = g_signal_connect_data(
+      frame_clock, "after-paint", G_CALLBACK(after_paint_cb), self, nullptr,
+      static_cast<GConnectFlags>(G_CONNECT_AFTER | G_CONNECT_SWAPPED));
 
   gtk_widget_queue_draw(widget);
 }
@@ -217,12 +217,16 @@ static void create_subsurface(FlViewRendererSubsurface* self,
       fl_wayland_display_create_subsurface(wayland_display, parent_surface);
   update_subsurface_position(self);
 
-  // A view sized to its content resizes the window to fit each frame, so its
-  // frames are always held back until GTK has committed the resized window.
-  // The window is redrawn for each frame to make that happen, see
-  // frame_presented_cb().
+  // A new subsurface is synchronized with its parent, which holds back every
+  // frame until the parent (GTK) surface is redrawn and committed. A view sized
+  // to its content relies on that, as it resizes the window to fit each frame
+  // and redraws the window for each one, see frame_presented_cb(). Otherwise
+  // desynchronize it so frames are shown as soon as they are committed, which
+  // leaves the GTK thread idle while Flutter is animating.
   if (self->sized_to_content) {
-    fl_subsurface_set_synchronized(self->subsurface, TRUE);
+    fl_subsurface_set_sync(self->subsurface);
+  } else {
+    fl_subsurface_set_desync(self->subsurface);
   }
 
   GtkAllocation allocation;

@@ -41,12 +41,6 @@ FlSubsurface* fl_subsurface_new(struct wl_compositor* compositor,
   self->subsurface = wl_subcompositor_get_subsurface(
       subcompositor, self->surface, parent_surface);
 
-  // A new subsurface is synchronized with its parent, which would hold back
-  // every frame until the parent (GTK) surface was redrawn and committed.
-  // Desynchronize it so frames are shown as soon as they are committed, which
-  // leaves the GTK thread idle while Flutter is animating.
-  wl_subsurface_set_desync(self->subsurface);
-
   // Give the subsurface an empty input region so pointer, touch and keyboard
   // events pass through to the parent (GTK) surface, which handles all input
   // for the view.
@@ -67,11 +61,12 @@ void fl_subsurface_set_position(FlSubsurface* self, gint x, gint y) {
   wl_subsurface_set_position(self->subsurface, x, y);
 }
 
-void fl_subsurface_set_synchronized(FlSubsurface* self, gboolean synchronized) {
+void fl_subsurface_set_sync(FlSubsurface* self) {
   g_return_if_fail(FL_IS_SUBSURFACE(self));
-  if (synchronized) {
-    wl_subsurface_set_sync(self->subsurface);
-  } else {
-    wl_subsurface_set_desync(self->subsurface);
-  }
+  wl_subsurface_set_sync(self->subsurface);
+}
+
+void fl_subsurface_set_desync(FlSubsurface* self) {
+  g_return_if_fail(FL_IS_SUBSURFACE(self));
+  wl_subsurface_set_desync(self->subsurface);
 }
