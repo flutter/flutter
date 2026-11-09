@@ -137,8 +137,6 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
     try {
       final Object? result = await connection.sendRequest(
         DiagnosticsExtension.runDiagnosticsMethod,
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
         timeout: null,
       );
       final List<ValidationResult> results = ValidationResult.listFromJson(result);
