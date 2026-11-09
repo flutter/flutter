@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -83,6 +85,22 @@ void main() {
       fileSystem: fileSystem,
       engineVersion: '2',
       analytics: fakeAnalytics,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'strawberry'],
+        ),
+      ),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: processManager,
+        ),
+      ),
     );
   });
 
@@ -488,8 +506,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macPlatform,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 

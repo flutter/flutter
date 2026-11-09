@@ -91,6 +91,7 @@ void main() {
       ),
     ]);
     final compiler = WebTestCompiler(
+      analytics: fakeAnalytics,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         config: config,
@@ -196,6 +197,7 @@ void main() {
           ),
         ]);
         final compiler = WebTestCompiler(
+          analytics: fakeAnalytics,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
             config: config,
@@ -277,6 +279,7 @@ void main() {
       ),
     ]);
     final compiler = WebTestCompiler(
+      analytics: fakeAnalytics,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         config: config,

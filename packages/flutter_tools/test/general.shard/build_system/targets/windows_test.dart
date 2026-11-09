@@ -367,4 +367,31 @@ flutter:
 
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\libvmservice_snapshot.dll'), exists);
   });
+
+  testWithoutContext(
+    'AotSnapshotRelease throws StateError when visualStudio is null on windows_x64',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        defines: <String, String>{kBuildMode: 'release', kTargetPlatform: 'windows-x64'},
+      );
+      environment.buildDir.createSync(recursive: true);
+
+      await expectLater(
+        const AotSnapshotRelease(TargetPlatform.windows_x64).build(environment),
+        throwsA(
+          isA<StateError>().having(
+            (StateError error) => error.message,
+            'message',
+            contains('VisualStudio'),
+          ),
+        ),
+      );
+    },
+  );
 }
