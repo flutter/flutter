@@ -3383,7 +3383,6 @@ void _testTextField() {
     expect(blurCount, 0);
     expect(domDocument.activeElement, input);
 
-    // Remove node 3, moving node 1 back under node 0.
     pumpSemantics(withNode3: false);
 
     expect(blurCount, 0);
