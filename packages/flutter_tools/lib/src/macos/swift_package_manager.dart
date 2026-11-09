@@ -3,16 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/version.dart';
 import '../context/tool_context.dart';
+import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
 import '../plugins.dart';
@@ -33,6 +36,9 @@ const kDisableSwiftPMInstructions =
     'You can also disable Swift Package Manager for the project by following these instructions:\n'
     '  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager\n'
     '$kSwiftPackageManagerDisabledWarning\n';
+
+const String kFileAnIssue =
+    'Please file an issue at https://github.com/flutter/flutter/issues/new/choose';
 
 /// Swift Package Manager is a dependency management solution for iOS and macOS
 /// applications.
@@ -79,7 +85,7 @@ class SwiftPackageManager {
           List<SwiftPackagePackageDependency> packageDependencies,
           List<SwiftPackageTargetDependency> targetDependencies,
           Set<String> expectedBasenames,
-        ) = _dependenciesForPlugins(
+        ) = await _dependenciesForPlugins(
           plugins: plugins,
           platform: platform,
           symlinkDirectory: symlinkDirectory,
@@ -147,19 +153,22 @@ class SwiftPackageManager {
     );
   }
 
-  (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>, Set<String>)
+  Future<(List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>, Set<String>)>
   _dependenciesForPlugins({
     required List<Plugin> plugins,
     required FlutterDarwinPlatform platform,
     required Directory symlinkDirectory,
     required String pathRelativeTo,
-  }) {
+  }) async {
     final FileSystem fileSystem = _toolContext.fs;
     final packageDependencies = <SwiftPackagePackageDependency>[];
     final targetDependencies = <SwiftPackageTargetDependency>[];
     final expectedBasenames = <String>{};
 
-    final Set<Plugin> pluginsRequiringPluginNameSymlink = _pluginsRequiringPluginNameSymlink(
+    final (
+      :Set<Plugin> pluginsRequiringPluginNameSymlink,
+      :Map<Plugin, SwiftPackageSupportedPlatform> minimumDeploymentOverrides,
+    ) = await _pluginsRequiringCopy(
       plugins: plugins,
       platform: platform,
     );
@@ -180,19 +189,27 @@ class SwiftPackageManager {
       }
 
       final String basename = fileSystem.directory(plugin.path).basename;
+      final bool requiresPluginNameSymlink = pluginsRequiringPluginNameSymlink.contains(plugin);
+      final SwiftPackageSupportedPlatform? minimumDeploymentOverride =
+          minimumDeploymentOverrides[plugin];
 
-      final Link pluginSymlink;
-      final String linkName;
-      if (pluginsRequiringPluginNameSymlink.contains(plugin)) {
-        // When basename can't be used as the symlink path, copy the plugin and update the
-        // manifest contents so Xcode will re-process the package manifest.
+      if (requiresPluginNameSymlink || minimumDeploymentOverride != null) {
+        // Copy the plugin so its manifest can be modified without changing the original plugin in
+        // the pub cache. See [_pluginsRequiringCopy] for the reasons a plugin may be copied.
         packagePath = _copyPluginAndUpdateManifest(
           plugin: plugin,
           pathRelativeTo: pathRelativeTo,
           basename: basename,
           platform: platform,
           manifest: manifest,
+          minimumDeploymentOverride: minimumDeploymentOverride,
         );
+      }
+
+      final String linkName;
+      if (requiresPluginNameSymlink) {
+        // When the basename can't be used as the symlink path, the copied manifest contains the
+        // basename so Xcode will re-process the package manifest when the plugin version changes.
         linkName = plugin.name;
       } else {
         // Use the plugin basename as the symlink plugin directory name since the basename has the
@@ -200,7 +217,7 @@ class SwiftPackageManager {
         // changes, which forces Xcode to re-process the package manifest.
         linkName = basename;
       }
-      pluginSymlink = symlinkDirectory.childLink(linkName);
+      final Link pluginSymlink = symlinkDirectory.childLink(linkName);
 
       _createPluginSymlink(pluginSymlink: pluginSymlink, packagePath: packagePath);
       expectedBasenames.add(linkName);
@@ -228,25 +245,48 @@ class SwiftPackageManager {
     return (packageDependencies, targetDependencies, expectedBasenames);
   }
 
-  /// Determine plugins that need to be symlinked by plugin name instead of basename.
+  /// Determine plugins that need to be copied to the build directory so their manifest can be
+  /// modified. A plugin is copied for either (or both) of the following reasons:
   ///
-  /// Xcode caches Swift package manifests and only re-processes them when the path or the contents
-  /// of the manifest change. To ensure that the package manifest is re-processed when the Flutter
-  /// plugin version changes, we use the basename as the symlink plugin directory name since the
-  /// basename has the version number in it. However, the basename cannot be used in the following
-  /// scenarios:
-  ///   - The basename does not match the plugin's name (see https://github.com/flutter/flutter/issues/186881).
-  ///   - The plugin is a dependency of another plugin. Inter-plugin dependencies are defined
-  ///     using relative paths and therefore must use the plugin name and not basename. Example:
-  ///     ```swift
-  ///     .package(name: "firebase_core", path: "../firebase_core"),
-  ///     ```
-  Set<Plugin> _pluginsRequiringPluginNameSymlink({
+  /// 1. **The plugin must be symlinked by plugin name instead of basename**
+  ///    (`pluginsRequiringPluginNameSymlink`).
+  ///
+  ///    Xcode caches Swift package manifests and only re-processes them when the path or the
+  ///    contents of the manifest change. To ensure that the package manifest is re-processed when
+  ///    the Flutter plugin version changes, we use the basename as the symlink plugin directory
+  ///    name since the basename has the version number in it. However, the basename cannot be used
+  ///    in the following scenarios:
+  ///      - The basename does not match the plugin's name (see https://github.com/flutter/flutter/issues/186881).
+  ///      - The plugin is a dependency of another plugin. Inter-plugin dependencies are defined
+  ///        using relative paths and therefore must use the plugin name and not basename. Example:
+  ///        ```swift
+  ///        .package(name: "firebase_core", path: "../firebase_core"),
+  ///        ```
+  ///    In these cases, the plugin is copied so that its manifest can be updated with a comment
+  ///    containing the basename, which forces Xcode to re-process the manifest when the plugin
+  ///    version changes.
+  ///
+  /// 2. **The plugin's minimum deployment target must be overridden**
+  ///    (`minimumDeploymentOverrides`).
+  ///
+  ///    Swift Package Manager requires a package's minimum deployment target to be greater than or
+  ///    equal to the minimum deployment target of its dependencies. If the plugin depends on
+  ///    another plugin with a higher minimum deployment target, the plugin is copied so that its
+  ///    manifest can be updated with the higher minimum deployment target. These plugins can still
+  ///    be symlinked by basename unless they also fall under reason 1.
+  Future<
+    ({
+      Set<Plugin> pluginsRequiringPluginNameSymlink,
+      Map<Plugin, SwiftPackageSupportedPlatform> minimumDeploymentOverrides,
+    })
+  >
+  _pluginsRequiringCopy({
     required List<Plugin> plugins,
     required FlutterDarwinPlatform platform,
-  }) {
+  }) async {
     final FileSystem fileSystem = _toolContext.fs;
-    final pluginsToCopy = <Plugin>{};
+    final Set<Plugin> pluginsRequiringPluginNameSymlink = {};
+    final Map<Plugin, SwiftPackageSupportedPlatform> minimumDeploymentOverrides = {};
     for (final plugin in plugins) {
       if (!plugin.supportSwiftPackageManagerForPlatform(fileSystem, platform.name)) {
         continue;
@@ -256,24 +296,32 @@ class SwiftPackageManager {
       // (see https://github.com/flutter/flutter/issues/186881).
       final String basename = fileSystem.directory(plugin.path).basename;
       if (basename != plugin.name && !basename.startsWith('${plugin.name}-')) {
-        pluginsToCopy.add(plugin);
+        pluginsRequiringPluginNameSymlink.add(plugin);
       }
 
-      // Plugins that are depended on by other plugins cannot use the basename
-      // since their dependency paths are relative using the name of the plugin.
       final String? manifestPath = plugin.pluginSwiftPackageManifestPath(fileSystem, platform.name);
       if (manifestPath == null) {
         continue;
       }
       final File manifest = fileSystem.file(manifestPath);
-      final String manifestContent = manifest.readAsStringSync();
-      final List<Plugin> pluginDependencies = _getPluginDependencies(manifestContent, plugins);
-      if (pluginDependencies.isNotEmpty) {
-        pluginsToCopy.addAll(pluginDependencies);
+      final (List<Plugin> pluginDependencies, SwiftPackageSupportedPlatform? supportedPlatform) =
+          await _getPluginDependencies(manifest, plugins, platform);
+
+      // Plugins that are depended on by other plugins cannot use the basename
+      // since their dependency paths are relative using the name of the plugin.
+      pluginsRequiringPluginNameSymlink.addAll(pluginDependencies);
+
+      // Plugins that depend on plugins with a higher minimum deployment target need their
+      // minimum deployment target overridden.
+      if (supportedPlatform != null) {
+        minimumDeploymentOverrides[plugin] = supportedPlatform;
       }
     }
 
-    return pluginsToCopy;
+    return (
+      pluginsRequiringPluginNameSymlink: pluginsRequiringPluginNameSymlink,
+      minimumDeploymentOverrides: minimumDeploymentOverrides,
+    );
   }
 
   /// Safely creates a symlink at [pluginSymlink] pointing to [packagePath].
@@ -330,7 +378,9 @@ class SwiftPackageManager {
     }
   }
 
-  /// Returns a list of [Plugin]s that the given plugin's [manifestContent] declares a dependency on.
+  /// Returns a list of [Plugin]s that the given plugin's [manifest] declares a dependency on, along
+  /// with a [SwiftPackageSupportedPlatform] override for [platform] if any of those plugin
+  /// dependencies require a higher minimum deployment target than the plugin itself.
   ///
   /// Plugins can declare a SwiftPM dependency on another plugin in their Package.swift like this:
   /// ```swift
@@ -339,29 +389,93 @@ class SwiftPackageManager {
   /// ]
   /// ```
   ///
-  List<Plugin> _getPluginDependencies(String manifestContent, List<Plugin> plugins) {
+  Future<(List<Plugin>, SwiftPackageSupportedPlatform?)> _getPluginDependencies(
+    File manifest,
+    List<Plugin> plugins,
+    FlutterDarwinPlatform platform,
+  ) async {
+    final FileSystem fileSystem = _toolContext.fs;
+    final Logger logger = _toolContext.logger;
+    final String manifestContent = manifest.readAsStringSync();
     final dependencyPattern = RegExp(r'"\.\.\/([^"]+)"');
     final Iterable<Match> matches = dependencyPattern.allMatches(manifestContent);
     final List<Plugin> pluginDependencies = [];
-    if (matches.isNotEmpty) {
-      for (final match in matches) {
-        final String? path = match.group(0);
-        final String? name = match.group(1);
-        if (path == null || name == null) {
-          continue;
+
+    // The plugin's manifest is only parsed once a plugin dependency is found. If it fails to parse,
+    // the plugin's own minimum deployment target is unknown, so no override is determined.
+    var pluginManifestParsed = false;
+    var canOverride = false;
+    SwiftPackageSupportedPlatform? pluginSupportedVersion;
+    SwiftPackageSupportedPlatform? highestDependencyVersion;
+
+    for (final match in matches) {
+      final String? path = match.group(0);
+      final String? name = match.group(1);
+      if (path == null || name == null) {
+        continue;
+      }
+      final Plugin? pluginDependency = plugins.firstWhereOrNull((plugin) => plugin.name == name);
+      if (pluginDependency == null) {
+        continue;
+      }
+
+      final String? dependencyManifestPath = pluginDependency.pluginSwiftPackageManifestPath(
+        fileSystem,
+        platform.name,
+      );
+      if (dependencyManifestPath == null) {
+        continue;
+      }
+      final File dependencyManifest = fileSystem.file(dependencyManifestPath);
+      if (!dependencyManifest.existsSync()) {
+        continue;
+      }
+      pluginDependencies.add(pluginDependency);
+
+      if (!pluginManifestParsed) {
+        pluginManifestParsed = true;
+        final Map<String, Object?>? manifestAsJson = await _parseSwiftPackage(
+          swiftPackageManifest: manifest,
+          processManager: _toolContext.processManager,
+          logger: logger,
+        );
+        if (manifestAsJson != null) {
+          canOverride = true;
+          pluginSupportedVersion = parseSwiftPackageSupportedPlatform(manifestAsJson, platform);
         }
-        final Plugin? pluginDependency = plugins.firstWhereOrNull((plugin) => plugin.name == name);
-        if (pluginDependency == null) {
-          continue;
+      }
+      if (!canOverride) {
+        continue;
+      }
+
+      final Map<String, Object?>? dependencyManifestAsJson = await _parseSwiftPackage(
+        swiftPackageManifest: dependencyManifest,
+        processManager: _toolContext.processManager,
+        logger: logger,
+      );
+      if (dependencyManifestAsJson != null) {
+        final SwiftPackageSupportedPlatform? dependencySupportedVersion =
+            parseSwiftPackageSupportedPlatform(dependencyManifestAsJson, platform);
+        if (dependencySupportedVersion != null &&
+            (highestDependencyVersion == null ||
+                dependencySupportedVersion.version > highestDependencyVersion.version)) {
+          highestDependencyVersion = dependencySupportedVersion;
         }
-        pluginDependencies.add(pluginDependency);
       }
     }
-    return pluginDependencies;
+
+    // Only override when a plugin dependency requires a higher minimum deployment target.
+    if (highestDependencyVersion != null &&
+        (pluginSupportedVersion == null ||
+            highestDependencyVersion.version > pluginSupportedVersion.version)) {
+      return (pluginDependencies, highestDependencyVersion);
+    }
+    return (pluginDependencies, null);
   }
 
   /// Copy the [plugin] to the build directory and update the manifest with a comment containing
-  /// the version. Returns the path to the copied plugin.
+  /// the version. If [minimumDeploymentOverride] is provided, also update the minimum deployment
+  /// target in the manifest. Returns the path to the copied plugin.
   ///
   /// Plugin must be copied first so that the original plugin in pub cache is not modified.
   ///
@@ -372,6 +486,7 @@ class SwiftPackageManager {
     required String basename,
     required FlutterDarwinPlatform platform,
     required File manifest,
+    SwiftPackageSupportedPlatform? minimumDeploymentOverride,
   }) {
     final ToolContext(:Config config, fs: FileSystem fileSystem, :ProcessUtils processUtils) =
         _toolContext;
@@ -416,7 +531,17 @@ class SwiftPackageManager {
         'rsync stdout: \n${result.stdout}\nrsync stderr: \n${result.stderr}',
       );
     }
-    final newManifestContent = '$manifestContent\n\n// Basename of original plugin: $basename';
+    var platformOverride = '';
+    if (minimumDeploymentOverride != null &&
+        manifestContent.contains(RegExp(r'\bpackage\s*=\s*Package\s*\('))) {
+      platformOverride =
+          '\n\n'
+          '// Overriding platform to match minimum of dependencies.\n'
+          'package.platforms = [${minimumDeploymentOverride.format()}]';
+    }
+    final newManifestContent =
+        '$manifestContent$platformOverride\n\n'
+        '// Basename of original plugin: $basename';
     copiedManifest.writeAsStringSync(newManifestContent);
     return packagePath;
   }
@@ -546,5 +671,51 @@ class SwiftPackageManager {
     } on FileSystemException catch (_) {
       // Ignore errors, as another process might be concurrently modifying the directory.
     }
+  }
+
+  static List<String> get convertSwiftPackageManifestToJsonCommand => [
+    'swift',
+    'package',
+    'dump-package',
+  ];
+
+  /// Uses `swift` command line tool to convert Package.swift to json.
+  static Future<Map<String, Object?>?> _parseSwiftPackage({
+    required File swiftPackageManifest,
+    required ProcessManager processManager,
+    required Logger logger,
+  }) async {
+    try {
+      final ProcessResult parsedManifest = await processManager.run(
+        convertSwiftPackageManifestToJsonCommand,
+        workingDirectory: swiftPackageManifest.parent.path,
+      );
+      return json.decode(parsedManifest.stdout.toString()) as Map<String, Object?>;
+    } on Exception catch (e, stackTrace) {
+      logger.printError(
+        'Failed to decode ${swiftPackageManifest.path}. $kFileAnIssue and include this file '
+        'and the following stack trace: \n$e\n$stackTrace',
+      );
+      return null;
+    }
+  }
+
+  /// Parses the Swift package manifest to determine the [SwiftPackageSupportedPlatform].
+  static SwiftPackageSupportedPlatform? parseSwiftPackageSupportedPlatform(
+    Map<String, Object?> manifestAsJson,
+    FlutterDarwinPlatform targetPlatform,
+  ) {
+    if (manifestAsJson case {'platforms': final List<Object?> platformsData}) {
+      for (final Map<String, Object?> platformData
+          in platformsData.whereType<Map<String, Object?>>()) {
+        final SwiftPackageSupportedPlatform? platform = SwiftPackageSupportedPlatform.fromJson(
+          platformData,
+        );
+        if (platform != null && platform.platform == targetPlatform.swiftPackagePlatform) {
+          return platform;
+        }
+      }
+    }
+    return null;
   }
 }

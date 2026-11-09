@@ -41,8 +41,6 @@ import '../version.dart';
 import 'build.dart';
 import 'darwin_add_to_app.dart';
 
-const String _kFileAnIssue =
-    'Please file an issue at https://github.com/flutter/flutter/issues/new/choose';
 const String _kFrameworks = 'Frameworks';
 const String _kPackages = 'Packages';
 const String _kFlutterPlugins = '.plugins';
@@ -821,7 +819,7 @@ class FlutterPluginSwiftDependencies {
 
     final Map<String, Object?> manifestAsJson = await _parseSwiftPackage(manifest);
     final SwiftPackageSupportedPlatform? parsedPlatformVersion =
-        _parseSwiftPackageSupportedPlatform(manifestAsJson);
+        SwiftPackageManager.parseSwiftPackageSupportedPlatform(manifestAsJson, _targetPlatform);
     final bool flutterDependencyFound = _hasFlutterDependency(manifestAsJson);
     if (!flutterDependencyFound) {
       final List<String> targetNames = _getTargetNames(manifestAsJson);
@@ -876,7 +874,7 @@ class FlutterPluginSwiftDependencies {
       overridePath: pluginDestination.path,
     );
     if (swiftPackagePath == null) {
-      throwToolExit("Failed to find copied ${plugin.name}'s Package.swift. $_kFileAnIssue");
+      throwToolExit("Failed to find copied ${plugin.name}'s Package.swift. $kFileAnIssue");
     }
     return swiftPackagePath;
   }
@@ -979,36 +977,17 @@ class FlutterPluginSwiftDependencies {
   /// Uses `swift` command line tool to convert Package.swift to json.
   Future<Map<String, Object?>> _parseSwiftPackage(File swiftPackageManifest) async {
     try {
-      final ProcessResult parsedManifest = await _utils.toolContext.processManager.run([
-        'swift',
-        'package',
-        'dump-package',
-      ], workingDirectory: swiftPackageManifest.parent.path);
+      final ProcessResult parsedManifest = await _utils.toolContext.processManager.run(
+        SwiftPackageManager.convertSwiftPackageManifestToJsonCommand,
+        workingDirectory: swiftPackageManifest.parent.path,
+      );
       return json.decode(parsedManifest.stdout.toString()) as Map<String, Object?>;
     } on Exception catch (e, stackTrace) {
       throwToolExit(
-        'Failed to decode ${swiftPackageManifest.path}. $_kFileAnIssue and include this file '
+        'Failed to decode ${swiftPackageManifest.path}. $kFileAnIssue and include this file '
         'and the following stack trace: \n$e\n$stackTrace',
       );
     }
-  }
-
-  /// Parses the Swift package manifest to determine the [SwiftPackageSupportedPlatform].
-  SwiftPackageSupportedPlatform? _parseSwiftPackageSupportedPlatform(
-    Map<String, Object?> manifestAsJson,
-  ) {
-    if (manifestAsJson case {'platforms': final List<Object?> platformsData}) {
-      for (final Map<String, Object?> platformData
-          in platformsData.whereType<Map<String, Object?>>()) {
-        final SwiftPackageSupportedPlatform? platform = SwiftPackageSupportedPlatform.fromJson(
-          platformData,
-        );
-        if (platform != null && platform.platform == _targetPlatform.swiftPackagePlatform) {
-          return platform;
-        }
-      }
-    }
-    return null;
   }
 
   /// Checks if the Swift package has a dependency on the Flutter framework.
