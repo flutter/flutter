@@ -325,6 +325,60 @@ void main() {
   );
 
   testWidgets(
+    'Does not measure a field on a route that was never laid out',
+    (WidgetTester tester) async {
+      final coveredController = TextEditingController(text: 'covered');
+      addTearDown(coveredController.dispose);
+      final coveredFocusNode = FocusNode();
+      addTearDown(coveredFocusNode.dispose);
+      controller.text = 'Lorem ipsum dolor sit amet';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Navigator(
+            // The first route is covered by the second from the start, so the
+            // overlay never lays it out.
+            onGenerateInitialRoutes: (_, _) => <Route<void>>[
+              PageRouteBuilder<void>(
+                pageBuilder: (_, _, _) => EditableText(
+                  controller: coveredController,
+                  backgroundCursorColor: _grey,
+                  focusNode: coveredFocusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                ),
+              ),
+              PageRouteBuilder<void>(
+                pageBuilder: (_, _, _) => EditableText(
+                  controller: controller,
+                  backgroundCursorColor: _grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  selectionControls: testTextSelectionHandleControls,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(TextInput.scribbleClients, hasLength(2));
+
+      final List<List<dynamic>> elements = await tester.testTextInput.scribbleRequestElementsInRect(
+        const Rect.fromLTWH(0, 0, 1, 1),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(elements, hasLength(1));
+
+      // On web, we should rely on the browser's implementation of Scribble, so the engine will
+      // never request the scribble elements.
+    },
+    skip: kIsWeb, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+  );
+
+  testWidgets(
     'single line Scribble fields can show a horizontal placeholder',
     (WidgetTester tester) async {
       controller.text = 'Lorem ipsum dolor sit amet';

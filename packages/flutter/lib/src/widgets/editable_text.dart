@@ -6470,7 +6470,9 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   @override
   Rect get bounds {
     final box = context.findRenderObject() as RenderBox?;
-    if (box == null || !mounted || !box.attached) {
+    // A field on a route that is covered by an opaque route is mounted but
+    // never laid out, so it has no size to measure.
+    if (box == null || !mounted || !box.attached || !box.hasSize) {
       return Rect.zero;
     }
     final Matrix4 transform = box.getTransformTo(null);
