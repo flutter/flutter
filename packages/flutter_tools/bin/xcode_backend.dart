@@ -403,9 +403,15 @@ class Context {
   static const _kVmServiceExecutableName = 'VMService';
 
   /// Embeds VMService.framework from BUILT_PRODUCTS_DIR into the Xcode Frameworks
-  /// directory when present in profile mode.
+  /// directory when present in profile mode, or removes any stale copy in other modes.
   void _embedVmServiceFramework(String xcodeFrameworksDir, String? expandedCodeSignIdentity) {
     if (parseFlutterBuildMode() != 'profile') {
+      final Directory embeddedVmServiceFramework = directoryFromPath(
+        '$xcodeFrameworksDir/$_kVmServiceFrameworkName',
+      );
+      if (embeddedVmServiceFramework.existsSync()) {
+        embeddedVmServiceFramework.deleteSync(recursive: true);
+      }
       return;
     }
     final String? builtProductsDir = environment['BUILT_PRODUCTS_DIR'];

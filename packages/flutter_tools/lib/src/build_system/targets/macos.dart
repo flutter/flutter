@@ -85,6 +85,15 @@ abstract class UnpackMacOS extends UnpackDarwin {
       frameworkBinaryPath,
       environment.defines[kDarwinArchs] ?? 'x86_64 arm64',
     );
+
+    if (buildMode != .profile) {
+      final Directory vmServiceFrameworkDir = environment.outputDir.childDirectory(
+        _kVmServiceFrameworkName,
+      );
+      if (vmServiceFrameworkDir.existsSync()) {
+        vmServiceFrameworkDir.deleteSync(recursive: true);
+      }
+    }
   }
 
   /// Files that should not be copied to build output directory if found during framework copy step.
@@ -191,6 +200,63 @@ class DebugUnpackMacOS extends UnpackMacOS {
     ...super.inputs,
     const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.debug),
   ];
+}
+
+const _kVmServiceFrameworkName = 'VMService.framework';
+const _kVmServiceExecutableName = 'VMService';
+
+/// Unpack the profile prebuilt VM service framework.
+class UnpackMacOSVmService extends UnpackDarwin {
+  const UnpackMacOSVmService();
+
+  @override
+  String get name => 'unpack_macos_vm_service';
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => .macos;
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+    Source.artifact(Artifact.vmserviceFramework, platform: .darwin, mode: .profile),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/$_kVmServiceExecutableName'),
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/Resources/Info.plist'),
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    await copyFramework(
+      environment,
+      buildMode: .profile,
+      framework: .vmserviceFramework,
+      targetPlatform: .darwin,
+    );
+
+    final File frameworkBinary = environment.fileSystem.file(
+      environment.fileSystem.path.join(
+        environment.outputDir.path,
+        _kVmServiceFrameworkName,
+        'Versions',
+        'A',
+        _kVmServiceExecutableName,
+      ),
+    );
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary ${frameworkBinary.path} does not exist, cannot thin');
+    }
+    await thinFramework(
+      environment,
+      frameworkBinary.path,
+      environment.defines[kDarwinArchs] ?? 'x86_64 arm64',
+    );
+  }
 }
 
 /// Create an App.framework for debug macOS targets.
@@ -571,30 +637,8 @@ abstract class MacOSBundleFlutterAssets extends Target {
         'the "${environment.outputDir.path}" directory and rerunning',
       );
     }
-
-    final Directory vmServiceRootDir = environment.outputDir.childDirectory(
-      _kVmServiceFrameworkName,
-    );
-    if (vmServiceRootDir.existsSync()) {
-      vmServiceRootDir.deleteSync(recursive: true);
-    }
-    if (buildMode == BuildMode.profile) {
-      final String vmServiceArtifactPath = environment.artifacts.getArtifactPath(
-        Artifact.vmserviceFramework,
-        platform: TargetPlatform.darwin,
-        mode: BuildMode.profile,
-      );
-      copyDirectory(
-        environment.fileSystem.directory(vmServiceArtifactPath),
-        vmServiceRootDir,
-        followLinks: false,
-      );
-    }
   }
 }
-
-const _kVmServiceFrameworkName = 'VMService.framework';
-const _kVmServiceExecutableName = 'VMService';
 
 /// Bundle the debug flutter assets into the App.framework.
 class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
@@ -664,27 +708,19 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     const CompileMacOSFramework(),
     const InstallCodeAssets(),
     const ProfileUnpackMacOS(),
+    const UnpackMacOSVmService(),
   ];
 
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
     const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-    const Source.artifact(
-      Artifact.vmserviceFramework,
-      platform: TargetPlatform.darwin,
-      mode: BuildMode.profile,
-    ),
   ];
 
   @override
   List<Source> get outputs => <Source>[
     ...super.outputs,
     const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-    const Source.pattern(
-      '{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/$_kVmServiceExecutableName',
-    ),
-    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/Resources/Info.plist'),
   ];
 }
 

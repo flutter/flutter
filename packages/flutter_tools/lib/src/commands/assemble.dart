@@ -48,6 +48,7 @@ var _kDefaultTargets = <Target>[
   const DebugUnpackMacOS(),
   const ProfileUnpackMacOS(),
   const ReleaseUnpackMacOS(),
+  const UnpackMacOSVmService(),
   // Linux targets
   const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
@@ -85,6 +86,7 @@ var _kDefaultTargets = <Target>[
   const DebugUnpackIOS(),
   const ProfileUnpackIOS(),
   const ReleaseUnpackIOS(),
+  const UnpackIosVmService(),
   // Windows targets
   const UnpackWindows(TargetPlatform.windows_x64),
   const UnpackWindows(TargetPlatform.windows_arm64),

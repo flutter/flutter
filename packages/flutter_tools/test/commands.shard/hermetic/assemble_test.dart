@@ -65,6 +65,28 @@ void main() {
     expect(logger.traceText, contains('build succeeded.'));
   });
 
+  for (final targetName in <String>['unpack_ios_vm_service', 'unpack_macos_vm_service']) {
+    testWithoutContext('flutter assemble recognizes $targetName', () async {
+      Target? builtTarget;
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+          featureFlags: TestFeatureFlags(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            builtTarget = target;
+          }),
+          toolContext: toolContext,
+        ),
+      );
+      await commandRunner.run(<String>['assemble', '-o Output', targetName]);
+
+      expect(builtTarget?.name, targetName);
+      expect(logger.traceText, contains('build succeeded.'));
+    });
+  }
+
   testWithoutContext('flutter assemble can parse defines whose values contain =', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(

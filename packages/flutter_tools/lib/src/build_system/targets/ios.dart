@@ -300,6 +300,15 @@ abstract class UnpackIOS extends UnpackDarwin {
     await thinFramework(environment, frameworkBinaryPath, archs);
 
     await _signFramework(environment, frameworkBinary, buildMode);
+
+    if (buildMode != .profile) {
+      final Directory vmServiceFrameworkDir = environment.outputDir.childDirectory(
+        _kVmServiceFrameworkName,
+      );
+      if (vmServiceFrameworkDir.existsSync()) {
+        vmServiceFrameworkDir.deleteSync(recursive: true);
+      }
+    }
   }
 
   Future<void> _copyFrameworkDysm(
@@ -368,6 +377,59 @@ class DebugUnpackIOS extends UnpackIOS {
 
   @override
   BuildMode get buildMode => BuildMode.debug;
+}
+
+const _kVmServiceFrameworkName = 'VMService.framework';
+const _kVmServiceExecutableName = 'VMService';
+
+/// Unpack the profile prebuilt VM service framework.
+class UnpackIosVmService extends UnpackDarwin {
+  const UnpackIosVmService();
+
+  @override
+  String get name => 'unpack_ios_vm_service';
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => .ios;
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+    Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/$_kVmServiceExecutableName'),
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Info.plist'),
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final String? archs = environment.defines[kIosArchs];
+    if (archs == null) {
+      throw MissingDefineException(kIosArchs, name);
+    }
+
+    await copyFramework(
+      environment,
+      buildMode: .profile,
+      framework: .vmserviceFramework,
+      targetPlatform: .ios,
+    );
+
+    final File frameworkBinary = environment.outputDir
+        .childDirectory(_kVmServiceFrameworkName)
+        .childFile(_kVmServiceExecutableName);
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary ${frameworkBinary.path} does not exist, cannot thin');
+    }
+    await thinFramework(environment, frameworkBinary.path, archs);
+    await _signFramework(environment, frameworkBinary, .profile);
+  }
 }
 
 // TODO(gaaclarke): Remove this after a reasonable amount of time where the
@@ -760,35 +822,8 @@ abstract class IosAssetBundle extends Target {
     await _updateMinimumOSVersion(appFrameworkInfoPlist, environment);
 
     await _signFramework(environment, frameworkBinary, buildMode);
-
-    final Directory vmServiceFrameworkDir = environment.outputDir.childDirectory(
-      _kVmServiceFrameworkName,
-    );
-    if (vmServiceFrameworkDir.existsSync()) {
-      vmServiceFrameworkDir.deleteSync(recursive: true);
-    }
-    if (buildMode == BuildMode.profile) {
-      final String vmServiceArtifactPath = environment.artifacts.getArtifactPath(
-        Artifact.vmserviceFramework,
-        platform: TargetPlatform.ios,
-        mode: BuildMode.profile,
-      );
-      copyDirectory(
-        environment.fileSystem.directory(vmServiceArtifactPath),
-        vmServiceFrameworkDir,
-        followLinks: false,
-      );
-      await _signFramework(
-        environment,
-        vmServiceFrameworkDir.childFile(_kVmServiceExecutableName),
-        buildMode,
-      );
-    }
   }
 }
-
-const _kVmServiceFrameworkName = 'VMService.framework';
-const _kVmServiceExecutableName = 'VMService';
 
 /// Build a debug iOS application bundle.
 class DebugIosApplicationBundle extends IosAssetBundle {
@@ -848,24 +883,11 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'profile_ios_bundle_flutter_assets';
 
   @override
-  List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.artifact(
-      Artifact.vmserviceFramework,
-      platform: TargetPlatform.ios,
-      mode: BuildMode.profile,
-    ),
+  List<Target> get dependencies => const <Target>[
+    AotAssemblyProfile(),
+    InstallCodeAssets(),
+    UnpackIosVmService(),
   ];
-
-  @override
-  List<Source> get outputs => <Source>[
-    ...super.outputs,
-    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/$_kVmServiceExecutableName'),
-    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Info.plist'),
-  ];
-
-  @override
-  List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];
 }
 
 /// Build a release iOS application bundle.
