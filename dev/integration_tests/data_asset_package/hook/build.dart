@@ -35,11 +35,7 @@ void main(List<String> args) async {
       }
       file.writeAsStringSync('generated content');
       output.assets.data.add(
-        DataAsset(
-          package: input.packageName,
-          name: 'data/generated.txt',
-          file: generatedUri,
-        ),
+        DataAsset(package: input.packageName, name: 'data/generated.txt', file: generatedUri),
       );
     }
   });

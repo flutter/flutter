@@ -1053,7 +1053,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
     // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
     for (final _ReorderableItemState item in _items.values) {
-      if ((_reverse && item.index == _dragIndex!) || !item.mounted) {
+      // Skip the dragged item so its original slot does not compete
+      // with the other items when determining the insertion index.
+      if (item.index == _dragIndex! || !item.mounted) {
         continue;
       }
 
@@ -1084,13 +1086,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
           newIndex = item.index;
         }
       } else {
-        if (item.index == _dragIndex!) {
-          // If end of the proxy is not in ending half of item,
-          // we don't process, because it's original dragged item.
-          if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
-            newIndex = _dragIndex!;
-          }
-        } else if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
+        if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
           // The start of the proxy is in the beginning half of the item, so
           // we should swap the item with the gap and we are done looking for
           // the new index.
@@ -1432,6 +1428,8 @@ class ReorderableDragStartListener extends StatelessWidget {
   ///
   /// If true, the item can be moved to another location in the list when the
   /// user taps on the child. If false, tapping on the child will be ignored.
+  ///
+  /// Defaults to true.
   final bool enabled;
 
   @override

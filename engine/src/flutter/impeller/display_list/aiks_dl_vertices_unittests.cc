@@ -160,6 +160,59 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// drawVertices with vertex colors, an image color source, and a blend mode
+// above kHardLight is drawn with the second "uber" vertices shader (see
+// ContentContext::GetDrawVerticesUberPipeline).
+static void DrawVerticesImageSourceWithAdvancedBlend(AiksTest* test,
+                                                     DlBlendMode mode) {
+  auto image = DlImageImpeller::Make(
+      test->CreateTextureForFixture("table_mountain_nx.png"));
+  ASSERT_TRUE(image);
+  DlISize size = image->GetSize();
+
+  // A triangle strip over the four corners covers the whole image exactly once.
+  std::vector<DlPoint> positions = {
+      DlPoint(0, 0),
+      DlPoint(size.width, 0),
+      DlPoint(0, size.height),
+      DlPoint(size.width, size.height),
+  };
+  std::vector<DlColor> colors = {
+      DlColor::kRed().modulateOpacity(0.5f),
+      DlColor::kBlue().modulateOpacity(0.5f),
+      DlColor::kGreen().modulateOpacity(0.5f),
+      DlColor::kRed().modulateOpacity(0.5f),
+  };
+  auto vertices =
+      MakeVertices(DlVertexMode::kTriangleStrip, positions, {}, {}, colors);
+
+  DlPaint paint;
+  paint.setColorSource(
+      DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
+
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  builder.DrawVertices(vertices, mode, paint);
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
+
+// One test per blend mode above kHardLight.
+#define VERTICES_ADVANCED_BLEND_TEST(mode)                                \
+  TEST_P(AiksTest, DrawVerticesImageSourceWithAdvancedBlend##mode) {      \
+    DrawVerticesImageSourceWithAdvancedBlend(this, DlBlendMode::k##mode); \
+  }
+
+VERTICES_ADVANCED_BLEND_TEST(SoftLight)
+VERTICES_ADVANCED_BLEND_TEST(Difference)
+VERTICES_ADVANCED_BLEND_TEST(Exclusion)
+VERTICES_ADVANCED_BLEND_TEST(Multiply)
+VERTICES_ADVANCED_BLEND_TEST(Hue)
+VERTICES_ADVANCED_BLEND_TEST(Saturation)
+VERTICES_ADVANCED_BLEND_TEST(Color)
+VERTICES_ADVANCED_BLEND_TEST(Luminosity)
+
+#undef VERTICES_ADVANCED_BLEND_TEST
+
 // Draw a hexagon using triangle fan
 TEST_P(AiksTest, CanConvertTriangleFanToTriangles) {
   constexpr Scalar hexagon_radius = 125;

@@ -24,9 +24,10 @@ Future<void> skpGeneratorTestsRunner() async {
     'https://github.com/flutter/tests.git',
     '.',
   ], workingDirectory: checkout.path);
+  final String skpGeneratorDir = path.join(checkout.path, 'skp_generator');
   await runCommand(
-    './build.sh',
+    path.join(skpGeneratorDir, 'build.sh'),
     const <String>[],
-    workingDirectory: path.join(checkout.path, 'skp_generator'),
+    workingDirectory: skpGeneratorDir,
   );
 }

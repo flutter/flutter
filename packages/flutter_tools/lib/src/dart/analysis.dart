@@ -13,38 +13,35 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../vmservice.dart';
 
 /// An interface to the Dart analysis server.
 class AnalysisServer {
   AnalysisServer(
     this.sdkPath,
     this.directories, {
-    required this._fileSystem,
-    required this._processManager,
-    required this._logger,
-    required this._platform,
-    required this._terminal,
     required this.suppressAnalytics,
-    this.withFineDependencies = true,
-    this.usePlugins = true,
+    required this._toolContext,
     this._protocolTrafficLog,
+    this.usePlugins = true,
+    this.withFineDependencies = true,
   });
 
   final bool withFineDependencies;
   final bool usePlugins;
   final String sdkPath;
   final List<String> directories;
-  final FileSystem _fileSystem;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final Platform _platform;
-  final Terminal _terminal;
+  final ToolContext _toolContext;
   final String? _protocolTrafficLog;
   final bool suppressAnalytics;
 
+  Logger get _logger => _toolContext.logger;
+
   Process? _process;
+  StreamSubscription<String>? _errorStreamSubscription;
+  StreamSubscription<List<int>>? _stdoutStreamSubscription;
   final _analyzingController = StreamController<bool>.broadcast();
   final _errorsController = StreamController<FileAnalysisErrors>.broadcast();
   var _didServerErrorOccur = false;
@@ -67,8 +64,10 @@ class AnalysisServer {
   final _outstandingRequests = <int, Completer<Map<String, Object?>?>>{};
 
   Future<void> start() async {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessManager processManager) =
+        _toolContext;
     final command = <String>[
-      _fileSystem.path.join(sdkPath, 'bin', 'dart'),
+      fs.path.join(sdkPath, 'bin', 'dart'),
       'language-server',
       '--dart-sdk',
       sdkPath,
@@ -80,24 +79,23 @@ class AnalysisServer {
       if (_protocolTrafficLog != null) '--protocol-traffic-log=$_protocolTrafficLog',
     ];
 
-    _logger.printTrace('dart ${command.skip(1).join(' ')}');
-    final Process process = _process = await _processManager.start(command);
+    logger.printTrace('dart ${command.skip(1).join(' ')}');
+    final Process process = _process = await processManager.start(command);
     _onExit = process.exitCode;
     // This callback hookup can't throw.
     unawaited(process.exitCode.whenComplete(() => _process = null));
 
     final Stream<String> errorStream = process.stderr.transform(utf8LineDecoder);
-    errorStream.listen(_handleError);
+    _errorStreamSubscription = errorStream.listen(_handleError);
 
-    process.stdout.listen(_handleServerResponseRaw);
+    _stdoutStreamSubscription = process.stdout.listen(_handleServerResponseRaw);
 
     await Future.any<void>([
       sendRequest('initialize', <String, Object?>{
         'processId': pid,
-        'rootUri': _fileSystem.directory(directories.first).uri.toString(),
+        'rootUri': fs.directory(directories.first).uri.toString(),
         'workspaceFolders': [
-          for (final dir in directories)
-            {'name': dir, 'uri': _fileSystem.directory(dir).uri.toString()},
+          for (final dir in directories) {'name': dir, 'uri': fs.directory(dir).uri.toString()},
         ],
         'capabilities': <String, Object?>{
           'window': <String, Object?>{'workDoneProgress': true},
@@ -243,7 +241,7 @@ class AnalysisServer {
   void _handleServerResponse(String line) {
     _logs.add('[stdout] $line');
     _logger.printTrace('<== $line');
-    if (line.startsWith(globals.kVMServiceMessageRegExp)) {
+    if (line.startsWith(kVMServiceMessageRegExp)) {
       return;
     }
 
@@ -296,7 +294,7 @@ class AnalysisServer {
     // LSP progress for analysis is typically reported via tokens.
     // The server sends begin/report/end for a token.
     final Object? value = params['value'];
-    if (value is Map<String, Object?>) {
+    if (value is Map<String, Object?> && !_analyzingController.isClosed) {
       final kind = value['kind'] as String?;
       if (kind == 'begin') {
         _analyzingController.add(true);
@@ -340,14 +338,15 @@ class AnalysisServer {
     }
     final diagnosticsList = params['diagnostics']! as List<Object?>;
 
+    final ToolContext(:FileSystem fs, :Platform platform, :Terminal terminal) = _toolContext;
     final List<AnalysisError> errors = diagnosticsList
         .map<Map<String, Object?>>((Object? e) => castStringKeyedMap(e) ?? <String, Object?>{})
         .map<AnalysisError>((Map<String, Object?> json) {
           return AnalysisError(
             WrittenError.fromLsp(json, file),
-            fileSystem: _fileSystem,
-            platform: _platform,
-            terminal: _terminal,
+            fileSystem: fs,
+            platform: platform,
+            terminal: terminal,
           );
         })
         .toList();
@@ -357,6 +356,10 @@ class AnalysisServer {
   }
 
   Future<bool?> dispose() async {
+    await _stdoutStreamSubscription?.cancel();
+    _stdoutStreamSubscription = null;
+    await _errorStreamSubscription?.cancel();
+    _errorStreamSubscription = null;
     await _analyzingController.close();
     await _errorsController.close();
     return _process?.kill();

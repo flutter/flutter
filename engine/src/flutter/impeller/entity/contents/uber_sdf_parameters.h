@@ -42,7 +42,7 @@ struct UberSDFParameters {
     };
 
     /// The type of gradient.
-    Type type;
+    Type type = Type::kLinear;
 
     /// Gradient start point (for linear gradients) or center (for radial
     /// gradients).
@@ -56,7 +56,19 @@ struct UberSDFParameters {
     Entity::TileMode tile_mode = Entity::TileMode::kClamp;
 
     /// Texture for gradient ramp.
+    ///
+    /// Mutually exclusive with `colors`/`stops`.
     std::shared_ptr<Texture> texture;
+
+    /// The gradient stop colors, unpremultiplied.
+    ///
+    /// Mutually exclusive with `texture`.
+    std::vector<Color> colors;
+
+    /// The normalized position of each entry in `colors`, in ascending order.
+    ///
+    /// Always the same length as `colors`.
+    std::vector<Scalar> stops;
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -91,7 +103,7 @@ struct UberSDFParameters {
       std::optional<StrokeParameters> stroke);
 
   /// The type of shape to render.
-  Type type;
+  Type type = Type::kCircle;
 
   /// The color used for filling or stroking the shape.
   Color color;

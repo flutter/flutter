@@ -1549,6 +1549,11 @@ class PerfTest {
                 if (data['99th_percentile_gpu_memory_mb'] != null) '99th_percentile_gpu_memory_mb',
                 if (data['worst_gpu_memory_mb'] != null) 'worst_gpu_memory_mb',
               ],
+              // Impeller shader warmup, reported by the new gallery's transition test.
+              if (data['shader_warmed_draw_percent'] != null) 'shader_warmed_draw_percent',
+              if (data['shader_lazy_variants'] != null) 'shader_lazy_variants',
+              if (data['shader_warmed_never_drawn_variants'] != null)
+                'shader_warmed_never_drawn_variants',
             ],
       );
     });
@@ -1648,7 +1653,7 @@ class WebCompileTest {
     });
   }
 
-  /// Obtains the size and gzipped size of both [dartBundleFile] and [buildDir].
+  /// Obtains the size and gzipped size of the given [files] and [directories].
   static Future<Map<String, int>> getSize({
     /// Mapping of metric key name to file system path for directories to measure
     Map<String, String> directories = const <String, String>{},

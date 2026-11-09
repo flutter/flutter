@@ -26,7 +26,7 @@ const String _chromeExecutableVar = 'CHROME_EXECUTABLE';
 /// If [requestedVersion] is not null, installs that version. The value
 /// may be "latest" (the latest available build of Chrome), "system"
 /// (manually installed Chrome on the current operating system), or an
-/// exact build nuber, such as 695653. Build numbers can be found here:
+/// exact build number, such as 695653. Build numbers can be found here:
 ///
 /// https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Linux_x64/
 Future<BrowserInstallation> getOrInstallChrome(
@@ -95,7 +95,7 @@ class ChromeInstaller {
     }
     if (version == 'latest') {
       throw BrowserInstallerException(
-        'Expected a concrete Chromer version, but got $version. Maybe use ChromeInstaller.latest()?',
+        'Expected a concrete Chrome version, but got $version. Maybe use ChromeInstaller.latest()?',
       );
     }
     final chromeInstallationDir = io.Directory(

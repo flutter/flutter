@@ -143,6 +143,7 @@ Future<void> main(List<String> args) async {
           runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
       'android_engine_opengles_tests': () =>
           runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_engine_hcpp_tests': runAndroidEngineHcppTests,
       'android_hardware_smoke_vulkan_tests': () =>
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan),
       'android_hardware_smoke_opengles_tests': () =>
@@ -194,39 +195,22 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
-  final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'commands.shard'))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .toList();
-  final allTests = <String>[];
-  for (final file in allFiles) {
-    if (file.path.endsWith('_test.dart')) {
-      allTests.add(file.path);
-    }
+  final List<String>? testPaths = _selectWeightedToolTests('commands');
+  if (testPaths == null) {
+    return;
   }
-
-  await runDartTest(
-    _toolsPath,
-    forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
-  );
+  await runDartTest(_toolsPath, forceSingleCore: true, testPaths: testPaths);
 }
 
 Future<void> _runWebToolTests() async {
-  final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'web.shard'))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .toList();
-  final allTests = <String>[];
-  for (final file in allFiles) {
-    if (file.path.endsWith('_test.dart')) {
-      allTests.add(file.path);
-    }
+  final List<String>? testPaths = _selectWeightedToolTests('web');
+  if (testPaths == null) {
+    return;
   }
   await runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: testPaths,
     includeLocalEngineEnv: true,
   );
 }
@@ -235,23 +219,72 @@ Future<void> _runWebToolTests() async {
 Future<void> _runToolHostCrossArchTests() async {}
 
 Future<void> _runIntegrationToolTests() async {
-  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-      .toList();
-
-  await runDartTest(
-    _toolsPath,
-    forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
-    collectMetrics: true,
-  );
+  final List<String>? testPaths = _selectWeightedToolTests('integration');
+  if (testPaths == null) {
+    return;
+  }
+  await runDartTest(_toolsPath, forceSingleCore: true, testPaths: testPaths, collectMetrics: true);
 
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'));
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'link_hook'));
-  await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'));
+  await runFlutterTest(
+    path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'),
+    environment: <String, String>{'FLUTTER_DART_DATA_ASSETS': 'true'},
+  );
+}
+
+/// This subshard's share of `packages/flutter_tools/test/<shard>.shard`,
+/// balanced by `dev/bots/tool_test_durations.json`. Null after reporting an
+/// error if that file is unusable.
+List<String>? _selectWeightedToolTests(String shard) {
+  final List<String> allTests =
+      Directory(path.join(_toolsPath, 'test', '$shard.shard'))
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+          .toList()
+        ..sort();
+
+  final Map<String, int>? durations = _loadToolTestDurations();
+  if (durations == null) {
+    return null;
+  }
+  // Unknown files get this shard's median.
+  final known = <int>[
+    for (final MapEntry(key: file, value: seconds) in durations.entries)
+      if (file.startsWith('test/$shard.shard/')) seconds,
+  ]..sort();
+  final int defaultDuration = known.isEmpty ? 0 : known[known.length ~/ 2];
+  int weight(String testPath) {
+    return durations[path.posix.joinAll(path.split(testPath))] ?? defaultDuration;
+  }
+
+  return selectWeightedSubshard<String>(allTests, weight: weight);
+}
+
+/// Seconds per tool test file on this host, keyed by path relative to
+/// `packages/flutter_tools` with forward slashes. Null after reporting an
+/// error if the file is missing or invalid.
+Map<String, int>? _loadToolTestDurations() {
+  final file = File(path.join(flutterRoot, 'dev', 'bots', 'tool_test_durations.json'));
+  void fail(String reason) {
+    foundError(<String>['$red$reason$reset', 'Run: dart dev/bots/update_tool_test_durations.dart']);
+  }
+
+  if (!file.existsSync()) {
+    fail('${file.path} is missing.');
+    return null;
+  }
+  try {
+    final hosts = json.decode(file.readAsStringSync()) as Map<String, Object?>;
+    return Map<String, int>.from(hosts[Platform.operatingSystem]! as Map<String, Object?>);
+  } on FormatException catch (e) {
+    fail('${file.path} is not valid JSON: $e');
+  } on TypeError catch (e) {
+    fail('${file.path} is not {host: {file: seconds}} or lacks "${Platform.operatingSystem}": $e');
+  }
+  return null;
 }
 
 Future<void> _runWidgetPreviewScaffoldToolTests() async {
@@ -352,6 +385,10 @@ Future<void> _runBuildTests() async {
           .cast<Directory>()
           .toList()
         ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
+        // Depends on the google_mobile_ads plugin, so its Android and iOS builds
+        // exercise native plugin integration that would otherwise only be built
+        // by post-submit devicelab benchmarks. See flutter/flutter#185538.
+        ..add(Directory(path.join(flutterRoot, 'dev', 'benchmarks', 'platform_views_layout')))
         ..add(
           Directory(
             path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),

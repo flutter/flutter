@@ -4,14 +4,18 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+
+import '../../src/android_common.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -163,9 +167,12 @@ void main() {
 }
 
 class FakeBuildInfoCommand extends FlutterCommand {
-  FakeBuildInfoCommand() : super() {
-    addSplitDebugInfoOption();
-    addDartObfuscationOption();
+  FakeBuildInfoCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.splitDebugInfo,
+      BuildInfoOptions.obfuscate,
+    ]);
   }
 
   @override
@@ -188,10 +195,21 @@ class FakeBuildCommand extends BuildCommand {
     required super.buildSystem,
     required super.templateRenderer,
     required super.toolContext,
+    AndroidBuilder? androidBuilder,
     FeatureFlags? featureFlags,
     bool verboseHelp = false,
-  }) : super(featureFlags: featureFlags ?? TestFeatureFlags(), verboseHelp: verboseHelp) {
-    addSubcommand(FakeBuildSubcommand(logger: toolContext.logger, verboseHelp: verboseHelp));
+  }) : super(
+         androidBuilder: androidBuilder ?? FakeAndroidBuilder(),
+         featureFlags: featureFlags ?? TestFeatureFlags(),
+         verboseHelp: verboseHelp,
+       ) {
+    addSubcommand(
+      FakeBuildSubcommand(
+        logger: toolContext.logger,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
   }
 
   @override
@@ -207,7 +225,11 @@ class FakeBuildCommand extends BuildCommand {
 }
 
 class FakeBuildSubcommand extends BuildSubCommand {
-  FakeBuildSubcommand({required super.logger, required super.verboseHelp});
+  FakeBuildSubcommand({
+    required super.logger,
+    required super.toolContext,
+    required super.verboseHelp,
+  });
 
   @override
   String get description => '';

@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../browser_detection.dart' show isIosSafari;
 import '../configuration.dart';
 import '../dom.dart';
 import '../mouse/prevent_default.dart';
@@ -49,6 +50,18 @@ bool browserHasAutofillOverlay() =>
 /// `transparentTextEditing` class is configured to make the autofill overlay
 /// transparent.
 const String transparentTextEditingClass = 'transparentTextEditing';
+
+/// How long to wait before treating a blur that named no incoming element as a
+/// real focus loss.
+///
+/// Several browser behaviors blur transiently and restore focus a moment later:
+/// backgrounding a tab fires blur before `visibilitychange`, and on iOS a
+/// native caret or selection drag blurs the input mid-gesture before WebKit
+/// refocuses it. Waiting this long lets those settle before the engine acts.
+///
+/// Shared by [DefaultTextEditingStrategy.handleBlur] and [ViewFocusBinding],
+/// which defer the same gesture and must not disagree about the window.
+const Duration kTransientBlurSettleDelay = Duration(milliseconds: 100);
 
 void _emptyCallback(dynamic _) {}
 
@@ -450,8 +463,32 @@ class EngineAutofillForm {
       shouldHideElement: !_isWebKit,
       shouldDisablePointerEvents: _isWebKit,
     );
+    _hideSyntheticElementFromAssistiveTechnology(synthetic);
     elements[id] = synthetic;
     formElement!.append(synthetic);
+  }
+
+  /// Hides a synthetic autofill element from screen readers and keyboard
+  /// navigation in semantics mode.
+  ///
+  /// Synthetic elements exist for the browser's autofill and form submission.
+  /// The semantics tree already exposes each field through its own element, so
+  /// a synthetic copy would show up as an extra, unlabeled control, and the
+  /// dormant form keeps it in the page for the rest of the session. Browser
+  /// autofill does not read ARIA, so credential save and autofill keep working
+  /// through these elements.
+  ///
+  /// Without semantics, password manager extensions fill these elements, and
+  /// some of them skip elements hidden from assistive technology, so they are
+  /// left untouched.
+  ///
+  /// See: https://github.com/flutter/flutter/issues/195174
+  void _hideSyntheticElementFromAssistiveTechnology(DomHTMLElement element) {
+    if (!associateFocusedElementByAttribute) {
+      return;
+    }
+    element.setAttribute('aria-hidden', 'true');
+    element.tabIndex = -1;
   }
 
   /// Makes the form dormant.
@@ -516,6 +553,7 @@ class EngineAutofillForm {
           shouldHideElement: !_isWebKit,
           shouldDisablePointerEvents: _isWebKit,
         );
+        _hideSyntheticElementFromAssistiveTechnology(htmlElement);
       }
 
       elements[field.autofillInfo.uniqueIdentifier] = htmlElement;
@@ -579,7 +617,7 @@ class EngineAutofillForm {
   /// On the other hand, overall for text editing there is already a lifecycle
   /// for subscriptions: All the subscriptions of the DOM elements are to the
   /// `subscriptions` property of [DefaultTextEditingStrategy].
-  /// [TextEditingStrategy] manages all subscription lifecyle. All
+  /// [TextEditingStrategy] manages all subscription lifecycle. All
   /// listeners with no exceptions are added during
   /// [TextEditingStrategy.addEventHandlers] method call and all
   /// listeners are removed during [TextEditingStrategy.disable] method call.
@@ -785,7 +823,7 @@ class TextEditingDeltaState {
   ///
   /// For a deletion, the length and the direction of the deletion (backward or forward)
   /// are calculated by comparing the new and last editing states.
-  /// If the deletion is backward, the length is susbtracted from the [deltaEnd]
+  /// If the deletion is backward, the length is subtracted from the [deltaEnd]
   /// that we set when beforeinput was fired to determine the [deltaStart].
   /// If the deletion is forward, [deltaStart] is set to the new editing state baseOffset
   /// and [deltaEnd] is set to [deltaStart] incremented by the length of the deletion.
@@ -1351,14 +1389,14 @@ abstract class TextEditingStrategy {
 
   /// Update the element's position.
   ///
-  /// The position will be updated everytime Flutter Framework sends
+  /// The position will be updated every time Flutter Framework sends
   /// 'TextInput.setEditableSizeAndTransform' message.
   void updateElementPlacement(EditableTextGeometry geometry);
 
   /// Set editing state of the element.
   ///
   /// This includes text and selection relelated states. The editing state will
-  /// be updated everytime Flutter Framework sends 'TextInput.setEditingState'
+  /// be updated every time Flutter Framework sends 'TextInput.setEditingState'
   /// message.
   void setEditingState(EditingState editingState);
 
@@ -1601,6 +1639,18 @@ abstract class DefaultTextEditingStrategy
   }
 
   void applyConfiguration(InputConfiguration config) {
+    // A `TextInput.updateConfig` message only describes the focused field, so
+    // the [EngineAutofillForm] decoded from it has no DOM form. While the
+    // editing element is part of a live form, keep that form. Otherwise
+    // [disable] would remove the element from the form instead of letting the
+    // form go dormant, and the next connection could not reuse it.
+    if (isEnabled && config.autofillGroup != null) {
+      final EngineAutofillForm? activeGroup = inputConfiguration.autofillGroup;
+      if (activeGroup?.formElement != null) {
+        config = config.copyWith(autofillGroup: activeGroup);
+      }
+    }
+
     inputConfiguration = config;
 
     if (config.readOnly) {
@@ -1748,9 +1798,17 @@ abstract class DefaultTextEditingStrategy
 
   @override
   void setEditingState(EditingState? editingState) {
+    final String? previousText = lastEditingState?.text;
     lastEditingState = editingState;
     if (!isEnabled || !editingState!.isValid) {
       return;
+    }
+    // Writing different text into the element ends any composition in
+    // progress, and Chrome does so without a `compositionend` event. This
+    // happens when an input formatter rejects a dead key character. Forget the
+    // composition so its stale range is not reported back to the framework.
+    if (editingState.text != previousText) {
+      resetComposition();
     }
     lastEditingState!.applyToDomElement(domElement);
   }
@@ -1864,9 +1922,35 @@ abstract class DefaultTextEditingStrategy
         // When a browser tab is backgrounded, the input blur arrives before
         // visibilitychange. Wait briefly so tab switches can keep the text
         // connection alive, while ordinary window/iframe blurs still close it.
-        _pendingBlurConnectionCloseTimer = Timer(const Duration(milliseconds: 100), () {
+        _pendingBlurConnectionCloseTimer = Timer(kTransientBlurSettleDelay, () {
           _pendingBlurConnectionCloseTimer = null;
           if (_documentVisibilityState == 'hidden' || _documentHasFocus) {
+            return;
+          }
+          textEditing.sendTextConnectionClosedToFrameworkIfAny();
+        });
+        return;
+      }
+      // On iOS WebKit, a native caret or selection drag transiently blurs the
+      // hidden input mid-gesture with `relatedTarget == null` while the document
+      // still has focus, and WebKit refocuses the input a frame later. Closing
+      // the connection on that blink drops the keyboard; a plain <input> keeps
+      // it. Defer the close and skip it if the input has regained focus by the
+      // time the timer fires. A genuine blur, the Done button or tapping away,
+      // does not refocus, so it still closes. [ViewFocusBinding] defers the
+      // matching `focusout` the same way.
+      // https://github.com/flutter/flutter/issues/189744
+      if (isIosSafari) {
+        _pendingBlurConnectionCloseTimer?.cancel();
+        _pendingBlurConnectionCloseTimer = Timer(kTransientBlurSettleDelay, () {
+          _pendingBlurConnectionCloseTimer = null;
+          if (domDocument.activeElement == activeDomElement) {
+            // The input refocused: this was the transient mid-gesture blur.
+            return;
+          }
+          if (_documentVisibilityState == 'hidden') {
+            // The page was backgrounded (e.g. a tab switch) after the blur was
+            // scheduled; keep the connection alive, matching the branch above.
             return;
           }
           textEditing.sendTextConnectionClosedToFrameworkIfAny();
@@ -2254,7 +2338,7 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 /// Firefox behaviour for text editing.
 ///
 /// Selections are different in Firefox. [addEventHandlers] strategy is
-/// impelemented diefferently in Firefox.
+/// implemented differently in Firefox.
 class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   FirefoxTextEditingStrategy(super.owner);
 
@@ -2755,6 +2839,16 @@ class HybridTextEditing {
   ///
   /// Also used to define if a keyboard is needed.
   bool isEditing = false;
+
+  /// Whether [element] is the DOM element currently receiving text input.
+  ///
+  /// [ViewFocusBinding] uses this to recognize a `focusout` that originated
+  /// from the active text-editing element.
+  ///
+  /// Prefer this over matching on [textEditingClass]. That class is
+  /// not guaranteed to be applied by all strategies.
+  bool isActiveTextEditingElement(DomElement? element) =>
+      isEditing && element != null && element == strategy.domElement;
 
   InputConfiguration? configuration;
 

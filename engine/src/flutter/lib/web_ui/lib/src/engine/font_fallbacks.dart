@@ -194,7 +194,7 @@ class _UnicodePropertyLookup<P> {
   /// `_values[i]` is the value for the range [`_boundaries[i-1]`, `_boundaries[i]`).
   /// Default values are stored as explicit ranges.
   ///
-  /// Example: the unicode range properies `[10-50]=>A`, `[100]=>B`, with
+  /// Example: the unicode range properties `[10-50]=>A`, `[100]=>B`, with
   /// default value `X` would be represented as:
   ///
   ///     boundaries:  [10, 51, 100, 101, 1114112]

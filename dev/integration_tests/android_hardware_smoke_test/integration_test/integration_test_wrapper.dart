@@ -37,7 +37,7 @@ void main() {
       final completer = Completer<String>();
 
       // ignore: deprecated_member_use
-      ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         testChannelName,
         message,
         (ByteData? replyData) {

@@ -22,10 +22,10 @@ import 'package:image/image.dart' as img;
 
 /// Pre-compiled 1x1 transparent PNG bytes used for mock asset loads and golden comparisons.
 ///
-/// This is used instead of [testImage] (which is a decoded [ui.Image] object) because:
+/// This is used instead of `testImage` (which is a decoded [ui.Image] object) because:
 /// 1. `compareGoldenOnDevice` and our comparator expect raw compressed [Uint8List] bytes.
 /// 2. The mock `'flutter/assets'` binary messenger channel must return raw file bytes.
-/// 3. Converting [testImage] to PNG bytes dynamically using `toByteData(format: png)`
+/// 3. Converting `testImage` to PNG bytes dynamically using `toByteData(format: png)`
 ///    is slow and deadlocks inside the test's `FakeAsync` zone.
 final Uint8List transparentImageBytes = Uint8List.fromList(
   img.encodePng(img.Image(width: 1, height: 1)),

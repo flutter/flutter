@@ -118,6 +118,10 @@ constexpr bool ShouldCreateLogMessageConstexpr(LogSeverity severity,
   FML_LAZY_STREAM(FML_VLOG_STREAM(verbose_level), FML_VLOG_IS_ON(verbose_level))
 
 #ifndef NDEBUG
+#define FML_DCHECK_IS_ON 1
+#endif
+
+#ifndef NDEBUG
 #define FML_DLOG(severity) FML_LOG(severity)
 #define FML_DCHECK(condition) FML_CHECK(condition)
 #else
