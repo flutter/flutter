@@ -6,6 +6,7 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'android/android_sdk.dart';
 import 'artifacts.dart';
 import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
@@ -26,6 +27,7 @@ import 'devfs.dart';
 import 'device.dart';
 import 'project.dart';
 import 'version.dart';
+import 'windows/visual_studio.dart';
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
@@ -34,9 +36,11 @@ class BundleBuilder {
     required this._buildSystem,
     required this._buildTargets,
     required this._toolContext,
+    this._androidSdkBuilder,
   });
 
   final Analytics _analytics;
+  final AndroidSdk? Function()? _androidSdkBuilder;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
   final ToolContext _toolContext;
@@ -94,7 +98,11 @@ class BundleBuilder {
       logger: logger,
       processManager: processManager,
       analytics: _analytics,
+      androidSdkBuilder: _androidSdkBuilder,
       platform: hostPlatform,
+      projectFactory: projectFactory,
+      visualStudio: VisualStudio(toolContext: _toolContext),
+      xcode: null,
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug

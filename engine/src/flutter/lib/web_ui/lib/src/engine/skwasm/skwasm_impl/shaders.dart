@@ -195,6 +195,7 @@ class SkwasmImageShader extends BackendImageShader implements SkwasmShader {
     }
   }
 
+  @override
   bool get debugDisposed => _handle == null;
 }
 
@@ -226,7 +227,8 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
   final ShaderData _shaderData;
 
   @override
-  ui.FragmentShader fragmentShader() => EngineFragmentShader(SkwasmFragmentShader(this));
+  ui.FragmentShader fragmentShader() =>
+      EngineFragmentShader(SkwasmFragmentShader(this), _shaderData);
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
 
@@ -472,11 +474,6 @@ class SkwasmFragmentShader extends BackendFragmentShader implements SkwasmShader
         components[15],
       ),
     );
-  }
-
-  @override
-  ui.ImageSamplerSlot getImageSampler(String name) {
-    throw UnsupportedError('getImageSampler is not supported on the web.');
   }
 
   List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
