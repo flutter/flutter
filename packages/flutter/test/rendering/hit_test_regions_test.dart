@@ -567,5 +567,100 @@ void main() {
         ]),
       );
     });
+
+    test('a render object under an ignoring IgnorePointer does not claim its own bounds', () {
+      final Float64List? regions = regionsFor(
+        _stack(<RenderBox>[
+          _at(const Rect.fromLTWH(0, 0, 400, 400), _platformView(1)),
+          _at(
+            const Rect.fromLTWH(0, 0, 300, 300),
+            RenderIgnorePointer(
+              child: _stack(<RenderBox>[
+                _at(
+                  const Rect.fromLTWH(10, 10, 100, 100),
+                  RenderAbsorbPointer(child: _hitTarget()),
+                ),
+                _at(
+                  const Rect.fromLTWH(150, 150, 100, 100),
+                  _RenderChildHitTestGate(
+                    childrenHitTestable: false,
+                    behavior: HitTestBehavior.opaque,
+                    child: _hitTarget(),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ]),
+      );
+      expect(regions, _payload(<(int, List<Rect>)>[(1, <Rect>[])]));
+    });
+
+    test('a non-ignoring IgnorePointer or non-absorbing AbsorbPointer under an ignoring '
+        'IgnorePointer does not let content claim', () {
+      const overlay = Rect.fromLTWH(250, 250, 100, 100);
+      final Float64List? regions = regionsFor(
+        _stack(<RenderBox>[
+          _at(const Rect.fromLTWH(0, 0, 400, 400), _platformView(1)),
+          _at(
+            const Rect.fromLTWH(0, 0, 300, 300),
+            RenderIgnorePointer(
+              child: _stack(<RenderBox>[
+                _at(
+                  const Rect.fromLTWH(10, 10, 50, 50),
+                  RenderAbsorbPointer(absorbing: false, child: _hitTarget()),
+                ),
+                _at(
+                  const Rect.fromLTWH(70, 70, 50, 50),
+                  RenderIgnorePointer(ignoring: false, child: _hitTarget()),
+                ),
+                // Painted after both, but still under the ignoring IgnorePointer.
+                _at(const Rect.fromLTWH(130, 130, 50, 50), _hitTarget()),
+              ]),
+            ),
+          ),
+          _at(overlay, _hitTarget()),
+        ]),
+      );
+      expect(
+        regions,
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[overlay]),
+        ]),
+      );
+    });
+
+    test('toggling an IgnorePointer between frames toggles whether its child claims', () {
+      const button = Rect.fromLTWH(40, 50, 60, 30);
+      const sibling = Rect.fromLTWH(200, 200, 50, 50);
+      final ignorer = RenderIgnorePointer(child: _hitTarget());
+      final RenderStack root = _stack(<RenderBox>[
+        _at(const Rect.fromLTWH(0, 0, 400, 400), _platformView(1)),
+        _at(button, RenderAbsorbPointer(absorbing: false, child: ignorer)),
+        _at(sibling, _hitTarget()),
+      ]);
+      expect(
+        regionsFor(root),
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[sibling]),
+        ]),
+      );
+
+      ignorer.ignoring = false;
+      expect(
+        regionsAfterFrame(),
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[button, sibling]),
+        ]),
+      );
+
+      ignorer.ignoring = true;
+      expect(
+        regionsAfterFrame(),
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[sibling]),
+        ]),
+      );
+    });
   });
 }
