@@ -4,6 +4,7 @@
 
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../web/compiler_config.dart';
 import 'build_system.dart';
@@ -20,7 +21,9 @@ abstract class BuildTargets {
     FileSystem fileSystem,
     List<WebCompilerConfig> compileConfigs,
     Analytics analytics,
-  );
+    Artifacts artifacts, {
+    required String engineRevision,
+  });
 }
 
 /// BuildTargets that return NoOpTarget for every action.
@@ -46,7 +49,9 @@ class NoOpBuildTargets extends BuildTargets {
     FileSystem fileSystem,
     List<WebCompilerConfig> compileConfigs,
     Analytics analytics,
-  ) => const _NoOpTarget();
+    Artifacts artifacts, {
+    required String engineRevision,
+  }) => const _NoOpTarget();
 }
 
 /// A [Target] that does nothing.

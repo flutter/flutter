@@ -1009,11 +1009,17 @@ DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
 extension type WebGLContext._(JSObject _) implements JSObject {
   external int getParameter(int value);
 
+  external int get drawingBufferWidth;
+  external int get drawingBufferHeight;
+
   @JS('SAMPLES')
   external int get samples;
 
   @JS('STENCIL_BITS')
   external int get stencilBits;
+
+  @JS('MAX_TEXTURE_SIZE')
+  external int get maxTextureSize;
 
   external JSAny? getExtension(String name);
 
@@ -1072,9 +1078,9 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external DomCanvasGradient createLinearGradient(num x0, num y0, num x1, num y1);
 
   @JS('createPattern')
-  external DomCanvasPattern? _createPattern(JSAny image, String reptitionType);
-  DomCanvasPattern? createPattern(Object image, String reptitionType) =>
-      _createPattern(image.toJSAnyShallow, reptitionType);
+  external DomCanvasPattern? _createPattern(JSAny image, String repetitionType);
+  DomCanvasPattern? createPattern(Object image, String repetitionType) =>
+      _createPattern(image.toJSAnyShallow, repetitionType);
 
   external DomCanvasGradient createRadialGradient(num x0, num y0, num r0, num x1, num y1, num r1);
 

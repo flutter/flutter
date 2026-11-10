@@ -8,27 +8,25 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../context/tool_context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand({required ToolContext super.toolContext, required super.verboseHelp}) {
-    addBuildModeFlags(verboseHelp: verboseHelp);
+  InstallCommand({required super.toolContext, required super.verboseHelp}) {
     requiresPubspecYaml();
-    usesApplicationBinaryOption();
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
-    usesDeviceUserOption();
-    usesFlavorOption();
+    registerOptionBundles(const <OptionBundle>[
+      BuildModeOptionsBundle(),
+      DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.useApplicationBinary,
+      BuildInfoOptions.flavor,
+    ], verboseHelp: verboseHelp);
     argParser.addFlag(
       'uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',
     );
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   Logger get _logger => toolContext.logger;
 

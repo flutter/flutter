@@ -36,6 +36,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.Color? color,
     ui.StrutStyle? strutStyle,
     this.textHeightBehavior,
+    this.hyphens,
+    this.hyphenCharacter,
   }) : _strutStyle = strutStyle as WebStrutStyle?,
        _textStyle = WebTextStyle(
          fontFamily: fontFamily,
@@ -43,6 +45,9 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          fontStyle: fontStyle,
          fontWeight: fontWeight,
          height: height,
+         // Propagate the paragraph's default leadingDistribution to the root text style
+         // so spans and lines inherit it unless overridden by a child TextStyle.
+         leadingDistribution: textHeightBehavior?.leadingDistribution,
          locale: locale,
          color: color,
        ),
@@ -59,6 +64,15 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   final String? ellipsis;
 
   final ui.TextHeightBehavior? textHeightBehavior;
+
+  // TODO(dbebawy): honor hyphens in the pure-Dart line-breaker/painter (no
+  // soft-hyphen glyph emitted at a break yet). Accepted and stored for now.
+  // https://github.com/flutter/flutter/issues/193506
+  final ui.Hyphens? hyphens;
+
+  // TODO(dbebawy): draw hyphenCharacter along with hyphens.
+  // https://github.com/flutter/flutter/issues/193506
+  final String? hyphenCharacter;
 
   WebStrutStyle? get strutStyle => _strutStyle;
   final WebStrutStyle? _strutStyle;
@@ -78,7 +92,9 @@ class WebParagraphStyle implements ui.ParagraphStyle {
         ellipsis == other.ellipsis &&
         textHeightBehavior == other.textHeightBehavior &&
         _strutStyle == other._strutStyle &&
-        _textStyle == other._textStyle;
+        _textStyle == other._textStyle &&
+        hyphens == other.hyphens &&
+        hyphenCharacter == other.hyphenCharacter;
   }
 
   @override
@@ -91,6 +107,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
       textHeightBehavior,
       _strutStyle,
       _textStyle,
+      hyphens,
+      hyphenCharacter,
     );
   }
 
@@ -105,6 +123,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
           'maxLines: $maxLines, '
           'ellipsis: $ellipsis, '
           'textHeightBehavior: $textHeightBehavior, '
+          'hyphens: $hyphens, '
+          'hyphenCharacter: $hyphenCharacter, '
           'strutStyle: $_strutStyle, '
           'textAlign: $textAlign'
           'textStyle: $_textStyle'
@@ -867,11 +887,79 @@ class TextSpan extends ParagraphSpan {
 ///
 /// See: https://chromestatus.com/feature/5075532483657728
 class WebParagraph implements ui.Paragraph {
-  WebParagraph(this.paragraphStyle, this.spans, this.text);
+  WebParagraph(this.paragraphStyle, List<ParagraphSpan> styleSpans, this.text)
+    : _styleSpans = styleSpans;
 
   final WebParagraphStyle paragraphStyle;
-  final List<ParagraphSpan> spans;
   final String text;
+
+  // Spans as pushed through the builder. Only read by _resolveSpans.
+  final List<ParagraphSpan> _styleSpans;
+
+  // Paragraph-level UAX #9 regions shared between span splitting and BiDi run extraction.
+  late final List<BidiRegion> bidiRegions = canvasKit.Bidi.getBidiRegions(
+    text,
+    paragraphStyle.textDirection,
+  );
+
+  /// Spans split at BiDi region boundaries, each with a single resolved direction.
+  late final List<ParagraphSpan> spans = _resolveSpans();
+
+  // Splits text spans at paragraph-level UAX #9 region boundaries so each sub-span has a
+  // single resolved textDirection.
+  List<ParagraphSpan> _resolveSpans() {
+    // Empty or placeholder-only paragraphs have no UAX #9 text regions to split across.
+    if (_styleSpans.isEmpty || bidiRegions.isEmpty) {
+      return _styleSpans;
+    }
+    final resolvedSpans = <ParagraphSpan>[];
+    var regionIndex = 0;
+    for (final ParagraphSpan span in _styleSpans) {
+      assert(span.isNotEmpty);
+      // Placeholders occupy a single U+FFFC code unit and do not measure text via Canvas2D.
+      if (span is PlaceholderSpan) {
+        resolvedSpans.add(span);
+        continue;
+      }
+      final textSpan = span as TextSpan;
+      // Skip BiDi regions that end before this span (such as regions on preceding placeholders).
+      while (regionIndex < bidiRegions.length && bidiRegions[regionIndex].end <= textSpan.start) {
+        regionIndex++;
+      }
+      for (
+        var i = regionIndex;
+        i < bidiRegions.length && bidiRegions[i].start < textSpan.end;
+        i++
+      ) {
+        final BidiRegion region = bidiRegions[i];
+        final int start = math.max(textSpan.start, region.start);
+        final int end = math.min(textSpan.end, region.end);
+        // UAX #9 even embedding levels resolve to LTR and odd levels to RTL. Assigning the
+        // paragraph-resolved direction per sub-span prevents Canvas2D from re-running BiDi in
+        // isolation and flipping neutral characters between same-direction spans.
+        final ui.TextDirection regionDirection = region.level.isEven
+            ? ui.TextDirection.ltr
+            : ui.TextDirection.rtl;
+        // Reuse the existing TextSpan when it already lies within a single matching BiDi region.
+        if (start == textSpan.start &&
+            end == textSpan.end &&
+            textSpan.textDirection == regionDirection) {
+          resolvedSpans.add(textSpan);
+        } else {
+          resolvedSpans.add(
+            TextSpan(
+              start: start,
+              end: end,
+              style: textSpan.style,
+              text: text.substring(start, end),
+              textDirection: regionDirection,
+            ),
+          );
+        }
+      }
+    }
+    return resolvedSpans;
+  }
 
   @override
   double alphabeticBaseline = 0;
@@ -1495,10 +1583,11 @@ class ChildStyleNode extends StyleNode {
   @override
   double? get _wordSpacing => style.wordSpacing ?? parent._wordSpacing;
 
+  // Preserve `style.height` as-is (including `ui.kTextHeightNone`) so a child
+  // span can explicitly override a non-null parent height and disable the
+  // height multiplier during layout.
   @override
-  double? get _height {
-    return style.height == ui.kTextHeightNone ? null : (style.height ?? parent._height);
-  }
+  double? get _height => style.height ?? parent._height;
 
   @override
   ui.TextLeadingDistribution? get _leadingDistribution =>
@@ -1581,8 +1670,9 @@ class RootStyleNode extends StyleNode {
   @override
   double? get _height => style.height;
 
+  // Inherit the default leadingDistribution from ParagraphStyle.textHeightBehavior.
   @override
-  ui.TextLeadingDistribution? get _leadingDistribution => null;
+  ui.TextLeadingDistribution? get _leadingDistribution => style.leadingDistribution;
 
   @override
   ui.Locale? get _locale => style.locale;
