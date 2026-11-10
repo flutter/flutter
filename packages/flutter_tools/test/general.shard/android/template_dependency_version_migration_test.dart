@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_
     show optOutFlag;
 import 'package:flutter_tools/src/android/migrations/template_dependency_version_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -129,24 +130,31 @@ void main() {
 
       await migrate();
 
-      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.1', kgp: '2.4.10'));
-      expect(wrapper.readAsStringSync(), gradleWrapper('9.3.1'));
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.3.1', kgp: '2.4.20'));
+      expect(wrapper.readAsStringSync(), gradleWrapper('9.5.0'));
       expect(
         logger.statusText,
         contains(
-          'Upgraded the Android Gradle Plugin from 9.1.0 to 9.1.1, '
-          'the minimum version that Flutter supports.',
+          'Upgraded Gradle from 9.3.1 to 9.5.0, '
+          'the lowest version that Flutter supports without a warning.',
         ),
       );
       expect(
         logger.statusText,
         contains(
-          'Upgraded the Kotlin Gradle Plugin from 2.4.0 to 2.4.10, '
-          'the minimum version that Flutter supports.',
+          'Upgraded the Android Gradle Plugin from 9.1.0 to 9.3.1, '
+          'the lowest version that Flutter supports without a warning.',
         ),
       );
+      expect(
+        logger.statusText,
+        contains(
+          'Upgraded the Kotlin Gradle Plugin from 2.4.0 to 2.4.20, '
+          'the lowest version that Flutter supports without a warning.',
+        ),
+      );
+      expect(logger.statusText, contains(optOutFlag));
       expect(logger.statusText, contains(pluginVersionOptOutFlag));
-      expect(logger.statusText, isNot(contains('Upgraded Gradle')));
     });
 
     testWithoutContext('upgrades a project created with Flutter 3.44', () async {
@@ -155,17 +163,14 @@ void main() {
 
       await migrate();
 
-      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.1', kgp: '2.4.10'));
-      expect(wrapper.readAsStringSync(), gradleWrapper('9.3.1'));
-      expect(
-        logger.statusText,
-        contains('Upgraded Gradle from 9.1.0 to 9.3.1, the minimum version that Flutter supports.'),
-      );
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.3.1', kgp: '2.4.20'));
+      expect(wrapper.readAsStringSync(), gradleWrapper('9.5.0'));
+      expect(logger.statusText, contains('Upgraded Gradle from 9.1.0 to 9.5.0'));
       expect(logger.statusText, contains(optOutFlag));
-      expect(logger.statusText, contains('Upgraded the Android Gradle Plugin from 9.0.1 to 9.1.1'));
+      expect(logger.statusText, contains('Upgraded the Android Gradle Plugin from 9.0.1 to 9.3.1'));
       expect(
         logger.statusText,
-        contains('Upgraded the Kotlin Gradle Plugin from 2.3.20 to 2.4.10'),
+        contains('Upgraded the Kotlin Gradle Plugin from 2.3.20 to 2.4.20'),
       );
     });
 
@@ -178,7 +183,7 @@ void main() {
 
       expect(
         settingsGroovy.readAsStringSync(),
-        moduleHostSettingsGroovy(agp: '9.1.1', kgp: '2.4.10'),
+        moduleHostSettingsGroovy(agp: '9.3.1', kgp: '2.4.20'),
       );
     });
 
@@ -196,8 +201,8 @@ plugins {
 
       expect(settingsGroovy.readAsStringSync(), '''
 plugins {
-    id 'com.android.application' version '9.1.1' apply false
-    id 'org.jetbrains.kotlin.android' version '2.4.10' apply false
+    id 'com.android.application' version '9.3.1' apply false
+    id 'org.jetbrains.kotlin.android' version '2.4.20' apply false
 }
 ''');
     });
@@ -208,8 +213,8 @@ plugins {
 
       await migrate();
 
-      expect(wrapper.readAsStringSync(), gradleWrapper('9.3.1', distribution: 'bin'));
-      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.1', kgp: '2.4.10'));
+      expect(wrapper.readAsStringSync(), gradleWrapper('9.5.0', distribution: 'bin'));
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.3.1', kgp: '2.4.20'));
     });
 
     testWithoutContext('leaves a project created with the current templates unchanged', () async {
@@ -266,13 +271,13 @@ plugins {
 
         await migrate();
 
-        expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.0', kgp: '2.4.10'));
+        expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.0', kgp: '2.4.20'));
         expect(wrapper.readAsStringSync(), gradleWrapper('9.2.0'));
         expect(
           logger.traceText,
           contains(
-            'Not upgrading the Android Gradle Plugin, because AGP 9.1.1 '
-            'requires Gradle 9.3.1 or later, and the project uses Gradle 9.2.0.',
+            'AGP 9.3.1 requires Gradle 9.5.0 or later, and the project uses Gradle 9.2.0, '
+            'so the Android Gradle Plugin is not upgraded.',
           ),
         );
       },
@@ -284,7 +289,7 @@ plugins {
 
       await migrate();
 
-      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.0', kgp: '2.4.10'));
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.0', kgp: '2.4.20'));
       expect(logger.traceText, contains('the project uses Gradle of an unknown version'));
     });
 
@@ -300,7 +305,7 @@ plugins {
 
         // The Gradle version can't be read from a mirror URL, so AGP is left
         // alone rather than risking an AGP and Gradle mismatch.
-        expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.0', kgp: '2.4.10'));
+        expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.0', kgp: '2.4.20'));
         expect(wrapper.readAsStringSync(), mirroredWrapper);
       },
     );
@@ -313,15 +318,15 @@ plugins {
       await migrate();
 
       expect(wrapper.readAsStringSync(), wrapperContents);
-      // AGP 9.1.1 needs a newer Gradle, so AGP is left alone too.
-      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.0.1', kgp: '2.4.10'));
+      // AGP 9.1.1 and 9.3.1 need a newer Gradle, so AGP is left alone too.
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.0.1', kgp: '2.4.20'));
       expect(logger.traceText, contains(optOutFlag));
     });
 
     testWithoutContext('honors the settings opt-out flag', () async {
       final settings = '// $pluginVersionOptOutFlag\n${appSettingsKts(agp: '9.1.0', kgp: '2.4.0')}';
       settingsKts.writeAsStringSync(settings);
-      wrapper.writeAsStringSync(gradleWrapper('9.3.1'));
+      wrapper.writeAsStringSync(gradleWrapper(templateDefaultGradleVersion));
 
       await migrate();
 
@@ -345,7 +350,7 @@ plugins {
       expect(settingsKts.readAsStringSync(), '''
 plugins {
     // id("com.android.application") version "9.1.0" apply false
-    id("com.android.application") version "9.1.1" apply false // was 9.0.1
+    id("com.android.application") version "9.3.1" apply false // was 9.0.1
 }
 ''');
     });
@@ -359,7 +364,7 @@ plugins {
 }
 ''';
       settingsKts.writeAsStringSync(settings);
-      wrapper.writeAsStringSync(gradleWrapper('9.3.1'));
+      wrapper.writeAsStringSync(gradleWrapper(templateDefaultGradleVersion));
 
       await migrate();
 
@@ -376,7 +381,7 @@ plugins {
 }
 ''';
       settingsKts.writeAsStringSync(settings);
-      wrapper.writeAsStringSync(gradleWrapper('9.3.1'));
+      wrapper.writeAsStringSync(gradleWrapper(templateDefaultGradleVersion));
 
       await migrate();
 
@@ -407,8 +412,8 @@ plugins {
       final migratedLogger = BufferLogger.test();
       await migrate(withLogger: migratedLogger);
 
-      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.1', kgp: '2.4.10'));
-      expect(wrapper.readAsStringSync(), gradleWrapper('9.3.1'));
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.3.1', kgp: '2.4.20'));
+      expect(wrapper.readAsStringSync(), gradleWrapper('9.5.0'));
       expect(migratedLogger.statusText, isEmpty);
     });
 
@@ -437,7 +442,7 @@ plugins {
 
         await migrate();
 
-        expect(wrapper.readAsStringSync(), gradleWrapper('9.3.1'));
+        expect(wrapper.readAsStringSync(), gradleWrapper('9.5.0'));
         expect(settingsKts.readAsStringSync(), settings);
         expect(logger.statusText, isNot(contains('settings.gradle.kts')));
       },
@@ -445,14 +450,14 @@ plugins {
 
     testWithoutContext('does not upgrade a Gradle pre-release', () async {
       settingsKts.writeAsStringSync(appSettingsKts(agp: '9.0.1', kgp: '2.3.20'));
-      // gradle-9.3.1-rc-1-all.zip doesn't exist, so this must not be rewritten.
+      // gradle-9.5.0-rc-1-all.zip doesn't exist, so this must not be rewritten.
       final String wrapperContents = gradleWrapper('9.1.0', distribution: 'rc-1-all');
       wrapper.writeAsStringSync(wrapperContents);
 
       await migrate();
 
       expect(wrapper.readAsStringSync(), wrapperContents);
-      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.0.1', kgp: '2.4.10'));
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.0.1', kgp: '2.4.20'));
     });
 
     testWithoutContext('prefers settings.gradle over settings.gradle.kts, like Gradle', () async {
@@ -466,7 +471,7 @@ plugins {
 
       expect(
         settingsGroovy.readAsStringSync(),
-        moduleHostSettingsGroovy(agp: '9.1.1', kgp: '2.4.10'),
+        moduleHostSettingsGroovy(agp: '9.3.1', kgp: '2.4.20'),
       );
       expect(settingsKts.readAsStringSync(), ignoredSettings);
     });
@@ -481,7 +486,7 @@ plugins {
 }
 ''';
       settingsKts.writeAsStringSync(settings);
-      wrapper.writeAsStringSync(gradleWrapper('9.3.1'));
+      wrapper.writeAsStringSync(gradleWrapper(templateDefaultGradleVersion));
 
       await migrate();
 
@@ -517,8 +522,9 @@ plugins {
 
       // MemoryFileSystem truncates a file before a failed write, as a full disk
       // can, so only check that the versions weren't upgraded.
-      expect(failingWrapper.readAsStringSync(), isNot(contains('9.3.1')));
-      expect(failingSettings.readAsStringSync(), isNot(contains('9.1.1')));
+      expect(failingWrapper.readAsStringSync(), isNot(contains('9.5.0')));
+      expect(failingSettings.readAsStringSync(), isNot(contains('9.3.1')));
+      expect(failingSettings.readAsStringSync(), isNot(contains('2.4.20')));
       expect(logger.errorText, contains('Mock write error'));
       expect(logger.statusText, isNot(contains('Upgraded')));
     });
@@ -531,14 +537,88 @@ plugins {
       await migrate();
 
       expect(wrapper.readAsStringSync(), wrapperContents);
-      // Gradle stays at 9.1.0, which AGP 9.1.1 doesn't support.
-      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.0.1', kgp: '2.4.10'));
+      // Gradle stays at 9.1.0, which AGP 9.1.1 and 9.3.1 don't support.
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.0.1', kgp: '2.4.20'));
       expect(logger.traceText, contains('pins distributionSha256Sum'));
     });
 
-    testWithoutContext('targets the minimum versions that Flutter supports', () async {
+    testWithoutContext(
+      'upgrades AGP to the minimum version when the Gradle wrapper of a Flutter 3.47 '
+      'project pins a checksum',
+      () async {
+        settingsKts.writeAsStringSync(appSettingsKts(agp: '9.1.0', kgp: '2.4.0'));
+        final wrapperContents = '${gradleWrapper('9.3.1')}distributionSha256Sum=b84e04fa\n';
+        wrapper.writeAsStringSync(wrapperContents);
+
+        await migrate();
+
+        expect(wrapper.readAsStringSync(), wrapperContents);
+        // Gradle stays at 9.3.1, which supports AGP 9.1.1 but not 9.3.1.
+        expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.1', kgp: '2.4.20'));
+        expect(
+          logger.statusText,
+          contains(
+            'Upgraded the Android Gradle Plugin from 9.1.0 to 9.1.1, the minimum version '
+            'that Flutter supports. To upgrade to 9.3.1 and remove the warning, upgrade '
+            'Gradle to 9.5.0 or later.',
+          ),
+        );
+        expect(
+          logger.statusText,
+          contains('Upgraded the Kotlin Gradle Plugin from 2.4.0 to 2.4.20'),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'upgrades AGP to the minimum version when a Flutter 3.47 project opts out of '
+      'the Gradle upgrade',
+      () async {
+        settingsKts.writeAsStringSync(appSettingsKts(agp: '9.1.0', kgp: '2.4.0'));
+        final wrapperContents = '${gradleWrapper('9.3.1')}# $optOutFlag\n';
+        wrapper.writeAsStringSync(wrapperContents);
+
+        await migrate();
+
+        expect(wrapper.readAsStringSync(), wrapperContents);
+        expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.1', kgp: '2.4.20'));
+        expect(logger.statusText, isNot(contains('Upgraded Gradle')));
+      },
+    );
+
+    testWithoutContext(
+      'upgrades AGP to the minimum version when a developer chose a Gradle version '
+      'between the two AGP requirements',
+      () async {
+        settingsKts.writeAsStringSync(appSettingsKts(agp: '9.1.0', kgp: '2.4.0'));
+        // Not a version that a template wrote, so it isn't upgraded.
+        wrapper.writeAsStringSync(gradleWrapper('9.4.1'));
+
+        await migrate();
+
+        expect(wrapper.readAsStringSync(), gradleWrapper('9.4.1'));
+        expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.1', kgp: '2.4.20'));
+        expect(
+          logger.traceText,
+          contains('so the Android Gradle Plugin is upgraded to 9.1.1 at most.'),
+        );
+      },
+    );
+
+    testWithoutContext('upgrades a Flutter 3.44 AGP to 9.3.1 with a newer Gradle', () async {
+      // A developer upgraded Gradle but kept the template AGP.
+      settingsKts.writeAsStringSync(appSettingsKts(agp: '9.0.1', kgp: '2.3.20'));
+      wrapper.writeAsStringSync(gradleWrapper('9.6.0'));
+
+      await migrate();
+
+      expect(wrapper.readAsStringSync(), gradleWrapper('9.6.0'));
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.3.1', kgp: '2.4.20'));
+    });
+
+    testWithoutContext('targets the versions that Flutter supports without a warning', () async {
       // Keep the targets in sync with DependencyVersionChecker.kt, so that the
-      // migrated project builds without an error and the targets don't drift
+      // migrated project builds without a warning and the targets don't drift
       // past the versions that this migration has been verified with.
       const FileSystem localFileSystem = LocalFileSystem();
       final File checker = localFileSystem.file(
@@ -560,9 +640,16 @@ plugins {
         return '${match.group(1)}.${match.group(2)}.${match.group(3)}';
       }
 
-      expect(templateGradleUpgradeTarget, versionOf('errorGradleVersion'));
-      expect(templateAgpUpgradeTarget, versionOf('errorAGPVersion'));
-      expect(templateKgpUpgradeTarget, versionOf('errorKGPVersion'));
+      expect(templateGradleUpgradeTarget, versionOf('warnGradleVersion'));
+      expect(templateAgpUpgradeTarget, versionOf('warnAGPVersion'));
+      expect(minimumAgpUpgradeTarget, versionOf('errorAGPVersion'));
+      expect(templateKgpUpgradeTarget, versionOf('warnKGPVersion'));
+      // The fallback AGP must need an older Gradle than the target AGP, or it
+      // would never be chosen.
+      expect(
+        Version.parse(getGradleVersionFor(minimumAgpUpgradeTarget)),
+        lessThan(Version.parse(getGradleVersionFor(templateAgpUpgradeTarget))!),
+      );
     });
   });
 }

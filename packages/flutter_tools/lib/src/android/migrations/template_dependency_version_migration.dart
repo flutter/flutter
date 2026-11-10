@@ -11,28 +11,37 @@ import '../../project.dart';
 import '../gradle_utils.dart';
 import 'android_studio_java_gradle_conflict_migration.dart' show optOutFlag;
 
-// The target versions are the minimum versions that the Flutter Gradle Plugin
-// accepts (the `error*Version` values in DependencyVersionChecker.kt), not the
-// newest template versions, so that the upgrade is as small as possible.
-// template_dependency_version_migration_test.dart keeps them in sync.
+// The targets are the lowest versions that the Flutter Gradle Plugin accepts
+// without a warning (the `warn*Version` values in DependencyVersionChecker.kt),
+// so that a migrated project builds cleanly and keeps building after the next
+// increase of the minimum versions. template_dependency_version_migration_test.dart
+// keeps them in sync.
 //
-// When those minimums are raised, add the template versions of the releases
+// When those versions are raised, add the template versions of the releases
 // that are now below them to the `*ToUpgrade` sets, including the previous
 // targets below. See packages/flutter_tools/lib/src/android/README.md.
 
 /// Gradle version that projects are upgraded to.
-///
-/// Also the minimum Gradle version that [templateAgpUpgradeTarget] requires.
 @visibleForTesting
-const templateGradleUpgradeTarget = '9.3.1';
+const templateGradleUpgradeTarget = '9.5.0';
 
-/// Android Gradle Plugin (AGP) version that projects are upgraded to.
+/// Android Gradle Plugin (AGP) version that projects are upgraded to when
+/// their Gradle version supports it.
 @visibleForTesting
-const templateAgpUpgradeTarget = '9.1.1';
+const templateAgpUpgradeTarget = '9.3.1';
+
+/// AGP version that projects are upgraded to when their Gradle version
+/// doesn't support [templateAgpUpgradeTarget], for example because the Gradle
+/// wrapper pins a checksum or opted out of upgrades.
+///
+/// The minimum AGP version that Flutter supports (`errorAGPVersion` in
+/// DependencyVersionChecker.kt).
+@visibleForTesting
+const minimumAgpUpgradeTarget = '9.1.1';
 
 /// Kotlin Gradle Plugin (KGP) version that projects are upgraded to.
 @visibleForTesting
-const templateKgpUpgradeTarget = '2.4.10';
+const templateKgpUpgradeTarget = '2.4.20';
 
 /// Gradle versions that `flutter create` wrote and that are upgraded to
 /// [templateGradleUpgradeTarget].
@@ -40,11 +49,12 @@ const templateKgpUpgradeTarget = '2.4.10';
 /// Only template versions are listed, so that versions chosen by a developer
 /// are left alone.
 ///  * 9.1.0: Flutter 3.44 and the pre-releases before Flutter 3.47.
+///  * 9.3.1: Flutter 3.47 and the pre-releases before Flutter 3.50.
 @visibleForTesting
-const templateGradleVersionsToUpgrade = <String>{'9.1.0'};
+const templateGradleVersionsToUpgrade = <String>{'9.1.0', '9.3.1'};
 
 /// AGP versions that `flutter create` wrote and that are upgraded to
-/// [templateAgpUpgradeTarget].
+/// [templateAgpUpgradeTarget] or [minimumAgpUpgradeTarget].
 ///  * 9.0.1: Flutter 3.44 and the pre-releases before Flutter 3.47.
 ///  * 9.1.0: Flutter 3.47 and the pre-releases before Flutter 3.50.
 @visibleForTesting
@@ -163,8 +173,9 @@ class TemplateGradleWrapperVersionMigration extends ProjectMigrator {
       return;
     }
     logger.printStatus(
-      'Upgraded Gradle from $fromVersion to $templateGradleUpgradeTarget, the minimum '
-      'version that Flutter supports. To keep the previous version, undo the change, '
+      'Upgraded Gradle from $fromVersion to $templateGradleUpgradeTarget, the lowest '
+      'version that Flutter supports without a warning. To keep the previous version, '
+      'undo the change, '
       "add a comment containing '$optOutFlag' to ${_gradleWrapperFile.basename}, and "
       'build with --android-skip-build-dependency-validation.',
     );
@@ -197,15 +208,16 @@ class TemplateGradleWrapperVersionMigration extends ProjectMigrator {
 /// migration:
 ///
 ///  * Only changes the versions in [templateAgpVersionsToUpgrade] and
-///    [templateKgpVersionsToUpgrade], and only to the minimum supported
-///    version, which stays within the same major version. AGP 8 projects are
-///    left alone because moving to AGP 9 needs other changes.
+///    [templateKgpVersionsToUpgrade], and stays within the same major version.
+///    AGP 8 projects are left alone because moving to AGP 9 needs other
+///    changes.
 ///  * Only changes literal versions in `plugins {}` declarations, which is
 ///    where the templates put them. Versions from a version catalog or a
 ///    variable aren't changed.
-///  * Only upgrades AGP when the project's Gradle version is at least
-///    [templateGradleUpgradeTarget], so that it doesn't create an AGP and
-///    Gradle version pair that can't build.
+///  * Upgrades AGP to [templateAgpUpgradeTarget] when the project's Gradle
+///    version supports it, otherwise to [minimumAgpUpgradeTarget] when Gradle
+///    supports that, and otherwise leaves AGP alone, so that it doesn't create
+///    an AGP and Gradle version pair that can't build.
 ///  * Can be turned off with [pluginVersionOptOutFlag].
 class TemplateAndroidPluginVersionMigration extends ProjectMigrator {
   TemplateAndroidPluginVersionMigration(AndroidProject project, super.logger)
@@ -215,8 +227,9 @@ class TemplateAndroidPluginVersionMigration extends ProjectMigrator {
   final File _settingsFile;
   final File _gradleWrapperFile;
 
-  /// Whether AGP can be upgraded, given the project's Gradle version.
-  late bool _gradleSupportsAgpTarget;
+  /// The AGP version that the project's Gradle version supports, or null if
+  /// AGP can't be upgraded.
+  String? _agpTarget;
 
   final _upgrades = <String>[];
 
@@ -246,13 +259,19 @@ class TemplateAndroidPluginVersionMigration extends ProjectMigrator {
     final Version? gradleVersion = _readGradleVersion(_gradleWrapperFile);
     // Not gradle_utils.validateGradleAndAgp, which also rejects Gradle versions
     // newer than the newest one Flutter knows about.
-    _gradleSupportsAgpTarget =
-        gradleVersion != null && gradleVersion >= Version.parse(templateGradleUpgradeTarget)!;
-    if (!_gradleSupportsAgpTarget) {
+    bool supports(String agpVersion) =>
+        gradleVersion != null && gradleVersion >= Version.parse(getGradleVersionFor(agpVersion))!;
+    _agpTarget = supports(templateAgpUpgradeTarget)
+        ? templateAgpUpgradeTarget
+        : supports(minimumAgpUpgradeTarget)
+        ? minimumAgpUpgradeTarget
+        : null;
+    if (_agpTarget != templateAgpUpgradeTarget) {
       logger.printTrace(
-        'Not upgrading the Android Gradle Plugin, because AGP $templateAgpUpgradeTarget '
-        'requires Gradle $templateGradleUpgradeTarget or later, and the project uses '
-        'Gradle ${gradleVersion ?? 'of an unknown version'}.',
+        'AGP $templateAgpUpgradeTarget requires Gradle '
+        '${getGradleVersionFor(templateAgpUpgradeTarget)} or later, and the project uses '
+        'Gradle ${gradleVersion ?? 'of an unknown version'}, so the Android Gradle Plugin '
+        '${_agpTarget == null ? 'is not upgraded' : 'is upgraded to $_agpTarget at most'}.',
       );
     }
     processFileLines(_settingsFile);
@@ -281,8 +300,8 @@ class TemplateAndroidPluginVersionMigration extends ProjectMigrator {
       'org.jetbrains.kotlin.android' when templateKgpVersionsToUpgrade.contains(currentVersion) =>
         templateKgpUpgradeTarget,
       'com.android.application' || 'com.android.library'
-          when _gradleSupportsAgpTarget && templateAgpVersionsToUpgrade.contains(currentVersion) =>
-        templateAgpUpgradeTarget,
+          when templateAgpVersionsToUpgrade.contains(currentVersion) =>
+        _agpTarget,
       _ => null,
     };
   }
@@ -308,8 +327,13 @@ class TemplateAndroidPluginVersionMigration extends ProjectMigrator {
           ? 'the Kotlin Gradle Plugin'
           : 'the Android Gradle Plugin';
       _upgrades.add(
-        'Upgraded $pluginName from ${m.namedGroup('version')} to $targetVersion, the minimum '
-        'version that Flutter supports.',
+        targetVersion == minimumAgpUpgradeTarget
+            ? 'Upgraded $pluginName from ${m.namedGroup('version')} to $targetVersion, the '
+                  'minimum version that Flutter supports. To upgrade to $templateAgpUpgradeTarget '
+                  'and remove the warning, upgrade Gradle to '
+                  '${getGradleVersionFor(templateAgpUpgradeTarget)} or later.'
+            : 'Upgraded $pluginName from ${m.namedGroup('version')} to $targetVersion, the '
+                  'lowest version that Flutter supports without a warning.',
       );
       return '${m.namedGroup('prefix')}$targetVersion';
     });
