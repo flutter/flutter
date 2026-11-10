@@ -651,11 +651,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       textureId = -1;
     } else {
       final PlatformViewRenderTarget renderTarget = makePlatformViewRenderTarget(textureRegistry);
+      renderTarget.resize(physicalWidth, physicalHeight);
       viewWrapper = new PlatformViewWrapper(context, renderTarget);
       textureId = renderTarget.getId();
     }
     viewWrapper.setTouchProcessor(androidTouchProcessor);
-    viewWrapper.resizeRenderTarget(physicalWidth, physicalHeight);
 
     final FrameLayout.LayoutParams viewWrapperLayoutParams =
         new FrameLayout.LayoutParams(physicalWidth, physicalHeight, Gravity.LEFT | Gravity.TOP);

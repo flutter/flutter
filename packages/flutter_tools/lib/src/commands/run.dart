@@ -59,7 +59,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       EngineRenderingFlagsBundle(includeTestFlag: true),
       WebServerOptionsBundle(),
     ]);
-    CommonOptions.nativeNullAssertions.addTo(argParser, hideOverride: !verboseHelp);
+    CommonOptions.nativeNullAssertions.addTo(argParser, hide: !verboseHelp);
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
       CommonOptions.dartDefines,
       CommonOptions.dartDefineFromFile,
@@ -81,7 +81,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       DebuggingOptionDescriptors.vmserviceOutFile,
       DebuggingOptionDescriptors.disableServiceAuthCodes,
       DebuggingOptionDescriptors.disableServiceOriginCheck,
-      DebuggingOptionDescriptors.startPaused(defaultsTo: startPausedDefault),
+      _startPaused,
       DebuggingOptionDescriptors.dartFlags,
       DebuggingOptionDescriptors.endlessTraceBuffer,
       DebuggingOptionDescriptors.traceSystrace,
@@ -100,6 +100,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       DebuggingOptionDescriptors.iosProfileDebugger,
     ], verboseHelp: verboseHelp);
   }
+
+  late final _startPaused = FlagOptionDescriptor(
+    name: 'start-paused',
+    defaultsTo: startPausedDefault,
+    help: 'Start in a paused mode and wait for a debugger to connect.',
+  );
 
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
@@ -208,7 +214,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
-        startPaused: getValue(DebuggingOptionDescriptors.startPausedOption),
+        startPaused: getValue(_startPaused),
         disableServiceAuthCodes: disableServiceAuthCodes,
         disableServiceOriginCheck: disableServiceOriginCheck,
         cacheStartupProfile: cacheStartupProfile,
