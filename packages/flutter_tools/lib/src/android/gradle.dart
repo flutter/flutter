@@ -531,7 +531,12 @@ To fix this, you can either:
       CmakeAndroid16kPagesMigration(project.android, logger),
       DisableBuiltInKotlinMigration(project.android, logger),
       DisableNewDslMigration(project.android, logger),
-      TemplateDependencyVersionMigration(project.android, logger),
+      // Developers who skip Flutter's dependency version checks manage these
+      // versions themselves.
+      if (!androidBuildInfo.buildInfo.androidGradleConfig.skipBuildDependencyValidation) ...[
+        TemplateGradleWrapperVersionMigration(project.android, logger),
+        TemplateAndroidPluginVersionMigration(project.android, logger),
+      ],
     ];
 
     final migration = ProjectMigration(migrators);

@@ -19,9 +19,8 @@ final androidStudioFlamingo = Version(2022, 2, 0);
 @visibleForTesting
 const gradleVersion7_6_1 = r'7.6.1';
 
-// String that can be placed in the gradle-wrapper.properties to opt out of this
-// migrator.
-@visibleForTesting
+/// String that can be placed in the gradle-wrapper.properties to opt out of this
+/// migrator and of `TemplateGradleWrapperVersionMigration`.
 const optOutFlag = 'NoFlutterGradleWrapperUpgrade';
 // Only the major version matters.
 final flamingoBundledJava = Version(17, 0, 0);

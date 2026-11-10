@@ -6,6 +6,8 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart'
+    show optOutFlag;
 import 'package:flutter_tools/src/android/migrations/template_dependency_version_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -93,7 +95,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradle-$dist
 ''';
 
 void main() {
-  group('TemplateDependencyVersionMigration', () {
+  group('Template dependency version migrations', () {
     late MemoryFileSystem fileSystem;
     late BufferLogger logger;
     late FakeAndroidProject project;
@@ -115,7 +117,11 @@ void main() {
             ..createSync(recursive: true);
     });
 
-    Future<void> migrate() => TemplateDependencyVersionMigration(project, logger).migrate();
+    // Runs the migrations in the same order as gradle.dart.
+    Future<void> migrate({Logger? withLogger}) async {
+      await TemplateGradleWrapperVersionMigration(project, withLogger ?? logger).migrate();
+      await TemplateAndroidPluginVersionMigration(project, withLogger ?? logger).migrate();
+    }
 
     testWithoutContext('upgrades a project created with Flutter 3.47', () async {
       settingsKts.writeAsStringSync(appSettingsKts(agp: '9.1.0', kgp: '2.4.0'));
@@ -128,19 +134,19 @@ void main() {
       expect(
         logger.statusText,
         contains(
-          'Upgrading the Android Gradle Plugin from 9.1.0 to 9.1.1, '
+          'Upgraded the Android Gradle Plugin from 9.1.0 to 9.1.1, '
           'the minimum version that Flutter supports.',
         ),
       );
       expect(
         logger.statusText,
         contains(
-          'Upgrading the Kotlin Gradle Plugin from 2.4.0 to 2.4.10, '
+          'Upgraded the Kotlin Gradle Plugin from 2.4.0 to 2.4.10, '
           'the minimum version that Flutter supports.',
         ),
       );
       expect(logger.statusText, contains(pluginVersionOptOutFlag));
-      expect(logger.statusText, isNot(contains('Upgrading Gradle')));
+      expect(logger.statusText, isNot(contains('Upgraded Gradle')));
     });
 
     testWithoutContext('upgrades a project created with Flutter 3.44', () async {
@@ -153,18 +159,13 @@ void main() {
       expect(wrapper.readAsStringSync(), gradleWrapper('9.3.1'));
       expect(
         logger.statusText,
-        contains(
-          'Upgrading Gradle from 9.1.0 to 9.3.1, the minimum version that Flutter supports.',
-        ),
+        contains('Upgraded Gradle from 9.1.0 to 9.3.1, the minimum version that Flutter supports.'),
       );
-      expect(logger.statusText, contains(gradleWrapperOptOutFlag));
+      expect(logger.statusText, contains(optOutFlag));
+      expect(logger.statusText, contains('Upgraded the Android Gradle Plugin from 9.0.1 to 9.1.1'));
       expect(
         logger.statusText,
-        contains('Upgrading the Android Gradle Plugin from 9.0.1 to 9.1.1'),
-      );
-      expect(
-        logger.statusText,
-        contains('Upgrading the Kotlin Gradle Plugin from 2.3.20 to 2.4.10'),
+        contains('Upgraded the Kotlin Gradle Plugin from 2.3.20 to 2.4.10'),
       );
     });
 
@@ -270,7 +271,7 @@ plugins {
         expect(
           logger.traceText,
           contains(
-            'Skipping Android Gradle Plugin upgrade from 9.1.0 because AGP 9.1.1 '
+            'Not upgrading the Android Gradle Plugin, because AGP 9.1.1 '
             'requires Gradle 9.3.1 or later, and the project uses Gradle 9.2.0.',
           ),
         );
@@ -306,7 +307,7 @@ plugins {
 
     testWithoutContext('honors the Gradle wrapper opt-out flag', () async {
       settingsKts.writeAsStringSync(appSettingsKts(agp: '9.0.1', kgp: '2.3.20'));
-      final wrapperContents = '${gradleWrapper('9.1.0')}# $gradleWrapperOptOutFlag\n';
+      final wrapperContents = '${gradleWrapper('9.1.0')}# $optOutFlag\n';
       wrapper.writeAsStringSync(wrapperContents);
 
       await migrate();
@@ -314,7 +315,7 @@ plugins {
       expect(wrapper.readAsStringSync(), wrapperContents);
       // AGP 9.1.1 needs a newer Gradle, so AGP is left alone too.
       expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.0.1', kgp: '2.4.10'));
-      expect(logger.traceText, contains(gradleWrapperOptOutFlag));
+      expect(logger.traceText, contains(optOutFlag));
     });
 
     testWithoutContext('honors the settings opt-out flag', () async {
@@ -404,7 +405,7 @@ plugins {
 
       await migrate();
       final migratedLogger = BufferLogger.test();
-      await TemplateDependencyVersionMigration(project, migratedLogger).migrate();
+      await migrate(withLogger: migratedLogger);
 
       expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.1', kgp: '2.4.10'));
       expect(wrapper.readAsStringSync(), gradleWrapper('9.3.1'));
@@ -418,7 +419,121 @@ plugins {
       await migrate();
 
       expect(logger.statusText, isEmpty);
-      expect(logger.traceText, contains('settings.gradle(.kts) not found'));
+      expect(logger.traceText, contains('settings.gradle.kts not found'));
+    });
+
+    testWithoutContext(
+      'does not rewrite the settings file when only the Gradle version changes',
+      () async {
+        // A developer-chosen AGP, CRLF line endings, and no trailing newline,
+        // so that any rewrite would change the bytes.
+        const settings =
+            'plugins {\r\n'
+            '    id("com.android.application") version "9.2.0" apply false\r\n'
+            '    id("org.jetbrains.kotlin.android") version "2.4.10" apply false\r\n'
+            '}';
+        settingsKts.writeAsStringSync(settings);
+        wrapper.writeAsStringSync(gradleWrapper('9.1.0'));
+
+        await migrate();
+
+        expect(wrapper.readAsStringSync(), gradleWrapper('9.3.1'));
+        expect(settingsKts.readAsStringSync(), settings);
+        expect(logger.statusText, isNot(contains('settings.gradle.kts')));
+      },
+    );
+
+    testWithoutContext('does not upgrade a Gradle pre-release', () async {
+      settingsKts.writeAsStringSync(appSettingsKts(agp: '9.0.1', kgp: '2.3.20'));
+      // gradle-9.3.1-rc-1-all.zip doesn't exist, so this must not be rewritten.
+      final String wrapperContents = gradleWrapper('9.1.0', distribution: 'rc-1-all');
+      wrapper.writeAsStringSync(wrapperContents);
+
+      await migrate();
+
+      expect(wrapper.readAsStringSync(), wrapperContents);
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.0.1', kgp: '2.4.10'));
+    });
+
+    testWithoutContext('prefers settings.gradle over settings.gradle.kts, like Gradle', () async {
+      final String ignoredSettings = appSettingsKts(agp: '9.1.0', kgp: '2.4.0');
+      settingsKts.writeAsStringSync(ignoredSettings);
+      final File settingsGroovy = project.hostAppGradleRoot.childFile('settings.gradle')
+        ..writeAsStringSync(moduleHostSettingsGroovy(agp: '9.1.0', kgp: '2.4.0'));
+      wrapper.writeAsStringSync(gradleWrapper('9.3.1'));
+
+      await migrate();
+
+      expect(
+        settingsGroovy.readAsStringSync(),
+        moduleHostSettingsGroovy(agp: '9.1.1', kgp: '2.4.10'),
+      );
+      expect(settingsKts.readAsStringSync(), ignoredSettings);
+    });
+
+    testWithoutContext('leaves declarations in block comments and other calls unchanged', () async {
+      const settings = '''
+plugins {
+    /*
+     * id("com.android.application") version "9.1.0" apply false
+     */
+    myid("com.android.application") version "9.1.0" apply false
+}
+''';
+      settingsKts.writeAsStringSync(settings);
+      wrapper.writeAsStringSync(gradleWrapper('9.3.1'));
+
+      await migrate();
+
+      expect(settingsKts.readAsStringSync(), settings);
+      expect(logger.statusText, isEmpty);
+    });
+
+    testWithoutContext('does not report upgrades that could not be written', () async {
+      var failWrites = false;
+      final failingFileSystem = MemoryFileSystem.test(
+        opHandle: (String context, FileSystemOp operation) {
+          if (failWrites && operation == FileSystemOp.write) {
+            throw const FileSystemException('Mock write error');
+          }
+        },
+      );
+      final Directory root = failingFileSystem.currentDirectory.childDirectory('android')
+        ..createSync();
+      final File failingWrapper =
+          root
+              .childDirectory(gradleDirectoryName)
+              .childDirectory(gradleWrapperDirectoryName)
+              .childFile(gradleWrapperPropertiesFilename)
+            ..createSync(recursive: true)
+            ..writeAsStringSync(gradleWrapper('9.1.0'));
+      final File failingSettings = root.childFile('settings.gradle.kts')
+        ..writeAsStringSync(appSettingsKts(agp: '9.0.1', kgp: '2.3.20'));
+      failWrites = true;
+
+      final failingProject = FakeAndroidProject(hostAppGradleRoot: root);
+      await TemplateGradleWrapperVersionMigration(failingProject, logger).migrate();
+      await TemplateAndroidPluginVersionMigration(failingProject, logger).migrate();
+
+      // MemoryFileSystem truncates a file before a failed write, as a full disk
+      // can, so only check that the versions weren't upgraded.
+      expect(failingWrapper.readAsStringSync(), isNot(contains('9.3.1')));
+      expect(failingSettings.readAsStringSync(), isNot(contains('9.1.1')));
+      expect(logger.errorText, contains('Mock write error'));
+      expect(logger.statusText, isNot(contains('Upgraded')));
+    });
+
+    testWithoutContext('does not upgrade a Gradle wrapper that pins a checksum', () async {
+      settingsKts.writeAsStringSync(appSettingsKts(agp: '9.0.1', kgp: '2.3.20'));
+      final wrapperContents = '${gradleWrapper('9.1.0')}distributionSha256Sum=b84e04fa\n';
+      wrapper.writeAsStringSync(wrapperContents);
+
+      await migrate();
+
+      expect(wrapper.readAsStringSync(), wrapperContents);
+      // Gradle stays at 9.1.0, which AGP 9.1.1 doesn't support.
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.0.1', kgp: '2.4.10'));
+      expect(logger.traceText, contains('pins distributionSha256Sum'));
     });
 
     testWithoutContext('targets the minimum versions that Flutter supports', () async {
@@ -445,9 +560,9 @@ plugins {
         return '${match.group(1)}.${match.group(2)}.${match.group(3)}';
       }
 
-      expect(gradleTargetVersion, versionOf('errorGradleVersion'));
-      expect(agpTargetVersion, versionOf('errorAGPVersion'));
-      expect(kgpTargetVersion, versionOf('errorKGPVersion'));
+      expect(templateGradleUpgradeTarget, versionOf('errorGradleVersion'));
+      expect(templateAgpUpgradeTarget, versionOf('errorAGPVersion'));
+      expect(templateKgpUpgradeTarget, versionOf('errorKGPVersion'));
     });
   });
 }
@@ -457,4 +572,11 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
   @override
   final Directory hostAppGradleRoot;
+
+  // Same precedence as AndroidProject.settingsGradleFile.
+  @override
+  File get settingsGradleFile {
+    final File groovy = hostAppGradleRoot.childFile('settings.gradle');
+    return groovy.existsSync() ? groovy : hostAppGradleRoot.childFile('settings.gradle.kts');
+  }
 }
