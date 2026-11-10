@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -2013,7 +2014,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 16));
 
-    // Assert mid-snap state: sheet has started snapping towards 1.0.
+    // Assert mid-snap state: sheet has started snapping towards 2 / 3.
     final double midSnapSize = controller.size;
     expect(midSnapSize, greaterThan(2 / 3));
     expect(midSnapSize, lessThan(1.0));
@@ -2059,15 +2060,31 @@ void main() {
       ),
     );
 
+    // Drag the sheet midway between 0.5 and 1.0 so extent.hasDragged is true
+    // and _shouldSnap() is true.
+    final Drag initialDrag = innerController.position.drag(DragStartDetails(), () {});
+    initialDrag.update(
+      DragUpdateDetails(
+        globalPosition: Offset.zero,
+        delta: const Offset(0.0, -90.0),
+        primaryDelta: -90.0,
+      ),
+    );
+    expect(controller.size, greaterThan(0.5));
+    expect(controller.size, lessThan(1.0));
+
     var holdCanceledCount = 0;
-    innerController.position.hold(() {
+    final ScrollHoldController hold = innerController.position.hold(() {
       holdCanceledCount++;
     });
     expect(holdCanceledCount, 0);
 
-    // Cancelled when superseded by snap (goBallistic):
-    (innerController.position as ScrollPositionWithSingleContext).goBallistic(0.0);
+    // Cancelled when superseded by snap (hold.cancel() calls goBallistic(0.0)):
+    hold.cancel();
     expect(holdCanceledCount, 1);
+    await tester.pumpAndSettle();
+    expect(holdCanceledCount, 1);
+    expect(controller.size, 0.5);
 
     // Re-register hold callback:
     innerController.position.hold(() {
@@ -2076,7 +2093,17 @@ void main() {
     expect(holdCanceledCount, 1);
 
     // Cancelled when superseded by drag:
-    innerController.position.drag(DragStartDetails(), () {});
+    final Drag drag = innerController.position.drag(DragStartDetails(), () {});
+    expect(holdCanceledCount, 2);
+    drag.update(
+      DragUpdateDetails(
+        globalPosition: Offset.zero,
+        delta: const Offset(0.0, 90.0),
+        primaryDelta: 90.0,
+      ),
+    );
+    drag.end(DragEndDetails(primaryVelocity: 0.0));
+    await tester.pumpAndSettle();
     expect(holdCanceledCount, 2);
   });
 
@@ -2159,7 +2186,7 @@ void main() {
 
       expect(controller.size, 0.5);
 
-      // Drag up and release to trigger snap towards 1.0.
+      // Drag up and release to trigger snap towards 0.5.
       final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 5')));
       await drag.moveBy(const Offset(0.0, -60.0));
       await tester.pump();
@@ -2197,4 +2224,46 @@ void main() {
       expect(childTaps, 1);
     },
   );
+
+  testWidgets('flinging a non-snapping sheet downward transitions isScrollingNotifier to false', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    late ScrollController innerController;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: DraggableScrollableSheet(
+          controller: controller,
+          builder: (BuildContext context, ScrollController sc) {
+            innerController = sc;
+            return SingleChildScrollView(
+              controller: sc,
+              child: Column(children: <Widget>[for (var i = 0; i < 40; i++) Text('Item $i')]),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(controller.size, 0.5);
+    expect(innerController.position.isScrollingNotifier.value, isFalse);
+
+    // Fling downward towards minChildSize (0.25).
+    await tester.fling(find.text('Item 1'), const Offset(0.0, 200.0), 2000.0);
+    expect(innerController.position.isScrollingNotifier.value, isTrue);
+
+    // Pump frames until the sheet reaches minChildSize.
+    while (controller.size > 0.25) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(controller.size, 0.25);
+
+    // After hitting minChildSize, super.goBallistic is called and isScrollingNotifier
+    // transitions to false after a couple of 16ms frames without a recreation loop.
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(innerController.position.isScrollingNotifier.value, isFalse);
+  });
 }

@@ -936,6 +936,10 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       _DraggableSheetBallisticScrollActivity(this, simulation, context.vsync, shouldIgnorePointer),
     );
   }
+
+  void _superGoBallistic(double velocity) {
+    super.goBallistic(velocity);
+  }
 }
 
 class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
@@ -978,9 +982,7 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
           _controller.velocity +
           (_position.physics.toleranceFor(_position).velocity * _controller.velocity.sign);
       _controller.stop();
-      delegate.goBallistic(nextVelocity);
-    } else if (_controller.isCompleted) {
-      _end();
+      _position._superGoBallistic(nextVelocity);
     }
   }
 
@@ -993,7 +995,7 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
       if (snapSize != null) {
         _position.extent.updateSize(snapSize, _position.context.notificationContext!);
       }
-      delegate.goBallistic(0.0);
+      _position._superGoBallistic(0.0);
     }
   }
 
