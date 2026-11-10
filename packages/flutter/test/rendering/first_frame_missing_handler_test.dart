@@ -13,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final binding = TestRenderBinding();
+  // The first-frame notification is sent once per binding, so this test must
+  // run before any other test in this file draws a frame.
   test(
     'Web first-frame notification does not report an error when flutter/service_worker is unhandled',
     () async {
