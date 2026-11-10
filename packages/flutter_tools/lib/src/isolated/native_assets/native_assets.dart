@@ -12,6 +12,7 @@ import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
 
+import '../../android/android_sdk.dart';
 import '../../base/common.dart';
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
@@ -21,6 +22,7 @@ import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../build_system/exceptions.dart';
 import '../../features.dart';
+import '../../windows/visual_studio.dart';
 import 'android/native_assets.dart';
 import 'dart_hook_result.dart';
 import 'ios/native_assets.dart';
@@ -224,6 +226,7 @@ runFlutterSpecificBuildHooks({
 
 List<AssetBuildTarget> _getTargets({
   required Map<String, String> environmentDefines,
+  required FlutterNativeAssetsBuildRunner? buildRunner,
   required TargetPlatform targetPlatform,
   required FileSystem fileSystem,
   required BuildCodeAssetsOptions? buildCodeAssets,
@@ -247,6 +250,8 @@ List<AssetBuildTarget> _getTargets({
     fileSystem: fileSystem,
     supportedAssetTypes: supportedAssetTypes,
     buildDirectory: buildCodeAssets?.appBuildDirectory,
+    androidSdkBuilder: () => buildRunner?.androidSdk,
+    visualStudio: buildRunner?.visualStudio,
   );
 }
 
@@ -260,6 +265,7 @@ Future<({List<AssetBuildTarget> targets, BuildMode buildMode, bool linkingEnable
 }) async {
   final List<AssetBuildTarget> targets = _getTargets(
     environmentDefines: environmentDefines,
+    buildRunner: buildRunner,
     targetPlatform: targetPlatform,
     fileSystem: fileSystem,
     buildCodeAssets: buildCodeAssets,
@@ -390,6 +396,7 @@ DartHooksResult combineBuildAndLinkResults({
 }) {
   final List<AssetBuildTarget> targets = _getTargets(
     environmentDefines: environmentDefines,
+    buildRunner: null,
     targetPlatform: targetPlatform,
     fileSystem: fileSystem,
     buildCodeAssets: buildCodeAssets,
@@ -533,6 +540,14 @@ Future<List<File>> installCodeAssets({
 /// It enables mocking `package:hooks_runner` package.
 /// It also enables mocking native toolchain discovery via [setCCompilerConfig].
 abstract interface class FlutterNativeAssetsBuildRunner {
+  /// The [AndroidSdk] used to locate the Android NDK toolchain when building
+  /// Android code assets.
+  AndroidSdk? get androidSdk;
+
+  /// The [VisualStudio] instance used to locate the MSVC toolchain when
+  /// building Windows code assets.
+  VisualStudio? get visualStudio;
+
   /// All packages in the transitive dependencies that have a `build.dart`.
   Future<List<String>> packagesWithNativeAssets();
 
@@ -563,10 +578,15 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.processManager,
     this.runPackageName,
     this.pubspecPath, {
-    required this.includeDevDependencies,
     required this._flutterRoot,
+    required this.includeDevDependencies,
+    required this._androidSdkBuilder,
+    required this.visualStudio,
   });
 
+  final AndroidSdk? Function()? _androidSdkBuilder;
+  @override
+  late final AndroidSdk? androidSdk = _androidSdkBuilder?.call();
   final String pubspecPath;
   final String packageConfigPath;
   final PackageConfig packageConfig;
@@ -575,6 +595,8 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   final Platform platform;
   final ProcessManager processManager;
   final String runPackageName;
+  @override
+  final VisualStudio? visualStudio;
 
   /// Include the dev dependencies of [runPackageName].
   final bool includeDevDependencies;
@@ -664,7 +686,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }
 
   @override
-  Future<void> setCCompilerConfig(CodeAssetTarget target) async => target.setCCompilerConfig(
+  Future<void> setCCompilerConfig(CodeAssetTarget target) => target.setCCompilerConfig(
     processUtils: ProcessUtils(processManager: processManager, logger: logger),
   );
 }
