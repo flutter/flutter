@@ -64,10 +64,10 @@ class ContentContextTest : public ::testing::Test {
           return std::make_shared<MockShaderFunction>(std::string(name), stage);
         });
     ON_CALL(*pipeline_library_, GetPipeline(_, _, _))
-        .WillByDefault([this](PipelineDescriptor descriptor, bool /*async*/,
-                              bool /*threadsafe*/) {
+        .WillByDefault([this](const PipelineDescriptor& descriptor,
+                              bool /*async*/, bool /*threadsafe*/) {
           requested_.push_back(descriptor);
-          return MakeRealizedPipelineFuture(std::move(descriptor));
+          return MakeRealizedPipelineFuture(descriptor);
         });
   }
 
@@ -89,6 +89,7 @@ TEST_F(ContentContextTest, WarmDefaultPipelinesRequestsDefaultPipelines) {
   ContentContext::WarmDefaultPipelines(*context_);
 
   std::vector<std::string> labels;
+  labels.reserve(requested_.size());
   for (const PipelineDescriptor& descriptor : requested_) {
     labels.emplace_back(descriptor.GetLabel());
   }
