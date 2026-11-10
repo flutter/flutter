@@ -247,6 +247,7 @@ AccessibilityBridge::CreateRemoveReparentedNodesUpdate() {
       ui::AXNodeData* parent = &updates[parent_id];
       auto iter = std::find(parent->child_ids.begin(), parent->child_ids.end(),
                             child_id);
+      FML_DCHECK(iter != parent->child_ids.end());
       if (iter != parent->child_ids.end()) {
         parent->child_ids.erase(iter);
       }
