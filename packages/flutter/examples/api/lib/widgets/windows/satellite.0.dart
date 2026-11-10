@@ -85,7 +85,7 @@ class _MyAppState extends State<MyApp> {
 
     if (_satelliteController != null) {
       children.add(
-        SatelliteWindow(
+        Window(
           controller: _satelliteController!,
           child: Container(
             padding: const EdgeInsets.all(8),

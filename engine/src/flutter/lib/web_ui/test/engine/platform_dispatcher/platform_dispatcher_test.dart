@@ -551,6 +551,37 @@ void testMain() {
       });
     });
 
+    test('invokeOnAlwaysUse24HourFormatChanged calls onAlwaysUse24HourFormatChanged', () {
+      var called = false;
+      void callback() {
+        called = true;
+      }
+
+      dispatcher.onAlwaysUse24HourFormatChanged = callback;
+      expect(dispatcher.onAlwaysUse24HourFormatChanged, same(callback));
+
+      dispatcher.invokeOnAlwaysUse24HourFormatChanged();
+      expect(called, isTrue);
+    });
+
+    test('invokeOnAlwaysUse24HourFormatChanged preserves the zone', () {
+      final Zone zone1 = Zone.current.fork();
+      final Zone zone2 = Zone.current.fork();
+      Zone? invokedZone;
+
+      zone1.runGuarded(() {
+        dispatcher.onAlwaysUse24HourFormatChanged = () {
+          invokedZone = Zone.current;
+        };
+      });
+
+      zone2.runGuarded(() {
+        dispatcher.invokeOnAlwaysUse24HourFormatChanged();
+      });
+
+      expect(invokedZone, same(zone1));
+    });
+
     test('adds the accessibility placeholder', () {
       final DomElement placeholder = domDocument.querySelector('flt-semantics-placeholder')!;
       expect(placeholder.isConnected, isTrue);

@@ -21,7 +21,6 @@ import 'base/template.dart';
 import 'base/time.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
-import 'cache.dart';
 import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
@@ -156,7 +155,6 @@ Future<Plugin?> _pluginFromPackage(
     flutterConfig['plugin'] as YamlMap?,
     flutterConstraint,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
-    fileSystem: fileSystem,
     appDependencies: appDependencies,
     isDevDependency: isDevDependency,
   );
@@ -569,10 +567,15 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-List<Map<String, Object?>> _extractPlatformMaps(Iterable<Plugin> plugins, String type) {
+List<Map<String, Object?>> _extractPlatformMaps(
+  Iterable<Plugin> plugins,
+  String type, {
+  required FileSystem fileSystem,
+}) {
   return <Map<String, Object?>>[
     for (final Plugin plugin in plugins)
-      if (plugin.platforms[type] case final PluginPlatform platformPlugin) platformPlugin.toMap(),
+      if (plugin.platforms[type] case final PluginPlatform platformPlugin)
+        platformPlugin.toMap(fileSystem: fileSystem),
   ];
 }
 
@@ -582,6 +585,7 @@ Future<void> _writeAndroidPluginRegistrant(
   required Logger logger,
   required TemplateRenderer templateRenderer,
 }) async {
+  final FileSystem fs = project.directory.fileSystem;
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     AndroidPlugin.kConfigKey,
@@ -589,13 +593,13 @@ Future<void> _writeAndroidPluginRegistrant(
   final List<Map<String, Object?>> androidPlugins = _extractPlatformMaps(
     methodChannelPlugins,
     AndroidPlugin.kConfigKey,
+    fileSystem: fs,
   );
 
   final templateContext = <String, Object>{
     'methodChannelPlugins': androidPlugins,
     'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
   };
-  final FileSystem fs = project.directory.fileSystem;
   final String javaSourcePath = fs.path.join(
     project.android.pluginRegistrantHost.path,
     'src',
@@ -972,6 +976,7 @@ Future<void> writeIOSPluginRegistrant(
   final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(
     methodChannelPlugins,
     IOSPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final context = <String, Object>{
     'os': FlutterDarwinPlatform.ios.name,
@@ -1044,12 +1049,14 @@ Future<void> _writeLinuxPluginFiles(
   final List<Map<String, Object?>> linuxMethodChannelPlugins = _extractPlatformMaps(
     methodChannelPlugins,
     LinuxPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, LinuxPlugin.kConfigKey)
     ..removeWhere(methodChannelPlugins.contains);
   final List<Map<String, Object?>> linuxFfiPlugins = _extractPlatformMaps(
     ffiPlugins,
     LinuxPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final context = <String, Object>{
     'os': 'linux',
@@ -1132,6 +1139,7 @@ Future<void> writeMacOSPluginRegistrant(
   final List<Map<String, Object?>> macosMethodChannelPlugins = _extractPlatformMaps(
     methodChannelPlugins,
     MacOSPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final context = <String, Object>{
     'os': FlutterDarwinPlatform.macos.name,
@@ -1216,12 +1224,14 @@ Future<void> writeWindowsPluginFiles(
   final List<Map<String, Object?>> windowsMethodChannelPlugins = _extractPlatformMaps(
     win32Plugins,
     WindowsPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)
     ..removeWhere(methodChannelPlugins.contains);
   final List<Map<String, Object?>> windowsFfiPlugins = _extractPlatformMaps(
     ffiPlugins,
     WindowsPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final context = <String, Object>{
     'os': 'windows',
@@ -1272,7 +1282,11 @@ Future<void> _writeWebPluginRegistrant(
   required Logger logger,
   required TemplateRenderer templateRenderer,
 }) async {
-  final List<Map<String, Object?>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
+  final List<Map<String, Object?>> webPlugins = _extractPlatformMaps(
+    plugins,
+    WebPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
+  );
   final context = <String, Object>{'methodChannelPlugins': webPlugins};
 
   final File pluginFile = destination.childFile('web_plugin_registrant.dart');
@@ -2125,6 +2139,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   File mainFile, {
+  required String flutterRoot,
   required Logger logger,
   required TemplateRenderer templateRenderer,
 }) async {
@@ -2137,7 +2152,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
     packageConfig.packageOf(mainFile.absolute.uri),
-    Cache.flutterRoot!,
+    flutterRoot,
   );
   final templateContext = <String, Object>{
     'dartLanguageVersion': entrypointVersion.toString(),

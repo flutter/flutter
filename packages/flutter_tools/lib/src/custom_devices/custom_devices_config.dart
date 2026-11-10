@@ -21,12 +21,13 @@ class CustomDevicesConfig {
   /// when it's not valid JSON (which other configurations do) and will not
   /// be implicitly created when it doesn't exist.
   CustomDevicesConfig({
-    required Platform platform,
     required FileSystem fileSystem,
     required Logger logger,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
+    required Platform platform,
+    required this.cache,
+  }) : _fileSystem = fileSystem,
        _logger = logger,
+       _platform = platform,
        _configLoader = (() => Config.managed(
          _kCustomDevicesConfigName,
          fileSystem: fileSystem,
@@ -38,6 +39,7 @@ class CustomDevicesConfig {
   CustomDevicesConfig.test({
     required this._fileSystem,
     required Logger logger,
+    required this.cache,
     Directory? directory,
     Platform? platform,
   }) : _platform = platform ?? FakePlatform(),
@@ -57,6 +59,7 @@ class CustomDevicesConfig {
   final Platform _platform;
   final FileSystem _fileSystem;
   final Logger _logger;
+  final Cache cache;
   final Config Function() _configLoader;
 
   // When the custom devices feature is disabled, CustomDevicesConfig is
@@ -79,7 +82,7 @@ class CustomDevicesConfig {
 
   String get _defaultSchema {
     final Uri uri = _fileSystem
-        .directory(Cache.flutterRoot)
+        .directory(cache.flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('static')

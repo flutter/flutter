@@ -257,7 +257,16 @@ void ImageEncodingImpeller::ConvertImageToRaster(
          image = std::move(image)]() { original_encode_task(image); });
   };
 
-  if (dl_image->owning_context() != DlImage::OwningContext::kRaster) {
+  // Check whether the image can be read back on the current (IO) thread.
+  // - Images owned by the raster context can't be read back on the IO thread.
+  // - On OpenGLES, do not read back on the IO thread because it may result in
+  //   deadlocks on some drivers if the raster thread uses the same texture
+  //   (https://github.com/flutter/flutter/issues/193428).
+  const bool is_opengles =
+      impeller_context && impeller_context->GetBackendType() ==
+                              impeller::Context::BackendType::kOpenGLES;
+  if (dl_image->owning_context() != DlImage::OwningContext::kRaster &&
+      !is_opengles) {
     DoConvertImageToRasterImpellerWithRetry(
         dl_image, std::move(encode_task),
         /*snapshot_delegate=*/{}, is_gpu_disabled_sync_switch, impeller_context,
@@ -265,6 +274,7 @@ void ImageEncodingImpeller::ConvertImageToRaster(
     return;
   }
 
+  // Read back the image on the raster thread.
   raster_task_runner->PostTask([dl_image, encode_task = std::move(encode_task),
                                 io_task_runner, snapshot_delegate,
                                 is_gpu_disabled_sync_switch, impeller_context,
