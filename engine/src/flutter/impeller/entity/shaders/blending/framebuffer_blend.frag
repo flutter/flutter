@@ -19,9 +19,26 @@ layout(constant_id = 1) const float supports_decal = 1;
 layout(input_attachment_index = 0) uniform subpassInputMS uSub;
 
 vec4 ReadDestination() {
-  return (subpassLoad(uSub, 0) + subpassLoad(uSub, 1) + subpassLoad(uSub, 2) +
-          subpassLoad(uSub, 3)) /
-         vec4(4.0);
+#ifdef IMPELLER_TARGET_VULKAN
+  // Vulkan reads MSAA input attachments one sample at a time, and this shader
+  // runs once per pixel. Average only the samples covered by this primitive.
+  // Samples outside its coverage may already have been written earlier in
+  // this draw, e.g. along the shared edge of the quad's two triangles.
+  // https://github.com/flutter/flutter/issues/179547
+  int mask = gl_SampleMaskIn[0] & 0xf;
+  vec4 result = vec4(0.0);
+  for (int i = 0; i < 4; i++) {
+    if ((mask & (1 << i)) != 0) {
+      result += subpassLoad(uSub, i);
+    }
+  }
+  return result / float(max(bitCount(mask), 1));
+#else
+  // On Metal and GLES, SPIRV-Cross turns this into framebuffer fetch and
+  // ignores the sample index. Sample variables such as gl_SampleMaskIn also
+  // aren't available in GLSL ES 1.00.
+  return subpassLoad(uSub, 0);
+#endif
 }
 
 uniform sampler2D texture_sampler_src;

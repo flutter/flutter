@@ -39,7 +39,7 @@ void testMain() {
         final ui.Picture picture = recorder.endRecording();
         final sb = ui.SceneBuilder();
         sb.addPicture(ui.Offset.zero, picture);
-        await renderer.renderScene(sb.build(), view);
+        await renderer.renderScene(sb.build(), view, size: view.physicalSize);
       }
 
       // Draw first frame at 200x200. This ensures the rasterizer is initialized
