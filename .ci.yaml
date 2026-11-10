@@ -6861,278 +6861,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Windows tool_integration_tests_1_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "1_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Windows tool_integration_tests_2_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "2_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "3600"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Windows tool_integration_tests_3_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "3_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Windows tool_integration_tests_4_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "4_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Windows tool_integration_tests_5_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "5_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Windows tool_integration_tests_6_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "6_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Windows tool_integration_tests_7_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "7_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Windows tool_integration_tests_8_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "8_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Windows tool_integration_tests_9_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "9_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Windows tool_integration_tests_10_10
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
-        ]
-      shard: tool_integration_tests
-      subshard: "10_10"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
   - name: Windows tool_integration_tests_1
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7159,7 +6888,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_2
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7186,7 +6914,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_3
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7213,7 +6940,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_4
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7240,7 +6966,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7267,7 +6992,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7294,7 +7018,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7321,7 +7044,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7348,7 +7070,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7375,7 +7096,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_10
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7402,7 +7122,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_11
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7429,7 +7148,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_12
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7456,7 +7174,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_13
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7483,7 +7200,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_14
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -7510,7 +7226,6 @@ targets:
       - DEPS
 
   - name: Windows tool_integration_tests_15
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
