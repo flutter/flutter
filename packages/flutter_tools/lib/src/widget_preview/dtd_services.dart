@@ -42,11 +42,10 @@ class WidgetPreviewDtdServices {
     required this.project,
     required this.shutdownHooks,
     @visibleForTesting this._dtd,
-    this.onClearSyntheticPreviews,
-    this.onHotReloadPreviewerRequest,
-    this.onRegisterSyntheticPreview,
-    this.onUnregisterSyntheticPreview,
-    this.webPreviewUri,
+    this.onHotReloadPreviewer,
+    this.onSyncPreviews,
+    this.projectRootPath,
+    this.webPreviewUriProvider,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -60,6 +59,13 @@ class WidgetPreviewDtdServices {
 
   /// The actual name of the registered widget preview service.
   late final String widgetPreviewService = _withUuid(kWidgetPreviewServiceRoot);
+
+  /// The name of the widget preview scaffold service, without a UUID.
+  @visibleForTesting
+  static const kWidgetPreviewScaffoldServiceRoot = 'PreviewScaffold';
+
+  /// The actual name of the registered widget preview scaffold service.
+  late final String widgetPreviewScaffoldService = _withUuid(kWidgetPreviewScaffoldServiceRoot);
 
   /// The name of the widget preview stream, without a UUID.
   @visibleForTesting
@@ -120,19 +126,9 @@ class WidgetPreviewDtdServices {
   static const kGetDevToolsUri = 'getDevToolsUri';
   static const kGetWebPreviewUrl = 'getWebPreviewUrl';
   static const kGetServiceInfo = 'getServiceInfo';
-  static const kRegisterSyntheticPreview = 'registerSyntheticPreview';
-  static const kUnregisterSyntheticPreview = 'unregisterSyntheticPreview';
-  static const kClearSyntheticPreviews = 'clearSyntheticPreviews';
+  static const kSyncPreviews = 'syncPreviews';
 
   static const kWidgetPreviewConnectedEvent = 'Connected';
-  static const kLayoutExceptionEvent = 'LayoutException';
-  static const kCompilationSucceededEvent = 'CompilationSucceeded';
-  static const kCompilationFailedEvent = 'CompilationFailed';
-  static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
-  static const kSyntheticPreviewStateChangedEvent = 'SyntheticPreviewStateChanged';
-
-  /// Protocol version for agent widget preview services.
-  static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry, or when a requested
@@ -150,24 +146,13 @@ class WidgetPreviewDtdServices {
     (kGetDevToolsUri, _getDevToolsUri),
     (kGetWebPreviewUrl, _getWebPreviewUrl),
     (kGetServiceInfo, _getServiceInfo),
-    (kRegisterSyntheticPreview, _registerSyntheticPreview),
-    (kUnregisterSyntheticPreview, _unregisterSyntheticPreview),
-    (kClearSyntheticPreviews, _clearSyntheticPreviews),
+    (kSyncPreviews, _syncPreviews),
   ];
 
   // END KEEP SYNCED
 
-  static const kClearSyntheticPreviewsResultType = 'ClearSyntheticPreviewsResult';
-  static const kClearedCount = 'clearedCount';
-  static const kCount = 'count';
-  static const kDiagnostic = 'diagnostic';
-  static const kDurationMs = 'durationMs';
-  static const kError = 'error';
-  static const kPreviewId = 'previewId';
-  static const kPreviews = 'previews';
-  static const kRegistered = 'registered';
-  static const kSuccess = 'success';
-  static const kType = 'type';
+  static const kTimeoutMs = 'timeoutMs';
+  static const kDefaultSyncTimeoutMs = 30_000;
 
   @visibleForTesting
   late final preferences = PersistentPreferences(fs: fs);
@@ -183,22 +168,55 @@ class WidgetPreviewDtdServices {
   final VoidCallback onHotRestartPreviewerRequest;
 
   /// Invoked when the [kHotReloadPreviewer] service method is invoked.
-  final Future<void> Function()? onHotReloadPreviewerRequest;
+  final Future<void> Function()? onHotReloadPreviewer;
 
-  /// Invoked when a synthetic preview is registered dynamically.
-  final Future<bool> Function(SyntheticPreviewDetails details)? onRegisterSyntheticPreview;
-
-  /// Invoked when a synthetic preview is unregistered.
-  final Future<bool> Function(String previewId)? onUnregisterSyntheticPreview;
-
-  /// Invoked when all synthetic previews are cleared.
-  final Future<int> Function()? onClearSyntheticPreviews;
+  /// Invoked when the [kSyncPreviews] service method is invoked.
+  final Future<SyncPreviewsResponse> Function({required Duration timeout})? onSyncPreviews;
 
   /// Returns the URI of the running web preview application, if available.
-  final Uri? Function()? webPreviewUri;
+  final Uri? Function()? webPreviewUriProvider;
+
+  /// Explicit path to the root directory of the previewed Flutter project.
+  ///
+  /// When omitted, defaults to [project]'s directory path.
+  final String? projectRootPath;
 
   /// The widget_preview_scaffold project.
   final FlutterProject project;
+
+  /// Whether the widget preview scaffold has connected to DTD.
+  bool get scaffoldConnected => _scaffoldConnected;
+  bool _scaffoldConnected = false;
+  Completer<void>? _scaffoldConnectedCompleter;
+
+  /// Resets [scaffoldConnected] to `false` before a full restart so callers
+  /// awaiting [waitForScaffoldConnected] wait for the fresh connection event.
+  void markScaffoldDisconnected() {
+    _scaffoldConnected = false;
+  }
+
+  /// Marks [scaffoldConnected] as `true` and completes any pending
+  /// [waitForScaffoldConnected] futures.
+  void markScaffoldConnected() {
+    _scaffoldConnected = true;
+    if (_scaffoldConnectedCompleter case final Completer<void> completer
+        when !completer.isCompleted) {
+      completer.complete();
+    }
+    _scaffoldConnectedCompleter = null;
+  }
+
+  /// Waits until the widget preview scaffold has posted
+  /// [kWidgetPreviewConnectedEvent] on [widgetPreviewScaffoldStream].
+  Future<void> waitForScaffoldConnected({
+    Duration timeout = const Duration(milliseconds: kDefaultSyncTimeoutMs),
+  }) async {
+    if (_scaffoldConnected) {
+      return;
+    }
+    final Completer<void> completer = _scaffoldConnectedCompleter ??= Completer<void>();
+    await completer.future.timeout(timeout);
+  }
 
   PackageConfig? _packageConfig;
 
@@ -230,7 +248,7 @@ class WidgetPreviewDtdServices {
   /// Connects to an existing DTD instance and registers any relevant services.
   Future<void> connect({required Uri dtdWsUri}) async {
     _dtdUri = dtdWsUri;
-    _dtd = await DartToolingDaemon.connect(dtdWsUri);
+    _dtd ??= await DartToolingDaemon.connect(dtdWsUri);
 
     _allLspServicesRegistered = false;
     final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
@@ -357,6 +375,7 @@ class WidgetPreviewDtdServices {
     final DartToolingDaemon dtd = _dtd!;
     dtd.onEvent(widgetPreviewScaffoldStream).listen((DTDEvent event) {
       if (event.kind == kWidgetPreviewConnectedEvent) {
+        markScaffoldConnected();
         previewAnalytics.reportPreviewerConnected();
       }
     });
@@ -409,120 +428,59 @@ class WidgetPreviewDtdServices {
   }
 
   Future<Map<String, Object?>> _hotReload(Parameters _) async {
-    if (onHotReloadPreviewerRequest != null) {
-      await onHotReloadPreviewerRequest!();
+    if (onHotReloadPreviewer != null) {
+      await onHotReloadPreviewer!();
     }
     return const Success().toJson();
   }
 
   Future<Map<String, Object?>> _getWebPreviewUrl(Parameters _) async {
-    final Uri? uri = webPreviewUri?.call();
+    final Uri? uri = webPreviewUriProvider?.call();
     if (uri == null) {
       throw RpcException(kNoValueForKey, 'Web preview server URL is not currently available.');
     }
     return WebPreviewUrlResult(host: uri.host, port: uri.port, url: uri.toString()).toJson();
   }
 
+  String get _resolvedProjectRootPath {
+    if (projectRootPath case final String rootPath) {
+      return rootPath;
+    }
+    return project.directory.existsSync()
+        ? project.directory.resolveSymbolicLinksSync()
+        : project.directory.absolute.path;
+  }
+
   Future<Map<String, Object?>> _getServiceInfo(Parameters _) async {
-    final Uri? uri = webPreviewUri?.call();
+    final Uri? uri = webPreviewUriProvider?.call();
     return PreviewServiceInfo(
       // Empty only when invoked in unit tests before connect() has been called.
       dtdUri: _dtdUri?.toString() ?? '',
-      serviceName: widgetPreviewService,
-      version: kProtocolVersion,
-      webPreviewUrl: uri?.toString(),
+      previewService: widgetPreviewService,
+      projectRoot: _resolvedProjectRootPath,
+      scaffoldConnected: scaffoldConnected,
+      scaffoldService: widgetPreviewScaffoldService,
+      scaffoldStream: widgetPreviewScaffoldStream,
+      webPreviewUri: uri?.toString(),
     ).toJson();
   }
 
-  Future<Map<String, Object?>> _registerSyntheticPreview(Parameters params) async {
-    final Parameter wrappersParam = params[SyntheticPreviewDetails.kWrappers];
-    final details = SyntheticPreviewDetails(
-      constructorExpression: params[SyntheticPreviewDetails.kConstructorExpression].asString,
-      filePath: params[SyntheticPreviewDetails.kFilePath].asString,
-      previewId: params[SyntheticPreviewDetails.kPreviewId].asString,
-      widgetName: params[SyntheticPreviewDetails.kWidgetName].asString,
-      wrappers: <String>[
-        if (wrappersParam.valueOr(null) != null)
-          for (var i = 0; i < wrappersParam.asList.length; i++) wrappersParam[i].asString,
-      ],
+  Future<Map<String, Object?>> _syncPreviews(Parameters params) async {
+    final int timeoutMs = params.value == null || params[kTimeoutMs].valueOr(null) == null
+        ? kDefaultSyncTimeoutMs
+        : params[kTimeoutMs].asInt;
+    if (timeoutMs < 0) {
+      throw RpcException.invalidParams('$kTimeoutMs must be non-negative, got: $timeoutMs');
+    }
+    final Future<SyncPreviewsResponse> Function({required Duration timeout})? syncCallback =
+        onSyncPreviews;
+    if (syncCallback == null) {
+      throw RpcException(kNoValueForKey, 'Preview synchronization is not currently available.');
+    }
+    final SyncPreviewsResponse response = await syncCallback(
+      timeout: Duration(milliseconds: timeoutMs),
     );
-    final bool success =
-        onRegisterSyntheticPreview != null && await onRegisterSyntheticPreview!(details);
-    if (success) {
-      await postSyntheticPreviewStateChangedEvent(previewId: details.previewId, registered: true);
-    }
-    return BoolResponse(success).toJson();
-  }
-
-  Future<Map<String, Object?>> _unregisterSyntheticPreview(Parameters params) async {
-    final String previewId = params[SyntheticPreviewDetails.kPreviewId].asString;
-    final bool success =
-        onUnregisterSyntheticPreview != null && await onUnregisterSyntheticPreview!(previewId);
-    if (success) {
-      await postSyntheticPreviewStateChangedEvent(previewId: previewId, registered: false);
-    }
-    return BoolResponse(success).toJson();
-  }
-
-  Future<Map<String, Object?>> _clearSyntheticPreviews(Parameters _) async {
-    final int count = onClearSyntheticPreviews != null ? await onClearSyntheticPreviews!() : 0;
-    return <String, Object?>{kType: kClearSyntheticPreviewsResultType, kClearedCount: count};
-  }
-
-  /// Posts a [kLayoutExceptionEvent] to the widget preview stream.
-  Future<void> postLayoutExceptionEvent({
-    required Map<String, Object?> diagnostic,
-    required String previewId,
-  }) async {
-    final DartToolingDaemon? dtd = _dtd;
-    if (dtd == null) {
-      return;
-    }
-    await dtd.postEvent(widgetPreviewScaffoldStream, kLayoutExceptionEvent, <String, Object?>{
-      kPreviewId: previewId,
-      kDiagnostic: diagnostic,
-    });
-  }
-
-  /// Posts a [kPreviewsUpdatedEvent] to the widget preview stream.
-  Future<void> postPreviewsUpdatedEvent({required List<Map<String, Object?>> previews}) async {
-    final DartToolingDaemon? dtd = _dtd;
-    if (dtd == null) {
-      return;
-    }
-    await dtd.postEvent(widgetPreviewScaffoldStream, kPreviewsUpdatedEvent, <String, Object?>{
-      kCount: previews.length,
-      kPreviews: previews,
-    });
-  }
-
-  /// Posts a compilation status event to the widget preview stream.
-  Future<void> postCompilationEvent({required bool success, int? durationMs, String? error}) async {
-    final DartToolingDaemon? dtd = _dtd;
-    if (dtd == null) {
-      return;
-    }
-    await dtd.postEvent(
-      widgetPreviewScaffoldStream,
-      success ? kCompilationSucceededEvent : kCompilationFailedEvent,
-      <String, Object?>{kSuccess: success, kDurationMs: ?durationMs, kError: ?error},
-    );
-  }
-
-  /// Posts a [kSyntheticPreviewStateChangedEvent] to the widget preview stream.
-  Future<void> postSyntheticPreviewStateChangedEvent({
-    required String previewId,
-    required bool registered,
-  }) async {
-    final DartToolingDaemon? dtd = _dtd;
-    if (dtd == null) {
-      return;
-    }
-    await dtd.postEvent(
-      widgetPreviewScaffoldStream,
-      kSyntheticPreviewStateChangedEvent,
-      <String, Object?>{kPreviewId: previewId, kRegistered: registered},
-    );
+    return response.toJson();
   }
 }
 

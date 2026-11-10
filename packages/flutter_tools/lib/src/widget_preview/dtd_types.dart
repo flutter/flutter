@@ -5,6 +5,8 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
 import 'package:collection/collection.dart';
+import 'package:dtd/dtd.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 
 import '../convert.dart';
 
@@ -268,96 +270,18 @@ class Position {
   }
 }
 
-/// Represents an ephemeral, dynamically registered synthetic preview that can be rendered
-/// without requiring an explicit `@Preview` annotation in user source code.
-class SyntheticPreviewDetails {
-  const SyntheticPreviewDetails({
-    required this.constructorExpression,
-    required this.filePath,
-    required this.previewId,
-    required this.widgetName,
-    this.wrappers = const <String>[],
-  });
-
-  static const kType = 'type';
-  static const kTypeName = 'SyntheticPreviewDetails';
-  static const kConstructorExpression = 'constructorExpression';
-  static const kFilePath = 'filePath';
-  static const kPreviewId = 'previewId';
-  static const kWidgetName = 'widgetName';
-  static const kWrappers = 'wrappers';
-
-  /// The Dart instantiation expression for the widget (e.g. `MyWidget(title: 'Test')`).
-  final String constructorExpression;
-
-  /// The absolute file path to the source file where the widget is defined.
-  final String filePath;
-
-  /// A unique identifier for this synthetic preview.
-  final String previewId;
-
-  /// The name of the widget class being previewed.
-  final String widgetName;
-
-  /// Optional list of wrapper widget types to wrap around the preview (e.g. `Material`, `Directionality`).
-  final List<String> wrappers;
-
-  @override
-  int get hashCode => Object.hash(
-    constructorExpression,
-    filePath,
-    previewId,
-    widgetName,
-    const DeepCollectionEquality().hash(wrappers),
-  );
-
-  @override
-  bool operator ==(Object other) {
-    return other is SyntheticPreviewDetails &&
-        other.runtimeType == SyntheticPreviewDetails &&
-        constructorExpression == other.constructorExpression &&
-        filePath == other.filePath &&
-        previewId == other.previewId &&
-        widgetName == other.widgetName &&
-        const DeepCollectionEquality().equals(wrappers, other.wrappers);
-  }
-
-  Map<String, Object?> toJson() {
-    return <String, Object?>{
-      kType: kTypeName,
-      kConstructorExpression: constructorExpression,
-      kFilePath: filePath,
-      kPreviewId: previewId,
-      kWidgetName: widgetName,
-      kWrappers: wrappers,
-    };
-  }
-
-  @override
-  String toString() => json.encode(toJson());
-
-  static SyntheticPreviewDetails fromJson(Map<String, Object?> json) {
-    final constructorExpression = json[kConstructorExpression]! as String;
-    final filePath = json[kFilePath]! as String;
-    final previewId = json[kPreviewId]! as String;
-    final widgetName = json[kWidgetName]! as String;
-    final wrappersJson = json[kWrappers] as List<Object?>?;
-    final List<String> wrappers = wrappersJson != null
-        ? wrappersJson.map((Object? item) => item! as String).toList()
-        : const <String>[];
-    return SyntheticPreviewDetails(
-      constructorExpression: constructorExpression,
-      filePath: filePath,
-      previewId: previewId,
-      widgetName: widgetName,
-      wrappers: wrappers,
-    );
-  }
-}
-
 /// Information about the active web preview HTTP server.
 class WebPreviewUrlResult {
   const WebPreviewUrlResult({required this.host, required this.port, required this.url});
+
+  factory WebPreviewUrlResult.fromDTDResponse(DTDResponse response) {
+    if (response.result[kType] != kTypeName) {
+      throw RpcException.invalidParams(
+        'Expected $kType param to be $kTypeName, got: ${response.result[kType]}',
+      );
+    }
+    return WebPreviewUrlResult.fromJson(response.result);
+  }
 
   static const kType = 'type';
   static const kTypeName = 'WebPreviewUrlResult';
@@ -405,50 +329,88 @@ class WebPreviewUrlResult {
 class PreviewServiceInfo {
   const PreviewServiceInfo({
     required this.dtdUri,
-    required this.serviceName,
-    required this.version,
-    this.webPreviewUrl,
+    required this.previewService,
+    required this.projectRoot,
+    required this.scaffoldConnected,
+    required this.scaffoldService,
+    required this.scaffoldStream,
+    this.webPreviewUri,
   });
+
+  factory PreviewServiceInfo.fromDTDResponse(DTDResponse response) {
+    if (response.result[kType] != kTypeName) {
+      throw RpcException.invalidParams(
+        'Expected $kType param to be $kTypeName, got: ${response.result[kType]}',
+      );
+    }
+    return PreviewServiceInfo.fromJson(response.result);
+  }
 
   static const kType = 'type';
   static const kTypeName = 'PreviewServiceInfo';
   static const kDtdUri = 'dtdUri';
-  static const kServiceName = 'serviceName';
-  static const kVersion = 'version';
-  static const kWebPreviewUrl = 'webPreviewUrl';
+  static const kPreviewService = 'previewService';
+  static const kProjectRoot = 'projectRoot';
+  static const kScaffoldConnected = 'scaffoldConnected';
+  static const kScaffoldService = 'scaffoldService';
+  static const kScaffoldStream = 'scaffoldStream';
+  static const kWebPreviewUri = 'webPreviewUri';
 
   /// The WebSocket URI of the Dart Tooling Daemon.
   final String dtdUri;
 
-  /// The registered DTD service name (with UUID if enabled).
-  final String serviceName;
+  /// The registered DTD service name for the tool widget preview service.
+  final String previewService;
 
-  /// The version string of the widget preview tool service protocol.
-  final String version;
+  /// The absolute path to the root directory of the previewed Flutter project.
+  final String projectRoot;
 
-  /// The active web preview HTTP URL, if available.
-  final String? webPreviewUrl;
+  /// Whether the widget preview scaffold has connected to DTD.
+  final bool scaffoldConnected;
+
+  /// The registered DTD service name for the widget preview scaffold.
+  final String scaffoldService;
+
+  /// The DTD stream name posted to by the widget preview scaffold.
+  final String scaffoldStream;
+
+  /// The active web preview HTTP URI, if available.
+  final String? webPreviewUri;
 
   @override
-  int get hashCode => Object.hash(dtdUri, serviceName, version, webPreviewUrl);
+  int get hashCode => Object.hash(
+    dtdUri,
+    previewService,
+    projectRoot,
+    scaffoldConnected,
+    scaffoldService,
+    scaffoldStream,
+    webPreviewUri,
+  );
 
   @override
   bool operator ==(Object other) {
     return other is PreviewServiceInfo &&
         other.runtimeType == PreviewServiceInfo &&
         dtdUri == other.dtdUri &&
-        serviceName == other.serviceName &&
-        version == other.version &&
-        webPreviewUrl == other.webPreviewUrl;
+        previewService == other.previewService &&
+        projectRoot == other.projectRoot &&
+        scaffoldConnected == other.scaffoldConnected &&
+        scaffoldService == other.scaffoldService &&
+        scaffoldStream == other.scaffoldStream &&
+        webPreviewUri == other.webPreviewUri;
   }
 
   Map<String, Object?> toJson() {
     return <String, Object?>{
       kType: kTypeName,
       kDtdUri: dtdUri,
-      kServiceName: serviceName,
-      kVersion: version,
-      kWebPreviewUrl: ?webPreviewUrl,
+      kProjectRoot: projectRoot,
+      kPreviewService: previewService,
+      kScaffoldService: scaffoldService,
+      kScaffoldStream: scaffoldStream,
+      kWebPreviewUri: webPreviewUri,
+      kScaffoldConnected: scaffoldConnected,
     };
   }
 
@@ -457,14 +419,107 @@ class PreviewServiceInfo {
 
   static PreviewServiceInfo fromJson(Map<String, Object?> json) {
     final dtdUri = json[kDtdUri]! as String;
-    final serviceName = json[kServiceName]! as String;
-    final version = json[kVersion]! as String;
-    final webPreviewUrl = json[kWebPreviewUrl] as String?;
+    final previewService = json[kPreviewService]! as String;
+    final projectRoot = json[kProjectRoot]! as String;
+    final scaffoldConnected = json[kScaffoldConnected]! as bool;
+    final scaffoldService = json[kScaffoldService]! as String;
+    final scaffoldStream = json[kScaffoldStream]! as String;
+    final webPreviewUri = json[kWebPreviewUri] as String?;
     return PreviewServiceInfo(
       dtdUri: dtdUri,
-      serviceName: serviceName,
-      version: version,
-      webPreviewUrl: webPreviewUrl,
+      previewService: previewService,
+      projectRoot: projectRoot,
+      scaffoldConnected: scaffoldConnected,
+      scaffoldService: scaffoldService,
+      scaffoldStream: scaffoldStream,
+      webPreviewUri: webPreviewUri,
+    );
+  }
+}
+
+/// Result of synchronizing on-disk preview edits and reloading the previewer.
+class SyncPreviewsResponse {
+  const SyncPreviewsResponse({
+    required this.compileSuccess,
+    required this.errorPreviewCount,
+    required this.fullRestart,
+    required this.reloaded,
+    this.compileError,
+  });
+
+  factory SyncPreviewsResponse.fromDTDResponse(DTDResponse response) {
+    if (response.result[kType] != kTypeName) {
+      throw RpcException.invalidParams(
+        'Expected $kType param to be $kTypeName, got: ${response.result[kType]}',
+      );
+    }
+    return SyncPreviewsResponse.fromJson(response.result);
+  }
+
+  static const kType = 'type';
+  static const kTypeName = 'SyncPreviewsResponse';
+  static const kCompileError = 'compileError';
+  static const kCompileSuccess = 'compileSuccess';
+  static const kErrorPreviewCount = 'errorPreviewCount';
+  static const kFullRestart = 'fullRestart';
+  static const kReloaded = 'reloaded';
+
+  /// Error message if compilation or reload failed, or `null` on success.
+  final String? compileError;
+
+  /// Whether incremental compilation and reload succeeded.
+  final bool compileSuccess;
+
+  /// Count of previews in the workspace with analyzer errors.
+  final int errorPreviewCount;
+
+  /// Whether a full hot restart was performed.
+  final bool fullRestart;
+
+  /// Whether the previewer reloaded cleanly.
+  final bool reloaded;
+
+  @override
+  int get hashCode =>
+      Object.hash(compileError, compileSuccess, errorPreviewCount, fullRestart, reloaded);
+
+  @override
+  bool operator ==(Object other) {
+    return other is SyncPreviewsResponse &&
+        other.runtimeType == SyncPreviewsResponse &&
+        compileError == other.compileError &&
+        compileSuccess == other.compileSuccess &&
+        errorPreviewCount == other.errorPreviewCount &&
+        fullRestart == other.fullRestart &&
+        reloaded == other.reloaded;
+  }
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      kType: kTypeName,
+      kReloaded: reloaded,
+      kFullRestart: fullRestart,
+      kCompileSuccess: compileSuccess,
+      kCompileError: compileError,
+      kErrorPreviewCount: errorPreviewCount,
+    };
+  }
+
+  @override
+  String toString() => json.encode(toJson());
+
+  static SyncPreviewsResponse fromJson(Map<String, Object?> json) {
+    final compileError = json[kCompileError] as String?;
+    final compileSuccess = json[kCompileSuccess]! as bool;
+    final errorPreviewCount = json[kErrorPreviewCount]! as int;
+    final fullRestart = json[kFullRestart]! as bool;
+    final reloaded = json[kReloaded]! as bool;
+    return SyncPreviewsResponse(
+      compileError: compileError,
+      compileSuccess: compileSuccess,
+      errorPreviewCount: errorPreviewCount,
+      fullRestart: fullRestart,
+      reloaded: reloaded,
     );
   }
 }

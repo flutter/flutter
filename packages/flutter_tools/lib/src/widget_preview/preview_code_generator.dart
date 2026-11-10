@@ -58,9 +58,10 @@ class PreviewCodeGenerator {
 
   void populateDtdConnectionInfo({
     required Uri dtdUri,
-    required String widgetPreviewServiceName,
-    required String widgetPreviewScaffoldStreamName,
     required String projectRootPath,
+    required String widgetPreviewScaffoldServiceName,
+    required String widgetPreviewScaffoldStreamName,
+    required String widgetPreviewServiceName,
   }) {
     final emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
     final lib = cb.Library(
@@ -80,6 +81,13 @@ class PreviewCodeGenerator {
               ..modifier = cb.FieldModifier.constant
               ..type = cb.refer('String')
               ..assignment = cb.literalString(widgetPreviewServiceName).code;
+          }),
+          cb.Field((b) {
+            b
+              ..name = 'kWidgetPreviewScaffoldService'
+              ..modifier = cb.FieldModifier.constant
+              ..type = cb.refer('String')
+              ..assignment = cb.literalString(widgetPreviewScaffoldServiceName).code;
           }),
           cb.Field((b) {
             b

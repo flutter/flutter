@@ -4,5 +4,6 @@
 
 const String kWidgetPreviewDtdUri = '';
 const String kWidgetPreviewService = 'widget-preview';
+const String kWidgetPreviewScaffoldService = 'PreviewScaffold';
 const String kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
 const String kProjectRootPath = r'';

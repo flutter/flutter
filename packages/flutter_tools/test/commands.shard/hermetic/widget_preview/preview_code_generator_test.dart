@@ -23,7 +23,6 @@ import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fakes.dart';
 import 'utils/preview_detector_test_utils.dart';
 
@@ -311,7 +310,7 @@ void main() {
       await fs.dispose();
     });
 
-    testUsingContext(
+    testWithoutContext(
       'correctly generates ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         // Check that the generated preview file doesn't exist yet.
@@ -461,7 +460,7 @@ List<_i1.WidgetPreview> previews() => [];
       },
     );
 
-    testUsingContext('ignores previews with null packageName for LSP updates', () async {
+    testWithoutContext('ignores previews with null packageName for LSP updates', () async {
       await previewDetector.initialize();
       final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
         PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
@@ -534,7 +533,7 @@ List<_i1.WidgetPreview> previews() => [
       expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
     });
 
-    testUsingContext(
+    testWithoutContext(
       'correctly generates ${PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs)}',
       () async {
         await previewDetector.initialize();
@@ -549,9 +548,10 @@ List<_i1.WidgetPreview> previews() => [
         final Uri dtdUri = Uri.parse('ws://localhost:1234');
         codeGenerator.populateDtdConnectionInfo(
           dtdUri: dtdUri,
-          widgetPreviewServiceName: 'widget-preview-service',
-          widgetPreviewScaffoldStreamName: 'widget-preview-stream',
           projectRootPath: project.directory.absolute.path,
+          widgetPreviewScaffoldServiceName: 'PreviewScaffold-service',
+          widgetPreviewScaffoldStreamName: 'widget-preview-stream',
+          widgetPreviewServiceName: 'widget-preview-service',
         );
 
         final String expectedDtdConnectionInfo = DartFormatter(languageVersion: Version.none)
@@ -560,6 +560,7 @@ List<_i1.WidgetPreview> previews() => [
 
 const String kWidgetPreviewDtdUri = '$dtdUri';
 const String kWidgetPreviewService = 'widget-preview-service';
+const String kWidgetPreviewScaffoldService = 'PreviewScaffold-service';
 const String kWidgetPreviewScaffoldStream = 'widget-preview-stream';
 const String kProjectRootPath = r'${project.directory.absolute.path}';
 ''');

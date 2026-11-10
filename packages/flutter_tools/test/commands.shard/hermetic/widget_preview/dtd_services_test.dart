@@ -19,10 +19,15 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
+import '../../../src/fakes.dart';
 
 class FakeWidgetPreviewAnalytics extends Fake implements WidgetPreviewAnalytics {
+  int reportPreviewerConnectedCount = 0;
+
   @override
-  void reportPreviewerConnected() {}
+  void reportPreviewerConnected() {
+    reportPreviewerConnectedCount++;
+  }
 }
 
 class FakeDtdLauncher extends Fake implements DtdLauncher {
@@ -32,6 +37,7 @@ class FakeDtdLauncher extends Fake implements DtdLauncher {
 
 class FakeDartToolingDaemon extends Fake implements DartToolingDaemon {
   final postedEvents = <({String streamId, String eventKind, Map<String, Object?> eventData})>[];
+  final registeredMethods = <String, Map<String, DTDServiceCallback>>{};
   final _eventControllers = <String, StreamController<DTDEvent>>{};
   final subscribedStreams = <String>{};
   int getRegisteredServicesCallCount = 0;
@@ -45,6 +51,16 @@ class FakeDartToolingDaemon extends Fake implements DartToolingDaemon {
   RpcException? streamListenError;
 
   bool hasListener(String streamId) => _eventControllers[streamId]?.hasListener ?? false;
+
+  @override
+  Future<void> registerService(
+    String service,
+    String method,
+    DTDServiceCallback callback, {
+    Map<String, Object?>? capabilities,
+  }) async {
+    registeredMethods.putIfAbsent(service, () => <String, DTDServiceCallback>{})[method] = callback;
+  }
 
   @override
   Future<void> postEvent(String streamId, String eventKind, Map<String, Object?> eventData) async {
@@ -119,31 +135,18 @@ class FakeDartToolingDaemon extends Fake implements DartToolingDaemon {
   }
 }
 
+DTDServiceCallback _callbackFor(WidgetPreviewDtdServices services, String method) {
+  for (final (String name, DTDServiceCallback callback) in services.services) {
+    if (name == method) {
+      return callback;
+    }
+  }
+  fail('Expected service method "$method" to be registered.');
+}
+
 void main() {
   group('DTD Types', () {
-    test('SyntheticPreviewDetails serialization and equality', () {
-      const details = SyntheticPreviewDetails(
-        constructorExpression: "PrimaryButton(label: 'Submit')",
-        filePath: '/project/lib/button.dart',
-        previewId: 'btn_preview',
-        widgetName: 'PrimaryButton',
-        wrappers: <String>['Material', 'Directionality'],
-      );
-
-      final Map<String, Object?> json = details.toJson();
-      final SyntheticPreviewDetails deserialized = SyntheticPreviewDetails.fromJson(json);
-
-      expect(deserialized, equals(details));
-      expect(deserialized.hashCode, equals(details.hashCode));
-      expect(deserialized.constructorExpression, "PrimaryButton(label: 'Submit')");
-      expect(deserialized.filePath, '/project/lib/button.dart');
-      expect(deserialized.previewId, 'btn_preview');
-      expect(deserialized.widgetName, 'PrimaryButton');
-      expect(deserialized.wrappers, <String>['Material', 'Directionality']);
-      expect(deserialized.toString(), contains('PrimaryButton'));
-    });
-
-    test('WebPreviewUrlResult serialization and equality', () {
+    testWithoutContext('WebPreviewUrlResult serialization, fromDTDResponse, and equality', () {
       const result = WebPreviewUrlResult(
         host: '127.0.0.1',
         port: 8080,
@@ -151,7 +154,10 @@ void main() {
       );
 
       final Map<String, Object?> json = result.toJson();
-      final WebPreviewUrlResult deserialized = WebPreviewUrlResult.fromJson(json);
+      expect(json[WebPreviewUrlResult.kType], WebPreviewUrlResult.kTypeName);
+      final deserialized = WebPreviewUrlResult.fromDTDResponse(
+        DTDResponse('1', WebPreviewUrlResult.kTypeName, json),
+      );
 
       expect(deserialized, equals(result));
       expect(deserialized.hashCode, equals(result.hashCode));
@@ -159,26 +165,117 @@ void main() {
       expect(deserialized.port, 8080);
       expect(deserialized.url, 'http://127.0.0.1:8080');
       expect(deserialized.toString(), contains('8080'));
+
+      expect(
+        () => WebPreviewUrlResult.fromDTDResponse(
+          DTDResponse('1', 'WrongType', <String, Object?>{'type': 'WrongType'}),
+        ),
+        throwsA(
+          isA<RpcException>().having((RpcException e) => e.code, 'code', error_code.INVALID_PARAMS),
+        ),
+      );
     });
 
-    test('PreviewServiceInfo serialization and equality', () {
+    testWithoutContext('PreviewServiceInfo serialization, fromDTDResponse, and equality', () {
       const info = PreviewServiceInfo(
         dtdUri: 'ws://127.0.0.1:42135/xyz',
-        serviceName: 'widget-preview',
-        version: '1.0.0',
-        webPreviewUrl: 'http://127.0.0.1:8080',
+        previewService: 'widget-preview-123',
+        projectRoot: '/abs/path/to/project',
+        scaffoldConnected: true,
+        scaffoldService: 'PreviewScaffold-123',
+        scaffoldStream: 'WidgetPreviewScaffold-123',
+        webPreviewUri: 'http://127.0.0.1:8080',
       );
 
       final Map<String, Object?> json = info.toJson();
-      final PreviewServiceInfo deserialized = PreviewServiceInfo.fromJson(json);
+      expect(json[PreviewServiceInfo.kType], PreviewServiceInfo.kTypeName);
+      final deserialized = PreviewServiceInfo.fromDTDResponse(
+        DTDResponse('1', PreviewServiceInfo.kTypeName, json),
+      );
 
       expect(deserialized, equals(info));
       expect(deserialized.hashCode, equals(info.hashCode));
       expect(deserialized.dtdUri, 'ws://127.0.0.1:42135/xyz');
-      expect(deserialized.serviceName, 'widget-preview');
-      expect(deserialized.version, '1.0.0');
-      expect(deserialized.webPreviewUrl, 'http://127.0.0.1:8080');
-      expect(deserialized.toString(), contains('1.0.0'));
+      expect(deserialized.projectRoot, '/abs/path/to/project');
+      expect(deserialized.previewService, 'widget-preview-123');
+      expect(deserialized.scaffoldService, 'PreviewScaffold-123');
+      expect(deserialized.scaffoldStream, 'WidgetPreviewScaffold-123');
+      expect(deserialized.webPreviewUri, 'http://127.0.0.1:8080');
+      expect(deserialized.scaffoldConnected, isTrue);
+      expect(deserialized.toString(), contains('PreviewScaffold-123'));
+
+      const disconnectedInfo = PreviewServiceInfo(
+        dtdUri: 'ws://127.0.0.1:42135/xyz',
+        previewService: 'widget-preview',
+        projectRoot: '/abs/path/to/project',
+        scaffoldConnected: false,
+        scaffoldService: 'PreviewScaffold',
+        scaffoldStream: 'WidgetPreviewScaffold',
+      );
+      final Map<String, Object?> disconnectedJson = disconnectedInfo.toJson();
+      expect(disconnectedJson.containsKey(PreviewServiceInfo.kWebPreviewUri), isTrue);
+      expect(disconnectedJson[PreviewServiceInfo.kWebPreviewUri], isNull);
+      expect(
+        PreviewServiceInfo.fromDTDResponse(
+          DTDResponse('1', PreviewServiceInfo.kTypeName, disconnectedJson),
+        ),
+        equals(disconnectedInfo),
+      );
+
+      expect(
+        () => PreviewServiceInfo.fromDTDResponse(
+          DTDResponse('1', 'WrongType', <String, Object?>{'type': 'WrongType'}),
+        ),
+        throwsA(
+          isA<RpcException>().having((RpcException e) => e.code, 'code', error_code.INVALID_PARAMS),
+        ),
+      );
+    });
+
+    testWithoutContext('SyncPreviewsResponse serialization, fromDTDResponse, and equality', () {
+      const okResponse = SyncPreviewsResponse(
+        compileSuccess: true,
+        errorPreviewCount: 0,
+        fullRestart: false,
+        reloaded: true,
+      );
+      final Map<String, Object?> okJson = okResponse.toJson();
+      expect(okJson[SyncPreviewsResponse.kType], SyncPreviewsResponse.kTypeName);
+      expect(okJson.containsKey(SyncPreviewsResponse.kCompileError), isTrue);
+      expect(okJson[SyncPreviewsResponse.kCompileError], isNull);
+
+      final deserializedOk = SyncPreviewsResponse.fromDTDResponse(
+        DTDResponse('1', SyncPreviewsResponse.kTypeName, okJson),
+      );
+      expect(deserializedOk, equals(okResponse));
+      expect(deserializedOk.hashCode, equals(okResponse.hashCode));
+
+      const failedResponse = SyncPreviewsResponse(
+        compileError: 'Failed to recompile application.',
+        compileSuccess: false,
+        errorPreviewCount: 2,
+        fullRestart: true,
+        reloaded: false,
+      );
+      final Map<String, Object?> failedJson = failedResponse.toJson();
+      final deserializedFailed = SyncPreviewsResponse.fromDTDResponse(
+        DTDResponse('1', SyncPreviewsResponse.kTypeName, failedJson),
+      );
+      expect(deserializedFailed, equals(failedResponse));
+      expect(deserializedFailed.compileError, 'Failed to recompile application.');
+      expect(deserializedFailed.errorPreviewCount, 2);
+      expect(deserializedFailed.fullRestart, isTrue);
+      expect(deserializedFailed.reloaded, isFalse);
+      expect(deserializedFailed.toString(), contains('Failed to recompile application.'));
+
+      expect(
+        () => SyncPreviewsResponse.fromDTDResponse(
+          DTDResponse('1', 'WrongType', <String, Object?>{'type': 'WrongType'}),
+        ),
+        throwsA(
+          isA<RpcException>().having((RpcException e) => e.code, 'code', error_code.INVALID_PARAMS),
+        ),
+      );
     });
   });
 
@@ -195,12 +292,48 @@ void main() {
       shutdownHooks = ShutdownHooks();
       final Directory projectDir = fs.directory('/project')..createSync(recursive: true);
       projectDir.childFile('pubspec.yaml').writeAsStringSync('name: test_project\n');
-      final projectFactory = FlutterProjectFactory(fileSystem: fs, logger: logger);
+      final projectFactory = FlutterProjectFactory(
+        config: FakeConfig(),
+        fileSystem: fs,
+        logger: logger,
+      );
       project = projectFactory.fromDirectory(projectDir);
       analytics = WidgetPreviewAnalytics(analytics: const NoOpAnalytics());
     });
 
-    test('Registers all expected agent DTD service methods', () {
+    testWithoutContext('builds matching service and stream names with and without UUID', () {
+      final withoutUuid = WidgetPreviewDtdServices(
+        addUuidToServiceName: false,
+        dtdLauncher: FakeDtdLauncher(),
+        fs: fs,
+        logger: logger,
+        onHotRestartPreviewerRequest: () {},
+        previewAnalytics: analytics,
+        project: project,
+        shutdownHooks: shutdownHooks,
+      );
+      expect(withoutUuid.widgetPreviewService, 'widget-preview');
+      expect(withoutUuid.widgetPreviewScaffoldService, 'PreviewScaffold');
+      expect(withoutUuid.widgetPreviewScaffoldStream, 'WidgetPreviewScaffold');
+
+      final withUuid = WidgetPreviewDtdServices(
+        addUuidToServiceName: true,
+        dtdLauncher: FakeDtdLauncher(),
+        fs: fs,
+        logger: logger,
+        onHotRestartPreviewerRequest: () {},
+        previewAnalytics: analytics,
+        project: project,
+        shutdownHooks: shutdownHooks,
+      );
+      final String uuid = withUuid.serviceUuid;
+      expect(uuid, isNotEmpty);
+      expect(withUuid.widgetPreviewService, 'widget-preview-$uuid');
+      expect(withUuid.widgetPreviewScaffoldService, 'PreviewScaffold-$uuid');
+      expect(withUuid.widgetPreviewScaffoldStream, 'WidgetPreviewScaffold-$uuid');
+    });
+
+    testWithoutContext('registers expected DTD service methods', () {
       final services = WidgetPreviewDtdServices(
         addUuidToServiceName: false,
         dtdLauncher: FakeDtdLauncher(),
@@ -212,10 +345,10 @@ void main() {
         shutdownHooks: shutdownHooks,
       );
 
-      final Set<String> registeredNames = services.services.map((DtdService s) => s.$1).toSet();
+      final registeredNames = <String>{for (final (String name, _) in services.services) name};
       expect(
         registeredNames,
-        containsAll(<String>[
+        equals(<String>{
           WidgetPreviewDtdServices.kHotRestartPreviewer,
           WidgetPreviewDtdServices.kHotReloadPreviewer,
           WidgetPreviewDtdServices.kIsWindows,
@@ -225,32 +358,31 @@ void main() {
           WidgetPreviewDtdServices.kGetDevToolsUri,
           WidgetPreviewDtdServices.kGetWebPreviewUrl,
           WidgetPreviewDtdServices.kGetServiceInfo,
-          WidgetPreviewDtdServices.kRegisterSyntheticPreview,
-          WidgetPreviewDtdServices.kUnregisterSyntheticPreview,
-          WidgetPreviewDtdServices.kClearSyntheticPreviews,
-        ]),
+          WidgetPreviewDtdServices.kSyncPreviews,
+        }),
       );
     });
 
-    test('Invokes onHotReloadPreviewerRequest when hotReloadPreviewer is called', () async {
+    testWithoutContext('invokes onHotReloadPreviewer when hotReloadPreviewer is called', () async {
       var hotReloadCalled = false;
       final services = WidgetPreviewDtdServices(
         addUuidToServiceName: false,
         dtdLauncher: FakeDtdLauncher(),
         fs: fs,
         logger: logger,
-        onHotRestartPreviewerRequest: () {},
-        onHotReloadPreviewerRequest: () async {
+        onHotReloadPreviewer: () async {
           hotReloadCalled = true;
         },
+        onHotRestartPreviewerRequest: () {},
         previewAnalytics: analytics,
         project: project,
         shutdownHooks: shutdownHooks,
       );
 
-      final DTDServiceCallback callback = services.services
-          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kHotReloadPreviewer)
-          .$2;
+      final DTDServiceCallback callback = _callbackFor(
+        services,
+        WidgetPreviewDtdServices.kHotReloadPreviewer,
+      );
       final Map<String, Object?> response = await callback(
         Parameters('hotReloadPreviewer', <String, Object?>{}),
       );
@@ -259,22 +391,23 @@ void main() {
       expect(response, equals(const Success().toJson()));
     });
 
-    test('Returns web preview URL when webPreviewUri callback is provided', () async {
+    testWithoutContext('returns web preview URL when webPreviewUriProvider is provided', () async {
       final services = WidgetPreviewDtdServices(
         addUuidToServiceName: false,
         dtdLauncher: FakeDtdLauncher(),
         fs: fs,
         logger: logger,
         onHotRestartPreviewerRequest: () {},
-        webPreviewUri: () => Uri.parse('http://127.0.0.1:9090'),
         previewAnalytics: analytics,
         project: project,
         shutdownHooks: shutdownHooks,
+        webPreviewUriProvider: () => Uri.parse('http://127.0.0.1:9090'),
       );
 
-      final DTDServiceCallback callback = services.services
-          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kGetWebPreviewUrl)
-          .$2;
+      final DTDServiceCallback callback = _callbackFor(
+        services,
+        WidgetPreviewDtdServices.kGetWebPreviewUrl,
+      );
       final Map<String, Object?> response = await callback(
         Parameters('getWebPreviewUrl', <String, Object?>{}),
       );
@@ -285,388 +418,284 @@ void main() {
       expect(response['url'], 'http://127.0.0.1:9090');
     });
 
-    test(
-      'Throws RpcException from getWebPreviewUrl when webPreviewUri is null or returns null',
-      () async {
-        final servicesWithoutCallback = WidgetPreviewDtdServices(
-          addUuidToServiceName: false,
-          dtdLauncher: FakeDtdLauncher(),
-          fs: fs,
-          logger: logger,
-          onHotRestartPreviewerRequest: () {},
-          previewAnalytics: analytics,
-          project: project,
-          shutdownHooks: shutdownHooks,
-        );
-
-        final DTDServiceCallback callbackWithout = servicesWithoutCallback.services
-            .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kGetWebPreviewUrl)
-            .$2;
-
-        await expectLater(
-          callbackWithout(Parameters('getWebPreviewUrl', <String, Object?>{})),
-          throwsA(
-            isA<RpcException>().having(
-              (RpcException e) => e.code,
-              'code',
-              WidgetPreviewDtdServices.kNoValueForKey,
-            ),
-          ),
-        );
-
-        final servicesReturningNull = WidgetPreviewDtdServices(
-          addUuidToServiceName: false,
-          dtdLauncher: FakeDtdLauncher(),
-          fs: fs,
-          logger: logger,
-          onHotRestartPreviewerRequest: () {},
-          previewAnalytics: analytics,
-          project: project,
-          shutdownHooks: shutdownHooks,
-          webPreviewUri: () => null,
-        );
-
-        final DTDServiceCallback callbackReturningNull = servicesReturningNull.services
-            .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kGetWebPreviewUrl)
-            .$2;
-
-        await expectLater(
-          callbackReturningNull(Parameters('getWebPreviewUrl', <String, Object?>{})),
-          throwsA(
-            isA<RpcException>().having(
-              (RpcException e) => e.code,
-              'code',
-              WidgetPreviewDtdServices.kNoValueForKey,
-            ),
-          ),
-        );
-      },
-    );
-
-    test('Returns service info from getServiceInfo', () async {
-      final services = WidgetPreviewDtdServices(
+    testWithoutContext('throws RpcException from getWebPreviewUrl when webPreviewUriProvider is null or returns null', () async {
+      final servicesWithoutCallback = WidgetPreviewDtdServices(
         addUuidToServiceName: false,
         dtdLauncher: FakeDtdLauncher(),
         fs: fs,
         logger: logger,
         onHotRestartPreviewerRequest: () {},
-        webPreviewUri: () => Uri.parse('http://127.0.0.1:8080'),
         previewAnalytics: analytics,
         project: project,
         shutdownHooks: shutdownHooks,
       );
 
-      final DTDServiceCallback callback = services.services
-          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kGetServiceInfo)
-          .$2;
-      final Map<String, Object?> response = await callback(
+      final DTDServiceCallback callbackWithout = _callbackFor(
+        servicesWithoutCallback,
+        WidgetPreviewDtdServices.kGetWebPreviewUrl,
+      );
+
+      await expectLater(
+        callbackWithout(Parameters('getWebPreviewUrl', <String, Object?>{})),
+        throwsA(
+          isA<RpcException>().having(
+            (RpcException e) => e.code,
+            'code',
+            WidgetPreviewDtdServices.kNoValueForKey,
+          ),
+        ),
+      );
+
+      final servicesReturningNull = WidgetPreviewDtdServices(
+        addUuidToServiceName: false,
+        dtdLauncher: FakeDtdLauncher(),
+        fs: fs,
+        logger: logger,
+        onHotRestartPreviewerRequest: () {},
+        previewAnalytics: analytics,
+        project: project,
+        shutdownHooks: shutdownHooks,
+        webPreviewUriProvider: () => null,
+      );
+
+      final DTDServiceCallback callbackReturningNull = _callbackFor(
+        servicesReturningNull,
+        WidgetPreviewDtdServices.kGetWebPreviewUrl,
+      );
+
+      await expectLater(
+        callbackReturningNull(Parameters('getWebPreviewUrl', <String, Object?>{})),
+        throwsA(
+          isA<RpcException>().having(
+            (RpcException e) => e.code,
+            'code',
+            WidgetPreviewDtdServices.kNoValueForKey,
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext('returns PreviewServiceInfo from getServiceInfo', () async {
+      final fakeDtd = FakeDartToolingDaemon();
+      final services = WidgetPreviewDtdServices(
+        addUuidToServiceName: true,
+        dtd: fakeDtd,
+        dtdLauncher: FakeDtdLauncher(),
+        fs: fs,
+        logger: logger,
+        onHotRestartPreviewerRequest: () {},
+        previewAnalytics: analytics,
+        project: project.widgetPreviewScaffoldProject,
+        projectRootPath: '/project',
+        shutdownHooks: shutdownHooks,
+        webPreviewUriProvider: () => Uri.parse('http://127.0.0.1:8080'),
+      );
+      await services.connect(dtdWsUri: Uri.parse('ws://127.0.0.1:54322/secret'));
+
+      final DTDServiceCallback callback = _callbackFor(
+        services,
+        WidgetPreviewDtdServices.kGetServiceInfo,
+      );
+      final Map<String, Object?> initialResponse = await callback(
         Parameters('getServiceInfo', <String, Object?>{}),
       );
 
-      expect(response[PreviewServiceInfo.kType], PreviewServiceInfo.kTypeName);
-      expect(response['dtdUri'], '');
-      expect(response['serviceName'], WidgetPreviewDtdServices.kWidgetPreviewServiceRoot);
-      expect(response['version'], WidgetPreviewDtdServices.kProtocolVersion);
-      expect(response['webPreviewUrl'], 'http://127.0.0.1:8080');
+      final String uuid = services.serviceUuid;
+      expect(initialResponse[PreviewServiceInfo.kType], PreviewServiceInfo.kTypeName);
+      expect(initialResponse[PreviewServiceInfo.kDtdUri], 'ws://127.0.0.1:54322/secret');
+      expect(initialResponse[PreviewServiceInfo.kProjectRoot], '/project');
+      expect(initialResponse[PreviewServiceInfo.kPreviewService], 'widget-preview-$uuid');
+      expect(initialResponse[PreviewServiceInfo.kScaffoldService], 'PreviewScaffold-$uuid');
+      expect(initialResponse[PreviewServiceInfo.kScaffoldStream], 'WidgetPreviewScaffold-$uuid');
+      expect(initialResponse[PreviewServiceInfo.kWebPreviewUri], 'http://127.0.0.1:8080');
+      expect(initialResponse[PreviewServiceInfo.kScaffoldConnected], isFalse);
+
+      fakeDtd.postFakeEvent(
+        services.widgetPreviewScaffoldStream,
+        WidgetPreviewDtdServices.kWidgetPreviewConnectedEvent,
+        const <String, Object?>{},
+      );
+      await pumpEventQueue();
+
+      final Map<String, Object?> connectedResponse = await callback(
+        Parameters('getServiceInfo', <String, Object?>{}),
+      );
+      expect(connectedResponse[PreviewServiceInfo.kScaffoldConnected], isTrue);
+
+      await fakeDtd.close();
     });
 
-    test('Handles register, unregister, and clear synthetic previews', () async {
-      SyntheticPreviewDetails? registeredDetails;
-      String? unregisteredId;
-      var clearCount = 0;
-      final fakeDtd = FakeDartToolingDaemon();
-
+    testWithoutContext('syncPreviews forwards timeout and returns SyncPreviewsResponse', () async {
+      Duration? receivedTimeout;
       final services = WidgetPreviewDtdServices(
         addUuidToServiceName: false,
-        dtd: fakeDtd,
         dtdLauncher: FakeDtdLauncher(),
         fs: fs,
         logger: logger,
         onHotRestartPreviewerRequest: () {},
-        onRegisterSyntheticPreview: (SyntheticPreviewDetails details) async {
-          registeredDetails = details;
-          return true;
-        },
-        onUnregisterSyntheticPreview: (String id) async {
-          unregisteredId = id;
-          return true;
-        },
-        onClearSyntheticPreviews: () async {
-          clearCount = 3;
-          return clearCount;
+        onSyncPreviews: ({required Duration timeout}) async {
+          receivedTimeout = timeout;
+          return const SyncPreviewsResponse(
+            compileSuccess: true,
+            errorPreviewCount: 1,
+            fullRestart: false,
+            reloaded: true,
+          );
         },
         previewAnalytics: analytics,
         project: project,
         shutdownHooks: shutdownHooks,
       );
 
-      // Register synthetic preview.
-      final DTDServiceCallback registerCallback = services.services
-          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kRegisterSyntheticPreview)
-          .$2;
-      final Map<String, Object?> registerResponse = await registerCallback(
-        Parameters('registerSyntheticPreview', <String, Object?>{
-          'constructorExpression': 'MyCard()',
-          'filePath': '/project/lib/card.dart',
-          'previewId': 'my_card_id',
-          'widgetName': 'MyCard',
-          'wrappers': <String>['Material'],
-        }),
+      final DTDServiceCallback callback = _callbackFor(
+        services,
+        WidgetPreviewDtdServices.kSyncPreviews,
       );
-      expect(registerResponse[WidgetPreviewDtdServices.kType], 'BoolResponse');
-      expect(registerResponse['value'], isTrue);
+
+      // Default timeout when params map is null, empty, or timeoutMs is explicitly null.
+      final Map<String, Object?> defaultResponse = await callback(Parameters('syncPreviews', null));
       expect(
-        registeredDetails,
-        equals(
-          const SyntheticPreviewDetails(
-            constructorExpression: 'MyCard()',
-            filePath: '/project/lib/card.dart',
-            previewId: 'my_card_id',
-            widgetName: 'MyCard',
-            wrappers: <String>['Material'],
+        receivedTimeout,
+        const Duration(milliseconds: WidgetPreviewDtdServices.kDefaultSyncTimeoutMs),
+      );
+      expect(defaultResponse[SyncPreviewsResponse.kType], SyncPreviewsResponse.kTypeName);
+      expect(defaultResponse[SyncPreviewsResponse.kReloaded], isTrue);
+      expect(defaultResponse[SyncPreviewsResponse.kErrorPreviewCount], 1);
+
+      receivedTimeout = null;
+      await callback(Parameters('syncPreviews', <String, Object?>{}));
+      expect(
+        receivedTimeout,
+        const Duration(milliseconds: WidgetPreviewDtdServices.kDefaultSyncTimeoutMs),
+      );
+
+      receivedTimeout = null;
+      await callback(Parameters('syncPreviews', <String, Object?>{'timeoutMs': null}));
+      expect(
+        receivedTimeout,
+        const Duration(milliseconds: WidgetPreviewDtdServices.kDefaultSyncTimeoutMs),
+      );
+
+      // Custom timeoutMs.
+      await callback(Parameters('syncPreviews', <String, Object?>{'timeoutMs': 12500}));
+      expect(receivedTimeout, const Duration(milliseconds: 12500));
+
+      // Invalid negative or non-int timeoutMs.
+      await expectLater(
+        callback(Parameters('syncPreviews', <String, Object?>{'timeoutMs': -1})),
+        throwsA(
+          isA<RpcException>().having((RpcException e) => e.code, 'code', error_code.INVALID_PARAMS),
+        ),
+      );
+      await expectLater(
+        callback(Parameters('syncPreviews', <String, Object?>{'timeoutMs': 'invalid'})),
+        throwsA(
+          isA<RpcException>().having((RpcException e) => e.code, 'code', error_code.INVALID_PARAMS),
+        ),
+      );
+
+      // Missing onSyncPreviews callback.
+      final unconfiguredServices = WidgetPreviewDtdServices(
+        addUuidToServiceName: false,
+        dtdLauncher: FakeDtdLauncher(),
+        fs: fs,
+        logger: logger,
+        onHotRestartPreviewerRequest: () {},
+        previewAnalytics: analytics,
+        project: project,
+        shutdownHooks: shutdownHooks,
+      );
+      final DTDServiceCallback unconfiguredCallback = _callbackFor(
+        unconfiguredServices,
+        WidgetPreviewDtdServices.kSyncPreviews,
+      );
+      await expectLater(
+        unconfiguredCallback(Parameters('syncPreviews', <String, Object?>{})),
+        throwsA(
+          isA<RpcException>().having(
+            (RpcException e) => e.code,
+            'code',
+            WidgetPreviewDtdServices.kNoValueForKey,
           ),
         ),
       );
-      expect(fakeDtd.postedEvents, hasLength(1));
-      expect(
-        fakeDtd.postedEvents[0].eventKind,
-        WidgetPreviewDtdServices.kSyntheticPreviewStateChangedEvent,
-      );
-      expect(
-        fakeDtd.postedEvents[0].eventData,
-        equals(<String, Object?>{
-          WidgetPreviewDtdServices.kPreviewId: 'my_card_id',
-          WidgetPreviewDtdServices.kRegistered: true,
-        }),
-      );
-
-      // Unregister synthetic preview.
-      final DTDServiceCallback unregisterCallback = services.services
-          .firstWhere(
-            (DtdService s) => s.$1 == WidgetPreviewDtdServices.kUnregisterSyntheticPreview,
-          )
-          .$2;
-      final Map<String, Object?> unregisterResponse = await unregisterCallback(
-        Parameters('unregisterSyntheticPreview', <String, Object?>{'previewId': 'my_card_id'}),
-      );
-      expect(unregisterResponse[WidgetPreviewDtdServices.kType], 'BoolResponse');
-      expect(unregisterResponse['value'], isTrue);
-      expect(unregisteredId, 'my_card_id');
-      expect(fakeDtd.postedEvents, hasLength(2));
-      expect(
-        fakeDtd.postedEvents[1].eventKind,
-        WidgetPreviewDtdServices.kSyntheticPreviewStateChangedEvent,
-      );
-      expect(
-        fakeDtd.postedEvents[1].eventData,
-        equals(<String, Object?>{
-          WidgetPreviewDtdServices.kPreviewId: 'my_card_id',
-          WidgetPreviewDtdServices.kRegistered: false,
-        }),
-      );
-
-      // Clear synthetic previews.
-      final DTDServiceCallback clearCallback = services.services
-          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kClearSyntheticPreviews)
-          .$2;
-      final Map<String, Object?> clearResponse = await clearCallback(
-        Parameters('clearSyntheticPreviews', <String, Object?>{}),
-      );
-      expect(
-        clearResponse[WidgetPreviewDtdServices.kType],
-        WidgetPreviewDtdServices.kClearSyntheticPreviewsResultType,
-      );
-      expect(clearResponse['clearedCount'], 3);
     });
 
-    test('Returns false for registerSyntheticPreview and unregisterSyntheticPreview when callbacks are null', () async {
-      final fakeDtd = FakeDartToolingDaemon();
-      final services = WidgetPreviewDtdServices(
-        addUuidToServiceName: false,
-        dtd: fakeDtd,
-        dtdLauncher: FakeDtdLauncher(),
-        fs: fs,
-        logger: logger,
-        onHotRestartPreviewerRequest: () {},
-        previewAnalytics: analytics,
-        project: project,
-        shutdownHooks: shutdownHooks,
-      );
+    testWithoutContext(
+      'tracks scaffoldConnected across Connected events, markScaffoldDisconnected, and timeouts',
+      () async {
+        final fakeDtd = FakeDartToolingDaemon();
+        final fakeAnalytics = FakeWidgetPreviewAnalytics();
+        final services = WidgetPreviewDtdServices(
+          addUuidToServiceName: false,
+          dtd: fakeDtd,
+          dtdLauncher: FakeDtdLauncher(),
+          fs: fs,
+          logger: logger,
+          onHotRestartPreviewerRequest: () {},
+          previewAnalytics: fakeAnalytics,
+          project: project,
+          shutdownHooks: shutdownHooks,
+        );
+        await services.connect(dtdWsUri: Uri.parse('ws://127.0.0.1:54322/secret'));
 
-      final DTDServiceCallback registerCallback = services.services
-          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kRegisterSyntheticPreview)
-          .$2;
-      final Map<String, Object?> registerResponse = await registerCallback(
-        Parameters('registerSyntheticPreview', <String, Object?>{
-          'constructorExpression': 'MyCard()',
-          'filePath': '/project/lib/card.dart',
-          'previewId': 'my_card_id',
-          'widgetName': 'MyCard',
-        }),
-      );
-      expect(registerResponse['value'], isFalse);
-      expect(fakeDtd.postedEvents, isEmpty);
+        expect(services.scaffoldConnected, isFalse);
 
-      final DTDServiceCallback unregisterCallback = services.services
-          .firstWhere(
-            (DtdService s) => s.$1 == WidgetPreviewDtdServices.kUnregisterSyntheticPreview,
-          )
-          .$2;
-      final Map<String, Object?> unregisterResponse = await unregisterCallback(
-        Parameters('unregisterSyntheticPreview', <String, Object?>{'previewId': 'my_card_id'}),
-      );
-      expect(unregisterResponse['value'], isFalse);
-      expect(fakeDtd.postedEvents, isEmpty);
-    });
+        var waiterCompleted = false;
+        final Future<void> initialWait = services.waitForScaffoldConnected().then((_) {
+          waiterCompleted = true;
+        });
+        await pumpEventQueue();
+        expect(waiterCompleted, isFalse);
 
-    test('Throws RpcException.invalidParams when registerSyntheticPreview has missing or malformed params', () async {
-      final services = WidgetPreviewDtdServices(
-        addUuidToServiceName: false,
-        dtdLauncher: FakeDtdLauncher(),
-        fs: fs,
-        logger: logger,
-        onHotRestartPreviewerRequest: () {},
-        previewAnalytics: analytics,
-        project: project,
-        shutdownHooks: shutdownHooks,
-      );
+        fakeDtd.postFakeEvent(
+          services.widgetPreviewScaffoldStream,
+          WidgetPreviewDtdServices.kWidgetPreviewConnectedEvent,
+          const <String, Object?>{},
+        );
+        await initialWait;
 
-      final DTDServiceCallback registerCallback = services.services
-          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kRegisterSyntheticPreview)
-          .$2;
+        expect(waiterCompleted, isTrue);
+        expect(services.scaffoldConnected, isTrue);
+        expect(fakeAnalytics.reportPreviewerConnectedCount, 1);
 
-      await expectLater(
-        registerCallback(
-          Parameters('registerSyntheticPreview', <String, Object?>{'previewId': 'my_card_id'}),
-        ),
-        throwsA(
-          isA<RpcException>().having((RpcException e) => e.code, 'code', error_code.INVALID_PARAMS),
-        ),
-      );
+        // Already connected: returns immediately.
+        await services.waitForScaffoldConnected(timeout: Duration.zero);
 
-      await expectLater(
-        registerCallback(
-          Parameters('registerSyntheticPreview', <String, Object?>{
-            'constructorExpression': 'MyCard()',
-            'filePath': '/project/lib/card.dart',
-            'previewId': 'my_card_id',
-            'widgetName': 'MyCard',
-            'wrappers': <Object?>[42],
-          }),
-        ),
-        throwsA(
-          isA<RpcException>().having((RpcException e) => e.code, 'code', error_code.INVALID_PARAMS),
-        ),
-      );
-    });
+        // Reset before fullRestart: waits for fresh Connected event.
+        services.markScaffoldDisconnected();
+        expect(services.scaffoldConnected, isFalse);
 
-    test('Event-posting helpers emit expected events on widgetPreviewScaffoldStream', () async {
-      final fakeDtd = FakeDartToolingDaemon();
-      final services = WidgetPreviewDtdServices(
-        addUuidToServiceName: false,
-        dtd: fakeDtd,
-        dtdLauncher: FakeDtdLauncher(),
-        fs: fs,
-        logger: logger,
-        onHotRestartPreviewerRequest: () {},
-        previewAnalytics: analytics,
-        project: project,
-        shutdownHooks: shutdownHooks,
-      );
+        await expectLater(
+          services.waitForScaffoldConnected(timeout: const Duration(milliseconds: 10)),
+          throwsA(isA<TimeoutException>()),
+        );
+        expect(services.scaffoldConnected, isFalse);
 
-      await services.postLayoutExceptionEvent(
-        diagnostic: <String, Object?>{'message': 'RenderFlex overflowed by 42 pixels'},
-        previewId: 'preview_1',
-      );
-      await services.postPreviewsUpdatedEvent(
-        previews: <Map<String, Object?>>[
-          <String, Object?>{'functionName': 'myPreview'},
-        ],
-      );
-      await services.postCompilationEvent(success: true, durationMs: 125);
-      await services.postCompilationEvent(success: false, error: 'Compilation failed');
-      await services.postSyntheticPreviewStateChangedEvent(
-        previewId: 'synthetic_1',
-        registered: true,
-      );
+        // Subsequent waiter after a timeout still completes once Connected arrives.
+        final Future<void> secondWait = services.waitForScaffoldConnected();
+        fakeDtd.postFakeEvent(
+          services.widgetPreviewScaffoldStream,
+          WidgetPreviewDtdServices.kWidgetPreviewConnectedEvent,
+          const <String, Object?>{},
+        );
+        await secondWait;
+        expect(services.scaffoldConnected, isTrue);
+        expect(fakeAnalytics.reportPreviewerConnectedCount, 2);
 
-      expect(fakeDtd.postedEvents, hasLength(5));
+        // Restoring connected state after an aborted fullRestart completes waiters
+        // without incrementing analytics.
+        services.markScaffoldDisconnected();
+        expect(services.scaffoldConnected, isFalse);
+        final Future<void> restoredWait = services.waitForScaffoldConnected();
+        services.markScaffoldConnected();
+        await restoredWait;
+        expect(services.scaffoldConnected, isTrue);
+        expect(fakeAnalytics.reportPreviewerConnectedCount, 2);
 
-      expect(
-        fakeDtd.postedEvents[0].streamId,
-        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
-      );
-      expect(fakeDtd.postedEvents[0].eventKind, WidgetPreviewDtdServices.kLayoutExceptionEvent);
-      expect(
-        fakeDtd.postedEvents[0].eventData,
-        equals(<String, Object?>{
-          WidgetPreviewDtdServices.kPreviewId: 'preview_1',
-          WidgetPreviewDtdServices.kDiagnostic: <String, Object?>{
-            'message': 'RenderFlex overflowed by 42 pixels',
-          },
-        }),
-      );
-
-      expect(
-        fakeDtd.postedEvents[1].streamId,
-        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
-      );
-      expect(fakeDtd.postedEvents[1].eventKind, WidgetPreviewDtdServices.kPreviewsUpdatedEvent);
-      expect(
-        fakeDtd.postedEvents[1].eventData,
-        equals(<String, Object?>{
-          WidgetPreviewDtdServices.kCount: 1,
-          WidgetPreviewDtdServices.kPreviews: <Map<String, Object?>>[
-            <String, Object?>{'functionName': 'myPreview'},
-          ],
-        }),
-      );
-
-      expect(
-        fakeDtd.postedEvents[2].streamId,
-        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
-      );
-      expect(
-        fakeDtd.postedEvents[2].eventKind,
-        WidgetPreviewDtdServices.kCompilationSucceededEvent,
-      );
-      expect(
-        fakeDtd.postedEvents[2].eventData,
-        equals(<String, Object?>{
-          WidgetPreviewDtdServices.kSuccess: true,
-          WidgetPreviewDtdServices.kDurationMs: 125,
-        }),
-      );
-
-      expect(
-        fakeDtd.postedEvents[3].streamId,
-        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
-      );
-      expect(fakeDtd.postedEvents[3].eventKind, WidgetPreviewDtdServices.kCompilationFailedEvent);
-      expect(
-        fakeDtd.postedEvents[3].eventData,
-        equals(<String, Object?>{
-          WidgetPreviewDtdServices.kSuccess: false,
-          WidgetPreviewDtdServices.kError: 'Compilation failed',
-        }),
-      );
-
-      expect(
-        fakeDtd.postedEvents[4].streamId,
-        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
-      );
-      expect(
-        fakeDtd.postedEvents[4].eventKind,
-        WidgetPreviewDtdServices.kSyntheticPreviewStateChangedEvent,
-      );
-      expect(
-        fakeDtd.postedEvents[4].eventData,
-        equals(<String, Object?>{
-          WidgetPreviewDtdServices.kPreviewId: 'synthetic_1',
-          WidgetPreviewDtdServices.kRegistered: true,
-        }),
-      );
-    });
+        await fakeDtd.close();
+      },
+    );
   });
 
   group('Lsp service and stream handling', () {
@@ -682,7 +711,11 @@ void main() {
       logger = BufferLogger.test();
       shutdownHooks = ShutdownHooks();
       fakeDtd = FakeDartToolingDaemon();
-      final projectFactory = FlutterProjectFactory(fileSystem: fs, logger: logger);
+      final projectFactory = FlutterProjectFactory(
+        config: FakeConfig(),
+        fileSystem: fs,
+        logger: logger,
+      );
       project = projectFactory.fromDirectory(fs.directory('project'));
 
       dtdServices = WidgetPreviewDtdServices(

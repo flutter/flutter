@@ -12,6 +12,10 @@ import 'package:widget_preview_scaffold/src/dtd/utils.dart';
 
 /// Provides services, streams, and RPC invocations to interact with Flutter developer tooling.
 class WidgetPreviewScaffoldDtdServices with DtdEditorService {
+  WidgetPreviewScaffoldDtdServices({
+    this.scaffoldServiceName = kWidgetPreviewScaffoldService,
+  });
+
   // WARNING: Keep these constants and services in sync with those defined in the widget preview
   // scaffold's dtd_services.dart.
   //
@@ -26,20 +30,9 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kGetDevToolsUri = 'getDevToolsUri';
   static const kGetWebPreviewUrl = 'getWebPreviewUrl';
   static const kGetServiceInfo = 'getServiceInfo';
-  static const kRegisterSyntheticPreview = 'registerSyntheticPreview';
-  static const kUnregisterSyntheticPreview = 'unregisterSyntheticPreview';
-  static const kClearSyntheticPreviews = 'clearSyntheticPreviews';
+  static const kSyncPreviews = 'syncPreviews';
 
   static const kWidgetPreviewConnectedEvent = 'Connected';
-  static const kLayoutExceptionEvent = 'LayoutException';
-  static const kCompilationSucceededEvent = 'CompilationSucceeded';
-  static const kCompilationFailedEvent = 'CompilationFailed';
-  static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
-  static const kSyntheticPreviewStateChangedEvent =
-      'SyntheticPreviewStateChanged';
-
-  /// Protocol version for agent widget preview services.
-  static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry, or when a requested
@@ -49,6 +42,9 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   // END KEEP SYNCED
 
   static const kUrl = 'url';
+
+  /// The DTD service name under which scaffold RPC methods are registered.
+  final String scaffoldServiceName;
 
   /// Connects to the Dart Tooling Daemon (DTD) specified by the Flutter tool.
   ///
