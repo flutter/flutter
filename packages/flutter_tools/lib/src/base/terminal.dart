@@ -416,6 +416,64 @@ class AnsiTerminal implements Terminal {
   }
 }
 
+const _defaultNumberedChoicePrompt = 'Please choose one (or "q" to quit)';
+
+/// Prompts the user to pick a 1-based option from `1..optionCount` or `'q'` to
+/// quit, using single-character input when [optionCount] is less than `10` and
+/// line input otherwise.
+Future<String> promptForNumberedChoice({
+  required Logger logger,
+  required int optionCount,
+  required Terminal terminal,
+  void Function()? onInvalidInput,
+  String prompt = _defaultNumberedChoicePrompt,
+}) async {
+  if (optionCount >= 10) {
+    return readNumberedChoiceLine(
+      logger: logger,
+      optionCount: optionCount,
+      terminal: terminal,
+      onInvalidInput: onInvalidInput,
+      prompt: prompt,
+    );
+  }
+  terminal.usesTerminalUi = true;
+  return terminal.promptForCharInput(
+    <String>[for (int i = 0; i < optionCount; i++) '${i + 1}', 'q', 'Q'],
+    displayAcceptedCharacters: false,
+    logger: logger,
+    prompt: prompt,
+  );
+}
+
+/// Reads a line-buffered 1-based choice from `1..optionCount` or `'q'` to quit.
+Future<String> readNumberedChoiceLine({
+  required Logger logger,
+  required int optionCount,
+  required Terminal terminal,
+  void Function()? onInvalidInput,
+  String prompt = _defaultNumberedChoicePrompt,
+}) async {
+  while (true) {
+    logger.printStatus(prompt, emphasis: true, newline: false);
+    logger.printStatus(': ', emphasis: true, newline: false);
+    final String choice;
+    try {
+      choice = (await terminal.readLine()).trim();
+    } on StateError {
+      return 'q';
+    }
+    if (choice.toLowerCase() == 'q') {
+      return choice;
+    }
+    final int? number = int.tryParse(choice);
+    if (number != null && number >= 1 && number <= optionCount) {
+      return choice;
+    }
+    onInvalidInput?.call();
+  }
+}
+
 class _TestTerminal implements Terminal {
   _TestTerminal({this.supportsColor = false, this.supportsEmoji = false});
 

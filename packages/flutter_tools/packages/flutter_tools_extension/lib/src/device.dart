@@ -16,8 +16,10 @@ abstract base class DeviceService extends ToolExtensionService {
 
   static const String _getDevicesRpcMethod = 'getDevices';
   static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
+  static const String _getEmulatorPlatformRpcMethod = 'getEmulatorPlatform';
   static const String _getEmulatorsRpcMethod = 'getEmulators';
   static const String _launchEmulatorRpcMethod = 'launchEmulator';
+  static const String _createEmulatorRpcMethod = 'createEmulator';
   static const String _launchAppRpcMethod = 'launchApp';
   static const String _getVmServiceUriRpcMethod = 'getVmServiceUri';
   static const String _stopAppRpcMethod = 'stopApp';
@@ -31,11 +33,18 @@ abstract base class DeviceService extends ToolExtensionService {
   static const String isSupportedForProjectMethod =
       '$serviceNamespace.$_isSupportedForProjectRpcMethod';
 
+  /// RPC method identifier to query the platform identifier for creating emulators.
+  static const String getEmulatorPlatformMethod =
+      '$serviceNamespace.$_getEmulatorPlatformRpcMethod';
+
   /// RPC method identifier to query contributed target emulators.
   static const String getEmulatorsMethod = '$serviceNamespace.$_getEmulatorsRpcMethod';
 
   /// RPC method identifier to launch a contributed target emulator.
   static const String launchEmulatorMethod = '$serviceNamespace.$_launchEmulatorRpcMethod';
+
+  /// RPC method identifier to create a new target emulator.
+  static const String createEmulatorMethod = '$serviceNamespace.$_createEmulatorRpcMethod';
 
   /// RPC method identifier to launch an application on a target device.
   static const String launchAppMethod = '$serviceNamespace.$_launchAppRpcMethod';
@@ -68,6 +77,9 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for whether to cold boot the target emulator.
   static const String coldBootParam = 'coldBoot';
 
+  /// RPC parameter key for the optional emulator name passed to [createEmulator].
+  static const String emulatorNameParam = 'name';
+
   /// RPC parameter key for the executable URI to launch.
   static const String executableUriParam = 'executableUri';
 
@@ -81,6 +93,22 @@ abstract base class DeviceService extends ToolExtensionService {
   /// notifications.
   static const String lineKey = 'line';
 
+  /// Reserved built-in emulator creation platform identifier (`'android'`).
+  static const String reservedAndroidPlatform = 'android';
+
+  // Platform identifiers are passed on the command line via `--platform <name>`,
+  // so restrict them to lowercase ASCII identifiers starting with a letter and
+  // containing only letters, digits, underscores, or hyphens.
+  static final RegExp _validPlatformNamePattern = RegExp(r'^[a-z][a-z0-9_-]*$');
+
+  /// Returns whether [name] is a valid extension emulator creation platform
+  /// identifier for `flutter emulators --create --platform <name>`.
+  ///
+  /// Valid identifiers match `^[a-z][a-z0-9_-]*$` and must not equal
+  /// [reservedAndroidPlatform] (`'android'`).
+  static bool isValidPlatformName(String name) =>
+      name != reservedAndroidPlatform && _validPlatformNamePattern.hasMatch(name);
+
   @override
   String get namespace => serviceNamespace;
 
@@ -93,18 +121,39 @@ abstract base class DeviceService extends ToolExtensionService {
     required ExtensionFlutterProject project,
   });
 
-  /// Returns the target emulators contributed by this extension.
+  /// Returns the optional platform identifier under which this extension
+  /// supports creating emulators via
+  /// `flutter emulators --create --platform <platform>` (for example,
+  /// `'custom_embedder'`), or `null` when emulator creation via
+  /// [createEmulator] is not supported by this extension.
+  ///
+  /// When non-null, must satisfy [isValidPlatformName].
+  Future<String?> getEmulatorPlatform() async => null;
+
+  /// Returns all available emulators or simulators managed by this extension.
   ///
   /// Defaults to returning an empty list for extensions that only provide
   /// physical or stationary target devices.
   Future<List<TargetEmulator>> getEmulators() async => const <TargetEmulator>[];
 
-  /// Launches the target emulator with [emulatorId].
+  /// Launches a specific device emulator for the custom platform (for
+  /// `flutter emulators`), optionally performing a [coldBoot].
   ///
-  /// When [coldBoot] is `true`, the emulator should boot from a clean state
-  /// rather than restoring a snapshot. Returns `true` if the emulator launch
-  /// succeeded, or `false` otherwise.
-  Future<bool> launchEmulator({required String emulatorId, bool coldBoot = false}) async => false;
+  /// Throws [UnsupportedError] (JSON-RPC `-32002`) when launching emulators is
+  /// not supported by this extension.
+  Future<void> launchEmulator({required String emulatorId, bool coldBoot = false}) async {
+    throw UnsupportedError('Launching emulator $emulatorId is not supported.');
+  }
+
+  /// Creates a new device emulator instance and returns its [TargetEmulator]
+  /// descriptor (for `flutter emulators --create [--name <name>]
+  /// [--platform <platform>]`).
+  ///
+  /// Throws [UnsupportedError] (JSON-RPC `-32002`) when emulator creation is
+  /// not supported by this extension.
+  Future<TargetEmulator> createEmulator({String? name}) async {
+    throw UnsupportedError('Creating emulators is not supported.');
+  }
 
   /// Launches the application at [executableUri] on the device with [deviceId]
   /// using the given [debuggingOptions].
@@ -161,8 +210,10 @@ abstract base class DeviceService extends ToolExtensionService {
     return <String, ExtensionRpcHandler>{
       _getDevicesRpcMethod: _getDevicesRpc,
       _isSupportedForProjectRpcMethod: _isSupportedForProjectRpc,
+      _getEmulatorPlatformRpcMethod: _getEmulatorPlatformRpc,
       _getEmulatorsRpcMethod: _getEmulatorsRpc,
       _launchEmulatorRpcMethod: _launchEmulatorRpc,
+      _createEmulatorRpcMethod: _createEmulatorRpc,
       _launchAppRpcMethod: _launchAppRpc,
       _getVmServiceUriRpcMethod: _getVmServiceUriRpc,
       _stopAppRpcMethod: _stopAppRpc,
@@ -193,12 +244,24 @@ abstract base class DeviceService extends ToolExtensionService {
     return isSupportedForProject(deviceId: deviceId, project: project);
   }
 
+  Future<String?> _getEmulatorPlatformRpc(Map<String, Object?> _) async {
+    final String? platform = await getEmulatorPlatform();
+    if (platform != null && !isValidPlatformName(platform)) {
+      throw StateError(
+        platform == reservedAndroidPlatform
+            ? 'Invalid emulator platform "$platform": "$reservedAndroidPlatform" is reserved for built-in Android emulators.'
+            : 'Invalid emulator platform "$platform": must match lowercase ASCII letters, digits, underscores, or hyphens.',
+      );
+    }
+    return platform;
+  }
+
   Future<List<Map<String, Object?>>> _getEmulatorsRpc(Map<String, Object?> _) async {
     final List<TargetEmulator> emulators = await getEmulators();
     return emulators.map((TargetEmulator e) => e.toMap()).toList();
   }
 
-  Future<bool> _launchEmulatorRpc(Map<String, Object?> params) async {
+  Future<Object?> _launchEmulatorRpc(Map<String, Object?> params) async {
     final String emulatorId;
     final bool coldBoot;
     try {
@@ -210,7 +273,22 @@ abstract base class DeviceService extends ToolExtensionService {
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-    return launchEmulator(emulatorId: emulatorId, coldBoot: coldBoot);
+    await launchEmulator(emulatorId: emulatorId, coldBoot: coldBoot);
+    return null;
+  }
+
+  Future<Map<String, Object?>> _createEmulatorRpc(Map<String, Object?> params) async {
+    final String? name;
+    try {
+      name = params.nullableField<String>(emulatorNameParam);
+      if (name != null && name.isEmpty) {
+        throw const FormatException('Invalid "$emulatorNameParam": must not be empty.');
+      }
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    final TargetEmulator created = await createEmulator(name: name);
+    return created.toMap();
   }
 
   String _parseDeviceId(Map<String, Object?> params) {

@@ -297,6 +297,7 @@ List<FlutterCommand> generateCommands({
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
       deviceManager: toolDependencies.deviceManager,
+      emulatorManager: toolDependencies.emulatorManager,
       hidden: !verboseHelp,
       toolContext: toolContext,
       xcode: toolDependencies.appleContext.xcode,

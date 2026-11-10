@@ -192,7 +192,7 @@ void main() {
       expect(parsed.manufacturer, isNull);
     });
 
-    test('listFromJson handles valid and invalid lists', () {
+    test('listFromJson parses valid lists and throws FormatException on invalid input', () {
       final validJson = <String, Object?>{
         TargetEmulator.idKey: 'emu_1',
         TargetEmulator.nameKey: 'Emulator 1',
@@ -203,8 +203,9 @@ void main() {
       expect(emulators.first.id, 'emu_1');
       expect(emulators.first.name, 'Emulator 1');
 
-      expect(TargetEmulator.listFromJson(null), isEmpty);
-      expect(TargetEmulator.listFromJson('invalid'), isEmpty);
+      expect(() => TargetEmulator.listFromJson(null), throwsFormatException);
+      expect(() => TargetEmulator.listFromJson('invalid'), throwsFormatException);
+      expect(() => TargetEmulator.listFromJson(<Object?>['not_a_map']), throwsFormatException);
     });
 
     test('fromJson throws FormatException on missing, empty, or invalid fields', () {

@@ -19,6 +19,10 @@ class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to query extension capabilities.
   static const String getCapabilitiesMethod = 'extension.getCapabilities';
 
+  /// JSON-RPC 2.0 error code returned when an optional capability is not
+  /// supported by the extension ([UnsupportedError]).
+  static const int unsupportedCapabilityErrorCode = -32002;
+
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
   /// Validates that [sendPort] is a [SendPort] (throwing an [ArgumentError]
@@ -92,6 +96,15 @@ class ToolExtensionEntryPoint {
           logger?.call('[ToolExtensionIsolate] RPC request "$fullMethod" completed.');
           return result;
         } on Object catch (error, stackTrace) {
+          if (error is UnsupportedError) {
+            logger?.call(
+              '[ToolExtensionIsolate] RPC request "$fullMethod" is unsupported: ${error.message}',
+            );
+            throw json_rpc.RpcException(
+              unsupportedCapabilityErrorCode,
+              error.message ?? 'Unsupported operation.',
+            );
+          }
           logger?.call(
             '[ToolExtensionIsolate] RPC request "$fullMethod" failed: $error\n$stackTrace',
           );

@@ -1000,6 +1000,14 @@ class FakeConfig extends Fake implements Config {
 class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 
 class FakeTerminal extends Fake implements AnsiTerminal {
+  FakeTerminal({this.stdinHasTerminal = false});
+
+  @override
+  bool stdinHasTerminal;
+
+  @override
+  bool usesTerminalUi = false;
+
   @override
   String get successMark => '✓';
   @override
@@ -1204,11 +1212,25 @@ class FakeWorkflow extends Fake implements Workflow {
 }
 
 class FakeEmulatorManager extends Fake implements EmulatorManager {
-  FakeEmulatorManager({this.createResult, this.emulators = const <Emulator>[]});
+  FakeEmulatorManager({
+    this.availableCreatePlatforms = const <String>[],
+    this.createResult,
+    this.emulators = const <Emulator>[],
+    this.extensionEmulatorSources = false,
+  });
 
+  final List<String> availableCreatePlatforms;
   final List<Emulator> emulators;
   final CreateEmulatorResult? createResult;
+  bool extensionEmulatorSources;
   String? lastCreatedName;
+  String? lastCreatedPlatform;
+
+  @override
+  Future<bool> hasExtensionEmulatorSources() async => extensionEmulatorSources;
+
+  @override
+  Future<List<String>> getAvailableCreatePlatforms() async => availableCreatePlatforms;
 
   @override
   Future<List<Emulator>> getAllAvailableEmulators() async => emulators;
@@ -1225,8 +1247,9 @@ class FakeEmulatorManager extends Fake implements EmulatorManager {
   }
 
   @override
-  Future<CreateEmulatorResult> createEmulator({String? name}) async {
+  Future<CreateEmulatorResult> createEmulator({String? name, String? platform}) async {
     lastCreatedName = name;
+    lastCreatedPlatform = platform;
     return createResult ?? CreateEmulatorResult('fake_emulator', success: true);
   }
 }

@@ -62,6 +62,7 @@ class DaemonCommand extends FlutterCommand {
     required this._xcode,
     this._androidWorkflow,
     this._deviceManager,
+    this._emulatorManager,
     this.hidden = false,
   }) {
     argParser.addOption(
@@ -77,6 +78,7 @@ class DaemonCommand extends FlutterCommand {
   final Xcode? _xcode;
   final AndroidWorkflow? _androidWorkflow;
   final DeviceManager? _deviceManager;
+  final EmulatorManager? _emulatorManager;
 
   AndroidSdk? get _androidSdk => _androidContext.androidSdk;
   Java? get _java => _androidContext.java;
@@ -125,6 +127,7 @@ class DaemonCommand extends FlutterCommand {
         androidSdk: _androidSdk,
         androidWorkflow: _androidWorkflow,
         deviceManager: _deviceManager,
+        emulatorManager: _emulatorManager,
         java: _java,
         notifyingLogger: asLogger<NotifyingLogger>(logger),
         port: port,
@@ -145,6 +148,7 @@ class DaemonCommand extends FlutterCommand {
       androidSdk: _androidSdk,
       androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
+      emulatorManager: _emulatorManager,
       java: _java,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
     );
@@ -171,6 +175,7 @@ class DaemonServer {
     this.androidWorkflow,
     @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
+    this.emulatorManager,
     this.java,
     this.notifyingLogger,
     this.port,
@@ -190,6 +195,7 @@ class DaemonServer {
 
   final Analytics analytics;
   final DeviceManager? deviceManager;
+  final EmulatorManager? emulatorManager;
   final Java? java;
   final AndroidSdk? androidSdk;
   final FeatureFlags featureFlags;
@@ -234,6 +240,7 @@ class DaemonServer {
         xcode: xcode,
         notifyingLogger: notifyingLogger,
         deviceManager: deviceManager,
+        emulatorManager: emulatorManager,
         java: java,
         androidSdk: androidSdk,
         featureFlags: featureFlags,
@@ -270,6 +277,7 @@ class Daemon {
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
+    EmulatorManager? emulatorManager,
     FileTransfer fileTransfer = const FileTransfer(),
     Java? java,
     this.logToStdout = false,
@@ -302,6 +310,7 @@ class Daemon {
         iosWorkflow: iosWorkflow,
         xcode: xcode,
         androidSdk: androidSdk,
+        emulatorManager: emulatorManager,
         java: java,
       ),
     );
@@ -330,6 +339,7 @@ class Daemon {
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
+    EmulatorManager? emulatorManager,
     Java? java,
   }) {
     final ToolContext(:Logger logger, :Stdio stdio) = toolContext;
@@ -348,6 +358,7 @@ class Daemon {
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
       deviceManager: deviceManager,
+      emulatorManager: emulatorManager,
       java: java,
       androidSdk: androidSdk,
       featureFlags: featureFlags,
@@ -1879,7 +1890,8 @@ class EmulatorDomain extends Domain {
 
   Future<Map<String, Object?>> create(Map<String, Object?> args) async {
     final String? name = _getStringArg(args, 'name');
-    final CreateEmulatorResult res = await emulators.createEmulator(name: name);
+    final String? platform = _getStringArg(args, 'platform');
+    final CreateEmulatorResult res = await emulators.createEmulator(name: name, platform: platform);
     return <String, Object?>{
       'success': res.success,
       'emulatorName': res.emulatorName,

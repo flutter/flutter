@@ -29,46 +29,54 @@ EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 /// A class to get all available emulators.
 class EmulatorManager {
   EmulatorManager({
-    required AndroidWorkflow androidWorkflow,
-    required IOSWorkflow? iosWorkflow,
+    required this._androidWorkflow,
+    required this._iosWorkflow,
     required this._javaBuilder,
     required this._toolContext,
-    required Xcode? xcode,
+    required this._xcode,
     this._androidSdkBuilder,
-    ExtensionManager? extensionManager,
-    FeatureFlags? featureFlags,
-  }) {
+    this._extensionManager,
+    this._featureFlags,
+  });
+
+  /// Platform identifier for built-in Android AVD creation (`--platform android`).
+  static const androidPlatform = 'android';
+
+  final AndroidSdk? Function()? _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
+  final AndroidWorkflow _androidWorkflow;
+  final ExtensionManager? _extensionManager;
+  final FeatureFlags? _featureFlags;
+  final IOSWorkflow? _iosWorkflow;
+  final Java? Function() _javaBuilder;
+  late final Java? _java = _javaBuilder();
+  final ToolContext _toolContext;
+  final Xcode? _xcode;
+
+  late final AndroidEmulators _androidEmulators = () {
     final ToolContext(:FileSystem fs, :Logger logger, :ProcessManager processManager) =
         _toolContext;
-    _androidEmulators = AndroidEmulators(
+    return AndroidEmulators(
       androidSdkBuilder: _androidSdkBuilder,
-      androidWorkflow: androidWorkflow,
+      androidWorkflow: _androidWorkflow,
       fileSystem: fs,
       logger: logger,
       processManager: processManager,
     );
-    _emulatorDiscoverers.add(
-      IOSEmulators(iosWorkflow: iosWorkflow, toolContext: _toolContext, xcode: xcode),
-    );
-    _emulatorDiscoverers.add(_androidEmulators);
-    if (extensionManager != null &&
-        (featureFlags == null || featureFlags.isToolExtensionsEnabled)) {
-      _emulatorDiscoverers.add(
-        ExtensionEmulators(extensionManager: extensionManager, logger: logger),
-      );
-    }
-  }
+  }();
 
-  final AndroidSdk? Function()? _androidSdkBuilder;
-  late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
-  final Java? Function() _javaBuilder;
-  late final Java? _java = _javaBuilder();
-  late final AndroidEmulators _androidEmulators;
-  final ToolContext _toolContext;
+  late final ExtensionEmulators? _extensionEmulators =
+      (_featureFlags?.isToolExtensionsEnabled ?? false) && _extensionManager != null
+      ? ExtensionEmulators(extensionManager: _extensionManager, logger: _toolContext.logger)
+      : null;
 
-  // Constructing EmulatorManager is cheap; they only do expensive work if some
-  // of their methods are called.
-  final _emulatorDiscoverers = <EmulatorDiscovery>[];
+  // Constructing EmulatorManager is cheap; discoverers are only instantiated
+  // when emulator methods are called.
+  late final _emulatorDiscoverers = <EmulatorDiscovery>[
+    IOSEmulators(iosWorkflow: _iosWorkflow, toolContext: _toolContext, xcode: _xcode),
+    _androidEmulators,
+    ?_extensionEmulators,
+  ];
 
   Future<List<Emulator>> getEmulatorsMatching(String searchText) async {
     final List<Emulator> emulators = await getAllAvailableEmulators();
@@ -111,8 +119,88 @@ class EmulatorManager {
     return emulators;
   }
 
-  /// Return the list of all available emulators.
-  Future<CreateEmulatorResult> createEmulator({String? name}) async {
+  bool get _canCreateAndroidEmulator =>
+      _androidSdk?.avdManagerPath != null && _androidEmulators.canLaunchAnything;
+
+  /// Returns whether any active tool extension contributes emulators or supports
+  /// creating emulators.
+  Future<bool> hasExtensionEmulatorSources() async {
+    final ExtensionEmulators? extensionEmulators = _extensionEmulators;
+    if (extensionEmulators == null) {
+      return false;
+    }
+    return extensionEmulators.hasEmulatorSources();
+  }
+
+  /// Returns the platform identifiers currently capable of creating emulators
+  /// (for example, `'android'` when `avdmanager` is available, followed by
+  /// active extension emulator platforms).
+  Future<List<String>> getAvailableCreatePlatforms() async {
+    final ExtensionEmulators? extensionEmulators = _extensionEmulators;
+    final List<String> extensionPlatforms = extensionEmulators != null
+        ? await extensionEmulators.getCreatePlatforms()
+        : const <String>[];
+    return <String>[if (_canCreateAndroidEmulator) androidPlatform, ...extensionPlatforms];
+  }
+
+  /// Creates a new emulator, optionally named [name], targeting [platform]
+  /// (`'android'` or an extension platform identifier).
+  ///
+  /// When [platform] is omitted, delegates automatically if at most one
+  /// emulator creation platform is available, or returns a failed
+  /// [CreateEmulatorResult] listing the available platforms when multiple
+  /// platforms are available.
+  Future<CreateEmulatorResult> createEmulator({String? name, String? platform}) async {
+    if (platform == androidPlatform) {
+      return _createAndroidEmulator(name: name);
+    }
+
+    final ExtensionEmulators? extensionEmulators = _extensionEmulators;
+    if (platform != null && extensionEmulators != null) {
+      final CreateEmulatorResult? result = await extensionEmulators.createEmulator(
+        platform: platform,
+        name: name,
+      );
+      if (result != null) {
+        return result;
+      }
+    }
+
+    final List<String> availablePlatforms = await getAvailableCreatePlatforms();
+    if (platform != null) {
+      return CreateEmulatorResult(
+        name ?? '',
+        success: false,
+        error: availablePlatforms.isEmpty
+            ? 'Unknown emulator creation platform "$platform".'
+            : 'Unknown emulator creation platform "$platform". '
+                  'Available platforms: ${availablePlatforms.join(', ')}.',
+      );
+    }
+
+    if (availablePlatforms.isEmpty ||
+        (availablePlatforms.length == 1 && availablePlatforms.single == androidPlatform)) {
+      return _createAndroidEmulator(name: name);
+    }
+    if (availablePlatforms.length == 1 && extensionEmulators != null) {
+      final CreateEmulatorResult? result = await extensionEmulators.createEmulator(
+        platform: availablePlatforms.single,
+        name: name,
+      );
+      if (result != null) {
+        return result;
+      }
+    }
+    return CreateEmulatorResult(
+      name ?? '',
+      success: false,
+      error:
+          'Multiple emulator creation platforms are available '
+          '(${availablePlatforms.join(', ')}). Specify one using "--platform <platform>".',
+    );
+  }
+
+  Future<CreateEmulatorResult> _createAndroidEmulator({String? name}) async {
     if (name == null || name.isEmpty) {
       const autoName = 'flutter_emulator';
       // Don't use getEmulatorsMatching here, as it will only return one

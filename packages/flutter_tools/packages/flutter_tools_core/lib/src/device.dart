@@ -247,7 +247,9 @@ class ExtensionDebuggingOptions {
 @immutable
 class TargetEmulator {
   /// Creates a [TargetEmulator] definition.
-  const TargetEmulator({required this.id, required this.name, this.category, this.manufacturer});
+  const TargetEmulator({required this.id, required this.name, this.category, this.manufacturer})
+    : assert(id != '', 'id must not be empty.'),
+      assert(name != '', 'name must not be empty.');
 
   /// Deserializes a [TargetEmulator] from a JSON-serializable map.
   ///
@@ -275,30 +277,36 @@ class TargetEmulator {
   }
 
   /// Map key for [category].
-  @visibleForTesting
   static const String categoryKey = 'category';
 
   /// Map key for [id].
-  @visibleForTesting
   static const String idKey = 'id';
 
   /// Map key for [manufacturer].
-  @visibleForTesting
   static const String manufacturerKey = 'manufacturer';
 
   /// Map key for [name].
-  @visibleForTesting
   static const String nameKey = 'name';
 
   /// Deserializes a list of [TargetEmulator] objects from RPC response data.
+  ///
+  /// Throws a [FormatException] if [rpcResult] is not a list or contains
+  /// invalid entries.
   static List<TargetEmulator> listFromJson(Object? rpcResult) {
-    if (rpcResult case final List<Object?> list) {
-      return <TargetEmulator>[
-        for (final Object? item in list)
-          if (item case final Map<String, Object?> map) TargetEmulator.fromJson(map),
-      ];
+    if (rpcResult is! List<Object?>) {
+      throw FormatException(
+        'Invalid target emulator list: expected a List, got ${rpcResult.runtimeType}.',
+      );
     }
-    return const <TargetEmulator>[];
+    return <TargetEmulator>[
+      for (final Object? item in rpcResult)
+        if (item is Map<String, Object?>)
+          TargetEmulator.fromJson(item)
+        else
+          throw FormatException(
+            'Invalid target emulator entry: expected a Map<String, Object?>, got ${item.runtimeType}.',
+          ),
+    ];
   }
 
   /// Optional device category (e.g. [Category.mobile], [Category.desktop], [Category.other]).
