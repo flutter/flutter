@@ -27,7 +27,7 @@ cd "$REPO_PATH"
 gclient sync -D
 
 # This calls `gn gen`.
-"$GN" --runtime-mode profile --no-goma --no-rbe --enable-minimal-linux
+"$GN" --runtime-mode profile --no-rbe --enable-minimal-linux
 ninja -C "$PROFILE_PATH" licenses_cpp
 "$LICENSE_CPP" \
   --working_dir="$WORKING_DIR" \
