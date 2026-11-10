@@ -1249,6 +1249,51 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     expect(logger.warningText, isEmpty);
   });
 
+  testWithoutContext('Chromium close returns promptly when Chrome already exited', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      // The process has already exited, so the reply never arrives. The exit
+      // should win the race and skip the timeout.
+      final process = FakeProcess();
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      // The process exit timer is already due.
+      fakeAsync.elapse(Duration.zero);
+      expect(closeCompleted, isTrue);
+      expect(process.signals, isEmpty);
+    });
+
+    expect(logger.warningText, isEmpty);
+  });
+
   testWithoutContext(
     'Chromium close handles a WebSocketException when closing the WipConnection',
     () async {

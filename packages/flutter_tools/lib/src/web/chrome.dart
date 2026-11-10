@@ -72,10 +72,13 @@ const kDevToolsListeningTimeout = Duration(seconds: 30);
 /// How long to wait for a `Browser.close` response before giving up on a clean
 /// shutdown and escalating to SIGTERM/SIGKILL.
 ///
-/// If Chrome exits before its `Browser.close` reply arrives, the pending
-/// command future in `webkit_inspection_protocol` never completes (its
-/// `_handleClose` closes the streams without completing pending completers),
-/// so an unbounded wait would hang [Chromium.close] forever.
+/// The reply is raced against process exit, so a Chrome that already exited
+/// returns immediately; this covers one that is alive but never answers.
+///
+/// If Chrome exits before its reply arrives, the pending command future in
+/// `webkit_inspection_protocol` never completes (its `_handleClose` closes the
+/// streams without completing pending completers), so an unbounded wait would
+/// hang [Chromium.close] forever.
 ///
 /// See: https://github.com/flutter/flutter/issues/196191
 @visibleForTesting
@@ -728,7 +731,12 @@ class Chromium {
         );
         if (tab != null) {
           final WipConnection wipConnection = await tab.connect();
-          await wipConnection.sendCommand('Browser.close').timeout(kBrowserCloseTimeout);
+          // Chrome may exit before its reply arrives, so race the reply
+          // against process exit to avoid waiting out the timeout.
+          await Future.any<void>(<Future<void>>[
+            wipConnection.sendCommand('Browser.close'),
+            _process.exitCode,
+          ]).timeout(kBrowserCloseTimeout);
           await wipConnection.close();
           sigtermDelay = const Duration(seconds: 1);
         }
