@@ -12,8 +12,6 @@ import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -35,9 +33,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     this._buildInfo, {
     required this._analytics,
     required this._plistParser,
-    required this._reportCrashes,
     required this._toolContext,
     required this._xcodeProjectInterpreter,
+    this._crashReportSender,
   }) : _xcodeProject = project,
        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
        super(_toolContext.logger);
@@ -46,8 +44,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   final FlutterDarwinPlatform _platform;
   final BuildInfo _buildInfo;
   final Analytics _analytics;
+  final CrashReportSender? _crashReportSender;
   final PlistParser _plistParser;
-  final bool _reportCrashes;
   final ToolContext _toolContext;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final File _xcodeProjectInfoFile;
@@ -171,12 +169,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       return;
     }
 
-    final ToolContext(
-      :Config config,
-      :FileSystem fs,
-      :OperatingSystemUtils os,
-      platform: Platform hostPlatform,
-    ) = _toolContext;
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
 
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
@@ -247,15 +240,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         );
       } on Exception catch (e, stackTrace) {
         // Send error to crash reporter.
-        if (_reportCrashes) {
+        if (_crashReportSender case final crashReportSender?) {
           try {
             await asyncGuard(() async {
-              final crashReportSender = CrashReportSender(
-                platform: hostPlatform,
-                logger: logger,
-                operatingSystemUtils: os,
-                analytics: _analytics,
-              );
               await crashReportSender.sendReport(
                 error: e,
                 stackTrace: stackTrace,
@@ -264,7 +251,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
                 typeId: 'XcodeBuildError',
               );
             });
-          } on Exception catch (_) {
+          } on Exception {
             // Fail silently if it fails to send crash report
           }
         }
