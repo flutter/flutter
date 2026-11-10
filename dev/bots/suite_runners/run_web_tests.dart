@@ -18,11 +18,13 @@ import 'dart:io'
         SocketException;
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 import '../browser.dart';
 import '../run_command.dart';
+import '../tool_subsharding.dart';
 import '../utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -520,66 +522,106 @@ class WebTestsSuite {
     }
   }
 
+  /// Packages with web unit tests, in run order.
+  static const List<String> _webUnitTestPackages = <String>[
+    'flutter',
+    'flutter_web_plugins',
+    'flutter_driver',
+  ];
+
+  /// Web unit test files, relative to [root] (the repository root), sorted.
+  static List<String> webUnitTestFiles({String? root}) {
+    final String repoRoot = root ?? flutterRoot;
+    String relative(FileSystemEntity entity) =>
+        path.posix.joinAll(path.split(path.relative(entity.path, from: repoRoot)));
+    final flutterPackageDirectory = Directory(path.join(repoRoot, 'packages', 'flutter'));
+    return <String>[
+      ...Directory(path.join(flutterPackageDirectory.path, 'test'))
+          .listSync()
+          .whereType<Directory>()
+          .expand((Directory directory) => directory.listSync(recursive: true))
+          .whereType<File>()
+          .where((File file) => file.path.endsWith('_test.dart'))
+          .where(
+            (File file) => !kWebTestFileKnownFailures.contains(
+              path.posix.joinAll(
+                path.split(path.relative(file.path, from: flutterPackageDirectory.path)),
+              ),
+            ),
+          )
+          .map(relative),
+      ...Directory(path.join(repoRoot, 'packages', 'flutter_web_plugins', 'test'))
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((File file) => file.path.endsWith('_test.dart'))
+          .map(relative),
+      'packages/flutter_driver/test/src/web_tests/web_extension_test.dart',
+    ]..sort();
+  }
+
   Future<void> _runWebUnitTests({required bool useWasm}) async {
-    final flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
-    final flutterPackageTestDirectory = Directory(path.join(flutterPackageDirectory.path, 'test'));
+    final Map<String, int>? durations = _loadWebTestDurations(useWasm ? 'skwasm' : 'canvaskit');
+    if (durations == null) {
+      return;
+    }
+    final List<String> allTests = webUnitTestFiles();
+    // Unknown files get the median.
+    final List<int> known = durations.values.toList()..sort();
+    final int defaultDuration = known.isEmpty ? 0 : known[known.length ~/ 2];
+    int weight(String test) => durations[test] ?? defaultDuration;
 
-    final List<String> allTests =
-        flutterPackageTestDirectory
-            .listSync()
-            .whereType<Directory>()
-            .expand(
-              (Directory directory) => directory
-                  .listSync(recursive: true)
-                  .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart')),
-            )
-            .whereType<File>()
-            .map<String>(
-              (File file) => path.relative(file.path, from: flutterPackageDirectory.path),
-            )
-            .where(
-              (String filePath) =>
-                  !kWebTestFileKnownFailures.contains(path.split(filePath).join('/')),
-            )
-            .toList()
-          // Finally we shuffle the list because we want the average cost per file to be uniformly
-          // distributed. If the list is not sorted then different shards and batches may have
-          // very different characteristics.
-          // We use a constant seed for repeatability.
-          ..shuffle(math.Random(0));
+    // Each `flutter test` compiles its package, so only split packages/flutter.
+    final units = <List<String>>[
+      for (final String test in allTests)
+        if (test.startsWith('packages/flutter/')) <String>[test],
+      for (final String package in _webUnitTestPackages)
+        if (package != 'flutter')
+          <String>[
+            for (final String test in allTests)
+              if (test.startsWith('packages/$package/')) test,
+          ],
+    ];
+    final List<String> testsToRun = selectWeightedSubshard<List<String>>(
+      units,
+      weight: (List<String> unit) => unit.map(weight).sum,
+    ).expand((List<String> unit) => unit).toList();
 
-    final String? subshardName = Platform.environment[kSubshardKey];
-    var isLastShard = true;
-    var testsToRun = allTests;
-
-    if (subshardName != null) {
-      final Pattern indexTotalPattern = RegExp(r'^(\d+)_(\d+)$');
-      final Match? match = indexTotalPattern.matchAsPrefix(subshardName);
-
-      if (match == null) {
-        foundError(<String>[
-          '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" (e.g. "1_8").',
-        ]);
-        throw Exception('Invalid subshard name: $subshardName');
+    for (final String package in _webUnitTestPackages) {
+      final prefix = 'packages/$package/';
+      final tests = <String>[
+        for (final String test in testsToRun)
+          if (test.startsWith(prefix))
+            path.joinAll(path.posix.split(test.substring(prefix.length))),
+      ];
+      if (tests.isNotEmpty) {
+        await _runFlutterWebTest(path.join(flutterRoot, 'packages', package), tests, useWasm);
       }
+    }
+  }
 
-      final int index = int.parse(match.group(1)!);
-      final int total = int.parse(match.group(2)!);
-      isLastShard = index == total;
-      testsToRun = selectIndexOfTotalSubshard<String>(allTests);
+  /// Seconds per test file for [renderer], or null after reporting an error.
+  Map<String, int>? _loadWebTestDurations(String renderer) {
+    final file = File(path.join(flutterRoot, 'dev', 'bots', 'web_test_durations.json'));
+    void fail(String reason) {
+      foundError(<String>[
+        '$red$reason$reset',
+        'Run: dart dev/bots/update_web_test_durations.dart',
+      ]);
     }
 
-    await _runFlutterWebTest(flutterPackageDirectory.path, testsToRun, useWasm);
-
-    // The last shard also runs the flutter_web_plugins and flutter_driver tests.
-    if (isLastShard) {
-      await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_web_plugins'), <String>[
-        'test',
-      ], useWasm);
-      await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_driver'), <String>[
-        path.join('test', 'src', 'web_tests', 'web_extension_test.dart'),
-      ], useWasm);
+    if (!file.existsSync()) {
+      fail('${file.path} is missing.');
+      return null;
     }
+    try {
+      final renderers = json.decode(file.readAsStringSync()) as Map<String, Object?>;
+      return Map<String, int>.from(renderers[renderer]! as Map<String, Object?>);
+    } on FormatException catch (e) {
+      fail('${file.path} is not valid JSON: $e');
+    } on TypeError catch (e) {
+      fail('${file.path} is not {renderer: {file: seconds}} or lacks "$renderer": $e');
+    }
+    return null;
   }
 
   Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests, bool useWasm) async {
@@ -606,6 +648,14 @@ class WebTestsSuite {
     // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
     // https://github.com/flutter/flutter/issues/146003
     if (!dryRun) {
+      // Report to ResultDB (no-op off LUCI); update_web_test_durations.dart
+      // reads the durations back from there.
+      if (metricFile.existsSync()) {
+        await reportTestResultsToResultDb(
+          TestFileReporterResults.fromFile(metricFile),
+          workingDirectory: workingDirectory,
+        );
+      }
       metricFile.deleteSync();
     }
   }
