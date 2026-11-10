@@ -64,10 +64,11 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     createCanvas: () => RenderCanvas(),
   );
 
+  // Nothing to prepare. The shared offscreen surface is resized as part of
+  // each `rasterize` call. Resizing it here, as a separate step, would let
+  // another view resize it again before this view renders.
   @override
-  Future<void> prepareToDraw() async {
-    await rasterizer.offscreenSurface.setSize(currentFrameSize);
-  }
+  Future<void> prepareToDraw() => Future<void>.value();
 
   @override
   Future<void> rasterize(
@@ -81,19 +82,21 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     recorder?.recordRasterStart();
     if (browserSupportsCreateImageBitmap) {
       final List<DomImageBitmap> bitmaps = await rasterizer.offscreenSurface
-          .rasterizeToImageBitmaps(pictures);
+          .rasterizeToImageBitmaps(currentFrameSize, pictures);
       for (var i = 0; i < displayCanvases.length; i++) {
         (displayCanvases[i] as RenderCanvas).render(bitmaps[i]);
       }
     } else {
-      for (var i = 0; i < displayCanvases.length; i++) {
-        await rasterizer.offscreenSurface.rasterizeToCanvas(pictures[i]);
-        (displayCanvases[i] as RenderCanvas).renderWithNoBitmapSupport(
-          rasterizer.offscreenSurface.canvasImageSource,
+      await rasterizer.offscreenSurface.rasterizeToCanvasSource(currentFrameSize, pictures, (
+        int index,
+        DomCanvasImageSource source,
+      ) {
+        (displayCanvases[index] as RenderCanvas).renderWithNoBitmapSupport(
+          source,
           currentFrameSize.height,
           currentFrameSize,
         );
-      }
+      });
     }
     recorder?.recordRasterFinish();
   }

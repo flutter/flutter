@@ -15,7 +15,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -23,9 +22,9 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/analysis.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
 import '../isolated/resident_web_runner.dart';
@@ -77,8 +76,6 @@ class WidgetPreviewCommand extends FlutterCommand {
     );
     addSubcommand(WidgetPreviewCleanCommand(toolContext: toolContext));
   }
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description => 'Manage the widget preview environment.';
@@ -96,9 +93,6 @@ class WidgetPreviewCommand extends FlutterCommand {
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   WidgetPreviewSubCommandBase({required super.toolContext});
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   FileSystem get fs => toolContext.fs;
   Logger get logger => toolContext.logger;
@@ -139,7 +133,8 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 /// The type of reload operation queued to run once [WidgetPreviewStartCommand._reloadMutex]
 /// is available.
 enum _PendingReload {
-  /// Perform a hot reload (`restart(fullRestart: false)`).
+  /// Perform a hot reload via [WidgetPreviewStartCommand.handleReload], which
+  /// falls back to a hot restart if the reload is rejected.
   hotReload,
 
   /// Perform a full hot restart (`restart(fullRestart: true)`).
@@ -161,8 +156,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
     _analysisServerFactoryOverride = analysisServerFactoryOverride;
     addPubOptions();
-    addMachineOutputFlag(verboseHelp: verbose);
-    addDevToolsOptions(verboseHelp: verbose);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.machine,
+      DebuggingOptionDescriptors.enableDevTools,
+      DebuggingOptionDescriptors.devToolsServerAddress,
+    ], verboseHelp: verbose);
     argParser
       ..addFlag(
         kWebServer,
@@ -218,6 +216,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       'Failed to locate browser. Make sure you are using an up-to-date Chrome or Edge. '
       'Otherwise, consider running with --$kWebServer instead.';
 
+  @visibleForTesting
+  static const kHotReloadRejectedMessage = 'Performing hot restart instead...';
+
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     // Ensure the Flutter Web SDK is installed.
@@ -244,8 +245,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   Platform get platform => toolContext.platform;
 
   ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
-
-  OperatingSystemUtils get os => toolContext.os;
 
   ProcessManager get processManager => toolContext.processManager;
 
@@ -278,27 +277,28 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final _lspPreviewDetector = LspPreviewDetector(
-    platform: platform,
-    previewAnalytics: previewAnalytics,
-    project: rootProject,
-    logger: logger,
-    fs: fs,
+    dtd: _dtdService,
     onChangeDetected: onChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
-    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
-    shutdownHooks: shutdownHooks,
-    dtd: _dtdService,
-    processManager: processManager,
-    terminal: terminal,
+    previewAnalytics: previewAnalytics,
+    project: rootProject,
     suppressAnalytics: !analytics.okToSend,
+    toolContext: toolContext,
     analysisServerFactory: _analysisServerFactoryOverride,
-    artifacts: artifacts,
+    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
   );
 
   late final Future<AnalysisServer> Function()? _analysisServerFactoryOverride;
   final ResidentRunnerFactory? _residentRunnerFactoryOverride;
 
-  late final PreviewCodeGenerator _previewCodeGenerator;
+  late PreviewCodeGenerator _previewCodeGenerator;
+
+  @visibleForTesting
+  PreviewCodeGenerator get previewCodeGenerator => _previewCodeGenerator;
+
+  @visibleForTesting
+  set previewCodeGenerator(PreviewCodeGenerator value) => _previewCodeGenerator = value;
+
   late final _previewManifest = PreviewManifest(
     logger: logger,
     rootProject: rootProject,
@@ -322,6 +322,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @visibleForTesting
   ResidentRunner? get widgetPreviewApp => _widgetPreviewApp;
+
+  @visibleForTesting
+  set widgetPreviewApp(ResidentRunner? value) => _widgetPreviewApp = value;
 
   /// Serializes initial preview scaffold startup and subsequent hot reload / hot
   /// restart operations so reloads cannot execute before the debug connection is
@@ -371,7 +374,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           organization: 'flutter',
           projectName: kWidgetPreviewScaffoldName,
           titleCaseProjectName: 'Widget Preview Scaffold',
-          flutterRoot: Cache.flutterRoot!,
+          flutterRoot: cache.flutterRoot,
           dartSdkVersionBounds: '^${cache.dartSdkBuild}',
           web: true,
         ),
@@ -494,6 +497,21 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
+  /// Hot reloads the previewer, falling back to a hot restart if the reload is
+  /// rejected due to unsupported changes.
+  @visibleForTesting
+  Future<OperationResult?> handleReload() async {
+    final OperationResult? result = await _widgetPreviewApp?.restart();
+    if (result case OperationResult(
+      isOk: false,
+      updateFSReport: UpdateFSReport(hotReloadRejected: true),
+    )) {
+      logger.printStatus(kHotReloadRejectedMessage);
+      return _widgetPreviewApp?.restart(fullRestart: true);
+    }
+    return result;
+  }
+
   Future<void> _triggerReload(_PendingReload requested) async {
     // Record the requested reload type. If a task is already queued waiting for
     // [_reloadMutex], coalesce this request into the pending one (upgrading a
@@ -516,7 +534,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         return;
       }
       try {
-        await _widgetPreviewApp?.restart(fullRestart: pending == .hotRestart);
+        switch (pending) {
+          case .hotReload:
+            await handleReload();
+          case .hotRestart:
+            await _widgetPreviewApp?.restart(fullRestart: true);
+        }
       } on Object catch (e, st) {
         logger.printTrace('Error during widget preview reload: $e\n$st');
       }

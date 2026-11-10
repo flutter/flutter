@@ -128,6 +128,8 @@ class JNIMock final : public PlatformViewAndroidJNI {
               (std::function<void()>&),
               (override));
 
+  MOCK_METHOD(void, sealFrameTransactions, (), (override));
+
   MOCK_METHOD(void, swapTransaction, (), (override));
 
   MOCK_METHOD(void, destroyOverlaySurface2, (), (override));

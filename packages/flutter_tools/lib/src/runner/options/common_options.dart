@@ -551,14 +551,6 @@ class VmServicePortOptionsBundle extends OptionBundle {
   final bool includeIpv6;
 
   @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesPortOption();
-    if (includeIpv6) {
-      command.enableUsesIpv6Flag();
-    }
-  }
-
-  @override
   List<OptionDescriptor<Object?>> get descriptors => <OptionDescriptor<Object?>>[
     DebuggingOptionDescriptors.vmServicePort,
     DebuggingOptionDescriptors.deviceVmservicePort,
@@ -569,24 +561,18 @@ class VmServicePortOptionsBundle extends OptionBundle {
 
 /// A bundle encapsulating DDS and DevTools options (`--dds`, `--dds-port`, `--disable-dds`, `--devtools`, `--devtools-server-address`).
 class DdsAndDevToolsOptionsBundle extends OptionBundle {
-  const DdsAndDevToolsOptionsBundle({
-    this.includeDevTools = true,
-    this.includeEnableDevTools = true,
-  });
+  const DdsAndDevToolsOptionsBundle({this.includeDevTools = true});
 
   final bool includeDevTools;
-  final bool includeEnableDevTools;
 
   @override
   List<OptionDescriptor<Object?>> get descriptors => <OptionDescriptor<Object?>>[
     DebuggingOptionDescriptors.ddsPort,
     DebuggingOptionDescriptors.dds,
     DebuggingOptionDescriptors.disableDds,
-    if (includeDevTools) ...<OptionDescriptor<Object?>>[
-      if (includeEnableDevTools) DebuggingOptionDescriptors.enableDevTools,
-      DebuggingOptionDescriptors.devToolsServerAddress(
-        includeEnableDevTools: includeEnableDevTools,
-      ),
+    if (includeDevTools) ...const <OptionDescriptor<Object?>>[
+      DebuggingOptionDescriptors.enableDevTools,
+      DebuggingOptionDescriptors.devToolsServerAddress,
     ],
   ];
 }
@@ -652,12 +638,6 @@ class DartCompileOptionsBundle extends OptionBundle {
 /// A bundle encapsulating basic build parameters (target, pub, build-number/name).
 class CommonBuildOptionsBundle extends OptionBundle {
   const CommonBuildOptionsBundle();
-
-  @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesTargetOption();
-    command.enableUsesPubOption();
-  }
 
   @override
   List<OptionDescriptor<Object?>> get descriptors => const [
@@ -761,12 +741,6 @@ class DarwinAddToAppOptionsBundle extends OptionBundle {
         'Build plugins as static frameworks. Link on, but do not embed these '
         'frameworks in the existing Xcode project.',
   );
-
-  @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesTargetOption();
-    command.enableUsesPubOption();
-  }
 
   @override
   List<OptionBundle> get subBundles => const [
@@ -901,27 +875,16 @@ abstract final class DebuggingOptionDescriptors {
         'Specifying port 0 (the default) will find a random free port.',
   );
 
+  static const publishPortHelp =
+      'Publish the VM service port over mDNS. Disable to prevent the '
+      'local network permission app dialog in debug and profile build modes (iOS devices only).';
+
   static const publishPort = FlagOptionDescriptor(
     name: 'publish-port',
     defaultsTo: true,
     verboseOnly: true,
-    help:
-        'Publish the VM service port over mDNS. Disable to prevent the '
-        'local network permission app dialog in debug and profile build modes (iOS devices only).',
+    help: publishPortHelp,
   );
-
-  static FlagOptionDescriptor publishPortOption({bool enabledByDefault = true}) {
-    if (enabledByDefault) {
-      return publishPort;
-    }
-    return const FlagOptionDescriptor(
-      name: 'publish-port',
-      verboseOnly: true,
-      help:
-          'Publish the VM service port over mDNS. Disable to prevent the '
-          'local network permission app dialog in debug and profile build modes (iOS devices only).',
-    );
-  }
 
   static const disableDds = FlagOptionDescriptor(
     name: 'disable-dds',
@@ -941,27 +904,17 @@ abstract final class DebuggingOptionDescriptors {
         'If "--no-${FlutterCommand.kEnableDevTools}" is specified, "--${FlutterCommand.kDevToolsServerAddress}" is ignored.',
   );
 
-  static StringOptionDescriptor devToolsServerAddress({bool includeEnableDevTools = true}) {
-    final ignoredMessage = includeEnableDevTools
-        ? ' Ignored if "--no-${FlutterCommand.kEnableDevTools}" is specified.'
-        : '';
-    return StringOptionDescriptor(
-      name: FlutterCommand.kDevToolsServerAddress,
-      verboseOnly: true,
-      help:
-          'When this value is provided, the Flutter tool will not spin up a '
-          'new DevTools server instance, and will instead use the one provided '
-          'at the given address.$ignoredMessage',
-    );
-  }
+  static const devToolsServerAddressBaseHelp =
+      'When this value is provided, the Flutter tool will not spin up a '
+      'new DevTools server instance, and will instead use the one provided '
+      'at the given address.';
 
-  static const devToolsServerAddressOption = StringOptionDescriptor(
+  static const devToolsServerAddress = StringOptionDescriptor(
     name: FlutterCommand.kDevToolsServerAddress,
     verboseOnly: true,
     help:
-        'When this value is provided, the Flutter tool will not spin up a '
-        'new DevTools server instance, and will instead use the one provided '
-        'at the given address.',
+        '$devToolsServerAddressBaseHelp '
+        'Ignored if "--no-${FlutterCommand.kEnableDevTools}" is specified.',
   );
 
   static const ipv6 = FlagOptionDescriptor(
@@ -1036,17 +989,6 @@ abstract final class DebuggingOptionDescriptors {
     help:
         'Allow connections to the VM service from any origin. '
         '(Not recommended. This can open your device to remote code execution attacks.)',
-  );
-
-  static FlagOptionDescriptor startPaused({bool defaultsTo = false}) => FlagOptionDescriptor(
-    name: 'start-paused',
-    defaultsTo: defaultsTo,
-    help: 'Start in a paused mode and wait for a debugger to connect.',
-  );
-
-  static const startPausedOption = FlagOptionDescriptor(
-    name: 'start-paused',
-    help: 'Start in a paused mode and wait for a debugger to connect.',
   );
 
   static const dartFlags = StringOptionDescriptor(
@@ -1282,17 +1224,4 @@ abstract final class DebuggingOptionDescriptors {
         '(deprecated) If necessary, build the app before running. To use an existing app, '
         'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
   );
-
-  static FlagOptionDescriptor buildOption({bool verboseOnly = true}) {
-    if (verboseOnly) {
-      return build;
-    }
-    return const FlagOptionDescriptor(
-      name: 'build',
-      defaultsTo: true,
-      help:
-          '(deprecated) If necessary, build the app before running. To use an existing app, '
-          'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
-    );
-  }
 }

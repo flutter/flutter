@@ -51,7 +51,7 @@ class FramebufferBlendContents final : public ColorSourceContents {
               const Entity& entity,
               RenderPass& pass) const override;
 
-  BlendMode blend_mode_;
+  BlendMode blend_mode_ = BlendMode::kSrcOver;
   std::shared_ptr<Contents> child_contents_;
 
   FramebufferBlendContents(const FramebufferBlendContents&) = delete;
