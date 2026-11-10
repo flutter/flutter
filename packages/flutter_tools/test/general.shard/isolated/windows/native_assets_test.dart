@@ -123,9 +123,7 @@ void main() {
           );
           final expectedDirectory = flutterTester ? code_assets.OS.current.toString() : 'windows';
           final Uri nativeAssetsFileUri = flutterTester
-              ? projectUri.resolve(
-                  'build/native_assets/$expectedDirectory/${InstallCodeAssets.nativeAssetsFilename}',
-                )
+              ? projectUri.resolve('build/native_assets/${InstallCodeAssets.nativeAssetsFilename}')
               : nonFlutterTesterAssetUri;
           await installCodeAssets(
             dartHookResult: dartHookResult,
