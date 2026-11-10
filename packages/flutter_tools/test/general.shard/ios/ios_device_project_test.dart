@@ -44,6 +44,7 @@ flutter:
   ''');
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         fileSystem.currentDirectory,
+        logger: BufferLogger.test(),
       );
       final IOSDevice device = setUpIOSDevice(fileSystem);
 
@@ -63,6 +64,7 @@ flutter:
       fileSystem.directory('ios').createSync();
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         fileSystem.currentDirectory,
+        logger: BufferLogger.test(),
       );
       final IOSDevice device = setUpIOSDevice(fileSystem);
 
@@ -81,6 +83,7 @@ flutter:
       fileSystem.file('pubspec.yaml').createSync();
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         fileSystem.currentDirectory,
+        logger: BufferLogger.test(),
       );
       final IOSDevice device = setUpIOSDevice(fileSystem);
 

@@ -1930,6 +1930,7 @@ extension type SkParagraphStyleProperties._(JSObject _) implements JSObject {
   external set replaceTabCharacters(bool? bool);
   external set applyRoundingHack(bool applyRoundingHack);
   external set renderSoftHyphens(bool renderSoftHyphens);
+  external set softHyphenString(String? softHyphenString);
 }
 
 extension type SkTextStyle(JSObject _) implements JSObject {}
@@ -2106,7 +2107,9 @@ extension type SkFontVariation._(JSObject _) implements JSObject {
 
 extension type SkTypeface(JSObject _) implements JSObject {
   /// Returns the family name of the typeface.
-  external String? getFamilyName();
+  external String getFamilyName();
+
+  external void delete();
 }
 
 @JS('window.flutterCanvasKit.Font')
