@@ -1318,9 +1318,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         _lastException == null &&
         _loadingProgress == null &&
         imageInfo.isCloneOf(currentImageInfo)) {
-      // Listening to the stream again sends the frame that is already shown.
-      // It is not a new frame.
+      // The stream sends a clone of the current frame synchronously whenever
+      // a listener is added. When we already show that frame, drop the clone
+      // so that the frame number and wasSynchronouslyLoaded stay unchanged.
       imageInfo.dispose();
+      // didUpdateWidget may listen again while paused (when a new provider
+      // resolves to the same stream), so stop listening again.
       if (_isPaused) {
         _stopListeningToStream(keepStreamAlive: true);
       }
