@@ -970,6 +970,14 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
   // so that layout changes during snapping do not restart the simulation.
 
   void _tick() {
+    if (delegate is! _DraggableScrollableSheetScrollPosition) {
+      // The scrollable switched to a ScrollController that is not the sheet's
+      // while this activity was running, and its new ScrollPosition absorbed this activity.
+      // The sheet can no longer be moved from here, so let the
+      // new position settle on its own.
+      delegate.goBallistic(0.0);
+      return;
+    }
     final double delta = _controller.value - _lastPosition;
     _lastPosition = _controller.value;
     _position.extent.addPixelDelta(delta, _position.context.notificationContext!);
@@ -988,6 +996,12 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
 
   void _end() {
     if (!_disposed) {
+      if (delegate is! _DraggableScrollableSheetScrollPosition) {
+        // If the scrollable's position was absorbed by a non-sheet controller
+        // before completion, let the new position settle on its own.
+        delegate.goBallistic(0.0);
+        return;
+      }
       // Update the extent value after the snap animation completes to
       // avoid rounding errors that could prevent the sheet from closing when
       // it reaches minSize.
@@ -1006,7 +1020,9 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
   bool get isScrolling => true;
 
   @override
-  double get velocity => _controller.velocity;
+  // The scroll offset is stationary while the sheet itself animates size, so
+  // the scroll offset velocity is 0.0.
+  double get velocity => 0.0;
 
   @override
   void dispose() {

@@ -2250,20 +2250,69 @@ void main() {
     expect(controller.size, 0.5);
     expect(innerController.position.isScrollingNotifier.value, isFalse);
 
-    // Fling downward towards minChildSize (0.25).
-    await tester.fling(find.text('Item 1'), const Offset(0.0, 200.0), 2000.0);
+    // A short, fast drag: the drag itself leaves the sheet above minChildSize
+    // (0.25), and the fling that follows carries it the rest of the way.
+    await tester.fling(find.text('Item 1'), const Offset(0.0, 60.0), 2000.0);
+    expect(controller.size, greaterThan(0.25));
     expect(innerController.position.isScrollingNotifier.value, isTrue);
-
     // Pump frames until the sheet reaches minChildSize.
-    while (controller.size > 0.25) {
+    for (var i = 0; i < 30 && controller.size > 0.25; i++) {
       await tester.pump(const Duration(milliseconds: 16));
     }
     expect(controller.size, 0.25);
-
-    // After hitting minChildSize, super.goBallistic is called and isScrollingNotifier
-    // transitions to false after a couple of 16ms frames without a recreation loop.
-    await tester.pump(const Duration(milliseconds: 16));
+    // At minChildSize the leftover velocity goes to the scrollable, which
+    // cannot scroll any further, so the position goes idle.
     await tester.pump(const Duration(milliseconds: 16));
     expect(innerController.position.isScrollingNotifier.value, isFalse);
   });
+
+  testWidgets(
+    'sheet at 0.6 with list at maxScrollExtent, flinging up keeps pixels <= maxScrollExtent on every frame',
+    (WidgetTester tester) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      late ScrollController innerController;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: DraggableScrollableSheet(
+            controller: controller,
+            builder: (BuildContext context, ScrollController sc) {
+              innerController = sc;
+              return ListView.builder(
+                controller: sc,
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) =>
+                    SizedBox(height: 50.0, child: Text('Item $index')),
+              );
+            },
+          ),
+        ),
+      );
+
+      controller.jumpTo(0.6);
+      await tester.pumpAndSettle();
+      expect(controller.size, 0.6);
+
+      innerController.jumpTo(innerController.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(innerController.position.pixels, innerController.position.maxScrollExtent);
+
+      // Fling up on the list.
+      await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 2000.0);
+
+      // Verify pixels <= maxScrollExtent on every frame as the sheet expands.
+      while (tester.binding.hasScheduledFrame) {
+        expect(
+          innerController.position.pixels,
+          lessThanOrEqualTo(innerController.position.maxScrollExtent),
+        );
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(
+        innerController.position.pixels,
+        lessThanOrEqualTo(innerController.position.maxScrollExtent),
+      );
+    },
+  );
 }
