@@ -882,11 +882,18 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    if (pointer == primaryPointer && !_longPressAccepted) {
-      // Another recognizer won the arena.
+    if (pointer == primaryPointer && _initialButtons != null && !_longPressAccepted) {
+      // Another recognizer won the arena after onLongPressDown was sent.
       _checkLongPressCancel();
     }
     super.rejectGesture(pointer);
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    // A rejected recognizer does not see the up event, so reset here too.
+    _reset();
+    super.didStopTrackingLastPointer(pointer);
   }
 
   @override

@@ -255,10 +255,24 @@ void main() {
         const PointerMoveEvent(pointer: 6, position: Offset(10, 110), delta: Offset(0, 100)),
       );
       tester.route(const PointerUpEvent(pointer: 6, position: Offset(10, 110)));
-      // Rejecting the next press must not assert on stale state from the first.
-      expect(recognized, const <String>['down']);
+      // The next press must not use stale state from the first.
+      expect(recognized, const <String>['down', 'cancel']);
       drag.dispose();
       scroll.dispose();
+    });
+
+    testGesture('Should not assert when eager recognizer wins before down is routed', (
+      GestureTester tester,
+    ) {
+      final eager = EagerGestureRecognizer();
+
+      eager.addPointer(down);
+      gesture.addPointer(down);
+      tester.closeArena(5);
+      tester.route(down);
+      tester.route(up);
+      expect(recognized, isEmpty);
+      eager.dispose();
     });
 
     testGesture('Should recognize long press up', (GestureTester tester) {
