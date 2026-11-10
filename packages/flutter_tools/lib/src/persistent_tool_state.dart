@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'base/config.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -21,6 +22,8 @@ abstract class PersistentToolState {
 
   factory PersistentToolState.test({required Directory directory, required Logger logger}) =
       _DefaultPersistentToolState.test;
+
+  static PersistentToolState? get instance => context.get<PersistentToolState>();
 
   /// Whether the welcome message should be redisplayed.
   ///

@@ -292,6 +292,10 @@ class ToolDependencies {
       xcodeProjectInterpreter == null || xcodeProjectInterpreterBuilder == null,
       'Cannot provide both xcodeProjectInterpreter and xcodeProjectInterpreterBuilder to ToolDependencies.bootstrap.',
     );
+    assert(
+      cache == null || flutterRoot == null,
+      'Cannot provide both cache and flutterRoot to ToolDependencies.bootstrap.',
+    );
 
     // 1. Core Platform Inputs
     final Platform finalPlatform = platform ?? const LocalPlatform();
@@ -432,14 +436,11 @@ class ToolDependencies {
       processManager: finalProcessManager,
     );
 
-    late final Artifacts finalArtifacts;
-
     final Cache finalCache =
         cache ??
         FlutterCache(
           flutterRoot: finalFlutterRoot,
           fileSystem: finalFS,
-          isLocalEngineBuilder: () => finalArtifacts.localEngineInfo != null,
           logger: finalLogger,
           platform: finalPlatform,
           osUtils: finalOS,
@@ -537,7 +538,7 @@ class ToolDependencies {
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
     // Artifacts will be updated later if a local engine is used.
-    finalArtifacts = switch (artifacts) {
+    final Artifacts finalArtifacts = switch (artifacts) {
       final DeferredArtifacts deferredArtifacts => deferredArtifacts,
       final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
       null => DeferredArtifacts(
@@ -765,7 +766,6 @@ class ToolDependencies {
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               doctorValidatorsProvider ??
               DoctorValidatorsProvider.create(
-                androidContext: finalAndroidContext,
                 appleContext: appleContext,
                 deviceManager: finalDeviceManager,
                 extensionManager: extensionManager,

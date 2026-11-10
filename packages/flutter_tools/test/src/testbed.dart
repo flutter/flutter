@@ -59,7 +59,6 @@ final _testbedDefaults = <Type, Generator>{
   Cache: () => FlutterCache(
     flutterRoot: '',
     fileSystem: globals.fs,
-    isLocalEngineBuilder: () => globals.artifacts?.localEngineInfo != null,
     logger: globals.logger,
     platform: globals.platform,
     osUtils: globals.os,

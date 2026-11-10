@@ -26,6 +26,7 @@ import 'java.dart';
 
 AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
 AndroidValidator? get androidValidator => context.get<AndroidValidator>();
+AndroidLicenseValidator? get androidLicenseValidator => context.get<AndroidLicenseValidator>();
 
 enum LicensesAccepted { none, some, all, unknown }
 

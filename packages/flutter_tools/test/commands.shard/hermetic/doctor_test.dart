@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide Category;
 import 'package:test/fake.dart';
@@ -551,22 +552,27 @@ void main() {
     });
   });
 
-  testWithoutContext('WebWorkflow is a part of validator workflows if enabled', () async {
-    final List<Workflow> workflows = DoctorValidatorsProvider.create(
-      androidContext: FakeAndroidContext(),
-      appleContext: FakeAppleContext(),
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      toolContext: FakeToolContext(
-        cache: Cache.test(processManager: fakeProcessManager),
-        platform: FakePlatform(),
-      ),
-    ).workflows;
-    expect(workflows, contains(isA<WebWorkflow>()));
-  });
+  testUsingContext(
+    'WebWorkflow is a part of validator workflows if enabled',
+    () async {
+      final List<Workflow> workflows = DoctorValidatorsProvider.create(
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(isWebEnabled: true),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: fakeProcessManager),
+          platform: FakePlatform(),
+        ),
+      ).workflows;
+      expect(workflows, contains(isA<WebWorkflow>()));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => fakeProcessManager,
+    },
+  );
 
-  testWithoutContext('CustomDevicesWorkflow is a part of validator workflows if enabled', () async {
+  testUsingContext('CustomDevicesWorkflow is a part of validator workflows if enabled', () async {
     final List<Workflow> workflows = DoctorValidatorsProvider.create(
-      androidContext: FakeAndroidContext(),
       appleContext: FakeAppleContext(),
       featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       toolContext: FakeToolContext(
@@ -575,7 +581,7 @@ void main() {
       ),
     ).workflows;
     expect(workflows, contains(isA<CustomDeviceWorkflow>()));
-  });
+  }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => fakeProcessManager});
 
   group('FlutterValidator', () {
     late FakeFlutterVersion initialVersion;
@@ -591,35 +597,52 @@ void main() {
       featureFlags = TestFeatureFlags();
     });
 
-    testWithoutContext('FlutterValidator fetches tags and gets fresh version', () async {
-      final Directory devtoolsDir = fs.directory(
-        '/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools',
-      )..createSync(recursive: true);
-      fs.directory('/path/to/flutter/bin/cache/artifacts').createSync(recursive: true);
-      devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "123"}');
-      final List<DoctorValidator> validators = DoctorValidatorsProvider.create(
-        androidContext: FakeAndroidContext(),
-        appleContext: FakeAppleContext(),
-        featureFlags: featureFlags,
-        toolContext: FakeToolContext(
-          cache: Cache.test(
-            rootOverride: fs.directory('/path/to/flutter'),
-            fileSystem: fs,
+    testUsingContext(
+      'FlutterValidator fetches tags and gets fresh version',
+      () async {
+        final Directory devtoolsDir = fs.directory(
+          '/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools',
+        )..createSync(recursive: true);
+        fs.directory('/path/to/flutter/bin/cache/artifacts').createSync(recursive: true);
+        devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "123"}');
+        fakeProcessManager.addCommands(const <FakeCommand>[
+          FakeCommand(command: <String>['which', 'java']),
+        ]);
+        final List<DoctorValidator> validators = DoctorValidatorsProvider.create(
+          appleContext: FakeAppleContext(),
+          featureFlags: featureFlags,
+          toolContext: FakeToolContext(
+            cache: Cache.test(
+              rootOverride: fs.directory('/path/to/flutter'),
+              fileSystem: fs,
+              processManager: fakeProcessManager,
+            ),
+            flutterVersion: initialVersion,
+            fs: fs,
+            platform: FakePlatform(),
             processManager: fakeProcessManager,
           ),
-          flutterVersion: initialVersion,
-          fs: fs,
-          platform: FakePlatform(),
+        ).validators;
+        final FlutterValidator flutterValidator = validators.whereType<FlutterValidator>().first;
+        final ValidationResult result = await flutterValidator.validate();
+        expect(
+          result.messages.map((ValidationMessage msg) => msg.message),
+          contains(contains('Framework revision 222')),
+        );
+      },
+      overrides: <Type, Generator>{
+        Cache: () => Cache.test(
+          rootOverride: fs.directory('/path/to/flutter'),
+          fileSystem: fs,
           processManager: fakeProcessManager,
         ),
-      ).validators;
-      final FlutterValidator flutterValidator = validators.whereType<FlutterValidator>().first;
-      final ValidationResult result = await flutterValidator.validate();
-      expect(
-        result.messages.map((ValidationMessage msg) => msg.message),
-        contains(contains('Framework revision 222')),
-      );
-    });
+        FileSystem: () => fs,
+        FlutterVersion: () => initialVersion,
+        Platform: () => FakePlatform(),
+        ProcessManager: () => fakeProcessManager,
+        TestFeatureFlags: () => featureFlags,
+      },
+    );
   });
 
   group('Doctor events with unified_analytics', () {
@@ -823,11 +846,7 @@ void main() {
     testWithoutContext('executes diagnose via injected Doctor', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(
-        androidContext: FakeAndroidContext(),
-        doctor: fakeDoctor,
-        toolContext: fakeToolContext,
-      );
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
       expect(command.toolContext, same(fakeToolContext));
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -841,9 +860,8 @@ void main() {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
       final command = DoctorCommand(
-        androidContext: FakeAndroidContext(),
-        doctor: fakeDoctor,
         toolContext: fakeToolContext,
+        doctor: fakeDoctor,
         verbose: true,
       );
 
@@ -857,11 +875,7 @@ void main() {
     testWithoutContext('passes --android-licenses to doctor.diagnose', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(
-        androidContext: FakeAndroidContext(),
-        doctor: fakeDoctor,
-        toolContext: fakeToolContext,
-      );
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor', '--android-licenses']);
@@ -875,9 +889,8 @@ void main() {
       final fakeToolContext = FakeToolContext();
       final fakeLicenseValidator = FakeAndroidLicenseValidator();
       final command = DoctorCommand(
-        androidContext: FakeAndroidContext(),
-        doctor: fakeDoctor,
         toolContext: fakeToolContext,
+        doctor: fakeDoctor,
         androidLicenseValidator: fakeLicenseValidator,
       );
 
@@ -889,31 +902,23 @@ void main() {
       expect(fakeDoctor.androidLicenseValidatorPassed, same(fakeLicenseValidator));
     });
 
-    testWithoutContext('lazily creates AndroidLicenseValidator from androidContext when androidLicenseValidator is not provided', () async {
+    testWithoutContext('lazily falls back when androidLicenseValidator is not provided', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(
-        androidContext: FakeAndroidContext(),
-        doctor: fakeDoctor,
-        toolContext: fakeToolContext,
-      );
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor', '--android-licenses']);
 
       expect(fakeDoctor.diagnoseCalled, isTrue);
       expect(fakeDoctor.androidLicensesPassed, isTrue);
-      expect(fakeDoctor.androidLicenseValidatorPassed, isA<AndroidLicenseValidator>());
+      expect(fakeDoctor.androidLicenseValidatorPassed, isNull);
     });
 
     testWithoutContext('checks remote artifacts when flag provided', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(
-        androidContext: FakeAndroidContext(),
-        doctor: fakeDoctor,
-        toolContext: fakeToolContext,
-      );
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor', '--check-for-remote-artifacts=1234567890abcdef']);
@@ -924,11 +929,7 @@ void main() {
     testWithoutContext('throws ToolExit on missing remote artifacts', () async {
       final fakeDoctor = FakeDiagnoseDoctor(checkRemoteArtifactsResult: true);
       final fakeToolContext = FakeToolContext();
-      final command = DoctorCommand(
-        androidContext: FakeAndroidContext(),
-        doctor: fakeDoctor,
-        toolContext: fakeToolContext,
-      );
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await expectLater(

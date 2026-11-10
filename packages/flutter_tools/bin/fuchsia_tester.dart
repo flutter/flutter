@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
@@ -70,8 +69,12 @@ Future<void> run(
   required ToolContext toolContext,
   TestWrapper testWrapper = const TestWrapper(),
 }) async {
-  final ToolContext(:Artifacts artifacts, :FileSystem fs, :Logger logger, :Platform platform) =
-      toolContext;
+  final ToolContext(
+    :Artifacts artifacts,
+    :FileSystem fs,
+    :Platform platform,
+    :FlutterProjectFactory projectFactory,
+  ) = toolContext;
 
   final parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config.json file')
@@ -138,7 +141,7 @@ Future<void> run(
     // setting libraryNames to null.
     final Set<String>? libraryNames = coverageDirectory != null
         ? null
-        : <String>{FlutterProject.current(fs, logger: logger).manifest.appName};
+        : <String>{projectFactory.fromDirectory(fs.currentDirectory).manifest.appName};
     final String packagesPath = fs.path.normalize(
       fs.path.absolute(argResults[_kOptionPackages] as String),
     );
