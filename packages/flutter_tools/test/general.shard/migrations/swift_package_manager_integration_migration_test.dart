@@ -4584,7 +4584,7 @@ void main() {
           platform,
           BuildInfo.debug,
           analytics: fakeAnalytics,
-          crashReportSender: crashReportSender,
+          crashReportSenderFactory: () => crashReportSender,
           plistParser: plistParser,
           toolContext: FakeToolContext(
             config: FakeConfig(),
@@ -4654,7 +4654,7 @@ void main() {
           platform,
           BuildInfo.debug,
           analytics: fakeAnalytics,
-          crashReportSender: crashReportSender,
+          crashReportSenderFactory: () => crashReportSender,
           plistParser: plistParser,
           toolContext: FakeToolContext(
             config: FakeConfig(),
@@ -4697,7 +4697,66 @@ void main() {
         expect(report.typeId, 'XcodeBuildError');
       });
 
-      testWithoutContext('does not send crash report if crashReportSender is null', () async {
+      testWithoutContext(
+        'does not send crash report if crashReportSenderFactory is null',
+        () async {
+          final memoryFileSystem = MemoryFileSystem();
+          final testLogger = BufferLogger.test();
+          final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            fs: memoryFileSystem,
+            fakeFlutterVersion: FakeFlutterVersion(),
+          );
+          const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
+          final project = FakeXcodeProject(
+            platform: platform.name,
+            fileSystem: memoryFileSystem,
+            logger: testLogger,
+          );
+          _createProjectFiles(project, platform);
+          project.xcodeProjectInfoFile.writeAsStringSync(
+            _projectSettings(_allSectionsUnmigrated(platform)),
+          );
+
+          final plistParser = FakePlistParser.multiple(<String>[
+            _plutilOutput(_allSectionsUnmigratedAsJson(platform)),
+            _plutilOutput(_allSectionsMigratedAsJson(platform)),
+          ]);
+
+          final projectMigration = SwiftPackageManagerIntegrationMigration(
+            project,
+            platform,
+            BuildInfo.debug,
+            analytics: fakeAnalytics,
+            plistParser: plistParser,
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
+          );
+          await expectLater(
+            () => projectMigration.migrate(),
+            throwsToolExit(message: 'Unable to get Xcode project information'),
+          );
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'swiftpm-migration-failure',
+                parameter: 'full',
+                result: 'Xcode failed for unknown reason.',
+              ),
+            ),
+          );
+          expect(testLogger.traceText, isNot(contains('Sending crash report to Google.')));
+        },
+      );
+
+      testWithoutContext('does not invoke crashReportSenderFactory if settings compile', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -4725,6 +4784,8 @@ void main() {
           platform,
           BuildInfo.debug,
           analytics: fakeAnalytics,
+          crashReportSenderFactory: () =>
+              fail('crashReportSenderFactory should not be invoked when settings compile'),
           plistParser: plistParser,
           toolContext: FakeToolContext(
             config: FakeConfig(),
@@ -4734,23 +4795,13 @@ void main() {
             os: FakeOperatingSystemUtils(),
             platform: FakePlatform(),
           ),
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
-        await expectLater(
-          () => projectMigration.migrate(),
-          throwsToolExit(message: 'Unable to get Xcode project information'),
-        );
+        await projectMigration.migrate();
         expect(
           fakeAnalytics.sentEvents,
-          contains(
-            Event.appleUsageEvent(
-              workflow: 'swiftpm-migration-failure',
-              parameter: 'full',
-              result: 'Xcode failed for unknown reason.',
-            ),
-          ),
+          contains(Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full')),
         );
-        expect(testLogger.traceText, isNot(contains('Sending crash report to Google.')));
       });
 
       testWithoutContext('restore project settings from backup on failure', () async {

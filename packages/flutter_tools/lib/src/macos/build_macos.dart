@@ -152,9 +152,9 @@ Future<void> buildMacOS({
       darwinPlatform,
       buildInfo,
       analytics: analytics,
-      crashReportSender: botDetector.isRunningOnBot
+      crashReportSenderFactory: botDetector.isRunningOnBot
           ? null
-          : CrashReportSender(
+          : () => CrashReportSender(
               platform: platform,
               logger: logger,
               operatingSystemUtils: os,

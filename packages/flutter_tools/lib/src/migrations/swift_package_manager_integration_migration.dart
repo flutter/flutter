@@ -35,7 +35,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     required this._plistParser,
     required this._toolContext,
     required this._xcodeProjectInterpreter,
-    this._crashReportSender,
+    this._crashReportSenderFactory,
   }) : _xcodeProject = project,
        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
        super(_toolContext.logger);
@@ -44,7 +44,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   final FlutterDarwinPlatform _platform;
   final BuildInfo _buildInfo;
   final Analytics _analytics;
-  final CrashReportSender? _crashReportSender;
+  final CrashReportSender Function()? _crashReportSenderFactory;
   final PlistParser _plistParser;
   final ToolContext _toolContext;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
@@ -240,10 +240,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         );
       } on Exception catch (e, stackTrace) {
         // Send error to crash reporter.
-        if (_crashReportSender case final crashReportSender?) {
+        if (_crashReportSenderFactory case final crashReportSenderFactory?) {
           try {
             await asyncGuard(() async {
-              await crashReportSender.sendReport(
+              await crashReportSenderFactory().sendReport(
                 error: e,
                 stackTrace: stackTrace,
                 getFlutterVersion: _flutterVersionString,
