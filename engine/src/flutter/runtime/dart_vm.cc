@@ -116,7 +116,7 @@ bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
   }
 
   const char* path = source_url + kFileUriPrefixLength;
-  struct stat info;
+  struct stat info{};
   if (stat(path, &info) < 0) {
     return true;
   }

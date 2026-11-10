@@ -104,6 +104,7 @@ typedef CanvasPath Path;
   V(PlatformConfigurationNativeApi::UpdateSemantics)               \
   V(PlatformConfigurationNativeApi::SetApplicationLocale)          \
   V(PlatformConfigurationNativeApi::SetNeedsReportTimings)         \
+  V(PlatformConfigurationNativeApi::ResetInternalState)            \
   V(PlatformConfigurationNativeApi::SetIsolateDebugName)           \
   V(PlatformConfigurationNativeApi::SetSemanticsTreeEnabled)       \
   V(PlatformConfigurationNativeApi::RequestDartPerformanceMode)    \
@@ -218,7 +219,6 @@ typedef CanvasPath Path;
   V(ImageShader, dispose)                        \
   V(ImageShader, initWithImage)                  \
   V(ImmutableBuffer, dispose)                    \
-  V(ImmutableBuffer, length)                     \
   V(ParagraphBuilder, addPlaceholder)            \
   V(ParagraphBuilder, addText)                   \
   V(ParagraphBuilder, build)                     \
@@ -246,7 +246,6 @@ typedef CanvasPath Path;
   V(Paragraph, minIntrinsicWidth)                \
   V(Paragraph, paint)                            \
   V(Paragraph, width)                            \
-  V(PathMeasure, setPath)                        \
   V(PathMeasure, getLength)                      \
   V(PathMeasure, getPosTan)                      \
   V(PathMeasure, getSegment)                     \

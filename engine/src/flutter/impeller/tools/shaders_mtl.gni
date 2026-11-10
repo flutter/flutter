@@ -27,6 +27,7 @@ template("impeller_shaders_metal") {
                                     "_shaders",
                                   ])
   impellerc_mtl = "impellerc_$target_name"
+
   impellerc(impellerc_mtl) {
     mnemonic = "IMPELLERC_METAL"
     shaders = invoker.shaders
@@ -51,6 +52,7 @@ template("impeller_shaders_metal") {
   }
 
   mtl_lib = "genlib_$target_name"
+
   metal_library(mtl_lib) {
     name = invoker.name
     metal_version = metal_version
@@ -60,11 +62,13 @@ template("impeller_shaders_metal") {
   }
 
   reflect_mtl = "reflect_$target_name"
+
   impellerc_reflect(reflect_mtl) {
     impellerc_invocation = ":$impellerc_mtl"
   }
 
   embed_mtl_lib = "embed_$target_name"
+
   embed_blob(embed_mtl_lib) {
     metal_library_files = get_target_outputs(":$mtl_lib")
     symbol_name = shaders_base_name

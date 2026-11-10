@@ -25,21 +25,36 @@ FLUTTER_ASSERT_ARC
   return nil;
 }
 
+- (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
+  SemanticsObject* semanticsObject = self.semanticsObject;
+  UIView* bridgeView = semanticsObject.bridgeView;
+  if (!bridgeView) {
+    return nil;
+  }
+  CGPoint pointInBridgeView = [self convertPoint:point toView:bridgeView];
+  return [semanticsObject _accessibilityHitTest:pointInBridgeView withEvent:event];
+}
+
 // The following methods are explicitly forwarded to the wrapped SemanticsObject because the
 // forwarding logic above doesn't apply to them since they are also implemented in the
 // UIScrollView class, the base class.
 
 - (BOOL)isAccessibilityElement {
-  flutter::AccessibilityBridgeIos* bridge = self.semanticsObject.bridge;
+  SemanticsObject* semanticsObject = self.semanticsObject;
+  flutter::AccessibilityBridgeIos* bridge = semanticsObject.bridge;
   if (!bridge) {
     return NO;
   }
 
-  if (bridge->isVoiceOverRunning()) {
-    return self.semanticsObject.accessibilityLabel.length > 0;
+  if ([semanticsObject hasChildren]) {
+    return NO;
   }
 
-  if (self.semanticsObject.isAccessibilityElement) {
+  if (bridge->isVoiceOverRunning()) {
+    return semanticsObject.accessibilityLabel.length > 0;
+  }
+
+  if (semanticsObject.isAccessibilityElement) {
     return YES;
   }
 
@@ -104,11 +119,40 @@ FLUTTER_ASSERT_ARC
 }
 
 - (id)accessibilityContainer {
-  return self.semanticsObject.accessibilityContainer;
+  SemanticsObject* semanticsObject = self.semanticsObject;
+  if (!semanticsObject.bridge) {
+    return nil;
+  }
+  return ([semanticsObject uid] == kRootNodeId) ? semanticsObject.bridgeView
+                                                : semanticsObject.parent.accessibilityContainer;
 }
 
 - (NSInteger)accessibilityElementCount {
   return self.semanticsObject.children.count;
+}
+
+- (nullable id)accessibilityElementAtIndex:(NSInteger)index {
+  NSArray<SemanticsObject*>* children = self.semanticsObject.children;
+  if (index < 0 || index >= static_cast<NSInteger>(children.count)) {
+    return nil;
+  }
+  SemanticsObject* child = children[index];
+  if ([child hasChildren]) {
+    return child.accessibilityContainer;
+  }
+  return child.nativeAccessibility;
+}
+
+- (NSInteger)indexOfAccessibilityElement:(id)element {
+  NSArray<SemanticsObject*>* children = self.semanticsObject.children;
+  for (size_t i = 0; i < children.count; i++) {
+    SemanticsObject* child = children[i];
+    if ((![child hasChildren] && child.nativeAccessibility == element) ||
+        ([child hasChildren] && [child accessibilityContainer] == element)) {
+      return i;
+    }
+  }
+  return NSNotFound;
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView*)scrollView

@@ -999,9 +999,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// {@endtemplate}
   ///
   /// You should not use [BuildContext.dependOnInheritedWidgetOfExactType] from this
-  /// method. However, [didChangeDependencies] will be called immediately
-  /// following this method, and [BuildContext.dependOnInheritedWidgetOfExactType] can
-  /// be used there.
+  /// method: the framework calls this method only once for each [State] object
+  /// and does not call it again when an inherited widget changes, so a value
+  /// read here from an inherited widget is never updated. However,
+  /// [didChangeDependencies] will be called immediately following this method,
+  /// and [BuildContext.dependOnInheritedWidgetOfExactType] can be used there.
   ///
   /// Implementations of this method should start with a call to the inherited
   /// method, as in `super.initState()`.
@@ -6075,10 +6077,10 @@ class StatefulElement extends ComponentElement {
           ),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
-            "its dependent widgets are rebuilt. If the dependent widget's reference to "
-            'the inherited widget is in a constructor or an initState() method, '
-            'then the rebuilt dependent widget will not reflect the changes in the '
-            'inherited widget.',
+            'its dependent widgets are rebuilt. The framework calls initState() only once for '
+            'each State object and does not call it again for those rebuilds, so a value that '
+            'initState() reads from an inherited widget is never updated when that inherited '
+            'widget changes.',
           ),
           ErrorHint(
             'Typically references to inherited widgets should occur in widget build() methods. Alternatively, '
@@ -6327,6 +6329,12 @@ class InheritedElement extends ProxyElement {
   /// so that they can selectively rebuild dependents in [notifyDependent].
   ///
   /// This method is typically only called in overrides of [updateDependencies].
+  /// For example, [InheritedModelElement.updateDependencies] calls this method
+  /// to register the initial dependency value for a [dependent], or to replace
+  /// it with an unconditional dependency, and otherwise mutates the existing
+  /// [Set] returned by [getDependencies] in-place without calling this method
+  /// again if the same [dependent] has already been registered by a previous
+  /// call to [updateDependencies].
   ///
   /// See also:
   ///
@@ -7137,7 +7145,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   void update(SingleChildRenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _child = updateChild(_child, (widget as SingleChildRenderObjectWidget).child, null);
+    _child = updateChild(_child, newWidget.child, null);
   }
 
   @override
@@ -7307,12 +7315,11 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void update(MultiChildRenderObjectWidget newWidget) {
     super.update(newWidget);
-    final multiChildRenderObjectWidget = widget as MultiChildRenderObjectWidget;
     assert(widget == newWidget);
-    assert(!debugChildrenHaveDuplicateKeys(widget, multiChildRenderObjectWidget.children));
+    assert(!debugChildrenHaveDuplicateKeys(widget, newWidget.children));
     _children = updateChildren(
       _children,
-      multiChildRenderObjectWidget.children,
+      newWidget.children,
       forgottenChildren: _forgottenChildren,
     );
     _forgottenChildren.clear();

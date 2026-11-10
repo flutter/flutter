@@ -34,7 +34,7 @@ apply plugin: "com.android.application"
 
 android {
   namespace = "io.flutter.licensecheck"
-  compileSdk = 36
+  compileSdk = 37
 }
 
 configurations {

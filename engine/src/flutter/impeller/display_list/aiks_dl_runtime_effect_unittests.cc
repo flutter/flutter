@@ -60,7 +60,7 @@ TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
 
   struct FragUniforms {
     Vector2 iResolution;
-    Scalar iTime;
+    Scalar iTime = 0.0f;
   } frag_uniforms = {.iResolution = Vector2(400, 400), .iTime = 100.0};
   auto uniform_data = std::make_shared<std::vector<uint8_t>>();
   uniform_data->resize(sizeof(FragUniforms));

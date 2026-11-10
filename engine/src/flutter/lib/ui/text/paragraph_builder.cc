@@ -90,6 +90,14 @@ const int kPSHeightIndex = 9;
 const int kPSStrutStyleIndex = 10;
 const int kPSEllipsisIndex = 11;
 const int kPSLocaleIndex = 12;
+// render_soft_hyphens is the first field whose mask bit and encode slot differ:
+// it claims the next free mask bit (13), but stores its value in the next free
+// encode slot (7), since slots 7-12 are reused only as mask-bit positions.
+const int kPSRenderSoftHyphensIndex = 13;
+const int kPSRenderSoftHyphensEncodeIndex = 7;
+// Like ellipsis, soft_hyphen_string is passed separately and only claims a
+// mask bit.
+const int kPSSoftHyphenStringIndex = 14;
 
 const int kPSTextAlignMask = 1 << kPSTextAlignIndex;
 const int kPSTextDirectionMask = 1 << kPSTextDirectionIndex;
@@ -103,6 +111,8 @@ const int kPSTextHeightBehaviorMask = 1 << kPSTextHeightBehaviorIndex;
 const int kPSStrutStyleMask = 1 << kPSStrutStyleIndex;
 const int kPSEllipsisMask = 1 << kPSEllipsisIndex;
 const int kPSLocaleMask = 1 << kPSLocaleIndex;
+const int kPSRenderSoftHyphensMask = 1 << kPSRenderSoftHyphensIndex;
+const int kPSSoftHyphenStringMask = 1 << kPSSoftHyphenStringIndex;
 
 // TextShadows decoding
 
@@ -153,11 +163,12 @@ void ParagraphBuilder::Create(Dart_Handle wrapper,
                               double fontSize,
                               double height,
                               const std::u16string& ellipsis,
-                              const std::string& locale) {
+                              const std::string& locale,
+                              const std::u16string& softHyphenString) {
   UIDartState::ThrowIfUIOperationsProhibited();
   auto res = fml::MakeRefCounted<ParagraphBuilder>(
       encoded_handle, strutData, fontFamily, strutFontFamilies, fontSize,
-      height, ellipsis, locale);
+      height, ellipsis, locale, softHyphenString);
   res->AssociateWithDartWrapper(wrapper);
 }
 
@@ -226,7 +237,8 @@ ParagraphBuilder::ParagraphBuilder(
     double fontSize,
     double height,
     const std::u16string& ellipsis,
-    const std::string& locale) {
+    const std::string& locale,
+    const std::u16string& softHyphenString) {
   int32_t mask = 0;
   txt::ParagraphStyle style;
   {
@@ -273,6 +285,12 @@ ParagraphBuilder::ParagraphBuilder(
     if (mask & kPSMaxLinesMask) {
       style.max_lines = encoded[kPSMaxLinesIndex];
     }
+
+    if (mask & kPSRenderSoftHyphensMask) {
+      // Hyphens.manual (0) renders the soft hyphen glyph; Hyphens.hidden (1)
+      // suppresses it.
+      style.render_soft_hyphens = encoded[kPSRenderSoftHyphensEncodeIndex] == 0;
+    }
   }
 
   if (mask & kPSStrutStyleMask) {
@@ -285,6 +303,10 @@ ParagraphBuilder::ParagraphBuilder(
 
   if (mask & kPSLocaleMask) {
     style.locale = locale;
+  }
+
+  if (mask & kPSSoftHyphenStringMask) {
+    style.soft_hyphen_string = softHyphenString;
   }
 
   FontCollection& font_collection = UIDartState::Current()

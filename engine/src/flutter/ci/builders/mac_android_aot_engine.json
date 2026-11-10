@@ -30,7 +30,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -40,7 +39,6 @@
                 "profile",
                 "--android",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_profile",
@@ -59,8 +57,7 @@
                     "--runtime-mode",
                     "profile",
                     "--android",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -88,7 +85,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -99,7 +95,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_profile_arm64",
@@ -119,8 +114,7 @@
                     "profile",
                     "--android",
                     "--android-cpu=arm64",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -148,7 +142,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -159,7 +152,6 @@
                 "--android",
                 "--android-cpu=x64",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_profile_x64",
@@ -179,8 +171,7 @@
                     "profile",
                     "--android",
                     "--android-cpu=x64",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -208,7 +199,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -218,7 +208,6 @@
                 "release",
                 "--android",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_release",
@@ -237,8 +226,7 @@
                     "--runtime-mode",
                     "release",
                     "--android",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -266,7 +254,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -277,7 +264,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_release_arm64",
@@ -297,8 +283,7 @@
                     "release",
                     "--android",
                     "--android-cpu=arm64",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -326,7 +311,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -337,7 +321,6 @@
                 "--android",
                 "--android-cpu=x64",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_release_x64",
@@ -357,8 +340,7 @@
                     "release",
                     "--android",
                     "--android-cpu=x64",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {

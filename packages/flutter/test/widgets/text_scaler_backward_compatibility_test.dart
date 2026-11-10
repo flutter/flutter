@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // TODO(LongCatIsLooong): Remove this file once textScaleFactor is removed.
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +14,7 @@ void main() {
         const TextStyle(fontSize: 14).getTextStyle(textScaleFactor: 2.0).toString(),
         contains('fontSize: 28'),
       );
-    }, skip: kIsWeb); // [intended] CkTextStyle doesn't have a custom toString implementation.
+    });
   });
   group('TextPainter', () {
     test('textScaleFactor translates to textScaler', () {

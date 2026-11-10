@@ -35,6 +35,9 @@ class RenderTargetCache : public RenderTargetAllocator {
   // |RenderTargetAllocator|
   void EnableCache() override;
 
+  // |RenderTargetAllocator|
+  void Clear() override;
+
   RenderTarget CreateOffscreen(
       const Context& context,
       ISize size,

@@ -8,7 +8,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -19,7 +18,6 @@
                 "--target-dir",
                 "ci/host_debug_clang_tidy",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_debug_clang_tidy",
@@ -41,7 +39,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -53,7 +50,6 @@
                 "--target-dir",
                 "ci/ios_debug_sim_clang_tidy",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug_sim_clang_tidy",
@@ -79,7 +75,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [
@@ -101,7 +96,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -134,7 +128,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [
@@ -156,7 +149,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -189,7 +181,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [
@@ -211,7 +202,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -244,7 +234,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [
@@ -266,7 +255,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -299,7 +287,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [
@@ -322,7 +309,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -339,7 +325,6 @@
                         "--target-dir",
                         "ci/ios_debug_sim_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },

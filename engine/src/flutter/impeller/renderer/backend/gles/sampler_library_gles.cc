@@ -31,6 +31,7 @@ raw_ptr<const Sampler> SamplerLibraryGLES::GetSampler(
     return raw_ptr<const Sampler>{nullptr};
   }
   uint64_t p_key = SamplerDescriptor::ToKey(descriptor);
+  Lock lock(samplers_mutex_);
   for (const auto& [key, value] : samplers_) {
     if (key == p_key) {
       return raw_ptr(value);

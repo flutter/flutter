@@ -68,6 +68,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
 
     expect(
@@ -108,6 +109,7 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         artifacts: artifacts,
+        platform: FakePlatform(),
       );
 
       expect(
@@ -149,6 +151,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
 
     expect(
@@ -188,6 +191,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
 
     expect(
@@ -227,6 +231,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
 
     try {
@@ -303,6 +308,7 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         artifacts: artifacts,
+        platform: FakePlatform(),
       );
 
       final bool result = await shaderCompiler.compileShader(
@@ -358,6 +364,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
@@ -409,6 +416,7 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         artifacts: artifacts,
+        platform: FakePlatform(),
       );
       final developmentShaderCompiler = DevelopmentShaderCompiler(
         shaderCompiler: shaderCompiler,
@@ -460,6 +468,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
@@ -511,6 +520,7 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         artifacts: artifacts,
+        platform: FakePlatform(),
       );
       final developmentShaderCompiler = DevelopmentShaderCompiler(
         shaderCompiler: shaderCompiler,
@@ -562,6 +572,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
@@ -611,6 +622,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
@@ -670,6 +682,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
@@ -728,6 +741,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
@@ -784,6 +798,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
@@ -839,6 +854,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      platform: FakePlatform(),
     );
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
@@ -1062,6 +1078,7 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
       );
 
       await expectLater(
