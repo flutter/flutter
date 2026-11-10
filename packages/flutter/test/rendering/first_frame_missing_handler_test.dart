@@ -43,6 +43,35 @@ void main() {
     },
     skip: !kIsWeb, // [intended] _handleWebFirstFrame only runs on the web.
   );
+
+  test(
+    'Web first-frame notification is not sent again on later frames',
+    () async {
+      var messages = 0;
+      binding.defaultBinaryMessenger.setMockMessageHandler('flutter/service_worker', (
+        ByteData? message,
+      ) async {
+        messages += 1;
+        return null;
+      });
+      addTearDown(() {
+        binding.defaultBinaryMessenger.setMockMessageHandler('flutter/service_worker', null);
+      });
+
+      // Make sure the first frame has been drawn, even if this test runs alone.
+      binding.handleBeginFrame(Duration.zero);
+      binding.handleDrawFrame();
+      await pumpEventQueue();
+      messages = 0;
+
+      binding.handleBeginFrame(const Duration(milliseconds: 16));
+      binding.handleDrawFrame();
+      await pumpEventQueue();
+
+      expect(messages, 0);
+    },
+    skip: !kIsWeb, // [intended] _handleWebFirstFrame only runs on the web.
+  );
 }
 
 class TestRenderBinding extends BindingBase
