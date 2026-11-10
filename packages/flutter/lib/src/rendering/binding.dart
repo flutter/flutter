@@ -536,7 +536,8 @@ mixin RendererBinding
 
   void _handleWebFirstFrame(Duration _) {
     assert(kIsWeb);
-    const methodChannel = MethodChannel('flutter/service_worker');
+    // Best-effort notification: nothing may be listening on this channel.
+    const methodChannel = OptionalMethodChannel('flutter/service_worker');
     methodChannel
         .invokeMethod<void>('first-frame')
         .then(
