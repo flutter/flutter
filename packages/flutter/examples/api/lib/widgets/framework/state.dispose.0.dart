@@ -75,11 +75,14 @@ class _CountDisplayControlsState extends State<CountDisplayControls> {
         _Button(
           onPressed: () {
             setState(() {
-              // Removing CountDisplay calls dispose on its State. A stream
-              // created by Stream.periodic can only be listened to once, so
-              // a new one is created for when it is shown again.
+              // Removing CountDisplay calls dispose on its State.
               _showCount = !_showCount;
-              _counts = _createCounts();
+              if (_showCount) {
+                // A stream created by Stream.periodic can only be listened
+                // to once, so a new one is needed when CountDisplay is shown
+                // again.
+                _counts = _createCounts();
+              }
             });
           },
           label: _showCount ? 'Remove counter' : 'Show counter',
