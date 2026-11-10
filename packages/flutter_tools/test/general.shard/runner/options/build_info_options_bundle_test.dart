@@ -6,8 +6,10 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/test.dart';
 
+import '../../../src/fakes.dart';
+
 class DummyCommand extends FlutterCommand {
-  DummyCommand() {
+  DummyCommand() : super(toolContext: FakeToolContext()) {
     registerOptionBundles(<OptionBundle>[const BuildInfoOptionsBundle()]);
   }
 
