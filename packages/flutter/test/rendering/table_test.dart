@@ -1149,6 +1149,10 @@ void main() {
     }
 
     // Paints `table` at 300x100 and returns the color of the pixel at (x, y).
+    //
+    // CanvasKit can round a partly covered pixel one step differently when it
+    // is next to a clip, so pixels are compared to each other with
+    // isSameColorAs.
     Future<Color Function(int x, int y)> paintPixels(RenderTable table) async {
       final boundary = RenderRepaintBoundary(child: table);
       layout(boundary, constraints: BoxConstraints.tight(const Size(300.0, 100.0)));
@@ -1202,9 +1206,9 @@ void main() {
         ),
       );
       expect(pixel(199, 25), isNot(transparent));
-      expect(pixel(199, 25), pixel(199, 75));
+      expect(pixel(199, 25), isSameColorAs(pixel(199, 75)));
       expect(pixel(150, 49), isNot(transparent));
-      expect(pixel(150, 49), pixel(250, 49));
+      expect(pixel(150, 49), isSameColorAs(pixel(250, 49)));
     });
 
     test('clips the inner borders out of a colSpan in RTL', () async {
@@ -1404,17 +1408,17 @@ void main() {
       expect(pixel(100, 25), transparent);
       // The hairlines around A are painted like those around the other cells.
       expect(pixel(0, 25), isNot(transparent));
-      expect(pixel(0, 25), pixel(0, 75));
+      expect(pixel(0, 25), isSameColorAs(pixel(0, 75)));
       expect(pixel(50, 0), isNot(transparent));
-      expect(pixel(50, 0), pixel(250, 0));
+      expect(pixel(50, 0), isSameColorAs(pixel(250, 0)));
       expect(pixel(199, 25), isNot(transparent));
-      expect(pixel(199, 25), pixel(199, 75));
-      expect(pixel(200, 25), pixel(200, 75));
+      expect(pixel(199, 25), isSameColorAs(pixel(199, 75)));
+      expect(pixel(200, 25), isSameColorAs(pixel(200, 75)));
       // Skia and Impeller place a hairline differently, so this compares both
       // rows that the hairline below A can be in.
       expect(pixel(150, 50), isNot(transparent));
-      expect(pixel(150, 49), pixel(250, 49));
-      expect(pixel(150, 50), pixel(250, 50));
+      expect(pixel(150, 49), isSameColorAs(pixel(250, 49)));
+      expect(pixel(150, 50), isSameColorAs(pixel(250, 50)));
     });
 
     test('clips what a TableBorder subclass paints inside a span', () async {
