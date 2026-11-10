@@ -7,7 +7,9 @@
 # Runs after `labeler-trigger.yml` completes. The artifact produced by that
 # workflow is UNTRUSTED (a pull request can modify the trigger workflow), so the
 # PR number is only used after binding it to the triggering run's head commit.
-# The label configuration is read from the default branch, not the PR.
+# The label configuration is read from the default branch, not the PR. Before
+# applying labels, it waits for the `cla/google` check run to complete; if the
+# CLA check fails, it skips labeling and moves the PR to a draft state.
 #
 # Pull requests from first-time contributors need a maintainer to approve their
 # `pull_request` runs. Until then, the trigger run is created already concluded
