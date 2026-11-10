@@ -18,8 +18,6 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/scalar.h"
-#include "fml/synchronization/count_down_latch.h"
-#include "impeller/core/device_buffer.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/playground/playground.h"
@@ -827,91 +825,6 @@ TEST_P(AiksTest, FramebufferAdvancedBlendCoverage) {
                     DlImageSampling::kMipmapLinear, &image_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
-}
-
-TEST_P(AiksTest,
-       FramebufferBlendDoesNotApplyMipBiasWhenHardwareDecalSupported) {
-  std::shared_ptr<Context> context = GetContext();
-  const auto& caps = context->GetCapabilities();
-  if (!caps->SupportsFramebufferFetch() ||
-      !caps->SupportsDecalSamplerAddressMode()) {
-    GTEST_SKIP() << "Requires framebuffer fetch and hardware decal support.";
-  }
-
-  // Mip 0 (8x8) is transparent black (0); mip 1 (4x4) is opaque white (255).
-  // Drawing at 0.5x scale selects LOD = 1.0 (white) when framebuffer_blend.frag
-  // takes the unbiased hardware decal path (`supports_decal > 0.0`). With the
-  // old `supports_decal > 1` check, `1.0 > 1` was false and `IPSampleDecal`
-  // applied `kDefaultMipBias = -0.475` (LOD = 0.525), dropping output to ~134.
-  TextureDescriptor tex_desc;
-  tex_desc.storage_mode = StorageMode::kDevicePrivate;
-  tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
-  tex_desc.size = ISize{8, 8};
-  tex_desc.mip_count = 2u;
-  tex_desc.usage = TextureUsage::kShaderRead;
-  auto mip_texture = context->GetResourceAllocator()->CreateTexture(tex_desc);
-  ASSERT_TRUE(mip_texture);
-
-  const std::vector<uint8_t> mip0_clear(8 * 8 * 4, 0);
-  const std::vector<uint8_t> mip1_white(4 * 4 * 4, 255);
-  auto buf0 = context->GetResourceAllocator()->CreateBufferWithCopy(
-      mip0_clear.data(), mip0_clear.size());
-  ASSERT_TRUE(buf0);
-  auto buf1 = context->GetResourceAllocator()->CreateBufferWithCopy(
-      mip1_white.data(), mip1_white.size());
-  ASSERT_TRUE(buf1);
-  {
-    auto cmd = context->CreateCommandBuffer();
-    auto blit = cmd->CreateBlitPass();
-    ASSERT_TRUE(blit->AddCopy(DeviceBuffer::AsBufferView(buf0), mip_texture,
-                              IRect::MakeSize(ISize{8, 8}), "mip0", 0u));
-    ASSERT_TRUE(blit->AddCopy(DeviceBuffer::AsBufferView(buf1), mip_texture,
-                              IRect::MakeSize(ISize{4, 4}), "mip1", 1u));
-    ASSERT_TRUE(blit->ConvertTextureToShaderRead(mip_texture));
-    ASSERT_TRUE(blit->EncodeCommands());
-    ASSERT_TRUE(context->GetCommandQueue()->Submit({cmd}).ok());
-  }
-
-  DisplayListBuilder builder;
-  builder.DrawPaint(DlPaint().setColor(DlColor::kBlack()));
-  builder.Scale(0.5f, 0.5f);
-  DlPaint blend_paint;
-  blend_paint.setBlendMode(DlBlendMode::kScreen);
-  builder.DrawImage(DlImageImpeller::Make(mip_texture), DlPoint(0, 0),
-                    DlImageSampling::kMipmapLinear, &blend_paint);
-
-  AiksContext renderer(context, nullptr);
-  auto out_texture =
-      DisplayListToTexture(builder.Build(), ISize{4, 4}, renderer);
-  ASSERT_TRUE(out_texture);
-
-  DeviceBufferDescriptor readback_desc;
-  readback_desc.size =
-      out_texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
-  readback_desc.readback = true;
-  readback_desc.storage_mode = StorageMode::kHostVisible;
-  auto readback = context->GetResourceAllocator()->CreateBuffer(readback_desc);
-  ASSERT_TRUE(readback);
-  {
-    auto cmd = context->CreateCommandBuffer();
-    auto blit = cmd->CreateBlitPass();
-    ASSERT_TRUE(blit->AddCopy(out_texture, readback));
-    ASSERT_TRUE(blit->EncodeCommands());
-    auto latch = std::make_shared<fml::CountDownLatch>(1u);
-    ASSERT_TRUE(
-        context->GetCommandQueue()
-            ->Submit({cmd},
-                     [latch](CommandBuffer::Status) { latch->CountDown(); })
-            .ok());
-    latch->Wait();
-  }
-
-  const uint8_t* contents = readback->OnGetContents();
-  ASSERT_TRUE(contents);
-  const uint8_t* pixel = contents + (2 * 4 + 2) * 4;
-  EXPECT_GE(pixel[0], 253u);
-  EXPECT_GE(pixel[1], 253u);
-  EXPECT_GE(pixel[2], 253u);
 }
 
 TEST_P(AiksTest, ColorWheel) {

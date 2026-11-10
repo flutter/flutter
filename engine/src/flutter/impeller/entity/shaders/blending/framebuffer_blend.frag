@@ -55,7 +55,7 @@ out vec4 frag_color;
 
 vec4 Sample(sampler2D texture_sampler, vec2 texture_coords) {
   if (supports_decal > 0.0) {
-    return texture(texture_sampler, texture_coords);
+    return texture(texture_sampler, texture_coords, kDefaultMipBias);
   }
   return IPSampleDecal(texture_sampler, texture_coords);
 }
