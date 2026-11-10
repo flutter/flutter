@@ -1071,6 +1071,55 @@ void main() {
       expect(registrar.selectables.length, 0);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/196327.
+    test('selection edges outside of a bidi paragraph select its whole text', () {
+      const cases = <(String, TextDirection)>[
+        ('Hello world שלום עולם', TextDirection.rtl),
+        ('שלום עולם Hello world', TextDirection.rtl),
+        ('Answer:', TextDirection.rtl),
+        ('שלום עולם Hello world', TextDirection.ltr),
+        ('Hello world שלום עולם', TextDirection.ltr),
+      ];
+      const granularities = <TextGranularity>[
+        TextGranularity.character,
+        TextGranularity.word,
+        TextGranularity.paragraph,
+      ];
+      for (final (String text, TextDirection textDirection) in cases) {
+        for (final granularity in granularities) {
+          final registrar = TestSelectionRegistrar();
+          final paragraph = RenderParagraph(
+            TextSpan(text: text),
+            textDirection: textDirection,
+            registrar: registrar,
+          );
+          layout(paragraph);
+          final Selectable selectable = registrar.selectables.single;
+          final Size size = paragraph.size;
+
+          // A drag that starts above the paragraph and ends below it.
+          selectable.dispatchSelectionEvent(
+            SelectionEdgeUpdateEvent.forStart(
+              globalPosition: Offset(size.width / 2, -10),
+              granularity: granularity,
+            ),
+          );
+          selectable.dispatchSelectionEvent(
+            SelectionEdgeUpdateEvent.forEnd(
+              globalPosition: Offset(size.width / 2, size.height + 10),
+              granularity: granularity,
+            ),
+          );
+          expect(
+            paragraph.selections.single,
+            TextSelection(baseOffset: 0, extentOffset: text.length),
+            reason: '"$text" ($textDirection, $granularity)',
+          );
+          expect(selectable.getSelectedContent()!.plainText, text);
+        }
+      }
+    });
+
     test('paints selection highlight', () async {
       final registrar = TestSelectionRegistrar();
       const selectionColor = Color(0xAF6694e8);

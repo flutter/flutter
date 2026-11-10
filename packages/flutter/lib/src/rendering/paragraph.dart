@@ -1930,13 +1930,12 @@ class _SelectableFragment
       );
       return result;
     }
-    final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
+    final TextPosition position = _getPositionForLocalOffset(
       _rect,
       localPosition,
-      direction: paragraph.textDirection,
+      start: range.start,
+      end: range.end,
     );
-
-    final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
     // Check if the original local position is within the rect, if it is not then
     // we do not need to look up the text boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
@@ -2003,14 +2002,8 @@ class _SelectableFragment
       );
       return result;
     }
-    final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
-      _rect,
-      localPosition,
-      direction: paragraph.textDirection,
-    );
-
     final TextPosition position = _clampTextPosition(
-      paragraph.getPositionForOffset(adjustedOffset),
+      _getPositionForLocalOffset(_rect, localPosition, start: range.start, end: range.end),
     );
     _setSelectionPosition(position, isEnd: isEnd);
     if (position.offset == range.end) {
@@ -2918,20 +2911,17 @@ class _SelectableFragment
       );
       return result;
     }
-    final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
+    final TextPosition position = _getPositionForLocalOffset(
       _rect,
       localPosition,
-      direction: paragraph.textDirection,
+      start: range.start,
+      end: range.end,
     );
-    final Offset adjustedOffsetRelativeToParagraph = SelectionUtils.adjustDragOffset(
+    final TextPosition positionInFullText = _getPositionForLocalOffset(
       paragraph.paintBounds,
       localPosition,
-      direction: paragraph.textDirection,
-    );
-
-    final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
-    final TextPosition positionInFullText = paragraph.getPositionForOffset(
-      adjustedOffsetRelativeToParagraph,
+      start: 0,
+      end: fullText.length,
     );
 
     final SelectionResult? result;
@@ -3108,6 +3098,26 @@ class _SelectableFragment
       }
     }
     return false;
+  }
+
+  // Maps a position outside of `rect` to `start` or `end`, using the areas of
+  // [SelectionUtils.adjustDragOffset]. Hit testing a corner of `rect` instead
+  // would land in the middle of the text when a line mixes text directions.
+  TextPosition _getPositionForLocalOffset(
+    Rect rect,
+    Offset localPosition, {
+    required int start,
+    required int end,
+  }) {
+    if (rect.contains(localPosition)) {
+      return paragraph.getPositionForOffset(localPosition);
+    }
+    final bool isBeforeRect =
+        localPosition.dy <= rect.top ||
+        localPosition.dy <= rect.bottom && localPosition.dx <= rect.left;
+    return isBeforeRect
+        ? TextPosition(offset: start)
+        : TextPosition(offset: end, affinity: TextAffinity.upstream);
   }
 
   TextPosition _clampTextPosition(TextPosition position) {
