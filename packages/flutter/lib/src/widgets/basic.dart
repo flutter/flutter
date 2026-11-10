@@ -25,11 +25,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import '_text_locale.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'indexed_stack.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'view.dart';
 import 'widget_span.dart';
@@ -6705,6 +6705,16 @@ class RichText extends MultiChildRenderObjectWidget {
   double _getDevicePixelRatio(BuildContext context) =>
       MediaQuery.maybeDevicePixelRatioOf(context) ?? View.maybeOf(context)?.devicePixelRatio ?? 1.0;
 
+  // A default locale that the app didn't choose isn't passed to the engine, so
+  // the platform's default locale is used for font fallback.
+  // See https://github.com/flutter/flutter/issues/194931.
+  Locale? _effectiveLocale(BuildContext context) {
+    if (locale != null) {
+      return locale;
+    }
+    return Localizations.isDefaultLocaleOf(context) ? null : Localizations.maybeLocaleOf(context);
+  }
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -6720,7 +6730,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       hyphens: hyphens,
-      locale: locale ?? textLocaleOf(context),
+      locale: _effectiveLocale(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
       devicePixelRatio: _getDevicePixelRatio(context),
@@ -6742,7 +6752,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
       ..hyphens = hyphens
-      ..locale = locale ?? textLocaleOf(context)
+      ..locale = _effectiveLocale(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
       ..devicePixelRatio = _getDevicePixelRatio(context);
