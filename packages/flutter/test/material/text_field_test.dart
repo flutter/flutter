@@ -6625,6 +6625,100 @@ void main() {
         .withValues(alpha: 0.15);
     expect(state1.widget.selectionColor, null);
     expect(state2.widget.selectionColor, inactiveSelectionColor);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ui.ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ui.ViewFocusState.focused,
+        direction: ui.ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+  });
+
+  testWidgets('Inactive selection highlight does not stick to a previously focused field', (
+    WidgetTester tester,
+  ) async {
+    // After window blur, focusing a different field on refocus must clear the
+    // previous field's inactive-highlight flag.
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    final TextEditingController controller1 = _textEditingController();
+    final TextEditingController controller2 = _textEditingController();
+    const Color selectionColor = Colors.orange;
+
+    void dispatchViewFocus(ui.ViewFocusState state) {
+      tester.platformDispatcher.notifyViewFocusChanged(
+        ui.ViewFocusEvent(
+          viewId: tester.view.viewId,
+          state: state,
+          direction: ui.ViewFocusDirection.undefined,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      overlay(
+        child: DefaultSelectionStyle(
+          selectionColor: selectionColor,
+          child: Column(
+            children: <Widget>[
+              TextField(key: key1, controller: controller1),
+              TextField(key: key2, controller: controller2),
+            ],
+          ),
+        ),
+      ),
+    );
+    // Prior tests may leave the shared test view unfocused.
+    dispatchViewFocus(ui.ViewFocusState.focused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    await tester.tap(find.byKey(key1));
+    await tester.enterText(find.byKey(key1), 'abcd');
+    await tester.pump();
+    controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    final EditableTextState state1 = tester.state<EditableTextState>(
+      find.descendant(of: find.byKey(key1), matching: find.byType(EditableText)),
+    );
+    final EditableTextState state2 = tester.state<EditableTextState>(
+      find.descendant(of: find.byKey(key2), matching: find.byType(EditableText)),
+    );
+    expect(state1.widget.focusNode.hasFocus, isTrue);
+    expect(View.hasFocusOf(state1.context), isTrue);
+    expect(state1.widget.selectionColor, selectionColor);
+
+    dispatchViewFocus(ui.ViewFocusState.unfocused);
+    await tester.pump();
+
+    final Color inactiveSelectionColor = Theme.of(state1.context).colorScheme.onSurface
+        .withValues(alpha: 0.15);
+    expect(View.hasFocusOf(state1.context), isFalse);
+    expect(state1.widget.selectionColor, inactiveSelectionColor);
+    expect(state2.widget.selectionColor, null);
+
+    // Refocus the view, then move focus to the second field.
+    dispatchViewFocus(ui.ViewFocusState.focused);
+    await tester.pump();
+    await tester.tap(find.byKey(key2));
+    await tester.enterText(find.byKey(key2), 'efgh');
+    await tester.pump();
+    controller2.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+    expect(state1.widget.selectionColor, null);
+    expect(state2.widget.selectionColor, selectionColor);
+
+    dispatchViewFocus(ui.ViewFocusState.unfocused);
+    await tester.pump();
+
+    expect(state1.widget.selectionColor, null);
+    expect(state2.widget.selectionColor, inactiveSelectionColor);
+
+    dispatchViewFocus(ui.ViewFocusState.focused);
+    await tester.pump();
   });
 
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {

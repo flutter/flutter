@@ -1188,23 +1188,34 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
     _editableText.requestKeyboard();
   }
 
-  // When the view loses window focus, focus is parked on the root scope and
-  // every field reports [FocusNode.hasFocus] == false while controllers still
-  // retain their selections. Track whether this field was the focused one so
-  // only it paints the inactive (grey) selection highlight.
+  // Cached while the view is focused: whether this field should keep an
+  // inactive (grey) selection highlight after the view loses focus. Updated
+  // during build whenever [View.hasFocusOf] is true so the flag cannot go
+  // stale when focus returns to a different field without notifying this one.
   bool _showInactiveSelectionHighlight = false;
 
   void _handleFocusChanged() {
     setState(() {
-      if (_effectiveFocusNode.hasFocus) {
-        _showInactiveSelectionHighlight = true;
-      } else if (!FocusManager.instance.rootScope.hasPrimaryFocus) {
-        // Focus moved to another widget (or the view scope), not parked for an
-        // inactive window — do not keep an inactive highlight for this field.
-        _showInactiveSelectionHighlight = false;
-      }
-      // If focus was parked on the root scope (inactive window), keep the flag.
+      // Rebuild the widget on focus change to show/hide the text selection
+      // highlight.
     });
+  }
+
+  Color? _selectionColorForFocus(Color selectionColor) {
+    final bool hasViewFocus = View.hasFocusOf(context);
+    if (hasViewFocus) {
+      _showInactiveSelectionHighlight = _effectiveFocusNode.hasFocus;
+    }
+    if (hasViewFocus) {
+      return _effectiveFocusNode.hasFocus ? selectionColor : null;
+    }
+    if (_showInactiveSelectionHighlight) {
+      return CupertinoDynamicColor.resolve(
+        CupertinoColors.systemGrey,
+        context,
+      ).withValues(alpha: 0.25);
+    }
+    return null;
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
@@ -1611,14 +1622,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             // focus so the selection remains visible (matching desktop platform
             // conventions). See https://github.com/flutter/flutter/issues/103446.
             // SelectableText / SelectionArea are out of scope for this behavior.
-            selectionColor: View.hasFocusOf(context)
-                ? (_effectiveFocusNode.hasFocus ? selectionColor : null)
-                : (_showInactiveSelectionHighlight
-                      ? CupertinoDynamicColor.resolve(
-                          CupertinoColors.systemGrey,
-                          context,
-                        ).withValues(alpha: 0.25)
-                      : null),
+            selectionColor: _selectionColorForFocus(selectionColor),
             selectionControls: widget.selectionEnabled ? textSelectionControls : null,
             groupId: widget.groupId,
             onChanged: widget.onChanged,
