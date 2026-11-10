@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../android/android_builder.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
@@ -28,13 +29,15 @@ enum AndroidAnalyzeOption {
 /// The [userPath] must be point to a flutter project.
 class AndroidAnalyze {
   AndroidAnalyze({
+    required this.androidBuilder,
     required this.fileSystem,
+    required this.logger,
     required this.option,
     required this.userPath,
     this.buildVariant,
-    required this.logger,
   }) : assert(option == AndroidAnalyzeOption.listBuildVariant || buildVariant != null);
 
+  final AndroidBuilder? androidBuilder;
   final FileSystem fileSystem;
   final AndroidAnalyzeOption option;
   final String? buildVariant;
@@ -42,13 +45,19 @@ class AndroidAnalyze {
   final Logger logger;
 
   Future<void> analyze() async {
-    final FlutterProject project = FlutterProject.fromDirectory(fileSystem.directory(userPath));
+    final FlutterProject project = FlutterProject.fromDirectory(
+      fileSystem.directory(userPath),
+      logger: logger,
+    );
     switch (option) {
       case AndroidAnalyzeOption.listBuildVariant:
-        logger.printStatus(jsonEncode(await project.android.getBuildVariants()));
+        logger.printStatus(
+          jsonEncode(await project.android.getBuildVariants(androidBuilder: androidBuilder)),
+        );
       case AndroidAnalyzeOption.outputAppLinkSettings:
         assert(buildVariant != null);
         final String filePath = await project.android.outputsAppLinkSettings(
+          androidBuilder: androidBuilder,
           variant: buildVariant!,
         );
         logger.printStatus('result saved in $filePath');
