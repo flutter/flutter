@@ -10,7 +10,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_scripts/test/')))
 
-from common import catch_sigterm, wait_for_sigterm
+from common import catch_sigterm, get_host_arch, wait_for_sigterm
 
 
 def Main():
@@ -36,6 +36,23 @@ def Main():
   )
   os.environ['FUCHSIA_READELF'] = os.path.join(
       os.environ['SRC_ROOT'], 'flutter/buildtools/linux-x64/clang/bin/llvm-readelf'
+  )
+
+  host_arch = get_host_arch()
+  if any(arg.endswith(('arm64', '_arm64_tester')) for arg in sys.argv[1:]):
+    image_arch = 'arm64'
+  elif any(arg.endswith(('x64', '_x64_tester')) for arg in sys.argv[1:]):
+    image_arch = 'x64'
+  else:
+    image_arch = host_arch
+  os.environ.setdefault(
+      'FUCHSIA_ORCHESTRATE_CONFIG',
+      os.path.join(
+          os.environ['SRC_ROOT'],
+          'flutter/testing/fuchsia',
+          f'orchestrate_{host_arch}_{image_arch}.json'
+          if host_arch != image_arch else f'orchestrate_{image_arch}.json',
+      ),
   )
 
   if os.getenv('DOWNLOAD_FUCHSIA_SDK') == 'True':
