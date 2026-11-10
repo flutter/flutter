@@ -63,6 +63,31 @@ void main() {
     ]);
   });
 
+  testWidgets('WidgetSpan reuses already unscaled MediaQuery data', (WidgetTester tester) async {
+    const data = MediaQueryData();
+    MediaQueryData? observed;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: data,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text.rich(
+            WidgetSpan(
+              child: Builder(
+                builder: (BuildContext context) {
+                  observed = MediaQuery.of(context);
+                  return const SizedBox(width: 10, height: 10);
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(observed, same(data));
+  });
+
   for (final depth in <int>[1, 2]) {
     testWidgets('WidgetSpan text scales once at depth $depth', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/166050.

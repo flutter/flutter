@@ -125,7 +125,7 @@ class WidgetSpan extends PlaceholderSpan {
                 child: Builder(
                   builder: (BuildContext context) {
                     final MediaQueryData? data = MediaQuery.maybeOf(context);
-                    if (data == null) {
+                    if (data == null || data.textScaler == TextScaler.noScaling) {
                       return span.child;
                     }
                     return MediaQuery(
