@@ -10,6 +10,7 @@ extern "C" {
 
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_accessible_text_field.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
@@ -85,6 +86,17 @@ static FlAccessibleNode* get_node(FlViewAccessible* self,
   return node;
 }
 
+// Builds semantics once an assistive technology reads the view, for one that
+// reads the tree without registering for events, so the AT-SPI registry does
+// not show it. get_n_children is not used for this, as the ATK bridge calls it
+// when it embeds the view whether or not an assistive technology is running.
+static void enable_semantics(FlViewAccessible* self) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine != nullptr) {
+    fl_engine_enable_semantics(engine);
+  }
+}
+
 // Implements AtkObject::get_n_children
 static gint fl_view_accessible_get_n_children(AtkObject* accessible) {
   FlViewAccessible* self = FL_VIEW_ACCESSIBLE(accessible);
@@ -100,6 +112,7 @@ static gint fl_view_accessible_get_n_children(AtkObject* accessible) {
 // Implements AtkObject::ref_child
 static AtkObject* fl_view_accessible_ref_child(AtkObject* accessible, gint i) {
   FlViewAccessible* self = FL_VIEW_ACCESSIBLE(accessible);
+  enable_semantics(self);
   FlAccessibleNode* node = lookup_node(self, 0);
 
   if (i != 0 || node == nullptr) {
@@ -111,12 +124,14 @@ static AtkObject* fl_view_accessible_ref_child(AtkObject* accessible, gint i) {
 
 // Implements AtkObject::get_role
 static AtkRole fl_view_accessible_get_role(AtkObject* accessible) {
+  enable_semantics(FL_VIEW_ACCESSIBLE(accessible));
   return ATK_ROLE_PANEL;
 }
 
 // Implements AtkObject::ref_state_set
 static AtkStateSet* fl_view_accessible_ref_state_set(AtkObject* accessible) {
   FlViewAccessible* self = FL_VIEW_ACCESSIBLE(accessible);
+  enable_semantics(self);
   FlAccessibleNode* node = lookup_node(self, 0);
   return node != nullptr ? atk_object_ref_state_set(ATK_OBJECT(node)) : nullptr;
 }

@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_accessibility_handler.h"
+#include "flutter/shell/platform/linux/fl_at_spi_monitor.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -58,6 +59,12 @@ struct _FlEngine {
 
   // Implements the flutter/settings channel.
   FlSettingsHandler* settings_handler;
+
+  // Enables semantics when an assistive technology connects.
+  FlAtSpiMonitor* at_spi_monitor;
+
+  // TRUE once the engine has been told to build semantics.
+  gboolean semantics_enabled;
 
   // Implements the flutter/platform channel.
   FlPlatformHandler* platform_handler;
@@ -615,6 +622,7 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->texture_registrar);
   g_clear_object(&self->binary_messenger);
   g_clear_object(&self->settings_handler);
+  g_clear_object(&self->at_spi_monitor);
   g_clear_object(&self->platform_handler);
   g_clear_object(&self->accessibility_handler);
   g_clear_object(&self->keyboard_manager);
@@ -756,6 +764,25 @@ FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* self) {
 FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
   return self->display_monitor;
+}
+
+void fl_engine_enable_semantics(FlEngine* self) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->semantics_enabled || self->engine == nullptr) {
+    return;
+  }
+  if (self->embedder_api.UpdateSemanticsEnabled(self->engine, TRUE) !=
+      kSuccess) {
+    g_warning("Failed to enable semantics on Flutter engine");
+    return;
+  }
+  self->semantics_enabled = TRUE;
+  g_clear_object(&self->at_spi_monitor);
+}
+
+static void at_spi_client_registered_cb(FlEngine* self) {
+  fl_engine_enable_semantics(self);
 }
 
 gboolean fl_engine_start(FlEngine* self, GError** error) {
@@ -929,10 +956,12 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
   setup_keyboard(self);
 
-  result = self->embedder_api.UpdateSemanticsEnabled(self->engine, TRUE);
-  if (result != kSuccess) {
-    g_warning("Failed to enable accessibility features on Flutter engine");
-  }
+  // Semantics cost time on every frame, so build them only while an
+  // assistive technology uses them, as the other desktop embedders do.
+  self->at_spi_monitor = fl_at_spi_monitor_new();
+  g_signal_connect_swapped(self->at_spi_monitor, "client-registered",
+                           G_CALLBACK(at_spi_client_registered_cb), self);
+  fl_at_spi_monitor_start(self->at_spi_monitor);
 
   fl_display_monitor_start(self->display_monitor);
 
