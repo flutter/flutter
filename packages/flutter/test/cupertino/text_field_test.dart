@@ -8,7 +8,16 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color, SemanticsInputType;
+import 'dart:ui'
+    as ui
+    show
+        BoxHeightStyle,
+        BoxWidthStyle,
+        Color,
+        SemanticsInputType,
+        ViewFocusDirection,
+        ViewFocusEvent,
+        ViewFocusState;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -769,6 +778,64 @@ void main() {
     await tester.pump();
     expect(state1.widget.selectionColor, null);
     expect(state2.widget.selectionColor, selectionColor);
+  });
+
+  testWidgets('CupertinoTextField greys selection when the view loses focus', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103446.
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    const Color selectionColor = CupertinoColors.activeOrange;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: DefaultSelectionStyle(
+            selectionColor: selectionColor,
+            child: CupertinoTextField(controller: controller),
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(CupertinoTextField), 'abcd');
+    await tester.pump();
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    final EditableTextState editableText = tester.state<EditableTextState>(
+      find.byType(EditableText),
+    );
+    expect(editableText.widget.selectionColor, selectionColor);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ui.ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ui.ViewFocusState.unfocused,
+        direction: ui.ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    final Color inactiveSelectionColor = CupertinoDynamicColor.resolve(
+      CupertinoColors.systemGrey,
+      editableText.context,
+    ).withValues(alpha: 0.25);
+    expect(View.hasFocusOf(editableText.context), isFalse);
+    expect(editableText.widget.selectionColor, inactiveSelectionColor);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ui.ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ui.ViewFocusState.focused,
+        direction: ui.ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    expect(View.hasFocusOf(editableText.context), isTrue);
+    expect(editableText.widget.selectionColor, selectionColor);
   });
 
   testWidgets('multi-lined text fields are intrinsically taller no-strut', (

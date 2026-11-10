@@ -595,7 +595,7 @@ void main() {
     expect(View.maybeHasFocusOf(viewContext), isTrue);
   });
 
-  testWidgets('View.hasFocusOf becomes false when the app is inactive', (
+  testWidgets('View.hasFocusOf becomes false when the app is inactive on desktop', (
     WidgetTester tester,
   ) async {
     late BuildContext viewContext;
@@ -617,7 +617,36 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     expect(View.hasFocusOf(viewContext), isTrue);
-  });
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets(
+    'View.hasFocusOf ignores app lifecycle on iOS and Android',
+    (WidgetTester tester) async {
+      late BuildContext viewContext;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            viewContext = context;
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+
+      expect(View.hasFocusOf(viewContext), isTrue);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      expect(View.hasFocusOf(viewContext), isTrue);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(View.hasFocusOf(viewContext), isTrue);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }),
+  );
 
   // A screen reader can move focus straight to a control instead of tabbing
   // into the view. On web that arrives as a SemanticsAction.focus for the

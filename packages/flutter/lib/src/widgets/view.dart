@@ -186,9 +186,12 @@ class View extends StatefulWidget {
   /// focused. Returns true when there is no enclosing [View] that reports focus
   /// (for example under a bare [RawView]).
   ///
-  /// On platforms that do not yet dispatch [ViewFocusEvent]s for the default
-  /// window, this still becomes false while the application lifecycle is not
-  /// [AppLifecycleState.resumed], so widgets can dim inactive selections.
+  /// On desktop and web, when the embedder does not dispatch [ViewFocusEvent]s
+  /// for the default window, this also becomes false while the application
+  /// lifecycle is inactive, hidden, or paused, so widgets can dim inactive
+  /// selections. Mobile platforms are excluded: [AppLifecycleState] changes
+  /// there are noisy (IME, Control Center, Notification Center) and
+  /// [FocusManager] likewise ignores them for focus.
   ///
   /// See also:
   ///
@@ -204,18 +207,19 @@ class View extends StatefulWidget {
   /// focus, or null if focus cannot be determined.
   ///
   /// Creates a dependency on the `context` that is notified when the enclosing
-  /// view's focus state changes, and when the application lifecycle becomes
-  /// inactive.
+  /// view's focus state changes, and on desktop/web when the application
+  /// lifecycle becomes inactive.
   ///
   /// Returns null when there is no enclosing [View] that reports focus (for
-  /// example under a bare [RawView]).
+  /// example under a bare [RawView]), or when a [LookupBoundary] hides the
+  /// ancestor [View].
   ///
   /// See also:
   ///
   ///  * [View.hasFocusOf], which defaults to true when focus cannot be
   ///    determined.
   static bool? maybeHasFocusOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_ViewFocusScope>()?.hasFocus;
+    return LookupBoundary.dependOnInheritedWidgetOfExactType<_ViewFocusScope>(context)?.hasFocus;
   }
 
   /// Returns the [FlutterView] that the provided `context` will render into.
@@ -293,27 +297,45 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
   bool _viewHasFocus = false;
   // Assumed focused until the first [ViewFocusEvent] so descendants that read
   // [View.hasFocusOf] do not briefly treat a newly created view as inactive.
+  // Background windows in multi-view apps may briefly report focused until the
+  // embedder sends a [ViewFocusEvent].
   bool _viewFocusForDependents = true;
-  // Single-window desktop embedders may not dispatch [ViewFocusEvent]s. Treat
-  // a non-resumed app lifecycle as losing window focus so selections can dim.
+  // Single-window desktop/web embedders may not dispatch [ViewFocusEvent]s.
+  // Mirror a subset of [AppLifecycleState] into [View.hasFocusOf] on those
+  // platforms only (see [_mirrorsAppLifecycleInHasFocus]).
   bool _appActive = true;
 
+  // Matches [FocusManager]'s policy: mobile lifecycle transitions are too noisy
+  // (IME, system UI overlays) to treat as window-focus changes.
+  static bool get _mirrorsAppLifecycleInHasFocus {
+    return kIsWeb ||
+        switch (defaultTargetPlatform) {
+          TargetPlatform.android || TargetPlatform.iOS => false,
+          TargetPlatform.fuchsia ||
+          TargetPlatform.linux ||
+          TargetPlatform.macOS ||
+          TargetPlatform.windows => true,
+        };
+  }
+
   static bool _isActiveLifecycle(AppLifecycleState? state) {
+    // [AppLifecycleState.detached] is treated as active so startup does not
+    // briefly report an unfocused view before the first [AppLifecycleState.resumed].
     return switch (state) {
-      null || AppLifecycleState.resumed => true,
-      AppLifecycleState.inactive ||
-      AppLifecycleState.hidden ||
-      AppLifecycleState.paused ||
-      AppLifecycleState.detached => false,
+      null || AppLifecycleState.resumed || AppLifecycleState.detached => true,
+      AppLifecycleState.inactive || AppLifecycleState.hidden || AppLifecycleState.paused => false,
     };
   }
 
-  bool get _hasFocusForDependents => _viewFocusForDependents && _appActive;
+  bool get _hasFocusForDependents =>
+      _viewFocusForDependents && (!_mirrorsAppLifecycleInHasFocus || _appActive);
 
   @override
   void initState() {
     super.initState();
-    _appActive = _isActiveLifecycle(WidgetsBinding.instance.lifecycleState);
+    if (_mirrorsAppLifecycleInHasFocus) {
+      _appActive = _isActiveLifecycle(WidgetsBinding.instance.lifecycleState);
+    }
     WidgetsBinding.instance.addObserver(this);
     _scopeNode.addListener(_scopeFocusChangeListener);
   }
@@ -350,6 +372,9 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_mirrorsAppLifecycleInHasFocus) {
+      return;
+    }
     final bool nextAppActive = _isActiveLifecycle(state);
     if (_appActive == nextAppActive) {
       return;

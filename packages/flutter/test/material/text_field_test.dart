@@ -6521,7 +6521,7 @@ void main() {
     expect(renderEditable.selectionColor, selectionColor);
   });
 
-  testWidgets('Text field greys selection when the app becomes inactive', (
+  testWidgets('Text field greys selection when the app becomes inactive on desktop', (
     WidgetTester tester,
   ) async {
     // Standard single-window desktop embedders may not dispatch ViewFocusEvents.
@@ -6563,6 +6563,68 @@ void main() {
 
     expect(View.hasFocusOf(editableText.context), isTrue);
     expect(editableText.widget.selectionColor, selectionColor);
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Only the last focused TextField greys when the view loses focus', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103446.
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    final TextEditingController controller1 = _textEditingController();
+    final TextEditingController controller2 = _textEditingController();
+    const Color selectionColor = Colors.orange;
+
+    await tester.pumpWidget(
+      overlay(
+        child: DefaultSelectionStyle(
+          selectionColor: selectionColor,
+          child: Column(
+            children: <Widget>[
+              TextField(key: key1, controller: controller1),
+              TextField(key: key2, controller: controller2),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key1));
+    await tester.enterText(find.byKey(key1), 'abcd');
+    controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    await tester.tap(find.byKey(key2));
+    await tester.enterText(find.byKey(key2), 'efgh');
+    controller2.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    // Both controllers retain selections; only field 2 is focused.
+    expect(controller1.selection.isCollapsed, isFalse);
+    expect(controller2.selection.isCollapsed, isFalse);
+
+    final EditableTextState state1 = tester.state<EditableTextState>(
+      find.byType(EditableText).first,
+    );
+    final EditableTextState state2 = tester.state<EditableTextState>(
+      find.byType(EditableText).last,
+    );
+    expect(state1.widget.selectionColor, null);
+    expect(state2.widget.selectionColor, selectionColor);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ui.ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ui.ViewFocusState.unfocused,
+        direction: ui.ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    final Color inactiveSelectionColor = Theme.of(state2.context).colorScheme.onSurface
+        .withValues(alpha: 0.15);
+    expect(state1.widget.selectionColor, null);
+    expect(state2.widget.selectionColor, inactiveSelectionColor);
   });
 
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
