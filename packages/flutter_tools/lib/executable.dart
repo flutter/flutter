@@ -183,24 +183,15 @@ Future<void> main(List<String> args) async {
 /// [ArgResults.rest]. `help` is the exception, since the command runner
 /// registers it on the parser itself and so reports it as a parsed command.
 @visibleForTesting
-String? findCommandName(List<String> args, {ToolContext? toolContext}) {
+String? findCommandName(List<String> args) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
-        .parse(args);
+    results = FlutterCommandRunner.createGlobalArgParser().parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
   }
   return results.command?.name ?? results.rest.firstOrNull;
-}
-
-class _FallbackToolContext implements ToolContext {
-  @override
-  final OutputPreferences outputPreferences = OutputPreferences();
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 List<FlutterCommand> generateCommands({
