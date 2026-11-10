@@ -172,6 +172,7 @@ DurationsByGroup reconcile(
   };
 }
 
+/// Reads [file] written by [writeDurations]. Empty if [file] is missing.
 DurationsByGroup readDurations(File file) {
   if (!file.existsSync()) {
     return const <String, DurationsByFile>{};
@@ -194,9 +195,11 @@ void writeDurations(File file, DurationsByGroup durations) {
       },
   };
   file.writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(sorted)}\n');
-  stderr.writeln('Wrote ${file.path} (${sorted.values.first.length} files)');
+  final int files = sorted.values.fold(0, (int sum, DurationsByFile group) => sum + group.length);
+  stderr.writeln('Wrote ${file.path} ($files files)');
 }
 
+/// Upper median of [values], or 0 if empty.
 int median(List<int> values) {
   if (values.isEmpty) {
     return 0;
