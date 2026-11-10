@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:extension_discovery/extension_discovery.dart' as ext_discovery;
-import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:yaml/yaml.dart';
@@ -13,52 +11,79 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../dart/package_map.dart';
 
-typedef _RawExtension = ({String package, Uri rootUri, Uri packageUri, Object? config});
-
-/// Metadata for a project-scoped tool extension discovered via
-/// the project's `.dart_tool/package_config.json` and
-/// tool extensions' `extension/flutter_tools/config.yaml`.
+/// Metadata for a project-scoped tool extension discovered via the project's
+/// `.dart_tool/package_config.json` and the extension package's
+/// `extension/flutter_tools/extension.dart` entrypoint.
 @immutable
 final class DiscoveredProjectExtension {
   const DiscoveredProjectExtension({
-    required this.config,
+    required this.entrypointUri,
     required this.name,
     required this.packageConfigUri,
     required this.packageUri,
     required this.rootUri,
-    required this.workspaceRootPath,
+    required this.workspaceRootUri,
   });
+
+  /// Absolute file URI of the extension's isolate entrypoint script
+  /// (`<rootUri>/extension/flutter_tools/extension.dart`).
+  final Uri entrypointUri;
 
   /// The Dart package name of the extension.
   final String name;
 
-  /// Absolute directory URI of the extension package root.
-  final Uri rootUri;
+  /// Absolute file URI of the `.dart_tool/package_config.json` used to resolve the extension.
+  final Uri packageConfigUri;
 
   /// Absolute directory URI of the extension package's `lib/` directory.
   final Uri packageUri;
 
-  /// Absolute file URI of the `.dart_tool/package_config.json` used to resolve the extension.
-  final Uri packageConfigUri;
+  /// Absolute directory URI of the extension package root.
+  final Uri rootUri;
 
-  /// File system path of the workspace or project root containing `.dart_tool/package_config.json`.
-  final String workspaceRootPath;
+  /// Absolute directory URI of the workspace or project root containing
+  /// `.dart_tool/package_config.json`.
+  final Uri workspaceRootUri;
 
-  /// Parsed static metadata from the extension's `extension/flutter_tools/config.yaml`.
-  final ExtensionPackageConfig config;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DiscoveredProjectExtension &&
+          other.entrypointUri == entrypointUri &&
+          other.name == name &&
+          other.packageConfigUri == packageConfigUri &&
+          other.packageUri == packageUri &&
+          other.rootUri == rootUri &&
+          other.workspaceRootUri == workspaceRootUri;
 
-  /// Absolute file URI of the extension's isolate entrypoint script.
-  Uri get entrypointUri => rootUri.resolve(config.entrypoint);
+  @override
+  int get hashCode =>
+      Object.hash(entrypointUri, name, packageConfigUri, packageUri, rootUri, workspaceRootUri);
+
+  @override
+  String toString() =>
+      'DiscoveredProjectExtension('
+      'name: $name, '
+      'rootUri: $rootUri, '
+      'packageUri: $packageUri, '
+      'entrypointUri: $entrypointUri, '
+      'packageConfigUri: $packageConfigUri, '
+      'workspaceRootUri: $workspaceRootUri'
+      ')';
 }
 
 /// Discovers Flutter Tool Extensions declared as direct dependencies of the
-/// active project or Pub workspace using `package:extension_discovery`.
+/// active project or Pub workspace.
 class ProjectExtensionFinder {
   ProjectExtensionFinder({required this._fileSystem, required this._logger});
 
-  /// Target package name passed to `findExtensions`.
+  /// Target subdirectory name under `extension/` for Flutter tool extensions.
   static const String kTargetPackageName = 'flutter_tools';
 
+  /// Conventional entrypoint filename under `extension/flutter_tools/`.
+  static const String kEntrypointFileName = 'extension.dart';
+
+  static const String _kExtensionDirectoryName = 'extension';
   static const String _kPubspecFileName = 'pubspec.yaml';
   static const _kDependencyKeys = <String>['dependencies', 'dev_dependencies'];
 
@@ -97,53 +122,75 @@ class ProjectExtensionFinder {
       return const <DiscoveredProjectExtension>[];
     }
 
-    final Uri packageConfigUri = packageConfigFile.absolute.uri;
-    final List<_RawExtension> rawExtensions =
-        await _tryFindWithExtensionDiscovery(packageConfigUri) ??
-        await _readExtensionsFromFileSystem(
-          packageConfigFile: packageConfigFile,
-          directDependencies: directDependencies,
-        );
-    return _filterAndValidateDiscoveredExtensions(
-      rawExtensions: rawExtensions,
-      directDependencies: directDependencies,
-      packageConfigUri: packageConfigUri,
-      workspaceRootPath: workspaceRoot.path,
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packageConfigFile,
+      logger: _logger,
+      throwOnError: false,
     );
-  }
+    final Uri packageConfigUri = packageConfigFile.absolute.uri;
+    final Uri workspaceRootUri = workspaceRoot.absolute.uri;
+    final discovered = <DiscoveredProjectExtension>[];
 
-  Future<List<_RawExtension>?> _tryFindWithExtensionDiscovery(Uri packageConfigUri) async {
-    if (!_isBackedByLocalFileSystem(_fileSystem)) {
-      return null;
-    }
-    try {
-      final List<ext_discovery.Extension> extensions = await ext_discovery.findExtensions(
-        kTargetPackageName,
-        packageConfig: packageConfigUri,
-      );
-      return <_RawExtension>[
-        for (final ext_discovery.Extension ext in extensions)
-          (
-            package: ext.package,
-            rootUri: ext.rootUri,
-            packageUri: ext.rootUri.resolveUri(ext.packageUri),
-            config: ext.config,
-          ),
-      ];
-    } on Exception catch (error) {
-      _logger.printTrace(
-        'ProjectExtensionFinder: findExtensions failed for "$packageConfigUri" ($error); '
-        'falling back to FileSystem scan.',
-      );
-      return null;
-    }
-  }
+    for (final Package pkg in packageConfig.packages) {
+      if (!directDependencies.contains(pkg.name)) {
+        continue;
+      }
 
-  static bool _isBackedByLocalFileSystem(FileSystem fs) => switch (fs) {
-    LocalFileSystem() => true,
-    ErrorHandlingFileSystem(:final FileSystem fileSystem) => _isBackedByLocalFileSystem(fileSystem),
-    _ => false,
-  };
+      final Directory rootDir = _fileSystem.directory(pkg.root);
+      final File entrypointFile = rootDir
+          .childDirectory(_kExtensionDirectoryName)
+          .childDirectory(kTargetPackageName)
+          .childFile(kEntrypointFileName);
+
+      if (!entrypointFile.existsSync()) {
+        final FileSystemEntityType entityType = ErrorHandlingFileSystem.noExitOnFailure(
+          () => _fileSystem.typeSync(entrypointFile.path, followLinks: false),
+        );
+        if (entityType == FileSystemEntityType.link) {
+          _logger.printWarning(
+            'Skipping extension "${pkg.name}": broken symlink at "${entrypointFile.path}".',
+          );
+        }
+        continue;
+      }
+
+      final String resolvedRootPath;
+      final String resolvedEntrypointPath;
+      try {
+        resolvedRootPath = _fileSystem.path.normalize(
+          ErrorHandlingFileSystem.noExitOnFailure(rootDir.resolveSymbolicLinksSync),
+        );
+        resolvedEntrypointPath = _fileSystem.path.normalize(
+          ErrorHandlingFileSystem.noExitOnFailure(entrypointFile.resolveSymbolicLinksSync),
+        );
+      } on FileSystemException catch (error) {
+        _logger.printWarning(
+          'Skipping extension "${pkg.name}": failed to resolve "${entrypointFile.path}" (${error.message}).',
+        );
+        continue;
+      }
+
+      if (!_fileSystem.path.isWithin(resolvedRootPath, resolvedEntrypointPath)) {
+        _logger.printWarning(
+          'Skipping extension "${pkg.name}": entrypoint "${entrypointFile.path}" resolves outside package root "${rootDir.path}".',
+        );
+        continue;
+      }
+
+      discovered.add(
+        DiscoveredProjectExtension(
+          entrypointUri: entrypointFile.absolute.uri,
+          name: pkg.name,
+          packageConfigUri: packageConfigUri,
+          packageUri: _fileSystem.directory(pkg.packageUriRoot).absolute.uri,
+          rootUri: rootDir.absolute.uri,
+          workspaceRootUri: workspaceRootUri,
+        ),
+      );
+    }
+
+    return discovered;
+  }
 
   /// Collects direct `dependencies` and `dev_dependencies` package names from
   /// the active project's `pubspec.yaml` and the workspace root's `pubspec.yaml`.
@@ -183,7 +230,8 @@ class ProjectExtensionFinder {
 
   void _extractPubspecDependencies(File pubspecFile, Set<String> outDependencies) {
     try {
-      final Object? parsed = loadYaml(pubspecFile.readAsStringSync());
+      final String content = ErrorHandlingFileSystem.noExitOnFailure(pubspecFile.readAsStringSync);
+      final Object? parsed = loadYaml(content);
       if (parsed is YamlMap) {
         for (final String key in _kDependencyKeys) {
           final Object? section = parsed[key];
@@ -192,104 +240,10 @@ class ProjectExtensionFinder {
           }
         }
       }
-    } on Exception catch (error) {
+    } on YamlException catch (error) {
       _logger.printTrace('ProjectExtensionFinder: failed to parse "${pubspecFile.path}": $error');
+    } on FileSystemException catch (error) {
+      _logger.printTrace('ProjectExtensionFinder: failed to read "${pubspecFile.path}": $error');
     }
-  }
-
-  Future<List<_RawExtension>> _readExtensionsFromFileSystem({
-    required Set<String> directDependencies,
-    required File packageConfigFile,
-  }) async {
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
-      logger: _logger,
-      throwOnError: false,
-    );
-    final rawExtensions = <_RawExtension>[];
-    for (final Package pkg in packageConfig.packages) {
-      if (!directDependencies.contains(pkg.name)) {
-        continue;
-      }
-      final Directory rootDir = _fileSystem.directory(pkg.root);
-      final File configFile = rootDir
-          .childDirectory('extension')
-          .childDirectory(kTargetPackageName)
-          .childFile('config.yaml');
-      if (!configFile.existsSync()) {
-        continue;
-      }
-      try {
-        rawExtensions.add((
-          package: pkg.name,
-          rootUri: rootDir.absolute.uri,
-          packageUri: _fileSystem.directory(pkg.packageUriRoot).absolute.uri,
-          config: loadYaml(configFile.readAsStringSync()),
-        ));
-      } on Exception catch (error) {
-        _logger.printWarning(
-          'Skipping extension "${pkg.name}": malformed extension/flutter_tools/config.yaml ($error).',
-        );
-      }
-    }
-    return rawExtensions;
-  }
-
-  List<DiscoveredProjectExtension> _filterAndValidateDiscoveredExtensions({
-    required Set<String> directDependencies,
-    required Uri packageConfigUri,
-    required List<_RawExtension> rawExtensions,
-    required String workspaceRootPath,
-  }) {
-    final discovered = <DiscoveredProjectExtension>[];
-    final seenNames = <String>{};
-
-    for (final (:String package, :Uri rootUri, :Uri packageUri, :Object? config) in rawExtensions) {
-      if (!directDependencies.contains(package)) {
-        _logger.printTrace(
-          'ProjectExtensionFinder: ignoring transitive extension package "$package".',
-        );
-        continue;
-      }
-      if (seenNames.contains(package)) {
-        continue;
-      }
-      if (config is! Map<Object?, Object?>) {
-        _logger.printWarning(
-          'Skipping extension "$package": extension/flutter_tools/config.yaml must be a YAML map.',
-        );
-        continue;
-      }
-      try {
-        final stringKeyedConfig = <String, Object?>{};
-        for (final MapEntry(:Object? key, :Object? value) in config.entries) {
-          if (key is! String) {
-            throw const FormatException('config.yaml keys must be strings.');
-          }
-          stringKeyedConfig[key] = value;
-        }
-        final parsedConfig = ExtensionPackageConfig.fromMap(
-          stringKeyedConfig,
-          packageName: package,
-        );
-        seenNames.add(package);
-        discovered.add(
-          DiscoveredProjectExtension(
-            name: package,
-            rootUri: rootUri,
-            packageUri: packageUri,
-            packageConfigUri: packageConfigUri,
-            workspaceRootPath: workspaceRootPath,
-            config: parsedConfig,
-          ),
-        );
-      } on FormatException catch (error) {
-        _logger.printWarning(
-          'Skipping extension "$package": invalid extension/flutter_tools/config.yaml (${error.message}).',
-        );
-      }
-    }
-
-    return discovered;
   }
 }

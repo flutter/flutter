@@ -9,6 +9,7 @@ import 'dart:isolate';
 import 'package:dart_data_home/dart_data_home.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -24,6 +25,8 @@ import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+
+typedef _TestLockPackage = ({String? resolvedRef, String source, String version});
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[]));
@@ -136,29 +139,43 @@ MemoryFileSystem _hostStyleMemoryFs() => MemoryFileSystem.test(
 
 void _writeExtensionPackage(
   Directory extDir, {
-  required String name,
-  String? configYaml,
   String entrypointBody = 'void main(List<String> args, Object? message) {}',
+  String? name,
 }) {
-  extDir.childDirectory('extension').childDirectory('flutter_tools').childFile('config.yaml')
-    ..createSync(recursive: true)
-    ..writeAsStringSync(
-      configYaml ??
-          '''
-name: $name
-services:
-  - diagnostics
-''',
-    );
-  extDir.childDirectory('bin').childFile('$name.dart')
+  extDir.childDirectory('extension').childDirectory('flutter_tools').childFile('extension.dart')
     ..createSync(recursive: true)
     ..writeAsStringSync(entrypointBody);
+}
+
+_TestLockPackage _inferLockPackage(FileSystem fs, String name, String rootPath) {
+  final String basename = fs.path.basename(rootPath);
+  final prefix = '$name-';
+  final String version = basename.startsWith(prefix) && basename.length > prefix.length
+      ? basename.substring(prefix.length)
+      : '1.0.0';
+  final String source;
+  if (rootPath.contains('hosted')) {
+    source = 'hosted';
+  } else if (rootPath.contains('git')) {
+    source = 'git';
+  } else if (rootPath.contains('flutter')) {
+    source = 'sdk';
+  } else {
+    source = 'path';
+  }
+  return (
+    resolvedRef: source == 'git' ? 'deadbeef00000000' : null,
+    source: source,
+    version: version,
+  );
 }
 
 File _writePackageConfig(
   Directory rootDir, [
   Map<String, String> packageRoots = const <String, String>{},
   Map<String, Object?> extraData = const <String, Object?>{},
+  Map<String, _TestLockPackage>? lockPackages,
+  bool writePubspecLock = true,
 ]) {
   final FileSystem fs = rootDir.fileSystem;
   final Directory dartToolDir = rootDir.childDirectory('.dart_tool')..createSync(recursive: true);
@@ -201,6 +218,24 @@ File _writePackageConfig(
           ],
         }),
       );
+
+  if (writePubspecLock) {
+    final lockBuffer = StringBuffer('packages:\n');
+    for (final MapEntry(:String key, :String value) in packageRoots.entries) {
+      final _TestLockPackage lockInfo = lockPackages?[key] ?? _inferLockPackage(fs, key, value);
+      lockBuffer
+        ..writeln('  $key:')
+        ..writeln('    dependency: transitive')
+        ..write(
+          lockInfo.resolvedRef != null
+              ? '    description:\n      resolved-ref: "${lockInfo.resolvedRef}"\n'
+              : '    description: $key\n',
+        )
+        ..writeln('    source: ${lockInfo.source}')
+        ..writeln('    version: "${lockInfo.version}"');
+    }
+    rootDir.childFile('pubspec.lock').writeAsStringSync(lockBuffer.toString());
+  }
   return packageConfigFile;
 }
 
@@ -215,14 +250,18 @@ DiscoveredProjectExtension _discoveredExtension(
   final String resolvedWorkspaceRoot =
       workspaceRootPath ?? fs.path.join(fsRoot, 'workspace', 'app');
   return DiscoveredProjectExtension(
+    entrypointUri: dir
+        .childDirectory('extension')
+        .childDirectory('flutter_tools')
+        .childFile('extension.dart')
+        .uri,
     name: name,
-    rootUri: dir.uri,
-    packageUri: dir.childDirectory('lib').uri,
     packageConfigUri: fs
         .file(fs.path.join(resolvedWorkspaceRoot, '.dart_tool', 'package_config.json'))
         .uri,
-    workspaceRootPath: resolvedWorkspaceRoot,
-    config: ExtensionPackageConfig(name: name, services: const <String>['diagnostics']),
+    packageUri: dir.childDirectory('lib').uri,
+    rootUri: dir.uri,
+    workspaceRootUri: fs.directory(resolvedWorkspaceRoot).uri,
   );
 }
 
@@ -762,19 +801,7 @@ dev_dependencies:
   my_ext:
     path: ../my_ext
 ''');
-        _writeExtensionPackage(
-          fs.directory('/workspace/my_ext'),
-          name: 'my_ext',
-          configYaml: '''
-name: my_ext
-host_platforms:
-  - linux
-services:
-  - build
-build_targets:
-  - custom-linux
-''',
-        );
+        _writeExtensionPackage(fs.directory('/workspace/my_ext'), name: 'my_ext');
 
         final finder = ProjectExtensionFinder(fileSystem: fs, logger: BufferLogger.test());
         expect(await finder.findProjectExtensions(startDirectory: projectDir), isEmpty);
@@ -788,99 +815,101 @@ build_targets:
           startDirectory: projectDir,
         );
         expect(afterPubGet, hasLength(1));
-        expect(afterPubGet.single.name, 'my_ext');
-        expect(afterPubGet.single.config.services, const <String>{'build'});
-        expect(afterPubGet.single.config.buildTargets, const <String>{'custom-linux'});
-      },
-    );
-
-    testWithoutContext(
-      'filters out transitive extensions not listed in direct dependencies or dev_dependencies',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
-name: app
-dependencies:
-  direct_ext: ^1.0.0
-''');
-        _writeExtensionPackage(fs.directory('/workspace/direct_ext'), name: 'direct_ext');
-        _writeExtensionPackage(fs.directory('/workspace/transitive_ext'), name: 'transitive_ext');
-        _writePackageConfig(projectDir, const <String, String>{
-          'app': '../',
-          'direct_ext': '../../direct_ext',
-          'transitive_ext': '../../transitive_ext',
-        });
-
-        final finder = ProjectExtensionFinder(fileSystem: fs, logger: BufferLogger.test());
-        final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
-          startDirectory: projectDir,
+        final DiscoveredProjectExtension ext = afterPubGet.single;
+        expect(ext.name, 'my_ext');
+        expect(
+          ext.entrypointUri,
+          fs.file('/workspace/my_ext/extension/flutter_tools/extension.dart').uri,
         );
-        expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
-          'direct_ext',
-        ]);
+        expect(ext.rootUri, fs.directory('/workspace/my_ext').uri);
+        expect(ext.packageUri, fs.directory('/workspace/my_ext/lib').uri);
+        expect(ext.workspaceRootUri, fs.directory('/workspace/app').uri);
+        expect(ext, _discoveredExtension(fs));
+        expect(ext.hashCode, _discoveredExtension(fs).hashCode);
+        expect(
+          ext.toString(),
+          allOf(
+            contains('name: my_ext'),
+            contains('rootUri: file:///workspace/my_ext/'),
+            contains('packageUri: file:///workspace/my_ext/lib/'),
+            contains(
+              'entrypointUri: file:///workspace/my_ext/extension/flutter_tools/extension.dart',
+            ),
+            contains('packageConfigUri: file:///workspace/app/.dart_tool/package_config.json'),
+            contains('workspaceRootUri: file:///workspace/app/'),
+          ),
+        );
       },
     );
 
-    testWithoutContext('logs warning and skips extension when config.yaml has non-string keys or invalid field types', () async {
-      final fs = MemoryFileSystem.test();
+    testWithoutContext('filters out transitive extensions without stating them and ignores packages without extension/flutter_tools/extension.dart', () async {
+      var transitiveStatted = false;
+      final fs = MemoryFileSystem.test(
+        opHandle: (String context, FileSystemOp operation) {
+          if (context.contains('transitive_ext/extension') && operation == FileSystemOp.exists) {
+            transitiveStatted = true;
+          }
+        },
+      );
       final logger = BufferLogger.test();
       final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
       projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 dependencies:
-  non_string_key_ext: ^1.0.0
-  invalid_type_ext: ^1.0.0
-  valid_ext: ^1.0.0
+  direct_ext: ^1.0.0
+  regular_pkg: ^1.0.0
 ''');
-      _writeExtensionPackage(
-        fs.directory('/workspace/non_string_key_ext'),
-        name: 'non_string_key_ext',
-        configYaml: '''
-name: non_string_key_ext
-123: invalid_key
-services:
-  - diagnostics
-''',
-      );
-      _writeExtensionPackage(
-        fs.directory('/workspace/invalid_type_ext'),
-        name: 'invalid_type_ext',
-        configYaml: '''
-name: invalid_type_ext
-services: 42
-''',
-      );
-      _writeExtensionPackage(fs.directory('/workspace/valid_ext'), name: 'valid_ext');
+      _writeExtensionPackage(fs.directory('/workspace/direct_ext'), name: 'direct_ext');
+      _writeExtensionPackage(fs.directory('/workspace/transitive_ext'), name: 'transitive_ext');
+      fs.directory('/workspace/regular_pkg/lib').createSync(recursive: true);
       _writePackageConfig(projectDir, const <String, String>{
         'app': '../',
-        'non_string_key_ext': '../../non_string_key_ext',
-        'invalid_type_ext': '../../invalid_type_ext',
-        'valid_ext': '../../valid_ext',
+        'direct_ext': '../../direct_ext',
+        'regular_pkg': '../../regular_pkg',
+        'transitive_ext': '../../transitive_ext',
       });
 
       final finder = ProjectExtensionFinder(fileSystem: fs, logger: logger);
       final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
         startDirectory: projectDir,
       );
-      expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>['valid_ext']);
-      expect(
-        logger.warningText,
-        contains(
-          'Skipping extension "non_string_key_ext": invalid extension/flutter_tools/config.yaml '
-          '(config.yaml keys must be strings.).',
-        ),
+      expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
+        'direct_ext',
+      ]);
+      expect(transitiveStatted, isFalse);
+      expect(logger.warningText, isEmpty);
+    });
+
+    testWithoutContext('handles malformed or unreadable pubspec.yaml without throwing ToolExit under ErrorHandlingFileSystem', () async {
+      var failRead = false;
+      final delegateFs = MemoryFileSystem.test(
+        opHandle: (String context, FileSystemOp operation) {
+          if (failRead && context.endsWith('pubspec.yaml') && operation == FileSystemOp.read) {
+            throw const FileSystemException(
+              'Permission denied',
+              '/workspace/app/pubspec.yaml',
+              OSError('Permission denied', 13),
+            );
+          }
+        },
       );
-      expect(
-        logger.warningText,
-        contains(
-          'Skipping extension "invalid_type_ext": invalid extension/flutter_tools/config.yaml',
-        ),
-      );
+      final fs = ErrorHandlingFileSystem(delegate: delegateFs, platform: FakePlatform());
+      final logger = BufferLogger.test();
+      final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('dependencies: [unclosed');
+      _writePackageConfig(projectDir, const <String, String>{'app': '../'});
+
+      final finder = ProjectExtensionFinder(fileSystem: fs, logger: logger);
+      expect(await finder.findProjectExtensions(startDirectory: projectDir), isEmpty);
+      expect(logger.traceText, contains('failed to parse "/workspace/app/pubspec.yaml"'));
+
+      failRead = true;
+      expect(await finder.findProjectExtensions(startDirectory: projectDir), isEmpty);
+      expect(logger.traceText, contains('failed to read "/workspace/app/pubspec.yaml"'));
     });
 
     testWithoutContext(
-      'includes direct dependencies from Pub workspace root pubspec.yaml',
+      'unions direct dependencies from Pub workspace root and member pubspec.yaml',
       () async {
         final fs = MemoryFileSystem.test();
         final Directory workspaceRoot = fs.directory('/workspace')..createSync(recursive: true);
@@ -897,20 +926,21 @@ dev_dependencies:
         appDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 resolution: workspace
+dependencies:
+  member_ext:
+    path: ../member_ext
 ''');
         _writeExtensionPackage(
           workspaceRoot.childDirectory('packages').childDirectory('workspace_ext'),
           name: 'workspace_ext',
-          configYaml: '''
-name: workspace_ext
-target_platforms:
-  - custom_linux
-services:
-  - template
-''',
+        );
+        _writeExtensionPackage(
+          workspaceRoot.childDirectory('packages').childDirectory('member_ext'),
+          name: 'member_ext',
         );
         _writePackageConfig(workspaceRoot, const <String, String>{
           'app': '../packages/app',
+          'member_ext': '../packages/member_ext',
           'workspace_ext': '../packages/workspace_ext',
         });
 
@@ -918,53 +948,132 @@ services:
         final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
           startDirectory: appDir,
         );
-        expect(discovered, hasLength(1));
-        expect(discovered.single.name, 'workspace_ext');
-        expect(discovered.single.config.targetPlatforms, const <String>{'custom_linux'});
+        expect(
+          discovered.map((DiscoveredProjectExtension e) => e.name),
+          unorderedEquals(const <String>['member_ext', 'workspace_ext']),
+        );
+        for (final ext in discovered) {
+          expect(ext.workspaceRootUri, workspaceRoot.uri);
+        }
       },
     );
 
-    testWithoutContext(
-      'discovers extensions via package:extension_discovery on LocalFileSystem',
-      () async {
-        final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
-        addTearDown(localFs.dispose);
-        final Directory tempDir = localFs.systemTempDirectory.createTempSync('ext_finder_local.');
-        addTearDown(() {
-          if (tempDir.existsSync()) {
-            tempDir.deleteSync(recursive: true);
-          }
-        });
+    testWithoutContext('discovers extensions and enforces symlink containment under ErrorHandlingFileSystem on LocalFileSystem', () async {
+      final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
+      addTearDown(localFs.dispose);
+      final fs = ErrorHandlingFileSystem(delegate: localFs, platform: FakePlatform());
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('ext_finder_local.');
+      addTearDown(() {
+        if (tempDir.existsSync()) {
+          tempDir.deleteSync(recursive: true);
+        }
+      });
 
-        final logger = BufferLogger.test();
-        final Directory projectDir = tempDir.childDirectory('app')..createSync(recursive: true);
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+      final logger = BufferLogger.test();
+      final Directory projectDir = tempDir.childDirectory('app')..createSync(recursive: true);
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 dependencies:
-  local_ext:
-    path: ../local_ext
+  valid_ext:
+    path: ../valid_ext
+  internal_symlink_ext:
+    path: ../internal_symlink_ext
+  escaped_file_ext:
+    path: ../escaped_file_ext
+  escaped_dir_ext:
+    path: ../escaped_dir_ext
+  broken_symlink_ext:
+    path: ../broken_symlink_ext
 ''');
-        _writeExtensionPackage(tempDir.childDirectory('local_ext'), name: 'local_ext');
-        _writeExtensionPackage(tempDir.childDirectory('transitive_ext'), name: 'transitive_ext');
-        _writePackageConfig(projectDir, const <String, String>{
-          'app': '../',
-          'local_ext': '../../local_ext',
-          'transitive_ext': '../../transitive_ext',
-        });
 
-        final finder = ProjectExtensionFinder(fileSystem: localFs, logger: logger);
-        final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
-          startDirectory: projectDir,
-        );
-        expect(discovered, hasLength(1));
-        expect(discovered.single.name, 'local_ext');
-        expect(discovered.single.config.services, const <String>{'diagnostics'});
-        expect(
-          logger.traceText,
-          contains('ignoring transitive extension package "transitive_ext"'),
-        );
-      },
-    );
+      // 1. Standard valid extension.
+      _writeExtensionPackage(tempDir.childDirectory('valid_ext'), name: 'valid_ext');
+
+      // 2. Symlink resolving inside <pkgRoot>.
+      final Directory internalSymlinkExtDir = tempDir.childDirectory('internal_symlink_ext');
+      final File internalTarget =
+          internalSymlinkExtDir.childDirectory('src').childFile('real_entrypoint.dart')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('void main(List<String> args, Object? message) {}');
+      internalSymlinkExtDir
+          .childDirectory('extension')
+          .childDirectory('flutter_tools')
+          .childLink('extension.dart')
+          .createSync(internalTarget.path, recursive: true);
+
+      // 3. File symlink resolving outside <pkgRoot>.
+      final File outsideFile = tempDir.childDirectory('outside').childFile('escaped.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main(List<String> args, Object? message) {}');
+      tempDir
+          .childDirectory('escaped_file_ext')
+          .childDirectory('extension')
+          .childDirectory('flutter_tools')
+          .childLink('extension.dart')
+          .createSync(outsideFile.path, recursive: true);
+
+      // 4. Directory symlink resolving outside <pkgRoot>.
+      final Directory outsideExtDir =
+          tempDir.childDirectory('outside_dir').childDirectory('flutter_tools')
+            ..createSync(recursive: true);
+      outsideExtDir
+          .childFile('extension.dart')
+          .writeAsStringSync('void main(List<String> args, Object? message) {}');
+      tempDir
+          .childDirectory('escaped_dir_ext')
+          .childLink('extension')
+          .createSync(outsideExtDir.parent.path, recursive: true);
+
+      // 5. Broken symlink at extension/flutter_tools/extension.dart.
+      tempDir
+          .childDirectory('broken_symlink_ext')
+          .childDirectory('extension')
+          .childDirectory('flutter_tools')
+          .childLink('extension.dart')
+          .createSync(tempDir.childFile('nonexistent_target.dart').path, recursive: true);
+
+      // 6. Transitive extension package.
+      _writeExtensionPackage(tempDir.childDirectory('transitive_ext'), name: 'transitive_ext');
+
+      _writePackageConfig(projectDir, const <String, String>{
+        'app': '../',
+        'valid_ext': '../../valid_ext',
+        'internal_symlink_ext': '../../internal_symlink_ext',
+        'escaped_file_ext': '../../escaped_file_ext',
+        'escaped_dir_ext': '../../escaped_dir_ext',
+        'broken_symlink_ext': '../../broken_symlink_ext',
+        'transitive_ext': '../../transitive_ext',
+      });
+
+      final finder = ProjectExtensionFinder(fileSystem: fs, logger: logger);
+      final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
+        startDirectory: projectDir,
+      );
+      expect(
+        discovered.map((DiscoveredProjectExtension e) => e.name),
+        unorderedEquals(const <String>['valid_ext', 'internal_symlink_ext']),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Skipping extension "escaped_file_ext": entrypoint '
+          '"${tempDir.childDirectory('escaped_file_ext').childDirectory('extension').childDirectory('flutter_tools').childFile('extension.dart').path}" '
+          'resolves outside package root',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Skipping extension "escaped_dir_ext": entrypoint '
+          '"${tempDir.childDirectory('escaped_dir_ext').childDirectory('extension').childDirectory('flutter_tools').childFile('extension.dart').path}" '
+          'resolves outside package root',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains('Skipping extension "broken_symlink_ext": broken symlink at'),
+      );
+    });
   });
 
   group('ExtensionKernelCompiler', () {
@@ -978,8 +1087,12 @@ dependencies:
 
       final Directory extDir = fs.directory('/workspace/my_ext');
       _writeExtensionPackage(extDir, name: 'my_ext');
-      final File entrypointFile = extDir.childDirectory('bin').childFile('my_ext.dart')
-        ..setLastModifiedSync(DateTime.utc(2026));
+      final File entrypointFile =
+          extDir
+              .childDirectory('extension')
+              .childDirectory('flutter_tools')
+              .childFile('extension.dart')
+            ..setLastModifiedSync(DateTime.utc(2026));
       final File helperFile = extDir.childDirectory('lib').childFile('helper.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('const int version = 1;')
@@ -1036,75 +1149,75 @@ dependencies:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('isPubCacheExtension resolves default pub-cache directory and does not misclassify local paths', () {
-      final posixFs = MemoryFileSystem.test();
-      const posixPubCacheExtRoot = '/Users/user/.pub-cache/hosted/pub.dev/my_ext-1.0.0';
-      _writePackageConfig(posixFs.directory('/workspace/app'), const <String, String>{
-        'app': '../',
-        'my_ext': posixPubCacheExtRoot,
-      });
-      final ExtensionKernelCompiler posixCompiler = _createCompiler(
-        posixFs,
-        environment: const <String, String>{'HOME': '/Users/user'},
-      );
+    testWithoutContext(
+      'isSharedCacheExtension uses pubspec.lock sources and rejects in-workspace paths',
+      () {
+        final posixFs = MemoryFileSystem.test();
+        const posixHostedExtRoot = '/Users/user/.pub-cache/hosted/pub.dev/my_ext-1.0.0';
+        _writePackageConfig(posixFs.directory('/workspace/app'), const <String, String>{
+          'app': '../',
+          'my_ext': posixHostedExtRoot,
+        });
+        final ExtensionKernelCompiler posixCompiler = _createCompiler(
+          posixFs,
+          environment: const <String, String>{'HOME': '/Users/user'},
+        );
 
-      expect(
-        posixCompiler.isPubCacheExtension(
-          _discoveredExtension(posixFs, rootPath: posixPubCacheExtRoot),
-        ),
-        isTrue,
-      );
-      for (final localPath in const <String>[
-        '/Users/user/Projects/.pub-cache-test/my_ext',
-        '/Users/user/Projects/Pub/Cache/my_ext',
-        '/Users/user/Projects/.pub-cache/my_ext',
-      ]) {
         expect(
-          posixCompiler.isPubCacheExtension(_discoveredExtension(posixFs, rootPath: localPath)),
+          posixCompiler.isSharedCacheExtension(
+            _discoveredExtension(posixFs, rootPath: posixHostedExtRoot),
+          ),
+          isTrue,
+        );
+        // In-workspace root is rejected even if pubspec.lock claims hosted.
+        expect(
+          posixCompiler.isSharedCacheExtension(
+            _discoveredExtension(posixFs, rootPath: '/workspace/app/packages/my_ext'),
+          ),
           isFalse,
         );
-      }
 
-      final windowsFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      const windowsPubCacheExtRoot =
-          r'C:\Users\user\AppData\Local\Pub\Cache\hosted\pub.dev\my_ext-1.0.0';
-      _writePackageConfig(windowsFs.directory(r'C:\workspace\app'), const <String, String>{
-        'app': '../',
-        'my_ext': windowsPubCacheExtRoot,
-      });
-      final ExtensionKernelCompiler windowsCompiler = _createCompiler(
-        windowsFs,
-        operatingSystem: 'windows',
-        flutterRootPath: r'C:\flutter',
-        environment: const <String, String>{'LOCALAPPDATA': r'C:\Users\user\AppData\Local'},
-      );
-      expect(
-        windowsCompiler.isPubCacheExtension(
-          _discoveredExtension(
-            windowsFs,
-            rootPath: windowsPubCacheExtRoot,
-            workspaceRootPath: r'C:\workspace\app',
+        final windowsFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        const windowsHostedExtRoot =
+            r'C:\Users\user\AppData\Local\Pub\Cache\hosted\pub.dev\my_ext-1.0.0';
+        _writePackageConfig(windowsFs.directory(r'C:\workspace\app'), const <String, String>{
+          'app': '../',
+          'my_ext': windowsHostedExtRoot,
+        });
+        final ExtensionKernelCompiler windowsCompiler = _createCompiler(
+          windowsFs,
+          operatingSystem: 'windows',
+          flutterRootPath: r'C:\flutter',
+          environment: const <String, String>{'LOCALAPPDATA': r'C:\Users\user\AppData\Local'},
+        );
+        expect(
+          windowsCompiler.isSharedCacheExtension(
+            _discoveredExtension(
+              windowsFs,
+              rootPath: windowsHostedExtRoot,
+              workspaceRootPath: r'C:\workspace\app',
+            ),
           ),
-        ),
-        isTrue,
-      );
-      final DiscoveredProjectExtension windowsLocalExt = _discoveredExtension(
-        windowsFs,
-        rootPath: r'C:\Users\user\Projects\Pub\Cache\my_ext',
-        workspaceRootPath: r'C:\workspace\app',
-      );
-      _writePackageConfig(windowsFs.directory(r'C:\workspace\app'));
-      _writeExtensionPackage(
-        windowsFs.directory(r'C:\Users\user\Projects\Pub\Cache\my_ext'),
-        name: 'my_ext',
-      );
-      expect(windowsCompiler.isPubCacheExtension(windowsLocalExt), isFalse);
-      expect(windowsFs.file(windowsLocalExt.entrypointUri).existsSync(), isTrue);
-      expect(windowsFs.file(windowsLocalExt.packageConfigUri).existsSync(), isTrue);
-    });
+          isTrue,
+        );
+        final DiscoveredProjectExtension windowsLocalExt = _discoveredExtension(
+          windowsFs,
+          rootPath: r'C:\Users\user\Projects\Pub\Cache\my_ext',
+          workspaceRootPath: r'C:\workspace\app',
+        );
+        _writePackageConfig(windowsFs.directory(r'C:\workspace\app'));
+        _writeExtensionPackage(
+          windowsFs.directory(r'C:\Users\user\Projects\Pub\Cache\my_ext'),
+          name: 'my_ext',
+        );
+        expect(windowsCompiler.isSharedCacheExtension(windowsLocalExt), isFalse);
+        expect(windowsFs.file(windowsLocalExt.entrypointUri).existsSync(), isTrue);
+        expect(windowsFs.file(windowsLocalExt.packageConfigUri).existsSync(), isTrue);
+      },
+    );
 
     testWithoutContext(
-      'caches immutable PUB_CACHE extension under DART_DATA_HOME/flutter_tool_extensions/cache',
+      'caches immutable hosted extension under DART_DATA_HOME/flutter_tool_extensions/cache',
       () async {
         final MemoryFileSystem fs = _hostStyleMemoryFs();
         final String root = fs.currentDirectory.path;
@@ -1129,7 +1242,7 @@ dependencies:
         )..setLastModifiedSync(DateTime.utc(2026));
         _writeExtensionPackage(fs.directory(extRootPath), name: 'hosted_ext');
         fs
-            .file(fs.path.join(extRootPath, 'bin', 'hosted_ext.dart'))
+            .file(fs.path.join(extRootPath, 'extension', 'flutter_tools', 'extension.dart'))
             .setLastModifiedSync(DateTime.utc(2026));
 
         final DiscoveredProjectExtension extension = _discoveredExtension(
@@ -1142,11 +1255,7 @@ dependencies:
         final ExtensionKernelCompiler compiler = _createCompiler(
           fs,
           flutterRootPath: flutterRootPath,
-          environment: <String, String>{
-            'HOME': homePath,
-            'PUB_CACHE': pubCachePath,
-            'DART_DATA_HOME': customDataPath,
-          },
+          environment: <String, String>{'HOME': homePath, 'DART_DATA_HOME': customDataPath},
           processManager: processManager,
         );
 
@@ -1154,7 +1263,7 @@ dependencies:
         expect(
           targetDill.path,
           startsWith(
-            fs.path.join(customDataPath, 'flutter_tool_extensions', 'cache', 'hosted_ext-3.13.0-'),
+            fs.path.join(customDataPath, 'flutter_tool_extensions', 'cache', 'hosted_ext-1.2.3-'),
           ),
         );
 
@@ -1188,7 +1297,9 @@ dependencies:
       DiscoveredProjectExtension extensionAt(String version, String workspaceRootPath) {
         final rootPath = '/pub/hosted/pub.dev/hosted_ext-$version';
         _writeExtensionPackage(fs.directory(rootPath), name: 'hosted_ext');
-        fs.file('$rootPath/bin/hosted_ext.dart').setLastModifiedSync(DateTime.utc(2026));
+        fs
+            .file('$rootPath/extension/flutter_tools/extension.dart')
+            .setLastModifiedSync(DateTime.utc(2026));
         _writePackageConfig(fs.directory(workspaceRootPath), <String, String>{
           'app': '../',
           'hosted_ext': rootPath,
@@ -1206,20 +1317,20 @@ dependencies:
       final processManager = FakeProcessManager.empty();
       final ExtensionKernelCompiler compiler = _createCompiler(
         fs,
-        environment: const <String, String>{'PUB_CACHE': '/pub', 'DART_DATA_HOME': '   '},
+        environment: const <String, String>{'DART_DATA_HOME': '   '},
         processManager: processManager,
       );
 
       final File v1Dill = compiler.resolveDillFile(v1);
       final File v2Dill = compiler.resolveDillFile(v2);
-      expect(compiler.isPubCacheExtension(v1), isTrue);
+      expect(compiler.isSharedCacheExtension(v1), isTrue);
       expect(
         v1Dill.path,
-        startsWith('/flutter/bin/cache/flutter_tool_extensions/cache/hosted_ext-3.13.0-0.0.pre-'),
+        startsWith('/flutter/bin/cache/flutter_tool_extensions/cache/hosted_ext-1.0.0-'),
       );
       expect(
         v2Dill.path,
-        startsWith('/flutter/bin/cache/flutter_tool_extensions/cache/hosted_ext-3.13.0-0.0.pre-'),
+        startsWith('/flutter/bin/cache/flutter_tool_extensions/cache/hosted_ext-1.1.0-'),
       );
       expect(v1Dill.path, isNot(v2Dill.path));
 
@@ -1260,7 +1371,7 @@ dependencies:
         final processManager = FakeProcessManager.list(<FakeCommand>[
           _compileKernelCommand(
             fs,
-            entrypointPath: '/workspace/my_ext/bin/my_ext.dart',
+            entrypointPath: '/workspace/my_ext/extension/flutter_tools/extension.dart',
             outputDillPath: expectedDillPath,
             exitCode: 254,
             stderr: 'Compilation error',
@@ -1305,7 +1416,6 @@ dependencies:
         );
 
         final defaultEnvironment = <String, String>{
-          'PUB_CACHE': pubCachePath,
           'HOME': fs.path.join(root, 'home', 'test'),
           'LOCALAPPDATA': fs.path.join(root, 'local_app_data'),
         };
@@ -1320,7 +1430,7 @@ dependencies:
         );
         expect(
           defaultCompiler.resolveDillFile(extension).path,
-          startsWith(fs.path.join(expectedDefaultDataHome, 'cache', 'hosted_ext-')),
+          startsWith(fs.path.join(expectedDefaultDataHome, 'cache', 'hosted_ext-1.0.0-')),
         );
 
         final xdgEnvironment = <String, String>{
@@ -1338,7 +1448,7 @@ dependencies:
         );
         expect(
           xdgCompiler.resolveDillFile(extension).path,
-          startsWith(fs.path.join(expectedXdgDataHome, 'cache', 'hosted_ext-')),
+          startsWith(fs.path.join(expectedXdgDataHome, 'cache', 'hosted_ext-1.0.0-')),
         );
 
         final ExtensionKernelCompiler emptyEnvCompiler = _createCompiler(
@@ -1346,16 +1456,18 @@ dependencies:
           flutterRootPath: flutterRootPath,
           environment: const <String, String>{},
         );
-        expect(emptyEnvCompiler.isPubCacheExtension(extension), isFalse);
+        expect(emptyEnvCompiler.isSharedCacheExtension(extension), isTrue);
         expect(
           emptyEnvCompiler.resolveDillFile(extension).path,
-          fs.path.join(
-            workspaceAppPath,
-            '.dart_tool',
-            'flutter_tools',
-            'extensions',
-            'hosted_ext',
-            'extension.dill',
+          startsWith(
+            fs.path.join(
+              flutterRootPath,
+              'bin',
+              'cache',
+              'flutter_tool_extensions',
+              'cache',
+              'hosted_ext-1.0.0-',
+            ),
           ),
         );
       },
@@ -1367,8 +1479,12 @@ dependencies:
 
       final Directory extDir = fs.directory('/workspace/my_ext');
       _writeExtensionPackage(extDir, name: 'my_ext');
-      final File entrypointFile = extDir.childDirectory('bin').childFile('my_ext.dart')
-        ..setLastModifiedSync(DateTime.utc(2026));
+      final File entrypointFile =
+          extDir
+              .childDirectory('extension')
+              .childDirectory('flutter_tools')
+              .childFile('extension.dart')
+            ..setLastModifiedSync(DateTime.utc(2026));
       final File spacedHelperFile = extDir.childDirectory('lib').childFile('part one.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('const int v = 1;')
@@ -1447,7 +1563,7 @@ dependencies:
 
         final ExtensionKernelCompiler compiler = _createCompiler(
           fs,
-          environment: <String, String>{'PUB_CACHE': pubPath, 'DART_DATA_HOME': dataHomePath},
+          environment: <String, String>{'DART_DATA_HOME': dataHomePath},
         );
 
         expect(compiler.resolveDillFile(extA).path, isNot(compiler.resolveDillFile(extB).path));
@@ -1476,7 +1592,7 @@ dependencies:
 
       _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
       fs
-          .file(fs.path.join(extRoot, 'bin', 'hosted_ext.dart'))
+          .file(fs.path.join(extRoot, 'extension', 'flutter_tools', 'extension.dart'))
           .setLastModifiedSync(DateTime.utc(2026));
 
       final Directory appADir = fs.directory(fs.path.join(root, 'workspace', 'app_a'));
@@ -1539,7 +1655,7 @@ dependencies:
       final processManager = FakeProcessManager.empty();
       final ExtensionKernelCompiler compiler = _createCompiler(
         fs,
-        environment: <String, String>{'PUB_CACHE': pubPath, 'DART_DATA_HOME': dataHomePath},
+        environment: <String, String>{'DART_DATA_HOME': dataHomePath},
         processManager: processManager,
       );
 
@@ -1575,18 +1691,18 @@ dependencies:
         final String dataHomePath = fs.path.join(root, 'data_home');
         final String extRoot = fs.path.join(pubPath, 'hosted', 'pub.dev', 'hosted_ext-1.0.0');
         _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
-        final File entrypointFile = fs.file(fs.path.join(extRoot, 'bin', 'hosted_ext.dart'))
-          ..setLastModifiedSync(DateTime.utc(2026));
+        final File entrypointFile = fs.file(
+          fs.path.join(extRoot, 'extension', 'flutter_tools', 'extension.dart'),
+        )..setLastModifiedSync(DateTime.utc(2026));
         final File helperFile = fs.file(fs.path.join(extRoot, 'lib', 'helper.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('const int v = 1;')
           ..setLastModifiedSync(DateTime.utc(2026));
         final Directory appDir = fs.directory(fs.path.join(root, 'workspace', 'app'));
-        final File configFile = _writePackageConfig(
-          appDir,
-          <String, String>{'app': '../', 'hosted_ext': extRoot},
-          <String, Object?>{'pubCache': fs.directory(pubPath).uri.toString()},
-        )..setLastModifiedSync(DateTime.utc(2026));
+        final File configFile = _writePackageConfig(appDir, <String, String>{
+          'app': '../',
+          'hosted_ext': extRoot,
+        })..setLastModifiedSync(DateTime.utc(2026));
 
         final DiscoveredProjectExtension ext = _discoveredExtension(
           fs,
@@ -1600,7 +1716,7 @@ dependencies:
           environment: <String, String>{'DART_DATA_HOME': dataHomePath},
           processManager: processManager,
         );
-        expect(compiler.isPubCacheExtension(ext), isTrue);
+        expect(compiler.isSharedCacheExtension(ext), isTrue);
         final File sharedDill = compiler.resolveDillFile(ext);
 
         processManager.addCommands(<FakeCommand>[
@@ -1636,72 +1752,59 @@ dependencies:
       },
     );
 
-    testWithoutContext('PUB_CACHE extension with SDK dependency in FLUTTER_ROOT uses shared cache keyed by SDK package root', () {
-      final MemoryFileSystem fs = _hostStyleMemoryFs();
-      final String root = fs.currentDirectory.path;
-      final String pubPath = fs.path.join(root, 'pub');
-      final String dataHomePath = fs.path.join(root, 'data_home');
-      final String flutterAPath = fs.path.join(root, 'flutter_a');
-      final String flutterBPath = fs.path.join(root, 'flutter_b');
-      final String extRoot = fs.path.join(pubPath, 'hosted', 'pub.dev', 'hosted_ext-1.0.0');
-      _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
+    testWithoutContext(
+      'extension with sdk dependency in pubspec.lock falls back to Tier 2 workspace-local cache',
+      () {
+        final MemoryFileSystem fs = _hostStyleMemoryFs();
+        final String root = fs.currentDirectory.path;
+        final String pubPath = fs.path.join(root, 'pub');
+        final String dataHomePath = fs.path.join(root, 'data_home');
+        final String flutterPath = fs.path.join(root, 'flutter');
+        final String extRoot = fs.path.join(pubPath, 'hosted', 'pub.dev', 'hosted_ext-1.0.0');
+        _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
 
-      final Directory appADir = fs.directory(fs.path.join(root, 'workspace', 'app_a'));
-      final Directory appBDir = fs.directory(fs.path.join(root, 'workspace', 'app_b'));
-      _writePackageConfig(appADir, <String, String>{
-        'app_a': '../',
-        'hosted_ext': extRoot,
-        'flutter_tools_extension': fs.path.join(
-          flutterAPath,
-          'packages',
-          'flutter_tools',
-          'packages',
-          'flutter_tools_extension',
-        ),
-      });
-      _writePackageConfig(appBDir, <String, String>{
-        'app_b': '../',
-        'hosted_ext': extRoot,
-        'flutter_tools_extension': fs.path.join(
-          flutterBPath,
-          'packages',
-          'flutter_tools',
-          'packages',
-          'flutter_tools_extension',
-        ),
-      });
+        final Directory appDir = fs.directory(fs.path.join(root, 'workspace', 'app'));
+        _writePackageConfig(appDir, <String, String>{
+          'app': '../',
+          'hosted_ext': extRoot,
+          'flutter_tools_extension': fs.path.join(
+            flutterPath,
+            'packages',
+            'flutter_tools',
+            'packages',
+            'flutter_tools_extension',
+          ),
+        });
 
-      final ExtensionKernelCompiler compilerA = _createCompiler(
-        fs,
-        flutterRootPath: flutterAPath,
-        environment: <String, String>{'PUB_CACHE': pubPath, 'DART_DATA_HOME': dataHomePath},
-      );
-      final ExtensionKernelCompiler compilerB = _createCompiler(
-        fs,
-        flutterRootPath: flutterBPath,
-        environment: <String, String>{'PUB_CACHE': pubPath, 'DART_DATA_HOME': dataHomePath},
-      );
+        final ExtensionKernelCompiler compiler = _createCompiler(
+          fs,
+          flutterRootPath: flutterPath,
+          environment: <String, String>{'DART_DATA_HOME': dataHomePath},
+        );
+        final DiscoveredProjectExtension ext = _discoveredExtension(
+          fs,
+          name: 'hosted_ext',
+          rootPath: extRoot,
+          workspaceRootPath: appDir.path,
+        );
 
-      final DiscoveredProjectExtension extA = _discoveredExtension(
-        fs,
-        name: 'hosted_ext',
-        rootPath: extRoot,
-        workspaceRootPath: appADir.path,
-      );
-      final DiscoveredProjectExtension extB = _discoveredExtension(
-        fs,
-        name: 'hosted_ext',
-        rootPath: extRoot,
-        workspaceRootPath: appBDir.path,
-      );
-
-      expect(compilerA.isPubCacheExtension(extA), isTrue);
-      expect(compilerB.isPubCacheExtension(extB), isTrue);
-      expect(compilerA.resolveDillFile(extA).path, isNot(compilerB.resolveDillFile(extB).path));
-    });
+        expect(compiler.isSharedCacheExtension(ext), isFalse);
+        expect(
+          compiler.resolveDillFile(ext).path,
+          fs.path.join(
+            appDir.path,
+            '.dart_tool',
+            'flutter_tools',
+            'extensions',
+            'hosted_ext',
+            'extension.dill',
+          ),
+        );
+      },
+    );
 
     testWithoutContext(
-      'PUB_CACHE extension with transitive dependency outside PUB_CACHE uses workspace-local cache',
+      'hosted extension with transitive path dependency uses workspace-local cache',
       () {
         final fs = MemoryFileSystem.test();
         const extRoot = '/pub/hosted/pub.dev/hosted_ext-1.0.0';
@@ -1714,7 +1817,7 @@ dependencies:
 
         final ExtensionKernelCompiler compiler = _createCompiler(
           fs,
-          environment: const <String, String>{'PUB_CACHE': '/pub', 'DART_DATA_HOME': '/data_home'},
+          environment: const <String, String>{'DART_DATA_HOME': '/data_home'},
         );
         final DiscoveredProjectExtension extension = _discoveredExtension(
           fs,
@@ -1722,7 +1825,7 @@ dependencies:
           rootPath: extRoot,
         );
 
-        expect(compiler.isPubCacheExtension(extension), isFalse);
+        expect(compiler.isSharedCacheExtension(extension), isFalse);
         expect(
           compiler.resolveDillFile(extension).path,
           '/workspace/app/.dart_tool/flutter_tools/extensions/hosted_ext/extension.dill',
@@ -1731,7 +1834,7 @@ dependencies:
     );
 
     testWithoutContext(
-      'PUB_CACHE extension falls back to workspace-local cache when package_graph.json is missing',
+      'hosted extension falls back to workspace-local cache when package_graph.json is missing',
       () {
         final fs = MemoryFileSystem.test();
         const extRoot = '/pub/hosted/pub.dev/hosted_ext-1.0.0';
@@ -1742,7 +1845,7 @@ dependencies:
 
         final ExtensionKernelCompiler compiler = _createCompiler(
           fs,
-          environment: const <String, String>{'PUB_CACHE': '/pub', 'DART_DATA_HOME': '/data_home'},
+          environment: const <String, String>{'DART_DATA_HOME': '/data_home'},
         );
         final DiscoveredProjectExtension extension = _discoveredExtension(
           fs,
@@ -1750,7 +1853,7 @@ dependencies:
           rootPath: extRoot,
         );
 
-        expect(compiler.isPubCacheExtension(extension), isFalse);
+        expect(compiler.isSharedCacheExtension(extension), isFalse);
         expect(
           compiler.resolveDillFile(extension).path,
           '/workspace/app/.dart_tool/flutter_tools/extensions/hosted_ext/extension.dill',
@@ -1758,33 +1861,36 @@ dependencies:
       },
     );
 
-    testWithoutContext('PUB_CACHE extension falls back to workspace-local cache when package_graph.json is malformed', () {
-      final fs = MemoryFileSystem.test();
-      const extRoot = '/pub/hosted/pub.dev/hosted_ext-1.0.0';
-      _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
-      final Directory appDir = fs.directory('/workspace/app');
-      _writePackageConfig(appDir, const <String, String>{'app': '../', 'hosted_ext': extRoot});
-      appDir
-          .childDirectory('.dart_tool')
-          .childFile('package_graph.json')
-          .writeAsStringSync('{malformed json');
+    testWithoutContext(
+      'hosted extension falls back to workspace-local cache when package_graph.json is malformed',
+      () {
+        final fs = MemoryFileSystem.test();
+        const extRoot = '/pub/hosted/pub.dev/hosted_ext-1.0.0';
+        _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
+        final Directory appDir = fs.directory('/workspace/app');
+        _writePackageConfig(appDir, const <String, String>{'app': '../', 'hosted_ext': extRoot});
+        appDir
+            .childDirectory('.dart_tool')
+            .childFile('package_graph.json')
+            .writeAsStringSync('{malformed json');
 
-      final ExtensionKernelCompiler compiler = _createCompiler(
-        fs,
-        environment: const <String, String>{'PUB_CACHE': '/pub', 'DART_DATA_HOME': '/data_home'},
-      );
-      final DiscoveredProjectExtension extension = _discoveredExtension(
-        fs,
-        name: 'hosted_ext',
-        rootPath: extRoot,
-      );
+        final ExtensionKernelCompiler compiler = _createCompiler(
+          fs,
+          environment: const <String, String>{'DART_DATA_HOME': '/data_home'},
+        );
+        final DiscoveredProjectExtension extension = _discoveredExtension(
+          fs,
+          name: 'hosted_ext',
+          rootPath: extRoot,
+        );
 
-      expect(compiler.isPubCacheExtension(extension), isFalse);
-      expect(
-        compiler.resolveDillFile(extension).path,
-        '/workspace/app/.dart_tool/flutter_tools/extensions/hosted_ext/extension.dill',
-      );
-    });
+        expect(compiler.isSharedCacheExtension(extension), isFalse);
+        expect(
+          compiler.resolveDillFile(extension).path,
+          '/workspace/app/.dart_tool/flutter_tools/extensions/hosted_ext/extension.dill',
+        );
+      },
+    );
 
     testWithoutContext(
       'throws ExtensionCompileException when bin/cache/dart-sdk/revision is missing',
@@ -1842,7 +1948,7 @@ dependencies:
 
       final ExtensionKernelCompiler compiler = _createCompiler(
         fs,
-        environment: <String, String>{'PUB_CACHE': pubPath, 'DART_DATA_HOME': dataHomePath},
+        environment: <String, String>{'DART_DATA_HOME': dataHomePath},
         sdkRevision: null,
       );
 
@@ -1856,7 +1962,9 @@ dependencies:
       final fs = MemoryFileSystem.test();
       _writePackageConfig(fs.directory('/workspace/app')).setLastModifiedSync(DateTime.utc(2026));
       _writeExtensionPackage(fs.directory('/workspace/my_ext'), name: 'my_ext');
-      fs.file('/workspace/my_ext/bin/my_ext.dart').setLastModifiedSync(DateTime.utc(2026));
+      fs
+          .file('/workspace/my_ext/extension/flutter_tools/extension.dart')
+          .setLastModifiedSync(DateTime.utc(2026));
 
       final DiscoveredProjectExtension localExt = _discoveredExtension(fs);
       final File revisionFile = fs.file('/flutter/bin/cache/dart-sdk/revision')
@@ -1869,14 +1977,14 @@ dependencies:
       final processManager = FakeProcessManager.list(<FakeCommand>[
         _compileKernelCommand(
           fs,
-          entrypointPath: '/workspace/my_ext/bin/my_ext.dart',
+          entrypointPath: '/workspace/my_ext/extension/flutter_tools/extension.dart',
           outputDillPath: localDillPath,
           bytes: const <int>[1],
           modified: DateTime.utc(2026, 1, 1, 5),
         ),
         _compileKernelCommand(
           fs,
-          entrypointPath: '/workspace/my_ext/bin/my_ext.dart',
+          entrypointPath: '/workspace/my_ext/extension/flutter_tools/extension.dart',
           outputDillPath: localDillPath,
           bytes: const <int>[2],
           modified: DateTime.utc(2026, 1, 1, 6),
@@ -1898,7 +2006,9 @@ dependencies:
         ..setLastModifiedSync(DateTime.utc(2026));
       final Uri recompiled = await compiler.compile(localExt);
       expect(fs.file(recompiled).readAsBytesSync(), const <int>[2]);
-      expect(fs.file('$localDillPath.revision').readAsStringSync(), '9876543210fedcba');
+      final stampJson =
+          jsonDecode(fs.file('$localDillPath.stamp').readAsStringSync()) as Map<String, Object?>;
+      expect(stampJson['sdkRevision'], '9876543210fedcba');
       // Subsequent compile reuses the updated kernel.
       expect(fs.file(await compiler.compile(localExt)).readAsBytesSync(), const <int>[2]);
       expect(processManager, hasNoRemainingExpectations);
@@ -1909,7 +2019,7 @@ dependencies:
       final String root = fs.currentDirectory.path;
       final String pubPath = fs.path.join(root, 'pub');
       final String dataHomePath = fs.path.join(root, 'data_home');
-      final String extRoot = fs.path.join(pubPath, 'hosted', 'pub.dev', 'hosted_ext-1.0.0');
+      final String extRoot = fs.path.join(pubPath, 'hosted', 'pub.dev', 'hosted_ext-1.0.0+build.1');
       _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
       _writePackageConfig(fs.directory(fs.path.join(root, 'workspace', 'app')), <String, String>{
         'app': '../',
@@ -1918,7 +2028,7 @@ dependencies:
 
       final ExtensionKernelCompiler compiler = _createCompiler(
         fs,
-        environment: <String, String>{'PUB_CACHE': pubPath, 'DART_DATA_HOME': dataHomePath},
+        environment: <String, String>{'DART_DATA_HOME': dataHomePath},
         sdkVersion: '3.13.0+build.1',
       );
       final DiscoveredProjectExtension pubCacheExt = _discoveredExtension(
@@ -1929,7 +2039,7 @@ dependencies:
 
       expect(
         compiler.resolveDillFile(pubCacheExt).basename,
-        startsWith('hosted_ext-3.13.0+build.1-'),
+        startsWith('hosted_ext-1.0.0+build.1-'),
       );
     });
 
@@ -1943,7 +2053,7 @@ dependencies:
       final processExceptionManager = FakeProcessManager.list(<FakeCommand>[
         _compileKernelCommand(
           fs,
-          entrypointPath: '/workspace/my_ext/bin/my_ext.dart',
+          entrypointPath: '/workspace/my_ext/extension/flutter_tools/extension.dart',
           outputDillPath: expectedDillPath,
           exception: const ProcessException('dart', <String>['compile', 'kernel'], 'spawn error'),
         ),
@@ -1987,7 +2097,7 @@ dependencies:
         final fsExceptionManager = FakeProcessManager.list(<FakeCommand>[
           _compileKernelCommand(
             failingFs,
-            entrypointPath: '/workspace/my_ext/bin/my_ext.dart',
+            entrypointPath: '/workspace/my_ext/extension/flutter_tools/extension.dart',
             outputDillPath: expectedDillPath,
             onRunExtra: () {
               throwOnTempDillExists = true;
@@ -2011,7 +2121,7 @@ dependencies:
         );
         expect(failingFs.file('$expectedDillPath.tmp').existsSync(), isFalse);
         expect(failingFs.file('$expectedDillPath.d.tmp').existsSync(), isFalse);
-        expect(failingFs.file('$expectedDillPath.revision.tmp').existsSync(), isFalse);
+        expect(failingFs.file('$expectedDillPath.stamp.tmp').existsSync(), isFalse);
         expect(fsExceptionManager, hasNoRemainingExpectations);
       },
     );
@@ -2027,12 +2137,14 @@ dependencies:
             '/workspace/app/.dart_tool/flutter_tools/extensions/my_ext/extension.dill';
         final File staleDepfile = fs.file('$expectedDillPath.d')
           ..createSync(recursive: true)
-          ..writeAsStringSync('$expectedDillPath.tmp: /workspace/my_ext/bin/my_ext.dart\n');
+          ..writeAsStringSync(
+            '$expectedDillPath.tmp: /workspace/my_ext/extension/flutter_tools/extension.dart\n',
+          );
 
         final processManager = FakeProcessManager.list(<FakeCommand>[
           _compileKernelCommand(
             fs,
-            entrypointPath: '/workspace/my_ext/bin/my_ext.dart',
+            entrypointPath: '/workspace/my_ext/extension/flutter_tools/extension.dart',
             outputDillPath: expectedDillPath,
             writeDefaultDepfile: false,
           ),
@@ -2070,7 +2182,11 @@ dev_dependencies:
         _writeExtensionPackage(fs.directory(localExtRootPath), name: 'local_ext');
         _writeExtensionPackage(fs.directory(hostedExtRootPath), name: 'hosted_ext');
         final File localEntrypoint =
-            fs.directory(localExtRootPath).childDirectory('bin').childFile('local_ext.dart')
+            fs
+                .directory(localExtRootPath)
+                .childDirectory('extension')
+                .childDirectory('flutter_tools')
+                .childFile('extension.dart')
               ..setLastModifiedSync(DateTime.utc(2026));
         final File localHelper =
             fs.directory(localExtRootPath).childDirectory('lib').childFile('helper.dart')
@@ -2079,8 +2195,9 @@ dev_dependencies:
               ..setLastModifiedSync(DateTime.utc(2026));
         fs
             .directory(hostedExtRootPath)
-            .childDirectory('bin')
-            .childFile('hosted_ext.dart')
+            .childDirectory('extension')
+            .childDirectory('flutter_tools')
+            .childFile('extension.dart')
             .setLastModifiedSync(DateTime.utc(2026));
 
         final File packageConfigFile = _writePackageConfig(appDir, const <String, String>{
@@ -2109,8 +2226,8 @@ dev_dependencies:
           environment: const <String, String>{'LOCALAPPDATA': localAppDataPath},
           processManager: processManager,
         );
-        expect(compiler.isPubCacheExtension(localExt), isFalse);
-        expect(compiler.isPubCacheExtension(hostedExt), isTrue);
+        expect(compiler.isSharedCacheExtension(localExt), isFalse);
+        expect(compiler.isSharedCacheExtension(hostedExt), isTrue);
 
         final File localDill = compiler.resolveDillFile(localExt);
         final File sharedDill = compiler.resolveDillFile(hostedExt);
@@ -2178,7 +2295,7 @@ dev_dependencies:
         final String extRoot = fs.path.join(pubPath, 'hosted', 'pub.dev', 'hosted_ext-1.0.0');
         _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
         fs
-            .file(fs.path.join(extRoot, 'bin', 'hosted_ext.dart'))
+            .file(fs.path.join(extRoot, 'extension', 'flutter_tools', 'extension.dart'))
             .setLastModifiedSync(DateTime.utc(2026));
         final Directory appDir = fs.directory(fs.path.join(root, 'workspace', 'app'));
         final File configFile = _writePackageConfig(appDir, <String, String>{
@@ -2195,10 +2312,7 @@ dev_dependencies:
         final processManager = FakeProcessManager.empty();
         final ExtensionKernelCompiler compiler = _createCompiler(
           fs,
-          environment: <String, String>{
-            'PUB_CACHE': pubPath,
-            'DART_DATA_HOME': 'relative_data_home',
-          },
+          environment: <String, String>{'DART_DATA_HOME': 'relative_data_home'},
           processManager: processManager,
         );
 
@@ -2220,5 +2334,527 @@ dev_dependencies:
         expect(processManager, hasNoRemainingExpectations);
       },
     );
+
+    testWithoutContext(
+      'validates pubspec.lock sources for Tier 1 eligibility and hashes git resolved-ref',
+      () {
+        final MemoryFileSystem delegateFs = _hostStyleMemoryFs();
+        final fs = ErrorHandlingFileSystem(delegate: delegateFs, platform: FakePlatform());
+        final String root = fs.currentDirectory.path;
+        final String pubPath = fs.path.join(root, 'pub');
+        final String dataHomePath = fs.path.join(root, 'data_home');
+        final String flutterPath = fs.path.join(root, 'flutter');
+        final String gitExtRoot = fs.path.join(pubPath, 'git', 'git_ext-abcdef');
+        final String hostedDepRoot = fs.path.join(pubPath, 'hosted', 'pub.dev', 'helper-1.0.0');
+        final String sdkDepRoot = fs.path.join(
+          flutterPath,
+          'packages',
+          'flutter_tools',
+          'packages',
+          'flutter_tools_extension',
+        );
+        _writeExtensionPackage(fs.directory(gitExtRoot), name: 'git_ext');
+
+        final Directory appDir = fs.directory(fs.path.join(root, 'workspace', 'app'));
+        final DiscoveredProjectExtension gitExt = _discoveredExtension(
+          fs,
+          name: 'git_ext',
+          rootPath: gitExtRoot,
+          workspaceRootPath: appDir.path,
+        );
+        final ExtensionKernelCompiler compiler = _createCompiler(
+          fs,
+          flutterRootPath: flutterPath,
+          environment: <String, String>{'DART_DATA_HOME': dataHomePath},
+        );
+
+        // 1. git source with hosted transitive dependency is eligible for Tier 1.
+        _writePackageConfig(
+          appDir,
+          <String, String>{'app': '../', 'git_ext': gitExtRoot, 'helper': hostedDepRoot},
+          const <String, Object?>{},
+          const <String, _TestLockPackage>{
+            'git_ext': (resolvedRef: 'commit111', source: 'git', version: '2.0.0'),
+            'helper': (resolvedRef: null, source: 'hosted', version: '1.0.0'),
+          },
+        );
+        expect(compiler.isSharedCacheExtension(gitExt), isTrue);
+        final File gitDillCommit1 = compiler.resolveDillFile(gitExt);
+        expect(gitDillCommit1.basename, startsWith('git_ext-2.0.0-'));
+
+        // Changing git resolved-ref changes the Tier 1 <sdkAndDepsHash>.
+        _writePackageConfig(
+          appDir,
+          <String, String>{'app': '../', 'git_ext': gitExtRoot, 'helper': hostedDepRoot},
+          const <String, Object?>{},
+          const <String, _TestLockPackage>{
+            'git_ext': (resolvedRef: 'commit222', source: 'git', version: '2.0.0'),
+            'helper': (resolvedRef: null, source: 'hosted', version: '1.0.0'),
+          },
+        );
+        final File gitDillCommit2 = compiler.resolveDillFile(gitExt);
+        expect(gitDillCommit2.path, isNot(gitDillCommit1.path));
+
+        // 2. path or sdk source in pubspec.lock falls back to Tier 2.
+        _writePackageConfig(
+          appDir,
+          <String, String>{'app': '../', 'git_ext': gitExtRoot, 'helper': hostedDepRoot},
+          const <String, Object?>{},
+          const <String, _TestLockPackage>{
+            'git_ext': (resolvedRef: null, source: 'path', version: '2.0.0'),
+            'helper': (resolvedRef: null, source: 'hosted', version: '1.0.0'),
+          },
+        );
+        expect(compiler.isSharedCacheExtension(gitExt), isFalse);
+
+        _writePackageConfig(
+          appDir,
+          <String, String>{
+            'app': '../',
+            'git_ext': gitExtRoot,
+            'flutter_tools_extension': sdkDepRoot,
+          },
+          const <String, Object?>{},
+          const <String, _TestLockPackage>{
+            'git_ext': (resolvedRef: 'commit111', source: 'git', version: '2.0.0'),
+            'flutter_tools_extension': (resolvedRef: null, source: 'sdk', version: '0.1.0'),
+          },
+        );
+        expect(compiler.isSharedCacheExtension(gitExt), isFalse);
+
+        // 3. Transitive path dependency override in pubspec.lock falls back to Tier 2.
+        _writePackageConfig(
+          appDir,
+          <String, String>{'app': '../', 'git_ext': gitExtRoot, 'helper': hostedDepRoot},
+          const <String, Object?>{},
+          const <String, _TestLockPackage>{
+            'git_ext': (resolvedRef: 'commit111', source: 'git', version: '2.0.0'),
+            'helper': (resolvedRef: null, source: 'path', version: '1.0.0'),
+          },
+        );
+        expect(compiler.isSharedCacheExtension(gitExt), isFalse);
+
+        // 4. Malformed or missing pubspec.lock falls back safely to Tier 2.
+        appDir.childFile('pubspec.lock').writeAsStringSync('packages: [unclosed');
+        expect(compiler.isSharedCacheExtension(gitExt), isFalse);
+        appDir.childFile('pubspec.lock').deleteSync();
+        expect(compiler.isSharedCacheExtension(gitExt), isFalse);
+      },
+    );
+
+    testWithoutContext('persists, round-trips, validates, and invalidates Tier 1 capabilities in .capabilities.json without race window', () async {
+      var capabilitiesDeletedBeforeDillRename = false;
+      String? targetDillPathToWatch;
+      String? capabilitiesPathToWatch;
+      late final MemoryFileSystem delegateFs;
+      delegateFs = MemoryFileSystem.test(
+        style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+        opHandle: (String context, FileSystemOp operation) {
+          if (targetDillPathToWatch case final String targetDillPath) {
+            if (capabilitiesPathToWatch case final String capabilitiesPath
+                when operation == FileSystemOp.delete && context == capabilitiesPath) {
+              // At the moment capabilitiesFile is deleted, dillFile must still hold its old bytes [1, 2, 3].
+              capabilitiesDeletedBeforeDillRename =
+                  delegateFs.file(targetDillPath).readAsBytesSync().first == 1;
+            }
+          }
+        },
+      );
+      final fs = ErrorHandlingFileSystem(delegate: delegateFs, platform: FakePlatform());
+      final String root = fs.currentDirectory.path;
+      final String pubPath = fs.path.join(root, 'pub');
+      final String dataHomePath = fs.path.join(root, 'data_home');
+      final String extRoot = fs.path.join(pubPath, 'hosted', 'pub.dev', 'hosted_ext-1.2.3');
+      _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
+      final File entrypointFile = fs.file(
+        fs.path.join(extRoot, 'extension', 'flutter_tools', 'extension.dart'),
+      )..setLastModifiedSync(DateTime.utc(2026));
+      final File helperFile = fs.file(fs.path.join(extRoot, 'lib', 'helper.dart'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('const int v = 1;')
+        ..setLastModifiedSync(DateTime.utc(2026));
+
+      final Directory appDir = fs.directory(fs.path.join(root, 'workspace', 'app'));
+      final File configFile = _writePackageConfig(appDir, <String, String>{
+        'app': '../',
+        'hosted_ext': extRoot,
+      })..setLastModifiedSync(DateTime.utc(2026));
+
+      final DiscoveredProjectExtension ext = _discoveredExtension(
+        fs,
+        name: 'hosted_ext',
+        rootPath: extRoot,
+        workspaceRootPath: appDir.path,
+      );
+      final processManager = FakeProcessManager.empty();
+      final ExtensionKernelCompiler compiler = _createCompiler(
+        fs,
+        environment: <String, String>{'DART_DATA_HOME': dataHomePath},
+        processManager: processManager,
+      );
+
+      final File sharedDill = compiler.resolveDillFile(ext);
+      final File capabilitiesFile = fs.file(
+        '${sharedDill.path.substring(0, sharedDill.path.length - '.dill'.length)}.capabilities.json',
+      );
+
+      // 1. Before compile, readCachedCapabilities returns null and writeCachedCapabilities is a no-op.
+      expect(compiler.readCachedCapabilities(ext), isNull);
+      await compiler.writeCachedCapabilities(
+        ext,
+        const ToolExtensionCapabilities(
+          extensionName: 'hosted_ext',
+          services: <String>['diagnostics', 'build'],
+          supportedPlatforms: <String>{'linux', 'macos'},
+        ),
+      );
+      expect(capabilitiesFile.existsSync(), isFalse);
+
+      processManager.addCommands(<FakeCommand>[
+        _compileKernelCommand(
+          fs,
+          entrypointPath: entrypointFile.path,
+          outputDillPath: sharedDill.path,
+          packageConfigPath: configFile.path,
+          modified: DateTime.utc(2026, 1, 1, 1),
+          depfileContent:
+              '${_escapeDepfilePath('${sharedDill.path}.tmp')}: '
+              '${_escapeDepfilePath(entrypointFile.path)} '
+              '${_escapeDepfilePath(helperFile.path)}\n',
+        ),
+        _compileKernelCommand(
+          fs,
+          entrypointPath: entrypointFile.path,
+          outputDillPath: sharedDill.path,
+          packageConfigPath: configFile.path,
+          bytes: const <int>[4, 5, 6],
+          modified: DateTime.utc(2026, 1, 1, 3),
+        ),
+      ]);
+
+      // 2. After compile but before handshake, readCachedCapabilities returns null.
+      await compiler.compile(ext);
+      expect(compiler.readCachedCapabilities(ext), isNull);
+
+      // 3. writeCachedCapabilities persists <prefix>.capabilities.json and round-trips.
+      const expectedCapabilities = ToolExtensionCapabilities(
+        extensionName: 'hosted_ext',
+        services: <String>['diagnostics', 'build'],
+        supportedPlatforms: <String>{'linux', 'macos'},
+      );
+      await compiler.writeCachedCapabilities(ext, expectedCapabilities);
+      expect(capabilitiesFile.existsSync(), isTrue);
+      final ToolExtensionCapabilities? cached = compiler.readCachedCapabilities(ext);
+      expect(cached, isNotNull);
+      expect(cached!.extensionName, 'hosted_ext');
+      expect(cached.services, const <String>['diagnostics', 'build']);
+      expect(cached.supportedPlatforms, const <String>{'linux', 'macos'});
+
+      // 4. Corrupt, non-map, or empty {} .capabilities.json returns null without throwing.
+      for (final invalidContent in const <String>[
+        '{corrupt json',
+        '[1, 2, 3]',
+        '{}',
+        '{"services": 42}',
+      ]) {
+        capabilitiesFile.writeAsStringSync(invalidContent);
+        expect(compiler.readCachedCapabilities(ext), isNull);
+      }
+
+      // Restore valid capabilities, then modify a depfile input and recompile:
+      // recompilation must delete the stale .capabilities.json BEFORE renaming tempDillFile.
+      await compiler.writeCachedCapabilities(ext, expectedCapabilities);
+      expect(compiler.readCachedCapabilities(ext), isNotNull);
+
+      targetDillPathToWatch = sharedDill.path;
+      capabilitiesPathToWatch = capabilitiesFile.path;
+      helperFile.setLastModifiedSync(DateTime.utc(2026, 1, 1, 2));
+      expect(compiler.readCachedCapabilities(ext), isNull);
+      await compiler.compile(ext);
+      expect(capabilitiesDeletedBeforeDillRename, isTrue);
+      expect(capabilitiesFile.existsSync(), isFalse);
+      expect(compiler.readCachedCapabilities(ext), isNull);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('persists, round-trips, and enforces freshness ordering and race-free stamp update for Tier 2 capabilities', () async {
+      const expectedDillPath =
+          '/workspace/app/.dart_tool/flutter_tools/extensions/my_ext/extension.dill';
+      var stampClearedBeforeDillRename = false;
+      var watchRecompileRename = false;
+      late final MemoryFileSystem delegateFs;
+      delegateFs = MemoryFileSystem.test(
+        opHandle: (String context, FileSystemOp operation) {
+          if (watchRecompileRename &&
+              operation == FileSystemOp.write &&
+              context == '$expectedDillPath.stamp.tmp') {
+            // At the moment the new stamp is written, the old dillFile has already been deleted
+            // and the new tempDillFile has not yet been renamed into place.
+            stampClearedBeforeDillRename = !delegateFs.file(expectedDillPath).existsSync();
+          }
+        },
+      );
+      final fs = ErrorHandlingFileSystem(delegate: delegateFs, platform: FakePlatform());
+      final Directory appDir = fs.directory('/workspace/app');
+      final Directory extDir = fs.directory('/workspace/my_ext');
+      _writeExtensionPackage(extDir, name: 'my_ext');
+      final File entrypointFile =
+          extDir
+              .childDirectory('extension')
+              .childDirectory('flutter_tools')
+              .childFile('extension.dart')
+            ..setLastModifiedSync(DateTime.utc(2026));
+      final File helperFile = extDir.childDirectory('lib').childFile('helper.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('const int v = 1;')
+        ..setLastModifiedSync(DateTime.utc(2026));
+
+      final File packageConfigFile = _writePackageConfig(appDir, const <String, String>{
+        'app': '../',
+        'my_ext': '/workspace/my_ext',
+        'local_dep': '/workspace/local_dep_v1',
+      })..setLastModifiedSync(DateTime.utc(2026));
+
+      final File stampFile = fs.file('$expectedDillPath.stamp');
+      final DiscoveredProjectExtension ext = _discoveredExtension(fs);
+
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        _compileKernelCommand(
+          fs,
+          entrypointPath: entrypointFile.path,
+          outputDillPath: expectedDillPath,
+          modified: DateTime.utc(2026, 1, 1, 2),
+          depfileContent:
+              '$expectedDillPath.tmp: ${packageConfigFile.path} ${entrypointFile.path} ${helperFile.path}\n',
+        ),
+        _compileKernelCommand(
+          fs,
+          entrypointPath: entrypointFile.path,
+          outputDillPath: expectedDillPath,
+          bytes: const <int>[4, 5, 6],
+          modified: DateTime.utc(2026, 1, 1, 4),
+          depfileContent:
+              '$expectedDillPath.tmp: ${packageConfigFile.path} ${entrypointFile.path} ${helperFile.path}\n',
+        ),
+      ]);
+      final ExtensionKernelCompiler compiler = _createCompiler(fs, processManager: processManager);
+
+      // 1. Before compile, readCachedCapabilities is null.
+      expect(compiler.readCachedCapabilities(ext), isNull);
+
+      // 2. Compile writes extension.dill.stamp without capabilities.
+      await compiler.compile(ext);
+      expect(stampFile.existsSync(), isTrue);
+      expect(compiler.readCachedCapabilities(ext), isNull);
+
+      // 3. writeCachedCapabilities persists capabilities into extension.dill.stamp.
+      const expectedCapabilities = ToolExtensionCapabilities(
+        extensionName: 'my_ext',
+        services: <String>['diagnostics', 'device'],
+        supportedPlatforms: <String>{'linux'},
+      );
+      await compiler.writeCachedCapabilities(ext, expectedCapabilities);
+      final ToolExtensionCapabilities? cached = compiler.readCachedCapabilities(ext);
+      expect(cached, isNotNull);
+      expect(cached!.extensionName, 'my_ext');
+      expect(cached.services, const <String>['diagnostics', 'device']);
+      expect(cached.supportedPlatforms, const <String>{'linux'});
+
+      // 4. Freshness check ordering BEFORE compile():
+      // (a) Modifying a .dart source listed in extension.dill.d invalidates readCachedCapabilities immediately.
+      helperFile.setLastModifiedSync(DateTime.utc(2026, 1, 1, 3));
+      expect(compiler.readCachedCapabilities(ext), isNull);
+      helperFile.setLastModifiedSync(DateTime.utc(2026));
+      expect(compiler.readCachedCapabilities(ext), isNotNull);
+
+      // (b) Touching package_config.json invalidates readCachedCapabilities immediately.
+      packageConfigFile.setLastModifiedSync(DateTime.utc(2026, 1, 1, 3));
+      expect(compiler.readCachedCapabilities(ext), isNull);
+      packageConfigFile.setLastModifiedSync(DateTime.utc(2026));
+      expect(compiler.readCachedCapabilities(ext), isNotNull);
+
+      // (c) Changing sdkRevision (even with an older mtime, e.g. fvm downgrade) invalidates readCachedCapabilities immediately.
+      final File revisionFile = fs.file('/flutter/bin/cache/dart-sdk/revision');
+      final String originalRevision = revisionFile.readAsStringSync();
+      revisionFile
+        ..writeAsStringSync('0000000000000000000000000000000000000000\n')
+        ..setLastModifiedSync(DateTime.utc(2025));
+      expect(compiler.readCachedCapabilities(ext), isNull);
+      revisionFile
+        ..writeAsStringSync(originalRevision)
+        ..setLastModifiedSync(DateTime.utc(2026));
+      expect(compiler.readCachedCapabilities(ext), isNotNull);
+
+      // (d) Changing closureHash in package_config.json (even with identical mtime) invalidates readCachedCapabilities immediately
+      // and triggers recompilation on compile(), updating extension.dill.stamp BEFORE renaming tempDillFile.
+      watchRecompileRename = true;
+      _writePackageConfig(appDir, const <String, String>{
+        'app': '../',
+        'my_ext': '/workspace/my_ext',
+        'local_dep': '/workspace/local_dep_v2',
+      }).setLastModifiedSync(DateTime.utc(2026));
+      expect(compiler.readCachedCapabilities(ext), isNull);
+
+      await compiler.compile(ext);
+      expect(stampClearedBeforeDillRename, isTrue);
+      expect(compiler.readCachedCapabilities(ext), isNull);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('falls back to Tier 2 workspace-local cache without ToolExit when DART_DATA_HOME is read-only under ErrorHandlingFileSystem', () async {
+      final delegateFs = MemoryFileSystem.test(
+        style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+        opHandle: (String context, FileSystemOp operation) {
+          if (context.contains('readonly_data_home') &&
+              (operation == FileSystemOp.create || operation == FileSystemOp.open)) {
+            throw FileSystemException(
+              'Read-only file system',
+              context,
+              const OSError('Read-only file system', 30),
+            );
+          }
+        },
+      );
+      final fs = ErrorHandlingFileSystem(delegate: delegateFs, platform: FakePlatform());
+      final String root = fs.currentDirectory.path;
+      final String pubPath = fs.path.join(root, 'pub');
+      final String readOnlyDataHomePath = fs.path.join(root, 'readonly_data_home');
+      final String extRoot = fs.path.join(pubPath, 'hosted', 'pub.dev', 'hosted_ext-1.0.0');
+      _writeExtensionPackage(fs.directory(extRoot), name: 'hosted_ext');
+      final File entrypointFile = fs.file(
+        fs.path.join(extRoot, 'extension', 'flutter_tools', 'extension.dart'),
+      )..setLastModifiedSync(DateTime.utc(2026));
+
+      final Directory appDir = fs.directory(fs.path.join(root, 'workspace', 'app'));
+      final File configFile = _writePackageConfig(appDir, <String, String>{
+        'app': '../',
+        'hosted_ext': extRoot,
+      })..setLastModifiedSync(DateTime.utc(2026));
+
+      final DiscoveredProjectExtension ext = _discoveredExtension(
+        fs,
+        name: 'hosted_ext',
+        rootPath: extRoot,
+        workspaceRootPath: appDir.path,
+      );
+      final String fallbackLocalDillPath = fs.path.join(
+        appDir.path,
+        '.dart_tool',
+        'flutter_tools',
+        'extensions',
+        'hosted_ext',
+        'extension.dill',
+      );
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        _compileKernelCommand(
+          fs,
+          entrypointPath: entrypointFile.path,
+          outputDillPath: fallbackLocalDillPath,
+          packageConfigPath: configFile.path,
+          bytes: const <int>[8, 8, 8],
+          modified: DateTime.utc(2026, 1, 1, 2),
+        ),
+      ]);
+      final ExtensionKernelCompiler compiler = _createCompiler(
+        fs,
+        logger: logger,
+        environment: <String, String>{'DART_DATA_HOME': readOnlyDataHomePath},
+        processManager: processManager,
+      );
+
+      expect(compiler.isSharedCacheExtension(ext), isTrue);
+
+      // 1. compile() catches the read-only shared cache failure and compiles to Tier 2 fallback.
+      final Uri compiledUri = await compiler.compile(ext);
+      expect(compiledUri, fs.file(fallbackLocalDillPath).uri);
+      expect(logger.traceText, contains('shared cache unavailable'));
+
+      // 2. Subsequent compile() hits the Tier 2 fallback cache without invoking dart compile kernel.
+      final Uri cachedUri = await compiler.compile(ext);
+      expect(cachedUri, fs.file(fallbackLocalDillPath).uri);
+
+      // 3. writeCachedCapabilities and readCachedCapabilities operate on the Tier 2 fallback stamp.
+      const expectedCapabilities = ToolExtensionCapabilities(
+        extensionName: 'hosted_ext',
+        services: <String>['diagnostics'],
+        supportedPlatforms: <String>{'linux'},
+      );
+      await compiler.writeCachedCapabilities(ext, expectedCapabilities);
+      final ToolExtensionCapabilities? readBack = compiler.readCachedCapabilities(ext);
+      expect(readBack, isNotNull);
+      expect(readBack!.extensionName, 'hosted_ext');
+      expect(readBack.services, const <String>['diagnostics']);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('concurrent compile and writeCachedCapabilities preserve ErrorHandlingFileSystem ToolExit state', () async {
+      final delegateFs = MemoryFileSystem.test(
+        opHandle: (String context, FileSystemOp operation) {
+          if (context == '/nonexistent' && operation == FileSystemOp.open) {
+            throw const FileSystemException(
+              'No such file or directory',
+              '/nonexistent',
+              OSError('No such file or directory', 2),
+            );
+          }
+        },
+      );
+      final fs = ErrorHandlingFileSystem(delegate: delegateFs, platform: FakePlatform());
+      final Directory appDir = fs.directory('/workspace/app');
+      _writeExtensionPackage(fs.directory('/workspace/ext_a'), name: 'ext_a');
+      _writeExtensionPackage(fs.directory('/workspace/ext_b'), name: 'ext_b');
+      final File configFile = _writePackageConfig(appDir, const <String, String>{
+        'app': '../',
+        'ext_a': '/workspace/ext_a',
+        'ext_b': '/workspace/ext_b',
+      })..setLastModifiedSync(DateTime.utc(2026));
+
+      const dillAPath = '/workspace/app/.dart_tool/flutter_tools/extensions/ext_a/extension.dill';
+      const dillBPath = '/workspace/app/.dart_tool/flutter_tools/extensions/ext_b/extension.dill';
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        _compileKernelCommand(
+          fs,
+          entrypointPath: '/workspace/ext_a/extension/flutter_tools/extension.dart',
+          outputDillPath: dillAPath,
+          packageConfigPath: configFile.path,
+          modified: DateTime.utc(2026, 1, 1, 2),
+        ),
+        _compileKernelCommand(
+          fs,
+          entrypointPath: '/workspace/ext_b/extension/flutter_tools/extension.dart',
+          outputDillPath: dillBPath,
+          packageConfigPath: configFile.path,
+          modified: DateTime.utc(2026, 1, 1, 2),
+        ),
+      ]);
+      final ExtensionKernelCompiler compiler = _createCompiler(fs, processManager: processManager);
+      final DiscoveredProjectExtension extA = _discoveredExtension(
+        fs,
+        name: 'ext_a',
+        rootPath: '/workspace/ext_a',
+      );
+      final DiscoveredProjectExtension extB = _discoveredExtension(
+        fs,
+        name: 'ext_b',
+        rootPath: '/workspace/ext_b',
+      );
+
+      await Future.wait(<Future<Uri>>[compiler.compile(extA), compiler.compile(extB)]);
+      await Future.wait(<Future<void>>[
+        compiler.writeCachedCapabilities(
+          extA,
+          const ToolExtensionCapabilities(services: <String>['diagnostics']),
+        ),
+        compiler.writeCachedCapabilities(
+          extB,
+          const ToolExtensionCapabilities(services: <String>['build']),
+        ),
+      ]);
+
+      // Verify ErrorHandlingFileSystem._noExitOnFailure was not left stuck true.
+      expect(() => fs.file('/nonexistent').openSync(), throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 }
