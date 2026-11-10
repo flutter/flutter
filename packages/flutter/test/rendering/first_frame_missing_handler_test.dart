@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -13,43 +11,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final binding = TestRenderBinding();
-  // The first-frame notification is sent once per binding, so this test must
-  // run before any other test in this file draws a frame.
   test(
-    'Web first-frame notification does not report an error when flutter/service_worker is unhandled',
+    'Web first-frame notification is sent exactly once and does not report an error when flutter/service_worker is unhandled',
     () async {
       final errors = <FlutterErrorDetails>[];
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
       FlutterError.onError = errors.add;
-      final called = Completer<void>();
+      var messages = 0;
       // A null binary reply is how an unhandled platform channel looks to
       // the framework.
-      binding.defaultBinaryMessenger.setMockMessageHandler('flutter/service_worker', (
-        ByteData? message,
-      ) async {
-        called.complete();
-        return null;
-      });
-      addTearDown(() {
-        FlutterError.onError = oldHandler;
-        binding.defaultBinaryMessenger.setMockMessageHandler('flutter/service_worker', null);
-      });
-
-      binding.handleBeginFrame(Duration.zero);
-      binding.handleDrawFrame();
-
-      await expectLater(called.future, completes);
-      await pumpEventQueue();
-
-      expect(errors, isEmpty);
-    },
-    skip: !kIsWeb, // [intended] _handleWebFirstFrame only runs on the web.
-  );
-
-  test(
-    'Web first-frame notification is not sent again on later frames',
-    () async {
-      var messages = 0;
       binding.defaultBinaryMessenger.setMockMessageHandler('flutter/service_worker', (
         ByteData? message,
       ) async {
@@ -57,20 +27,25 @@ void main() {
         return null;
       });
       addTearDown(() {
+        FlutterError.onError = oldHandler;
         binding.defaultBinaryMessenger.setMockMessageHandler('flutter/service_worker', null);
       });
 
-      // Make sure the first frame has been drawn, even if this test runs alone.
+      // The first frame sends the notification.
       binding.handleBeginFrame(Duration.zero);
       binding.handleDrawFrame();
       await pumpEventQueue();
-      messages = 0;
 
+      expect(messages, 1);
+      expect(errors, isEmpty);
+
+      // Later frames do not send it again.
       binding.handleBeginFrame(const Duration(milliseconds: 16));
       binding.handleDrawFrame();
       await pumpEventQueue();
 
-      expect(messages, 0);
+      expect(messages, 1);
+      expect(errors, isEmpty);
     },
     skip: !kIsWeb, // [intended] _handleWebFirstFrame only runs on the web.
   );
