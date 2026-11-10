@@ -558,6 +558,67 @@ void main() {
     expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('View.hasFocusOf tracks ViewFocusEvents', (WidgetTester tester) async {
+    late BuildContext viewContext;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          viewContext = context;
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+
+    expect(View.hasFocusOf(viewContext), isTrue);
+    expect(View.maybeHasFocusOf(viewContext), isTrue);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ViewFocusState.unfocused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+    expect(View.hasFocusOf(viewContext), isFalse);
+    expect(View.maybeHasFocusOf(viewContext), isFalse);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+    expect(View.hasFocusOf(viewContext), isTrue);
+    expect(View.maybeHasFocusOf(viewContext), isTrue);
+  });
+
+  testWidgets('View.hasFocusOf becomes false when the app is inactive', (
+    WidgetTester tester,
+  ) async {
+    late BuildContext viewContext;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          viewContext = context;
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+
+    expect(View.hasFocusOf(viewContext), isTrue);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+    expect(View.hasFocusOf(viewContext), isFalse);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(View.hasFocusOf(viewContext), isTrue);
+  });
+
   // A screen reader can move focus straight to a control instead of tabbing
   // into the view. On web that arrives as a SemanticsAction.focus for the
   // control, followed by a focus event for the view with an undefined

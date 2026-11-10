@@ -1593,8 +1593,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             expands: widget.expands,
             magnifierConfiguration:
                 widget.magnifierConfiguration ?? CupertinoTextField._iosMagnifierConfiguration,
-            // Only show the selection highlight when the text field is focused.
-            selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
+            // Show the active selection color while focused. When the enclosing
+            // view loses window focus (or the app becomes inactive), keep a
+            // neutral highlight so the selection remains visible (matching
+            // desktop platform conventions). See
+            // https://github.com/flutter/flutter/issues/103446.
+            selectionColor: View.hasFocusOf(context)
+                ? (_effectiveFocusNode.hasFocus ? selectionColor : null)
+                : CupertinoDynamicColor.resolve(CupertinoColors.systemGrey4, context),
             selectionControls: widget.selectionEnabled ? textSelectionControls : null,
             groupId: widget.groupId,
             onChanged: widget.onChanged,

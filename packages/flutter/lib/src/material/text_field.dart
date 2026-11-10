@@ -1709,8 +1709,14 @@ class _TextFieldState extends State<TextField>
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          // Only show the selection highlight when the text field is focused.
-          selectionColor: focusNode.hasFocus ? selectionColor : null,
+          // Show the active selection color while focused. When the enclosing
+          // view loses window focus (or the app becomes inactive), keep a
+          // neutral highlight so the selection remains visible (matching
+          // desktop platform conventions). See
+          // https://github.com/flutter/flutter/issues/103446.
+          selectionColor: View.hasFocusOf(context)
+              ? (focusNode.hasFocus ? selectionColor : null)
+              : theme.colorScheme.onSurface.withValues(alpha: 0.15),
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,

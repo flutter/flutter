@@ -9,7 +9,13 @@ library;
 
 import 'dart:collection';
 import 'dart:ui'
-    show FlutterView, SemanticsUpdate, ViewFocusDirection, ViewFocusEvent, ViewFocusState;
+    show
+        AppLifecycleState,
+        FlutterView,
+        SemanticsUpdate,
+        ViewFocusDirection,
+        ViewFocusEvent,
+        ViewFocusState;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -168,6 +174,50 @@ class View extends StatefulWidget {
     return LookupBoundary.dependOnInheritedWidgetOfExactType<_ViewScope>(context)?.view;
   }
 
+  /// Whether the [View] that encloses the given `context` currently has window
+  /// focus.
+  ///
+  /// Creates a dependency on the `context` that is notified when the enclosing
+  /// view's focus state changes, and when the application lifecycle becomes
+  /// inactive (for example after switching to another app on desktop).
+  ///
+  /// Defaults to true when the enclosing [View] has not yet received a
+  /// [ViewFocusEvent], matching the common case that a newly created view is
+  /// focused. Returns true when there is no enclosing [View] that reports focus
+  /// (for example under a bare [RawView]).
+  ///
+  /// On platforms that do not yet dispatch [ViewFocusEvent]s for the default
+  /// window, this still becomes false while the application lifecycle is not
+  /// [AppLifecycleState.resumed], so widgets can dim inactive selections.
+  ///
+  /// See also:
+  ///
+  ///  * [View.maybeHasFocusOf], which returns null when focus cannot be
+  ///    determined from the `context`.
+  ///  * [WidgetsBindingObserver.didChangeViewFocus], which delivers the
+  ///    underlying focus changes.
+  static bool hasFocusOf(BuildContext context) {
+    return maybeHasFocusOf(context) ?? true;
+  }
+
+  /// Whether the [View] that encloses the given `context` currently has window
+  /// focus, or null if focus cannot be determined.
+  ///
+  /// Creates a dependency on the `context` that is notified when the enclosing
+  /// view's focus state changes, and when the application lifecycle becomes
+  /// inactive.
+  ///
+  /// Returns null when there is no enclosing [View] that reports focus (for
+  /// example under a bare [RawView]).
+  ///
+  /// See also:
+  ///
+  ///  * [View.hasFocusOf], which defaults to true when focus cannot be
+  ///    determined.
+  static bool? maybeHasFocusOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_ViewFocusScope>()?.hasFocus;
+  }
+
   /// Returns the [FlutterView] that the provided `context` will render into.
   ///
   /// Throws if the `context` is not associated with a [FlutterView].
@@ -241,10 +291,29 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
   final FocusScopeNode _scopeNode = FocusScopeNode(debugLabel: kReleaseMode ? null : 'View Scope');
   final FocusTraversalPolicy _policy = ReadingOrderTraversalPolicy();
   bool _viewHasFocus = false;
+  // Assumed focused until the first [ViewFocusEvent] so descendants that read
+  // [View.hasFocusOf] do not briefly treat a newly created view as inactive.
+  bool _viewFocusForDependents = true;
+  // Single-window desktop embedders may not dispatch [ViewFocusEvent]s. Treat
+  // a non-resumed app lifecycle as losing window focus so selections can dim.
+  bool _appActive = true;
+
+  static bool _isActiveLifecycle(AppLifecycleState? state) {
+    return switch (state) {
+      null || AppLifecycleState.resumed => true,
+      AppLifecycleState.inactive ||
+      AppLifecycleState.hidden ||
+      AppLifecycleState.paused ||
+      AppLifecycleState.detached => false,
+    };
+  }
+
+  bool get _hasFocusForDependents => _viewFocusForDependents && _appActive;
 
   @override
   void initState() {
     super.initState();
+    _appActive = _isActiveLifecycle(WidgetsBinding.instance.lifecycleState);
     WidgetsBinding.instance.addObserver(this);
     _scopeNode.addListener(_scopeFocusChangeListener);
   }
@@ -270,12 +339,38 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
     );
   }
 
+  void _updateViewFocusForDependents(bool nextHasFocus) {
+    if (_viewFocusForDependents == nextHasFocus) {
+      return;
+    }
+    setState(() {
+      _viewFocusForDependents = nextHasFocus;
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final bool nextAppActive = _isActiveLifecycle(state);
+    if (_appActive == nextAppActive) {
+      return;
+    }
+    setState(() {
+      _appActive = nextAppActive;
+    });
+  }
+
   @override
   void didChangeViewFocus(ViewFocusEvent event) {
     _viewHasFocus = switch (event.state) {
       ViewFocusState.focused => event.viewId == widget.view.viewId,
       ViewFocusState.unfocused => false,
     };
+    if (event.viewId == widget.view.viewId) {
+      _updateViewFocusForDependents(event.state == ViewFocusState.focused);
+    } else if (event.state == ViewFocusState.focused) {
+      // Another view became focused, so this one no longer has window focus.
+      _updateViewFocusForDependents(false);
+    }
     if (event.viewId != widget.view.viewId) {
       return;
     }
@@ -305,21 +400,24 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
       view: widget.view,
       deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: widget._deprecatedPipelineOwner,
       deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: widget._deprecatedRenderView,
-      child: MediaQuery.fromView(
-        view: widget.view,
-        child: FocusTraversalGroup(
-          policy: _policy,
-          // Attach this view's focus subtree directly to the root scope rather
-          // than nesting it under an enclosing view's scope (which happens when
-          // a view is rendered inside another via a [ViewAnchor]). Each view is
-          // an independent focus root: nesting would otherwise make an ancestor
-          // view report hasFocus when a descendant view is focused, causing it
-          // to request native focus and pull its window forward.
-          parentNode: FocusManager.instance.rootScope,
-          child: FocusScope.withExternalFocusNode(
-            includeSemantics: false,
-            focusScopeNode: _scopeNode,
-            child: widget.child,
+      child: _ViewFocusScope(
+        hasFocus: _hasFocusForDependents,
+        child: MediaQuery.fromView(
+          view: widget.view,
+          child: FocusTraversalGroup(
+            policy: _policy,
+            // Attach this view's focus subtree directly to the root scope rather
+            // than nesting it under an enclosing view's scope (which happens when
+            // a view is rendered inside another via a [ViewAnchor]). Each view is
+            // an independent focus root: nesting would otherwise make an ancestor
+            // view report hasFocus when a descendant view is focused, causing it
+            // to request native focus and pull its window forward.
+            parentNode: FocusManager.instance.rootScope,
+            child: FocusScope.withExternalFocusNode(
+              includeSemantics: false,
+              focusScopeNode: _scopeNode,
+              child: widget.child,
+            ),
           ),
         ),
       ),
@@ -661,6 +759,15 @@ class _ViewScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_ViewScope oldWidget) => view != oldWidget.view;
+}
+
+class _ViewFocusScope extends InheritedWidget {
+  const _ViewFocusScope({required this.hasFocus, required super.child});
+
+  final bool hasFocus;
+
+  @override
+  bool updateShouldNotify(_ViewFocusScope oldWidget) => hasFocus != oldWidget.hasFocus;
 }
 
 class _PipelineOwnerScope extends InheritedWidget {

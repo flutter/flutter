@@ -9,7 +9,15 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, SemanticsInputType;
+import 'dart:ui'
+    as ui
+    show
+        BoxHeightStyle,
+        BoxWidthStyle,
+        SemanticsInputType,
+        ViewFocusDirection,
+        ViewFocusEvent,
+        ViewFocusState;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -6453,6 +6461,108 @@ void main() {
     await tester.pump();
     expect(state1.widget.selectionColor, null);
     expect(state2.widget.selectionColor, selectionColor);
+  });
+
+  testWidgets('Text field greys selection when the view loses focus', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103446.
+    final TextEditingController controller = _textEditingController();
+    const Color selectionColor = Colors.orange;
+
+    await tester.pumpWidget(
+      overlay(
+        child: DefaultSelectionStyle(
+          selectionColor: selectionColor,
+          child: TextField(controller: controller),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'abcd');
+    await tester.pump();
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    final EditableTextState editableText = tester.state<EditableTextState>(
+      find.byType(EditableText),
+    );
+    final RenderEditable renderEditable = tester.allRenderObjects
+        .whereType<RenderEditable>()
+        .single;
+    expect(editableText.widget.selectionColor, selectionColor);
+    expect(renderEditable.selectionColor, selectionColor);
+    expect(View.hasFocusOf(editableText.context), isTrue);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ui.ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ui.ViewFocusState.unfocused,
+        direction: ui.ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    final Color inactiveSelectionColor = Theme.of(editableText.context).colorScheme.onSurface
+        .withValues(alpha: 0.15);
+    expect(View.hasFocusOf(editableText.context), isFalse);
+    expect(editableText.widget.selectionColor, inactiveSelectionColor);
+    expect(renderEditable.selectionColor, inactiveSelectionColor);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ui.ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ui.ViewFocusState.focused,
+        direction: ui.ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    expect(View.hasFocusOf(editableText.context), isTrue);
+    expect(editableText.widget.selectionColor, selectionColor);
+    expect(renderEditable.selectionColor, selectionColor);
+  });
+
+  testWidgets('Text field greys selection when the app becomes inactive', (
+    WidgetTester tester,
+  ) async {
+    // Standard single-window desktop embedders may not dispatch ViewFocusEvents.
+    // App lifecycle is the signal that the window is no longer active.
+    // Regression test for https://github.com/flutter/flutter/issues/103446.
+    final TextEditingController controller = _textEditingController();
+    const Color selectionColor = Colors.orange;
+
+    await tester.pumpWidget(
+      overlay(
+        child: DefaultSelectionStyle(
+          selectionColor: selectionColor,
+          child: TextField(controller: controller),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'abcd');
+    await tester.pump();
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    final EditableTextState editableText = tester.state<EditableTextState>(
+      find.byType(EditableText),
+    );
+    expect(editableText.widget.selectionColor, selectionColor);
+    expect(View.hasFocusOf(editableText.context), isTrue);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+
+    final Color inactiveSelectionColor = Theme.of(editableText.context).colorScheme.onSurface
+        .withValues(alpha: 0.15);
+    expect(View.hasFocusOf(editableText.context), isFalse);
+    expect(editableText.widget.selectionColor, inactiveSelectionColor);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    expect(View.hasFocusOf(editableText.context), isTrue);
+    expect(editableText.widget.selectionColor, selectionColor);
   });
 
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
