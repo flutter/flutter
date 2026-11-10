@@ -729,7 +729,13 @@ class Context {
       }
     }
     if (platform == TargetPlatform.macos) {
-      final String? deploymentTarget = environment['MACOSX_DEPLOYMENT_TARGET'];
+      // This script runs in the Flutter Assemble aggregate target, whose
+      // MACOSX_DEPLOYMENT_TARGET can differ from the app target's. Prefer the
+      // app target's value written by the Flutter tool.
+      final String? appDeploymentTarget = environment['FLUTTER_MACOS_DEPLOYMENT_TARGET'];
+      final String? deploymentTarget = appDeploymentTarget != null && appDeploymentTarget.isNotEmpty
+          ? appDeploymentTarget
+          : environment['MACOSX_DEPLOYMENT_TARGET'];
       if (deploymentTarget != null && deploymentTarget.isNotEmpty) {
         flutterArgs.add('-dMacOSDeploymentTarget=$deploymentTarget');
       }

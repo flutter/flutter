@@ -30,6 +30,7 @@ Future<void> updateGeneratedXcodeProperties({
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
+  String? macOSDeploymentTarget,
   bool printWarnings = false,
 }) async {
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
@@ -40,6 +41,7 @@ Future<void> updateGeneratedXcodeProperties({
     useMacOSConfig: useMacOSConfig,
     buildDirOverride: buildDirOverride,
     configurationBuildDir: configurationBuildDir,
+    macOSDeploymentTarget: macOSDeploymentTarget,
     printWarnings: printWarnings,
   );
 
@@ -169,6 +171,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
+  String? macOSDeploymentTarget,
 }) async {
   final ToolContext(
     :Artifacts artifacts,
@@ -217,6 +220,12 @@ Future<List<String>> _xcodeBuildSettingsLines({
   // bundle to launch.
   if (configurationBuildDir != null) {
     xcodeBuildSettings.add('CONFIGURATION_BUILD_DIR=$configurationBuildDir');
+  }
+
+  // The Flutter Assemble aggregate target cannot read the app target's
+  // MACOSX_DEPLOYMENT_TARGET, so the app's resolved value is forwarded here.
+  if (macOSDeploymentTarget != null && macOSDeploymentTarget.isNotEmpty) {
+    xcodeBuildSettings.add('FLUTTER_MACOS_DEPLOYMENT_TARGET=$macOSDeploymentTarget');
   }
 
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;

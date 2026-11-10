@@ -209,6 +209,8 @@ Future<void> buildMacOS({
       ) ??
       <String, String>{};
 
+  final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
+
   // Write configuration to an xconfig file in a standard location.
   await updateGeneratedXcodeProperties(
     project: flutterProject,
@@ -216,10 +218,10 @@ Future<void> buildMacOS({
     toolContext: toolContext,
     targetOverride: targetOverride,
     useMacOSConfig: true,
+    macOSDeploymentTarget: macOSDeploymentTarget,
   );
 
   if (flutterProject.macos.usesSwiftPackageManager) {
-    final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
     if (macOSDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
         platform: darwinPlatform,

@@ -1049,8 +1049,10 @@ const kIosDeploymentTarget = 'IosDeploymentTarget';
 
 /// The macOS deployment target used for native asset hooks.
 ///
-/// Passed from the build phase's MACOSX_DEPLOYMENT_TARGET setting. May include
-/// minor and patch versions. If absent, uses the native-assets default.
+/// Passed from the app target's setting when the Flutter tool forwarded it as
+/// FLUTTER_MACOS_DEPLOYMENT_TARGET, otherwise from the build phase's
+/// MACOSX_DEPLOYMENT_TARGET. May include minor and patch versions. If absent,
+/// uses the native-assets default.
 const kMacOSDeploymentTarget = 'MacOSDeploymentTarget';
 
 /// The define to control what macOS architectures are built for.
