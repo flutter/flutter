@@ -340,6 +340,30 @@ void main() {
       }
 
       for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
+        testWithoutContext('verify ${buildMode.cliName} artifacts.zip checksum is generated', () {
+          final String artifactDir = FlutterDarwinPlatform.ios.artifactName(buildMode);
+          final File checksumFile = fileSystem.file(
+            fileSystem.path.join(
+              flutterRoot,
+              'bin',
+              'cache',
+              'artifacts',
+              'engine',
+              artifactDir,
+              'artifacts.zip.checksum.json',
+            ),
+          );
+          expect(checksumFile, exists);
+
+          final Object? checksumJson = json.decode(checksumFile.readAsStringSync());
+          if (checksumJson case {'url': final String url, 'checksum': final String checksum}) {
+            expect(url, endsWith('/$artifactDir/${FlutterDarwinPlatform.ios.artifactZip}'));
+            expect(checksum, isNotNull);
+          } else {
+            fail('${checksumFile.path} is missing "url" or "checksum" key: $checksumJson');
+          }
+        });
+
         for (final arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
           testWithoutContext('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
             final String artifactDir;
