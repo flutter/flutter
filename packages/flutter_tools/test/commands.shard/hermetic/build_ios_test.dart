@@ -677,14 +677,14 @@ void main() {
   );
 
   testUsingContext(
-    'ios build config-only writes TRACK_WIDGET_CREATION=true to Generated.xcconfig by default',
+    'ios build debug config-only writes TRACK_WIDGET_CREATION=true to Generated.xcconfig by default',
     () async {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = createBuildCommand();
 
       await createTestCommandRunner(command)
-          .run(const <String>['build', 'ios', '--config-only', '--no-pub']);
+          .run(const <String>['build', 'ios', '--debug', '--config-only', '--no-pub']);
 
       final File configFile = fileSystem.file('ios/Flutter/Generated.xcconfig');
       expect(configFile, exists);
@@ -701,7 +701,7 @@ void main() {
   );
 
   testUsingContext(
-    'ios build config-only respects --no-track-widget-creation flag',
+    'ios build debug config-only respects --no-track-widget-creation flag',
     () async {
       createMinimalMockProjectFiles();
 
@@ -710,6 +710,7 @@ void main() {
       await createTestCommandRunner(command).run(const <String>[
         'build',
         'ios',
+        '--debug',
         '--config-only',
         '--no-pub',
         '--no-track-widget-creation',
