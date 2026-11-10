@@ -358,7 +358,48 @@ void main() {
           _singleServiceEntryPoint,
           expectedConfig: ExtensionPackageConfig(
             name: 'test_extension',
+            hostPlatforms: const <String>{'linux', 'macos'},
+          ),
+          logger: logger,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'capabilities mismatch: extension/flutter_tools/config.yaml declares services',
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
+          expectedConfig: ExtensionPackageConfig(
+            name: 'test_extension',
             hostPlatforms: const <String>{'linux', 'windows'},
+            services: const <String>{'test'},
+          ),
+          logger: logger,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'capabilities mismatch: extension/flutter_tools/config.yaml declares host_platforms',
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
+          expectedConfig: ExtensionPackageConfig(
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux'},
             services: const <String>{'test'},
           ),
           logger: logger,

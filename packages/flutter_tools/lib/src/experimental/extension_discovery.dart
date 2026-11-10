@@ -152,7 +152,7 @@ class ExtensionConnection {
   /// When [expectedConfig] is provided, validates that the runtime
   /// [ToolExtensionCapabilities] reported by `extension.getCapabilities` match
   /// the static declarations in `extension/flutter_tools/config.yaml`,
-  /// disposing the connection and throwing a [StateError] if they drift.
+  /// killing the extension isolate and throwing a [StateError] if they drift.
   @visibleForTesting
   static Future<ExtensionConnection> spawn(
     ExtensionEntryPoint entryPoint, {
@@ -180,7 +180,7 @@ class ExtensionConnection {
   /// When [expectedConfig] is provided, validates that the runtime
   /// [ToolExtensionCapabilities] reported by `extension.getCapabilities` match
   /// the static declarations in `extension/flutter_tools/config.yaml`,
-  /// disposing the connection and throwing a [StateError] if they drift.
+  /// killing the extension isolate and throwing a [StateError] if they drift.
   static Future<ExtensionConnection> spawnUri(
     Uri entrypointUri, {
     required Logger logger,

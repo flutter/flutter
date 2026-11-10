@@ -15,6 +15,26 @@ import 'package:yaml/yaml.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
+const _linuxPrototypePackageName = 'flutter_tools_extension_linux_prototype';
+
+Future<(Uri, Uri, ExtensionPackageConfig)> _resolveLinuxPrototypeExtension() async {
+  final Uri? libUri = await Isolate.resolvePackageUri(
+    Uri.parse('package:$_linuxPrototypePackageName/$_linuxPrototypePackageName.dart'),
+  );
+  expect(libUri, isNotNull);
+  final Uri entrypointUri = libUri!.resolve('../bin/$_linuxPrototypePackageName.dart');
+  final Uri? packageConfigUri = await Isolate.packageConfig;
+  expect(packageConfigUri, isNotNull);
+
+  final Uri configUri = libUri.resolve('../extension/flutter_tools/config.yaml');
+  final rawYaml = loadYaml(fileSystem.file(configUri).readAsStringSync()) as YamlMap;
+  final expectedConfig = ExtensionPackageConfig.fromMap(
+    rawYaml.cast<String, Object?>(),
+    packageName: _linuxPrototypePackageName,
+  );
+  return (entrypointUri, packageConfigUri!, expectedConfig);
+}
+
 void main() {
   final bool isLinux = const LocalPlatform().isLinux;
   late Directory tempHome;
@@ -197,43 +217,76 @@ void main() {
     expect(projectDir.existsSync(), isFalse);
   });
 
+  // Regression tests moved from general.shard for https://github.com/flutter/flutter/issues/195966.
   testWithoutContext(
     'ExtensionConnection.spawnUri spawns extension script and completes handshake',
     () async {
       final logger = BufferLogger.test();
-      final Uri? libUri = await Isolate.resolvePackageUri(
-        Uri.parse(
-          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
-        ),
-      );
-      expect(libUri, isNotNull);
-      final Uri entrypointUri = libUri!.resolve(
-        '../bin/flutter_tools_extension_linux_prototype.dart',
-      );
-      final Uri? packageConfigUri = await Isolate.packageConfig;
-      expect(packageConfigUri, isNotNull);
-
-      final Uri configUri = libUri.resolve('../extension/flutter_tools/config.yaml');
-      final rawYaml = loadYaml(fileSystem.file(configUri).readAsStringSync()) as YamlMap;
-      final expectedConfig = ExtensionPackageConfig.fromMap(
-        rawYaml.cast<String, Object?>(),
-        packageName: 'flutter_tools_extension_linux_prototype',
-      );
+      final (Uri entrypointUri, Uri packageConfigUri, ExtensionPackageConfig expectedConfig) =
+          await _resolveLinuxPrototypeExtension();
 
       final ExtensionConnection connection = await ExtensionConnection.spawnUri(
         entrypointUri,
         expectedConfig: expectedConfig,
+        extensionName: _linuxPrototypePackageName,
         logger: logger,
-        packageConfigUri: packageConfigUri!,
-        extensionName: 'flutter_tools_extension_linux_prototype',
+        packageConfigUri: packageConfigUri,
       );
       addTearDown(connection.dispose);
 
-      expect(connection.extensionName, 'flutter_tools_extension_linux_prototype');
+      expect(connection.extensionName, _linuxPrototypePackageName);
       expect(
         connection.capabilities.services,
         containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
       );
     },
   );
+
+  testWithoutContext('ExtensionConnection.spawnUri throws StateError when expectedConfig does not match capabilities', () async {
+    final logger = BufferLogger.test();
+    final (Uri entrypointUri, Uri packageConfigUri, ExtensionPackageConfig prototypeConfig) =
+        await _resolveLinuxPrototypeExtension();
+
+    await expectLater(
+      ExtensionConnection.spawnUri(
+        entrypointUri,
+        expectedConfig: ExtensionPackageConfig(
+          name: _linuxPrototypePackageName,
+          hostPlatforms: prototypeConfig.hostPlatforms,
+          services: const <String>{'diagnostics'},
+        ),
+        logger: logger,
+        packageConfigUri: packageConfigUri,
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (StateError e) => e.message,
+          'message',
+          contains('capabilities mismatch: extension/flutter_tools/config.yaml declares services'),
+        ),
+      ),
+    );
+
+    await expectLater(
+      ExtensionConnection.spawnUri(
+        entrypointUri,
+        expectedConfig: ExtensionPackageConfig(
+          name: _linuxPrototypePackageName,
+          hostPlatforms: const <String>{'macos'},
+          services: prototypeConfig.services,
+        ),
+        logger: logger,
+        packageConfigUri: packageConfigUri,
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (StateError e) => e.message,
+          'message',
+          contains(
+            'capabilities mismatch: extension/flutter_tools/config.yaml declares host_platforms',
+          ),
+        ),
+      ),
+    );
+  });
 }
