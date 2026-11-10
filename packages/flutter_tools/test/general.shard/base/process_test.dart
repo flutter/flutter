@@ -637,11 +637,36 @@ void main() {
       );
     }
 
+    for (final callerTool in <String>['dart-mcp-server', 'vscode-plugins']) {
+      testWithoutContext(
+        'ignores a caller-supplied DASH__TOOL of "$callerTool" when the parent has none',
+        () async {
+          fakeProcessManager.addCommand(
+            const FakeCommand(
+              command: <String>['whoohoo'],
+              environment: expectedEnvWithDefaultTool,
+            ),
+          );
+
+          await analytics.setTelemetry(false);
+
+          expect(
+            (await processUtils.run(
+              <String>['whoohoo'],
+              environment: <String, String>{'DASH__TOOL': callerTool},
+            )).exitCode,
+            0,
+          );
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+      );
+    }
+
     testWithoutContext(
-      'falls back to a caller-supplied DASH__TOOL when the parent value cannot be a root tool',
+      'prefers a valid parent DASH__TOOL over a different caller-supplied value',
       () async {
         final ProcessUtils localProcessUtils = createProcessUtils(
-          platformEnvironment: const <String, String>{'DASH__TOOL': 'dart-mcp-server'},
+          platformEnvironment: const <String, String>{'DASH__TOOL': 'vscode-plugins'},
         );
 
         fakeProcessManager.addCommand(
@@ -653,7 +678,7 @@ void main() {
         expect(
           (await localProcessUtils.run(
             <String>['whoohoo'],
-            environment: const <String, String>{'DASH__TOOL': 'vscode-plugins'},
+            environment: const <String, String>{'DASH__TOOL': 'intellij-plugins'},
           )).exitCode,
           0,
         );

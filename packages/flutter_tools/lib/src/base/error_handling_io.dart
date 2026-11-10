@@ -1253,15 +1253,14 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
     // Propagate the root tool identifier down to the spawned process.
     //
-    // Prefer this process's `DASH__TOOL`, then a caller-supplied value, and
-    // otherwise report this tool. Only pass on a value that names a tool that
-    // can be a root tool. An invalid label or a shared component (for example
-    // `analysis-server`) is ignored, which matches how `package:unified_analytics`
-    // resolves the root tool for this process.
+    // This matches how `package:unified_analytics` resolves the root tool for
+    // this process (`DASH__TOOL` if it names a tool that can be a root tool,
+    // otherwise this tool), so the sub-tool reports the same root tool as this
+    // process. An invalid label or a shared component (for example
+    // `analysis-server`) is never passed on, and a caller-supplied value is
+    // ignored.
     environmentResult[DashEnvVar.tool.name] =
-        _asRootToolLabel(_platform.environment[DashEnvVar.tool.name]) ??
-        _asRootToolLabel(environmentResult[DashEnvVar.tool.name]) ??
-        DashTool.flutterTool.label;
+        _asRootToolLabel(_platform.environment[DashEnvVar.tool.name]) ?? DashTool.flutterTool.label;
 
     return environmentResult;
   }
