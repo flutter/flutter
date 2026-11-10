@@ -186,6 +186,7 @@ Future<void> run(List<String> args, Directory tempDir) async {
     );
     final debuggingOptions = DebuggingOptions.enabled(buildInfo);
     final testRunner = FlutterTestRunner(
+      analytics: dependencies.analytics,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: dependencies.toolContext,
     );

@@ -5,7 +5,6 @@
 import 'dart:isolate';
 
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/experimental/config.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
