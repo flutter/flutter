@@ -980,13 +980,6 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     super.dispose();
   }
 
-  void _goBallisticFromList(BallisticScrollActivity listActivity, double remainingVelocity) {
-    setPixels(minScrollExtent);
-    if (identical(activity, listActivity) && pixels == minScrollExtent) {
-      goBallistic(remainingVelocity);
-    }
-  }
-
   @override
   void goBallistic(double velocity) {
     if (velocity < 0.0 && listShouldScroll && !extent.isAtMin) {
@@ -1095,7 +1088,17 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   }
 }
 
-// Returns the list to its start before handing ballistic motion to the sheet.
+/// Returns the list to its start before continuing a downward fling in the sheet.
+///
+/// Used when the sheet can still shrink but its list has already been scrolled,
+/// for example after revealing a focused text field. The list follows its
+/// configured scroll physics until it reaches [ScrollPosition.minScrollExtent].
+/// At that boundary, the remaining velocity is handed to the sheet, preserving
+/// momentum and preventing the list from bouncing past its start.
+///
+/// A completed simulation hands off zero velocity, allowing the sheet to snap.
+/// If a scroll notification cancels this activity while applying the boundary
+/// position, the handoff is also cancelled.
 class _DraggableScrollableSheetBallisticScrollActivity extends BallisticScrollActivity {
   _DraggableScrollableSheetBallisticScrollActivity(
     super.delegate,
@@ -1103,6 +1106,8 @@ class _DraggableScrollableSheetBallisticScrollActivity extends BallisticScrollAc
     super.vsync,
     super.shouldIgnorePointer,
   );
+
+  bool _isDisposed = false;
 
   @override
   _DraggableScrollableSheetScrollPosition get delegate =>
@@ -1113,9 +1118,19 @@ class _DraggableScrollableSheetBallisticScrollActivity extends BallisticScrollAc
     if (value > delegate.minScrollExtent || delegate.extent.isAtMin) {
       return super.applyMoveTo(value);
     }
-    delegate._goBallisticFromList(this, math.min(velocity, 0.0));
+    final double remainingVelocity = math.min(velocity, 0.0);
+    delegate.setPixels(delegate.minScrollExtent);
+    if (!_isDisposed && delegate.pixels == delegate.minScrollExtent) {
+      delegate.goBallistic(remainingVelocity);
+    }
     // The old list activity must not go idle after the sheet takes over.
     return true;
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }
 
