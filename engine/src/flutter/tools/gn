@@ -65,6 +65,9 @@ def get_out_dir(args):
   if args.slimpeller:
     target_dir.append('slimpeller')
 
+  if not args.harfbuzz:
+    target_dir.append('no_harfbuzz')
+
   if args.target_dir != '':
     target_dir = [args.target_dir]
 
@@ -452,6 +455,8 @@ def to_gn_args(args):
   # If building for WASM, set the GN args using 'to_gn_wasm_args' as most
   # of the Flutter SDK specific arguments are unused.
   if args.target_os == 'wasm' or args.web:
+    if not args.harfbuzz:
+      raise Exception('--no-harfbuzz is only supported for macOS and iOS targets')
     to_gn_wasm_args(args, gn_args)
     return gn_args
 
@@ -483,6 +488,7 @@ def to_gn_args(args):
   gn_args['skia_use_wuffs'] = True
   gn_args['skia_use_expat'] = True
   gn_args['skia_use_fontconfig'] = args.enable_fontconfig
+  gn_args['skia_use_harfbuzz'] = args.harfbuzz
   gn_args['skia_use_icu'] = True
   gn_args['skia_use_xps'] = False  # Flutter does not use XPS
   gn_args['is_official_build'] = True  # Disable Skia test utilities.
@@ -530,6 +536,12 @@ def to_gn_args(args):
     gn_args['target_os'] = args.target_os
     gn_args['target_cpu'] = get_target_cpu(args)
     gn_args['dart_target_arch'] = gn_args['target_cpu']
+
+  if not args.harfbuzz and gn_args['target_os'] not in ['ios', 'mac']:
+    raise Exception('--no-harfbuzz is only supported for macOS and iOS targets')
+
+  if gn_args['target_os'] in ['ios', 'mac']:
+    gn_args['skia_use_apple_unicode'] = True
 
   if not args.build_engine_artifacts:
     gn_args['flutter_build_engine_artifacts'] = False
@@ -1251,6 +1263,14 @@ def parse_args(args):
       help='Enable optimizations that attempt to reduce binary size of the ' +
       'Flutter engine by assuming only the Impeller rendering engine is supported.' +
       'See [go/slimpeller-dashboard](https://github.com/orgs/flutter/projects/21) for details.'
+  )
+
+  parser.add_argument(
+      '--no-harfbuzz',
+      dest='harfbuzz',
+      action='store_false',
+      default=True,
+      help='Disable HarfBuzz text shaping (supported on macOS/iOS with CoreText paragraph shaping).'
   )
 
   # Sanitizers.

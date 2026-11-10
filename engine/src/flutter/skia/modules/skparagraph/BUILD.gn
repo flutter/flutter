@@ -14,10 +14,17 @@ declare_args() {
   paragraph_gms_enabled = true
   paragraph_tests_enabled = true
   paragraph_bench_enabled = false
+  skia_use_coretext_paragraph = skia_use_fonthost_mac
 }
 
 config("public_config") {
   defines = [ "SK_ENABLE_PARAGRAPH" ]
+  if (skia_use_coretext_paragraph) {
+    defines += [ "SK_PARAGRAPH_NATIVE_CORETEXT" ]
+  }
+  if (!skia_use_harfbuzz) {
+    defines += [ "SK_PARAGRAPH_DISABLE_HARFBUZZ" ]
+  }
   include_dirs = [ "$_skia_root/modules/skparagraph/include" ]
 }
 
@@ -29,6 +36,23 @@ skia_component("skparagraph") {
   public_configs = [ ":public_config" ]
   public = skparagraph_core_public
   sources = skparagraph_core_sources
+
+  if (skia_use_coretext_paragraph) {
+    sources += skparagraph_coretext_sources
+    frameworks = [
+      "CoreFoundation.framework",
+      "CoreGraphics.framework",
+      "CoreText.framework",
+    ]
+  }
+  if (!skia_use_harfbuzz) {
+    # OneLineShaper is the HarfBuzz shaper; CoreText-only builds lay out
+    # kCoreText alone.
+    sources -= [
+      "$_skia_root/modules/skparagraph/src/OneLineShaper.cpp",
+      "$_skia_root/modules/skparagraph/src/OneLineShaper.h",
+    ]
+  }
 
   public_deps = [
     "../..:skia",

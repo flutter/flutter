@@ -314,7 +314,9 @@ ParagraphBuilder::ParagraphBuilder(
                                         ->client()
                                         ->GetFontCollection();
 
-  auto impeller_enabled = UIDartState::Current()->IsImpellerEnabled();
+  auto* dart_state = UIDartState::Current();
+  style.enable_skoretext = dart_state->IsSkoreTextEnabled();
+  auto impeller_enabled = dart_state->IsImpellerEnabled();
   m_paragraph_builder_ = txt::ParagraphBuilder::CreateSkiaBuilder(
       style, font_collection.GetFontCollection(), impeller_enabled);
 }

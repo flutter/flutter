@@ -704,6 +704,18 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     switches.push_back("--enable-flutter-gpu=true");
   }
 
+  if (std::find(switches.begin(), switches.end(), "--enable-skoretext=false") != switches.end()) {
+    // Explicitly disabled via CLI; do not let Info.plist re-enable it.
+  } else if (std::find(switches.begin(), switches.end(), "--enable-skoretext=true") !=
+                 switches.end() ||
+             std::find(switches.begin(), switches.end(), "--enable-skoretext") != switches.end()) {
+    // Already explicitly enabled via CLI switches.
+  } else if (_project.enableSkoreText) {
+    switches.push_back("--enable-skoretext=true");
+  } else {
+    switches.push_back("--enable-skoretext=false");
+  }
+
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),
                  [](const std::string& arg) -> const char* { return arg.c_str(); });
 

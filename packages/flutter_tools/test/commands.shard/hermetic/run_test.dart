@@ -2137,6 +2137,7 @@ server:
           '--native-null-assertions',
           '--enable-impeller',
           '--enable-flutter-gpu',
+          '--enable-skoretext',
           '--enable-vulkan-validation',
           '--trace-systrace',
           '--enable-software-rendering',
@@ -2164,11 +2165,49 @@ server:
       expect(options.traceSystrace, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
       expect(options.enableFlutterGpu, true);
+      expect(options.enableSkoretext, true);
       expect(options.enableVulkanValidation, true);
       expect(options.enableSoftwareRendering, true);
       expect(options.skiaDeterministicRendering, true);
       expect(options.usingCISystem, true);
       expect(options.debugLogsDirectoryPath, 'path/to/logs');
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    '--no-enable-skoretext and omitted enable-skoretext propagate to debugging options',
+    () async {
+      final disabledCommand = RunCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext: const DelegatingToolContext(),
+      );
+      await expectLater(
+        () =>
+            createTestCommandRunner(disabledCommand).run(<String>['run', '--no-enable-skoretext']),
+        throwsToolExit(),
+      );
+      final DebuggingOptions disabledOptions = await disabledCommand.createDebuggingOptions();
+      expect(disabledOptions.enableSkoretext, isFalse);
+
+      final defaultCommand = RunCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext: const DelegatingToolContext(),
+      );
+      await expectLater(
+        () => createTestCommandRunner(defaultCommand).run(<String>['run']),
+        throwsToolExit(),
+      );
+      final DebuggingOptions defaultOptions = await defaultCommand.createDebuggingOptions();
+      expect(defaultOptions.enableSkoretext, isNull);
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),

@@ -26,6 +26,8 @@ class GNTestCase(unittest.TestCase):
                            os.path.join('out', 'ios_release'))
     self._expect_build_dir(['--ios', '--darwin-extension-safe', '--runtime-mode', 'release'],
                            os.path.join('out', 'ios_release_extension_safe'))
+    self._expect_build_dir(['--ios', '--no-harfbuzz'], os.path.join('out', 'ios_debug_no_harfbuzz'))
+    self._expect_build_dir(['--mac', '--no-harfbuzz'], os.path.join('out', 'mac_debug_no_harfbuzz'))
     self._expect_build_dir(['--android'], os.path.join('out', 'android_debug'))
     self._expect_build_dir(['--android', '--runtime-mode', 'release'],
                            os.path.join('out', 'android_release'))
@@ -64,6 +66,29 @@ class GNTestCase(unittest.TestCase):
   def test_cannot_use_ios_and_enable_unittests(self):
     with self.assertRaises(Exception):
       self._gn_args(['--ios', '--enable-unittests'])
+
+  def test_harfbuzz_and_apple_unicode_args(self):
+    ios_args = self._gn_args(['--ios'])
+    self.assertEqual(ios_args['skia_use_harfbuzz'], True)
+    self.assertEqual(ios_args['skia_use_apple_unicode'], True)
+
+    ios_no_hb_args = self._gn_args(['--ios', '--no-harfbuzz'])
+    self.assertEqual(ios_no_hb_args['skia_use_harfbuzz'], False)
+    self.assertEqual(ios_no_hb_args['skia_use_apple_unicode'], True)
+
+    mac_no_hb_args = self._gn_args(['--mac', '--no-harfbuzz'])
+    self.assertEqual(mac_no_hb_args['skia_use_harfbuzz'], False)
+    self.assertEqual(mac_no_hb_args['skia_use_apple_unicode'], True)
+
+    android_args = self._gn_args(['--android'])
+    self.assertEqual(android_args['skia_use_harfbuzz'], True)
+    self.assertNotIn('skia_use_apple_unicode', android_args)
+
+    with self.assertRaises(Exception):
+      self._gn_args(['--android', '--no-harfbuzz'])
+
+    with self.assertRaises(Exception):
+      self._gn_args(['--web', '--no-harfbuzz'])
 
   def test_parse_size(self):
     self.assertEqual(gn.parse_size('5B'), 5)

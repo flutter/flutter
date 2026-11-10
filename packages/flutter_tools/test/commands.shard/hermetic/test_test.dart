@@ -1936,6 +1936,43 @@ dev_dependencies:
     );
 
     testUsingContext(
+      'forwards an explicit --[no-]enable-skoretext and defaults to null when omitted',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final enabledCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
+        await createTestCommandRunner(enabledCommand)
+            .run(const <String>['test', '--no-pub', '--enable-skoretext']);
+        expect(testRunner.lastDebuggingOptionsValue.enableSkoretext, isTrue);
+
+        final disabledCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
+        await createTestCommandRunner(disabledCommand)
+            .run(const <String>['test', '--no-pub', '--no-enable-skoretext']);
+        expect(testRunner.lastDebuggingOptionsValue.enableSkoretext, isFalse);
+
+        final defaultCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
+        await createTestCommandRunner(defaultCommand).run(const <String>['test', '--no-pub']);
+        expect(testRunner.lastDebuggingOptionsValue.enableSkoretext, isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'uninstallApp defaults to true',
       () async {
         final testRunner = FakeFlutterTestRunner(0);
@@ -2303,6 +2340,7 @@ resolution: workspace
           'machine',
           'enable-flutter-gpu',
           'enable-hcpp',
+          'enable-skoretext',
           'deprecated-js-interop',
           'fatal-warnings',
           'experimental-faster-testing',
