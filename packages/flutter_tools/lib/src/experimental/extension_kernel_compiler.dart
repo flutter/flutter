@@ -365,7 +365,7 @@ class ExtensionKernelCompiler {
         closurePackages: closurePackages,
         sdkRevision: sdkRevision,
       );
-      return (cacheDir.childFile('${extension.name}-$sdkKey.dill'), true, sdkRevision);
+      return (cacheDir.childFile('${extension.name}-$sdkKey.dill').absolute, true, sdkRevision);
     }
     final File localDill = _fileSystem
         .directory(extension.workspaceRootPath)
@@ -374,7 +374,7 @@ class ExtensionKernelCompiler {
         .childDirectory('extensions')
         .childDirectory(extension.name)
         .childFile('extension.dill');
-    return (localDill, false, sdkRevision);
+    return (localDill.absolute, false, sdkRevision);
   }
 
   /// Resolves the shared cache directory for compiled `.dill` files via
