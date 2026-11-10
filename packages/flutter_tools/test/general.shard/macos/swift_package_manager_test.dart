@@ -1219,7 +1219,7 @@ let package = Package(
                   '${validPlugin3.path}/${platform.name}/valid_plugin_3',
                   stdout: _platformsJson(platform, highVersion),
                 ),
-                _dumpPackageCommand('${validPlugin2.path}/${platform.name}/valid_plugin_2'),
+                // valid_plugin_2's own manifest is not parsed again since the result is cached.
                 _rsyncCommand(
                   source: validPlugin2.path,
                   destination: '$buildSourcePackagesPath/valid_plugin_2-1.0.0',

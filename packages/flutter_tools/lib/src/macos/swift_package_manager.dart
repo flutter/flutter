@@ -49,10 +49,15 @@ const String kFileAnIssue =
 ///   * https://developer.apple.com/documentation/packagedescription/package -
 ///     documentation on Swift Package Manager manifest file, Package.swift.
 class SwiftPackageManager {
-  const SwiftPackageManager({required this._templateRenderer, required this._toolContext});
+  SwiftPackageManager({required this._templateRenderer, required this._toolContext});
 
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
+
+  /// Cache of parsed Swift package manifests, keyed by the manifest's path.
+  ///
+  /// Running `swift package dump-package` is expensive, so the result is cached.
+  final Map<String, Future<Map<String, Object?>?>> _parsedManifestCache = {};
 
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
@@ -399,7 +404,6 @@ class SwiftPackageManager {
     FlutterDarwinPlatform platform,
   ) async {
     final FileSystem fileSystem = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
     final String manifestContent = manifest.readAsStringSync();
     // Matches relative paths to sibling packages, such as "../plugin_1", capturing the package name.
     final dependencyPattern = RegExp(r'"\.\.\/([^"]+)"');
@@ -432,10 +436,8 @@ class SwiftPackageManager {
       pluginDependencies.add(pluginDependency);
 
       // Track the highest minimum deployment target required by any plugin dependency.
-      final Map<String, Object?>? dependencyManifestAsJson = await _parseSwiftPackage(
-        swiftPackageManifest: dependencyManifest,
-        processManager: _toolContext.processManager,
-        logger: logger,
+      final Map<String, Object?>? dependencyManifestAsJson = await _parseAndCacheSwiftPackage(
+        dependencyManifest,
       );
       if (dependencyManifestAsJson != null) {
         final SwiftPackageSupportedPlatform? dependencySupportedVersion =
@@ -456,11 +458,7 @@ class SwiftPackageManager {
 
     // If the plugin's manifest fails to parse, the plugin's own minimum deployment target is
     // unknown, so no override is determined.
-    final Map<String, Object?>? manifestAsJson = await _parseSwiftPackage(
-      swiftPackageManifest: manifest,
-      processManager: _toolContext.processManager,
-      logger: logger,
-    );
+    final Map<String, Object?>? manifestAsJson = await _parseAndCacheSwiftPackage(manifest);
     if (manifestAsJson == null) {
       return (pluginDependencies, null);
     }
@@ -681,6 +679,20 @@ class SwiftPackageManager {
     'dump-package',
   ];
 
+  /// Parses the Swift package manifest using [_parseSwiftPackage] and caches
+  /// the result in [_parsedManifestCache] so the same manifest is not parsed
+  /// more than once.
+  Future<Map<String, Object?>?> _parseAndCacheSwiftPackage(File swiftPackageManifest) {
+    return _parsedManifestCache.putIfAbsent(
+      swiftPackageManifest.path,
+      () => _parseSwiftPackage(
+        swiftPackageManifest: swiftPackageManifest,
+        processManager: _toolContext.processManager,
+        logger: _toolContext.logger,
+      ),
+    );
+  }
+
   /// Uses `swift` command line tool to convert Package.swift to json.
   static Future<Map<String, Object?>?> _parseSwiftPackage({
     required File swiftPackageManifest,
@@ -692,6 +704,15 @@ class SwiftPackageManager {
         convertSwiftPackageManifestToJsonCommand,
         workingDirectory: swiftPackageManifest.parent.path,
       );
+      if (parsedManifest.exitCode != 0) {
+        logger.printError(
+          'Failed to decode ${swiftPackageManifest.path}. $kFileAnIssue and include this file '
+          'and the following logs: \n'
+          'stdout: ${parsedManifest.stdout}\n'
+          'stderr: ${parsedManifest.stderr}',
+        );
+        return null;
+      }
       return json.decode(parsedManifest.stdout.toString()) as Map<String, Object?>;
     } on Exception catch (e, stackTrace) {
       logger.printError(

@@ -981,6 +981,14 @@ class FlutterPluginSwiftDependencies {
         SwiftPackageManager.convertSwiftPackageManifestToJsonCommand,
         workingDirectory: swiftPackageManifest.parent.path,
       );
+      if (parsedManifest.exitCode != 0) {
+        throwToolExit(
+          'Failed to decode ${swiftPackageManifest.path}. $kFileAnIssue and include this file '
+          'and the following logs: \n'
+          'stdout: ${parsedManifest.stdout}\n'
+          'stderr: ${parsedManifest.stderr}',
+        );
+      }
       return json.decode(parsedManifest.stdout.toString()) as Map<String, Object?>;
     } on Exception catch (e, stackTrace) {
       throwToolExit(
