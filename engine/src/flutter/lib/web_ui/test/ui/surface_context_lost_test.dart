@@ -120,8 +120,55 @@ void testMain() {
       () async {
         final Rasterizer rasterizer = renderer.rasterizer;
         final surfaceProvider = rasterizer.surfaceProvider as OffscreenSurfaceProvider;
-        final Surface surface = surfaceProvider.surfaceCreateFn(NoWebGLOffscreenCanvasProvider());
+        final OffscreenSurface surface = surfaceProvider.surfaceCreateFn(
+          NoWebGLOffscreenCanvasProvider(),
+        );
+        addTearDown(surface.dispose);
         await expectLater(surface.initialized, throwsStateError);
+
+        // Subsequent frames fail quietly rather than rethrowing the StateError.
+        final ui.Picture picture = drawPicture((ui.Canvas canvas) {
+          canvas.drawRect(
+            const ui.Rect.fromLTWH(0, 0, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFFFF0000),
+          );
+        });
+        final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(10, 10),
+          <ui.Picture>[picture],
+        );
+        expect(bitmaps, isEmpty);
+      },
+      skip:
+          !isSkwasm || isMultiThreaded || isFirefox || isSafari || !browserSupportsOffscreenCanvas,
+    );
+
+    test(
+      'context loss recreation failure reports error on initialized without unhandled async error',
+      () async {
+        final Rasterizer rasterizer = renderer.rasterizer;
+        final surfaceProvider = rasterizer.surfaceProvider as OffscreenSurfaceProvider;
+        final OffscreenSurface surface = surfaceProvider.surfaceCreateFn(
+          NoWebGLOffscreenCanvasProvider(validCanvasCount: 1),
+        );
+        addTearDown(surface.dispose);
+        await surface.initialized;
+
+        await surface.triggerContextLoss();
+        await surface.handledContextLossEvent;
+        await expectLater(surface.initialized, throwsStateError);
+
+        final ui.Picture picture = drawPicture((ui.Canvas canvas) {
+          canvas.drawRect(
+            const ui.Rect.fromLTWH(0, 0, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFFFF0000),
+          );
+        });
+        final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(10, 10),
+          <ui.Picture>[picture],
+        );
+        expect(bitmaps, isEmpty);
       },
       skip:
           !isSkwasm || isMultiThreaded || isFirefox || isSafari || !browserSupportsOffscreenCanvas,
@@ -143,13 +190,22 @@ class MockOffscreenCanvasProvider extends OffscreenCanvasProvider {
   }
 }
 
-/// Hands out canvases that already have a 2D context, so any attempt to create
-/// a WebGL context on them fails.
+/// Hands out canvases that already have a 2D context after [validCanvasCount]
+/// normal canvases, so any subsequent attempt to create a WebGL context on
+/// them fails.
 class NoWebGLOffscreenCanvasProvider extends OffscreenCanvasProvider {
+  NoWebGLOffscreenCanvasProvider({this.validCanvasCount = 0});
+
+  int validCanvasCount;
+
   @override
   DomOffscreenCanvas acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
     final DomOffscreenCanvas canvas = super.acquireCanvas(size, onContextLost: onContextLost);
-    canvas.getContext('2d');
+    if (validCanvasCount > 0) {
+      validCanvasCount--;
+    } else {
+      canvas.getContext('2d');
+    }
     return canvas;
   }
 }

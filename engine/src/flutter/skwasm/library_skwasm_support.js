@@ -364,6 +364,9 @@ mergeInto(LibraryManager.library, {
         enableExtensionsByDefault: true,
       };
       const contextHandle = GL.createContext(canvas, contextAttributes);
+      if (!contextHandle) {
+        return 0;
+      }
       handleToCanvasMap.set(contextHandle, canvas);
 
       // Register an event listener for the context lost event.
