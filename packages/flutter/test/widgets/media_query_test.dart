@@ -515,7 +515,7 @@ void main() {
           textScaler: TextScaler.linear(44),
           platformBrightness: Brightness.dark,
           accessibleNavigation: true,
-          alwaysUse24HourFormat: false,
+          alwaysUse24HourFormat: true,
         ),
         child: MediaQuery.fromView(
           view: tester.view,
@@ -550,10 +550,10 @@ void main() {
     expect(data.accessibleNavigation, true);
     expect(rebuildCount, 1);
 
-    expect(data.alwaysUse24HourFormat, false);
+    expect(data.alwaysUse24HourFormat, true);
     tester.platformDispatcher.alwaysUse24HourFormatTestValue = true;
     await tester.pump();
-    expect(data.alwaysUse24HourFormat, false);
+    expect(data.alwaysUse24HourFormat, true);
     expect(rebuildCount, 1);
 
     expect(data.devicePixelRatio, 44);
