@@ -15,6 +15,7 @@ import '../context/tool_context.dart';
 import '../project.dart';
 import 'gradle_utils.dart' as utils;
 import 'java.dart';
+import 'migrations/disable_new_dsl_migration.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -93,6 +94,9 @@ final gradleErrors = <GradleHandledError>[
   jlinkErrorWithJava21AndSourceCompatibility,
   missingNdkSourcePropertiesFile,
   applyingKotlinAndroidPluginErrorHandler,
+  // Must precede legacyVariantApiErrorHandler because KGP new-DSL stacktraces also log a BaseExtension cast.
+  kotlinAndroidPluginWithNewDslErrorHandler,
+  legacyVariantApiErrorHandler,
   useNewAgpDslErrorHandler,
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
@@ -888,6 +892,12 @@ const String kMigrateToBuiltInKotlinDocsUrl =
 const String kOptOutOfNewDslDocsUrl =
     'https://developer.android.com/build/releases/agp-9-0-0-release-notes';
 
+/// The URL for documentation on extending the Android Gradle Plugin with the
+/// variant API.
+// TODO(reidbaker-agent): Point to Flutter's newDsl migration guide once published (https://github.com/flutter/flutter/issues/193713).
+@visibleForTesting
+const kAgpVariantApiDocsUrl = 'https://developer.android.com/build/extend-agp';
+
 /// Handler when applying the kotlin-android plugin results in a build failure. This failure occurs when
 /// using AGP 9+ because built-in Kotlin has become the default behavior.
 @visibleForTesting
@@ -954,4 +964,219 @@ For instructions on how to opt out, see: $kOptOutOfNewDslDocsUrl
         return GradleBuildStatus.exit;
       },
   eventLabel: 'use-new-agp-dsl-error',
+);
+
+final _newDslPropertyPattern = RegExp(
+  r'^android\.newDsl(?:(?:[ \t]*[=:][ \t]*|[ \t]+)(\S.*?)|[ \t]*)$',
+);
+
+String _gradlePropertiesDisplayPath(FlutterProject project) {
+  try {
+    final File propertiesFile = project.android.hostAppGradleRoot.childFile('gradle.properties');
+    final FileSystem fs = project.directory.fileSystem;
+    if (fs.path.isWithin(project.directory.path, propertiesFile.path)) {
+      return fs.path
+          .relative(propertiesFile.path, from: project.directory.path)
+          .replaceAll(r'\', '/');
+    }
+    return propertiesFile.path;
+  } on UnimplementedError {
+    return 'android/gradle.properties';
+  }
+}
+
+bool _isNewDslDisabledInGradleProperties(FlutterProject project) {
+  try {
+    final File propertiesFile = project.android.hostAppGradleRoot.childFile('gradle.properties');
+    if (!propertiesFile.existsSync()) {
+      return false;
+    }
+    bool? isDisabled;
+    for (final String rawLine in propertiesFile.readAsLinesSync()) {
+      final String trimmedLeft = rawLine.trimLeft();
+      if (trimmedLeft.isEmpty || trimmedLeft.startsWith('#') || trimmedLeft.startsWith('!')) {
+        continue;
+      }
+      final RegExpMatch? match = _newDslPropertyPattern.firstMatch(trimmedLeft.trimRight());
+      if (match != null) {
+        isDisabled = (match.group(1) ?? '').toLowerCase() == 'false';
+      }
+    }
+    return isDisabled ?? false;
+  } on UnimplementedError {
+    return false;
+  } on FileSystemException {
+    return false;
+  } on FormatException {
+    return false;
+  }
+}
+
+String _newDslOptOutInstructions(FlutterProject project, {required String gradlePropertiesPath}) {
+  if (_isNewDslDisabledInGradleProperties(project)) {
+    return '$gradlePropertiesPath already sets android.newDsl=false; to build now, '
+        'remove any android.newDsl=true override in ~/.gradle/gradle.properties '
+        'or -Pandroid.newDsl command-line flags.\n'
+        'Android Gradle Plugin 10.0 removes the android.newDsl=false option.\n'
+        'For details, see: $kOptOutOfNewDslDocsUrl';
+  }
+  return 'To build now, set android.newDsl=false in $gradlePropertiesPath.\n'
+      'Do not add "$kNewDslTemplateMarker" or "$kNewDslMigratorMarker" above '
+      'android.newDsl=false; Flutter removes android.newDsl=false when preceded '
+      'by either comment.\n'
+      'Android Gradle Plugin 10.0 removes the android.newDsl=false option.\n'
+      'For details, see: $kOptOutOfNewDslDocsUrl';
+}
+
+final _kotlinAndroidWithNewDslPattern = RegExp(
+  r"The 'org\.jetbrains\.kotlin\.android' plugin is not compatible with AGP\b.*new DSL",
+);
+
+/// Handles the Kotlin Gradle plugin failure when `org.jetbrains.kotlin.android`
+/// is applied while `android.newDsl` is enabled and `android.builtInKotlin` is
+/// disabled.
+@visibleForTesting
+final kotlinAndroidPluginWithNewDslErrorHandler = GradleHandledError(
+  test: _kotlinAndroidWithNewDslPattern.hasMatch,
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        final String gradlePropertiesPath = _gradlePropertiesDisplayPath(project);
+        final String optOutInstructions = _newDslOptOutInstructions(
+          project,
+          gradlePropertiesPath: gradlePropertiesPath,
+        );
+        logger.printBox(
+          "${logger.terminal.warningMark} The 'org.jetbrains.kotlin.android' (kotlin-android) "
+          'Gradle plugin does not support android.newDsl=true.\n'
+          'Flutter applies kotlin-android automatically when android.builtInKotlin=false is set '
+          'in $gradlePropertiesPath, or a Gradle build script in the app or in a Flutter plugin '
+          'may apply kotlin-android directly.\n'
+          'Gradle identifies the build script or project under "* Where:" or "* What went wrong:" '
+          'above.\n\n'
+          '$optOutInstructions\n\n'
+          'If a Flutter plugin applies kotlin-android, upgrade the Flutter plugin or file an '
+          'issue with the plugin asking for built-in Kotlin support.\n'
+          'Otherwise, set android.builtInKotlin=true in $gradlePropertiesPath and remove any '
+          "'org.jetbrains.kotlin.android' (kotlin-android) declaration from the app's Gradle "
+          'build script.\n'
+          'For migration instructions, see: $kMigrateToBuiltInKotlinDocsUrl',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'kotlin-android-plugin-with-new-dsl-error',
+);
+
+final _runtimeConfirmedNewDslPatterns = <RegExp>[
+  // Groovy property access such as `android.applicationVariants` or `android { applicationVariants.all {} }`.
+  RegExp(
+    r"Could not get unknown property '(?:applicationVariants|libraryVariants|testVariants|unitTestVariants)' for object of type com\.android\.build\.\S*ExtensionImpl",
+  ),
+  // Groovy method call such as `android { variantFilter {} }` or `android { applicationVariants {} }`.
+  RegExp(
+    r'Could not find method (?:applicationVariants|libraryVariants|testVariants|unitTestVariants|variantFilter)\(\) for arguments \[[^\]]*\] on object of type com\.android\.build\.\S*ExtensionImpl',
+  ),
+  // Extension lookup such as `extensions.configure<LibraryExtension>` or `extensions.getByType(BaseExtension)`.
+  RegExp(
+    r"Extension of type '(?:com\.android\.build\.gradle\.(?:internal\.dsl\.)?)?(?:LibraryExtension|AppExtension|BaseAppModuleExtension|BaseExtension|TestedExtension|TestExtension)' does not exist\. Currently registered extension types: \[(?![^\]]*\bBaseAppModuleExtension\b)[^\]]*\b(?:ApplicationExtension|(?:Application|Library|DynamicFeature|Test)ExtensionImpl)\b",
+  ),
+  // JVM bytecode cast of the `android` extension to a legacy AGP extension class.
+  RegExp(
+    r'class com\.android\.build\.\S*ExtensionImpl\S* cannot be cast to class com\.android\.build\.gradle\.(?:(?:Base|Library|App|Tested|Test)Extension|internal\.dsl\.BaseAppModuleExtension)\b',
+  ),
+  // Groovy cast such as `project.android as BaseExtension`.
+  RegExp(
+    r"Cannot cast object .* with class 'com\.android\.build\.\S*ExtensionImpl[^']*' to class 'com\.android\.build\.gradle\.(?:(?:Base|Library|App|Tested|Test)Extension|internal\.dsl\.BaseAppModuleExtension)'",
+  ),
+];
+
+final _ambiguousScriptNewDslPatterns = <RegExp>[
+  // Groovy `android { sourceSets { applicationVariants.all {} } }` or `libraryVariants.all {}`.
+  RegExp(r'on source set (?:application|library) variants of type com\.android\.build\.'),
+  // Kotlin `.gradle.kts` build script reference to a legacy variant collection or `variantFilter`.
+  RegExp(
+    r"\.gradle\.kts:\d+:\d+:.*Unresolved reference '(?:applicationVariants|libraryVariants|testVariants|unitTestVariants|variantFilter)'\.",
+  ),
+];
+
+bool _matchesAnyPattern(String line, List<RegExp> patterns) {
+  return patterns.any((RegExp pattern) => pattern.hasMatch(line));
+}
+
+/// Handles Gradle build failures when a Gradle build script or plugin uses
+/// legacy Android Gradle Plugin extension types or variant APIs removed under
+/// `android.newDsl=true`.
+@visibleForTesting
+final legacyVariantApiErrorHandler = GradleHandledError(
+  test: (String line) =>
+      _matchesAnyPattern(line, _runtimeConfirmedNewDslPatterns) ||
+      _matchesAnyPattern(line, _ambiguousScriptNewDslPatterns),
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final List<String> lines = line.split('\n');
+        String? matchedRuntimeLine;
+        for (final candidate in lines) {
+          if (_matchesAnyPattern(candidate, _runtimeConfirmedNewDslPatterns)) {
+            matchedRuntimeLine = candidate;
+            break;
+          }
+        }
+        String? matchedAmbiguousLine;
+        if (matchedRuntimeLine == null) {
+          for (final candidate in lines) {
+            if (_matchesAnyPattern(candidate, _ambiguousScriptNewDslPatterns)) {
+              matchedAmbiguousLine = candidate;
+              break;
+            }
+          }
+        }
+        if (matchedRuntimeLine == null &&
+            matchedAmbiguousLine != null &&
+            _isNewDslDisabledInGradleProperties(project)) {
+          return GradleBuildStatus.exit;
+        }
+
+        final Logger logger = toolContext.logger;
+        final String gradlePropertiesPath = _gradlePropertiesDisplayPath(project);
+        final String optOutInstructions = _newDslOptOutInstructions(
+          project,
+          gradlePropertiesPath: gradlePropertiesPath,
+        );
+        final String echoedLine = (matchedRuntimeLine ?? matchedAmbiguousLine ?? lines.first)
+            .trim();
+        final errorLineSection = echoedLine.isEmpty ? '' : '\n$echoedLine\n\n';
+        logger.printBox(
+          '${logger.terminal.warningMark} A Gradle build script or Gradle plugin, in the app or '
+          'in a Flutter plugin, uses an Android Gradle Plugin API unavailable when '
+          'android.newDsl is enabled.\n'
+          '$errorLineSection'
+          'Gradle identifies the build script or project under "* Where:" or '
+          '"* What went wrong:" above.\n\n'
+          '$optOutInstructions\n\n'
+          'If a Flutter plugin or third-party Gradle plugin uses the removed API, upgrade the '
+          'plugin or file an issue with the plugin author asking for android.newDsl support.\n'
+          'If the build script is in the app, migrate the build script to the '
+          'com.android.build.api.dsl interfaces and the variant API '
+          '(androidComponents.onVariants or androidComponents.beforeVariants).\n'
+          'For migration instructions, see: $kAgpVariantApiDocsUrl',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'legacy-variant-api-error',
 );
