@@ -143,6 +143,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
 
+/// Whether composition parameters are currently cached for the platform view with `viewId`.
+///
+/// Only accessed from the raster thread.
+- (BOOL)hasCompositionParamsForView:(int64_t)viewId;
+
 /// @brief The composition order from the previous frame.
 ///
 /// Only accessed from the platform thread.
