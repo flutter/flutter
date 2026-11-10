@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:args/args.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -36,6 +37,7 @@ import '../src/test_build_system.dart';
 BundleBuilder createBundleBuilder({
   required BuildSystem buildSystem,
   required FileSystem fileSystem,
+  AndroidSdk? Function()? androidSdkBuilder,
   Artifacts? artifacts,
 }) {
   final processManager = FakeProcessManager.any();
@@ -43,6 +45,7 @@ BundleBuilder createBundleBuilder({
   final platform = FakePlatform();
   return BundleBuilder(
     analytics: const NoOpAnalytics(),
+    androidSdkBuilder: androidSdkBuilder,
     buildSystem: buildSystem,
     buildTargets: const BuildTargetsImpl(),
     toolContext: FakeToolContext(
@@ -136,6 +139,7 @@ void main() {
         'engine/src/out/host_debug',
       );
       expect(capturedEnvironment.engineVersion, isNull);
+      expect(capturedEnvironment.visualStudio, isNotNull);
     },
   );
 
@@ -445,6 +449,40 @@ flutter:
       );
     },
   );
+
+  testWithoutContext('forwards androidSdkBuilder lazily to Environment', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final fakeAndroidSdk = FakeAndroidSdk();
+    var sdkEvaluations = 0;
+    var evaluatedBeforeAccess = true;
+    AndroidSdk? capturedAndroidSdk;
+    final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+      Target target,
+      Environment environment,
+    ) {
+      evaluatedBeforeAccess = sdkEvaluations > 0;
+      capturedAndroidSdk = environment.androidSdk;
+    });
+    await createBundleBuilder(
+      androidSdkBuilder: () {
+        sdkEvaluations++;
+        return fakeAndroidSdk;
+      },
+      buildSystem: buildSystem,
+      fileSystem: fileSystem,
+    ).build(
+      platform: TargetPlatform.android_arm64,
+      buildInfo: BuildInfo.debug,
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      mainPath: fileSystem.path.join('lib', 'main.dart'),
+      assetDirPath: 'example',
+      depfilePath: 'example.d',
+    );
+
+    expect(evaluatedBeforeAccess, isFalse);
+    expect(sdkEvaluations, 1);
+    expect(capturedAndroidSdk, same(fakeAndroidSdk));
+  });
 }
 
 class FakeAssetBundle extends Fake implements AssetBundle {

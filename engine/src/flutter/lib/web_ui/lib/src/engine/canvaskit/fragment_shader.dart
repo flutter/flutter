@@ -10,7 +10,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 class CkFragmentProgram implements ui.FragmentProgram {
-  CkFragmentProgram(this.name, this.effect, this.uniforms, this.floatCount, this.textureCount);
+  CkFragmentProgram(this.name, this.effect, this._shaderData);
 
   factory CkFragmentProgram.fromBytes(String name, Uint8List data) {
     final shaderData = ShaderData.fromBytes(data);
@@ -19,24 +19,19 @@ class CkFragmentProgram implements ui.FragmentProgram {
       throw const FormatException('Invalid Shader Source');
     }
 
-    return CkFragmentProgram(
-      name,
-      effect,
-      shaderData.uniforms,
-      shaderData.floatCount,
-      shaderData.textureCount,
-    );
+    return CkFragmentProgram(name, effect, shaderData);
   }
 
   final String name;
   final SkRuntimeEffect effect;
-  final List<UniformData> uniforms;
-  final int floatCount;
-  final int textureCount;
+  final ShaderData _shaderData;
+  List<UniformData> get uniforms => _shaderData.uniforms;
+  int get floatCount => _shaderData.floatCount;
+  int get textureCount => _shaderData.textureCount;
 
   @override
   ui.FragmentShader fragmentShader() {
-    return EngineFragmentShader(CkFragmentShader(name, effect, this));
+    return EngineFragmentShader(CkFragmentShader(name, effect, this), _shaderData);
   }
 
   UniformData _getUniformFloatInfo(String name) {
@@ -315,11 +310,6 @@ class CkFragmentShader extends BackendFragmentShader implements CkShader {
         components[15],
       ),
     );
-  }
-
-  @override
-  ui.ImageSamplerSlot getImageSampler(String name) {
-    throw UnsupportedError('getImageSampler is not supported on the web.');
   }
 
   List<CkUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
