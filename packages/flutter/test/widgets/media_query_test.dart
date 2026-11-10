@@ -2090,7 +2090,9 @@ void main() {
     expect(heightBuildCount, 2);
   });
 
-  testWidgets('MediaQuery.fromView updates when alwaysUse24HourFormat changes at runtime', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView updates when alwaysUse24HourFormat changes at runtime', (
+    WidgetTester tester,
+  ) async {
     addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
     await tester.pumpWidget(
       MediaQuery.fromView(

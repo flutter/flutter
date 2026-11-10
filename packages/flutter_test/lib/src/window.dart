@@ -470,7 +470,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  VoidCallback? get onAlwaysUse24HourFormatChanged => _platformDispatcher.onAlwaysUse24HourFormatChanged;
+  VoidCallback? get onAlwaysUse24HourFormatChanged =>
+      _platformDispatcher.onAlwaysUse24HourFormatChanged;
   @override
   set onAlwaysUse24HourFormatChanged(VoidCallback? callback) {
     _platformDispatcher.onAlwaysUse24HourFormatChanged = callback;
