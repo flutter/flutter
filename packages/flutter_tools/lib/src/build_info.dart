@@ -589,11 +589,7 @@ extension CpuArchExtension on CpuArch {
   /// instructions are then built into architecture-specific binaries, which are
   /// merged into a universal binary using the `lipo` tool.
   String get dartName => switch (this) {
-    .armv7 => 'armv7',
-    .arm64 => 'arm64',
-    .x86 => 'x86',
-    .x64 => 'x64',
-    .riscv64 => 'riscv64',
+    .armv7 || .arm64 || .x86 || .x64 || .riscv64 => name,
     _ => throw UnsupportedError('Unexpected CPU arch $this'),
   };
 
@@ -604,8 +600,7 @@ extension CpuArchExtension on CpuArch {
   /// directories on iOS and macOS. This differs from [dartName] for
   /// [CpuArch.x64], which maps to `x86_64` here.
   String get darwinArchName => switch (this) {
-    .armv7 => 'armv7',
-    .arm64 => 'arm64',
+    .armv7 || .arm64 => name,
     .x64 => 'x86_64',
     _ => throw UnsupportedError('Unexpected Darwin CPU arch $this'),
   };
@@ -621,11 +616,11 @@ extension CpuArchExtension on CpuArch {
 
   /// The `TargetPlatform` name of the Android platform for this architecture.
   String get androidPlatformName => switch (this) {
-    .armv7 => 'android-arm',
-    .arm64 => 'android-arm64',
-    .x64 => 'android-x64',
+    .armv7 => TargetPlatform.android_arm,
+    .arm64 => TargetPlatform.android_arm64,
+    .x64 => TargetPlatform.android_x64,
     _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
-  };
+  }.getName();
 }
 
 /// The operating system (or runtime environment) that a [TargetPlatform]

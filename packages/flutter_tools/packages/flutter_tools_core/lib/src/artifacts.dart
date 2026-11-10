@@ -6,6 +6,12 @@ import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
 
+/// Matches a single-segment lowercase ASCII alphanumeric identifier.
+///
+/// Hyphens and underscores are disallowed because they delimit `<os>` and
+/// `<arch>` in [HostPlatform.cliName] and [HostPlatform.name].
+final RegExp _validIdentifierRegExp = RegExp(r'^[a-z0-9]+$');
+
 /// Platform-agnostic CPU architecture type.
 ///
 /// Built-in architectures are exposed as static constants (e.g. [x64],
@@ -18,7 +24,7 @@ final class CpuArch {
   /// `'x64'` or `'ppc64le'`).
   CpuArch(this.name)
     : assert(
-        _validNameRegExp.hasMatch(name),
+        _validIdentifierRegExp.hasMatch(name),
         'Invalid CPU architecture name (expected lowercase alphanumeric): "$name"',
       );
 
@@ -52,8 +58,6 @@ final class CpuArch {
   /// Standard built-in CPU architectures available in the Flutter tool.
   static const values = <CpuArch>[.unknown, .armv7, .arm64, .x86, .x64, .riscv64];
 
-  static final RegExp _validNameRegExp = RegExp(r'^[a-z0-9]+$');
-
   /// The canonical architecture identifier (e.g. `'x64'`, `'arm64'`, `'riscv64'`).
   final String name;
 
@@ -69,7 +73,7 @@ final class CpuArch {
       'x86' => .x86,
       'x64' || 'x86_64' => .x64,
       'riscv64' => .riscv64,
-      _ when _validNameRegExp.hasMatch(name) => CpuArch(name),
+      _ when _validIdentifierRegExp.hasMatch(name) => CpuArch(name),
       _ => null,
     };
   }
@@ -97,7 +101,7 @@ final class HostPlatform {
   /// (e.g. `'linux'`, `'darwin'`, `'freebsd'`) and [cpuArch].
   HostPlatform(this.osName, this.cpuArch)
     : assert(
-        _validOsNameRegExp.hasMatch(osName),
+        _validIdentifierRegExp.hasMatch(osName),
         'Invalid host OS name (expected lowercase alphanumeric): "$osName"',
       );
 
@@ -143,8 +147,6 @@ final class HostPlatform {
     .windows_x64,
     .windows_arm64,
   ];
-
-  static final RegExp _validOsNameRegExp = RegExp(r'^[a-z0-9]+$');
 
   // Matches a lowercase alphanumeric <os> and <arch> separated by a single '-' or '_'.
   static final RegExp _validNameRegExp = RegExp(r'^[a-z0-9]+[-_][a-z0-9]+$');
