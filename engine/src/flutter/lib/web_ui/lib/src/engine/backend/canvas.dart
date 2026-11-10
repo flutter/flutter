@@ -34,6 +34,8 @@ abstract class BackendCanvas {
 
   void saveLayer(ui.Rect? bounds, BackendPaint paint);
 
+  /// Saves a new layer that first applies [backdropFilter] to the content
+  /// behind it, sampling past the backdrop edges with [backdropTileMode].
   void saveLayerWithFilter(
     ui.Rect? bounds,
     BackendPaint paint,
@@ -43,14 +45,17 @@ abstract class BackendCanvas {
 
   void restore();
 
+  /// Pops the save stack until its depth is [count].
   void restoreToCount(int count);
 
+  /// The current save stack depth; a fresh canvas has a depth of 1.
   int getSaveCount();
 
   void translate(double dx, double dy);
 
   void scale(double sx, double sy);
 
+  /// Rotates the current transform clockwise by [radians].
   void rotate(double radians);
 
   void skew(double sx, double sy);
@@ -60,6 +65,7 @@ abstract class BackendCanvas {
   /// The caller has already checked that [matrix4] has 16 entries.
   void transform(Float64List matrix4);
 
+  /// The current transform as a 16-entry column-major matrix.
   Float64List getTransform();
 
   void clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias);
@@ -71,8 +77,10 @@ abstract class BackendCanvas {
   /// The current clip in device space, rounded out to whole pixels.
   ui.Rect getDestinationClipBounds();
 
+  /// Fills the current clip with [color], replacing the existing pixels.
   void clear(ui.Color color);
 
+  /// Whether [rect], in local coordinates, lies entirely outside the clip.
   bool quickReject(ui.Rect rect);
 
   void drawColor(ui.Color color, ui.BlendMode blendMode);
@@ -117,6 +125,8 @@ abstract class BackendCanvas {
     ui.FilterQuality filterQuality,
   );
 
+  /// Draws [image] as a nine-slice into [dst], where [center] is in image
+  /// coordinates.
   void drawImageNine(
     BackendImage image,
     ui.Rect center,
@@ -150,6 +160,8 @@ abstract class BackendCanvas {
     ui.FilterQuality filterQuality,
   );
 
+  /// Draws the shadow of [path]. [devicePixelRatio] scales the light
+  /// geometry from logical to physical pixels.
   void drawShadow(
     BackendPath path,
     ui.Color color,

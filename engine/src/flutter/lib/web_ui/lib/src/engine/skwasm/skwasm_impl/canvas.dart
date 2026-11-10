@@ -16,7 +16,8 @@ import 'package:ui/ui.dart' as ui;
 /// Validation, image tracking and paint lifetimes are handled by
 /// [EngineCanvas].
 class SkwasmCanvas implements BackendCanvas {
-  SkwasmCanvas(this._handle);
+  /// Creates a backend canvas that draws into the native canvas [handle].
+  SkwasmCanvas(CanvasHandle handle) : _handle = handle;
 
   // Note that we do not need to deal with the finalizer registry here, because
   // the underlying native skia object is tied directly to the lifetime of the
@@ -303,8 +304,6 @@ class SkwasmCanvas implements BackendCanvas {
 
   @override
   void drawParagraph(BackendParagraph paragraph, ui.Offset offset) {
-    // Note: Skwasm paragraphs are pre-built via ParagraphBuilder and their
-    // paint styles/shaders are managed directly by Skwasm's native paragraph.
     canvasDrawParagraph(_handle, (paragraph as SkwasmParagraph).handle, offset.dx, offset.dy);
   }
 

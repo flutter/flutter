@@ -21,14 +21,15 @@ final SkClipOp _clipOpIntersect = canvasKit.ClipOp.Intersect;
 /// This is intentionally not memory-managing the underlying [SkCanvas]. See
 /// the docs on [SkCanvas], which explain the reason.
 class CkCanvas implements BackendCanvas {
-  CkCanvas(this.skCanvas);
+  /// Creates a backend canvas that draws into [skCanvas].
+  CkCanvas(SkCanvas skCanvas) : _skCanvas = skCanvas;
 
   // Cubic equation coefficients recommended by Mitchell & Netravali
   // in their paper on cubic interpolation.
   static const double _kMitchellNetravali_B = 1.0 / 3.0;
   static const double _kMitchellNetravali_C = 1.0 / 3.0;
 
-  final SkCanvas skCanvas;
+  final SkCanvas _skCanvas;
 
   static SkImage _getSkImage(BackendImage image) {
     if (image is CkImageDelegate) {
@@ -39,12 +40,12 @@ class CkCanvas implements BackendCanvas {
 
   @override
   void save() {
-    skCanvas.save();
+    _skCanvas.save();
   }
 
   @override
   void saveLayer(ui.Rect? bounds, BackendPaint paint) {
-    skCanvas.saveLayer(
+    _skCanvas.saveLayer(
       (paint as CkPaint).skiaObject,
       bounds == null ? null : toSkRect(bounds),
       null,
@@ -60,7 +61,7 @@ class CkCanvas implements BackendCanvas {
     BackendImageFilter backdropFilter,
     ui.TileMode backdropTileMode,
   ) {
-    skCanvas.saveLayer(
+    _skCanvas.saveLayer(
       (paint as CkPaint).skiaObject,
       bounds == null ? null : toSkRect(bounds),
       (backdropFilter as CkImageFilter).nativeFilter,
@@ -71,42 +72,42 @@ class CkCanvas implements BackendCanvas {
 
   @override
   void restore() {
-    skCanvas.restore();
+    _skCanvas.restore();
   }
 
   @override
   void restoreToCount(int count) {
-    skCanvas.restoreToCount(count.toDouble());
+    _skCanvas.restoreToCount(count.toDouble());
   }
 
   @override
   int getSaveCount() {
-    return skCanvas.getSaveCount().toInt();
+    return _skCanvas.getSaveCount().toInt();
   }
 
   @override
   void translate(double dx, double dy) {
-    skCanvas.translate(dx, dy);
+    _skCanvas.translate(dx, dy);
   }
 
   @override
   void scale(double sx, double sy) {
-    skCanvas.scale(sx, sy);
+    _skCanvas.scale(sx, sy);
   }
 
   @override
   void rotate(double radians) {
-    skCanvas.rotate(radians * 180.0 / math.pi, 0.0, 0.0);
+    _skCanvas.rotate(radians * 180.0 / math.pi, 0.0, 0.0);
   }
 
   @override
   void skew(double sx, double sy) {
-    skCanvas.skew(sx, sy);
+    _skCanvas.skew(sx, sy);
   }
 
   @override
   void transform(Float64List matrix4) {
-    skCanvas.concat(toSkM44FromFloat32(toMatrix32(matrix4)));
+    _skCanvas.concat(toSkM44FromFloat32(toMatrix32(matrix4)));
   }
 
   @override
@@ -115,7 +116,7 @@ class CkCanvas implements BackendCanvas {
   }
 
   Float32List _getLocalToDevice() {
-    final List<dynamic> list = skCanvas.getLocalToDevice();
+    final List<dynamic> list = _skCanvas.getLocalToDevice();
     final matrix4 = Float32List(16);
     for (var r = 0; r < 4; r++) {
       for (var c = 0; c < 4; c++) {
@@ -127,72 +128,72 @@ class CkCanvas implements BackendCanvas {
 
   @override
   void clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {
-    skCanvas.clipRect(toSkRect(rect), toSkClipOp(clipOp), doAntiAlias);
+    _skCanvas.clipRect(toSkRect(rect), toSkClipOp(clipOp), doAntiAlias);
   }
 
   @override
   void clipRRect(ui.RRect rrect, bool doAntiAlias) {
-    skCanvas.clipRRect(toSkRRect(rrect), _clipOpIntersect, doAntiAlias);
+    _skCanvas.clipRRect(toSkRRect(rrect), _clipOpIntersect, doAntiAlias);
   }
 
   @override
   void clipPath(BackendPath path, bool doAntiAlias) {
-    skCanvas.clipPath((path as CkPath).skiaObject, _clipOpIntersect, doAntiAlias);
+    _skCanvas.clipPath((path as CkPath).skiaObject, _clipOpIntersect, doAntiAlias);
   }
 
   @override
   ui.Rect getDestinationClipBounds() {
-    return rectFromSkIRect(skCanvas.getDeviceClipBounds());
+    return rectFromSkIRect(_skCanvas.getDeviceClipBounds());
   }
 
   @override
   void clear(ui.Color color) {
-    skCanvas.clear(toSharedSkColor1(color));
+    _skCanvas.clear(toSharedSkColor1(color));
   }
 
   @override
   bool quickReject(ui.Rect rect) {
-    return skCanvas.quickReject(toSkRect(rect));
+    return _skCanvas.quickReject(toSkRect(rect));
   }
 
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
-    skCanvas.drawColorInt(color.value.toDouble(), toSkBlendMode(blendMode));
+    _skCanvas.drawColorInt(color.value.toDouble(), toSkBlendMode(blendMode));
   }
 
   @override
   void drawLine(ui.Offset p1, ui.Offset p2, BackendPaint paint) {
-    skCanvas.drawLine(p1.dx, p1.dy, p2.dx, p2.dy, (paint as CkPaint).skiaObject);
+    _skCanvas.drawLine(p1.dx, p1.dy, p2.dx, p2.dy, (paint as CkPaint).skiaObject);
   }
 
   @override
   void drawPaint(BackendPaint paint) {
-    skCanvas.drawPaint((paint as CkPaint).skiaObject);
+    _skCanvas.drawPaint((paint as CkPaint).skiaObject);
   }
 
   @override
   void drawRect(ui.Rect rect, BackendPaint paint) {
-    skCanvas.drawRect(toSkRect(rect), (paint as CkPaint).skiaObject);
+    _skCanvas.drawRect(toSkRect(rect), (paint as CkPaint).skiaObject);
   }
 
   @override
   void drawRRect(ui.RRect rrect, BackendPaint paint) {
-    skCanvas.drawRRect(toSkRRect(rrect), (paint as CkPaint).skiaObject);
+    _skCanvas.drawRRect(toSkRRect(rrect), (paint as CkPaint).skiaObject);
   }
 
   @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, BackendPaint paint) {
-    skCanvas.drawDRRect(toSkRRect(outer), toSkRRect(inner), (paint as CkPaint).skiaObject);
+    _skCanvas.drawDRRect(toSkRRect(outer), toSkRRect(inner), (paint as CkPaint).skiaObject);
   }
 
   @override
   void drawOval(ui.Rect rect, BackendPaint paint) {
-    skCanvas.drawOval(toSkRect(rect), (paint as CkPaint).skiaObject);
+    _skCanvas.drawOval(toSkRect(rect), (paint as CkPaint).skiaObject);
   }
 
   @override
   void drawCircle(ui.Offset center, double radius, BackendPaint paint) {
-    skCanvas.drawCircle(center.dx, center.dy, radius, (paint as CkPaint).skiaObject);
+    _skCanvas.drawCircle(center.dx, center.dy, radius, (paint as CkPaint).skiaObject);
   }
 
   @override
@@ -204,7 +205,7 @@ class CkCanvas implements BackendCanvas {
     BackendPaint paint,
   ) {
     const double toDegrees = 180 / math.pi;
-    skCanvas.drawArc(
+    _skCanvas.drawArc(
       toSkRect(rect),
       startAngle * toDegrees,
       sweepAngle * toDegrees,
@@ -215,7 +216,7 @@ class CkCanvas implements BackendCanvas {
 
   @override
   void drawPath(BackendPath path, BackendPaint paint) {
-    skCanvas.drawPath((path as CkPath).skiaObject, (paint as CkPaint).skiaObject);
+    _skCanvas.drawPath((path as CkPath).skiaObject, (paint as CkPaint).skiaObject);
   }
 
   @override
@@ -228,7 +229,7 @@ class CkCanvas implements BackendCanvas {
     final SkImage skImage = _getSkImage(image);
     final SkPaint skPaint = (paint as CkPaint).skiaObject;
     if (filterQuality == ui.FilterQuality.high) {
-      skCanvas.drawImageCubic(
+      _skCanvas.drawImageCubic(
         skImage,
         offset.dx,
         offset.dy,
@@ -237,7 +238,7 @@ class CkCanvas implements BackendCanvas {
         skPaint,
       );
     } else {
-      skCanvas.drawImageOptions(
+      _skCanvas.drawImageOptions(
         skImage,
         offset.dx,
         offset.dy,
@@ -259,7 +260,7 @@ class CkCanvas implements BackendCanvas {
     final SkImage skImage = _getSkImage(image);
     final SkPaint skPaint = (paint as CkPaint).skiaObject;
     if (filterQuality == ui.FilterQuality.high) {
-      skCanvas.drawImageRectCubic(
+      _skCanvas.drawImageRectCubic(
         skImage,
         toSkRect(src),
         toSkRect(dst),
@@ -268,7 +269,7 @@ class CkCanvas implements BackendCanvas {
         skPaint,
       );
     } else {
-      skCanvas.drawImageRectOptions(
+      _skCanvas.drawImageRectOptions(
         skImage,
         toSkRect(src),
         toSkRect(dst),
@@ -287,7 +288,7 @@ class CkCanvas implements BackendCanvas {
     BackendPaint paint,
     ui.FilterQuality filterQuality,
   ) {
-    skCanvas.drawImageNine(
+    _skCanvas.drawImageNine(
       _getSkImage(image),
       toSkRect(center),
       toSkRect(dst),
@@ -298,22 +299,22 @@ class CkCanvas implements BackendCanvas {
 
   @override
   void drawPicture(ui.Picture picture) {
-    skCanvas.drawPicture((picture as CkPicture).skiaObject);
+    _skCanvas.drawPicture((picture as CkPicture).skiaObject);
   }
 
   @override
   void drawParagraph(BackendParagraph paragraph, ui.Offset offset) {
-    skCanvas.drawParagraph((paragraph as CkParagraph).skiaObject, offset.dx, offset.dy);
+    _skCanvas.drawParagraph((paragraph as CkParagraph).skiaObject, offset.dx, offset.dy);
   }
 
   @override
   void drawPoints(ui.PointMode pointMode, Float32List points, BackendPaint paint) {
-    skCanvas.drawPoints(toSkPointMode(pointMode), points, (paint as CkPaint).skiaObject);
+    _skCanvas.drawPoints(toSkPointMode(pointMode), points, (paint as CkPaint).skiaObject);
   }
 
   @override
   void drawVertices(BackendVertices vertices, ui.BlendMode blendMode, BackendPaint paint) {
-    skCanvas.drawVertices(
+    _skCanvas.drawVertices(
       (vertices as CkVertices).skiaObject,
       toSkBlendMode(blendMode),
       (paint as CkPaint).skiaObject,
@@ -335,7 +336,7 @@ class CkCanvas implements BackendCanvas {
     BackendPaint paint,
     ui.FilterQuality filterQuality,
   ) {
-    skCanvas.drawAtlas(
+    _skCanvas.drawAtlas(
       _getSkImage(atlas),
       rects,
       rstTransforms,
@@ -355,7 +356,7 @@ class CkCanvas implements BackendCanvas {
     double devicePixelRatio,
   ) {
     drawSkShadow(
-      skCanvas,
+      _skCanvas,
       (path as CkPath).skiaObject,
       color,
       elevation,

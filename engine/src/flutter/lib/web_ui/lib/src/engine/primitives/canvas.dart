@@ -25,7 +25,7 @@ import 'package:ui/ui.dart' as ui;
 ///    [EngineVertices], [EngineParagraph], [EngineImageFilter]) into their
 ///    backend delegates.
 class EngineCanvas implements LayerCanvas {
-  /// Creates a canvas that forwards to [_backend].
+  /// Creates a canvas that forwards every operation to the given backend.
   ///
   /// When recording, [recorder] is the picture recorder that owns the native
   /// canvas, and [tracker] retains the image sources drawn into it. Canvases
@@ -172,7 +172,7 @@ class EngineCanvas implements LayerCanvas {
   ui.Rect getLocalClipBounds() {
     final transform = Matrix4.fromFloat32List(toMatrix32(_backend.getTransform()));
     if (transform.invert() == 0) {
-      // non-invertible transforms collapse space to a line or point
+      // Non-invertible transforms collapse space to a line or point.
       return ui.Rect.zero;
     }
     return transform.transformRect(_backend.getDestinationClipBounds());
@@ -363,7 +363,7 @@ class EngineCanvas implements LayerCanvas {
 
   /// Draws a sequence of points according to [pointMode].
   ///
-  /// Retains any image sources referenced by [paint] (such as an [ImageShader]).
+  /// Retains any image sources referenced by [paint] (such as an [ui.ImageShader]).
   @override
   void drawPoints(ui.PointMode pointMode, List<ui.Offset> points, ui.Paint paint) {
     final int pointCount = points.length;
@@ -380,7 +380,7 @@ class EngineCanvas implements LayerCanvas {
   /// Draws a sequence of points from raw float coordinates according to
   /// [pointMode].
   ///
-  /// Retains any image sources referenced by [paint] (such as an [ImageShader]).
+  /// Retains any image sources referenced by [paint] (such as an [ui.ImageShader]).
   @override
   void drawRawPoints(ui.PointMode pointMode, Float32List points, ui.Paint paint) {
     if (points.length % 2 != 0) {
@@ -399,7 +399,7 @@ class EngineCanvas implements LayerCanvas {
   /// Draws a set of triangles/vertices with optional texture coordinates and
   /// colors.
   ///
-  /// Retains any image sources referenced by [paint] (such as an [ImageShader]).
+  /// Retains any image sources referenced by [paint] (such as an [ui.ImageShader]).
   @override
   void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
     assert(!vertices.debugDisposed);
