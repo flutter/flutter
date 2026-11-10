@@ -712,8 +712,9 @@ void main() {
                       },
                       child: const SizedBox.square(dimension: 10.0),
                     )
-                  : OverlayPortal.targetsRootOverlay(
+                  : OverlayPortal(
                       controller: controller,
+                      overlayLocation: OverlayChildLocation.rootOverlay,
                       overlayChildBuilder: (BuildContext context) => buildOverlayChild(),
                       child: const SizedBox.square(dimension: 10.0),
                     ),
