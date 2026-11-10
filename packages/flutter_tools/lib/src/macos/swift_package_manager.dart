@@ -532,8 +532,9 @@ class SwiftPackageManager {
       );
     }
     var platformOverride = '';
-    if (minimumDeploymentOverride != null &&
-        manifestContent.contains(RegExp(r'\bpackage\s*=\s*Package\s*\('))) {
+    // The override assigns to `package.platforms`, so it can only be applied if the manifest
+    // declares a variable named `package`.
+    if (minimumDeploymentOverride != null && _declaresPackageVariable(manifestContent)) {
       platformOverride =
           '\n\n'
           '// Overriding platform to match minimum of dependencies.\n'
@@ -544,6 +545,20 @@ class SwiftPackageManager {
         '// Basename of original plugin: $basename';
     copiedManifest.writeAsStringSync(newManifestContent);
     return packagePath;
+  }
+
+  /// Whether the Swift package [manifestContent] declares a variable named `package` that is
+  /// assigned a `Package`.
+  ///
+  /// Example matches:
+  /// ```swift
+  /// let package = Package(
+  /// var package = Package(
+  /// let package: Package = Package(
+  /// let package=Package(
+  /// ```
+  static bool _declaresPackageVariable(String manifestContent) {
+    return manifestContent.contains(RegExp(r'\bpackage\s*(:\s*Package)?\s*=\s*Package\s*\('));
   }
 
   /// Returns Flutter framework dependencies for the `FlutterGeneratedPluginSwiftPackage`.
