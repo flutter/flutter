@@ -590,9 +590,6 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # TODO(flutter/flutter#164140): Reduce timeout once customer
-      # tests are sharded.
-      test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
   # The DevTools tests build DevTools from source and take as long as the rest
   # of the registry, and their test step only runs on Linux.
@@ -1503,7 +1500,6 @@ targets:
       subshard: "1_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1532,7 +1528,6 @@ targets:
       subshard: "2_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1561,7 +1556,6 @@ targets:
       subshard: "3_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1590,7 +1584,6 @@ targets:
       subshard: "4_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1619,7 +1612,6 @@ targets:
       subshard: "5_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1648,7 +1640,6 @@ targets:
       subshard: "6_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1677,7 +1668,6 @@ targets:
       subshard: "7_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2379,7 +2369,6 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4123,7 +4112,6 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -6313,7 +6301,6 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
@@ -7610,7 +7597,6 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -7632,7 +7618,6 @@ targets:
       subshard: "2_2"
       tags: >
         ["framework", "hostonly", "shard"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
     - dev/**
     - packages/flutter_tools/**
