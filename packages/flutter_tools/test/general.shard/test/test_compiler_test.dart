@@ -490,6 +490,7 @@ environment:
   testWithoutContext(
     'TestCompiler falls back to copying dill when cross-volume rename fails with EXDEV',
     () async {
+      // POSIX EXDEV (errno 18): Invalid cross-device link.
       const exdev = 18;
       const compiledBytes = <int>[4, 5, 6, 7];
       final copiedPaths = <String>[];

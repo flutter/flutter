@@ -2066,7 +2066,9 @@ Please ensure that the SDK and/or project is installed in a location that has re
   });
 
   group('moveOrCopy', () {
+    // POSIX EXDEV (errno 18): Invalid cross-device link.
     const exdev = 18;
+    // POSIX ENOSPC (errno 28): No space left on device.
     const enospc = 28;
 
     testWithoutContext(

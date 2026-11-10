@@ -327,6 +327,9 @@ class TestCompiler {
             await outputFile.copy(testFilePath);
           }
           final String path = request.mainUri.toFilePath(windows: platform.isWindows);
+          // If rename falls back to a copy, outputFile is left in place; it is
+          // overwritten by the next compile and deleted with
+          // outputDillDirectory on dispose.
           final File kernelReadyToRun = await ErrorHandlingFileSystem.moveOrCopy(
             outputFile,
             '$path.dill',
