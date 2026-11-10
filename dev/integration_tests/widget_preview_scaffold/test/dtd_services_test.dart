@@ -3,25 +3,54 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Process, ProcessStartMode;
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
+import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:flutter_tools/src/widget_preview/persistent_preferences.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/fake.dart';
 import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
 import '../../../../packages/flutter_tools/test/src/common.dart';
-import '../../../../packages/flutter_tools/test/src/context.dart';
+import '../../../../packages/flutter_tools/test/src/fake_process_manager.dart'
+    show ProcessManager;
 import '../../../../packages/flutter_tools/test/src/fakes.dart';
-import '../../../../packages/flutter_tools/test/commands.shard/permeable/utils/project_testing_utils.dart';
+
+const _kProjectRootPath = '/project';
+
+class _LocalProcessManager extends Fake implements ProcessManager {
+  @override
+  Future<Process> start(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) {
+    return Process.start(
+      command.first.toString(),
+      <String>[for (final Object arg in command.skip(1)) arg.toString()],
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      mode: mode,
+    );
+  }
+}
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   FakeFlutterProject();
@@ -32,24 +61,73 @@ class FakeAnalysisServer extends Fake implements AnalysisServer {
   Future<void> connectToDtd({required Uri dtdUri}) async {}
 }
 
+class _FakeDtdArtifacts extends Fake implements Artifacts {
+  _FakeDtdArtifacts({required this.dartBinaryPath});
+
+  final String dartBinaryPath;
+
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) {
+    if (artifact == Artifact.engineDartBinary) {
+      return dartBinaryPath;
+    }
+    throw UnimplementedError('Unexpected artifact: $artifact');
+  }
+}
+
+String _resolveDartBinaryPath() {
+  const Platform platform = LocalPlatform();
+  final String flutterRoot = switch (platform.environment['FLUTTER_ROOT']) {
+    final String root when root.isNotEmpty => root,
+    _ => path.normalize(path.absolute('..', '..', '..')),
+  };
+  final String dartBinaryName = platform.isWindows ? 'dart.exe' : 'dart';
+  return path.join(
+    flutterRoot,
+    'bin',
+    'cache',
+    'dart-sdk',
+    'bin',
+    dartBinaryName,
+  );
+}
+
 void main() {
   late WidgetPreviewDtdServices dtdServer;
-  late LoggingProcessManager loggingProcessManager;
   late Logger logger;
+  WidgetPreviewScaffoldDtdServices? scaffoldDtd;
 
-  setUp(() async {
-    loggingProcessManager = LoggingProcessManager();
+  setUp(() {
     logger = BufferLogger.test();
   });
 
   tearDown(() async {
+    await scaffoldDtd?.dtd.close();
+    scaffoldDtd = null;
     await dtdServer.shutdownHooks.runShutdownHooks(logger);
   });
 
   Future<WidgetPreviewDtdServices> launchDtdServer({
+    Future<void> Function()? onHotReloadPreviewer,
     void Function()? onHotRestartPreviewerRequest,
+    Uri? Function()? webPreviewUriProvider,
   }) async {
     final server = WidgetPreviewDtdServices(
+      addUuidToServiceName: false,
+      dtdLauncher: DtdLauncher(
+        artifacts: _FakeDtdArtifacts(dartBinaryPath: _resolveDartBinaryPath()),
+        logger: logger,
+        processManager: _LocalProcessManager(),
+      ),
+      fs: MemoryFileSystem.test(),
+      logger: logger,
+      onHotReloadPreviewer: onHotReloadPreviewer,
+      onHotRestartPreviewerRequest: onHotRestartPreviewerRequest ?? () {},
       previewAnalytics: WidgetPreviewAnalytics(
         analytics: getInitializedFakeAnalyticsInstance(
           // We don't care about anything written to the file system by analytics, so we're safe
@@ -58,46 +136,93 @@ void main() {
           fakeFlutterVersion: FakeFlutterVersion(),
         ),
       ),
-      fs: MemoryFileSystem.test(),
-      logger: logger,
-      shutdownHooks: ShutdownHooks(),
-      dtdLauncher: DtdLauncher(
-        logger: logger,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
-      ),
-      onHotRestartPreviewerRequest: onHotRestartPreviewerRequest ?? () {},
       project: FakeFlutterProject(),
-      addUuidToServiceName: false,
+      projectRootPath: _kProjectRootPath,
+      shutdownHooks: ShutdownHooks(),
+      webPreviewUriProvider: webPreviewUriProvider,
     );
     await server.launchAndConnect(analysisServer: FakeAnalysisServer());
     return server;
   }
 
   group('$WidgetPreviewDtdServices', () {
-    testUsingContext(
-      'handles ${WidgetPreviewDtdServices.kHotRestartPreviewer} invocations',
+    testWithoutContext(
+      'handles ${WidgetPreviewDtdServices.kHotRestartPreviewer} and '
+      '${WidgetPreviewDtdServices.kHotReloadPreviewer} invocations',
       () async {
-        // Start DTD and register the widget preview DTD services with a custom handler for hot
-        // restart requests.
         final hotRestartRequestCompleter = Completer<void>();
+        final hotReloadRequestCompleter = Completer<void>();
         dtdServer = await launchDtdServer(
+          onHotReloadPreviewer: () async {
+            hotReloadRequestCompleter.complete();
+          },
           onHotRestartPreviewerRequest: hotRestartRequestCompleter.complete,
         );
 
-        // Connect to the DTD instance and invoke the hot restart endpoint.
         final dtd = WidgetPreviewScaffoldDtdServices();
+        scaffoldDtd = dtd;
+        expect(
+          dtd.scaffoldServiceName,
+          WidgetPreviewDtdServices.kWidgetPreviewScaffoldServiceRoot,
+        );
         await dtd.connect(dtdUri: dtdServer.dtdUri);
 
         await dtd.hotRestartPreviewer();
-
-        // Ensure the custom handler is actually invoked.
         await hotRestartRequestCompleter.future;
+
+        await dtd.hotReloadPreviewer();
+        await hotReloadRequestCompleter.future;
       },
-      overrides: <Type, Generator>{ProcessManager: () => loggingProcessManager},
     );
 
-    testUsingContext(
+    testWithoutContext(
+      'handles ${WidgetPreviewDtdServices.kGetWebPreviewUrl} and '
+      '${WidgetPreviewDtdServices.kGetServiceInfo} invocations',
+      () async {
+        Uri? currentWebUri;
+        dtdServer = await launchDtdServer(
+          webPreviewUriProvider: () => currentWebUri,
+        );
+
+        final dtd = WidgetPreviewScaffoldDtdServices();
+        scaffoldDtd = dtd;
+        await dtd.connect(dtdUri: dtdServer.dtdUri);
+        await dtdServer.waitForScaffoldConnected();
+
+        // Returns null when web preview URL is unavailable (kNoValueForKey).
+        expect(await dtd.getWebPreviewUrl(), isNull);
+
+        // Returns active web preview Uri once available.
+        final expectedWebUri = Uri.parse('http://127.0.0.1:8080');
+        currentWebUri = expectedWebUri;
+        expect(await dtd.getWebPreviewUrl(), expectedWebUri);
+
+        final Map<String, Object?>? info = await dtd.getServiceInfo();
+        expect(info, isNotNull);
+        expect(info![PreviewServiceInfo.kType], PreviewServiceInfo.kTypeName);
+        expect(info[PreviewServiceInfo.kDtdUri], dtdServer.dtdUri.toString());
+        expect(info[PreviewServiceInfo.kProjectRoot], _kProjectRootPath);
+        expect(
+          info[PreviewServiceInfo.kPreviewService],
+          WidgetPreviewDtdServices.kWidgetPreviewServiceRoot,
+        );
+        expect(
+          info[PreviewServiceInfo.kScaffoldService],
+          WidgetPreviewDtdServices.kWidgetPreviewScaffoldServiceRoot,
+        );
+        expect(
+          info[PreviewServiceInfo.kScaffoldStream],
+          WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
+        );
+        expect(
+          info[PreviewServiceInfo.kWebPreviewUri],
+          expectedWebUri.toString(),
+        );
+        expect(info[PreviewServiceInfo.kScaffoldConnected], isTrue);
+      },
+    );
+
+    testWithoutContext(
       'handles ${WidgetPreviewDtdServices.kGetDevToolsUri} invocation',
       () async {
         // Start DTD and register the widget preview DTD services.
@@ -105,22 +230,22 @@ void main() {
 
         // Connect to the DTD instance and invoke the getDevToolsUri endpoint.
         final dtd = WidgetPreviewScaffoldDtdServices();
+        scaffoldDtd = dtd;
         await dtd.connect(dtdUri: dtdServer.dtdUri);
 
-        final devToolsUriResponseFuture = dtd.getDevToolsUri();
+        final Future<Uri> devToolsUriResponseFuture = dtd.getDevToolsUri();
 
         dtdServer.setDevToolsServerAddress(
           devToolsServerAddress: Uri.http('localhost:8282', 'devtools'),
           applicationUri: Uri(scheme: 'ws', host: 'localhost', port: 1234),
         );
-        final actualDevToolsUri = await dtdServer.devToolsServerAddress;
+        final Uri actualDevToolsUri = await dtdServer.devToolsServerAddress;
         expect(await devToolsUriResponseFuture, actualDevToolsUri);
       },
-      overrides: <Type, Generator>{ProcessManager: () => loggingProcessManager},
     );
 
-    testUsingContext(
-      'can set and retreive values from $PersistentPreferences',
+    testWithoutContext(
+      'can set and retrieve values from $PersistentPreferences',
       () async {
         dtdServer = await launchDtdServer();
 
@@ -130,6 +255,7 @@ void main() {
 
         // Connect to the DTD instance.
         final dtd = WidgetPreviewScaffoldDtdServices();
+        scaffoldDtd = dtd;
         await dtd.connect(dtdUri: dtdServer.dtdUri);
 
         const kTestKey = 'myKey';
@@ -142,33 +268,36 @@ void main() {
         const kFirstValue = 'foo';
         await dtd.setPreference(kTestKey, kFirstValue);
         expect(await dtd.getPreference(kTestKey), kFirstValue);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kTestKey: kFirstValue,
-        });
+        expect(
+          json.decode(preferencesFile.readAsStringSync()),
+          <String, Object?>{kTestKey: kFirstValue},
+        );
 
         // Overwrite kTestKey and ensure it's read back.
         const kSecondValue = 'bar';
         await dtd.setPreference(kTestKey, kSecondValue);
         expect(await dtd.getPreference(kTestKey), kSecondValue);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kTestKey: kSecondValue,
-        });
+        expect(
+          json.decode(preferencesFile.readAsStringSync()),
+          <String, Object?>{kTestKey: kSecondValue},
+        );
 
         // Write a flag.
         const kFlagKey = 'flag';
         await dtd.setPreference(kFlagKey, true);
         expect(await dtd.getFlag(kFlagKey), true);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kFlagKey: true,
-          kTestKey: kSecondValue,
-        });
+        expect(
+          json.decode(preferencesFile.readAsStringSync()),
+          <String, Object?>{kFlagKey: true, kTestKey: kSecondValue},
+        );
 
         // Remove an entry.
         await dtd.setPreference(kTestKey, null);
         expect(await dtd.getPreference(kTestKey), null);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kFlagKey: true,
-        });
+        expect(
+          json.decode(preferencesFile.readAsStringSync()),
+          <String, Object?>{kFlagKey: true},
+        );
       },
     );
   });

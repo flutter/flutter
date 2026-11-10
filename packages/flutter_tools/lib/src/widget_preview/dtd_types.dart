@@ -5,6 +5,8 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
 import 'package:collection/collection.dart';
+import 'package:dtd/dtd.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 
 import '../convert.dart';
 
@@ -265,5 +267,259 @@ class Position {
     final Object? lineJson = json['line'];
     final line = lineJson! as int;
     return Position(character: character, line: line);
+  }
+}
+
+/// Information about the active web preview HTTP server.
+class WebPreviewUrlResult {
+  const WebPreviewUrlResult({required this.host, required this.port, required this.url});
+
+  factory WebPreviewUrlResult.fromDTDResponse(DTDResponse response) {
+    if (response.result[kType] != kTypeName) {
+      throw RpcException.invalidParams(
+        'Expected $kType param to be $kTypeName, got: ${response.result[kType]}',
+      );
+    }
+    return WebPreviewUrlResult.fromJson(response.result);
+  }
+
+  static const kType = 'type';
+  static const kTypeName = 'WebPreviewUrlResult';
+  static const kHost = 'host';
+  static const kPort = 'port';
+  static const kUrl = 'url';
+
+  /// The host interface (e.g. `127.0.0.1` or `localhost`).
+  final String host;
+
+  /// The port the web server is listening on.
+  final int port;
+
+  /// The full HTTP URL string for embedding or browser navigation.
+  final String url;
+
+  @override
+  int get hashCode => Object.hash(host, port, url);
+
+  @override
+  bool operator ==(Object other) {
+    return other is WebPreviewUrlResult &&
+        other.runtimeType == WebPreviewUrlResult &&
+        host == other.host &&
+        port == other.port &&
+        url == other.url;
+  }
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{kType: kTypeName, kHost: host, kPort: port, kUrl: url};
+  }
+
+  @override
+  String toString() => json.encode(toJson());
+
+  static WebPreviewUrlResult fromJson(Map<String, Object?> json) {
+    final host = json[kHost]! as String;
+    final port = json[kPort]! as int;
+    final url = json[kUrl]! as String;
+    return WebPreviewUrlResult(host: host, port: port, url: url);
+  }
+}
+
+/// Metadata describing the active widget preview service and connected endpoints.
+class PreviewServiceInfo {
+  const PreviewServiceInfo({
+    required this.dtdUri,
+    required this.previewService,
+    required this.projectRoot,
+    required this.scaffoldConnected,
+    required this.scaffoldService,
+    required this.scaffoldStream,
+    this.webPreviewUri,
+  });
+
+  factory PreviewServiceInfo.fromDTDResponse(DTDResponse response) {
+    if (response.result[kType] != kTypeName) {
+      throw RpcException.invalidParams(
+        'Expected $kType param to be $kTypeName, got: ${response.result[kType]}',
+      );
+    }
+    return PreviewServiceInfo.fromJson(response.result);
+  }
+
+  static const kType = 'type';
+  static const kTypeName = 'PreviewServiceInfo';
+  static const kDtdUri = 'dtdUri';
+  static const kPreviewService = 'previewService';
+  static const kProjectRoot = 'projectRoot';
+  static const kScaffoldConnected = 'scaffoldConnected';
+  static const kScaffoldService = 'scaffoldService';
+  static const kScaffoldStream = 'scaffoldStream';
+  static const kWebPreviewUri = 'webPreviewUri';
+
+  /// The WebSocket URI of the Dart Tooling Daemon.
+  final String dtdUri;
+
+  /// The registered DTD service name for the tool widget preview service.
+  final String previewService;
+
+  /// The absolute path to the root directory of the previewed Flutter project.
+  final String projectRoot;
+
+  /// Whether the widget preview scaffold has connected to DTD.
+  final bool scaffoldConnected;
+
+  /// The registered DTD service name for the widget preview scaffold.
+  final String scaffoldService;
+
+  /// The DTD stream name posted to by the widget preview scaffold.
+  final String scaffoldStream;
+
+  /// The active web preview HTTP URI, if available.
+  final String? webPreviewUri;
+
+  @override
+  int get hashCode => Object.hash(
+    dtdUri,
+    previewService,
+    projectRoot,
+    scaffoldConnected,
+    scaffoldService,
+    scaffoldStream,
+    webPreviewUri,
+  );
+
+  @override
+  bool operator ==(Object other) {
+    return other is PreviewServiceInfo &&
+        other.runtimeType == PreviewServiceInfo &&
+        dtdUri == other.dtdUri &&
+        previewService == other.previewService &&
+        projectRoot == other.projectRoot &&
+        scaffoldConnected == other.scaffoldConnected &&
+        scaffoldService == other.scaffoldService &&
+        scaffoldStream == other.scaffoldStream &&
+        webPreviewUri == other.webPreviewUri;
+  }
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      kType: kTypeName,
+      kDtdUri: dtdUri,
+      kProjectRoot: projectRoot,
+      kPreviewService: previewService,
+      kScaffoldService: scaffoldService,
+      kScaffoldStream: scaffoldStream,
+      kWebPreviewUri: webPreviewUri,
+      kScaffoldConnected: scaffoldConnected,
+    };
+  }
+
+  @override
+  String toString() => json.encode(toJson());
+
+  static PreviewServiceInfo fromJson(Map<String, Object?> json) {
+    final dtdUri = json[kDtdUri]! as String;
+    final previewService = json[kPreviewService]! as String;
+    final projectRoot = json[kProjectRoot]! as String;
+    final scaffoldConnected = json[kScaffoldConnected]! as bool;
+    final scaffoldService = json[kScaffoldService]! as String;
+    final scaffoldStream = json[kScaffoldStream]! as String;
+    final webPreviewUri = json[kWebPreviewUri] as String?;
+    return PreviewServiceInfo(
+      dtdUri: dtdUri,
+      previewService: previewService,
+      projectRoot: projectRoot,
+      scaffoldConnected: scaffoldConnected,
+      scaffoldService: scaffoldService,
+      scaffoldStream: scaffoldStream,
+      webPreviewUri: webPreviewUri,
+    );
+  }
+}
+
+/// Result of synchronizing on-disk preview edits and reloading the previewer.
+class SyncPreviewsResponse {
+  const SyncPreviewsResponse({
+    required this.compileSuccess,
+    required this.errorPreviewCount,
+    required this.fullRestart,
+    required this.reloaded,
+    this.compileError,
+  });
+
+  factory SyncPreviewsResponse.fromDTDResponse(DTDResponse response) {
+    if (response.result[kType] != kTypeName) {
+      throw RpcException.invalidParams(
+        'Expected $kType param to be $kTypeName, got: ${response.result[kType]}',
+      );
+    }
+    return SyncPreviewsResponse.fromJson(response.result);
+  }
+
+  static const kType = 'type';
+  static const kTypeName = 'SyncPreviewsResponse';
+  static const kCompileError = 'compileError';
+  static const kCompileSuccess = 'compileSuccess';
+  static const kErrorPreviewCount = 'errorPreviewCount';
+  static const kFullRestart = 'fullRestart';
+  static const kReloaded = 'reloaded';
+
+  /// Error message if compilation or reload failed, or `null` on success.
+  final String? compileError;
+
+  /// Whether incremental compilation and reload succeeded.
+  final bool compileSuccess;
+
+  /// Count of previews in the workspace with analyzer errors.
+  final int errorPreviewCount;
+
+  /// Whether a full hot restart was performed.
+  final bool fullRestart;
+
+  /// Whether the previewer reloaded cleanly.
+  final bool reloaded;
+
+  @override
+  int get hashCode =>
+      Object.hash(compileError, compileSuccess, errorPreviewCount, fullRestart, reloaded);
+
+  @override
+  bool operator ==(Object other) {
+    return other is SyncPreviewsResponse &&
+        other.runtimeType == SyncPreviewsResponse &&
+        compileError == other.compileError &&
+        compileSuccess == other.compileSuccess &&
+        errorPreviewCount == other.errorPreviewCount &&
+        fullRestart == other.fullRestart &&
+        reloaded == other.reloaded;
+  }
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      kType: kTypeName,
+      kReloaded: reloaded,
+      kFullRestart: fullRestart,
+      kCompileSuccess: compileSuccess,
+      kCompileError: compileError,
+      kErrorPreviewCount: errorPreviewCount,
+    };
+  }
+
+  @override
+  String toString() => json.encode(toJson());
+
+  static SyncPreviewsResponse fromJson(Map<String, Object?> json) {
+    final compileError = json[kCompileError] as String?;
+    final compileSuccess = json[kCompileSuccess]! as bool;
+    final errorPreviewCount = json[kErrorPreviewCount]! as int;
+    final fullRestart = json[kFullRestart]! as bool;
+    final reloaded = json[kReloaded]! as bool;
+    return SyncPreviewsResponse(
+      compileError: compileError,
+      compileSuccess: compileSuccess,
+      errorPreviewCount: errorPreviewCount,
+      fullRestart: fullRestart,
+      reloaded: reloaded,
+    );
   }
 }

@@ -62,8 +62,25 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   final String widgetPreviewService = WidgetPreviewDtdServices.kWidgetPreviewServiceRoot;
 
   @override
+  final String widgetPreviewScaffoldService =
+      WidgetPreviewDtdServices.kWidgetPreviewScaffoldServiceRoot;
+
+  @override
   final String widgetPreviewScaffoldStream =
       WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot;
+
+  @override
+  bool scaffoldConnected = false;
+
+  @override
+  void markScaffoldConnected() {
+    scaffoldConnected = true;
+  }
+
+  @override
+  void markScaffoldDisconnected() {
+    scaffoldConnected = false;
+  }
 
   @override
   Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {

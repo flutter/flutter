@@ -181,6 +181,38 @@ class LspPreviewDetector {
     }
   }
 
+  /// Waits for any in-progress analysis to complete and retrieves the current
+  /// workspace widget previews under [mutex].
+  ///
+  /// Returns `null` if this detector has been disposed or the tool is shutting
+  /// down.
+  Future<FlutterWidgetPreviews?> syncPreviews() {
+    return mutex.runGuarded(() async {
+      if (_disposed || shutdownHooks.isShuttingDown) {
+        return null;
+      }
+      try {
+        await waitForAnalysis();
+        if (_disposed || shutdownHooks.isShuttingDown) {
+          return null;
+        }
+        return await dtd.getFlutterWidgetPreviews();
+      } on Exception catch (e) {
+        if (_disposed || shutdownHooks.isShuttingDown) {
+          logger.printTrace('Failed to sync widget previews during shutdown: $e');
+          return null;
+        }
+        rethrow;
+      } on StateError catch (e) {
+        if (_disposed || shutdownHooks.isShuttingDown) {
+          logger.printTrace('Failed to sync widget previews during shutdown: $e');
+          return null;
+        }
+        rethrow;
+      }
+    });
+  }
+
   Future<void> _fileAddedOrUpdated({required String filePath}) async {
     if (filePath.isPubspec) {
       onPubspecChangeDetected(filePath);

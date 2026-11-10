@@ -241,6 +241,48 @@ void main() {
       expect(fakeDtd.waitForAnalysisCallCount, 2);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
+
+    testWithoutContext(
+      'syncPreviews returns null without falling back to DTD when queued behind dispose',
+      () async {
+        final analysisGate = Completer<void>();
+        fakeAnalysisServer.waitForAnalysisGate = analysisGate;
+        fakeDtd.shouldThrow = true;
+
+        // Hold detector.mutex inside _onFileSystemEvent while analysis is in flight.
+        fakeWatcher.emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+        await pumpEventQueue();
+
+        // Queue dispose() (which nulls _analysisServer) followed by syncPreviews().
+        final Future<void> disposeFuture = detector.dispose();
+        final Future<FlutterWidgetPreviews?> syncFuture = detector.syncPreviews();
+
+        analysisGate.complete();
+        await disposeFuture;
+
+        expect(await syncFuture, isNull);
+        expect(fakeDtd.waitForAnalysisCallCount, 0);
+      },
+    );
+
+    testWithoutContext(
+      'syncPreviews returns null when shutdown begins while waitForAnalysis is in flight',
+      () async {
+        final analysisGate = Completer<void>();
+        fakeAnalysisServer.waitForAnalysisGate = analysisGate;
+
+        final Future<FlutterWidgetPreviews?> syncFuture = detector.syncPreviews();
+        await pumpEventQueue();
+
+        shutdownHooks.addShutdownHook(() async {
+          fakeAnalysisServer.shouldThrow = true;
+          analysisGate.complete();
+        });
+        await shutdownHooks.runShutdownHooks(logger);
+
+        expect(await syncFuture, isNull);
+      },
+    );
   });
 }
 
@@ -274,6 +316,7 @@ class FakeWatcher extends Fake implements Watcher {
 class FakeAnalysisServer extends Fake implements AnalysisServer {
   int waitForAnalysisCallCount = 0;
   bool shouldThrow = false;
+  Completer<void>? waitForAnalysisGate;
 
   @override
   Future<void> start() async {}
@@ -286,6 +329,9 @@ class FakeAnalysisServer extends Fake implements AnalysisServer {
 
   @override
   Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
+    if (waitForAnalysisGate case final Completer<void> gate) {
+      await gate.future;
+    }
     if (shouldThrow) {
       throw StateError('Fake analysis server error');
     }

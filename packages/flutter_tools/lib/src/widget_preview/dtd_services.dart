@@ -42,6 +42,10 @@ class WidgetPreviewDtdServices {
     required this.project,
     required this.shutdownHooks,
     @visibleForTesting this._dtd,
+    this.onHotReloadPreviewer,
+    this.onSyncPreviews,
+    this.projectRootPath,
+    this.webPreviewUriProvider,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -55,6 +59,13 @@ class WidgetPreviewDtdServices {
 
   /// The actual name of the registered widget preview service.
   late final String widgetPreviewService = _withUuid(kWidgetPreviewServiceRoot);
+
+  /// The name of the widget preview scaffold service, without a UUID.
+  @visibleForTesting
+  static const kWidgetPreviewScaffoldServiceRoot = 'PreviewScaffold';
+
+  /// The actual name of the registered widget preview scaffold service.
+  late final String widgetPreviewScaffoldService = _withUuid(kWidgetPreviewScaffoldServiceRoot);
 
   /// The name of the widget preview stream, without a UUID.
   @visibleForTesting
@@ -108,28 +119,40 @@ class WidgetPreviewDtdServices {
 
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kHotReloadPreviewer = 'hotReloadPreviewer';
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
   static const kGetDevToolsUri = 'getDevToolsUri';
+  static const kGetWebPreviewUrl = 'getWebPreviewUrl';
+  static const kGetServiceInfo = 'getServiceInfo';
+  static const kSyncPreviews = 'syncPreviews';
 
   static const kWidgetPreviewConnectedEvent = 'Connected';
 
   /// Error code for RpcException thrown when attempting to load a key from
-  /// persistent preferences that doesn't have an entry.
+  /// persistent preferences that doesn't have an entry, or when a requested
+  /// resource (such as the web preview URL) is not available.
   static const kNoValueForKey = 200;
 
   /// The list of DTD service methods registered by the tool.
   late final services = <DtdService>[
     (kHotRestartPreviewer, _hotRestart),
+    (kHotReloadPreviewer, _hotReload),
     (kIsWindows, _isWindows),
     (kResolveUri, _resolveUri),
     (kSetPreference, _setPreference),
     (kGetPreference, _getPreference),
     (kGetDevToolsUri, _getDevToolsUri),
+    (kGetWebPreviewUrl, _getWebPreviewUrl),
+    (kGetServiceInfo, _getServiceInfo),
+    (kSyncPreviews, _syncPreviews),
   ];
 
   // END KEEP SYNCED
+
+  static const kTimeoutMs = 'timeoutMs';
+  static const kDefaultSyncTimeoutMs = 30_000;
 
   @visibleForTesting
   late final preferences = PersistentPreferences(fs: fs);
@@ -144,8 +167,56 @@ class WidgetPreviewDtdServices {
   /// scaffold.
   final VoidCallback onHotRestartPreviewerRequest;
 
+  /// Invoked when the [kHotReloadPreviewer] service method is invoked.
+  final Future<void> Function()? onHotReloadPreviewer;
+
+  /// Invoked when the [kSyncPreviews] service method is invoked.
+  final Future<SyncPreviewsResponse> Function({required Duration timeout})? onSyncPreviews;
+
+  /// Returns the URI of the running web preview application, if available.
+  final Uri? Function()? webPreviewUriProvider;
+
+  /// Explicit path to the root directory of the previewed Flutter project.
+  ///
+  /// When omitted, defaults to [project]'s directory path.
+  final String? projectRootPath;
+
   /// The widget_preview_scaffold project.
   final FlutterProject project;
+
+  /// Whether the widget preview scaffold has connected to DTD.
+  bool get scaffoldConnected => _scaffoldConnected;
+  bool _scaffoldConnected = false;
+  Completer<void>? _scaffoldConnectedCompleter;
+
+  /// Resets [scaffoldConnected] to `false` before a full restart so callers
+  /// awaiting [waitForScaffoldConnected] wait for the fresh connection event.
+  void markScaffoldDisconnected() {
+    _scaffoldConnected = false;
+  }
+
+  /// Marks [scaffoldConnected] as `true` and completes any pending
+  /// [waitForScaffoldConnected] futures.
+  void markScaffoldConnected() {
+    _scaffoldConnected = true;
+    if (_scaffoldConnectedCompleter case final Completer<void> completer
+        when !completer.isCompleted) {
+      completer.complete();
+    }
+    _scaffoldConnectedCompleter = null;
+  }
+
+  /// Waits until the widget preview scaffold has posted
+  /// [kWidgetPreviewConnectedEvent] on [widgetPreviewScaffoldStream].
+  Future<void> waitForScaffoldConnected({
+    Duration timeout = const Duration(milliseconds: kDefaultSyncTimeoutMs),
+  }) async {
+    if (_scaffoldConnected) {
+      return;
+    }
+    final Completer<void> completer = _scaffoldConnectedCompleter ??= Completer<void>();
+    await completer.future.timeout(timeout);
+  }
 
   PackageConfig? _packageConfig;
 
@@ -177,7 +248,7 @@ class WidgetPreviewDtdServices {
   /// Connects to an existing DTD instance and registers any relevant services.
   Future<void> connect({required Uri dtdWsUri}) async {
     _dtdUri = dtdWsUri;
-    _dtd = await DartToolingDaemon.connect(dtdWsUri);
+    _dtd ??= await DartToolingDaemon.connect(dtdWsUri);
 
     _allLspServicesRegistered = false;
     final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
@@ -304,6 +375,7 @@ class WidgetPreviewDtdServices {
     final DartToolingDaemon dtd = _dtd!;
     dtd.onEvent(widgetPreviewScaffoldStream).listen((DTDEvent event) {
       if (event.kind == kWidgetPreviewConnectedEvent) {
+        markScaffoldConnected();
         previewAnalytics.reportPreviewerConnected();
       }
     });
@@ -353,6 +425,62 @@ class WidgetPreviewDtdServices {
 
   Future<Map<String, Object?>> _getDevToolsUri(Parameters _) async {
     return StringResponse((await _devToolsServerAddress.future).toString()).toJson();
+  }
+
+  Future<Map<String, Object?>> _hotReload(Parameters _) async {
+    if (onHotReloadPreviewer != null) {
+      await onHotReloadPreviewer!();
+    }
+    return const Success().toJson();
+  }
+
+  Future<Map<String, Object?>> _getWebPreviewUrl(Parameters _) async {
+    final Uri? uri = webPreviewUriProvider?.call();
+    if (uri == null) {
+      throw RpcException(kNoValueForKey, 'Web preview server URL is not currently available.');
+    }
+    return WebPreviewUrlResult(host: uri.host, port: uri.port, url: uri.toString()).toJson();
+  }
+
+  String get _resolvedProjectRootPath {
+    if (projectRootPath case final String rootPath) {
+      return rootPath;
+    }
+    return project.directory.existsSync()
+        ? project.directory.resolveSymbolicLinksSync()
+        : project.directory.absolute.path;
+  }
+
+  Future<Map<String, Object?>> _getServiceInfo(Parameters _) async {
+    final Uri? uri = webPreviewUriProvider?.call();
+    return PreviewServiceInfo(
+      // Empty only when invoked in unit tests before connect() has been called.
+      dtdUri: _dtdUri?.toString() ?? '',
+      previewService: widgetPreviewService,
+      projectRoot: _resolvedProjectRootPath,
+      scaffoldConnected: scaffoldConnected,
+      scaffoldService: widgetPreviewScaffoldService,
+      scaffoldStream: widgetPreviewScaffoldStream,
+      webPreviewUri: uri?.toString(),
+    ).toJson();
+  }
+
+  Future<Map<String, Object?>> _syncPreviews(Parameters params) async {
+    final int timeoutMs = params.value == null || params[kTimeoutMs].valueOr(null) == null
+        ? kDefaultSyncTimeoutMs
+        : params[kTimeoutMs].asInt;
+    if (timeoutMs < 0) {
+      throw RpcException.invalidParams('$kTimeoutMs must be non-negative, got: $timeoutMs');
+    }
+    final Future<SyncPreviewsResponse> Function({required Duration timeout})? syncCallback =
+        onSyncPreviews;
+    if (syncCallback == null) {
+      throw RpcException(kNoValueForKey, 'Preview synchronization is not currently available.');
+    }
+    final SyncPreviewsResponse response = await syncCallback(
+      timeout: Duration(milliseconds: timeoutMs),
+    );
+    return response.toJson();
   }
 }
 
