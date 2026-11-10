@@ -154,10 +154,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
     _analysisServerFactoryOverride = analysisServerFactoryOverride;
     addPubOptions();
-    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.machine,
       DebuggingOptionDescriptors.enableDevTools,
-      DebuggingOptionDescriptors.devToolsServerAddress(),
+      DebuggingOptionDescriptors.devToolsServerAddress,
     ], verboseHelp: verbose);
     argParser
       ..addFlag(
