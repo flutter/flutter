@@ -434,7 +434,8 @@ void main() {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
-      ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+      ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn
+      ..alwaysUse24HourFormatTestValue = false;
     tester.view.devicePixelRatio = 44;
 
     late MediaQueryData data;
@@ -480,11 +481,17 @@ void main() {
     expect(data.accessibleNavigation, false);
     expect(rebuildCount, 4);
 
+    expect(data.alwaysUse24HourFormat, false);
+    tester.platformDispatcher.alwaysUse24HourFormatTestValue = true;
+    await tester.pump();
+    expect(data.alwaysUse24HourFormat, true);
+    expect(rebuildCount, 5);
+
     expect(data.devicePixelRatio, 44);
     tester.view.devicePixelRatio = 55;
     await tester.pump();
     expect(data.devicePixelRatio, 55);
-    expect(rebuildCount, 5);
+    expect(rebuildCount, 6);
   });
 
   testWidgets('MediaQuery.fromView updates on notifications (with parent data)', (
@@ -496,7 +503,8 @@ void main() {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
-      ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+      ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn
+      ..alwaysUse24HourFormatTestValue = false;
     tester.view.devicePixelRatio = 44;
 
     late MediaQueryData data;
@@ -507,6 +515,7 @@ void main() {
           textScaler: TextScaler.linear(44),
           platformBrightness: Brightness.dark,
           accessibleNavigation: true,
+          alwaysUse24HourFormat: false,
         ),
         child: MediaQuery.fromView(
           view: tester.view,
@@ -539,6 +548,12 @@ void main() {
     tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
     await tester.pumpAndSettle();
     expect(data.accessibleNavigation, true);
+    expect(rebuildCount, 1);
+
+    expect(data.alwaysUse24HourFormat, false);
+    tester.platformDispatcher.alwaysUse24HourFormatTestValue = true;
+    await tester.pump();
+    expect(data.alwaysUse24HourFormat, false);
     expect(rebuildCount, 1);
 
     expect(data.devicePixelRatio, 44);
