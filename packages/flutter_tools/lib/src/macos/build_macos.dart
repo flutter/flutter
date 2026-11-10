@@ -152,7 +152,7 @@ Future<void> buildMacOS({
       buildInfo,
       analytics: analytics,
       plistParser: plistParser,
-      reportCrashes: !(await botDetector.isRunningOnBot),
+      reportCrashes: !botDetector.isRunningOnBot,
       toolContext: toolContext,
       xcodeProjectInterpreter: xcodeProjectInterpreter,
     ),
@@ -388,6 +388,7 @@ Future<void> buildMacOS({
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
     flutterProject.macos,
+    plistParser: plistParser,
     toolContext: toolContext,
   ).applicationBundle(buildInfo);
   if (applicationBundle != null) {

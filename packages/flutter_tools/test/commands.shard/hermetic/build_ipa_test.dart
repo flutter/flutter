@@ -122,8 +122,7 @@ void main() {
     fileSystem
         .file(fileSystem.path.join('ios', 'Flutter', 'Flutter.xcodeproj', 'project.pbxproj'))
         .createSync();
-    final packageConfigPath =
-        '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+    const packageConfigPath = '/packages/flutter_tools/.dart_tool/package_config.json';
     fileSystem.file(packageConfigPath)
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -182,7 +181,7 @@ void main() {
       xcode: effectiveXcode,
       xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
       artifacts: FakeArtifacts(),
-      cache: FakeCache(),
+      cache: FakeCache(flutterRoot: '/'),
       flutterVersion: FakeFlutterVersion(),
     );
   }
@@ -1627,8 +1626,8 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
       const projectIconImagePath =
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
-      final templateIconContentsJsonPath =
-          '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const templateIconContentsJsonPath =
+          '/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
       const templateIconImagePath =
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
@@ -1713,8 +1712,8 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
       const projectIconImagePath =
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
-      final templateIconContentsJsonPath =
-          '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const templateIconContentsJsonPath =
+          '/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
       const templateIconImagePath =
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
@@ -2187,8 +2186,8 @@ void main() {
           'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
       const projectLaunchImagePath =
           'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
-      final templateLaunchImageContentsJsonPath =
-          '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+      const templateLaunchImageContentsJsonPath =
+          '/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
       const templateLaunchImagePath =
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
 
@@ -2271,8 +2270,8 @@ void main() {
           'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
       const projectLaunchImagePath =
           'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
-      final templateLaunchImageContentsJsonPath =
-          '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+      const templateLaunchImageContentsJsonPath =
+          '/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
       const templateLaunchImagePath =
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
 
