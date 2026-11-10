@@ -6,6 +6,7 @@
 
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_formats.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/external_semaphore_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
@@ -192,19 +193,19 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
 
 bool AHBSwapchainImplVK::Present(
     const std::shared_ptr<AHBTextureSourceVK>& texture) {
+  fml::ScopedCleanupClosure mark_frame_end([&transients = transients_]() {
+    auto context = transients->GetContext().lock();
+    if (context) {
+      ContextVK::Cast(*context).GetGPUTracer()->MarkFrameEnd();
+    }
+  });
+
   auto control = surface_control_.lock();
   if (!control || !control->IsValid()) {
     VALIDATION_LOG << "Surface control died before swapchain image could be "
                       "presented.";
     return false;
   }
-
-#if IMPELLER_DEBUG
-  auto context = transients_->GetContext().lock();
-  if (context) {
-    ContextVK::Cast(*context).GetGPUTracer()->MarkFrameEnd();
-  }
-#endif  // IMPELLER_DEBUG
 
   if (!texture) {
     return false;

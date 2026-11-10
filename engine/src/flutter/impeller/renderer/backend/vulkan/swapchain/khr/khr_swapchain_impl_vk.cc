@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_impl_vk.h"
 
+#include "fml/closure.h"
 #include "fml/synchronization/semaphore.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
@@ -442,7 +443,8 @@ bool KHRSwapchainImplVK::Present(
 
   const auto& context = ContextVK::Cast(*context_strong);
   const auto& sync = synchronizers_[current_frame_];
-  context.GetGPUTracer()->MarkFrameEnd();
+  fml::ScopedCleanupClosure mark_frame_end(
+      [&context]() { context.GetGPUTracer()->MarkFrameEnd(); });
 
   //----------------------------------------------------------------------------
   /// Transition the image to color-attachment-optimal.
@@ -455,8 +457,9 @@ bool KHRSwapchainImplVK::Present(
     return false;
   }
 
-  auto vk_final_cmd_buffer =
-      CommandBufferVK::Cast(*sync->final_cmd_buffer).GetCommandBuffer();
+  CommandBufferVK& final_cmd_buffer =
+      CommandBufferVK::Cast(*sync->final_cmd_buffer);
+  auto vk_final_cmd_buffer = final_cmd_buffer.GetCommandBuffer();
   {
     BarrierVK barrier;
     barrier.new_layout = vk::ImageLayout::ePresentSrcKHR;
@@ -470,7 +473,7 @@ bool KHRSwapchainImplVK::Present(
       return false;
     }
 
-    if (vk_final_cmd_buffer.end() != vk::Result::eSuccess) {
+    if (!final_cmd_buffer.EndCommandBuffer()) {
       return false;
     }
   }
