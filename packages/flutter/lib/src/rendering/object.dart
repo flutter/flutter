@@ -4129,6 +4129,33 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   // If you add yourself to /result/ and still return false, then that means you
   // will see events but so will objects below you.
 
+  /// Whether pointer events can reach this render object's children.
+  ///
+  /// Subclasses that override their hit testing (for example, `hitTest` or
+  /// `hitTestChildren`) so that pointer events never reach their children
+  /// should override this getter to return false while that is the case. For
+  /// example, [RenderIgnorePointer] returns false while it is
+  /// [RenderIgnorePointer.ignoring], and [RenderAbsorbPointer] returns false
+  /// while it is [RenderAbsorbPointer.absorbing]. The value must agree with
+  /// the render object's hit testing behavior.
+  ///
+  /// This getter is currently only read by the experimental pass that
+  /// computes the hit-test regions of Flutter content painted on top of
+  /// platform views on the web (see
+  /// [RendererBinding.automaticPointerInterceptorsEnabled]). When it is false,
+  /// no descendant of this render object claims a hit-test region, but the
+  /// pass still searches the subtree for platform views, because the browser
+  /// still delivers pointer events to them directly. Whether this render
+  /// object itself claims a region is unaffected.
+  ///
+  /// Changing the value does not need to mark the render object as needing
+  /// layout or paint; the hit-test regions are recomputed every frame while
+  /// the pass is enabled.
+  ///
+  /// Defaults to true.
+  @protected
+  bool get hitTestsChildren => true;
+
   /// Returns a human understandable name.
   @override
   String toStringShort() {

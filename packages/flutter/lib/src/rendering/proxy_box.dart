@@ -3753,6 +3753,9 @@ class RenderIgnorePointer extends RenderProxyBox {
   }
 
   @override
+  bool get hitTestsChildren => !ignoring;
+
+  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isBlockingUserActions = _ignoring;
@@ -3952,6 +3955,9 @@ class RenderAbsorbPointer extends RenderProxyBox {
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
     return absorbing ? size.contains(position) : super.hitTest(result, position: position);
   }
+
+  @override
+  bool get hitTestsChildren => !absorbing;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {

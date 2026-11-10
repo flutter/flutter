@@ -69,11 +69,12 @@ typedef _PlatformViewHitTestGroup = ({int viewId, Rect platformViewRect, List<Re
 ///   pixels when [root] is a [RenderView]).
 /// * Subtrees that cannot receive pointer events are skipped: offstage
 ///   subtrees ([RenderOffstage]) and render boxes that have never been laid
-///   out are not visited at all, and render objects
-///   under an ignoring [RenderIgnorePointer] or an absorbing
-///   [RenderAbsorbPointer] never claim a region. A platform view in such a
-///   subtree still starts a group, because the browser still delivers pointer
-///   events to it.
+///   out are not visited at all, and no descendant of a render object whose
+///   [RenderObject.hitTestsChildren] is false (such as an ignoring
+///   [RenderIgnorePointer] or an absorbing [RenderAbsorbPointer]) claims a
+///   region. Such a render object may still claim its own bounds, and a
+///   platform view in its subtree still starts a group, because the browser
+///   still delivers pointer events to the platform view.
 /// * A render box claims its bounds if it is an absorbing
 ///   [RenderAbsorbPointer] (its subtree is still visited, as described above,
 ///   so that platform views inside it start their own groups), or if
@@ -141,24 +142,24 @@ Float64List? computeHitTestRegions(RenderObject root) {
 
   // Visits [node] and its descendants in child order (see above). [transform] maps
   // [node]'s local coordinates to the root's, [clip] is the accumulated paint
-  // clip in root coordinates (or null if unclipped), and [ignoringPointers] is
-  // true when an ancestor [RenderIgnorePointer] is ignoring pointer events or an
-  // ancestor [RenderAbsorbPointer] is absorbing them.
-  void visit(RenderObject node, Matrix4 transform, Rect? clip, {required bool ignoringPointers}) {
+  // clip in root coordinates (or null if unclipped), and [canClaim] is false
+  // when pointer events cannot reach [node] because an ancestor's
+  // [RenderObject.hitTestsChildren] is false.
+  void visit(RenderObject node, Matrix4 transform, Rect? clip, {required bool canClaim}) {
     // Offstage subtrees are neither painted nor hit tested.
     if (node is RenderOffstage && node.offstage) {
       return;
     }
 
-    // A render object under (or itself being) an ignoring IgnorePointer never
-    // claims a region.
-    final bool selfIgnoringPointers =
-        ignoringPointers || (node is RenderIgnorePointer && node.ignoring);
-    // An absorbing AbsorbPointer swallows every pointer event within its
-    // bounds, so nothing in its subtree can receive pointer events either;
-    // its subtree is treated as if it were under an ignoring IgnorePointer.
-    final bool childIgnoringPointers =
-        selfIgnoringPointers || (node is RenderAbsorbPointer && node.absorbing);
+    // Pointer events reach [node]'s children only if they reach [node] and
+    // [node] passes them on. A render object that stops them from reaching its
+    // children (for example, an ignoring IgnorePointer or an absorbing
+    // AbsorbPointer) may still claim its own bounds, but nothing in its
+    // subtree does.
+    // hitTestsChildren is protected, but whether pointer events can reach a
+    // render object's children is exactly what this pass needs to know.
+    // ignore: invalid_use_of_protected_member
+    final bool childrenCanClaim = canClaim && node.hitTestsChildren;
 
     // A platform view starts a new group. Everything visited after this point
     // paints on top of it.
@@ -178,16 +179,13 @@ Float64List? computeHitTestRegions(RenderObject root) {
     }
 
     // Nothing can cover a platform view until one has been painted, and
-    // render objects that ignore pointers never claim a region.
-    if (groups.isNotEmpty &&
-        !selfIgnoringPointers &&
-        node is RenderBox &&
-        node.hasSize &&
-        !node.size.isEmpty) {
+    // render objects that pointer events cannot reach never claim a region.
+    if (groups.isNotEmpty && canClaim && node is RenderBox && node.hasSize && !node.size.isEmpty) {
       if (node is RenderAbsorbPointer) {
         // An absorbing AbsorbPointer claims its own bounds. Its subtree is
-        // still visited (with pointers ignored) so that platform views inside
-        // it start their own groups.
+        // still visited (with claiming suppressed, because its
+        // hitTestsChildren is false) so that platform views inside it start
+        // their own groups.
         if (node.absorbing) {
           addClaimedRect(node, transform, clip);
         }
@@ -225,11 +223,11 @@ Float64List? computeHitTestRegions(RenderObject root) {
       }
       final Matrix4 childTransform = transform.clone();
       node.applyPaintTransform(child, childTransform);
-      visit(child, childTransform, childClip, ignoringPointers: childIgnoringPointers);
+      visit(child, childTransform, childClip, canClaim: childrenCanClaim);
     });
   }
 
-  visit(root, Matrix4.identity(), null, ignoringPointers: false);
+  visit(root, Matrix4.identity(), null, canClaim: true);
 
   if (groups.isEmpty) {
     return null;
