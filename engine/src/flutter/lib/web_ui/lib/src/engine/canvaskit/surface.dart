@@ -159,6 +159,8 @@ abstract class CkSurface extends Surface {
   /// canvas types.
   int _getGlContext(SkWebGLContextOptions options);
 
+  WebGLContext _getCanvasGlContext();
+
   /// Creates the Skia objects that are backed by the canvas.
   ///
   /// This method is responsible for creating the `SkGrContext` and the
@@ -265,9 +267,34 @@ abstract class CkSurface extends Surface {
 
   @override
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
     _isDisposed = true;
+    _releaseCanvasAndContext();
+  }
+
+  /// Releases the current canvas and its Skia and WebGL resources.
+  void _releaseCanvasAndContext() {
+    // Remove the context-loss listener before releasing the context. Otherwise
+    // an old surface can recreate it after a hot restart, evicting live contexts.
+    _canvasProvider.releaseCanvas(_canvas);
     _skSurface?.dispose();
     _skSurface = null;
+    _grContext?.releaseResourcesAndAbandonContext();
+    _grContext?.delete();
+    _grContext = null;
+    if (_glContext != -1) {
+      final WebGLContext context = _getCanvasGlContext();
+      if (!context.isContextLost()) {
+        final loseContext =
+            context.getExtension('WEBGL_lose_context') as WebGLLoseContextExtension?;
+        loseContext?.loseContext();
+      }
+      // CanvasKit is cached across hot restarts, including its context table.
+      canvasKit.deleteContext(_glContext.toDouble());
+      _glContext = -1;
+    }
   }
 
   @override
@@ -358,7 +385,10 @@ abstract class CkSurface extends Surface {
   }
 
   @override
-  Future<void> triggerContextLoss();
+  Future<void> triggerContextLoss() async {
+    _handledContextLostEvent = Completer<void>();
+    _getCanvasGlContext().loseContextExtension.loseContext();
+  }
 
   @override
   Future<void> get handledContextLossEvent => _handledContextLostEvent!.future;
@@ -496,33 +526,6 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     }
   }
 
-  /// Releases the current canvas, explicitly loses its WebGL context so the
-  /// browser frees the context slot immediately, and tears down the Skia
-  /// objects bound to it.
-  void _releaseCanvasAndContext() {
-    final offscreenCanvas = canvas as DomOffscreenCanvas;
-    // Release the canvas first so that its `webglcontextlost` listener is
-    // removed and [onContextLost] does not fire for the deliberate loss below.
-    _canvasProvider.releaseCanvas(offscreenCanvas);
-    if (supportsWebGl) {
-      final WebGLContext gl = offscreenCanvas.getGlContext(webGLVersion);
-      // An already-lost context holds no slot to free and exposes no
-      // extensions.
-      if (!gl.isContextLost()) {
-        gl.loseContextExtension.loseContext();
-      }
-    }
-
-    // Unlike `_adoptCanvas`, which only drops its references,
-    // dispose the SkSurface before abandoning and deleting the GrContext so the
-    // Skia objects bound to the old context are freed now.
-    _skSurface?.dispose();
-    _skSurface = null;
-    _grContext?.releaseResourcesAndAbandonContext();
-    _grContext?.delete();
-    _grContext = null;
-  }
-
   /// Replaces the current canvas with a new one of [size] and attempts to
   /// create a fresh WebGL context for it, falling back to software rendering
   /// if that fails.
@@ -547,20 +550,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   }
 
   @override
-  Future<void> triggerContextLoss() async {
-    _handledContextLostEvent = Completer<void>();
-    final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
-    gl.loseContextExtension.loseContext();
-  }
-
-  @override
-  void dispose() {
-    if (_isDisposed) {
-      return;
-    }
-    _releaseCanvasAndContext();
-    super.dispose();
-  }
+  WebGLContext _getCanvasGlContext() => (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
 }
 
 /// The CanvasKit implementation of [OnscreenSurface].
@@ -610,9 +600,5 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
   }
 
   @override
-  Future<void> triggerContextLoss() async {
-    _handledContextLostEvent = Completer<void>();
-    final WebGLContext gl = (canvas as DomHTMLCanvasElement).getGlContext(webGLVersion);
-    gl.loseContextExtension.loseContext();
-  }
+  WebGLContext _getCanvasGlContext() => (canvas as DomHTMLCanvasElement).getGlContext(webGLVersion);
 }
