@@ -1366,7 +1366,7 @@ void testMain() {
       packets.add(packet);
     };
 
-    for (final ui_web.OperatingSystem os in <ui_web.OperatingSystem>[
+    for (final os in <ui_web.OperatingSystem>[
       ui_web.OperatingSystem.windows,
       ui_web.OperatingSystem.linux,
     ]) {
