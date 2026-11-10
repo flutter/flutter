@@ -3,7 +3,11 @@
 // found in the LICENSE file.
 
 #include <memory>
+#include <utility>
+#include <vector>
 
+#include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -230,6 +234,188 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
       holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
       holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
 }
+
+namespace {
+
+// Probes whether `Rasterizer::Setup` has populated `surface_` without invoking
+// `Surface::AcquireFrame` (requires viewport metrics on view 0 that exclude
+// `DlISize(1, 1)` so `ShouldDiscardLayerTree` discards the task once `surface_`
+// is present, returning `kDone`, whereas a null `surface_` returns
+// `kNotSetUp`).
+DrawStatus ProbeRasterizerSetupStatus(Rasterizer& rasterizer) {
+  auto pipeline = std::make_shared<FramePipeline>(1);
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+  const fml::TimePoint now = fml::TimePoint::Now();
+  recorder->RecordVsync(now, now + fml::TimeDelta::FromSeconds(3600));
+  recorder->RecordBuildStart(now);
+  recorder->RecordBuildEnd(now);
+  std::vector<std::unique_ptr<LayerTreeTask>> tasks;
+  tasks.push_back(std::make_unique<LayerTreeTask>(
+      /*view_id=*/0,
+      std::make_unique<LayerTree>(/*root_layer=*/nullptr, DlISize(1, 1)),
+      /*device_pixel_ratio=*/1.0f));
+  auto continuation = pipeline->Produce();
+  PipelineProduceResult produce_result = continuation.Complete(
+      std::make_unique<FrameItem>(std::move(tasks), std::move(recorder)));
+  EXPECT_TRUE(produce_result.success);
+  return rasterizer.Draw(pipeline);
+}
+
+}  // namespace
+
+TEST(AndroidShellHolder, NotifyCreatedAndChangedDoNotBlockPlatformThread) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+#if defined(NDEBUG) || SLIMPELLER
+  constexpr AndroidRenderingAPI kRenderingApi =
+      AndroidRenderingAPI::kImpellerOpenGLES;
+#else
+  // In `--unoptimized` (`!NDEBUG`) builds, `AndroidContextGLImpeller` does not
+  // create a pbuffer fallback for fake windows, so `CreateGPUSurface` hits a
+  // pre-existing `FML_DCHECK(CanReactOnCurrentThread())` in `ReactorGLES`.
+  constexpr AndroidRenderingAPI kRenderingApi =
+      AndroidRenderingAPI::kSkiaOpenGLES;
+  settings.enable_impeller = false;
+#endif
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder =
+      std::make_unique<AndroidShellHolder>(settings, jni, kRenderingApi);
+  ASSERT_NE(holder, nullptr);
+  ASSERT_TRUE(holder->IsValid());
+  holder->GetPlatformView()->SetViewportMetrics(
+      0, ViewportMetrics{1.0, 100, 100, 22, 0});
+
+  auto raster_runner =
+      holder->GetShellForTesting()->GetTaskRunners().GetRasterTaskRunner();
+  fml::AutoResetWaitableEvent raster_entered;
+  fml::AutoResetWaitableEvent unblock_raster;
+  raster_runner->PostTask([&raster_entered, &unblock_raster]() {
+    raster_entered.Signal();
+    unblock_raster.Wait();
+  });
+  raster_entered.Wait();
+
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
+  holder->GetPlatformView()->NotifyCreated(window);
+  holder->GetPlatformView()->NotifyChanged(DlISize(1080, 1920));
+
+  unblock_raster.Signal();
+
+  DrawStatus status_after_create = DrawStatus::kNotSetUp;
+  fml::AutoResetWaitableEvent raster_done;
+  raster_runner->PostTask([shell_ptr = holder->GetShellForTesting().get(),
+                           &status_after_create, &raster_done]() {
+    status_after_create =
+        ProbeRasterizerSetupStatus(*shell_ptr->GetRasterizer());
+    raster_done.Signal();
+  });
+  ASSERT_FALSE(raster_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(10)));
+  EXPECT_EQ(status_after_create, DrawStatus::kDone);
+}
+
+#if !SLIMPELLER
+TEST(AndroidShellHolder, SupersededNotifyCreatedAndNotifyChangedAreSkipped) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  settings.enable_impeller = false;
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kSkiaOpenGLES);
+  ASSERT_NE(holder, nullptr);
+  ASSERT_TRUE(holder->IsValid());
+
+  auto raster_runner =
+      holder->GetShellForTesting()->GetTaskRunners().GetRasterTaskRunner();
+  fml::AutoResetWaitableEvent raster_entered;
+  fml::AutoResetWaitableEvent unblock_raster;
+  raster_runner->PostTask([&raster_entered, &unblock_raster]() {
+    raster_entered.Signal();
+    unblock_raster.Wait();
+  });
+  raster_entered.Wait();
+
+  // `AndroidContextGLSkia` backs fake windows with a valid pbuffer surface, so
+  // the first `NotifyCreated` would populate `GetGrContext()` if it were not
+  // superseded before running on the raster thread.
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
+  holder->GetPlatformView()->NotifyCreated(window);
+  holder->GetPlatformView()->NotifyChanged(DlISize(1080, 1920));
+
+  bool setup_ran_for_superseded_generation = true;
+  raster_runner->PostTask([shell_ptr = holder->GetShellForTesting().get(),
+                           &setup_ran_for_superseded_generation]() {
+    setup_ran_for_superseded_generation =
+        shell_ptr->GetRasterizer()->GetGrContext() != nullptr;
+  });
+
+  holder->GetPlatformView()->NotifyCreated(window);
+  unblock_raster.Signal();
+
+  bool setup_ran_for_active_generation = false;
+  fml::AutoResetWaitableEvent raster_done;
+  raster_runner->PostTask([shell_ptr = holder->GetShellForTesting().get(),
+                           &setup_ran_for_active_generation, &raster_done]() {
+    setup_ran_for_active_generation =
+        shell_ptr->GetRasterizer()->GetGrContext() != nullptr;
+    raster_done.Signal();
+  });
+  ASSERT_FALSE(raster_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(10)));
+  EXPECT_FALSE(setup_ran_for_superseded_generation);
+  EXPECT_TRUE(setup_ran_for_active_generation);
+
+  holder->GetPlatformView()->NotifyDestroyed();
+}
+
+TEST(AndroidShellHolder,
+     NotifyCreatedRunsSetupWhenSetNativeWindowFailsButSurfaceIsValid) {
+  Settings settings;
+  settings.enable_software_rendering = true;
+  settings.enable_impeller = false;
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kSoftware);
+  ASSERT_NE(holder, nullptr);
+  ASSERT_TRUE(holder->IsValid());
+  holder->GetPlatformView()->SetViewportMetrics(
+      0, ViewportMetrics{1.0, 100, 100, 22, 0});
+
+  auto raster_runner =
+      holder->GetShellForTesting()->GetTaskRunners().GetRasterTaskRunner();
+  DrawStatus status_before_create = DrawStatus::kDone;
+  fml::AutoResetWaitableEvent initial_probe_done;
+  raster_runner->PostTask([shell_ptr = holder->GetShellForTesting().get(),
+                           &status_before_create, &initial_probe_done]() {
+    status_before_create =
+        ProbeRasterizerSetupStatus(*shell_ptr->GetRasterizer());
+    initial_probe_done.Signal();
+  });
+  ASSERT_FALSE(
+      initial_probe_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(10)));
+  EXPECT_EQ(status_before_create, DrawStatus::kNotSetUp);
+
+  // `AndroidSurfaceSoftware::SetNativeWindow` returns false for a fake window,
+  // yet `CreateRenderingSurface` returns a valid `GPUSurfaceSoftware` so
+  // `Rasterizer::Setup` must still run (preserving attempt-and-validate
+  // semantics).
+  auto invalid_window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
+  holder->GetPlatformView()->NotifyCreated(invalid_window);
+  holder->GetPlatformView()->NotifyChanged(DlISize(1080, 1920));
+
+  DrawStatus status_after_create = DrawStatus::kNotSetUp;
+  fml::AutoResetWaitableEvent raster_done;
+  raster_runner->PostTask([shell_ptr = holder->GetShellForTesting().get(),
+                           &status_after_create, &raster_done]() {
+    status_after_create =
+        ProbeRasterizerSetupStatus(*shell_ptr->GetRasterizer());
+    raster_done.Signal();
+  });
+  ASSERT_FALSE(raster_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(10)));
+  EXPECT_EQ(status_after_create, DrawStatus::kDone);
+}
+#endif  // !SLIMPELLER
 
 }  // namespace testing
 }  // namespace flutter
