@@ -96,7 +96,7 @@ void main() {
         expect(context.stderr, contains('ERROR: Unknown FLUTTER_BUILD_MODE: null.\n'));
       });
 
-      test('calls flutter assemble without deployment target defines when settings are absent', () {
+      test('calls flutter assemble', () {
         final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
@@ -732,7 +732,7 @@ void main() {
         expect(context.stderr, contains('ERROR: Unknown FLUTTER_BUILD_MODE: null.\n'));
       });
 
-      test('calls flutter assemble without deployment target defines when settings are absent', () {
+      test('calls flutter assemble', () {
         final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
