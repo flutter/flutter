@@ -39,8 +39,6 @@ import '../src/fakes.dart';
 import '../src/package_config.dart';
 import '../src/throwing_pub.dart';
 
-late ToolContext _testToolContext;
-
 void main() {
   // TODO(zanderso): remove once FlutterProject is fully refactored.
   // this is safe since no tests have expectations on the test logger.
@@ -155,19 +153,30 @@ void main() {
     });
 
     group('ensure ready for platform-specific tooling', () {
-      _testInMemory('does nothing, if project is not created', () async {
-        final FileSystem fs = _testToolContext.fs;
+      _testInMemory('does nothing, if project is not created', (ToolContext toolContext, _) async {
+        final FileSystem fs = toolContext.fs;
         final project = FlutterProject(
           fs.directory('not_created'),
           FlutterManifest.empty(logger: logger),
           FlutterManifest.empty(logger: logger),
         );
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expectNotExists(project.directory);
       });
-      _testInMemory('does nothing in plugin or package root project', () async {
-        final FlutterProject project = await aPluginProject();
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+      _testInMemory('does nothing in plugin or package root project', (
+        ToolContext toolContext,
+        _,
+      ) async {
+        final FlutterProject project = await aPluginProject(toolContext: toolContext);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expectNotExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
@@ -179,7 +188,10 @@ void main() {
         );
         expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
-      _testInMemory('does nothing in a project with no platform directories', () async {
+      _testInMemory('does nothing in a project with no platform directories', (
+        ToolContext toolContext,
+        _,
+      ) async {
         // A project (e.g. a pure-Dart package or the flutter framework's own
         // packages) with no android/ios/linux/macos/windows/web directories
         // has nothing for refreshPluginsList or injectPlugins to do — every
@@ -187,8 +199,8 @@ void main() {
         // gates on the matching platform directory existing. The plugin
         // dependency below ensures the file would be written without the
         // early-return.
-        await aPluginProject(legacy: false);
-        final ToolContext(:FileSystem fs, :Logger logger) = _testToolContext;
+        await aPluginProject(legacy: false, toolContext: toolContext);
+        final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
         final Directory directory = fs.directory('some_project');
         writePackageConfigFiles(
           directory: directory,
@@ -207,17 +219,25 @@ dependencies:
 ''');
         final FlutterProject project = FlutterProject.fromDirectory(directory, logger: logger);
 
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
 
         expectNotExists(project.flutterPluginsDependenciesFile);
       });
-      _testInMemory('works if there is an "example" folder', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('works if there is an "example" folder', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         // The presence of an "example" folder used to be used as an indicator
         // that a project was a plugin, but shouldn't be as this creates false
         // positives.
         project.directory.childDirectory('example').createSync();
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expectExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
@@ -229,36 +249,58 @@ dependencies:
         );
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
-      _testInMemory('injects plugins for iOS', () async {
-        final FlutterProject project = await someProject();
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+      _testInMemory('injects plugins for iOS', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expectExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
       });
-      _testInMemory('generates Xcode configuration for iOS', () async {
-        final FlutterProject project = await someProject();
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+      _testInMemory('generates Xcode configuration for iOS', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expectExists(
           project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'),
         );
       });
-      _testInMemory('injects plugins for Android', () async {
-        final FlutterProject project = await someProject();
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+      _testInMemory('injects plugins for Android', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expectExists(
           androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')),
         );
       });
-      _testInMemory('updates local properties for Android', () async {
-        final FlutterProject project = await someProject();
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+      _testInMemory('updates local properties for Android', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
-      _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
+      _testInMemory('checkForDeprecation fails on invalid android app manifest file', (
+        ToolContext toolContext,
+        _,
+      ) async {
         // This is not a valid Xml document
         const invalidManifest = '<manifest></application>';
-        final FlutterProject project = await someProject(androidManifestOverride: invalidManifest);
+        final FlutterProject project = await someProject(
+          androidManifestOverride: invalidManifest,
+          toolContext: toolContext,
+        );
 
         expect(
           () => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore),
@@ -270,26 +312,32 @@ dependencies:
       });
       _testInMemory(
         'Project not on v2 embedding does not warn if deprecation status is irrelevant',
-        () async {
-          final FlutterProject project = await someProject();
+        (ToolContext toolContext, BufferLogger logger) async {
+          final FlutterProject project = await someProject(toolContext: toolContext);
           // The default someProject with an empty <manifest> already indicates
           // v1 embedding, as opposed to having <meta-data
           // android:name="flutterEmbedding" android:value="2" />.
 
           // Default is "DeprecationBehavior.none"
           project.checkForDeprecation();
-          expect(testLogger.statusText, isEmpty);
+          expect(logger.statusText, isEmpty);
         },
       );
-      _testInMemory('Android project no pubspec continues', () async {
-        final FlutterProject project = await someProject(includePubspec: false);
+      _testInMemory('Android project no pubspec continues', (
+        ToolContext toolContext,
+        BufferLogger logger,
+      ) async {
+        final FlutterProject project = await someProject(
+          includePubspec: false,
+          toolContext: toolContext,
+        );
         // The default someProject with an empty <manifest> already indicates
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
 
         project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
         expect(
-          testLogger.statusText,
+          logger.statusText,
           isNot(
             contains(
               'https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md',
@@ -297,35 +345,42 @@ dependencies:
           ),
         );
       });
-      _testInMemory(
-        'Android plugin project does not throw v1 embedding deprecation warning',
-        () async {
-          final FlutterProject project = await aPluginProject();
+      _testInMemory('Android plugin project does not throw v1 embedding deprecation warning', (
+        ToolContext toolContext,
+        BufferLogger logger,
+      ) async {
+        final FlutterProject project = await aPluginProject(toolContext: toolContext);
 
-          project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit);
-          expect(
-            testLogger.statusText,
-            isNot(
-              contains(
-                'https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md',
-              ),
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit);
+        expect(
+          logger.statusText,
+          isNot(
+            contains(
+              'https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md',
             ),
-          );
-          expect(
-            testLogger.statusText,
-            isNot(
-              contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in '),
-            ),
-          );
-        },
-      );
-      _testInMemory('Android plugin without example app does not show a warning', () async {
-        final FlutterProject project = await aPluginProject();
+          ),
+        );
+        expect(
+          logger.statusText,
+          isNot(
+            contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in '),
+          ),
+        );
+      });
+      _testInMemory('Android plugin without example app does not show a warning', (
+        ToolContext toolContext,
+        BufferLogger logger,
+      ) async {
+        final FlutterProject project = await aPluginProject(toolContext: toolContext);
         project.example.directory.deleteSync();
 
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expect(
-          testLogger.statusText,
+          logger.statusText,
           isNot(
             contains(
               'https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md',
@@ -333,9 +388,13 @@ dependencies:
           ),
         );
       });
-      _testInMemory('updates local properties for Android', () async {
-        final FlutterProject project = await someProject();
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+      _testInMemory('updates local properties for Android', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
 
@@ -489,18 +548,26 @@ dependencies:
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
       });
-      _testInMemory('creates Android library in module', () async {
-        final FlutterProject project = await aModuleProject();
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+      _testInMemory('creates Android library in module', (ToolContext toolContext, _) async {
+        final FlutterProject project = await aModuleProject(toolContext: toolContext);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         expectExists(project.android.hostAppGradleRoot.childFile('settings.gradle'));
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
         expectExists(
           androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('Flutter')),
         );
       });
-      _testInMemory('creates iOS pod in module', () async {
-        final FlutterProject project = await aModuleProject();
-        await regeneratePlatformSpecificTooling(project, releaseMode: false);
+      _testInMemory('creates iOS pod in module', (ToolContext toolContext, _) async {
+        final FlutterProject project = await aModuleProject(toolContext: toolContext);
+        await regeneratePlatformSpecificTooling(
+          project,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
         final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('flutter_export_environment.sh'));
@@ -512,7 +579,7 @@ dependencies:
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.m'));
       });
 
-      testUsingContext('Version.json info is correct', () {
+      testWithoutContext('Version.json info is correct', () {
         final fileSystem = MemoryFileSystem.test();
         final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
@@ -525,32 +592,32 @@ dependencies:
         expect(versionInfo['build_number'], '3');
         expect(versionInfo['package_name'], 'test');
       });
-      _testInMemory('gets xcworkspace directory', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('gets xcworkspace directory', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         project.ios.hostAppRoot.childFile('._Runner.xcworkspace').createSync(recursive: true);
         project.ios.hostAppRoot.childFile('Runner.xcworkspace').createSync(recursive: true);
 
         expect(project.ios.xcodeWorkspace?.basename, 'Runner.xcworkspace');
       });
-      _testInMemory('no xcworkspace directory found', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('no xcworkspace directory found', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         expect(project.ios.xcodeWorkspace?.basename, null);
       });
     });
 
     group('module status', () {
-      _testInMemory('is known for module', () async {
-        final FlutterProject project = await aModuleProject();
+      _testInMemory('is known for module', (ToolContext toolContext, _) async {
+        final FlutterProject project = await aModuleProject(toolContext: toolContext);
         expect(project.isModule, isTrue);
         expect(project.android.isModule, isTrue);
         expect(project.ios.isModule, isTrue);
         expect(project.android.hostAppGradleRoot.basename, '.android');
         expect(project.ios.hostAppRoot.basename, '.ios');
       });
-      _testInMemory('is known for non-module', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is known for non-module', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         expect(project.isModule, isFalse);
         expect(project.android.isModule, isFalse);
         expect(project.ios.isModule, isFalse);
@@ -560,17 +627,23 @@ dependencies:
     });
 
     group('example', () {
-      _testInMemory('exists for plugin in legacy format', () async {
-        final FlutterProject project = await aPluginProject();
+      _testInMemory('exists for plugin in legacy format', (ToolContext toolContext, _) async {
+        final FlutterProject project = await aPluginProject(toolContext: toolContext);
         expect(project.isPlugin, isTrue);
         expect(project.hasExampleApp, isTrue);
       });
-      _testInMemory('exists for plugin in multi-platform format', () async {
-        final FlutterProject project = await aPluginProject(legacy: false);
+      _testInMemory('exists for plugin in multi-platform format', (
+        ToolContext toolContext,
+        _,
+      ) async {
+        final FlutterProject project = await aPluginProject(
+          legacy: false,
+          toolContext: toolContext,
+        );
         expect(project.hasExampleApp, isTrue);
       });
-      _testInMemory('does not exist for non-plugin', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('does not exist for non-plugin', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         expect(project.isPlugin, isFalse);
         expect(project.hasExampleApp, isFalse);
       });
@@ -580,8 +653,9 @@ dependencies:
       Future<FlutterProject?> configureGradleAgpForTest({
         required String gradleV,
         required String agpV,
+        required ToolContext toolContext,
       }) async {
-        final FlutterProject project = await someProject();
+        final FlutterProject project = await someProject(toolContext: toolContext);
         addRootGradleFile(
           project.directory,
           gradleFileContent: () {
@@ -612,10 +686,11 @@ dependencies {
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
         _testInMemory(
           'flamingo values are compatible',
-          () async {
+          (ToolContext toolContext, _) async {
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: '8.0',
               agpV: '7.4.2',
+              toolContext: toolContext,
             );
             final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
               java: java,
@@ -643,10 +718,11 @@ dependencies {
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
         _testInMemory(
           'java 8 era values are compatible',
-          () async {
+          (ToolContext toolContext, _) async {
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: '6.7.1',
               agpV: '4.2.0',
+              toolContext: toolContext,
             );
             final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
               java: java,
@@ -675,10 +751,11 @@ dependencies {
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
         _testInMemory(
           'electric eel era values are compatible',
-          () async {
+          (ToolContext toolContext, _) async {
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: '7.3.3',
               agpV: '7.2.0',
+              toolContext: toolContext,
             );
             final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
               java: java,
@@ -711,10 +788,11 @@ dependencies {
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
         _testInMemory(
           'incompatible everything',
-          () async {
+          (ToolContext toolContext, _) async {
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
+              toolContext: toolContext,
             );
             final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
               java: java,
@@ -769,10 +847,11 @@ dependencies {
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
         _testInMemory(
           'incompatible java/gradle only',
-          () async {
+          (ToolContext toolContext, _) async {
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
+              toolContext: toolContext,
             );
             final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
               java: java,
@@ -809,12 +888,13 @@ dependencies {
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
         _testInMemory(
           'incompatible gradle/agp only',
-          () async {
+          (ToolContext toolContext, _) async {
             const gradleV = '7.0.3';
             const agpV = '7.1.0';
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
+              toolContext: toolContext,
             );
             final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
               java: java,
@@ -855,10 +935,11 @@ dependencies {
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
         _testInMemory(
           'incompatible kgp/gradle only',
-          () async {
+          (ToolContext toolContext, _) async {
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
+              toolContext: toolContext,
             );
             final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
               java: java,
@@ -899,10 +980,11 @@ dependencies {
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
         _testInMemory(
           'incompatible agp/kgp only',
-          () async {
+          (ToolContext toolContext, _) async {
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
+              toolContext: toolContext,
             );
             final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
               java: java,
@@ -940,11 +1022,12 @@ dependencies {
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
         _testInMemory(
           'null agp only',
-          () async {
+          (ToolContext toolContext, _) async {
             const gradleV = '7.0.3';
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: '',
+              toolContext: toolContext,
             );
             final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
               java: java,
@@ -974,6 +1057,7 @@ dependencies {
       late XcodeProjectInterpreter xcodeProjectInterpreter;
       late MemoryFileSystem fs;
       late FlutterProjectFactory flutterProjectFactory;
+      late ToolContext toolContext;
       setUp(() {
         fs = MemoryFileSystem.test();
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(
@@ -985,74 +1069,56 @@ dependencies {
           logger: logger,
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
-        _testToolContext = FakeToolContext(
+        toolContext = FakeToolContext(
           fs: fs,
           logger: logger,
           projectFactory: flutterProjectFactory,
         );
       });
 
-      _testInMemory('default host app language', () async {
-        final FlutterProject project = await someProject();
+      testWithoutContext('default host app language', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         expect(project.android.isKotlin, isFalse);
       });
 
-      testUsingContext(
-        'kotlin host app language',
-        () async {
-          final FlutterProject project = await someProject();
+      testWithoutContext('kotlin host app language', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
 
-          addAndroidGradleFile(
-            project.directory,
-            gradleFileContent: () {
-              return '''
+        addAndroidGradleFile(
+          project.directory,
+          gradleFileContent: () {
+            return '''
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 ''';
-            },
-          );
-          expect(project.android.isKotlin, isTrue);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
+          },
+        );
+        expect(project.android.isKotlin, isTrue);
+      });
 
-      testUsingContext(
-        'kotlin host app language with Gradle Kotlin DSL',
-        () async {
-          final FlutterProject project = await someProject();
+      testWithoutContext('kotlin host app language with Gradle Kotlin DSL', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
 
-          addAndroidGradleFile(
-            project.directory,
-            kotlinDsl: true,
-            gradleFileContent: () {
-              return '''
+        addAndroidGradleFile(
+          project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
 plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 ''';
-            },
-          );
-          expect(project.android.isKotlin, isTrue);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
+          },
+        );
+        expect(project.android.isKotlin, isTrue);
+      });
 
-      testUsingContext(
+      testWithoutContext(
         'kotlin host app language with Gradle Kotlin DSL and typesafe plugin id',
         () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
 
           addAndroidGradleFile(
             project.directory,
@@ -1069,70 +1135,46 @@ plugins {
           );
           expect(project.android.isKotlin, isTrue);
         },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
       );
 
-      testUsingContext(
-        'Gradle Groovy files are preferred to Gradle Kotlin files',
-        () async {
-          final FlutterProject project = await someProject();
+      testWithoutContext('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
 
-          addAndroidGradleFile(
-            project.directory,
-            gradleFileContent: () {
-              return '''
+        addAndroidGradleFile(
+          project.directory,
+          gradleFileContent: () {
+            return '''
 plugins {
     id "com.android.application"
     id "dev.flutter.flutter-gradle-plugin"
 }
 ''';
-            },
-          );
-          addAndroidGradleFile(
-            project.directory,
-            kotlinDsl: true,
-            gradleFileContent: () {
-              return '''
+          },
+        );
+        addAndroidGradleFile(
+          project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 ''';
-            },
-          );
+          },
+        );
 
-          expect(project.android.isKotlin, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
+        expect(project.android.isKotlin, isFalse);
+      });
 
       group('_kotlinCompilerOptionsPattern', () {
         void testRegex(String description, String content, {bool expected = true}) {
-          testUsingContext(
-            description,
-            () async {
-              final FlutterProject project = await someProject();
-              addAndroidGradleFile(project.directory, gradleFileContent: () => content);
-              expect(project.android.isKotlin, expected);
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => fs,
-              ProcessManager: () => FakeProcessManager.any(),
-              XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-              FlutterProjectFactory: () => flutterProjectFactory,
-            },
-          );
+          testWithoutContext(description, () async {
+            final FlutterProject project = await someProject(toolContext: toolContext);
+            addAndroidGradleFile(project.directory, gradleFileContent: () => content);
+            expect(project.android.isKotlin, expected);
+          });
         }
 
         testRegex('matches standard formatting', '''
@@ -1182,45 +1224,27 @@ android {
 ''', expected: false);
       });
 
-      testUsingContext(
-        'isKotlin is true if src/main/kotlin directory exists',
-        () async {
-          final FlutterProject project = await someProject();
-          project.android.hostAppGradleRoot
-              .childDirectory('app')
-              .childDirectory('src')
-              .childDirectory('main')
-              .childDirectory('kotlin')
-              .createSync(recursive: true);
-          expect(project.android.isKotlin, isTrue);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
+      testWithoutContext('isKotlin is true if src/main/kotlin directory exists', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.android.hostAppGradleRoot
+            .childDirectory('app')
+            .childDirectory('src')
+            .childDirectory('main')
+            .childDirectory('kotlin')
+            .createSync(recursive: true);
+        expect(project.android.isKotlin, isTrue);
+      });
 
-      testUsingContext(
-        'isKotlin is false if src/main/kotlin directory does not exist',
-        () async {
-          final FlutterProject project = await someProject();
-          project.android.hostAppGradleRoot
-              .childDirectory('app')
-              .childDirectory('src')
-              .childDirectory('main')
-              .childDirectory('java')
-              .createSync(recursive: true);
-          expect(project.android.isKotlin, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
+      testWithoutContext('isKotlin is false if src/main/kotlin directory does not exist', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.android.hostAppGradleRoot
+            .childDirectory('app')
+            .childDirectory('src')
+            .childDirectory('main')
+            .childDirectory('java')
+            .createSync(recursive: true);
+        expect(project.android.isKotlin, isFalse);
+      });
     });
 
     group('With mocked context', () {
@@ -1228,6 +1252,7 @@ android {
       late FakePlistParser testPlistUtils;
       late FakeXcodeProjectInterpreter xcodeProjectInterpreter;
       late FlutterProjectFactory flutterProjectFactory;
+      late ToolContext toolContext;
       setUp(() {
         fs = MemoryFileSystem.test();
         testPlistUtils = FakePlistParser();
@@ -1239,7 +1264,7 @@ android {
           plistParser: testPlistUtils,
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
-        _testToolContext = FakeToolContext(
+        toolContext = FakeToolContext(
           fs: fs,
           logger: logger,
           projectFactory: flutterProjectFactory,
@@ -1247,22 +1272,12 @@ android {
       });
 
       void testWithMocks(String description, Future<void> Function() testMethod) {
-        testUsingContext(
-          description,
-          testMethod,
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: () => FakeProcessManager.any(),
-            PlistParser: () => testPlistUtils,
-            XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-            FlutterProjectFactory: () => flutterProjectFactory,
-          },
-        );
+        testWithoutContext(description, testMethod);
       }
 
       group('universal link', () {
         testWithMocks('build with flavor', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
           const entitlementFilePath = 'myEntitlement.Entitlement';
@@ -1306,7 +1321,7 @@ android {
         });
 
         testWithMocks('can handle entitlement file in nested directory structure.', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
           const entitlementFilePath = 'nested/somewhere/myEntitlement.Entitlement';
@@ -1349,7 +1364,7 @@ android {
         });
 
         testWithMocks('return empty when no entitlement', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
 
@@ -1382,12 +1397,12 @@ android {
 
       group('product bundle identifier', () {
         testWithMocks('null, if no build settings or plist entries', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           expect(await project.ios.productBundleIdentifier(null), isNull);
         });
 
         testWithMocks('from build settings, if no plist', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -1404,7 +1419,7 @@ android {
         });
 
         testWithMocks('from project file, if no plist or build settings', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
             <String>[],
             <String>[],
@@ -1422,14 +1437,14 @@ android {
         });
 
         testWithMocks('from plist, if no variables', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
           testPlistUtils.setProperty('CFBundleIdentifier', 'io.flutter.someProject');
           expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
         });
 
         testWithMocks('from build settings and plist, if default variable', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -1447,7 +1462,7 @@ android {
         });
 
         testWithMocks('from build settings and plist, by substitution', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
           const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
@@ -1470,7 +1485,7 @@ android {
         });
 
         testWithMocks('Always pass parsing org on ios project with flavors', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           addIosProjectFile(
             project.directory,
             projectFileContent: () {
@@ -1489,7 +1504,7 @@ android {
         });
 
         testWithMocks('fails with no flavor and defined schemes', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
             <String>[],
@@ -1505,7 +1520,7 @@ android {
         });
 
         testWithMocks('handles case insensitive flavor', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           const buildContext = XcodeProjectBuildContext(scheme: 'Free');
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -1528,7 +1543,7 @@ android {
         });
 
         testWithMocks('fails with flavor and default schemes', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
             <String>[],
@@ -1552,7 +1567,7 @@ android {
         });
 
         testWithMocks('empty surrounded by quotes', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
             <String>[],
             <String>[],
@@ -1569,7 +1584,7 @@ android {
         });
 
         testWithMocks('surrounded by double quotes', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
             <String>[],
             <String>[],
@@ -1586,7 +1601,7 @@ android {
         });
 
         testWithMocks('surrounded by single quotes', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
             <String>[],
             <String>[],
@@ -1605,13 +1620,13 @@ android {
 
       group('flutterSwiftPackageInProjectSettings', () {
         testWithMocks('is false if pbxproj missing', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           expect(project.ios.xcodeProjectInfoFile.existsSync(), isFalse);
           expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
         });
 
         testWithMocks('is false if pbxproj does not contain FlutterGeneratedPluginSwiftPackage in build process', () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProjectInfoFile.createSync(recursive: true);
           expect(project.ios.xcodeProjectInfoFile.existsSync(), isTrue);
           expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
@@ -1620,7 +1635,7 @@ android {
         testWithMocks(
           'is true if pbxproj does contain FlutterGeneratedPluginSwiftPackage in build process',
           () async {
-            final FlutterProject project = await someProject();
+            final FlutterProject project = await someProject(toolContext: toolContext);
             project.ios.xcodeProjectInfoFile.createSync(recursive: true);
             project.ios.xcodeProjectInfoFile.writeAsStringSync('''
 '		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
@@ -1635,6 +1650,7 @@ android {
     group('application bundle name', () {
       late MemoryFileSystem fs;
       late FakeXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      late ToolContext toolContext;
       setUp(() {
         fs = MemoryFileSystem.test();
         mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
@@ -1644,60 +1660,44 @@ android {
           logger: logger,
           xcodeProjectInterpreter: mockXcodeProjectInterpreter,
         );
-        _testToolContext = FakeToolContext(fs: fs, logger: logger, projectFactory: projectFactory);
+        toolContext = FakeToolContext(fs: fs, logger: logger, projectFactory: projectFactory);
       });
 
-      testUsingContext(
-        'app product name defaults to Runner',
-        () async {
-          final FlutterProject project = await someProject();
-          expect(await project.ios.productName(null), 'Runner');
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-        },
-      );
+      testWithoutContext('app product name defaults to Runner', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        expect(await project.ios.productName(null), 'Runner');
+      });
 
-      testUsingContext(
-        'app product name xcodebuild settings',
-        () async {
-          final FlutterProject project = await someProject();
-          project.ios.xcodeProject.createSync();
-          const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
-          mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-            'PRODUCT_NAME': 'My App',
-          };
-          mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
-            <String>[],
-            <String>[],
-            <String>['Runner'],
-            logger,
-          );
+      testWithoutContext('app product name xcodebuild settings', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.xcodeProject.createSync();
+        const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+          'PRODUCT_NAME': 'My App',
+        };
+        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
+          <String>[],
+          <String>[],
+          <String>['Runner'],
+          logger,
+        );
 
-          expect(await project.ios.productName(null), 'My App');
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-        },
-      );
+        expect(await project.ios.productName(null), 'My App');
+      });
     });
 
     group('organization names set', () {
-      _testInMemory('is empty, if project not created', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is empty, if project not created', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         expect(await project.organizationNames, isEmpty);
       });
-      _testInMemory('is empty, if no platform folders exist', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is empty, if no platform folders exist', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         project.directory.createSync();
         expect(await project.organizationNames, isEmpty);
       });
-      _testInMemory('is populated from iOS bundle identifier', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is populated from iOS bundle identifier', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         addIosProjectFile(
           project.directory,
           projectFileContent: () {
@@ -1706,8 +1706,8 @@ android {
         );
         expect(await project.organizationNames, <String>['io.flutter']);
       });
-      _testInMemory('is populated from Android application ID', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is populated from Android application ID', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         addAndroidGradleFile(
           project.directory,
           gradleFileContent: () {
@@ -1716,8 +1716,11 @@ android {
         );
         expect(await project.organizationNames, <String>['io.flutter']);
       });
-      _testInMemory('is populated from iOS bundle identifier in plugin example', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is populated from iOS bundle identifier in plugin example', (
+        ToolContext toolContext,
+        _,
+      ) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         addIosProjectFile(
           project.example.directory,
           projectFileContent: () {
@@ -1726,8 +1729,11 @@ android {
         );
         expect(await project.organizationNames, <String>['io.flutter']);
       });
-      _testInMemory('is populated from Android application ID in plugin example', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is populated from Android application ID in plugin example', (
+        ToolContext toolContext,
+        _,
+      ) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         addAndroidGradleFile(
           project.example.directory,
           gradleFileContent: () {
@@ -1736,13 +1742,16 @@ android {
         );
         expect(await project.organizationNames, <String>['io.flutter']);
       });
-      _testInMemory('is populated from Android group in plugin', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is populated from Android group in plugin', (
+        ToolContext toolContext,
+        _,
+      ) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         addAndroidWithGroup(project.directory, 'io.flutter.someproject');
         expect(await project.organizationNames, <String>['io.flutter']);
       });
-      _testInMemory('is singleton, if sources agree', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is singleton, if sources agree', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         addIosProjectFile(
           project.directory,
           projectFileContent: () {
@@ -1757,8 +1766,8 @@ android {
         );
         expect(await project.organizationNames, <String>['io.flutter']);
       });
-      _testInMemory('is non-singleton, if sources disagree', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('is non-singleton, if sources disagree', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         addIosProjectFile(
           project.directory,
           projectFileContent: () {
@@ -1776,8 +1785,8 @@ android {
     });
 
     group('manifest', () {
-      _testInMemory('can be replaced', () async {
-        final FlutterProject project = await someProject();
+      _testInMemory('can be replaced', (ToolContext toolContext, _) async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
         final String originalPubspecContents = project.pubspecFile.readAsStringSync();
         final FlutterManifest updated = FlutterManifest.createFromString(
           validPubspecWithDependencies,
@@ -2371,6 +2380,7 @@ resolution: workspace
     late FakePlistParser testPlistParser;
     late FakeXcodeProjectInterpreter mockXcodeProjectInterpreter;
     late FlutterProjectFactory flutterProjectFactory;
+    late ToolContext toolContext;
     setUp(() {
       fs = MemoryFileSystem.test();
       testPlistParser = FakePlistParser();
@@ -2382,44 +2392,25 @@ resolution: workspace
         plistParser: testPlistParser,
         xcodeProjectInterpreter: mockXcodeProjectInterpreter,
       );
-      _testToolContext = FakeToolContext(
-        fs: fs,
-        logger: logger,
-        projectFactory: flutterProjectFactory,
-      );
+      toolContext = FakeToolContext(fs: fs, logger: logger, projectFactory: flutterProjectFactory);
       const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
       mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
         IosProject.kProductBundleIdKey: 'io.flutter.someProject',
       };
     });
 
-    testUsingContext(
-      'cannot find bundle identifier',
-      () async {
-        final FlutterProject project = await someProject();
-        final projectInfo = XcodeProjectInfo(
-          <String>['WatchTarget'],
-          <String>[],
-          <String>[],
-          logger,
-        );
-        expect(
-          await project.ios.containsWatchCompanion(
-            projectInfo: projectInfo,
-            buildInfo: BuildInfo.debug,
-            deviceId: '123',
-          ),
-          isFalse,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        PlistParser: () => testPlistParser,
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-        FlutterProjectFactory: () => flutterProjectFactory,
-      },
-    );
+    testWithoutContext('cannot find bundle identifier', () async {
+      final FlutterProject project = await someProject(toolContext: toolContext);
+      final projectInfo = XcodeProjectInfo(<String>['WatchTarget'], <String>[], <String>[], logger);
+      expect(
+        await project.ios.containsWatchCompanion(
+          projectInfo: projectInfo,
+          buildInfo: BuildInfo.debug,
+          deviceId: '123',
+        ),
+        isFalse,
+      );
+    });
 
     group('with bundle identifier and multiple schemes', () {
       setUp(() {
@@ -2431,32 +2422,22 @@ resolution: workspace
         );
       });
 
-      testUsingContext(
-        'no Info.plist in target',
-        () async {
-          final FlutterProject project = await someProject();
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isFalse,
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => testPlistParser,
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
+      testWithoutContext('no Info.plist in target', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isFalse,
+        );
+      });
 
-      testUsingContext(
+      testWithoutContext(
         'Info.plist in target does not contain WKCompanionAppBundleIdentifier',
         () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.hostAppRoot
               .childDirectory('WatchTarget')
               .childFile('Info.plist')
@@ -2471,19 +2452,12 @@ resolution: workspace
             isFalse,
           );
         },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => testPlistParser,
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
       );
 
-      testUsingContext(
+      testWithoutContext(
         'target WKCompanionAppBundleIdentifier is not project bundle identifier',
         () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.hostAppRoot
               .childDirectory('WatchTarget')
               .childFile('Info.plist')
@@ -2501,124 +2475,87 @@ resolution: workspace
             isFalse,
           );
         },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => testPlistParser,
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
       );
 
-      testUsingContext(
-        'has watch companion in plist',
-        () async {
-          final FlutterProject project = await someProject();
-          project.ios.xcodeProject.createSync();
-          project.ios.hostAppRoot
-              .childDirectory('WatchTarget')
-              .childFile('Info.plist')
-              .createSync(recursive: true);
-          testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someProject');
+      testWithoutContext('has watch companion in plist', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.xcodeProject.createSync();
+        project.ios.hostAppRoot
+            .childDirectory('WatchTarget')
+            .childFile('Info.plist')
+            .createSync(recursive: true);
+        testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someProject');
 
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isTrue,
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => testPlistParser,
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
-
-      testUsingContext(
-        'has watch companion in plist with xcode variable',
-        () async {
-          final FlutterProject project = await someProject();
-          project.ios.xcodeProject.createSync();
-          const buildContext = XcodeProjectBuildContext(
-            scheme: 'Runner',
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
             deviceId: '123',
-          ); // for substituteXcodeVariables call of plist parsing
-          mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
-          };
-          project.ios.hostAppRoot
-              .childDirectory('WatchTarget')
-              .childFile('Info.plist')
-              .createSync(recursive: true);
-          testPlistParser.setProperty(
-            'WKCompanionAppBundleIdentifier',
-            r'$(PRODUCT_BUNDLE_IDENTIFIER)',
-          );
+          ),
+          isTrue,
+        );
+      });
 
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isTrue,
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => testPlistParser,
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
+      testWithoutContext('has watch companion in plist with xcode variable', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.xcodeProject.createSync();
+        const buildContext = XcodeProjectBuildContext(
+          scheme: 'Runner',
+          deviceId: '123',
+        ); // for substituteXcodeVariables call of plist parsing
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+          IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+        };
+        project.ios.hostAppRoot
+            .childDirectory('WatchTarget')
+            .childFile('Info.plist')
+            .createSync(recursive: true);
+        testPlistParser.setProperty(
+          'WKCompanionAppBundleIdentifier',
+          r'$(PRODUCT_BUNDLE_IDENTIFIER)',
+        );
 
-      testUsingContext(
-        'has watch companion in other scheme build settings',
-        () async {
-          final FlutterProject project = await someProject();
-          project.ios.xcodeProject.createSync();
-          project.ios.xcodeProjectInfoFile.writeAsStringSync('''
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isTrue,
+        );
+      });
+
+      testWithoutContext('has watch companion in other scheme build settings', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.xcodeProject.createSync();
+        project.ios.xcodeProjectInfoFile.writeAsStringSync('''
         Build settings for action build and target "WatchTarget":
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.someProject
 ''');
 
-          const watchBuildContext = XcodeProjectBuildContext(
-            scheme: 'WatchScheme',
-            sdk: XcodeSdk.WatchOS,
-          );
-          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
-              <String, String>{
-                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
-              };
+        const watchBuildContext = XcodeProjectBuildContext(
+          scheme: 'WatchScheme',
+          sdk: XcodeSdk.WatchOS,
+        );
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+            <String, String>{
+              'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
+            };
 
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isTrue,
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => testPlistParser,
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isTrue,
+        );
+      });
 
-      testUsingContext(
+      testWithoutContext(
         'has watch companion in other scheme build settings with xcode variable',
         () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(toolContext: toolContext);
           project.ios.xcodeProject.createSync();
           project.ios.xcodeProjectInfoFile.writeAsStringSync(r'''
         Build settings for action build and target "WatchTarget":
@@ -2643,13 +2580,6 @@ resolution: workspace
             ),
             isTrue,
           );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => testPlistParser,
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
         },
       );
     });
@@ -2686,25 +2616,26 @@ resolution: workspace
 Future<void> regeneratePlatformSpecificTooling(
   FlutterProject project, {
   required bool releaseMode,
+  required ToolContext toolContext,
   FeatureFlags? featureFlagsOverride,
-  ToolContext? toolContext,
 }) {
   const analytics = NoOpAnalytics();
-  final ToolContext resolvedToolContext = toolContext ?? _testToolContext;
+  final ToolContext(:Cache cache, :Logger logger, :OperatingSystemUtils os, :Platform platform) =
+      toolContext;
   return project.regeneratePlatformSpecificTooling(
-    toolContext: resolvedToolContext,
+    toolContext: toolContext,
     analytics: analytics,
     cocoaPods: CocoaPods(
       analytics: analytics,
-      toolContext: resolvedToolContext,
+      toolContext: toolContext,
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     ),
     featureFlags: featureFlagsOverride ?? TestFeatureFlags(),
     gradleUtils: gradle_utils.GradleUtils(
-      operatingSystemUtils: resolvedToolContext.os,
-      logger: resolvedToolContext.logger,
-      platform: resolvedToolContext.platform,
-      cache: resolvedToolContext.cache,
+      operatingSystemUtils: os,
+      logger: logger,
+      platform: platform,
+      cache: cache,
     ),
     plistParser: FakePlistParser(),
     releaseMode: releaseMode,
@@ -2713,12 +2644,11 @@ Future<void> regeneratePlatformSpecificTooling(
 }
 
 Future<FlutterProject> someProject({
+  required ToolContext toolContext,
   String? androidManifestOverride,
   bool includePubspec = true,
-  ToolContext? toolContext,
 }) async {
-  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) =
-      toolContext ?? _testToolContext;
+  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
   final Directory directory = fs.directory('some_project');
   writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'hello');
   if (includePubspec) {
@@ -2735,9 +2665,8 @@ Future<FlutterProject> someProject({
   return projectFactory.fromDirectory(directory);
 }
 
-Future<FlutterProject> projectWithPluginDependency({ToolContext? toolContext}) async {
-  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) =
-      toolContext ?? _testToolContext;
+Future<FlutterProject> projectWithPluginDependency({required ToolContext toolContext}) async {
+  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
   final Directory directory = fs.directory('some_project');
   writePackageConfigFiles(
     directory: directory,
@@ -2763,12 +2692,11 @@ dev_dependencies:
 }
 
 Future<FlutterProject> aPluginProject({
+  required ToolContext toolContext,
   bool includeAndroidMain = false,
   bool legacy = true,
-  ToolContext? toolContext,
 }) async {
-  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) =
-      toolContext ?? _testToolContext;
+  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
   final Directory directory = fs.directory('plugin_project');
   directory.childDirectory('ios').createSync(recursive: true);
   directory.childDirectory('android').createSync(recursive: true);
@@ -2816,9 +2744,8 @@ class MyPlugin extends FluttPlugin { /* ... */ }
   return projectFactory.fromDirectory(directory);
 }
 
-Future<FlutterProject> aModuleProject({ToolContext? toolContext}) async {
-  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) =
-      toolContext ?? _testToolContext;
+Future<FlutterProject> aModuleProject({required ToolContext toolContext}) async {
+  final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
   final Directory directory = fs.directory('module_project');
   writePackageConfigFiles(mainLibName: 'my_module', directory: directory);
   directory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -2869,7 +2796,7 @@ void _insertFakeGradleArtifactDir({required Directory flutterRoot}) {
 @isTest
 void _testInMemory(
   String description,
-  Future<void> Function() testMethod, {
+  Future<void> Function(ToolContext toolContext, BufferLogger logger) testMethod, {
   FileSystem? fileSystem,
   Java? java,
   AndroidStudio? androidStudio,
@@ -2929,8 +2856,7 @@ void _testInMemory(
   testUsingContext(
     description,
     () async {
-      _testToolContext = toolContext;
-      await testMethod();
+      await testMethod(toolContext, testBufferLogger);
     },
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -2940,9 +2866,7 @@ void _testInMemory(
       // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
       Cache: () => cache,
-      Config: () => testConfig,
       Logger: () => testBufferLogger,
-      OperatingSystemUtils: () => osUtils,
       Pub: ThrowingPub.new,
     },
   );

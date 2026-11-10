@@ -661,6 +661,7 @@ void main() {
     testUsingContext(
       "catches ProcessException calling git because it's not available",
       () async {
+        final logger = BufferLogger.test();
         final command = _GitNotFoundFlutterCommand();
 
         await runner.run(
@@ -670,10 +671,11 @@ void main() {
           flutterVersion: '[user-branch]/',
           reportCrashes: false,
           shutdownHooks: ShutdownHooks(),
+          overrides: <Type, Generator>{Logger: () => logger},
         );
 
         expect(
-          testLogger.errorText,
+          logger.errorText,
           'Failed to find "git" in the search path.\n'
           '\n'
           'An error was encountered when trying to run git.\n'
@@ -691,6 +693,7 @@ void main() {
     testUsingContext(
       'handles ProcessException calling git when ProcessManager.canRun fails',
       () async {
+        final logger = BufferLogger.test();
         final command = _GitNotFoundFlutterCommand();
 
         await runner.run(
@@ -700,10 +703,11 @@ void main() {
           flutterVersion: '[user-branch]/',
           reportCrashes: false,
           shutdownHooks: ShutdownHooks(),
+          overrides: <Type, Generator>{Logger: () => logger},
         );
 
         expect(
-          testLogger.errorText,
+          logger.errorText,
           'Failed to find "git" in the search path.\n'
           '\n'
           'An error was encountered when trying to run git.\n'
@@ -721,15 +725,17 @@ void main() {
     testUsingContext(
       'do not print welcome on bots',
       () async {
+        final logger = BufferLogger.test();
         await runner.run(
           <String>['--version', '--machine'],
           (ToolDependencies toolDependencies) => <FlutterCommand>[],
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
+          overrides: <Type, Generator>{Logger: () => logger},
         );
 
-        expect(testLogger.traceText, isNot(contains('Showed analytics consent message.')));
+        expect(logger.traceText, isNot(contains('Showed analytics consent message.')));
       },
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
@@ -756,7 +762,7 @@ void main() {
           verbose: false,
           prefixedErrors: false,
           widgetPreviews: false,
-          windows: false,
+          windows: const LocalPlatform().isWindows,
         );
         await runner.run(
           <String>['devices', '--machine'],
