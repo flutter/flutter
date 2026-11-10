@@ -150,7 +150,7 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
                               slices_.at(view_id).get(),  //
                               overlay->second             //
         );
-    if (should_submit_current_frame) {
+    if (frame && should_submit_current_frame) {
       frame->Submit();
     }
   }
@@ -167,6 +167,9 @@ AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
 
   std::unique_ptr<SurfaceFrame> frame =
       layer->surface->AcquireFrame(frame_size_);
+  if (!frame) {
+    return nullptr;
+  }
   // Display the overlay surface. If it's already displayed, then it's
   // just positioned and sized.
   jni_facade_->FlutterViewDisplayOverlaySurface(layer->id,        //
@@ -296,15 +299,29 @@ void AndroidExternalViewEmbedder::Teardown() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::DestroySurfaces() {
-  if (!surface_pool_->HasLayers()) {
+  bool has_pending_destroys = false;
+  {
+    std::lock_guard lock(pending_overlay_destroys_->mutex);
+    has_pending_destroys = !pending_overlay_destroys_->ids.empty();
+  }
+  if (!surface_pool_->HasLayers() && !has_pending_destroys) {
     return;
   }
   fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetPlatformTaskRunner(),
-                                    [&]() {
-                                      surface_pool_->DestroyLayers(jni_facade_);
-                                      latch.Signal();
-                                    });
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(), [&]() {
+        std::vector<int32_t> pending_ids;
+        {
+          std::lock_guard lock(pending_overlay_destroys_->mutex);
+          pending_ids.swap(pending_overlay_destroys_->ids);
+        }
+        if (surface_pool_->HasLayers()) {
+          surface_pool_->DestroyLayers(jni_facade_);
+        } else if (!pending_ids.empty()) {
+          jni_facade_->FlutterViewDestroyOverlaySurfacesById(pending_ids);
+        }
+        latch.Signal();
+      });
   latch.Wait();
 }
 
@@ -314,15 +331,32 @@ void AndroidExternalViewEmbedder::ReleaseOverlayLayers() {
   if (layers.empty()) {
     return;
   }
+  {
+    std::lock_guard lock(pending_overlay_destroys_->mutex);
+    pending_overlay_destroys_->ids.reserve(
+        pending_overlay_destroys_->ids.size() + layers.size());
+    for (const std::shared_ptr<OverlayLayer>& layer : layers) {
+      pending_overlay_destroys_->ids.push_back(layer->id);
+    }
+  }
   // Release the rendering surfaces on the thread that renders into them.
   layers.clear();
 
-  // Destroy the overlay views on the platform thread without waiting. Tasks run
-  // in the order they were posted, so this runs before a later frame can
-  // allocate new overlay surfaces, which only happens on the platform thread.
+  // Destroy only these stale overlay IDs on the platform thread without
+  // waiting. If an earlier-queued raster task runs on the platform thread after
+  // a dynamic thread merge before this posted task, any newly allocated overlay
+  // gets a fresh ID and is left intact.
   fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetPlatformTaskRunner(), [jni_facade = jni_facade_]() {
-        jni_facade->FlutterViewDestroyOverlaySurfaces();
+      task_runners_.GetPlatformTaskRunner(),
+      [jni_facade = jni_facade_, pending = pending_overlay_destroys_]() {
+        std::vector<int32_t> ids_to_destroy;
+        {
+          std::lock_guard lock(pending->mutex);
+          ids_to_destroy.swap(pending->ids);
+        }
+        if (!ids_to_destroy.empty()) {
+          jni_facade->FlutterViewDestroyOverlaySurfacesById(ids_to_destroy);
+        }
       });
 }
 

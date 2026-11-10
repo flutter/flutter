@@ -359,5 +359,70 @@ TEST(FindFirstLoadableLibraryTest, EmptyReturnsNull) {
             nullptr);
 }
 
+TEST_F(PlatformViewAndroidJNIImplTest,
+       DestroyOverlaySurfacesByIdMarshalsIdsAndReleasesLocalRef) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+
+  const jobject kFlutterJniObj = reinterpret_cast<jobject>(0x1001);
+  const jintArray kJavaIdsArray = reinterpret_cast<jintArray>(0x4004);
+  const int32_t kFirstOverlayId = 3;
+  const int32_t kSecondOverlayId = 7;
+
+  EXPECT_CALL(mock_env, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, NewWeakGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteWeakGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  bool array_local_ref_deleted = false;
+  EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly([&](jobject ref) {
+    if (ref == kJavaIdsArray) {
+      array_local_ref_deleted = true;
+    }
+  });
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  // Empty vector is a no-op with zero JNI allocations or calls.
+  EXPECT_CALL(mock_env, NewIntArray(_)).Times(0);
+  android_jni.FlutterViewDestroyOverlaySurfacesById({});
+  ::testing::Mock::VerifyAndClearExpectations(&mock_env);
+
+  EXPECT_CALL(mock_env, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteWeakGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+  EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly([&](jobject ref) {
+    if (ref == kJavaIdsArray) {
+      array_local_ref_deleted = true;
+    }
+  });
+
+  std::vector<int32_t> captured_ids;
+  EXPECT_CALL(mock_env, NewIntArray(2)).WillOnce(Return(kJavaIdsArray));
+  EXPECT_CALL(mock_env, SetIntArrayRegion(kJavaIdsArray, 0, 2, _))
+      .WillOnce([&](jintArray, jsize, jsize len, const jint* buf) {
+        captured_ids.assign(buf, buf + len);
+      });
+  bool call_void_invoked = false;
+  EXPECT_CALL(mock_env, CallVoidMethodV(kFlutterJniObj, _, _))
+      .WillOnce([&](jobject, jmethodID, va_list args) {
+        EXPECT_EQ(va_arg(args, jobject), kJavaIdsArray);
+        EXPECT_FALSE(array_local_ref_deleted);
+        call_void_invoked = true;
+      });
+
+  android_jni.FlutterViewDestroyOverlaySurfacesById(
+      {kFirstOverlayId, kSecondOverlayId});
+
+  EXPECT_TRUE(call_void_invoked);
+  EXPECT_TRUE(array_local_ref_deleted);
+  EXPECT_THAT(captured_ids, ElementsAre(kFirstOverlayId, kSecondOverlayId));
+}
+
 }  // namespace testing
 }  // namespace flutter

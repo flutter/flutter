@@ -110,6 +110,9 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void FlutterViewDestroyOverlaySurfaces() override;
 
+  void FlutterViewDestroyOverlaySurfacesById(
+      const std::vector<int32_t>& overlay_ids) override;
+
   std::unique_ptr<std::vector<std::string>>
   FlutterViewComputePlatformResolvedLocale(
       std::vector<std::string> supported_locales_data) override;
