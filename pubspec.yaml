@@ -40,6 +40,7 @@ workspace:
   - dev/integration_tests/ios_platform_view_tests
   - dev/integration_tests/keyboard_hot_restart
   - dev/integration_tests/link_hook
+  - dev/integration_tests/linux_semantics_testing
   - dev/integration_tests/new_gallery
   - dev/integration_tests/platform_interaction
   - dev/integration_tests/record_use_test_app
@@ -106,6 +107,7 @@ dependencies:
   csslib: 1.0.2
   cupertino_icons: 1.0.9
   cupertino_ui: ^1.1.6
+  dbus: 0.8.0
   fake_async: ^1.3.3
   ffi: 2.2.0
   file: 7.0.1
@@ -222,4 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: brquls
+# PUBSPEC CHECKSUM: u1ei8

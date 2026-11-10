@@ -1,0 +1,24 @@
+name: linux_semantics_testing
+description: Integration tests for Linux accessibility over AT-SPI.
+publish_to: none
+
+environment:
+  sdk: ^3.13.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+
+dev_dependencies:
+  dbus: any
+  meta: any
+  test: any
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: 7kovqm
