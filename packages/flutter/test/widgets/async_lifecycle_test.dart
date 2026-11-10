@@ -77,7 +77,8 @@ class VoidAsyncDisposeAfterAwaitWidget extends StatefulWidget {
 
 class VoidAsyncDisposeAfterAwaitWidgetState extends State<VoidAsyncDisposeAfterAwaitWidget> {
   @override
-  // Tests a `void` async dispose, which also returns a Future at runtime.
+  // Tests a dispose() that is declared to return void but is marked async.
+  // Even though its return type is void, it still returns a Future at runtime.
   // ignore: avoid_void_async
   void dispose() async {
     await Future<void>.value();
@@ -125,6 +126,29 @@ class AsyncDisposeBeforeAwaitWidget extends StatefulWidget {
 class AsyncDisposeBeforeAwaitWidgetState extends State<AsyncDisposeBeforeAwaitWidget> {
   @override
   Future<void> dispose() async {
+    super.dispose();
+    await Future<void>.value();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class VoidAsyncDisposeBeforeAwaitWidget extends StatefulWidget {
+  const VoidAsyncDisposeBeforeAwaitWidget({super.key});
+
+  @override
+  VoidAsyncDisposeBeforeAwaitWidgetState createState() => VoidAsyncDisposeBeforeAwaitWidgetState();
+}
+
+class VoidAsyncDisposeBeforeAwaitWidgetState extends State<VoidAsyncDisposeBeforeAwaitWidget> {
+  @override
+  // Tests a dispose() that is declared to return void but is marked async,
+  // and calls super.dispose() before the first await.
+  // ignore: avoid_void_async
+  void dispose() async {
     super.dispose();
     await Future<void>.value();
   }
@@ -238,6 +262,15 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const AsyncDisposeBeforeAwaitWidget());
+    await tester.pumpWidget(Container());
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('void async dispose that calls super.dispose before an await does not throw', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const VoidAsyncDisposeBeforeAwaitWidget());
     await tester.pumpWidget(Container());
 
     expect(tester.takeException(), isNull);

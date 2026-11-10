@@ -6062,7 +6062,7 @@ class StatefulElement extends ComponentElement {
   @override
   void unmount() {
     super.unmount();
-    final Object? debugCheckForReturnedFuture = state.dispose() as dynamic;
+    final debugCheckForReturnedFuture = state.dispose() as Object?;
     assert(() {
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         return true;
