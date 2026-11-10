@@ -227,6 +227,15 @@ std::optional<Rect> FilterContents::GetSourceCoverage(
   return inputs_coverage;
 }
 
+bool FilterContents::RequiresFullSourceCoverage() const {
+  for (const auto& input : inputs_) {
+    if (input->RequiresFullSourceCoverage()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 std::optional<Entity> FilterContents::GetEntity(
     const ContentContext& renderer,
     const Entity& entity,

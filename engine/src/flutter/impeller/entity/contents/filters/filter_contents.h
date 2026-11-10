@@ -176,6 +176,25 @@ class FilterContents : public Contents {
   std::optional<Rect> GetSourceCoverage(const Matrix& effect_transform,
                                         const Rect& output_limit) const;
 
+  /// @brief  Whether this filter, or any filter in its input chain, requires
+  ///         its full source coverage.
+  ///
+  ///         Most filters only need the source pixels returned by
+  ///         |GetSourceCoverage| to produce a given output, so subpasses that
+  ///         feed them can be trimmed to that region. Filters such as runtime
+  ///         effect shaders may sample their input anywhere and depend on the
+  ///         input's full extent (e.g. via `u_size` and `FlutterFragCoord()`),
+  ///         so trimming their input would change their output.
+  ///
+  ///         The default implementation returns true if any input requires
+  ///         its full source coverage.
+  ///
+  ///         The DisplayList counterpart of this is a `DlImageFilter` whose
+  ///         `get_input_device_bounds` returns nullptr, which preserves the
+  ///         SaveLayer bounds at record time; the two should be kept
+  ///         consistent.
+  virtual bool RequiresFullSourceCoverage() const;
+
   virtual Matrix GetLocalTransform(const Matrix& parent_transform) const;
 
   Matrix GetTransform(const Matrix& parent_transform) const;

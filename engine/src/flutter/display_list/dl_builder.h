@@ -567,6 +567,13 @@ class DisplayListBuilder final : public virtual DlCanvas,
     bool contains_backdrop_filter = false;
     bool is_unbounded = false;
 
+    // Whether the filter could not determine the input bounds it needs to
+    // fill a given output (|DlImageFilter::get_input_device_bounds| returned
+    // nullptr), e.g. a runtime effect that may sample anywhere in its input.
+    // In that case the caller-supplied saveLayer bounds are preserved rather
+    // than shrunk to the bounds of the layer's content.
+    bool filter_input_is_unbounded = false;
+
     bool is_group_opacity_compatible() const {
       return !opacity_incompatible_op_detected &&
              !layer_local_accumulator.overlap_detected();
@@ -712,12 +719,15 @@ class DisplayListBuilder final : public virtual DlCanvas,
   }
 
   void RestoreLayer();
-  void TransferLayerBounds(const DlRect& content_bounds);
+  void TransferLayerBounds(
+      const DlRect& content_bounds,
+      std::optional<DlRect> unbounded_input_device_bounds);
   bool AdjustRTreeRects(RTreeData& data,
                         const DlImageFilter& filter,
                         const DlMatrix& matrix,
                         const DlRect& clip,
-                        size_t rect_index);
+                        size_t rect_index,
+                        std::optional<DlRect> unbounded_input_device_bounds);
 
   // This flag indicates whether or not the current rendering attributes
   // are compatible with rendering ops applying an inherited opacity.
