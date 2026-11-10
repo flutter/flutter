@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -42,6 +43,43 @@ void main() {
     expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
   });
+
+  testWithoutContext(
+    'ArtifactUpdater calls onExtracted with the downloaded zip archive after extracting it',
+    () async {
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final artifactUpdater = ArtifactUpdater(
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: operatingSystemUtils,
+        platform: testPlatform,
+        httpClient: FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('http://test.zip'),
+            response: FakeResponse(body: utf8.encode('archive contents')),
+          ),
+        ]),
+        tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
+        allowedBaseUrls: <String>['http://test.zip'],
+      );
+
+      String? archiveContents;
+      var wasExtracted = false;
+      await artifactUpdater.downloadZipArchive(
+        'test message',
+        Uri.parse('http://test.zip'),
+        fileSystem.currentDirectory.childDirectory('out'),
+        onExtracted: (File archive) async {
+          archiveContents = archive.readAsStringSync();
+          wasExtracted = fileSystem.file('out/test').existsSync();
+        },
+      );
+      expect(archiveContents, 'archive contents');
+      expect(wasExtracted, isTrue);
+    },
+  );
 
   testWithoutContext('ArtifactUpdater can download a zip archive and delete stale files', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();

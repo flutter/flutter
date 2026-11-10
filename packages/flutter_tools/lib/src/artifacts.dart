@@ -39,10 +39,18 @@ enum Artifact {
   flutterFrameworkDsym('Flutter.framework.dSYM'),
   flutterXcframework('Flutter.xcframework'),
 
+  /// JSON file with the Swift package checksum and download URL of the zip archive containing
+  /// [flutterXcframework]. Only recorded on macOS hosts.
+  iosFrameworkArchiveChecksum('artifacts.zip.checksum.json'),
+
   /// The framework directory of the macOS desktop.
   flutterMacOSFramework('FlutterMacOS.framework'),
   flutterMacOSFrameworkDsym('FlutterMacOS.framework.dSYM'),
   flutterMacOSXcframework('FlutterMacOS.xcframework'),
+
+  /// JSON file with the Swift package checksum and download URL of the zip archive containing
+  /// [flutterMacOSXcframework]. Only recorded on macOS hosts.
+  macOSFrameworkArchiveChecksum('framework.zip.checksum.json'),
   vmSnapshotData('vm_isolate_snapshot.bin'),
   isolateSnapshotData('isolate_snapshot.bin'),
   icuData('icudtl.dat'),
@@ -527,9 +535,11 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterMacOSFrameworkDsym:
         return _getMacOSFrameworkDsymPath(engineDir, _fileSystem, _platform);
       case Artifact.flutterMacOSXcframework:
+      case Artifact.macOSFrameworkArchiveChecksum:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
+      case Artifact.iosFrameworkArchiveChecksum:
       case Artifact.fontSubset:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
@@ -576,9 +586,11 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterMacOSFrameworkDsym:
       case Artifact.flutterMacOSXcframework:
+      case Artifact.macOSFrameworkArchiveChecksum:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
+      case Artifact.iosFrameworkArchiveChecksum:
       case Artifact.fontSubset:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
@@ -609,6 +621,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
       case Artifact.flutterXcframework:
+      case Artifact.iosFrameworkArchiveChecksum:
         final String artifactFileName = artifact.getFileName(_platform);
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
         return _fileSystem.path.join(engineDir, artifactFileName);
@@ -625,6 +638,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterMacOSFrameworkDsym:
       case Artifact.flutterMacOSXcframework:
+      case Artifact.macOSFrameworkArchiveChecksum:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
       case Artifact.fontSubset:
@@ -678,8 +692,10 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterMacOSFrameworkDsym:
       case Artifact.flutterMacOSXcframework:
+      case Artifact.macOSFrameworkArchiveChecksum:
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
+      case Artifact.iosFrameworkArchiveChecksum:
       case Artifact.fontSubset:
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
@@ -780,6 +796,7 @@ class CachedArtifacts implements Artifacts {
           _platform,
         );
       case Artifact.flutterMacOSXcframework:
+      case Artifact.macOSFrameworkArchiveChecksum:
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
       case Artifact.linuxHeaders:
@@ -816,6 +833,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterFramework:
       case Artifact.flutterFrameworkDsym:
       case Artifact.flutterXcframework:
+      case Artifact.iosFrameworkArchiveChecksum:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
         throw StateError('Artifact $artifact not available for platform $platform.');
@@ -1127,7 +1145,9 @@ class CachedLocalEngineArtifacts implements Artifacts {
         );
       case Artifact.icuData:
       case Artifact.flutterXcframework:
+      case Artifact.iosFrameworkArchiveChecksum:
       case Artifact.flutterMacOSXcframework:
+      case Artifact.macOSFrameworkArchiveChecksum:
         return _fileSystem.path.join(localEngineInfo.targetOutPath, artifactFileName);
       case Artifact.platformKernelDill:
         if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
@@ -1321,9 +1341,11 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.flutterFramework:
         case Artifact.flutterFrameworkDsym:
         case Artifact.flutterXcframework:
+        case Artifact.iosFrameworkArchiveChecksum:
         case Artifact.flutterMacOSFramework:
         case Artifact.flutterMacOSFrameworkDsym:
         case Artifact.flutterMacOSXcframework:
+        case Artifact.macOSFrameworkArchiveChecksum:
         case Artifact.vmSnapshotData:
         case Artifact.isolateSnapshotData:
         case Artifact.icuData:

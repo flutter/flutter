@@ -6,18 +6,22 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 
 import 'android/java.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/io.dart' show ProcessException, ProcessResult;
 import 'base/logger.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
 import 'cache.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
+import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
@@ -27,6 +31,7 @@ class FlutterCache extends Cache {
     required Logger logger,
     required super.fileSystem,
     required Platform platform,
+    required ProcessManager processManager,
     required super.osUtils,
     required FlutterProjectFactory projectFactory,
     super.stdio,
@@ -35,13 +40,22 @@ class FlutterCache extends Cache {
     registerArtifact(GradleWrapper(this));
     registerArtifact(AndroidGenSnapshotArtifacts(this, platform: platform));
     registerArtifact(AndroidInternalBuildArtifacts(this));
-    registerArtifact(IOSEngineArtifacts(this, platform: platform));
+    registerArtifact(
+      IOSEngineArtifacts(this, platform: platform, processManager: processManager, logger: logger),
+    );
     registerArtifact(FlutterWebSdk(this));
     registerArtifact(FlutterEngineStamp(this, logger));
     registerArtifact(LegacyCanvasKitRemover(this));
     registerArtifact(FlutterSdk(this, platform: platform));
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
-    registerArtifact(MacOSEngineArtifacts(this, platform: platform));
+    registerArtifact(
+      MacOSEngineArtifacts(
+        this,
+        platform: platform,
+        processManager: processManager,
+        logger: logger,
+      ),
+    );
     registerArtifact(LinuxEngineArtifacts(this, platform: platform));
     registerArtifact(LinuxFuchsiaSDKArtifacts(this, platform: platform));
     registerArtifact(MacOSFuchsiaSDKArtifacts(this, platform: platform));
@@ -282,11 +296,27 @@ class FlutterSdk extends EngineCachedArtifact {
   List<String> getLicenseDirs() => const <String>[];
 }
 
-class MacOSEngineArtifacts extends EngineCachedArtifact {
-  MacOSEngineArtifacts(Cache cache, {required this._platform})
-    : super('macos-sdk', cache, DevelopmentArtifact.macOS);
+class MacOSEngineArtifacts extends EngineCachedArtifact with SwiftPackageChecksumArtifact {
+  MacOSEngineArtifacts(
+    Cache cache, {
+    required this._platform,
+    required this.processManager,
+    required this.logger,
+  }) : super('macos-sdk', cache, DevelopmentArtifact.macOS);
 
   final Platform _platform;
+
+  @override
+  Platform get hostPlatform => _platform;
+
+  @override
+  final ProcessManager processManager;
+
+  @override
+  final Logger logger;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
 
   @override
   String get displayName => 'MacOS SDK';
@@ -491,11 +521,27 @@ class AndroidInternalBuildArtifacts extends EngineCachedArtifact {
   }
 }
 
-class IOSEngineArtifacts extends EngineCachedArtifact {
-  IOSEngineArtifacts(Cache cache, {required this._platform})
-    : super('ios-sdk', cache, DevelopmentArtifact.iOS);
+class IOSEngineArtifacts extends EngineCachedArtifact with SwiftPackageChecksumArtifact {
+  IOSEngineArtifacts(
+    Cache cache, {
+    required this._platform,
+    required this.processManager,
+    required this.logger,
+  }) : super('ios-sdk', cache, DevelopmentArtifact.iOS);
 
   final Platform _platform;
+
+  @override
+  Platform get hostPlatform => _platform;
+
+  @override
+  final ProcessManager processManager;
+
+  @override
+  final Logger logger;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
 
   @override
   String get displayName => 'iOS SDK';
@@ -516,6 +562,64 @@ class IOSEngineArtifacts extends EngineCachedArtifact {
   @override
   List<String> getPackageDirs() {
     return <String>[];
+  }
+}
+
+/// Records the Swift package checksum of downloaded Flutter framework zip archives so that they can
+/// be referenced as remote binary targets (see `flutter build swift-package --remote`) without
+/// downloading them again.
+///
+/// The checksum is computed with `swift package compute-checksum` and is only recorded on macOS
+/// hosts, where the Swift toolchain is available through Xcode.
+mixin SwiftPackageChecksumArtifact on EngineCachedArtifact {
+  @protected
+  Platform get hostPlatform;
+
+  @protected
+  ProcessManager get processManager;
+
+  @protected
+  Logger get logger;
+
+  /// The platform whose [FlutterDarwinPlatform.artifactZip] archives contain the Flutter framework
+  /// and should have their Swift package checksum recorded.
+  @protected
+  FlutterDarwinPlatform get darwinPlatform;
+
+  @override
+  Future<void> onBinaryArchiveExtracted({
+    required Uri url,
+    required File archive,
+    required Directory location,
+  }) async {
+    if (!hostPlatform.isMacOS || url.pathSegments.last != darwinPlatform.artifactZip) {
+      return;
+    }
+    final File checksumFile = location.childFile(
+      darwinPlatform.archiveZipChecksumArtifact.getFileName(hostPlatform),
+    );
+    // Remove any stale checksum in case it cannot be computed for the new archive.
+    ErrorHandlingFileSystem.deleteIfExists(checksumFile);
+    try {
+      final ProcessResult result = await processManager.run(<String>[
+        'xcrun',
+        'swift',
+        'package',
+        'compute-checksum',
+        archive.path,
+      ]);
+      final String checksum = result.stdout.toString().trim();
+      if (result.exitCode != 0 || checksum.isEmpty) {
+        logger.printTrace('Failed to compute Swift package checksum for $url: ${result.stderr}');
+        return;
+      }
+      checksumFile.writeAsStringSync(
+        json.encode(<String, String>{'url': url.toString(), 'checksum': checksum}),
+      );
+    } on ProcessException catch (error) {
+      // Not fatal, since the checksum is not required to use the downloaded artifact.
+      logger.printTrace('Failed to compute Swift package checksum for $url: $error');
+    }
   }
 }
 

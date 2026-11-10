@@ -786,6 +786,108 @@ let package = Package(
 )
 ''');
       });
+
+      testWithoutContext('generateSwiftPackage with remote = true uses checksum from engine cache', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory packageDirectory = fs.directory(debugPackagesDirectoryPath);
+        final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
+        fs.file('$_flutterRoot/bin/cache/artifacts/engine/ios-release/artifacts.zip.checksum.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            json.encode(<String, String>{
+              'url':
+                  'https://storage.googleapis.com/flutter_infra_release/flutter/$_engineVersion/ios-release/artifacts.zip',
+              'checksum': 'engine_cache_checksum_67890',
+            }),
+          );
+
+        final processManager = FakeProcessManager.empty();
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
+          logger: logger,
+          processManager: processManager,
+        );
+        final flutterFrameworkDependency = FlutterFrameworkDependency(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+        await flutterFrameworkDependency.generateSwiftPackage(
+          packageDirectory,
+          cacheDirectory: cacheDirectory,
+          buildMode: BuildMode.release,
+          remote: true,
+        );
+        expect(processManager, hasNoRemainingExpectations);
+        expect(cacheDirectory.childDirectory('temp_release').existsSync(), isFalse);
+        expect(
+          cacheDirectory.childFile('Release/flutter_framework_checksum.json').existsSync(),
+          isFalse,
+        );
+        final File manifest = packageDirectory
+            .childDirectory('FlutterFramework')
+            .childFile('Package.swift');
+        expect(
+          manifest.readAsStringSync(),
+          contains('''
+        .binaryTarget(
+            name: "Flutter",
+            url: "https://storage.googleapis.com/flutter_infra_release/flutter/$_engineVersion/ios-release/artifacts.zip",
+            checksum: "engine_cache_checksum_67890"
+        )'''),
+        );
+      });
+
+      testWithoutContext(
+        'generateSwiftPackage with remote = true ignores engine cache checksum for a different URL',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          final Directory packageDirectory = fs.directory(debugPackagesDirectoryPath);
+          final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
+          final Directory tempDir = cacheDirectory.childDirectory('temp_release');
+          fs.file(
+              '$_flutterRoot/bin/cache/artifacts/engine/ios-release/artifacts.zip.checksum.json',
+            )
+            ..createSync(recursive: true)
+            ..writeAsStringSync(
+              json.encode(<String, String>{
+                'url': 'https://storage.googleapis.com/flutter_infra_release/flutter/other_engine_version/ios-release/artifacts.zip',
+                'checksum': 'stale_checksum',
+              }),
+            );
+
+          final processManager = FakeProcessManager.list([
+            FakeCommand(
+              command: const ['xcrun', 'swift', 'package', 'compute-checksum', 'artifacts.zip'],
+              workingDirectory: tempDir.path,
+              stdout: 'computed_checksum\n',
+            ),
+          ]);
+          const FlutterDarwinPlatform targetPlatform = .ios;
+          final BuildSwiftPackageUtils testUtils = _createTestUtils(
+            fs: fs,
+            logger: logger,
+            processManager: processManager,
+          );
+          final flutterFrameworkDependency = FlutterFrameworkDependency(
+            targetPlatform: targetPlatform,
+            utils: testUtils,
+          );
+          await flutterFrameworkDependency.generateSwiftPackage(
+            packageDirectory,
+            cacheDirectory: cacheDirectory,
+            buildMode: BuildMode.release,
+            remote: true,
+          );
+          expect(processManager, hasNoRemainingExpectations);
+          final File manifest = packageDirectory
+              .childDirectory('FlutterFramework')
+              .childFile('Package.swift');
+          expect(manifest.readAsStringSync(), contains('checksum: "computed_checksum"'));
+        },
+      );
     });
 
     group('AppFrameworkAndNativeAssetsDependencies', () {
@@ -3030,6 +3132,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           outputDirectory: outputDirectory,
           flutterIntegrationPackage: flutterIntegrationPackage,
           highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
+          useRemoteFlutterFramework: false,
         );
 
         final Directory scriptsDirectory = outputDirectory.childDirectory('Scripts');
@@ -3272,6 +3375,7 @@ let package = Package(
           outputDirectory: outputDirectory,
           flutterIntegrationPackage: flutterIntegrationPackage,
           highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
+          useRemoteFlutterFramework: false,
         );
 
         final Directory scriptsDirectory = outputDirectory.childDirectory('Scripts');
@@ -3573,6 +3677,14 @@ class FakeArtifacts extends Fake implements Artifacts {
     BuildMode? mode,
     EnvironmentType? environmentType,
   }) {
+    if (artifact == Artifact.iosFrameworkArchiveChecksum ||
+        artifact == Artifact.macOSFrameworkArchiveChecksum) {
+      final FlutterDarwinPlatform darwinPlatform = FlutterDarwinPlatform.fromTargetPlatform(
+        platform!,
+      )!;
+      return '$_flutterRoot/bin/cache/artifacts/engine/${darwinPlatform.artifactName(mode!)}/'
+          '${artifact.getFileName(FakePlatform())}';
+    }
     return engineArtifactPath;
   }
 
@@ -3661,6 +3773,11 @@ class FakeCache extends Fake implements Cache {
   @override
   Directory getRoot() {
     return _fileSystem.directory(_fileSystem.path.join(flutterRoot, 'bin', 'cache'));
+  }
+
+  @override
+  Directory getArtifactDirectory(String name) {
+    return getRoot().childDirectory('artifacts').childDirectory(name);
   }
 
   @override

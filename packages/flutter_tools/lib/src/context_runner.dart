@@ -153,6 +153,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        processManager: globals.processManager,
         osUtils: globals.os,
         projectFactory: globals.projectFactory,
         stdio: globals.stdio,

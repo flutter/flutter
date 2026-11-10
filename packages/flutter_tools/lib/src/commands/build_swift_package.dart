@@ -24,6 +24,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
+import '../flutter_cache.dart';
 import '../flutter_plugins.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
@@ -773,8 +774,11 @@ class FlutterFrameworkDependency {
 
   /// Returns the remote URL and Swift package checksum for the Flutter framework artifact zip.
   ///
-  /// Restores the checksum from the cache if the URL has not changed; otherwise, downloads the
-  /// artifact zip, computes the checksum, and caches it for subsequent runs.
+  /// Uses the checksum recorded in the Flutter engine artifact cache when the artifact zip was
+  /// downloaded (see [SwiftPackageChecksumArtifact]), if it was recorded for the same URL. If
+  /// unavailable, restores the checksum from [cacheDirectory] if the URL has not changed;
+  /// otherwise, downloads the artifact zip, computes the checksum, and caches it for subsequent
+  /// runs.
   Future<({Uri url, String checksum})> _getRemoteArtifactUrlAndChecksum({
     required Directory cacheDirectory,
     required FlutterDarwinPlatform platform,
@@ -785,19 +789,44 @@ class FlutterFrameworkDependency {
       '${_utils.cache.storageBaseUrl}/flutter_infra_release/flutter/${_utils.cache.engineRevision}'
       '/${platform.artifactName(mode)}/$zipFileName',
     );
+
+    // First try to get the checksum from the engine cache
+    final File engineCacheChecksumFile = _utils.fileSystem.file(
+      _utils.artifacts.getArtifactPath(
+        platform.archiveZipChecksumArtifact,
+        platform: platform.targetPlatform,
+        mode: mode,
+      ),
+    );
+    final String? engineCacheChecksum = _restoreChecksumFromCache(
+      cachedChecksumFile: engineCacheChecksumFile,
+      url: url,
+    );
+    if (engineCacheChecksum != null) {
+      return (url: url, checksum: engineCacheChecksum);
+    }
+
+    // Next, try to get the checksum from this command's cache
     final File cachedChecksumFile = cacheDirectory
         .childDirectory(mode.uppercaseName)
         .childFile('flutter_framework_checksum.json');
-    String? checksum = _restoreChecksumFromCache(cachedChecksumFile: cachedChecksumFile, url: url);
-    if (checksum == null) {
-      checksum = await _downloadAndComputeChecksum(
-        url: url,
-        cacheDirectory: cacheDirectory,
-        artifactZip: zipFileName,
-        mode: mode,
-      );
-      _saveChecksumToCache(cachedChecksumFile: cachedChecksumFile, url: url, checksum: checksum);
+    final String? cachedChecksum = _restoreChecksumFromCache(
+      cachedChecksumFile: cachedChecksumFile,
+      url: url,
+    );
+    if (cachedChecksum != null) {
+      return (url: url, checksum: cachedChecksum);
     }
+
+    // If fails to get checksum from both caches, download and compute the checksum and save it to
+    // the cache for next time.
+    final String checksum = await _downloadAndComputeChecksum(
+      url: url,
+      cacheDirectory: cacheDirectory,
+      artifactZip: zipFileName,
+      mode: mode,
+    );
+    _saveChecksumToCache(cachedChecksumFile: cachedChecksumFile, url: url, checksum: checksum);
     return (url: url, checksum: checksum);
   }
 
@@ -2013,7 +2042,7 @@ class FlutterNativeIntegrationSwiftPackage {
     required Directory outputDirectory,
     required Directory flutterIntegrationPackage,
     required SwiftPackageSupportedPlatform highestSupportedVersion,
-    bool useRemoteFlutterFramework = false,
+    required bool useRemoteFlutterFramework,
   }) async {
     final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
       _kFlutterNativeTools,

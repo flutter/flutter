@@ -206,7 +206,12 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   }
 
   @override
-  Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
+  Future<void> downloadZipArchive(
+    String message,
+    Uri url,
+    Directory location, {
+    Future<void> Function(File archive)? onExtracted,
+  }) async {
     onDownloadZipArchive?.call(message, url, location);
   }
 
