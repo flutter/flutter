@@ -14,6 +14,8 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
 
@@ -105,6 +107,9 @@ flutter::ThreadHost MakeThreadHost(NSString* thread_label) {
 @implementation FlutterShell {
   std::shared_ptr<flutter::ThreadHost> _threadHost;
   std::shared_ptr<flutter::SamplingProfiler> _profiler;
+
+  FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
+  FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
 }
 
 - (instancetype)init {
@@ -150,6 +155,31 @@ flutter::ThreadHost MakeThreadHost(NSString* thread_label) {
 
 - (const flutter::ThreadHost*)threadHost {
   return _threadHost.get();
+}
+
+- (void)adoptTaskRunners:(const flutter::TaskRunners&)taskRunners {
+  _platformTaskRunnerWrapper =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:taskRunners.GetPlatformTaskRunner()];
+  _rasterTaskRunnerWrapper =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:taskRunners.GetRasterTaskRunner()];
+}
+
+- (void)resetTaskRunners {
+  _platformTaskRunnerWrapper = nil;
+  _rasterTaskRunnerWrapper = nil;
+}
+
+- (FlutterFMLTaskRunner*)platformTaskRunner {
+  return _platformTaskRunnerWrapper;
+}
+
+- (FlutterFMLTaskRunner*)uiTaskRunner {
+  // The platform and UI threads are always merged on iOS.
+  return _platformTaskRunnerWrapper;
+}
+
+- (FlutterFMLTaskRunner*)rasterTaskRunner {
+  return _rasterTaskRunnerWrapper;
 }
 
 @end

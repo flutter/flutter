@@ -5,14 +5,32 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
+#include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell_Internal.h"
 
 FLUTTER_ASSERT_ARC
+
+namespace {
+
+// Builds the same task runner configuration as FlutterEngine: the current (platform) thread is also
+// the UI thread, and the raster and IO threads come from the thread host.
+flutter::TaskRunners MakeTaskRunners(FlutterShell* shell) {
+  fml::RefPtr<fml::TaskRunner> platform_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  return flutter::TaskRunners(shell.threadLabel.UTF8String,                      // label
+                              platform_runner,                                   // platform
+                              shell.threadHost->raster_thread->GetTaskRunner(),  // raster
+                              platform_runner,                                   // ui
+                              shell.threadHost->io_thread->GetTaskRunner()       // io
+  );
+}
+
+}  // namespace
 
 @interface FlutterShellTest : XCTestCase
 @end
@@ -23,6 +41,9 @@ FLUTTER_ASSERT_ARC
   FlutterShell* shell = [[FlutterShell alloc] init];
   XCTAssertEqual(shell.threadHost, nullptr);
   XCTAssertNil(shell.threadLabel);
+  XCTAssertNil(shell.platformTaskRunner);
+  XCTAssertNil(shell.uiTaskRunner);
+  XCTAssertNil(shell.rasterTaskRunner);
 }
 
 - (void)testCreateThreadHost {
@@ -113,6 +134,56 @@ FLUTTER_ASSERT_ARC
   [shell startProfilerIfEnabled];
   [shell destroyThreadHost];
   XCTAssertEqual(shell.threadHost, nullptr);
+}
+
+- (void)testAdoptTaskRunners {
+  FlutterShell* shell = [[FlutterShell alloc] init];
+  [shell createThreadHostWithLabelPrefix:@"foo"];
+  [shell adoptTaskRunners:MakeTaskRunners(shell)];
+
+  XCTAssertNotNil(shell.platformTaskRunner);
+  XCTAssertNotNil(shell.rasterTaskRunner);
+  // The platform and UI threads are always merged on iOS.
+  XCTAssertEqual(shell.uiTaskRunner, shell.platformTaskRunner);
+  XCTAssertNotEqual(shell.rasterTaskRunner, shell.platformTaskRunner);
+
+  // The platform task runner is the calling thread.
+  XCTAssertTrue([shell.platformTaskRunner runsTasksOnCurrentThread]);
+  XCTAssertFalse([shell.rasterTaskRunner runsTasksOnCurrentThread]);
+
+  // The raster task runner runs tasks on the thread host's raster thread.
+  fml::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent* latchPtr = &latch;
+  __block BOOL ranOnRasterThread = NO;
+  [shell.rasterTaskRunner postTask:^{
+    ranOnRasterThread = [shell.rasterTaskRunner runsTasksOnCurrentThread];
+    latchPtr->Signal();
+  }];
+  latch.Wait();
+  XCTAssertTrue(ranOnRasterThread);
+
+  [shell resetTaskRunners];
+  [shell destroyThreadHost];
+}
+
+- (void)testResetTaskRunners {
+  FlutterShell* shell = [[FlutterShell alloc] init];
+  [shell createThreadHostWithLabelPrefix:@"foo"];
+  [shell adoptTaskRunners:MakeTaskRunners(shell)];
+  XCTAssertNotNil(shell.platformTaskRunner);
+  XCTAssertNotNil(shell.rasterTaskRunner);
+
+  [shell resetTaskRunners];
+  XCTAssertNil(shell.platformTaskRunner);
+  XCTAssertNil(shell.uiTaskRunner);
+  XCTAssertNil(shell.rasterTaskRunner);
+
+  // Resetting again is a no-op.
+  [shell resetTaskRunners];
+  XCTAssertNil(shell.platformTaskRunner);
+  XCTAssertNil(shell.rasterTaskRunner);
+
+  [shell destroyThreadHost];
 }
 
 @end

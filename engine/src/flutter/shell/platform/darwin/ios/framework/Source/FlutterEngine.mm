@@ -169,9 +169,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   FlutterBinaryMessengerRelay* _binaryMessenger;
   FlutterTextureRegistryRelay* _textureRegistry;
 
-  FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
-  FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
-
   // The display information last sent to the framework by `updateDisplays`.
   BOOL _hasSentDisplays;
   CGSize _lastSentScreenNativeSize;
@@ -451,16 +448,16 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (FlutterFMLTaskRunner*)platformTaskRunner {
-  return _platformTaskRunnerWrapper;
+  return self.backend.platformTaskRunner;
 }
 
 - (FlutterFMLTaskRunner*)uiTaskRunner {
   // The platform and UI threads are always merged on iOS.
-  return _platformTaskRunnerWrapper;
+  return self.backend.uiTaskRunner;
 }
 
 - (FlutterFMLTaskRunner*)rasterTaskRunner {
-  return _rasterTaskRunnerWrapper;
+  return self.backend.rasterTaskRunner;
 }
 
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
@@ -581,8 +578,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _shell.reset();
   [self.backend destroyThreadHost];
   _platformViewsController = nil;
-  _platformTaskRunnerWrapper = nil;
-  _rasterTaskRunnerWrapper = nil;
+  [self.backend resetTaskRunners];
 }
 
 - (NSURL*)vmServiceUrl {
@@ -795,10 +791,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _shell = std::move(shell);
   // A new shell has not received any display information yet.
   _hasSentDisplays = NO;
-  _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
-      initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
-  _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
-      initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
+  [self.backend adoptTaskRunners:_shell->GetTaskRunners()];
 }
 
 /// Configures the engine.
