@@ -533,10 +533,8 @@ To fix this, you can either:
       DisableNewDslMigration(project.android, logger),
       // Developers who skip Flutter's dependency version checks manage these
       // versions themselves.
-      if (!androidBuildInfo.buildInfo.androidGradleConfig.skipBuildDependencyValidation) ...[
-        TemplateGradleWrapperVersionMigration(project.android, logger),
-        TemplateAndroidPluginVersionMigration(project.android, logger),
-      ],
+      if (!androidBuildInfo.buildInfo.androidGradleConfig.skipBuildDependencyValidation)
+        ...templateDependencyVersionMigrations(project.android, logger),
     ];
 
     final migration = ProjectMigration(migrators);

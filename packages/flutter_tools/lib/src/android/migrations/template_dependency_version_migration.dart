@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../../base/file_system.dart';
+import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
 import '../../base/version.dart';
 import '../../project.dart';
@@ -79,8 +80,12 @@ const pluginVersionOptOutFlag = 'NoFlutterAndroidPluginVersionUpgrade';
 /// might not exist.
 const _gradleDistributionTypes = <String>{'all', 'bin'};
 
-/// Matches an uncommented `distributionSha256Sum` in `gradle-wrapper.properties`.
-final _distributionSha256SumRegExp = RegExp(r'^\s*distributionSha256Sum\s*[=:]', multiLine: true);
+/// Matches an uncommented `distributionSha256Sum` in `gradle-wrapper.properties`,
+/// with any of the separators that Java properties files allow.
+final _distributionSha256SumRegExp = RegExp(
+  r'^\s*distributionSha256Sum(?:\s*[=:]|\s)',
+  multiLine: true,
+);
 
 /// Matches an AGP or KGP plugin declaration with a literal version in a
 /// `plugins {}` block, such as:
@@ -88,7 +93,8 @@ final _distributionSha256SumRegExp = RegExp(r'^\s*distributionSha256Sum\s*[=:]',
 ///  * Kotlin DSL: `id("com.android.application") version "9.1.0" apply false`
 ///  * Groovy DSL: `id 'com.android.library' version '9.1.0' apply false`
 ///
-/// `(?<=^[^/*]*)` skips declarations in `//` and `/* */` comments.
+/// `(?<=^[^/*]*)` skips declarations after `//` or `/*` on the same line, and
+/// lines that start with `*`, as in the middle of a block comment.
 ///
 /// This is separate from the AGP and KGP version regexes in gradle_utils.dart
 /// because it must also match `com.android.library`, which editable add-to-app
@@ -97,6 +103,17 @@ final _distributionSha256SumRegExp = RegExp(r'^\s*distributionSha256Sum\s*[=:]',
 final _pluginDeclarationRegExp = RegExp(
   r'''(?<=^[^/*]*)(?<prefix>\bid\s*\(?\s*(?<quote>['"])(?<id>com\.android\.application|com\.android\.library|org\.jetbrains\.kotlin\.android)\k<quote>\s*\)?\s+version\s*\(?\s*\k<quote>)(?<version>[^'"]+)(?=\k<quote>)''',
 );
+
+/// The template dependency version migrations, in the order that they must
+/// run.
+///
+/// [TemplateAndroidPluginVersionMigration] reads the Gradle version that
+/// [TemplateGradleWrapperVersionMigration] wrote, so it must run second.
+List<ProjectMigrator> templateDependencyVersionMigrations(AndroidProject project, Logger logger) =>
+    <ProjectMigrator>[
+      TemplateGradleWrapperVersionMigration(project, logger),
+      TemplateAndroidPluginVersionMigration(project, logger),
+    ];
 
 /// The Gradle version in [gradleWrapperFile], or null if it's missing or
 /// can't be read.
@@ -317,7 +334,7 @@ class TemplateAndroidPluginVersionMigration extends ProjectMigrator {
 
   @override
   String migrateLine(String line) {
-    return line.replaceFirstMapped(_pluginDeclarationRegExp, (Match match) {
+    return line.replaceAllMapped(_pluginDeclarationRegExp, (Match match) {
       final m = match as RegExpMatch;
       final String? targetVersion = _targetVersionFor(m);
       if (targetVersion == null) {
@@ -329,9 +346,9 @@ class TemplateAndroidPluginVersionMigration extends ProjectMigrator {
       _upgrades.add(
         targetVersion == minimumAgpUpgradeTarget
             ? 'Upgraded $pluginName from ${m.namedGroup('version')} to $targetVersion, the '
-                  'minimum version that Flutter supports. To upgrade to $templateAgpUpgradeTarget '
-                  'and remove the warning, upgrade Gradle to '
-                  '${getGradleVersionFor(templateAgpUpgradeTarget)} or later.'
+                  'minimum version that Flutter supports. To remove the warning, upgrade '
+                  'Gradle to ${getGradleVersionFor(templateAgpUpgradeTarget)} or later and '
+                  '$pluginName to $templateAgpUpgradeTarget or later.'
             : 'Upgraded $pluginName from ${m.namedGroup('version')} to $targetVersion, the '
                   'lowest version that Flutter supports without a warning.',
       );

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
@@ -10,6 +12,7 @@ import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_
     show optOutFlag;
 import 'package:flutter_tools/src/android/migrations/template_dependency_version_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/project_migrator.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -118,10 +121,14 @@ void main() {
             ..createSync(recursive: true);
     });
 
-    // Runs the migrations in the same order as gradle.dart.
+    // Runs the migrations in the order that gradle.dart runs them.
     Future<void> migrate({Logger? withLogger}) async {
-      await TemplateGradleWrapperVersionMigration(project, withLogger ?? logger).migrate();
-      await TemplateAndroidPluginVersionMigration(project, withLogger ?? logger).migrate();
+      for (final ProjectMigrator migrator in templateDependencyVersionMigrations(
+        project,
+        withLogger ?? logger,
+      )) {
+        await migrator.migrate();
+      }
     }
 
     testWithoutContext('upgrades a project created with Flutter 3.47', () async {
@@ -155,6 +162,13 @@ void main() {
       );
       expect(logger.statusText, contains(optOutFlag));
       expect(logger.statusText, contains(pluginVersionOptOutFlag));
+      expect(
+        logger.statusText,
+        contains(
+          "add a comment containing '$pluginVersionOptOutFlag' to settings.gradle.kts, "
+          'and build with --android-skip-build-dependency-validation.',
+        ),
+      );
     });
 
     testWithoutContext('upgrades a project created with Flutter 3.44', () async {
@@ -559,8 +573,8 @@ plugins {
           logger.statusText,
           contains(
             'Upgraded the Android Gradle Plugin from 9.1.0 to 9.1.1, the minimum version '
-            'that Flutter supports. To upgrade to 9.3.1 and remove the warning, upgrade '
-            'Gradle to 9.5.0 or later.',
+            'that Flutter supports. To remove the warning, upgrade Gradle to 9.5.0 or '
+            'later and the Android Gradle Plugin to 9.3.1 or later.',
           ),
         );
         expect(
@@ -616,6 +630,69 @@ plugins {
       expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.3.1', kgp: '2.4.20'));
     });
 
+    testWithoutContext('upgrades every declaration on a line', () async {
+      final File settingsGroovy = project.hostAppGradleRoot.childFile('settings.gradle')
+        ..writeAsStringSync(
+          "plugins { id 'com.android.application' version '9.1.0' apply false; "
+          "id 'org.jetbrains.kotlin.android' version '2.4.0' apply false }\n",
+        );
+      wrapper.writeAsStringSync(gradleWrapper('9.3.1'));
+
+      await migrate();
+
+      expect(
+        settingsGroovy.readAsStringSync(),
+        "plugins { id 'com.android.application' version '9.3.1' apply false; "
+        "id 'org.jetbrains.kotlin.android' version '2.4.20' apply false }\n",
+      );
+      expect(logger.statusText, contains('Upgraded the Android Gradle Plugin'));
+      expect(logger.statusText, contains('Upgraded the Kotlin Gradle Plugin'));
+    });
+
+    testWithoutContext('does not upgrade AGP when Gradle is a pre-release', () async {
+      settingsKts.writeAsStringSync(appSettingsKts(agp: '9.1.0', kgp: '2.4.0'));
+      final String wrapperContents = gradleWrapper('9.5.0', distribution: 'rc-1-all');
+      wrapper.writeAsStringSync(wrapperContents);
+
+      await migrate();
+
+      expect(wrapper.readAsStringSync(), wrapperContents);
+      expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.0', kgp: '2.4.20'));
+      expect(logger.traceText, contains('the project uses Gradle of an unknown version'));
+    });
+
+    testWithoutContext(
+      'does not upgrade a Gradle wrapper that pins a checksum with a space separator',
+      () async {
+        final wrapperContents = '${gradleWrapper('9.3.1')}distributionSha256Sum b84e04fa\n';
+        wrapper.writeAsStringSync(wrapperContents);
+        settingsKts.writeAsStringSync(appSettingsKts(agp: '9.1.0', kgp: '2.4.0'));
+
+        await migrate();
+
+        expect(wrapper.readAsStringSync(), wrapperContents);
+        expect(settingsKts.readAsStringSync(), appSettingsKts(agp: '9.1.1', kgp: '2.4.20'));
+      },
+    );
+
+    testWithoutContext(
+      'does not report plugin upgrades when the settings file is left unchanged',
+      () async {
+        final String settings = appSettingsKts(agp: '9.1.0', kgp: '2.4.0');
+        settingsKts.writeAsStringSync(settings);
+        wrapper.writeAsStringSync(gradleWrapper(templateDefaultGradleVersion));
+        // Unlike MemoryFileSystem, a read-only file isn't truncated when the
+        // write fails.
+        project.settingsFileOverride = _UnwritableFile(settingsKts);
+
+        await migrate();
+
+        expect(settingsKts.readAsStringSync(), settings);
+        expect(logger.errorText, contains('Read-only file'));
+        expect(logger.statusText, isNot(contains('Upgraded')));
+      },
+    );
+
     testWithoutContext('targets the versions that Flutter supports without a warning', () async {
       // Keep the targets in sync with DependencyVersionChecker.kt, so that the
       // migrated project builds without a warning and the targets don't drift
@@ -660,10 +737,45 @@ class FakeAndroidProject extends Fake implements AndroidProject {
   @override
   final Directory hostAppGradleRoot;
 
+  File? settingsFileOverride;
+
   // Same precedence as AndroidProject.settingsGradleFile.
   @override
   File get settingsGradleFile {
+    if (settingsFileOverride case final File file) {
+      return file;
+    }
     final File groovy = hostAppGradleRoot.childFile('settings.gradle');
     return groovy.existsSync() ? groovy : hostAppGradleRoot.childFile('settings.gradle.kts');
+  }
+}
+
+/// A file that can be read but not written, like a read-only file on disk.
+class _UnwritableFile extends Fake implements File {
+  _UnwritableFile(this._file);
+
+  final File _file;
+
+  @override
+  String get basename => _file.basename;
+
+  @override
+  bool existsSync() => _file.existsSync();
+
+  @override
+  String readAsStringSync({Encoding encoding = utf8}) => _file.readAsStringSync(encoding: encoding);
+
+  @override
+  List<String> readAsLinesSync({Encoding encoding = utf8}) =>
+      _file.readAsLinesSync(encoding: encoding);
+
+  @override
+  void writeAsStringSync(
+    String contents, {
+    FileMode mode = FileMode.write,
+    Encoding encoding = utf8,
+    bool flush = false,
+  }) {
+    throw FileSystemException('Read-only file', _file.path);
   }
 }
