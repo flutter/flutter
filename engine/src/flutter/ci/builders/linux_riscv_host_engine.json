@@ -42,8 +42,7 @@
                 "--enable-fontconfig",
                 "--no-prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/linux_profile_riscv64",
             "description": "Produces profile mode artifacts to target riscv64 Linux from a Linux host.",
@@ -90,8 +89,7 @@
                 "--enable-fontconfig",
                 "--no-prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/linux_debug_riscv64",
             "description": "Produces debug mode artifacts to target riscv64 Linux from a Linux host.",
@@ -138,8 +136,7 @@
                 "--enable-fontconfig",
                 "--no-prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/linux_release_riscv64",
             "description": "Produces release mode artifacts to target riscv64 Linux from a Linux host.",
