@@ -200,20 +200,22 @@ void main() {
       expect(androidApk, isNotNull);
     }, overrides: overrides);
 
-    testUsingContext('AndroidApk.fromAndroidProject parses manifest with activity-alias', () async {
-      final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
-      project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
-      final File appGradle = project.android.hostAppGradleRoot.childFile(
-        fs.path.join('app', 'build.gradle'),
-      );
-      appGradle.createSync(recursive: true);
-      appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
+    testWithoutContext(
+      'AndroidApk.fromAndroidProject parses manifest with activity-alias',
+      () async {
+        final logger = BufferLogger.test();
+        final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
+        project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
+        final File appGradle = project.android.hostAppGradleRoot.childFile(
+          fs.path.join('app', 'build.gradle'),
+        );
+        appGradle.createSync(recursive: true);
+        appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
 
-      // Create AndroidManifest.xml with activity-alias
-      final File manifestFile = project.android.appManifestFile;
-      manifestFile.createSync(recursive: true);
-      manifestFile.writeAsStringSync('''
+        // Create AndroidManifest.xml with activity-alias
+        final File manifestFile = project.android.appManifestFile;
+        manifestFile.createSync(recursive: true);
+        manifestFile.writeAsStringSync('''
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="io.flutter.examples.hello_world">
@@ -232,31 +234,32 @@ void main() {
 </manifest>
 ''');
 
-      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
-        project.android,
-        androidSdk: sdk,
-        buildInfo: const BuildInfo(
-          BuildMode.debug,
-          null,
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        toolContext: FakeToolContext(
-          config: Config.test(),
-          fs: fs,
-          logger: logger,
-          processManager: fakeProcessManager,
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-          userMessages: UserMessages(),
-        ),
-      );
+        final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+          project.android,
+          androidSdk: sdk,
+          buildInfo: const BuildInfo(
+            BuildMode.debug,
+            null,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
+          ),
+        );
 
-      expect(androidApk, isNotNull);
-      expect(androidApk!.id, 'io.flutter.examples.hello_world');
-      expect(androidApk.launchActivity, 'io.flutter.examples.hello_world/.LauncherAlias');
-    }, overrides: overrides);
+        expect(androidApk, isNotNull);
+        expect(androidApk!.id, 'io.flutter.examples.hello_world');
+        expect(androidApk.launchActivity, 'io.flutter.examples.hello_world/.LauncherAlias');
+      },
+    );
 
-    testUsingContext(
+    testWithoutContext(
       'AndroidApk.fromAndroidProject returns null if launch activity has no android:name',
       () async {
         final logger = BufferLogger.test();
@@ -307,7 +310,6 @@ void main() {
 
         expect(androidApk, isNull);
       },
-      overrides: overrides,
     );
 
     testUsingContext(
@@ -391,7 +393,7 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('falls back to source AndroidManifest.xml when fromApk fails', () async {
+    testWithoutContext('falls back to source AndroidManifest.xml when fromApk fails', () async {
       const aaptPath = 'aaptPath';
       final sdkVersion = FakeAndroidSdkVersion();
       sdkVersion.aaptPath = aaptPath;
@@ -464,9 +466,9 @@ void main() {
         contains('Failed to extract manifest from APK: falling back to source AndroidManifest.xml'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
-    }, overrides: overrides);
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'falls back to source AndroidManifest.xml when fromApk returns garbage',
       () async {
         const aaptPath = 'aaptPath';
@@ -545,7 +547,6 @@ void main() {
         expect(logger.errorText, contains('Failed to parse manifest from APK'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
-      overrides: overrides,
     );
   });
 

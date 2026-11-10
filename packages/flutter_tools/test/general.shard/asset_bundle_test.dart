@@ -365,22 +365,20 @@ flutter:
       },
     );
 
-    testUsingContext(
-      'deferred assets are parsed',
-      () async {
-        writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
-            .createSync(recursive: true);
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'bar', 'barbie.txt'))
-            .createSync(recursive: true);
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'wild', 'dash.txt'))
-            .createSync(recursive: true);
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+    testWithoutContext('deferred assets are parsed', () async {
+      writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'bar', 'barbie.txt'))
+          .createSync(recursive: true);
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'wild', 'dash.txt'))
+          .createSync(recursive: true);
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
@@ -391,37 +389,31 @@ flutter:
         - assets/bar/barbie.txt
         - assets/wild/
 ''');
-        final AssetBundle bundle = AssetBundleFactory.defaultInstance(
-          logger: testLogger,
-          fileSystem: testFileSystem,
-          flutterRoot: getFlutterRoot(),
-          platform: platform,
-          splitDeferredAssets: true,
-        ).createBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          deferredComponentsEnabled: true,
-          targetPlatform: TargetPlatform.tester,
-        );
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-            'assets/foo/bar.txt',
-          ]),
-        );
-        expect(bundle.deferredComponentsEntries.length, 1);
-        expect(bundle.deferredComponentsEntries['component1']!.length, 2);
-        expect(bundle.needsBuild(), false);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      final AssetBundle bundle = AssetBundleFactory.defaultInstance(
+        logger: BufferLogger.test(),
+        fileSystem: testFileSystem,
+        flutterRoot: getFlutterRoot(),
+        platform: platform,
+        splitDeferredAssets: true,
+      ).createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        deferredComponentsEnabled: true,
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
+          'assets/foo/bar.txt',
+        ]),
+      );
+      expect(bundle.deferredComponentsEntries.length, 1);
+      expect(bundle.deferredComponentsEntries['component1']!.length, 2);
+      expect(bundle.needsBuild(), false);
+    });
 
     testUsingContext(
       'deferred assets are parsed regularly when splitDeferredAssets Disabled',
@@ -475,25 +467,23 @@ flutter:
       },
     );
 
-    testUsingContext(
-      'deferred assets wildcard parsed',
-      () async {
-        final File packageFile = writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
-          mainLibName: 'my_app',
-        );
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
-            .createSync(recursive: true);
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'bar', 'barbie.txt'))
-            .createSync(recursive: true);
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'wild', 'dash.txt'))
-            .createSync(recursive: true);
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+    testWithoutContext('deferred assets wildcard parsed', () async {
+      final File packageFile = writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
+        mainLibName: 'my_app',
+      );
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'bar', 'barbie.txt'))
+          .createSync(recursive: true);
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'wild', 'dash.txt'))
+          .createSync(recursive: true);
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
@@ -504,61 +494,55 @@ flutter:
         - assets/bar/barbie.txt
         - assets/wild/
 ''');
-        final AssetBundle bundle = AssetBundleFactory.defaultInstance(
-          logger: testLogger,
-          fileSystem: testFileSystem,
-          flutterRoot: getFlutterRoot(),
-          platform: platform,
-          splitDeferredAssets: true,
-        ).createBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          deferredComponentsEnabled: true,
-          targetPlatform: TargetPlatform.tester,
-        );
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'assets/foo/bar.txt',
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-          ]),
-        );
-        expect(bundle.deferredComponentsEntries.length, 1);
-        expect(bundle.deferredComponentsEntries['component1']!.length, 2);
-        expect(bundle.needsBuild(), false);
+      final AssetBundle bundle = AssetBundleFactory.defaultInstance(
+        logger: BufferLogger.test(),
+        fileSystem: testFileSystem,
+        flutterRoot: getFlutterRoot(),
+        platform: platform,
+        splitDeferredAssets: true,
+      ).createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        deferredComponentsEnabled: true,
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'assets/foo/bar.txt',
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
+        ]),
+      );
+      expect(bundle.deferredComponentsEntries.length, 1);
+      expect(bundle.deferredComponentsEntries['component1']!.length, 2);
+      expect(bundle.needsBuild(), false);
 
-        // Simulate modifying the files by updating the filestat time manually.
-        testFileSystem.file(testFileSystem.path.join('assets', 'wild', 'fizz.txt'))
-          ..createSync(recursive: true)
-          ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
+      // Simulate modifying the files by updating the filestat time manually.
+      testFileSystem.file(testFileSystem.path.join('assets', 'wild', 'fizz.txt'))
+        ..createSync(recursive: true)
+        ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
-        expect(bundle.needsBuild(), true);
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          deferredComponentsEnabled: true,
-          targetPlatform: TargetPlatform.tester,
-        );
+      expect(bundle.needsBuild(), true);
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        deferredComponentsEnabled: true,
+        targetPlatform: TargetPlatform.tester,
+      );
 
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'assets/foo/bar.txt',
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-          ]),
-        );
-        expect(bundle.deferredComponentsEntries.length, 1);
-        expect(bundle.deferredComponentsEntries['component1']!.length, 3);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'assets/foo/bar.txt',
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
+        ]),
+      );
+      expect(bundle.deferredComponentsEntries.length, 1);
+      expect(bundle.deferredComponentsEntries['component1']!.length, 3);
+    });
   });
 
   group('AssetBundle.build', () {

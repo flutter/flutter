@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/package_config.dart';
 
@@ -60,74 +59,58 @@ flutter:
 ''');
   });
 
-  testUsingContext(
-    'includes LICENSE file inputs in dependencies',
-    () async {
-      writePackageConfigFiles(
-        directory: fileSystem.currentDirectory,
-        mainLibName: 'example',
-        packages: <String, String>{'foo': 'bar'},
-      );
-      fileSystem.file('bar/LICENSE')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('THIS IS A LICENSE');
+  testWithoutContext('includes LICENSE file inputs in dependencies', () async {
+    writePackageConfigFiles(
+      directory: fileSystem.currentDirectory,
+      mainLibName: 'example',
+      packages: <String, String>{'foo': 'bar'},
+    );
+    fileSystem.file('bar/LICENSE')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('THIS IS A LICENSE');
 
-      await const CopyAssets().build(environment);
+    await const CopyAssets().build(environment);
 
-      final File depfile = environment.buildDir.childFile('flutter_assets.d');
+    final File depfile = environment.buildDir.childFile('flutter_assets.d');
 
-      expect(depfile, exists);
+    expect(depfile, exists);
 
-      final Depfile dependencies = environment.depFileService.parse(depfile);
+    final Depfile dependencies = environment.depFileService.parse(depfile);
 
-      expect(
-        dependencies.inputs.firstWhereOrNull((File file) => file.path == '/bar/LICENSE'),
-        isNotNull,
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(
+      dependencies.inputs.firstWhereOrNull((File file) => file.path == '/bar/LICENSE'),
+      isNotNull,
+    );
+  });
 
-  testUsingContext(
-    'Copies files to correct asset directory',
-    () async {
-      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
-      await const CopyAssets().build(environment);
+  testWithoutContext('Copies files to correct asset directory', () async {
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+    await const CopyAssets().build(environment);
 
-      expect(
-        fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'),
-        exists,
-      );
-      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/NOTICES.Z'), exists);
-      // See https://github.com/flutter/flutter/issues/35293
-      expect(
-        fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/foo/bar.png'),
-        exists,
-      );
-      // See https://github.com/flutter/flutter/issues/46163
-      expect(
-        fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/wildcard/%23bar.png'),
-        exists,
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(
+      fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'),
+      exists,
+    );
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/NOTICES.Z'), exists);
+    // See https://github.com/flutter/flutter/issues/35293
+    expect(
+      fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/foo/bar.png'),
+      exists,
+    );
+    // See https://github.com/flutter/flutter/issues/46163
+    expect(
+      fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/wildcard/%23bar.png'),
+      exists,
+    );
+  });
 
   group(
     "Only copies assets with a flavor if the assets' flavor matches the flavor in the environment",
     () {
-      testUsingContext(
-        'When the environment does not have a flavor defined',
-        () async {
-          fileSystem.file('pubspec.yaml')
-            ..createSync()
-            ..writeAsStringSync('''
+      testWithoutContext('When the environment does not have a flavor defined', () async {
+        fileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync('''
   name: example
   flutter:
     assets:
@@ -139,56 +122,46 @@ flutter:
         flavors:
           - strawberry
   ''');
-          writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-          fileSystem.file('assets/common/image.png').createSync(recursive: true);
-          fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
-          fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+        fileSystem.file('assets/common/image.png').createSync(recursive: true);
+        fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+        fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
 
-          await const CopyAssets().build(environment);
+        await const CopyAssets().build(environment);
 
-          expect(
-            fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/common/image.png'),
-            exists,
-          );
-          expect(
-            fileSystem.file(
-              '${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png',
-            ),
-            isNot(exists),
-          );
-          expect(
-            fileSystem.file(
-              '${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png',
-            ),
-            isNot(exists),
-          );
-          expect(
-            logger.traceText,
-            contains('Skipping assets entry "assets/vanilla/ice-cream.png"'),
-          );
-          expect(
-            logger.traceText,
-            contains('Skipping assets entry "assets/strawberry/ice-cream.png"'),
-          );
-          expect(
-            logger.traceText,
-            isNot(contains('Skipping assets entry "assets/common/image.png"')),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        expect(
+          fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/common/image.png'),
+          exists,
+        );
+        expect(
+          fileSystem.file(
+            '${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png',
+          ),
+          isNot(exists),
+        );
+        expect(
+          fileSystem.file(
+            '${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png',
+          ),
+          isNot(exists),
+        );
+        expect(logger.traceText, contains('Skipping assets entry "assets/vanilla/ice-cream.png"'));
+        expect(
+          logger.traceText,
+          contains('Skipping assets entry "assets/strawberry/ice-cream.png"'),
+        );
+        expect(
+          logger.traceText,
+          isNot(contains('Skipping assets entry "assets/common/image.png"')),
+        );
+      });
 
-      testUsingContext(
-        'When the environment has a flavor defined',
-        () async {
-          environment.defines[kFlavor] = 'strawberry';
-          fileSystem.file('pubspec.yaml')
-            ..createSync()
-            ..writeAsStringSync('''
+      testWithoutContext('When the environment has a flavor defined', () async {
+        environment.defines[kFlavor] = 'strawberry';
+        fileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync('''
   name: example
   flutter:
     assets:
@@ -200,69 +173,59 @@ flutter:
         flavors:
           - strawberry
   ''');
-          writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-          fileSystem.file('assets/common/image.png').createSync(recursive: true);
-          fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
-          fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+        fileSystem.file('assets/common/image.png').createSync(recursive: true);
+        fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+        fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
 
-          await const CopyAssets().build(environment);
+        await const CopyAssets().build(environment);
 
-          expect(
-            fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/common/image.png'),
-            exists,
-          );
-          expect(
-            fileSystem.file(
-              '${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png',
-            ),
-            isNot(exists),
-          );
-          expect(
-            fileSystem.file(
-              '${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png',
-            ),
-            exists,
-          );
-          expect(
-            logger.traceText,
-            contains('Skipping assets entry "assets/vanilla/ice-cream.png"'),
-          );
-          expect(
-            logger.traceText,
-            isNot(contains('Skipping assets entry "assets/strawberry/ice-cream.png"')),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        expect(
+          fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/common/image.png'),
+          exists,
+        );
+        expect(
+          fileSystem.file(
+            '${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png',
+          ),
+          isNot(exists),
+        );
+        expect(
+          fileSystem.file(
+            '${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png',
+          ),
+          exists,
+        );
+        expect(logger.traceText, contains('Skipping assets entry "assets/vanilla/ice-cream.png"'));
+        expect(
+          logger.traceText,
+          isNot(contains('Skipping assets entry "assets/strawberry/ice-cream.png"')),
+        );
+      });
     },
   );
 
   group("Only compiles shaders with a flavor if the shaders' flavor matches the flavor in the environment", () {
-    testUsingContext(
-      'When the environment does not have a flavor defined',
-      () async {
-        // Re-create the environment with the correct process manager for this test.
-        environment = Environment.test(
-          fileSystem.currentDirectory,
-          processManager: FakeProcessManager.any(),
-          artifacts: Artifacts.test(),
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        );
+    testWithoutContext('When the environment does not have a flavor defined', () async {
+      // Re-create the environment with the correct process manager for this test.
+      environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: FakeProcessManager.any(),
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+      );
 
-        final artifacts = Artifacts.test();
-        final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
-        fileSystem.file(impellercPath).createSync(recursive: true);
+      final artifacts = Artifacts.test();
+      final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+      fileSystem.file(impellercPath).createSync(recursive: true);
 
-        fileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync('''
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
 name: example
 flutter:
   shaders:
@@ -271,55 +234,48 @@ flutter:
       flavors:
         - premium
 ''');
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-        fileSystem.file('shaders/common.frag').createSync(recursive: true);
-        fileSystem.file('shaders/premium.frag').createSync(recursive: true);
+      fileSystem.file('shaders/common.frag').createSync(recursive: true);
+      fileSystem.file('shaders/premium.frag').createSync(recursive: true);
 
-        // Manually create expected output files since FakeProcessManager.any() won't create them
-        fileSystem
-            .file('${environment.buildDir.path}/flutter_assets/shaders/common.frag')
-            .createSync(recursive: true);
+      // Manually create expected output files since FakeProcessManager.any() won't create them
+      fileSystem
+          .file('${environment.buildDir.path}/flutter_assets/shaders/common.frag')
+          .createSync(recursive: true);
 
-        await const CopyAssets().build(environment);
+      await const CopyAssets().build(environment);
 
-        expect(
-          fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/common.frag'),
-          exists,
-        );
-        expect(
-          fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag'),
-          isNot(exists),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(
+        fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/common.frag'),
+        exists,
+      );
+      expect(
+        fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag'),
+        isNot(exists),
+      );
+    });
 
-    testUsingContext(
-      'When the environment has a matching flavor defined',
-      () async {
-        // Re-create the environment with the correct process manager for this test.
-        environment = Environment.test(
-          fileSystem.currentDirectory,
-          processManager: FakeProcessManager.any(),
-          artifacts: Artifacts.test(),
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        );
+    testWithoutContext('When the environment has a matching flavor defined', () async {
+      // Re-create the environment with the correct process manager for this test.
+      environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: FakeProcessManager.any(),
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+      );
 
-        final artifacts = Artifacts.test();
-        final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
-        fileSystem.file(impellercPath).createSync(recursive: true);
+      final artifacts = Artifacts.test();
+      final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+      fileSystem.file(impellercPath).createSync(recursive: true);
 
-        environment.defines[kFlavor] = 'premium';
-        fileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync('''
+      environment.defines[kFlavor] = 'premium';
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
 name: example
 flutter:
   shaders:
@@ -328,58 +284,51 @@ flutter:
       flavors:
         - premium
 ''');
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-        fileSystem.file('shaders/common.frag').createSync(recursive: true);
-        fileSystem.file('shaders/premium.frag').createSync(recursive: true);
+      fileSystem.file('shaders/common.frag').createSync(recursive: true);
+      fileSystem.file('shaders/premium.frag').createSync(recursive: true);
 
-        // Manually create expected output files since FakeProcessManager.any() won't create them
-        fileSystem
-            .file('${environment.buildDir.path}/flutter_assets/shaders/common.frag')
-            .createSync(recursive: true);
-        fileSystem
-            .file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag')
-            .createSync(recursive: true);
+      // Manually create expected output files since FakeProcessManager.any() won't create them
+      fileSystem
+          .file('${environment.buildDir.path}/flutter_assets/shaders/common.frag')
+          .createSync(recursive: true);
+      fileSystem
+          .file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag')
+          .createSync(recursive: true);
 
-        await const CopyAssets().build(environment);
+      await const CopyAssets().build(environment);
 
-        expect(
-          fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/common.frag'),
-          exists,
-        );
-        expect(
-          fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag'),
-          exists,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(
+        fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/common.frag'),
+        exists,
+      );
+      expect(
+        fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag'),
+        exists,
+      );
+    });
 
-    testUsingContext(
-      'When the environment has a mismatching flavor defined',
-      () async {
-        // Re-create the environment with the correct process manager for this test.
-        environment = Environment.test(
-          fileSystem.currentDirectory,
-          processManager: FakeProcessManager.any(),
-          artifacts: Artifacts.test(),
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        );
+    testWithoutContext('When the environment has a mismatching flavor defined', () async {
+      // Re-create the environment with the correct process manager for this test.
+      environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: FakeProcessManager.any(),
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+      );
 
-        final artifacts = Artifacts.test();
-        final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
-        fileSystem.file(impellercPath).createSync(recursive: true);
+      final artifacts = Artifacts.test();
+      final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+      fileSystem.file(impellercPath).createSync(recursive: true);
 
-        environment.defines[kFlavor] = 'free'; // Mismatch
-        fileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync('''
+      environment.defines[kFlavor] = 'free'; // Mismatch
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
 name: example
 flutter:
   shaders:
@@ -388,32 +337,27 @@ flutter:
       flavors:
         - premium
 ''');
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-        fileSystem.file('shaders/common.frag').createSync(recursive: true);
-        fileSystem.file('shaders/premium.frag').createSync(recursive: true);
+      fileSystem.file('shaders/common.frag').createSync(recursive: true);
+      fileSystem.file('shaders/premium.frag').createSync(recursive: true);
 
-        // Manually create expected output files for the ones that SHOULD exist
-        fileSystem
-            .file('${environment.buildDir.path}/flutter_assets/shaders/common.frag')
-            .createSync(recursive: true);
+      // Manually create expected output files for the ones that SHOULD exist
+      fileSystem
+          .file('${environment.buildDir.path}/flutter_assets/shaders/common.frag')
+          .createSync(recursive: true);
 
-        await const CopyAssets().build(environment);
+      await const CopyAssets().build(environment);
 
-        expect(
-          fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/common.frag'),
-          exists,
-        );
-        expect(
-          fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag'),
-          isNot(exists),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(
+        fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/common.frag'),
+        exists,
+      );
+      expect(
+        fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag'),
+        isNot(exists),
+      );
+    });
   });
 
   testWithoutContext('transforms assets declared with transformers', () async {
@@ -761,81 +705,58 @@ flutter:
 
     group('includes assets only for matching platform', () {
       for (final platform in kValidPluginPlatforms) {
-        testUsingContext(
-          platform,
-          () async {
-            final TargetPlatform targetPlatform = targetFor(platform);
-            final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
+        testWithoutContext(platform, () async {
+          final TargetPlatform targetPlatform = targetFor(platform);
+          final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
 
-            expect(didInclude, isTrue, reason: 'Expected asset for $platform to be included');
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fileSystem,
-            ProcessManager: () => FakeProcessManager.any(),
-          },
-        );
+          expect(didInclude, isTrue, reason: 'Expected asset for $platform to be included');
+        });
       }
     });
 
     group('skips assets for non-matching platform', () {
       for (final platform in kValidPluginPlatforms) {
-        testUsingContext(
-          platform,
-          () async {
-            final TargetPlatform targetPlatform = platform == 'android'
-                ? TargetPlatform.ios
-                : TargetPlatform.android;
-            final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
+        testWithoutContext(platform, () async {
+          final TargetPlatform targetPlatform = platform == 'android'
+              ? TargetPlatform.ios
+              : TargetPlatform.android;
+          final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
 
-            expect(
-              didInclude,
-              isFalse,
-              reason: 'Expected asset for $platform to be skipped when target is $targetPlatform',
-            );
-            expect(logger.traceText, contains('Skipping assets entry "assets/test-$platform.txt"'));
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fileSystem,
-            ProcessManager: () => FakeProcessManager.any(),
-          },
-        );
+          expect(
+            didInclude,
+            isFalse,
+            reason: 'Expected asset for $platform to be skipped when target is $targetPlatform',
+          );
+          expect(logger.traceText, contains('Skipping assets entry "assets/test-$platform.txt"'));
+        });
       }
     });
 
     group('includes assets for all platforms when no restriction is set', () {
       for (final platform in kValidPluginPlatforms) {
-        testUsingContext(
-          platform,
-          () async {
-            final TargetPlatform targetPlatform = targetFor(platform);
-            final bool didInclude = await setupAndBuildPlatformAsset('', targetPlatform);
+        testWithoutContext(platform, () async {
+          final TargetPlatform targetPlatform = targetFor(platform);
+          final bool didInclude = await setupAndBuildPlatformAsset('', targetPlatform);
 
-            expect(
-              didInclude,
-              isTrue,
-              reason:
-                  'Expected asset to be included for all platforms when no platforms are specified (platform: $platform)',
-            );
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fileSystem,
-            ProcessManager: () => FakeProcessManager.any(),
-          },
-        );
+          expect(
+            didInclude,
+            isTrue,
+            reason:
+                'Expected asset to be included for all platforms when no platforms are specified (platform: $platform)',
+          );
+        });
       }
     });
 
     group('includes assets only for declared multiple platforms', () {
       for (final platform in kValidPluginPlatforms) {
-        testUsingContext(
-          platform,
-          () async {
-            const filePath = 'assets/test-multi.txt';
-            final targetPlatforms = <String>['android', 'ios'];
+        testWithoutContext(platform, () async {
+          const filePath = 'assets/test-multi.txt';
+          final targetPlatforms = <String>['android', 'ios'];
 
-            fileSystem.file('pubspec.yaml')
-              ..createSync()
-              ..writeAsStringSync('''
+          fileSystem.file('pubspec.yaml')
+            ..createSync()
+            ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -843,30 +764,25 @@ flutter:
       platforms: [${targetPlatforms.join(',')}]
 ''');
 
-            writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
-            fileSystem.file(filePath).createSync(recursive: true);
+          writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+          fileSystem.file(filePath).createSync(recursive: true);
 
-            final TargetPlatform targetPlatform = targetFor(platform);
+          final TargetPlatform targetPlatform = targetFor(platform);
 
-            await const CopyAssets().build(environment, targetPlatform: targetPlatform);
+          await const CopyAssets().build(environment, targetPlatform: targetPlatform);
 
-            final File bundledFile = fileSystem.file(
-              '${environment.buildDir.path}/flutter_assets/$filePath',
-            );
+          final File bundledFile = fileSystem.file(
+            '${environment.buildDir.path}/flutter_assets/$filePath',
+          );
 
-            final bool exists = bundledFile.existsSync();
+          final bool exists = bundledFile.existsSync();
 
-            if (targetPlatforms.contains(platform)) {
-              expect(exists, isTrue, reason: 'Expected asset to be included for $platform');
-            } else {
-              expect(exists, isFalse, reason: 'Expected asset to be skipped for $platform');
-            }
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fileSystem,
-            ProcessManager: () => FakeProcessManager.any(),
-          },
-        );
+          if (targetPlatforms.contains(platform)) {
+            expect(exists, isTrue, reason: 'Expected asset to be included for $platform');
+          } else {
+            expect(exists, isFalse, reason: 'Expected asset to be skipped for $platform');
+          }
+        });
       }
     });
   });
@@ -959,12 +875,10 @@ flutter:
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext(
-    'Throws exception if pubspec contains missing files',
-    () async {
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
+  testWithoutContext('Throws exception if pubspec contains missing files', () async {
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
 name: example
 
 flutter:
@@ -973,11 +887,6 @@ flutter:
 
 ''');
 
-      expect(() async => const CopyAssets().build(environment), throwsException);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(() async => const CopyAssets().build(environment), throwsException);
+  });
 }

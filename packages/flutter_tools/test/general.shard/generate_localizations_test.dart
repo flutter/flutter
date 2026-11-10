@@ -681,7 +681,7 @@ void main() {
     );
   });
 
-  testUsingContext('generates normalized input & output file paths', () {
+  testWithoutContext('generates normalized input & output file paths', () {
     const Platform platform = LocalPlatform();
     final FileSystem fs = MemoryFileSystem.test(
       style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,

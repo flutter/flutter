@@ -6,20 +6,17 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const kModulePubspec = '''
 name: test
@@ -283,48 +280,31 @@ void main() {
   });
 
   group('gradle build', () {
-    testUsingContext('do not crash if there is no Android SDK', () async {
+    testWithoutContext('do not crash if there is no Android SDK', () async {
+      final logger = BufferLogger.test();
       expect(
         () {
           gradle_utils.updateLocalProperties(
             cache: Cache.test(processManager: FakeProcessManager.any()),
             project: FlutterProject.fromDirectoryTest(MemoryFileSystem.test().currentDirectory),
             analytics: const NoOpAnalytics(),
-            logger: testLogger,
+            logger: logger,
           );
         },
         throwsToolExit(
           message:
-              '${testLogger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_HOME environment variable.',
+              '${logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_HOME environment variable.',
         ),
       );
-    }, overrides: <Type, Generator>{AndroidSdk: () => null});
+    });
   });
 
   group('Gradle local.properties', () {
-    late Artifacts localEngineArtifacts;
     late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
-      localEngineArtifacts = Artifacts.testLocalEngine(
-        localEngine: 'out/android_arm',
-        localEngineHost: 'out/host_release',
-      );
     });
-
-    void testUsingAndroidContext(String description, dynamic Function() testMethod) {
-      testUsingContext(
-        description,
-        testMethod,
-        overrides: <Type, Generator>{
-          Artifacts: () => localEngineArtifacts,
-          Platform: () => FakePlatform(),
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
-    }
 
     String? propertyFor(String key, File file) {
       final Iterable<String> result = file
@@ -356,7 +336,7 @@ void main() {
       expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
     }
 
-    testUsingAndroidContext('extract build name and number from pubspec.yaml', () async {
+    testWithoutContext('extract build name and number from pubspec.yaml', () async {
       const manifest = '''
 name: test
 version: 1.0.0+1
@@ -380,7 +360,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('extract build name from pubspec.yaml', () async {
+    testWithoutContext('extract build name from pubspec.yaml', () async {
       const manifest = '''
 name: test
 version: 1.0.0
@@ -398,7 +378,7 @@ flutter:
       await checkBuildVersion(manifest: manifest, buildInfo: buildInfo, expectedBuildName: '1.0.0');
     });
 
-    testUsingAndroidContext('allow build info to override build name', () async {
+    testWithoutContext('allow build info to override build name', () async {
       const manifest = '''
 name: test
 version: 1.0.0+1
@@ -422,7 +402,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build number', () async {
+    testWithoutContext('allow build info to override build number', () async {
       const manifest = '''
 name: test
 version: 1.0.0+1
@@ -446,7 +426,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build name and number', () async {
+    testWithoutContext('allow build info to override build name and number', () async {
       const manifest = '''
 name: test
 version: 1.0.0+1
@@ -471,7 +451,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build name and set number', () async {
+    testWithoutContext('allow build info to override build name and set number', () async {
       const manifest = '''
 name: test
 version: 1.0.0
@@ -496,7 +476,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to set build name and number', () async {
+    testWithoutContext('allow build info to set build name and number', () async {
       const manifest = '''
 name: test
 dependencies:
@@ -520,7 +500,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to unset build name and number', () async {
+    testWithoutContext('allow build info to unset build name and number', () async {
       const manifest = '''
 name: test
 dependencies:
