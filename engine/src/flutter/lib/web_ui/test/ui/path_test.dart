@@ -75,6 +75,7 @@ Future<void> testMain() async {
             reverse ? outer : inner,
           );
 
+          expect(ring.fillType, PathFillType.evenOdd);
           expect(ring.contains(const Offset(1, 1)), isTrue);
           expect(ring.contains(const Offset(100, 100)), isFalse);
           expect(ring.contains(const Offset(201, 201)), isFalse);
