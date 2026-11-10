@@ -5140,30 +5140,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
       shard: verify_binaries_pre_codesigned
 
-  - name: Mac web_tool_tests
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
-        ]
-      shard: web_tool_tests
-      subshard: "1_1"
-      tags: >
-        ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
   - name: Mac web_tool_tests_1
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5176,7 +5153,6 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5186,7 +5162,6 @@ targets:
       - DEPS
 
   - name: Mac web_tool_tests_2
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5199,7 +5174,6 @@ targets:
       subshard: "2_2"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
