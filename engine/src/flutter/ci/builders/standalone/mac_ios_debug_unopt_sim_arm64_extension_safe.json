@@ -20,7 +20,6 @@
         "arm64",
         "--darwin-extension-safe",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--target-dir",
         "ci/ios_debug_unopt_sim_arm64_extension_safe"

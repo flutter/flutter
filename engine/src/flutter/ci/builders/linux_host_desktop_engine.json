@@ -38,7 +38,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/host_debug_desktop"
             ],
@@ -78,7 +77,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/host_profile_desktop"
             ],
@@ -118,7 +116,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/host_release_desktop"
             ],
