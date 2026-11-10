@@ -79,11 +79,11 @@ Before applying or re-applying the `autosubmit` label (`gh pr edit <number> --re
 
 ## 4. Failed Checks & Manual LUCI Re-runs
 
-* Due to GitHub App permission policies, third-party check runs (such as LUCI checks created by `flutter-dashboard`) cannot be re-run via the GitHub API.
+* Due to GitHub App permission policies, third-party check runs (such as LUCI checks created by `flutter-dashboard`) cannot be re-run via the GitHub API. Retrying a build directly on LUCI or with `bb add` does not update Cocoon or the GitHub check status either; re-runs must be triggered from the Flutter Presubmit Dashboard.
 * *Action*:
-  1. Print the exact LUCI Buildbucket link (e.g., `https://cr-buildbucket.appspot.com/build/<build_id>`) for the failing check.
-  2. Instruct the user to open the URL and click **Retry Build** on the LUCI page.
-  3. If a check continues to fail after manual retries, inspect the failure logs (`gh pr view <number> --repo flutter/flutter` or `flutter-pr-checks-finder`) and summarize the failure for the user.
+  1. Find the failing check and its logs with `flutter-pr-checks-finder`, and decide whether the failure is flaky or unrelated to the PR (for example `INFRA_FAILURE`, an unrelated shard, or a known flake) or looks real.
+  2. If it's flaky or unrelated, first confirm that no retry is already scheduled or running for that commit. If the `flutter-presubmit-rerun` skill is available, re-run the failed checks **once** without asking, then tell the user which check you re-ran, why, and the link to the new run. Otherwise, provide the Flutter Presubmit Dashboard link (`https://flutter-dashboard.appspot.com/#/presubmit?repo=flutter&pr=<number>&sha=<head_sha>`) and ask the user to click **Re-run failed** there.
+  3. If it looks real, or the re-run fails again, don't re-run it. Summarize the failure for the user with the log link.
 
 ## 5. Stale Branch Updates, CICD Label & Token Scope
 

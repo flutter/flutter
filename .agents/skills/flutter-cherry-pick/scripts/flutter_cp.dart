@@ -8,7 +8,21 @@ import 'dart:io';
 /// A helper class to orchestrate the Flutter cherry-pick (CP) process.
 class CherryPickHelper {
   /// Creates a new [CherryPickHelper] instance.
-  CherryPickHelper({required this.pr, required this.channel, required this.repoPath});
+  CherryPickHelper({
+    required this.pr,
+    required this.channel,
+    required this.repoPath,
+    Future<ProcessResult> Function(List<String> cmd, {String? workingDirectory})? processRunner,
+    void Function(Object? message)? onInfo,
+    void Function(Object? message)? onError,
+  }) : _processRunner = processRunner ?? _defaultProcessRunner,
+       _onInfo = onInfo ?? _info,
+       _onError = onError ?? _error;
+
+  static Future<ProcessResult> _defaultProcessRunner(
+    List<String> cmd, {
+    String? workingDirectory,
+  }) => Process.run(cmd[0], cmd.sublist(1), workingDirectory: workingDirectory);
 
   /// The original PR number on the master branch.
   final int pr;
@@ -19,6 +33,10 @@ class CherryPickHelper {
   /// The path to the local Flutter repository.
   final String repoPath;
 
+  final Future<ProcessResult> Function(List<String> cmd, {String? workingDirectory}) _processRunner;
+  final void Function(Object? message) _onInfo;
+  final void Function(Object? message) _onError;
+
   /// Detailed data about the original PR, fetched from GitHub.
   Map<String, Object?>? originalPrData;
 
@@ -27,15 +45,11 @@ class CherryPickHelper {
   /// Throws an error and exits with code 1 if the command fails, unless
   /// [allowFailure] is set to true.
   Future<ProcessResult> runCmd(List<String> cmd, {bool allowFailure = false}) async {
-    final ProcessResult result = await Process.run(
-      cmd[0],
-      cmd.sublist(1),
-      workingDirectory: repoPath,
-    );
+    final ProcessResult result = await _processRunner(cmd, workingDirectory: repoPath);
     if (result.exitCode != 0 && !allowFailure) {
-      _error('Command failed: ${cmd.join(' ')}');
-      _error('Stdout: ${result.stdout}');
-      _error('Stderr: ${result.stderr}');
+      _onError('Command failed: ${cmd.join(' ')}');
+      _onError('Stdout: ${result.stdout}');
+      _onError('Stderr: ${result.stderr}');
       exit(1);
     }
     return result;
@@ -52,7 +66,7 @@ class CherryPickHelper {
       'view',
       pr.toString(),
       '--json',
-      'title,body,mergeCommit,state,url',
+      'title,body,mergeCommit,state,url,author,reviews',
     ]);
 
     final Object? decoded = jsonDecode(result.stdout as String);
@@ -287,6 +301,144 @@ class CherryPickHelper {
     return pushAndCreatePr(candidateBranch);
   }
 
+  static const Set<String> _knownBotLogins = <String>{
+    'auto-submit',
+    'flutteractionsbot',
+    'fluttergithubbot',
+  };
+
+  static bool _isBotLogin(String login, {Object? isBotFlag}) {
+    if (isBotFlag == true) {
+      return true;
+    }
+    final String lower = login.toLowerCase();
+    return lower.isEmpty ||
+        lower.endsWith('[bot]') ||
+        lower.endsWith('-autoroll') ||
+        lower.endsWith('-bot') ||
+        lower.endsWith('-agent') ||
+        _knownBotLogins.contains(lower);
+  }
+
+  /// Requests reviews on [cpPr] from the original PR's author and approvers.
+  ///
+  /// Skips the current `gh` user, the [cpPr] author, and bot accounts. If a
+  /// batched request fails (for example because an external PR author is not a
+  /// repository collaborator), retries each reviewer individually so team
+  /// approvers are still requested and warns only about the failed logins.
+  Future<void> requestReviewers(int cpPr) async {
+    final ProcessResult userResult = await runCmd([
+      'gh',
+      'api',
+      'user',
+      '--jq',
+      '.login',
+    ], allowFailure: true);
+    final ProcessResult cpAuthorResult = await runCmd([
+      'gh',
+      'pr',
+      'view',
+      cpPr.toString(),
+      '-R',
+      'flutter/flutter',
+      '--json',
+      'author',
+      '--jq',
+      '.author.login',
+    ], allowFailure: true);
+    final excludedLower = <String>{
+      if (userResult.exitCode == 0) (userResult.stdout as String).trim().toLowerCase(),
+      if (cpAuthorResult.exitCode == 0) (cpAuthorResult.stdout as String).trim().toLowerCase(),
+    }..remove('');
+
+    final reviewersByLower = <String, String>{};
+    void addCandidate(String login, {Object? isBotFlag}) {
+      if (_isBotLogin(login, isBotFlag: isBotFlag)) {
+        return;
+      }
+      final String lower = login.toLowerCase();
+      if (excludedLower.contains(lower)) {
+        return;
+      }
+      reviewersByLower.putIfAbsent(lower, () => login);
+    }
+
+    if (originalPrData case {'author': final Map<Object?, Object?> authorMap}) {
+      if (authorMap['login'] case final String author) {
+        addCandidate(author, isBotFlag: authorMap['is_bot']);
+      }
+    }
+    if (originalPrData case {'reviews': final List<Object?> reviews}) {
+      for (final review in reviews) {
+        if (review case {'state': 'APPROVED', 'author': final Map<Object?, Object?> authorMap}) {
+          if (authorMap['login'] case final String reviewer) {
+            addCandidate(reviewer, isBotFlag: authorMap['is_bot']);
+          }
+        }
+      }
+    }
+
+    final List<String> reviewers = reviewersByLower.values.toList();
+    if (reviewers.isEmpty) {
+      _onInfo('No reviewers to request on PR #$cpPr.');
+      return;
+    }
+    _onInfo('Requesting reviews on PR #$cpPr from ${reviewers.join(', ')}...');
+    final ProcessResult batchResult = await _postReviewers(cpPr, reviewers);
+    if (batchResult.exitCode == 0) {
+      return;
+    }
+    if (reviewers.length == 1) {
+      _warnFailedReviewers(cpPr, reviewers, batchResult.stderr);
+      return;
+    }
+
+    final failed = <String>[];
+    Object? lastError = batchResult.stderr;
+    for (final reviewer in reviewers) {
+      final ProcessResult singleResult = await _postReviewers(cpPr, <String>[reviewer]);
+      if (singleResult.exitCode != 0) {
+        failed.add(reviewer);
+        lastError = singleResult.stderr;
+      }
+    }
+    if (failed.isNotEmpty) {
+      _warnFailedReviewers(cpPr, failed, lastError);
+    }
+  }
+
+  Future<ProcessResult> _postReviewers(int cpPr, List<String> reviewers) {
+    return runCmd([
+      'gh',
+      'api',
+      '-X',
+      'POST',
+      'repos/flutter/flutter/pulls/$cpPr/requested_reviewers',
+      for (final String reviewer in reviewers) ...['-f', 'reviewers[]=$reviewer'],
+    ], allowFailure: true);
+  }
+
+  void _warnFailedReviewers(int cpPr, List<String> failed, Object? stderrText) {
+    _onError(
+      'WARNING: Could not request reviews from ${failed.join(', ')} on PR #$cpPr: '
+      '$stderrText. Mention them on the PR instead.',
+    );
+  }
+
+  /// Initial pull request body for a manual cherry-pick of [pr] to [channel].
+  ///
+  /// Pre-fills `.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md` so automation
+  /// does not close the PR for an empty description before Phase 4 fills it in.
+  String initialPrBody() {
+    final summary = 'Cherry-pick of #$pr to $channel.';
+    final template = File('$repoPath/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md');
+    if (!template.existsSync()) {
+      _onError('Warning: Cherry-pick template not found at ${template.path}.');
+      return summary;
+    }
+    return '$summary\n\n${template.readAsStringSync()}';
+  }
+
   /// Pushes the local cherry-pick branch and creates a pull request targeting [candidateBranch].
   Future<int> pushAndCreatePr(String candidateBranch) async {
     final Map<String, String> remotes = await detectRemotes();
@@ -300,7 +452,7 @@ class CherryPickHelper {
 
     final String originalTitle = originalPrData?['title'] as String? ?? '';
     final title = '[$channel] $originalTitle';
-    final body = 'Cherry-pick of #$pr to $channel';
+    final String body = initialPrBody();
     _info('Creating pull request: $title...');
 
     final createCmd = <String>[
@@ -384,16 +536,19 @@ void main(List<String> arguments) async {
     await Future<void>.delayed(const Duration(seconds: 5));
     final int? cpPr = await helper.pollForPr(candidateBranch);
     if (cpPr != null) {
+      await helper.requestReviewers(cpPr);
       _info('SUCCESS:AUTOMATED:$cpPr');
       exit(0);
     } else {
       _info('Automated cherry-pick did not create a PR. Falling back to manual...');
       final int manualPr = await helper.startManualCp(candidateBranch);
+      await helper.requestReviewers(manualPr);
       _info('SUCCESS:MANUAL:$manualPr');
       exit(0);
     }
   } else if (action == 'continue') {
     final int manualPr = await helper.continueManualCp(candidateBranch);
+    await helper.requestReviewers(manualPr);
     _info('SUCCESS:MANUAL:$manualPr');
     exit(0);
   }
