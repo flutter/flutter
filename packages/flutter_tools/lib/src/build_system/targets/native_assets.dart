@@ -423,7 +423,10 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
     environment.processManager,
     runPackageName,
     pubspecPath,
+    androidSdkBuilder: () => environment.androidSdk,
+    flutterRoot: environment.flutterRootDir.path,
     includeDevDependencies: includeDevDependencies,
+    visualStudio: environment.visualStudio,
   );
 }
 
