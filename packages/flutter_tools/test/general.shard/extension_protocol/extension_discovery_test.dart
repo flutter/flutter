@@ -15,6 +15,16 @@ void _dummyExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[]));
 }
 
+void _singleServiceEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_DummyService('test', 'ping')],
+      supportedPlatforms: const <String>{'linux', 'macos'},
+    ),
+  );
+}
+
 void _failingExtensionEntryPoint(SendPort sendPort) {
   // Throws during isolate initialization before handshake.
   throw StateError('Simulated isolate startup failure');
@@ -284,14 +294,19 @@ void main() {
     test('ExtensionConnection.spawn completes handshake and matches expectedConfig', () async {
       final logger = BufferLogger.test();
       final ExtensionConnection connection = await ExtensionConnection.spawn(
-        _dummyExtensionEntryPoint,
-        expectedConfig: ExtensionPackageConfig(name: 'test_extension'),
+        _singleServiceEntryPoint,
+        expectedConfig: ExtensionPackageConfig(
+          name: 'test_extension',
+          hostPlatforms: const <String>{'linux', 'macos'},
+          services: const <String>{'test'},
+        ),
         logger: logger,
       );
       addTearDown(connection.dispose);
 
       expect(connection.extensionName, 'test_extension');
-      expect(connection.capabilities.services, isEmpty);
+      expect(connection.capabilities.services, const <String>['test']);
+      expect(connection.capabilities.supportedPlatforms, const <String>{'linux', 'macos'});
     });
 
     test('ExtensionConnection.spawn throws StateError when expectedConfig does not match capabilities', () async {
@@ -319,10 +334,32 @@ void main() {
 
       await expectLater(
         ExtensionConnection.spawn(
-          _dummyExtensionEntryPoint,
+          _singleServiceEntryPoint,
           expectedConfig: ExtensionPackageConfig(
             name: 'test_extension',
-            hostPlatforms: const <String>{'macos'},
+            hostPlatforms: const <String>{'linux', 'macos'},
+            services: const <String>{'other'},
+          ),
+          logger: logger,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'capabilities mismatch: extension/flutter_tools/config.yaml declares services',
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
+          expectedConfig: ExtensionPackageConfig(
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux', 'windows'},
+            services: const <String>{'test'},
           ),
           logger: logger,
         ),

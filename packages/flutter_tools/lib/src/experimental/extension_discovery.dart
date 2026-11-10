@@ -211,7 +211,11 @@ class ExtensionConnection {
     );
   }
 
-  void _validateCapabilitiesMatchConfig(ExtensionPackageConfig expectedConfig) {
+  static void _validateCapabilitiesMatchConfig(
+    ToolExtensionCapabilities capabilities,
+    ExtensionPackageConfig expectedConfig, {
+    required String extensionName,
+  }) {
     final Set<String> actualServices = capabilities.services.toSet();
     if (actualServices.length != expectedConfig.services.length ||
         !actualServices.containsAll(expectedConfig.services)) {
@@ -304,25 +308,25 @@ class ExtensionConnection {
         'ExtensionConnection handshake complete. Capabilities: ${capabilities.services}',
       );
 
-      final ExtensionConnection activeConnection = connection = ExtensionConnection._(
+      final String resolvedExtensionName =
+          extensionName ?? capabilities.extensionName ?? defaultExtensionName;
+      if (expectedConfig != null) {
+        _validateCapabilitiesMatchConfig(
+          capabilities,
+          expectedConfig,
+          extensionName: resolvedExtensionName,
+        );
+      }
+      return connection = ExtensionConnection._(
         capabilities: capabilities,
         errorPort: errorPort,
         exitPort: exitPort,
-        extensionName: extensionName ?? capabilities.extensionName ?? defaultExtensionName,
+        extensionName: resolvedExtensionName,
         isolate: isolate,
         logger: logger,
         peer: peer,
         receivePort: receivePort,
       );
-      if (expectedConfig != null) {
-        try {
-          activeConnection._validateCapabilitiesMatchConfig(expectedConfig);
-        } on Object {
-          await activeConnection.dispose();
-          rethrow;
-        }
-      }
-      return activeConnection;
     } on TimeoutException {
       logger.printTrace('ExtensionConnection handshake timed out.');
       receivePort.close();
