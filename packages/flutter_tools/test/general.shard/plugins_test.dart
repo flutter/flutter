@@ -3224,7 +3224,7 @@ iosPrefix: FLT
       () async {
         final handle = FileExceptionHandler();
         final fileSystem = ErrorHandlingFileSystem(
-          platform: FakePlatform(),
+          platform: FakePlatform(operatingSystem: 'windows'),
           delegate: MemoryFileSystem.test(
             style: FileSystemStyle.windows,
             opHandle: handle.opHandle,
@@ -3650,7 +3650,7 @@ iosPrefix: FLT
   testWithoutContext('exits tool when deleting .plugin_symlinks fails', () async {
     final handle = FileExceptionHandler();
     final fileSystem = ErrorHandlingFileSystem(
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'windows'),
       delegate: MemoryFileSystem.test(style: FileSystemStyle.windows, opHandle: handle.opHandle),
     );
     const symlinkDirectoryPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks';
