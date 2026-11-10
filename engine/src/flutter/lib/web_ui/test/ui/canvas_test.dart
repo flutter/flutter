@@ -295,6 +295,25 @@ Future<void> testMain() async {
       expect(canvas.getLocalClipBounds(), ui.Rect.zero);
       recorder.endRecording().dispose();
     });
+
+    test('Canvas.getLocalClipBounds bounds all four corners of a rotated clip', () {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 100, 100));
+      canvas.rotate(pi / 4);
+      // The device corners map back to (0, 0), (70.7, -70.7), (70.7, 70.7) and
+      // (141.4, 0). The transform is single precision, hence the tolerance.
+      final ui.Rect local = canvas.getLocalClipBounds();
+      expect(local.left, closeTo(0, 1e-3));
+      expect(local.top, closeTo(-70.71068, 1e-3));
+      expect(local.right, closeTo(141.42136, 1e-3));
+      expect(local.bottom, closeTo(70.71068, 1e-3));
+
+      // A transform that is singular in only one axis still has no local space.
+      canvas.scale(1, 0);
+      expect(canvas.getLocalClipBounds(), ui.Rect.zero);
+      recorder.endRecording().dispose();
+    });
   });
 
   group('RestoreToCount function tests', () {
