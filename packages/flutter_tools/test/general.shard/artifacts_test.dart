@@ -165,6 +165,64 @@ void main() {
       );
     });
 
+    testWithoutContext('getArtifactPath for Swift package checksum artifacts', () {
+      final String engineCachePath = fileSystem.path.join(
+        'root',
+        'bin',
+        'cache',
+        'artifacts',
+        'engine',
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.iosFrameworkArchiveChecksum,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.debug,
+        ),
+        fileSystem.path.join(engineCachePath, 'ios', 'artifacts.zip.checksum.json'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.iosFrameworkArchiveChecksum,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join(engineCachePath, 'ios-profile', 'artifacts.zip.checksum.json'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.iosFrameworkArchiveChecksum,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.release,
+        ),
+        fileSystem.path.join(engineCachePath, 'ios-release', 'artifacts.zip.checksum.json'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.macOSFrameworkArchiveChecksum,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.debug,
+        ),
+        fileSystem.path.join(engineCachePath, 'darwin-x64', 'framework.zip.checksum.json'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.macOSFrameworkArchiveChecksum,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join(engineCachePath, 'darwin-x64-profile', 'framework.zip.checksum.json'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.macOSFrameworkArchiveChecksum,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.release,
+        ),
+        fileSystem.path.join(engineCachePath, 'darwin-x64-release', 'framework.zip.checksum.json'),
+      );
+    });
+
     testWithoutContext(
       'getArtifactPath for FlutterMacOS.framework and FlutterMacOS.xcframework',
       () {

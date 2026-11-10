@@ -1040,6 +1040,17 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   /// Return a list of (directory path, download URL path) tuples.
   List<List<String>> getBinaryDirs();
 
+  /// Called after the zip archive downloaded from [url] has been extracted to [location].
+  ///
+  /// [archive] is the downloaded zip archive, which is deleted at some point after this returns.
+  /// Subclasses may override this to record additional information about the archive.
+  @protected
+  Future<void> onBinaryArchiveExtracted({
+    required Uri url,
+    required File archive,
+    required Directory location,
+  }) async {}
+
   /// A list of cache directory paths to which the LICENSE file should be copied.
   List<String> getLicenseDirs();
 
@@ -1091,7 +1102,14 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final Directory dir = fileSystem.directory(fileSystem.path.join(location.path, cacheDir));
 
       final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
-      await artifactUpdater.downloadZipArchive(friendlyName, Uri.parse(url + urlPath), dir);
+      final Uri archiveUrl = Uri.parse(url + urlPath);
+      await artifactUpdater.downloadZipArchive(
+        friendlyName,
+        archiveUrl,
+        dir,
+        onExtracted: (File archive) =>
+            onBinaryArchiveExtracted(url: archiveUrl, archive: archive, location: dir),
+      );
 
       _makeFilesExecutable(dir, operatingSystemUtils);
     }
@@ -1245,8 +1263,22 @@ class ArtifactUpdater {
   }
 
   /// Download a zip archive from the given [url] and unzip it to [location].
-  Future<void> downloadZipArchive(String artifactName, Uri url, Directory location) {
-    return _downloadArchive(artifactName, url, location, _operatingSystemUtils.unzip);
+  ///
+  /// If provided, [onExtracted] is called with the downloaded zip archive after it has been
+  /// successfully extracted.
+  Future<void> downloadZipArchive(
+    String artifactName,
+    Uri url,
+    Directory location, {
+    Future<void> Function(File archive)? onExtracted,
+  }) {
+    return _downloadArchive(
+      artifactName,
+      url,
+      location,
+      _operatingSystemUtils.unzip,
+      onExtracted: onExtracted,
+    );
   }
 
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
@@ -1274,12 +1306,16 @@ class ArtifactUpdater {
   }
 
   /// Download an archive from the given [url] and unzip it to [location].
+  ///
+  /// If provided, [onExtracted] is called with the downloaded archive after it has been
+  /// successfully extracted.
   Future<void> _downloadArchive(
     String artifactName,
     Uri url,
     Directory location,
-    void Function(File, Directory) extractor,
-  ) async {
+    void Function(File, Directory) extractor, {
+    Future<void> Function(File archive)? onExtracted,
+  }) async {
     final String downloadPath = flattenNameSubdirs(url, _fileSystem);
     final File tempFile = _createDownloadFile(downloadPath);
     int retries = _kRetryCount;
@@ -1366,6 +1402,9 @@ class ArtifactUpdater {
         continue;
       }
       _removeDenylistedFiles(location);
+      if (onExtracted != null) {
+        await onExtracted(tempFile);
+      }
       return;
     }
   }

@@ -437,6 +437,7 @@ class ToolDependencies {
           fileSystem: finalFS,
           logger: finalLogger,
           platform: finalPlatform,
+          processManager: finalProcessManager,
           osUtils: finalOS,
           projectFactory: finalProjectFactory,
           stdio: finalStdio,
