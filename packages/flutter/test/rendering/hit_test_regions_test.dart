@@ -58,6 +58,26 @@ Float64List _payload(List<(int, List<Rect>)> groups, {double scale = 1.0}) {
   ]);
 }
 
+/// A proxy box whose [hitTestsChildren] is read from [childrenHitTestable],
+/// so pointer events reach its child only while that is true.
+///
+/// It is not a render object type the framework knows about, so the
+/// hit-test region pass can only learn about its children through
+/// [hitTestsChildren].
+class _RenderChildHitTestGate extends RenderProxyBoxWithHitTestBehavior {
+  _RenderChildHitTestGate({required this.childrenHitTestable, super.behavior, super.child});
+
+  bool childrenHitTestable;
+
+  @override
+  bool get hitTestsChildren => childrenHitTestable;
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return childrenHitTestable && super.hitTestChildren(result, position: position);
+  }
+}
+
 ViewConfiguration _viewConfiguration({double devicePixelRatio = 1.0}) {
   final logicalConstraints = BoxConstraints.tight(const Size(800.0, 600.0));
   return ViewConfiguration(
@@ -479,6 +499,71 @@ void main() {
         _payload(<(int, List<Rect>)>[
           (1, <Rect>[absorber]),
           (2, <Rect>[barrier]),
+        ]),
+      );
+    });
+
+    test('descendants of a render object whose hitTestsChildren is false claim nothing, '
+        'but platform views among them still start groups', () {
+      const opaqueOverPv1 = Rect.fromLTWH(60, 60, 60, 40);
+      const nestedOverPv2 = Rect.fromLTWH(160, 160, 40, 40);
+      const overlay = Rect.fromLTWH(250, 250, 100, 100);
+      final gate = _RenderChildHitTestGate(
+        childrenHitTestable: false,
+        child: _stack(<RenderBox>[
+          _at(const Rect.fromLTWH(10, 10, 60, 40), _hitTarget()),
+          _at(const Rect.fromLTWH(100, 100, 150, 150), _platformView(2)),
+          // Its own hitTestsChildren is true, but its ancestor's is not.
+          _at(
+            const Rect.fromLTWH(110, 110, 40, 40),
+            _RenderChildHitTestGate(childrenHitTestable: true, child: _hitTarget()),
+          ),
+        ]),
+      );
+      final RenderStack root = _stack(<RenderBox>[
+        _at(const Rect.fromLTWH(0, 0, 400, 400), _platformView(1)),
+        _at(const Rect.fromLTWH(50, 50, 300, 300), gate),
+        _at(overlay, _hitTarget()),
+      ]);
+      expect(
+        regionsFor(root),
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[]),
+          (2, <Rect>[overlay]),
+        ]),
+      );
+
+      // Changing hitTestsChildren neither relayouts nor repaints; the next
+      // pass sees it.
+      gate.childrenHitTestable = true;
+      expect(
+        regionsAfterFrame(),
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[opaqueOverPv1]),
+          (2, <Rect>[nestedOverPv2, overlay]),
+        ]),
+      );
+    });
+
+    test('a render object whose hitTestsChildren is false still claims its own bounds', () {
+      const gateRect = Rect.fromLTWH(20, 30, 200, 150);
+      final Float64List? regions = regionsFor(
+        _stack(<RenderBox>[
+          _at(const Rect.fromLTWH(0, 0, 400, 400), _platformView(1)),
+          _at(
+            gateRect,
+            _RenderChildHitTestGate(
+              childrenHitTestable: false,
+              behavior: HitTestBehavior.opaque,
+              child: _stack(<RenderBox>[_at(const Rect.fromLTWH(10, 15, 60, 40), _hitTarget())]),
+            ),
+          ),
+        ]),
+      );
+      expect(
+        regions,
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[gateRect]),
         ]),
       );
     });
