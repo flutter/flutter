@@ -38,7 +38,7 @@ void _duplicateRpcEntryPoint(SendPort sendPort) {
   );
 }
 
-class _DummyService extends ToolExtensionService {
+final class _DummyService extends ToolExtensionService {
   _DummyService(this.namespace, this.methodName);
 
   @override
@@ -51,7 +51,7 @@ class _DummyService extends ToolExtensionService {
   }
 }
 
-class _FailingInitService extends ToolExtensionService {
+final class _FailingInitService extends ToolExtensionService {
   @override
   String get namespace => 'failing';
 
@@ -61,7 +61,7 @@ class _FailingInitService extends ToolExtensionService {
   }
 }
 
-class _NotificationTestService extends ToolExtensionService {
+final class _NotificationTestService extends ToolExtensionService {
   @override
   String get namespace => 'notify';
 
@@ -82,7 +82,7 @@ void _notificationExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
-class _ExitingService extends ToolExtensionService {
+final class _ExitingService extends ToolExtensionService {
   @override
   String get namespace => 'exit';
 
@@ -100,7 +100,7 @@ void _exitingExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ExitingService()]));
 }
 
-class _AsyncErrorService extends ToolExtensionService {
+final class _AsyncErrorService extends ToolExtensionService {
   @override
   String get namespace => 'error';
 
@@ -121,7 +121,7 @@ void _asyncErrorExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_AsyncErrorService()]));
 }
 
-class _ProtocolHardeningService extends ToolExtensionService {
+final class _ProtocolHardeningService extends ToolExtensionService {
   @override
   String get namespace => 'hardening';
 
@@ -144,7 +144,7 @@ void _protocolHardeningEntryPoint(SendPort sendPort) {
   );
 }
 
-class _ExitInInitService extends ToolExtensionService {
+final class _ExitInInitService extends ToolExtensionService {
   @override
   String get namespace => 'exit_init';
 
@@ -158,11 +158,12 @@ void _exitInInitEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ExitInInitService()]));
 }
 
-class _ShutdownTrackingService extends ToolExtensionService {
-  _ShutdownTrackingService(this.namespace, {this.throwOnShutdown = false});
+final class _ShutdownTrackingService extends ToolExtensionService {
+  _ShutdownTrackingService(this.namespace, {this.gateSendPort, this.throwOnShutdown = false});
 
   @override
   final String namespace;
+  final SendPort? gateSendPort;
   final bool throwOnShutdown;
 
   @override
@@ -172,6 +173,12 @@ class _ShutdownTrackingService extends ToolExtensionService {
 
   @override
   Future<void> shutdown() async {
+    if (gateSendPort case final SendPort gate) {
+      final releasePort = ReceivePort();
+      gate.send(releasePort.sendPort);
+      await releasePort.first;
+      releasePort.close();
+    }
     sendNotification('lifecycle.shutdown', <String, Object?>{'service': namespace});
     if (throwOnShutdown) {
       throw StateError('Simulated shutdown failure in $namespace');
@@ -695,5 +702,55 @@ void main() {
       expect(shutdownServices, unorderedEquals(const <String>['service_a', 'service_b']));
       expect(logger.traceText, isNot(contains('did not complete cleanly')));
     });
+
+    test(
+      'concurrent ExtensionConnection.dispose calls await in-flight shutdown before resolving',
+      () async {
+        final logger = BufferLogger.test();
+        final gatePort = ReceivePort();
+        addTearDown(gatePort.close);
+        final SendPort gateSendPort = gatePort.sendPort;
+
+        void gatedShutdownEntryPoint(SendPort sendPort) {
+          unawaited(
+            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+              _ShutdownTrackingService('gated_service', gateSendPort: gateSendPort),
+            ]),
+          );
+        }
+
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          gatedShutdownEntryPoint,
+          logger: logger,
+        );
+
+        final shutdownServices = <String>[];
+        final StreamSubscription<Map<String, Object?>> subscription = connection
+            .onNotification('lifecycle.shutdown')
+            .listen((Map<String, Object?> event) {
+              if (event['service'] case final String serviceName) {
+                shutdownServices.add(serviceName);
+              }
+            });
+        addTearDown(subscription.cancel);
+
+        final Future<void> firstDispose = connection.dispose();
+        expect(connection.isDisposed, isTrue);
+
+        final releaseSendPort = await gatePort.first as SendPort;
+        var secondDisposeCompleted = false;
+        final Future<void> secondDispose = connection.dispose().then((_) {
+          secondDisposeCompleted = true;
+        });
+
+        await pumpEventQueue();
+        expect(secondDisposeCompleted, isFalse);
+
+        releaseSendPort.send(null);
+        await Future.wait(<Future<void>>[firstDispose, secondDispose]);
+        expect(secondDisposeCompleted, isTrue);
+        expect(shutdownServices, const <String>['gated_service']);
+      },
+    );
   });
 }

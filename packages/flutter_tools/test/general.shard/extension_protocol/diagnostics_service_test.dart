@@ -16,7 +16,7 @@ import 'package:test/test.dart';
 
 import '../../src/fakes.dart';
 
-class _SecondaryTestDiagnostics extends DiagnosticsExtension {
+final class _SecondaryTestDiagnostics extends DiagnosticsExtension {
   @override
   String get title => 'Secondary Diagnostic Check';
 
@@ -30,7 +30,7 @@ class _SecondaryTestDiagnostics extends DiagnosticsExtension {
   }
 }
 
-class _DomainErrorDiagnosticsService extends DiagnosticsExtension {
+final class _DomainErrorDiagnosticsService extends DiagnosticsExtension {
   @override
   String get title => 'Custom Diagnostics';
 

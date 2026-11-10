@@ -127,7 +127,7 @@ class ExtensionConfiguration {
 }
 
 /// A host-side [ConfigurationExtension] client adapter that delegates RPC queries to an [ExtensionConnection].
-class ConfigurationExtensionClient extends ConfigurationExtension {
+final class ConfigurationExtensionClient extends ConfigurationExtension {
   ConfigurationExtensionClient(
     this.connection, {
     required this._logger,

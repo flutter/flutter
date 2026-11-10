@@ -65,7 +65,7 @@ class ExtensionDoctorValidator extends DoctorValidator {
 }
 
 /// A host-side [DiagnosticsExtension] client adapter that delegates RPC queries to an [ExtensionConnection].
-class DiagnosticsExtensionClient extends DiagnosticsExtension {
+final class DiagnosticsExtensionClient extends DiagnosticsExtension {
   /// Creates a [DiagnosticsExtensionClient] wrapping the host [connection].
   DiagnosticsExtensionClient(
     this.connection, {

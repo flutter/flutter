@@ -63,11 +63,11 @@ class ExtensionConnection {
   /// The resolved package or extension name of the connected extension.
   final String extensionName;
 
-  bool _isDisposed = false;
+  Future<void>? _disposeFuture;
   bool _isolateExited = false;
 
   /// Whether this connection has been disposed.
-  bool get isDisposed => _isDisposed;
+  bool get isDisposed => _disposeFuture != null;
 
   /// Handles uncaught async errors from the extension isolate after handshake.
   ///
@@ -105,7 +105,7 @@ class ExtensionConnection {
   /// Returns a broadcast stream of JSON-RPC 2.0 notifications sent by the
   /// extension isolate for [method].
   Stream<Map<String, Object?>> onNotification(String method) {
-    if (_isDisposed) {
+    if (isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
     final StreamController<Map<String, Object?>>
@@ -135,7 +135,7 @@ class ExtensionConnection {
     Object? params,
     Duration? timeout = const Duration(seconds: 5),
   }) async {
-    if (_isDisposed) {
+    if (isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
     _logger.printTrace('ExtensionConnection sending RPC request "$method"...');
@@ -346,11 +346,9 @@ class ExtensionConnection {
   }
 
   /// Disposes the extension isolate connection.
-  Future<void> dispose() async {
-    if (_isDisposed) {
-      return;
-    }
-    _isDisposed = true;
+  Future<void> dispose() => _disposeFuture ??= _doDispose();
+
+  Future<void> _doDispose() async {
     _logger.printTrace('ExtensionConnection disposing isolate connection.');
     if (!_isolateExited && !_peer.isClosed) {
       try {

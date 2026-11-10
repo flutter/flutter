@@ -17,7 +17,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 
-class _SecondaryConfigurationExtension extends ConfigurationExtension {
+final class _SecondaryConfigurationExtension extends ConfigurationExtension {
   @override
   String get title => 'Secondary Configuration Extension';
 
@@ -40,7 +40,7 @@ class _SecondaryConfigurationExtension extends ConfigurationExtension {
   }
 }
 
-class _FailingConfigurationExtension extends ConfigurationExtension {
+final class _FailingConfigurationExtension extends ConfigurationExtension {
   @override
   String get title => 'Failing Configuration Extension';
 
@@ -72,7 +72,7 @@ void _secondaryExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_SecondaryConfigurationExtension()]);
 }
 
-class _DomainErrorConfigurationExtension extends ConfigurationExtension {
+final class _DomainErrorConfigurationExtension extends ConfigurationExtension {
   @override
   String get title => 'Custom Config';
 

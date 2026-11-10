@@ -21,7 +21,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-class _ShutdownNotifyingService extends ToolExtensionService {
+final class _ShutdownNotifyingService extends ToolExtensionService {
   @override
   String get namespace => 'lifecycle';
 
