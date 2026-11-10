@@ -307,7 +307,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
               context->GetSamplerLibrary()->GetSampler(
                   input.sampler_descriptor);
 
-          SampledImageSlot image_slot;
+          SampledImageSlot image_slot{};
           image_slot.name = uniform.name.c_str();
           image_slot.binding = uniform.binding;
           image_slot.texture_index = sampler_location;
@@ -326,7 +326,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           BufferView buffer_view = EmplaceUniform(
               uniform_data_->data() + buffer_offset, data_host_buffer, uniform);
 
-          ShaderUniformSlot uniform_slot;
+          ShaderUniformSlot uniform_slot{};
           uniform_slot.name = uniform.name.c_str();
           uniform_slot.ext_res_0 = buffer_location;
           pass.BindDynamicResource(ShaderStage::kFragment,
@@ -340,7 +340,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         case kStruct: {
           FML_DCHECK(renderer.GetContext()->GetBackendType() ==
                      Context::BackendType::kVulkan);
-          ShaderUniformSlot uniform_slot;
+          ShaderUniformSlot uniform_slot{};
           uniform_slot.binding = uniform.location;
           uniform_slot.name = uniform.name.c_str();
 

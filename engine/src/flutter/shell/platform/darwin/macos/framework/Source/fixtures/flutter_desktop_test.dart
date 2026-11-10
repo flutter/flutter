@@ -134,6 +134,14 @@ void testRenderSizedToContentResizable() {
 void testRenderSizedToContent() {
   var frameCount = 0;
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final FlutterView view = PlatformDispatcher.instance.views.last;
+    // A frame may begin before the test has created its window, in which case
+    // the only view is the implicit view, which has no window in this test.
+    // Skip such frames so that the first frame rendered to the test's window is
+    // the 300x300 one. See https://github.com/flutter/flutter/issues/194780.
+    if (view == PlatformDispatcher.instance.implicitView) {
+      return;
+    }
     final size = frameCount == 0 ? const Size(300, 300) : const Size(200, 200);
     final baseRecorder = PictureRecorder();
     final canvas = Canvas(baseRecorder);
@@ -142,7 +150,7 @@ void testRenderSizedToContent() {
     final Picture picture = baseRecorder.endRecording();
     final builder = SceneBuilder();
     builder.addPicture(Offset.zero, picture);
-    PlatformDispatcher.instance.views.last.render(builder.build(), size: size);
+    view.render(builder.build(), size: size);
     ++frameCount;
     if (frameCount == 1) {
       PlatformDispatcher.instance.scheduleFrame();

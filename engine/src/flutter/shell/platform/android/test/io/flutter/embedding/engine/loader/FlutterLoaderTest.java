@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.engine.loader;
 
-import static android.os.Looper.getMainLooper;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -25,7 +24,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -92,7 +91,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
     flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     assertTrue(flutterLoader.initialized());
     verify(mockFlutterJNI, times(1)).loadLibrary(ctx);
     verify(mockFlutterJNI, times(1)).updateRefreshRate();
@@ -111,7 +110,7 @@ public class FlutterLoaderTest {
     try {
       flutterLoader.startInitialization(ctx);
       flutterLoader.ensureInitializationComplete(ctx, null);
-      shadowOf(getMainLooper()).idle();
+      shadowMainLooper().idle();
       fail(); // Should not get here.
     } catch (RuntimeException re) {
       Throwable e = re.getCause();
@@ -138,7 +137,7 @@ public class FlutterLoaderTest {
     try {
       flutterLoader.startInitialization(ctx);
       flutterLoader.ensureInitializationComplete(ctx, null);
-      shadowOf(getMainLooper()).idle();
+      shadowMainLooper().idle();
       fail(); // Should not get here.
     } catch (RuntimeException re) {
       Throwable e = re.getCause();
@@ -156,7 +155,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
     flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     ActivityManager activityManager =
         (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
@@ -186,7 +185,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
     flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     DisplayMetrics displayMetrics = ctx.getResources().getDisplayMetrics();
     int screenWidth = displayMetrics.widthPixels;
@@ -216,7 +215,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
     flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     final String leakVMArg = "--leak-vm=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
@@ -252,7 +251,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
     flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     final String enableImpellerArg = "--enable-impeller";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
@@ -277,7 +276,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
     flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     final String enableVulkanValidationArg = "--enable-vulkan-validation";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
@@ -411,9 +410,9 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
-    final String hcppArg = "--enable-hcpp-and-surface-control";
+    final String hcppArg = "--enable-hcpp-and-surface-control=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(
@@ -429,6 +428,91 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void itDisablesHcppFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.EnableHcpp", false);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowMainLooper().idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains("--enable-hcpp-and-surface-control=false"));
+    assertFalse(arguments.contains("--enable-hcpp-and-surface-control=true"));
+  }
+
+  @Test
+  public void ifHcppDisabledViaCommandLineAndEnabledViaManifestThenCommandLineTakesPrecedence() {
+    String expectedHcppArgFromMetadata = "--enable-hcpp-and-surface-control=true";
+    String expectedHcppArgFromCommandLine = "--enable-hcpp-and-surface-control=false";
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.EnableHcpp", true);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, new String[] {expectedHcppArgFromCommandLine});
+    shadowMainLooper().idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // The engine uses the last value specified for a switch, so the command line argument must
+    // come after the manifest metadata argument.
+    assertTrue(arguments.contains(expectedHcppArgFromMetadata));
+    assertTrue(arguments.contains(expectedHcppArgFromCommandLine));
+    assertTrue(
+        arguments.indexOf(expectedHcppArgFromMetadata)
+            < arguments.indexOf(expectedHcppArgFromCommandLine));
+  }
+
+  @Test
+  public void itSetsHcppDisabledCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-hcpp-and-surface-control=false\"]",
+        new String[] {"--enable-hcpp-and-surface-control=false"},
+        true,
+        true);
+  }
+
+  @Test
+  public void itSetsHcppEnabledCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-hcpp-and-surface-control=true\"]",
+        new String[] {"--enable-hcpp-and-surface-control=true"},
+        true,
+        true);
+  }
+
+  @Test
   public void itSetsShaderInitModeFromMetaData() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
@@ -440,7 +524,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     final String shaderModeArg = "--impeller-lazy-shader-mode";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
@@ -804,7 +888,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     assertTrue(flutterLoader.getSofwareRenderingEnabledViaManifest());
   }
@@ -1029,17 +1113,29 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsMergedPlatformUiThread() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.MergedPlatformUIThread",
-        defaultFlagTestValue,
-        "--merged-platform-ui-thread");
+  public void itSetsMergedPlatformUiThreadFromMetadata() {
+    for (String value : new String[] {"enabled", "mergeAfterLaunch"}) {
+      // Test debug mode.
+      testFlagFromMetadataPresent(
+          "io.flutter.embedding.android.MergedPlatformUIThread",
+          value,
+          "--merged-platform-ui-thread=" + value);
 
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
+      // Test release mode.
+      testFlagFromMetadataPresentInReleaseMode(
+          "io.flutter.embedding.android.MergedPlatformUIThread",
+          value,
+          "--merged-platform-ui-thread=" + value);
+    }
+  }
+
+  @Test
+  public void itDoesNotSetMergedPlatformUiThreadWithoutValueFromMetadata() {
+    // The engine ignores --merged-platform-ui-thread without a value, so the flag must be passed
+    // along with the value specified in the manifest.
+    testFlagFromMetadataNotPresent(
         "io.flutter.embedding.android.MergedPlatformUIThread",
-        defaultFlagTestValue,
+        "mergeAfterLaunch",
         "--merged-platform-ui-thread");
   }
 
@@ -1225,7 +1321,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(ctx, recognizedArg);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
@@ -1264,7 +1360,7 @@ public class FlutterLoaderTest {
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(
         ctx, new String[] {expectedImpellerArgFromCommandLine});
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
@@ -1322,7 +1418,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(
         ctx,
         new String[] {expectedAotSharedLibraryNameFromCommandLine, "--enable-opengl-gpu-tracing"});
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
@@ -1357,7 +1453,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(ctx, new String[] {expectedArg}, true);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
@@ -1394,6 +1490,15 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void itSetsMergedPlatformUiThreadCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--merged-platform-ui-thread=mergeAfterLaunch\"]",
+        new String[] {"--merged-platform-ui-thread=mergeAfterLaunch"},
+        true,
+        true);
+  }
+
+  @Test
   public void
       itSetsMultipleCommandLineFlagsWithSpecialCharactersFromManifestMetadataInReleaseMode() {
     testMultipleFlagsFromManifestMetadata(
@@ -1424,7 +1529,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(ctx, null, false);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     verify(metadata, never()).getString("io.flutter.app.androidEngineShellArgs");
 
@@ -1465,7 +1570,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(ctx, null, true);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
@@ -1498,7 +1603,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(ctx, null, isReleaseMode);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
@@ -1580,7 +1685,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(ctx, null, isReleaseMode);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))

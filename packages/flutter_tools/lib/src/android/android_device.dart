@@ -224,26 +224,10 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
-    switch (await targetPlatform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-        return buildMode != BuildMode.jitRelease;
-      case TargetPlatform.android:
-      case TargetPlatform.darwin:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-      case TargetPlatform.unsupported:
-        throw UnsupportedError('Invalid target platform for Android');
+    if ((await targetPlatform).os != .android) {
+      throw UnsupportedError('Invalid target platform for Android');
     }
+    return buildMode != BuildMode.jitRelease;
   }
 
   @override
@@ -562,7 +546,7 @@ class AndroidDevice extends Device {
     if (!prebuiltApplication ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       _logger.printTrace('Building APK');
-      final FlutterProject project = FlutterProject.current();
+      final FlutterProject project = FlutterProject.current(_fileSystem, logger: _logger);
 
       final releaseManifestEngineShellArgs = <String>[
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
@@ -818,14 +802,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> isSupported() async {
-    final TargetPlatform platform = await targetPlatform;
-    return switch (platform) {
-      TargetPlatform.android ||
-      TargetPlatform.android_arm ||
-      TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 => true,
-      _ => false,
-    };
+    return (await targetPlatform).os == .android;
   }
 
   @override
@@ -849,8 +826,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    _logReader?._stop();
-    _pastLogReader?._stop();
+    await Future.wait(<Future<void>>[?_logReader?.dispose(), ?_pastLogReader?.dispose()]);
   }
 }
 
@@ -1079,7 +1055,7 @@ class AdbLogReader extends DeviceLogReader {
 
   @override
   Future<void> provideVmService(FlutterVmService connectedVmService) async {
-    final VM? vm = await connectedVmService.getVmGuarded();
+    final VM? vm = await connectedVmService.getVmGuarded(logger: _logger);
     if (vm == null) {
       _logger.printError(
         'An error occurred when setting up filtering for adb logs. '
@@ -1228,14 +1204,15 @@ class AdbLogReader extends DeviceLogReader {
     }
   }
 
-  void _stop() {
-    _linesController.close();
+  Future<void> _stop() async {
+    final Future<void> closed = _linesController.close();
     _adbProcess.kill();
+    await closed;
   }
 
   @override
-  void dispose() {
-    _stop();
+  Future<void> dispose() async {
+    await _stop();
   }
 }
 

@@ -15,7 +15,6 @@
     "--prebuilt-dart-sdk",
     "--no-lto",
     "--no-rbe",
-    "--no-goma",
     "--target-dir",
     "ci/linux_unopt_debug_no_rbe"
   ],

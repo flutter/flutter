@@ -160,6 +160,31 @@ class IMockGLESImpl {
   virtual GLint GetUniformLocation(GLuint program, const GLchar* name) {
     return -1;
   }
+  virtual void TexParameteri(GLenum target, GLenum pname, GLint param) {}
+  virtual void UseProgram(GLuint program) {}
+  virtual void Enable(GLenum cap) {}
+  virtual void Disable(GLenum cap) {}
+  virtual void Scissor(GLint x, GLint y, GLsizei width, GLsizei height) {}
+  virtual void ColorMask(GLboolean red,
+                         GLboolean green,
+                         GLboolean blue,
+                         GLboolean alpha) {}
+  virtual void BlendFuncSeparate(GLenum sfactorRGB,
+                                 GLenum dfactorRGB,
+                                 GLenum sfactorAlpha,
+                                 GLenum dfactorAlpha) {}
+  virtual void BlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {}
+  virtual void DepthFunc(GLenum func) {}
+  virtual void DepthMask(GLboolean flag) {}
+  virtual void StencilFuncSeparate(GLenum face,
+                                   GLenum func,
+                                   GLint ref,
+                                   GLuint mask) {}
+  virtual void StencilOpSeparate(GLenum face,
+                                 GLenum sfail,
+                                 GLenum dpfail,
+                                 GLenum dppass) {}
+  virtual void StencilMaskSeparate(GLenum face, GLuint mask) {}
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -385,6 +410,46 @@ class MockGLESImpl : public IMockGLESImpl {
   MOCK_METHOD(GLint,
               GetUniformLocation,
               (GLuint program, const GLchar* name),
+              (override));
+  MOCK_METHOD(void,
+              TexParameteri,
+              (GLenum target, GLenum pname, GLint param),
+              (override));
+  MOCK_METHOD(void, UseProgram, (GLuint program), (override));
+  MOCK_METHOD(void, Enable, (GLenum cap), (override));
+  MOCK_METHOD(void, Disable, (GLenum cap), (override));
+  MOCK_METHOD(void,
+              Scissor,
+              (GLint x, GLint y, GLsizei width, GLsizei height),
+              (override));
+  MOCK_METHOD(void,
+              ColorMask,
+              (GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha),
+              (override));
+  MOCK_METHOD(void,
+              BlendFuncSeparate,
+              (GLenum sfactorRGB,
+               GLenum dfactorRGB,
+               GLenum sfactorAlpha,
+               GLenum dfactorAlpha),
+              (override));
+  MOCK_METHOD(void,
+              BlendEquationSeparate,
+              (GLenum modeRGB, GLenum modeAlpha),
+              (override));
+  MOCK_METHOD(void, DepthFunc, (GLenum func), (override));
+  MOCK_METHOD(void, DepthMask, (GLboolean flag), (override));
+  MOCK_METHOD(void,
+              StencilFuncSeparate,
+              (GLenum face, GLenum func, GLint ref, GLuint mask),
+              (override));
+  MOCK_METHOD(void,
+              StencilOpSeparate,
+              (GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass),
+              (override));
+  MOCK_METHOD(void,
+              StencilMaskSeparate,
+              (GLenum face, GLuint mask),
               (override));
 };
 
