@@ -607,7 +607,9 @@ mixin SwiftPackageChecksumArtifact on EngineCachedArtifact {
     required File archive,
     required Directory location,
   }) async {
-    if (!hostPlatform.isMacOS || url.pathSegments.last != darwinPlatform.artifactZip) {
+    if (!hostPlatform.isMacOS ||
+        url.pathSegments.isEmpty ||
+        url.pathSegments.last != darwinPlatform.artifactZip) {
       return;
     }
     final File checksumFile = location.childFile(
@@ -631,7 +633,7 @@ mixin SwiftPackageChecksumArtifact on EngineCachedArtifact {
       checksumFile.writeAsStringSync(
         json.encode(<String, String>{'url': url.toString(), 'checksum': checksum}),
       );
-    } on ProcessException catch (error) {
+    } on Exception catch (error) {
       // Not fatal, since the checksum is not required to use the downloaded artifact.
       logger.printTrace('Failed to compute Swift package checksum for $url: $error');
     }
