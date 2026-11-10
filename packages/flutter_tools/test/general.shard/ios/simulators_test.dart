@@ -557,6 +557,185 @@ void main() {
     });
   });
 
+  group('Simulator screen recording', () {
+    testWithoutContext('supports screen recording and records video successfully', () async {
+      final xcode = Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
+      final Logger logger = BufferLogger.test();
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'io',
+            'x',
+            'recordVideo',
+            '--codec',
+            'h264',
+            '--force',
+            'recording.mp4',
+          ],
+          stderr: 'Recording started\n',
+        ),
+      ]);
+
+      final simControl = SimControl(
+        processManager: fakeProcessManager,
+        logger: logger,
+        xcode: xcode,
+      );
+      final deviceUnderTest = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        name: 'iPhone SE',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
+      );
+
+      expect(deviceUnderTest.supportsScreenRecording, isTrue);
+
+      final File recording = MemoryFileSystem.test().file('recording.mp4');
+      final ScreenRecording screenRecording = await deviceUnderTest.startScreenRecording(recording);
+      await screenRecording.done;
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('startScreenRecording throws ToolExit when simctl fails', () async {
+      final xcode = Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
+      final Logger logger = BufferLogger.test();
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'io',
+            'x',
+            'recordVideo',
+            '--codec',
+            'h264',
+            '--force',
+            'recording.mp4',
+          ],
+          exitCode: 1,
+          stderr: 'simctl record error',
+        ),
+      ]);
+
+      final simControl = SimControl(
+        processManager: fakeProcessManager,
+        logger: logger,
+        xcode: xcode,
+      );
+      final deviceUnderTest = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        name: 'iPhone SE',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
+      );
+
+      final File recording = MemoryFileSystem.test().file('recording.mp4');
+      final ScreenRecording screenRecording = await deviceUnderTest.startScreenRecording(recording);
+      await expectLater(
+        () => screenRecording.done,
+        throwsToolExit(message: 'Screen recording failed (exit 1): simctl record error'),
+      );
+    });
+
+    testWithoutContext('startScreenRecording respects duration', () async {
+      fakeAsync((FakeAsync async) {
+        final xcode = Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        );
+        final Logger logger = BufferLogger.test();
+        final completer = Completer<void>();
+        final fakeProcess = FakeProcess(
+          stderr: 'Recording started\n'.codeUnits,
+          completer: completer,
+        );
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              'xcrun',
+              'simctl',
+              'io',
+              'x',
+              'recordVideo',
+              '--codec',
+              'h264',
+              '--force',
+              'recording.mp4',
+            ],
+            process: fakeProcess,
+          ),
+        ]);
+
+        final simControl = SimControl(
+          processManager: fakeProcessManager,
+          logger: logger,
+          xcode: xcode,
+        );
+        final deviceUnderTest = IOSSimulator(
+          'x',
+          cpuArch: CpuArch.x64,
+          name: 'iPhone SE',
+          simControl: simControl,
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+          xcode: FakeXcode(),
+        );
+
+        final File recording = MemoryFileSystem.test().file('recording.mp4');
+        late ScreenRecording screenRecording;
+        deviceUnderTest
+            .startScreenRecording(recording, duration: const Duration(seconds: 5))
+            .then((ScreenRecording r) => screenRecording = r);
+        async.flushMicrotasks();
+
+        var isDone = false;
+        screenRecording.done.then((_) => isDone = true);
+
+        // Before the duration elapses, no SIGINT and recording keeps running.
+        async.elapse(const Duration(seconds: 4));
+        expect(fakeProcess.signals, isEmpty);
+        expect(isDone, isFalse);
+
+        // Duration elapses: the tool sends SIGINT to stop the recording.
+        async.elapse(const Duration(seconds: 2));
+        expect(fakeProcess.signals.map((s) => s.toString()), contains('SIGINT'));
+        expect(isDone, isFalse);
+
+        // Process exits after SIGINT; recording completes.
+        completer.complete();
+        async.flushTimers();
+        expect(isDone, isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+    });
+  });
+
   group('device log tool', () {
     late FakeProcessManager fakeProcessManager;
     late FakeSimControl simControl;

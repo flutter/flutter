@@ -12,6 +12,7 @@ import 'application_package.dart';
 import 'base/context.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -802,6 +803,9 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
+  /// Whether the device supports recording the screen.
+  bool get supportsScreenRecording => false;
+
   /// Whether the Flavors feature ('--flavor') is supported for this device.
   bool get supportsFlavors => false;
 
@@ -819,6 +823,16 @@ abstract class Device {
   }
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
+
+  /// Starts recording the device screen to [outputFile].
+  ///
+  /// Returns a [ScreenRecording] handle that can be used to stop the recording
+  /// and await completion.
+  ///
+  /// [duration] caps the recording length. When null, recording runs until
+  /// stopped via [ScreenRecording.stop].
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async =>
+      throw UnimplementedError();
 
   @nonVirtual
   @override
@@ -893,6 +907,7 @@ abstract class Device {
         'hotReload': supportsHotReload,
         'hotRestart': supportsHotRestart,
         'screenshot': supportsScreenshot,
+        'screenRecording': supportsScreenRecording,
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
@@ -904,6 +919,32 @@ abstract class Device {
   ///
   /// For example log readers or port forwarders.
   Future<void> dispose();
+}
+
+/// A screen recording started by [Device.startScreenRecording].
+///
+/// Platforms return `ScreenRecording(process, runRecording())`, optionally
+/// passing a custom `signalStop` to override the default SIGINT sent to the
+/// recording process.
+class ScreenRecording {
+  ScreenRecording(Process process, this.done, {Future<void> Function()? signalStop})
+    : _signalStop = signalStop ?? (() async => ProcessSignal.sigint.kill(process));
+
+  /// Exit codes produced when a recording is stopped normally: exited on its
+  /// own (0), stopped by SIGINT or SIGTERM as reported by a shell
+  /// (128 + signal number: 130, 143) or by `dart:io` (negative: -2, -15).
+  static const stoppedExitCodes = <int>{0, 130, 143, -2, -15};
+
+  final Future<void> Function() _signalStop;
+
+  /// Completes once the recording has been written to the output file.
+  final Future<void> done;
+
+  /// Stops the recording. Completes once [done] completes.
+  Future<void> stop() async {
+    await _signalStop();
+    await done;
+  }
 }
 
 /// Information about an application's memory usage.
