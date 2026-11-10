@@ -185,19 +185,29 @@ void PlatformViewAndroid::NotifyCreated(
     fml::RefPtr<AndroidNativeWindow> native_window) {
   if (android_surface_) {
     InstallFirstFrameCallback();
-
-    fml::AutoResetWaitableEvent latch;
-    fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetRasterTaskRunner(),
-        [&latch, surface = android_surface_.get(),
-         native_window = std::move(native_window), jni_facade = jni_facade_]() {
-          surface->SetNativeWindow(native_window, jni_facade);
-          latch.Signal();
-        });
-    latch.Wait();
   }
 
-  PlatformView::NotifyCreated();
+  const uint64_t generation = ++surface_generation_;
+
+  // `this` is safe to capture without a latch because `Shell::~Shell()` flushes
+  // the raster task runner before destroying `platform_view_`.
+  PlatformView::NotifyCreatedDeferred(
+      [this, generation, native_window = std::move(native_window),
+       jni_facade = jni_facade_]() mutable -> std::unique_ptr<Surface> {
+        if (surface_generation_.load() != generation) {
+          return nullptr;
+        }
+        if (android_surface_) {
+          android_surface_->SetNativeWindow(std::move(native_window),
+                                            jni_facade);
+        }
+        std::unique_ptr<Surface> surface = CreateRenderingSurface();
+        if (!surface || !surface->IsValid()) {
+          FML_LOG(ERROR) << "Failed to create platform view rendering surface";
+          return nullptr;
+        }
+        return surface;
+      });
 }
 
 void PlatformViewAndroid::NotifySurfaceWindowChanged(
@@ -219,6 +229,7 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
 }
 
 void PlatformViewAndroid::NotifyDestroyed() {
+  ++surface_generation_;
   PlatformView::NotifyDestroyed();
 
   if (android_surface_) {
@@ -237,14 +248,14 @@ void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
   if (!android_surface_) {
     return;
   }
-  fml::AutoResetWaitableEvent latch;
+  const uint64_t generation = surface_generation_.load();
   fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetRasterTaskRunner(),  //
-      [&latch, surface = android_surface_.get(), size]() {
-        surface->OnScreenSurfaceResize(size);
-        latch.Signal();
+      task_runners_.GetRasterTaskRunner(), [this, generation, size]() {
+        if (surface_generation_.load() != generation) {
+          return;
+        }
+        android_surface_->OnScreenSurfaceResize(size);
       });
-  latch.Wait();
 }
 
 void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,

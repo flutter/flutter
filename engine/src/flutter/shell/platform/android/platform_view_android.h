@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 
+#include <atomic>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -136,6 +138,9 @@ class PlatformViewAndroid final : public PlatformView {
 
   std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
+  // Incremented on the platform thread in NotifyCreated and NotifyDestroyed so
+  // deferred raster tasks from a superseded or destroyed surface are skipped.
+  std::atomic<uint64_t> surface_generation_{0};
   bool android_meets_hcpp_criteria_ = false;
 
   // |PlatformView|

@@ -53,6 +53,7 @@ class PlatformView {
  public:
   using AddViewCallback = std::function<void(bool added)>;
   using RemoveViewCallback = std::function<void(bool removed)>;
+  using SurfaceFactory = std::function<std::unique_ptr<Surface>()>;
   //----------------------------------------------------------------------------
   /// @brief      Used to forward events from the platform view to interested
   ///             subsystems. This forwarding is done by the shell which sets
@@ -62,6 +63,7 @@ class PlatformView {
    public:
     using AddViewCallback = PlatformView::AddViewCallback;
     using RemoveViewCallback = PlatformView::RemoveViewCallback;
+    using SurfaceFactory = PlatformView::SurfaceFactory;
     using KeyDataResponse = std::function<void(bool)>;
     //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the platform view was created
@@ -73,6 +75,25 @@ class PlatformView {
     /// @param[in]  surface           The surface
     ///
     virtual void OnPlatformViewCreated(std::unique_ptr<Surface> surface) = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Notifies the delegate that the platform view was created,
+    ///             allowing deferring delegates (`Shell`) to invoke
+    ///             `surface_factory` asynchronously on the raster task runner
+    ///             so the platform thread does not block waiting on GPU context
+    ///             or swapchain initialization.
+    ///
+    ///             The default implementation is a synchronous fallback on the
+    ///             calling thread (`OnPlatformViewCreated(surface_factory())`)
+    ///             for delegates/test mocks that do not support deferral.
+    ///
+    /// @param[in]  surface_factory   Callable that constructs and returns the
+    ///                               rendering surface (on the raster task
+    ///                               runner when deferred by `Shell`), or
+    ///                               nullptr / an invalid surface if
+    ///                               cancelled/failed.
+    ///
+    virtual void OnPlatformViewCreatedDeferred(SurfaceFactory surface_factory);
 
     //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the platform view was destroyed.
@@ -1035,7 +1056,15 @@ class PlatformView {
   virtual void SetupImpellerContext() {}
 
  protected:
-  // This is the only method called on the raster task runner.
+  //----------------------------------------------------------------------------
+  /// @brief      Notifies the shell that a platform view has been created,
+  ///             running `surface_factory` asynchronously on the raster task
+  ///             runner when supported by the delegate.
+  ///
+  void NotifyCreatedDeferred(SurfaceFactory surface_factory);
+
+  // Called on the raster task runner (as is `surface_factory` when deferred via
+  // `Shell::OnPlatformViewCreatedDeferred`).
   virtual std::unique_ptr<Surface> CreateRenderingSurface();
 
   PlatformView::Delegate& delegate_;
