@@ -160,73 +160,6 @@ void main() {
         expect(context.stderr, isEmpty);
       });
 
-      test('forwards the app target deployment target in preference to its own', () {
-        final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-        final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
-        const buildMode = 'Debug';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'CONFIGURATION': buildMode,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'FLUTTER_BUILD_DIR': 'build',
-            'FLUTTER_BUILD_NAME': '1.0.0',
-            'FLUTTER_BUILD_NUMBER': '1',
-            'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_MACOS_DEPLOYMENT_TARGET': '14.4.1',
-            'MACOSX_DEPLOYMENT_TARGET': '12.0',
-          },
-          commands: <FakeCommand>[
-            FakeCommand(
-              command: <String>[
-                '${flutterRoot.path}/bin/flutter',
-                'assemble',
-                '--no-version-check',
-                '--output=${buildDir.path}/',
-                '-dTargetPlatform=${targetPlatform.toLowerCase()}',
-                '-dTargetFile=lib/main.dart',
-                '-dBuildMode=${buildMode.toLowerCase()}',
-                '-dConfiguration=$buildMode',
-                '-d${targetPlatform}Archs=',
-                '-dSdkRoot=',
-                '-dSplitDebugInfo=',
-                '-dTreeShakeIcons=',
-                '-dTrackWidgetCreation=',
-                '-dDartObfuscation=',
-                '-dAction=',
-                '-dFrontendServerStarterPath=',
-                '--ExtraGenSnapshotOptions=',
-                '--DartDefines=',
-                '--ExtraFrontEndOptions=',
-                '-dSrcRoot=',
-                '-dXcodeBuildScript=build',
-                if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
-                if (platform == TargetPlatform.macos) ...<String>[
-                  '-dMacOSDeploymentTarget=14.4.1',
-                  '--build-inputs=/Flutter/ephemeral/FlutterInputs.xcfilelist',
-                  '--build-outputs=/Flutter/ephemeral/FlutterOutputs.xcfilelist',
-                ],
-                'debug_${platformName}_bundle_flutter_assets',
-              ],
-            ),
-          ],
-          fileSystem: fileSystem,
-          scriptOutputStreamFile: pipe,
-        )..run();
-        final List<String> streamedLines = pipe.readAsLinesSync();
-        // Ensure after line splitting, the exact string 'done' appears
-        expect(streamedLines, contains('done'));
-        expect(streamedLines, contains(' └─Compiling, linking and signing...'));
-        expect(context.stdout, contains('built and packaged successfully.'));
-        expect(context.stderr, isEmpty);
-      });
-
       test('forwards all env variables to flutter assemble', () {
         final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
@@ -902,7 +835,8 @@ void main() {
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
             'IPHONEOS_DEPLOYMENT_TARGET': iosDeploymentTarget,
-            'MACOSX_DEPLOYMENT_TARGET': macOSDeploymentTarget,
+            'MACOSX_DEPLOYMENT_TARGET': '12.0',
+            'FLUTTER_MACOS_DEPLOYMENT_TARGET': macOSDeploymentTarget,
           },
           commands: <FakeCommand>[
             FakeCommand(

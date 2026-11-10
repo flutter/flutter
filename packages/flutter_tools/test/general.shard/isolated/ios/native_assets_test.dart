@@ -262,9 +262,11 @@ void main() {
           },
           onLink: (LinkInput input) {
             expect(input.config.code.iOS.deploymentVersion, expectedVersion);
-            return FakeFlutterNativeAssetsBuilderResult.fromAssets(
-              codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-            );
+            return buildMode == BuildMode.debug
+                ? null
+                : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                    codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                  );
           },
         );
         final environmentDefines = <String, String>{

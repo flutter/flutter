@@ -339,9 +339,11 @@ void main() {
                 input.config.code.macOS.deploymentVersion,
                 AppleVersion(14, minor: 4, patch: 1),
               );
-              return FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-              );
+              return buildMode == BuildMode.debug
+                  ? null
+                  : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                      codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                    );
             },
           );
           final environmentDefines = <String, String>{

@@ -13,6 +13,7 @@ import '../native_assets.dart';
 import '../native_assets_manifest.dart';
 import 'native_assets_host.dart';
 
+// TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
 const targetMacOSVersion = 13;
 
 /// The deployment version supplied to assemble, or the native-assets default.

@@ -13,6 +13,7 @@ import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
 
+// TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
 const targetIOSVersion = 15;
 
 /// The deployment version supplied to assemble, or the native-assets default.
@@ -69,9 +70,6 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsIOS(
 ///
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in xcode_backend.dart.
-///
-/// The framework minimum OS version uses the same [deploymentVersion] as the
-/// hooks, with [targetIOSVersion] as the default.
 Future<List<File>> copyNativeCodeAssetsIOS(
   Uri targetUri,
   Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
