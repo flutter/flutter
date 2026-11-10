@@ -14,7 +14,7 @@ import 'android/java.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show ProcessException, ProcessResult;
+import 'base/io.dart' show ProcessResult;
 import 'base/logger.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
