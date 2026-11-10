@@ -10,7 +10,7 @@ Future<void> main() async {
     combine(<TaskFunction>[
       PluginTest('ios', <String>['--platforms=ios']).call,
       // Test that app builds with Flutter as a transitive dependency. The
-      // plugin is the same as above.
+      // plugin is the same as above, so no need to test again.
       PluginTest(
         'ios',
         <String>['--platforms=ios'],
