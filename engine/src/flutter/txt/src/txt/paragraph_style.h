@@ -87,7 +87,8 @@ class ParagraphStyle {
 
   // General paragraph properties.
   TextAlign text_align = TextAlign::start;
-  TextDirection text_direction = TextDirection::ltr;
+  std::optional<TextDirection> text_direction = std::nullopt;
+  std::optional<TextDirection> default_text_direction = std::nullopt;
   size_t max_lines = std::numeric_limits<size_t>::max();
   std::u16string ellipsis;
   std::string locale;
@@ -106,7 +107,10 @@ class ParagraphStyle {
   bool unlimited_lines() const;
   bool ellipsized() const;
 
-  // Return a text alignment value that is not dependent on the text direction.
+  // Return a text alignment value that is not dependent on the text
+  // direction. When `text_direction` is unset (Auto), this assumes LTR
+  // so that alignment is well-defined for layout; the final direction
+  // is resolved later by the builder from the text content.
   TextAlign effective_align() const;
 };
 
