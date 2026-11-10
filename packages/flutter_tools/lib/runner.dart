@@ -274,7 +274,7 @@ Future<int> run(
           :UserMessages userMessages,
         ) = toolContext;
         terminal.applyFeatureFlags(featureFlags);
-        reportCrashes ??= !await botDetector.isRunningOnBot;
+        reportCrashes ??= !botDetector.isRunningOnBot;
         DoctorValidatorsProvider createDoctorValidatorsProvider({
           ExtensionManager? extensionManager,
         }) =>
