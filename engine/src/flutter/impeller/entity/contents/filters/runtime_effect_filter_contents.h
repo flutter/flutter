@@ -23,10 +23,20 @@ class RuntimeEffectFilterContents final : public FilterContents {
   void SetTextureInputs(
       std::vector<RuntimeEffectContents::TextureInput> texture_inputs);
 
+  /// @brief  Sets whether the input of this filter should be the entire
+  ///         filtered content rather than only the part of it that is inside
+  ///         the clip.
+  ///
+  ///         When enabled, the size and coordinate space of the input seen by
+  ///         the shader do not depend on how much of the content is clipped,
+  ///         and only the output of the filter is clipped.
+  void SetUnclippedInput(bool unclipped_input);
+
  private:
   std::shared_ptr<RuntimeStage> runtime_stage_;
   std::shared_ptr<std::vector<uint8_t>> uniforms_;
   std::vector<RuntimeEffectContents::TextureInput> texture_inputs_;
+  bool unclipped_input_ = false;
 
   // |FilterContents|
   std::optional<Entity> RenderFilter(
