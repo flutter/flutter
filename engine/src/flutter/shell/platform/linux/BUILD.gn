@@ -275,6 +275,7 @@ executable("flutter_linux_unittests") {
     "fl_scrolling_manager_test.cc",
     "fl_settings_handler_test.cc",
     "fl_settings_portal_test.cc",
+    "fl_socket_accessible_test.cc",
     "fl_standard_message_codec_test.cc",
     "fl_standard_method_codec_test.cc",
     "fl_string_codec_test.cc",
