@@ -462,10 +462,6 @@ shuffle_flags = [
     '--gtest_shuffle',
 ]
 
-repeat_flags = [
-    '--repeat=2',
-]
-
 
 def run_cc_tests(
     build_dir: str, executable_filter: typing.Optional[typing.List[str]], coverage: bool,
@@ -483,7 +479,7 @@ def run_cc_tests(
       extra_env: typing.Optional[typing.Dict[str, str]] = None
   ) -> typing.Tuple[str, typing.List[str], typing.Dict[str, str]]:
     if flags is None:
-      flags = repeat_flags
+      flags = []
     if extra_env is None:
       extra_env = {}
     return (name, flags, extra_env)
@@ -508,7 +504,7 @@ def run_cc_tests(
       make_test('testing_unittests'),
       make_test('tonic_unittests'),
       # The image release unit test can take a while on slow machines.
-      make_test('ui_unittests', flags=repeat_flags + ['--timeout=90']),
+      make_test('ui_unittests', flags=['--timeout=90']),
   ]
 
   if not is_windows():
@@ -547,16 +543,16 @@ def run_cc_tests(
     ]
     icu_flags = [f'--icu-data-file-path={os.path.join(build_dir, "icudtl.dat")}']
     unittests += [
-        make_test('flow_unittests', flags=repeat_flags + ['--'] + flow_flags),
+        make_test('flow_unittests', flags=['--'] + flow_flags),
         make_test('flutter_glfw_unittests'),
         make_test('flutter_linux_unittests', extra_env={'G_DEBUG': 'fatal-criticals'}),
         # https://github.com/flutter/flutter/issues/36296
-        make_test('txt_unittests', flags=repeat_flags + ['--'] + icu_flags),
+        make_test('txt_unittests', flags=['--'] + icu_flags),
     ]
   else:
     flow_flags = ['--gtest_filter=-PerformanceOverlayLayer.Gold']
     unittests += [
-        make_test('flow_unittests', flags=repeat_flags + flow_flags),
+        make_test('flow_unittests', flags=flow_flags),
     ]
 
   build_name = os.path.basename(build_dir)
@@ -602,7 +598,7 @@ def run_cc_tests(
       )
     extra_env = metal_validation_env()
     extra_env.update(vulkan_validation_env(build_dir))
-    mac_impeller_unittests_flags = repeat_flags + [
+    mac_impeller_unittests_flags = [
         '--gtest_filter=-*OpenGLES:*OpenGLESSDF',  # These are covered in the golden tests.
         '--',
         '--enable_vulkan_validation',
@@ -1507,7 +1503,6 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
           build_dir,
           'impeller_unittests',
           engine_filter,
-          repeat_flags,
           coverage=args.coverage,
           gtest=True,
           extra_env=extra_env,
