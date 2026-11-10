@@ -224,8 +224,12 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     super.attach(owner);
     switch (state) {
       case RenderAnimatedSizeState.start:
-      case RenderAnimatedSizeState.stable:
         break;
+      case RenderAnimatedSizeState.stable:
+        // Resume an animation that a detach interrupted.
+        if (_sizeTween.begin != _sizeTween.end && _controller.value != _controller.upperBound) {
+          markNeedsLayout();
+        }
       case RenderAnimatedSizeState.changed:
       case RenderAnimatedSizeState.unstable:
         // Call markNeedsLayout in case the RenderObject isn't marked dirty
@@ -410,7 +414,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   void _animationStatusListener(AnimationStatus status) {
-    if (!status.isCompleted) {
+    if (!status.isCompleted || _onEnd == null) {
       return;
     }
     // onEnd can call setState() or read the size, which is not allowed

@@ -705,6 +705,46 @@ void main() {
       });
     }
 
+    testWidgets('resumes an interrupted animation in the stable state after a move to a parent '
+        'with the same constraints', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      Widget build({required bool second, required Duration duration, required double size}) {
+        final Widget animatedSize = Center(
+          key: key,
+          child: AnimatedSize(
+            duration: duration,
+            child: SizedBox.square(dimension: size),
+          ),
+        );
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: <Widget>[
+              SizedBox(height: 200.0, child: second ? null : animatedSize),
+              SizedBox(height: 200.0, child: second ? animatedSize : null),
+            ],
+          ),
+        );
+      }
+
+      const duration = Duration(milliseconds: 200);
+      await tester.pumpWidget(build(second: false, duration: duration, size: 100.0));
+      await tester.pumpWidget(build(second: false, duration: duration, size: 200.0));
+      await tester.pump(const Duration(milliseconds: 100));
+      final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
+      expect(box.state, RenderAnimatedSizeState.stable);
+      expect(box.isAnimating, isTrue);
+
+      // The move detaches and attaches the render object, which stops the
+      // animation. The new parent gives the same constraints, so only the
+      // attach can mark the render object dirty. The resumed animation
+      // completes at once with a zero duration.
+      await tester.pumpWidget(build(second: true, duration: Duration.zero, size: 200.0));
+      expect(tester.renderObject(find.byType(AnimatedSize)), same(box));
+      expect(tester.takeException(), isNull);
+      expect(box.size, const Size.square(200.0));
+    });
+
     group('with zero duration, onEnd after a layout outside a frame', () {
       late int onEndCount;
       late RenderAnimatedSize box;
