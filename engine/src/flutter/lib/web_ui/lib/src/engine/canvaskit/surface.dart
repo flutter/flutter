@@ -631,20 +631,18 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   /// create a fresh WebGL context for it, falling back to software rendering
   /// if that fails.
   ///
-  /// The old canvas and its context are torn down by
-  /// [_releaseCanvasAndContext] before the new canvas is acquired.
+  /// The old canvas and its context are torn down by [_releaseCanvas] before
+  /// the new canvas is acquired.
   ///
   /// This also records [size] as the current size, because the new Skia
   /// surface is created at [_currentSize].
   void _replaceCanvasWithSize(BitmapSize size) {
     _currentSize = size;
-    _releaseCanvasAndContext();
+    _releaseCanvas();
 
-    final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
-      size,
-      onContextLost: onContextLost,
-    );
-    _replaceCanvas(newCanvas);
+    _canvas = _canvasProvider.acquireCanvas(size, onContextLost: onContextLost);
+    _maybeAttachCanvasToDom();
+    _createSkiaObjects();
   }
 
   @override
