@@ -281,6 +281,20 @@ Future<void> testMain() async {
       expect(canvas.getLocalClipBounds(), initialLocalBounds);
       expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
     });
+
+    test('Canvas.getLocalClipBounds maps the rounded-out device clip to local space', () {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      canvas.scale(2);
+      // The device clip (2.4, 4.6, 20.8, 41.2) rounds out to (2, 4, 21, 42).
+      canvas.clipRect(const ui.Rect.fromLTRB(1.2, 2.3, 10.4, 20.6));
+      expect(canvas.getLocalClipBounds(), const ui.Rect.fromLTRB(1, 2, 10.5, 21));
+
+      // A non-invertible transform collapses local space.
+      canvas.scale(0);
+      expect(canvas.getLocalClipBounds(), ui.Rect.zero);
+      recorder.endRecording().dispose();
+    });
   });
 
   group('RestoreToCount function tests', () {
