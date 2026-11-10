@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/widgets/framework/state.dispose.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +27,7 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     expect(find.text('Count: 3'), findsOne);
 
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Restart'));
+    await tester.tap(find.text('Restart'));
     await tester.pump();
     expect(find.text('Count: 0'), findsOne);
 
@@ -43,7 +42,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Count: 1'), findsOne);
 
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Remove counter'));
+    await tester.tap(find.text('Remove counter'));
     await tester.pump();
     expect(find.byType(example.CountDisplay), findsNothing);
     expect(find.text('Counter removed'), findsOne);
@@ -53,7 +52,7 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Show counter'));
+    await tester.tap(find.text('Show counter'));
     await tester.pump();
     expect(find.text('Count: 0'), findsOne);
 

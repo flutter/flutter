@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for [State.dispose].
 
@@ -17,8 +17,18 @@ class StateDisposeExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: CountDisplayControls())),
+    return WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      // WidgetsApp does not install a [DefaultTextStyle], so without this the
+      // labels below fall back to a style with no color and are invisible
+      // against the white background.
+      textStyle: const TextStyle(color: Color(0xFF000000), fontSize: 14.0),
+      builder: (BuildContext context, Widget? child) {
+        return const ColoredBox(
+          color: Color(0xFFFFFFFF),
+          child: Center(child: CountDisplayControls()),
+        );
+      },
     );
   }
 }
@@ -50,7 +60,7 @@ class _CountDisplayControlsState extends State<CountDisplayControls> {
           CountDisplay(counts: _counts)
         else
           const Text('Counter removed'),
-        ElevatedButton(
+        _Button(
           onPressed: _showCount
               ? () {
                   // Passes a new stream to CountDisplay, which calls
@@ -60,9 +70,9 @@ class _CountDisplayControlsState extends State<CountDisplayControls> {
                   });
                 }
               : null,
-          child: const Text('Restart'),
+          label: 'Restart',
         ),
-        ElevatedButton(
+        _Button(
           onPressed: () {
             setState(() {
               // Removing CountDisplay calls dispose on its State. A stream
@@ -72,7 +82,7 @@ class _CountDisplayControlsState extends State<CountDisplayControls> {
               _counts = _createCounts();
             });
           },
-          child: Text(_showCount ? 'Remove counter' : 'Show counter'),
+          label: _showCount ? 'Remove counter' : 'Show counter',
         ),
       ],
     );
@@ -129,5 +139,42 @@ class _CountDisplayState extends State<CountDisplay> {
   @override
   Widget build(BuildContext context) {
     return Text('Count: $_count');
+  }
+}
+
+/// A simple button built from widgets in the widgets library.
+///
+/// The button is disabled when [onPressed] is null.
+class _Button extends StatelessWidget {
+  const _Button({required this.onPressed, required this.label});
+
+  final VoidCallback? onPressed;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool enabled = onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            color: enabled ? const Color(0xFF2196F3) : const Color(0xFFE0E0E0),
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: enabled
+                  ? const Color(0xFFFFFFFF)
+                  : const Color(0xFF9E9E9E),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
