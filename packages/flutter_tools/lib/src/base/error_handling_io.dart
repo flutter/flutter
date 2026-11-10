@@ -1366,6 +1366,7 @@ void _handlePosixException(
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const eperm = 1;
   const enoent = 2;
+  const exdev = 18;
   const enospc = 28;
   const eacces = 13;
   // Catch errors and bail when:
@@ -1375,6 +1376,12 @@ void _handlePosixException(
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
           ' Try running "flutter clean" and try again.',
+    exdev =>
+      '${message != null && message.isNotEmpty ? '$message.\n' : ''}'
+          'A file system operation failed across different volumes or mount points.\n'
+          '$e\n'
+          'Ensure that the project, build output, and temporary directories are on the same '
+          'writable volume, or check external volume and security software settings.',
     enospc =>
       '$message. The target device is full.'
           '\n$e\n'
