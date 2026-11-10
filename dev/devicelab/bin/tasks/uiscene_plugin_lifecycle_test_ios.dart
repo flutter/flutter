@@ -69,6 +69,7 @@ Future<void> main(List<String> args) async {
     );
 
     try {
+      final int? xcodeMajorVersion = await _xcodeMajorVersion();
       final Directory appDir = await _createFlutterModuleApp(
         destinationDir: destinationDir,
         templatesDir: templatesDir,
@@ -82,7 +83,7 @@ Future<void> main(List<String> args) async {
       var testFailedCount = 0;
       await testWithNewIOSSimulator(
         'TestAdd2AppSim',
-        deviceTypeId: 'com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-3rd-generation',
+        deviceTypeId: 'com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M4-8GB',
         (String deviceId) async {
           for (final xcodeProjectType in projectTypesToTest) {
             final (String xcodeProjectName, Directory xcodeProjectDir) = await _createNativeApp(
@@ -98,6 +99,14 @@ Future<void> main(List<String> args) async {
             );
             for (final String scenarioName in scenariosMap.keys) {
               if (testName != null && scenarioName != testName) {
+                continue;
+              }
+              if (scenarioName.contains('AppNotMigrated') &&
+                  xcodeMajorVersion != null &&
+                  xcodeMajorVersion >= 27) {
+                section(
+                  'Skipping Scenario $scenarioName (unsupported on Xcode $xcodeMajorVersion)',
+                );
                 continue;
               }
               final List<FileReplacements> replacements = FileReplacements.fromScenario(
@@ -156,6 +165,13 @@ Future<void> main(List<String> args) async {
       }
     }
   });
+}
+
+/// Returns the major version of the selected Xcode, or null if it cannot be determined.
+Future<int?> _xcodeMajorVersion() async {
+  final String output = await eval('xcodebuild', <String>['-version'], canFail: true);
+  final RegExpMatch? match = RegExp(r'Xcode (\d+)').firstMatch(output);
+  return match == null ? null : int.tryParse(match.group(1)!);
 }
 
 Future<Directory> _createFlutterModuleApp({

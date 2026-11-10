@@ -24,6 +24,14 @@ void main() {
     );
   }
 
+  testWithoutContext('Flutter tool bug instructions should end with the issue URL', () {
+    final userMessages = UserMessages();
+    expect(
+      userMessages.flutterToolBugInstructions,
+      endsWith('https://github.com/flutter/flutter/issues'),
+    );
+  });
+
   testWithoutContext('Android installation instructions', () {
     final userMessages = UserMessages();
     checkInstallationURL(

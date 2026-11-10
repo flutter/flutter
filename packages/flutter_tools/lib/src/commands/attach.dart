@@ -66,13 +66,12 @@ class AttachCommand extends FlutterCommand {
   AttachCommand({
     required this._buildSystem,
     required this._buildTargets,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required this._xcode,
     HotRunnerFactory? hotRunnerFactory,
     super.verboseHelp = false,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
        _toolContext = toolContext {
-    enableUsesTargetOption();
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(defaultToRelease: false, excludeRelease: true),
       VmServicePortOptionsBundle(),

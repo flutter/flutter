@@ -83,7 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// mutations.
 ///
 /// Called from the raster thread.
-- (BOOL)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)frame
+- (void)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)frame
      withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext;
 
 /// @brief Handler for platform view message channels.

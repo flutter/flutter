@@ -412,7 +412,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowMainLooper().idle();
 
-    final String hcppArg = "--enable-hcpp-and-surface-control";
+    final String hcppArg = "--enable-hcpp-and-surface-control=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(
@@ -425,6 +425,91 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(hcppArg));
+  }
+
+  @Test
+  public void itDisablesHcppFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.EnableHcpp", false);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowMainLooper().idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains("--enable-hcpp-and-surface-control=false"));
+    assertFalse(arguments.contains("--enable-hcpp-and-surface-control=true"));
+  }
+
+  @Test
+  public void ifHcppDisabledViaCommandLineAndEnabledViaManifestThenCommandLineTakesPrecedence() {
+    String expectedHcppArgFromMetadata = "--enable-hcpp-and-surface-control=true";
+    String expectedHcppArgFromCommandLine = "--enable-hcpp-and-surface-control=false";
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.EnableHcpp", true);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, new String[] {expectedHcppArgFromCommandLine});
+    shadowMainLooper().idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // The engine uses the last value specified for a switch, so the command line argument must
+    // come after the manifest metadata argument.
+    assertTrue(arguments.contains(expectedHcppArgFromMetadata));
+    assertTrue(arguments.contains(expectedHcppArgFromCommandLine));
+    assertTrue(
+        arguments.indexOf(expectedHcppArgFromMetadata)
+            < arguments.indexOf(expectedHcppArgFromCommandLine));
+  }
+
+  @Test
+  public void itSetsHcppDisabledCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-hcpp-and-surface-control=false\"]",
+        new String[] {"--enable-hcpp-and-surface-control=false"},
+        true,
+        true);
+  }
+
+  @Test
+  public void itSetsHcppEnabledCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-hcpp-and-surface-control=true\"]",
+        new String[] {"--enable-hcpp-and-surface-control=true"},
+        true,
+        true);
   }
 
   @Test
