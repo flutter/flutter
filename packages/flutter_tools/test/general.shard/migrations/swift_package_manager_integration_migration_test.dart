@@ -6,11 +6,9 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -18,8 +16,6 @@ import 'package:flutter_tools/src/migrations/swift_package_manager_integration_m
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -4559,24 +4555,6 @@ void main() {
     });
 
     group('validate project settings', () {
-      (CrashReportSender, List<http.Request>) createCrashReportSender({
-        required Analytics analytics,
-        required Logger logger,
-      }) {
-        final requests = <http.Request>[];
-        final crashReportSender = CrashReportSender(
-          client: MockClient((http.Request request) async {
-            requests.add(request);
-            return http.Response('test-report-id', HttpStatus.ok);
-          }),
-          platform: FakePlatform(),
-          logger: logger,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          analytics: analytics,
-        );
-        return (crashReportSender, requests);
-      }
-
       testWithoutContext('throw if settings fail to compile', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
@@ -4584,8 +4562,7 @@ void main() {
           fs: memoryFileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
         );
-        final (CrashReportSender crashReportSender, List<http.Request> requests) =
-            createCrashReportSender(analytics: fakeAnalytics, logger: testLogger);
+        final crashReportSender = FakeCrashReportSender();
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final project = FakeXcodeProject(
           platform: platform.name,
@@ -4633,12 +4610,19 @@ void main() {
             ),
           ),
         );
-        expect(testLogger.traceText, contains('Sending crash report to Google.'));
-        expect(testLogger.traceText, contains('Crash report sent (report ID: test-report-id)'));
-        expect(requests, hasLength(1));
-        final Map<String, String> fields = _parseMultipartFields(requests.single);
-        expect(fields['comments'], 'swiftpm-migration');
-        expect(fields['type'], 'XcodeBuildError');
+        expect(crashReportSender.sentReports, hasLength(1));
+        final SentCrashReport report = crashReportSender.sentReports.single;
+        expect(report.command, 'swiftpm-migration');
+        expect(
+          report.error,
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'Unable to get Xcode project information',
+          ),
+        );
+        expect(report.flutterVersion, 'master/11111111111111111111');
+        expect(report.typeId, 'XcodeBuildError');
       });
 
       testWithoutContext('throw if settings fail to compile due to package dependencies', () async {
@@ -4648,8 +4632,7 @@ void main() {
           fs: memoryFileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
         );
-        final (CrashReportSender crashReportSender, List<http.Request> requests) =
-            createCrashReportSender(analytics: fakeAnalytics, logger: testLogger);
+        final crashReportSender = FakeCrashReportSender();
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final project = FakeXcodeProject(
           platform: platform.name,
@@ -4699,12 +4682,19 @@ void main() {
             ),
           ),
         );
-        expect(testLogger.traceText, contains('Sending crash report to Google.'));
-        expect(testLogger.traceText, contains('Crash report sent (report ID: test-report-id)'));
-        expect(requests, hasLength(1));
-        final Map<String, String> fields = _parseMultipartFields(requests.single);
-        expect(fields['comments'], 'swiftpm-migration');
-        expect(fields['type'], 'XcodeBuildError');
+        expect(crashReportSender.sentReports, hasLength(1));
+        final SentCrashReport report = crashReportSender.sentReports.single;
+        expect(report.command, 'swiftpm-migration');
+        expect(
+          report.error,
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'Could not resolve package dependencies: network error',
+          ),
+        );
+        expect(report.flutterVersion, 'master/11111111111111111111');
+        expect(report.typeId, 'XcodeBuildError');
       });
 
       testWithoutContext('does not send crash report if crashReportSender is null', () async {
@@ -6056,37 +6046,24 @@ class FakeConfig extends Fake implements Config {
   Object? getValue(String key) => null;
 }
 
-/// Matches the `name="..."` attribute in a multipart `Content-Disposition` header.
-final _multipartFieldNamePattern = RegExp(r'name="([^"]*)"');
+typedef SentCrashReport = ({String command, Object error, String flutterVersion, String? typeId});
 
-Map<String, String> _parseMultipartFields(http.Request request) {
-  const boundaryPrefix = 'boundary=';
-  const crlf = '\r\n';
-  const headerBodySeparator = '\r\n\r\n';
+class FakeCrashReportSender extends Fake implements CrashReportSender {
+  final sentReports = <SentCrashReport>[];
 
-  final String? contentType = request.headers['content-type'];
-  if (contentType == null) {
-    return const <String, String>{};
+  @override
+  Future<void> sendReport({
+    required Object error,
+    required StackTrace stackTrace,
+    required String Function() getFlutterVersion,
+    required String command,
+    String? typeId,
+  }) async {
+    sentReports.add((
+      command: command,
+      error: error,
+      flutterVersion: getFlutterVersion(),
+      typeId: typeId,
+    ));
   }
-  final int boundaryIndex = contentType.indexOf(boundaryPrefix);
-  if (boundaryIndex == -1) {
-    return const <String, String>{};
-  }
-  final String boundary = contentType.substring(boundaryIndex + boundaryPrefix.length);
-  final fields = <String, String>{};
-  for (final String part in utf8.decode(request.bodyBytes).split('--$boundary')) {
-    final int separatorIndex = part.indexOf(headerBodySeparator);
-    if (separatorIndex == -1) {
-      continue;
-    }
-    final String headers = part.substring(0, separatorIndex);
-    String body = part.substring(separatorIndex + headerBodySeparator.length);
-    if (body.endsWith(crlf)) {
-      body = body.substring(0, body.length - crlf.length);
-    }
-    if (_multipartFieldNamePattern.firstMatch(headers)?.group(1) case final String name) {
-      fields[name] = body;
-    }
-  }
-  return fields;
 }
