@@ -1817,9 +1817,7 @@ std::optional<Rect> Canvas::GetLocalCoverageLimit() const {
   //
   // Do not intersect with the root render target. Inside a subpass, content
   // outside the root RT can still end up on-screen (e.g. an ancestor image
-  // filter translates it), so both culling and nested subpass sizing must be
-  // bounded by the current pass texture and clip only. On the root pass the
-  // pass texture is the root RT, so the result is unchanged there.
+  // filter translates it).
   return Rect::MakeOriginSize(GetGlobalPassPosition(),
                               Size(back_texture->GetSize()))
       .Intersection(current_clip_coverage);
