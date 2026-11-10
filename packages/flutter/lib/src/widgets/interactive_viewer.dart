@@ -644,7 +644,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     if (scale == 1.0) {
       return matrix.clone();
     }
-    assert(scale != 0.0);
 
     // Don't allow a scale that results in an overall scale beyond min/max
     // scale.

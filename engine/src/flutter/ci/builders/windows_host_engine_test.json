@@ -19,7 +19,6 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
-                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_debug_test",

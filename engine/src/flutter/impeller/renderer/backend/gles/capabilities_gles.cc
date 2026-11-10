@@ -446,4 +446,10 @@ bool CapabilitiesGLES::NeedsPartitionedHostBuffer() const {
 #endif
 }
 
+// The OpenGL ES backend does not support compute, so it reports no compute
+// limits.
+ComputeLimits CapabilitiesGLES::GetComputeLimits() const {
+  return {};
+}
+
 }  // namespace impeller

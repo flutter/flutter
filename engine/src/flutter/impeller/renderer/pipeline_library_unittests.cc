@@ -16,12 +16,12 @@ TEST(MockPipelineLibrary, LogAndGetPipelineUsageSinglePipeline) {
   pipeline_library.LogPipelineUsage(pipeline_desc);
   pipeline_library.LogPipelineUsage(pipeline_desc);
 
-  auto usage_counts = pipeline_library.GetPipelineUseCounts();
+  auto usage = pipeline_library.GetPipelineUsage();
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
-  EXPECT_EQ(usage_counts[pipeline_desc], 2);
+  EXPECT_EQ(usage[pipeline_desc].count, 2);
 #else
-  EXPECT_EQ(usage_counts[pipeline_desc], 0);
+  EXPECT_EQ(usage[pipeline_desc].count, 0);
 #endif
 }
 
@@ -38,15 +38,48 @@ TEST(MockPipelineLibrary, LogAndGetPipelineUsageMultiplePipelines) {
   pipeline_library.LogPipelineUsage(pipeline_a);
   pipeline_library.LogPipelineUsage(pipeline_b);
 
-  auto usage_counts = pipeline_library.GetPipelineUseCounts();
+  auto usage = pipeline_library.GetPipelineUsage();
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
-  EXPECT_EQ(usage_counts[pipeline_a], 2);
-  EXPECT_EQ(usage_counts[pipeline_b], 1);
+  EXPECT_EQ(usage[pipeline_a].count, 2);
+  EXPECT_EQ(usage[pipeline_b].count, 1);
 #else
-  EXPECT_EQ(usage_counts[pipeline_a], 0);
-  EXPECT_EQ(usage_counts[pipeline_b], 0);
+  EXPECT_EQ(usage[pipeline_a].count, 0);
+  EXPECT_EQ(usage[pipeline_b].count, 0);
+#endif
+}
+
+TEST(MockPipelineLibrary, LogPipelineCreationMarksPipelineEagerlyCreated) {
+  MockPipelineLibrary pipeline_library;
+
+  PipelineDescriptor eager_desc;
+  eager_desc.SetLabel("eager_pipeline");
+
+  PipelineDescriptor unused_eager_desc;
+  unused_eager_desc.SetLabel("unused_eager_pipeline");
+
+  PipelineDescriptor lazy_desc;
+  lazy_desc.SetLabel("lazy_pipeline");
+
+  pipeline_library.LogPipelineCreation(eager_desc);
+  pipeline_library.LogPipelineUsage(eager_desc);
+  pipeline_library.LogPipelineCreation(unused_eager_desc);
+  pipeline_library.LogPipelineUsage(lazy_desc);
+
+  auto usage = pipeline_library.GetPipelineUsage();
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+  EXPECT_EQ(usage.size(), 3u);
+  EXPECT_EQ(usage[eager_desc].count, 1);
+  EXPECT_TRUE(usage[eager_desc].eagerly_created);
+  // Eagerly created pipelines are reported even if they are never bound.
+  EXPECT_EQ(usage[unused_eager_desc].count, 0);
+  EXPECT_TRUE(usage[unused_eager_desc].eagerly_created);
+  EXPECT_EQ(usage[lazy_desc].count, 1);
+  EXPECT_FALSE(usage[lazy_desc].eagerly_created);
+#else
+  EXPECT_TRUE(usage.empty());
 #endif
 }
 
