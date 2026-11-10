@@ -79,7 +79,7 @@ void main() {
   }) {
     final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     final xcode = Xcode.test(
-      processManager: fakeProcessManager,
+      toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
         toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
         version: xcodeVersion,

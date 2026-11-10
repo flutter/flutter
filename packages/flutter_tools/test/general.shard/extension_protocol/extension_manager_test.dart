@@ -96,5 +96,37 @@ void main() {
         await manager.dispose();
       },
     );
+
+    testWithoutContext(
+      'hostPlatformName maps built-in and custom darwin/non-darwin host platforms',
+      () {
+        final logger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        expect(
+          ExtensionManager(
+            hostPlatform: HostPlatform.darwin_arm64,
+            logger: logger,
+            featureFlags: featureFlags,
+          ).hostPlatformName,
+          'macos',
+        );
+        expect(
+          ExtensionManager(
+            hostPlatform: HostPlatform('darwin-riscv64', 'riscv64'),
+            logger: logger,
+            featureFlags: featureFlags,
+          ).hostPlatformName,
+          'macos',
+        );
+        expect(
+          ExtensionManager(
+            hostPlatform: HostPlatform('freebsd-x64', 'x64'),
+            logger: logger,
+            featureFlags: featureFlags,
+          ).hostPlatformName,
+          'freebsd',
+        );
+      },
+    );
   });
 }
