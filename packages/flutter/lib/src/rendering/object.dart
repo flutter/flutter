@@ -4149,8 +4149,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// object itself claims a region is unaffected.
   ///
   /// Changing the value does not need to mark the render object as needing
-  /// layout or paint; the hit-test regions are recomputed every frame while
-  /// the pass is enabled.
+  /// layout or paint, because the hit-test regions are recomputed every frame
+  /// while the pass is enabled. The new value takes effect on the next frame.
   ///
   /// Defaults to true.
   @protected

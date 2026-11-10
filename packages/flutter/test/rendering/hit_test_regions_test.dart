@@ -439,7 +439,8 @@ void main() {
           ]),
         );
 
-        // Toggling absorbing neither relayouts nor repaints; the next pass sees it.
+        // Toggling absorbing marks nothing as needing layout or paint; the next
+        // frame's pass still sees the new value.
         absorber.absorbing = true;
         expect(
           regionsAfterFrame(),
@@ -533,8 +534,8 @@ void main() {
         ]),
       );
 
-      // Changing hitTestsChildren neither relayouts nor repaints; the next
-      // pass sees it.
+      // Changing hitTestsChildren marks nothing as needing layout or paint;
+      // the next frame's pass still sees the new value.
       gate.childrenHitTestable = true;
       expect(
         regionsAfterFrame(),

@@ -156,6 +156,7 @@ Float64List? computeHitTestRegions(RenderObject root) {
     // children (for example, an ignoring IgnorePointer or an absorbing
     // AbsorbPointer) may still claim its own bounds, but nothing in its
     // subtree does.
+    //
     // hitTestsChildren is protected, but whether pointer events can reach a
     // render object's children is exactly what this pass needs to know.
     // ignore: invalid_use_of_protected_member
