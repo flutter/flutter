@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Links the prelinked libimpeller.a into an executable that defines its own
-// copies of symbols that Impeller also uses internally (Skia, HarfBuzz, ICU,
-// FreeType, libpng, libjpeg). Each copy aborts when called.
+// Links the prelinked static library into an
+// executable that defines its own copies of symbols that Impeller also uses
+// internally (Skia, HarfBuzz, ICU, FreeType, libpng, libjpeg). Each copy aborts
+// when called.
 //
 // * If the archive exported any of these symbols, linking would fail with
 //   duplicate symbols.
@@ -56,10 +57,17 @@ TRAP(FT_New_Memory_Face, "FT_New_Memory_Face")
 TRAP(png_create_read_struct, "skia_png_create_read_struct")
 TRAP(jpeg_read_header, "jpeg_read_header")
 // Skia: SkFontMgr::makeFromData(sk_sp<SkData>, int) const and SkFont::SkFont().
+#if defined(_WIN32)
+TRAP(sk_font_mgr_make_from_data,
+     "?makeFromData@SkFontMgr@@QEBA?AV?$sk_sp@VSkTypeface@@@@V?$sk_sp@"
+     "VSkData@@@@H@Z")
+TRAP(sk_font_ctor, "??0SkFont@@QEAA@XZ")
+#else
 TRAP(sk_font_mgr_make_from_data,
      "_ZNK9SkFontMgr12makeFromDataE5sk_spI6SkDataEi")
 TRAP(sk_font_ctor_c1, "_ZN6SkFontC1Ev")
 TRAP(sk_font_ctor_c2, "_ZN6SkFontC2Ev")
+#endif
 
 static int failures = 0;
 

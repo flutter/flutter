@@ -212,7 +212,7 @@ if (_prelink_static_library) {
 }
 
 _build_static_library_link_test =
-    _prelink_static_library && (is_mac || is_linux)
+    _prelink_static_library && (is_mac || is_linux || is_win)
 
 if (_build_static_library_link_test) {
   embed_blob("static_library_link_test_font") {
@@ -223,7 +223,7 @@ if (_build_static_library_link_test) {
     deps = []
   }
 
-  # Links the prelinked libimpeller.a, and nothing else from the engine. See
+  # Links the prelinked static library, and nothing else from the engine. See
   # static_library_link_test.cc.
   executable("static_library_link_test") {
     testonly = true
@@ -232,12 +232,16 @@ if (_build_static_library_link_test) {
 
     sources = [ "static_library_link_test.cc" ]
 
+    # Uses the Impeller and ICU headers without depending on their targets,
+    # which would link other copies of the libraries.
+    check_includes = false
+
     include_dirs = [
       "//flutter",
       "//flutter/third_party/icu/source/common",
     ]
 
-    libs = [ "$target_out_dir/libimpeller.a" ]
+    libs = [ "$target_out_dir/${_static_library_prefix}impeller.${_static_library_extension}" ]
 
     deps = [
       ":static_library",
@@ -255,6 +259,13 @@ if (_build_static_library_link_test) {
         "Metal.framework",
         "MetalPerformanceShaders.framework",
         "QuartzCore.framework",
+      ]
+    } else if (is_win) {
+      libs += [
+        "rpcrt4.lib",
+        "shlwapi.lib",
+        "user32.lib",
+        "winmm.lib",
       ]
     } else {
       libs += [

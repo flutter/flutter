@@ -577,7 +577,7 @@ def run_cc_tests(
     if is_linux():
       xvfb.stop_virtual_x(build_name)
 
-  if is_mac() or is_linux():
+  if is_mac() or is_linux() or is_windows():
     # Links the prelinked Impeller static library.
     run_engine_executable(
         build_dir,
