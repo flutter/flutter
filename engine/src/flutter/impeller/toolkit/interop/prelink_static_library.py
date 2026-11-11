@@ -25,11 +25,15 @@ symbol that is not declared with IMPELLER_EXPORT in impeller.h local.
     the same name (template instantiations) in other objects in favor of the
     now-local copies in this object.
 
+  * COFF: there is no relocatable link, so `llvm-objcopy --redefine-syms`
+    instead prefixes every other symbol that the archive defines with
+    COFF_PREFIX.
+
 If the archive holds LLVM bitcode (enable_lto), LTO runs as part of the
 prelink.
 
 The result is checked: the defined global symbols of the object must be
-exactly the Impeller C API.
+exactly the Impeller C API (plus prefixed symbols for COFF).
 """
 
 import argparse
@@ -58,16 +62,26 @@ def impeller_exports(header):
   return names
 
 
+def tool(args, name):
+  return os.path.join(args.clang_bin, name + ('.exe' if sys.platform == 'win32' else ''))
+
+
 def run(args):
-  result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+  result = subprocess.run(
+      args,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE,
+      encoding='utf-8',
+      errors='surrogateescape',
+  )
   if result.returncode != 0:
-    sys.stderr.write('Command failed: %s\n%s' % (' '.join(args), result.stdout))
+    sys.stderr.write('Command failed: %s\n%s%s' % (' '.join(args), result.stdout, result.stderr))
     raise SystemExit(result.returncode)
   return result.stdout
 
 
 def write_lines(path, lines):
-  with open(path, 'w') as f:
+  with open(path, 'w', encoding='utf-8', errors='surrogateescape', newline='\n') as f:
     f.write(''.join(line + '\n' for line in lines))
 
 
@@ -136,7 +150,7 @@ def prelink_macho(args, exports, work_dir, merged):
       shutil.rmtree(lto_dir)
     os.makedirs(lto_dir)
     command = [
-        os.path.join(args.clang_bin, 'clang++'),
+        tool(args, 'clang++'),
         '-arch',
         args.arch,
         '-fuse-ld=lld',
@@ -178,7 +192,7 @@ def prelink_elf(args, exports, work_dir, merged):
   write_lines(exports_list, exports)
   relocatable = os.path.join(work_dir, 'relocatable.o')
   run([
-      os.path.join(args.clang_bin, 'ld.lld'),
+      tool(args, 'ld.lld'),
       '-r',
       '--whole-archive',
       args.input,
@@ -186,7 +200,7 @@ def prelink_elf(args, exports, work_dir, merged):
       relocatable,
   ])
   run([
-      os.path.join(args.clang_bin, 'llvm-objcopy'),
+      tool(args, 'llvm-objcopy'),
       '--keep-global-symbols=' + exports_list,
       '--remove-section=.group',
       relocatable,
@@ -195,9 +209,108 @@ def prelink_elf(args, exports, work_dir, merged):
   return exports
 
 
+COFF_PREFIX = 'impeller_internal.'
+
+
+def coff_external_symbols(args, archive):
+  """Returns ({defined external symbols}, {undefined symbols}) of a COFF archive."""
+  output = run([tool(args, 'llvm-nm'), '--extern-only', '--format=posix', '--no-sort', archive])
+  defined = set()
+  undefined = set()
+  for line in output.splitlines():
+    # Skip member headers ("impeller.lib[foo.obj]:").
+    if not line or line.endswith(']:'):
+      continue
+    fields = line.split(' ')
+    if len(fields) < 2:
+      continue
+    name, kind = fields[0], fields[1]
+    if kind == 'U':
+      undefined.add(name)
+    else:
+      defined.add(name)
+  return defined, undefined
+
+
+# Linker directives that name a symbol.
+COFF_SYMBOL_DIRECTIVES = re.compile(
+    r'[/-](alternatename:([^\s=]+)=(\S+)|include:(\S+)|export:([^\s,=]+))', re.IGNORECASE
+)
+
+
+def coff_directive_symbols(args, archive):
+  """Returns ({symbols named by /INCLUDE}, {symbols named by other directives})."""
+  output = run([tool(args, 'llvm-readobj'), '--coff-directives', archive])
+  included = set()
+  others = set()
+  for match in COFF_SYMBOL_DIRECTIVES.finditer(output):
+    alternate, target, include, export = (n.strip('"') if n else n for n in match.groups()[1:])
+    if include:
+      included.add(include)
+    others.update(n for n in (alternate, target, export) if n)
+  return included, others
+
+
+def prelink_coff(args, exports, work_dir):
+  defined, _ = coff_external_symbols(args, args.input)
+  missing = sorted(set(exports) - defined)
+  if missing:
+    raise SystemExit('%s does not define: %s' % (args.input, ', '.join(missing[:50])))
+
+  # .drectve sections are not rewritten. Symbols that the MSVC STL headers
+  # /INCLUDE (e.g. std::locale facet ids) must stay shared with the CRT anyway.
+  included, directive_symbols = coff_directive_symbols(args, args.input)
+  renamed = sorted(defined - set(exports) - included)
+  # --redefine-syms files are whitespace separated, and '#' starts a comment.
+  unrenameable = [n for n in renamed if '#' in n]
+  if unrenameable:
+    raise SystemExit('Cannot rename: %s' % ', '.join(unrenameable[:50]))
+  stale = sorted(directive_symbols & set(renamed))
+  if stale:
+    raise SystemExit(
+        'Linker directives in %s name internal symbols: %s' % (args.input, ', '.join(stale[:50]))
+    )
+
+  renames = []
+  for name in renamed:
+    renames.append('%s %s%s' % (name, COFF_PREFIX, name))
+    renames.append('__imp_%s __imp_%s%s' % (name, COFF_PREFIX, name))
+  renames_file = os.path.join(work_dir, 'renames.coff.txt')
+  write_lines(renames_file, renames)
+
+  renamed_archive = os.path.join(work_dir, 'impeller_renamed.lib')
+  if os.path.exists(renamed_archive):
+    os.remove(renamed_archive)
+  run([
+      tool(args, 'llvm-objcopy'),
+      '--redefine-syms=' + renames_file,
+      args.input,
+      renamed_archive,
+  ])
+
+  defined, undefined = coff_external_symbols(args, renamed_archive)
+  expected = set(exports)
+  extra = sorted(n for n in defined - expected - included if not n.startswith(COFF_PREFIX))
+  missing = sorted(expected - defined)
+  dangling = sorted(undefined & set(renamed))
+  if extra or missing or dangling:
+    message = '%s does not export exactly the Impeller C API.\n' % renamed_archive
+    if extra:
+      message += 'Unexpected global symbols (%d): %s\n' % (len(extra), ', '.join(extra[:50]))
+    if missing:
+      message += 'Missing exports (%d): %s\n' % (len(missing), ', '.join(missing[:50]))
+    if dangling:
+      message += 'Unrenamed references (%d): %s\n' % (len(dangling), ', '.join(dangling[:50]))
+    raise SystemExit(message)
+
+  if os.path.exists(args.output):
+    os.remove(args.output)
+  shutil.move(renamed_archive, args.output)
+
+
 def check_exports(args, merged, expected):
   output = run([
-      os.path.join(args.clang_bin, 'llvm-nm'),
+      tool(args, 'llvm-nm'),
       '--defined-only',
       '--extern-only',
       '--format=just-symbols',
@@ -218,7 +331,7 @@ def check_exports(args, merged, expected):
 
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument('--format', required=True, choices=['macho', 'elf'])
+  parser.add_argument('--format', required=True, choices=['macho', 'elf', 'coff'])
   parser.add_argument('--input', required=True, help='The archive to prelink.')
   parser.add_argument('--output', required=True, help='The archive to write.')
   parser.add_argument('--header', required=True, help='impeller.h')
@@ -234,6 +347,11 @@ def main():
 
   os.makedirs(args.work_dir, exist_ok=True)
   exports = impeller_exports(args.header)
+
+  if args.format == 'coff':
+    prelink_coff(args, exports, args.work_dir)
+    return 0
+
   merged = os.path.join(args.work_dir, 'impeller.o')
 
   if args.format == 'macho':
@@ -246,7 +364,7 @@ def main():
   if os.path.exists(args.output):
     os.remove(args.output)
   run([
-      os.path.join(args.clang_bin, 'llvm-ar'),
+      tool(args, 'llvm-ar'),
       '--format=' + ('darwin' if args.format == 'macho' else 'gnu'),
       'rcs',
       args.output,

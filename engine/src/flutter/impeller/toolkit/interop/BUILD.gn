@@ -12,11 +12,26 @@ if (is_mac) {
 
 declare_args() {
   # Prelinks libimpeller.a into a single object that only exports the C API.
+  # On Windows, renames every other symbol in impeller.lib instead.
   impeller_prelink_static_library = true
 }
 
 _prelink_static_library = impeller_prelink_static_library && is_clang &&
-                          (is_mac || is_linux || is_android)
+                          (is_mac || is_linux || is_android || is_win)
+
+if (host_os == "win") {
+  _buildtools_host_dir = "$buildtools_path/windows-${host_cpu}"
+} else {
+  _buildtools_host_dir = "$buildtools_path/${host_os}-${host_cpu}"
+}
+
+if (is_win) {
+  _static_library_prefix = ""
+  _static_library_extension = "lib"
+} else {
+  _static_library_prefix = "lib"
+  _static_library_extension = "a"
+}
 
 embed_blob("embedded_icu_data") {
   symbol_name = "embedded_icu_data"
@@ -138,14 +153,14 @@ if (_prelink_static_library) {
   action("static_library") {
     script = "prelink_static_library.py"
 
-    _archive = "$target_out_dir/libimpeller_unprelinked.a"
+    _archive = "$target_out_dir/${_static_library_prefix}impeller_unprelinked.${_static_library_extension}"
     _work_dir = "$target_gen_dir/prelink_static_library"
 
     inputs = [
       _archive,
       "impeller.h",
     ]
-    outputs = [ "$target_out_dir/libimpeller.a" ]
+    outputs = [ "$target_out_dir/${_static_library_prefix}impeller.${_static_library_extension}" ]
 
     args = [
       "--input",
@@ -155,8 +170,7 @@ if (_prelink_static_library) {
       "--header",
       rebase_path("impeller.h", root_build_dir),
       "--clang-bin",
-      rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/bin",
-                  root_build_dir),
+      rebase_path("$_buildtools_host_dir/clang/bin", root_build_dir),
       "--work-dir",
       rebase_path(_work_dir, root_build_dir),
     ]
@@ -176,6 +190,11 @@ if (_prelink_static_library) {
         rebase_path(mac_sdk_path, root_build_dir),
         "--ld",
         rebase_path("$mac_host_toolchain_path/usr/bin/ld", root_build_dir),
+      ]
+    } else if (is_win) {
+      args += [
+        "--format",
+        "coff",
       ]
     } else {
       args += [
