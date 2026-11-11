@@ -8,6 +8,7 @@ import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -514,9 +515,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     DeviceManager? deviceManager,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
-    this.extensionBuildManager,
-    this.extensionCleanManager,
-    this.extensionManager,
+    this._extensionBuildManager,
+    this._extensionCleanManager,
+    this._extensionManager,
     FeatureFlags? featureFlags,
     this._macOSWorkflow,
     TemplateRenderer? templateRenderer,
@@ -536,6 +537,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        toolContext = toolContext ?? FakeToolContext();
 
   final AndroidWorkflow? _androidWorkflow;
+  final ExtensionBuildManager? _extensionBuildManager;
+  final ExtensionCleanManager? _extensionCleanManager;
+  final ExtensionManager? _extensionManager;
   final MacOSWorkflow? _macOSWorkflow;
   final WindowsWorkflow? _windowsWorkflow;
 
@@ -575,13 +579,25 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final EmulatorManager emulatorManager;
 
   @override
-  final ExtensionBuildManager? extensionBuildManager;
+  late final ExtensionBuildManager extensionBuildManager =
+      _extensionBuildManager ??
+      ExtensionBuildManager(
+        extensionManager: extensionManager,
+        featureFlags: featureFlags,
+        logger: _logger,
+      );
 
   @override
-  final ExtensionCleanManager? extensionCleanManager;
+  late final ExtensionCleanManager extensionCleanManager =
+      _extensionCleanManager ??
+      ExtensionCleanManager(
+        extensionManager: extensionManager,
+        featureFlags: featureFlags,
+        logger: _logger,
+      );
 
   @override
-  final ExtensionManager? extensionManager;
+  late final ExtensionManager extensionManager = _extensionManager ?? FakeExtensionManager();
 
   @override
   final FeatureFlags featureFlags;
@@ -600,5 +616,6 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   late final WindowsWorkflow windowsWorkflow =
       _windowsWorkflow ?? WindowsWorkflow(featureFlags: featureFlags, platform: _platform);
 
+  Logger get _logger => toolContext.logger;
   Platform get _platform => toolContext.platform;
 }

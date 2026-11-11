@@ -63,7 +63,6 @@ import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
-import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -130,12 +129,12 @@ Future<void> main(List<String> args) async {
 
   final ToolDependencies toolDependencies = await ToolDependencies.bootstrap(
     buildTargets: const BuildTargetsImpl(),
+    enablePreRunValidator: true,
     extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
     logger: logger,
     nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
     outputPreferences: outputPreferences,
     platform: platform,
-    preRunValidatorBuilder: PreRunValidator.new,
     shutdownHooks: shutdownHooks,
     stdio: stdio,
     templateRenderer: const MustacheTemplateRenderer(),
@@ -149,13 +148,12 @@ Future<void> main(List<String> args) async {
       args,
       (ToolDependencies toolDependencies) {
         final ToolDependencies(
-          :ExtensionManager? extensionManager,
+          :ExtensionManager extensionManager,
           :FeatureFlags featureFlags,
           toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
         ) = toolDependencies;
-        final ExtensionManager manager = extensionManager!;
         final templateManager = ExtensionTemplateManager(
-          extensionManager: manager,
+          extensionManager: extensionManager,
           featureFlags: featureFlags,
           fileSystem: fs,
           flutterRoot: cache.flutterRoot,

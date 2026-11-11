@@ -10,8 +10,6 @@ import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart';
-import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -25,6 +23,8 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/context_runner.dart';
@@ -33,13 +33,10 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:flutter_tools/src/ios/simulators.dart';
-import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
-import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
@@ -50,7 +47,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 
 const kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
@@ -58,30 +54,21 @@ const kCustomBugInstructions = 'These are instructions to report with a custom b
 Future<ToolDependencies> _bootstrapForTest({
   required FileSystem fs,
   Analytics? analytics,
-  AndroidSdk? Function()? androidSdkBuilder,
-  AndroidStudio? Function()? androidStudioBuilder,
   Artifacts? artifacts,
   BotDetector? botDetector,
   Cache? cache,
-  CocoaPodsValidator? Function()? cocoapodsValidatorBuilder,
   CrashReporter? crashReporter,
   DeviceManager? deviceManager,
+  bool enablePreRunValidator = false,
   FeatureFlags? featureFlags,
-  GradleUtils Function()? gradleUtilsBuilder,
-  IOSSimulatorUtils? Function()? iosSimulatorUtilsBuilder,
-  Java? Function()? javaBuilder,
   Logger? logger,
   OutputPreferences? outputPreferences,
   Platform? platform,
   PlistParser? plistParser,
-  PreRunValidator Function({required Cache cache, required FileSystem fileSystem})?
-  preRunValidatorBuilder,
   ProcessManager? processManager,
   io.Stdio? stdio,
   AnsiTerminal? terminal,
   UserMessages? userMessages,
-  XCDevice? Function()? xcdeviceBuilder,
-  Xcode? Function()? xcodeBuilder,
 }) {
   final Platform resolvedPlatform =
       platform ?? FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'});
@@ -96,12 +83,9 @@ Future<ToolDependencies> _bootstrapForTest({
   final Directory configDir = fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
   return ToolDependencies.bootstrap(
     analytics: analytics ?? const NoOpAnalytics(),
-    androidSdkBuilder: androidSdkBuilder,
-    androidStudioBuilder: androidStudioBuilder,
     artifacts: artifacts,
     botDetector: botDetector ?? const FakeBotDetector(true),
     cache: cache,
-    cocoapodsValidatorBuilder: cocoapodsValidatorBuilder,
     config: Config.test(
       name: Config.kFlutterSettings,
       directory: configDir,
@@ -109,30 +93,51 @@ Future<ToolDependencies> _bootstrapForTest({
     ),
     crashReporter: crashReporter ?? const NoopCrashReporter(),
     deviceManager: deviceManager,
+    enablePreRunValidator: enablePreRunValidator,
     featureFlags: featureFlags,
     flutterVersion: FakeFlutterVersion(),
     fs: fs,
-    gradleUtilsBuilder: gradleUtilsBuilder,
-    httpClientFactory: () => FakeHttpClient.any(),
-    iosSimulatorUtilsBuilder: iosSimulatorUtilsBuilder ?? () => const NoopIOSSimulatorUtils(),
-    javaBuilder: javaBuilder,
+    iosSimulatorUtils: const NoopIOSSimulatorUtils(),
     logger: resolvedLogger,
     outputPreferences: resolvedOutputPreferences,
     persistentToolState: PersistentToolState.test(directory: configDir, logger: resolvedLogger),
     platform: resolvedPlatform,
     plistParser: plistParser ?? FakePlistParser(),
-    preRunValidatorBuilder: preRunValidatorBuilder,
     processManager: resolvedProcessManager,
     signals: FakeSignals(),
     stdio: resolvedStdio,
     templateRenderer: FakeTemplateRenderer(),
     terminal: resolvedTerminal,
     userMessages: userMessages ?? UserMessages(),
-    xcdeviceBuilder: xcdeviceBuilder,
-    xcodeBuilder: xcodeBuilder,
     xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
   );
 }
+
+/// Returns a copy of [base] with [androidContext] and [appleContext] replaced.
+ToolDependencies _withPlatformContexts(
+  ToolDependencies base, {
+  AndroidContext? androidContext,
+  AppleContext? appleContext,
+}) => ToolDependencies(
+  analytics: base.analytics,
+  androidContext: androidContext ?? base.androidContext,
+  androidWorkflow: base.androidWorkflow,
+  appleContext: appleContext ?? base.appleContext,
+  buildSystem: base.buildSystem,
+  buildTargets: base.buildTargets,
+  crashReporter: base.crashReporter,
+  deviceManager: base.deviceManager,
+  doctor: base.doctor,
+  emulatorManager: base.emulatorManager,
+  extensionBuildManager: base.extensionBuildManager,
+  extensionCleanManager: base.extensionCleanManager,
+  extensionManager: base.extensionManager,
+  featureFlags: base.featureFlags,
+  macOSWorkflow: base.macOSWorkflow,
+  templateRenderer: base.templateRenderer,
+  toolContext: base.toolContext,
+  windowsWorkflow: base.windowsWorkflow,
+);
 
 void main() {
   group('runner (crash reporting)', () {
@@ -923,24 +928,26 @@ void main() {
       // drops the `AppContext` `overrides` that `runner.run` installs.
       test('does not eagerly evaluate AndroidSdk, AndroidStudio, GradleUtils, or Java during bootstrap or generateCommands', () async {
         late final _DeviceManagerRecordingFlutterCommand command;
-        final ToolDependencies toolDependencies = await _bootstrapForTest(
-          androidSdkBuilder: () {
-            sdkEvaluations++;
-            return FakeAndroidSdk();
-          },
-          androidStudioBuilder: () {
-            studioEvaluations++;
-            return _FakeAndroidStudio();
-          },
-          fs: fs,
-          gradleUtilsBuilder: () {
-            gradleEvaluations++;
-            return FakeGradleUtils();
-          },
-          javaBuilder: () {
-            javaEvaluations++;
-            return FakeJava();
-          },
+        final ToolDependencies toolDependencies = _withPlatformContexts(
+          await _bootstrapForTest(fs: fs),
+          androidContext: AndroidContext(
+            androidSdkBuilder: () {
+              sdkEvaluations++;
+              return FakeAndroidSdk();
+            },
+            androidStudioBuilder: () {
+              studioEvaluations++;
+              return _FakeAndroidStudio();
+            },
+            gradleUtilsBuilder: () {
+              gradleEvaluations++;
+              return FakeGradleUtils();
+            },
+            javaBuilder: () {
+              javaEvaluations++;
+              return FakeJava();
+            },
+          ),
         );
         final int exitCode = await runner.run(
           <String>[_DeviceManagerRecordingFlutterCommand.commandName],
@@ -995,20 +1002,29 @@ void main() {
       // Uses plain `test` for the same reason as the Android laziness test.
       test('does not eagerly evaluate CocoaPodsValidator, IOSSimulatorUtils, or XCDevice during bootstrap or generateCommands', () async {
         late final _DeviceManagerRecordingFlutterCommand command;
-        final ToolDependencies toolDependencies = await _bootstrapForTest(
-          cocoapodsValidatorBuilder: () {
-            cocoapodsValidatorEvaluations++;
-            return FakeCocoaPodsValidator();
-          },
-          fs: fs,
-          iosSimulatorUtilsBuilder: () {
-            iosSimulatorUtilsEvaluations++;
-            return FakeIOSSimulatorUtils();
-          },
-          xcdeviceBuilder: () {
-            xcdeviceEvaluations++;
-            return FakeXCDevice();
-          },
+        final ToolDependencies base = await _bootstrapForTest(fs: fs);
+        final AppleContext baseApple = base.appleContext;
+        final ToolDependencies toolDependencies = _withPlatformContexts(
+          base,
+          appleContext: AppleContext(
+            cocoaPodsBuilder: () => baseApple.cocoaPods,
+            cocoapodsValidatorBuilder: () {
+              cocoapodsValidatorEvaluations++;
+              return FakeCocoaPodsValidator();
+            },
+            iosSimulatorUtilsBuilder: () {
+              iosSimulatorUtilsEvaluations++;
+              return FakeIOSSimulatorUtils();
+            },
+            iosWorkflowBuilder: () => baseApple.iosWorkflow,
+            plistParserBuilder: () => baseApple.plistParser,
+            xcdeviceBuilder: () {
+              xcdeviceEvaluations++;
+              return FakeXCDevice();
+            },
+            xcodeBuilder: () => baseApple.xcode,
+            xcodeProjectInterpreterBuilder: () => baseApple.xcodeProjectInterpreter,
+          ),
         );
         final int exitCode = await runner.run(
           <String>[_DeviceManagerRecordingFlutterCommand.commandName],
@@ -1061,22 +1077,42 @@ void main() {
         final fakeXCDevice = FakeXCDevice();
         final fakeXcode = FakeXcode();
         late final _ContextRecordingFlutterCommand command;
-        final ToolDependencies toolDependencies = await _bootstrapForTest(
-          androidSdkBuilder: () {
-            sdkEvaluations++;
-            return fakeAndroidSdk;
-          },
+        final ToolDependencies base = await _bootstrapForTest(
           deviceManager: FakeDeviceManager(),
           fs: fs,
           plistParser: fakePlistParser,
-          xcdeviceBuilder: () {
-            xcdeviceEvaluations++;
-            return fakeXCDevice;
-          },
-          xcodeBuilder: () {
-            xcodeEvaluations++;
-            return fakeXcode;
-          },
+        );
+        final ToolDependencies(
+          androidContext: AndroidContext baseAndroid,
+          appleContext: AppleContext baseApple,
+        ) = base;
+        final ToolDependencies toolDependencies = _withPlatformContexts(
+          base,
+          androidContext: AndroidContext(
+            androidSdkBuilder: () {
+              sdkEvaluations++;
+              return fakeAndroidSdk;
+            },
+            androidStudioBuilder: () => baseAndroid.androidStudio,
+            gradleUtilsBuilder: () => baseAndroid.gradleUtils,
+            javaBuilder: () => baseAndroid.java,
+          ),
+          appleContext: AppleContext(
+            cocoaPodsBuilder: () => baseApple.cocoaPods,
+            cocoapodsValidatorBuilder: () => baseApple.cocoapodsValidator,
+            iosSimulatorUtilsBuilder: () => baseApple.iosSimulatorUtils,
+            iosWorkflowBuilder: () => baseApple.iosWorkflow,
+            plistParserBuilder: () => baseApple.plistParser,
+            xcdeviceBuilder: () {
+              xcdeviceEvaluations++;
+              return fakeXCDevice;
+            },
+            xcodeBuilder: () {
+              xcodeEvaluations++;
+              return fakeXcode;
+            },
+            xcodeProjectInterpreterBuilder: () => baseApple.xcodeProjectInterpreter,
+          ),
         );
         final int exitCode = await runner.run(
           <String>[_ContextRecordingFlutterCommand.commandName],
@@ -1116,13 +1152,13 @@ void main() {
     );
 
     testWithoutContext(
-      'applies FeatureFlags to AnsiTerminal and honors preRunValidatorBuilder',
+      'applies FeatureFlags to AnsiTerminal and honors enablePreRunValidator',
       () async {
         final ToolDependencies toolDependencies = await _bootstrapForTest(
           deviceManager: FakeDeviceManager(),
+          enablePreRunValidator: true,
           featureFlags: TestFeatureFlags(),
           fs: fs,
-          preRunValidatorBuilder: PreRunValidator.new,
         );
         final int exitCode = await runner.run(
           <String>[_DeviceManagerRecordingFlutterCommand.commandName],
