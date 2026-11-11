@@ -1,10 +1,10 @@
 # build_defs
 
 The build rules (`.bzl` files) the repository's `BUILD` files load, with their
-scripts and helper targets, by subject. The design of each -- why it exists,
-what GN shape it stands in for, what was measured -- is in
-`engine/src/flutter/build/bazel/README.md`, the migration's design document;
-this file is the index. Rules relevant to a single directory stay with that
+scripts and helper targets, by subject. The design of each -- why it exists
+and what GN shape it stands in for -- is in the reference documents under
+`engine/src/flutter/build/bazel/docs/` (start at
+`engine/src/flutter/build/bazel/README.md`); this file is the index. Rules relevant to a single directory stay with that
 directory: the toolchain configurations
 (`engine/src/flutter/build/bazel/toolchains/`), `packages/flutter/test/framework_tests.bzl`.
 
@@ -47,6 +47,23 @@ directory: the toolchain configurations
 | `java/` | `robolectric.bzl` | `java_classes` (javac on `@openjdk` into one jar), `android_test_apk` (the merged manifest, the resource APK and the R classes, as AGP's unit tests get them), `robolectric_test` / `robolectric_tests` (one JUnit run per test class under Robolectric, offline, on `@openjdk`). |
 | `desktop/` | `build_tools.bzl` | `linux_build_tools`: one `bin/` directory of scripts named `cmake`, `ninja`, `pkg-config`, `clang`, `clang++`, `ld`, `ar`... that run the build's own (Kitware's CMake, Debian's ninja and pkg-config from the runtime sysroot, the engine's clang over its build sysroot), for `dart_test`'s `tools`; carries the built app's run-time environment (`ToolEnvironmentInfo`). |
 | `android/` | `build_tools.bzl` (+ `engine_maven.py`) | `android_engine_artifacts`: the engine's Android artifacts in the SDK facsimile's shape -- gen_snapshot per CPU and AOT mode, the embedding's jars and poms as a Maven repository at the facsimile's engine version (`engine_maven_repository`, the script) -- for three CPUs in three modes through `in_configuration`; `android_build_tools`: the environment of a test that runs `flutter build apk` (ANDROID_HOME, JAVA_HOME, and FLUTTER_STORAGE_BASE_URL at the build's Maven repository when there is one -- under the prebuilt engine Gradle fetches the embedding from the storage), for `dart_test`'s `tools`. |
+| `android/` | `native_activity_apk.bzl` | GN's `native_activity_apk` template: a gtest suite packaged as an Android APK around `android.app.NativeActivity`. |
+| `cc/` | `apple.bzl` | What the engine's Apple builds agree on (the deployment targets), for the rules and the toolchains. |
+| `cc/` | `shared_library.bzl` | `flutter_shared_library`: GN's `shared_library()`, named as the platform names its shared libraries (`lib<name>.so`, `lib<name>.dylib`). |
+| `cc/` | `swift_library.bzl` | `flutter_swift_library`: a GN source_set of Swift sources, compiled as GN's `tool("swift")` compiles it. |
+| `config/` | `platforms.bzl` | A platform and its runtime modes: one output directory per mode, as GN has one build directory per mode. |
+| `dart/` | `flutter_snapshot.bzl` | GN's `flutter_snapshot` template: a Flutter app's kernel and snapshot. |
+| `dist/` | `everything.bzl` | GN's default target -- everything the root group lays out -- as the contents of an install or a local engine. |
+| `dist/` | `framework.bzl, assemble_bundle.py, xcframework.py` | A macOS framework bundle's symlinks (GN's action over `package_framework.py`), a bundle assembled as a directory, and `create_xcframework.py` run over it. |
+| `dist/` | `universal.bzl, universal.py` | The recipe's universal Apple artifacts as one target each: a split transition over the builds they join, then the recipe's generator script. |
+| `gn/` | `macos_args.bzl` | The GN arguments a wrapped GN build (`gn_build`) takes for a macOS or an iOS target. |
+| `impeller/` | `tool.bzl` | impellerc as the build's tool, built without the target's fontconfig. |
+| `repositories/` | `flutter_bin_cache.bzl` | The engine artifacts the flutter tool downloaded into `bin/cache`, as a repository (`--config=prebuilt_engine`). |
+| `repositories/` | `host_files.bzl` | Files of the build machine that GN's build files name by absolute path, as `@host_files`. |
+| `testing/` | `android_device_test.bzl` | `flutter_android_device_test`: pushes a test executable to a device or emulator with adb and runs it, as `run_tests.py --type android` does. |
+| `testing/` | `ios_xctest.bzl` | An Xcode project's XCTest run on an iOS simulator: `run_tests.py --type objc`. |
+| `testing/` | `native_symbols.bzl` | GN's `check_forbidden_native_symbols` template as a rule. |
+| `engine/` | `BUILD.bazel` | The engine as the framework's and the tool's tests consume it: aliases that select the tree's targets or the prebuilt artifacts in `bin/cache` (`--//build_defs/engine:source=prebuilt`). |
 
 Loading a rule:
 
