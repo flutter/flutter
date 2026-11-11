@@ -111,14 +111,30 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ArgParser get argParser => _argParser;
   ArgParser _argParser;
 
-  /// Creates a standalone [ArgParser] configured with global `flutter` options
-  /// and the built-in `help` command.
-  static ArgParser createGlobalArgParser() {
+  static ArgParser _createGlobalArgParser() {
     final parser = ArgParser(allowTrailingOptions: false)
       ..addFlag('help', abbr: 'h', negatable: false, help: 'Print this usage information.')
       ..addCommand('help');
     _populateOptions(parser, verboseHelp: false);
     return parser;
+  }
+
+  /// The name of the command in [args], or null if there isn't one.
+  ///
+  /// Global options can come before the command, so it can't be found by
+  /// position. A throwaway parser walks past them instead: trailing options are
+  /// disabled, so parsing stops at the command and leaves it at the head of
+  /// [ArgResults.rest]. `help` is the exception, since the command runner
+  /// registers it on the parser itself and so reports it as a parsed command.
+  static String? findCommandName(List<String> args) {
+    final ArgResults results;
+    try {
+      results = _createGlobalArgParser().parse(args);
+    } on ArgParserException {
+      // The real parser will complain about these later.
+      return null;
+    }
+    return results.command?.name ?? results.rest.firstOrNull;
   }
 
   static void _populateOptions(ArgParser argParser, {required bool verboseHelp}) {
