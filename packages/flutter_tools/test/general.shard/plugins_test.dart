@@ -2650,10 +2650,8 @@ flutter:
           ..writeAsStringSync(yamlString);
       }
 
-      testUsingContext(
-        'validatePubspecForPlugin works',
-        () async {
-          const pluginYaml = '''
+      testWithoutContext('validatePubspecForPlugin works', () async {
+        const pluginYaml = '''
   flutter:
     plugin:
       platforms:
@@ -2672,20 +2670,16 @@ flutter:
           pluginClass: SomePlugin
           package: AndroidPackage
   ''';
-          createPubspecFile(pluginYaml);
-          validatePubspecForPlugin(
-            projectDir: projectDir.absolute.path,
-            pluginClass: 'SomePlugin',
-            expectedPlatforms: <String>['ios', 'macos', 'windows', 'linux', 'android', 'web'],
-            androidIdentifier: 'AndroidPackage',
-            webFileName: 'lib/SomeFile.dart',
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        createPubspecFile(pluginYaml);
+        validatePubspecForPlugin(
+          projectDir: projectDir.absolute.path,
+          pluginClass: 'SomePlugin',
+          expectedPlatforms: <String>['ios', 'macos', 'windows', 'linux', 'android', 'web'],
+          androidIdentifier: 'AndroidPackage',
+          fileSystem: fs,
+          webFileName: 'lib/SomeFile.dart',
+        );
+      });
 
       testUsingContext(
         'Plugin.fromYaml rejects a plugin class with code-injection characters',
