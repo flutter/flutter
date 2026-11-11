@@ -199,12 +199,13 @@ static void composite_layer(FlCompositorOpenGL* self,
                             double y,
                             int width,
                             int height) {
-  size_t texture_width = fl_framebuffer_get_width(framebuffer);
-  size_t texture_height = fl_framebuffer_get_height(framebuffer);
-  glUniform2f(self->offset_location, (2 * x / width) - 1.0,
-              (2 * y / height) - 1.0);
-  glUniform2f(self->scale_location, texture_width / width,
-              texture_height / height);
+  double scale_x =
+      static_cast<double>(fl_framebuffer_get_width(framebuffer)) / width;
+  double scale_y =
+      static_cast<double>(fl_framebuffer_get_height(framebuffer)) / height;
+  glUniform2f(self->offset_location, (2 * x / width) + scale_x - 1.0,
+              1.0 - (2 * y / height) - scale_y);
+  glUniform2f(self->scale_location, scale_x, scale_y);
 
   GLuint texture_id = fl_framebuffer_get_texture_id(framebuffer);
   glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -509,24 +510,37 @@ static gboolean fl_compositor_opengl_present_layers_gtk3(
   gboolean first_layer = TRUE;
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
-    if (layer->type != kFlutterLayerContentTypeBackingStore) {
-      continue;
+    switch (layer->type) {
+      case kFlutterLayerContentTypeBackingStore: {
+        const FlutterBackingStore* backing_store = layer->backing_store;
+        FlFramebuffer* layer_framebuffer =
+            FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
+        // The first layer can be blitted, and following layers composited with
+        // this. If glBlitFramebuffer is unavailable, composite the first layer
+        // with the shader instead.
+        if (first_layer && self->can_blit) {
+          glBindFramebuffer(GL_READ_FRAMEBUFFER,
+                            fl_framebuffer_get_id(layer_framebuffer));
+          // Flutter layer offsets have the origin at the top-left, OpenGL has
+          // the origin at the bottom-left.
+          GLint x0 = layer->offset.x;
+          GLint y0 = height - (layer->offset.y + layer->size.height);
+          GLint layer_width = layer->size.width;
+          GLint layer_height = layer->size.height;
+          glBlitFramebuffer(0, 0, layer_width, layer_height, x0, y0,
+                            x0 + layer_width, y0 + layer_height,
+                            GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        } else {
+          composite_layer(self, layer_framebuffer, layer->offset.x,
+                          layer->offset.y, width, height);
+        }
+        first_layer = FALSE;
+      } break;
+      case kFlutterLayerContentTypePlatformView: {
+        // TODO(robert-ancell) Not implemented -
+        // https://github.com/flutter/flutter/issues/41724
+      } break;
     }
-
-    const FlutterBackingStore* backing_store = layer->backing_store;
-    FlFramebuffer* framebuffer =
-        FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(framebuffer));
-    if (first_layer && self->can_blit) {
-      glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,
-                        layer->size.height, layer->offset.x, layer->offset.y,
-                        layer->size.width, layer->size.height,
-                        GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    } else {
-      composite_layer(self, framebuffer, layer->offset.x, layer->offset.y,
-                      width, height);
-    }
-    first_layer = FALSE;
   }
   glFlush();
   glDeleteVertexArrays(1, &vao);

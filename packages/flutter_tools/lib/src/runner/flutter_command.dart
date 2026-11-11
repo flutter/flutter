@@ -343,9 +343,10 @@ abstract class FlutterCommand extends Command<void> {
   void addDdsOptions({required bool verboseHelp}) {
     DebuggingOptionDescriptors.dds.addTo(argParser);
     DebuggingOptionDescriptors.ddsPort.addTo(argParser, verboseHelp: verboseHelp);
-    DebuggingOptionDescriptors.devToolsServerAddressOption.addTo(
+    DebuggingOptionDescriptors.devToolsServerAddress.addTo(
       argParser,
       verboseHelp: verboseHelp,
+      help: DebuggingOptionDescriptors.devToolsServerAddressBaseHelp,
     );
   }
 
@@ -423,10 +424,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Uri? get devToolsServerAddress {
-    if (wasParsed(DebuggingOptionDescriptors.devToolsServerAddressOption)) {
-      final Uri? uri = Uri.tryParse(
-        getValue(DebuggingOptionDescriptors.devToolsServerAddressOption)!,
-      );
+    if (wasParsed(DebuggingOptionDescriptors.devToolsServerAddress)) {
+      final Uri? uri = Uri.tryParse(getValue(DebuggingOptionDescriptors.devToolsServerAddress)!);
       if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
         return uri;
       }

@@ -18,10 +18,9 @@ import 'package:package_config/package_config_types.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../context_runner.dart';
 import '../../convert.dart';
 import '../../dart/package_map.dart';
-import '../../features.dart';
+import '../../features.dart' show featureFlags;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
@@ -58,11 +57,13 @@ class BuildHooks extends Target {
       :SerializedBuildResults results,
       :DartHooksResult buildResult,
     ) = await runFlutterSpecificBuildHooks(
+      androidSdkProvider: environment,
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      featureFlags: featureFlags,
       logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(
         appBuildDirectory: _buildCodeAssetsDirectory(
@@ -72,6 +73,7 @@ class BuildHooks extends Target {
         ),
       ),
       buildDataAssets: true,
+      visualStudio: environment.visualStudio,
     );
 
     final File dartBuildOutputJsonFile = environment.buildDir.childFile(resultFilename);
@@ -139,14 +141,11 @@ Directory _buildCodeAssetsDirectory(
       targetPlatform == TargetPlatform.linux_arm64 ||
       targetPlatform == TargetPlatform.linux_riscv64) {
     final String? linuxGtkVersion = environment.defines['FLUTTER_LINUX_GTK'];
-    return environment.projectDir
-        .childDirectory(
-          getLinuxBuildDirectory(
-            targetPlatform,
-            linuxGtkVersion: linuxGtkVersion,
-            toolContext: const GlobalToolContext(),
-          ),
-        )
+    return environment.projectFactory
+        .fromDirectory(environment.projectDir)
+        .buildDirectory
+        .childDirectory(linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux')
+        .childDirectory(targetPlatform.simpleName)
         .childDirectory(buildModeEnvironment);
   }
   return environment.outputDir;
@@ -247,11 +246,13 @@ class LinkHooks extends Target {
     final DartHooksResult linkResult;
     if (linkingEnabled) {
       linkResult = await runFlutterSpecificLinkHooks(
+        androidSdkProvider: environment,
         environmentDefines: environment.defines,
         buildRunner: buildRunner,
         targetPlatform: targetPlatform,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: environment.logger,
         buildCodeAssets: BuildCodeAssetsOptions(
           appBuildDirectory: _buildCodeAssetsDirectory(
@@ -263,6 +264,7 @@ class LinkHooks extends Target {
         buildDataAssets: true,
         buildResults: buildResults,
         recordedUsesFile: recordedUsesFileToPass,
+        visualStudio: environment.visualStudio,
       );
     } else {
       linkResult = DartHooksResult.empty();
@@ -272,6 +274,7 @@ class LinkHooks extends Target {
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       fileSystem: fileSystem,
+      featureFlags: featureFlags,
       buildCodeAssets: BuildCodeAssetsOptions(
         appBuildDirectory: _buildCodeAssetsDirectory(
           environment,

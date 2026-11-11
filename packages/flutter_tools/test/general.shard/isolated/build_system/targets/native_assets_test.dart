@@ -87,6 +87,7 @@ void main() {
           kTargetPlatform: TargetPlatform.linux_x64.getName(),
           'FLUTTER_LINUX_GTK': 'gtk4',
         },
+        buildDir: fileSystem.currentDirectory.childDirectory('.dart_tool/flutter_build'),
         outputDir: fileSystem.currentDirectory.childDirectory('ignored-output'),
         inputs: <String, String>{},
         artifacts: artifacts,
@@ -95,7 +96,8 @@ void main() {
         logger: logger,
       );
 
-      final Directory cmakeBuildDirectory = linuxEnvironment.rootBuildDir
+      final Directory cmakeBuildDirectory = linuxEnvironment.projectDir
+          .childDirectory('build')
           .childDirectory('linux-gtk4')
           .childDirectory('x64')
           .childDirectory('debug');
