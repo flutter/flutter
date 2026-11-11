@@ -243,6 +243,7 @@ void main() {
       await jsResponse.read().drain<void>();
     },
   );
+
   testUsingContext(
     'FlutterWebPlatform serves the correct bootstrap files (ddc library bundle module system)',
     () async {
@@ -346,34 +347,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Logger: () => logger,
-    },
-  );
-
-  testWithoutContext(
-    'createDirectoryHandler sets Cache-Control and cross-origin isolation headers',
-    () async {
-      final Directory dir = tempDir.childDirectory('dir')..createSync();
-      dir.childFile('index.html').writeAsStringSync('<html></html>');
-      dir.childFile('asset.js').writeAsStringSync('// asset');
-
-      final shelf.Handler handler = createDirectoryHandler(dir, crossOriginIsolated: true);
-
-      final shelf.Response htmlResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/index.html')),
-      );
-      expect(htmlResponse.statusCode, HttpStatus.ok);
-      expect(htmlResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(htmlResponse.headers['Cross-Origin-Opener-Policy'], 'same-origin');
-      expect(htmlResponse.headers['Cross-Origin-Embedder-Policy'], 'credentialless');
-      await htmlResponse.read().drain<void>();
-
-      final shelf.Response jsResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/asset.js')),
-      );
-      expect(jsResponse.statusCode, HttpStatus.ok);
-      expect(jsResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(jsResponse.headers['Cross-Origin-Opener-Policy'], isNull);
-      await jsResponse.read().drain<void>();
     },
   );
 
@@ -520,34 +493,6 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'createDirectoryHandler sets Cache-Control and cross-origin isolation headers',
-    () async {
-      final Directory dir = tempDir.childDirectory('dir')..createSync();
-      dir.childFile('index.html').writeAsStringSync('<html></html>');
-      dir.childFile('asset.js').writeAsStringSync('// asset');
-
-      final shelf.Handler handler = createDirectoryHandler(dir, crossOriginIsolated: true);
-
-      final shelf.Response htmlResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/index.html')),
-      );
-      expect(htmlResponse.statusCode, HttpStatus.ok);
-      expect(htmlResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(htmlResponse.headers['Cross-Origin-Opener-Policy'], 'same-origin');
-      expect(htmlResponse.headers['Cross-Origin-Embedder-Policy'], 'credentialless');
-      await htmlResponse.read().drain<void>();
-
-      final shelf.Response jsResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/asset.js')),
-      );
-      expect(jsResponse.statusCode, HttpStatus.ok);
-      expect(jsResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(jsResponse.headers['Cross-Origin-Opener-Policy'], isNull);
-      await jsResponse.read().drain<void>();
-    },
-  );
-
   testUsingContext(
     'FlutterWebPlatform launches Chrome with scale factor and window size flags for goldens alignment',
     () async {
@@ -608,34 +553,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Logger: () => logger,
-    },
-  );
-
-  testWithoutContext(
-    'createDirectoryHandler sets Cache-Control and cross-origin isolation headers',
-    () async {
-      final Directory dir = tempDir.childDirectory('dir')..createSync();
-      dir.childFile('index.html').writeAsStringSync('<html></html>');
-      dir.childFile('asset.js').writeAsStringSync('// asset');
-
-      final shelf.Handler handler = createDirectoryHandler(dir, crossOriginIsolated: true);
-
-      final shelf.Response htmlResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/index.html')),
-      );
-      expect(htmlResponse.statusCode, HttpStatus.ok);
-      expect(htmlResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(htmlResponse.headers['Cross-Origin-Opener-Policy'], 'same-origin');
-      expect(htmlResponse.headers['Cross-Origin-Embedder-Policy'], 'credentialless');
-      await htmlResponse.read().drain<void>();
-
-      final shelf.Response jsResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/asset.js')),
-      );
-      expect(jsResponse.statusCode, HttpStatus.ok);
-      expect(jsResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(jsResponse.headers['Cross-Origin-Opener-Policy'], isNull);
-      await jsResponse.read().drain<void>();
     },
   );
 
