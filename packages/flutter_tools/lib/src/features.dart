@@ -97,29 +97,7 @@ abstract class FeatureFlags {
   bool isEnabled(Feature feature);
 
   /// All current Flutter feature flags.
-  List<Feature> get allFeatures => const <Feature>[
-    flutterWebFeature,
-    flutterLinuxDesktopFeature,
-    flutterMacOSDesktopFeature,
-    flutterWindowsDesktopFeature,
-    flutterAndroidFeature,
-    flutterIOSFeature,
-    flutterFuchsiaFeature,
-    flutterCustomDevicesFeature,
-    cliAnimation,
-    nativeAssets,
-    dartDataAssets,
-    recordUse,
-    swiftPackageManager,
-    omitLegacyVersionFile,
-    windowingFeature,
-    lldbDebugging,
-    uiSceneMigration,
-    riscv64,
-    macOSArm64Only,
-    hcpp,
-    toolExtensionsFeature,
-  ];
+  List<Feature> get allFeatures => allFlutterFeatures;
 
   /// All current Flutter feature flags that can be configured.
   ///
@@ -134,6 +112,31 @@ abstract class FeatureFlags {
     return allFeatures.where(isEnabled);
   }
 }
+
+/// All current Flutter feature flags.
+const allFlutterFeatures = <Feature>[
+  flutterWebFeature,
+  flutterLinuxDesktopFeature,
+  flutterMacOSDesktopFeature,
+  flutterWindowsDesktopFeature,
+  flutterAndroidFeature,
+  flutterIOSFeature,
+  flutterFuchsiaFeature,
+  flutterCustomDevicesFeature,
+  cliAnimation,
+  nativeAssets,
+  dartDataAssets,
+  recordUse,
+  swiftPackageManager,
+  omitLegacyVersionFile,
+  windowingFeature,
+  lldbDebugging,
+  uiSceneMigration,
+  riscv64,
+  macOSArm64Only,
+  hcpp,
+  toolExtensionsFeature,
+];
 
 /// All current Flutter feature flags that can be configured.
 ///
