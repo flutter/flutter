@@ -178,8 +178,8 @@ enum _MediaQueryAspect {
 /// that position content within these insets. The padding value defines areas
 /// that might not be completely visible, like the display "notch" on the iPhone
 /// X. The viewInsets value defines areas reserved for system UI, typically the
-/// device's keyboard; because that UI may be translucent or have rounded
-/// corners, what is painted there can remain visible. Similar to viewInsets,
+/// device's keyboard (which may be translucent or have rounded corners, leaving
+/// what is painted there visible). Similar to viewInsets,
 /// viewPadding does not differentiate padding in areas that may be obscured.
 /// For example, by using the viewPadding property, padding would defer to the
 /// iPhone "safe area" regardless of whether a keyboard is showing.
@@ -508,11 +508,12 @@ class MediaQueryData {
   /// device's keyboard.
   ///
   /// When a mobile device's keyboard is visible, `viewInsets.bottom`
-  /// corresponds to the top of the keyboard. Because that system UI may be
-  /// translucent or have rounded corners, what is painted in this area can
-  /// remain visible. Consider keeping content and controls out of the inset
-  /// while continuing to paint backgrounds in it (for example, by applying the
-  /// inset as padding inside a background surface rather than outside it).
+  /// corresponds to the top of the keyboard. Because the keyboard or other
+  /// system UI may be translucent or have rounded corners, what is painted
+  /// behind it can remain visible. Consider keeping content and controls out of
+  /// the inset area while continuing to paint backgrounds behind it (for
+  /// example, by applying `viewInsets` as padding inside a background surface
+  /// rather than outside it).
   ///
   /// This value is independent of the [padding] and [viewPadding]. viewPadding
   /// is measured from the edges of the [MediaQuery] widget's bounds. Padding is

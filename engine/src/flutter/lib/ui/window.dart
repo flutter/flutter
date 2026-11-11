@@ -196,8 +196,8 @@ class FlutterView {
   /// which the view can render, but over which the operating system will likely
   /// place system UI, such as the keyboard.
   ///
-  /// That system UI may be translucent or have rounded corners, so content
-  /// rendered in this area can remain visible.
+  /// The system UI may be translucent or have rounded corners, so content
+  /// rendered behind it can remain visible.
   ///
   /// When this property changes, [PlatformDispatcher.onMetricsChanged] is
   /// called. When using the Flutter framework, using [MediaQuery.of] to obtain
