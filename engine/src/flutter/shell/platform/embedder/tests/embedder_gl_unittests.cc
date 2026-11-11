@@ -4924,6 +4924,7 @@ TEST_F(EmbedderTest, RenderExternalTextureWithImpellerOpenGL) {
                                    GLsizei height, GLint border, GLenum format,
                                    GLenum type, const void* pixels);
   typedef void (*glTexParameteriProc)(GLenum target, GLenum pname, GLint param);
+  typedef void (*glDeleteTexturesProc)(GLsizei n, const GLuint* textures);
   static glGenTexturesProc glGenTextures = reinterpret_cast<glGenTexturesProc>(
       context.GLGetProcAddress("glGenTextures"));
   static glBindTextureProc glBindTexture = reinterpret_cast<glBindTextureProc>(
@@ -4933,6 +4934,9 @@ TEST_F(EmbedderTest, RenderExternalTextureWithImpellerOpenGL) {
   static glTexParameteriProc glTexParameteri =
       reinterpret_cast<glTexParameteriProc>(
           context.GLGetProcAddress("glTexParameteri"));
+  static glDeleteTexturesProc glDeleteTextures =
+      reinterpret_cast<glDeleteTexturesProc>(
+          context.GLGetProcAddress("glDeleteTextures"));
   static PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES =
       reinterpret_cast<PFNGLEGLIMAGETARGETTEXTURE2DOESPROC>(
           context.GLGetProcAddress("glEGLImageTargetTexture2DOES"));
@@ -4945,45 +4949,57 @@ TEST_F(EmbedderTest, RenderExternalTextureWithImpellerOpenGL) {
   static PFNEGLCREATEIMAGEKHRPROC eglCreateImageKHR =
       reinterpret_cast<PFNEGLCREATEIMAGEKHRPROC>(
           context.GLGetProcAddress("eglCreateImageKHR"));
+  static PFNEGLDESTROYIMAGEKHRPROC eglDestroyImageKHR =
+      reinterpret_cast<PFNEGLDESTROYIMAGEKHRPROC>(
+          context.GLGetProcAddress("eglDestroyImageKHR"));
 
-  static GLuint gl_texture = 0;
   auto rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().open_gl.gl_external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterOpenGLTexture* texture) -> bool {
-    if (gl_texture == 0) {
-      std::vector<uint8_t> buffer(kWidth * kHeight * 4);
-      for (int i = 0; i < kWidth * kHeight; ++i) {
-        bool top = i < kWidth * kHeight / 2;
-        buffer[i * 4 + 0] = top ? 255 : 0;
-        buffer[i * 4 + 1] = 0;
-        buffer[i * 4 + 2] = top ? 0 : 255;
-        buffer[i * 4 + 3] = 255;
-      }
-      GLuint source;
-      glGenTextures(1, &source);
-      glBindTexture(GL_TEXTURE_2D, source);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, kWidth, kHeight, 0, GL_RGBA,
-                   GL_UNSIGNED_BYTE, buffer.data());
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-      // Sample the texture through an EGLImage as an external texture.
-      EGLImageKHR image = eglCreateImageKHR(
-          eglGetCurrentDisplay(), eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-          reinterpret_cast<EGLClientBuffer>(static_cast<uintptr_t>(source)),
-          nullptr);
-      if (image == EGL_NO_IMAGE_KHR) {
-        return false;
-      }
-      glGenTextures(1, &gl_texture);
-      glBindTexture(GL_TEXTURE_EXTERNAL_OES, gl_texture);
-      glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
+    std::vector<uint8_t> buffer(kWidth * kHeight * 4);
+    for (int i = 0; i < kWidth * kHeight; ++i) {
+      bool top = i < kWidth * kHeight / 2;
+      buffer[i * 4 + 0] = top ? 255 : 0;
+      buffer[i * 4 + 1] = 0;
+      buffer[i * 4 + 2] = top ? 0 : 255;
+      buffer[i * 4 + 3] = 255;
     }
+    GLuint source;
+    glGenTextures(1, &source);
+    glBindTexture(GL_TEXTURE_2D, source);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, kWidth, kHeight, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, buffer.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // Sample the texture through an EGLImage as an external texture. The
+    // external texture keeps the image contents alive after the image and
+    // source texture are deleted.
+    EGLDisplay display = eglGetCurrentDisplay();
+    EGLImageKHR image = eglCreateImageKHR(
+        display, eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+        reinterpret_cast<EGLClientBuffer>(static_cast<uintptr_t>(source)),
+        nullptr);
+    if (image == EGL_NO_IMAGE_KHR) {
+      glDeleteTextures(1, &source);
+      return false;
+    }
+    GLuint gl_texture;
+    glGenTextures(1, &gl_texture);
+    glBindTexture(GL_TEXTURE_EXTERNAL_OES, gl_texture);
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
+    eglDestroyImageKHR(display, image);
+    glDeleteTextures(1, &source);
+
     texture->target = GL_TEXTURE_EXTERNAL_OES;
     texture->name = gl_texture;
     texture->format = GL_RGBA8;
-    texture->destruction_callback = nullptr;
-    texture->user_data = nullptr;
+    texture->destruction_callback = [](void* user_data) {
+      GLuint gl_texture =
+          static_cast<GLuint>(reinterpret_cast<uintptr_t>(user_data));
+      glDeleteTextures(1, &gl_texture);
+    };
+    texture->user_data = reinterpret_cast<void*>(gl_texture);
     texture->width = width;
     texture->height = height;
     return true;
