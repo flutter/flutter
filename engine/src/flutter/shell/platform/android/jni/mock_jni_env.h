@@ -65,8 +65,10 @@ class MockableJNIEnv : public JNIEnv {
     jni_.FindClass = WrapFindClass;
     jni_.GetFieldID = WrapGetFieldID;
     jni_.GetMethodID = WrapGetMethodID;
+    jni_.GetObjectClass = WrapGetObjectClass;
     jni_.GetObjectRefType = WrapGetObjectRefType;
     jni_.GetStaticFieldID = WrapGetStaticFieldID;
+    jni_.GetStaticFloatField = WrapGetStaticFloatField;
     jni_.GetStaticMethodID = WrapGetStaticMethodID;
     jni_.NewGlobalRef = WrapNewGlobalRef;
     jni_.NewLocalRef = WrapNewLocalRef;
@@ -88,8 +90,10 @@ class MockableJNIEnv : public JNIEnv {
   virtual jclass FindClass(const char*) = 0;
   virtual jfieldID GetFieldID(jclass, const char*, const char*) = 0;
   virtual jmethodID GetMethodID(jclass, const char*, const char*) = 0;
+  virtual jclass GetObjectClass(jobject) = 0;
   virtual jobjectRefType GetObjectRefType(jobject) = 0;
   virtual jfieldID GetStaticFieldID(jclass, const char*, const char*) = 0;
+  virtual jfloat GetStaticFloatField(jclass, jfieldID) = 0;
   virtual jmethodID GetStaticMethodID(jclass, const char*, const char*) = 0;
   virtual jobject NewGlobalRef(jobject) = 0;
   virtual jobject NewLocalRef(jobject) = 0;
@@ -167,6 +171,9 @@ class MockableJNIEnv : public JNIEnv {
                                    const char* sig) {
     return static_cast<MockableJNIEnv*>(env)->GetMethodID(clazz, name, sig);
   }
+  static jclass WrapGetObjectClass(JNIEnv* env, jobject obj) {
+    return static_cast<MockableJNIEnv*>(env)->GetObjectClass(obj);
+  }
   static jobjectRefType WrapGetObjectRefType(JNIEnv* env, jobject obj) {
     return static_cast<MockableJNIEnv*>(env)->GetObjectRefType(obj);
   }
@@ -176,6 +183,12 @@ class MockableJNIEnv : public JNIEnv {
                                        const char* sig) {
     return static_cast<MockableJNIEnv*>(env)->GetStaticFieldID(clazz, name,
                                                                sig);
+  }
+  static jfloat WrapGetStaticFloatField(JNIEnv* env,
+                                        jclass clazz,
+                                        jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticFloatField(clazz,
+                                                                  fieldID);
   }
   static jmethodID WrapGetStaticMethodID(JNIEnv* env,
                                          jclass clazz,
@@ -238,11 +251,13 @@ class MockJNIEnv : public MockableJNIEnv {
               GetMethodID,
               (jclass, const char*, const char*),
               (override));
+  MOCK_METHOD(jclass, GetObjectClass, (jobject), (override));
   MOCK_METHOD(jobjectRefType, GetObjectRefType, (jobject), (override));
   MOCK_METHOD(jfieldID,
               GetStaticFieldID,
               (jclass, const char*, const char*),
               (override));
+  MOCK_METHOD(jfloat, GetStaticFloatField, (jclass, jfieldID), (override));
   MOCK_METHOD(jmethodID,
               GetStaticMethodID,
               (jclass, const char*, const char*),
