@@ -23,6 +23,9 @@ namespace impeller {
 struct UberSDFParameters {
   /// The amount by which the UberSDF shader fades the edge of the drawn shapes,
   /// in pixels.
+  ///
+  /// The shader hardcodes this value as `kAntialiasPixels` in
+  /// `uber_sdf_common.glsl`, so the two must be kept in sync.
   static constexpr Scalar kAntialiasPixels = 1.0f;
 
   /// The type of primitive shape.
@@ -126,6 +129,9 @@ struct UberSDFParameters {
   Point superellipse_degree;
 
   /// The angular span of the circular cap for the top and right octants.
+  ///
+  /// The shader receives the cosines of these angles in the otherwise unused
+  /// `radii.zw` uniform components.
   Point angle_span;
 
   /// The circular cap center for the top octant of each

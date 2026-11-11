@@ -5,6 +5,8 @@
 #ifndef RSE_SDF_GLSL_
 #define RSE_SDF_GLSL_
 
+#include <impeller/constants.glsl>
+
 #include "sdf_functions.glsl"
 #include "sdf_utils.glsl"
 
@@ -28,16 +30,30 @@ bool useCircularDistance(vec2 p, float radius, float span) {
   return false;
 }
 
-float distanceFromRSEOctant(vec2 p_oct,
-                            vec2 circle_center,
-                            float radius,
-                            float span,
-                            float axis_length,
-                            float se_degree) {
+// Equivalent to `useCircularDistance`, but takes the cosine of the span.
+//
+// `p` is within the span of the corner circle's arc when the angle between `p`
+// and the 45 degree midline is less than the span, i.e. when
+// cos(angle) > cos(span). This avoids atan() and mod(), which need more
+// constants and uniform registers.
+bool useCircularDistanceCos(vec2 p, float cos_span) {
+  return dot(p, vec2(kHalfSqrtTwo)) > cos_span * length(p);
+}
+
+// Signed distance from `p_oct` to one octant of a rounded superellipse, in
+// the octant's coordinate system.
+//
+// `cos_span` is the cosine of the angular span of the corner circle's arc.
+float distanceFromRSEOctantCos(vec2 p_oct,
+                               vec2 circle_center,
+                               float radius,
+                               float cos_span,
+                               float axis_length,
+                               float se_degree) {
   // Move the point to the corner circle's coordinate system.
   vec2 p_rel = p_oct - circle_center;
 
-  if (useCircularDistance(p_rel, radius, span)) {
+  if (useCircularDistanceCos(p_rel, cos_span)) {
     return length(p_rel) - radius;
   }
   return sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;

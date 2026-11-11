@@ -20,6 +20,7 @@ impeller_shaders("entity_shaders") {
     "shaders/circle.vert",
     "shaders/complex_rse.frag",
     "shaders/uber_sdf.frag",
+    "shaders/uber_sdf.vert",
     "shaders/clip.frag",
     "shaders/clip.vert",
     "shaders/glyph_atlas.frag",
