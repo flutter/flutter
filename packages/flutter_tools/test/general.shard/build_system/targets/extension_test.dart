@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/extension.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -792,6 +793,7 @@ void main() {
     expect(resolvedAssemble, equals(resolvedBuild));
 
     expect(BuiltInTargets.copyAssets, equals(const CopyAssets().name));
+    expect(BuiltInTargets.installCodeAssets, equals(const InstallCodeAssets().name));
     expect(BuiltInTargets.kernelSnapshot, equals(const KernelSnapshot().name));
   });
 }

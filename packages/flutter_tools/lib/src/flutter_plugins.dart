@@ -1745,7 +1745,7 @@ List<ExtensionPlugin> resolveExtensionPluginsForPlatform(
     for (final Plugin plugin in resolved)
       ExtensionPlugin(
         name: plugin.name,
-        path: Uri.directory(plugin.path),
+        path: fileSystem.directory(plugin.path).uri,
         configuration: switch (plugin.platforms[platformKey]) {
           final CustomPlatformPlugin custom => custom.configuration,
           final PluginPlatform platform => platform.toMap(fileSystem: fileSystem),

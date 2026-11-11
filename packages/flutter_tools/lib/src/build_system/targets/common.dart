@@ -206,28 +206,25 @@ class KernelSnapshot extends Target {
     // everything besides 'false' is considered to be enabled.
     final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     // Custom extension platforms are not part of the built-in TargetPlatform
-    // enum. When TargetPlatform.fromName fails and kExtensionTargetOs is
-    // explicitly provided, fall back to a representative TargetPlatform so
-    // KernelCompiler can resolve the host engine's Artifact.platformKernelDill
-    // and link the platform kernel into the output dill for custom embedders.
+    // enum. Map recognized custom extension target platforms to
+    // TargetPlatform.unsupported and resolve Artifact.flutterPatchedSdkPath
+    // against the host engine (platform: null) without triggering built-in
+    // platform-specific side effects such as Xcode flavor parsing.
     TargetPlatform targetPlatform;
     OS? customTargetOs;
+    var isExtensionTargetPlatform = false;
     try {
       targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     } on Exception {
-      final String? extensionTargetOs = environment.defines[kExtensionTargetOs];
-      if (extensionTargetOs == null || extensionTargetOs.trim().isEmpty) {
+      if (!hasExtensionPlatformDefines(environment.defines)) {
         rethrow;
       }
-      customTargetOs = parseNativeOS(extensionTargetOs);
-      targetPlatform = switch (customTargetOs) {
-        OS.android => TargetPlatform.android,
-        OS.fuchsia => TargetPlatform.fuchsia_arm64,
-        OS.iOS => TargetPlatform.ios,
-        OS.macOS => TargetPlatform.darwin,
-        OS.windows => TargetPlatform.windows_x64,
-        _ => TargetPlatform.linux_x64,
-      };
+      isExtensionTargetPlatform = true;
+      targetPlatform = TargetPlatform.unsupported;
+      final String? extensionTargetOs = environment.defines[kExtensionTargetOs];
+      if (extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) {
+        customTargetOs = parseNativeOS(extensionTargetOs);
+      }
     }
 
     // This configuration is all optional.
@@ -278,7 +275,13 @@ class KernelSnapshot extends Target {
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
       case TargetPlatform.unsupported:
-        TargetPlatform.throwUnsupportedTarget();
+        if (!isExtensionTargetPlatform) {
+          TargetPlatform.throwUnsupportedTarget();
+        }
+        forceLinkPlatform = switch (customTargetOs) {
+          OS.android || OS.fuchsia || OS.iOS => false,
+          _ => true,
+        };
     }
 
     // frontend_server's --target-os flag only accepts the six built-in VM
@@ -288,11 +291,13 @@ class KernelSnapshot extends Target {
     // For custom extension platforms, only pass --target-os when
     // customTargetOs is one of those six operating systems (for example, a
     // Linux-based embedded target that sets ExtensionTargetOs=linux). For
-    // custom operating systems not in OS.values, omit --target-os (null) so
-    // Platform.operatingSystem is evaluated at runtime by the embedder instead
-    // of being constant-folded to 'linux'.
-    final String? targetOS = customTargetOs != null
-        ? (OS.values.contains(customTargetOs) ? customTargetOs.name : null)
+    // custom operating systems not in OS.values or when ExtensionTargetOs is
+    // unset, omit --target-os (null) so Platform.operatingSystem is evaluated
+    // at runtime by the embedder instead of being constant-folded.
+    final String? targetOS = isExtensionTargetPlatform
+        ? (customTargetOs != null && OS.values.contains(customTargetOs)
+              ? customTargetOs.name
+              : null)
         : switch (targetPlatform.os) {
             .fuchsia || .android || .macos || .ios || .linux || .windows => targetPlatform.os.name,
             .tester || .web => null,
@@ -318,7 +323,7 @@ class KernelSnapshot extends Target {
     final CompilerOutput? output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: targetPlatform,
+        platform: targetPlatform == TargetPlatform.unsupported ? null : targetPlatform,
         mode: buildMode,
       ),
       aot: buildMode.isPrecompiled,

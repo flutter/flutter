@@ -88,12 +88,7 @@ class DartPluginRegistrantTarget extends Target {
       try {
         targetPlatform = TargetPlatform.fromName(platformName);
       } on Exception {
-        final String? extensionTargetOs = environment.defines[kExtensionTargetOs];
-        final String? extensionPluginPlatformKey = environment.defines[kExtensionPluginPlatformKey];
-        final bool hasExtensionPlatform =
-            (extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) ||
-            (extensionPluginPlatformKey != null && extensionPluginPlatformKey.trim().isNotEmpty);
-        if (!hasExtensionPlatform) {
+        if (!hasExtensionPlatformDefines(environment.defines)) {
           rethrow;
         }
         // Custom extension target platforms are not part of the built-in

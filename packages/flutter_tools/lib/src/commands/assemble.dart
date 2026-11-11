@@ -232,10 +232,7 @@ class AssembleCommand extends FlutterCommand {
       targetPlatform = TargetPlatform.fromName(platform);
     } on Exception {
       await _resolveExtensionEnvironmentDefines();
-      final String? extensionTargetOs = _environment.defines[kExtensionTargetOs];
-      final String? extensionPluginPlatformKey = _environment.defines[kExtensionPluginPlatformKey];
-      if ((extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) ||
-          (extensionPluginPlatformKey != null && extensionPluginPlatformKey.trim().isNotEmpty)) {
+      if (hasExtensionPlatformDefines(_environment.defines)) {
         return super.requiredArtifacts;
       }
       rethrow;
@@ -271,6 +268,12 @@ class AssembleCommand extends FlutterCommand {
         buildTargets.where((ExtensionBuildTarget t) => t.name == platform).firstOrNull ??
         buildTargets.where((ExtensionBuildTarget t) => t.targetPlatform == platform).firstOrNull;
     if (matchedTarget == null) {
+      final List<ExtensionAssembleTarget> assembleTargets = await buildManager.getAssembleTargets();
+      if (assembleTargets.any((ExtensionAssembleTarget t) => t.targetPlatform == platform) &&
+          !_environment.defines.containsKey(kExtensionCustomTargetPlatform)) {
+        _environment.defines[kExtensionCustomTargetPlatform] = 'true';
+        _cachedEnvironment = _createEnvironment(definesOverride: _environment.defines);
+      }
       return;
     }
     final String? buildModeName = _environment.defines[kBuildMode];
@@ -300,10 +303,13 @@ class AssembleCommand extends FlutterCommand {
           resolvedArtifacts: resolvedArtifacts,
           targetName: matchedTarget.name,
         );
-    final Map<String, String> extensionDefines = buildManager.environmentDefinesForTarget(
-      matchedTarget.name,
-      nativeAssetsConfig: nativeAssetsConfig,
-    );
+    final extensionDefines = <String, String>{
+      kExtensionCustomTargetPlatform: 'true',
+      ...buildManager.environmentDefinesForTarget(
+        matchedTarget.name,
+        nativeAssetsConfig: nativeAssetsConfig,
+      ),
+    };
     var addedDefines = false;
     for (final MapEntry(:String key, :String value) in extensionDefines.entries) {
       _environment.defines.putIfAbsent(key, () {

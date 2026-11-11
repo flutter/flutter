@@ -326,28 +326,39 @@ class InstallCodeAssets extends Target {
     // native_asset.yaml that can be used by the final AOT compilation.
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
 
-    final OS targetOS = getNativeOSFromTargetPlatform(
-      targetPlatform,
-      environmentDefines: environment.defines,
-    );
-    Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    if (targetOS == OS.linux || targetOS == OS.windows || !OS.values.contains(targetOS)) {
-      // Avoid needing migration for CMake files, keep old directory structure,
-      // and place custom extension OS assets under native_assets/<os>/.
-      targetUri = targetUri.resolve('${targetOS.name}/');
-    }
+    final List<File> installedFiles;
+    if (targetPlatform == TargetPlatform.unsupported &&
+        resolveCustomNativeTarget(environment.defines) == null &&
+        combinedResult.codeAssets.isEmpty) {
+      installedFiles = await writeEmptyNativeAssetsJson(
+        fileSystem: fileSystem,
+        logger: environment.logger,
+        nativeAssetsFileUri: nativeAssetsFileUri,
+      );
+    } else {
+      final OS targetOS = getNativeOSFromTargetPlatform(
+        targetPlatform,
+        environmentDefines: environment.defines,
+      );
+      Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
+      if (targetOS == OS.linux || targetOS == OS.windows || !OS.values.contains(targetOS)) {
+        // Avoid needing migration for CMake files, keep old directory structure,
+        // and place custom extension OS assets under native_assets/<os>/.
+        targetUri = targetUri.resolve('${targetOS.name}/');
+      }
 
-    final List<File> installedFiles = await installCodeAssets(
-      dartHookResult: combinedResult,
-      environmentDefines: environment.defines,
-      targetPlatform: targetPlatform,
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-      logger: environment.logger,
-      processManager: environment.processManager,
-      nativeAssetsFileUri: nativeAssetsFileUri,
-      targetUri: targetUri,
-    );
+      installedFiles = await installCodeAssets(
+        dartHookResult: combinedResult,
+        environmentDefines: environment.defines,
+        targetPlatform: targetPlatform,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        logger: environment.logger,
+        processManager: environment.processManager,
+        nativeAssetsFileUri: nativeAssetsFileUri,
+        targetUri: targetUri,
+      );
+    }
     assert(fileSystem.file(nativeAssetsFileUri).existsSync());
 
     final depfile = Depfile(<File>[
@@ -397,9 +408,11 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
     return TargetPlatform.fromName(targetPlatformEnvironment);
   } on Exception {
     // Custom extension platforms are not part of the built-in TargetPlatform
-    // enum. Map them to TargetPlatform.unsupported when a native OS and
-    // architecture can be resolved from extension defines.
-    if (resolveCustomNativeTarget(environment.defines) != null) {
+    // enum. Map recognized custom extension target platforms to
+    // TargetPlatform.unsupported so projects without hooks skip cleanly while
+    // projects with hooks validate kExtensionTargetOs and kExtensionTargetArch.
+    if (resolveCustomNativeTarget(environment.defines) != null ||
+        hasExtensionPlatformDefines(environment.defines)) {
       return TargetPlatform.unsupported;
     }
     rethrow;

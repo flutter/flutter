@@ -424,6 +424,9 @@ DartHooksResult combineBuildAndLinkResults({
   required SerializedBuildResults buildResults,
   required DartHooksResult linkResult,
 }) {
+  if (buildResults.isEmpty && linkResult.codeAssets.isEmpty && linkResult.dataAssets.isEmpty) {
+    return linkResult;
+  }
   final List<AssetBuildTarget> targets = _getTargets(
     androidSdkProvider: null,
     environmentDefines: environmentDefines,
@@ -568,6 +571,21 @@ Future<List<File>> installCodeAssets({
   final manifest = NativeAssetsManifest.fromTargetLocations(assetTargetLocations);
   await _writeNativeAssetsJson(manifest, nativeAssetsFileUri, fileSystem, logger: logger);
   return <File>[fileSystem.file(nativeAssetsFileUri), ...installedFiles];
+}
+
+/// Writes an empty `native_assets.json` manifest when a custom extension target
+/// platform has no bundled [FlutterCodeAsset]s and did not configure native
+/// asset target OS/architecture defines.
+Future<List<File>> writeEmptyNativeAssetsJson({
+  required FileSystem fileSystem,
+  required Logger logger,
+  required Uri nativeAssetsFileUri,
+}) async {
+  final manifest = NativeAssetsManifest.fromTargetLocations(
+    const <FlutterCodeAsset, FlutterCodeAssetTargetLocation>{},
+  );
+  await _writeNativeAssetsJson(manifest, nativeAssetsFileUri, fileSystem, logger: logger);
+  return <File>[fileSystem.file(nativeAssetsFileUri)];
 }
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.

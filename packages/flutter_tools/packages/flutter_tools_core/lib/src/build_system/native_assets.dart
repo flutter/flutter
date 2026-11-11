@@ -141,22 +141,23 @@ class ExtensionCCompilerConfig {
 /// `package:code_assets`'s `OS.fromString` and `Architecture.fromString`.
 @immutable
 class ExtensionNativeAssetsConfig {
-  const ExtensionNativeAssetsConfig({
+  ExtensionNativeAssetsConfig({
     required this.targetArchitecture,
     required this.targetOs,
     this.cCompilerConfig,
-  });
+  }) : assert(targetArchitecture.trim().isNotEmpty, 'targetArchitecture cannot be empty.'),
+       assert(targetOs.trim().isNotEmpty, 'targetOs cannot be empty.');
 
   /// Deserializes an [ExtensionNativeAssetsConfig] from a JSON-serializable map.
   factory ExtensionNativeAssetsConfig.fromJson(Map<String, Object?> json) {
     final String targetArchitecture = json.requiredField<String>(targetArchitectureKey);
-    if (targetArchitecture.isEmpty) {
+    if (targetArchitecture.trim().isEmpty) {
       throw const FormatException(
         'Missing or invalid "$targetArchitectureKey" for ExtensionNativeAssetsConfig.',
       );
     }
     final String targetOs = json.requiredField<String>(targetOsKey);
-    if (targetOs.isEmpty) {
+    if (targetOs.trim().isEmpty) {
       throw const FormatException(
         'Missing or invalid "$targetOsKey" for ExtensionNativeAssetsConfig.',
       );
@@ -226,11 +227,11 @@ class ExtensionNativeAssetsConfig {
       targetOsDefine: targetOs,
       targetArchDefine: targetArchitecture,
       if (compiler != null) ...<String, String>{
-        cCompilerCcDefine: compiler.cc.toFilePath(),
-        cCompilerArDefine: compiler.ar.toFilePath(),
-        cCompilerLdDefine: compiler.ld.toFilePath(),
+        cCompilerCcDefine: compiler.cc.toString(),
+        cCompilerArDefine: compiler.ar.toString(),
+        cCompilerLdDefine: compiler.ld.toString(),
         if (compiler.envScript case final Uri envScript)
-          cCompilerEnvScriptDefine: envScript.toFilePath(),
+          cCompilerEnvScriptDefine: envScript.toString(),
         if (compiler.envScriptArgs.isNotEmpty)
           cCompilerEnvScriptArgsDefine: jsonEncode(compiler.envScriptArgs),
       },

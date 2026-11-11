@@ -254,6 +254,39 @@ void main() {
         }),
         throwsFormatException,
       );
+      expect(
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'pluginPlatformKey': 'invalid-hyphen-key',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'pluginPlatformKey': 'InvalidUpper',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'pluginPlatformKey': '',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget(
+          description: 'desc',
+          name: 'custom-target',
+          outputDir: '{OUTPUT_DIR}/custom',
+          targetPlatform: 'custom-arm64',
+          pluginPlatformKey: 'invalid-hyphen-key',
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(ExtensionBuildTarget.isValidPluginPlatformKey('custom_os_2'), isTrue);
+      expect(ExtensionBuildTarget.isValidPluginPlatformKey('custom-os'), isFalse);
     });
 
     test('listFromJson handles valid and invalid lists', () {
@@ -601,11 +634,11 @@ void main() {
         targetArchitecture: 'arm64',
         targetOs: 'linux',
         cCompilerConfig: ExtensionCCompilerConfig(
-          ar: Uri.file('/usr/bin/llvm-ar'),
-          cc: Uri.file('/usr/bin/clang'),
-          envScript: Uri.file('/opt/sdk/env.sh'),
+          ar: Uri.parse('file:///usr/bin/llvm-ar'),
+          cc: Uri.parse('file:///usr/bin/clang'),
+          envScript: Uri.parse('file:///opt/sdk/env.sh'),
           envScriptArgs: const <String>['--arch', 'arm64'],
-          ld: Uri.file('/usr/bin/ld.lld'),
+          ld: Uri.parse('file:///usr/bin/ld.lld'),
         ),
       );
 
@@ -633,7 +666,7 @@ void main() {
     });
 
     test('serializes and deserializes with required fields only', () {
-      const config = ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: 'linux');
+      final config = ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: 'linux');
 
       final Map<String, Object?> jsonMap = config.toMap();
       expect(jsonMap.containsKey(ExtensionNativeAssetsConfig.cCompilerConfigKey), isFalse);
@@ -643,9 +676,9 @@ void main() {
       expect(parsed.cCompilerConfig, isNull);
 
       final compilerWithoutEnvArgs = ExtensionCCompilerConfig(
-        ar: Uri.file('/usr/bin/llvm-ar'),
-        cc: Uri.file('/usr/bin/clang'),
-        ld: Uri.file('/usr/bin/ld.lld'),
+        ar: Uri.parse('file:///usr/bin/llvm-ar'),
+        cc: Uri.parse('file:///usr/bin/clang'),
+        ld: Uri.parse('file:///usr/bin/ld.lld'),
       );
       expect(compilerWithoutEnvArgs.envScriptArgs, isEmpty);
       final Map<String, Object?> compilerMap = compilerWithoutEnvArgs.toMap();
@@ -666,6 +699,28 @@ void main() {
           'targetArchitecture': 'x64',
         }),
         throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': '   ',
+          'targetOs': 'linux',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x64',
+          'targetOs': '   ',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: ' ', targetOs: 'linux'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: ' '),
+        throwsA(isA<AssertionError>()),
       );
       expect(
         () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
@@ -736,33 +791,33 @@ void main() {
       );
       expect(
         () => ExtensionCCompilerConfig(
-          ar: Uri.directory('/usr/bin'),
-          cc: Uri.file('/usr/bin/clang'),
-          ld: Uri.file('/usr/bin/ld.lld'),
+          ar: Uri.parse('file:///usr/bin/'),
+          cc: Uri.parse('file:///usr/bin/clang'),
+          ld: Uri.parse('file:///usr/bin/ld.lld'),
         ),
         throwsA(isA<AssertionError>()),
       );
       expect(
         () => ExtensionCCompilerConfig(
-          ar: Uri.file('/usr/bin/llvm-ar'),
-          cc: Uri.file('/usr/bin/clang'),
-          ld: Uri.file('/usr/bin/ld.lld'),
+          ar: Uri.parse('file:///usr/bin/llvm-ar'),
+          cc: Uri.parse('file:///usr/bin/clang'),
+          ld: Uri.parse('file:///usr/bin/ld.lld'),
           envScriptArgs: const <String>['--arch', 'arm64'],
         ),
         throwsA(isA<AssertionError>()),
       );
     });
 
-    test('toEnvironmentDefines maps targetOs, targetArchitecture, and compiler paths', () {
+    test('toEnvironmentDefines maps targetOs, targetArchitecture, and canonical compiler URIs', () {
       final config = ExtensionNativeAssetsConfig(
         targetArchitecture: 'arm64',
         targetOs: 'custom_os',
         cCompilerConfig: ExtensionCCompilerConfig(
-          ar: Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
-          cc: Uri.file('/opt/custom-sdk/llvm/bin/clang'),
-          envScript: Uri.file('/opt/custom-sdk/env.sh'),
+          ar: Uri.parse('file:///opt/custom-sdk/llvm/bin/llvm-ar'),
+          cc: Uri.parse('file:///opt/custom-sdk/llvm/bin/clang'),
+          envScript: Uri.parse('file:///C:/sdk/vcvarsall.bat'),
           envScriptArgs: const <String>['--arch', 'arm64 with spaces'],
-          ld: Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'),
+          ld: Uri.parse('file:///opt/custom-sdk/llvm/bin/ld.lld'),
         ),
       );
 
@@ -771,14 +826,15 @@ void main() {
         equals(<String, String>{
           ExtensionNativeAssetsConfig.targetOsDefine: 'custom_os',
           ExtensionNativeAssetsConfig.targetArchDefine: 'arm64',
-          ExtensionNativeAssetsConfig.cCompilerCcDefine: '/opt/custom-sdk/llvm/bin/clang',
-          ExtensionNativeAssetsConfig.cCompilerArDefine: '/opt/custom-sdk/llvm/bin/llvm-ar',
-          ExtensionNativeAssetsConfig.cCompilerLdDefine: '/opt/custom-sdk/llvm/bin/ld.lld',
-          ExtensionNativeAssetsConfig.cCompilerEnvScriptDefine: '/opt/custom-sdk/env.sh',
+          ExtensionNativeAssetsConfig.cCompilerCcDefine: 'file:///opt/custom-sdk/llvm/bin/clang',
+          ExtensionNativeAssetsConfig.cCompilerArDefine: 'file:///opt/custom-sdk/llvm/bin/llvm-ar',
+          ExtensionNativeAssetsConfig.cCompilerLdDefine: 'file:///opt/custom-sdk/llvm/bin/ld.lld',
+          ExtensionNativeAssetsConfig.cCompilerEnvScriptDefine: 'file:///C:/sdk/vcvarsall.bat',
           ExtensionNativeAssetsConfig.cCompilerEnvScriptArgsDefine:
               '["--arch","arm64 with spaces"]',
         }),
       );
+      expect(BuiltInTargets.installCodeAssets, 'install_code_assets');
     });
   });
 
@@ -786,7 +842,7 @@ void main() {
     test('serializes, deserializes, and compares nested configuration across JSON round-trip', () {
       final plugin = ExtensionPlugin(
         name: 'url_launcher_linux',
-        path: Uri.directory('/pub-cache/url_launcher_linux'),
+        path: Uri.parse('file:///pub-cache/url_launcher_linux/'),
         configuration: const <String, Object?>{
           'pluginClass': 'UrlLauncherPlugin',
           'ffiPlugin': false,
@@ -827,6 +883,14 @@ void main() {
       expect(() => ExtensionPlugin.fromJson(const <String, Object?>{}), throwsFormatException);
       expect(
         () => ExtensionPlugin.fromJson(const <String, Object?>{
+          'name': '   ',
+          'path': 'file:///pub-cache/my_plugin/',
+          'configuration': <String, Object?>{},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPlugin.fromJson(const <String, Object?>{
           'name': 'my_plugin',
           'path': 'file:///pub-cache/my_plugin',
           'configuration': <String, Object?>{},
@@ -857,11 +921,11 @@ void main() {
         throwsFormatException,
       );
       expect(
-        () => ExtensionPlugin(name: '', path: Uri.directory('/pub-cache/my_plugin')),
+        () => ExtensionPlugin(name: ' ', path: Uri.parse('file:///pub-cache/my_plugin/')),
         throwsA(isA<AssertionError>()),
       );
       expect(
-        () => ExtensionPlugin(name: 'my_plugin', path: Uri.file('/pub-cache/my_plugin')),
+        () => ExtensionPlugin(name: 'my_plugin', path: Uri.parse('file:///pub-cache/my_plugin')),
         throwsA(isA<AssertionError>()),
       );
     });

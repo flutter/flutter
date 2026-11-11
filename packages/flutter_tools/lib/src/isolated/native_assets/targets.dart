@@ -7,7 +7,7 @@ import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
-import '../../base/file_system.dart' show Directory, File, FileSystem;
+import '../../base/file_system.dart' show Directory, FileSystem;
 import '../../base/process.dart' show ProcessUtils;
 import '../../build_info.dart'
     show
@@ -17,6 +17,7 @@ import '../../build_info.dart'
         TargetPlatform,
         getCpuArchForName,
         getCpuArchsFromEnv,
+        hasExtensionPlatformDefines,
         kAndroidArchs,
         kExtensionCCompilerAr,
         kExtensionCCompilerCc,
@@ -26,7 +27,8 @@ import '../../build_info.dart'
         kExtensionTargetArch,
         kExtensionTargetOs,
         kIosArchs,
-        kSdkRoot;
+        kSdkRoot,
+        kTargetPlatform;
 import '../../build_system/exceptions.dart' show MissingDefineException;
 import '../../context/android_context.dart' show AndroidSdkProvider;
 import '../../convert.dart' show json;
@@ -127,7 +129,17 @@ sealed class AssetBuildTarget {
         return _flutterTesterTarget(supportedAssetTypes, visualStudio: visualStudio);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
+        throwToolExit('No targets defined for target platform $targetPlatform.');
       case TargetPlatform.unsupported:
+        if (hasExtensionPlatformDefines(environmentDefines)) {
+          final String targetPlatformName =
+              environmentDefines[kTargetPlatform] ?? targetPlatform.name;
+          throwToolExit(
+            'Dart build and link hooks require "$kExtensionTargetOs" and '
+            '"$kExtensionTargetArch" (via BuildTarget.resolveNativeAssetsConfig) '
+            'for custom target platform "$targetPlatformName".',
+          );
+        }
         throwToolExit('No targets defined for target platform $targetPlatform.');
     }
   }
@@ -320,12 +332,7 @@ final class CustomCodeAssetTarget extends CodeAssetTarget {
     required ProcessUtils processUtils,
     bool mustMatchAppBuild = true,
   }) async {
-    cCompilerConfigSync =
-        cCompilerConfigFromDefines(environmentDefines) ??
-        _cCompilerConfigForCustomTarget(
-          environmentDefines: environmentDefines,
-          fileSystem: fileSystem,
-        );
+    cCompilerConfigSync = cCompilerConfigFromDefines(environmentDefines, fileSystem: fileSystem);
   }
 }
 
@@ -640,31 +647,78 @@ Architecture parseNativeArchitecture(String rawArch) {
 }
 
 /// Resolves a [CCompilerConfig] from explicit `kExtensionCCompiler*` defines in
-/// [environmentDefines], or returns `null` if compiler defines are not all provided.
-CCompilerConfig? cCompilerConfigFromDefines(Map<String, String> environmentDefines) {
+/// [environmentDefines], or returns `null` if no compiler defines are provided.
+///
+/// Throws a `ToolExit` if only a subset of [kExtensionCCompilerCc],
+/// [kExtensionCCompilerAr], and [kExtensionCCompilerLd] are specified, or if
+/// [kExtensionCCompilerEnvScriptArgs] is specified without
+/// [kExtensionCCompilerEnvScript].
+CCompilerConfig? cCompilerConfigFromDefines(
+  Map<String, String> environmentDefines, {
+  required FileSystem fileSystem,
+}) {
   final String? cc = _emptyToNull(environmentDefines[kExtensionCCompilerCc]);
   final String? ar = _emptyToNull(environmentDefines[kExtensionCCompilerAr]);
   final String? ld = _emptyToNull(environmentDefines[kExtensionCCompilerLd]);
-  if (cc == null || ar == null || ld == null) {
-    return null;
-  }
   final String? envScript = _emptyToNull(environmentDefines[kExtensionCCompilerEnvScript]);
   final List<String> envScriptArgs = _parseEnvScriptArgs(
     environmentDefines[kExtensionCCompilerEnvScriptArgs],
   );
+  if (cc == null && ar == null && ld == null) {
+    if (envScript != null || envScriptArgs.isNotEmpty) {
+      throwToolExit(
+        'Cannot specify "$kExtensionCCompilerEnvScript" or '
+        '"$kExtensionCCompilerEnvScriptArgs" without "$kExtensionCCompilerCc", '
+        '"$kExtensionCCompilerAr", and "$kExtensionCCompilerLd".',
+      );
+    }
+    return null;
+  }
+  if (cc == null || ar == null || ld == null) {
+    throwToolExit(
+      'Partial C compiler configuration in environment defines: '
+      '"$kExtensionCCompilerCc", "$kExtensionCCompilerAr", and '
+      '"$kExtensionCCompilerLd" must all be provided together.',
+    );
+  }
+  if (envScript == null && envScriptArgs.isNotEmpty) {
+    throwToolExit(
+      'Cannot specify "$kExtensionCCompilerEnvScriptArgs" without '
+      '"$kExtensionCCompilerEnvScript".',
+    );
+  }
   return CCompilerConfig(
-    archiver: Uri.file(ar),
-    compiler: Uri.file(cc),
-    linker: Uri.file(ld),
+    archiver: _parseExecutableUri(ar, kExtensionCCompilerAr, fileSystem: fileSystem),
+    compiler: _parseExecutableUri(cc, kExtensionCCompilerCc, fileSystem: fileSystem),
+    linker: _parseExecutableUri(ld, kExtensionCCompilerLd, fileSystem: fileSystem),
     windows: envScript == null
         ? null
         : WindowsCCompilerConfig(
             developerCommandPrompt: DeveloperCommandPrompt(
-              script: Uri.file(envScript),
+              script: _parseExecutableUri(
+                envScript,
+                kExtensionCCompilerEnvScript,
+                fileSystem: fileSystem,
+              ),
               arguments: envScriptArgs,
             ),
           ),
   );
+}
+
+Uri _parseExecutableUri(String rawValue, String defineName, {required FileSystem fileSystem}) {
+  final Uri? parsed = Uri.tryParse(rawValue);
+  if (parsed != null && parsed.isScheme('file')) {
+    if (!parsed.isAbsolute ||
+        parsed.hasQuery ||
+        parsed.hasFragment ||
+        parsed.path.isEmpty ||
+        parsed.path.endsWith('/')) {
+      throwToolExit('Invalid "$defineName" define: expected a valid file path or file: URI.');
+    }
+    return parsed;
+  }
+  return fileSystem.file(rawValue).uri;
 }
 
 List<String> _parseEnvScriptArgs(String? rawArgs) {
@@ -690,66 +744,4 @@ List<String> _parseEnvScriptArgs(String? rawArgs) {
   throwToolExit(
     'Invalid "$kExtensionCCompilerEnvScriptArgs" define: expected a JSON-encoded list of strings.',
   );
-}
-
-CCompilerConfig? _cCompilerConfigForCustomTarget({
-  required Map<String, String> environmentDefines,
-  required FileSystem fileSystem,
-}) {
-  final String? explicitCc = _emptyToNull(environmentDefines[kExtensionCCompilerCc]);
-  if (explicitCc == null) {
-    return null;
-  }
-  final compiler = Uri.file(explicitCc);
-  final String compilerParentDir = fileSystem.file(compiler).parent.path;
-  final Uri? archiver = _resolveSiblingExecutable(
-    const <String>['llvm-ar', 'ar'],
-    explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerAr]),
-    fileSystem: fileSystem,
-    siblingDir: compilerParentDir,
-  );
-  final Uri? linker = _resolveSiblingExecutable(
-    const <String>['ld.lld', 'ld'],
-    explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerLd]),
-    fileSystem: fileSystem,
-    siblingDir: compilerParentDir,
-  );
-  if (archiver == null || linker == null) {
-    return null;
-  }
-  final String? envScript = _emptyToNull(environmentDefines[kExtensionCCompilerEnvScript]);
-  final List<String> envScriptArgs = _parseEnvScriptArgs(
-    environmentDefines[kExtensionCCompilerEnvScriptArgs],
-  );
-  return CCompilerConfig(
-    archiver: archiver,
-    compiler: compiler,
-    linker: linker,
-    windows: envScript == null
-        ? null
-        : WindowsCCompilerConfig(
-            developerCommandPrompt: DeveloperCommandPrompt(
-              script: Uri.file(envScript),
-              arguments: envScriptArgs,
-            ),
-          ),
-  );
-}
-
-Uri? _resolveSiblingExecutable(
-  List<String> candidates, {
-  required String? explicitPath,
-  required FileSystem fileSystem,
-  required String siblingDir,
-}) {
-  if (explicitPath != null) {
-    return Uri.file(explicitPath);
-  }
-  for (final candidate in candidates) {
-    final File candidateFile = fileSystem.file(fileSystem.path.join(siblingDir, candidate));
-    if (candidateFile.existsSync()) {
-      return candidateFile.uri;
-    }
-  }
-  return null;
 }

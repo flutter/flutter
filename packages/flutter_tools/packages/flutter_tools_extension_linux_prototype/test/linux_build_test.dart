@@ -30,7 +30,7 @@ void main() {
         final parsed = ExtensionNativeAssetsConfig.fromJson(result! as Map<String, Object?>);
         expect(parsed.targetOs, 'custom_os');
         expect(parsed.targetArchitecture, 'arm64');
-        expect(parsed.cCompilerConfig?.cc, Uri.file('/opt/release-sdk/bin/clang'));
+        expect(parsed.cCompilerConfig?.cc, Uri.parse('file:///opt/release-sdk/bin/clang'));
         await service.shutdown();
       },
     );
@@ -456,9 +456,9 @@ final class _CustomNativeAssetsBuildTarget extends BuildTarget {
       targetArchitecture: 'arm64',
       targetOs: 'custom_os',
       cCompilerConfig: ExtensionCCompilerConfig(
-        ar: Uri.file('/opt/${context.buildMode.cliName}-sdk/bin/llvm-ar'),
-        cc: Uri.file('/opt/${context.buildMode.cliName}-sdk/bin/clang'),
-        ld: Uri.file('/opt/${context.buildMode.cliName}-sdk/bin/ld.lld'),
+        ar: Uri.parse('file:///opt/${context.buildMode.cliName}-sdk/bin/llvm-ar'),
+        cc: Uri.parse('file:///opt/${context.buildMode.cliName}-sdk/bin/clang'),
+        ld: Uri.parse('file:///opt/${context.buildMode.cliName}-sdk/bin/ld.lld'),
       ),
     );
   }

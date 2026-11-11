@@ -91,7 +91,7 @@ class ExtensionPlugin {
     required this.name,
     required this.path,
     this.configuration = const <String, Object?>{},
-  }) : assert(name.isNotEmpty, 'Plugin name cannot be empty.'),
+  }) : assert(name.trim().isNotEmpty, 'Plugin name cannot be empty.'),
        assert(
          path.isValidDirectoryUri,
          'Plugin path must be an absolute file: directory URI ending with "/": $path',
@@ -100,7 +100,7 @@ class ExtensionPlugin {
   /// Deserializes an [ExtensionPlugin] from a JSON-serializable map.
   factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
     final String name = json.requiredField<String>(nameKey);
-    if (name.isEmpty) {
+    if (name.trim().isEmpty) {
       throw const FormatException('Missing or invalid "$nameKey" for ExtensionPlugin.');
     }
     final Uri path = json.directoryUri(pathKey);
@@ -184,13 +184,23 @@ class ExtensionBuildTarget {
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
     this.pluginPlatformKey,
-  }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage');
+  }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage'),
+       assert(
+         pluginPlatformKey == null || isValidPluginPlatformKey(pluginPlatformKey),
+         'Invalid pluginPlatformKey "$pluginPlatformKey". $_invalidPluginPlatformKeyMessage',
+       );
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
     final String name = json.requiredField<String>(nameKey);
     if (!isValidName(name)) {
       throw FormatException('Invalid "$nameKey" field: "$name". $_invalidNameMessage');
+    }
+    final String? pluginPlatformKey = json.nullableField<String>(pluginPlatformKeyKey);
+    if (pluginPlatformKey != null && !isValidPluginPlatformKey(pluginPlatformKey)) {
+      throw FormatException(
+        'Invalid "$pluginPlatformKeyKey" field: "$pluginPlatformKey". $_invalidPluginPlatformKeyMessage',
+      );
     }
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
@@ -204,7 +214,7 @@ class ExtensionBuildTarget {
         for (final String name in json.stringIterable(hostArtifactsKey))
           ExtensionHostArtifact(name),
       },
-      pluginPlatformKey: json.nullableField<String>(pluginPlatformKeyKey),
+      pluginPlatformKey: pluginPlatformKey,
     );
   }
 
@@ -213,12 +223,22 @@ class ExtensionBuildTarget {
       'Build target names must start with a lowercase ASCII letter and contain '
       'only lowercase ASCII letters, digits, underscores, and hyphens.';
 
+  // Plugin platform keys map to snake_case identifiers in pubspec.yaml and Dart
+  // code generation, so hyphens and uppercase characters are disallowed.
+  static final _validPluginPlatformKeyPattern = RegExp(r'^[a-z][a-z0-9_]*$');
+  static const String _invalidPluginPlatformKeyMessage =
+      'Plugin platform keys must start with a lowercase ASCII letter and contain '
+      'only lowercase ASCII letters, digits, and underscores.';
+
   /// Returns whether [name] is a valid build target name.
   ///
   /// A valid target name must start with a lowercase ASCII letter (`a-z`) and
   /// may contain only lowercase ASCII letters, digits (`0-9`), underscores
   /// (`_`), and hyphens (`-`).
   static bool isValidName(String name) => _validNamePattern.hasMatch(name);
+
+  /// Returns whether [key] is a valid plugin platform key (`^[a-z][a-z0-9_]*$`).
+  static bool isValidPluginPlatformKey(String key) => _validPluginPlatformKeyPattern.hasMatch(key);
 
   /// Map key for [artifacts].
   static const String artifactsKey = 'artifacts';

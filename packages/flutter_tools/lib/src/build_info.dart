@@ -1173,6 +1173,25 @@ const String kExtensionCCompilerEnvScriptArgs =
 /// Dart plugins on an extension target.
 const kExtensionPluginPlatformKey = 'ExtensionPluginPlatformKey';
 
+/// Marks [kTargetPlatform] as a custom target platform registered by an active
+/// tool extension (`'true'`).
+const kExtensionCustomTargetPlatform = 'ExtensionCustomTargetPlatform';
+
+/// Whether [defines] contains custom platform configuration from a tool
+/// extension ([kExtensionTargetOs], [kExtensionPluginPlatformKey], or
+/// [kExtensionCustomTargetPlatform]).
+bool hasExtensionPlatformDefines(Map<String, String> defines) {
+  final String? extensionTargetOs = defines[kExtensionTargetOs];
+  if (extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) {
+    return true;
+  }
+  final String? extensionPluginPlatformKey = defines[kExtensionPluginPlatformKey];
+  if (extensionPluginPlatformKey != null && extensionPluginPlatformKey.trim().isNotEmpty) {
+    return true;
+  }
+  return defines[kExtensionCustomTargetPlatform] == 'true';
+}
+
 /// Compile-time Dart environment define (`-DFLUTTER_CUSTOM_PLATFORM=<platform>`)
 /// used by `dart_plugin_registrant.dart` to select Dart plugin implementations
 /// for a custom extension target platform.

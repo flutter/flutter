@@ -113,9 +113,9 @@ final class _PluginCapturingBuildTarget extends BuildTarget {
       targetArchitecture: 'arm64',
       targetOs: 'custom_os',
       cCompilerConfig: ExtensionCCompilerConfig(
-        ar: Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
-        cc: Uri.file('/opt/custom-sdk/llvm/bin/clang'),
-        ld: Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'),
+        ar: Uri.parse('file:///opt/custom-sdk/llvm/bin/llvm-ar'),
+        cc: Uri.parse('file:///opt/custom-sdk/llvm/bin/clang'),
+        ld: Uri.parse('file:///opt/custom-sdk/llvm/bin/ld.lld'),
       ),
     );
   }
@@ -123,8 +123,42 @@ final class _PluginCapturingBuildTarget extends BuildTarget {
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
     _pluginsPort.send(context.plugins);
-    return ExtensionBuildResult(success: true, executableUri: Uri.file('/tmp/custom_pkg/app'));
+    return ExtensionBuildResult(
+      success: true,
+      executableUri: Uri.parse('file:///tmp/custom_pkg/app'),
+    );
   }
+}
+
+final class _DefaultHooksBuildTarget extends BuildTarget {
+  const _DefaultHooksBuildTarget()
+    : super(
+        description: 'Custom build target using default resolveNativeAssetsConfig => null.',
+        outputDir: '{OUTPUT_DIR}/custom_hookless',
+        targetPlatform: 'custom-hookless-arm64',
+      );
+
+  @override
+  String get name => 'custom-hookless';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _DefaultHooksBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => const <BuildTarget>[_DefaultHooksBuildTarget()];
+}
+
+void _defaultHooksExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_DefaultHooksBuildService()],
+    extensionName: 'default_hooks_extension',
+    supportedPlatforms: const <String>{'linux'},
+  );
 }
 
 final class _PluginCapturingAssembleTarget extends AssembleTarget {
@@ -376,8 +410,38 @@ platforms:
         equals(<ExtensionPlugin>[
           ExtensionPlugin(
             name: 'url_launcher_custom',
-            path: Uri.directory('/pub/url_launcher_custom'),
+            path: fileSystem.directory('/pub/url_launcher_custom').uri,
             configuration: const <String, Object?>{'pluginClass': 'UrlLauncherCustomPlugin'},
+          ),
+        ]),
+      );
+
+      final windowsFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final winPlugin = Plugin.fromYaml(
+        'camera_custom',
+        r'C:\pub-cache\camera_custom',
+        loadYaml('''
+platforms:
+  custom_embedder:
+    pluginClass: CameraCustomPlugin
+''') as YamlMap,
+        null,
+        const <String>[],
+        extraPlatformKeys: const <String>['custom_embedder'],
+        isDevDependency: false,
+      );
+      expect(
+        resolveExtensionPluginsForPlatform(
+          <Plugin>[winPlugin],
+          'custom_embedder',
+          fileSystem: windowsFs,
+          logger: logger,
+        ),
+        equals(<ExtensionPlugin>[
+          ExtensionPlugin(
+            name: 'camera_custom',
+            path: Uri.parse('file:///C:/pub-cache/camera_custom/'),
+            configuration: const <String, Object?>{'pluginClass': 'CameraCustomPlugin'},
           ),
         ]),
       );
@@ -623,7 +687,7 @@ environment:
       final expectedCustomPlugins = <ExtensionPlugin>[
         ExtensionPlugin(
           name: 'camera_custom',
-          path: Uri.directory('/camera_custom'),
+          path: fileSystem.directory('/camera_custom').uri,
           configuration: const <String, Object?>{
             'pluginClass': 'CameraCustomPlugin',
             'archivePath': 'pkg/camera.pkg',
@@ -670,13 +734,102 @@ environment:
         equals(<String, String>{
           kExtensionTargetOs: 'custom_os',
           kExtensionTargetArch: 'arm64',
-          kExtensionCCompilerCc: '/opt/custom-sdk/llvm/bin/clang',
-          kExtensionCCompilerAr: '/opt/custom-sdk/llvm/bin/llvm-ar',
-          kExtensionCCompilerLd: '/opt/custom-sdk/llvm/bin/ld.lld',
+          kExtensionCCompilerCc: 'file:///opt/custom-sdk/llvm/bin/clang',
+          kExtensionCCompilerAr: 'file:///opt/custom-sdk/llvm/bin/llvm-ar',
+          kExtensionCCompilerLd: 'file:///opt/custom-sdk/llvm/bin/ld.lld',
           kExtensionPluginPlatformKey: 'custom_os',
         }),
       );
     });
+
+    testWithoutContext(
+      'ExtensionBuildManager logs conflicting federated custom platform plugin errors',
+      () async {
+        final (
+          :ExtensionBuildManager buildManager,
+          expectedCustomPlugins: _,
+          extensionManager: _,
+          featureFlags: _,
+          pluginsEvents: _,
+          :Directory projectDir,
+        ) = setUpCustomPluginProject();
+
+        final Directory cameraFrontend = fileSystem.directory('/camera')
+          ..createSync(recursive: true);
+        cameraFrontend.childFile('pubspec.yaml').writeAsStringSync('''
+name: camera
+environment:
+  sdk: ^3.7.0-0
+flutter:
+  plugin:
+    platforms:
+      custom_os:
+        default_package: camera_custom
+''');
+        final Directory cameraAlt = fileSystem.directory('/camera_custom_alt')
+          ..createSync(recursive: true);
+        cameraAlt.childFile('pubspec.yaml').writeAsStringSync('''
+name: camera_custom_alt
+environment:
+  sdk: ^3.7.0-0
+flutter:
+  plugin:
+    implements: camera
+    platforms:
+      custom_os:
+        pluginClass: CameraCustomAltPlugin
+''');
+        fileSystem.file('/camera_custom/pubspec.yaml').writeAsStringSync('''
+name: camera_custom
+environment:
+  sdk: ^3.7.0-0
+flutter:
+  plugin:
+    implements: camera
+    platforms:
+      custom_os:
+        pluginClass: CameraCustomPlugin
+''');
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+environment:
+  sdk: ^3.7.0-0
+dependencies:
+  camera:
+    path: /camera
+  camera_custom:
+    path: /camera_custom
+  camera_custom_alt:
+    path: /camera_custom_alt
+flutter:
+  uses-material-design: false
+''');
+        writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'my_app',
+          packages: <String, String>{
+            'camera': '/camera',
+            'camera_custom': '/camera_custom',
+            'camera_custom_alt': '/camera_custom_alt',
+          },
+        );
+
+        await expectLater(
+          buildManager.build(
+            buildMode: BuildMode.release,
+            flutterRoot: fileSystem.directory('/flutter').uri,
+            mainPath: 'lib/main.dart',
+            outputDir: fileSystem.directory('/project/build/custom_pkg').uri,
+            projectRoot: projectDir.uri,
+            resolvedArtifacts: const <String, String>{},
+            targetName: 'custom-pkg',
+          ),
+          throwsToolExit(),
+        );
+        expect(logger.errorText, contains('camera_custom'));
+        expect(logger.errorText, contains('camera_custom_alt'));
+      },
+    );
 
     testWithoutContext(
       'ExtensionBuildManager.resolveNativeAssetsConfig throws ToolExit when extension fails',
@@ -856,14 +1009,17 @@ environment:
       expect(capturedEnvironment, isNotNull);
       expect(capturedEnvironment!.defines[kExtensionTargetOs], 'custom_os');
       expect(capturedEnvironment!.defines[kExtensionTargetArch], 'arm64');
-      expect(capturedEnvironment!.defines[kExtensionCCompilerCc], '/opt/custom-sdk/llvm/bin/clang');
+      expect(
+        capturedEnvironment!.defines[kExtensionCCompilerCc],
+        'file:///opt/custom-sdk/llvm/bin/clang',
+      );
       expect(
         capturedEnvironment!.defines[kExtensionCCompilerAr],
-        '/opt/custom-sdk/llvm/bin/llvm-ar',
+        'file:///opt/custom-sdk/llvm/bin/llvm-ar',
       );
       expect(
         capturedEnvironment!.defines[kExtensionCCompilerLd],
-        '/opt/custom-sdk/llvm/bin/ld.lld',
+        'file:///opt/custom-sdk/llvm/bin/ld.lld',
       );
       expect(capturedEnvironment!.defines[kExtensionPluginPlatformKey], 'custom_os');
 
@@ -938,15 +1094,15 @@ environment:
       );
       expect(
         customTarget.cCompilerConfigSync?.compiler,
-        Uri.file('/toolchain/bin/riscv64-linux-gnu-gcc'),
+        fileSystem.file('/toolchain/bin/riscv64-linux-gnu-gcc').uri,
       );
       expect(
         customTarget.cCompilerConfigSync?.archiver,
-        Uri.file('/toolchain/bin/riscv64-linux-gnu-ar'),
+        fileSystem.file('/toolchain/bin/riscv64-linux-gnu-ar').uri,
       );
       expect(
         customTarget.cCompilerConfigSync?.linker,
-        Uri.file('/toolchain/bin/riscv64-linux-gnu-ld'),
+        fileSystem.file('/toolchain/bin/riscv64-linux-gnu-ld').uri,
       );
     });
 
@@ -1072,7 +1228,6 @@ environment:
         final String build = environment.buildDir.path;
         final String flutterPatchedSdkPath = artifacts.getArtifactPath(
           Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.windows_x64,
           mode: BuildMode.profile,
         );
         processManager.addCommand(
@@ -1114,12 +1269,7 @@ environment:
       },
     );
 
-    testWithoutContext('AssetBuildTarget.targetsFor supports custom OS identifiers', () async {
-      fileSystem.directory('/opt/custom-sdk/llvm/bin').createSync(recursive: true);
-      fileSystem.file('/opt/custom-sdk/llvm/bin/clang').createSync();
-      fileSystem.file('/opt/custom-sdk/llvm/bin/llvm-ar').createSync();
-      fileSystem.file('/opt/custom-sdk/llvm/bin/ld.lld').createSync();
-
+    testWithoutContext('AssetBuildTarget.targetsFor and cCompilerConfigFromDefines validate compiler URIs and reject partial defines', () async {
       final List<AssetBuildTarget> customTargets = AssetBuildTarget.targetsFor(
         androidSdkProvider: null,
         buildDirectory: fileSystem.directory('/project/build'),
@@ -1129,7 +1279,9 @@ environment:
           kTargetPlatform: 'custom-arm64',
           kExtensionTargetOs: 'custom_os',
           kExtensionTargetArch: 'arm64',
-          kExtensionCCompilerCc: '/opt/custom-sdk/llvm/bin/clang',
+          kExtensionCCompilerCc: 'file:///opt/custom-sdk/llvm/bin/clang',
+          kExtensionCCompilerAr: 'file:///opt/custom-sdk/llvm/bin/llvm-ar',
+          kExtensionCCompilerLd: 'file:///opt/custom-sdk/llvm/bin/ld.lld',
         },
         fileSystem: fileSystem,
         supportedAssetTypes: <SupportedAssetTypes>[
@@ -1152,13 +1304,52 @@ environment:
       );
       expect(
         customTarget.cCompilerConfigSync?.compiler,
-        Uri.file('/opt/custom-sdk/llvm/bin/clang'),
+        Uri.parse('file:///opt/custom-sdk/llvm/bin/clang'),
       );
       expect(
         customTarget.cCompilerConfigSync?.archiver,
-        Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
+        Uri.parse('file:///opt/custom-sdk/llvm/bin/llvm-ar'),
       );
-      expect(customTarget.cCompilerConfigSync?.linker, Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'));
+      expect(
+        customTarget.cCompilerConfigSync?.linker,
+        Uri.parse('file:///opt/custom-sdk/llvm/bin/ld.lld'),
+      );
+
+      final windowsFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final CCompilerConfig? windowsCompiler = cCompilerConfigFromDefines(<String, String>{
+        kExtensionCCompilerCc: r'C:\sdk\bin\clang.exe',
+        kExtensionCCompilerAr: r'C:\sdk\bin\llvm-ar.exe',
+        kExtensionCCompilerLd: r'C:\sdk\bin\lld-link.exe',
+        kExtensionCCompilerEnvScript: r'C:\sdk\vcvarsall.bat',
+        kExtensionCCompilerEnvScriptArgs: '["x64_arm64"]',
+      }, fileSystem: windowsFs);
+      expect(windowsCompiler?.compiler, Uri.parse('file:///C:/sdk/bin/clang.exe'));
+      expect(windowsCompiler?.archiver, Uri.parse('file:///C:/sdk/bin/llvm-ar.exe'));
+      expect(windowsCompiler?.linker, Uri.parse('file:///C:/sdk/bin/lld-link.exe'));
+      expect(
+        windowsCompiler?.windows.developerCommandPrompt?.script,
+        Uri.parse('file:///C:/sdk/vcvarsall.bat'),
+      );
+      expect(
+        windowsCompiler?.windows.developerCommandPrompt?.arguments,
+        equals(<String>['x64_arm64']),
+      );
+
+      expect(
+        () => cCompilerConfigFromDefines(<String, String>{
+          kExtensionCCompilerCc: '/opt/custom-sdk/llvm/bin/clang',
+        }, fileSystem: fileSystem),
+        throwsToolExit(message: 'Partial C compiler configuration'),
+      );
+      expect(
+        () => cCompilerConfigFromDefines(<String, String>{
+          kExtensionCCompilerCc: '/opt/custom-sdk/llvm/bin/clang',
+          kExtensionCCompilerAr: '/opt/custom-sdk/llvm/bin/llvm-ar',
+          kExtensionCCompilerLd: '/opt/custom-sdk/llvm/bin/ld.lld',
+          kExtensionCCompilerEnvScriptArgs: '["--arch"]',
+        }, fileSystem: fileSystem),
+        throwsToolExit(message: 'without "$kExtensionCCompilerEnvScript"'),
+      );
     });
 
     testWithoutContext('unknown kTargetPlatform without kExtensionTargetOs throws in KernelSnapshot, DartPluginRegistrantTarget, and BuildHooks', () async {
@@ -1269,7 +1460,6 @@ environment:
       final String build = environment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.linux_x64,
         mode: BuildMode.profile,
       );
       processManager.addCommand(
@@ -1307,5 +1497,155 @@ environment:
 
       expect(processManager, hasNoRemainingExpectations);
     });
+
+    testUsingContext(
+      'default resolveNativeAssetsConfig => null succeeds for hookless apps and throws actionable ToolExit when hooks are present',
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(
+          isNativeAssetsEnabled: true,
+          isDartDataAssetsEnabled: true,
+          isToolExtensionsEnabled: true,
+        ),
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        fileSystem.directory('/flutter').createSync(recursive: true);
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+environment:
+  sdk: ^3.7.0-0
+flutter:
+  uses-material-design: false
+''');
+        projectDir.childDirectory('lib').childFile('main.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}\n');
+        writePackageConfigFiles(directory: projectDir, mainLibName: 'my_app');
+
+        final featureFlags = TestFeatureFlags(
+          isNativeAssetsEnabled: true,
+          isDartDataAssetsEnabled: true,
+          isToolExtensionsEnabled: true,
+        );
+        final extensionManager = ExtensionManager(
+          entryPoints: <ExtensionEntryPoint>[_defaultHooksExtensionEntryPoint],
+          featureFlags: featureFlags,
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+        );
+        addTearDown(extensionManager.dispose);
+        final buildManager = ExtensionBuildManager(
+          extensionManager: extensionManager,
+          featureFlags: featureFlags,
+          fileSystem: fileSystem,
+          logger: logger,
+          projectFactory: FlutterProjectFactory(
+            config: FakeConfig(),
+            fileSystem: fileSystem,
+            logger: logger,
+          ),
+        );
+
+        Environment? capturedEnvironment;
+        final cache = FakeCache(fileSystem: fileSystem, flutterRoot: '/flutter');
+        final assembleCommand = AssembleCommand(
+          androidContext: FakeAndroidContext(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            capturedEnvironment = environment;
+          }),
+          extensionBuildManager: buildManager,
+          featureFlags: featureFlags,
+          toolContext: FakeToolContext(
+            cache: cache,
+            fs: fileSystem,
+            logger: logger,
+            signals: FakeSignals(),
+          ),
+          xcode: null,
+        );
+        final CommandRunner<void> commandRunner = createTestCommandRunner(assembleCommand);
+        await commandRunner.run(<String>[
+          'assemble',
+          '--output=/project/build/custom_hookless',
+          '-dTargetPlatform=custom-hookless-arm64',
+          '-dBuildMode=release',
+          'copy_assets',
+        ]);
+
+        expect(capturedEnvironment, isNotNull);
+        expect(capturedEnvironment!.defines[kExtensionCustomTargetPlatform], 'true');
+        expect(capturedEnvironment!.defines.containsKey(kExtensionTargetOs), isFalse);
+
+        const boundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
+        final processManager = FakeProcessManager.empty();
+        final hooklessEnv = Environment.test(
+          projectDir,
+          artifacts: artifacts,
+          defines: capturedEnvironment!.defines,
+          fileSystem: fileSystem,
+          inputs: <String, String>{},
+          logger: logger,
+          processManager: processManager,
+          generateDartPluginRegistry: true,
+        );
+        hooklessEnv.buildDir.createSync(recursive: true);
+        final String hooklessBuild = hooklessEnv.buildDir.path;
+        final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+          Artifact.flutterPatchedSdkPath,
+          mode: BuildMode.release,
+        );
+        processManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
+              artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+              '--sdk-root',
+              '$flutterPatchedSdkPath/',
+              '--target=flutter',
+              '--no-print-incremental-dependencies',
+              ...buildModeOptions(BuildMode.release, <String>[]),
+              '--aot',
+              '--tfa',
+              '--packages',
+              '/project/.dart_tool/package_config.json',
+              '--output-dill',
+              '$hooklessBuild/app.dill',
+              '--depfile',
+              '$hooklessBuild/kernel_snapshot_program.d',
+              '--verbosity=error',
+              '--recorded-uses=$hooklessBuild/recorded_uses.json',
+              'package:my_app/main.dart',
+            ],
+            stdout: 'result $boundaryKey\n$boundaryKey\n$boundaryKey $hooklessBuild/app.dill 0\n',
+            onRun: (_) {
+              fileSystem
+                  .file('$hooklessBuild/${KernelSnapshot.recordedUsesFileName}')
+                  .writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
+            },
+          ),
+        );
+
+        expect(await const DartPluginRegistrantTarget().canSkip(hooklessEnv), isFalse);
+        await const KernelSnapshot().build(hooklessEnv);
+        expect(processManager, hasNoRemainingExpectations);
+        final emptyHookRunner = FakeFlutterNativeAssetsBuildRunner();
+        await BuildHooks(buildRunner: emptyHookRunner).build(hooklessEnv);
+        await LinkHooks(buildRunner: emptyHookRunner).build(hooklessEnv);
+        await const InstallCodeAssets().build(hooklessEnv);
+        expect(hooklessEnv.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
+
+        final nonEmptyHookRunner = FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['my_app'],
+        );
+        await expectLater(
+          () => BuildHooks(buildRunner: nonEmptyHookRunner).build(hooklessEnv),
+          throwsToolExit(message: 'BuildTarget.resolveNativeAssetsConfig'),
+        );
+      },
+    );
   });
 }

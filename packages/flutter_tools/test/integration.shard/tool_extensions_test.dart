@@ -281,8 +281,6 @@ flutter:
         '--no-version-check',
         '--output=${outputDir.path}',
         '-dTargetPlatform=custom-arm64',
-        '-dExtensionTargetOs=custom_os',
-        '-dExtensionTargetArch=arm64',
         '-dExtensionPluginPlatformKey=custom_os',
         '-dBuildMode=debug',
         '-dTargetFile=lib/main.dart',

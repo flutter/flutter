@@ -475,7 +475,6 @@ base class ExtensionBuildManager {
       pluginPlatformKey,
       fileSystem: _fileSystem,
       logger: _logger,
-      quiet: true,
     );
   }
 }
