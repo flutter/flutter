@@ -229,15 +229,6 @@ class PlatformViewAndroidJNI {
   ///
   virtual void FlutterViewDestroyOverlaySurfaces() = 0;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Destroys only the specified hybrid composition overlay
-  ///             surfaces by ID without closing newer overlays.
-  ///
-  /// @note       Must be called from the platform thread.
-  ///
-  virtual void FlutterViewDestroyOverlaySurfacesById(
-      const std::vector<int32_t>& overlay_ids) = 0;
-
   // New Platform View Support.
 
   //----------------------------------------------------------------------------

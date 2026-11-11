@@ -65,13 +65,25 @@ class SurfacePool {
   // Marks the layers in the pool as available for reuse.
   void RecycleLayers();
 
-  // Destroys all the layers in the pool.
+  // Destroys all the layers in the pool and any taken layers still awaiting
+  // destruction on the platform thread.
   void DestroyLayers(const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
+  // Destroys any Java overlay surfaces whose layers were removed by
+  // |TakeLayers| if they have not already been destroyed. Must be called on the
+  // platform thread.
+  void DestroyPendingLayers(
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+
   // Removes all the layers from the pool and returns them without calling into
-  // Java. The caller owns the returned layers and is responsible for destroying
-  // their overlay surfaces on the platform thread.
+  // Java, marking their Java overlay surfaces as pending destruction on the
+  // platform thread (via |DestroyPendingLayers|, |GetLayer|, or
+  // |DestroyLayers|).
   std::vector<std::shared_ptr<OverlayLayer>> TakeLayers();
+
+  // Returns true if |TakeLayers| removed layers whose Java overlay surfaces
+  // have not yet been destroyed on the platform thread.
+  bool HasPendingDestroy();
 
   // Sets the frame size used by the layers in the pool.
   // If the current layers in the pool have a different frame size,
@@ -113,8 +125,11 @@ class SurfacePool {
   // Used to guard public methods.
   std::mutex mutex_;
   bool use_new_surface_methods_ = false;
+  bool pending_java_destroy_ = false;
 
   void DestroyLayersLocked(
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+  void DestroyJavaLayersLocked(
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 };
 

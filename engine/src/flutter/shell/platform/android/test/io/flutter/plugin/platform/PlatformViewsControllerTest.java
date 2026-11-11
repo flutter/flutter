@@ -1776,62 +1776,6 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
-  @Config(
-      shadows = {
-        ShadowFlutterSurfaceView.class,
-        ShadowFlutterJNI.class,
-        ShadowPlatformTaskQueue.class
-      })
-  public void destroyOverlaySurfacesById_leavesNewerLiveOverlayIntact() {
-    final PlatformViewsController platformViewsController = new PlatformViewsController();
-    final int platformViewId = 0;
-    final int overlayBoundsPx = 10;
-
-    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
-    final PlatformView platformView = mock(PlatformView.class);
-    when(platformView.getView()).thenReturn(mock(View.class));
-    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
-    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
-
-    final FlutterJNI jni = new FlutterJNI();
-    jni.attachToNative();
-    platformViewsController.setFlutterJNI(jni);
-    jni.setPlatformViewsController(platformViewsController);
-    final FlutterView flutterView = mock(FlutterView.class);
-    platformViewsController.attachToView(flutterView);
-
-    final PlatformOverlayView staleOverlay = mock(PlatformOverlayView.class);
-    final PlatformOverlayView liveOverlay = mock(PlatformOverlayView.class);
-    when(staleOverlay.acquireLatestImage()).thenReturn(true);
-    when(liveOverlay.acquireLatestImage()).thenReturn(true);
-
-    // Frame 1 creates staleOverlay (id = 0).
-    final FlutterOverlaySurface staleSurface =
-        platformViewsController.createOverlaySurface(staleOverlay);
-
-    // Frame 2 (merged ahead of the posted resize-destroy task) creates liveOverlay (id = 1).
-    final FlutterOverlaySurface liveSurface =
-        platformViewsController.createOverlaySurface(liveOverlay);
-
-    // Delayed resize-destroy task runs via FlutterJNI targeting only staleSurface's ID.
-    jni.destroyOverlaySurfaces(new int[] {staleSurface.getId()});
-
-    verify(staleOverlay, times(1)).detachFromRenderer();
-    verify(staleOverlay, times(1)).closeImageReader();
-    verify(liveOverlay, never()).detachFromRenderer();
-    verify(liveOverlay, never()).closeImageReader();
-    verify(flutterView, never()).removeView(any());
-
-    platformViewsController.onDisplayOverlaySurface(
-        liveSurface.getId(),
-        /* x=*/ 0,
-        /* y=*/ 0,
-        /* width=*/ overlayBoundsPx,
-        /* height=*/ overlayBoundsPx);
-    verify(flutterView, times(1)).addView(liveOverlay);
-  }
-
-  @Test
   public void checkInputConnectionProxy_falseIfViewIsNull() {
     final PlatformViewsController platformViewsController = new PlatformViewsController();
     boolean shouldProxying = platformViewsController.checkInputConnectionProxy(null);

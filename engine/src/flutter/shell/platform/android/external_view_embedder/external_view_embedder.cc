@@ -44,7 +44,7 @@ AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
       jni_facade_(std::move(jni_facade)),
       surface_factory_(std::move(surface_factory)),
       surface_pool_(
-          std::make_unique<SurfacePool>(/*use_new_surface_methods=*/false)),
+          std::make_shared<SurfacePool>(/*use_new_surface_methods=*/false)),
       task_runners_(task_runners) {}
 
 // |ExternalViewEmbedder|
@@ -299,29 +299,15 @@ void AndroidExternalViewEmbedder::Teardown() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::DestroySurfaces() {
-  bool has_pending_destroys = false;
-  {
-    std::lock_guard lock(pending_overlay_destroys_->mutex);
-    has_pending_destroys = !pending_overlay_destroys_->ids.empty();
-  }
-  if (!surface_pool_->HasLayers() && !has_pending_destroys) {
+  if (!surface_pool_->HasLayers() && !surface_pool_->HasPendingDestroy()) {
     return;
   }
   fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetPlatformTaskRunner(), [&]() {
-        std::vector<int32_t> pending_ids;
-        {
-          std::lock_guard lock(pending_overlay_destroys_->mutex);
-          pending_ids.swap(pending_overlay_destroys_->ids);
-        }
-        if (surface_pool_->HasLayers()) {
-          surface_pool_->DestroyLayers(jni_facade_);
-        } else if (!pending_ids.empty()) {
-          jni_facade_->FlutterViewDestroyOverlaySurfacesById(pending_ids);
-        }
-        latch.Signal();
-      });
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetPlatformTaskRunner(),
+                                    [&]() {
+                                      surface_pool_->DestroyLayers(jni_facade_);
+                                      latch.Signal();
+                                    });
   latch.Wait();
 }
 
@@ -331,31 +317,20 @@ void AndroidExternalViewEmbedder::ReleaseOverlayLayers() {
   if (layers.empty()) {
     return;
   }
-  {
-    std::lock_guard lock(pending_overlay_destroys_->mutex);
-    pending_overlay_destroys_->ids.reserve(
-        pending_overlay_destroys_->ids.size() + layers.size());
-    for (const std::shared_ptr<OverlayLayer>& layer : layers) {
-      pending_overlay_destroys_->ids.push_back(layer->id);
-    }
-  }
   // Release the rendering surfaces on the thread that renders into them.
   layers.clear();
 
-  // Destroy only these stale overlay IDs on the platform thread without
+  // Destroy the stale Java overlay surfaces on the platform thread without
   // waiting. If an earlier-queued raster task runs on the platform thread after
-  // a dynamic thread merge before this posted task, any newly allocated overlay
-  // gets a fresh ID and is left intact.
+  // a dynamic thread merge ahead of this task, |SurfacePool::GetLayer| flushes
+  // the pending destroy before allocating a new overlay surface, turning this
+  // posted call into a no-op.
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetPlatformTaskRunner(),
-      [jni_facade = jni_facade_, pending = pending_overlay_destroys_]() {
-        std::vector<int32_t> ids_to_destroy;
-        {
-          std::lock_guard lock(pending->mutex);
-          ids_to_destroy.swap(pending->ids);
-        }
-        if (!ids_to_destroy.empty()) {
-          jni_facade->FlutterViewDestroyOverlaySurfacesById(ids_to_destroy);
+      [jni_facade = jni_facade_,
+       pool = std::weak_ptr<SurfacePool>(surface_pool_)]() {
+        if (std::shared_ptr<SurfacePool> locked_pool = pool.lock()) {
+          locked_pool->DestroyPendingLayers(jni_facade);
         }
       });
 }

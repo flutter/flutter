@@ -1349,17 +1349,6 @@ public class FlutterJNI {
 
   @SuppressWarnings("unused")
   @UiThread
-  public void destroyOverlaySurfaces(@NonNull int[] overlayIds) {
-    ensureRunningOnMainThread();
-    if (platformViewsController == null) {
-      throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
-    }
-    platformViewsController.destroyOverlaySurfaces(overlayIds);
-  }
-
-  @SuppressWarnings("unused")
-  @UiThread
   public void maybeResizeSurfaceView(int width, int height) {
     for (FlutterUiResizeListener listener : flutterUiResizeListeners) {
       listener.resizeEngineView(width, height);

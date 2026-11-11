@@ -5,9 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
 
-#include <cstdint>
 #include <memory>
-#include <mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -106,16 +104,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   const std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
 
   // Holds surfaces. Allows to recycle surfaces or allocate new ones.
-  const std::unique_ptr<SurfacePool> surface_pool_;
-
-  // Overlay IDs taken out of `surface_pool_` by `ReleaseOverlayLayers()` whose
-  // Java overlay views still await destruction on the platform thread.
-  struct PendingOverlayDestroys {
-    std::mutex mutex;
-    std::vector<int32_t> ids;
-  };
-  const std::shared_ptr<PendingOverlayDestroys> pending_overlay_destroys_ =
-      std::make_shared<PendingOverlayDestroys>();
+  const std::shared_ptr<SurfacePool> surface_pool_;
 
   // The task runners.
   const TaskRunners task_runners_;

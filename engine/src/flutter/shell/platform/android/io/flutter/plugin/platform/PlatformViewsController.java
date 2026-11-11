@@ -1440,25 +1440,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
   }
 
-  /**
-   * Destroys only the specified overlay surfaces by ID, leaving any newer overlay surfaces intact.
-   *
-   * <p>This method is used only internally by {@code FlutterJNI}.
-   */
-  public void destroyOverlaySurfaces(@NonNull int[] overlayIds) {
-    for (final int overlayId : overlayIds) {
-      final PlatformOverlayView overlayView = overlayLayerViews.get(overlayId);
-      if (overlayView != null) {
-        overlayView.detachFromRenderer();
-        overlayView.closeImageReader();
-        // Don't remove overlayView from the view hierarchy since this method can
-        // be called while the Android framework is iterating over the array of views.
-        // See ViewGroup#dispatchDetachedFromWindow(), and
-        // https://github.com/flutter/flutter/issues/97679.
-      }
-    }
-  }
-
   private void removeOverlaySurfaces() {
     if (flutterView == null) {
       Log.e(TAG, "removeOverlaySurfaces called while flutter view is null");
