@@ -26,6 +26,7 @@ abstract base class DeviceService extends ToolExtensionService {
   static const String _isAppInstalledRpcMethod = 'isAppInstalled';
   static const String _takeScreenshotRpcMethod = 'takeScreenshot';
   static const String _startScreenRecordingRpcMethod = 'startScreenRecording';
+  static const String _waitForScreenRecordingRpcMethod = 'waitForScreenRecording';
   static const String _stopScreenRecordingRpcMethod = 'stopScreenRecording';
   static const String _launchAppRpcMethod = 'launchApp';
   static const String _getVmServiceUriRpcMethod = 'getVmServiceUri';
@@ -59,6 +60,11 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC method identifier to start a screen recording on a target device.
   static const String startScreenRecordingMethod =
       '$serviceNamespace.$_startScreenRecordingRpcMethod';
+
+  /// RPC method identifier to await completion of an active screen recording on
+  /// a target device.
+  static const String waitForScreenRecordingMethod =
+      '$serviceNamespace.$_waitForScreenRecordingRpcMethod';
 
   /// RPC method identifier to stop an active screen recording on a target device.
   static const String stopScreenRecordingMethod =
@@ -189,7 +195,12 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   /// Starts a screen recording on the device with [deviceId], writing the
-  /// captured video to [outputFileUri] and optionally stopping after [duration].
+  /// captured video to [outputFileUri] and optionally capping its length at
+  /// [duration].
+  ///
+  /// Implementations should return once recording has been initiated so the
+  /// host tool can await completion via [waitForScreenRecording] while
+  /// remaining able to terminate the recording early via [stopScreenRecording].
   ///
   /// Throws an [UnsupportedError] by default if the device does not support
   /// screen recording.
@@ -201,8 +212,18 @@ abstract base class DeviceService extends ToolExtensionService {
     throw UnsupportedError('Screen recording is not supported on $deviceId.');
   }
 
+  /// Waits for an active screen recording on the device with [deviceId] to
+  /// finish (whether capped by `duration` or stopped via [stopScreenRecording])
+  /// and returns the `file:` [Uri] of the finalized output file.
+  ///
+  /// Throws an [UnsupportedError] by default if the device does not support
+  /// screen recording.
+  Future<Uri> waitForScreenRecording({required String deviceId}) async {
+    throw UnsupportedError('Screen recording is not supported on $deviceId.');
+  }
+
   /// Stops an active screen recording on the device with [deviceId] and returns
-  /// the `file:` [Uri] of the recorded output file.
+  /// the `file:` [Uri] of the finalized output file.
   ///
   /// Throws an [UnsupportedError] by default if the device does not support
   /// screen recording.
@@ -276,6 +297,7 @@ abstract base class DeviceService extends ToolExtensionService {
       _isAppInstalledRpcMethod: _isAppInstalledRpc,
       _takeScreenshotRpcMethod: _takeScreenshotRpc,
       _startScreenRecordingRpcMethod: _startScreenRecordingRpc,
+      _waitForScreenRecordingRpcMethod: _waitForScreenRecordingRpc,
       _stopScreenRecordingRpcMethod: _stopScreenRecordingRpc,
       _launchAppRpcMethod: _launchAppRpc,
       _getVmServiceUriRpcMethod: _getVmServiceUriRpc,
@@ -315,19 +337,7 @@ abstract base class DeviceService extends ToolExtensionService {
       throw RpcException.invalidParams(e.message);
     }
     final ExtensionApplicationPackage? resolved = await resolveApplication(context);
-    if (resolved == null) {
-      return null;
-    }
-    if (resolved.appId.isEmpty) {
-      throw StateError('resolveApplication returned an empty appId.');
-    }
-    final Uri? bundleUri = resolved.bundleUri;
-    if (bundleUri != null && !bundleUri.isValidFileUri) {
-      throw StateError(
-        'resolveApplication returned an invalid bundleUri "$bundleUri" (expected an absolute "file:" file URI).',
-      );
-    }
-    return resolved.toMap();
+    return resolved?.toMap();
   }
 
   Future<Object?> _installAppRpc(Map<String, Object?> params) async {
@@ -335,7 +345,7 @@ abstract base class DeviceService extends ToolExtensionService {
     final Uri bundleUri;
     final bool prebuiltApplication;
     try {
-      bundleUri = _requireFileUri(params, bundleUriParam);
+      bundleUri = _requireArtifactUri(params, bundleUriParam);
       prebuiltApplication = params.optionalField<bool>(
         prebuiltApplicationParam,
         defaultValue: false,
@@ -395,10 +405,37 @@ abstract base class DeviceService extends ToolExtensionService {
     );
   }
 
+  Future<String> _waitForScreenRecordingRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
+    final Uri recordingUri = await waitForScreenRecording(deviceId: deviceId);
+    if (!recordingUri.isValidFileUri) {
+      throw StateError(
+        'waitForScreenRecording returned an invalid file URI "$recordingUri" '
+        '(expected an absolute "file:" file URI).',
+      );
+    }
+    return recordingUri.toString();
+  }
+
   Future<String> _stopScreenRecordingRpc(Map<String, Object?> params) async {
     final String deviceId = _parseDeviceId(params);
     final Uri recordingUri = await stopScreenRecording(deviceId: deviceId);
+    if (!recordingUri.isValidFileUri) {
+      throw StateError(
+        'stopScreenRecording returned an invalid file URI "$recordingUri" '
+        '(expected an absolute "file:" file URI).',
+      );
+    }
     return recordingUri.toString();
+  }
+
+  static Uri _requireArtifactUri(Map<String, Object?> params, String key) {
+    final String rawUri = params.requiredField<String>(key);
+    final Uri? uri = Uri.tryParse(rawUri);
+    if (uri == null || !uri.isValidArtifactUri) {
+      throw FormatException('Invalid "$key": must be a non-root absolute "file:" URI.');
+    }
+    return uri;
   }
 
   static Uri _requireFileUri(Map<String, Object?> params, String key) {

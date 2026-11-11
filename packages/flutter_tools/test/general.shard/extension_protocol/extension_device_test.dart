@@ -133,11 +133,13 @@ final class _TestDeviceService extends DeviceService {
     this.onInstallApp,
     this.onIsAppInstalled,
     this.onResolveApplication,
+    this.onStartLogStream,
     this.onStartScreenRecording,
     this.onStopApp,
     this.onStopScreenRecording,
     this.onTakeScreenshot,
     this.onUninstallApp,
+    this.onWaitForScreenRecording,
   });
 
   final Future<void> Function(String deviceId, Uri bundleUri, bool prebuiltApplication)?
@@ -147,12 +149,14 @@ final class _TestDeviceService extends DeviceService {
     ExtensionApplicationResolutionContext context,
   )?
   onResolveApplication;
+  final Future<void> Function(String deviceId, String? appId)? onStartLogStream;
   final Future<void> Function(String deviceId, Uri outputFileUri, Duration? duration)?
   onStartScreenRecording;
   final Future<bool> Function(String deviceId, String? appId)? onStopApp;
   final Future<Uri> Function(String deviceId)? onStopScreenRecording;
   final Future<void> Function(String deviceId, Uri outputFileUri)? onTakeScreenshot;
   final Future<void> Function(String deviceId, String appId)? onUninstallApp;
+  final Future<Uri> Function(String deviceId)? onWaitForScreenRecording;
 
   @override
   Future<List<TargetDevice>> getDevices() async => const <TargetDevice>[];
@@ -248,11 +252,27 @@ final class _TestDeviceService extends DeviceService {
   }
 
   @override
+  Future<Uri> waitForScreenRecording({required String deviceId}) async {
+    if (onWaitForScreenRecording case final callback?) {
+      return callback(deviceId);
+    }
+    return super.waitForScreenRecording(deviceId: deviceId);
+  }
+
+  @override
   Future<Uri> stopScreenRecording({required String deviceId}) async {
     if (onStopScreenRecording case final callback?) {
       return callback(deviceId);
     }
     return super.stopScreenRecording(deviceId: deviceId);
+  }
+
+  @override
+  Future<void> startLogStream({required String deviceId, String? appId}) async {
+    if (onStartLogStream case final callback?) {
+      return callback(deviceId, appId);
+    }
+    return super.startLogStream(deviceId: deviceId, appId: appId);
   }
 }
 
@@ -1103,6 +1123,13 @@ void main() {
                           'durationMs': duration?.inMilliseconds,
                         });
                       },
+                  onWaitForScreenRecording: (String deviceId) async {
+                    eventsSendPort.send(<String, Object?>{
+                      'method': 'waitForScreenRecording',
+                      'deviceId': deviceId,
+                    });
+                    return activeRecordingUri ?? Uri.file('/tmp/fallback.mp4');
+                  },
                   onStopScreenRecording: (String deviceId) async {
                     eventsSendPort.send(<String, Object?>{
                       'method': 'stopScreenRecording',
@@ -1134,10 +1161,12 @@ void main() {
           duration: const Duration(seconds: 10),
           outputFileUri: recordingUri,
         );
+        final Uri waitedUri = await client.waitForScreenRecording(deviceId: deviceId);
+        expect(waitedUri, equals(recordingUri));
         final Uri stoppedUri = await client.stopScreenRecording(deviceId: deviceId);
         expect(stoppedUri, equals(recordingUri));
 
-        expect(events, hasLength(3));
+        expect(events, hasLength(4));
         expect(events[0], <String, Object?>{
           'method': 'takeScreenshot',
           'deviceId': deviceId,
@@ -1149,7 +1178,11 @@ void main() {
           'outputFileUri': recordingUri.toString(),
           'durationMs': 10000,
         });
-        expect(events[2], <String, Object?>{'method': 'stopScreenRecording', 'deviceId': deviceId});
+        expect(events[2], <String, Object?>{
+          'method': 'waitForScreenRecording',
+          'deviceId': deviceId,
+        });
+        expect(events[3], <String, Object?>{'method': 'stopScreenRecording', 'deviceId': deviceId});
       },
     );
 
@@ -1203,6 +1236,10 @@ void main() {
       );
       await expectLater(
         client.startScreenRecording(deviceId: deviceId, outputFileUri: Uri.file('/tmp/out.mp4')),
+        throwsA(isA<json_rpc.RpcException>()),
+      );
+      await expectLater(
+        client.waitForScreenRecording(deviceId: deviceId),
         throwsA(isA<json_rpc.RpcException>()),
       );
       await expectLater(
@@ -1330,7 +1367,7 @@ void main() {
             DeviceService.installAppMethod,
             params: <String, Object?>{
               DeviceService.deviceIdParam: 'device-1',
-              DeviceService.bundleUriParam: 'file:///tmp/app.bundle/',
+              DeviceService.bundleUriParam: 'file:///',
             },
           ),
           throwsA(_isInvalidParamsRpcException()),
@@ -1457,21 +1494,20 @@ void main() {
           throwsA(_isInvalidParamsRpcException()),
         );
 
-        // stopScreenRecording: empty deviceId, missing deviceId.
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.stopScreenRecordingMethod,
-            params: <String, Object?>{DeviceService.deviceIdParam: ''},
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.stopScreenRecordingMethod,
-            params: const <String, Object?>{},
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
+        // waitForScreenRecording & stopScreenRecording: empty deviceId, missing deviceId.
+        for (final method in const <String>[
+          DeviceService.waitForScreenRecordingMethod,
+          DeviceService.stopScreenRecordingMethod,
+        ]) {
+          await expectLater(
+            conn.sendRequest(method, params: <String, Object?>{DeviceService.deviceIdParam: ''}),
+            throwsA(_isInvalidParamsRpcException()),
+          );
+          await expectLater(
+            conn.sendRequest(method, params: const <String, Object?>{}),
+            throwsA(_isInvalidParamsRpcException()),
+          );
+        }
 
         // stopApp: empty appId is rejected with INVALID_PARAMS.
         await expectLater(
@@ -1562,6 +1598,9 @@ void main() {
                     (String deviceId, Uri outputFileUri, Duration? duration) async {
                       recordedUri = outputFileUri;
                     },
+                onWaitForScreenRecording: (String deviceId) async {
+                  return recordedUri ?? Uri.file('/tmp/default.mp4');
+                },
                 onStopScreenRecording: (String deviceId) async {
                   return recordedUri ?? Uri.file('/tmp/default.mp4');
                 },
@@ -1598,9 +1637,8 @@ void main() {
       expect(await device.targetPlatform, TargetPlatform.unsupported);
       expect(device.supportsInstall, isTrue);
       expect(device.supportsScreenshot, isTrue);
-      expect(device.supportsScreenRecording, isTrue);
 
-      // Prebuilt package resolution wraps in PrebuiltExtensionBackedApplicationPackage.
+      // Prebuilt package resolution wraps in PrebuiltExtensionBackedApplicationPackage for both files and directory bundles.
       final File prebuiltFile = fs.file('/prebuilt/custom_archive.pkg')
         ..createSync(recursive: true);
       final ApplicationPackage? prebuiltPkg = await device.resolveApplicationPackage(
@@ -1611,6 +1649,20 @@ void main() {
       expect(prebuiltPkg, isA<PrebuiltApplicationPackage>());
       expect(prebuiltPkg!.id, 'com.custom.test_project_app');
       expect(prebuiltPkg.name, 'custom_archive.pkg');
+
+      final Directory prebuiltBundleDir = fs.directory('/prebuilt/MyApp.app')
+        ..createSync(recursive: true);
+      final ApplicationPackage? prebuiltDirPkg = await device.resolveApplicationPackage(
+        applicationBinary: fs.file(prebuiltBundleDir.path),
+        buildInfo: BuildInfo.release,
+      );
+      expect(prebuiltDirPkg, isA<PrebuiltExtensionBackedApplicationPackage>());
+      expect(
+        (prebuiltDirPkg! as PrebuiltExtensionBackedApplicationPackage).applicationPackage,
+        isA<Directory>(),
+      );
+      expect(await device.installApp(prebuiltDirPkg), isTrue);
+      expect(await device.uninstallApp(prebuiltDirPkg), isTrue);
 
       expect(await device.isAppInstalled(prebuiltPkg), isFalse);
       expect(await device.installApp(prebuiltPkg), isTrue);
@@ -1643,6 +1695,7 @@ void main() {
       expect(buildManager.buildCalls, isEmpty);
       await pumpEventQueue();
       expect(receivedInstalls, <({Uri bundleUri, bool prebuiltApplication})>[
+        (bundleUri: prebuiltBundleDir.absolute.uri, prebuiltApplication: true),
         (bundleUri: prebuiltFile.absolute.uri, prebuiltApplication: true),
         (bundleUri: expectedBuiltUri, prebuiltApplication: false),
       ]);
@@ -1704,9 +1757,100 @@ void main() {
       await device.takeScreenshot(screenshotFile);
 
       final File recordingFile = fs.file('/captures/video.mp4');
-      await device.startScreenRecording(recordingFile, duration: const Duration(seconds: 5));
-      final Uri savedRecordingUri = await device.stopScreenRecording();
+      await client.startScreenRecording(
+        deviceId: device.id,
+        duration: const Duration(seconds: 5),
+        outputFileUri: recordingFile.absolute.uri,
+      );
+      final Uri waitedRecordingUri = await client.waitForScreenRecording(deviceId: device.id);
+      expect(waitedRecordingUri, equals(recordingFile.absolute.uri));
+      final Uri savedRecordingUri = await client.stopScreenRecording(deviceId: device.id);
       expect(savedRecordingUri, equals(recordingFile.absolute.uri));
+    });
+
+    testWithoutContext('getLogReader preserves active subscribers across scope changes and deduplicates concurrent callers after dispose', () async {
+      final startedLogAppIds = <String?>[];
+      final eventsPort = ReceivePort();
+      addTearDown(eventsPort.close);
+      final StreamSubscription<Object?> sub = eventsPort.listen((Object? message) {
+        if (message case {'startLogAppId': final String? appId}) {
+          startedLogAppIds.add(appId);
+        }
+      });
+      addTearDown(sub.cancel);
+      final SendPort eventsSendPort = eventsPort.sendPort;
+
+      void entryPoint(SendPort sendPort) {
+        late final _TestDeviceService service;
+        service = _TestDeviceService(
+          onStartLogStream: (String deviceId, String? appId) async {
+            eventsSendPort.send(<String, Object?>{'startLogAppId': appId});
+            service.emitLogLine(deviceId: deviceId, line: 'log:${appId ?? '*'}');
+          },
+        );
+        unawaited(
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[service],
+            supportedPlatforms: const <String>{'linux'},
+          ),
+        );
+      }
+
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
+      final device = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger),
+        connection: conn,
+        deviceService: ExtensionDeviceClient(conn, logger: logger),
+        targetDevice: const TargetDevice(
+          category: Category.mobile,
+          id: 'ext-log-device',
+          name: 'Log Extension Device',
+        ),
+        toolContext: _createToolContext(fs: fs, logger: logger),
+      );
+      final appPkg = ExtensionBackedApplicationPackage(id: 'com.example.app');
+
+      // Scenario A: Active device-wide subscriber (e.g. flutter daemon) is NOT closed when getLogReader(app: pkg) runs.
+      final DeviceLogReader daemonReader = await device.getLogReader();
+      var daemonClosed = false;
+      final daemonLines = <String>[];
+      final StreamSubscription<String> daemonSub = daemonReader.logLines.listen(
+        daemonLines.add,
+        onDone: () => daemonClosed = true,
+      );
+      addTearDown(daemonSub.cancel);
+      await pumpEventQueue();
+
+      final DeviceLogReader runReader = await device.getLogReader(app: appPkg);
+      expect(identical(daemonReader, runReader), isTrue);
+      expect(daemonClosed, isFalse);
+
+      await daemonReader.dispose();
+      expect(daemonClosed, isTrue);
+
+      // Scenario B: After dispose(), concurrent getLogReader(app: appPkg) callers share a single live reader.
+      final List<DeviceLogReader> concurrent = await Future.wait(<Future<DeviceLogReader>>[
+        device.getLogReader(app: appPkg),
+        device.getLogReader(app: appPkg),
+      ]);
+      expect(identical(concurrent[0], concurrent[1]), isTrue);
+      var r1Closed = false;
+      final StreamSubscription<String> r1Sub = concurrent[0].logLines.listen(
+        (_) {},
+        onDone: () => r1Closed = true,
+      );
+      addTearDown(r1Sub.cancel);
+      await pumpEventQueue();
+      expect(r1Closed, isFalse);
+
+      // Scenario C: Active app-scoped subscriber widens to device-wide (app: null) in place without closing.
+      final DeviceLogReader widened = await device.getLogReader();
+      expect(identical(widened, concurrent[0]), isTrue);
+      expect(r1Closed, isFalse);
+      await pumpEventQueue();
+      expect(startedLogAppIds, <String?>[null, 'com.example.app', null]);
     });
 
     testWithoutContext('handles !supportsInstall no-op semantics, catches RPC and peer-exit exceptions with printError, and propagates host errors', () async {
@@ -1764,7 +1908,6 @@ void main() {
       );
       expect(unsupportedInstallDevice.supportsInstall, isFalse);
       expect(unsupportedInstallDevice.supportsScreenshot, isFalse);
-      expect(unsupportedInstallDevice.supportsScreenRecording, isFalse);
       expect(await unsupportedInstallDevice.isAppInstalled(app), isFalse);
       expect(await unsupportedInstallDevice.installApp(app), isTrue);
       expect(await unsupportedInstallDevice.uninstallApp(app), isTrue);

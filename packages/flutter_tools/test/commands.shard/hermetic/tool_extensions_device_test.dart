@@ -881,6 +881,28 @@ flutter:
             logger.statusText,
             contains('test_app not found on Fake Test Extension Device, skipping uninstall'),
           );
+
+          // Directory bundles (--use-application-binary=prebuilt_dir.app) pass validation and install cleanly.
+          logger.clear();
+          recordedEvents.clear();
+          final Directory prebuiltDir = fileSystem.directory('prebuilt_dir.app')..createSync();
+          await runner.run(<String>[
+            'install',
+            '-d',
+            'fake_test_device',
+            '--use-application-binary=prebuilt_dir.app',
+          ]);
+          await pumpEventQueue();
+          expect(
+            recordedEvents,
+            contains(
+              equals(<String, Object?>{
+                'event': 'install',
+                'bundleUri': prebuiltDir.absolute.uri.toString(),
+                'prebuiltApplication': true,
+              }),
+            ),
+          );
         });
 
         testWithoutContext('InstallCommand without --use-application-binary never builds, preserves installed app when bundle is missing, and installs existing built bundle', () async {

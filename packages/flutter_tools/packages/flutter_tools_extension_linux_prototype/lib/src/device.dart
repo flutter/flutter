@@ -95,7 +95,7 @@ final class LinuxDeviceService extends DeviceService {
     if (deviceId != customLinuxDeviceId) {
       throw UnsupportedError('Unknown device "$deviceId".');
     }
-    if (!File.fromUri(bundleUri).existsSync()) {
+    if (FileSystemEntity.typeSync(bundleUri.toFilePath()) == FileSystemEntityType.notFound) {
       throw FileSystemException('Application bundle does not exist', bundleUri.toFilePath());
     }
   }

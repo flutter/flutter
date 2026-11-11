@@ -70,15 +70,16 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     if (userIdentifier != null && device is! AndroidDevice) {
       throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
     }
-    if (_applicationBinaryPath != null && !(_applicationBinary?.existsSync() ?? true)) {
-      throwToolExit('Prebuilt binary $_applicationBinaryPath does not exist');
+    if (_applicationBinaryPath case final String binaryPath
+        when toolContext.fs.typeSync(binaryPath) == FileSystemEntityType.notFound) {
+      throwToolExit('Prebuilt binary $binaryPath does not exist');
     }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device targetDevice = device!;
-    final ApplicationPackage? package = await resolveApplicationPackageForDevice(
+    final ApplicationPackage? package = await getApplicationPackageForDevice(
       targetDevice,
       factoryBuilder: () => applicationPackages,
       applicationBinary: _applicationBinary,
@@ -108,9 +109,6 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 
   Future<void> _installApp(ApplicationPackage package, Device device) async {
-    if (device is ExtensionBackedDevice && !device.hasValidInstallBundle(package)) {
-      throwToolExit('Install failed');
-    }
     _logger.printStatus('Installing $package to $device...');
 
     if (!await installApp(device, package, logger: _logger, userIdentifier: userIdentifier)) {

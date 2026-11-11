@@ -14,6 +14,7 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../experimental/extension_device_manager.dart';
 import '../version.dart';
 import '../vmservice.dart';
 import 'test_device.dart';
@@ -54,9 +55,9 @@ class IntegrationTestTestDevice extends TestDevice {
   Future<StreamChannel<String>> start(String entrypointPath) async {
     final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
         toolContext;
-    _applicationPackage = await resolveApplicationPackageForDevice(
+    _applicationPackage = await getApplicationPackageForDevice(
       device,
-      factoryBuilder: () => _applicationPackageFactory ?? ApplicationPackageFactory.instance,
+      factoryBuilder: () => _applicationPackageFactory ?? ApplicationPackageFactory.instance!,
       buildInfo: debuggingOptions.buildInfo,
     );
     final ApplicationPackage? package = _applicationPackage;

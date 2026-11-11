@@ -22,15 +22,41 @@ import '../context/tool_context.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
-import '../vmservice.dart';
 import 'extension_build_manager.dart';
+import 'extension_device_log_reader.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
+
+export 'extension_device_log_reader.dart';
+
+/// Resolves an [ApplicationPackage] for [device], delegating directly to
+/// [ExtensionBackedDevice.resolveApplicationPackage] for extension-backed
+/// devices without evaluating [factoryBuilder], and delegating to
+/// [ApplicationPackageFactory.getPackageForPlatform] on the factory returned by
+/// [factoryBuilder] otherwise.
+Future<ApplicationPackage?> getApplicationPackageForDevice(
+  Device device, {
+  required ApplicationPackageFactory? Function() factoryBuilder,
+  File? applicationBinary,
+  BuildInfo? buildInfo,
+}) async {
+  if (device is ExtensionBackedDevice) {
+    return device.resolveApplicationPackage(
+      applicationBinary: applicationBinary,
+      buildInfo: buildInfo,
+    );
+  }
+  final TargetPlatform targetPlatform = await device.targetPlatform;
+  return factoryBuilder()?.getPackageForPlatform(
+    targetPlatform,
+    applicationBinary: applicationBinary,
+    buildInfo: buildInfo,
+  );
+}
 
 /// An [ApplicationPackage] representing an application targeting a custom tool
 /// extension device.
 class ExtensionBackedApplicationPackage extends ApplicationPackage {
-  /// Creates an [ExtensionBackedApplicationPackage].
   ExtensionBackedApplicationPackage({required super.id, this.bundleUri, String? name})
     : name = name ?? id;
 
@@ -47,7 +73,6 @@ class ExtensionBackedApplicationPackage extends ApplicationPackage {
 /// `--use-application-binary`.
 class PrebuiltExtensionBackedApplicationPackage extends ExtensionBackedApplicationPackage
     implements PrebuiltApplicationPackage {
-  /// Creates a [PrebuiltExtensionBackedApplicationPackage].
   PrebuiltExtensionBackedApplicationPackage({
     required this.applicationPackage,
     required super.id,
@@ -64,7 +89,6 @@ class PrebuiltExtensionBackedApplicationPackage extends ExtensionBackedApplicati
 
 /// A host-side [DeviceService] client adapter delegating RPC queries to an [ExtensionConnection].
 final class ExtensionDeviceClient extends DeviceService {
-  /// Creates an [ExtensionDeviceClient] wrapping the host [connection].
   ExtensionDeviceClient(this.connection, {required this._logger});
 
   /// The active extension isolate connection.
@@ -247,6 +271,20 @@ final class ExtensionDeviceClient extends DeviceService {
   }
 
   @override
+  Future<Uri> waitForScreenRecording({required String deviceId}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient awaiting screen recording completion on "$deviceId" via RPC '
+      '("${DeviceService.waitForScreenRecordingMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.waitForScreenRecordingMethod,
+      params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
+      timeout: null,
+    );
+    return _parseRecordingFileUri(rawResult, DeviceService.waitForScreenRecordingMethod);
+  }
+
+  @override
   Future<Uri> stopScreenRecording({required String deviceId}) async {
     _logger.printTrace(
       'ExtensionDeviceClient stopping screen recording on "$deviceId" via RPC '
@@ -257,20 +295,22 @@ final class ExtensionDeviceClient extends DeviceService {
       params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
       timeout: null,
     );
+    return _parseRecordingFileUri(rawResult, DeviceService.stopScreenRecordingMethod);
+  }
+
+  Uri _parseRecordingFileUri(Object? rawResult, String method) {
     if (rawResult case final String rawUri) {
       final Uri? uri = Uri.tryParse(rawUri);
       if (uri != null && uri.isValidFileUri) {
         return uri;
       }
-      final message =
-          'ExtensionDeviceClient received invalid file URI for '
-          '"${DeviceService.stopScreenRecordingMethod}": "$rawUri".';
+      final message = 'ExtensionDeviceClient received invalid file URI for "$method": "$rawUri".';
       _logger.printError(message);
       throw FormatException(message);
     }
     final message =
-        'ExtensionDeviceClient received invalid response for '
-        '"${DeviceService.stopScreenRecordingMethod}": expected String, got ${rawResult.runtimeType}.';
+        'ExtensionDeviceClient received invalid response for "$method": '
+        'expected String, got ${rawResult.runtimeType}.';
     _logger.printError(message);
     throw FormatException(message);
   }
@@ -360,6 +400,7 @@ final class ExtensionDeviceClient extends DeviceService {
           DeviceService.appIdParam: ?appId,
           DeviceService.deviceIdParam: deviceId,
         },
+        timeout: null,
       );
       if (rawResult case final bool stopped) {
         return stopped;
@@ -403,149 +444,8 @@ final class ExtensionDeviceClient extends DeviceService {
   }
 }
 
-/// A [DeviceLogReader] that streams log lines from a tool extension isolate
-/// via [DeviceService.logEntryNotificationMethod] notifications.
-class ExtensionDeviceLogReader extends DeviceLogReader {
-  ExtensionDeviceLogReader._({
-    required this._connection,
-    required this._deviceId,
-    required this._deviceService,
-    required this._logger,
-    required this.name,
-    this._appId,
-  }) {
-    // Defer flushing buffered lines to a microtask so that if multiple
-    // subscribers attach to the broadcast stream in the same synchronous turn,
-    // all of them receive the initial buffered lines rather than only the first
-    // subscriber that triggered onListen synchronously.
-    _logLinesController = StreamController<String>.broadcast(
-      onListen: () => scheduleMicrotask(_flushPendingLines),
-    );
-  }
-
-  /// Creates an [ExtensionDeviceLogReader] and starts the device log stream on
-  /// the extension isolate.
-  static Future<ExtensionDeviceLogReader> create({
-    required ExtensionConnection connection,
-    required String deviceId,
-    required DeviceService deviceService,
-    required Logger logger,
-    required String name,
-    String? appId,
-  }) async {
-    final reader = ExtensionDeviceLogReader._(
-      appId: appId,
-      connection: connection,
-      deviceId: deviceId,
-      deviceService: deviceService,
-      logger: logger,
-      name: name,
-    );
-    await reader._startLogStream();
-    return reader;
-  }
-
-  static const _maxPendingLines = 1000;
-
-  final String? _appId;
-  final ExtensionConnection _connection;
-  final String _deviceId;
-  final DeviceService _deviceService;
-  final Logger _logger;
-  final _pendingLines = <String>[];
-
-  @override
-  final String name;
-
-  late final StreamController<String> _logLinesController;
-  StreamSubscription<Map<String, Object?>>? _notificationSubscription;
-  bool _closeAfterFlush = false;
-  bool _isDisposed = false;
-
-  @override
-  Stream<String> get logLines => _logLinesController.stream;
-
-  void _flushPendingLines() {
-    if (_isDisposed || _logLinesController.isClosed) {
-      return;
-    }
-    if (_pendingLines.isNotEmpty) {
-      _pendingLines.forEach(_logLinesController.add);
-      _pendingLines.clear();
-    }
-    if (_closeAfterFlush) {
-      unawaited(_logLinesController.close());
-    }
-  }
-
-  Future<void> _startLogStream() async {
-    try {
-      _notificationSubscription = _connection
-          .onNotification(DeviceService.logEntryNotificationMethod)
-          .listen(
-            (Map<String, Object?> params) {
-              if (_isDisposed || _logLinesController.isClosed) {
-                return;
-              }
-              if (params[DeviceService.deviceIdParam] == _deviceId) {
-                if (params[DeviceService.lineKey] case final String line) {
-                  if (_logLinesController.hasListener) {
-                    _logLinesController.add(line);
-                  } else if (_pendingLines.length < _maxPendingLines) {
-                    _pendingLines.add(line);
-                  }
-                }
-              }
-            },
-            onDone: () {
-              if (_isDisposed || _logLinesController.isClosed) {
-                return;
-              }
-              if (_pendingLines.isEmpty) {
-                unawaited(_logLinesController.close());
-              } else {
-                _closeAfterFlush = true;
-              }
-            },
-          );
-      await _deviceService.startLogStream(appId: _appId, deviceId: _deviceId);
-    } on Object catch (error) {
-      _logger.printWarning('Failed to start log stream for extension device "$_deviceId": $error');
-      if (!_isDisposed) {
-        _isDisposed = true;
-        await _notificationSubscription?.cancel();
-        _notificationSubscription = null;
-        if (!_logLinesController.isClosed) {
-          await _logLinesController.close();
-        }
-      }
-    }
-  }
-
-  @override
-  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
-
-  @override
-  Future<void> dispose() async {
-    if (_isDisposed) {
-      return;
-    }
-    _isDisposed = true;
-    _pendingLines.clear();
-    await _notificationSubscription?.cancel();
-    _notificationSubscription = null;
-    try {
-      await _deviceService.stopLogStream(deviceId: _deviceId);
-    } on Object {
-      // Ignore errors when stopping log streams during disposal.
-    }
-    await _logLinesController.close();
-  }
-}
-
 /// A host-side [DeviceDiscovery] mechanism that discovers devices registered by active extensions.
 class ExtensionDevices extends PollingDeviceDiscovery {
-  /// Creates an [ExtensionDevices] instance.
   ExtensionDevices({
     required this._extensionBuildManager,
     required this._extensionManager,
@@ -660,7 +560,6 @@ class ExtensionDevices extends PollingDeviceDiscovery {
 
 /// A host-side [Device] wrapper representing a target device backed by a tool extension.
 class ExtensionBackedDevice extends Device {
-  /// Creates an [ExtensionBackedDevice] wrapping a [TargetDevice].
   ExtensionBackedDevice({
     required this._buildManager,
     required this.connection,
@@ -680,7 +579,6 @@ class ExtensionBackedDevice extends Device {
   final DeviceService _deviceService;
   TargetDevice _targetDevice;
   Future<ExtensionDeviceLogReader>? _logReader;
-  String? _logReaderAppId;
   bool _disposed = false;
 
   @override
@@ -745,8 +643,8 @@ class ExtensionBackedDevice extends Device {
 
     final Uri? applicationBinaryUri;
     if (applicationBinary != null) {
-      applicationBinaryUri = fs.file(fs.path.normalize(applicationBinary.absolute.path)).uri;
-      if (!applicationBinaryUri.isValidFileUri) {
+      applicationBinaryUri = _resolveArtifactUri(fs, applicationBinary);
+      if (!applicationBinaryUri.isValidArtifactUri) {
         logger.printError('Invalid application binary path: ${applicationBinary.path}');
         return null;
       }
@@ -796,8 +694,13 @@ class ExtensionBackedDevice extends Device {
     final Uri? bundleUri = resolved?.bundleUri ?? applicationBinaryUri;
 
     if (applicationBinary != null) {
+      final FileSystemEntity resolvedEntity = bundleUri != null
+          ? _resolveArtifactEntity(fs, bundleUri)
+          : (fs.isDirectorySync(applicationBinary.path)
+                ? fs.directory(applicationBinary.path)
+                : applicationBinary);
       return PrebuiltExtensionBackedApplicationPackage(
-        applicationPackage: bundleUri != null ? fs.file(bundleUri) : applicationBinary,
+        applicationPackage: resolvedEntity,
         bundleUri: bundleUri,
         id: appId,
         name: applicationBinary.basename,
@@ -819,22 +722,45 @@ class ExtensionBackedDevice extends Device {
       return NoOpDeviceLogReader(name);
     }
     final String? resolvedAppId = app != null && app.id.isNotEmpty ? app.id : null;
-    if (_logReader case final Future<ExtensionDeviceLogReader> existingFuture
-        when _logReaderAppId == resolvedAppId) {
+    while (true) {
+      final Future<ExtensionDeviceLogReader>? existingFuture = _logReader;
+      if (existingFuture == null) {
+        break;
+      }
       final ExtensionDeviceLogReader existingReader = await existingFuture;
       if (_disposed) {
         await existingReader.dispose();
         return NoOpDeviceLogReader(name);
       }
-      if (!existingReader._isDisposed) {
+      if (!existingReader.isDisposed) {
+        if (existingReader.appId != resolvedAppId) {
+          if (!existingReader.hasActiveSubscriber) {
+            await existingReader.reconfigureAppId(resolvedAppId, clearPendingLines: true);
+          } else if (existingReader.appId != null && resolvedAppId == null) {
+            await existingReader.reconfigureAppId(null);
+          }
+        }
         return existingReader;
       }
+      if (identical(_logReader, existingFuture)) {
+        _logReader = null;
+        break;
+      }
     }
-    final Future<ExtensionDeviceLogReader>? previousFuture = _logReader;
-    _logReaderAppId = resolvedAppId;
-    final Future<ExtensionDeviceLogReader> readerFuture = _createLogReader(
+
+    late final Future<ExtensionDeviceLogReader> readerFuture;
+    readerFuture = ExtensionDeviceLogReader.create(
       appId: resolvedAppId,
-      previousReaderFuture: previousFuture,
+      connection: connection,
+      deviceId: id,
+      deviceService: _deviceService,
+      logger: logger,
+      name: name,
+      onDispose: () {
+        if (identical(_logReader, readerFuture)) {
+          _logReader = null;
+        }
+      },
     );
     _logReader = readerFuture;
     final ExtensionDeviceLogReader reader = await readerFuture;
@@ -845,28 +771,6 @@ class ExtensionBackedDevice extends Device {
     return reader;
   }
 
-  Future<ExtensionDeviceLogReader> _createLogReader({
-    required String? appId,
-    Future<ExtensionDeviceLogReader>? previousReaderFuture,
-  }) async {
-    if (previousReaderFuture != null) {
-      try {
-        final ExtensionDeviceLogReader previousReader = await previousReaderFuture;
-        await previousReader.dispose();
-      } on Object {
-        // Ignore errors when disposing the previous log reader.
-      }
-    }
-    return ExtensionDeviceLogReader.create(
-      appId: appId,
-      connection: connection,
-      deviceId: id,
-      deviceService: _deviceService,
-      logger: logger,
-      name: name,
-    );
-  }
-
   @override
   void clearLogs() {}
 
@@ -875,7 +779,6 @@ class ExtensionBackedDevice extends Device {
     _disposed = true;
     final Future<ExtensionDeviceLogReader>? logReaderFuture = _logReader;
     _logReader = null;
-    _logReaderAppId = null;
     try {
       final ExtensionDeviceLogReader? reader = await logReaderFuture;
       await reader?.dispose();
@@ -901,15 +804,22 @@ class ExtensionBackedDevice extends Device {
     final prebuiltApplication = app is PrebuiltApplicationPackage;
     final Uri? bundleUri = switch (app) {
       ExtensionBackedApplicationPackage(:final Uri? bundleUri) => bundleUri,
-      PrebuiltApplicationPackage(:final FileSystemEntity applicationPackage) =>
-        fs.file(fs.path.normalize(applicationPackage.absolute.path)).uri,
+      PrebuiltApplicationPackage(:final FileSystemEntity applicationPackage) => _resolveArtifactUri(
+        fs,
+        applicationPackage,
+      ),
       _ => null,
     };
-    if (bundleUri == null || !bundleUri.isValidFileUri || !fs.file(bundleUri).existsSync()) {
+    final String? bundlePath = bundleUri != null && bundleUri.isValidArtifactUri
+        ? fs.path.fromUri(bundleUri)
+        : null;
+    final bool bundleExists =
+        bundlePath != null && (fs.isFileSync(bundlePath) || fs.isDirectorySync(bundlePath));
+    if (!bundleExists) {
       if (prebuiltApplication) {
         logger.printError(
           'Prebuilt application binary does not exist'
-          '${bundleUri != null ? ': ${fs.file(bundleUri).path}' : '.'}',
+          '${bundlePath != null ? ': $bundlePath' : '.'}',
         );
       } else {
         final String? buildTarget = _targetDevice.buildTarget;
@@ -918,12 +828,28 @@ class ExtensionBackedDevice extends Device {
             : 'Build the application first, or pass "--use-application-binary".';
         logger.printError(
           'Application bundle for "${app.id}" was not found'
-          '${bundleUri != null ? ' at ${fs.file(bundleUri).path}' : ''}. $buildHint',
+          '${bundlePath != null ? ' at $bundlePath' : ''}. $buildHint',
         );
       }
       return null;
     }
     return bundleUri;
+  }
+
+  static Uri _resolveArtifactUri(FileSystem fs, FileSystemEntity entity) {
+    final String normalizedPath = fs.path.normalize(entity.absolute.path);
+    if (entity is Directory || fs.isDirectorySync(normalizedPath)) {
+      return fs.directory(normalizedPath).uri;
+    }
+    return fs.file(normalizedPath).uri;
+  }
+
+  static FileSystemEntity _resolveArtifactEntity(FileSystem fs, Uri uri) {
+    final String path = fs.path.fromUri(uri);
+    if (uri.path.endsWith('/') || fs.isDirectorySync(path)) {
+      return fs.directory(path);
+    }
+    return fs.file(path);
   }
 
   @override
@@ -1131,24 +1057,7 @@ class ExtensionBackedDevice extends Device {
   @override
   bool get supportsScreenshot => _targetDevice.supportsScreenshot;
 
-  /// Whether the device supports recording the screen of a running Flutter
-  /// application.
-  bool get supportsScreenRecording => _targetDevice.supportsScreenRecording;
-
   @override
   Future<void> takeScreenshot(File outputFile) =>
       _deviceService.takeScreenshot(deviceId: id, outputFileUri: outputFile.absolute.uri);
-
-  /// Starts recording the device screen to [outputFile], optionally stopping
-  /// automatically after [duration].
-  Future<void> startScreenRecording(File outputFile, {Duration? duration}) =>
-      _deviceService.startScreenRecording(
-        deviceId: id,
-        duration: duration,
-        outputFileUri: outputFile.absolute.uri,
-      );
-
-  /// Stops an active screen recording on the device and returns the [Uri] of
-  /// the recorded output file.
-  Future<Uri> stopScreenRecording() => _deviceService.stopScreenRecording(deviceId: id);
 }

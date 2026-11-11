@@ -114,6 +114,7 @@ void main() {
       addTearDown(() => tempDir.deleteSync(recursive: true));
 
       final bundleFile = File('${tempDir.path}/app_bundle')..writeAsStringSync('binary');
+      final bundleDir = Directory('${tempDir.path}/dir_bundle.app')..createSync();
       final service = LinuxDeviceService();
 
       await expectLater(
@@ -129,6 +130,11 @@ void main() {
       );
       await service.installApp(
         bundleUri: bundleFile.uri,
+        deviceId: LinuxDeviceService.customLinuxDeviceId,
+        prebuiltApplication: true,
+      );
+      await service.installApp(
+        bundleUri: bundleDir.uri,
         deviceId: LinuxDeviceService.customLinuxDeviceId,
         prebuiltApplication: true,
       );

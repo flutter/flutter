@@ -181,8 +181,9 @@ class FlutterDriverService extends DriverService {
       );
     }
     _device = device;
-    _applicationPackage = await _applicationPackageFactory.getPackageForDevice(
+    _applicationPackage = await getApplicationPackageForDevice(
       device,
+      factoryBuilder: () => _applicationPackageFactory,
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );

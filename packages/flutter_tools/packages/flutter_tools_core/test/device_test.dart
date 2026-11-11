@@ -259,13 +259,20 @@ void main() {
       );
       expect(
         () => ExtensionApplicationResolutionContext.fromJson(<String, Object?>{
-          ExtensionApplicationResolutionContext.applicationBinaryUriKey: 'file:///tmp/dir/',
+          ExtensionApplicationResolutionContext.applicationBinaryUriKey: 'file:///',
           ExtensionApplicationResolutionContext.buildModeKey: 'debug',
           ExtensionApplicationResolutionContext.deviceIdKey: 'custom_device_1',
           ExtensionApplicationResolutionContext.projectKey: validProjectMap,
         }),
         throwsFormatException,
       );
+      final dirBinaryContext = ExtensionApplicationResolutionContext.fromJson(<String, Object?>{
+        ExtensionApplicationResolutionContext.applicationBinaryUriKey: 'file:///tmp/MyApp.app/',
+        ExtensionApplicationResolutionContext.buildModeKey: 'debug',
+        ExtensionApplicationResolutionContext.deviceIdKey: 'custom_device_1',
+        ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+      });
+      expect(dirBinaryContext.applicationBinaryUri, Uri.parse('file:///tmp/MyApp.app/'));
       expect(
         () => ExtensionApplicationResolutionContext.fromJson(<String, Object?>{
           ExtensionApplicationResolutionContext.buildModeKey: 'debug',
@@ -275,11 +282,38 @@ void main() {
         }),
         throwsFormatException,
       );
+      final validProject = ExtensionFlutterProject.fromJson(validProjectMap);
+      expect(
+        () => ExtensionApplicationResolutionContext(
+          buildMode: .debug,
+          deviceId: '',
+          project: validProject,
+        ),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionApplicationResolutionContext(
+          applicationBinaryUri: Uri.parse('relative/app.pkg'),
+          buildMode: .debug,
+          deviceId: 'custom_device_1',
+          project: validProject,
+        ),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionApplicationResolutionContext(
+          buildMode: .debug,
+          deviceId: 'custom_device_1',
+          flavor: '',
+          project: validProject,
+        ),
+        throwsFormatException,
+      );
     });
   });
 
   group('ExtensionApplicationPackage', () {
-    test('serializes and deserializes with and without bundleUri', () {
+    test('serializes and deserializes with file, directory, and null bundleUri', () {
       final withBundle = ExtensionApplicationPackage(
         appId: 'com.example.my_app',
         bundleUri: Uri.parse('file:///tmp/build/my_app.pkg'),
@@ -293,7 +327,13 @@ void main() {
       expect(parsed.hashCode, equals(withBundle.hashCode));
       expect(parsed.toString(), contains('com.example.my_app'));
 
-      const withoutBundle = ExtensionApplicationPackage(appId: 'com.example.my_app');
+      final withDirBundle = ExtensionApplicationPackage(
+        appId: 'com.example.my_app',
+        bundleUri: Uri.parse('file:///tmp/build/bundle/'),
+      );
+      expect(ExtensionApplicationPackage.fromJson(withDirBundle.toMap()), equals(withDirBundle));
+
+      final withoutBundle = ExtensionApplicationPackage(appId: 'com.example.my_app');
       final Map<String, Object?> minimalMap = withoutBundle.toMap();
       expect(minimalMap.containsKey(ExtensionApplicationPackage.bundleUriKey), isFalse);
       expect(ExtensionApplicationPackage.fromJson(minimalMap), equals(withoutBundle));
@@ -321,8 +361,16 @@ void main() {
       expect(
         () => ExtensionApplicationPackage.fromJson(const <String, Object?>{
           ExtensionApplicationPackage.appIdKey: 'com.example.my_app',
-          ExtensionApplicationPackage.bundleUriKey: 'file:///tmp/bundle/',
+          ExtensionApplicationPackage.bundleUriKey: 'file:///',
         }),
+        throwsFormatException,
+      );
+      expect(() => ExtensionApplicationPackage(appId: ''), throwsFormatException);
+      expect(
+        () => ExtensionApplicationPackage(
+          appId: 'com.example.my_app',
+          bundleUri: Uri.parse('http://example.com/app.pkg'),
+        ),
         throwsFormatException,
       );
     });

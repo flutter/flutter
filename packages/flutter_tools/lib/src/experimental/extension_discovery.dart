@@ -25,7 +25,6 @@ typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 /// RPC request because the connection has been disposed or the extension
 /// isolate closed.
 class ExtensionConnectionException implements Exception {
-  /// Creates an [ExtensionConnectionException] for [extensionName] with [message].
   const ExtensionConnectionException({required this.extensionName, required this.message});
 
   /// The resolved package or extension name of the disconnected extension.
