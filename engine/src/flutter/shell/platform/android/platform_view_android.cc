@@ -445,7 +445,8 @@ void PlatformViewAndroid::CheckWarmedColorFormat() const {
   if (!impeller_context) {
     return;
   }
-  const impeller::PixelFormat surface_color_format =
+  // Only read by the DCHECK below, which compiles out of release builds.
+  [[maybe_unused]] const impeller::PixelFormat surface_color_format =
       impeller_context->GetCapabilities()->GetDefaultColorFormat();
   FML_DCHECK(surface_color_format == warmed_color_format_.value())
       << "The default pipelines were warmed for "
