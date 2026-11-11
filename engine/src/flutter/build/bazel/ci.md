@@ -184,7 +184,7 @@ the test for real, and so does the command from `engine/src`.
   through the install, and `run_tests.py --type android` as the suite of
   three `flutter_android_device_test`s, each pushed to the emulator the
   recipe's `android_virtual_device` context boots before the step and run
-  there whole, as `run_android_tests` did -- README, "Android"),
+  there whole, as `run_android_tests` did -- `docs/toolchains.md`, "Android"),
   `linux_clang_tidy` (545: each of its two builds lints itself -- the
   install of everything, then `ci/clang_tidy.sh --variant <build>
   --lint-all` as the build's own test step on a 32-core drone, which makes
@@ -227,7 +227,9 @@ the test for real, and so does the command from `engine/src`.
   (the Dart SDK from source; `--config=host_debug_no_prebuilt_dart_sdk`
   exists for a developer, a cold bot has no time for it);
   `local_engine_builds` (local_engine.json's builds
-  are `bazel build` targets without installs); the Fuchsia builders; the
+  are `bazel build` targets without installs); the Fuchsia builders;
+  `linux_riscv_host_engine` (the Bazel build has no riscv64 Linux
+  platform); the
   standalone file `linux_benchmarks` -- deliberately: it is postsubmit
   only and uploads the engine's benchmark series (`generate_metrics.sh`
   over nine executables of the build directory, `upload_metrics.sh` to
@@ -359,7 +361,7 @@ the test for real, and so does the command from `engine/src`.
   84–155 s each, local) and the install. On the 8-core bots the gain is
   about half (500: `ci/android_release` 22:38 → 10:12, of which the Dart
   runtime's wrap is 442 s); the shards, all on
-  8-core bots, are the like-for-like measurement (README: 23–35% off the
+  8-core bots, are the like-for-like measurement (23–35% off the
   kernel-compile-heavy ones). The workers are 2-vCPU Debian 11 machines,
   clock in UTC. Three findings, all the worker's environment: the desktop
   builds' impellerc linked the sysroot's libfontconfig (the fontconfig
