@@ -32,9 +32,6 @@ struct OverlayLayer {
   std::unique_ptr<IOSSurface> ios_surface;
   std::unique_ptr<Surface> surface;
 
-  // Whether a frame for this layer was submitted.
-  bool did_submit_last_frame;
-
   void UpdateViewState(UIView* flutter_view, DlRect rect, int64_t view_id, int64_t overlay_id);
 };
 

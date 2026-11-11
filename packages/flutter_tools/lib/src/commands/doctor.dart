@@ -4,7 +4,6 @@
 
 import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
-import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../experimental/extension_manager.dart';
 import '../runner/flutter_command.dart';
@@ -18,7 +17,7 @@ class DoctorCommand extends FlutterCommand {
   /// active context when `--android-licenses` is supplied.
   DoctorCommand({
     required this._doctor,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     this._androidLicenseValidator,
     this.extensionManager,
     this.verbose = false,
@@ -42,9 +41,6 @@ class DoctorCommand extends FlutterCommand {
   final android_workflow.AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
   final ExtensionManager? extensionManager;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'doctor';

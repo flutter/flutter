@@ -7,6 +7,8 @@
 
 /// @docImport 'dart:io';
 ///
+/// @docImport 'package:flutter_driver/flutter_driver.dart' as flutter_driver;
+///
 /// @docImport 'controller.dart';
 /// @docImport 'test_pointer.dart';
 /// @docImport 'widget_tester.dart';
@@ -1166,8 +1168,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding()
-    : platformDispatcher = TestPlatformDispatcher(platformDispatcher: PlatformDispatcher.instance) {
+  TestWidgetsFlutterBinding() {
     platformDispatcher.defaultRouteNameTestValue = '/';
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
@@ -1202,8 +1203,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   late final TestWindow window;
 
+  // Wraps the dispatcher [BindingBase] provides rather than
+  // [PlatformDispatcher.instance], so that [debugViewMetricsOverrides] apply in
+  // tests too. Test values set explicitly still win: they are consulted first.
   @override
-  final TestPlatformDispatcher platformDispatcher;
+  late final TestPlatformDispatcher platformDispatcher = TestPlatformDispatcher(
+    platformDispatcher: super.platformDispatcher,
+  );
 
   @override
   TestRestorationManager get restorationManager {

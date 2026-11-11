@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity_playground.h"
+#include "impeller/renderer/pipeline_library.h"
 
 namespace impeller {
 namespace testing {
@@ -136,6 +137,57 @@ TEST_P(PipelineVariantRecordingTest, ReportsEachContextSeparately) {
   };
   EXPECT_EQ(count_lazy(observer.GetReports()[0]), 0u);
   EXPECT_EQ(count_lazy(observer.GetReports()[1]), 1u);
+}
+
+TEST_P(PipelineVariantRecordingTest,
+       DefaultPipelinesAreLoggedAsEagerlyCreated) {
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG && \
+    FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE
+  GTEST_SKIP() << "Pipeline usage logging is only in debug and profile builds.";
+#else
+  ContentContext content_context(GetContext(), GetTypographerContext());
+  ASSERT_TRUE(content_context.IsValid());
+
+  const SampleCount pass_sample_count =
+      GetContext()->GetCapabilities()->SupportsOffscreenMSAA()
+          ? SampleCount::kCount4
+          : SampleCount::kCount1;
+  const PixelFormat default_color_format =
+      GetContext()->GetCapabilities()->GetDefaultColorFormat();
+  ContentContextOptions default_solid_fill_options{
+      .sample_count = pass_sample_count,
+      .blend_mode = BlendMode::kSrc,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_color_format,
+      .depth_write_enabled = true};
+  ContentContextOptions default_clip_options{
+      .sample_count = pass_sample_count,
+      .blend_mode = BlendMode::kDst,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .stencil_mode = ContentContextOptions::StencilMode::kCoverCompareInverted,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_color_format,
+      .depth_write_enabled = true};
+  PipelineRef solid_fill =
+      content_context.GetSolidFillPipeline(default_solid_fill_options);
+  ASSERT_TRUE(solid_fill);
+  PipelineRef clip = content_context.GetClipPipeline(default_clip_options);
+  ASSERT_TRUE(clip);
+  PipelineRef lazy_solid_fill =
+      content_context.GetSolidFillPipeline(MakeLazyOptions(*GetContext()));
+  ASSERT_TRUE(lazy_solid_fill);
+
+  const PipelineUsageMap usage =
+      GetContext()->GetPipelineLibrary()->GetPipelineUsage();
+  auto is_eagerly_created = [&usage](const PipelineDescriptor& descriptor) {
+    auto found = usage.find(descriptor);
+    return found != usage.end() && found->second.eagerly_created;
+  };
+  EXPECT_TRUE(is_eagerly_created(solid_fill->GetDescriptor()));
+  EXPECT_TRUE(is_eagerly_created(clip->GetDescriptor()));
+  EXPECT_FALSE(is_eagerly_created(lazy_solid_fill->GetDescriptor()));
+#endif
 }
 
 }  // namespace testing

@@ -50,7 +50,7 @@ void CreateSimpleSimulatedPointerData(PointerData& data,  // NOLINT
 
 TEST(PointerDataPacketTest, CanGetPointerData) {
   auto packet = std::make_unique<PointerDataPacket>(1);
-  PointerData data;
+  PointerData data{};
   CreateSimpleSimulatedPointerData(data, PointerData::Change::kAdd, 1, 2.0, 3.0,
                                    4);
   packet->SetPointerData(0, data);
