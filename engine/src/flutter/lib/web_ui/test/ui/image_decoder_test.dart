@@ -126,6 +126,11 @@ Future<void> testMain() async {
     final ui.Codec codec = await renderer.instantiateImageCodec(avifBytes);
     addTearDown(codec.dispose);
     expect(codec.frameCount, greaterThan(1));
+
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    addTearDown(frame.image.dispose);
+    expect(frame.image.width, 100);
+    expect(frame.image.height, 100);
   }, skip: !browserSupportsImageDecoder);
 
   test('ImageDecoder-based codec decodes still AVIF images loaded from a URL', () async {
@@ -149,6 +154,11 @@ Future<void> testMain() async {
     );
     addTearDown(codec.dispose);
     expect(codec.frameCount, greaterThan(1));
+
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    addTearDown(frame.image.dispose);
+    expect(frame.image.width, 100);
+    expect(frame.image.height, 100);
   }, skip: !browserSupportsImageDecoder);
 
   test(
