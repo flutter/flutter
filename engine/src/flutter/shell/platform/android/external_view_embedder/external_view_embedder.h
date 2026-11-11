@@ -151,8 +151,9 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
 
-  // Creates a Surface when needed or recycles an existing one.
-  // Finally, draws the picture on the frame's canvas.
+  // Creates a Surface when needed or recycles an existing one, and draws the
+  // picture on the frame's canvas. Returns nullptr if acquiring a frame from
+  // the overlay surface fails.
   std::unique_ptr<SurfaceFrame> CreateSurfaceIfNeeded(GrDirectContext* context,
                                                       int64_t view_id,
                                                       EmbedderViewSlice* slice,

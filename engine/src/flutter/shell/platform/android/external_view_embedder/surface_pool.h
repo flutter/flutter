@@ -49,7 +49,10 @@ class SurfacePool {
 
   ~SurfacePool();
 
-  // Gets a layer from the pool if available, or allocates a new one.
+  // Gets a layer from the pool if available, or allocates a new one. If
+  // |TakeLayers| left stale Java overlay surfaces pending destruction, flushes
+  // them first via `jni_facade` (requiring the platform thread whenever
+  // |HasPendingDestroy| is true or a new/resized HC layer must be created).
   // Finally, it marks the layer as used. That is, it increments
   // `available_layer_index_`.
   std::shared_ptr<OverlayLayer> GetLayer(
@@ -66,7 +69,8 @@ class SurfacePool {
   void RecycleLayers();
 
   // Destroys all the layers in the pool and any taken layers still awaiting
-  // destruction on the platform thread.
+  // destruction on the platform thread. Must be called on the platform thread
+  // when |HasLayers| or |HasPendingDestroy| is true.
   void DestroyLayers(const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
   // Destroys any Java overlay surfaces whose layers were removed by
