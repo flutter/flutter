@@ -2,8 +2,21 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/toolchain.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/impeller/tools/impeller.gni")
+
+if (is_mac) {
+  import("//build/config/darwin/darwin_sdk.gni")
+}
+
+declare_args() {
+  # Prelinks libimpeller.a into a single object that only exports the C API.
+  impeller_prelink_static_library = true
+}
+
+_prelink_static_library = impeller_prelink_static_library && is_clang &&
+                          (is_mac || is_linux || is_android)
 
 embed_blob("embedded_icu_data") {
   symbol_name = "embedded_icu_data"
@@ -103,16 +116,79 @@ impeller_component("shared_library") {
   deps = [ ":interop" ]
 }
 
-impeller_component("static_library") {
+impeller_component("static_library_archive") {
   target_type = "static_library"
 
   complete_static_lib = true
 
-  output_name = "impeller"
+  if (_prelink_static_library) {
+    output_name = "impeller_unprelinked"
+  } else {
+    output_name = "impeller"
+  }
 
   deps = [ ":interop" ]
   if (use_flutter_cxx) {
     deps += [ "//flutter/third_party/libcxx" ]
+  }
+}
+
+if (_prelink_static_library) {
+  # See prelink_static_library.py.
+  action("static_library") {
+    script = "prelink_static_library.py"
+
+    _archive = "$target_out_dir/libimpeller_unprelinked.a"
+    _work_dir = "$target_gen_dir/prelink_static_library"
+
+    inputs = [
+      _archive,
+      "impeller.h",
+    ]
+    outputs = [ "$target_out_dir/libimpeller.a" ]
+
+    args = [
+      "--input",
+      rebase_path(_archive, root_build_dir),
+      "--output",
+      rebase_path(outputs[0], root_build_dir),
+      "--header",
+      rebase_path("impeller.h", root_build_dir),
+      "--clang-bin",
+      rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/bin",
+                  root_build_dir),
+      "--work-dir",
+      rebase_path(_work_dir, root_build_dir),
+    ]
+
+    if (is_mac) {
+      if (target_cpu == "x64") {
+        _arch = "x86_64"
+      } else {
+        _arch = target_cpu
+      }
+      args += [
+        "--format",
+        "macho",
+        "--arch",
+        _arch,
+        "--sysroot",
+        rebase_path(mac_sdk_path, root_build_dir),
+        "--ld",
+        rebase_path("$mac_host_toolchain_path/usr/bin/ld", root_build_dir),
+      ]
+    } else {
+      args += [
+        "--format",
+        "elf",
+      ]
+    }
+
+    deps = [ ":static_library_archive" ]
+  }
+} else {
+  group("static_library") {
+    public_deps = [ ":static_library_archive" ]
   }
 }
 
