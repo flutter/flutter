@@ -79,7 +79,7 @@ void testMain() {
         }
         final scene = builder.build() as LayerScene;
         try {
-          await renderer.renderScene(scene, view);
+          await renderer.renderScene(scene, view, size: view.physicalSize);
         } finally {
           scene.dispose();
           picture.dispose();
