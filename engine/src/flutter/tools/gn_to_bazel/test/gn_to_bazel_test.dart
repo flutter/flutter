@@ -8602,6 +8602,8 @@ cc_library(
   ${build('ci/host_debug_test', '--target-dir ci/host_debug_test --runtime-mode debug --prebuilt-dart-sdk --no-lto', <String>['flutter:unittests'], tests: '${runTests('Host Tests', 'dart,dart-host,engine,impeller-golden')}, {"name": "Lint", "language": "bash", "script": "flutter/ci/lint.sh", "parameters": [], "contexts": []}, {"name": "Tests of tools/gn", "language": "python3", "script": "flutter/tools/gn_test.py", "parameters": [], "contexts": []}')},
   ${build('ci/host_debug_unopt', '--runtime-mode debug --unoptimized --asan --dart-debug', <String>['flutter/tools/font_subset', 'flutter/fml:fml_unittests'])},
   ${build('ci/host_profile_lto', '--runtime-mode profile --prebuilt-dart-sdk', <String>['flutter/tools/font_subset'])},
+  ${build('ci/host_release_thin_lto', '--runtime-mode release --prebuilt-dart-sdk --thin-lto', <String>['flutter/tools/font_subset'])},
+  ${build('ci/host_release_thin_no_lto', '--runtime-mode release --prebuilt-dart-sdk --thin-lto --no-lto', <String>['flutter/tools/font_subset'])},
   ${build('ci/android_debug', '--android --no-lto', <String>['flutter'])},
   ${build('ci/android_debug_x86', '--android --android-cpu=x86 --no-lto', <String>['flutter'])},
   ${build('ci/android_debug_arm64', '--target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma', <String>['flutter', 'flutter/shell/platform/android:abi_jars', 'flutter/shell/platform/embedder:embedder-archive'], archives: <String>['out/ci/android_debug_arm64/zip_archives/android-arm64/symbols.zip'])},
@@ -8619,12 +8621,14 @@ cc_library(
   ${build('ci/fuchsia_debug_x64', '--target-os=fuchsia --fuchsia-cpu=x64 --runtime-mode debug --no-lto', <String>['flutter/shell/platform/fuchsia:fuchsia'])}
 ]}''',
         // The web: --web is the wasm platform, whose optimized build links
-        // with LTO as GN's does (so --no-lto is what it cannot express).
+        // with LTO as GN's does (so --no-lto is what it cannot express);
+        // --thin-lto is nothing there, as tools/gn reads it for no web build.
         'linux_web_engine_build.json':
             '''
 {"builds": [
   ${build('ci/wasm_release', '--web --runtime-mode=release --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'], archives: <String>['out/wasm_release/zip_archives/flutter-web-sdk.zip'])},
-  ${build('ci/wasm_profile', '--web --runtime-mode=profile --no-lto', <String>['flutter/web_sdk:flutter_web_sdk_archive'])}
+  ${build('ci/wasm_profile', '--web --runtime-mode=profile --no-lto', <String>['flutter/web_sdk:flutter_web_sdk_archive'])},
+  ${build('ci/wasm_release_thin_lto', '--web --runtime-mode=release --thin-lto', <String>['flutter/web_sdk:flutter_web_sdk_archive'])}
 ]}''',
         // The developer's configurations: linux/wasm_release sets what
         // ci/wasm_release sets (one configuration); linux/host_debug's
@@ -8652,12 +8656,15 @@ cc_library(
         'host_debug_test',
         'ci_host_debug_unopt',
         'host_profile_lto',
+        'host_release_thin_lto',
+        'host_release_thin_no_lto',
         'android_debug',
         'android_debug_x86',
         'android_debug_arm64',
         'host_release_licenses',
         'wasm_release',
         'wasm_profile',
+        'wasm_release_thin_lto',
         'host_debug',
         'host_debug_unopt',
         'wasm_release',
@@ -8693,6 +8700,14 @@ build:ci_host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:r
 #   --runtime-mode profile --prebuilt-dart-sdk
 build:host_profile_lto --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_profile --//engine/src/flutter/build/bazel:lto
 
+# linux_host_engine.json: ci/host_release_thin_lto
+#   --runtime-mode release --prebuilt-dart-sdk --thin-lto
+build:host_release_thin_lto --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:thin_lto
+
+# linux_host_engine.json: ci/host_release_thin_no_lto
+#   --runtime-mode release --prebuilt-dart-sdk --thin-lto --no-lto
+build:host_release_thin_no_lto --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release
+
 # linux_host_engine.json: ci/android_debug
 #   --android --no-lto
 build:android_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm_debug --//engine/src/flutter/build/bazel:stripped=false
@@ -8718,6 +8733,10 @@ build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 #   --web --runtime-mode=profile --no-lto
 # No configuration: the Bazel build cannot express
 #   --no-lto (the wasm platform links the optimized build with LTO)
+
+# linux_web_engine_build.json: ci/wasm_release_thin_lto
+#   --web --runtime-mode=release --thin-lto
+build:wasm_release_thin_lto --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten_release
 
 # local_engine.json: linux/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma

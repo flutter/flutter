@@ -66,7 +66,8 @@ _GN_ARGS = {
     "angle_vulkan_loader_dir": '"//flutter/third_party/vulkan-deps/vulkan-loader/src"',
     "angle_vulkan_tools_dir": '"//flutter/third_party/vulkan-deps/vulkan-tools/src"',
     "buildtools_path": '"//flutter/buildtools"',
-    # No LTO in either mode, as in dart_wrap: the CI host builders' --no-lto.
+    # No LTO in any build, as in dart_wrap; these are the tests' backends,
+    # which no archive ships.
     "enable_lto": "false",
     "host_cpu": '"%s"' % HOST_CPU,
     "host_os": '"%s"' % HOST_OS,

@@ -492,10 +492,12 @@ _ASAN_LINK_FLAGS = ["-fsanitize=address"]
 
 # GN's enable_lto (//build/config/compiler:optimize, under enable_lto on
 # Linux, Android, Apple, Fuchsia and wasm): -flto on the compiles and the
-# link of an optimized build. The `lto` attribute, which BUILD.bazel
-# selects on //engine/src/flutter/build/bazel:lto; tools/gn turns it off in
-# unoptimized builds, so the feature requires the opt mode.
+# link of an optimized build, -flto=thin under use_thin_lto. The `lto` and
+# `thin_lto` attributes, which BUILD.bazel selects on
+# //engine/src/flutter/build/bazel:lto and :thin_lto; tools/gn turns LTO
+# off in unoptimized builds, so the feature requires the opt mode.
 _LTO_FLAGS = ["-flto"]
+_THIN_LTO_FLAGS = ["-flto=thin"]
 
 def _defines(names):
     return ["-D" + name for name in names]
@@ -561,6 +563,7 @@ def _impl(ctx):
     cxx_flags = _LINUX_CXX_FLAGS + cxx_include_flags
     objcxx_flags = []
     opt_link_flags = _OPT_LINK_FLAGS + ([] if ctx.attr.asan else _OPT_AS_NEEDED_LINK_FLAGS)
+    lto_flags = _THIN_LTO_FLAGS if ctx.attr.thin_lto else _LTO_FLAGS
     dbg_defines = _DBG_DEFINES
     nodeps_dynamic_library_link_flags = []
     if android:
@@ -639,14 +642,14 @@ def _impl(ctx):
             ],
         ),
         # Link-time optimization, when the build asks for it, in the opt mode
-        # alone (as tools/gn has it).
+        # alone (as tools/gn has it): full LTO, or ThinLTO under thin_lto.
         feature(
             name = "lto",
             enabled = ctx.attr.lto,
             requires = [feature_set(features = ["opt"])],
             flag_sets = [
-                flag_set(actions = ALL_CC_COMPILE_ACTION_NAMES, flag_groups = [flag_group(flags = _LTO_FLAGS)]),
-                flag_set(actions = ALL_CC_LINK_ACTION_NAMES, flag_groups = [flag_group(flags = _LTO_FLAGS)]),
+                flag_set(actions = ALL_CC_COMPILE_ACTION_NAMES, flag_groups = [flag_group(flags = lto_flags)]),
+                flag_set(actions = ALL_CC_LINK_ACTION_NAMES, flag_groups = [flag_group(flags = lto_flags)]),
             ],
         ),
         # Compilation modes; Bazel enables exactly one of dbg/opt/fastbuild.
@@ -1036,6 +1039,11 @@ flutter_cc_toolchain_config = rule(
         "lto": attr.bool(
             default = False,
             doc = "Whether an optimized build compiles and links with -flto (GN's enable_lto).",
+        ),
+        "thin_lto": attr.bool(
+            default = False,
+            doc = "Whether the LTO of an optimized build is ThinLTO, -flto=thin in place of -flto (GN's " +
+                  "use_thin_lto); nothing without `lto`.",
         ),
         "arch_copts": attr.string_list(
             default = LINUX_X64_COMPILE_FLAGS,

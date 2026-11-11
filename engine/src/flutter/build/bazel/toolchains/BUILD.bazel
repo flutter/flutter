@@ -142,6 +142,10 @@ flutter_cc_toolchain_config(
     # by the Chrome sysroot creator to advertise 2.26 (see the smoke test).
     target_libc = "glibc_2.31",
     target_system_name = "x86_64-unknown-linux-gnu",
+    thin_lto = select({
+        "//engine/src/flutter/build/bazel:thin_lto_enabled": True,
+        "//conditions:default": False,
+    }),
     toolchain_identifier = "linux_x64_clang",
 )
 
@@ -243,6 +247,10 @@ flutter_cc_toolchain_config(
     target_cpu = "aarch64",
     target_libc = "glibc_2.31",
     target_system_name = "aarch64-unknown-linux-gnu",
+    thin_lto = select({
+        "//engine/src/flutter/build/bazel:thin_lto_enabled": True,
+        "//conditions:default": False,
+    }),
     toolchain_identifier = "linux_arm64_clang",
 )
 
@@ -356,6 +364,10 @@ flutter_cc_toolchain_config(
     target_cpu = "aarch64",
     target_libc = "bionic_24",
     target_system_name = "aarch64-unknown-linux-android",
+    thin_lto = select({
+        "//engine/src/flutter/build/bazel:thin_lto_enabled": True,
+        "//conditions:default": False,
+    }),
     toolchain_identifier = "android_arm64_clang",
 )
 
@@ -477,6 +489,10 @@ flutter_cc_toolchain_config(
     target_cpu = "aarch64",
     target_libc = "bionic_26",
     target_system_name = "aarch64-unknown-linux-android",
+    thin_lto = select({
+        "//engine/src/flutter/build/bazel:thin_lto_enabled": True,
+        "//conditions:default": False,
+    }),
     toolchain_identifier = "android_arm64_api26_clang",
 )
 
@@ -579,6 +595,10 @@ flutter_cc_toolchain_config(
     target_cpu = "x86_64",
     target_libc = "bionic_24",
     target_system_name = "x86_64-unknown-linux-android",
+    thin_lto = select({
+        "//engine/src/flutter/build/bazel:thin_lto_enabled": True,
+        "//conditions:default": False,
+    }),
     toolchain_identifier = "android_x64_clang",
 )
 
@@ -677,6 +697,10 @@ flutter_cc_toolchain_config(
     target_cpu = "riscv64",
     target_libc = "bionic_35",
     target_system_name = "riscv64-unknown-linux-android",
+    thin_lto = select({
+        "//engine/src/flutter/build/bazel:thin_lto_enabled": True,
+        "//conditions:default": False,
+    }),
     toolchain_identifier = "android_riscv64_clang",
 )
 
@@ -776,6 +800,10 @@ flutter_cc_toolchain_config(
     target_cpu = "armv7",
     target_libc = "bionic_21",
     target_system_name = "arm-unknown-linux-androideabi",
+    thin_lto = select({
+        "//engine/src/flutter/build/bazel:thin_lto_enabled": True,
+        "//conditions:default": False,
+    }),
     toolchain_identifier = "android_arm_clang",
 )
 
