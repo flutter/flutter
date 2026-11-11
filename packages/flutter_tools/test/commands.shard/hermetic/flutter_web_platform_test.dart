@@ -145,7 +145,10 @@ void main() {
     operatingSystemUtils = FakeOperatingSystemUtils();
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform_test.');
 
-    for (final artifact in <HostArtifact>[HostArtifact.webPrecompiledDDCCanarySdk]) {
+    for (final artifact in <HostArtifact>[
+      HostArtifact.webPrecompiledDDCCanarySdk,
+      HostArtifact.webPrecompiledDDCCanarySdkSourcemaps,
+    ]) {
       final artifactFile = artifacts.getHostArtifact(artifact) as File;
       artifactFile.createSync();
       artifactFile.writeAsStringSync(artifact.name);
@@ -207,6 +210,19 @@ void main() {
       );
       final String contents = await response.readAsString();
       expect(contents, HostArtifact.webPrecompiledDDCCanarySdk.name);
+
+      final shelf.Response sourcemapResponse = await handler(
+        shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js.map')),
+      );
+      expect(sourcemapResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+      expect(
+        sourcemapResponse.headers[HttpHeaders.contentLengthHeader],
+        HostArtifact.webPrecompiledDDCCanarySdkSourcemaps.name.length.toString(),
+      );
+      expect(
+        await sourcemapResponse.readAsString(),
+        HostArtifact.webPrecompiledDDCCanarySdkSourcemaps.name,
+      );
       await webPlatform.close();
     },
     overrides: <Type, Generator>{

@@ -395,10 +395,10 @@ window.\$dartLoader.loader.nextAttempt();
     } else if (path.contains('ahem.ttf')) {
       file = _ahem;
       contentType = null;
-    } else if (path.contains('dart_sdk.js')) {
-      file = _dartSdk;
     } else if (path.contains('dart_sdk.js.map')) {
       file = _dartSdkSourcemaps;
+    } else if (path.contains('dart_sdk.js')) {
+      file = _dartSdk;
     } else if (path.contains('dart_stack_trace_mapper.js')) {
       file = _stackTraceMapper;
     } else if (path.contains('static/dart.js')) {
