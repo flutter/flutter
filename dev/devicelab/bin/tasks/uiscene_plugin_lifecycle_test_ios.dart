@@ -408,8 +408,10 @@ class Scenarios {
   /// in a native iOS app. The file replacements are used to set up the
   /// specific configuration for each scenario.
   late Map<String, Map<String, String>> uiKitSwiftScenarios = <String, Map<String, String>>{
-    ...basicLifecycleScenarios,
+    // Opening the app by URL breaks scene restoration until the simulator
+    // reboots, so these run before the deep link tests.
     ...stateRestorationScenarios,
+    ...basicLifecycleScenarios,
     ...implicitEngineDelegateScenarios,
     ...multiSceneScenarios,
   };
