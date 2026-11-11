@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
 import 'package:meta/meta.dart';
 
@@ -14,76 +15,14 @@ typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> pa
 /// service to the host tool.
 typedef ExtensionNotificationSender = void Function(String method, Map<String, Object?> params);
 
-/// Enumeration of standard tool extension service namespaces.
-enum ExtensionService {
-  /// Health check and diagnostic validation service (`diagnostics.*` RPCs).
-  diagnostics,
-
-  /// Feature flag and configuration option service (`config.*` RPCs).
-  config,
-
-  /// Project, app, and plugin template service (`template.*` RPCs).
-  template,
-
-  /// Target device discovery and execution service (`device.*` RPCs).
-  device,
-
-  /// Custom target build service (`build.*` RPCs).
-  build,
-
-  /// Platform artifact download and cache service (`artifact.*` RPCs).
-  artifact,
-
-  /// Ephemeral and build directory cleanup service (`clean.*` RPCs).
-  clean;
-
-  /// Resolves an [ExtensionService] from its namespace string, or `null` if unknown.
-  static ExtensionService? tryFromNamespace(String namespace) => values.asNameMap()[namespace];
-}
-
-/// Severity level for structured log messages emitted by a tool extension.
-enum ExtensionLogLevel {
-  /// Standard informational status log message.
-  info,
-
-  /// Non-fatal warning log message.
-  warning,
-
-  /// Error log message.
-  error,
-
-  /// Verbose diagnostic trace log message.
-  trace;
-
-  /// Resolves an [ExtensionLogLevel] from its wire [name].
-  ///
-  /// Throws a [FormatException] if [name] is not a recognized log level.
-  static ExtensionLogLevel fromName(String name) {
-    final ExtensionLogLevel? level = values.asNameMap()[name];
-    if (level == null) {
-      throw FormatException('Unknown ExtensionLogLevel: "$name".');
-    }
-    return level;
-  }
-}
-
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
 /// Extension authors implement this class to group related RPC endpoints under
-/// a specific [namespace] (e.g. `diagnostics`, `configuration`, `device`, `build`, `templates`).
+/// a specific [namespace] (e.g. `diagnostics`, `config`, `device`, `build`, `template`).
 abstract class ToolExtensionService {
   /// Reserved JSON-RPC 2.0 notification method for structured log messages
   /// emitted by an extension to the host tool.
   static const logNotificationMethod = 'extension.log';
-
-  /// JSON key for the log severity level in [logNotificationMethod] notifications.
-  static const levelKey = 'level';
-
-  /// JSON key for the timestamp in [logNotificationMethod] notifications.
-  static const timestampKey = 'timestamp';
-
-  /// JSON key for the log message in [logNotificationMethod] notifications.
-  static const messageKey = 'message';
 
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
   ///
@@ -117,11 +56,14 @@ abstract class ToolExtensionService {
 
   /// Sends a structured [logNotificationMethod] notification to the host tool.
   void log(String message, {ExtensionLogLevel level = .info, DateTime? timestamp}) {
-    sendNotification(logNotificationMethod, <String, Object?>{
-      levelKey: level.name,
-      messageKey: message,
-      timestampKey: ?timestamp?.toUtc().toIso8601String(),
-    });
+    sendNotification(
+      logNotificationMethod,
+      ExtensionLogMessage(
+        level: level,
+        message: message,
+        timestamp: (timestamp ?? DateTime.now()).toUtc(),
+      ).toMap(),
+    );
   }
 
   /// Cleans up resources held by the service when the extension is shut down.

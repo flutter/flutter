@@ -237,7 +237,7 @@ exec sleep 30
 ''');
       await Process.run('chmod', <String>['+x', scriptFile.path]);
 
-      final service = LinuxDeviceService(dependencies: ExtensionDependencies.bootstrap());
+      final service = LinuxDeviceService(dependencies: const ExtensionDependencies.bootstrap());
       addTearDown(service.shutdown);
 
       final bool launched = await service.launchApp(

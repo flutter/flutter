@@ -100,6 +100,13 @@ class ExtensionConnection {
     if (_isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
+    if (method == ToolExtensionService.logNotificationMethod) {
+      throw ArgumentError.value(
+        method,
+        'method',
+        '"${ToolExtensionService.logNotificationMethod}" notifications are handled by ExtensionConnection and routed to the host Logger.',
+      );
+    }
     final StreamController<Map<String, Object?>>
     controller = _notificationControllers.putIfAbsent(method, () {
       final newController = StreamController<Map<String, Object?>>.broadcast();
@@ -286,6 +293,38 @@ class ExtensionConnection {
       logger.printTrace('ExtensionConnection isolate spawned; connecting IsolateChannel...');
       final channel = IsolateChannel<Object?>.connectReceive(receivePort);
       final peer = json_rpc.Peer.withoutJson(channel);
+
+      peer.registerMethod(ToolExtensionService.logNotificationMethod, (json_rpc.Parameters params) {
+        final String currentExtensionName =
+            connection?.extensionName ?? extensionName ?? defaultExtensionName;
+        final Object? rawValue = params.value;
+        if (rawValue is! Map<String, Object?>) {
+          logger.printWarning(
+            'Extension "$currentExtensionName" sent malformed notification for '
+            '"${ToolExtensionService.logNotificationMethod}": expected Map<String, Object?>.',
+          );
+          return;
+        }
+        try {
+          final logMessage = ExtensionLogMessage.fromJson(rawValue);
+          final formatted = '[$currentExtensionName] ${logMessage.message}';
+          switch (logMessage.level) {
+            case .info:
+              logger.printStatus(formatted);
+            case .warning:
+              logger.printWarning(formatted);
+            case .error:
+              logger.printError(formatted);
+            case .trace:
+              logger.printTrace(formatted);
+          }
+        } on FormatException catch (error) {
+          logger.printWarning(
+            'Extension "$currentExtensionName" sent malformed notification for '
+            '"${ToolExtensionService.logNotificationMethod}": ${error.message}',
+          );
+        }
+      });
 
       unawaited(peer.listen());
 

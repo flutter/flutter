@@ -6,61 +6,18 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 
-/// Dependency container injected into tool extension services and build targets
-/// to isolate host operating system, file system, process execution, network,
-/// and logging side effects.
+/// Dependency container injected into tool extension services to isolate host
+/// file system side effects.
 @immutable
 final class ExtensionDependencies {
   /// Creates an [ExtensionDependencies] container with explicit dependencies.
-  const ExtensionDependencies({
-    required this.environment,
-    required this.fileSystem,
-    required this.httpClientFactory,
-    required this.logger,
-    required this.operatingSystem,
-    required this.processManager,
-  });
+  const ExtensionDependencies({required this.fileSystem});
 
-  /// Creates an [ExtensionDependencies] container wired to the real host
-  /// operating system, file system, process manager, HTTP client, and stdout/stderr.
-  factory ExtensionDependencies.bootstrap({
-    Map<String, String>? environment,
-    ExtensionFileSystem? fileSystem,
-    HttpClient Function()? httpClientFactory,
-    ExtensionLogger? logger,
-    String? operatingSystem,
-    ExtensionProcessManager? processManager,
-  }) {
-    return ExtensionDependencies(
-      environment: Map<String, String>.unmodifiable(environment ?? Platform.environment),
-      fileSystem: fileSystem ?? const LocalExtensionFileSystem(),
-      httpClientFactory: httpClientFactory ?? HttpClient.new,
-      logger: logger ?? const StdoutExtensionLogger(),
-      operatingSystem: operatingSystem ?? Platform.operatingSystem,
-      processManager: processManager ?? const LocalExtensionProcessManager(),
-    );
-  }
-
-  /// Host environment variables visible to the extension.
-  final Map<String, String> environment;
+  /// Creates an [ExtensionDependencies] container wired to the host file system.
+  const ExtensionDependencies.bootstrap() : fileSystem = const LocalExtensionFileSystem();
 
   /// File system abstraction used for reading and writing files and directories.
   final ExtensionFileSystem fileSystem;
-
-  /// Factory used to create [HttpClient] instances for network requests.
-  final HttpClient Function() httpClientFactory;
-
-  /// Logger abstraction used to record status, warning, error, and trace output.
-  final ExtensionLogger logger;
-
-  /// Identifier of the host operating system (e.g. `'linux'`, `'macos'`, `'windows'`).
-  final String operatingSystem;
-
-  /// Process execution abstraction used to invoke external tools.
-  final ExtensionProcessManager processManager;
-
-  /// Creates a new [HttpClient] using [httpClientFactory].
-  HttpClient createHttpClient() => httpClientFactory();
 }
 
 /// Abstract file system interface for tool extensions.
@@ -213,92 +170,4 @@ final class _LocalExtensionFile implements ExtensionFile {
 
   @override
   void writeAsBytesSync(List<int> bytes) => _delegate.writeAsBytesSync(bytes);
-}
-
-/// Abstract process execution interface for tool extensions.
-abstract interface class ExtensionProcessManager {
-  /// Runs [command] asynchronously and returns the [ProcessResult].
-  Future<ProcessResult> run(
-    List<String> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-  });
-
-  /// Runs [command] synchronously and returns the [ProcessResult].
-  ProcessResult runSync(
-    List<String> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-  });
-}
-
-/// Host `dart:io` [Process]-backed implementation of [ExtensionProcessManager].
-final class LocalExtensionProcessManager implements ExtensionProcessManager {
-  const LocalExtensionProcessManager();
-
-  @override
-  Future<ProcessResult> run(
-    List<String> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-  }) {
-    if (command.isEmpty) {
-      throw ArgumentError.value(command, 'command', 'Command list must not be empty.');
-    }
-    return Process.run(
-      command.first,
-      command.sublist(1),
-      workingDirectory: workingDirectory,
-      environment: environment,
-    );
-  }
-
-  @override
-  ProcessResult runSync(
-    List<String> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-  }) {
-    if (command.isEmpty) {
-      throw ArgumentError.value(command, 'command', 'Command list must not be empty.');
-    }
-    return Process.runSync(
-      command.first,
-      command.sublist(1),
-      workingDirectory: workingDirectory,
-      environment: environment,
-    );
-  }
-}
-
-/// Abstract logger interface for tool extensions.
-abstract interface class ExtensionLogger {
-  /// Logs a standard status message.
-  void printStatus(String message);
-
-  /// Logs an error message.
-  void printError(String message);
-
-  /// Logs a warning message.
-  void printWarning(String message);
-
-  /// Logs a verbose trace message.
-  void printTrace(String message);
-}
-
-/// Host `stdout`/`stderr`-backed implementation of [ExtensionLogger].
-final class StdoutExtensionLogger implements ExtensionLogger {
-  const StdoutExtensionLogger();
-
-  @override
-  void printStatus(String message) => stdout.writeln(message);
-
-  @override
-  void printError(String message) => stderr.writeln(message);
-
-  @override
-  void printWarning(String message) => stderr.writeln(message);
-
-  @override
-  void printTrace(String message) => stdout.writeln(message);
 }

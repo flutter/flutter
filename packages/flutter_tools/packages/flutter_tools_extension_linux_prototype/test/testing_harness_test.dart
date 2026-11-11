@@ -85,6 +85,11 @@ final class _TestTemplateService extends TemplateService {
 }
 
 final class _TestDeviceService extends DeviceService {
+  _TestDeviceService({this.eventPort});
+
+  final SendPort? eventPort;
+  bool _running = false;
+
   @override
   Future<List<TargetDevice>> getDevices() async {
     return const <TargetDevice>[
@@ -110,17 +115,53 @@ final class _TestDeviceService extends DeviceService {
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
-  }) async => false;
+  }) async {
+    if (deviceId != 'test-device-1') {
+      return false;
+    }
+    _running = true;
+    eventPort?.send(<String, Object?>{
+      'event': 'launchApp',
+      'deviceId': deviceId,
+      'executableUri': executableUri.toString(),
+      'buildMode': debuggingOptions.buildMode.cliName,
+      'debuggingEnabled': debuggingOptions.debuggingEnabled,
+    });
+    return true;
+  }
 
   @override
-  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+  Future<Uri?> getVmServiceUri({required String deviceId}) async {
+    if (deviceId != 'test-device-1' || !_running) {
+      return null;
+    }
+    return Uri.parse('http://127.0.0.1:43210/auth=/');
+  }
 
   @override
-  Future<bool> stopApp({required String deviceId}) async => false;
+  Future<bool> stopApp({required String deviceId}) async {
+    if (deviceId != 'test-device-1' || !_running) {
+      return false;
+    }
+    _running = false;
+    return true;
+  }
+
+  @override
+  Future<void> startLogStream({required String deviceId}) async {
+    emitLogLine(deviceId: deviceId, line: 'device log line 1');
+    emitLogLine(deviceId: 'other-device', line: 'other device line');
+    emitLogLine(deviceId: deviceId, line: 'device log line 2');
+  }
+
+  @override
+  Future<void> stopLogStream({required String deviceId}) async {
+    eventPort?.send(<String, Object?>{'event': 'stopLogStream', 'deviceId': deviceId});
+  }
 }
 
 final class _TestBuildTarget extends BuildTarget {
-  const _TestBuildTarget()
+  const _TestBuildTarget([this.name = 'custom-target'])
     : super(
         description: 'Builds custom-target',
         outputDir: '${BuiltInPlaceholders.outputDir}/custom',
@@ -128,17 +169,69 @@ final class _TestBuildTarget extends BuildTarget {
       );
 
   @override
-  String get name => 'custom-target';
+  final String name;
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
-    return const ExtensionBuildResult(success: true);
+    return ExtensionBuildResult(
+      success: true,
+      executableUri: context.outputDir.resolve('app_bundle'),
+    );
+  }
+}
+
+final class _TestAssembleTarget extends AssembleTarget {
+  const _TestAssembleTarget()
+    : super(description: 'Assembles custom_assemble', targetPlatform: 'linux-x64');
+
+  @override
+  String get name => 'custom_assemble';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
+    return ExtensionBuildResult(
+      success: true,
+      executableUri: context.buildDir.resolve('assembled.bin'),
+    );
   }
 }
 
 final class _TestBuildService extends BuildService {
+  _TestBuildService({this.targets = const <BuildTarget>[_TestBuildTarget()]});
+
+  final List<BuildTarget> targets;
+
   @override
-  List<BuildTarget> get buildTargets => const <BuildTarget>[_TestBuildTarget()];
+  List<BuildTarget> get buildTargets => targets;
+
+  @override
+  List<AssembleTarget> get assembleTargets => const <AssembleTarget>[_TestAssembleTarget()];
+}
+
+final class _TestArtifactService extends ArtifactService {
+  static const _sampleSha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
+  @override
+  Future<List<ArtifactDependency>> listRequiredArtifacts({
+    required String engineVersion,
+    required HostPlatform hostPlatform,
+    Set<String>? targetPlatforms,
+  }) async {
+    final artifact = ArtifactDependency(
+      name: 'custom-sysroot',
+      sha256: _sampleSha256,
+      url: Uri.parse('https://example.com/$engineVersion/sysroot.zip'),
+      hostPlatform: HostPlatform.linux_x64,
+      targetPlatform: 'custom-arm64',
+    );
+    if (!artifact.matchesPlatforms(
+      currentHostPlatform: hostPlatform,
+      targetPlatforms: targetPlatforms,
+    )) {
+      return const <ArtifactDependency>[];
+    }
+    return <ArtifactDependency>[artifact];
+  }
 }
 
 final class _TestCleanService extends CleanService {
@@ -159,28 +252,82 @@ final class _ExitOnCleanService extends CleanService {
   }
 }
 
+final class _AsyncErrorService extends ToolExtensionService {
+  @override
+  String get namespace => 'error';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'triggerUnhandledError': (Map<String, Object?> _) {
+        Timer.run(() {
+          throw StateError('Simulated post-handshake isolate crash');
+        });
+        return Completer<Object?>().future;
+      },
+    };
+  }
+}
+
+final class _MalformedNotificationService extends ToolExtensionService {
+  @override
+  String get namespace => 'malformed';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'emitBadLog': (Map<String, Object?> _) {
+        sendNotification(ToolExtensionService.logNotificationMethod, <String, Object?>{
+          ExtensionLogMessage.levelKey: 'not_a_valid_level',
+          ExtensionLogMessage.messageKey: 'bad log',
+          ExtensionLogMessage.timestampKey: '2026-10-21T00:00:00.000Z',
+        });
+        return 'ok';
+      },
+      'emitBadDeviceLog': (Map<String, Object?> _) {
+        sendNotification(DeviceService.logEntryNotificationMethod, <String, Object?>{
+          DeviceService.deviceIdParam: 'test-device-1',
+          DeviceService.lineKey: 12345,
+        });
+        return 'ok';
+      },
+      'emitValidCustom': (Map<String, Object?> params) {
+        sendNotification('malformed.customEvent', params);
+        return 'ok';
+      },
+    };
+  }
+}
+
+Future<ExtensionTestHarness> _spawnFullTestHarness({
+  SendPort? cleanedPort,
+  SendPort? deviceEventsPort,
+}) {
+  return ExtensionTestHarness.spawn((SendPort sendPort) {
+    return ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[
+        _TestDiagnosticsService(),
+        _TestConfigService(),
+        _TestTemplateService(),
+        _TestDeviceService(eventPort: deviceEventsPort),
+        _TestBuildService(),
+        _TestArtifactService(),
+        _TestCleanService(cleanedPort: cleanedPort),
+      ],
+      extensionName: 'test_extension',
+      supportedPlatforms: const <String>{'linux'},
+    );
+  });
+}
+
 void main() {
   const methodNotFoundErrorCode = -32601;
   const invalidParamsErrorCode = -32602;
 
   group('createTestDependencies (Tier 1)', () {
     test('MemoryExtensionFileSystem supports hermetic file and directory operations', () async {
-      final ExtensionDependencies dependencies = createTestDependencies(
-        environment: const <String, String>{'CUSTOM_SDK': '/sdk'},
-      );
-      expect(dependencies.operatingSystem, 'linux');
-      expect(dependencies.environment['CUSTOM_SDK'], '/sdk');
-      expect(
-        () => dependencies.createHttpClient(),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('Unexpected HTTP request in hermetic test.'),
-          ),
-        ),
-      );
-
+      final ExtensionDependencies dependencies = createTestDependencies();
       final ExtensionFileSystem fs = dependencies.fileSystem;
       final ExtensionDirectory projectDir = fs.directory(Uri.parse('file:///workspace/app/'));
       expect(projectDir.existsSync(), isFalse);
@@ -214,102 +361,11 @@ void main() {
       expect(pubspecFile.existsSync(), isFalse);
       expect(binaryFile.existsSync(), isFalse);
     });
-
-    test('FakeExtensionProcessManager validates command queue and expectations', () async {
-      var callbackRan = false;
-      final processManager = FakeExtensionProcessManager(<FakeExtensionCommand>[
-        FakeExtensionCommand(
-          command: const <String>['cmake', '-B', 'build'],
-          workingDirectory: '/workspace/app',
-          environment: const <String, String>{'CC': 'clang'},
-          stdout: 'Configured\n',
-          onRun: () {
-            callbackRan = true;
-          },
-        ),
-      ]);
-      final ExtensionDependencies dependencies = createTestDependencies(
-        processManager: processManager,
-      );
-      expect(processManager.hasRemainingCommands, isTrue);
-
-      final ProcessResult result = await dependencies.processManager.run(
-        const <String>['cmake', '-B', 'build'],
-        workingDirectory: '/workspace/app',
-        environment: const <String, String>{'CC': 'clang', 'EXTRA': '1'},
-      );
-      expect(result.exitCode, 0);
-      expect(result.stdout, 'Configured\n');
-      expect(callbackRan, isTrue);
-      expect(processManager.hasRemainingCommands, isFalse);
-      processManager.assertNoRemainingCommands();
-
-      expect(
-        () => dependencies.processManager.runSync(const <String>['ninja']),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('Unexpected command executed: ninja'),
-          ),
-        ),
-      );
-
-      processManager.addCommand(
-        const FakeExtensionCommand(command: <String>['ninja', '-C', 'build']),
-      );
-      expect(() => processManager.assertNoRemainingCommands(), throwsA(isA<StateError>()));
-      expect(
-        () => dependencies.processManager.runSync(const <String>['ninja', '-C', 'other']),
-        throwsA(isA<StateError>()),
-      );
-    });
-
-    test('BufferExtensionLogger records and clears status, error, warning, and trace logs', () {
-      final logger = BufferExtensionLogger();
-      final ExtensionDependencies dependencies = createTestDependencies(logger: logger);
-
-      dependencies.logger
-        ..printStatus('status line')
-        ..printWarning('warning line')
-        ..printError('error line')
-        ..printTrace('trace line');
-
-      expect(logger.statusText, 'status line\n');
-      expect(logger.warningText, 'warning line\n');
-      expect(logger.errorText, 'error line\n');
-      expect(logger.traceText, 'trace line\n');
-
-      logger.clear();
-      expect(logger.statusText, isEmpty);
-      expect(logger.warningText, isEmpty);
-      expect(logger.errorText, isEmpty);
-      expect(logger.traceText, isEmpty);
-    });
   });
 
   group('ExtensionTestHarness (Tier 2)', () {
-    test('supports typed clients and logs', () async {
-      final cleanedPort = ReceivePort();
-      addTearDown(cleanedPort.close);
-
-      final SendPort cleanedSendPort = cleanedPort.sendPort;
-
-      final ExtensionTestHarness harness = await ExtensionTestHarness.spawn((SendPort sendPort) {
-        return ToolExtensionEntryPoint.run(
-          sendPort,
-          <ToolExtensionService>[
-            _TestDiagnosticsService(),
-            _TestConfigService(),
-            _TestTemplateService(),
-            _TestDeviceService(),
-            _TestBuildService(),
-            _TestCleanService(cleanedPort: cleanedSendPort),
-          ],
-          extensionName: 'test_extension',
-          supportedPlatforms: const <String>{'linux'},
-        );
-      });
+    test('diagnosticsClient and configClient query diagnostics, logs, and configuration', () async {
+      final ExtensionTestHarness harness = await _spawnFullTestHarness();
       addTearDown(harness.dispose);
 
       final receivedLogs = <ExtensionLogMessage>[];
@@ -329,6 +385,11 @@ void main() {
       expect(await harness.configClient.getTitle(), 'Test Configuration');
       expect(await harness.configClient.getFeatureFlags(), hasLength(1));
       expect(await harness.configClient.getConfigurations(), hasLength(1));
+    });
+
+    test('templateClient queries app, plugin, and project templates', () async {
+      final ExtensionTestHarness harness = await _spawnFullTestHarness();
+      addTearDown(harness.dispose);
 
       expect(await harness.templateClient.getAppTemplates(), <String>{'custom_os/Runner.tmpl'});
       expect(await harness.templateClient.getPluginTemplates(), <String>{'custom_os/Plugin.tmpl'});
@@ -339,6 +400,23 @@ void main() {
       final Map<String, Object?> generatedParams = await harness.templateClient
           .generateTemplateParameters('custom-app', const <String, Object?>{'projectName': 'app'});
       expect(generatedParams['customKey'], 'customValue');
+    });
+
+    test('deviceClient manages device discovery, app lifecycle, and log streaming', () async {
+      final deviceEventsPort = ReceivePort();
+      addTearDown(deviceEventsPort.close);
+      final deviceEvents = <Map<String, Object?>>[];
+      final StreamSubscription<Object?> deviceEventSub = deviceEventsPort.listen((Object? event) {
+        if (event case final Map<String, Object?> map) {
+          deviceEvents.add(map);
+        }
+      });
+      addTearDown(deviceEventSub.cancel);
+
+      final ExtensionTestHarness harness = await _spawnFullTestHarness(
+        deviceEventsPort: deviceEventsPort.sendPort,
+      );
+      addTearDown(harness.dispose);
 
       final List<TargetDevice> devices = await harness.deviceClient.getDevices();
       expect(devices, hasLength(1));
@@ -355,21 +433,108 @@ void main() {
         isTrue,
       );
 
+      final bool launched = await harness.deviceClient.launchApp(
+        debuggingOptions: const ExtensionDebuggingOptions(
+          buildMode: .debug,
+          debuggingEnabled: true,
+        ),
+        deviceId: 'test-device-1',
+        executableUri: Uri.parse('file:///app/build/app_bundle'),
+      );
+      expect(launched, isTrue);
+      expect(
+        await harness.deviceClient.getVmServiceUri(deviceId: 'test-device-1'),
+        Uri.parse('http://127.0.0.1:43210/auth=/'),
+      );
+      expect(await harness.deviceClient.stopApp(deviceId: 'test-device-1'), isTrue);
+      expect(await harness.deviceClient.getVmServiceUri(deviceId: 'test-device-1'), isNull);
+
+      final streamedLines = <String>[];
+      final StreamSubscription<String> deviceLogSub = harness.deviceClient
+          .logLines(deviceId: 'test-device-1')
+          .listen(streamedLines.add);
+      addTearDown(deviceLogSub.cancel);
+      await harness.deviceClient.startLogStream(deviceId: 'test-device-1');
+      await pumpEventQueue();
+      expect(streamedLines, <String>['device log line 1', 'device log line 2']);
+      await harness.deviceClient.stopLogStream(deviceId: 'test-device-1');
+      await pumpEventQueue();
+      expect(
+        deviceEvents,
+        contains(
+          equals(const <String, Object?>{'event': 'stopLogStream', 'deviceId': 'test-device-1'}),
+        ),
+      );
+    });
+
+    test('buildClient, artifactClient, and cleanClient execute RPCs and dispose cleanly', () async {
+      final cleanedPort = ReceivePort();
+      addTearDown(cleanedPort.close);
+
+      final ExtensionTestHarness harness = await _spawnFullTestHarness(
+        cleanedPort: cleanedPort.sendPort,
+      );
+      addTearDown(harness.dispose);
+
+      final List<ExtensionAssembleTarget> assembleTargets = await harness.buildClient
+          .getAssembleTargets();
+      expect(assembleTargets, hasLength(1));
+      expect(assembleTargets.single.name, 'custom_assemble');
+
+      final Uri flutterRoot = Uri.parse('file:///sdk/flutter/');
+      final Uri projectRoot = Uri.parse('file:///app/');
+      final Uri outputDir = Uri.parse('file:///app/build/');
+      final Uri buildDir = Uri.parse('file:///app/.dart_tool/flutter_build/');
+
       final ExtensionBuildResult buildResult = await harness.buildClient.build(
         buildMode: .debug,
+        flutterRoot: flutterRoot,
         mainPath: 'lib/main.dart',
-        projectRoot: Uri.parse('file:///app/'),
+        outputDir: outputDir,
+        projectRoot: projectRoot,
         targetName: 'custom-target',
       );
       expect(buildResult.success, isTrue);
+      expect(buildResult.executableUri, Uri.parse('file:///app/build/app_bundle'));
 
-      final cleanEnv = CleanEnvironment(
-        buildDir: Uri.parse('file:///app/build/'),
-        projectRoot: Uri.parse('file:///app/'),
+      final ExtensionBuildResult assembleResult = await harness.buildClient.assemble(
+        buildDir: buildDir,
+        buildMode: .debug,
+        flutterRoot: flutterRoot,
+        mainPath: 'lib/main.dart',
+        outputDir: outputDir,
+        projectRoot: projectRoot,
+        targetName: 'custom_assemble',
       );
+      expect(assembleResult.success, isTrue);
+      expect(
+        assembleResult.executableUri,
+        Uri.parse('file:///app/.dart_tool/flutter_build/assembled.bin'),
+      );
+
+      final List<ArtifactDependency> matchingArtifacts = await harness.artifactClient
+          .listRequiredArtifacts(
+            engineVersion: 'engine123',
+            hostPlatform: HostPlatform.linux_x64,
+            targetPlatforms: const <String>{'custom-arm64'},
+          );
+      expect(matchingArtifacts, hasLength(1));
+      expect(matchingArtifacts.single.name, 'custom-sysroot');
+
+      final List<ArtifactDependency> filteredOutArtifacts = await harness.artifactClient
+          .listRequiredArtifacts(
+            engineVersion: 'engine123',
+            hostPlatform: HostPlatform.darwin_arm64,
+          );
+      expect(filteredOutArtifacts, isEmpty);
+
+      final cleanEnv = CleanEnvironment(buildDir: outputDir, projectRoot: projectRoot);
       await harness.cleanClient.clean(cleanEnv);
       final Object? rawCleaned = await cleanedPort.first;
-      expect(CleanEnvironment.fromJson(rawCleaned! as Map<String, Object?>), cleanEnv);
+      expect(rawCleaned, isA<Map<String, Object?>>());
+      if (rawCleaned case final Map<String, Object?> cleanedMap) {
+        expect(CleanEnvironment.fromJson(cleanedMap), cleanEnv);
+      }
 
       await expectLater(
         harness.sendRawRequest('nonexistent.method'),
@@ -392,6 +557,52 @@ void main() {
         () => harness.sendRawRequest(BuildService.getBuildTargetsMethod),
         throwsA(isA<StateError>()),
       );
+      expect(() => harness.onNotification('custom.event'), throwsA(isA<StateError>()));
+    });
+
+    test('surfaces malformed log and device.logEntry notifications as FormatExceptions', () async {
+      final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
+        (SendPort sendPort) => ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[_MalformedNotificationService()],
+          extensionName: 'malformed_extension',
+          supportedPlatforms: const <String>{'linux'},
+        ),
+      );
+      addTearDown(harness.dispose);
+
+      expect(
+        () => harness.onNotification(ToolExtensionService.logNotificationMethod),
+        throwsArgumentError,
+      );
+
+      final Future<void> badLogError = expectLater(
+        harness.onLog,
+        emitsError(isA<FormatException>()),
+      );
+      await harness.sendRawRequest('malformed.emitBadLog');
+      await badLogError;
+
+      final Future<void> badDeviceLogError = expectLater(
+        harness.deviceClient.logLines(deviceId: 'test-device-1'),
+        emitsError(isA<FormatException>()),
+      );
+      await harness.sendRawRequest('malformed.emitBadDeviceLog');
+      await badDeviceLogError;
+
+      final customEvents = <Map<String, Object?>>[];
+      final StreamSubscription<Map<String, Object?>> customSub = harness
+          .onNotification('malformed.customEvent')
+          .listen(customEvents.add);
+      addTearDown(customSub.cancel);
+      await harness.sendRawRequest(
+        'malformed.emitValidCustom',
+        params: const <String, Object?>{'key': 'value'},
+      );
+      await pumpEventQueue();
+      expect(customEvents, <Map<String, Object?>>[
+        const <String, Object?>{'key': 'value'},
+      ]);
     });
 
     test('cleans up ports and rethrows when isolate fails during startup', () async {
@@ -409,7 +620,7 @@ void main() {
       );
     });
 
-    test('fails pending requests immediately when isolate exits after handshake', () async {
+    test('fails pending timeout: null requests and closes notification streams when isolate exits after handshake', () async {
       final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
         (SendPort sendPort) => ToolExtensionEntryPoint.run(
           sendPort,
@@ -420,42 +631,74 @@ void main() {
       );
       addTearDown(harness.dispose);
 
+      final Future<void> logStreamDone = expectLater(harness.onLog, emitsDone);
+      final Future<void> customNotificationDone = expectLater(
+        harness.onNotification('custom.event'),
+        emitsDone,
+      );
+
       await expectLater(
-        harness
-            .sendRawRequest(
-              CleanService.cleanMethod,
-              params: <String, Object?>{
-                CleanService.environmentParam: CleanEnvironment(
-                  buildDir: Uri.parse('file:///app/build/'),
-                  projectRoot: Uri.parse('file:///app/'),
-                ).toMap(),
-              },
-              timeout: const Duration(seconds: 30),
+        harness.cleanClient
+            .clean(
+              CleanEnvironment(
+                buildDir: Uri.parse('file:///app/build/'),
+                projectRoot: Uri.parse('file:///app/'),
+              ),
             )
             .timeout(const Duration(seconds: 5)),
         throwsA(isA<StateError>()),
       );
+      await logStreamDone;
+      await customNotificationDone;
+      expect(harness.isDisposed, isTrue);
+    });
+
+    test('surfaces post-handshake unhandled isolate errors with extension details', () async {
+      final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
+        (SendPort sendPort) => ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[_AsyncErrorService()],
+          extensionName: 'error_extension',
+          supportedPlatforms: const <String>{'linux'},
+        ),
+      );
+      addTearDown(harness.dispose);
+
+      final Future<void> logError = expectLater(
+        harness.onLog,
+        emitsError(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Simulated post-handshake isolate crash'),
+          ),
+        ),
+      );
+      await expectLater(
+        harness.sendRawRequest('error.triggerUnhandledError', timeout: null),
+        throwsA(isA<StateError>()),
+      );
+      await logError;
+
+      expect(harness.isolateErrors, hasLength(1));
+      expect(
+        harness.isolateErrors.single.message,
+        contains('Simulated post-handshake isolate crash'),
+      );
+      expect(harness.isDisposed, isTrue);
     });
   });
 
   group('verifyExtensionPackage (Tier 3)', () {
-    ExtensionFileSystem createManifestFileSystem({
-      String? yamlContent,
+    ExtensionFileSystem createPackageFileSystem({
+      String entrypointRelativePath = 'extension/flutter_tools/extension.dart',
       bool createEntrypoint = true,
     }) {
       final fs = MemoryExtensionFileSystem();
       final ExtensionDirectory root = fs.directory(Uri.parse('file:///ext_pkg/'))
         ..createSync(recursive: true);
-      if (yamlContent != null) {
-        final ExtensionFile manifestFile = root
-            .childDirectory('extension')
-            .childDirectory('flutter_tools')
-            .childFile('config.yaml');
-        manifestFile.createSync(recursive: true);
-        manifestFile.writeAsStringSync(yamlContent);
-      }
       if (createEntrypoint) {
-        final ExtensionFile entrypointFile = root.childDirectory('bin').childFile('test_ext.dart');
+        final ExtensionFile entrypointFile = fs.file(root.uri.resolve(entrypointRelativePath));
         entrypointFile.createSync(recursive: true);
         entrypointFile.writeAsStringSync('// entrypoint stub\n');
       }
@@ -473,36 +716,43 @@ void main() {
       supportedPlatforms: const <String>{'linux'},
     );
 
+    test('succeeds for conventional extension/flutter_tools/extension.dart entrypoint', () async {
+      final ExtensionFileSystem fs = createPackageFileSystem();
+
+      await verifyExtensionPackage(
+        packageRoot: Uri.parse('file:///ext_pkg/'),
+        entryPoint: validEntryPoint,
+        fileSystem: fs,
+      );
+    });
+
     test(
-      'succeeds when config.yaml matches runtime capabilities, targets, and templates',
+      'succeeds when expectedConfig matches runtime capabilities, targets, and templates',
       () async {
-        final ExtensionFileSystem fs = createManifestFileSystem(
-          yamlContent: '''
-name: test_ext
-entrypoint: bin/test_ext.dart
-host_platforms:
-  - linux
-services:
-  - diagnostics
-  - build
-  - template
-build_targets:
-  - custom-target
-templates:
-  - custom-app
-''',
+        final ExtensionFileSystem fs = createPackageFileSystem(
+          entrypointRelativePath: 'bin/test_ext.dart',
+        );
+        final expectedConfig = ExtensionPackageConfig(
+          name: 'test_ext',
+          entrypoint: 'bin/test_ext.dart',
+          hostPlatforms: const <String>{'linux'},
+          services: const <String>{'diagnostics', 'build', 'template'},
+          buildTargets: const <String>{'custom-target'},
+          templates: const <String>{'custom-app'},
+          targetPlatforms: const <String>{'custom_os'},
         );
 
         await verifyExtensionPackage(
           packageRoot: Uri.parse('file:///ext_pkg/'),
           entryPoint: validEntryPoint,
+          expectedConfig: expectedConfig,
           fileSystem: fs,
         );
       },
     );
 
-    test('throws StateError when config.yaml is missing', () async {
-      final ExtensionFileSystem fs = createManifestFileSystem();
+    test('throws StateError when entrypoint file is missing', () async {
+      final ExtensionFileSystem fs = createPackageFileSystem(createEntrypoint: false);
 
       await expectLater(
         verifyExtensionPackage(
@@ -514,27 +764,50 @@ templates:
           isA<StateError>().having(
             (StateError e) => e.message,
             'message',
-            contains('Extension manifest not found'),
+            contains('Extension entrypoint not found'),
           ),
         ),
       );
     });
 
-    test('throws FormatException when config.yaml declares an unknown service', () async {
-      final ExtensionFileSystem fs = createManifestFileSystem(
-        yamlContent: '''
-name: test_ext
-protocolVersion: 1
-entrypoint: bin/test_ext.dart
-services:
-  - invalid_service
-''',
+    test('throws StateError when build target collides with built-in subcommand', () async {
+      final ExtensionFileSystem fs = createPackageFileSystem();
+
+      await expectLater(
+        verifyExtensionPackage(
+          packageRoot: Uri.parse('file:///ext_pkg/'),
+          entryPoint: (SendPort sendPort) => ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _TestBuildService(targets: const <BuildTarget>[_TestBuildTarget('apk')]),
+            ],
+            extensionName: 'test_ext',
+            supportedPlatforms: const <String>{'linux'},
+          ),
+          fileSystem: fs,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('collides with built-in flutter build subcommand'),
+          ),
+        ),
+      );
+    });
+
+    test('throws FormatException when expectedConfig declares an unknown service', () async {
+      final ExtensionFileSystem fs = createPackageFileSystem();
+      final expectedConfig = ExtensionPackageConfig(
+        name: 'test_ext',
+        services: const <String>{'invalid_service'},
       );
 
       await expectLater(
         verifyExtensionPackage(
           packageRoot: Uri.parse('file:///ext_pkg/'),
           entryPoint: validEntryPoint,
+          expectedConfig: expectedConfig,
           fileSystem: fs,
         ),
         throwsA(
@@ -547,156 +820,100 @@ services:
       );
     });
 
-    test('throws StateError when extensionName mismatches config.yaml', () async {
-      final ExtensionFileSystem fs = createManifestFileSystem(
-        yamlContent: '''
-name: wrong_name
-protocolVersion: 1
-entrypoint: bin/test_ext.dart
-supportedPlatforms: [linux]
-services: [diagnostics, build, template]
-''',
-      );
+    test(
+      'throws StateError when expectedConfig drifts from runtime capabilities or targets',
+      () async {
+        final ExtensionFileSystem fs = createPackageFileSystem(
+          entrypointRelativePath: 'bin/test_ext.dart',
+        );
 
-      await expectLater(
-        verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: validEntryPoint,
-          fileSystem: fs,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('Extension name mismatch'),
+        await expectLater(
+          verifyExtensionPackage(
+            packageRoot: Uri.parse('file:///ext_pkg/'),
+            entryPoint: validEntryPoint,
+            expectedConfig: ExtensionPackageConfig(
+              name: 'wrong_name',
+              entrypoint: 'bin/test_ext.dart',
+              hostPlatforms: const <String>{'linux'},
+              services: const <String>{'diagnostics', 'build', 'template'},
+            ),
+            fileSystem: fs,
           ),
-        ),
-      );
-    });
-
-    test('throws StateError when services mismatch config.yaml', () async {
-      final ExtensionFileSystem fs = createManifestFileSystem(
-        yamlContent: '''
-name: test_ext
-protocolVersion: 1
-entrypoint: bin/test_ext.dart
-supportedPlatforms: [linux]
-services: [diagnostics]
-''',
-      );
-
-      await expectLater(
-        verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: validEntryPoint,
-          fileSystem: fs,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('Services mismatch'),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('Extension name mismatch'),
+            ),
           ),
-        ),
-      );
-    });
+        );
 
-    test('throws StateError when buildTargets mismatch runtime getBuildTargets', () async {
-      final ExtensionFileSystem fs = createManifestFileSystem(
-        yamlContent: '''
-name: test_ext
-entrypoint: bin/test_ext.dart
-host_platforms: [linux]
-services: [diagnostics, build, template]
-build_targets: [wrong-target]
-''',
-      );
-
-      await expectLater(
-        verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: validEntryPoint,
-          fileSystem: fs,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('Build targets mismatch'),
+        await expectLater(
+          verifyExtensionPackage(
+            packageRoot: Uri.parse('file:///ext_pkg/'),
+            entryPoint: validEntryPoint,
+            expectedConfig: ExtensionPackageConfig(
+              name: 'test_ext',
+              entrypoint: 'bin/test_ext.dart',
+              hostPlatforms: const <String>{'linux'},
+              services: const <String>{'diagnostics'},
+            ),
+            fileSystem: fs,
           ),
-        ),
-      );
-    });
-
-    test('throws StateError when templates mismatch runtime getProjectTemplates', () async {
-      final ExtensionFileSystem fs = createManifestFileSystem(
-        yamlContent: '''
-name: test_ext
-entrypoint: bin/test_ext.dart
-host_platforms: [linux]
-services: [diagnostics, build, template]
-build_targets: [custom-target]
-templates: [wrong-template]
-''',
-      );
-
-      await expectLater(
-        verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: validEntryPoint,
-          fileSystem: fs,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('Templates mismatch'),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('Services mismatch'),
+            ),
           ),
-        ),
-      );
-    });
+        );
 
-    test('preserves quoted commas in flow lists and rejects unsupported YAML syntax', () async {
-      final ExtensionFileSystem quotedCommaFs = createManifestFileSystem(
-        yamlContent: '''
-name: test_ext
-entrypoint: bin/test_ext.dart
-host_platforms: [linux]
-services: [diagnostics, build, template]
-build_targets: ["target,with,comma"]
-''',
-      );
-
-      await expectLater(
-        verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: validEntryPoint,
-          fileSystem: quotedCommaFs,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('config.yaml declares {target,with,comma}'),
+        await expectLater(
+          verifyExtensionPackage(
+            packageRoot: Uri.parse('file:///ext_pkg/'),
+            entryPoint: validEntryPoint,
+            expectedConfig: ExtensionPackageConfig(
+              name: 'test_ext',
+              entrypoint: 'bin/test_ext.dart',
+              hostPlatforms: const <String>{'linux'},
+              services: const <String>{'diagnostics', 'build', 'template'},
+              buildTargets: const <String>{'wrong-target'},
+            ),
+            fileSystem: fs,
           ),
-        ),
-      );
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('Build targets mismatch'),
+            ),
+          ),
+        );
 
-      final ExtensionFileSystem blockScalarFs = createManifestFileSystem(
-        yamlContent: '''
-name: |-
-  test_ext
-''',
-      );
-
-      await expectLater(
-        verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: validEntryPoint,
-          fileSystem: blockScalarFs,
-        ),
-        throwsA(isA<FormatException>()),
-      );
-    });
+        await expectLater(
+          verifyExtensionPackage(
+            packageRoot: Uri.parse('file:///ext_pkg/'),
+            entryPoint: validEntryPoint,
+            expectedConfig: ExtensionPackageConfig(
+              name: 'test_ext',
+              entrypoint: 'bin/test_ext.dart',
+              hostPlatforms: const <String>{'linux'},
+              services: const <String>{'diagnostics', 'build', 'template'},
+              buildTargets: const <String>{'custom-target'},
+              templates: const <String>{'wrong-template'},
+            ),
+            fileSystem: fs,
+          ),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('Templates mismatch'),
+            ),
+          ),
+        );
+      },
+    );
   });
 }

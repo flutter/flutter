@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/testing.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/build.dart';
-import 'package:flutter_tools_extension_linux_prototype/src/clean.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/config.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/device.dart';
-import 'package:flutter_tools_extension_linux_prototype/src/diagnostics.dart';
-import 'package:flutter_tools_extension_linux_prototype/src/template.dart';
 import 'package:test/test.dart';
 
 Uri _resolvePrototypePackageRoot() {
@@ -86,14 +84,28 @@ void main() {
       expect(buildTargets, hasLength(1));
       expect(buildTargets.first.name, LinuxBuildService.customLinuxBuildTargetName);
 
+      final List<ExtensionAssembleTarget> assembleTargets = await harness.buildClient
+          .getAssembleTargets();
+      expect(assembleTargets, hasLength(1));
+      expect(assembleTargets.first.name, 'custom-linux-assemble-only-debug');
+
+      final Uri projectRoot = Uri.parse('file:///nonexistent_project_root/');
       final ExtensionBuildResult buildResult = await harness.buildClient.build(
         buildMode: .debug,
+        flutterRoot: Uri.parse('file:///flutter_sdk/'),
         mainPath: 'lib/main.dart',
-        projectRoot: Uri.parse('file:///nonexistent_project_root/'),
+        outputDir: projectRoot.resolve('build/'),
+        projectRoot: projectRoot,
         targetName: LinuxBuildService.customLinuxBuildTargetName,
       );
       expect(buildResult.success, isFalse);
       expect(buildResult.errorMessage, contains('Missing linux/CMakeLists.txt'));
+
+      final List<ArtifactDependency> artifacts = await harness.artifactClient.listRequiredArtifacts(
+        engineVersion: 'abcdef123456',
+        hostPlatform: HostPlatform.linux_x64,
+      );
+      expect(artifacts, isEmpty);
 
       await expectLater(
         harness.sendRawRequest('unknown.method'),
@@ -104,43 +116,27 @@ void main() {
     });
 
     test(
-      'deviceClient and cleanClient work with injected hermetic ExtensionDependencies',
+      'deviceClient and cleanClient operate over JSON-RPC on a temporary project directory',
       () async {
-        final ExtensionDependencies dependencies = createTestDependencies();
-        final ExtensionDirectory projectDir = dependencies.fileSystem.directory(
-          Uri.parse('file:///hermetic_app/'),
-        )..createSync(recursive: true);
-        final ExtensionDirectory buildDir = projectDir.childDirectory('build')
-          ..createSync(recursive: true);
-        final ExtensionDirectory linuxBuildDir = buildDir.childDirectory('linux')
-          ..createSync(recursive: true);
-        linuxBuildDir.childFile('libapp.so').writeAsStringSync('elf');
-        final ExtensionDirectory linuxEphemeralDir =
-            projectDir.childDirectory('linux').childDirectory('flutter').childDirectory('ephemeral')
-              ..createSync(recursive: true);
-        linuxEphemeralDir.childFile('generated.cmake').writeAsStringSync('cmake');
+        final Directory tempDir = Directory.systemTemp.createTempSync('linux_harness_test.');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
 
-        final ExtensionTestHarness harness = await ExtensionTestHarness.spawn((SendPort sendPort) {
-          return ToolExtensionEntryPoint.run(
-            sendPort,
-            <ToolExtensionService>[
-              LinuxExtensionDiagnostics(),
-              LinuxConfigurationExtension(),
-              LinuxTemplateService(),
-              LinuxDeviceService(dependencies: dependencies),
-              LinuxBuildService(),
-              LinuxCleanService(dependencies: dependencies),
-            ],
-            extensionName: 'flutter_tools_extension_linux_prototype',
-            supportedPlatforms: const <String>{'linux'},
-          );
-        });
+        final buildDir = Directory('${tempDir.path}/build')..createSync(recursive: true);
+        final linuxBuildDir = Directory('${buildDir.path}/linux')..createSync(recursive: true);
+        File('${linuxBuildDir.path}/libapp.so').writeAsStringSync('elf');
+        final linuxEphemeralDir = Directory('${tempDir.path}/linux/flutter/ephemeral')
+          ..createSync(recursive: true);
+        File('${linuxEphemeralDir.path}/generated.cmake').writeAsStringSync('cmake');
+
+        final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
+          linuxExtensionEntryPoint,
+        );
         addTearDown(harness.dispose);
 
         final project = ExtensionFlutterProject(
-          appName: 'hermetic_app',
+          appName: 'temp_app',
           buildDirectory: buildDir.uri,
-          directory: projectDir.uri,
+          directory: tempDir.uri,
         );
         expect(
           await harness.deviceClient.isSupportedForProject(
@@ -161,29 +157,12 @@ void main() {
           isFalse,
         );
 
-        final buildAsProject = ExtensionFlutterProject(
-          appName: 'hermetic_build_probe',
-          buildDirectory: buildDir.uri,
-          directory: buildDir.uri,
-        );
-        expect(
-          await harness.deviceClient.isSupportedForProject(
-            deviceId: LinuxDeviceService.customLinuxDeviceId,
-            project: buildAsProject,
-          ),
-          isTrue,
-        );
-
         await harness.cleanClient.clean(
-          CleanEnvironment(buildDir: buildDir.uri, projectRoot: projectDir.uri),
+          CleanEnvironment(buildDir: buildDir.uri, projectRoot: tempDir.uri),
         );
-        expect(
-          await harness.deviceClient.isSupportedForProject(
-            deviceId: LinuxDeviceService.customLinuxDeviceId,
-            project: buildAsProject,
-          ),
-          isFalse,
-        );
+        expect(linuxBuildDir.existsSync(), isFalse);
+        expect(linuxEphemeralDir.existsSync(), isFalse);
+        expect(buildDir.existsSync(), isTrue);
       },
     );
 
@@ -202,12 +181,36 @@ void main() {
       expect(devices.first.id, LinuxDeviceService.customLinuxDeviceId);
     });
 
-    test('verifyExtensionPackage validates config.yaml against runtime extension', () async {
-      final Uri packageRoot = _resolvePrototypePackageRoot();
+    test(
+      'verifyExtensionPackage validates prototype entrypoint and runtime capabilities',
+      () async {
+        final Uri packageRoot = _resolvePrototypePackageRoot();
+        final expectedConfig = ExtensionPackageConfig(
+          name: 'flutter_tools_extension_linux_prototype',
+          entrypoint: 'bin/flutter_tools_extension_linux_prototype.dart',
+          hostPlatforms: const <String>{'linux'},
+          services: const <String>{
+            'diagnostics',
+            'config',
+            'template',
+            'device',
+            'build',
+            'clean',
+            'artifact',
+          },
+          buildTargets: const <String>{LinuxBuildService.customLinuxBuildTargetName},
+          templates: const <String>{'custom-linux-app'},
+          targetPlatforms: const <String>{'custom_linux'},
+        );
 
-      await verifyExtensionPackage(packageRoot: packageRoot, entryPoint: linuxExtensionEntryPoint);
+        await verifyExtensionPackage(
+          packageRoot: packageRoot,
+          entryPoint: linuxExtensionEntryPoint,
+          expectedConfig: expectedConfig,
+        );
 
-      await verifyExtensionPackage(packageRoot: packageRoot);
-    });
+        await verifyExtensionPackage(packageRoot: packageRoot, expectedConfig: expectedConfig);
+      },
+    );
   });
 }
