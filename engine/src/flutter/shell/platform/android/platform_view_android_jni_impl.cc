@@ -257,6 +257,10 @@ static jobject SpawnJNI(JNIEnv* env,
   return jni;
 }
 
+static void PrewarmRendering(JNIEnv* env, jobject jcaller, jlong shell_holder) {
+  ANDROID_SHELL_HOLDER->GetPlatformView()->PrewarmRendering();
+}
+
 static void SurfaceCreated(JNIEnv* env,
                            jobject jcaller,
                            jlong shell_holder,
@@ -817,6 +821,11 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeGetBitmap",
           .signature = "(J)Landroid/graphics/Bitmap;",
           .fnPtr = reinterpret_cast<void*>(&GetBitmap),
+      },
+      {
+          .name = "nativePrewarmRendering",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&PrewarmRendering),
       },
       {
           .name = "nativeSurfaceCreated",

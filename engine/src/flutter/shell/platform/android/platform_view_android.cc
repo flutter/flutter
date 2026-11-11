@@ -33,7 +33,9 @@
 #endif  // !SLIMPELLER
 
 #include "fml/logging.h"
+#include "fml/trace_event.h"
 #include "impeller/display_list/aiks_context.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
@@ -60,6 +62,26 @@ AndroidContext::ContextSettings CreateContextSettings(
   settings.enable_validation = p_settings.enable_vulkan_validation;
   settings.enable_surface_control = p_settings.enable_surface_control;
   return settings;
+}
+
+// Starts compiling the pipelines that rendering to a surface will need.
+//
+// Constructing an AiksContext requests every pipeline it warms up from the
+// context's pipeline library, which compiles them on worker threads and keeps
+// them, keyed by descriptor, for the life of the context. Discarding the
+// AiksContext right away leaves those pipelines in the library, where the
+// AiksContext that a surface builds later finds them, compiled or in flight,
+// without this one's buffers being kept alive until then.
+void PrewarmPipelines(const std::shared_ptr<impeller::Context>& context) {
+  // On OpenGL ES, building an AiksContext needs an EGL context to be current,
+  // and none is current on the raster thread before a surface is created.
+  if (!context ||
+      context->GetBackendType() != impeller::Context::BackendType::kVulkan) {
+    return;
+  }
+  TRACE_EVENT0("flutter", "PlatformViewAndroid::PrewarmRendering");
+  impeller::AiksContext aiks_context(context,
+                                     impeller::TypographerContextSkia::Make());
 }
 }  // namespace
 
@@ -181,8 +203,28 @@ PlatformViewAndroid::PlatformViewAndroid(
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
+void PlatformViewAndroid::PrewarmRendering() {
+  if (requested_pipelines_) {
+    return;
+  }
+  requested_pipelines_ = true;
+  // Don't wait for the raster thread, as |NotifyCreated| does: it may still be
+  // setting up the rendering context, and sparing the platform thread that wait
+  // is the point. The task holds the context weakly so that it can't keep the
+  // context alive after this platform view is gone.
+  task_runners_.GetRasterTaskRunner()->PostTask(
+      [weak_context = std::weak_ptr<AndroidContext>(android_context_)]() {
+        if (std::shared_ptr<AndroidContext> context = weak_context.lock()) {
+          PrewarmPipelines(context->GetImpellerContext());
+        }
+      });
+}
+
 void PlatformViewAndroid::NotifyCreated(
     fml::RefPtr<AndroidNativeWindow> native_window) {
+  // The surface's own AiksContext requests the pipelines, which leaves nothing
+  // for |PrewarmRendering| to do.
+  requested_pipelines_ = true;
   if (android_surface_) {
     InstallFirstFrameCallback();
 

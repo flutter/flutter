@@ -1464,6 +1464,9 @@ public class PlatformViewsController2Test {
         String channel, ByteBuffer message, int position, int responseId) {}
 
     @Implementation
+    public void prewarmRendering() {}
+
+    @Implementation
     public void onSurfaceCreated(Surface surface) {}
 
     @Implementation

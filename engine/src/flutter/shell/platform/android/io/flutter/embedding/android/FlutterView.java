@@ -1176,6 +1176,10 @@ public class FlutterView extends FrameLayout
     // Instruct our FlutterRenderer that we are now its designated RenderSurface.
     FlutterRenderer flutterRenderer = this.flutterEngine.getRenderer();
     isFlutterUiDisplayed = flutterRenderer.isDisplayingFlutterUi();
+    // Start warming up rendering now, so that it overlaps with the rest of startup instead of
+    // waiting for the surface. This must come before attachToRenderer(), which starts rendering
+    // right away if the surface is already available.
+    flutterRenderer.prewarmRendering();
     renderSurface.attachToRenderer(flutterRenderer);
     flutterRenderer.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
     if (isContentSizingEnabled) {

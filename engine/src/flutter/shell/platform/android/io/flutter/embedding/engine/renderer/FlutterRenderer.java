@@ -1124,6 +1124,19 @@ public class FlutterRenderer implements TextureRegistry {
   // ------ END TextureRegistry IMPLEMENTATION ----
 
   /**
+   * Notifies Flutter that a {@link RenderSurface} is about to be attached, so that it can start
+   * warming up rendering before {@link #startRenderingToSurface(Surface, boolean)} is called.
+   *
+   * <p>Does nothing if the engine is no longer attached to native.
+   */
+  public void prewarmRendering() {
+    if (!flutterJNI.isAttached()) {
+      return;
+    }
+    flutterJNI.prewarmRendering();
+  }
+
+  /**
    * Notifies Flutter that the given {@code surface} was created and is available for Flutter
    * rendering.
    *
