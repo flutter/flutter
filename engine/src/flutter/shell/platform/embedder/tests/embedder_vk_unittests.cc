@@ -253,6 +253,7 @@ struct ExternalTextureConfig {
   CreateTestImage create_image = nullptr;
   VkFormat format = VK_FORMAT_UNDEFINED;
   VoidCallback destruction_callback = nullptr;
+  const FlutterVulkanYcbcrConversionInfo* ycbcr_conversion_info = nullptr;
 };
 
 static_assert(std::is_trivially_destructible_v<ExternalTextureConfig>);
@@ -283,6 +284,8 @@ bool ExternalTextureFrameCallback(void* user_data,
   g_last_texture_user_data = img;
   texture->width = width;
   texture->height = height;
+  texture->ycbcr_conversion_info =
+      g_external_texture_config.ycbcr_conversion_info;
   return true;
 }
 
@@ -290,8 +293,10 @@ void SetExternalTexture(
     EmbedderTestContextVulkan& context,
     CreateTestImage create_image,
     VkFormat format,
-    VoidCallback destruction_callback = DeleteTestVulkanImage) {
-  g_external_texture_config = {create_image, format, destruction_callback};
+    VoidCallback destruction_callback = DeleteTestVulkanImage,
+    const FlutterVulkanYcbcrConversionInfo* ycbcr_conversion_info = nullptr) {
+  g_external_texture_config = {create_image, format, destruction_callback,
+                               ycbcr_conversion_info};
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       ExternalTextureFrameCallback;
 }
@@ -529,6 +534,102 @@ TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
   ASSERT_TRUE(engine.is_valid());
   WaitAndVerifyFrame(latch, rendered_scene, "external_texture_nv12.png",
                      kWidth * 2);
+}
+
+TEST_F(EmbedderTest, RenderNV12TextureWithExplicitYcbcrConversionInfoImpeller) {
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
+
+  if (!CanCreateNV12Texture(context)) {
+    GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
+  }
+
+  static const FlutterVulkanYcbcrConversionInfo kYcbcrInfo = {
+      .struct_size = sizeof(FlutterVulkanYcbcrConversionInfo),
+      .format = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM,
+      .ycbcr_model = VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_709,
+      .ycbcr_range = VK_SAMPLER_YCBCR_RANGE_ITU_FULL,
+      .components =
+          {
+              .r = kFlutterVulkanComponentSwizzleIdentity,
+              .g = kFlutterVulkanComponentSwizzleIdentity,
+              .b = kFlutterVulkanComponentSwizzleIdentity,
+              .a = kFlutterVulkanComponentSwizzleIdentity,
+          },
+      .x_chroma_offset = VK_CHROMA_LOCATION_COSITED_EVEN,
+      .y_chroma_offset = VK_CHROMA_LOCATION_COSITED_EVEN,
+      .chroma_filter = VK_FILTER_LINEAR,
+      .force_explicit_reconstruction = false,
+      .format_features =
+          VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
+          VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT |
+          VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT,
+      .external_format = 0,
+  };
+
+  EmbedderConfigBuilder builder(context);
+  fml::AutoResetWaitableEvent latch;
+  ConfigureTextureTest(context, builder, latch, /*enable_impeller=*/true);
+  SetExternalTexture(context, CreateVulkanTextureNV12,
+                     VK_FORMAT_G8_B8R8_2PLANE_420_UNORM, DeleteTestVulkanImage,
+                     &kYcbcrInfo);
+
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
+  UniqueEngine engine = LaunchEngineAndScheduleFrames(builder);
+  ASSERT_TRUE(engine.is_valid());
+  // Allow up to 2 rows (kWidth * 2 pixels) of minor chroma rounding tolerance
+  // across Vulkan drivers, matching RenderNV12TextureWithImpellerVulkan.
+  constexpr int kAllowableYuvPixelDiffPerColumn = 2;
+  WaitAndVerifyFrame(latch, rendered_scene, "external_texture_nv12.png",
+                     kWidth * kAllowableYuvPixelDiffPerColumn);
+}
+
+TEST_F(EmbedderTest, RenderNV12TextureWithExplicitYcbcrConversionInfoSkia) {
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
+
+  if (!CanCreateNV12Texture(context)) {
+    GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
+  }
+
+  static const FlutterVulkanYcbcrConversionInfo kYcbcrInfo = {
+      .struct_size = sizeof(FlutterVulkanYcbcrConversionInfo),
+      .format = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM,
+      .ycbcr_model = VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_709,
+      .ycbcr_range = VK_SAMPLER_YCBCR_RANGE_ITU_FULL,
+      .components =
+          {
+              .r = kFlutterVulkanComponentSwizzleIdentity,
+              .g = kFlutterVulkanComponentSwizzleIdentity,
+              .b = kFlutterVulkanComponentSwizzleIdentity,
+              .a = kFlutterVulkanComponentSwizzleIdentity,
+          },
+      .x_chroma_offset = VK_CHROMA_LOCATION_COSITED_EVEN,
+      .y_chroma_offset = VK_CHROMA_LOCATION_COSITED_EVEN,
+      .chroma_filter = VK_FILTER_LINEAR,
+      .force_explicit_reconstruction = false,
+      .format_features =
+          VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
+          VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT |
+          VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT,
+      .external_format = 0,
+  };
+
+  EmbedderConfigBuilder builder(context);
+  fml::AutoResetWaitableEvent latch;
+  ConfigureTextureTest(context, builder, latch, /*enable_impeller=*/false);
+  SetExternalTexture(context, CreateVulkanTextureNV12,
+                     VK_FORMAT_G8_B8R8_2PLANE_420_UNORM, DeleteTestVulkanImage,
+                     &kYcbcrInfo);
+
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
+  UniqueEngine engine = LaunchEngineAndScheduleFrames(builder);
+  ASSERT_TRUE(engine.is_valid());
+  // Allow up to 2 rows (kWidth * 2 pixels) of minor chroma rounding tolerance
+  // across Vulkan drivers, matching RenderNV12TextureWithSkiaVulkan.
+  constexpr int kAllowableYuvPixelDiffPerColumn = 2;
+  WaitAndVerifyFrame(latch, rendered_scene, "external_texture_nv12.png",
+                     kWidth * kAllowableYuvPixelDiffPerColumn);
 }
 
 }  // namespace testing

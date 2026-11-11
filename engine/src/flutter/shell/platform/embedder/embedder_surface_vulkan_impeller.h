@@ -42,7 +42,9 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
       VkQueue queue,
       const VulkanDispatchTable& vulkan_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
-      impeller::Flags impeller_flags = {});
+      impeller::Flags impeller_flags = {},
+      bool enable_vulkan_validation = false,
+      std::shared_ptr<impeller::Context> shared_context = nullptr);
 
   ~EmbedderSurfaceVulkanImpeller() override;
 
@@ -58,12 +60,16 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
   // |GPUSurfaceVulkanDelegate|
   std::shared_ptr<impeller::Context> CreateImpellerContext() const override;
 
+  void SetupImpellerContext();
+
  private:
   bool valid_ = false;
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   VulkanDispatchTable vulkan_dispatch_table_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
+  impeller::ContextVK::Settings context_settings_;
   std::shared_ptr<impeller::ContextVK> context_;
+  bool context_initialized_ = false;
 
   // |EmbedderSurface|
   bool IsValid() const override;

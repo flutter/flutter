@@ -802,7 +802,7 @@ TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
   const int64_t second_view_id = 2;
 
   // 2. Add the first view and wait for the add view callback.
-  FlutterWindowMetricsEvent window_metrics_event;
+  FlutterWindowMetricsEvent window_metrics_event = {};
   window_metrics_event.struct_size = sizeof(FlutterWindowMetricsEvent);
   window_metrics_event.width = 100;
   window_metrics_event.height = 100;
@@ -817,7 +817,7 @@ TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
   window_metrics_event.view_id = first_view_id;
   window_metrics_event.has_constraints = false;
 
-  FlutterAddViewInfo add_view_info;
+  FlutterAddViewInfo add_view_info = {};
   add_view_info.struct_size = sizeof(FlutterAddViewInfo);
   add_view_info.view_id = first_view_id;
   add_view_info.view_metrics = &window_metrics_event;

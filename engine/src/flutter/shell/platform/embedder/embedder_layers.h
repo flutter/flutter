@@ -19,7 +19,8 @@ class EmbedderLayers {
   EmbedderLayers(DlISize frame_size,
                  double device_pixel_ratio,
                  DlMatrix root_surface_transformation,
-                 uint64_t presentation_time);
+                 uint64_t presentation_time,
+                 uint64_t platform_view_mutation_capabilities = 0);
 
   ~EmbedderLayers();
 
@@ -36,12 +37,19 @@ class EmbedderLayers {
                              const PresentCallback& callback) const;
 
  private:
+  struct ReferencedPath {
+    std::vector<FlutterPathVerb> verbs;
+    std::vector<FlutterPoint> points;
+    std::vector<double> conic_weights;
+  };
   const DlISize frame_size_;
   const double device_pixel_ratio_;
   const DlMatrix root_surface_transformation_;
+  const uint64_t platform_view_mutation_capabilities_ = 0;
   std::vector<std::unique_ptr<FlutterPlatformView>> platform_views_referenced_;
   std::vector<std::unique_ptr<FlutterPlatformViewMutation>>
       mutations_referenced_;
+  std::vector<std::unique_ptr<ReferencedPath>> paths_referenced_;
   std::vector<std::unique_ptr<std::vector<const FlutterPlatformViewMutation*>>>
       mutations_arrays_referenced_;
   std::vector<std::unique_ptr<FlutterBackingStorePresentInfo>>

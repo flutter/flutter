@@ -23,17 +23,34 @@ void EmbedderPlatformMessageResponse::Complete(
     return;
   }
 
+  if (!callback_) {
+    return;
+  }
+
   runner_->PostTask(
       // The static leak checker gets confused by the use of fml::MakeCopyable.
       // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       fml::MakeCopyable([data = std::move(data), callback = callback_]() {
-        callback(data->GetMapping(), data->GetSize());
+        // Preserve a non-null pointer for 0-byte responses (where an empty
+        // std::vector<uint8_t> inside fml::DataMapping returns GetMapping() ==
+        // nullptr) so C-API embedders can distinguish a 0-byte ByteData(0)
+        // reply from CompleteEmpty() (which passes nullptr, 0).
+        static constexpr uint8_t kEmptyResponseSentinel = 0;
+        const uint8_t* bytes = data->GetMapping();
+        if (bytes == nullptr && data->GetSize() == 0) {
+          bytes = &kEmptyResponseSentinel;
+        }
+        callback(bytes, data->GetSize());
       }));
 }
 
 // |PlatformMessageResponse|
 void EmbedderPlatformMessageResponse::CompleteEmpty() {
-  Complete(std::make_unique<fml::NonOwnedMapping>(nullptr, 0u));
+  if (!callback_) {
+    return;
+  }
+
+  runner_->PostTask([callback = callback_]() { callback(nullptr, 0u); });
 }
 
 }  // namespace flutter

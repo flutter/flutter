@@ -9,8 +9,8 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
-#include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_vm_init.h"
 
 namespace flutter {
 
@@ -23,7 +23,7 @@ class FlutterMain {
   static FlutterMain& Get();
 
   const flutter::Settings& GetSettings() const;
-  flutter::AndroidRenderingAPI GetAndroidRenderingAPI();
+  flutter::AndroidRenderingAPI GetAndroidRenderingAPI() const;
 
   static AndroidRenderingAPI SelectedRenderingAPI(
       const flutter::Settings& settings,
@@ -32,7 +32,6 @@ class FlutterMain {
  private:
   const flutter::Settings settings_;
   const flutter::AndroidRenderingAPI android_rendering_api_;
-  DartServiceIsolate::CallbackHandle vm_service_uri_callback_ = 0;
 
   explicit FlutterMain(const flutter::Settings& settings,
                        flutter::AndroidRenderingAPI android_rendering_api);
@@ -46,8 +45,6 @@ class FlutterMain {
                    jstring engineCachesPath,
                    jlong initTimeMillis,
                    jint api_level);
-
-  void SetupDartVMServiceUriCallback(JNIEnv* env);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterMain);
 };

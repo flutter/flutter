@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/testing/testing.gni")
 import("config.gni")
 
 config("flutter_config") {
@@ -15,6 +16,8 @@ source_set("common") {
     "settings.h",
     "task_runners.cc",
     "task_runners.h",
+    "vulkan_driver_info.cc",
+    "vulkan_driver_info.h",
   ]
 
   deps = [ "//flutter/fml" ]
@@ -23,4 +26,22 @@ source_set("common") {
     ":flutter_config",
     "//flutter:config",
   ]
+}
+
+if (enable_unittests) {
+  test_fixtures("common_fixtures") {
+    fixtures = []
+  }
+
+  executable("common_unittests") {
+    testonly = true
+
+    sources = [ "vulkan_driver_info_unittests.cc" ]
+
+    deps = [
+      ":common",
+      ":common_fixtures",
+      "//flutter/testing",
+    ]
+  }
 }

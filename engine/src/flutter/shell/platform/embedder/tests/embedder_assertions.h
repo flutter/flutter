@@ -167,6 +167,31 @@ inline bool operator==(const FlutterBackingStore& a,
   return false;
 }
 
+inline bool operator==(const FlutterPath& a, const FlutterPath& b) {
+  if (a.struct_size != b.struct_size || a.fill_type != b.fill_type ||
+      a.verbs_count != b.verbs_count || a.points_count != b.points_count ||
+      a.conic_weights_count != b.conic_weights_count ||
+      !(a.bounds == b.bounds)) {
+    return false;
+  }
+  for (size_t i = 0; i < a.verbs_count; ++i) {
+    if (a.verbs[i] != b.verbs[i]) {
+      return false;
+    }
+  }
+  for (size_t i = 0; i < a.points_count; ++i) {
+    if (!(a.points[i] == b.points[i])) {
+      return false;
+    }
+  }
+  for (size_t i = 0; i < a.conic_weights_count; ++i) {
+    if (!flutter::testing::NumberNear(a.conic_weights[i], b.conic_weights[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 inline bool operator==(const FlutterPlatformViewMutation& a,
                        const FlutterPlatformViewMutation& b) {
   if (a.type != b.type) {
@@ -182,6 +207,8 @@ inline bool operator==(const FlutterPlatformViewMutation& a,
       return a.clip_rounded_rect == b.clip_rounded_rect;
     case kFlutterPlatformViewMutationTypeTransformation:
       return a.transformation == b.transformation;
+    case kFlutterPlatformViewMutationTypeClipPath:
+      return a.clip_path == b.clip_path;
   }
 
   return false;
@@ -338,6 +365,8 @@ inline std::string FlutterPlatformViewMutationTypeToString(
       return "kFlutterPlatformViewMutationTypeClipRoundedRect";
     case kFlutterPlatformViewMutationTypeTransformation:
       return "kFlutterPlatformViewMutationTypeTransformation";
+    case kFlutterPlatformViewMutationTypeClipPath:
+      return "kFlutterPlatformViewMutationTypeClipPath";
   }
   return "Unknown";
 }
@@ -349,12 +378,20 @@ inline std::ostream& operator<<(std::ostream& out,
   switch (m.type) {
     case kFlutterPlatformViewMutationTypeOpacity:
       out << "Opacity: " << m.opacity;
+      break;
     case kFlutterPlatformViewMutationTypeClipRect:
       out << "Clip Rect: " << m.clip_rect;
+      break;
     case kFlutterPlatformViewMutationTypeClipRoundedRect:
       out << "Clip Rounded Rect: " << m.clip_rounded_rect;
+      break;
     case kFlutterPlatformViewMutationTypeTransformation:
       out << "Transformation: " << m.transformation;
+      break;
+    case kFlutterPlatformViewMutationTypeClipPath:
+      out << "Clip Path Bounds: " << m.clip_path.bounds
+          << " Verbs: " << m.clip_path.verbs_count;
+      break;
   }
   return out;
 }
