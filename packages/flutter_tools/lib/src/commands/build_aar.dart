@@ -15,7 +15,6 @@ import '../base/os.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../context/android_context.dart';
-import '../context/tool_context.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -25,9 +24,9 @@ class BuildAarCommand extends BuildSubCommand {
     required this._androidBuilder,
     required this._androidContext,
     required this._buildSystem,
-    required ToolContext toolContext,
+    required super.toolContext,
     super.verboseHelp = false,
-  }) : super(logger: toolContext.logger, toolContext: toolContext) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundles(const <OptionBundle>[
       DartCompileOptionsBundle(),
       AndroidGradleOptionsBundle(),
@@ -87,9 +86,6 @@ class BuildAarCommand extends BuildSubCommand {
   /// The [BuildSystem] used for building the project.
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   FileSystem get _fileSystem => toolContext.fs;
 

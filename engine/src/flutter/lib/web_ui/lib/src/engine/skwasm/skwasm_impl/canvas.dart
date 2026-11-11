@@ -59,15 +59,15 @@ class SkwasmCanvas implements LayerCanvas {
   @override
   void saveLayer(ui.Rect? bounds, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
     if (bounds != null) {
       withStackScope((StackScope s) {
-        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nullptr);
+        canvasSaveLayer(_handle, s.convertRectToNative(bounds), backendPaint.handle, nullptr);
       });
     } else {
-      canvasSaveLayer(_handle, nullptr, paintHandle, nullptr);
+      canvasSaveLayer(_handle, nullptr, backendPaint.handle, nullptr);
     }
-    paintDispose(paintHandle);
+    backendPaint.dispose();
   }
 
   @override
@@ -75,7 +75,7 @@ class SkwasmCanvas implements LayerCanvas {
     _tracker?.recordPaint(paint);
     // There are 2 ImageFilter objects applied here. The filter in the paint
     // object is applied to the contents and its default tile mode is decal
-    // (automatically applied by toSkPaint).
+    // (automatically applied by createBackendPaint).
     // The filter supplied as an argument to this function [nativeFilter] will
     // be applied to the backdrop and its default tile mode will be mirror.
     // We also pass in the blur tile mode as an argument to saveLayer because
@@ -92,15 +92,20 @@ class SkwasmCanvas implements LayerCanvas {
         engineFilter.getBackendFilter(defaultBlurTileMode: ui.TileMode.mirror) as SkwasmImageFilter;
     final ImageFilterHandle nativeFilterHandle = backendFilter.nativeFilter;
 
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(/*ui.TileMode.decal*/);
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
     if (bounds != null) {
       withStackScope((StackScope s) {
-        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nativeFilterHandle);
+        canvasSaveLayer(
+          _handle,
+          s.convertRectToNative(bounds),
+          backendPaint.handle,
+          nativeFilterHandle,
+        );
       });
     } else {
-      canvasSaveLayer(_handle, nullptr, paintHandle, nativeFilterHandle);
+      canvasSaveLayer(_handle, nullptr, backendPaint.handle, nativeFilterHandle);
     }
-    paintDispose(paintHandle);
+    backendPaint.dispose();
   }
 
   @override
@@ -169,37 +174,37 @@ class SkwasmCanvas implements LayerCanvas {
   @override
   void drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawLine(_handle, p1.dx, p1.dy, p2.dx, p2.dy, paintHandle);
-    paintDispose(paintHandle);
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
+    canvasDrawLine(_handle, p1.dx, p1.dy, p2.dx, p2.dy, backendPaint.handle);
+    backendPaint.dispose();
   }
 
   @override
   void drawPaint(ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawPaint(_handle, paintHandle);
-    paintDispose(paintHandle);
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
+    canvasDrawPaint(_handle, backendPaint.handle);
+    backendPaint.dispose();
   }
 
   @override
   void drawRect(ui.Rect rect, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
     withStackScope((StackScope s) {
-      canvasDrawRect(_handle, s.convertRectToNative(rect), paintHandle);
+      canvasDrawRect(_handle, s.convertRectToNative(rect), backendPaint.handle);
     });
-    paintDispose(paintHandle);
+    backendPaint.dispose();
   }
 
   @override
   void drawRRect(ui.RRect rrect, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
     withStackScope((StackScope s) {
-      canvasDrawRRect(_handle, s.convertRRectToNative(rrect), paintHandle);
+      canvasDrawRRect(_handle, s.convertRRectToNative(rrect), backendPaint.handle);
     });
-    paintDispose(paintHandle);
+    backendPaint.dispose();
   }
 
   @override
@@ -214,40 +219,40 @@ class SkwasmCanvas implements LayerCanvas {
   @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawDRRect(
         _handle,
         s.convertRRectToNative(outer),
         s.convertRRectToNative(inner),
-        paintHandle,
+        backendPaint.handle,
       );
     });
-    paintDispose(paintHandle);
+    backendPaint.dispose();
   }
 
   @override
   void drawOval(ui.Rect rect, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
     withStackScope((StackScope s) {
-      canvasDrawOval(_handle, s.convertRectToNative(rect), paintHandle);
+      canvasDrawOval(_handle, s.convertRectToNative(rect), backendPaint.handle);
     });
-    paintDispose(paintHandle);
+    backendPaint.dispose();
   }
 
   @override
   void drawCircle(ui.Offset center, double radius, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawCircle(_handle, center.dx, center.dy, radius, paintHandle);
-    paintDispose(paintHandle);
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
+    canvasDrawCircle(_handle, center.dx, center.dy, radius, backendPaint.handle);
+    backendPaint.dispose();
   }
 
   @override
   void drawArc(ui.Rect rect, double startAngle, double sweepAngle, bool useCenter, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawArc(
         _handle,
@@ -255,20 +260,20 @@ class SkwasmCanvas implements LayerCanvas {
         ui.toDegrees(startAngle),
         ui.toDegrees(sweepAngle),
         useCenter,
-        paintHandle,
+        backendPaint.handle,
       );
     });
-    paintDispose(paintHandle);
+    backendPaint.dispose();
   }
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
     final enginePath = path as EnginePath;
     final skwasmPath = enginePath.backendPath as SkwasmPath;
-    canvasDrawPath(_handle, skwasmPath.handle, paintHandle);
-    paintDispose(paintHandle);
+    canvasDrawPath(_handle, skwasmPath.handle, backendPaint.handle);
+    backendPaint.dispose();
   }
 
   ImageHandle _getImageHandle(ui.Image image) {
@@ -283,18 +288,18 @@ class SkwasmCanvas implements LayerCanvas {
     _tracker?.recordImage(image);
     _tracker?.recordPaint(paint);
     final ImageHandle imageHandle = _getImageHandle(image);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+    final backendPaint = (paint as EnginePaint).createBackendPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
-    );
+    ) as SkwasmPaint;
     canvasDrawImage(
       _handle,
       imageHandle,
       offset.dx,
       offset.dy,
-      paintHandle,
+      backendPaint.handle,
       paint.filterQuality.index,
     );
-    paintDispose(paintHandle);
+    backendPaint.dispose();
   }
 
   @override
@@ -305,18 +310,18 @@ class SkwasmCanvas implements LayerCanvas {
     withStackScope((StackScope scope) {
       final Pointer<Float> sourceRect = scope.convertRectToNative(src);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+      final backendPaint = (paint as EnginePaint).createBackendPaint(
         defaultBlurTileMode: ui.TileMode.clamp,
-      );
+      ) as SkwasmPaint;
       canvasDrawImageRect(
         _handle,
         imageHandle,
         sourceRect,
         destRect,
-        paintHandle,
+        backendPaint.handle,
         paint.filterQuality.index,
       );
-      paintDispose(paintHandle);
+      backendPaint.dispose();
     });
   }
 
@@ -328,18 +333,18 @@ class SkwasmCanvas implements LayerCanvas {
     withStackScope((StackScope scope) {
       final Pointer<Int32> centerRect = scope.convertIRectToNative(center);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+      final backendPaint = (paint as EnginePaint).createBackendPaint(
         defaultBlurTileMode: ui.TileMode.clamp,
-      );
+      ) as SkwasmPaint;
       canvasDrawImageNine(
         _handle,
         imageHandle,
         centerRect,
         destRect,
-        paintHandle,
+        backendPaint.handle,
         paint.filterQuality.index,
       );
-      paintDispose(paintHandle);
+      backendPaint.dispose();
     });
   }
 
@@ -371,9 +376,9 @@ class SkwasmCanvas implements LayerCanvas {
     _tracker?.recordPaint(paint);
     withStackScope((StackScope scope) {
       final RawPointArray rawPoints = scope.convertPointArrayToNative(points);
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-      canvasDrawPoints(_handle, pointMode.index, rawPoints, points.length, paintHandle);
-      paintDispose(paintHandle);
+      final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
+      canvasDrawPoints(_handle, pointMode.index, rawPoints, points.length, backendPaint.handle);
+      backendPaint.dispose();
     });
   }
 
@@ -385,9 +390,15 @@ class SkwasmCanvas implements LayerCanvas {
     _tracker?.recordPaint(paint);
     withStackScope((StackScope scope) {
       final RawPointArray rawPoints = scope.convertDoublesToNative(points);
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-      canvasDrawPoints(_handle, pointMode.index, rawPoints, points.length ~/ 2, paintHandle);
-      paintDispose(paintHandle);
+      final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
+      canvasDrawPoints(
+        _handle,
+        pointMode.index,
+        rawPoints,
+        points.length ~/ 2,
+        backendPaint.handle,
+      );
+      backendPaint.dispose();
     });
   }
 
@@ -401,9 +412,9 @@ class SkwasmCanvas implements LayerCanvas {
       return;
     }
     _tracker?.recordPaint(paint);
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawVertices(_handle, skwasmVertices.handle, blendMode.index, paintHandle);
-    paintDispose(paintHandle);
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
+    canvasDrawVertices(_handle, skwasmVertices.handle, blendMode.index, backendPaint.handle);
+    backendPaint.dispose();
   }
 
   @override
@@ -427,9 +438,9 @@ class SkwasmCanvas implements LayerCanvas {
           : nullptr;
       final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
 
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+      final backendPaint = (paint as EnginePaint).createBackendPaint(
         defaultBlurTileMode: ui.TileMode.clamp,
-      );
+      ) as SkwasmPaint;
 
       canvasDrawAtlas(
         _handle,
@@ -440,11 +451,11 @@ class SkwasmCanvas implements LayerCanvas {
         transforms.length,
         (blendMode ?? ui.BlendMode.src).index,
         rawCullRect,
-        paintHandle,
+        backendPaint.handle,
         paint.filterQuality.index,
       );
 
-      paintDispose(paintHandle);
+      backendPaint.dispose();
     });
   }
 
@@ -469,9 +480,9 @@ class SkwasmCanvas implements LayerCanvas {
           : nullptr;
       final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
 
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+      final backendPaint = (paint as EnginePaint).createBackendPaint(
         defaultBlurTileMode: ui.TileMode.clamp,
-      );
+      ) as SkwasmPaint;
 
       canvasDrawAtlas(
         _handle,
@@ -482,11 +493,11 @@ class SkwasmCanvas implements LayerCanvas {
         rstTransforms.length ~/ 4,
         (blendMode ?? ui.BlendMode.src).index,
         rawCullRect,
-        paintHandle,
+        backendPaint.handle,
         paint.filterQuality.index,
       );
 
-      paintDispose(paintHandle);
+      backendPaint.dispose();
     });
   }
 

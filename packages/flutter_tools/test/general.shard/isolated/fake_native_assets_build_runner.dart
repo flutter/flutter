@@ -7,8 +7,10 @@ import 'dart:io' as io;
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
+import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 
@@ -23,6 +25,8 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     this.onLink,
     this.buildResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.linkResult = const FakeFlutterNativeAssetsBuilderResult(),
+    this.androidSdk,
+    this.visualStudio,
   });
 
   // TODO(dcharkes): Cleanup this fake https://github.com/flutter/flutter/issues/162061
@@ -31,6 +35,10 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   final BuildResult? buildResult;
   final LinkResult? linkResult;
   final List<String> packagesWithNativeAssetsResult;
+  @override
+  final AndroidSdk? androidSdk;
+  @override
+  final VisualStudio? visualStudio;
 
   int buildInvocations = 0;
   int linkInvocations = 0;
