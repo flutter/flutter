@@ -301,8 +301,10 @@ float pixelSize(float sdf) {
 vec2 filledSDF(vec2 p) {
   float sdf;
   float pixel_size;
-  // frag_info.type holds an exact small integer.
-  int type = int(frag_info.type);
+  // frag_info.type holds a small integer. Round before converting so that a
+  // value stored or converted slightly below it can't truncate to the wrong
+  // shape.
+  int type = int(round(frag_info.type));
   if (type == 0) {  // Circle
     sdf = distanceFromCircle(p, frag_info.size.x);
     pixel_size = pixelSize(sdf);
@@ -337,9 +339,10 @@ vec2 strokedSDF(vec2 p) {
   float half_stroke = max(frag_info.stroke_width, pixel_size) * 0.5;
 
   float sdf;
-  // frag_info.type and frag_info.stroke_join hold exact small integers.
-  int type = int(frag_info.type);
-  int join = int(frag_info.stroke_join);
+  // frag_info.type and frag_info.stroke_join hold small integers (see
+  // filledSDF() for why they are rounded).
+  int type = int(round(frag_info.type));
+  int join = int(round(frag_info.stroke_join));
   if (type == 1 && join == 0) {
     // Rect with Miter join
     float outer = distanceFromRect(p, frag_info.size + half_stroke);

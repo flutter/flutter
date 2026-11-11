@@ -30,20 +30,34 @@ bool useCircularDistance(vec2 p, float radius, float span) {
   return false;
 }
 
-// Equivalent to `useCircularDistance`, but takes the cosine of the span.
-//
-// `p` is within the span of the corner circle's arc when the angle between `p`
-// and the 45 degree midline is less than the span, i.e. when
-// cos(angle) > cos(span). This avoids atan() and mod(), which need more
-// constants and uniform registers.
+/// Returns whether the closest point on a rounded superellipse octant to `p`
+/// is on the octant's corner circle, in which case the distance to the
+/// superellipse is the distance to that circle.
+///
+/// `p` is relative to the corner circle's center. The closest point is on the
+/// circle when `p` is within the circle's arc, i.e. when the angle between `p`
+/// and the 45 degree midline is less than the arc's angular span. This is
+/// tested as cos(angle) > `cos_span`, where `cos_span` is the cosine of the
+/// angular span.
+///
+/// This gives the same result as `useCircularDistance`, which takes the span
+/// itself, but avoids atan() and mod(), which need more constants and uniform
+/// registers.
+///
+/// @see useCircularDistance
 bool useCircularDistanceCos(vec2 p, float cos_span) {
   return dot(p, vec2(kHalfSqrtTwo)) > cos_span * length(p);
 }
 
-// Signed distance from `p_oct` to one octant of a rounded superellipse, in
-// the octant's coordinate system.
-//
-// `cos_span` is the cosine of the angular span of the corner circle's arc.
+/// Returns the signed distance from `p_oct` to one octant of a rounded
+/// superellipse, in the octant's coordinate system.
+///
+/// The octant is a superellipse with exponent `se_degree` and axis length
+/// `axis_length`, joined to a corner circle with center `circle_center` and
+/// radius `radius`. `cos_span` is the cosine of the angular span of the
+/// circle's arc.
+///
+/// @see useCircularDistanceCos
 float distanceFromRSEOctantCos(vec2 p_oct,
                                vec2 circle_center,
                                float radius,

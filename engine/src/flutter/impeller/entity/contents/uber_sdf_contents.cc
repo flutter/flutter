@@ -64,14 +64,15 @@ struct SamplerBinding {
   raw_ptr<const Sampler> sampler;
 };
 
-/// @brief  Populates the vertex shader uniforms shared by both UberSDF
-///         variants, except for `mvp`, which `DrawGeometry` sets.
+/// @brief  Populates the vertex shader uniforms, except for `mvp`, which
+///         `DrawGeometry` sets. Both UberSDF variants use the same vertex
+///         shader.
 ///
 ///         The vertex shader subtracts the shape's center and the gradient's
 ///         origin, which keeps those values out of the fragment shader's
 ///         uniforms.
-template <typename FrameInfo>
-void SetupFrameInfo(const UberSDFParameters& params, FrameInfo& frame_info) {
+void SetupFrameInfo(const UberSDFParameters& params,
+                    UberSDFPipeline::VertexShader::FrameInfo& frame_info) {
   frame_info.center = params.center;
   frame_info.gradient_origin =
       params.gradient.has_value() ? params.gradient->start : Point();
