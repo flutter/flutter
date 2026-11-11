@@ -237,7 +237,16 @@ class RunSuiteStep implements PipelineStep {
       'CanvasKitVariant': ?variant?.name,
       if (isWebParagraph) 'WebParagraph': 'true',
     };
-    final skiaClient = SkiaGoldClient(workDirectory, dimensions: dimensions);
+    final skiaClient = SkiaGoldClient(
+      workDirectory,
+      dimensions: dimensions,
+      // Each screenshot test has a 30-second timeout, and a single stalled
+      // goldctl call to Skia Gold shouldn't be enough to exhaust it.
+      goldctlTimeoutPolicy: const GoldctlRetryOnTimeout(
+        timeout: Duration(seconds: 8),
+        maxAttempts: 3,
+      ),
+    );
 
     final (bool success, String? reason) = await _checkSkiaClient(skiaClient);
     if (success) {

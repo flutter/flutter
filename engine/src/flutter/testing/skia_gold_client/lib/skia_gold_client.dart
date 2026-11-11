@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
@@ -24,6 +25,34 @@ const String _kLuciEnvName = 'LUCI_CONTEXT';
 const String _skiaGoldHost = 'https://flutter-gold.skia.org';
 const String _instance = 'flutter';
 
+/// How long [SkiaGoldClient] waits for each `goldctl` command to finish.
+sealed class GoldctlTimeoutPolicy {
+  const GoldctlTimeoutPolicy();
+}
+
+/// Waits for each `goldctl` command to exit, however long it takes.
+final class GoldctlNoTimeout extends GoldctlTimeoutPolicy {
+  /// Creates a policy that never times out `goldctl` commands.
+  const GoldctlNoTimeout();
+}
+
+/// Kills a `goldctl` command that runs longer than [timeout], and retries it.
+///
+/// Use this when the caller has its own deadline (for example, a test timeout)
+/// and a single stalled connection to Skia Gold should not exhaust it.
+final class GoldctlRetryOnTimeout extends GoldctlTimeoutPolicy {
+  /// Creates a policy that runs each `goldctl` command up to [maxAttempts]
+  /// times, killing each attempt that runs longer than [timeout].
+  const GoldctlRetryOnTimeout({required this.timeout, required this.maxAttempts})
+    : assert(maxAttempts > 0);
+
+  /// How long a single attempt may run before it is killed.
+  final Duration timeout;
+
+  /// The total number of attempts, including the first one.
+  final int maxAttempts;
+}
+
 /// Uploads images and makes baseline requests to Skia Gold.
 ///
 /// For an example of how to use this class, see `tool/e2e_test.dart`.
@@ -40,23 +69,29 @@ interface class SkiaGoldClient {
   ///   dimensions: <String, String>{
   ///     'platform': 'linux',
   ///   },
+  ///   goldctlTimeoutPolicy: const GoldctlNoTimeout(),
   /// );
   /// ```
   ///
   /// The [verbose] flag is intended for use in debugging CI issues, and
   /// produces more detailed output that some may find useful, but would be too
   /// spammy for regular use.
+  ///
+  /// The [goldctlTimeoutPolicy] decides whether a `goldctl` command that takes
+  /// too long is killed and retried.
   factory SkiaGoldClient(
     io.Directory workDirectory, {
     String prefix = 'engine.',
     Map<String, String>? dimensions,
     bool verbose = false,
+    required GoldctlTimeoutPolicy goldctlTimeoutPolicy,
   }) {
     return SkiaGoldClient.forTesting(
       workDirectory,
       dimensions: dimensions,
       verbose: verbose,
       prefix: prefix,
+      goldctlTimeoutPolicy: goldctlTimeoutPolicy,
     );
   }
 
@@ -81,6 +116,7 @@ interface class SkiaGoldClient {
     this.dimensions,
     this.verbose = false,
     String? prefix,
+    required GoldctlTimeoutPolicy goldctlTimeoutPolicy,
     io.HttpClient? httpClient,
     ProcessManager? processManager,
     StringSink? stderr,
@@ -89,6 +125,7 @@ interface class SkiaGoldClient {
   }) : httpClient = httpClient ?? io.HttpClient(),
        process = processManager ?? const LocalProcessManager(),
        _prefix = prefix,
+       _goldctlTimeoutPolicy = goldctlTimeoutPolicy,
        _stderr = stderr ?? io.stderr,
        _environment = environment ?? io.Platform.environment,
        _engineRoot = engineRoot ?? Engine.findWithin() {
@@ -178,6 +215,9 @@ interface class SkiaGoldClient {
   /// Prefix to add to all test names, if any.
   final String? _prefix;
 
+  /// Whether a `goldctl` command that takes too long is killed and retried.
+  final GoldctlTimeoutPolicy _goldctlTimeoutPolicy;
+
   /// Prefix to add to all test names.
   String get prefix => _prefix ?? 'engine.';
 
@@ -253,8 +293,42 @@ interface class SkiaGoldClient {
     }
   }
 
-  Future<io.ProcessResult> _runCommand(List<String> command) {
-    return process.run(command);
+  Future<io.ProcessResult> _runCommand(List<String> command) async {
+    switch (_goldctlTimeoutPolicy) {
+      case GoldctlNoTimeout():
+        return process.run(command);
+      case GoldctlRetryOnTimeout(:final Duration timeout, :final int maxAttempts):
+        var stdout = '';
+        var stderr = '';
+        for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+          final io.Process goldctl = await process.start(command);
+          final Future<String> stdoutFuture = io.systemEncoding.decodeStream(goldctl.stdout);
+          final Future<String> stderrFuture = io.systemEncoding.decodeStream(goldctl.stderr);
+          try {
+            final int exitCode = await goldctl.exitCode.timeout(timeout);
+            return io.ProcessResult(goldctl.pid, exitCode, await stdoutFuture, await stderrFuture);
+          } on TimeoutException {
+            // Wait for the killed process to exit, so it can't race the next
+            // attempt on the files in the work directory.
+            goldctl.kill(io.ProcessSignal.sigkill);
+            await goldctl.exitCode;
+            stdout = await stdoutFuture;
+            stderr = await stderrFuture;
+            _stderr.writeln(
+              'goldctl did not finish within ${timeout.inSeconds}s '
+              '(attempt $attempt of $maxAttempts): ${command.join(' ')}',
+            );
+          }
+        }
+        throw SkiaGoldProcessError(
+          command: command,
+          stdout: stdout,
+          stderr: stderr,
+          message:
+              'goldctl did not finish within ${timeout.inSeconds}s in any of '
+              '$maxAttempts attempts.',
+        );
+    }
   }
 
   /// Executes the `imgtest init` command in the `goldctl` tool.

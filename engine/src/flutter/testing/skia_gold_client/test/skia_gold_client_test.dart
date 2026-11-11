@@ -52,18 +52,21 @@ void main() {
     Map<String, String>? dimensions,
     String? prefix,
     bool verbose = false,
+    GoldctlTimeoutPolicy goldctlTimeoutPolicy = const GoldctlNoTimeout(),
     io.ProcessResult Function(FakeCommandLogEntry entry) onRun = _runUnhandled,
+    io.Process Function(FakeCommandLogEntry entry) onStart = _startUnhandled,
   }) {
     return SkiaGoldClient.forTesting(
       fixture.workDirectory,
       dimensions: dimensions,
       engineRoot: Engine.fromSrcPath(fixture.engineSrcDir.path),
       httpClient: fixture.httpClient,
-      processManager: FakeProcessManager(onRun: onRun),
+      processManager: FakeProcessManager(onRun: onRun, onStart: onStart),
       verbose: verbose,
       stderr: fixture.outputSink,
       environment: environment,
       prefix: prefix,
+      goldctlTimeoutPolicy: goldctlTimeoutPolicy,
     );
   }
 
@@ -664,6 +667,143 @@ void main() {
     }
   });
 
+  group('with GoldctlRetryOnTimeout', () {
+    const retryOnTimeout = GoldctlRetryOnTimeout(
+      timeout: Duration(milliseconds: 10),
+      maxAttempts: 2,
+    );
+
+    io.ProcessResult runGit(FakeCommandLogEntry entry) {
+      if (entry.command case ['git', ...]) {
+        return io.ProcessResult(0, 0, mockCommitHash, '');
+      }
+      return _runUnhandled(entry);
+    }
+
+    test('addImg [post-submit] kills and retries goldctl when it times out', () async {
+      final fixture = _TestFixture();
+      try {
+        final hangingProcess = _HangingProcess();
+        var imgtestAddCount = 0;
+        final SkiaGoldClient client = createClient(
+          fixture,
+          environment: postsubmitEnv,
+          goldctlTimeoutPolicy: retryOnTimeout,
+          onRun: runGit,
+          onStart: (FakeCommandLogEntry entry) {
+            if (entry.command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
+              return FakeProcess();
+            }
+            if (entry.command case ['python tools/goldctl.py', 'imgtest', 'add', ...]) {
+              imgtestAddCount++;
+              return imgtestAddCount == 1 ? hangingProcess : FakeProcess();
+            }
+            return _startUnhandled(entry);
+          },
+        );
+
+        await client.addImg(
+          'test-name.foo',
+          io.File(p.join(fixture.workDirectory.path, 'temp', 'golden.png')),
+          screenshotSize: 1000,
+        );
+
+        expect(imgtestAddCount, 2);
+        expect(hangingProcess.killSignals, <io.ProcessSignal>[io.ProcessSignal.sigkill]);
+        expect(fixture.outputSink.toString(), contains('(attempt 1 of 2)'));
+      } finally {
+        fixture.dispose();
+      }
+    });
+
+    test('addImg [post-submit] fails when every goldctl attempt times out', () async {
+      final fixture = _TestFixture();
+      try {
+        final hangingProcesses = <_HangingProcess>[];
+        final SkiaGoldClient client = createClient(
+          fixture,
+          environment: postsubmitEnv,
+          goldctlTimeoutPolicy: retryOnTimeout,
+          onRun: runGit,
+          onStart: (FakeCommandLogEntry entry) {
+            if (entry.command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
+              return FakeProcess();
+            }
+            if (entry.command case ['python tools/goldctl.py', 'imgtest', 'add', ...]) {
+              final process = _HangingProcess(stdout: 'stalled-stdout');
+              hangingProcesses.add(process);
+              return process;
+            }
+            return _startUnhandled(entry);
+          },
+        );
+
+        await expectLater(
+          client.addImg(
+            'test-name.foo',
+            io.File(p.join(fixture.workDirectory.path, 'temp', 'golden.png')),
+            screenshotSize: 1000,
+          ),
+          throwsA(
+            isA<SkiaGoldProcessError>()
+                .having((e) => e.message, 'message', contains('in any of 2 attempts'))
+                .having((e) => e.stdout, 'stdout', 'stalled-stdout')
+                .having(
+                  (e) => e.command,
+                  'command',
+                  containsAllInOrder(<String>['imgtest', 'add']),
+                ),
+          ),
+        );
+        expect(hangingProcesses, hasLength(2));
+        for (final process in hangingProcesses) {
+          expect(process.killSignals, <io.ProcessSignal>[io.ProcessSignal.sigkill]);
+        }
+      } finally {
+        fixture.dispose();
+      }
+    });
+
+    test('addImg [post-submit] does not retry when goldctl fails', () async {
+      final fixture = _TestFixture();
+      try {
+        var imgtestAddCount = 0;
+        final SkiaGoldClient client = createClient(
+          fixture,
+          environment: postsubmitEnv,
+          goldctlTimeoutPolicy: retryOnTimeout,
+          onRun: runGit,
+          onStart: (FakeCommandLogEntry entry) {
+            if (entry.command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
+              return FakeProcess();
+            }
+            if (entry.command case ['python tools/goldctl.py', 'imgtest', 'add', ...]) {
+              imgtestAddCount++;
+              return FakeProcess(exitCode: 1, stdout: 'stdout-text', stderr: 'stderr-text');
+            }
+            return _startUnhandled(entry);
+          },
+        );
+
+        await expectLater(
+          client.addImg(
+            'test-name.foo',
+            io.File(p.join(fixture.workDirectory.path, 'temp', 'golden.png')),
+            screenshotSize: 1000,
+          ),
+          throwsA(
+            isA<SkiaGoldProcessError>()
+                .having((e) => e.stdout, 'stdout', 'stdout-text')
+                .having((e) => e.stderr, 'stderr', 'stderr-text'),
+          ),
+        );
+        expect(imgtestAddCount, 1);
+      } finally {
+        fixture.dispose();
+      }
+    });
+  });
+
   test('getExpectationsForTest returns the latest positive digest', () async {
     final fixture = _TestFixture();
     try {
@@ -798,6 +938,50 @@ final class _TestFixture {
 
 io.ProcessResult _runUnhandled(FakeCommandLogEntry entry) {
   throw UnimplementedError('Unhandled run: ${entry.command.join(' ')}');
+}
+
+io.Process _startUnhandled(FakeCommandLogEntry entry) {
+  throw UnimplementedError('Unhandled start: ${entry.command.join(' ')}');
+}
+
+/// A fake [io.Process] that never exits until it is killed.
+final class _HangingProcess implements io.Process {
+  _HangingProcess({String stdout = ''}) {
+    _stdout.add(io.systemEncoding.encode(stdout));
+  }
+
+  final Completer<int> _exitCode = Completer<int>();
+  final StreamController<List<int>> _stdout = StreamController<List<int>>();
+  final StreamController<List<int>> _stderr = StreamController<List<int>>();
+
+  /// The signals passed to [kill], in order.
+  final List<io.ProcessSignal> killSignals = <io.ProcessSignal>[];
+
+  @override
+  Future<int> get exitCode => _exitCode.future;
+
+  @override
+  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    killSignals.add(signal);
+    if (!_exitCode.isCompleted) {
+      _stdout.close();
+      _stderr.close();
+      _exitCode.complete(-9);
+    }
+    return true;
+  }
+
+  @override
+  int get pid => 0;
+
+  @override
+  Stream<List<int>> get stdout => _stdout.stream;
+
+  @override
+  Stream<List<int>> get stderr => _stderr.stream;
+
+  @override
+  io.IOSink get stdin => throw UnimplementedError();
 }
 
 /// An  in-memory fake of [io.HttpClient] that allows [getUrl] to be mocked.
