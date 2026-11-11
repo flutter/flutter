@@ -60,6 +60,7 @@ AndroidContext::ContextSettings CreateContextSettings(
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
   settings.enable_surface_control = p_settings.enable_surface_control;
+  settings.impeller_flags.use_sdfs = p_settings.impeller_use_sdfs;
   return settings;
 }
 }  // namespace
@@ -124,7 +125,7 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     case AndroidRenderingAPI::kImpellerOpenGLES:
       return std::make_unique<AndroidContextGLImpeller>(
           std::make_unique<impeller::egl::Display>(), enable_opengl_gpu_tracing,
-          std::move(io_task_runner));
+          settings.impeller_flags, std::move(io_task_runner));
     case AndroidRenderingAPI::kImpellerAutoselect:
       // Determine if we're using GL or Vulkan.
       return std::make_unique<AndroidContextDynamicImpeller>(
