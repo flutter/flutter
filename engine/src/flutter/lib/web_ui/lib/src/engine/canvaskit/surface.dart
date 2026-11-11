@@ -315,7 +315,7 @@ abstract class CkSurface extends Surface {
     final canvas = CkCanvas.fromSkCanvas(skSurface.getCanvas());
 
     canvas.clear(const ui.Color(0x00000000));
-    final paint = CkPaint();
+    final paint = ui.Paint();
 
     canvas.drawImage(engineImage, ui.Offset.zero, paint);
     final SkImage snapshot = skSurface.makeImageSnapshot();
