@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('ExportOptions.plist generation for manual signing', () {
@@ -23,7 +24,13 @@ void main() {
 
     test('generates simple plist for automatic signing', () async {
       final fileSystem = MemoryFileSystem.test();
-      final command = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false);
+      final command = BuildIOSArchiveCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: FakeBuildSystem(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: BufferLogger.test()),
+        verboseHelp: false,
+      );
 
       final File plistFile = await command.createExportPlist(
         exportMethod: 'app-store',
@@ -42,7 +49,13 @@ void main() {
 
     test('falls back to simple plist when profile UUID cannot be found', () async {
       final fileSystem = MemoryFileSystem.test();
-      final command = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false);
+      final command = BuildIOSArchiveCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: FakeBuildSystem(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: BufferLogger.test()),
+        verboseHelp: false,
+      );
 
       // Even with manual signing, if we can't find a profile UUID, we fall back to simple plist
       final File plistFile = await command.createExportPlist(
@@ -68,7 +81,13 @@ void main() {
 
     test('does not enhance plist for debug builds with manual signing', () async {
       final fileSystem = MemoryFileSystem.test();
-      final command = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false);
+      final command = BuildIOSArchiveCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: FakeBuildSystem(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: BufferLogger.test()),
+        verboseHelp: false,
+      );
 
       final File plistFile = await command.createExportPlist(
         exportMethod: 'app-store',
@@ -85,7 +104,13 @@ void main() {
 
     test('handles null buildSettings gracefully', () async {
       final fileSystem = MemoryFileSystem.test();
-      final command = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false);
+      final command = BuildIOSArchiveCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: FakeBuildSystem(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: BufferLogger.test()),
+        verboseHelp: false,
+      );
 
       final File plistFile = await command.createExportPlist(
         exportMethod: 'app-store',
@@ -103,7 +128,13 @@ void main() {
 
     test('generates enhanced plist for manual signing when profile is found', () async {
       final fileSystem = MemoryFileSystem.test();
-      final command = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false);
+      final command = BuildIOSArchiveCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: FakeBuildSystem(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: BufferLogger.test()),
+        verboseHelp: false,
+      );
 
       // Set up home directory path for the MemoryFileSystem
       final String homeDir = fileSystem.currentDirectory.path;

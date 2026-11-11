@@ -7,7 +7,6 @@
 #include <array>
 #include <cstdint>
 
-#include "fml/status.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/device_buffer.h"
@@ -24,6 +23,7 @@
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -499,10 +499,10 @@ bool RenderPassVK::SetIndexBuffer(BufferView index_buffer,
 }
 
 // |RenderPass|
-fml::Status RenderPassVK::Draw() {
+absl::Status RenderPassVK::Draw() {
   if (!pipeline_) {
-    return fml::Status(fml::StatusCode::kCancelled,
-                       "No valid pipeline is bound to the RenderPass.");
+    return absl::Status(absl::StatusCode::kCancelled,
+                        "No valid pipeline is bound to the RenderPass.");
   }
 
   //----------------------------------------------------------------------------
@@ -527,8 +527,8 @@ fml::Status RenderPassVK::Draw() {
         PipelineVK::Cast(*pipeline_)
             .CreateVariantForImmutableSamplers(immutable_sampler_);
     if (!pipeline_variant) {
-      return fml::Status(
-          fml::StatusCode::kAborted,
+      return absl::Status(
+          absl::StatusCode::kAborted,
           "Could not create pipeline variant with immutable sampler.");
     }
     pipeline_ = raw_ptr(pipeline_variant);
@@ -541,8 +541,8 @@ fml::Status RenderPassVK::Draw() {
       pipeline_vk.GetDescriptorSetLayout(), pipeline_vk.GetPipelineKey(),
       context_vk);
   if (!descriptor_result.ok()) {
-    return fml::Status(fml::StatusCode::kAborted,
-                       "Could not allocate descriptor sets.");
+    return absl::Status(absl::StatusCode::kAborted,
+                        "Could not allocate descriptor sets.");
   }
   const auto descriptor_set = descriptor_result.value();
   const auto pipeline_layout = pipeline_vk.GetPipelineLayout();
@@ -602,7 +602,7 @@ fml::Status RenderPassVK::Draw() {
   pipeline_ = PipelineRef(nullptr);
   pipeline_uses_input_attachments_ = false;
   immutable_sampler_ = nullptr;
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 // The RenderPassVK binding methods only need the binding, set, and buffer type
@@ -693,7 +693,7 @@ bool RenderPassVK::BindResource(ShaderStage stage,
   vk::DescriptorImageInfo image_info;
   image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
   image_info.sampler = sampler_vk.GetSampler();
-  image_info.imageView = texture_vk.GetImageView();
+  image_info.imageView = texture_vk.GetSampledImageView();
   image_workspace_[bound_image_offset_++] = image_info;
 
   vk::WriteDescriptorSet write_set;

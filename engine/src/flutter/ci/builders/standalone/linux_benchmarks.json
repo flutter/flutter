@@ -5,7 +5,6 @@
     ],
     "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
     },
     "gn": [
@@ -15,8 +14,7 @@
         "release",
         "--prebuilt-dart-sdk",
         "--build-embedder-examples",
-        "--rbe",
-        "--no-goma"
+        "--rbe"
     ],
     "name": "ci/host_release_benchmarks",
     "description": "Builds and runs host-side benchmarks on Linux.",

@@ -4,12 +4,8 @@
 
 #include <unordered_map>
 #include "flutter/display_list/dl_tile_mode.h"
-#include "flutter/display_list/effects/dl_image_filter.h"
-#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
-#include "impeller/core/formats.h"
-#include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_image_impeller.h"
@@ -246,6 +242,80 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
                     ContentBoundsPromise::kContainsContents, 1, false, 1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
+}
+
+TEST_P(AiksTest, BackdropGroupIdUsesCoverageUnionForSnapshot) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 1000, 1000),
+                                 /*requires_readback=*/true);
+  std::unordered_map<int64_t, BackdropData> data;
+  data[1] = BackdropData{
+      .backdrop_count = 2,
+      .all_filters_equal = true,
+      .coverage_union = Rect::MakeLTRB(100, 100, 200, 200),
+  };
+  canvas->SetBackdropData(data, 2);
+
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
+
+  canvas->DrawRect(flutter::DlRect::MakeLTRB(0, 0, 1000, 1000),
+                   {.color = Color::Azure()});
+  canvas->SaveLayer({}, std::nullopt, blur.get(),
+                    ContentBoundsPromise::kContainsContents,
+                    /*total_content_depth=*/1, /*can_distribute_opacity=*/false,
+                    /*backdrop_id=*/1);
+  canvas->Restore();
+
+  canvas->SaveLayer({}, std::nullopt, blur.get(),
+                    ContentBoundsPromise::kContainsContents,
+                    /*total_content_depth=*/1, /*can_distribute_opacity=*/false,
+                    /*backdrop_id=*/1);
+  canvas->Restore();
+
+  const auto& backdrop_map = canvas->GetBackdropData();
+  auto it = backdrop_map.find(1);
+  ASSERT_TRUE(it != backdrop_map.end());
+  EXPECT_TRUE(it->second.shared_filter_snapshot.has_value());
+  if (it->second.shared_filter_snapshot.has_value()) {
+    ISize snapshot_size = it->second.shared_filter_snapshot->texture->GetSize();
+    EXPECT_LE(snapshot_size.width, 250u);
+    EXPECT_LE(snapshot_size.height, 250u);
+  }
+}
+
+TEST_P(AiksTest, BackdropGroupSharedSnapshotReservesContentDepth) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 1000, 1000),
+                                 /*requires_readback=*/true);
+  std::unordered_map<int64_t, BackdropData> data;
+  data[1] = BackdropData{
+      .backdrop_count = 2,
+      .all_filters_equal = true,
+      .coverage_union = Rect::MakeLTRB(100, 100, 300, 200),
+  };
+  canvas->SetBackdropData(data, 2);
+
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
+
+  canvas->DrawRect(flutter::DlRect::MakeLTRB(0, 0, 1000, 1000),
+                   {.color = Color::Azure()});
+  for (int i = 0; i < 2; i++) {
+    canvas->SaveLayer({}, std::nullopt, blur.get(),
+                      ContentBoundsPromise::kContainsContents,
+                      /*total_content_depth=*/1,
+                      /*can_distribute_opacity=*/false,
+                      /*backdrop_id=*/1);
+    canvas->DrawRect(flutter::DlRect::MakeXYWH(100 + i * 100, 100, 100, 100),
+                     {.color = Color::Red()});
+    canvas->Restore();
+  }
+
+  const auto& backdrop_map = canvas->GetBackdropData();
+  auto it = backdrop_map.find(1);
+  ASSERT_TRUE(it != backdrop_map.end());
+  EXPECT_TRUE(it->second.shared_filter_snapshot.has_value());
 }
 
 // We only know the total number of backdrop filters, not the number of backdrop

@@ -35,8 +35,11 @@ import 'theme_data.dart';
 ///
 /// The [states] parameter is the button's current pressed/hovered/etc state. The [child] is
 /// typically a descendant of the returned widget.
-typedef ButtonLayerBuilder =
-    Widget Function(BuildContext context, Set<WidgetState> states, Widget? child);
+typedef ButtonLayerBuilder = Widget Function(
+  BuildContext context,
+  Set<WidgetState> states,
+  Widget? child,
+);
 
 /// The visual properties that most buttons have in common.
 ///

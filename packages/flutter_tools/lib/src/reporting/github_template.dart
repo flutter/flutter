@@ -21,12 +21,10 @@ import '../version.dart';
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
   GitHubTemplateCreator({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FlutterProjectFactory flutterProjectFactory,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _flutterProjectFactory = flutterProjectFactory;
+    required this._fileSystem,
+    required this._logger,
+    required this._flutterProjectFactory,
+  });
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -149,8 +147,12 @@ ${_projectMetadataInformation()}
       if (manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
-      final metadata = FlutterProjectMetadata(project.metadataFile, _logger);
-      final FlutterTemplateType? projectType = metadata.projectType;
+      final metadata = FlutterProjectMetadata(
+        project.metadataFile,
+        _logger,
+        extensionTemplateManager: null,
+      );
+      final ParsedFlutterTemplateType? projectType = metadata.projectType;
       final description = StringBuffer()
         ..writeln('**Type**: ${projectType == null ? 'malformed' : projectType.cliName}')
         ..writeln('**Version**: ${manifest.appVersion}')

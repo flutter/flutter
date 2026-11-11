@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [RepeatingAnimationBuilder].

@@ -141,8 +141,11 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   }
 }
 
-typedef RemovedItemBuilder<E> =
-    Widget Function(E item, BuildContext context, Animation<double> animation);
+typedef RemovedItemBuilder<E> = Widget Function(
+  E item,
+  BuildContext context,
+  Animation<double> animation,
+);
 
 // Keeps a Dart [List] in sync with an [AnimatedList].
 //

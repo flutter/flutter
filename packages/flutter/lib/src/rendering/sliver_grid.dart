@@ -490,7 +490,7 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   final double? mainAxisExtent;
 
   bool _debugAssertIsValid(double crossAxisExtent) {
-    assert(crossAxisExtent > 0.0);
+    assert(crossAxisExtent >= 0.0);
     assert(maxCrossAxisExtent > 0.0);
     assert(mainAxisSpacing >= 0.0);
     assert(crossAxisSpacing >= 0.0);
@@ -561,8 +561,7 @@ class SliverGridParentData extends SliverMultiBoxAdaptorParentData {
 class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
   /// Creates a sliver that contains multiple box children that whose size and
   /// position are determined by a delegate.
-  RenderSliverGrid({required super.childManager, required SliverGridDelegate gridDelegate})
-    : _gridDelegate = gridDelegate;
+  RenderSliverGrid({required super.childManager, required this._gridDelegate});
 
   @override
   void setupParentData(RenderObject child) {

@@ -16,7 +16,6 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
@@ -72,8 +71,8 @@ class FlutterHookResult {
 
   static bool _wasAnyFileModifiedSince(FileSystem fileSystem, DateTime since, List<Uri> uris) {
     for (final uri in uris) {
-      final DateTime modified = fileSystem.statSync(uri.toFilePath()).modified;
-      if (modified.isAfter(since)) {
+      final FileStat stat = fileSystem.statSync(fileSystem.path.fromUri(uri));
+      if (stat.type == FileSystemEntityType.notFound || stat.modified.isAfter(since)) {
         return true;
       }
     }
@@ -134,13 +133,15 @@ abstract class AssetBundleFactory {
   static AssetBundleFactory get instance => context.get<AssetBundleFactory>()!;
 
   static AssetBundleFactory defaultInstance({
-    required Logger logger,
     required FileSystem fileSystem,
+    required String flutterRoot,
+    required Logger logger,
     required Platform platform,
     bool splitDeferredAssets = false,
   }) => _ManifestAssetBundleFactory(
-    logger: logger,
     fileSystem: fileSystem,
+    flutterRoot: flutterRoot,
+    logger: logger,
     platform: platform,
     splitDeferredAssets: splitDeferredAssets,
   );
@@ -201,18 +202,17 @@ abstract class AssetBundle {
 
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
   _ManifestAssetBundleFactory({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    bool splitDeferredAssets = false,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _splitDeferredAssets = splitDeferredAssets;
+    required this._fileSystem,
+    required this._flutterRoot,
+    required this._logger,
+    required this._platform,
+    this._splitDeferredAssets = false,
+  });
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
+  final String _flutterRoot;
   final bool _splitDeferredAssets;
 
   @override
@@ -220,7 +220,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     logger: _logger,
     fileSystem: _fileSystem,
     platform: _platform,
-    flutterRoot: Cache.flutterRoot!,
+    flutterRoot: _flutterRoot,
     splitDeferredAssets: _splitDeferredAssets,
   );
 }
@@ -230,16 +230,12 @@ class ManifestAssetBundle implements AssetBundle {
   /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
   ManifestAssetBundle({
-    required Logger logger,
+    required this._logger,
     required FileSystem fileSystem,
-    required Platform platform,
-    required String flutterRoot,
-    bool splitDeferredAssets = false,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _flutterRoot = flutterRoot,
-       _splitDeferredAssets = splitDeferredAssets,
+    required this._platform,
+    required this._flutterRoot,
+    this._splitDeferredAssets = false,
+  }) : _fileSystem = fileSystem,
        _licenseCollector = LicenseCollector(fileSystem: fileSystem),
        _lastHookResult = FlutterHookResult.empty();
 
@@ -330,7 +326,10 @@ class ManifestAssetBundle implements AssetBundle {
   }) async {
     if (flutterProject == null) {
       try {
-        flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
+        flutterProject = FlutterProject.fromDirectory(
+          _fileSystem.file(manifestPath).parent,
+          logger: _logger,
+        );
       } on Exception catch (e) {
         _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         _logger.printError('$e');
@@ -344,7 +343,7 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     _lastHookResult = flutterHookResult ?? FlutterHookResult.empty();
-    if (flutterManifest.isEmpty) {
+    if (flutterManifest.isEmpty && (flutterHookResult?.dataAssets.isEmpty ?? true)) {
       final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
         <dynamic, dynamic>{},
       )!;
@@ -422,10 +421,9 @@ class ManifestAssetBundle implements AssetBundle {
     // dependencies.
     // To avoid bundling assets from dev_dependencies and other pub workspace
     // packages, we compute the set of transitive dependencies.
-    final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
-      flutterProject,
-      packageConfig,
-    );
+    final List<Dependency> transitiveDependencies = flutterManifest.isEmpty
+        ? <Dependency>[]
+        : computeTransitiveDependencies(flutterProject, packageConfig);
     final additionalLicenseFiles = <String, List<File>>{};
     for (final dependency in transitiveDependencies) {
       if (!includeAssetsFromDevDependencies && dependency.isExclusiveDevDependency) {
@@ -538,7 +536,7 @@ class ManifestAssetBundle implements AssetBundle {
       final Package package = packageConfig[dataAsset.package]!;
       final Uri fileUri = dataAsset.file;
 
-      final String filePath = fileUri.toFilePath();
+      final String filePath = _fileSystem.path.fromUri(fileUri);
 
       final asset = _Asset(
         baseDir: _fileSystem.path.dirname(filePath),

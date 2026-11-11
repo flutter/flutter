@@ -20,14 +20,15 @@ class AccessibilityBridgeMacSpy : public AccessibilityBridgeMac {
 
   AccessibilityBridgeMacSpy(__weak FlutterEngine* flutter_engine,
                             __weak FlutterViewController* view_controller)
-      : AccessibilityBridgeMac(flutter_engine, view_controller) {}
+      : AccessibilityBridgeMac(flutter_engine, view_controller),
+        actual_notifications([NSMutableDictionary dictionary]) {}
 
-  std::unordered_map<std::string, gfx::NativeViewAccessible> actual_notifications;
+  NSMutableDictionary<NSAccessibilityNotificationName, id>* actual_notifications;
 
  private:
   void DispatchMacOSNotification(gfx::NativeViewAccessible native_node,
                                  NSAccessibilityNotificationName mac_notification) override {
-    actual_notifications[[mac_notification UTF8String]] = native_node;
+    actual_notifications[mac_notification] = native_node;
   }
 };
 
@@ -133,10 +134,10 @@ TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlu
 
   bridge->OnAccessibilityEvent(targeted_event);
 
-  ASSERT_EQ(bridge->actual_notifications.size(), 1u);
-  auto target = bridge->actual_notifications.find([NSAccessibilityCreatedNotification UTF8String]);
-  ASSERT_NE(target, bridge->actual_notifications.end());
-  EXPECT_EQ(target->second, expectedTarget);
+  ASSERT_EQ(bridge->actual_notifications.count, 1u);
+  id target = bridge->actual_notifications[NSAccessibilityCreatedNotification];
+  ASSERT_NE(target, nil);
+  EXPECT_EQ(target, expectedTarget);
   [engine shutDownEngine];
 }
 
@@ -263,7 +264,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   bridge->OnAccessibilityEvent(targeted_event);
 
   // Does not send any notification if the engine is headless.
-  EXPECT_EQ(bridge->actual_notifications.size(), 0u);
+  EXPECT_EQ(bridge->actual_notifications.count, 0u);
   [engine shutDownEngine];
 }
 
@@ -312,7 +313,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   bridge->OnAccessibilityEvent(targeted_event);
 
   // Does not send any notification if the flutter view is not attached to a NSWindow.
-  EXPECT_EQ(bridge->actual_notifications.size(), 0u);
+  EXPECT_EQ(bridge->actual_notifications.count, 0u);
   [engine shutDownEngine];
 }
 

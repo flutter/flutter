@@ -16,7 +16,9 @@ namespace egl {
 /// Mock for the |Manager| base class.
 class MockManager : public flutter::egl::Manager {
  public:
-  MockManager() : Manager(flutter::egl::GpuPreference::NoPreference) {}
+  MockManager()
+      : Manager(flutter::egl::GpuPreference::NoPreference,
+                /*allow_inverted_surface=*/false) {}
 
   MOCK_METHOD(std::unique_ptr<flutter::egl::WindowSurface>,
               CreateWindowSurface,
@@ -25,6 +27,7 @@ class MockManager : public flutter::egl::Manager {
 
   MOCK_METHOD(flutter::egl::Context*, render_context, (), (const, override));
   MOCK_METHOD(flutter::egl::Context*, resource_context, (), (const, override));
+  MOCK_METHOD(bool, surface_origin_is_top_left, (), (const, override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockManager);

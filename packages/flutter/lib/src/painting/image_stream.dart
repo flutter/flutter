@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'dart:ui';
-///
 /// @docImport 'package:flutter/widgets.dart';
 ///
 /// @docImport 'image_cache.dart';
@@ -999,12 +997,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// (see [addListener]).
   MultiFrameImageStreamCompleter({
     required Future<ui.Codec> codec,
-    required double scale,
+    required this._scale,
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
-  }) : _informationCollector = informationCollector,
-       _scale = scale {
+  }) : _informationCollector = informationCollector {
     this.debugLabel = debugLabel;
     codec.then<void>(
       _handleCodecReady,
@@ -1064,7 +1061,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners) {
       return;
     }
-    assert(_nextFrame != null);
+    // A listener can be re-added after this callback was scheduled (for
+    // example when TickerMode toggles during a route transition). That
+    // restarts decoding in addListener, which discards _nextFrame. The
+    // in-flight decode schedules a new callback when it completes.
+    if (_nextFrame == null) {
+      return;
+    }
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
       _emitFrame(
         ImageInfo(image: _nextFrame!.image.clone(), scale: _scale, debugLabel: debugLabel),

@@ -42,26 +42,27 @@ class _OverlayPortalLayoutBuilderExampleState
     return Center(
       child: OverlayPortal.overlayChildLayoutBuilder(
         controller: _controller,
-        overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
-          // Translate the child widget's local coordinates to the overlay's
-          // coordinate space. This assumes the child paint transform is invertible
-          // (e.g., not a transform that collapses the child to a line or point),
-          // otherwise the resulting childRect would contain NaN.
-          final Rect childRect = MatrixUtils.transformRect(
-            info.childPaintTransform,
-            Offset.zero & info.childSize,
-          );
+        overlayChildBuilder:
+            (BuildContext context, OverlayChildLayoutInfo info) {
+              // Translate the child widget's local coordinates to the overlay's
+              // coordinate space. This assumes the child paint transform is invertible
+              // (e.g., not a transform that collapses the child to a line or point),
+              // otherwise the resulting childRect would contain NaN.
+              final Rect childRect = MatrixUtils.transformRect(
+                info.childPaintTransform,
+                Offset.zero & info.childSize,
+              );
 
-          return Positioned(
-            left: childRect.left,
-            top: childRect.bottom,
-            child: Container(
-              color: const Color(0xFFFFE57F),
-              padding: const .all(8),
-              child: const Text('Hello from the overlay!'),
-            ),
-          );
-        },
+              return Positioned(
+                left: childRect.left,
+                top: childRect.bottom,
+                child: Container(
+                  color: const Color(0xFFFFE57F),
+                  padding: const .all(8),
+                  child: const Text('Hello from the overlay!'),
+                ),
+              );
+            },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _controller.toggle,

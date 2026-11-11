@@ -61,23 +61,10 @@ Rect HostWindowRegular::GetInitialRect(FlutterWindowsEngine* engine,
                                        const BoxConstraints& constraints,
                                        bool sized_to_content,
                                        bool resizable) {
-  double client_width;
-  double client_height;
-  if (sized_to_content) {
-    // Use the minimum constraint as the initial window size. The window will
-    // be resized to match the rendered content after the first frame.
-    client_width = std::max(1.0, constraints.smallest().width());
-    client_height = std::max(1.0, constraints.smallest().height());
-  } else {
-    client_width = preferred_size.preferred_view_width;
-    client_height = preferred_size.preferred_view_height;
-  }
-
-  std::optional<Size> const window_size =
-      HostWindow::GetWindowSizeForClientSize(
-          *engine->windows_proc_table(), Size(client_width, client_height),
-          constraints.smallest(), constraints.biggest(),
-          GetWindowStyleForRegular(resizable), 0, nullptr);
+  std::optional<Size> const window_size = GetInitialWindowSize(
+      engine, preferred_size, constraints, GetWindowStyleForRegular(resizable),
+      /*extended_window_style=*/0, /*owner_window=*/std::nullopt,
+      sized_to_content);
   return {{CW_USEDEFAULT, CW_USEDEFAULT},
           window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT}};
 }

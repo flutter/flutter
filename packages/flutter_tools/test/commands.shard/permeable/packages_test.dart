@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -24,6 +25,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -31,9 +33,6 @@ void main() {
 
   setUp(() {
     mockStdio = FakeStdio()..stdout.terminalColumns = 80;
-
-    // Some tests below override this with a blank root, always reset it.
-    Cache.flutterRoot = null;
   });
 
   setUpAll(() {
@@ -75,7 +74,10 @@ void main() {
       List<String>? args,
       List<String>? globalArgs,
     }) async {
-      final command = PackagesCommand();
+      final command = PackagesCommand(
+        buildSystem: globals.buildSystem,
+        toolContext: const DelegatingToolContext(),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         ...?globalArgs,
@@ -268,6 +270,7 @@ void main() {
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -296,6 +299,7 @@ void main() {
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -370,6 +374,7 @@ workspace:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -447,6 +452,7 @@ workspace:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -493,6 +499,7 @@ workspace:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -534,11 +541,13 @@ flutter:
       },
       overrides: <Type, Generator>{
         Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
+          toolContext: DelegatingToolContext(
+            cache: Cache.test(
+              flutterRoot: getFlutterRoot(),
+              fileSystem: globals.fs,
+              processManager: globals.processManager,
+            ),
+          ),
         ),
       },
     );
@@ -556,15 +565,15 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesNumberPlugins'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesNumberPlugins'],
           0,
         );
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -593,15 +602,15 @@ flutter:
 
         // A plugin example depends on the plugin itself, and integration_test.
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesNumberPlugins'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesNumberPlugins'],
           2,
         );
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -622,15 +631,15 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesProjectModule'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesProjectModule'],
           false,
         );
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -654,15 +663,15 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesProjectModule'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesProjectModule'],
           true,
         );
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -683,15 +692,15 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesAndroidEmbeddingVersion'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesAndroidEmbeddingVersion'],
           'v2',
         );
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -719,6 +728,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -746,6 +756,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -779,6 +790,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -810,6 +822,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -833,7 +846,6 @@ flutter:
     testUsingContext(
       'test without bot',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
         globals.fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
@@ -847,17 +859,25 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: const DelegatingToolContext(),
+          ),
+        ).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(false),
         Pub: () => Pub.test(
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -871,7 +891,6 @@ flutter:
     testUsingContext(
       'test with bot',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
           const FakeCommand(
@@ -885,17 +904,25 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: const DelegatingToolContext(),
+          ),
+        ).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(true),
         Pub: () => Pub.test(
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -909,7 +936,6 @@ flutter:
     testUsingContext(
       'run pass arguments through to pub',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
@@ -926,17 +952,23 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          PackagesCommand(),
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: const DelegatingToolContext(),
+          ),
         ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -950,7 +982,6 @@ flutter:
     testUsingContext(
       'token pass arguments through to pub',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
@@ -966,17 +997,23 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          PackagesCommand(),
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: const DelegatingToolContext(),
+          ),
         ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -990,7 +1027,6 @@ flutter:
     testUsingContext(
       'upgrade does not check for pubspec.yaml if -h/--help is passed',
       () async {
-        Cache.flutterRoot = '';
         processManager.addCommand(
           FakeCommand(
             command: const <String>[
@@ -1003,16 +1039,24 @@ flutter:
             stdin: IOSink(StreamController<List<int>>().sink),
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'upgrade', '-h']);
+        await createTestCommandRunner(
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: const DelegatingToolContext(),
+          ),
+        ).run(<String>['pub', 'upgrade', '-h']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,

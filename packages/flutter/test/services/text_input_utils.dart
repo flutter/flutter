@@ -68,9 +68,7 @@ class FakeTextChannel implements MethodChannel {
 }
 
 class FakeScribbleElement implements ScribbleClient {
-  FakeScribbleElement({required String elementIdentifier, Rect bounds = Rect.zero})
-    : _elementIdentifier = elementIdentifier,
-      _bounds = bounds;
+  FakeScribbleElement({required this._elementIdentifier, this._bounds = Rect.zero});
 
   final String _elementIdentifier;
   final Rect _bounds;

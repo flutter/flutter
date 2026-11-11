@@ -230,7 +230,7 @@ Future<void> testMain() async {
       editingStrategy.disable();
     });
 
-    test('should be [0, compostionStrLength] on new composition', () {
+    test('should be [0, compositionStrLength] on new composition', () {
       const composingText = 'hi';
 
       _inputElement.dispatchEvent(
@@ -260,43 +260,177 @@ Future<void> testMain() async {
       );
     });
 
-    test(
-      'should be [beforeComposingText - composingText, compostionStrLength] on composition in the middle of text',
-      () {
-        const composingText = 'hi';
-        const beforeComposingText = 'beforeComposingText';
-        const afterComposingText = 'afterComposingText';
+    test('should be [beforeComposingText - composingText, compositionStrLength] on composition in the middle of text', () {
+      const composingText = 'hi';
+      const beforeComposingText = 'beforeComposingText';
+      const afterComposingText = 'afterComposingText';
 
-        // Type in the text box, then move cursor to the middle.
-        _inputElement.value = '$beforeComposingText$afterComposingText';
-        _inputElement.setSelectionRange(beforeComposingText.length, beforeComposingText.length);
+      // Type in the text box, then move cursor to the middle.
+      _inputElement.value = '$beforeComposingText$afterComposingText';
+      _inputElement.setSelectionRange(beforeComposingText.length, beforeComposingText.length);
 
-        _inputElement.dispatchEvent(
-          createDomCompositionEvent(
-            _MockWithCompositionAwareMixin._kCompositionUpdate,
-            <Object?, Object?>{'data': composingText},
-          ),
-        );
+      _inputElement.dispatchEvent(
+        createDomCompositionEvent(
+          _MockWithCompositionAwareMixin._kCompositionUpdate,
+          <Object?, Object?>{'data': composingText},
+        ),
+      );
 
-        // Flush editing state (since we did not compositionend).
-        _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+      // Flush editing state (since we did not compositionend).
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
 
-        expect(
-          editingStrategy.lastEditingState,
-          isA<EditingState>()
-              .having(
-                (EditingState editingState) => editingState.composingBaseOffset,
-                'composingBaseOffset',
-                beforeComposingText.length - composingText.length,
-              )
-              .having(
-                (EditingState editingState) => editingState.composingExtentOffset,
-                'composingExtentOffset',
-                beforeComposingText.length,
-              ),
-        );
-      },
-    );
+      expect(
+        editingStrategy.lastEditingState,
+        isA<EditingState>()
+            .having(
+              (EditingState editingState) => editingState.composingBaseOffset,
+              'composingBaseOffset',
+              beforeComposingText.length - composingText.length,
+            )
+            .having(
+              (EditingState editingState) => editingState.composingExtentOffset,
+              'composingExtentOffset',
+              beforeComposingText.length,
+            ),
+      );
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/189056.
+    test('should be cleared when the framework removes the composing text', () {
+      _inputElement.value = 'AAA';
+      _inputElement.setSelectionRange(3, 3);
+
+      // Dead key `^` starts a composition.
+      _inputElement.dispatchEvent(
+        createDomCompositionEvent(
+          _MockWithCompositionAwareMixin._kCompositionUpdate,
+          <Object?, Object?>{'data': '^'},
+        ),
+      );
+      _inputElement.value = 'AAA^';
+      _inputElement.setSelectionRange(4, 4);
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(editingStrategy.lastEditingState?.composingBaseOffset, 3);
+      expect(editingStrategy.lastEditingState?.composingExtentOffset, 4);
+
+      // An input formatter rejects `^`. Chrome drops the composition without
+      // firing compositionend.
+      editingStrategy.setEditingState(EditingState(text: 'AAA', baseOffset: 3, extentOffset: 3));
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(
+        editingStrategy.lastEditingState,
+        EditingState(text: 'AAA', baseOffset: 3, extentOffset: 3),
+      );
+
+      // Typing afterwards must not mark the new character as composing.
+      _inputElement.value = 'AAAB';
+      _inputElement.setSelectionRange(4, 4);
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(
+        editingStrategy.lastEditingState,
+        EditingState(text: 'AAAB', baseOffset: 4, extentOffset: 4),
+      );
+    });
+
+    test('should be cleared when the framework removes composing text mid-text', () {
+      _inputElement.value = 'AB';
+      _inputElement.setSelectionRange(1, 1);
+
+      _inputElement.dispatchEvent(
+        createDomCompositionEvent(
+          _MockWithCompositionAwareMixin._kCompositionUpdate,
+          <Object?, Object?>{'data': '^'},
+        ),
+      );
+      _inputElement.value = 'A^B';
+      _inputElement.setSelectionRange(2, 2);
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(editingStrategy.lastEditingState?.composingBaseOffset, 1);
+      expect(editingStrategy.lastEditingState?.composingExtentOffset, 2);
+
+      // The stale range 1..2 still fits the new text, so it must not be
+      // reported as `B` composing.
+      editingStrategy.setEditingState(EditingState(text: 'AB', baseOffset: 1, extentOffset: 1));
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(
+        editingStrategy.lastEditingState,
+        EditingState(text: 'AB', baseOffset: 1, extentOffset: 1),
+      );
+    });
+
+    test('should be kept when the framework sets the same text', () {
+      _inputElement.value = 'AAA';
+      _inputElement.setSelectionRange(3, 3);
+
+      _inputElement.dispatchEvent(
+        createDomCompositionEvent(
+          _MockWithCompositionAwareMixin._kCompositionUpdate,
+          <Object?, Object?>{'data': '^'},
+        ),
+      );
+      _inputElement.value = 'AAA^';
+      _inputElement.setSelectionRange(4, 4);
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      // Writing unchanged text does not end the composition in the browser.
+      editingStrategy.setEditingState(
+        EditingState(
+          text: 'AAA^',
+          baseOffset: 4,
+          extentOffset: 4,
+          composingBaseOffset: 3,
+          composingExtentOffset: 4,
+        ),
+      );
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(editingStrategy.lastEditingState?.composingBaseOffset, 3);
+      expect(editingStrategy.lastEditingState?.composingExtentOffset, 4);
+    });
+
+    test('should not carry over to the next text field', () {
+      _inputElement.value = 'A';
+      _inputElement.setSelectionRange(1, 1);
+
+      // The first field is mid-composition when focus moves away.
+      _inputElement.dispatchEvent(
+        createDomCompositionEvent(
+          _MockWithCompositionAwareMixin._kCompositionUpdate,
+          <Object?, Object?>{'data': '^'},
+        ),
+      );
+      _inputElement.value = 'A^';
+      _inputElement.setSelectionRange(2, 2);
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(editingStrategy.lastEditingState?.composingBaseOffset, 1);
+      expect(editingStrategy.lastEditingState?.composingExtentOffset, 2);
+
+      // The framework connects the second field: it sends its state while
+      // the strategy is disabled, then shows the keyboard.
+      editingStrategy.disable();
+      editingStrategy.setEditingState(EditingState(text: 'B', baseOffset: 1, extentOffset: 1));
+      editingStrategy.enable(
+        InputConfiguration(viewId: kImplicitViewId),
+        onChange: (_, _) {},
+        onAction: (_) {},
+      );
+
+      final input = editingStrategy.activeDomElement as DomHTMLInputElement;
+      input.value = 'BC';
+      input.setSelectionRange(2, 2);
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(
+        editingStrategy.lastEditingState,
+        EditingState(text: 'BC', baseOffset: 2, extentOffset: 2),
+      );
+    });
   });
 
   group('Text Editing Delta Model', () {

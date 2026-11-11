@@ -4,14 +4,15 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:dart_skills_lint/dart_skills_lint.dart';
+
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+import 'package:skills_lint/skills_lint.dart';
 import 'package:test/test.dart';
 
 import 'check_backticks_relative_paths_rule.dart';
 
-const String _configFileName = 'dart_skills_lint.yaml';
+const String _configFileName = 'skills_lint.yaml';
 
 Directory _findSkillsDir() {
   Directory dir = Directory.current;
@@ -59,6 +60,7 @@ void main() {
     final Configuration config = await ConfigParser.loadConfig(
       path: path.join(repoRoot.path, 'dev', 'tools', _configFileName),
     );
+    expect(config.parsingErrors, isEmpty, reason: 'Configuration should load without errors.');
     final bool isValid = await validateSkills(
       skillDirPaths: [skillsDirectory, reidbakerSkillsDirectory],
       config: config,
