@@ -2061,7 +2061,10 @@ class _ViewConfiguration {
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but over which the operating system will likely
-  /// place system UI, such as the keyboard, that fully obscures any content.
+  /// place system UI, such as the keyboard.
+  ///
+  /// That system UI may be translucent or have rounded corners, so content
+  /// rendered in this area can remain visible.
   ///
   /// The relationship between this [viewInsets], [viewPadding], and [padding]
   /// are described in more detail in the documentation for [FlutterView].

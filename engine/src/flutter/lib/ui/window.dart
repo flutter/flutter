@@ -56,18 +56,16 @@ class Display {
 /// when visible.
 ///
 /// The [viewInsets] are the physical pixels which the operating
-/// system reserves for system UI, such as the keyboard, which would fully
-/// obscure any content drawn in that area.
+/// system reserves for system UI, such as the keyboard. That system UI may be
+/// translucent or have rounded corners, so pixels drawn in this area can
+/// remain visible.
 ///
 /// The [viewPadding] are the physical pixels on each side of the
 /// display that may be partially obscured by system UI or by physical
 /// intrusions into the display, such as an overscan region on a television or a
-/// "notch" on a phone. Unlike the insets, these areas may have portions that
-/// show the user view-painted pixels without being obscured, such as a
-/// notch at the top of a phone that covers only a subset of the area. Insets,
-/// on the other hand, either partially or fully obscure the window, such as an
-/// opaque keyboard or a partially translucent status bar, which cover an area
-/// without gaps.
+/// "notch" on a phone. These areas may have portions that show the user
+/// view-painted pixels without being obscured, such as a notch at the top of a
+/// phone that covers only a subset of the area.
 ///
 /// The [padding] property is computed from both
 /// [viewInsets] and [viewPadding]. It will allow a
@@ -198,7 +196,10 @@ class FlutterView {
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but over which the operating system will likely
-  /// place system UI, such as the keyboard, that fully obscures any content.
+  /// place system UI, such as the keyboard.
+  ///
+  /// That system UI may be translucent or have rounded corners, so content
+  /// rendered in this area can remain visible.
   ///
   /// When this property changes, [PlatformDispatcher.onMetricsChanged] is
   /// called. When using the Flutter framework, using [MediaQuery.of] to obtain

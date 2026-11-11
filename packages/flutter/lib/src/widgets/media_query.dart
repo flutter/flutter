@@ -177,8 +177,11 @@ enum _MediaQueryAspect {
 /// configuration of the device and are used and optionally consumed by widgets
 /// that position content within these insets. The padding value defines areas
 /// that might not be completely visible, like the display "notch" on the iPhone
-/// X. The viewInsets value defines areas that aren't visible at all, typically
-/// because they're obscured by the device's keyboard. Similar to viewInsets,
+/// X. The viewInsets value defines areas covered by system UI, typically the
+/// device's keyboard. Because that system UI may be translucent or have rounded
+/// corners (such as the iOS keyboard since iOS 26), what is painted in this
+/// area can remain visible; consider keeping content and controls out of the
+/// inset while continuing to paint backgrounds in it. Similar to viewInsets,
 /// viewPadding does not differentiate padding in areas that may be obscured.
 /// For example, by using the viewPadding property, padding would defer to the
 /// iPhone "safe area" regardless of whether a keyboard is showing.
@@ -503,11 +506,16 @@ class MediaQueryData {
   ///    platformBrightness defined for a [BuildContext].
   final Brightness platformBrightness;
 
-  /// The parts of the display that are completely obscured by system UI,
-  /// typically by the device's keyboard.
+  /// The parts of the display that are covered by system UI, typically by the
+  /// device's keyboard.
   ///
-  /// When a mobile device's keyboard is visible `viewInsets.bottom`
-  /// corresponds to the top of the keyboard.
+  /// When a mobile device's keyboard is visible, `viewInsets.bottom`
+  /// corresponds to the top of the keyboard. Because that system UI may be
+  /// translucent or have rounded corners (such as the iOS keyboard since
+  /// iOS 26), what is painted in this area can remain visible. Consider keeping
+  /// content and controls out of the inset while continuing to paint
+  /// backgrounds in it (for example, by applying the inset as padding inside a
+  /// painted surface rather than outside it).
   ///
   /// This value is independent of the [padding] and [viewPadding]. viewPadding
   /// is measured from the edges of the [MediaQuery] widget's bounds. Padding is
