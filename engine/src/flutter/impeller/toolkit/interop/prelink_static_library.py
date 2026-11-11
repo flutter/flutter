@@ -72,7 +72,7 @@ def run(args):
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE,
       encoding='utf-8',
-      errors='surrogateescape',
+      errors='replace',
   )
   if result.returncode != 0:
     sys.stderr.write('Command failed: %s\n%s%s' % (' '.join(args), result.stdout, result.stderr))
