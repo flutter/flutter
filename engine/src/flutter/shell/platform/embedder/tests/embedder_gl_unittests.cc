@@ -4952,6 +4952,10 @@ TEST_F(EmbedderTest, RenderExternalTextureWithImpellerOpenGL) {
   static PFNEGLDESTROYIMAGEKHRPROC eglDestroyImageKHR =
       reinterpret_cast<PFNEGLDESTROYIMAGEKHRPROC>(
           context.GLGetProcAddress("eglDestroyImageKHR"));
+  if (glEGLImageTargetTexture2DOES == nullptr || eglCreateImageKHR == nullptr ||
+      eglDestroyImageKHR == nullptr) {
+    GTEST_SKIP() << "EGL image extensions are not supported";
+  }
 
   auto rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().open_gl.gl_external_texture_frame_callback =
