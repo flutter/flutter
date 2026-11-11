@@ -365,6 +365,9 @@ class EngineCanvas implements LayerCanvas {
   @override
   void drawPoints(ui.PointMode pointMode, List<ui.Offset> points, ui.Paint paint) {
     final int pointCount = points.length;
+    if (pointCount == 0) {
+      return;
+    }
     final flatPoints = Float32List(pointCount * 2);
     for (var i = 0; i < pointCount; i++) {
       final ui.Offset point = points[i];
@@ -381,6 +384,9 @@ class EngineCanvas implements LayerCanvas {
   /// Retains any image sources referenced by [paint] (such as an [ui.ImageShader]).
   @override
   void drawRawPoints(ui.PointMode pointMode, Float32List points, ui.Paint paint) {
+    if (points.isEmpty) {
+      return;
+    }
     if (points.length % 2 != 0) {
       throw ArgumentError('"points" must have an even number of values.');
     }
@@ -433,6 +439,9 @@ class EngineCanvas implements LayerCanvas {
       throw ArgumentError(
         'If non-null, "colors" length must match that of "transforms" and "rects".',
       );
+    }
+    if (rectCount == 0) {
+      return;
     }
 
     final rstTransformBuffer = Float32List(rectCount * 4);
@@ -498,6 +507,9 @@ class EngineCanvas implements LayerCanvas {
       throw ArgumentError(
         'If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".',
       );
+    }
+    if (rectCount == 0) {
+      return;
     }
 
     // An empty color list means "no colors": pass null so that backends don't

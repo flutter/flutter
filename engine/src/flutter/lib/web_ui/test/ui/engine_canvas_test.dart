@@ -343,6 +343,56 @@ Future<void> testMain() async {
     expect(pixelAt(2, 2), 0x00000000);
     expect(pixelAt(6, 6), 0x00FF00FF);
   });
+
+  test('empty points and atlases do not retain image sources', () async {
+    final ui.Image image = await _createImageWithSource();
+    final ImageSource source = (image as EngineImage).imageSource!;
+    final shader = ui.ImageShader(image, ui.TileMode.clamp, ui.TileMode.clamp, _identity);
+    final shaderPaint = ui.Paint()..shader = shader;
+
+    final emptyCalls = <String, void Function(ui.Canvas)>{
+      'drawPoints': (ui.Canvas canvas) =>
+          canvas.drawPoints(ui.PointMode.points, const <ui.Offset>[], shaderPaint),
+      'drawRawPoints': (ui.Canvas canvas) =>
+          canvas.drawRawPoints(ui.PointMode.points, Float32List(0), shaderPaint),
+      'drawAtlas': (ui.Canvas canvas) => canvas.drawAtlas(
+        image,
+        const <ui.RSTransform>[],
+        const <ui.Rect>[],
+        const <ui.Color>[],
+        null,
+        null,
+        shaderPaint,
+      ),
+      'drawRawAtlas': (ui.Canvas canvas) => canvas.drawRawAtlas(
+        image,
+        Float32List(0),
+        Float32List(0),
+        Int32List(0),
+        ui.BlendMode.srcOver,
+        null,
+        shaderPaint,
+      ),
+    };
+
+    final pictures = <ui.Picture>[];
+    for (final MapEntry<String, void Function(ui.Canvas)>(
+          key: String name,
+          value: void Function(ui.Canvas) call,
+        )
+        in emptyCalls.entries) {
+      final ui.Picture picture = drawPicture(call);
+      expect((picture as LayerPicture).imageTracker, isNull, reason: name);
+      pictures.add(picture);
+    }
+
+    shader.dispose();
+    image.dispose();
+    expect(source.debugIsClosed, isTrue);
+    for (final picture in pictures) {
+      picture.dispose();
+    }
+  });
 }
 
 final Float64List _identity = Float64List.fromList(<double>[

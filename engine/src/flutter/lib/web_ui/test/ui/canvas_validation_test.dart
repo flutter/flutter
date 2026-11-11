@@ -119,6 +119,19 @@ Future<void> testMain() async {
         'If non-null, "colors" length must match that of "transforms" and "rects".',
       ),
       (
+        'drawAtlas with non-empty colors for 0 sprites',
+        (ui.Canvas canvas) => canvas.drawAtlas(
+          atlas,
+          const <ui.RSTransform>[],
+          const <ui.Rect>[],
+          const <ui.Color>[ui.Color(0xFFFF0000)],
+          ui.BlendMode.srcOver,
+          null,
+          paint,
+        ),
+        'If non-null, "colors" length must match that of "transforms" and "rects".',
+      ),
+      (
         'drawRawAtlas with mismatched lengths',
         (ui.Canvas canvas) => canvas.drawRawAtlas(
           atlas,
@@ -151,6 +164,19 @@ Future<void> testMain() async {
           Float32List.fromList(<double>[1, 0, 0, 0]),
           Float32List.fromList(<double>[0, 0, 4, 4]),
           Int32List.fromList(<int>[0xFFFF0000, 0xFF00FF00]),
+          ui.BlendMode.srcOver,
+          null,
+          paint,
+        ),
+        'If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".',
+      ),
+      (
+        'drawRawAtlas with non-empty colors for 0 sprites',
+        (ui.Canvas canvas) => canvas.drawRawAtlas(
+          atlas,
+          Float32List(0),
+          Float32List(0),
+          Int32List.fromList(<int>[0xFFFF0000]),
           ui.BlendMode.srcOver,
           null,
           paint,
