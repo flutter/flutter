@@ -463,15 +463,90 @@ void main() {
         });
       });
 
-      group('createGlobalArgParser', () {
-        testWithoutContext('configures global options and built-in help command', () {
-          final ArgParser parser = FlutterCommandRunner.createGlobalArgParser();
+      group('findCommandName', () {
+        testWithoutContext('finds a command given on its own', () {
+          expect(FlutterCommandRunner.findCommandName(<String>['doctor']), 'doctor');
+          expect(FlutterCommandRunner.findCommandName(<String>['help']), 'help');
+        });
 
-          expect(parser.allowTrailingOptions, isFalse);
-          expect(parser.commands, contains('help'));
-          expect(parser.options, contains('help'));
-          expect(parser.options, contains(FlutterGlobalOptions.kVerboseFlag));
-          expect(parser.options[FlutterGlobalOptions.kQuietFlag]!.hide, isTrue);
+        testWithoutContext('finds a command followed by its own arguments', () {
+          expect(FlutterCommandRunner.findCommandName(<String>['doctor', '-v']), 'doctor');
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['doctor', '--android-licenses']),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['test', 'test/widget_test.dart']),
+            'test',
+          );
+        });
+
+        testWithoutContext('finds a command preceded by global options', () {
+          expect(FlutterCommandRunner.findCommandName(<String>['-v', 'doctor']), 'doctor');
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--no-version-check', 'doctor', '-v']),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--no-version-check', 'help', '-v']),
+            'help',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>[
+              '--suppress-analytics',
+              '--no-color',
+              'doctor',
+              '-v',
+            ]),
+            'doctor',
+          );
+        });
+
+        testWithoutContext('does not mistake the value of a global option for the command', () {
+          expect(
+            FlutterCommandRunner.findCommandName(<String>[
+              '--local-engine',
+              'host_debug',
+              'doctor',
+            ]),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--local-engine=host_debug', 'doctor']),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--wrap-column', '100', 'doctor']),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['-d', 'emulator-5554', 'doctor']),
+            'doctor',
+          );
+        });
+
+        testWithoutContext('does not mistake an argument of the command for the command', () {
+          expect(FlutterCommandRunner.findCommandName(<String>['create', 'doctor']), 'create');
+          expect(FlutterCommandRunner.findCommandName(<String>['create', 'daemon']), 'create');
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['create', 'widget-preview']),
+            'create',
+          );
+          expect(FlutterCommandRunner.findCommandName(<String>['help', 'doctor']), 'help');
+        });
+
+        testWithoutContext('returns null when no command is given', () {
+          expect(FlutterCommandRunner.findCommandName(<String>[]), isNull);
+          expect(FlutterCommandRunner.findCommandName(<String>['-v']), isNull);
+          expect(FlutterCommandRunner.findCommandName(<String>['-h']), isNull);
+          expect(FlutterCommandRunner.findCommandName(<String>['--version', '-v']), isNull);
+        });
+
+        testWithoutContext('returns null when the global options cannot be parsed', () {
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--not-a-real-flag', 'doctor']),
+            isNull,
+          );
         });
       });
 
