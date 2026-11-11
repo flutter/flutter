@@ -77,17 +77,15 @@ class PlatformView {
     virtual void OnPlatformViewCreated(std::unique_ptr<Surface> surface) = 0;
 
     //--------------------------------------------------------------------------
-    /// @brief      Notifies the delegate that the platform view was created,
-    ///             allowing deferring delegates (`Shell`) to invoke
-    ///             `surface_factory` asynchronously on the raster task runner
-    ///             so the platform thread does not block waiting on GPU context
-    ///             or swapchain initialization.
+    /// @brief      Notifies the delegate that the platform view was created.
+    ///             The delegate invokes `surface_factory` asynchronously on
+    ///             the raster task runner, so the platform thread does not
+    ///             block waiting on GPU context or swapchain initialization.
     ///
-    /// @param[in]  surface_factory   Callable that constructs and returns the
-    ///                               rendering surface (on the raster task
-    ///                               runner when deferred by `Shell`), or
-    ///                               nullptr / an invalid surface if
-    ///                               cancelled/failed.
+    /// @param[in]  surface_factory   Callable invoked on the raster task
+    ///                               runner that constructs and returns the
+    ///                               rendering surface, or nullptr / an
+    ///                               invalid surface if cancelled/failed.
     ///
     virtual void OnPlatformViewCreatedDeferred(
         SurfaceFactory surface_factory) = 0;
@@ -1054,14 +1052,14 @@ class PlatformView {
 
  protected:
   //----------------------------------------------------------------------------
-  /// @brief      Notifies the shell that a platform view has been created,
-  ///             running `surface_factory` asynchronously on the raster task
-  ///             runner when supported by the delegate.
+  /// @brief      Notifies the shell that a platform view has been created
+  ///             without blocking the platform thread. The shell runs
+  ///             `surface_factory` asynchronously on the raster task runner.
   ///
   void NotifyCreatedDeferred(SurfaceFactory surface_factory);
 
-  // Called on the raster task runner (as is `surface_factory` when deferred via
-  // `Shell::OnPlatformViewCreatedDeferred`).
+  // Called on the raster task runner, as is the `surface_factory` passed to
+  // `NotifyCreatedDeferred`.
   virtual std::unique_ptr<Surface> CreateRenderingSurface();
 
   PlatformView::Delegate& delegate_;
