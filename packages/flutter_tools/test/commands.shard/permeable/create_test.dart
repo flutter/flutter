@@ -1571,6 +1571,20 @@ void main() {
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
 
+    final String mainContents = projectDir
+        .childDirectory('lib')
+        .childFile('main.dart')
+        .readAsStringSync()
+        .replaceAll('\r\n', '\n');
+    expect(mainContents, contains('themeMode: .system,'));
+    expect(
+      mainContents,
+      contains('''
+      darkTheme: ThemeData(
+        colorScheme: .fromSeed(seedColor: Colors.deepPurple, brightness: .dark),
+      ),'''),
+    );
+
     for (final FileSystemEntity file in projectDir.listSync(recursive: true)) {
       if (file is File && file.path.endsWith('.dart')) {
         final String original = file.readAsStringSync();
