@@ -23,6 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 FLUTTER_ASSERT_ARC
@@ -43,6 +44,29 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
  private:
   TestPlatformMessageResponse() = default;
 };
+
+// Returns a mock view controller whose view is in a window on a screen with the given native size
+// and scale.
+id CreateMockViewControllerOnScreen(CGSize screenNativeSize, CGFloat screenScale) {
+  UIScreen* screen = OCMClassMock([UIScreen class]);
+  OCMStub([screen nativeBounds]).andDo(^(NSInvocation* invocation) {
+    CGRect nativeBounds = CGRectMake(0, 0, screenNativeSize.width, screenNativeSize.height);
+    [invocation setReturnValue:&nativeBounds];
+  });
+  OCMStub([screen scale]).andDo(^(NSInvocation* invocation) {
+    CGFloat scale = screenScale;
+    [invocation setReturnValue:&scale];
+  });
+  UIWindowScene* windowScene = OCMClassMock([UIWindowScene class]);
+  OCMStub([windowScene screen]).andReturn(screen);
+  UIWindow* window = OCMClassMock([UIWindow class]);
+  OCMStub([window windowScene]).andReturn(windowScene);
+  UIView* view = OCMClassMock([UIView class]);
+  OCMStub([view window]).andReturn(window);
+  FlutterViewController* viewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([viewController viewIfLoaded]).andReturn(view);
+  return viewController;
+}
 }  // namespace
 
 /// A `FlutterTexture` that vends no frames. Used to obtain a registered texture id.
@@ -176,12 +200,16 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
 
 - (void)testDestroyContextIsIdempotent {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertEqual(engine.backend.threadHost, nullptr);
   XCTAssertTrue([engine run]);
+  XCTAssertNotEqual(engine.backend.threadHost, nullptr);
 
   // Both `appOrSceneWillTerminate` and view controller deallocation can destroy the same engine.
   // Verify a second call is a no-op and not a double teardown.
   [engine destroyContext];
+  XCTAssertEqual(engine.backend.threadHost, nullptr);
   [engine destroyContext];
+  XCTAssertEqual(engine.backend.threadHost, nullptr);
   XCTAssertNil(engine.platformTaskRunner);
 }
 
@@ -254,15 +282,37 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   XCTAssertTrue(((NSString*)infoDictionary[@"ClangVersion"]).length > 15UL);
 }
 
+// Checks releasing a running engine without calling -destroyContext doesn't
+// fail.
+//
+// Shell::~Shell waits for tasks it posts to the raster and IO threads, which
+// _backend owns, so this deadlocks unless FlutterEngine destroys _shell before
+// _backend. FlutterShell must also stop the profiler before it joins the
+// profiler thread.
 - (void)testDeallocated {
+  // Watchdog to prevent hangs and fail immediately if FlutterEngine->_shell was
+  // destroyed before the ThreadHost in FlutterShell.
+  dispatch_block_t watchdog = dispatch_block_create(static_cast<dispatch_block_flags_t>(0), ^{
+    FML_LOG(FATAL) << "Releasing a running FlutterEngine deadlocked. Check that FlutterEngine "
+                      "destroys _shell before _backend.";
+  });
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, static_cast<int64_t>(30 * NSEC_PER_SEC)),
+                 dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), watchdog);
+
   __weak FlutterEngine* weakEngine = nil;
+  __weak FlutterShell* weakBackend = nil;
   @autoreleasepool {
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+    // Check that there is a running shell and a thread host to tear down.
+    XCTAssertTrue([engine run]);
+    XCTAssertNotEqual(engine.backend.threadHost, nullptr);
     weakEngine = engine;
-    [engine run];
-    XCTAssertNotNil(weakEngine);
+    weakBackend = engine.backend;
   }
+  dispatch_block_cancel(watchdog);
+
   XCTAssertNil(weakEngine);
+  XCTAssertNil(weakBackend);
 }
 
 - (void)testSendMessageBeforeRun {
@@ -398,11 +448,15 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   [engine run];
   int64_t id1 = engine.engineIdentifier;
   XCTAssertTrue(id1 != 0);
+  NSObject<FlutterPluginRegistrar>* registrar1 = [engine registrarForPlugin:@"foo"];
+  XCTAssertEqual(registrar1.engineIdentifier, id1);
   FlutterEngine* spawn = [engine spawnWithEntrypoint:nil
                                           libraryURI:nil
                                         initialRoute:nil
                                       entrypointArgs:nil];
   int64_t id2 = spawn.engineIdentifier;
+  NSObject<FlutterPluginRegistrar>* registrar2 = [spawn registrarForPlugin:@"foo"];
+  XCTAssertEqual(registrar2.engineIdentifier, id2);
   XCTAssertEqual([FlutterEngine engineForIdentifier:id1], engine);
   XCTAssertEqual([FlutterEngine engineForIdentifier:id2], spawn);
 }
@@ -489,6 +543,30 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
 }
 
+- (void)testFlutterTextInputViewDidRestoreFirstResponderWillCallTextInputClientOnFocusReceived {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine setBinaryMessenger:mockBinaryMessenger];
+  [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInputClient.onFocusReceived"
+                                        arguments:@[ @(123) ]];
+  NSData* encodedMethodCall = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:methodCall];
+  NSData* encodedReply = [[FlutterJSONMethodCodec sharedInstance] encodeSuccessEnvelope:@NO];
+  id mockBinaryReply = [OCMArg invokeBlockWithArgs:encodedReply, nil];
+  OCMStub([mockBinaryMessenger sendOnChannel:@"flutter/textinput"
+                                     message:encodedMethodCall
+                                 binaryReply:mockBinaryReply]);
+
+  __block id focusReceivedResult;
+  [engine flutterTextInputView:nil
+      didRestoreFirstResponderWithTextInputClient:123
+                                           result:^(id result) {
+                                             focusReceivedResult = result;
+                                           }];
+  XCTAssertEqualObjects(focusReceivedResult, @NO);
+}
+
 - (void)testFlutterEngineUpdatesDisplays {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   id mockEngine = OCMPartialMock(engine);
@@ -497,6 +575,109 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   OCMVerify(times(1), [mockEngine updateDisplays]);
   engine.viewController = nil;
   OCMVerify(times(2), [mockEngine updateDisplays]);
+}
+
+- (void)testUpdateDisplaysFallsBackToMainScreenBeforeViewIsInWindow {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  id mockEngine = OCMPartialMock(engine);
+
+  // The framework can read the display as soon as the isolate launches, before any view controller
+  // is attached, so `run` must send a display even though there is no screen to ask yet.
+  [engine run];
+
+  CGSize mainScreenNativeSize = UIScreen.mainScreen.nativeBounds.size;
+  CGFloat mainScreenScale = UIScreen.mainScreen.scale;
+  OCMVerify(times(1), [mockEngine sendDisplayWithScreenNativeSize:mainScreenNativeSize
+                                                            scale:mainScreenScale]);
+}
+
+- (void)testUpdateDisplaysUsesScreenOfViewWindow {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  id mockEngine = OCMPartialMock(engine);
+  __block id viewController = nil;
+  OCMStub([mockEngine viewController]).andDo(^(NSInvocation* invocation) {
+    __unsafe_unretained id value = viewController;
+    [invocation setReturnValue:&value];
+  });
+  [engine run];
+
+  viewController = CreateMockViewControllerOnScreen(CGSizeMake(1001, 2002), 3);
+  [engine updateDisplays];
+
+  OCMVerify(times(1), [mockEngine sendDisplayWithScreenNativeSize:CGSizeMake(1001, 2002) scale:3]);
+}
+
+- (void)testUpdateDisplaysDoesNotResendUnchangedDisplay {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  id mockEngine = OCMPartialMock(engine);
+  __block id viewController = nil;
+  OCMStub([mockEngine viewController]).andDo(^(NSInvocation* invocation) {
+    __unsafe_unretained id value = viewController;
+    [invocation setReturnValue:&value];
+  });
+  [engine run];
+
+  viewController = CreateMockViewControllerOnScreen(CGSizeMake(1001, 2002), 3);
+  [engine updateDisplays];
+  [engine updateDisplays];
+  // A different view controller on a screen with the same size and scale.
+  viewController = CreateMockViewControllerOnScreen(CGSizeMake(1001, 2002), 3);
+  [engine updateDisplays];
+
+  OCMVerify(times(1), [mockEngine sendDisplayWithScreenNativeSize:CGSizeMake(1001, 2002) scale:3]);
+}
+
+- (void)testUpdateDisplaysResendsWhenScreenChanges {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  id mockEngine = OCMPartialMock(engine);
+  __block id viewController = nil;
+  OCMStub([mockEngine viewController]).andDo(^(NSInvocation* invocation) {
+    __unsafe_unretained id value = viewController;
+    [invocation setReturnValue:&value];
+  });
+  [engine run];
+
+  // E.g. moving between the outer and inner displays of a device with multiple built-in displays.
+  viewController = CreateMockViewControllerOnScreen(CGSizeMake(1001, 2002), 3);
+  [engine updateDisplays];
+  viewController = CreateMockViewControllerOnScreen(CGSizeMake(3003, 4004), 3);
+  [engine updateDisplays];
+  viewController = CreateMockViewControllerOnScreen(CGSizeMake(1001, 2002), 3);
+  [engine updateDisplays];
+  // Same size, different scale.
+  viewController = CreateMockViewControllerOnScreen(CGSizeMake(1001, 2002), 2);
+  [engine updateDisplays];
+
+  OCMVerify(times(2), [mockEngine sendDisplayWithScreenNativeSize:CGSizeMake(1001, 2002) scale:3]);
+  OCMVerify(times(1), [mockEngine sendDisplayWithScreenNativeSize:CGSizeMake(3003, 4004) scale:3]);
+  OCMVerify(times(1), [mockEngine sendDisplayWithScreenNativeSize:CGSizeMake(1001, 2002) scale:2]);
+}
+
+- (void)testUpdateDisplaysKeepsLastDisplayWhenViewIsNotInWindow {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  id mockEngine = OCMPartialMock(engine);
+  __block id viewController = nil;
+  OCMStub([mockEngine viewController]).andDo(^(NSInvocation* invocation) {
+    __unsafe_unretained id value = viewController;
+    [invocation setReturnValue:&value];
+  });
+  [engine run];
+
+  viewController = CreateMockViewControllerOnScreen(CGSizeMake(1001, 2002), 3);
+  [engine updateDisplays];
+  // A view controller whose view is not loaded (e.g. a newly attached view controller).
+  viewController = OCMClassMock([FlutterViewController class]);
+  [engine updateDisplays];
+  // No view controller.
+  viewController = nil;
+  [engine updateDisplays];
+
+  // Only the initial display (from `run`) used the `UIScreen.mainScreen` fallback.
+  CGSize mainScreenNativeSize = UIScreen.mainScreen.nativeBounds.size;
+  CGFloat mainScreenScale = UIScreen.mainScreen.scale;
+  OCMVerify(times(1), [mockEngine sendDisplayWithScreenNativeSize:mainScreenNativeSize
+                                                            scale:mainScreenScale]);
+  OCMVerify(times(1), [mockEngine sendDisplayWithScreenNativeSize:CGSizeMake(1001, 2002) scale:3]);
 }
 
 - (void)testLifeCycleNotificationDidEnterBackgroundForApplication {
@@ -847,24 +1028,36 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   [engine cleanUpConnection:connection];
 }
 
-- (void)testLifeCycleNotificationSceneWillConnect {
+- (void)testSingleSceneEngineRegistersWithSceneLifeCycleDelegate {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication supportsMultipleScenes]).andReturn(NO);
+
+  id mockLifeCycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];
-  id mockScene = OCMClassMock([UIWindowScene class]);
-  id mockLifecycleProvider = OCMProtocolMock(@protocol(FlutterSceneLifeCycleProvider));
-  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
-  OCMStub([mockScene delegate]).andReturn(mockLifecycleProvider);
-  OCMStub([mockLifecycleProvider sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
-  NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneWillConnectNotification
-                                    object:mockScene
-                                  userInfo:nil];
+  OCMVerify(times(1), [mockLifeCycleDelegate registerEngineForSingleScene:engine]);
+  [mockApplication stopMocking];
+  [mockLifeCycleDelegate stopMocking];
+}
 
-  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
-  OCMVerify(times(1), [mockLifecycleDelegate engine:engine
-                          receivedConnectNotificationFor:mockScene]);
+- (void)testMultiSceneEngineDoesNotRegisterWithSingleSceneLifeCycleDelegate {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication supportsMultipleScenes]).andReturn(YES);
+
+  id mockLifeCycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  OCMVerify(times(0), [mockLifeCycleDelegate registerEngineForSingleScene:engine]);
+  [mockApplication stopMocking];
+  [mockLifeCycleDelegate stopMocking];
 }
 
 - (void)testSpawnsShareGpuContext {
@@ -1008,6 +1201,8 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
 
   NSObject<FlutterApplicationRegistrar>* registrar = [mockEngine registrarForApplication:pluginKey];
 
+  XCTAssertTrue([registrar respondsToSelector:@selector(engineIdentifier)]);
+  XCTAssertEqual(registrar.engineIdentifier, engine.engineIdentifier);
   XCTAssertTrue([registrar respondsToSelector:@selector(messenger)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(textures)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(registerViewFactory:withId:)]);

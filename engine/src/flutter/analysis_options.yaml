@@ -21,6 +21,7 @@ analyzer:
 linter:
   rules:
     avoid_equals_and_hash_code_on_mutable_classes: false # cannot import the meta package here
+    comment_references: false # TODO(zarah): enable once the dart:ui references resolve, https://github.com/flutter/flutter/issues/192870
     missing_whitespace_between_adjacent_strings: false # too many false positives
     public_member_api_docs: true # dart:ui is public API
     use_string_in_part_of_directives: false # needs to be evaluated, dart:ui frequently uses non-strings

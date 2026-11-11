@@ -543,7 +543,7 @@ class _SnippetChecker {
 
   List<_Line>? _headersWithImports;
 
-  /// Checks all the snippets in the Dart files in [_flutterPackage] for errors.
+  /// Checks all the snippets in the Dart files in [_flutterPackages] for errors.
   /// Returns true if any errors are found, false otherwise.
   Future<bool> checkSnippets() async {
     final snippets = <String, _SnippetFile>{};
@@ -1169,7 +1169,7 @@ class _SnippetChecker {
     return errors;
   }
 
-  /// Invokes the analyzer on the given [directory] and returns the stdout (with some lines filtered).
+  /// Invokes the analyzer on the given `directory` and returns the stdout (with some lines filtered).
   List<String> _runAnalyzer() {
     _createConfigurationFiles();
     // Run pub get to avoid output from getting dependencies in the analyzer

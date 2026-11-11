@@ -771,7 +771,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  Future<void> render(ui.Scene scene, [ui.FlutterView? view]) async {
+  Future<void> render(ui.Scene scene, [ui.FlutterView? view, ui.Size? size]) async {
     final target = (view ?? implicitView) as EngineFlutterView?;
     assert(target != null, 'Calling render without a FlutterView');
     if (target == null) {
@@ -784,7 +784,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
     if (shouldRender) {
-      final Future<void> sceneRender = renderer.renderScene(scene, target);
+      final ui.Size frameSize = size ?? target.physicalSize;
+      final Future<void> sceneRender = renderer.renderScene(scene, target, size: frameSize);
       // The first frame ends while this render is still in flight, so remember
       // whether it belongs to it instead of asking again below.
       final bool isFirstFrameRender = _isBuildingFirstFrame;
@@ -1061,6 +1062,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// The setting indicating whether time should always be shown in the 24-hour
   /// format.
+  ///
+  /// The [onAlwaysUse24HourFormatChanged] callback is called whenever this
+  /// value changes.
   ///
   /// This option is used by [showTimePicker].
   @override
@@ -1427,6 +1431,31 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Otherwise zones won't work properly.
   void invokeOnSystemFontFamilyChanged() {
     invoke(_onSystemFontFamilyChanged, _onSystemFontFamilyChangedZone);
+  }
+
+  /// A callback that is invoked whenever [alwaysUse24HourFormat] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
+  @override
+  ui.VoidCallback? get onAlwaysUse24HourFormatChanged => _onAlwaysUse24HourFormatChanged;
+  ui.VoidCallback? _onAlwaysUse24HourFormatChanged;
+  Zone? _onAlwaysUse24HourFormatChangedZone;
+  @override
+  set onAlwaysUse24HourFormatChanged(ui.VoidCallback? callback) {
+    _onAlwaysUse24HourFormatChanged = callback;
+    _onAlwaysUse24HourFormatChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnAlwaysUse24HourFormatChanged() {
+    invoke(_onAlwaysUse24HourFormatChanged, _onAlwaysUse24HourFormatChangedZone);
   }
 
   /// Whether the user has requested that [updateSemantics] be called when
@@ -1882,10 +1911,7 @@ class ViewConfiguration {
     this.view,
     this.devicePixelRatio = 1.0,
     this.visible = false,
-    this.viewInsets = ui.ViewPadding.zero as ViewPadding,
-    this.viewPadding = ui.ViewPadding.zero as ViewPadding,
     this.systemGestureInsets = ui.ViewPadding.zero as ViewPadding,
-    this.padding = ui.ViewPadding.zero as ViewPadding,
     this.gestureSettings = const ui.GestureSettings(),
     this.displayFeatures = const <ui.DisplayFeature>[],
     this.displayCornerRadii,
@@ -1895,10 +1921,7 @@ class ViewConfiguration {
     EngineFlutterView? view,
     double? devicePixelRatio,
     bool? visible,
-    ViewPadding? viewInsets,
-    ViewPadding? viewPadding,
     ViewPadding? systemGestureInsets,
-    ViewPadding? padding,
     ui.GestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
     ui.DisplayCornerRadii? displayCornerRadii,
@@ -1907,10 +1930,7 @@ class ViewConfiguration {
       view: view ?? this.view,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       visible: visible ?? this.visible,
-      viewInsets: viewInsets ?? this.viewInsets,
-      viewPadding: viewPadding ?? this.viewPadding,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      padding: padding ?? this.padding,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
       displayCornerRadii: displayCornerRadii ?? this.displayCornerRadii,
@@ -1920,10 +1940,7 @@ class ViewConfiguration {
   final EngineFlutterView? view;
   final double devicePixelRatio;
   final bool visible;
-  final ViewPadding viewInsets;
-  final ViewPadding viewPadding;
   final ViewPadding systemGestureInsets;
-  final ViewPadding padding;
   final ui.GestureSettings gestureSettings;
   final List<ui.DisplayFeature> displayFeatures;
   final ui.DisplayCornerRadii? displayCornerRadii;

@@ -347,19 +347,25 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   double get devicePixelRatio => context.devicePixelRatio;
 
-  /// Whether [pixels] is currently being moved by a drag synthesized from a
-  /// semantics scroll action.
+  /// Whether [pixels] is being moved by a drag synthesized from a semantics
+  /// scroll action.
   ///
-  /// [Scrollable] sets this while it replays the drag sequence synthesized
-  /// for a semantics scroll action and resets it when the replay ends. While
-  /// it is true, [setPixels] does not move [pixels] further outside the range
-  /// from [minScrollExtent] to [maxScrollExtent] than it already is, so that
-  /// assistive technologies scroll exactly to the edge of the content instead
-  /// of overscrolling and bouncing back with physics like
-  /// [BouncingScrollPhysics]. The discarded distance is reported by
-  /// [didOverscrollBy], consistent with physics that reject out-of-range
-  /// values themselves, like [ClampingScrollPhysics].
-  bool semanticsScrollInProgress = false;
+  /// [Scrollable] sets this while it replays such a drag. While it is true,
+  /// [pixels] does not move further outside the range from [minScrollExtent]
+  /// to [maxScrollExtent], regardless of the [physics], and the discarded
+  /// distance is reported by [didOverscrollBy]. If the next layout changes
+  /// the scroll extents, [pixels] is also kept in the new range.
+  bool get semanticsScrollInProgress => _semanticsScrollInProgress;
+  bool _semanticsScrollInProgress = false;
+  set semanticsScrollInProgress(bool value) {
+    _semanticsScrollInProgress = value;
+    if (value) {
+      _semanticsScrollAwaitingLayout = true;
+    }
+  }
+
+  // Whether a semantics scroll may have moved [pixels] since the last layout.
+  bool _semanticsScrollAwaitingLayout = false;
 
   /// Update the scroll position ([pixels]) to a given pixel value.
   ///
@@ -559,9 +565,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final value =
-          PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
-      if (value != null) {
+      final Object? value = PageStorage.maybeOf(context.storageContext)
+          ?.readState(context.storageContext);
+      // The slot is identified only by the PageStorageKeys above the context,
+      // so another widget under the same keys may have saved a value of a
+      // different type here.
+      if (value is double) {
         correctPixels(value);
       }
     }
@@ -687,6 +696,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       applyNewDimensions();
       _pendingDimensions = false;
     }
+    _semanticsScrollAwaitingLayout = false;
     assert(
       !_didChangeViewportDimensionOrReceiveCorrection,
       'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().',
@@ -721,12 +731,19 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// The default implementation defers to [ScrollPhysics.adjustPositionForNewDimensions].
   @protected
   bool correctForNewDimensions(ScrollMetrics oldPosition, ScrollMetrics newPosition) {
-    final double newPixels = physics.adjustPositionForNewDimensions(
+    double newPixels = physics.adjustPositionForNewDimensions(
       oldPosition: oldPosition,
       newPosition: newPosition,
       isScrolling: activity!.isScrolling,
       velocity: activity!.velocity,
     );
+    if (_semanticsScrollAwaitingLayout &&
+        pixels >= oldPosition.minScrollExtent &&
+        pixels <= oldPosition.maxScrollExtent) {
+      // A semantics scroll that ended in range stays in range, so that it
+      // does not bounce back when the layout changes the scroll extents.
+      newPixels = clampDouble(newPixels, newPosition.minScrollExtent, newPosition.maxScrollExtent);
+    }
     if (newPixels != pixels) {
       correctPixels(newPixels);
       return false;

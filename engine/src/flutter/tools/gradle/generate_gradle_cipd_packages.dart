@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:path/path.dart' as path;
 
 Future<void> main(List<String> args) async {
   final parser = ArgParser()
@@ -22,7 +23,7 @@ Future<void> main(List<String> args) async {
   // SHOULD be 'bin' distribution types) AND the default gradle
   // version defined in gradle_utils.dart (this SHOULD be the 'all'
   // distribution type).
-  final versions = <String>['8.14-bin', '8.4-bin', '8.13-rc-1-bin', '9.3.1-bin', '9.3.1-all'];
+  final versions = <String>['8.14-bin', '8.4-bin', '9.3.1-bin', '9.5.0-bin', '9.5.0-all'];
 
   // Define the CIPD packages location
   const location = 'flutter/gradle_dists';
@@ -55,7 +56,10 @@ Future<void> main(List<String> args) async {
       'groovy',
       '--no-daemon',
     ], stagingProject.path);
-    final gradlewExecutable = isWindows ? r'.\gradlew.bat' : './gradlew';
+    final String gradlewExecutable = path.join(
+      stagingProject.path,
+      isWindows ? 'gradlew.bat' : 'gradlew',
+    );
 
     for (final versionStr in versions) {
       print('Processing Gradle Wrapper $versionStr...');

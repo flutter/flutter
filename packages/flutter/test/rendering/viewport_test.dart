@@ -2856,6 +2856,20 @@ void main() {
       tester: tester,
     );
   });
+
+  testWidgets('Viewport does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final viewportOffset = ViewportOffset.fixed(100);
+    addTearDown(viewportOffset.dispose);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Viewport(offset: viewportOffset)),
+      ),
+    );
+    expect(tester.getSize(find.byType(Viewport)), Size.zero);
+  });
 }
 
 class TestCustomPainter extends CustomPainter {

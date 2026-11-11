@@ -13,7 +13,7 @@ import 'text_editing.dart';
 /// an [EditingState] with new composition values; namely, [EditingState.composingBaseOffset]
 /// and [EditingState.composingExtentOffset].
 ///
-/// A class with this mixin should call [addCompositionEventHandlers] on initalization, and
+/// A class with this mixin should call [addCompositionEventHandlers] on initialization, and
 /// [removeCompositionEventHandlers] on deinitalization.
 ///
 /// See also:
@@ -62,12 +62,16 @@ mixin CompositionAwareMixin {
     domElement.removeEventListener(_kCompositionStart, _compositionStartListener);
     domElement.removeEventListener(_kCompositionUpdate, _compositionUpdateListener);
     domElement.removeEventListener(_kCompositionEnd, _compositionEndListener);
+    // Composition can't be observed ending anymore.
+    resetComposition();
   }
 
-  void _handleCompositionStart(DomEvent event) {
+  void resetComposition() {
     composingText = null;
     composingBase = null;
   }
+
+  void _handleCompositionStart(DomEvent event) => resetComposition();
 
   void _handleCompositionUpdate(DomEvent event) {
     if (event.isA<DomCompositionEvent>()) {
@@ -75,10 +79,7 @@ mixin CompositionAwareMixin {
     }
   }
 
-  void _handleCompositionEnd(DomEvent event) {
-    composingText = null;
-    composingBase = null;
-  }
+  void _handleCompositionEnd(DomEvent event) => resetComposition();
 
   EditingState determineCompositionState(EditingState editingState) {
     if (composingText == null) {

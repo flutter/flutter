@@ -139,6 +139,10 @@ skt::ParagraphStyle ParagraphBuilderSkia::TxtToSkia(const ParagraphStyle& txt) {
   skia.turnHintingOff();
   skia.setReplaceTabCharacters(true);
   skia.setApplyRoundingHack(false);
+  skia.setRenderSoftHyphens(txt.render_soft_hyphens);
+  if (txt.soft_hyphen_string.has_value()) {
+    skia.setSoftHyphenString(txt.soft_hyphen_string.value());
+  }
 
   return skia;
 }

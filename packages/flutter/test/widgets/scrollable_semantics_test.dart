@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'two_dimensional_utils.dart';
 
 class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
   const _PinnedHeaderDelegate({required double height}) : minExtent = height, maxExtent = height;
@@ -870,8 +871,6 @@ void main() {
   );
 
   group('semantic scroll actions do not overscroll at the boundaries', () {
-    // Regression test for https://github.com/flutter/flutter/issues/11665
-
     // Bouncing ListView under a MediaQuery, tracking the extreme offsets seen.
     Future<(ScrollController, int Function(), List<double>)> pumpList(
       WidgetTester tester, {
@@ -1096,6 +1095,260 @@ void main() {
       // The position never left the scrollable range.
       expect(extremes[0], minExtent);
       expect(extremes[1], maxExtent);
+
+      semantics.dispose();
+    });
+
+    testWidgets('ClampingScrollPhysics still dispatches OverscrollNotification at the boundary', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final controller = ScrollController(initialScrollOffset: 190.0);
+      addTearDown(controller.dispose);
+      final overscrolls = <OverscrollNotification>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotificationListener<OverscrollNotification>(
+            onNotification: (OverscrollNotification notification) {
+              overscrolls.add(notification);
+              return false;
+            },
+            child: ListView(
+              controller: controller,
+              physics: const ClampingScrollPhysics(),
+              children: List<Widget>.generate(
+                20,
+                (int i) => SizedBox(height: 40.0, child: Text('$i')),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(controller.position.maxScrollExtent, 200.0);
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[
+                SemanticsAction.scrollUp,
+                SemanticsAction.scrollDown,
+                SemanticsAction.scrollToOffset,
+              ],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.offset, 200.0);
+      expect(overscrolls, isNotEmpty);
+
+      semantics.dispose();
+    });
+
+    testWidgets('clamps the horizontal axis of a TwoDimensionalScrollable with diagonal dragging', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final horizontalController = ScrollController(initialScrollOffset: 190.0);
+      final verticalController = ScrollController();
+      addTearDown(horizontalController.dispose);
+      addTearDown(verticalController.dispose);
+
+      var maxHorizontalObserved = 190.0;
+      horizontalController.addListener(() {
+        if (horizontalController.offset > maxHorizontalObserved) {
+          maxHorizontalObserved = horizontalController.offset;
+        }
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: SimpleBuilderTableView(
+              diagonalDragBehavior: DiagonalDragBehavior.free,
+              horizontalDetails: ScrollableDetails.horizontal(
+                controller: horizontalController,
+                physics: const BouncingScrollPhysics(),
+              ),
+              verticalDetails: ScrollableDetails.vertical(
+                controller: verticalController,
+                physics: const BouncingScrollPhysics(),
+              ),
+              // A 1000 by 1000 table in an 800 by 600 viewport.
+              delegate: TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 4,
+                maxYIndex: 4,
+                builder: (BuildContext context, ChildVicinity vicinity) {
+                  return const SizedBox.square(dimension: 200.0);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(horizontalController.position.maxScrollExtent, 200.0);
+      expect(horizontalController.offset, 190.0);
+
+      // The pan gesture recognizer of the vertical scrollable handles both
+      // axes.
+      tester
+          .state<RawGestureDetectorState>(find.byType(RawGestureDetector).first)
+          .replaceSemanticsActions(<SemanticsAction>{
+            SemanticsAction.scrollUp,
+            SemanticsAction.scrollDown,
+            SemanticsAction.scrollLeft,
+            SemanticsAction.scrollRight,
+          });
+      await tester.pump();
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[
+                SemanticsAction.scrollUp,
+                SemanticsAction.scrollDown,
+                SemanticsAction.scrollLeft,
+                SemanticsAction.scrollRight,
+                SemanticsAction.scrollToOffset,
+              ],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollLeft,
+      );
+      await tester.pumpAndSettle();
+
+      expect(horizontalController.offset, 200.0);
+      expect(maxHorizontalObserved, 200.0);
+
+      semantics.dispose();
+    });
+
+    testWidgets('stops at the estimated max extent then continues on the next scroll', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: ListView.builder(
+              controller: controller,
+              cacheExtent: 0.0,
+              physics: const BouncingScrollPhysics(),
+              itemCount: 9,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(height: index < 8 ? 80.0 : 800.0, child: Text('Item $index'));
+              },
+            ),
+          ),
+        ),
+      );
+      // The last item is not laid out yet, so its extent is underestimated.
+      expect(controller.position.maxScrollExtent, 120.0);
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.offset, 120.0);
+      expect(controller.position.maxScrollExtent, 840.0);
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[
+                SemanticsAction.scrollUp,
+                SemanticsAction.scrollDown,
+                SemanticsAction.scrollToOffset,
+              ],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.offset, 600.0);
+
+      semantics.dispose();
+    });
+
+    testWidgets('does not reverse direction when the position is already out of range', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: ListView(
+              controller: controller,
+              physics: const BouncingScrollPhysics(),
+              children: List<Widget>.generate(
+                20,
+                (int i) => SizedBox(height: 40.0, child: Text('$i')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      controller.jumpTo(100.0);
+      await tester.pump();
+
+      final int scrollableId = semantics
+          .nodesWith(
+            actions: <SemanticsAction>[
+              SemanticsAction.scrollUp,
+              SemanticsAction.scrollDown,
+              SemanticsAction.scrollToOffset,
+            ],
+          )
+          .single
+          .id;
+
+      // Overscroll past the min extent with a pointer drag.
+      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+      await gesture.moveBy(const Offset(0.0, 160.0));
+      await gesture.up();
+      final double overscrolledOffset = controller.offset;
+      expect(overscrolledOffset, lessThan(0.0));
+
+      var scrolledBy = 0.0;
+      controller.addListener(() {
+        scrolledBy = controller.offset - overscrolledOffset;
+      });
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        scrollableId,
+        SemanticsAction.scrollDown,
+      );
+      expect(scrolledBy, lessThanOrEqualTo(0.0));
+
+      await tester.pumpAndSettle();
+      expect(controller.offset, 0.0);
 
       semantics.dispose();
     });

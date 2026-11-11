@@ -195,8 +195,8 @@ public class FlutterEngineConnectionRegistryTest {
 
     when(flutterLoader.getSofwareRenderingEnabledViaManifest()).thenReturn(false);
     when(appComponent.getAppComponent()).thenReturn(activity);
-    Intent intent = mock(Intent.class);
-    when(intent.getBooleanExtra("enable-software-rendering", false)).thenReturn(true);
+    Intent intent = new Intent();
+    intent.putExtra("enable-software-rendering", true);
     when(activity.getIntent()).thenReturn(intent);
 
     registry.attachToActivity(appComponent, lifecycle);

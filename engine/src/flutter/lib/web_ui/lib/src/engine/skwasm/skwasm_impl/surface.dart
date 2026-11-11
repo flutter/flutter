@@ -106,6 +106,7 @@ class SkwasmSurface implements OffscreenSurface {
   double _currentDevicePixelRatio = -1;
   BitmapSize _currentSize = const BitmapSize(1, 1);
   Completer<void> _initializedCompleter;
+  bool _initializationFailed = false;
   Completer<void>? _handledContextLostEvent;
 
   /// Handles the context lost event by acquiring a new canvas and recreating the
@@ -115,34 +116,49 @@ class SkwasmSurface implements OffscreenSurface {
       _initializedCompleter.complete();
     }
     _initializedCompleter = Completer<void>();
+    _initializationFailed = false;
     _handledContextLostEvent?.complete();
     final DomOffscreenCanvas newCanvas = _canvasProvider.acquireCanvas(
       _currentSize,
       onContextLost: onContextLost,
     );
-    recreateContextForCanvas(newCanvas);
+    unawaited(recreateContextForCanvas(newCanvas).catchError((Object _) {}));
   }
 
   void _initialize() {
     final CallbackId callbackId = surfaceSetCanvas(handle, _canvas);
 
     SkwasmCallbackHandler.instance.registerCallback(callbackId).then((JSAny contextLostCallbackId) {
-      // The context may have been lost before the Surface finished
-      // initializing.
-      if (!_initializedCompleter.isCompleted) {
-        _initializedCompleter.complete();
-      }
       // Once we have transferred control of the canvas to the Skwasm Surface,
       // the reference to the _canvas is no longer valid and any listeners
       // attached to it will never fire. Inform the CanvasProvider that it
       // should release its reference to the canvas and unregister any listeners
       // attached to it.
       _canvasProvider.releaseCanvas(_canvas);
-      SkwasmCallbackHandler.instance
-          .registerCallback((contextLostCallbackId as JSNumber).toDartInt)
-          .then((_) {
-            onContextLost();
-          });
+      final int contextLostId = (contextLostCallbackId as JSNumber).toDartInt;
+      if (contextLostId == 0) {
+        // Skwasm could not create a WebGL context for the canvas, so this
+        // surface can never render. Report the failure on [initialized] once
+        // and let subsequent frames return early rather than hanging or
+        // rethrowing on every frame.
+        const message =
+            'Skwasm failed to create a WebGL2 context. Nothing will be '
+            'rendered. This usually means WebGL2 is unavailable or the GPU '
+            'process failed in this browser.';
+        _initializationFailed = true;
+        if (!_initializedCompleter.isCompleted) {
+          _initializedCompleter.completeError(StateError(message));
+        }
+        return;
+      }
+      // The context may have been lost before the Surface finished
+      // initializing.
+      if (!_initializedCompleter.isCompleted) {
+        _initializedCompleter.complete();
+      }
+      SkwasmCallbackHandler.instance.registerCallback(contextLostId).then((_) {
+        onContextLost();
+      });
     });
   }
 
@@ -159,7 +175,9 @@ class SkwasmSurface implements OffscreenSurface {
       throw ArgumentError('The image being rasterized must be a Skwasm image.');
     }
 
-    await setSize(BitmapSize(engineImage.width, engineImage.height));
+    // The raster thread resizes the surface to fit the image in the same message
+    // that rasterizes it, so no other operation can resize it in between.
+    _currentSize = BitmapSize(engineImage.width, engineImage.height);
 
     // Initiate the native rasterization call. This schedules the rasterization on the C++
     // side and returns a callback ID that will resolve when the image bytes are ready.
@@ -197,8 +215,18 @@ class SkwasmSurface implements OffscreenSurface {
   }
 
   @override
-  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures) async {
+  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(
+    BitmapSize size,
+    List<ui.Picture> pictures,
+  ) async {
+    if (_initializationFailed) {
+      return <DomImageBitmap>[];
+    }
     await initialized;
+    // The size is sent along with the pictures, so the raster thread resizes and
+    // renders in a single message. Messages are processed in order, so no other
+    // operation can resize the surface in between.
+    _currentSize = size;
     final int callbackId = withStackScope((StackScope scope) {
       final Pointer<PictureHandle> pictureHandles = scope
           .allocPointerArray(pictures.length)
@@ -206,7 +234,14 @@ class SkwasmSurface implements OffscreenSurface {
       for (var i = 0; i < pictures.length; i++) {
         pictureHandles[i] = (pictures[i] as SkwasmPicture).handle;
       }
-      return surfaceRenderPictures(handle, pictureHandles, pictures.length);
+      return surfaceRenderPictures(
+        handle,
+        pictureHandles,
+        pictures.length,
+        size.width,
+        size.height,
+        true,
+      );
     });
     final rasterResult =
         (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
@@ -232,6 +267,9 @@ class SkwasmSurface implements OffscreenSurface {
 
   @override
   Future<void> setSize(BitmapSize size) async {
+    if (_initializationFailed) {
+      return;
+    }
     await initialized;
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     if (_currentSize == size && devicePixelRatio == _currentDevicePixelRatio) {
@@ -269,6 +307,15 @@ class SkwasmSurface implements OffscreenSurface {
   // Skwasm.
   @override
   Future<void> rasterizeToCanvas(ui.Picture picture) {
-    throw StateError('rasterizeToCanvas is not supported for SkwasmSurface');
+    throw UnsupportedError('rasterizeToCanvas is not supported for SkwasmSurface');
+  }
+
+  @override
+  Future<void> rasterizeToCanvasSource(
+    BitmapSize size,
+    List<ui.Picture> pictures,
+    void Function(int index, DomCanvasImageSource source) onRendered,
+  ) {
+    throw UnsupportedError('rasterizeToCanvasSource is not supported for SkwasmSurface');
   }
 }

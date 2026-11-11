@@ -25,6 +25,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeConfig;
 
 void main() {
   testWithoutContext('AndroidDevice stores the requested id', () {
@@ -202,6 +203,7 @@ flutter:
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      config: FakeConfig(),
     ).fromDirectory(fileSystem.currentDirectory);
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
 
@@ -215,6 +217,7 @@ flutter:
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      config: FakeConfig(),
     ).fromDirectory(fileSystem.currentDirectory);
 
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
@@ -228,6 +231,7 @@ flutter:
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      config: FakeConfig(),
     ).fromDirectory(fileSystem.currentDirectory);
 
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
@@ -337,6 +341,27 @@ flutter:
 
     expect(await device.emulatorId, isNull);
   });
+
+  testWithoutContext(
+    'AndroidConsole handles socket.done completing with a SocketException',
+    () async {
+      final doneCompleter = Completer<void>();
+      final socket = FakeWorkingAndroidConsoleSocket('dummyEmulatorId', done: doneCompleter.future);
+      final console = AndroidConsole(socket);
+      await console.connect();
+
+      doneCompleter.completeError(
+        const SocketException(
+          'Error event raised in event handler : error condition has been reset',
+          port: 0,
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(await console.getAvdName(), equals('dummyEmulatorId'));
+      console.destroy();
+    },
+  );
 
   testWithoutContext('AndroidDevice clearLogs does not crash', () async {
     final AndroidDevice device = setUpAndroidDevice(
@@ -801,7 +826,8 @@ const kAdbShellGetprop = '''
 /// A mock Android Console that presents a connection banner and responds to
 /// "avd name" requests with the supplied name.
 class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
-  FakeWorkingAndroidConsoleSocket(this.avdName) {
+  FakeWorkingAndroidConsoleSocket(this.avdName, {Future<void>? done})
+    : done = done ?? Completer<void>().future {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
     // it's sent alone to ensure both are handled.
@@ -810,6 +836,9 @@ class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
 
   final String avdName;
   final _controller = StreamController<String>();
+
+  @override
+  final Future<void> done;
 
   @override
   Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) =>
@@ -837,6 +866,9 @@ class FakeUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
   final _controller = StreamController<String>();
 
   @override
+  final Future<void> done = Completer<void>().future;
+
+  @override
   Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) =>
       _controller.stream as Stream<E>;
 
@@ -857,6 +889,9 @@ class FakeDisconnectingAndroidConsoleSocket extends Fake implements Socket {
   }
 
   final _controller = StreamController<String>();
+
+  @override
+  final Future<void> done = Completer<void>().future;
 
   @override
   Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) =>

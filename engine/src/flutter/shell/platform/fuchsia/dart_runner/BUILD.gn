@@ -13,6 +13,7 @@ import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
 template("runner_sources") {
   assert(defined(invoker.product), "runner_sources must define product")
+
   source_set(target_name) {
     forward_variables_from(invoker, [ "defines" ])
     sources = [
@@ -161,6 +162,7 @@ template("aot_runner_package") {
   if (invoker.product) {
     product_suffix = "_product"
   }
+
   fuchsia_archive(target_name) {
     deps = [
       ":dart_aot${product_suffix}_runner_bin",

@@ -9,7 +9,17 @@ import 'package:path/path.dart' as path;
 import '../run_command.dart';
 import '../utils.dart';
 
-Future<void> customerTestingRunner() async {
+// The DevTools tests build DevTools from source and take longer than the rest
+// of the registry combined, so they get their own shard.
+const String _devtoolsTestsGlob = 'flutter_devtools*.test';
+
+Future<void> customerTestingRunner() =>
+    _runCustomerTesting(<String>['--exclude=$_devtoolsTestsGlob']);
+
+Future<void> customerTestingDevtoolsRunner() =>
+    _runCustomerTesting(<String>['--include=$_devtoolsTestsGlob']);
+
+Future<void> _runCustomerTesting(List<String> ciArguments) async {
   printProgress('${green}Running customer testing$reset');
   await runCommand('git', const <String>[
     'fetch',
@@ -27,10 +37,9 @@ Future<void> customerTestingRunner() async {
   if (revision != null) {
     await runCommand('git', <String>['checkout', revision], workingDirectory: flutterRoot);
   }
-  final String winScript = path.join(flutterRoot, 'dev', 'customer_testing', 'ci.bat');
   await runCommand(
-    Platform.isWindows ? winScript : './ci.sh',
-    <String>[],
+    path.join(flutterRoot, 'dev', 'customer_testing', Platform.isWindows ? 'ci.bat' : 'ci.sh'),
+    ciArguments,
     workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
   );
 }

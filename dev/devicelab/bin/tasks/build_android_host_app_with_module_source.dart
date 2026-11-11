@@ -390,5 +390,5 @@ class ModuleTest {
 }
 
 Future<void> main() async {
-  await task(combine(<TaskFunction>[ModuleTest(gradleVersion: '9.3.1').call]));
+  await task(combine(<TaskFunction>[ModuleTest(gradleVersion: '9.5.0').call]));
 }

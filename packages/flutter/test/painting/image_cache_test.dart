@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -645,7 +644,7 @@ void main() {
 
     imageInfo.dispose();
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+  });
 
   test(
     'Image is obtained and disposed of properly for cache when listener is still active',
@@ -687,7 +686,6 @@ void main() {
       imageInfo.dispose();
       expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
     },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87442
   );
 
   test('clear does not leave pending images stuck', () async {

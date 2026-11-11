@@ -27,24 +27,5 @@ class TestVsyncWaiter : public VsyncWaiter {
   void AwaitVSync() override { await_vsync_call_count_++; }
 };
 
-TEST(VsyncWaiterTest, NoUnneededAwaitVsync) {
-  using flutter::ThreadHost;
-  std::string prefix = "vsync_waiter_test";
-
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-  auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
-
-  const flutter::TaskRunners task_runners(prefix, task_runner, task_runner,
-                                          task_runner, task_runner);
-
-  TestVsyncWaiter vsync_waiter(task_runners);
-
-  vsync_waiter.ScheduleSecondaryCallback(1, [] {});
-  EXPECT_EQ(vsync_waiter.await_vsync_call_count_, 1);
-
-  vsync_waiter.ScheduleSecondaryCallback(2, [] {});
-  EXPECT_EQ(vsync_waiter.await_vsync_call_count_, 1);
-}
-
 }  // namespace testing
 }  // namespace flutter

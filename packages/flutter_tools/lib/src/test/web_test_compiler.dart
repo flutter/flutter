@@ -5,13 +5,13 @@
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -20,7 +20,6 @@ import '../cache.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../dart/language_version.dart';
-import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
@@ -28,27 +27,9 @@ import 'test_config.dart';
 
 /// A web compiler for the test runner.
 class WebTestCompiler {
-  WebTestCompiler({
-    Artifacts? artifacts,
-    Config? config,
-    FileSystem? fileSystem,
-    Logger? logger,
-    Platform? platform,
-    ProcessManager? processManager,
-    ShutdownHooks? shutdownHooks,
-    ToolContext? toolContext,
-  }) : _toolContext =
-           toolContext ??
-           _FallbackToolContext(
-             artifacts: artifacts,
-             config: config,
-             fileSystem: fileSystem,
-             logger: logger,
-             platform: platform,
-             processManager: processManager,
-             shutdownHooks: shutdownHooks,
-           );
+  WebTestCompiler({required this._analytics, required this._toolContext});
 
+  final Analytics _analytics;
   final ToolContext _toolContext;
 
   Future<File> _generateTestEntrypoint({
@@ -122,6 +103,7 @@ class WebTestCompiler {
   }) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Cache cache,
       :Config config,
       :FileSystem fs,
       :Logger logger,
@@ -129,7 +111,7 @@ class WebTestCompiler {
       :ProcessManager processManager,
       :ShutdownHooks shutdownHooks,
     ) = _toolContext;
-    final LanguageVersion languageVersion = currentLanguageVersion(fs, Cache.flutterRoot!);
+    final LanguageVersion languageVersion = currentLanguageVersion(fs, cache.flutterRoot);
 
     final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
     final File testFile = await _generateTestEntrypoint(
@@ -143,7 +125,7 @@ class WebTestCompiler {
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       dartDefines: buildInfo.dartDefines,
       targetModel: TargetModel.dartdevc,
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
       fileSystem: fs,
       config: config,
     );
@@ -171,7 +153,14 @@ class WebTestCompiler {
       fs: fs,
       projectRootPath: projectDirectory.absolute.path,
     );
-    if (output == null || output.errorCount > 0) {
+    final bool compileFailed = output == null || output.errorCount > 0;
+    sendDdcCompileAnalytics(
+      analytics: _analytics,
+      deprecatedJsInterop: buildInfo.deprecatedJsInterop,
+      command: 'test',
+      succeeded: !compileFailed,
+    );
+    if (compileFailed) {
       throwToolExit('Failed to compile');
     }
     // Cache the output kernel file to speed up subsequent compiles.
@@ -195,6 +184,7 @@ class WebTestCompiler {
   }) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Cache cache,
       :FileSystem fs,
       :Logger logger,
       :ProcessManager processManager,
@@ -204,7 +194,7 @@ class WebTestCompiler {
       testFiles: testFiles,
       projectDirectory: projectDirectory,
       outputDirectory: outputDirectory,
-      languageVersion: currentLanguageVersion(fs, Cache.flutterRoot!),
+      languageVersion: currentLanguageVersion(fs, cache.flutterRoot),
     );
 
     final String platformBinariesPath = artifacts
@@ -244,57 +234,4 @@ class WebTestCompiler {
 
     return WebMemoryFS();
   }
-}
-
-// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
-// provide ToolContext directly. This fallback context delegates to globals.* to
-// maintain backwards compatibility with existing Google3 test runners.
-class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext({
-    this._artifacts,
-    this._config,
-    this._fileSystem,
-    this._logger,
-    this._platform,
-    this._processManager,
-    this._shutdownHooks,
-  });
-
-  final Artifacts? _artifacts;
-  final Config? _config;
-  final FileSystem? _fileSystem;
-  final Logger? _logger;
-  final Platform? _platform;
-  final ProcessManager? _processManager;
-  final ShutdownHooks? _shutdownHooks;
-
-  @override
-  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
-
-  @override
-  Config get config => _config ?? globals.config;
-
-  @override
-  FileSystem get fs => _fileSystem ?? globals.fs;
-
-  @override
-  Logger get logger => _logger ?? globals.logger;
-
-  @override
-  OperatingSystemUtils get os => globals.os;
-
-  @override
-  Platform get platform => _platform ?? globals.platform;
-
-  @override
-  ProcessManager get processManager => _processManager ?? globals.processManager;
-
-  @override
-  ProcessUtils get processUtils => globals.processUtils;
-
-  @override
-  ShutdownHooks get shutdownHooks => _shutdownHooks ?? globals.shutdownHooks;
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
