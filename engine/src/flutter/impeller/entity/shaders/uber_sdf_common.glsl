@@ -20,7 +20,7 @@ precision mediump float;
 ///
 /// Must match `UberSDFParameters::kAntialiasPixels`, which pads the drawn
 /// geometry to make room for it.
-const float kAntialiasPixels = 1.0;
+const float aa_pixels = 1.0;
 
 uniform FragInfo {
   // FragInfo fields are sorted by size (vec4 -> vec2 -> float) to optimize
@@ -384,7 +384,7 @@ void main() {
   float sdf = sdf_and_pixel_size.x;
   float pixel_size = sdf_and_pixel_size.y;
 
-  float alpha = SDFAlpha(sdf, pixel_size, kAntialiasPixels);
+  float alpha = SDFAlpha(sdf, pixel_size, aa_pixels);
   // Clamp alpha in case floating point precision errors cause it to be outside
   // [0.0, 1.0].
   alpha = clamp(alpha, 0.0, 1.0);
