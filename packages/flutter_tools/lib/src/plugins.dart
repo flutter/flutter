@@ -71,6 +71,7 @@ class Plugin {
     List<String> dependencies, {
     required bool isDevDependency,
     Set<String>? appDependencies,
+    Iterable<String> extraPlatformKeys = const <String>[],
   }) {
     final ParseResult<Plugin> result = _parseFromYaml(
       name,
@@ -80,6 +81,7 @@ class Plugin {
       dependencies,
       isDevDependency: isDevDependency,
       appDependencies: appDependencies,
+      extraPlatformKeys: extraPlatformKeys,
     );
     switch (result) {
       case ParseResultPass(value: final Plugin plugin):
@@ -97,6 +99,7 @@ class Plugin {
     List<String> dependencies, {
     required bool isDevDependency,
     Set<String>? appDependencies,
+    Iterable<String> extraPlatformKeys = const <String>[],
   }) {
     if (pluginYaml == null) {
       return .fail(<String>['Invalid "plugin" specification.']);
@@ -137,6 +140,7 @@ class Plugin {
         dependencies,
         isDirectDependency,
         isDevDependency: isDevDependency,
+        extraPlatformKeys: extraPlatformKeys,
       );
     }
     return _parseLegacyYaml(
@@ -158,6 +162,7 @@ class Plugin {
     List<String> dependencies,
     bool isDirectDependency, {
     required bool isDevDependency,
+    Iterable<String> extraPlatformKeys = const <String>[],
   }) {
     final Object? platformsValue = pluginYaml['platforms'];
     if (platformsValue is! YamlMap?) {
@@ -244,8 +249,8 @@ class Plugin {
       WindowsPlugin.kConfigKey,
       (YamlMap yaml) => WindowsPlugin.parseFromYaml(name, yaml),
     );
-    for (final Object? key in platformsYaml.keys) {
-      if (key is! String || _builtInPlatformKeys.contains(key) || platformsYaml[key] is! YamlMap) {
+    for (final String key in extraPlatformKeys.toSet()) {
+      if (builtInPlatformKeys.contains(key) || platformsYaml[key] == null) {
         continue;
       }
       if (!_customPlatformKeyPattern.hasMatch(key)) {
@@ -381,7 +386,8 @@ class Plugin {
     return YamlMap.wrap(map);
   }
 
-  static const _builtInPlatformKeys = <String>{
+  /// Built-in platform keys under `flutter.plugin.platforms` in `pubspec.yaml`.
+  static const builtInPlatformKeys = <String>{
     AndroidPlugin.kConfigKey,
     IOSPlugin.kConfigKey,
     LinuxPlugin.kConfigKey,
@@ -390,9 +396,17 @@ class Plugin {
     WindowsPlugin.kConfigKey,
   };
 
+  /// Platform keys under `flutter.plugin.platforms` must be lowercase ASCII
+  /// identifiers (`a-z`, `0-9`, `_`) matching `pubspec.yaml` platform stanza
+  /// conventions, and because custom keys are interpolated into generated
+  /// Dart plugin registrant source files.
   static final _customPlatformKeyPattern = RegExp(r'^[a-z][a-z0-9_]*$');
 
-  static List<String> validatePluginYaml(YamlMap? yaml, {required String packageName}) {
+  static List<String> validatePluginYaml(
+    YamlMap? yaml, {
+    required String packageName,
+    Iterable<String> extraPlatformKeys = const <String>[],
+  }) {
     final ParseResult<Plugin> result = _parseFromYaml(
       packageName,
       '',
@@ -400,6 +414,7 @@ class Plugin {
       null,
       const <String>[],
       isDevDependency: false,
+      extraPlatformKeys: extraPlatformKeys,
     );
     return switch (result) {
       ParseResultFail(:final List<String> errors) => errors,

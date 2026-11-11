@@ -142,13 +142,13 @@ base class ExtensionBuildManager {
         return ExtensionNativeAssetsConfig.fromJson(resultMap);
       }
       throwToolExit(
-        'Invalid native assets config response from extension for target "$targetName".',
+        'Invalid native assets config response from extension "${connection.extensionName}" for target "$targetName".',
       );
     } on ToolExit {
       rethrow;
     } on Object catch (e) {
       throwToolExit(
-        'Failed to resolve native assets config from extension for target "$targetName": $e',
+        'Failed to resolve native assets config from extension "${connection.extensionName}" for target "$targetName": $e',
       );
     }
   }
@@ -298,6 +298,7 @@ base class ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    String? pluginPlatformKey,
   }) {
     return _executeBuildRpc(
       buildDir: buildDir,
@@ -311,6 +312,7 @@ base class ExtensionBuildManager {
       flutterRoot: flutterRoot,
       mainPath: mainPath,
       outputDir: outputDir,
+      pluginPlatformKey: pluginPlatformKey,
       projectRoot: projectRoot,
       resolvedArtifacts: resolvedArtifacts,
       rpcMethod: BuildService.assembleMethod,
@@ -332,6 +334,7 @@ base class ExtensionBuildManager {
     required String targetKind,
     required String targetName,
     Uri? buildDir,
+    String? pluginPlatformKey,
   }) async {
     _validateRequestUris(
       buildDir: buildDir,
@@ -374,20 +377,14 @@ base class ExtensionBuildManager {
       outputDir: outputDir,
       pluginPlatformKey: buildDir == null
           ? _buildTargetsByName[targetName]?.pluginPlatformKey
-          : null,
+          : pluginPlatformKey,
       projectRoot: projectRoot,
       resolvedArtifacts: resolvedArtifacts,
       targetName: targetName,
     );
 
     try {
-      final Object? result = await connection.sendRequest(
-        rpcMethod,
-        params: params,
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
-        timeout: null,
-      );
+      final Object? result = await connection.sendRequest(rpcMethod, params: params, timeout: null);
       if (result case final Map<String, Object?> resultMap) {
         return ExtensionBuildResult.fromJson(resultMap);
       }
@@ -466,6 +463,7 @@ base class ExtensionBuildManager {
     final FlutterProject project = _projectFactory.fromDirectory(projectDir);
     final List<Plugin> foundPlugins = await findPlugins(
       project,
+      extraPlatformKeys: <String>{pluginPlatformKey},
       logger: _logger,
       throwOnError: false,
     );

@@ -60,6 +60,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    String? pluginPlatformKey,
   }) async {
     invokedBuildDir = buildDir;
     invokedBuildMode = buildMode;

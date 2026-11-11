@@ -87,11 +87,15 @@ enum BuildMode {
 /// Representation of a Flutter plugin resolved for an extension target platform.
 @immutable
 class ExtensionPlugin {
-  const ExtensionPlugin({
+  ExtensionPlugin({
     required this.name,
     required this.path,
     this.configuration = const <String, Object?>{},
-  });
+  }) : assert(name.isNotEmpty, 'Plugin name cannot be empty.'),
+       assert(
+         path.isValidDirectoryUri,
+         'Plugin path must be an absolute file: directory URI ending with "/": $path',
+       );
 
   /// Deserializes an [ExtensionPlugin] from a JSON-serializable map.
   factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
@@ -100,20 +104,22 @@ class ExtensionPlugin {
       throw const FormatException('Missing or invalid "$nameKey" for ExtensionPlugin.');
     }
     final Uri path = json.directoryUri(pathKey);
-    final Map<String, Object?> configuration = json.optionalField<Map<String, Object?>>(
+    final Map<String, Object?> configuration = json.requiredField<Map<String, Object?>>(
       configurationKey,
-      defaultValue: const <String, Object?>{},
     );
     return ExtensionPlugin(name: name, path: path, configuration: configuration);
   }
 
   /// Map key for [configuration].
+  @visibleForTesting
   static const String configurationKey = 'configuration';
 
   /// Map key for [name].
+  @visibleForTesting
   static const String nameKey = 'name';
 
   /// Map key for [path].
+  @visibleForTesting
   static const String pathKey = 'path';
 
   /// Deserializes a list of [ExtensionPlugin] objects from RPC parameter data.
@@ -124,12 +130,14 @@ class ExtensionPlugin {
           switch (item) {
             final Map<String, Object?> map => ExtensionPlugin.fromJson(map),
             final Object? invalid => throw FormatException(
-              'Invalid entry in ExtensionPlugin list: $invalid',
+              'Invalid ExtensionPlugin list element: expected Map<String, Object?>, got ${invalid.runtimeType}.',
             ),
           },
       ];
     }
-    throw FormatException('Invalid ExtensionPlugin list: $rpcResult');
+    throw FormatException(
+      'Invalid ExtensionPlugin list: expected List<Object?>, got ${rpcResult.runtimeType}.',
+    );
   }
 
   /// The package name of the plugin.
@@ -228,6 +236,7 @@ class ExtensionBuildTarget {
   static const String outputDirKey = 'outputDir';
 
   /// Map key for [pluginPlatformKey].
+  @visibleForTesting
   static const String pluginPlatformKeyKey = 'pluginPlatformKey';
 
   /// Map key for [targetPlatform].

@@ -719,6 +719,30 @@ void main() {
         throwsFormatException,
       );
       expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'file:///usr/bin/',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'file:///usr/bin/llvm-ar?query=1',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig(
+          ar: Uri.directory('/usr/bin'),
+          cc: Uri.file('/usr/bin/clang'),
+          ld: Uri.file('/usr/bin/ld.lld'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
         () => ExtensionCCompilerConfig(
           ar: Uri.file('/usr/bin/llvm-ar'),
           cc: Uri.file('/usr/bin/clang'),
@@ -787,15 +811,32 @@ void main() {
       expect(list, equals(<ExtensionPlugin>[plugin]));
       expect(() => ExtensionPlugin.listFromJson(null), throwsFormatException);
       expect(() => ExtensionPlugin.listFromJson('invalid'), throwsFormatException);
-      expect(() => ExtensionPlugin.listFromJson(<Object?>['not-a-map']), throwsFormatException);
+      expect(
+        () => ExtensionPlugin.listFromJson(<Object?>['secret-payload']),
+        throwsA(
+          isA<FormatException>().having(
+            (FormatException e) => e.message,
+            'message',
+            allOf(contains('got String'), isNot(contains('secret-payload'))),
+          ),
+        ),
+      );
     });
 
-    test('fromJson throws FormatException on missing or invalid fields', () {
+    test('fromJson and constructor validate required fields and directory URI', () {
       expect(() => ExtensionPlugin.fromJson(const <String, Object?>{}), throwsFormatException);
       expect(
         () => ExtensionPlugin.fromJson(const <String, Object?>{
           'name': 'my_plugin',
           'path': 'file:///pub-cache/my_plugin',
+          'configuration': <String, Object?>{},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPlugin.fromJson(const <String, Object?>{
+          'name': 'my_plugin',
+          'path': 'file:///pub-cache/my_plugin/',
         }),
         throwsFormatException,
       );
@@ -803,6 +844,7 @@ void main() {
         () => ExtensionPlugin.fromJson(const <String, Object?>{
           'name': 'my_plugin',
           'path': 'relative/my_plugin/',
+          'configuration': <String, Object?>{},
         }),
         throwsFormatException,
       );
@@ -813,6 +855,14 @@ void main() {
           'configuration': 'not-a-map',
         }),
         throwsFormatException,
+      );
+      expect(
+        () => ExtensionPlugin(name: '', path: Uri.directory('/pub-cache/my_plugin')),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionPlugin(name: 'my_plugin', path: Uri.file('/pub-cache/my_plugin')),
+        throwsA(isA<AssertionError>()),
       );
     });
   });

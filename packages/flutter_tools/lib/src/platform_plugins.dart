@@ -687,8 +687,6 @@ class CustomPlatformPlugin extends PluginPlatform implements NativePlugin, DartP
   @override
   bool hasFfi() => configuration[kFfiPlugin] == true;
 
-  bool hasDart() => dartPluginClass != null || configuration[kDartPluginClass] is String;
-
   @override
   Map<String, Object?> toMap({required FileSystem fileSystem}) => <String, Object?>{
     ...configuration,

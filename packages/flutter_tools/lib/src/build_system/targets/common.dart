@@ -175,15 +175,6 @@ class KernelSnapshot extends Target {
   static const dillName = 'app.dill';
   static const recordedUsesFileName = 'recorded_uses.json';
 
-  static const _builtInPlatformKeys = <String>{
-    'android',
-    'ios',
-    'linux',
-    'macos',
-    'web',
-    'windows',
-  };
-
   /// The content of an empty recorded uses file.
   ///
   /// We always write this file even if no resources are recorded to prevent
@@ -303,12 +294,7 @@ class KernelSnapshot extends Target {
     final String? targetOS = customTargetOs != null
         ? (OS.values.contains(customTargetOs) ? customTargetOs.name : null)
         : switch (targetPlatform.os) {
-            .fuchsia => 'fuchsia',
-            .android => 'android',
-            .macos => 'macos',
-            .ios => 'ios',
-            .linux => 'linux',
-            .windows => 'windows',
+            .fuchsia || .android || .macos || .ios || .linux || .windows => targetPlatform.os.name,
             .tester || .web => null,
             .unsupported => TargetPlatform.throwUnsupportedTarget(),
           };
@@ -322,14 +308,7 @@ class KernelSnapshot extends Target {
 
     final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
     await _addFlavorToDartDefines(dartDefines, environment, targetPlatform);
-    final String? rawPluginPlatformKey = environment.defines[kExtensionPluginPlatformKey]?.trim();
-    final String? customPlatformKey =
-        (rawPluginPlatformKey != null && rawPluginPlatformKey.isNotEmpty)
-        ? rawPluginPlatformKey
-        : environment.defines[kExtensionTargetOs]?.trim().toLowerCase();
-    if (customPlatformKey != null &&
-        customPlatformKey.isNotEmpty &&
-        !_builtInPlatformKeys.contains(customPlatformKey)) {
+    if (resolveCustomPluginPlatformKey(environment.defines) case final String customPlatformKey) {
       dartDefines.removeWhere(
         (String define) => define.startsWith('$kFlutterCustomPlatformDartDefine='),
       );

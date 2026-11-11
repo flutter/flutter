@@ -11,8 +11,25 @@ import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../isolated/mustache_template.dart';
+import '../../plugins.dart' show Plugin;
 import '../../project.dart';
 import '../build_system.dart';
+
+/// Resolves the custom extension plugin platform key from [defines], or returns
+/// `null` if none is configured or if the key matches a built-in Flutter
+/// platform.
+String? resolveCustomPluginPlatformKey(Map<String, String> defines) {
+  final String? rawPluginPlatformKey = defines[kExtensionPluginPlatformKey]?.trim();
+  final String? customPlatformKey = rawPluginPlatformKey != null && rawPluginPlatformKey.isNotEmpty
+      ? rawPluginPlatformKey
+      : defines[kExtensionTargetOs]?.trim().toLowerCase();
+  if (customPlatformKey == null ||
+      customPlatformKey.isEmpty ||
+      Plugin.builtInPlatformKeys.contains(customPlatformKey)) {
+    return null;
+  }
+  return customPlatformKey;
+}
 
 /// Generates a new `./dart_tool/flutter_build/dart_plugin_registrant.dart`
 /// based on the current dependency map in `pubspec.lock`.
@@ -28,15 +45,6 @@ class DartPluginRegistrantTarget extends Target {
     FlutterProject project, {
     this.templateRenderer = const MustacheTemplateRenderer(),
   }) : _project = project;
-
-  static const _builtInPlatformKeys = <String>{
-    'android',
-    'ios',
-    'linux',
-    'macos',
-    'web',
-    'windows',
-  };
 
   final FlutterProject? _project;
   final TemplateRenderer templateRenderer;
@@ -55,17 +63,8 @@ class DartPluginRegistrantTarget extends Target {
     final String targetFilePath =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFilePath);
-    final String? rawPluginPlatformKey = environment.defines[kExtensionPluginPlatformKey]?.trim();
-    final String? customPlatformKey =
-        (rawPluginPlatformKey != null && rawPluginPlatformKey.isNotEmpty)
-        ? rawPluginPlatformKey
-        : environment.defines[kExtensionTargetOs]?.trim().toLowerCase();
-    final extraPlatformKeys = <String>{
-      if (customPlatformKey != null &&
-          customPlatformKey.isNotEmpty &&
-          !_builtInPlatformKeys.contains(customPlatformKey))
-        customPlatformKey,
-    };
+    final String? customPlatformKey = resolveCustomPluginPlatformKey(environment.defines);
+    final extraPlatformKeys = <String>{?customPlatformKey};
 
     await generateMainDartWithPluginRegistrant(
       project,

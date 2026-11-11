@@ -139,6 +139,7 @@ class ExtensionTarget extends Target {
       flutterRoot: environment.flutterRootDir.uri,
       mainPath: mainPath,
       outputDir: outputDir.uri,
+      pluginPlatformKey: defines[kExtensionPluginPlatformKey],
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
       targetName: assembleTarget.name,

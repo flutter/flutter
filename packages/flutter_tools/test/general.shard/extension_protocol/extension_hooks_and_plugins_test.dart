@@ -12,6 +12,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart' hide BuildMode;
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -22,7 +23,6 @@ import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
@@ -48,7 +48,6 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
-import '../../src/throwing_pub.dart';
 import '../isolated/fake_native_assets_build_runner.dart';
 
 final class _ThrowingNativeAssetsBuildTarget extends BuildTarget {
@@ -84,6 +83,7 @@ void _throwingNativeAssetsExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_ThrowingNativeAssetsBuildService()],
+    extensionName: 'failing_hooks_extension',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -127,6 +127,25 @@ final class _PluginCapturingBuildTarget extends BuildTarget {
   }
 }
 
+final class _PluginCapturingAssembleTarget extends AssembleTarget {
+  const _PluginCapturingAssembleTarget(this._pluginsPort)
+    : super(
+        description: 'Custom assemble target that captures plugins.',
+        targetPlatform: 'custom-arm64',
+      );
+
+  final SendPort _pluginsPort;
+
+  @override
+  String get name => 'custom-pkg-assemble';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
+    _pluginsPort.send(context.plugins);
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
 final class _PluginCapturingBuildService extends BuildService {
   _PluginCapturingBuildService(this._pluginsPort);
 
@@ -134,6 +153,11 @@ final class _PluginCapturingBuildService extends BuildService {
 
   @override
   List<BuildTarget> get buildTargets => <BuildTarget>[_PluginCapturingBuildTarget(_pluginsPort)];
+
+  @override
+  List<AssembleTarget> get assembleTargets => <AssembleTarget>[
+    _PluginCapturingAssembleTarget(_pluginsPort),
+  ];
 }
 
 final class _PluginCapturingDeviceService extends DeviceService {
@@ -221,6 +245,11 @@ platforms:
         pluginYaml,
         null,
         const <String>[],
+        extraPlatformKeys: const <String>{
+          'custom_embedder',
+          'custom_federated',
+          'custom_platform_b',
+        },
         isDevDependency: false,
       );
 
@@ -232,7 +261,7 @@ platforms:
       expect(customPlugin.platformKey, 'custom_embedder');
       expect(customPlugin.hasMethodChannel(), isTrue);
       expect(customPlugin.hasFfi(), isTrue);
-      expect(customPlugin.hasDart(), isTrue);
+      expect(customPlugin.dartPluginClass, 'CustomEmbedderDartPlugin');
       expect(customPlugin.configuration['pluginClass'], 'CustomEmbedderPlugin');
       expect(
         customPlugin.configuration['nested'],
@@ -248,7 +277,33 @@ platforms:
       );
     });
 
+    testWithoutContext('Plugin.fromYaml ignores non-built-in platform stanzas by default when extraPlatformKeys is omitted', () {
+      final pluginYaml = loadYaml('''
+platforms:
+  android:
+    package: com.example.my_plugin
+    pluginClass: MyAndroidPlugin
+  bad-hyphen-key:
+    pluginClass: Bad;Class
+  empty_custom_map: {}
+  scalar_custom_entry: 123
+''') as YamlMap;
+
+      final plugin = Plugin.fromYaml(
+        'my_plugin',
+        '/packages/my_plugin',
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+      );
+
+      expect(plugin.platforms.keys, equals(<String>['android']));
+      expect(plugin.defaultPackagePlatforms, isEmpty);
+    });
+
     testWithoutContext('resolvePluginImplementationsForPlatform and resolveExtensionPluginsForPlatform resolve custom platform plugins without affecting built-in resolution', () {
+      const extraKeys = <String>{'custom_embedder'};
       final appFacingPlugin = Plugin.fromYaml(
         'url_launcher',
         '/pub/url_launcher',
@@ -260,6 +315,7 @@ platforms:
         null,
         const <String>['url_launcher_custom'],
         appDependencies: const <String>{'url_launcher'},
+        extraPlatformKeys: extraKeys,
         isDevDependency: false,
       );
 
@@ -275,6 +331,7 @@ platforms:
         null,
         const <String>[],
         appDependencies: const <String>{'url_launcher'},
+        extraPlatformKeys: extraKeys,
         isDevDependency: false,
       );
 
@@ -290,6 +347,7 @@ platforms:
         null,
         const <String>[],
         appDependencies: const <String>{'android_only'},
+        extraPlatformKeys: extraKeys,
         isDevDependency: false,
       );
 
@@ -325,72 +383,68 @@ platforms:
       );
     });
 
-    testWithoutContext(
-      'Plugin.fromYaml rejects invalid custom platform keys and specifications',
-      () {
-        expect(
-          () => Plugin.fromYaml(
-            'my_plugin',
-            '/packages/my_plugin',
-            loadYaml('''
+    testWithoutContext('Plugin.fromYaml rejects invalid custom platform keys and specifications when requested in extraPlatformKeys', () {
+      expect(
+        () => Plugin.fromYaml(
+          'my_plugin',
+          '/packages/my_plugin',
+          loadYaml('''
 platforms:
   bad-key:
     pluginClass: GoodClass
 ''') as YamlMap,
-            null,
-            const <String>[],
-            isDevDependency: false,
-          ),
-          throwsToolExit(message: 'Invalid "bad-key" plugin specification.'),
-        );
+          null,
+          const <String>[],
+          extraPlatformKeys: const <String>{'bad-key'},
+          isDevDependency: false,
+        ),
+        throwsToolExit(message: 'Invalid "bad-key" plugin specification.'),
+      );
 
-        expect(
-          () => Plugin.fromYaml(
-            'my_plugin',
-            '/packages/my_plugin',
-            loadYaml('''
+      expect(
+        () => Plugin.fromYaml(
+          'my_plugin',
+          '/packages/my_plugin',
+          loadYaml('''
 platforms:
   custom_embedder:
     pluginClass: Bad;Class
 ''') as YamlMap,
-            null,
-            const <String>[],
-            isDevDependency: false,
-          ),
-          throwsToolExit(
-            message:
-                'Invalid "custom_embedder" plugin specification: '
-                'the "pluginClass" field must be a valid identifier',
-          ),
-        );
+          null,
+          const <String>[],
+          extraPlatformKeys: const <String>{'custom_embedder'},
+          isDevDependency: false,
+        ),
+        throwsToolExit(
+          message:
+              'Invalid "custom_embedder" plugin specification: '
+              'the "pluginClass" field must be a valid identifier',
+        ),
+      );
 
-        expect(
-          () => Plugin.fromYaml(
-            'my_plugin',
-            '/packages/my_plugin',
-            loadYaml('''
+      expect(
+        () => Plugin.fromYaml(
+          'my_plugin',
+          '/packages/my_plugin',
+          loadYaml('''
 platforms:
   custom_embedder:
     pluginClass: GoodClass
     dartFileName: src/custom.dart
 ''') as YamlMap,
-            null,
-            const <String>[],
-            isDevDependency: false,
-          ),
-          throwsToolExit(
-            message: '"dartFileName" cannot be specified without "dartPluginClass" in custom_embedder platform of plugin "my_plugin"',
-          ),
-        );
-      },
-    );
+          null,
+          const <String>[],
+          extraPlatformKeys: const <String>{'custom_embedder'},
+          isDevDependency: false,
+        ),
+        throwsToolExit(
+          message: '"dartFileName" cannot be specified without "dartPluginClass" in custom_embedder platform of plugin "my_plugin"',
+        ),
+      );
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'DartPluginRegistrantTarget supports custom platform plugins when extension defines are set',
-      overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
-        Pub: ThrowingPub.new,
-      },
       () async {
         final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
         final environment = Environment.test(
@@ -660,7 +714,7 @@ environment:
             targetName: 'failing-hooks-target',
           ),
           throwsToolExit(
-            message: 'Failed to resolve native assets config from extension for target "failing-hooks-target"',
+            message: 'Failed to resolve native assets config from extension "failing_hooks_extension" for target "failing-hooks-target"',
           ),
         );
       },
@@ -712,7 +766,12 @@ environment:
         final subCommand = ExtensionBuildSubCommand(
           buildManager: buildManager,
           target: targets.single,
-          toolContext: FakeToolContext(cache: cache, fs: fileSystem, logger: logger),
+          toolContext: FakeToolContext(
+            cache: cache,
+            fs: fileSystem,
+            logger: logger,
+            signals: FakeSignals(),
+          ),
           verboseHelp: false,
         );
         final FlutterCommandResult subCommandResult = await subCommand.runCommand();
@@ -753,7 +812,7 @@ environment:
       },
     );
 
-    testUsingContext('AssembleCommand resolves nativeAssetsConfig and environmentDefinesForTarget for custom extension targetPlatform', () async {
+    testWithoutContext('AssembleCommand resolves nativeAssetsConfig, environmentDefinesForTarget, and assemble target plugins for custom extension targetPlatform', () async {
       final (
         :ExtensionBuildManager buildManager,
         :List<ExtensionPlugin> expectedCustomPlugins,
@@ -764,19 +823,23 @@ environment:
       ) = setUpCustomPluginProject();
 
       Environment? capturedEnvironment;
-      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        capturedEnvironment = environment;
-      });
       final cache = FakeCache(fileSystem: fileSystem, flutterRoot: '/flutter');
       final assembleCommand = AssembleCommand(
         androidContext: FakeAndroidContext(),
-        buildSystem: buildSystem,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          capturedEnvironment = environment;
+        }),
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
-        toolContext: FakeToolContext(cache: cache, fs: fileSystem, logger: logger),
+        toolContext: FakeToolContext(
+          cache: cache,
+          fs: fileSystem,
+          logger: logger,
+          signals: FakeSignals(),
+        ),
         xcode: null,
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(assembleCommand);
@@ -803,6 +866,38 @@ environment:
         '/opt/custom-sdk/llvm/bin/ld.lld',
       );
       expect(capturedEnvironment!.defines[kExtensionPluginPlatformKey], 'custom_os');
+
+      final buildSystem = FlutterBuildSystem(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+      );
+      final realAssembleCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
+        buildSystem: buildSystem,
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        toolContext: FakeToolContext(
+          cache: cache,
+          fs: fileSystem,
+          logger: logger,
+          signals: FakeSignals(),
+        ),
+        xcode: null,
+      );
+      final CommandRunner<void> realAssembleRunner = createTestCommandRunner(realAssembleCommand);
+      await realAssembleRunner.run(<String>[
+        'assemble',
+        '--output=/project/build/custom_pkg_assemble',
+        '-dTargetPlatform=custom-arm64',
+        '-dBuildMode=release',
+        'custom-pkg-assemble',
+      ]);
+      // First event is resolveNativeAssetsConfig, second is custom-pkg-assemble.build(context).
+      expect(await pluginsEvents.moveNext(), isTrue);
+      expect(pluginsEvents.current, equals(expectedCustomPlugins));
+      expect(await pluginsEvents.moveNext(), isTrue);
+      expect(pluginsEvents.current, equals(expectedCustomPlugins));
     });
   });
 
@@ -917,56 +1012,47 @@ environment:
       },
     );
 
-    testUsingContext(
-      'CopyAssets includes NativeAssetsManifest.json when present',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-      () async {
-        final Directory projectDir = fileSystem.currentDirectory;
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+    testWithoutContext('CopyAssets includes NativeAssetsManifest.json when present', () async {
+      final Directory projectDir = fileSystem.currentDirectory;
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: test_app
 environment:
   sdk: ^3.7.0
 ''');
-        writePackageConfigFiles(directory: projectDir, mainLibName: 'test_app');
+      writePackageConfigFiles(directory: projectDir, mainLibName: 'test_app');
 
-        final environment = Environment.test(
-          projectDir,
-          artifacts: artifacts,
-          defines: <String, String>{
-            kBuildMode: BuildMode.debug.cliName,
-            kTargetPlatform: 'custom-embedder-arm64',
-            kExtensionTargetOs: 'linux',
-          },
-          fileSystem: fileSystem,
-          inputs: <String, String>{},
-          logger: logger,
-          processManager: FakeProcessManager.any(),
-        );
-        environment.buildDir.createSync(recursive: true);
-        environment.buildDir
-            .childFile(InstallCodeAssets.nativeAssetsFilename)
-            .writeAsStringSync('{"format-version":[1,0,0],"native-assets":{}}');
+      final environment = Environment.test(
+        projectDir,
+        artifacts: artifacts,
+        defines: <String, String>{
+          kBuildMode: BuildMode.debug.cliName,
+          kTargetPlatform: 'custom-embedder-arm64',
+          kExtensionTargetOs: 'linux',
+        },
+        fileSystem: fileSystem,
+        inputs: <String, String>{},
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+      );
+      environment.buildDir.createSync(recursive: true);
+      environment.buildDir
+          .childFile(InstallCodeAssets.nativeAssetsFilename)
+          .writeAsStringSync('{"format-version":[1,0,0],"native-assets":{}}');
 
-        await const CopyAssets().build(environment);
+      await const CopyAssets().build(environment);
 
-        final File bundledManifest = environment.buildDir
-            .childDirectory('flutter_assets')
-            .childFile('NativeAssetsManifest.json');
-        expect(bundledManifest, exists);
-        expect(bundledManifest.readAsStringSync(), '{"format-version":[1,0,0],"native-assets":{}}');
-      },
-    );
+      final File bundledManifest = environment.buildDir
+          .childDirectory('flutter_assets')
+          .childFile('NativeAssetsManifest.json');
+      expect(bundledManifest, exists);
+      expect(bundledManifest.readAsStringSync(), '{"format-version":[1,0,0],"native-assets":{}}');
+    });
 
     testWithoutContext(
       'KernelSnapshot resolves targetOS from kExtensionTargetOs for custom kTargetPlatform',
       () async {
         const boundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
-        fileSystem.file('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
         final processManager = FakeProcessManager.empty();
         final environment = Environment.test(
           fileSystem.currentDirectory,
@@ -1013,7 +1099,7 @@ environment:
               '$build/kernel_snapshot_program.d',
               '--verbosity=error',
               '--recorded-uses=$build/recorded_uses.json',
-              'file:///lib/main.dart',
+              'package:my_app/main.dart',
             ],
             stdout: 'result $boundaryKey\n$boundaryKey\n$boundaryKey $build/app.dill 0\n',
             onRun: (_) {
@@ -1164,9 +1250,7 @@ environment:
 
     testWithoutContext('KernelSnapshot omits --target-os for custom OS platforms', () async {
       const boundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       final processManager = FakeProcessManager.empty();
       final environment = Environment.test(
         fileSystem.currentDirectory,
@@ -1210,7 +1294,7 @@ environment:
             '$build/kernel_snapshot_program.d',
             '--verbosity=error',
             '--recorded-uses=$build/recorded_uses.json',
-            'file:///lib/main.dart',
+            'package:my_app/main.dart',
           ],
           stdout: 'result $boundaryKey\n$boundaryKey\n$boundaryKey $build/app.dill 0\n',
           onRun: (_) {

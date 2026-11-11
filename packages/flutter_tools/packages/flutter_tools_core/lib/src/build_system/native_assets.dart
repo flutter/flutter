@@ -22,7 +22,14 @@ class ExtensionCCompilerConfig {
     required this.ld,
     this.envScript,
     this.envScriptArgs = const <String>[],
-  }) : assert(
+  }) : assert(ar.isValidFileUri, 'ar must be an absolute file: URI: $ar'),
+       assert(cc.isValidFileUri, 'cc must be an absolute file: URI: $cc'),
+       assert(ld.isValidFileUri, 'ld must be an absolute file: URI: $ld'),
+       assert(
+         envScript == null || envScript.isValidFileUri,
+         'envScript must be an absolute file: URI: $envScript',
+       ),
+       assert(
          envScript != null || envScriptArgs.isEmpty,
          'Cannot provide envScriptArgs without envScript.',
        );
@@ -37,36 +44,41 @@ class ExtensionCCompilerConfig {
       );
     }
     return ExtensionCCompilerConfig(
-      ar: _parseAbsoluteUri(json.requiredField<String>(arKey), arKey),
-      cc: _parseAbsoluteUri(json.requiredField<String>(ccKey), ccKey),
-      ld: _parseAbsoluteUri(json.requiredField<String>(ldKey), ldKey),
-      envScript: rawEnvScript != null ? _parseAbsoluteUri(rawEnvScript, envScriptKey) : null,
+      ar: _parseFileUri(json.requiredField<String>(arKey), arKey),
+      cc: _parseFileUri(json.requiredField<String>(ccKey), ccKey),
+      ld: _parseFileUri(json.requiredField<String>(ldKey), ldKey),
+      envScript: rawEnvScript != null ? _parseFileUri(rawEnvScript, envScriptKey) : null,
       envScriptArgs: envScriptArgs,
     );
   }
 
   /// Map key for [ar].
+  @visibleForTesting
   static const String arKey = 'ar';
 
   /// Map key for [cc].
+  @visibleForTesting
   static const String ccKey = 'cc';
 
   /// Map key for [envScriptArgs].
+  @visibleForTesting
   static const String envScriptArgsKey = 'envScriptArgs';
 
   /// Map key for [envScript].
+  @visibleForTesting
   static const String envScriptKey = 'envScript';
 
   /// Map key for [ld].
+  @visibleForTesting
   static const String ldKey = 'ld';
 
-  /// Absolute URI to the archiver (`ar`) executable.
+  /// Absolute `file:` URI to the archiver (`ar`) executable.
   final Uri ar;
 
-  /// Absolute URI to the C compiler (`cc`) executable.
+  /// Absolute `file:` URI to the C compiler (`cc`) executable.
   final Uri cc;
 
-  /// Absolute URI to the linker (`ld`) executable.
+  /// Absolute `file:` URI to the linker (`ld`) executable.
   final Uri ld;
 
   /// Optional absolute `file:` URI to a Windows developer command prompt
@@ -76,17 +88,14 @@ class ExtensionCCompilerConfig {
   /// Arguments passed to [envScript] on Windows.
   final List<String> envScriptArgs;
 
-  static Uri _parseAbsoluteUri(String rawValue, String fieldName) {
-    if (rawValue.isEmpty) {
-      throw FormatException(
-        'Missing or invalid "$fieldName" for ExtensionCCompilerConfig: $rawValue',
-      );
-    }
+  static Uri _parseFileUri(String rawValue, String fieldName) {
     final Uri? uri = Uri.tryParse(rawValue);
-    if (uri == null || !uri.isScheme('file') || !uri.hasAbsolutePath) {
-      throw FormatException('"$fieldName" must be an absolute file:// URI: $rawValue');
+    if (uri != null && uri.isValidFileUri) {
+      return uri;
     }
-    return uri;
+    throw FormatException(
+      'Invalid "$fieldName" in ExtensionCCompilerConfig: expected an absolute file: URI.',
+    );
   }
 
   /// Serializes the compiler configuration to a JSON-serializable map.
@@ -165,12 +174,15 @@ class ExtensionNativeAssetsConfig {
   }
 
   /// Map key for [cCompilerConfig].
+  @visibleForTesting
   static const String cCompilerConfigKey = 'cCompilerConfig';
 
   /// Map key for [targetArchitecture].
+  @visibleForTesting
   static const String targetArchitectureKey = 'targetArchitecture';
 
   /// Map key for [targetOs].
+  @visibleForTesting
   static const String targetOsKey = 'targetOs';
 
   /// Environment define key (`-dExtensionTargetOs=...`) for [targetOs].

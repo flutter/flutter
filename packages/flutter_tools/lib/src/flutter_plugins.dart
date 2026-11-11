@@ -113,6 +113,7 @@ Future<Plugin?> _pluginFromPackage(
   required FileSystem fileSystem,
   required bool isDevDependency,
   required Logger logger,
+  Iterable<String> extraPlatformKeys = const <String>[],
   PubspecCache? pubspecCache,
 }) async {
   YamlMap? pubspec;
@@ -158,6 +159,7 @@ Future<Plugin?> _pluginFromPackage(
     flutterConstraint,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     appDependencies: appDependencies,
+    extraPlatformKeys: extraPlatformKeys,
     isDevDependency: isDevDependency,
   );
 }
@@ -168,6 +170,7 @@ Future<Plugin?> _pluginFromPackage(
 Future<List<Plugin>> findPlugins(
   FlutterProject project, {
   required Logger logger,
+  Iterable<String> extraPlatformKeys = const <String>[],
   PackageConfig? packageConfig,
   PackageGraph? packageGraph,
   PubspecCache? pubspecCache,
@@ -214,6 +217,7 @@ Future<List<Plugin>> findPlugins(
       packageName,
       dependency.rootUri,
       project.manifest.dependencies,
+      extraPlatformKeys: extraPlatformKeys,
       isDevDependency: dependency.isExclusiveDevDependency,
       logger: logger,
       fileSystem: fs,
@@ -2195,7 +2199,11 @@ Future<void> generateMainDartWithPluginRegistrant(
   required TemplateRenderer templateRenderer,
   Iterable<String> extraPlatformKeys = const <String>[],
 }) async {
-  final List<Plugin> plugins = await findPlugins(rootProject, logger: logger);
+  final List<Plugin> plugins = await findPlugins(
+    rootProject,
+    extraPlatformKeys: extraPlatformKeys,
+    logger: logger,
+  );
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     logger: logger,
