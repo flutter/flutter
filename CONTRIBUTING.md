@@ -3,7 +3,7 @@
 Contributing to Flutter
 =======================
 
-_tl;dr: join [Discord](./docs/contributing/Chat.md), be [courteous](CODE_OF_CONDUCT.md), follow the steps below to set up a development environment; if you stick around and contribute, you can [join the team](./docs/contributing/Contributor-access.md) and get commit access._
+_tl;dr: join [Discord](./docs/contributing/Chat.md), be [courteous](CODE_OF_CONDUCT.md), follow the steps below to set up a development environment; if you stick around and contribute, you can advance on the [Flutter Contributor Ladder](https://github.com/flutter/contributors) and earn [triage and commit access](./docs/contributing/Contributor-access.md)._
 
 Welcome
 -------
@@ -14,11 +14,7 @@ on our mailing lists, our chat channels, or on Stack Overflow, helping to triage
 fix bugs that people have filed, adding to our documentation,
 doing outreach about Flutter, or helping out in any other way.
 
-We grant commit access (which includes full rights to the issue
-database, such as being able to edit labels) to people who have gained
-our trust and demonstrated a commitment to Flutter. For more details
-see the [Contributor access](./docs/contributing/Contributor-access.md)
-page in our docs.
+We grant triage access (such as being able to edit labels and close duplicate issues as a **Reviewer**) and commit access (full repository write and merge permissions as a **Committer**) through the [Flutter Contributor Ladder](https://github.com/flutter/contributors) to people who have gained our trust and demonstrated a commitment to Flutter. For more details see the [Contributor access](./docs/contributing/Contributor-access.md) page in our docs.
 
 We communicate primarily over GitHub and [Discord](./docs/contributing/Chat.md).
 
@@ -63,9 +59,8 @@ If you want to help us triage, you are very welcome to do so!
    which covers the meanings of some important GitHub labels and
    milestones.
 
-5. Once you've been doing this for a while, someone will invite you to the flutter-hackers
-   team on GitHub and you'll be able to add labels too. See the
-   [contributor access](./docs/contributing/Contributor-access.md) wiki
+5. Once you've been doing this for a while, you can be invited to join the [Flutter Contributor Ladder](https://github.com/flutter/contributors) as a **Reviewer** (part of the `flutter-hackers` team on GitHub) and you'll be able to add labels too. See the
+   [contributor access](./docs/contributing/Contributor-access.md)
    page for details.
 
 
@@ -185,13 +180,13 @@ everyone, regardless of whether you have commit access.
 Anyone can provide review feedback on a change, and doing so is an excellent way
 to learn the codebase.
 
-While reviews are welcome from the entire community, currently only members of
-the `flutter-hackers` group can grant the final approval required for a change
-to land. Consistently providing helpful code reviews is a valid and highly
-encouraged path to joining this group.
+While reviews are welcome from the entire community, only members of
+the `flutter-hackers` group on the [Flutter Contributor Ladder](https://github.com/flutter/contributors) (`Reviewers`, `Committers`, and `Maintainers`) can grant the approvals required for a change
+to land (with at least one binding approval from a `Committer` or `Maintainer`; see the [Code Review Workflow](https://github.com/flutter/contributors/blob/main/docs/CODE_REVIEW_WORKFLOW.md)). Consistently providing helpful code reviews is a valid and highly
+encouraged path to joining the contributor ladder.
 
-For more information on how to earn commit access, please read the
-[Contributor access guide](./docs/contributing/Contributor-access.md).
+For more information on how to earn triage and commit access, please read the
+[Contributor access guide](./docs/contributing/Contributor-access.md) and [`flutter/contributors`](https://github.com/flutter/contributors).
 
 ### How to Review
 

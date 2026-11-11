@@ -47,9 +47,6 @@ const _kDefaultPlatformArgumentHelp =
 
 /// Common behavior for `flutter create` and `flutter widget-preview start` commands.
 mixin CreateBase on FlutterCommand {
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
   @protected
   TemplateRenderer get templateRenderer => const MustacheTemplateRenderer();
 
