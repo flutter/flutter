@@ -91,7 +91,7 @@
                 "--runtime-mode",
                 "release",
                 "--prebuilt-dart-sdk",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe"
             ],
             "name": "ci/host_release",
