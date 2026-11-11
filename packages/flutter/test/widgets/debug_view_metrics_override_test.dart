@@ -1594,6 +1594,9 @@ class _FakeView implements ui.FlutterView {
   ui.DisplayCornerRadii? get displayCornerRadii => null;
 
   @override
+  ui.VerticalBarEdge? get verticalBarEdge => null;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
 }

@@ -136,6 +136,9 @@ enum _MediaQueryAspect {
 
   /// Specifies the aspect corresponding to [MediaQueryData.displayCornerRadii].
   displayCornerRadii,
+
+  /// Specifies the aspect corresponding to [MediaQueryData.verticalBarEdge].
+  verticalBarEdge,
 }
 
 /// Information about a piece of media (e.g., a window).
@@ -243,6 +246,7 @@ class MediaQueryData {
     this.wordSpacingOverride,
     this.paragraphSpacingOverride,
     this.displayCornerRadii,
+    this.verticalBarEdge,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -372,7 +376,8 @@ class MediaQueryData {
       paragraphSpacingOverride =
           platformData?.paragraphSpacingOverride ??
           view.platformDispatcher.paragraphSpacingOverride,
-      displayCornerRadii = _displayCornerRadiiFromView(view);
+      displayCornerRadii = _displayCornerRadiiFromView(view),
+      verticalBarEdge = view.verticalBarEdge;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
@@ -908,6 +913,34 @@ class MediaQueryData {
   ///    radii in physical pixels.
   final BorderRadius? displayCornerRadii;
 
+  /// The edge of the screen that the system prefers for its vertical bar, or
+  /// null if the platform does not report it.
+  ///
+  /// Some devices can place the status bar and other system bars in a vertical
+  /// bar along the left or right edge of the screen. For example, iPhone Duo
+  /// (iOS 27.1 and later) puts the status bar in a vertical bar beside the
+  /// camera.
+  ///
+  /// This is the system's preference, not a description of what is drawn: the
+  /// edge can be reported while nothing occupies it, for example while the
+  /// status bar is hidden. Use [padding] to decide how much space to avoid on
+  /// each side.
+  ///
+  /// The value is a physical side and does not change with the ambient
+  /// [Directionality].
+  ///
+  /// [ui.VerticalBarEdge.none] means that the platform reported that there is no
+  /// preferred edge, while null means that the platform does not report this
+  /// information.
+  ///
+  /// This is currently populated only on iOS 27.1 and later. On earlier iOS
+  /// versions and other platforms, this value is `null`.
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterView.verticalBarEdge], which reports this value for a view.
+  final ui.VerticalBarEdge? verticalBarEdge;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -980,6 +1013,7 @@ class MediaQueryData {
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
       displayCornerRadii: displayCornerRadii,
+      verticalBarEdge: verticalBarEdge,
     );
   }
 
@@ -1028,6 +1062,7 @@ class MediaQueryData {
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
       displayCornerRadii: displayCornerRadii,
+      verticalBarEdge: verticalBarEdge,
     );
   }
 
@@ -1064,6 +1099,7 @@ class MediaQueryData {
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
       displayCornerRadii: displayCornerRadii,
+      verticalBarEdge: verticalBarEdge,
     );
   }
 
@@ -1268,7 +1304,8 @@ class MediaQueryData {
         other.letterSpacingOverride == letterSpacingOverride &&
         other.wordSpacingOverride == wordSpacingOverride &&
         other.paragraphSpacingOverride == paragraphSpacingOverride &&
-        other.displayCornerRadii == displayCornerRadii;
+        other.displayCornerRadii == displayCornerRadii &&
+        other.verticalBarEdge == verticalBarEdge;
   }
 
   @override
@@ -1298,6 +1335,7 @@ class MediaQueryData {
       wordSpacingOverride,
       paragraphSpacingOverride,
       displayCornerRadii,
+      verticalBarEdge,
     ),
   );
 
@@ -1329,6 +1367,7 @@ class MediaQueryData {
       'wordSpacingOverride: $wordSpacingOverride',
       'paragraphSpacingOverride: $paragraphSpacingOverride',
       'displayCornerRadii: $displayCornerRadii',
+      'verticalBarEdge: $verticalBarEdge',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -2344,6 +2383,28 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static BorderRadius? maybeDisplayCornerRadiiOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.displayCornerRadii)?.displayCornerRadii;
 
+  /// Returns [MediaQueryData.verticalBarEdge] for the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.verticalBarEdge] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static ui.VerticalBarEdge? verticalBarEdgeOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.verticalBarEdge).verticalBarEdge;
+
+  /// Returns [MediaQueryData.verticalBarEdge] for the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.verticalBarEdge] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static ui.VerticalBarEdge? maybeVerticalBarEdgeOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.verticalBarEdge)?.verticalBarEdge;
+
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
@@ -2408,6 +2469,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
               data.paragraphSpacingOverride != oldWidget.data.paragraphSpacingOverride,
             _MediaQueryAspect.displayCornerRadii =>
               data.displayCornerRadii != oldWidget.data.displayCornerRadii,
+            _MediaQueryAspect.verticalBarEdge =>
+              data.verticalBarEdge != oldWidget.data.verticalBarEdge,
           },
     );
   }
