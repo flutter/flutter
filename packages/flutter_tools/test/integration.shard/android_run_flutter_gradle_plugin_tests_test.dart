@@ -6,11 +6,11 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_utils.dart';
 
 Future<void> runFlutterGradlePluginTests({
@@ -18,14 +18,30 @@ Future<void> runFlutterGradlePluginTests({
 }) async {
   final gradleFileName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
   final gradleExecutable = Platform.isWindows ? '.\\$gradleFileName' : './$gradleFileName';
+  final String flutterRoot = getFlutterRoot();
   final Directory flutterGradlePluginDirectory = fileSystem
-      .directory(getFlutterRoot())
+      .directory(flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('gradle');
-  globals.gradleUtils?.injectGradleWrapperIfNeeded(flutterGradlePluginDirectory);
+  final logger = BufferLogger.test();
+  final cache = Cache.test(
+    rootOverride: fileSystem.directory(flutterRoot),
+    flutterRoot: flutterRoot,
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
+  GradleUtils(
+    platform: platform,
+    logger: logger,
+    cache: cache,
+    operatingSystemUtils: cache.osUtils,
+  ).injectGradleWrapperIfNeeded(flutterGradlePluginDirectory);
   makeExecutable(flutterGradlePluginDirectory.childFile(gradleFileName));
-  final RunResult runResult = await globals.processUtils.run(<String>[
+  final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+  final RunResult runResult = await processUtils.run(<String>[
     gradleExecutable,
     'test',
     ...extraGradleArguments,
@@ -34,11 +50,11 @@ Future<void> runFlutterGradlePluginTests({
 }
 
 void main() {
-  testUsingContext('Flutter Gradle Plugin unit tests pass', () async {
+  testWithoutContext('Flutter Gradle Plugin unit tests pass', () async {
     await runFlutterGradlePluginTests();
   });
 
-  testUsingContext('Flutter Gradle Plugin unit tests pass against the AGP 9 line', () async {
+  testWithoutContext('Flutter Gradle Plugin unit tests pass against the AGP 9 line', () async {
     // The public AGP DSL is not binary-compatible between major versions everywhere (see
     // AgpCommonExtensionWrapper.kt), so the plugin must compile and pass its tests against
     // both the default AGP version in build.gradle.kts and the AGP version used by the
