@@ -211,6 +211,68 @@ if (_prelink_static_library) {
   }
 }
 
+_build_static_library_link_test =
+    _prelink_static_library && (is_mac || is_linux)
+
+if (_build_static_library_link_test) {
+  embed_blob("static_library_link_test_font") {
+    symbol_name = "static_library_link_test_font"
+    blob = "//flutter/txt/third_party/fonts/Roboto-Regular.ttf"
+    hdr = "$target_gen_dir/static_library_link_test_font.h"
+    cc = "$target_gen_dir/static_library_link_test_font.cc"
+    deps = []
+  }
+
+  # Links the prelinked libimpeller.a, and nothing else from the engine. See
+  # static_library_link_test.cc.
+  executable("static_library_link_test") {
+    testonly = true
+
+    output_name = "impeller_static_library_link_test"
+
+    sources = [ "static_library_link_test.cc" ]
+
+    include_dirs = [
+      "//flutter",
+      "//flutter/third_party/icu/source/common",
+    ]
+
+    libs = [ "$target_out_dir/libimpeller.a" ]
+
+    deps = [
+      ":static_library",
+      ":static_library_link_test_font",
+    ]
+
+    if (is_mac) {
+      frameworks = [
+        "AppKit.framework",
+        "CoreFoundation.framework",
+        "CoreGraphics.framework",
+        "CoreText.framework",
+        "Foundation.framework",
+        "ImageIO.framework",
+        "Metal.framework",
+        "MetalPerformanceShaders.framework",
+        "QuartzCore.framework",
+      ]
+    } else {
+      libs += [
+        "dl",
+        "m",
+        "pthread",
+      ]
+    }
+  }
+}
+
+group("static_library_tests") {
+  testonly = true
+  if (_build_static_library_link_test) {
+    deps = [ ":static_library_link_test" ]
+  }
+}
+
 impeller_component("example_gl") {
   target_type = "executable"
 
