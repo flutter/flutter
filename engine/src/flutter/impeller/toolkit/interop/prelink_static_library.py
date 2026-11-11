@@ -45,7 +45,7 @@ import sys
 
 
 def impeller_exports(header):
-  with open(header) as f:
+  with open(header, encoding='utf-8') as f:
     text = f.read()
   # Declarations look like:
   #   IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerFoo IMPELLER_NULLABLE

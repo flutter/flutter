@@ -42,10 +42,6 @@ def llvm_tool(name):
   return os.path.join(CLANG_BIN, name + ('.exe' if sys.platform == 'win32' else ''))
 
 
-def has_llvm_tools():
-  return os.path.exists(llvm_tool('clang++'))
-
-
 def ar_member_header(name, size):
   return b'%-16s%-12s%-6s%-6s%-8s%-10d`\n' % (name, b'0', b'0', b'0', b'644', size)
 
@@ -86,7 +82,7 @@ class ImpellerExportsTest(unittest.TestCase):
 
   def write_header(self, text):
     handle, path = tempfile.mkstemp(suffix='.h')
-    with os.fdopen(handle, 'w') as f:
+    with os.fdopen(handle, 'w', encoding='utf-8') as f:
       f.write(text)
     self.addCleanup(os.remove, path)
     return path
@@ -94,7 +90,7 @@ class ImpellerExportsTest(unittest.TestCase):
   def test_parses_impeller_header(self):
     header = os.path.join(INTEROP_DIR, 'impeller.h')
     exports = prelink.impeller_exports(header)
-    with open(header) as f:
+    with open(header, encoding='utf-8') as f:
       declarations = sum(1 for line in f if line.startswith('IMPELLER_EXPORT'))
     self.assertEqual(len(exports), declarations)
     self.assertEqual(len(exports), len(set(exports)))
@@ -194,14 +190,20 @@ class PrelinkFailed(Exception):
   pass
 
 
-@unittest.skipUnless(has_llvm_tools(), 'The buildtools clang is not available.')
 class EndToEndTest(unittest.TestCase):
+
+  @classmethod
+  def setUpClass(cls):
+    # Every engine checkout has the buildtools clang. Fail instead of skipping,
+    # so that a wrong path can't silently disable these tests.
+    if not os.path.exists(llvm_tool('clang++')):
+      raise FileNotFoundError('The buildtools clang is not at %s' % CLANG_BIN)
 
   def setUp(self):
     self.work_dir = tempfile.mkdtemp()
     self.addCleanup(shutil.rmtree, self.work_dir)
     self.header = self.path('impeller.h')
-    with open(self.header, 'w') as f:
+    with open(self.header, 'w', encoding='utf-8') as f:
       f.write(HEADER)
 
   def path(self, name):
@@ -211,7 +213,7 @@ class EndToEndTest(unittest.TestCase):
     objects = []
     for name, source in (('a', SOURCE_A), ('b', SOURCE_B)):
       source_path = self.path(name + '.cc')
-      with open(source_path, 'w') as f:
+      with open(source_path, 'w', encoding='utf-8') as f:
         f.write(source)
       object_path = self.path(name + '.o')
       subprocess.check_call([
@@ -276,7 +278,7 @@ class EndToEndTest(unittest.TestCase):
     self.assertNotIn('.group', headers)
 
   def test_elf_rejects_missing_export(self):
-    with open(self.header, 'a') as f:
+    with open(self.header, 'a', encoding='utf-8') as f:
       f.write('IMPELLER_EXPORT int ImpellerTestMissing(void);\n')
     archive = self.build_archive('x86_64-linux-gnu', 'gnu')
     with self.assertRaisesRegex(PrelinkFailed, 'Missing exports.*ImpellerTestMissing'):
