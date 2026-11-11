@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -52,7 +51,7 @@ void main() {
       fs
           .file(
             project.android.hostAppGradleRoot
-                .childFile(globals.platform.isWindows ? 'gradlew.bat' : 'gradlew')
+                .childFile(const LocalPlatform().isWindows ? 'gradlew.bat' : 'gradlew')
                 .path,
           )
           .createSync(recursive: true);
@@ -60,7 +59,7 @@ void main() {
 
     testUsingContext('does not throw and exception when build info is null', () async {
       const aaptPath = 'aaptPath';
-      final File apkFile = globals.fs.file('app.apk');
+      final File apkFile = fs.file('app.apk');
       final sdkVersion = FakeAndroidSdkVersion();
       sdkVersion.aaptPath = aaptPath;
       sdk.latestVersion = sdkVersion;
@@ -92,7 +91,7 @@ void main() {
         applicationBinary: apkFile,
       );
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -125,7 +124,7 @@ void main() {
 
     testUsingContext('correct debug filename in module projects', () async {
       const aaptPath = 'aaptPath';
-      final File apkFile = globals.fs.file('app-debug.apk');
+      final File apkFile = fs.file('app-debug.apk');
       final sdkVersion = FakeAndroidSdkVersion();
       sdkVersion.aaptPath = aaptPath;
       sdk.latestVersion = sdkVersion;
@@ -165,7 +164,7 @@ void main() {
         applicationBinary: apkFile,
       );
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -201,20 +200,22 @@ void main() {
       expect(androidApk, isNotNull);
     }, overrides: overrides);
 
-    testUsingContext('AndroidApk.fromAndroidProject parses manifest with activity-alias', () async {
-      final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
-      project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
-      final File appGradle = project.android.hostAppGradleRoot.childFile(
-        fs.path.join('app', 'build.gradle'),
-      );
-      appGradle.createSync(recursive: true);
-      appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
+    testWithoutContext(
+      'AndroidApk.fromAndroidProject parses manifest with activity-alias',
+      () async {
+        final logger = BufferLogger.test();
+        final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
+        project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
+        final File appGradle = project.android.hostAppGradleRoot.childFile(
+          fs.path.join('app', 'build.gradle'),
+        );
+        appGradle.createSync(recursive: true);
+        appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
 
-      // Create AndroidManifest.xml with activity-alias
-      final File manifestFile = project.android.appManifestFile;
-      manifestFile.createSync(recursive: true);
-      manifestFile.writeAsStringSync('''
+        // Create AndroidManifest.xml with activity-alias
+        final File manifestFile = project.android.appManifestFile;
+        manifestFile.createSync(recursive: true);
+        manifestFile.writeAsStringSync('''
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="io.flutter.examples.hello_world">
@@ -233,35 +234,36 @@ void main() {
 </manifest>
 ''');
 
-      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
-        project.android,
-        androidSdk: sdk,
-        buildInfo: const BuildInfo(
-          BuildMode.debug,
-          null,
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        toolContext: FakeToolContext(
-          config: Config.test(),
-          fs: fs,
-          logger: logger,
-          processManager: fakeProcessManager,
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-          userMessages: UserMessages(),
-        ),
-      );
+        final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+          project.android,
+          androidSdk: sdk,
+          buildInfo: const BuildInfo(
+            BuildMode.debug,
+            null,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
+          ),
+        );
 
-      expect(androidApk, isNotNull);
-      expect(androidApk!.id, 'io.flutter.examples.hello_world');
-      expect(androidApk.launchActivity, 'io.flutter.examples.hello_world/.LauncherAlias');
-    }, overrides: overrides);
+        expect(androidApk, isNotNull);
+        expect(androidApk!.id, 'io.flutter.examples.hello_world');
+        expect(androidApk.launchActivity, 'io.flutter.examples.hello_world/.LauncherAlias');
+      },
+    );
 
-    testUsingContext(
+    testWithoutContext(
       'AndroidApk.fromAndroidProject returns null if launch activity has no android:name',
       () async {
         final logger = BufferLogger.test();
-        final FlutterProject project = await aModuleProject();
+        final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
         project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
         final File appGradle = project.android.hostAppGradleRoot.childFile(
           fs.path.join('app', 'build.gradle'),
@@ -308,14 +310,13 @@ void main() {
 
         expect(androidApk, isNull);
       },
-      overrides: overrides,
     );
 
     testUsingContext(
       'Licenses not available, platform and buildtools available, apk exists',
       () async {
         const aaptPath = 'aaptPath';
-        final File apkFile = globals.fs.file('app-debug.apk');
+        final File apkFile = fs.file('app-debug.apk');
         final sdkVersion = FakeAndroidSdkVersion();
         sdkVersion.aaptPath = aaptPath;
         sdk.latestVersion = sdkVersion;
@@ -359,7 +360,7 @@ void main() {
 
       await ApplicationPackageFactory.instance!.getPackageForPlatform(
         TargetPlatform.android_arm,
-        applicationBinary: globals.fs.file('app-debug.apk'),
+        applicationBinary: fs.file('app-debug.apk'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);
@@ -392,7 +393,7 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('falls back to source AndroidManifest.xml when fromApk fails', () async {
+    testWithoutContext('falls back to source AndroidManifest.xml when fromApk fails', () async {
       const aaptPath = 'aaptPath';
       final sdkVersion = FakeAndroidSdkVersion();
       sdkVersion.aaptPath = aaptPath;
@@ -414,7 +415,7 @@ void main() {
       );
 
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -465,9 +466,9 @@ void main() {
         contains('Failed to extract manifest from APK: falling back to source AndroidManifest.xml'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
-    }, overrides: overrides);
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'falls back to source AndroidManifest.xml when fromApk returns garbage',
       () async {
         const aaptPath = 'aaptPath';
@@ -491,7 +492,7 @@ void main() {
         );
 
         final logger = BufferLogger.test();
-        final FlutterProject project = await aModuleProject();
+        final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
         project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
         final File appGradle = project.android.hostAppGradleRoot.childFile(
           fs.path.join('app', 'build.gradle'),
@@ -546,7 +547,6 @@ void main() {
         expect(logger.errorText, contains('Failed to parse manifest from APK'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
-      overrides: overrides,
     );
   });
 
@@ -1359,8 +1359,8 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
   late String aaptPath;
 }
 
-Future<FlutterProject> aModuleProject() async {
-  final Directory directory = globals.fs.directory('module_project');
+Future<FlutterProject> aModuleProject({required FileSystem fs, required Logger logger}) async {
+  final Directory directory = fs.directory('module_project');
   writePackageConfigFiles(directory: directory, mainLibName: 'my_app');
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
@@ -1368,7 +1368,7 @@ flutter:
   module:
     androidPackage: com.example
 ''');
-  return FlutterProject.fromDirectory(directory, logger: globals.logger);
+  return FlutterProject.fromDirectory(directory, logger: logger);
 }
 
 const String _aaptDataWithActivityAlias = '''

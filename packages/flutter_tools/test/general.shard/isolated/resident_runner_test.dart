@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -23,15 +23,18 @@ import '../resident_runner_helpers.dart';
 void main() {
   late TestBed testbed;
   late FakeDevFS devFS;
+  late MemoryFileSystem fileSystem;
   FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
+    fileSystem = MemoryFileSystem.test();
     testbed = TestBed(
       setup: () {
-        globals.fs.file(globals.fs.path.join('build', 'app.dill'))
+        fileSystem.file(fileSystem.path.join('build', 'app.dill'))
           ..createSync(recursive: true)
           ..writeAsStringSync('ABC');
       },
+      overrides: <Type, Generator>{FileSystem: () => fileSystem},
     );
     devFS = FakeDevFS();
   });
@@ -50,7 +53,7 @@ void main() {
         ..generator = residentCompiler;
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
       final residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -79,7 +82,7 @@ void main() {
       expect(result, 0);
 
       expect(residentCompiler.recompileCalled, true);
-      expect(residentCompiler.receivedNativeAssetsYaml, globals.fs.path.toUri('foo.yaml'));
+      expect(residentCompiler.receivedNativeAssetsYaml, fileSystem.path.toUri('foo.yaml'));
     }),
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
