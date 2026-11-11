@@ -149,7 +149,7 @@ const methodWithNamedParameterTemplate = '''
   }''';
 
 const pluralVariableTemplate = '''
-    String @(varName) = intl.Intl.pluralLogic(
+    String @(varName) = @(explicitPluralCases)intl.Intl.pluralLogic(
       @(count),
       locale: localeName,
 @(pluralLogicArgs)
