@@ -513,7 +513,7 @@ void testMain() {
     builder1.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene1 = builder1.build();
     addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
     // Wait until Frame 1 is holding in rasterize.
     await frame1Started.future;
@@ -522,7 +522,7 @@ void testMain() {
     final builder2 = ui.SceneBuilder();
     builder2.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene2 = builder2.build();
-    final Future<void> frame2Done = renderer.renderScene(scene2, view);
+    final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
     scene2.dispose();
 
     // Release Frame 1, and ensure Frame 2 does not hold.
@@ -549,7 +549,7 @@ void testMain() {
     builder1.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene1 = builder1.build();
     addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
     // Wait until Frame 1 is holding in rasterize.
     await frame1Started.future;
@@ -560,7 +560,7 @@ void testMain() {
     builder2.addPicture(ui.Offset.zero, createTestPicture());
     builder2.pop();
     final ui.Scene scene2 = builder2.build();
-    final Future<void> frame2Done = renderer.renderScene(scene2, view);
+    final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
     offsetLayer.dispose();
     addTearDown(scene2.dispose);
 
@@ -591,7 +591,7 @@ void testMain() {
       builder1.addPicture(ui.Offset.zero, createTestPicture());
       builder1.pop();
       final ui.Scene scene1 = builder1.build();
-      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
       // Wait until Frame 1 is holding in rasterize.
       await frame1Started.future;
@@ -600,7 +600,7 @@ void testMain() {
       final builder2 = ui.SceneBuilder();
       builder2.addRetained(offsetLayer);
       final ui.Scene scene2 = builder2.build();
-      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
       scene1.dispose();
       offsetLayer.dispose();
@@ -632,7 +632,7 @@ void testMain() {
       final builder1 = ui.SceneBuilder();
       builder1.addPicture(ui.Offset.zero, createTestPicture());
       final ui.Scene scene1 = builder1.build();
-      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
       // Wait until Frame 1 is holding in rasterize.
       await frame1Started.future;
@@ -641,7 +641,7 @@ void testMain() {
       final builder2 = ui.SceneBuilder();
       builder2.addPicture(ui.Offset.zero, createTestPicture());
       final ui.Scene scene2 = builder2.build();
-      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
       // Rapid and redundant disposals while Frame 1 is in-flight and Frame 2 is queued.
       for (var i = 0; i < 5; i++) {
@@ -680,7 +680,7 @@ void testMain() {
     builder1.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene1 = builder1.build();
     addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
     await frame1Started.future;
 
@@ -702,7 +702,7 @@ void testMain() {
       expect(offsetLayer.dispose, returnsNormally);
     }
 
-    final Future<void> frame2Done = renderer.renderScene(scene2, view);
+    final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
     // Redundant dispose while queued
     for (var i = 0; i < 3; i++) {
@@ -742,7 +742,7 @@ void testMain() {
     builder1.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene1 = builder1.build();
     addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
     await frame1Started.future;
 
@@ -750,21 +750,21 @@ void testMain() {
     final builder2 = ui.SceneBuilder();
     builder2.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene2 = builder2.build();
-    final Future<void> frame2Done = renderer.renderScene(scene2, view);
+    final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
     scene2.dispose();
 
     // Frame 3 queued, overwriting Frame 2
     final builder3 = ui.SceneBuilder();
     builder3.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene3 = builder3.build();
-    final Future<void> frame3Done = renderer.renderScene(scene3, view);
+    final Future<void> frame3Done = renderer.renderScene(scene3, view, size: view.physicalSize);
     scene3.dispose();
 
     // Frame 4 queued, overwriting Frame 3
     final builder4 = ui.SceneBuilder();
     builder4.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene4 = builder4.build();
-    final Future<void> frame4Done = renderer.renderScene(scene4, view);
+    final Future<void> frame4Done = renderer.renderScene(scene4, view, size: view.physicalSize);
     scene4.dispose();
 
     // Dropped frames 2 and 3 complete their completers upon being overwritten.
@@ -796,7 +796,7 @@ void testMain() {
     builder1.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene1 = builder1.build();
     addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
     await frame1Started.future;
 
@@ -817,7 +817,7 @@ void testMain() {
     builder2.pop();
     final ui.Scene scene2 = builder2.build();
 
-    final Future<void> frame2Done = renderer.renderScene(scene2, view);
+    final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
     // Dispose intermediate engine layers out-of-order prior to rasterization
     clipLayer.dispose();
@@ -852,14 +852,14 @@ void testMain() {
       builder1.addPicture(ui.Offset.zero, createTestPicture());
       final ui.Scene scene1 = builder1.build();
       addTearDown(scene1.dispose);
-      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
       await frame1Started.future;
 
       // Frame 2: empty scene (no pictures, no child layers)
       final builder2 = ui.SceneBuilder();
       final ui.Scene scene2 = builder2.build();
-      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
       // Dispose immediately and redundantly
       scene2.dispose();
@@ -890,7 +890,7 @@ void testMain() {
     builder1.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene1 = builder1.build();
     addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
     await frame1Started.future;
 
@@ -898,7 +898,7 @@ void testMain() {
     builder2.addPicture(ui.Offset.zero, createTestPicture());
     final ui.Scene scene2 = builder2.build();
     addTearDown(scene2.dispose);
-    final Future<void> frame2Done = renderer.renderScene(scene2, view);
+    final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
     // Call debugClear() while Frame 1 is holding and Frame 2 is in renderQueue.next.
     renderer.debugClear();
