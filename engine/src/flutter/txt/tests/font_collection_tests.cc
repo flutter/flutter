@@ -27,5 +27,40 @@ TEST_F(FontCollectionTests, SettingUpDefaultFontManagerClearsCache) {
   sk_font_collection = font_collection.CreateSktFontCollection();
   ASSERT_NE(sk_font_collection->getFallbackManager().get(), nullptr);
 }
+
+TEST_F(FontCollectionTests,
+       DeferringDefaultFontManagerClearsCacheAndResolvesOnUse) {
+  FontCollection font_collection;
+  sk_sp<skia::textlayout::FontCollection> sk_font_collection =
+      font_collection.CreateSktFontCollection();
+  ASSERT_EQ(sk_font_collection->getFallbackManager().get(), nullptr);
+  ASSERT_EQ(font_collection.GetFontManagersCount(), 0u);
+
+  font_collection.DeferDefaultFontManager(0);
+  sk_font_collection = font_collection.CreateSktFontCollection();
+  ASSERT_NE(sk_font_collection->getFallbackManager().get(), nullptr);
+  ASSERT_EQ(font_collection.GetFontManagersCount(), 1u);
+}
+
+TEST_F(FontCollectionTests,
+       DeferringDefaultFontManagerResolvesOnGetFontManagersCount) {
+  FontCollection font_collection;
+  font_collection.DeferDefaultFontManager(0);
+
+  const FontCollection& const_font_collection = font_collection;
+  ASSERT_EQ(const_font_collection.GetFontManagersCount(), 1u);
+}
+
+TEST_F(FontCollectionTests,
+       SetDefaultFontManagerOverridesDeferredDefaultFontManager) {
+  FontCollection font_collection;
+  font_collection.DeferDefaultFontManager(0);
+  font_collection.SetDefaultFontManager(nullptr);
+
+  ASSERT_EQ(font_collection.GetFontManagersCount(), 0u);
+  sk_sp<skia::textlayout::FontCollection> sk_font_collection =
+      font_collection.CreateSktFontCollection();
+  ASSERT_EQ(sk_font_collection->getFallbackManager().get(), nullptr);
+}
 }  // namespace testing
 }  // namespace txt
