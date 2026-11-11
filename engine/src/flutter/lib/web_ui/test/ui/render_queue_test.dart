@@ -129,7 +129,7 @@ void testMain() {
       FrameTimingRecorder.recordCurrentFrameBuildStart();
       final ui.Scene scene1 = ui.SceneBuilder().build();
       addTearDown(scene1.dispose);
-      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
       // Wait until Frame 1 is holding in rasterize.
       await frame1Started.future;
@@ -140,7 +140,7 @@ void testMain() {
       FrameTimingRecorder.recordCurrentFrameBuildStart();
       final ui.Scene scene2 = ui.SceneBuilder().build();
       addTearDown(scene2.dispose);
-      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
       // Simulate 100ms in-flight rasterization for Frame 1.
       await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -183,7 +183,7 @@ void testMain() {
       FrameTimingRecorder.recordCurrentFrameBuildStart();
       final ui.Scene scene1 = ui.SceneBuilder().build();
       addTearDown(scene1.dispose);
-      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
       // Wait until Frame 1 is holding in rasterize.
       await frame1Started.future;
@@ -194,7 +194,7 @@ void testMain() {
       FrameTimingRecorder.recordCurrentFrameBuildStart();
       final ui.Scene scene2 = ui.SceneBuilder().build();
       addTearDown(scene2.dispose);
-      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
       // Frame 3 is submitted while Frame 1 is still holding in rasterize -> overwrites Frame 2 in renderQueue.next.
       FrameTimingRecorder.recordCurrentFrameNumber(103);
@@ -202,7 +202,7 @@ void testMain() {
       FrameTimingRecorder.recordCurrentFrameBuildStart();
       final ui.Scene scene3 = ui.SceneBuilder().build();
       addTearDown(scene3.dispose);
-      final Future<void> frame3Done = renderer.renderScene(scene3, view);
+      final Future<void> frame3Done = renderer.renderScene(scene3, view, size: view.physicalSize);
 
       // Frame 2 was dropped: its completer must complete.
       await expectLater(frame2Done, completes);
@@ -247,7 +247,7 @@ void testMain() {
       final ui.Scene scene1 = ui.SceneBuilder().build();
       addTearDown(scene1.dispose);
 
-      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
       await expectLater(frame1Done, completes);
 
       final allTimings = <ui.FrameTiming>[
@@ -269,7 +269,7 @@ void testMain() {
       final ui.Scene scene2 = ui.SceneBuilder().build();
       addTearDown(scene2.dispose);
 
-      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
       await expectLater(frame2Done, completes);
 
       final allTimings2 = <ui.FrameTiming>[
@@ -299,7 +299,7 @@ void testMain() {
     FrameTimingRecorder.recordCurrentFrameBuildStart();
     final ui.Scene scene1 = ui.SceneBuilder().build();
     addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
     await frame1Started.future;
 
@@ -311,7 +311,7 @@ void testMain() {
       FrameTimingRecorder.recordCurrentFrameBuildStart();
       final ui.Scene scene = ui.SceneBuilder().build();
       addTearDown(scene.dispose);
-      droppedFutures.add(renderer.renderScene(scene, view));
+      droppedFutures.add(renderer.renderScene(scene, view, size: view.physicalSize));
     }
 
     // Frame 5: the final winning frame
@@ -320,7 +320,7 @@ void testMain() {
     FrameTimingRecorder.recordCurrentFrameBuildStart();
     final ui.Scene scene5 = ui.SceneBuilder().build();
     addTearDown(scene5.dispose);
-    final Future<void> frame5Done = renderer.renderScene(scene5, view);
+    final Future<void> frame5Done = renderer.renderScene(scene5, view, size: view.physicalSize);
 
     // All intermediate dropped frames (302, 303, 304) must have completed
     for (final dropped in droppedFutures) {
@@ -369,17 +369,17 @@ void testMain() {
 
       final ui.Scene scene1 = ui.SceneBuilder().build();
       addTearDown(scene1.dispose);
-      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
       await frame1Started.future;
 
       final ui.Scene scene2 = ui.SceneBuilder().build();
       addTearDown(scene2.dispose);
-      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
       final ui.Scene scene3 = ui.SceneBuilder().build();
       addTearDown(scene3.dispose);
-      final Future<void> frame3Done = renderer.renderScene(scene3, view);
+      final Future<void> frame3Done = renderer.renderScene(scene3, view, size: view.physicalSize);
 
       // Frame 2 is dropped and completed
       await expectLater(frame2Done, completes);
@@ -412,7 +412,7 @@ void testMain() {
       FrameTimingRecorder.recordCurrentFrameBuildStart();
       final ui.Scene scene1 = ui.SceneBuilder().build();
       addTearDown(scene1.dispose);
-      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
 
       await frame1Started.future;
 
@@ -425,7 +425,7 @@ void testMain() {
       FrameTimingRecorder.recordCurrentFrameBuildStart();
       final ui.Scene scene2 = ui.SceneBuilder().build();
       addTearDown(scene2.dispose);
-      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
 
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
@@ -460,7 +460,7 @@ void testMain() {
     FrameTimingRecorder.recordCurrentFrameBuildStart();
     final ui.Scene scene = ui.SceneBuilder().build();
     addTearDown(scene.dispose);
-    await renderer.renderScene(scene, view);
+    await renderer.renderScene(scene, view, size: view.physicalSize);
 
     final allTimings = <ui.FrameTiming>[
       ...reportedTimings,
