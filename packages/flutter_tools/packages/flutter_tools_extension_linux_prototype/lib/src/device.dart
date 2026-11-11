@@ -57,36 +57,67 @@ final class LinuxDeviceService extends DeviceService {
     return Directory.fromUri(project.directory.resolve('linux')).existsSync();
   }
 
+  @override
+  Future<ExtensionApplicationPackage?> resolveApplication(
+    ExtensionApplicationResolutionContext context,
+  ) async {
+    if (context.deviceId != customLinuxDeviceId) {
+      return null;
+    }
+    final String? binaryName = getLinuxCmakeBinaryName(context.project.directory);
+    if (context.applicationBinaryUri case final Uri prebuiltUri) {
+      final String fallbackName = context.project.appName.isNotEmpty
+          ? context.project.appName
+          : prebuiltUri.pathSegments.lastWhere((String s) => s.isNotEmpty, orElse: () => 'app');
+      return ExtensionApplicationPackage(appId: binaryName ?? fallbackName, bundleUri: prebuiltUri);
+    }
+    if (binaryName == null) {
+      return null;
+    }
+    return ExtensionApplicationPackage(
+      appId: binaryName,
+      bundleUri: customLinuxExecutableUri(
+        binaryName: binaryName,
+        buildDirectory: context.project.buildDirectory,
+        buildMode: context.buildMode,
+      ),
+    );
+  }
+
   // Since the host and target devices are the same on desktop, verify the
   // bundle exists without copying it.
   @override
-  Future<bool> installApp({required Uri bundleUri, required String deviceId}) async {
+  Future<void> installApp({
+    required Uri bundleUri,
+    required String deviceId,
+    bool prebuiltApplication = false,
+  }) async {
     if (deviceId != customLinuxDeviceId) {
-      return false;
+      throw UnsupportedError('Unknown device "$deviceId".');
     }
-    return File.fromUri(bundleUri).existsSync();
+    if (!File.fromUri(bundleUri).existsSync()) {
+      throw FileSystemException('Application bundle does not exist', bundleUri.toFilePath());
+    }
   }
 
   // Since the host and target devices are the same on desktop, no work needs
   // to be done to uninstall the application.
   @override
-  Future<bool> uninstallApp({
-    required String deviceId,
-    required ExtensionFlutterProject project,
-    String? appId,
-  }) async {
-    return deviceId == customLinuxDeviceId;
+  Future<void> uninstallApp({required String appId, required String deviceId}) async {
+    if (deviceId != customLinuxDeviceId) {
+      throw UnsupportedError('Unknown device "$deviceId".');
+    }
   }
 
-  // Since the host and target devices are the same on desktop, no work needs
-  // to be done to install the application.
+  // Since the host and target devices are the same on desktop, mirror
+  // DesktopDevice by treating the application as installed on the matching
+  // device.
   @override
-  Future<bool> isAppInstalled({
-    required String deviceId,
-    required ExtensionFlutterProject project,
-    String? appId,
-  }) async {
-    return deviceId == customLinuxDeviceId;
+  Future<bool> isAppInstalled({required String appId, required String deviceId}) async {
+    if (deviceId != customLinuxDeviceId) {
+      throw UnsupportedError('Unknown device "$deviceId".');
+    }
+    return true;
   }
 
   @override
@@ -166,7 +197,7 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> stopApp({required String deviceId}) async {
+  Future<bool> stopApp({required String deviceId, String? appId}) async {
     final _RunningApp? runningApp = _runningApps[deviceId];
     if (runningApp == null || !runningApp.process.kill()) {
       return false;

@@ -11,6 +11,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../experimental/extension_device_manager.dart';
 import '../runner/flutter_command.dart';
 
 /// Show log output for running Flutter apps.
@@ -71,7 +72,8 @@ class LogsCommand extends FlutterCommand {
     }
 
     final TargetPlatform targetPlatform = await cachedDevice.targetPlatform;
-    final ApplicationPackage? app = targetPlatform == .unsupported
+    final ApplicationPackage? app =
+        cachedDevice is ExtensionBackedDevice || targetPlatform == .unsupported
         ? null
         : await applicationPackages?.getPackageForPlatform(targetPlatform);
 

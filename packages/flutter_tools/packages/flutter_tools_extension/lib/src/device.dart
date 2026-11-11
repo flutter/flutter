@@ -20,6 +20,7 @@ abstract base class DeviceService extends ToolExtensionService {
 
   static const String _getDevicesRpcMethod = 'getDevices';
   static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
+  static const String _resolveApplicationRpcMethod = 'resolveApplication';
   static const String _installAppRpcMethod = 'installApp';
   static const String _uninstallAppRpcMethod = 'uninstallApp';
   static const String _isAppInstalledRpcMethod = 'isAppInstalled';
@@ -38,6 +39,10 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC method identifier to query whether a target device is supported for a project.
   static const String isSupportedForProjectMethod =
       '$serviceNamespace.$_isSupportedForProjectRpcMethod';
+
+  /// RPC method identifier to resolve the platform application identity and
+  /// expected bundle location for a target device.
+  static const String resolveApplicationMethod = '$serviceNamespace.$_resolveApplicationRpcMethod';
 
   /// RPC method identifier to install an application bundle on a target device.
   static const String installAppMethod = '$serviceNamespace.$_installAppRpcMethod';
@@ -90,6 +95,9 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for the application package identifier.
   static const String appIdParam = 'appId';
 
+  /// RPC parameter key indicating whether the bundle is a user-supplied prebuilt application.
+  static const String prebuiltApplicationParam = 'prebuiltApplication';
+
   /// RPC parameter key for the capture output file URI.
   static const String outputFileUriParam = 'outputFileUri';
 
@@ -121,34 +129,55 @@ abstract base class DeviceService extends ToolExtensionService {
     required ExtensionFlutterProject project,
   });
 
-  /// Installs the application bundle at [bundleUri] onto the device with [deviceId].
+  /// Resolves the platform-specific application identifier and expected bundle
+  /// location for [context] to back a host-side `ApplicationPackage`.
   ///
-  /// [bundleUri] is guaranteed to be an absolute `file:` URI pointing to either
-  /// the prebuilt application binary (when `--use-application-binary` is
-  /// supplied) or the [ExtensionBuildResult.executableUri] returned by
-  /// [BuildTarget.build] for the device's [TargetDevice.buildTarget]. Returns
-  /// `true` if installation succeeded, or `false` if installation failed or is
-  /// unsupported.
-  Future<bool> installApp({required Uri bundleUri, required String deviceId}) async => false;
+  /// Returns `null` when the extension does not provide custom manifest or
+  /// bundle resolution, in which case the host falls back to a synthesized
+  /// `ApplicationPackage` using the project's `pubspec.yaml` `name` as `id`
+  /// and [ExtensionApplicationResolutionContext.applicationBinaryUri] as
+  /// `bundleUri`.
+  Future<ExtensionApplicationPackage?> resolveApplication(
+    ExtensionApplicationResolutionContext context,
+  ) async => null;
 
-  /// Uninstalls the application for [project] (optionally identified by
-  /// [appId]) from the device with [deviceId].
+  /// Installs the compiled application bundle at [bundleUri] to [deviceId]
+  /// without launching it (for `flutter install`; required when
+  /// [TargetDevice.supportsInstall] is `true`).
   ///
-  /// Returns `true` if uninstallation succeeded, or `false` if uninstallation
-  /// failed or is unsupported.
-  Future<bool> uninstallApp({
+  /// When [prebuiltApplication] is `true`
+  /// (`flutter install --use-application-binary`), [bundleUri] points to a
+  /// user-supplied prebuilt package file rather than the output of
+  /// [BuildTarget.build].
+  ///
+  /// Throws [UnsupportedError] by default when application installation is not
+  /// supported on [deviceId].
+  Future<void> installApp({
+    required Uri bundleUri,
     required String deviceId,
-    required ExtensionFlutterProject project,
-    String? appId,
-  }) async => false;
+    bool prebuiltApplication = false,
+  }) async {
+    throw UnsupportedError('App installation is not supported on $deviceId.');
+  }
 
-  /// Returns whether the application for [project] (optionally identified by
-  /// [appId]) is currently installed on the device with [deviceId].
-  Future<bool> isAppInstalled({
-    required String deviceId,
-    required ExtensionFlutterProject project,
-    String? appId,
-  }) async => false;
+  /// Uninstalls the application identified by [appId] from [deviceId] (required
+  /// when [TargetDevice.supportsInstall] is `true`).
+  ///
+  /// Throws [UnsupportedError] by default when application uninstallation is
+  /// not supported on [deviceId].
+  Future<void> uninstallApp({required String appId, required String deviceId}) async {
+    throw UnsupportedError('App uninstallation is not supported on $deviceId.');
+  }
+
+  /// Returns `true` if the application identified by [appId] is currently
+  /// installed on [deviceId] (required when [TargetDevice.supportsInstall] is
+  /// `true`).
+  ///
+  /// Throws [UnsupportedError] by default when checking application
+  /// installation status is not supported on [deviceId].
+  Future<bool> isAppInstalled({required String appId, required String deviceId}) async {
+    throw UnsupportedError('Checking app installation status is not supported on $deviceId.');
+  }
 
   /// Captures a screenshot from the device with [deviceId] and writes it to
   /// [outputFileUri].
@@ -201,20 +230,25 @@ abstract base class DeviceService extends ToolExtensionService {
   /// or return `null` if the process exits or VM Service discovery fails.
   Future<Uri?> getVmServiceUri({required String deviceId});
 
-  /// Stops any running application on [deviceId].
+  /// Stops the running application on [deviceId].
+  ///
+  /// When [appId] is non-null, implementations may scope termination to that
+  /// specific application; when [appId] is `null`, implementations stop the
+  /// active or most recently launched Flutter application on [deviceId].
   ///
   /// Returns `true` if a running application was stopped, or `false` if no
   /// application was running on [deviceId] or stopping it failed.
-  Future<bool> stopApp({required String deviceId});
+  Future<bool> stopApp({required String deviceId, String? appId});
 
-  /// Starts streaming log output for the device identified by [deviceId].
+  /// Starts streaming log output for the device identified by [deviceId],
+  /// optionally filtered to [appId] when non-null.
   ///
   /// Invoked by the host tool when a log consumer (such as `flutter logs` or
   /// `flutter run`) begins reading logs from [deviceId]. Implementations should
   /// return once log streaming has been initiated rather than awaiting the
   /// lifetime of the stream, and forward each log line (without a trailing
   /// newline) to the host by calling [emitLogLine].
-  Future<void> startLogStream({required String deviceId}) async {}
+  Future<void> startLogStream({required String deviceId, String? appId}) async {}
 
   /// Stops streaming log output for the device identified by [deviceId].
   ///
@@ -236,6 +270,7 @@ abstract base class DeviceService extends ToolExtensionService {
     return <String, ExtensionRpcHandler>{
       _getDevicesRpcMethod: _getDevicesRpc,
       _isSupportedForProjectRpcMethod: _isSupportedForProjectRpc,
+      _resolveApplicationRpcMethod: _resolveApplicationRpc,
       _installAppRpcMethod: _installAppRpc,
       _uninstallAppRpcMethod: _uninstallAppRpc,
       _isAppInstalledRpcMethod: _isAppInstalledRpc,
@@ -272,50 +307,61 @@ abstract base class DeviceService extends ToolExtensionService {
     return isSupportedForProject(deviceId: deviceId, project: project);
   }
 
-  Future<bool> _installAppRpc(Map<String, Object?> params) async {
-    final String deviceId = _parseDeviceId(params);
-    final Uri bundleUri;
+  Future<Map<String, Object?>?> _resolveApplicationRpc(Map<String, Object?> params) async {
+    final ExtensionApplicationResolutionContext context;
     try {
-      bundleUri = _requireFileUri(params, bundleUriParam);
+      context = ExtensionApplicationResolutionContext.fromJson(params);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-    return installApp(bundleUri: bundleUri, deviceId: deviceId);
+    final ExtensionApplicationPackage? resolved = await resolveApplication(context);
+    if (resolved == null) {
+      return null;
+    }
+    if (resolved.appId.isEmpty) {
+      throw StateError('resolveApplication returned an empty appId.');
+    }
+    final Uri? bundleUri = resolved.bundleUri;
+    if (bundleUri != null && !bundleUri.isValidFileUri) {
+      throw StateError(
+        'resolveApplication returned an invalid bundleUri "$bundleUri" (expected an absolute "file:" file URI).',
+      );
+    }
+    return resolved.toMap();
   }
 
-  Future<bool> _uninstallAppRpc(Map<String, Object?> params) async {
-    final (String deviceId, ExtensionFlutterProject project, String? appId) = _parseAppTarget(
-      params,
+  Future<Object?> _installAppRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
+    final Uri bundleUri;
+    final bool prebuiltApplication;
+    try {
+      bundleUri = _requireFileUri(params, bundleUriParam);
+      prebuiltApplication = params.optionalField<bool>(
+        prebuiltApplicationParam,
+        defaultValue: false,
+      );
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    await installApp(
+      bundleUri: bundleUri,
+      deviceId: deviceId,
+      prebuiltApplication: prebuiltApplication,
     );
-    return uninstallApp(appId: appId, deviceId: deviceId, project: project);
+    return null;
+  }
+
+  Future<Object?> _uninstallAppRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
+    final String appId = _parseRequiredAppId(params);
+    await uninstallApp(appId: appId, deviceId: deviceId);
+    return null;
   }
 
   Future<bool> _isAppInstalledRpc(Map<String, Object?> params) async {
-    final (String deviceId, ExtensionFlutterProject project, String? appId) = _parseAppTarget(
-      params,
-    );
-    return isAppInstalled(appId: appId, deviceId: deviceId, project: project);
-  }
-
-  (String deviceId, ExtensionFlutterProject project, String? appId) _parseAppTarget(
-    Map<String, Object?> params,
-  ) {
     final String deviceId = _parseDeviceId(params);
-    final ExtensionFlutterProject project;
-    final String? appId;
-    try {
-      final Map<String, Object?> projectMap = params.requiredField<Map<String, Object?>>(
-        projectParam,
-      );
-      project = ExtensionFlutterProject.fromJson(projectMap);
-      appId = params.nullableField<String>(appIdParam);
-      if (appId != null && appId.isEmpty) {
-        throw const FormatException('Invalid "$appIdParam": must not be empty.');
-      }
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams(e.message);
-    }
-    return (deviceId, project, appId);
+    final String appId = _parseRequiredAppId(params);
+    return isAppInstalled(appId: appId, deviceId: deviceId);
   }
 
   Future<void> _takeScreenshotRpc(Map<String, Object?> params) async {
@@ -377,6 +423,32 @@ abstract base class DeviceService extends ToolExtensionService {
     return deviceId;
   }
 
+  String _parseRequiredAppId(Map<String, Object?> params) {
+    final String appId;
+    try {
+      appId = params.requiredField<String>(appIdParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    if (appId.isEmpty) {
+      throw RpcException.invalidParams('Parameter "$appIdParam" must not be empty.');
+    }
+    return appId;
+  }
+
+  String? _parseOptionalAppId(Map<String, Object?> params) {
+    final String? appId;
+    try {
+      appId = params.nullableField<String>(appIdParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    if (appId != null && appId.isEmpty) {
+      throw RpcException.invalidParams('Parameter "$appIdParam" must not be empty.');
+    }
+    return appId;
+  }
+
   Future<bool> _launchAppRpc(Map<String, Object?> params) async {
     final String deviceId = _parseDeviceId(params);
     final String executableUriStr;
@@ -424,11 +496,14 @@ abstract base class DeviceService extends ToolExtensionService {
 
   Future<bool> _stopAppRpc(Map<String, Object?> params) async {
     final String deviceId = _parseDeviceId(params);
-    return stopApp(deviceId: deviceId);
+    final String? appId = _parseOptionalAppId(params);
+    return stopApp(appId: appId, deviceId: deviceId);
   }
 
   Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {
-    await startLogStream(deviceId: _parseDeviceId(params));
+    final String deviceId = _parseDeviceId(params);
+    final String? appId = _parseOptionalAppId(params);
+    await startLogStream(appId: appId, deviceId: deviceId);
     return null;
   }
 

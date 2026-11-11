@@ -30,6 +30,7 @@ class IntegrationTestTestDevice extends TestDevice {
     required this.userIdentifier,
     required this.compileExpression,
     required super.toolContext,
+    this._applicationPackageFactory,
     this.ddsShutdownTimeout = const Duration(seconds: 5),
   });
 
@@ -38,6 +39,7 @@ class IntegrationTestTestDevice extends TestDevice {
   final DebuggingOptions debuggingOptions;
   final String? userIdentifier;
   final CompileExpression? compileExpression;
+  final ApplicationPackageFactory? _applicationPackageFactory;
   final Duration ddsShutdownTimeout;
   late final _ddsLauncher = DartDevelopmentService(logger: toolContext.logger);
 
@@ -52,13 +54,14 @@ class IntegrationTestTestDevice extends TestDevice {
   Future<StreamChannel<String>> start(String entrypointPath) async {
     final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
         toolContext;
-    final TargetPlatform targetPlatform = await device.targetPlatform;
-    _applicationPackage = await ApplicationPackageFactory.instance?.getPackageForPlatform(
-      targetPlatform,
+    _applicationPackage = await resolveApplicationPackageForDevice(
+      device,
+      factoryBuilder: () => _applicationPackageFactory ?? ApplicationPackageFactory.instance,
       buildInfo: debuggingOptions.buildInfo,
     );
     final ApplicationPackage? package = _applicationPackage;
     if (package == null) {
+      final TargetPlatform targetPlatform = await device.targetPlatform;
       throw TestDeviceException('No application found for $targetPlatform.', StackTrace.current);
     }
 

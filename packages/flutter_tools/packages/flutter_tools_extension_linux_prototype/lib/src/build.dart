@@ -129,7 +129,7 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
       );
     }
 
-    final String? appName = _getCmakeBinaryName(projectDir.uri);
+    final String? appName = getLinuxCmakeBinaryName(projectDir.uri);
     if (appName == null) {
       return const ExtensionBuildResult(
         success: false,
@@ -236,7 +236,9 @@ class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
   }
 }
 
-String? _getCmakeBinaryName(Uri projectDirUri) {
+/// Parses `BINARY_NAME` from `<projectDirUri>/linux/CMakeLists.txt`, or returns
+/// `null` if the file or declaration is absent.
+String? getLinuxCmakeBinaryName(Uri projectDirUri) {
   final cmakeFile = File.fromUri(projectDirUri.resolve('linux/CMakeLists.txt'));
   if (!cmakeFile.existsSync()) {
     return null;
@@ -252,6 +254,16 @@ String? _getCmakeBinaryName(Uri projectDirUri) {
     }
   }
   return null;
+}
+
+/// Resolves the expected Linux executable `file:` [Uri] under [buildDirectory]
+/// for [buildMode] and [binaryName].
+Uri customLinuxExecutableUri({
+  required String binaryName,
+  required Uri buildDirectory,
+  required BuildMode buildMode,
+}) {
+  return buildDirectory.resolve('linux_extension/x64/${buildMode.cliName}/bundle/$binaryName');
 }
 
 /// Prototype Linux [BuildService] implementation.

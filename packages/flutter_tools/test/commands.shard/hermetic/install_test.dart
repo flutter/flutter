@@ -182,6 +182,32 @@ void main() {
       expect(testLogger.errorText, contains('Error accessing device throwing-device:'));
       expect(testLogger.errorText, contains('ADB failed'));
     });
+
+    testWithoutContext('throws ToolExit when target device has supportsInstall false', () async {
+      final localContext = FakeToolContext(
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        fs: fileSystem,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+      );
+      final command = InstallCommand(
+        applicationPackageFactory: FakeApplicationPackageFactory(FakeAndroidApk()),
+        toolContext: localContext,
+        verboseHelp: false,
+      );
+      final deviceManager = FakeDeviceManager()..attachedDevices = <Device>[_NoInstallDevice()];
+      final runner = TestFlutterCommandRunner(
+        deviceManager: deviceManager,
+        doctor: FakeDoctor(),
+        featureFlags: TestFeatureFlags(),
+        toolContext: localContext,
+      )..addCommand(command);
+
+      await expectLater(
+        runner.run(<String>['install', '-d', 'no-install-device']),
+        throwsToolExit(message: 'flutter install is not supported on No Install Device'),
+      );
+    });
   });
 }
 
@@ -279,4 +305,36 @@ class _ThrowingDevice extends Fake implements Device {
 
   @override
   Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async => true;
+}
+
+class _NoInstallDevice extends Fake implements Device {
+  @override
+  String get id => 'no-install-device';
+
+  @override
+  String get name => 'No Install Device';
+
+  @override
+  String get displayName => name;
+
+  @override
+  bool get ephemeral => true;
+
+  @override
+  Future<bool> get isLocalEmulator async => false;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  Future<bool> isSupported() async => true;
+
+  @override
+  bool isSupportedForProject(Object flutterProject) => true;
+
+  @override
+  bool get supportsInstall => false;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.unsupported;
 }

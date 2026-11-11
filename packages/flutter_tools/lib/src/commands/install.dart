@@ -8,15 +8,17 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../build_info.dart';
-import '../context/tool_context.dart';
 import '../device.dart';
 import '../experimental/extension_device_manager.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand({required super.toolContext, required super.verboseHelp}) {
+  InstallCommand({
+    required super.toolContext,
+    required super.verboseHelp,
+    ApplicationPackageFactory? applicationPackageFactory,
+  }) {
+    applicationPackages = applicationPackageFactory;
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(),
@@ -76,24 +78,12 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device targetDevice = device!;
-    final BuildInfo buildInfo = await getBuildInfo();
-    final ApplicationPackage? package;
-    if (targetDevice is ExtensionBackedDevice) {
-      final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
-      final FlutterProject currentProject = projectFactory.fromDirectory(fs.currentDirectory);
-      package = ExtensionApplicationPackage(
-        id: currentProject.manifest.appName,
-        applicationBinary: _applicationBinary,
-        buildInfo: buildInfo,
-        project: currentProject,
-      );
-    } else {
-      package = await applicationPackages?.getPackageForPlatform(
-        await targetDevice.targetPlatform,
-        applicationBinary: _applicationBinary,
-        buildInfo: buildInfo,
-      );
-    }
+    final ApplicationPackage? package = await resolveApplicationPackageForDevice(
+      targetDevice,
+      factoryBuilder: () => applicationPackages,
+      applicationBinary: _applicationBinary,
+      buildInfo: await getBuildInfo(),
+    );
     if (package == null) {
       throwToolExit('Could not find or build package');
     }
@@ -118,6 +108,9 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 
   Future<void> _installApp(ApplicationPackage package, Device device) async {
+    if (device is ExtensionBackedDevice && !device.hasValidInstallBundle(package)) {
+      throwToolExit('Install failed');
+    }
     _logger.printStatus('Installing $package to $device...');
 
     if (!await installApp(device, package, logger: _logger, userIdentifier: userIdentifier)) {
@@ -139,6 +132,9 @@ Future<bool> installApp(
   bool uninstall = true,
   String? userIdentifier,
 }) async {
+  if (device is ExtensionBackedDevice && !device.hasValidInstallBundle(package)) {
+    return false;
+  }
   try {
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       logger.printStatus('Uninstalling old version...');

@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'build.dart';
 import 'json_utils.dart';
+import 'project.dart';
 
 /// A description of the kind of workflow the device supports.
 enum Category {
@@ -102,12 +103,15 @@ class TargetDevice {
   static const String sdkNameAndVersionKey = 'sdkNameAndVersion';
 
   /// Map key for [supportsInstall].
+  @visibleForTesting
   static const String supportsInstallKey = 'supportsInstall';
 
   /// Map key for [supportsScreenshot].
+  @visibleForTesting
   static const String supportsScreenshotKey = 'supportsScreenshot';
 
   /// Map key for [supportsScreenRecording].
+  @visibleForTesting
   static const String supportsScreenRecordingKey = 'supportsScreenRecording';
 
   /// Map key for [targetPlatform].
@@ -156,8 +160,9 @@ class TargetDevice {
   /// Operating system SDK name and version string (e.g. `'Custom Linux 1.0.0'`).
   final String? sdkNameAndVersion;
 
-  /// Whether the device supports installing and uninstalling application
-  /// packages via `DeviceService.installApp` and `DeviceService.uninstallApp`.
+  /// Whether the device supports application installation management via
+  /// `DeviceService.installApp`, `DeviceService.uninstallApp`, and
+  /// `DeviceService.isAppInstalled`.
   final bool supportsInstall;
 
   /// Whether the device supports capturing screenshots via `DeviceService.takeScreenshot`.
@@ -283,4 +288,196 @@ class ExtensionDebuggingOptions {
 
   @override
   int get hashCode => Object.hash(buildMode, debuggingEnabled);
+}
+
+/// Context passed to `DeviceService.resolveApplication` when resolving the
+/// platform application identity and expected bundle output path for a device.
+@immutable
+final class ExtensionApplicationResolutionContext {
+  /// Creates an application resolution context for [deviceId] and [project].
+  const ExtensionApplicationResolutionContext({
+    required this.buildMode,
+    required this.deviceId,
+    required this.project,
+    this.applicationBinaryUri,
+    this.flavor,
+  }) : assert(deviceId != '', 'deviceId must not be empty.'),
+       assert(flavor != '', 'flavor must not be empty.');
+
+  /// Deserializes an [ExtensionApplicationResolutionContext] from a
+  /// JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if required fields are missing or invalid.
+  factory ExtensionApplicationResolutionContext.fromJson(Map<String, Object?> json) {
+    final String deviceId = json.requiredField<String>(deviceIdKey);
+    if (deviceId.isEmpty) {
+      throw const FormatException('Invalid "$deviceIdKey": must not be empty.');
+    }
+    final BuildMode buildMode = _parseContextBuildMode(json.requiredField<String>(buildModeKey));
+    final project = ExtensionFlutterProject.fromJson(
+      json.requiredField<Map<String, Object?>>(projectKey),
+    );
+    final Uri? applicationBinaryUri = _parseOptionalFileUri(json, applicationBinaryUriKey);
+    final String? flavor = json.nullableField<String>(flavorKey);
+    if (flavor != null && flavor.isEmpty) {
+      throw const FormatException('Invalid "$flavorKey": must not be empty.');
+    }
+    return ExtensionApplicationResolutionContext(
+      applicationBinaryUri: applicationBinaryUri,
+      buildMode: buildMode,
+      deviceId: deviceId,
+      flavor: flavor,
+      project: project,
+    );
+  }
+
+  static BuildMode _parseContextBuildMode(String modeName) {
+    try {
+      return BuildMode.fromCliName(modeName);
+    } on ArgumentError catch (e) {
+      throw FormatException('Invalid "$buildModeKey": ${e.message}');
+    }
+  }
+
+  /// Map key for [applicationBinaryUri].
+  @visibleForTesting
+  static const String applicationBinaryUriKey = 'applicationBinaryUri';
+
+  /// Map key for [buildMode].
+  @visibleForTesting
+  static const String buildModeKey = 'buildMode';
+
+  /// Map key for [deviceId].
+  @visibleForTesting
+  static const String deviceIdKey = 'deviceId';
+
+  /// Map key for [flavor].
+  @visibleForTesting
+  static const String flavorKey = 'flavor';
+
+  /// Map key for [project].
+  @visibleForTesting
+  static const String projectKey = 'project';
+
+  /// User-supplied prebuilt application binary or archive URI passed via
+  /// `--use-application-binary`, or `null` when resolving from [project].
+  final Uri? applicationBinaryUri;
+
+  /// Target compilation mode (`debug`, `profile`, `release`, or `jitRelease`).
+  final BuildMode buildMode;
+
+  /// Target device identifier for which the application package is being
+  /// resolved.
+  final String deviceId;
+
+  /// Optional application flavor specified via `--flavor`.
+  final String? flavor;
+
+  /// The Flutter project being resolved.
+  final ExtensionFlutterProject project;
+
+  /// Serializes the application resolution context to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    applicationBinaryUriKey: ?applicationBinaryUri?.toString(),
+    buildModeKey: buildMode.cliName,
+    deviceIdKey: deviceId,
+    flavorKey: ?flavor,
+    projectKey: project.toMap(),
+  };
+
+  @override
+  String toString() =>
+      'ExtensionApplicationResolutionContext(deviceId: $deviceId, '
+      'buildMode: $buildMode, project: $project, '
+      'applicationBinaryUri: $applicationBinaryUri, flavor: $flavor)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionApplicationResolutionContext &&
+            other.applicationBinaryUri == applicationBinaryUri &&
+            other.buildMode == buildMode &&
+            other.deviceId == deviceId &&
+            other.flavor == flavor &&
+            other.project == project);
+  }
+
+  @override
+  int get hashCode => Object.hash(applicationBinaryUri, buildMode, deviceId, flavor, project);
+}
+
+/// Resolved platform application identity and expected bundle location for a
+/// custom target device.
+@immutable
+final class ExtensionApplicationPackage {
+  /// Creates a resolved application descriptor with its platform [appId] and
+  /// optional [bundleUri].
+  const ExtensionApplicationPackage({required this.appId, this.bundleUri})
+    : assert(appId != '', 'appId must not be empty.');
+
+  /// Deserializes an [ExtensionApplicationPackage] from a JSON-serializable
+  /// map.
+  ///
+  /// Throws a [FormatException] if [appIdKey] is missing or empty, or if
+  /// [bundleUriKey] is not a valid absolute `file:` file URI.
+  factory ExtensionApplicationPackage.fromJson(Map<String, Object?> json) {
+    final String appId = json.requiredField<String>(appIdKey);
+    if (appId.isEmpty) {
+      throw const FormatException('Invalid "$appIdKey": must not be empty.');
+    }
+    final Uri? bundleUri = _parseOptionalFileUri(json, bundleUriKey);
+    return ExtensionApplicationPackage(appId: appId, bundleUri: bundleUri);
+  }
+
+  /// Map key for [appId].
+  @visibleForTesting
+  static const String appIdKey = 'appId';
+
+  /// Map key for [bundleUri].
+  @visibleForTesting
+  static const String bundleUriKey = 'bundleUri';
+
+  /// Platform-specific application or bundle identifier (for example,
+  /// `'com.example.my_app'` from a platform manifest or prebuilt archive).
+  final String appId;
+
+  /// Expected application bundle or package URI for the requested
+  /// [ExtensionApplicationResolutionContext.buildMode] and
+  /// [ExtensionApplicationResolutionContext.flavor] (or
+  /// [ExtensionApplicationResolutionContext.applicationBinaryUri] when
+  /// supplied), or `null` only when the bundle location cannot be determined
+  /// without building.
+  final Uri? bundleUri;
+
+  /// Serializes the resolved application package to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    appIdKey: appId,
+    bundleUriKey: ?bundleUri?.toString(),
+  };
+
+  @override
+  String toString() => 'ExtensionApplicationPackage(appId: $appId, bundleUri: $bundleUri)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionApplicationPackage &&
+            other.appId == appId &&
+            other.bundleUri == bundleUri);
+  }
+
+  @override
+  int get hashCode => Object.hash(appId, bundleUri);
+}
+
+Uri? _parseOptionalFileUri(Map<String, Object?> json, String key) {
+  final String? rawUri = json.nullableField<String>(key);
+  if (rawUri == null) {
+    return null;
+  }
+  final Uri? uri = Uri.tryParse(rawUri);
+  if (uri != null && uri.isValidFileUri) {
+    return uri;
+  }
+  throw FormatException('Invalid "$key": must be an absolute "file:" file URI.');
 }

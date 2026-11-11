@@ -15,12 +15,11 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
-import 'package:flutter_tools_core/json.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:stream_channel/isolate_channel.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart';
@@ -90,15 +89,23 @@ final class _StreamingTestDeviceService extends DeviceService {
   Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
 
   @override
-  Future<bool> stopApp({required String deviceId}) async => false;
+  Future<bool> stopApp({required String deviceId, String? appId}) async {
+    eventSendPort.send(<String, Object?>{
+      _eventTypeKey: 'stopApp',
+      DeviceService.appIdParam: appId,
+      DeviceService.deviceIdParam: deviceId,
+    });
+    return true;
+  }
 
   @override
-  Future<void> startLogStream({required String deviceId}) async {
+  Future<void> startLogStream({required String deviceId, String? appId}) async {
     if (throwOnStart) {
       throw StateError('Simulated startLogStream failure');
     }
     eventSendPort.send(<String, Object?>{
       _eventTypeKey: _startEventType,
+      DeviceService.appIdParam: appId,
       DeviceService.deviceIdParam: deviceId,
     });
     for (final MapEntry(key: String sourceDeviceId, value: List<String> lines)
@@ -125,21 +132,27 @@ final class _TestDeviceService extends DeviceService {
   _TestDeviceService({
     this.onInstallApp,
     this.onIsAppInstalled,
+    this.onResolveApplication,
     this.onStartScreenRecording,
+    this.onStopApp,
     this.onStopScreenRecording,
     this.onTakeScreenshot,
     this.onUninstallApp,
   });
 
-  final Future<bool> Function(String deviceId, Uri bundleUri)? onInstallApp;
-  final Future<bool> Function(String deviceId, String? appId, ExtensionFlutterProject project)?
-  onIsAppInstalled;
+  final Future<void> Function(String deviceId, Uri bundleUri, bool prebuiltApplication)?
+  onInstallApp;
+  final Future<bool> Function(String deviceId, String appId)? onIsAppInstalled;
+  final Future<ExtensionApplicationPackage?> Function(
+    ExtensionApplicationResolutionContext context,
+  )?
+  onResolveApplication;
   final Future<void> Function(String deviceId, Uri outputFileUri, Duration? duration)?
   onStartScreenRecording;
+  final Future<bool> Function(String deviceId, String? appId)? onStopApp;
   final Future<Uri> Function(String deviceId)? onStopScreenRecording;
   final Future<void> Function(String deviceId, Uri outputFileUri)? onTakeScreenshot;
-  final Future<bool> Function(String deviceId, String? appId, ExtensionFlutterProject project)?
-  onUninstallApp;
+  final Future<void> Function(String deviceId, String appId)? onUninstallApp;
 
   @override
   Future<List<TargetDevice>> getDevices() async => const <TargetDevice>[];
@@ -149,6 +162,16 @@ final class _TestDeviceService extends DeviceService {
     required String deviceId,
     required ExtensionFlutterProject project,
   }) async => true;
+
+  @override
+  Future<ExtensionApplicationPackage?> resolveApplication(
+    ExtensionApplicationResolutionContext context,
+  ) async {
+    if (onResolveApplication case final callback?) {
+      return callback(context);
+    }
+    return super.resolveApplication(context);
+  }
 
   @override
   Future<bool> launchApp({
@@ -161,38 +184,43 @@ final class _TestDeviceService extends DeviceService {
   Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
 
   @override
-  Future<bool> stopApp({required String deviceId}) async => false;
+  Future<bool> stopApp({required String deviceId, String? appId}) async {
+    if (onStopApp case final callback?) {
+      return callback(deviceId, appId);
+    }
+    return false;
+  }
 
   @override
-  Future<bool> installApp({required Uri bundleUri, required String deviceId}) async {
+  Future<void> installApp({
+    required Uri bundleUri,
+    required String deviceId,
+    bool prebuiltApplication = false,
+  }) async {
     if (onInstallApp case final callback?) {
-      return callback(deviceId, bundleUri);
+      return callback(deviceId, bundleUri, prebuiltApplication);
     }
-    return super.installApp(bundleUri: bundleUri, deviceId: deviceId);
+    return super.installApp(
+      bundleUri: bundleUri,
+      deviceId: deviceId,
+      prebuiltApplication: prebuiltApplication,
+    );
   }
 
   @override
-  Future<bool> uninstallApp({
-    required String deviceId,
-    required ExtensionFlutterProject project,
-    String? appId,
-  }) async {
+  Future<void> uninstallApp({required String appId, required String deviceId}) async {
     if (onUninstallApp case final callback?) {
-      return callback(deviceId, appId, project);
+      return callback(deviceId, appId);
     }
-    return super.uninstallApp(appId: appId, deviceId: deviceId, project: project);
+    return super.uninstallApp(appId: appId, deviceId: deviceId);
   }
 
   @override
-  Future<bool> isAppInstalled({
-    required String deviceId,
-    required ExtensionFlutterProject project,
-    String? appId,
-  }) async {
+  Future<bool> isAppInstalled({required String appId, required String deviceId}) async {
     if (onIsAppInstalled case final callback?) {
-      return callback(deviceId, appId, project);
+      return callback(deviceId, appId);
     }
-    return super.isAppInstalled(appId: appId, deviceId: deviceId, project: project);
+    return super.isAppInstalled(appId: appId, deviceId: deviceId);
   }
 
   @override
@@ -234,13 +262,6 @@ final class _FakePrebuiltApplicationPackage extends ApplicationPackage
 
   @override
   final FileSystemEntity applicationPackage;
-
-  @override
-  String? get name => id;
-}
-
-final class _FakeNonPrebuiltApplicationPackage extends ApplicationPackage {
-  _FakeNonPrebuiltApplicationPackage({required super.id});
 
   @override
   String? get name => id;
@@ -311,6 +332,11 @@ _FakeExtensionBuildManager _createBuildManager({
   );
 }
 
+FakeToolContext _createToolContext({required Logger logger, FileSystem? fs}) {
+  final FileSystem resolvedFs = fs ?? MemoryFileSystem.test();
+  return FakeToolContext(fs: resolvedFs, logger: logger);
+}
+
 Matcher _isInvalidParamsRpcException() => isA<json_rpc.RpcException>().having(
   (json_rpc.RpcException e) => e.code,
   'code',
@@ -325,7 +351,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('streams log lines end-to-end from extension isolate to ExtensionBackedDevice.getLogReader().logLines', () async {
+    testWithoutContext('streams log lines end-to-end, forwards appId, and recreates log reader after dispose or appId change', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -357,9 +383,8 @@ void main() {
         buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: client,
-        fileSystem: MemoryFileSystem.test(),
-        logger: logger,
         targetDevice: targetDevices.first,
+        toolContext: _createToolContext(logger: logger),
       );
 
       final Future<Map<String, Object?>> startEventFuture = events.firstWhere(
@@ -368,9 +393,7 @@ void main() {
       final DeviceLogReader reader = await device.getLogReader();
       expect(await device.getLogReader(), same(reader));
 
-      final Future<List<String>> receivedLinesFuture = reader.logLines.take(2).toList();
-
-      final List<String> receivedLines = await receivedLinesFuture;
+      final List<String> receivedLines = await reader.logLines.take(2).toList();
       expect(
         receivedLines,
         equals(<String>['Booting application...', 'Flutter run key commands.']),
@@ -378,6 +401,26 @@ void main() {
 
       final Map<String, Object?> startEvent = await startEventFuture;
       expect(startEvent[DeviceService.deviceIdParam], equals(_primaryDeviceId));
+      expect(startEvent[DeviceService.appIdParam], isNull);
+
+      // Disposing the reader allows getLogReader to create a fresh reader, and passing app forwards appId.
+      await reader.dispose();
+      final Future<Map<String, Object?>> scopedStartEventFuture = events.firstWhere(
+        (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
+      );
+      final appPkg = ExtensionBackedApplicationPackage(id: 'com.example.custom_app');
+      final DeviceLogReader scopedReader = await device.getLogReader(app: appPkg);
+      expect(scopedReader, isNot(same(reader)));
+      final Map<String, Object?> scopedStartEvent = await scopedStartEventFuture;
+      expect(scopedStartEvent[DeviceService.appIdParam], 'com.example.custom_app');
+
+      // stopApp forwards appId when an ApplicationPackage is supplied.
+      final Future<Map<String, Object?>> stopAppEventFuture = events.firstWhere(
+        (Map<String, Object?> event) => event[_eventTypeKey] == 'stopApp',
+      );
+      expect(await device.stopApp(appPkg), isTrue);
+      final Map<String, Object?> stopAppEvent = await stopAppEventFuture;
+      expect(stopAppEvent[DeviceService.appIdParam], 'com.example.custom_app');
 
       final Future<Map<String, Object?>> stopEventFuture = events.firstWhere(
         (Map<String, Object?> event) => event[_eventTypeKey] == _stopEventType,
@@ -422,9 +465,8 @@ void main() {
           buildManager: _createBuildManager(logger: logger),
           connection: conn,
           deviceService: client,
-          fileSystem: MemoryFileSystem.test(),
-          logger: logger,
           targetDevice: targetDevices.firstWhere((TargetDevice d) => d.id == _primaryDeviceId),
+          toolContext: _createToolContext(logger: logger),
         );
         addTearDown(device.dispose);
 
@@ -563,7 +605,7 @@ void main() {
       },
     );
 
-    testWithoutContext('startLogStream and stopLogStream throw INVALID_PARAMS on missing, empty, or invalid parameters', () async {
+    testWithoutContext('startLogStream, stopLogStream, and stopApp throw INVALID_PARAMS on missing, empty, or invalid parameters', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final SendPort eventSendPort = eventPort.sendPort;
@@ -582,12 +624,12 @@ void main() {
       for (final method in <String>[
         DeviceService.startLogStreamMethod,
         DeviceService.stopLogStreamMethod,
+        DeviceService.stopAppMethod,
       ]) {
         await expectLater(
           conn.sendRequest(method, params: const <String, Object?>{}),
           throwsA(_isInvalidParamsRpcException()),
         );
-
         await expectLater(
           conn.sendRequest(
             method,
@@ -595,11 +637,36 @@ void main() {
           ),
           throwsA(_isInvalidParamsRpcException()),
         );
-
         await expectLater(
           conn.sendRequest(
             method,
             params: const <String, Object?>{DeviceService.deviceIdParam: 42},
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+      }
+
+      for (final method in <String>[
+        DeviceService.startLogStreamMethod,
+        DeviceService.stopAppMethod,
+      ]) {
+        await expectLater(
+          conn.sendRequest(
+            method,
+            params: const <String, Object?>{
+              DeviceService.deviceIdParam: _primaryDeviceId,
+              DeviceService.appIdParam: '',
+            },
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+        await expectLater(
+          conn.sendRequest(
+            method,
+            params: const <String, Object?>{
+              DeviceService.deviceIdParam: _primaryDeviceId,
+              DeviceService.appIdParam: 123,
+            },
           ),
           throwsA(_isInvalidParamsRpcException()),
         );
@@ -642,9 +709,8 @@ void main() {
         buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: client,
-        fileSystem: MemoryFileSystem.test(),
-        logger: logger,
         targetDevice: targetDevices.first,
+        toolContext: _createToolContext(logger: logger),
       );
       addTearDown(device.dispose);
 
@@ -698,8 +764,7 @@ void main() {
       final discovery = ExtensionDevices(
         extensionBuildManager: _createBuildManager(extensionManager: manager, logger: logger),
         extensionManager: manager,
-        fileSystem: MemoryFileSystem.test(),
-        logger: logger,
+        toolContext: _createToolContext(logger: logger),
       );
       addTearDown(discovery.dispose);
 
@@ -767,14 +832,13 @@ void main() {
           ),
           connection: conn,
           deviceService: client,
-          fileSystem: MemoryFileSystem.test(),
-          logger: logger,
           targetDevice: const TargetDevice(
             buildTarget: 'custom-linux-build',
             category: Category.desktop,
             id: 'test_device',
             name: 'Test Device',
           ),
+          toolContext: _createToolContext(logger: logger),
         );
         addTearDown(device.dispose);
 
@@ -856,7 +920,7 @@ void main() {
     });
   });
 
-  group('DeviceService RPC install and capture', () {
+  group('DeviceService RPC resolveApplication, install, and capture', () {
     late BufferLogger logger;
 
     setUp(() {
@@ -864,7 +928,7 @@ void main() {
     });
 
     testWithoutContext(
-      'handles installApp, uninstallApp, and isAppInstalled over RPC with appId and project',
+      'handles resolveApplication, installApp, uninstallApp, and isAppInstalled over RPC',
       () async {
         final events = <Map<String, Object?>>[];
         final eventsPort = ReceivePort();
@@ -884,42 +948,49 @@ void main() {
               sendPort,
               <ToolExtensionService>[
                 _TestDeviceService(
-                  onInstallApp: (String deviceId, Uri bundleUri) async {
+                  onResolveApplication: (ExtensionApplicationResolutionContext context) async {
+                    eventsSendPort.send(<String, Object?>{
+                      'method': 'resolveApplication',
+                      'deviceId': context.deviceId,
+                      'buildMode': context.buildMode.cliName,
+                      'flavor': context.flavor,
+                      'projectName': context.project.appName,
+                      'applicationBinaryUri': context.applicationBinaryUri?.toString(),
+                    });
+                    return ExtensionApplicationPackage(
+                      appId: 'com.example.${context.project.appName}',
+                      bundleUri:
+                          context.applicationBinaryUri ??
+                          context.project.buildDirectory.resolve(
+                            'custom_os/${context.buildMode.cliName}/app.pkg',
+                          ),
+                    );
+                  },
+                  onInstallApp: (String deviceId, Uri bundleUri, bool prebuiltApplication) async {
                     eventsSendPort.send(<String, Object?>{
                       'method': 'installApp',
                       'deviceId': deviceId,
                       'bundleUri': bundleUri.toString(),
+                      'prebuiltApplication': prebuiltApplication,
                     });
-                    installedApps.add('com.example.app');
-                    installedApps.add('project_app');
-                    return true;
+                    installedApps.add('com.example.project_app');
                   },
-                  onIsAppInstalled:
-                      (String deviceId, String? appId, ExtensionFlutterProject project) async {
-                        eventsSendPort.send(<String, Object?>{
-                          'method': 'isAppInstalled',
-                          'deviceId': deviceId,
-                          'appId': appId,
-                          'projectName': project.appName,
-                        });
-                        return (appId != null && installedApps.contains(appId)) ||
-                            installedApps.contains(project.appName);
-                      },
-                  onUninstallApp:
-                      (String deviceId, String? appId, ExtensionFlutterProject project) async {
-                        eventsSendPort.send(<String, Object?>{
-                          'method': 'uninstallApp',
-                          'deviceId': deviceId,
-                          'appId': appId,
-                          'projectName': project.appName,
-                        });
-                        var removed = false;
-                        if (appId != null) {
-                          removed = installedApps.remove(appId) || removed;
-                        }
-                        removed = installedApps.remove(project.appName) || removed;
-                        return removed;
-                      },
+                  onIsAppInstalled: (String deviceId, String appId) async {
+                    eventsSendPort.send(<String, Object?>{
+                      'method': 'isAppInstalled',
+                      'deviceId': deviceId,
+                      'appId': appId,
+                    });
+                    return installedApps.contains(appId);
+                  },
+                  onUninstallApp: (String deviceId, String appId) async {
+                    eventsSendPort.send(<String, Object?>{
+                      'method': 'uninstallApp',
+                      'deviceId': deviceId,
+                      'appId': appId,
+                    });
+                    installedApps.remove(appId);
+                  },
                 ),
               ],
               supportedPlatforms: const <String>{'linux'},
@@ -935,46 +1006,61 @@ void main() {
         final client = ExtensionDeviceClient(conn, logger: logger);
 
         const deviceId = 'device-1';
-        const appId = 'com.example.app';
-        final bundleUri = Uri.file('/tmp/build/app.bundle');
         final project = ExtensionFlutterProject(
           appName: 'project_app',
           buildDirectory: Uri.directory('/tmp/project/build/'),
           directory: Uri.directory('/tmp/project/'),
         );
 
-        expect(
-          await client.isAppInstalled(appId: appId, deviceId: deviceId, project: project),
-          isFalse,
+        final ExtensionApplicationPackage? resolved = await client.resolveApplication(
+          ExtensionApplicationResolutionContext(
+            buildMode: BuildMode.release,
+            deviceId: deviceId,
+            flavor: 'staging',
+            project: project,
+          ),
         );
-        expect(await client.installApp(bundleUri: bundleUri, deviceId: deviceId), isTrue);
+        expect(resolved, isNotNull);
+        expect(resolved!.appId, 'com.example.project_app');
+        expect(
+          resolved.bundleUri,
+          Uri.parse('file:///tmp/project/build/custom_os/release/app.pkg'),
+        );
 
-        expect(
-          await client.isAppInstalled(appId: appId, deviceId: deviceId, project: project),
-          isTrue,
+        expect(await client.isAppInstalled(appId: resolved.appId, deviceId: deviceId), isFalse);
+        await client.installApp(
+          bundleUri: resolved.bundleUri!,
+          deviceId: deviceId,
+          prebuiltApplication: true,
         );
-        expect(await client.isAppInstalled(deviceId: deviceId, project: project), isTrue);
-        expect(
-          await client.uninstallApp(appId: appId, deviceId: deviceId, project: project),
-          isTrue,
-        );
-        expect(
-          await client.isAppInstalled(appId: appId, deviceId: deviceId, project: project),
-          isFalse,
-        );
-        expect(await client.isAppInstalled(deviceId: deviceId, project: project), isFalse);
+        expect(await client.isAppInstalled(appId: resolved.appId, deviceId: deviceId), isTrue);
+        await client.uninstallApp(appId: resolved.appId, deviceId: deviceId);
+        expect(await client.isAppInstalled(appId: resolved.appId, deviceId: deviceId), isFalse);
         await pumpEventQueue();
 
         expect(
           events,
-          contains(
-            equals(<String, Object?>{
+          containsAll(<Object>[
+            <String, Object?>{
+              'method': 'resolveApplication',
+              'deviceId': deviceId,
+              'buildMode': 'release',
+              'flavor': 'staging',
+              'projectName': 'project_app',
+              'applicationBinaryUri': null,
+            },
+            <String, Object?>{
+              'method': 'installApp',
+              'deviceId': deviceId,
+              'bundleUri': 'file:///tmp/project/build/custom_os/release/app.pkg',
+              'prebuiltApplication': true,
+            },
+            <String, Object?>{
               'method': 'uninstallApp',
               'deviceId': deviceId,
-              'appId': appId,
-              'projectName': 'project_app',
-            }),
-          ),
+              'appId': 'com.example.project_app',
+            },
+          ]),
         );
       },
     );
@@ -1067,7 +1153,7 @@ void main() {
       },
     );
 
-    testWithoutContext('default DeviceService implementations return false for install methods and throw for capture', () async {
+    testWithoutContext('default DeviceService returns null from resolveApplication and throws UnsupportedError for install and capture', () async {
       void entryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(
@@ -1089,18 +1175,28 @@ void main() {
         directory: Uri.directory('/tmp/project/'),
       );
       expect(
-        await client.installApp(bundleUri: Uri.file('/tmp/app.bundle'), deviceId: deviceId),
-        isFalse,
-      );
-      expect(
-        await client.uninstallApp(appId: 'com.example.app', deviceId: deviceId, project: project),
-        isFalse,
-      );
-      expect(
-        await client.isAppInstalled(appId: 'com.example.app', deviceId: deviceId, project: project),
-        isFalse,
+        await client.resolveApplication(
+          ExtensionApplicationResolutionContext(
+            buildMode: BuildMode.debug,
+            deviceId: deviceId,
+            project: project,
+          ),
+        ),
+        isNull,
       );
 
+      await expectLater(
+        client.installApp(bundleUri: Uri.file('/tmp/app.bundle'), deviceId: deviceId),
+        throwsA(isA<json_rpc.RpcException>()),
+      );
+      await expectLater(
+        client.uninstallApp(appId: 'com.example.app', deviceId: deviceId),
+        throwsA(isA<json_rpc.RpcException>()),
+      );
+      await expectLater(
+        client.isAppInstalled(appId: 'com.example.app', deviceId: deviceId),
+        throwsA(isA<json_rpc.RpcException>()),
+      );
       await expectLater(
         client.takeScreenshot(deviceId: deviceId, outputFileUri: Uri.file('/tmp/out.png')),
         throwsA(isA<json_rpc.RpcException>()),
@@ -1134,7 +1230,71 @@ void main() {
         );
         addTearDown(conn.dispose);
 
-        // installApp: empty deviceId, relative bundleUri, non-file bundleUri, trailing-slash directory bundleUri.
+        const validProjectMap = <String, Object?>{
+          ExtensionFlutterProject.appNameKey: 'my_app',
+          ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
+          ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
+        };
+
+        // resolveApplication: missing deviceId, empty deviceId, invalid buildMode, invalid applicationBinaryUri, empty flavor.
+        await expectLater(
+          conn.sendRequest(
+            DeviceService.resolveApplicationMethod,
+            params: <String, Object?>{
+              ExtensionApplicationResolutionContext.buildModeKey: 'debug',
+              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+            },
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+        await expectLater(
+          conn.sendRequest(
+            DeviceService.resolveApplicationMethod,
+            params: <String, Object?>{
+              ExtensionApplicationResolutionContext.buildModeKey: 'debug',
+              ExtensionApplicationResolutionContext.deviceIdKey: '',
+              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+            },
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+        await expectLater(
+          conn.sendRequest(
+            DeviceService.resolveApplicationMethod,
+            params: <String, Object?>{
+              ExtensionApplicationResolutionContext.buildModeKey: 'invalid_mode',
+              ExtensionApplicationResolutionContext.deviceIdKey: 'device-1',
+              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+            },
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+        await expectLater(
+          conn.sendRequest(
+            DeviceService.resolveApplicationMethod,
+            params: <String, Object?>{
+              ExtensionApplicationResolutionContext.applicationBinaryUriKey: 'relative/app.pkg',
+              ExtensionApplicationResolutionContext.buildModeKey: 'debug',
+              ExtensionApplicationResolutionContext.deviceIdKey: 'device-1',
+              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+            },
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+        await expectLater(
+          conn.sendRequest(
+            DeviceService.resolveApplicationMethod,
+            params: <String, Object?>{
+              ExtensionApplicationResolutionContext.buildModeKey: 'debug',
+              ExtensionApplicationResolutionContext.deviceIdKey: 'device-1',
+              ExtensionApplicationResolutionContext.flavorKey: '',
+              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+            },
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+
+        // installApp: empty deviceId, relative bundleUri, non-file bundleUri, trailing-slash directory bundleUri, non-bool prebuiltApplication.
         await expectLater(
           conn.sendRequest(
             DeviceService.installAppMethod,
@@ -1175,13 +1335,19 @@ void main() {
           ),
           throwsA(_isInvalidParamsRpcException()),
         );
+        await expectLater(
+          conn.sendRequest(
+            DeviceService.installAppMethod,
+            params: <String, Object?>{
+              DeviceService.deviceIdParam: 'device-1',
+              DeviceService.bundleUriParam: 'file:///tmp/app.bundle',
+              DeviceService.prebuiltApplicationParam: 'yes',
+            },
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
 
-        // uninstallApp & isAppInstalled: empty deviceId, empty appId, missing project, invalid project.
-        const validProjectMap = <String, Object?>{
-          ExtensionFlutterProject.appNameKey: 'my_app',
-          ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
-          ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
-        };
+        // uninstallApp & isAppInstalled: empty deviceId, missing appId, empty appId, non-String appId.
         for (final method in const <String>[
           DeviceService.uninstallAppMethod,
           DeviceService.isAppInstalledMethod,
@@ -1192,8 +1358,14 @@ void main() {
               params: <String, Object?>{
                 DeviceService.deviceIdParam: '',
                 DeviceService.appIdParam: 'com.example.app',
-                DeviceService.projectParam: validProjectMap,
               },
+            ),
+            throwsA(_isInvalidParamsRpcException()),
+          );
+          await expectLater(
+            conn.sendRequest(
+              method,
+              params: <String, Object?>{DeviceService.deviceIdParam: 'device-1'},
             ),
             throwsA(_isInvalidParamsRpcException()),
           );
@@ -1203,7 +1375,6 @@ void main() {
               params: <String, Object?>{
                 DeviceService.deviceIdParam: 'device-1',
                 DeviceService.appIdParam: '',
-                DeviceService.projectParam: validProjectMap,
               },
             ),
             throwsA(_isInvalidParamsRpcException()),
@@ -1213,31 +1384,7 @@ void main() {
               method,
               params: <String, Object?>{
                 DeviceService.deviceIdParam: 'device-1',
-                DeviceService.appIdParam: 'com.example.app',
-              },
-            ),
-            throwsA(_isInvalidParamsRpcException()),
-          );
-          await expectLater(
-            conn.sendRequest(
-              method,
-              params: <String, Object?>{
-                DeviceService.deviceIdParam: 'device-1',
-                DeviceService.projectParam: const <String, Object?>{},
-              },
-            ),
-            throwsA(_isInvalidParamsRpcException()),
-          );
-          await expectLater(
-            conn.sendRequest(
-              method,
-              params: <String, Object?>{
-                DeviceService.deviceIdParam: 'device-1',
-                DeviceService.projectParam: <String, Object?>{
-                  ExtensionFlutterProject.appNameKey: 'my_app',
-                  ExtensionFlutterProject.buildDirectoryKey: 'relative/build/',
-                  ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
-                },
+                DeviceService.appIdParam: 42,
               },
             ),
             throwsA(_isInvalidParamsRpcException()),
@@ -1325,29 +1472,48 @@ void main() {
           ),
           throwsA(_isInvalidParamsRpcException()),
         );
+
+        // stopApp: empty appId is rejected with INVALID_PARAMS.
+        await expectLater(
+          conn.sendRequest(
+            DeviceService.stopAppMethod,
+            params: <String, Object?>{
+              DeviceService.deviceIdParam: 'device-1',
+              DeviceService.appIdParam: '',
+            },
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
       },
     );
   });
 
-  group('ExtensionBackedDevice delegation', () {
+  group('ExtensionBackedDevice resolveApplicationPackage and delegation', () {
     late MemoryFileSystem fs;
     late BufferLogger logger;
 
     setUp(() {
       fs = MemoryFileSystem.test();
+      fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: test_project_app\n');
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('delegates installApp (prebuilt and buildTarget), uninstallApp, isAppInstalled (with project forwarding), takeScreenshot, startScreenRecording, and stopScreenRecording', () async {
-      final receivedInstallUris = <Uri>[];
-      final receivedProjectNames = <String?>[];
+    testWithoutContext('resolves application via resolveApplication, falls back on null and METHOD_NOT_FOUND (-32601), and delegates install/uninstall/capture without building during install', () async {
+      final receivedInstalls = <({Uri bundleUri, bool prebuiltApplication})>[];
+      final receivedStops = <String?>[];
       final eventsPort = ReceivePort();
       addTearDown(eventsPort.close);
       final StreamSubscription<Object?> sub = eventsPort.listen((Object? message) {
-        if (message case {'installUri': final String installUriStr}) {
-          receivedInstallUris.add(Uri.parse(installUriStr));
-        } else if (message case {'projectName': final String? projectName}) {
-          receivedProjectNames.add(projectName);
+        if (message case {
+          'installUri': final String installUriStr,
+          'prebuilt': final bool prebuilt,
+        }) {
+          receivedInstalls.add((
+            bundleUri: Uri.parse(installUriStr),
+            prebuiltApplication: prebuilt,
+          ));
+        } else if (message case {'stopAppId': final String? stopAppId}) {
+          receivedStops.add(stopAppId);
         }
       });
       addTearDown(sub.cancel);
@@ -1361,31 +1527,36 @@ void main() {
             sendPort,
             <ToolExtensionService>[
               _TestDeviceService(
-                onInstallApp: (String deviceId, Uri bundleUri) async {
-                  eventsSendPort.send(<String, Object?>{'installUri': bundleUri.toString()});
-                  if (bundleUri.isValidFileUri) {
-                    installedApps.add('com.example.prebuilt');
-                    installedApps.add('test_project_app');
-                    return true;
+                onResolveApplication: (ExtensionApplicationResolutionContext context) async {
+                  if (context.flavor == 'fallback_null') {
+                    return null;
                   }
-                  return false;
+                  return ExtensionApplicationPackage(
+                    appId: 'com.custom.${context.project.appName}',
+                    bundleUri:
+                        context.applicationBinaryUri ??
+                        context.project.buildDirectory.resolve(
+                          'custom_os/${context.buildMode.cliName}/app.pkg',
+                        ),
+                  );
                 },
-                onIsAppInstalled:
-                    (String deviceId, String? appId, ExtensionFlutterProject project) async {
-                      eventsSendPort.send(<String, Object?>{'projectName': project.appName});
-                      return (appId != null && installedApps.contains(appId)) ||
-                          installedApps.contains(project.appName);
-                    },
-                onUninstallApp:
-                    (String deviceId, String? appId, ExtensionFlutterProject project) async {
-                      eventsSendPort.send(<String, Object?>{'projectName': project.appName});
-                      var removed = false;
-                      if (appId != null) {
-                        removed = installedApps.remove(appId) || removed;
-                      }
-                      removed = installedApps.remove(project.appName) || removed;
-                      return removed;
-                    },
+                onInstallApp: (String deviceId, Uri bundleUri, bool prebuiltApplication) async {
+                  eventsSendPort.send(<String, Object?>{
+                    'installUri': bundleUri.toString(),
+                    'prebuilt': prebuiltApplication,
+                  });
+                  installedApps.add('com.custom.test_project_app');
+                },
+                onIsAppInstalled: (String deviceId, String appId) async {
+                  return installedApps.contains(appId);
+                },
+                onStopApp: (String deviceId, String? appId) async {
+                  eventsSendPort.send(<String, Object?>{'stopAppId': appId});
+                  return true;
+                },
+                onUninstallApp: (String deviceId, String appId) async {
+                  installedApps.remove(appId);
+                },
                 onTakeScreenshot: (String deviceId, Uri outputFileUri) async {},
                 onStartScreenRecording:
                     (String deviceId, Uri outputFileUri, Duration? duration) async {
@@ -1404,12 +1575,7 @@ void main() {
       final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
       addTearDown(conn.dispose);
       final client = ExtensionDeviceClient(conn, logger: logger);
-
-      final builtBundleUri = Uri.file('/build/output/custom_bundle.bin');
-      final _FakeExtensionBuildManager buildManager = _createBuildManager(
-        buildResult: ExtensionBuildResult(executableUri: builtBundleUri, success: true),
-        logger: logger,
-      );
+      final _FakeExtensionBuildManager buildManager = _createBuildManager(logger: logger);
 
       const targetDevice = TargetDevice(
         buildTarget: 'custom-linux-build',
@@ -1419,56 +1585,120 @@ void main() {
         supportsInstall: true,
         supportsScreenRecording: true,
         supportsScreenshot: true,
+        targetPlatform: 'custom-embedder-arm64',
       );
       final device = ExtensionBackedDevice(
         buildManager: buildManager,
         connection: conn,
         deviceService: client,
-        fileSystem: fs,
-        logger: logger,
         targetDevice: targetDevice,
+        toolContext: _createToolContext(fs: fs, logger: logger),
       );
 
+      expect(await device.targetPlatform, TargetPlatform.unsupported);
       expect(device.supportsInstall, isTrue);
       expect(device.supportsScreenshot, isTrue);
       expect(device.supportsScreenRecording, isTrue);
 
-      final File bundleFile = fs.file('/build/app.apk')..createSync(recursive: true);
-      final app = _FakePrebuiltApplicationPackage(
-        id: 'com.example.prebuilt',
-        applicationPackage: bundleFile,
-      );
-
-      expect(await device.isAppInstalled(app), isFalse);
-      expect(await device.installApp(app), isTrue);
-      expect(await device.isAppInstalled(app), isTrue);
-      expect(await device.uninstallApp(app), isTrue);
-      expect(await device.isAppInstalled(app), isFalse);
-      expect(receivedInstallUris.first, equals(bundleFile.absolute.uri));
-
-      // Non-prebuilt install via ExtensionApplicationPackage triggers ExtensionBuildManager.build
-      // and forwards ExtensionFlutterProject on isAppInstalled and uninstallApp.
-      fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: test_project_app\n');
-      final FlutterProject flutterProject = FlutterProjectFactory(
-        fileSystem: fs,
-        logger: logger,
-      ).fromDirectory(fs.currentDirectory);
-      final extensionApp = ExtensionApplicationPackage(
-        id: 'test_project_app',
+      // Prebuilt package resolution wraps in PrebuiltExtensionBackedApplicationPackage.
+      final File prebuiltFile = fs.file('/prebuilt/custom_archive.pkg')
+        ..createSync(recursive: true);
+      final ApplicationPackage? prebuiltPkg = await device.resolveApplicationPackage(
+        applicationBinary: prebuiltFile,
         buildInfo: BuildInfo.release,
-        project: flutterProject,
+      );
+      expect(prebuiltPkg, isA<PrebuiltExtensionBackedApplicationPackage>());
+      expect(prebuiltPkg, isA<PrebuiltApplicationPackage>());
+      expect(prebuiltPkg!.id, 'com.custom.test_project_app');
+      expect(prebuiltPkg.name, 'custom_archive.pkg');
+
+      expect(await device.isAppInstalled(prebuiltPkg), isFalse);
+      expect(await device.installApp(prebuiltPkg), isTrue);
+      expect(await device.isAppInstalled(prebuiltPkg), isTrue);
+      expect(await device.uninstallApp(prebuiltPkg), isTrue);
+      expect(await device.isAppInstalled(prebuiltPkg), isFalse);
+
+      // Non-prebuilt package resolution does NOT build on install; fails when missing on disk.
+      final ApplicationPackage? builtPkg = await device.resolveApplicationPackage(
+        buildInfo: BuildInfo.release,
+      );
+      expect(builtPkg, isA<ExtensionBackedApplicationPackage>());
+      expect(builtPkg, isNot(isA<PrebuiltApplicationPackage>()));
+      expect(builtPkg!.id, 'com.custom.test_project_app');
+
+      expect(await device.installApp(builtPkg), isFalse);
+      expect(buildManager.buildCalls, isEmpty);
+      expect(
+        logger.errorText,
+        contains(
+          'Run "flutter build custom-linux-build" first, or pass "--use-application-binary".',
+        ),
       );
 
-      expect(await device.installApp(extensionApp), isTrue);
-      expect(buildManager.buildCalls, hasLength(1));
-      expect(buildManager.buildCalls.single.buildMode, BuildMode.release);
-      expect(buildManager.buildCalls.single.targetName, 'custom-linux-build');
-      expect(receivedInstallUris.last, equals(builtBundleUri));
+      // Once the built bundle exists on disk, installApp installs it with prebuiltApplication: false.
+      logger.clear();
+      final Uri expectedBuiltUri = (builtPkg as ExtensionBackedApplicationPackage).bundleUri!;
+      fs.file(expectedBuiltUri).createSync(recursive: true);
+      expect(await device.installApp(builtPkg), isTrue);
+      expect(buildManager.buildCalls, isEmpty);
+      await pumpEventQueue();
+      expect(receivedInstalls, <({Uri bundleUri, bool prebuiltApplication})>[
+        (bundleUri: prebuiltFile.absolute.uri, prebuiltApplication: true),
+        (bundleUri: expectedBuiltUri, prebuiltApplication: false),
+      ]);
 
-      expect(await device.isAppInstalled(extensionApp), isTrue);
-      expect(await device.uninstallApp(extensionApp), isTrue);
-      expect(await device.isAppInstalled(extensionApp), isFalse);
-      expect(receivedProjectNames, contains('test_project_app'));
+      expect(await device.stopApp(builtPkg), isTrue);
+      expect(await device.stopApp(null), isTrue);
+      await pumpEventQueue();
+      expect(receivedStops, <String?>['com.custom.test_project_app', null]);
+
+      // Fallback when resolveApplication returns null uses pubspec name and applicationBinaryUri.
+      final ApplicationPackage? fallbackPkg = await device.resolveApplicationPackage(
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          'fallback_null',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
+      );
+      expect(fallbackPkg, isA<ExtensionBackedApplicationPackage>());
+      expect(fallbackPkg!.id, 'test_project_app');
+      expect((fallbackPkg as ExtensionBackedApplicationPackage).bundleUri, isNull);
+
+      // Fallback when an older extension returns -32601 (METHOD_NOT_FOUND).
+      void legacyEntryPoint(SendPort sendPort) {
+        final channel = IsolateChannel<Object?>.connectSend(sendPort);
+        final peer = json_rpc.Peer.withoutJson(channel)
+          ..registerMethod(ToolExtensionEntryPoint.getCapabilitiesMethod, () {
+            return const ToolExtensionCapabilities(
+              extensionName: 'legacy_device_ext',
+              services: <String>[DeviceService.serviceNamespace],
+              supportedPlatforms: <String>{'linux'},
+            ).toMap();
+          });
+        unawaited(peer.listen());
+      }
+
+      final ExtensionConnection legacyConn = await ExtensionConnection.spawn(
+        legacyEntryPoint,
+        logger: logger,
+      );
+      addTearDown(legacyConn.dispose);
+      final legacyDevice = ExtensionBackedDevice(
+        buildManager: buildManager,
+        connection: legacyConn,
+        deviceService: ExtensionDeviceClient(legacyConn, logger: logger),
+        targetDevice: targetDevice,
+        toolContext: _createToolContext(fs: fs, logger: logger),
+      );
+      logger.clear();
+      final ApplicationPackage? legacyFallback = await legacyDevice.resolveApplicationPackage(
+        applicationBinary: prebuiltFile,
+        buildInfo: BuildInfo.debug,
+      );
+      expect(legacyFallback, isA<PrebuiltExtensionBackedApplicationPackage>());
+      expect(legacyFallback!.id, 'test_project_app');
+      expect(logger.errorText, isEmpty);
 
       final File screenshotFile = fs.file('/captures/screen.png');
       await device.takeScreenshot(screenshotFile);
@@ -1479,65 +1709,23 @@ void main() {
       expect(savedRecordingUri, equals(recordingFile.absolute.uri));
     });
 
-    testWithoutContext(
-      'installApp without prebuilt binary fails when device has no buildTarget',
-      () async {
-        void entryPoint(SendPort sendPort) {
-          unawaited(
-            ToolExtensionEntryPoint.run(
-              sendPort,
-              <ToolExtensionService>[_TestDeviceService()],
-              supportedPlatforms: const <String>{'linux'},
-            ),
-          );
-        }
-
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          entryPoint,
-          logger: logger,
-        );
-        addTearDown(conn.dispose);
-        final client = ExtensionDeviceClient(conn, logger: logger);
-
-        final device = ExtensionBackedDevice(
-          buildManager: _createBuildManager(logger: logger),
-          connection: conn,
-          deviceService: client,
-          fileSystem: fs,
-          logger: logger,
-          targetDevice: const TargetDevice(
-            category: Category.mobile,
-            id: 'ext-device-no-build-target',
-            name: 'Extension Device No Build Target',
-            supportsInstall: true,
-          ),
-        );
-
-        final nonPrebuiltApp = _FakeNonPrebuiltApplicationPackage(id: 'com.example.nonprebuilt');
-        expect(await device.installApp(nonPrebuiltApp), isFalse);
-        expect(
-          logger.errorText,
-          contains(
-            'Device Extension Device No Build Target does not specify a buildTarget for installing applications.',
-          ),
-        );
-      },
-    );
-
-    testWithoutContext('isAppInstalled, installApp, and uninstallApp handle !supportsInstall, catch RPC and peer-exit exceptions, and propagate host errors', () async {
+    testWithoutContext('handles !supportsInstall no-op semantics, catches RPC and peer-exit exceptions with printError, and propagates host errors', () async {
       void failingEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(
             sendPort,
             <ToolExtensionService>[
               _TestDeviceService(
-                onInstallApp: (String _, Uri _) async {
+                onResolveApplication: (ExtensionApplicationResolutionContext _) async {
+                  throw StateError('Simulated resolve failure');
+                },
+                onInstallApp: (String _, Uri _, bool _) async {
                   throw StateError('Simulated install failure');
                 },
-                onIsAppInstalled: (String _, String? _, ExtensionFlutterProject _) async {
+                onIsAppInstalled: (String _, String _) async {
                   throw StateError('Simulated isAppInstalled failure');
                 },
-                onUninstallApp: (String _, String? _, ExtensionFlutterProject _) async {
+                onUninstallApp: (String _, String _) async {
                   throw StateError('Simulated uninstall failure');
                 },
               ),
@@ -1555,7 +1743,7 @@ void main() {
       addTearDown(conn.dispose);
       final client = ExtensionDeviceClient(conn, logger: logger);
 
-      final File bundleFile = fs.file('/build/app.apk')..createSync(recursive: true);
+      final File bundleFile = fs.file('/build/app.pkg')..createSync(recursive: true);
       final app = _FakePrebuiltApplicationPackage(
         id: 'com.example.app',
         applicationPackage: bundleFile,
@@ -1567,13 +1755,12 @@ void main() {
         buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: client,
-        fileSystem: fs,
-        logger: logger,
         targetDevice: const TargetDevice(
           category: Category.desktop,
           id: 'ext-device-no-install',
           name: 'No Install Extension Device',
         ),
+        toolContext: _createToolContext(fs: fs, logger: logger),
       );
       expect(unsupportedInstallDevice.supportsInstall, isFalse);
       expect(unsupportedInstallDevice.supportsScreenshot, isFalse);
@@ -1581,7 +1768,7 @@ void main() {
       expect(await unsupportedInstallDevice.isAppInstalled(app), isFalse);
       expect(await unsupportedInstallDevice.installApp(app), isTrue);
       expect(await unsupportedInstallDevice.uninstallApp(app), isTrue);
-      expect(logger.warningText, isEmpty);
+      expect(logger.errorText, isEmpty);
 
       const targetDevice = TargetDevice(
         category: Category.mobile,
@@ -1593,47 +1780,57 @@ void main() {
         buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: client,
-        fileSystem: fs,
-        logger: logger,
         targetDevice: targetDevice,
+        toolContext: _createToolContext(fs: fs, logger: logger),
       );
 
+      expect(await device.resolveApplicationPackage(buildInfo: BuildInfo.debug), isNull);
+      expect(
+        logger.errorText,
+        contains(
+          'Failed to resolve application for "ext-device-fail" ("failing_device_extension")',
+        ),
+      );
+
+      logger.clear();
       expect(await device.isAppInstalled(app), isFalse);
       expect(
-        logger.warningText,
+        logger.errorText,
         contains(
           'Failed to check if application "com.example.app" is installed on '
           '"ext-device-fail" ("failing_device_extension")',
         ),
       );
 
+      logger.clear();
       expect(await device.installApp(app), isFalse);
       expect(
-        logger.warningText,
+        logger.errorText,
         contains(
           'Failed to install application "com.example.app" on '
           '"ext-device-fail" ("failing_device_extension")',
         ),
       );
 
+      logger.clear();
       expect(await device.uninstallApp(app), isFalse);
       expect(
-        logger.warningText,
+        logger.errorText,
         contains(
           'Failed to uninstall application "com.example.app" from '
           '"ext-device-fail" ("failing_device_extension")',
         ),
       );
 
-      // When the extension isolate exits unexpectedly during installApp, both installApp
-      // and a subsequent isAppInstalled catch ExtensionConnectionException and log warnings.
+      // When the extension isolate exits mid-RPC during installApp, both installApp
+      // and a subsequent isAppInstalled catch ExtensionConnectionException and log errors.
       void exitingEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(
             sendPort,
             <ToolExtensionService>[
               _TestDeviceService(
-                onInstallApp: (String _, Uri _) async {
+                onInstallApp: (String _, Uri _, bool _) async {
                   Isolate.exit();
                 },
               ),
@@ -1653,15 +1850,14 @@ void main() {
         buildManager: _createBuildManager(logger: logger),
         connection: exitingConn,
         deviceService: ExtensionDeviceClient(exitingConn, logger: logger),
-        fileSystem: fs,
-        logger: logger,
         targetDevice: targetDevice,
+        toolContext: _createToolContext(fs: fs, logger: logger),
       );
 
       logger.clear();
       expect(await exitingDevice.installApp(app), isFalse);
       expect(
-        logger.warningText,
+        logger.errorText,
         contains(
           'Failed to install application "com.example.app" on '
           '"ext-device-fail" ("exiting_device_extension")',
@@ -1670,7 +1866,7 @@ void main() {
       logger.clear();
       expect(await exitingDevice.isAppInstalled(app), isFalse);
       expect(
-        logger.warningText,
+        logger.errorText,
         contains(
           'Failed to check if application "com.example.app" is installed on '
           '"ext-device-fail" ("exiting_device_extension")',
@@ -1681,15 +1877,12 @@ void main() {
         buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: _TestDeviceService(
-          onInstallApp: (String _, Uri _) => Future<bool>.error(StateError('Host bug')),
-          onIsAppInstalled: (String _, String? _, ExtensionFlutterProject _) =>
-              Future<bool>.error(StateError('Host bug')),
-          onUninstallApp: (String _, String? _, ExtensionFlutterProject _) =>
-              Future<bool>.error(StateError('Host bug')),
+          onInstallApp: (String _, Uri _, bool _) => Future<void>.error(StateError('Host bug')),
+          onIsAppInstalled: (String _, String _) => Future<bool>.error(StateError('Host bug')),
+          onUninstallApp: (String _, String _) => Future<void>.error(StateError('Host bug')),
         ),
-        fileSystem: fs,
-        logger: logger,
         targetDevice: targetDevice,
+        toolContext: _createToolContext(fs: fs, logger: logger),
       );
       await expectLater(directErrorDevice.isAppInstalled(app), throwsStateError);
       await expectLater(directErrorDevice.installApp(app), throwsStateError);
