@@ -5031,6 +5031,75 @@ TEST_F(EmbedderTest, RenderExternalTextureWithImpellerOpenGL) {
       ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
 }
 
+TEST_F(EmbedderTest, RenderUnsupportedTextureTargetWithImpellerOpenGL) {
+  constexpr int kWidth = 800;
+  constexpr int kHeight = 600;
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+  EmbedderConfigBuilder builder(context);
+  fml::AutoResetWaitableEvent latch;
+  context.SetGLPresentCallback(
+      [&](FlutterPresentInfo present_info) { latch.Signal(); });
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(kWidth, kHeight));
+
+  static std::atomic<bool> callback_called;
+  callback_called = false;
+  context.GetRendererConfig().open_gl.gl_external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterOpenGLTexture* texture) -> bool {
+    callback_called = true;
+
+    // The target is rejected before the texture is used, so no GL texture is
+    // needed.
+    texture->target = GL_TEXTURE_CUBE_MAP;
+    texture->format = GL_RGBA8;
+    texture->width = width;
+    texture->height = height;
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+
+  constexpr int texture_id = 1;
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  // The texture is resolved on the raster thread, so capture its log there.
+  fml::RefPtr<fml::TaskRunner> raster_task_runner =
+      embedder_engine->GetShell().GetTaskRunners().GetRasterTaskRunner();
+  std::ostringstream log;
+  fml::AutoResetWaitableEvent capture_latch;
+  raster_task_runner->PostTask([&] {
+    fml::LogMessage::CaptureNextLog(&log);
+    capture_latch.Signal();
+  });
+  capture_latch.Wait();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = kWidth;
+  event.height = kHeight;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  latch.Wait();
+  EXPECT_TRUE(callback_called);
+
+  raster_task_runner->PostTask([&] {
+    fml::LogMessage::CaptureNextLog(nullptr);
+    capture_latch.Signal();
+  });
+  capture_latch.Wait();
+  EXPECT_NE(log.str().find("Unsupported texture target " +
+                           std::to_string(GL_TEXTURE_CUBE_MAP)),
+            std::string::npos);
+}
+
 TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGLDestructCallback) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
