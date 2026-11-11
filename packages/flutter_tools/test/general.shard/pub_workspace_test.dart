@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
-  final FileSystem fs = globals.localFileSystem;
+  final FileSystem fs = LocalFileSystem.test(signals: FakeSignals());
   final String flutterToolsRoot = fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
   const expectedWorkspaceMembers = <String>[
     'packages/flutter_tools_core',

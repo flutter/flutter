@@ -8,9 +8,9 @@ import 'dart:io';
 import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
+import '../test_utils.dart';
 import 'test_client.dart';
 import 'test_server.dart';
 
@@ -99,10 +99,10 @@ class SimpleFlutterRunner {
 
   static Future<SimpleFlutterRunner> start(Directory projectDirectory) async {
     final String flutterRoot = getFlutterRoot();
-    final String flutterToolPath = globals.fs.path.join(
+    final String flutterToolPath = fileSystem.path.join(
       flutterRoot,
       'bin',
-      globals.platform.isWindows ? 'flutter.bat' : 'flutter',
+      platform.isWindows ? 'flutter.bat' : 'flutter',
     );
 
     final args = <String>['run', '--machine', '-d', 'flutter-tester'];
