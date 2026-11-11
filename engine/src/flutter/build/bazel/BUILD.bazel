@@ -323,9 +323,10 @@ config_setting(
 
 # GN's enable_lto (tools/gn: on unless --no-lto, and never in an unoptimized
 # build): link-time optimization, -flto on every compile and link of an
-# optimized build (//build/config/compiler:optimize). The Android AOT
-# builders are the ones that build with it; every other Linux builder says
-# --no-lto. Off by default, as the developer's configurations have it.
+# optimized build (//build/config/compiler:optimize). Among the builders'
+# builds the Android AOT, the iOS device and the Linux benchmark builds have
+# it, and the Linux profile and release builds its thin form (thin_lto,
+# below). Off by default, as the developer's configurations have it.
 bool_flag(
     name = "lto",
     build_setting_default = False,
@@ -334,6 +335,22 @@ bool_flag(
 config_setting(
     name = "lto_enabled",
     flag_values = {":lto": "True"},
+)
+
+# GN's use_thin_lto (//build/config/compiler/compiler.gni; tools/gn
+# --thin-lto): which LTO a build with LTO has -- ThinLTO, -flto=thin where
+# full LTO has -flto. Nothing without `lto`: tools/gn passes the argument
+# under enable_lto alone, so --no-lto on top of --thin-lto (the recipe's, in
+# a release builder's presubmit) is a build without LTO. Off by default, as
+# GN's argument is.
+bool_flag(
+    name = "thin_lto",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "thin_lto_enabled",
+    flag_values = {":thin_lto": "True"},
 )
 
 # The wrapped GN builds' compiles on Flutter's RBE workers through reclient

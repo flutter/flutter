@@ -24,9 +24,13 @@ for the CPU (`toolchains:android_arm64`, `android_x64`, `android_arm` --
 `android_riscv64`; x86 has none, and a build asking for it is listed with
 the reason), `--lto`/`--no-lto` the `lto` setting
 (`//engine/src/flutter/build/bazel:lto`: `-flto` on the compiles and links
-of the clang toolchains, Linux and Android; on in an optimized build
-without `--no-lto`, as `tools/gn` has it, which is CI's Android AOT builds
-and linux_benchmarks' `ci/host_release_benchmarks`),
+of the clang toolchains; on in an optimized build
+without `--no-lto`, as `tools/gn` has it, which is CI's Android AOT and iOS
+device builds and linux_benchmarks' `ci/host_release_benchmarks`),
+`--thin-lto` the `thin_lto` setting beside it
+(`//engine/src/flutter/build/bazel:thin_lto`: `-flto=thin` in place of
+`-flto`, in a build with LTO alone, as `tools/gn` passes `use_thin_lto`;
+CI's Linux profile and release builds),
 `--no-dart-secure-socket` the Dart wrap's `dart_disable_secure_socket` flag
 (the size-experiment builds; the archives take their `-size-exp` names from
 it), `--enable-vulkan-validation-layers` nothing where GN's default formula

@@ -186,6 +186,10 @@ def macos_clang_toolchain(name, exec_cpu, target_cpu, clang, sdk = "@macos_sdk//
             "//engine/src/flutter/build/bazel:lto_enabled": True,
             "//conditions:default": False,
         }),
+        thin_lto = select({
+            "//engine/src/flutter/build/bazel:thin_lto_enabled": True,
+            "//conditions:default": False,
+        }),
         objcopy = clang + "//:bin/llvm-objcopy",
         os = "mac",
         resource_include_marker = clang + "//:resource_include_marker",
@@ -289,6 +293,10 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
         deployment_target_flag = env.deployment_target_flag,
         lto = select({
             "//engine/src/flutter/build/bazel:lto_enabled": True,
+            "//conditions:default": False,
+        }),
+        thin_lto = select({
+            "//engine/src/flutter/build/bazel:thin_lto_enabled": True,
             "//conditions:default": False,
         }),
         objcopy = clang + "//:bin/llvm-objcopy",

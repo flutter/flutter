@@ -285,10 +285,12 @@ _GN_ARGS = {
     "dart_lib_export_symbols": "false",
     "dart_sdk_verification_hash": '"%s"' % _DART_REVISION[:10],
     "dart_version_git_info": "false",
-    # No LTO in either mode: every host builder in ci/builders passes
-    # tools/gn --no-lto (so does et's local_engine.json), and the Bazel
-    # toolchain compiles the engine without it, so a -c opt build is one
-    # build without LTO rather than an engine without and a VM with.
+    # No LTO in any build. In a build without it (tools/gn --no-lto: the
+    # debug builders, et's local_engine.json) that is GN's build. In a build
+    # with it -- full in the Android AOT and iOS device builds, thin in the
+    # Linux profile and release builds -- GN compiles the VM with the
+    # engine's LTO, and here the VM's objects stay machine code, which the
+    # engine's LTO link takes as they are.
     "enable_lto": "false",
     "host_cpu": '"%s"' % HOST_CPU,
     "host_os": '"%s"' % HOST_OS,

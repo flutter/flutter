@@ -75,6 +75,12 @@ enum GnFlagEffect {
   /// the wasm platform's optimized build always has it.
   lto,
 
+  /// `--thin-lto`/`--no-thin-lto`: which LTO a build with LTO has, ThinLTO
+  /// or full: the `thin_lto` setting beside `lto`. Nothing in a build
+  /// without LTO (tools/gn passes use_thin_lto under enable_lto alone), and
+  /// nothing for the wasm platform (tools/gn reads no LTO flag for the web).
+  thinLto,
+
   /// `--stripped`/`--no-stripped`: tools/gn's stripped_symbols, whether the
   /// shared libraries a build ships are stripped (executables always are);
   /// the `stripped` setting for the Linux and Android platforms (tools/gn's
@@ -223,6 +229,10 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   // Whether the Bazel build can follow is the platform's (BuilderBuild.of).
   '--no-lto': GnFlag(GnFlagEffect.lto),
   '--lto': GnFlag(GnFlagEffect.lto),
+  // tools/gn: use_thin_lto, ThinLTO in place of full LTO, in a build with
+  // LTO alone (the Linux profile and release builders' flag).
+  '--thin-lto': GnFlag(GnFlagEffect.thinLto),
+  '--no-thin-lto': GnFlag(GnFlagEffect.thinLto),
   '--rbe': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
   '--no-rbe': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
   '--goma': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
@@ -346,6 +356,10 @@ const String strippedSetting = '//engine/src/flutter/build/bazel:stripped';
 /// The LTO setting of the Bazel build (build/bazel/BUILD.bazel): -flto on
 /// the compiles and links of an optimized build.
 const String ltoSetting = '//engine/src/flutter/build/bazel:lto';
+
+/// The ThinLTO setting of the Bazel build (build/bazel/BUILD.bazel):
+/// -flto=thin in place of -flto, under [ltoSetting].
+const String thinLtoSetting = '//engine/src/flutter/build/bazel:thin_lto';
 
 /// testing/run_tests.py's test types, as the Bazel suites that run the same
 /// tests: `dart` is the Dart tests under flutter_tester with the VM
@@ -534,6 +548,7 @@ final class BuilderBuild {
     String? otherPlatform;
     var unoptimized = false;
     var lto = true;
+    var thinLto = false;
     bool? stripped;
     String? runtimeMode;
     String? buildDirectory;
@@ -598,6 +613,8 @@ final class BuilderBuild {
           }
         case GnFlagEffect.lto:
           lto = flag == '--lto';
+        case GnFlagEffect.thinLto:
+          thinLto = flag == '--thin-lto';
         case GnFlagEffect.stripped:
           stripped = flag == '--stripped';
         case GnFlagEffect.setting:
@@ -703,12 +720,17 @@ final class BuilderBuild {
     }
     // tools/gn: LTO is on unless --no-lto, and off in unoptimized builds.
     // An optimized build with it (the Android AOT builders) sets the `lto`
-    // setting of the clang toolchains; the wasm platform links the
+    // setting of the clang toolchains, and `thin_lto` beside it under
+    // --thin-lto (the Linux profile and release builders), which tools/gn
+    // reads in a build with LTO alone; the wasm platform links the
     // optimized build with LTO, as GN's web build does, and has no setting
     // that turns it off.
     final wasm = platform == '--platforms=$wasmPlatform';
     if (!unoptimized && lto && !wasm) {
       settings.add('--$ltoSetting');
+      if (thinLto) {
+        settings.add('--$thinLtoSetting');
+      }
     } else if (!unoptimized && !lto && wasm) {
       unsupported.add('--no-lto (the wasm platform links the optimized build with LTO)');
     }

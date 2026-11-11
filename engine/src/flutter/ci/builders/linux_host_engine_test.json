@@ -70,7 +70,7 @@
                 "profile",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
+                "--thin-lto",
                 "--no-rbe",
                 "--no-goma",
                 "--bazel"
@@ -125,7 +125,7 @@
                 "release",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
+                "--thin-lto",
                 "--no-rbe",
                 "--no-goma",
                 "--bazel"

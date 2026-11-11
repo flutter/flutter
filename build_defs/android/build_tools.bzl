@@ -128,7 +128,7 @@ def android_engine_artifacts(name, cpus = CPUS, modes = MODES, target_compatible
 
     Declares, for each CPU and mode, the embedding's and the ABI's jars and
     poms built under that configuration (in_configuration with the CPU's
-    platform, the mode, `-c opt`, LTO in profile and release, and
+    platform, the mode, `-c opt`, full LTO in profile and release, and
     --no-stripped: the Android builders' configurations,
     android_<mode>_<cpu>), gathered as `<name>_maven`; and for each CPU and
     AOT mode (profile, release) gen_snapshot's archive laid as a directory,
@@ -155,7 +155,8 @@ def android_engine_artifacts(name, cpus = CPUS, modes = MODES, target_compatible
 
             # The Android builders' configuration of the mode
             # (ci/builders/configs.bazelrc's android_<mode>_<cpu>): -c opt
-            # in debug too, LTO in profile and release, and --no-stripped
+            # in debug too, LTO in profile and release (full LTO: the
+            # Android builders pass no --thin-lto), and --no-stripped
             # throughout -- the jar carries the unstripped libflutter.so,
             # whose symbols an app's build extracts into its bundle and
             # strips itself (the tool checks a release bundle for them).
@@ -165,6 +166,7 @@ def android_engine_artifacts(name, cpus = CPUS, modes = MODES, target_compatible
                 platform = spec.platform,
                 runtime_mode = mode,
                 stripped = "false",
+                thin_lto = "false",
                 **compatibility
             )
             for suffix, target in targets.items():

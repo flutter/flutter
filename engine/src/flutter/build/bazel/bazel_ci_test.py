@@ -126,6 +126,22 @@ class MatchBuildTest(unittest.TestCase):
     self.assertEqual(build['options'], ['--//engine/src/flutter/build/bazel:lto=false'])
     # A build whose own flags have it matches as it is.
     self.assertEqual(bazel_ci.match_build(BUILDS, HOST_DEBUG['gn'] + ['--bazel'])['options'], [])
+    # A ThinLTO build the same: its --thin-lto stays among the flags, and says
+    # nothing once LTO is off (tools/gn: use_thin_lto under enable_lto alone).
+    thin = {
+        **HOST_DEBUG,
+        'file': 'linux_host_desktop_engine.json',
+        'name': 'ci/host_release_desktop',
+        'gn': [
+            '--runtime-mode', 'release', '--thin-lto', '--target-dir', 'ci/host_release_desktop'
+        ],
+        'build_directory': 'ci/host_release_desktop',
+        'config': 'ci_host_release_desktop',
+    }
+    build = bazel_ci.match_build(BUILDS + [thin], thin['gn'] + ['--bazel', '--no-lto'])
+    self.assertEqual(build['name'], thin['name'])
+    self.assertEqual(build['options'], ['--//engine/src/flutter/build/bazel:lto=false'])
+    self.assertEqual(bazel_ci.match_build(BUILDS + [thin], thin['gn'] + ['--bazel'])['options'], [])
 
   def test_tells_two_builds_of_one_directory_apart(self):
     self.assertEqual(
