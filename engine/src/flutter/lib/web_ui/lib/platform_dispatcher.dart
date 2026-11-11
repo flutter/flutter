@@ -413,6 +413,8 @@ enum DisplayFeatureType { unknown, fold, hinge, cutout }
 
 enum DisplayFeatureState { unknown, postureFlat, postureHalfOpened, postureFlipped }
 
+enum VerticalBarEdge { none, left, right }
+
 class DisplayCornerRadii {
   const DisplayCornerRadii({
     required this.topLeft,

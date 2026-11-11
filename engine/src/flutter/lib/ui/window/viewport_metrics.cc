@@ -126,7 +126,8 @@ bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
          a.physical_display_corner_radius_bottom_right ==
              b.physical_display_corner_radius_bottom_right &&
          a.physical_display_corner_radius_bottom_left ==
-             b.physical_display_corner_radius_bottom_left;
+             b.physical_display_corner_radius_bottom_left &&
+         a.vertical_bar_edge == b.vertical_bar_edge;
 }
 
 std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
@@ -150,7 +151,8 @@ std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
      << "Corner Radii: [" << a.physical_display_corner_radius_top_left << "TL "
      << a.physical_display_corner_radius_top_right << "TR "
      << a.physical_display_corner_radius_bottom_right << "BR "
-     << a.physical_display_corner_radius_bottom_left << "BL]";
+     << a.physical_display_corner_radius_bottom_left << "BL] "
+     << "Vertical Bar Edge: " << a.vertical_bar_edge;
   return os;
 }
 

@@ -84,6 +84,9 @@ const double _kUnsetGestureSetting = -1.0;
 // A display corner radius value that indicates it has not been set by the engine.
 const double _kUnsetDisplayCornerRadius = -1.0;
 
+// A vertical bar edge value that indicates it has not been set by the engine.
+const int _kUnsetVerticalBarEdge = -1;
+
 // A message channel to receive KeyData from the platform.
 //
 // See embedder.cc::kFlutterKeyDataChannel for more information.
@@ -2044,6 +2047,7 @@ class _ViewConfiguration {
     this.displayId = 0,
     this.viewConstraints = const ViewConstraints(maxWidth: 0, maxHeight: 0),
     this.displayCornerRadii,
+    this.verticalBarEdge,
   });
 
   /// The identifier for a display for this view, in
@@ -2133,6 +2137,10 @@ class _ViewConfiguration {
   /// This is currently populated only on Android API 31+. On earlier Android
   /// versions, iOS, and other platforms, this value is `null`.
   final DisplayCornerRadii? displayCornerRadii;
+
+  /// The physical edge of the view that the system prefers for its vertical
+  /// bar, or null if the platform does not report it.
+  final VerticalBarEdge? verticalBarEdge;
 
   @override
   String toString() {
@@ -2886,6 +2894,39 @@ class DisplayCornerRadii {
     return 'DisplayCornerRadii(topLeft: $topLeft, topRight: $topRight, '
         'bottomRight: $bottomRight, bottomLeft: $bottomLeft)';
   }
+}
+
+/// The physical edge of a view that the system prefers for its vertical bar.
+///
+/// On some devices the system can place its bars in a vertical bar along the
+/// left or right edge of the screen instead of along the top and bottom. For
+/// example, iPhone Duo (iOS 27.1 and later) puts the status bar in a vertical
+/// bar beside the camera.
+///
+/// A [FlutterView.verticalBarEdge] of null means that the platform does not
+/// report this information at all, which is different from [none].
+///
+/// See also:
+///
+///  * [FlutterView.verticalBarEdge], which reports this value for a view.
+enum VerticalBarEdge {
+  /// The platform reports that it has no preferred edge for a vertical bar in
+  /// this view.
+  ///
+  /// This is reported on devices without a vertical bar, in orientations or
+  /// window sizes where the system does not use one, and when the app has opted
+  /// out of it. It can also be reported briefly while the view is being set up
+  /// or while the display configuration changes, such as when a foldable device
+  /// is unfolded.
+  ///
+  /// On iOS, this corresponds to `UIVerticalBarEdgeUnspecified`.
+  none,
+
+  /// The vertical bar is on the left edge of the view.
+  left,
+
+  /// The vertical bar is on the right edge of the view.
+  right,
 }
 
 /// An identifier used to select a user's language and formatting preferences.

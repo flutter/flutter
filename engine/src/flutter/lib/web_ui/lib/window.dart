@@ -25,6 +25,7 @@ abstract class FlutterView {
   List<DisplayFeature> get displayFeatures;
   Display get display;
   DisplayCornerRadii? get displayCornerRadii;
+  VerticalBarEdge? get verticalBarEdge;
   void render(Scene scene, {Size? size});
   void updateSemantics(SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
 }

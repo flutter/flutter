@@ -138,6 +138,7 @@ bool PlatformConfiguration::AddView(int64_t view_id,
               view_metrics.physical_display_corner_radius_bottom_right),
           tonic::ToDart(
               view_metrics.physical_display_corner_radius_bottom_left),
+          tonic::ToDart(view_metrics.vertical_bar_edge),
       }));
   return true;
 }
@@ -246,6 +247,7 @@ bool PlatformConfiguration::UpdateViewMetrics(
               view_metrics.physical_display_corner_radius_bottom_right),
           tonic::ToDart(
               view_metrics.physical_display_corner_radius_bottom_left),
+          tonic::ToDart(view_metrics.vertical_bar_edge),
       }));
   return true;
 }

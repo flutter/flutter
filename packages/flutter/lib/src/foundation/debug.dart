@@ -46,6 +46,7 @@ import 'dart:ui'
         SingletonFlutterWindow,
         Size,
         TimingsCallback,
+        VerticalBarEdge,
         ViewConstraints,
         ViewFocusChangeCallback,
         ViewFocusDirection,
@@ -1836,6 +1837,9 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
 
   @override
   ui.DisplayCornerRadii? get displayCornerRadii => _view.displayCornerRadii;
+
+  @override
+  ui.VerticalBarEdge? get verticalBarEdge => _view.verticalBarEdge;
 
   @override
   ui.GestureSettings get gestureSettings => _view.gestureSettings;

@@ -73,6 +73,10 @@ struct ViewportMetrics {
   double physical_display_corner_radius_top_right = -1.0;
   double physical_display_corner_radius_bottom_right = -1.0;
   double physical_display_corner_radius_bottom_left = -1.0;
+  // The physical edge of the view that the system prefers for its vertical
+  // bar, as the index of a dart:ui `VerticalBarEdge` value (0: none, 1: left,
+  // 2: right). -1 means the platform does not report it.
+  int vertical_bar_edge = -1;
 };
 
 bool operator==(const ViewportMetrics& a, const ViewportMetrics& b);

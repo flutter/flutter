@@ -317,6 +317,10 @@ class EngineFlutterView implements ui.FlutterView {
   @override
   ui.DisplayCornerRadii? get displayCornerRadii => _viewConfiguration.displayCornerRadii;
 
+  // Browsers don't place system bars along the side of the page.
+  @override
+  ui.VerticalBarEdge? get verticalBarEdge => null;
+
   @override
   EngineFlutterDisplay get display => EngineFlutterDisplay.instance;
 
