@@ -1410,32 +1410,12 @@ class _TextFieldState extends State<TextField>
     return false;
   }
 
-  // Cached while the view is focused: whether this field should keep an
-  // inactive (grey) selection highlight after the view loses focus. Updated
-  // during build whenever [View.hasFocusOf] is true so the flag cannot go
-  // stale when focus returns to a different field without notifying this one.
-  bool _showInactiveSelectionHighlight = false;
-
   void _handleFocusChanged() {
     setState(() {
       // Rebuild the widget on focus change to show/hide the text selection
       // highlight.
     });
     _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
-  }
-
-  Color? _selectionColorForFocus(Color selectionColor, ThemeData theme) {
-    final bool hasViewFocus = View.hasFocusOf(context);
-    if (hasViewFocus) {
-      _showInactiveSelectionHighlight = _effectiveFocusNode.hasFocus;
-    }
-    if (hasViewFocus) {
-      return _effectiveFocusNode.hasFocus ? selectionColor : null;
-    }
-    if (_showInactiveSelectionHighlight) {
-      return theme.colorScheme.onSurface.withValues(alpha: 0.15);
-    }
-    return null;
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
@@ -1729,13 +1709,8 @@ class _TextFieldState extends State<TextField>
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          // Show the active selection color while focused. When the enclosing
-          // view loses window focus (or the app becomes inactive on
-          // desktop/web), keep a neutral highlight on the field that held
-          // focus so the selection remains visible (matching desktop platform
-          // conventions). See https://github.com/flutter/flutter/issues/103446.
-          // SelectableText / SelectionArea are out of scope for this behavior.
-          selectionColor: _selectionColorForFocus(selectionColor, theme),
+          // Only show the selection highlight when the text field is focused.
+          selectionColor: focusNode.hasFocus ? selectionColor : null,
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,
