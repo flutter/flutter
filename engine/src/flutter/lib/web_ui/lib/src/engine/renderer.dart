@@ -96,7 +96,10 @@ abstract class Renderer {
     rasterizer.dispose();
   }
 
-  ui.Paint createPaint();
+  /// Creates a native paint for a single draw call from [paint].
+  ///
+  /// The caller owns the result and must dispose it after the draw call.
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode});
 
   BackendVertices createVertices(
     ui.VertexMode mode,
@@ -355,7 +358,7 @@ abstract class Renderer {
   /// Map from view id to the associated [ViewRasterizer] for that view.
   final Map<int, ViewRasterizer> rasterizers = <int, ViewRasterizer>{};
 
-  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) async {
+  Future<void> renderScene(ui.Scene scene, EngineFlutterView view, {required ui.Size size}) async {
     assert(
       rasterizers.containsKey(view.viewId),
       "Unable to render to a view which hasn't been registered",
@@ -370,11 +373,11 @@ abstract class Renderer {
       // so that the scene view always displays the most recently requested scene.
       renderQueue.next?.completer.complete();
       final completer = Completer<void>();
-      renderQueue.next = (scene: scene, completer: completer, recorder: recorder);
+      renderQueue.next = (scene: scene, size: size, completer: completer, recorder: recorder);
       return completer.future;
     }
     final completer = Completer<void>();
-    renderQueue.current = (scene: scene, completer: completer, recorder: recorder);
+    renderQueue.current = (scene: scene, size: size, completer: completer, recorder: recorder);
     unawaited(_kickRenderLoop(rasterizer));
     return completer.future;
   }
@@ -383,7 +386,7 @@ abstract class Renderer {
     final RenderQueue renderQueue = rasterizer.queue;
     final RenderRequest current = renderQueue.current!;
     try {
-      await _renderScene(current.scene, rasterizer, current.recorder);
+      await _renderScene(current.scene, current.size, rasterizer, current.recorder);
       current.completer.complete();
     } catch (error, stackTrace) {
       current.completer.completeError(error, stackTrace);
@@ -399,10 +402,11 @@ abstract class Renderer {
 
   Future<void> _renderScene(
     ui.Scene scene,
+    ui.Size size,
     ViewRasterizer rasterizer,
     FrameTimingRecorder? recorder,
   ) async {
-    await rasterizer.draw((scene as LayerScene).layerTree, recorder);
+    await rasterizer.draw((scene as LayerScene).layerTree, size, recorder);
     recorder?.submitTimings();
   }
 

@@ -4691,7 +4691,7 @@ void main() {
           ),
         );
         expect(testLogger.traceText, contains('Sending crash report to Google.'));
-      });
+      }, skip: true); // https://github.com/flutter/flutter/issues/196307
 
       testWithoutContext('throw if settings fail to compile due to package dependencies', () async {
         final memoryFileSystem = MemoryFileSystem();
@@ -4750,7 +4750,7 @@ void main() {
           ),
         );
         expect(testLogger.traceText, contains('Sending crash report to Google.'));
-      });
+      }, skip: true); // https://github.com/flutter/flutter/issues/196307
 
       testWithoutContext('does not send crash report if reportCrashes is false', () async {
         final memoryFileSystem = MemoryFileSystem();

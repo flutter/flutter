@@ -22,6 +22,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -91,6 +92,7 @@ class ToolDependencies {
   ToolDependencies({
     required this.analytics,
     required this.androidContext,
+    required this.androidWorkflow,
     required this.appleContext,
     required this.buildSystem,
     required this.buildTargets,
@@ -99,8 +101,10 @@ class ToolDependencies {
     required this.doctor,
     required this.emulatorManager,
     required this.featureFlags,
+    required this.macOSWorkflow,
     required this.templateRenderer,
     required this.toolContext,
+    required this.windowsWorkflow,
     this.extensionBuildManager,
     this.extensionCleanManager,
     this.extensionManager,
@@ -111,6 +115,9 @@ class ToolDependencies {
 
   /// Sub-context containing Android-specific platform services.
   final AndroidContext androidContext;
+
+  /// Evaluates host readiness and toolchain requirements for Android workflows.
+  final AndroidWorkflow androidWorkflow;
 
   /// Sub-context containing Apple platform services.
   final AppleContext appleContext;
@@ -145,11 +152,17 @@ class ToolDependencies {
   /// Feature flags that govern tool capabilities and rollouts.
   final FeatureFlags featureFlags;
 
+  /// Evaluates host readiness and toolchain requirements for macOS workflows.
+  final MacOSWorkflow macOSWorkflow;
+
   /// Renderer for mustache project and platform templates.
   final TemplateRenderer templateRenderer;
 
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
+
+  /// Evaluates host readiness and toolchain requirements for Windows workflows.
+  final WindowsWorkflow windowsWorkflow;
 
   /// Bootstraps the dependency graph and constructs all three contexts.
   ///
@@ -181,6 +194,7 @@ class ToolDependencies {
     CustomDevicesConfig? customDevicesConfig,
     DeviceManager? deviceManager,
     Doctor? doctor,
+    DoctorValidatorsProvider? doctorValidatorsProvider,
     EmulatorManager? emulatorManager,
     List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
@@ -189,6 +203,7 @@ class ToolDependencies {
     Git? git,
     GradleUtils? gradleUtils,
     GradleUtils Function()? gradleUtilsBuilder,
+    HttpClientFactory? httpClientFactory,
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSSimulatorUtils? Function()? iosSimulatorUtilsBuilder,
     IOSWorkflow? iosWorkflow,
@@ -205,10 +220,13 @@ class ToolDependencies {
     PlistParser? plistParser,
     PlistParser? Function()? plistParserBuilder,
     PreRunValidator? preRunValidator,
+    PreRunValidator Function({required Cache cache, required FileSystem fileSystem})?
+    preRunValidatorBuilder,
     ProcessInfo? processInfo,
     ProcessManager? processManager,
     FlutterProjectFactory? projectFactory,
     ShutdownHooks? shutdownHooks,
+    Signals? signals,
     Stdio? stdio,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
@@ -258,6 +276,10 @@ class ToolDependencies {
       'Cannot provide both plistParser and plistParserBuilder to ToolDependencies.bootstrap.',
     );
     assert(
+      preRunValidator == null || preRunValidatorBuilder == null,
+      'Cannot provide both preRunValidator and preRunValidatorBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
       xcdevice == null || xcdeviceBuilder == null,
       'Cannot provide both xcdevice and xcdeviceBuilder to ToolDependencies.bootstrap.',
     );
@@ -275,6 +297,7 @@ class ToolDependencies {
     final SystemClock finalSystemClock = systemClock ?? const SystemClock();
     final UserMessages finalUserMessages = userMessages ?? UserMessages();
     final ShutdownHooks finalShutdownHooks = shutdownHooks ?? ShutdownHooks();
+    final Signals finalSignals = signals ?? LocalSignals.instance;
     final Stdio finalStdio = stdio ?? Stdio();
 
     // 2. Terminal and Preferences
@@ -284,6 +307,9 @@ class ToolDependencies {
           stdio: finalStdio,
           platform: finalPlatform,
           now: finalSystemClock.now(),
+          // So that we don't animate anything before calling applyFeatureFlags, default
+          // the animations to disabled in real apps.
+          defaultCliAnimationEnabled: false,
           shutdownHooks: finalShutdownHooks,
         );
 
@@ -313,11 +339,7 @@ class ToolDependencies {
     // 4. File System
     final finalFS = fs == null
         ? ErrorHandlingFileSystem(
-            delegate: LocalFileSystem(
-              LocalSignals.instance,
-              Signals.defaultExitSignals,
-              finalShutdownHooks,
-            ),
+            delegate: LocalFileSystem(finalSignals, Signals.defaultExitSignals, finalShutdownHooks),
             platform: finalPlatform,
           )
         : ErrorHandlingFileSystem(delegate: fs, platform: finalPlatform);
@@ -329,7 +351,7 @@ class ToolDependencies {
 
     final BotDetector finalBotDetector = botDetector ?? BotDetector(platform: finalPlatform);
 
-    final bool isBot = await finalBotDetector.isRunningOnBot;
+    final bool isBot = finalBotDetector.isRunningOnBot;
 
     final Config finalConfig =
         config ??
@@ -443,7 +465,9 @@ class ToolDependencies {
           config: finalConfig,
         );
     finalAnalyticsInitialized = true;
-    LocalSignals.instance.configureExit(analytics: finalAnalytics, logger: finalLogger);
+    if (finalSignals is LocalSignals) {
+      finalSignals.configureExit(analytics: finalAnalytics, logger: finalLogger);
+    }
 
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
     final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
@@ -489,7 +513,9 @@ class ToolDependencies {
         );
 
     final PreRunValidator finalPreRunValidator =
-        preRunValidator ?? PreRunValidator(cache: finalCache, fileSystem: finalFS);
+        preRunValidator ??
+        preRunValidatorBuilder?.call(cache: finalCache, fileSystem: finalFS) ??
+        const NoOpPreRunValidator();
 
     final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
 
@@ -541,7 +567,7 @@ class ToolDependencies {
       processUtils: finalProcessUtils,
       projectFactory: finalProjectFactory,
       shutdownHooks: finalShutdownHooks,
-      signals: LocalSignals.instance,
+      signals: finalSignals,
       stdio: finalStdio,
       systemClock: finalSystemClock,
       terminal: finalTerminal,
@@ -732,11 +758,13 @@ class ToolDependencies {
           clock: finalSystemClock,
           logger: finalLogger,
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
+              doctorValidatorsProvider ??
               DoctorValidatorsProvider.create(
                 appleContext: appleContext,
                 deviceManager: finalDeviceManager,
                 extensionManager: extensionManager,
                 featureFlags: finalFeatureFlags,
+                httpClientFactory: httpClientFactory,
                 toolContext: finalToolContext,
               ),
         );
@@ -744,6 +772,7 @@ class ToolDependencies {
     return ToolDependencies(
       analytics: finalAnalytics,
       androidContext: finalAndroidContext,
+      androidWorkflow: finalAndroidWorkflow,
       appleContext: appleContext,
       buildSystem: finalBuildSystem,
       buildTargets: finalBuildTargets,
@@ -755,8 +784,10 @@ class ToolDependencies {
       extensionCleanManager: extensionCleanManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
+      macOSWorkflow: finalMacOSWorkflow,
       templateRenderer: templateRenderer,
       toolContext: finalToolContext,
+      windowsWorkflow: finalWindowsWorkflow,
     );
   }
 }
