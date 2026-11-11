@@ -83,17 +83,14 @@ class PlatformView {
     ///             so the platform thread does not block waiting on GPU context
     ///             or swapchain initialization.
     ///
-    ///             The default implementation is a synchronous fallback on the
-    ///             calling thread (`OnPlatformViewCreated(surface_factory())`)
-    ///             for delegates/test mocks that do not support deferral.
-    ///
     /// @param[in]  surface_factory   Callable that constructs and returns the
     ///                               rendering surface (on the raster task
     ///                               runner when deferred by `Shell`), or
     ///                               nullptr / an invalid surface if
     ///                               cancelled/failed.
     ///
-    virtual void OnPlatformViewCreatedDeferred(SurfaceFactory surface_factory);
+    virtual void OnPlatformViewCreatedDeferred(
+        SurfaceFactory surface_factory) = 0;
 
     //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the platform view was destroyed.

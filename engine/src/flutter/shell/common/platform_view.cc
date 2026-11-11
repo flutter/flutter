@@ -84,16 +84,6 @@ void PlatformView::NotifyCreated() {
   delegate_.OnPlatformViewCreated(std::move(surface));
 }
 
-void PlatformView::Delegate::OnPlatformViewCreatedDeferred(
-    // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    SurfaceFactory surface_factory) {
-  std::unique_ptr<Surface> surface =
-      surface_factory ? surface_factory() : nullptr;
-  if (surface && surface->IsValid()) {
-    OnPlatformViewCreated(std::move(surface));
-  }
-}
-
 void PlatformView::NotifyCreatedDeferred(SurfaceFactory surface_factory) {
   delegate_.OnPlatformViewCreatedDeferred(std::move(surface_factory));
 }
