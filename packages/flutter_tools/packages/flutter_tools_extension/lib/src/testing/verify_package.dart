@@ -26,39 +26,24 @@ const _validServiceNamespaces = <String>{
   CleanService.serviceNamespace,
 };
 
-const _builtInBuildSubcommands = <String>{
-  'aar',
-  'apk',
-  'appbundle',
-  'bundle',
-  'ios',
-  'ios-framework',
-  'ipa',
-  'linux',
-  'macos',
-  'macos-framework',
-  'swift-package',
-  'web',
-  'windows',
-  'xcframework',
-};
-
 /// Validates a tool extension package's isolate entrypoint, handshake
 /// capabilities, contributed build/assemble target identifiers, and optional
 /// [expectedConfig].
 ///
 /// If [entryPoint] is provided, the extension isolate is spawned in-process via
 /// [ExtensionTestHarness.spawn]; otherwise, the entrypoint script under
-/// [packageRoot] (resolved from [expectedConfig], `extension/flutter_tools/extension.dart`,
-/// or `bin/<package_name>.dart`) is spawned via [ExtensionTestHarness.spawnUri].
+/// [packageRoot] (resolved from [expectedConfig] or
+/// `extension/flutter_tools/extension.dart`) is spawned via
+/// [ExtensionTestHarness.spawnUri].
 ///
 /// Throws a [FormatException] or [StateError] if the entrypoint is missing,
-/// capabilities are invalid, build target names are malformed or collide with
-/// built-in `flutter build` subcommands, or runtime capabilities drift from
-/// [expectedConfig].
+/// capabilities are invalid, build target names are malformed or duplicated,
+/// or runtime capabilities drift from [expectedConfig].
 Future<void> verifyExtensionPackage({
   required Uri packageRoot,
   ExtensionTestEntryPoint? entryPoint,
+  // TODO(bkonyi): Remove expectedConfig once ExtensionPackageConfig is removed
+  // in https://github.com/flutter/flutter/pull/194774.
   ExtensionPackageConfig? expectedConfig,
   ExtensionFileSystem fileSystem = const LocalExtensionFileSystem(),
   Uri? packageConfigUri,
@@ -143,11 +128,6 @@ Future<void> verifyExtensionPackage({
             'Invalid build target name "${target.name}" reported by build.getBuildTargets.',
           );
         }
-        if (_builtInBuildSubcommands.contains(target.name)) {
-          throw StateError(
-            'Build target name "${target.name}" collides with built-in flutter build subcommand.',
-          );
-        }
         if (!runtimeTargetNames.add(target.name)) {
           throw StateError(
             'Duplicate build target name "${target.name}" reported by build.getBuildTargets.',
@@ -220,15 +200,6 @@ Uri _resolveEntrypointUri({
   final Uri conventionalUri = rootUri.resolve(_defaultEntrypointRelativePath);
   if (fileSystem.file(conventionalUri).existsSync()) {
     return conventionalUri;
-  }
-
-  final List<String> segments = rootUri.pathSegments.where((String s) => s.isNotEmpty).toList();
-  final String? packageDirName = segments.isNotEmpty ? segments.last : null;
-  if (packageDirName != null) {
-    final Uri binUri = rootUri.resolve('bin/$packageDirName.dart');
-    if (fileSystem.file(binUri).existsSync()) {
-      return binUri;
-    }
   }
 
   throw StateError(

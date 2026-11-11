@@ -290,6 +290,21 @@ void main() {
       );
       await pumpEventQueue();
       expect(messages, isEmpty);
+
+      await expectLater(
+        ToolExtensionEntryPoint.run(receivePort.sendPort, <ToolExtensionService>[
+          _DummyService('extension', 'log'),
+        ]),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Reserved RPC method registered: "extension.log"'),
+          ),
+        ),
+      );
+      await pumpEventQueue();
+      expect(messages, isEmpty);
     });
 
     test('ToolExtensionEntryPoint.run validates SendPort message', () async {

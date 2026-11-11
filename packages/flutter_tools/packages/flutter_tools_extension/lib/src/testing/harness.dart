@@ -87,6 +87,10 @@ final class ExtensionTestHarness {
   List<ExtensionLogMessage> get logs => List<ExtensionLogMessage>.unmodifiable(_logs);
 
   /// Broadcast stream of `'extension.log'` messages emitted by the extension.
+  ///
+  /// When a listener is attached, malformed `'extension.log'` payloads are
+  /// delivered to this stream as [FormatException] errors and unhandled
+  /// post-handshake isolate errors are delivered as [StateError] errors.
   Stream<ExtensionLogMessage> get onLog => _logController.stream;
 
   /// Returns a broadcast stream of JSON-RPC 2.0 notifications sent by the

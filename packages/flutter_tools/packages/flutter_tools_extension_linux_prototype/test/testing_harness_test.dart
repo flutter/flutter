@@ -770,7 +770,7 @@ void main() {
       );
     });
 
-    test('throws StateError when build target collides with built-in subcommand', () async {
+    test('throws StateError when build target name is invalid', () async {
       final ExtensionFileSystem fs = createPackageFileSystem();
 
       await expectLater(
@@ -779,7 +779,7 @@ void main() {
           entryPoint: (SendPort sendPort) => ToolExtensionEntryPoint.run(
             sendPort,
             <ToolExtensionService>[
-              _TestBuildService(targets: const <BuildTarget>[_TestBuildTarget('apk')]),
+              _TestBuildService(targets: const <BuildTarget>[_TestBuildTarget('Invalid_Target')]),
             ],
             extensionName: 'test_ext',
             supportedPlatforms: const <String>{'linux'},
@@ -790,7 +790,7 @@ void main() {
           isA<StateError>().having(
             (StateError e) => e.message,
             'message',
-            contains('collides with built-in flutter build subcommand'),
+            contains('Invalid build target name "Invalid_Target"'),
           ),
         ),
       );
