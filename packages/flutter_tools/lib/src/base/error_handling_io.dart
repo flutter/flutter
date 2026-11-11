@@ -154,6 +154,30 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     return true;
   }
 
+  /// Moves [source] to [newPath], falling back to copying if the rename fails.
+  ///
+  /// Attempts a single optimistic rename of [source] to [newPath] (bypassing
+  /// [ErrorHandlingFile]'s [ToolExit] conversion and Windows retry delays on
+  /// the optimistic rename attempt) and falls back to `source.copy(newPath)`
+  /// on [FileSystemException] (for example across volumes or mount points with
+  /// `EXDEV` or `ERROR_NOT_SAME_DEVICE`, or transient Windows
+  /// `FILE_SHARE_DELETE` locks during antivirus scans), preserving full
+  /// [ErrorHandlingFileSystem] retry and [ToolExit] error reporting on the
+  /// fallback `copy`.
+  ///
+  /// When `rename` fails and [moveOrCopy] falls back to [File.copy], [source]
+  /// is left in place.
+  static Future<File> moveOrCopy(File source, String newPath) async {
+    try {
+      if (source is ErrorHandlingFile) {
+        return source.wrapFile(await source.delegate.rename(newPath));
+      }
+      return await source.rename(newPath);
+    } on FileSystemException {
+      return source.copy(newPath);
+    }
+  }
+
   static var _noExitOnFailure = false;
 
   @override
