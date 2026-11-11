@@ -193,6 +193,16 @@ void main() {
           await formatTimeOfDay(tester, const Locale('da'), const TimeOfDay(hour: 9, minute: 32)),
           '09.32',
         );
+
+        // Regression test for https://github.com/flutter/flutter/issues/196374.
+        expect(
+          await formatTimeOfDay(tester, const Locale('si'), const TimeOfDay(hour: 9, minute: 32)),
+          '09.32',
+        );
+        expect(
+          await formatTimeOfDay(tester, const Locale('si'), const TimeOfDay(hour: 20, minute: 32)),
+          '20.32',
+        );
       });
 
       testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (WidgetTester tester) async {

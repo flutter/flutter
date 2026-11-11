@@ -37412,7 +37412,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'ටැබ $tabIndexකින් $tabCount';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
 
   @override
   String get timePickerDialHelpText => 'වේලාව තෝරන්න';
