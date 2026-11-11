@@ -1235,6 +1235,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     CustomSemanticsAction.resetForTests(); // ignore: invalid_use_of_visible_for_testing_member
     _enableFocusManagerLifecycleAwarenessIfSupported();
+    defaultBinaryMessenger.clearPendingMessages();
   }
 
   void _enableFocusManagerLifecycleAwarenessIfSupported() {
@@ -2348,6 +2349,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _announcementHandler = null;
     }
     _announcements = <CapturedAccessibilityAnnouncement>[];
+
+    defaultBinaryMessenger.clearPendingMessages();
 
     ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
