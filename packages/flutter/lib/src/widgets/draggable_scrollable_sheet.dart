@@ -933,7 +933,13 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     }
 
     beginActivity(
-      _DraggableSheetBallisticScrollActivity(this, simulation, context.vsync, shouldIgnorePointer),
+      _DraggableSheetBallisticScrollActivity(
+        this,
+        simulation,
+        context.vsync,
+        shouldIgnorePointer,
+        velocity,
+      ),
     );
   }
 
@@ -948,6 +954,7 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
     Simulation simulation,
     TickerProvider vsync,
     this.shouldIgnorePointer,
+    this._initialVelocity,
   ) {
     _controller =
         AnimationController.unbounded(
@@ -959,7 +966,7 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
           ..addListener(_tick)
           ..animateWith(simulation).whenComplete(_end);
   }
-
+  final double _initialVelocity;
   late final AnimationController _controller;
   _DraggableScrollableSheetScrollPosition get _position =>
       delegate as _DraggableScrollableSheetScrollPosition;
@@ -981,8 +988,8 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
     final double delta = _controller.value - _lastPosition;
     _lastPosition = _controller.value;
     _position.extent.addPixelDelta(delta, _position.context.notificationContext!);
-    if ((_controller.velocity > 0 && _position.extent.isAtMax) ||
-        (_controller.velocity < 0 && _position.extent.isAtMin)) {
+    if ((_initialVelocity > 0 && _controller.velocity > 0 && _position.extent.isAtMax) ||
+        (_initialVelocity < 0 && _controller.velocity < 0 && _position.extent.isAtMin)) {
       // Make sure we pass along enough velocity to keep scrolling - otherwise
       // we just "bounce" off the top making it look like the list doesn't
       // have more to scroll.
@@ -996,12 +1003,6 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
 
   void _end() {
     if (!_disposed) {
-      if (delegate is! _DraggableScrollableSheetScrollPosition) {
-        // If the scrollable's position was absorbed by a non-sheet controller
-        // before completion, let the new position settle on its own.
-        delegate.goBallistic(0.0);
-        return;
-      }
       // Update the extent value after the snap animation completes to
       // avoid rounding errors that could prevent the sheet from closing when
       // it reaches minSize.
