@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -882,6 +881,7 @@ void main() {
       );
 
       final defaultCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -891,6 +891,7 @@ void main() {
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
         toolContext: toolContext,
+        xcode: null,
       );
       final CommandRunner<void> defaultRunner = createTestCommandRunner(defaultCommand);
       await defaultRunner.run(<String>[
@@ -907,6 +908,7 @@ void main() {
       expect(buildManager.cachedAssembleTargets, isEmpty);
 
       final customCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -916,6 +918,7 @@ void main() {
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
         toolContext: toolContext,
+        xcode: null,
       );
       final CommandRunner<void> customRunner = createTestCommandRunner(customCommand);
       await customRunner.run(<String>[
@@ -959,6 +962,7 @@ void main() {
           platform: FakePlatform(),
         );
         final command = AssembleCommand(
+          androidContext: FakeAndroidContext(),
           buildSystem: buildSystem,
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
@@ -969,6 +973,7 @@ void main() {
             logger: logger,
             processManager: FakeProcessManager.any(),
           ),
+          xcode: null,
         );
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -1141,6 +1146,7 @@ void main() {
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
 
         final assembleCommand = AssembleCommand(
+          androidContext: FakeAndroidContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
             Environment environment,
@@ -1156,6 +1162,7 @@ void main() {
             logger: testLogger,
             processManager: FakeProcessManager.any(),
           ),
+          xcode: null,
         );
         final CommandRunner<void> assembleRunner = createTestCommandRunner(assembleCommand);
         await assembleRunner.run(<String>[
