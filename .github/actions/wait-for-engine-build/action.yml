@@ -19,8 +19,17 @@ runs:
       id: check_engine
       uses: ./.github/actions/has-engine-changes
 
+    - name: Skip LUCI wait on forks
+      if: steps.check_engine.outputs.changed == 'true' && github.repository != 'flutter/flutter' && env.ACT != 'true'
+      shell: bash
+      env:
+        REPO_NAME: ${{ github.repository }}
+      run: |
+        echo "Skipping LUCI engine build wait on fork repository '$REPO_NAME' (flutter_archives_v2 is only built on flutter/flutter)."
+        echo "FLUTTER_STRICT_ENGINE_VERSION=false" >> $GITHUB_ENV # zizmor: ignore[github-env]
+
     - name: Log wait requirement
-      if: steps.check_engine.outputs.changed == 'true'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter'
       shell: bash
       env:
         INPUTS_CHECK_NAME: ${{ inputs.check-name }}
@@ -30,7 +39,7 @@ runs:
 
     # Note: Use the Cocoon wait-for-tests action to poll the Cocoon API.
     - name: Wait for test check-in
-      if: steps.check_engine.outputs.changed == 'true' && env.ACT != 'true'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && env.ACT != 'true'
       uses: flutter/cocoon/packages/wait_for_tests@c82f779e201b2d22f43b531268cfbd2ce4fbd4ab
       with:
         sha: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -38,12 +47,12 @@ runs:
         required-tests: ${{ inputs.check-name }}
 
     - name: Redirect engine.version - Realm
-      if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && github.event_name == 'pull_request'
       shell: bash
       run: echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV # zizmor: ignore[github-env]
 
     - name: Redirect engine.version - Prebuilt Engine Version
-      if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && github.event_name == 'pull_request'
       shell: bash
       run: echo "FLUTTER_PREBUILT_ENGINE_VERSION=$HEAD_SHA" >> $GITHUB_ENV # zizmor: ignore[github-env]
       env:

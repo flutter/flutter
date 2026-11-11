@@ -1014,11 +1014,17 @@ DomHTMLCanvasElement createDomCanvasElement({int? width, int? height, DomDocumen
 extension type WebGLContext._(JSObject _) implements JSObject {
   external int getParameter(int value);
 
+  external int get drawingBufferWidth;
+  external int get drawingBufferHeight;
+
   @JS('SAMPLES')
   external int get samples;
 
   @JS('STENCIL_BITS')
   external int get stencilBits;
+
+  @JS('MAX_TEXTURE_SIZE')
+  external int get maxTextureSize;
 
   external JSAny? getExtension(String name);
 

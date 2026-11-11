@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/reporting/github_template.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 const _kPluginsFile = '''
 {
@@ -190,7 +191,11 @@ void main() {
           final creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
-            flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+            flutterProjectFactory: FlutterProjectFactory(
+              fileSystem: fs,
+              logger: logger,
+              config: FakeConfig(),
+            ),
           );
           expect(
             await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText),
@@ -215,7 +220,11 @@ void main() {
           final creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
-            flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+            flutterProjectFactory: FlutterProjectFactory(
+              fileSystem: fs,
+              logger: logger,
+              config: FakeConfig(),
+            ),
           );
           final Directory projectDirectory = fs.currentDirectory;
 

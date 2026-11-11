@@ -28,6 +28,18 @@ external JSFunction get _getContext;
 @JS('HTMLCanvasElement.prototype.getContext')
 external set _getContext(JSFunction value);
 
+@JS('CanvasRenderingContext2D.prototype.drawImage')
+external JSFunction get _drawImage;
+
+@JS('CanvasRenderingContext2D.prototype.drawImage')
+external set _drawImage(JSFunction value);
+
+@JS('window.requestAnimationFrame')
+external JSFunction get _requestAnimationFrame;
+
+@JS('window.requestAnimationFrame')
+external set _requestAnimationFrame(JSFunction value);
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -95,6 +107,7 @@ void testMain() {
     expect(_pixel(first.canvases.single.canvasElement), <int>[0, 0, 0, 255]);
     await first.draw(1);
     expect(first.rasterizer.debugIsDirect, isTrue);
+    expect(first.rasterizer.sceneElement.querySelector('flt-canvas-staging'), isNull);
   });
 
   test('continuous resize does not render or read back the direct surface', () async {
@@ -159,6 +172,41 @@ void testMain() {
       _getImageData = original;
     }
     expect(_pixel(first.canvases.single.canvasElement), <int>[10, 0, 0, 255]);
+  });
+
+  test('an unavailable placeholder cannot reuse the reference pixels', () async {
+    final JSFunction original = _drawImage;
+    var ignoredReads = 0;
+    void drawImage(JSObject context, JSObject source, JSNumber x, JSNumber y) {
+      if (source.isA<DomHTMLCanvasElement>()) {
+        // Browsers can ignore drawImage until the worker has published a frame.
+        ignoredReads++;
+        return;
+      }
+      original.callAsFunction(context, source, x, y);
+    }
+
+    _drawImage = drawImage.toJSCaptureThis;
+    try {
+      await first.draw(9);
+      expect(ignoredReads, greaterThan(0));
+      expect(first.rasterizer.debugIsDirect, isFalse);
+    } finally {
+      _drawImage = original;
+    }
+    expect(_pixel(first.canvases.single.canvasElement), <int>[9, 0, 0, 255]);
+  });
+
+  test('promotes verified pixels when animation callbacks are delayed', () async {
+    final JSFunction original = _requestAnimationFrame;
+    _requestAnimationFrame = ((JSFunction callback) => 0).toJS;
+    try {
+      await first.draw(1);
+      expect(first.rasterizer.debugIsDirect, isTrue);
+      expect(_pixel(direct.canvasImageSource as DomHTMLCanvasElement), <int>[1, 0, 0, 255]);
+    } finally {
+      _requestAnimationFrame = original;
+    }
   });
 
   test('a failed direct render preserves the old frame until bitmap export completes', () async {
@@ -408,7 +456,12 @@ void testMain() {
   });
 
   test('recovers presentation after context loss', () async {
+    // Warm the transferred context before testing an exit from direct mode.
+    // Cold publication can legitimately exceed the bounded observation window.
+    await first.draw(0);
+    await first.draw(0, overlay: true);
     await first.draw(1);
+    expect(first.rasterizer.debugIsDirect, isTrue);
     final OnscreenSurface surface = first.rasterizer.debugDirectSurface!;
     final int context = surface.glContext;
     await surface.triggerContextLoss();
@@ -637,12 +690,12 @@ void testMain() {
       expect(adopted.glContext, isNot(originalContext));
       expect((adopted.canvasImageSource as DomHTMLCanvasElement).ownerDocument, destination);
       expect(_pixel(adopted.canvasImageSource as DomHTMLCanvasElement), <int>[3, 0, 0, 255]);
-      expect(first.rasterizer.sceneElement.querySelector('flt-canvas-staging')!.children, isEmpty);
+      expect(first.rasterizer.sceneElement.querySelector('flt-canvas-staging'), isNull);
       domDocument.body!.append(first.host);
       await first.draw(4);
       await first.draw(5);
       expect(first.rasterizer.debugIsDirect, isTrue);
-      expect(first.rasterizer.sceneElement.querySelector('flt-canvas-staging')!.children, isEmpty);
+      expect(first.rasterizer.sceneElement.querySelector('flt-canvas-staging'), isNull);
     } finally {
       domDocument.body!.append(first.host);
       frame.remove();
@@ -721,7 +774,7 @@ class _View {
     }
     final scene = builder.build() as LayerScene;
     try {
-      await rasterizer.draw(scene.layerTree, null);
+      await rasterizer.draw(scene.layerTree, view.physicalSize, null);
     } finally {
       scene.dispose();
       picture.dispose();

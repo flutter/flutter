@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:meta/meta.dart';
 
@@ -74,6 +75,8 @@ abstract class BuildTarget {
   });
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
+  ///
+  /// Must match [ExtensionBuildTarget.isValidName].
   String get name;
 
   /// Description of what this target builds.

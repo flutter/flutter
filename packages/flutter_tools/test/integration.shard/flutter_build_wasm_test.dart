@@ -40,6 +40,7 @@ void main() {
     );
     for (final filename in const <String>[
       'flutter.js',
+      'flutter_bootstrap.js',
       'flutter_service_worker.js',
       'index.html',
       'main.dart.wasm',
