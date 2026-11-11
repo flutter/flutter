@@ -51,7 +51,7 @@ def impeller_exports(header):
   #   IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerFoo IMPELLER_NULLABLE
   #   ImpellerFooNew(...);
   names = []
-  for match in re.finditer(r'^IMPELLER_EXPORT\b(.*?)\(', text, re.MULTILINE | re.DOTALL):
+  for match in re.finditer(r'^\s*IMPELLER_EXPORT\b(.*?)\(', text, re.MULTILINE | re.DOTALL):
     identifiers = re.findall(r'[A-Za-z_]\w*', match.group(1))
     names.append(identifiers[-1])
   if not names:

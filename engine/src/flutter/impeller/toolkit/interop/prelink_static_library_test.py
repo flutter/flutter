@@ -91,7 +91,7 @@ class ImpellerExportsTest(unittest.TestCase):
     header = os.path.join(INTEROP_DIR, 'impeller.h')
     exports = prelink.impeller_exports(header)
     with open(header, encoding='utf-8') as f:
-      declarations = sum(1 for line in f if line.startswith('IMPELLER_EXPORT'))
+      declarations = sum(1 for line in f if line.lstrip().startswith('IMPELLER_EXPORT'))
     self.assertEqual(len(exports), declarations)
     self.assertEqual(len(exports), len(set(exports)))
     for name in exports:
