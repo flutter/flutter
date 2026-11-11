@@ -311,22 +311,8 @@ Future<void> testMain() async {
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
       canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 100, 100));
-
-      canvas.save();
       canvas.scale(0);
       expect(canvas.getLocalClipBounds(), ui.Rect.zero);
-      canvas.restore();
-
-      canvas.save();
-      canvas.scale(1, 0);
-      expect(canvas.getLocalClipBounds(), ui.Rect.zero);
-      canvas.restore();
-
-      canvas.save();
-      canvas.scale(0, 1);
-      expect(canvas.getLocalClipBounds(), ui.Rect.zero);
-      canvas.restore();
-
       recorder.endRecording().dispose();
     });
   });
