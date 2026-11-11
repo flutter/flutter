@@ -7,12 +7,10 @@ import 'dart:async';
 import 'package:dtd/dtd.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 import 'widget_preview_test_helpers.dart';
@@ -39,11 +37,11 @@ void main() {
   });
 
   group('widget-preview detection', () {
-    testUsingContext('Newly added previews are detected (LSP)', () async {
+    testWithoutContext('Newly added previews are detected (LSP)', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
+        processManager: processManager,
       );
 
       final Uri dtdUri = await dtdLauncher!.launch();
@@ -84,11 +82,11 @@ Widget myNewPreview() => Container();
       await waitForPreviews(dtdConnection);
     });
 
-    testUsingContext('Removed previews are detected (LSP)', () async {
+    testWithoutContext('Removed previews are detected (LSP)', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
+        processManager: processManager,
       );
 
       final Uri dtdUri = await dtdLauncher!.launch();
@@ -158,11 +156,11 @@ Widget myRemovePreview() => Container();
       );
     });
 
-    testUsingContext('Modified previews are detected (LSP)', () async {
+    testWithoutContext('Modified previews are detected (LSP)', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
+        processManager: processManager,
       );
 
       final Uri dtdUri = await dtdLauncher!.launch();
@@ -233,11 +231,11 @@ Widget myModifyPreview() => Container();
       );
     });
 
-    testUsingContext('Previews within libraries with parts are detected (LSP)', () async {
+    testWithoutContext('Previews within libraries with parts are detected (LSP)', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
+        processManager: processManager,
       );
 
       final Uri dtdUri = await dtdLauncher!.launch();
