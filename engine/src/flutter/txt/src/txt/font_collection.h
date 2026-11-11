@@ -6,6 +6,8 @@
 #define FLUTTER_TXT_SRC_TXT_FONT_COLLECTION_H_
 
 #include <memory>
+#include <mutex>
+#include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -29,6 +31,7 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   size_t GetFontManagersCount() const;
 
   void SetupDefaultFontManager(uint32_t font_initialization_data);
+  void DeferDefaultFontManager(uint32_t font_initialization_data);
   void SetDefaultFontManager(sk_sp<SkFontMgr> font_manager);
   void SetAssetFontManager(sk_sp<SkFontMgr> font_manager);
   void SetDynamicFontManager(sk_sp<SkFontMgr> font_manager);
@@ -45,7 +48,9 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   sk_sp<skia::textlayout::FontCollection> CreateSktFontCollection();
 
  private:
-  sk_sp<SkFontMgr> default_font_manager_;
+  mutable std::mutex default_font_manager_mutex_;
+  mutable std::optional<uint32_t> default_font_manager_init_data_;
+  mutable sk_sp<SkFontMgr> default_font_manager_;
   sk_sp<SkFontMgr> asset_font_manager_;
   sk_sp<SkFontMgr> dynamic_font_manager_;
   sk_sp<SkFontMgr> test_font_manager_;
@@ -55,6 +60,8 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   sk_sp<skia::textlayout::FontCollection> skt_collection_;
 
   std::vector<sk_sp<SkFontMgr>> GetFontManagerOrder() const;
+
+  sk_sp<SkFontMgr> GetDefaultFontManager() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };
