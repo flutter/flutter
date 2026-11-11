@@ -63,9 +63,7 @@ class Display {
 /// The [viewPadding] are the physical pixels on each side of the
 /// display that may be partially obscured by system UI or by physical
 /// intrusions into the display, such as an overscan region on a television or a
-/// "notch" on a phone. These areas may have portions that show the user
-/// view-painted pixels without being obscured, such as a notch at the top of a
-/// phone that covers only a subset of the area.
+/// "notch" on a phone.
 ///
 /// The [padding] property is computed from both
 /// [viewInsets] and [viewPadding]. It will allow a
