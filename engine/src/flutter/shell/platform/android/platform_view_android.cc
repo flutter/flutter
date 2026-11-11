@@ -50,18 +50,24 @@ namespace flutter {
 
 namespace {
 
+// Minimum Android SDK version required for Hybrid Composition++ (HCPP) and
+// SurfaceControl-backed swapchains (Android 14 / API 34, which introduced
+// ASurfaceTransaction_fromJava).
 static constexpr int kMinAPILevelHCPP = 34;
 static constexpr int64_t kImplicitViewId = 0;
 
-AndroidContext::ContextSettings CreateContextSettings(
-    const Settings& p_settings) {
+}  // namespace
+
+AndroidContext::ContextSettings PlatformViewAndroid::CreateContextSettings(
+    const Settings& p_settings,
+    int api_level) {
   AndroidContext::ContextSettings settings;
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
-  settings.enable_surface_control = p_settings.enable_surface_control;
+  settings.enable_surface_control =
+      p_settings.enable_surface_control && api_level >= kMinAPILevelHCPP;
   return settings;
 }
-}  // namespace
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
@@ -145,7 +151,8 @@ PlatformViewAndroid::PlatformViewAndroid(
               task_runners,
               rendering_api,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
-              CreateContextSettings(delegate.OnPlatformViewGetSettings()),
+              CreateContextSettings(delegate.OnPlatformViewGetSettings(),
+                                    android_get_device_api_level()),
               delegate.OnPlatformViewGetShutdownSafeIOTaskRunner())) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
