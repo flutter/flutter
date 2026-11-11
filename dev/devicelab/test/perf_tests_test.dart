@@ -151,4 +151,109 @@ void main() {
       expect(result.data!['illegal_refresh_rate_frame_count'], 10);
     },
   );
+
+  test('reports Impeller shader warmup metrics when they are in the data', () async {
+    final fakeData = <String, dynamic>{
+      'frame_count': 5,
+      'average_frame_build_time_millis': 0.1,
+      'worst_frame_build_time_millis': 0.1,
+      '90th_percentile_frame_build_time_millis': 0.1,
+      '99th_percentile_frame_build_time_millis': 0.1,
+      'average_frame_rasterizer_time_millis': 0.1,
+      'worst_frame_rasterizer_time_millis': 0.1,
+      '90th_percentile_frame_rasterizer_time_millis': 0.1,
+      '99th_percentile_frame_rasterizer_time_millis': 0.1,
+      'old_gen_gc_count': 1,
+      'total_ui_gc_time': 1,
+      'average_vsync_transitions_missed': 1,
+      '90th_percentile_vsync_transitions_missed': 1,
+      '99th_percentile_vsync_transitions_missed': 1,
+      'shader_warmed_draw_percent': 92.65,
+      'shader_lazy_variants': 20,
+      'shader_warmed_never_drawn_variants': 3,
+    };
+    const resultFileName = 'fake_result';
+    void driveCallback(List<String> arguments) {
+      final resultFile = File('$perfTestOutputPath/$resultFileName.json')
+        ..createSync(recursive: true);
+      resultFile.writeAsStringSync(json.encode(fakeData));
+    }
+
+    final perfTest = PerfTest(
+      testDirectory.absolute.path,
+      testTarget.absolute.path,
+      'test_file',
+      resultFilename: resultFileName,
+      device: device,
+      flutterDriveCallback: driveCallback,
+    );
+    final TaskResult result = await perfTest.run();
+    expect(
+      result.benchmarkScoreKeys,
+      containsAll(<String>[
+        'shader_warmed_draw_percent',
+        'shader_lazy_variants',
+        'shader_warmed_never_drawn_variants',
+      ]),
+    );
+  });
+
+  test('MemoryTest.handleLogcatLine ignores duplicate benchmark markers', () async {
+    final memoryTest = MemoryTest('project', 'test', 'package');
+    memoryTest.prepareForNextMessage('TAPPED');
+
+    memoryTest.handleLogcatLine('I/flutter: ==== MEMORY BENCHMARK ==== TAPPED ====');
+    await memoryTest.receivedNextMessage;
+
+    // A duplicate marker must not throw a StateError ('Future already completed').
+    memoryTest.handleLogcatLine('I/flutter: ==== MEMORY BENCHMARK ==== TAPPED ====');
+  });
+
+  test('MemoryTest.tapNotification taps once when TAPPED is received on first tap', () async {
+    late _TestMemoryTest memoryTest;
+    var tapCalls = 0;
+    final tapDevice = _TapRecordingFakeDevice(
+      onTap: (int x, int y) async {
+        tapCalls += 1;
+        memoryTest.handleLogcatLine('I/flutter: ==== MEMORY BENCHMARK ==== TAPPED ====');
+      },
+    );
+    memoryTest = _TestMemoryTest(tapDevice);
+
+    await memoryTest.tapNotification();
+    expect(tapCalls, 1);
+  });
+
+  test('MemoryTest.tapNotification retries sequentially when initial tap is dropped', () async {
+    late _TestMemoryTest memoryTest;
+    var tapCalls = 0;
+    final tapDevice = _TapRecordingFakeDevice(
+      onTap: (int x, int y) async {
+        tapCalls += 1;
+        if (tapCalls == 2) {
+          memoryTest.handleLogcatLine('I/flutter: ==== MEMORY BENCHMARK ==== TAPPED ====');
+        }
+      },
+    );
+    memoryTest = _TestMemoryTest(tapDevice);
+
+    await memoryTest.tapNotification();
+    expect(tapCalls, 2);
+  });
+}
+
+class _TapRecordingFakeDevice extends FakeDevice {
+  const _TapRecordingFakeDevice({required this.onTap}) : super(deviceId: 'fakeDeviceId');
+
+  final Future<void> Function(int x, int y) onTap;
+
+  @override
+  Future<void> tap(int x, int y) => onTap(x, y);
+}
+
+class _TestMemoryTest extends MemoryTest {
+  _TestMemoryTest(this.device) : super('project', 'test', 'package', requiresTapToStart: true);
+
+  @override
+  final Device device;
 }

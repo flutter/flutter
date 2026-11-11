@@ -152,6 +152,9 @@ abstract class PlatformDispatcher {
   VoidCallback? get onSystemFontFamilyChanged;
   set onSystemFontFamilyChanged(VoidCallback? callback);
 
+  VoidCallback? get onAlwaysUse24HourFormatChanged;
+  set onAlwaysUse24HourFormatChanged(VoidCallback? callback);
+
   bool get semanticsEnabled;
 
   VoidCallback? get onSemanticsEnabledChanged;
