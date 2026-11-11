@@ -209,11 +209,10 @@ final class FailedComparisonException implements Exception {
 }
 
 /// A function that uploads an image to Skia Gold.
-typedef AddImageToSkiaGold =
-    Future<void> Function(
-      String testName,
-      io.File goldenFile, {
-      double differentPixelsRate,
-      int pixelColorDelta,
-      required int screenshotSize,
-    });
+typedef AddImageToSkiaGold = Future<void> Function(
+  String testName,
+  io.File goldenFile, {
+  double differentPixelsRate,
+  int pixelColorDelta,
+  required int screenshotSize,
+});

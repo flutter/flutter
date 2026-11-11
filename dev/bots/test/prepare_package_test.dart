@@ -883,62 +883,57 @@ void main() {
         );
       });
 
-      test(
-        'publishArchive throws if forceUpload is false and artifact already exists on cloud storage',
-        () async {
-          final archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
-          final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
-          final publisher = ArchivePublisher(
-            tempDir,
-            testRef,
-            Branch.stable,
-            <String, String>{
-              'frameworkVersionFromGit': 'v1.2.3',
-              'dartSdkVersion': '3.2.1',
-              'dartTargetArch': 'x64',
-            },
-            outputFile,
-            false,
-            fs: fs,
-            processManager: processManager,
-            subprocessOutput: false,
-            platform: platform,
-          );
-          final calls = <String, List<ProcessResult>>{
-            // This process returns 0 because file already exists
-            '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
-          };
-          processManager.addCommands(convertResults(calls));
-          expect(() async => publisher.publishArchive(), throwsException);
-        },
-      );
+      test('publishArchive throws if forceUpload is false and artifact already exists on cloud storage', () async {
+        final archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
+        final publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
+          outputFile,
+          false,
+          fs: fs,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+        );
+        final calls = <String, List<ProcessResult>>{
+          // This process returns 0 because file already exists
+          '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
+        };
+        processManager.addCommands(convertResults(calls));
+        expect(() async => publisher.publishArchive(), throwsException);
+      });
 
-      test(
-        'publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage',
-        () async {
-          final archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
-          final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
-          final publisher = ArchivePublisher(
-            tempDir,
-            testRef,
-            Branch.stable,
-            <String, String>{
-              'frameworkVersionFromGit': 'v1.2.3',
-              'dartSdkVersion': '3.2.1',
-              'dartTargetArch': 'x64',
-            },
-            outputFile,
-            false,
-            fs: fs,
-            processManager: processManager,
-            subprocessOutput: false,
-            platform: platform,
-          );
-          final String archivePath = path.join(tempDir.absolute.path, archiveName);
-          final String jsonPath = path.join(tempDir.absolute.path, releasesName);
-          final gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
-          final releasesJson =
-              '''
+      test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
+        final archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
+        final publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
+          outputFile,
+          false,
+          fs: fs,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+        );
+        final String archivePath = path.join(tempDir.absolute.path, archiveName);
+        final String jsonPath = path.join(tempDir.absolute.path, releasesName);
+        final gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
+        final releasesJson =
+            '''
 {
   "base_url": "https://storage.googleapis.com/flutter_infra_release/releases",
   "current_release": {
@@ -973,26 +968,25 @@ void main() {
   ]
 }
 ''';
-          fs.file(jsonPath).writeAsStringSync(releasesJson);
-          fs.file(fs.path.join(tempDir.path, 'downloaded.json')).createSync(recursive: true);
-          fs.file(fs.path.join(tempDir.path, 'downloaded.json')).writeAsStringSync(releasesJson);
-          fs.file(archivePath).writeAsStringSync('archive contents');
-          final calls = <String, List<ProcessResult>?>{
-            '$gsutilCall -- rm $gsArchivePath': null,
-            '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-            '$gsutilCall -- stat $gsJsonPath': <ProcessResult>[
-              ProcessResult(0, 0, 'Generation: 12345', ''),
-            ],
-            '$gsutilCall -- cp $gsJsonPath#12345 ${fs.path.join(tempDir.path, "downloaded.json")}':
-                null,
-            '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDir.path, "upload.json")} $gsJsonPath':
-                null,
-          };
-          processManager.addCommands(convertResults(calls));
-          assert(tempDir.existsSync());
-          await publisher.publishArchive(true);
-        },
-      );
+        fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).createSync(recursive: true);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).writeAsStringSync(releasesJson);
+        fs.file(archivePath).writeAsStringSync('archive contents');
+        final calls = <String, List<ProcessResult>?>{
+          '$gsutilCall -- rm $gsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
+          '$gsutilCall -- stat $gsJsonPath': <ProcessResult>[
+            ProcessResult(0, 0, 'Generation: 12345', ''),
+          ],
+          '$gsutilCall -- cp $gsJsonPath#12345 ${fs.path.join(tempDir.path, "downloaded.json")}':
+              null,
+          '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDir.path, "upload.json")} $gsJsonPath':
+              null,
+        };
+        processManager.addCommands(convertResults(calls));
+        assert(tempDir.existsSync());
+        await publisher.publishArchive(true);
+      });
     });
 
     group('transactionalUpdate', () {

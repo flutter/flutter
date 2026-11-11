@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -28,11 +29,15 @@ void main() {
     late BufferLogger logger;
 
     setUp(() {
+      final String flutterRoot = getFlutterRoot();
       fs = LocalFileSystem.test(signals: FakeSignals());
       watcher = FakeWatcher();
       logger = BufferLogger.test();
       project = FlutterProject.fromDirectoryTest(fs.systemTempDirectory.createTempSync('root'));
+      final String sdkPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk');
+      final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(
+        artifacts: artifacts,
         platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(

@@ -24,20 +24,22 @@ abstract class FlutterBaseDebugAdapter
     super.channel, {
     required this.fileSystem,
     required this.platform,
+    required this.cache,
     super.ipv6,
     this.enableFlutterDds = true,
     super.enableAuthCodes,
     super.logger,
     super.onError,
-  }) : flutterSdkRoot = Cache.flutterRoot! {
+  }) {
     configureOrgDartlangSdkMappings();
   }
 
   FileSystem fileSystem;
   Platform platform;
+  final Cache cache;
   Process? process;
 
-  final String flutterSdkRoot;
+  String get flutterSdkRoot => cache.flutterRoot;
 
   /// Whether DDS should be enabled in the Flutter process.
   ///
@@ -58,10 +60,13 @@ abstract class FlutterBaseDebugAdapter
 
   @override
   void handleSessionTerminate([String exitSuffix = '']) {
+    isTerminating = true;
     if (waitingForDebugger && !debuggerInitializationFailedCompleter.isCompleted) {
-      debuggerInitializationFailedCompleter.completeError(
-        DebugAdapterException('Session terminated before debugger initialized: $exitSuffix'),
-      );
+      final String suffix = exitSuffix.trim();
+      final message = suffix.isNotEmpty
+          ? 'Session terminated before debugger initialized: $suffix'
+          : 'Session terminated before debugger initialized';
+      debuggerInitializationFailedCompleter.completeError(DebugAdapterException(message));
     }
     super.handleSessionTerminate(exitSuffix);
   }

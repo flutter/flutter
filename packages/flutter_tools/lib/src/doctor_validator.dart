@@ -8,7 +8,6 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 
 import 'base/async_guard.dart';
 import 'base/terminal.dart';
-import 'globals.dart' as globals;
 
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);
@@ -149,8 +148,8 @@ extension ValidationResultFormatting on ValidationResult {
     _ => type.name,
   };
 
-  String get coloredLeadingBox {
-    return globals.terminal.color(leadingBox, switch (type) {
+  String coloredLeadingBox(Terminal terminal) {
+    return terminal.color(leadingBox, switch (type) {
       ValidationType.success => TerminalColor.green,
       ValidationType.crash || ValidationType.missing => TerminalColor.red,
       ValidationType.notAvailable || ValidationType.partial => TerminalColor.yellow,
@@ -167,8 +166,8 @@ extension ValidationMessageFormatting on ValidationMessage {
     ValidationMessageType.information => '•',
   };
 
-  String get coloredIndicator {
-    return globals.terminal.color(indicator, switch (type) {
+  String coloredIndicator(Terminal terminal) {
+    return terminal.color(indicator, switch (type) {
       ValidationMessageType.error => TerminalColor.red,
       ValidationMessageType.hint => TerminalColor.yellow,
       ValidationMessageType.information => TerminalColor.green,
@@ -176,6 +175,9 @@ extension ValidationMessageFormatting on ValidationMessage {
   }
 }
 
+/// A validator that reports when no supported IDEs are installed.
+///
+/// This class is required by internal google3 tooling (`mobile/flutter/cli/context`).
 class NoIdeValidator extends DoctorValidator {
   NoIdeValidator() : super('Flutter IDE Support');
 
@@ -196,13 +198,4 @@ class NoIdeValidator extends DoctorValidator {
       statusInfo: noIdeStatusInfo,
     );
   }
-}
-
-class ValidatorWithResult extends DoctorValidator {
-  ValidatorWithResult(super.title, this.result);
-
-  final ValidationResult result;
-
-  @override
-  Future<ValidationResult> validateImpl() async => result;
 }

@@ -13,8 +13,11 @@ import 'widget_tester.dart';
 
 /// A function which takes the name of the method channel, it's handler,
 /// platform message and asynchronously returns an encoded response.
-typedef AllMessagesHandler =
-    Future<ByteData?>? Function(String channel, MessageHandler? handler, ByteData? message);
+typedef AllMessagesHandler = Future<ByteData?>? Function(
+  String channel,
+  MessageHandler? handler,
+  ByteData? message,
+);
 
 /// A [BinaryMessenger] subclass that is used as the default binary messenger
 /// under testing environment.
@@ -363,7 +366,6 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     }
 
     final controller = StreamController<Object?>();
-    addTearDown(controller.close);
 
     setMockMethodCallHandler(
       MethodChannel(channel.name, channel.codec),
@@ -378,7 +380,16 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       (Object? e) =>
           handlePlatformMessage(channel.name, channel.codec.encodeSuccessEnvelope(e), null),
     );
-    addTearDown(sub.cancel);
+    addTearDown(() async {
+      await sub.cancel();
+      // If the handler already closed the stream (for example with
+      // MockStreamHandlerEventSink.endOfStream inside a testWidgets body), the
+      // done future belongs to the test's fake async zone. Tear down does not
+      // run that zone, so awaiting the done future again does not return.
+      if (!controller.isClosed) {
+        await controller.close();
+      }
+    });
     sub.onError((Object? e) {
       if (e is! PlatformException) {
         throw ArgumentError('Stream error must be a PlatformException');

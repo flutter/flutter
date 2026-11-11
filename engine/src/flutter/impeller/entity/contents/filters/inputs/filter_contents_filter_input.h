@@ -38,6 +38,9 @@ class FilterContentsFilterInput final : public FilterInput {
   virtual void SetEffectTransform(const Matrix& matrix) override;
 
   // |FilterInput|
+  virtual void SetLocalToPassTransform(const Matrix& matrix) override;
+
+  // |FilterInput|
   virtual void SetRenderingMode(Entity::RenderingMode rendering_mode) override;
 
  private:

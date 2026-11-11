@@ -220,9 +220,9 @@ flutter:
           .childDirectory('flutter_assets')
           .childFile('AssetManifest.bin')
           .readAsBytesSync();
-      final assetManifest =
-          const StandardMessageCodec().decodeMessage(ByteData.sublistView(assetManifestData))
-              as Map<Object?, Object?>;
+      final assetManifest = const StandardMessageCodec().decodeMessage(
+        ByteData.sublistView(assetManifestData),
+      ) as Map<Object?, Object?>;
 
       expect(assetManifest.containsKey('assets/common/image.png'), isTrue);
       expect(assetManifest.containsKey('assets/strawberry/ice-cream.png'), isTrue);
@@ -247,14 +247,17 @@ flutter:
       );
 
       environment.buildDir.childFile('app.so').createSync(recursive: true);
+      environment.buildDir.childFile('app.pdb').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
+      await const WindowsAotBundle(AotSnapshotProfile(TargetPlatform.windows_x64))
+          .build(environment);
       await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
       // Depfile is created and so is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
       expect(fileSystem.file(r'C:\windows\app.so'), exists);
+      expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
       expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
     },
     overrides: <Type, Generator>{
@@ -276,19 +279,49 @@ flutter:
       );
 
       environment.buildDir.childFile('app.so').createSync(recursive: true);
+      environment.buildDir.childFile('app.pdb').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
+      await const WindowsAotBundle(AotSnapshotRelease(TargetPlatform.windows_x64))
+          .build(environment);
       await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
       // Depfile is created and so is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
       expect(fileSystem.file(r'C:\windows\app.so'), exists);
+      expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
       expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testWithoutContext(
+    'AotSnapshotRelease throws StateError when visualStudio is null on windows_x64',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        defines: <String, String>{kBuildMode: 'release', kTargetPlatform: 'windows-x64'},
+      );
+      environment.buildDir.createSync(recursive: true);
+
+      await expectLater(
+        const AotSnapshotRelease(TargetPlatform.windows_x64).build(environment),
+        throwsA(
+          isA<StateError>().having(
+            (StateError error) => error.message,
+            'message',
+            contains('VisualStudio'),
+          ),
+        ),
+      );
     },
   );
 }

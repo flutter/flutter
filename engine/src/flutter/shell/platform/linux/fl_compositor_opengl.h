@@ -40,6 +40,29 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
 FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager);
 
 /**
+ * fl_compositor_opengl_get_opengl_manager:
+ * @compositor: an #FlCompositorOpenGL.
+ *
+ * Gets the OpenGL manager the frames are composited with.
+ *
+ * Returns: an #FlOpenGLManager.
+ */
+FlOpenGLManager* fl_compositor_opengl_get_opengl_manager(
+    FlCompositorOpenGL* compositor);
+
+/**
+ * fl_compositor_opengl_can_fence:
+ * @compositor: an #FlCompositorOpenGL.
+ *
+ * Checks whether fences can be used to synchronize a composited frame with the
+ * context that presents it. Callers have to fall back to waiting for the
+ * rendering to complete, e.g. with glFinish(), when this returns %FALSE.
+ *
+ * Returns: %TRUE if fences are available.
+ */
+gboolean fl_compositor_opengl_can_fence(FlCompositorOpenGL* compositor);
+
+/**
  * fl_compositor_opengl_composite_layers:
  * @compositor: an #FlCompositorOpenGL.
  * @layers: layers to be composited.
@@ -52,6 +75,20 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager);
 void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* compositor,
                                            const FlutterLayer** layers,
                                            size_t layers_count);
+
+/**
+ * fl_compositor_opengl_get_frame_format:
+ * @layers: layers the frame is composited from.
+ * @layers_count: number of layers.
+ *
+ * Gets the texture format to composite @layers into. This matches the format
+ * the engine rendered them with, so the composited frame can be read back
+ * correctly. Compositing into a mismatched format produces an empty frame.
+ *
+ * Returns: a texture format, e.g. GL_RGBA or GL_BGRA_EXT.
+ */
+GLint fl_compositor_opengl_get_frame_format(const FlutterLayer** layers,
+                                            size_t layers_count);
 
 G_END_DECLS
 

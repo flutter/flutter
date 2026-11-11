@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+
 import 'package:flutter/material.dart';
+
 import 'metrics.dart';
 
 class SettingsIcon extends StatelessWidget {

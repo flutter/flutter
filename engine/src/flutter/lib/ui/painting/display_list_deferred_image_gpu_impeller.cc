@@ -49,7 +49,7 @@ DlDeferredImageGPUImpeller::~DlDeferredImageGPUImpeller() = default;
 // |DlImage|
 std::shared_ptr<impeller::Texture>
 DlDeferredImageGPUImpeller::GetImpellerTexture(
-    const std::shared_ptr<impeller::Context>& context) const {
+    impeller::ContentContext& renderer) const {
   if (!wrapper_) {
     return nullptr;
   }
@@ -168,23 +168,31 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
           return;
         }
 
-        sk_sp<DisplayList> display_list;
-
+        SnapshotDelegate::SnapshotDisplayListProvider provider;
         if (std::holds_alternative<sk_sp<DisplayList>>(content)) {
-          display_list = std::get<sk_sp<DisplayList>>(std::move(content));
+          provider = [display_list =
+                          std::get<sk_sp<DisplayList>>(std::move(content))](
+                         impeller::AiksContext*) { return display_list; };
         } else if (std::holds_alternative<std::unique_ptr<LayerTree>>(
                        content)) {
-          std::unique_ptr<LayerTree> layer_tree =
-              std::get<std::unique_ptr<LayerTree>>(std::move(content));
-          auto aiks_context = snapshot_delegate->GetAiksContext();
-          display_list = layer_tree->Flatten(
-              DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height),
-              snapshot_delegate->GetTextureRegistry(),
-              /*gr_context=*/nullptr, aiks_context.get());
+          // Flatten only once the snapshot controller has made a rendering
+          // context current, and with the AiksContext that renders the
+          // snapshot. https://github.com/flutter/flutter/issues/192365
+          provider = fml::MakeCopyable(
+              [layer_tree =
+                   std::get<std::unique_ptr<LayerTree>>(std::move(content)),
+               texture_registry = snapshot_delegate->GetTextureRegistry(),
+               bounds =
+                   DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height)](
+                  impeller::AiksContext* aiks_context) mutable {
+                return layer_tree->Flatten(bounds, texture_registry,
+                                           /*gr_context=*/nullptr,
+                                           aiks_context);
+              });
         }
 
         auto texture = snapshot_delegate->MakeImpellerSnapshotSync(
-            display_list, wrapper->size_, wrapper->pixel_format_);
+            std::move(provider), wrapper->size_, wrapper->pixel_format_);
         if (!texture) {
           std::scoped_lock lock(wrapper->error_mutex_);
           wrapper->error_ = "Failed to create snapshot.";

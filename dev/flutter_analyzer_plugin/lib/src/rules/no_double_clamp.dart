@@ -11,13 +11,15 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 /// Verify that we use clampDouble instead of double.clamp for performance
 /// reasons.
 ///
 /// See also:
 ///   * https://github.com/flutter/flutter/pull/103559
 ///   * https://github.com/flutter/flutter/issues/103917
-class NoDoubleClamp extends AnalysisRule {
+class NoDoubleClamp extends FlutterAnalysisRule {
   NoDoubleClamp()
     : super(
         name: code.name,
@@ -36,7 +38,7 @@ class NoDoubleClamp extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry.addSimpleIdentifier(this, visitor);
   }

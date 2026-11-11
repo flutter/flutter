@@ -7,17 +7,18 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -45,8 +46,7 @@ void main() {
       sdk = FakeAndroidSdk();
       fakeProcessManager = FakeProcessManager.empty();
       fs = MemoryFileSystem.test();
-      cache = Cache.test(processManager: FakeProcessManager.any());
-      Cache.flutterRoot = '../..';
+      cache = Cache.test(flutterRoot: '../..', processManager: FakeProcessManager.any());
       sdk.licensesAvailable = true;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       fs
@@ -109,11 +109,14 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
+        ),
 
         // ignore: avoid_redundant_argument_values
       );
@@ -180,20 +183,133 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
         ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
+        ),
       );
       expect(androidApk, isNotNull);
     }, overrides: overrides);
+
+    testUsingContext('AndroidApk.fromAndroidProject parses manifest with activity-alias', () async {
+      final logger = BufferLogger.test();
+      final FlutterProject project = await aModuleProject();
+      project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
+      final File appGradle = project.android.hostAppGradleRoot.childFile(
+        fs.path.join('app', 'build.gradle'),
+      );
+      appGradle.createSync(recursive: true);
+      appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
+
+      // Create AndroidManifest.xml with activity-alias
+      final File manifestFile = project.android.appManifestFile;
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('''
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="io.flutter.examples.hello_world">
+    <application android:name="io.flutter.app.FlutterApplication">
+        <activity android:name=".MainActivity" android:enabled="true">
+        </activity>
+        <activity-alias
+            android:name=".LauncherAlias"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+    </application>
+</manifest>
+''');
+
+      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+        project.android,
+        androidSdk: sdk,
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          null,
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
+        ),
+      );
+
+      expect(androidApk, isNotNull);
+      expect(androidApk!.id, 'io.flutter.examples.hello_world');
+      expect(androidApk.launchActivity, 'io.flutter.examples.hello_world/.LauncherAlias');
+    }, overrides: overrides);
+
+    testUsingContext(
+      'AndroidApk.fromAndroidProject returns null if launch activity has no android:name',
+      () async {
+        final logger = BufferLogger.test();
+        final FlutterProject project = await aModuleProject();
+        project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
+        final File appGradle = project.android.hostAppGradleRoot.childFile(
+          fs.path.join('app', 'build.gradle'),
+        );
+        appGradle.createSync(recursive: true);
+        appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
+
+        // Create AndroidManifest.xml with launcher but missing name
+        final File manifestFile = project.android.appManifestFile;
+        manifestFile.createSync(recursive: true);
+        manifestFile.writeAsStringSync('''
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="io.flutter.examples.hello_world">
+    <application android:name="io.flutter.app.FlutterApplication">
+        <activity android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+''');
+
+        final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+          project.android,
+          androidSdk: sdk,
+          buildInfo: const BuildInfo(
+            BuildMode.debug,
+            null,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
+          ),
+        );
+
+        expect(androidApk, isNull);
+      },
+      overrides: overrides,
+    );
 
     testUsingContext(
       'Licenses not available, platform and buildtools available, apk exists',
@@ -264,11 +380,12 @@ void main() {
       final Logger logger = BufferLogger.test();
       final AndroidApk? androidApk = AndroidApk.fromApk(
         fs.file(''),
-        processManager: fakeProcessManager,
-        logger: logger,
-        userMessages: UserMessages(),
         androidSdk: sdk,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        toolContext: FakeToolContext(
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        ),
       );
 
       expect(androidApk, isNull);
@@ -331,11 +448,14 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
+        ),
       );
       expect(androidApk, isNotNull);
       expect(androidApk!.id, 'io.flutter.examples.hello_world');
@@ -405,11 +525,14 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
-          processManager: fakeProcessManager,
-          userMessages: UserMessages(),
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-          logger: logger,
-          fileSystem: fs,
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
+          ),
         );
         expect(androidApk, isNotNull);
         expect(androidApk!.id, 'io.flutter.examples.hello_world');
@@ -428,33 +551,27 @@ void main() {
   });
 
   group('ApkManifestData', () {
-    testWithoutContext(
-      'Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER',
-      () {
-        final ApkManifestData data = ApkManifestData.parseFromXmlDump(
-          _aaptDataWithExplicitEnabledAndMainLauncherActivity,
-          BufferLogger.test(),
-        )!;
+    testWithoutContext('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithExplicitEnabledAndMainLauncherActivity,
+        BufferLogger.test(),
+      )!;
 
-        expect(data, isNotNull);
-        expect(data.packageName, 'io.flutter.examples.hello_world');
-        expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-      },
-    );
+      expect(data, isNotNull);
+      expect(data.packageName, 'io.flutter.examples.hello_world');
+      expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
+    });
 
-    testWithoutContext(
-      'Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER',
-      () {
-        final ApkManifestData data = ApkManifestData.parseFromXmlDump(
-          _aaptDataWithDefaultEnabledAndMainLauncherActivity,
-          BufferLogger.test(),
-        )!;
+    testWithoutContext('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+        BufferLogger.test(),
+      )!;
 
-        expect(data, isNotNull);
-        expect(data.packageName, 'io.flutter.examples.hello_world');
-        expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-      },
-    );
+      expect(data, isNotNull);
+      expect(data.packageName, 'io.flutter.examples.hello_world');
+      expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
+    });
 
     testWithoutContext('Parses manifest with a dist namespace', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(
@@ -467,70 +584,69 @@ void main() {
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
     });
 
-    testWithoutContext(
-      'Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field',
-      () {
-        final logger = BufferLogger.test();
-        final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
-          _aaptDataWithNoEnabledActivity,
-          logger,
-        );
+    testWithoutContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
+      final logger = BufferLogger.test();
+      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithNoEnabledActivity,
+        logger,
+      );
 
-        expect(data, isNull);
-        expect(
-          logger.errorText,
-          'Error running io.flutter.examples.hello_world. Default activity not found\n',
-        );
-      },
-    );
+      expect(data, isNull);
+      expect(
+        logger.errorText,
+        'Error running io.flutter.examples.hello_world. Default activity not found\n',
+      );
+    });
 
-    testWithoutContext(
-      'Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN',
-      () {
-        final logger = BufferLogger.test();
-        final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
-          _aaptDataWithNoMainActivity,
-          logger,
-        );
+    testWithoutContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
+      final logger = BufferLogger.test();
+      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithNoMainActivity,
+        logger,
+      );
 
-        expect(data, isNull);
-        expect(
-          logger.errorText,
-          'Error running io.flutter.examples.hello_world. Default activity not found\n',
-        );
-      },
-    );
+      expect(data, isNull);
+      expect(
+        logger.errorText,
+        'Error running io.flutter.examples.hello_world. Default activity not found\n',
+      );
+    });
 
-    testWithoutContext(
-      'Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER',
-      () {
-        final logger = BufferLogger.test();
-        final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
-          _aaptDataWithNoLauncherActivity,
-          logger,
-        );
+    testWithoutContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
+      final logger = BufferLogger.test();
+      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithNoLauncherActivity,
+        logger,
+      );
 
-        expect(data, isNull);
-        expect(
-          logger.errorText,
-          'Error running io.flutter.examples.hello_world. Default activity not found\n',
-        );
-      },
-    );
+      expect(data, isNull);
+      expect(
+        logger.errorText,
+        'Error running io.flutter.examples.hello_world. Default activity not found\n',
+      );
+    });
 
-    testWithoutContext(
-      'Parsing manifest with Activity that has multiple category, android.intent.category.LAUNCHER and android.intent.category.DEFAULT',
-      () {
-        final ApkManifestData data = ApkManifestData.parseFromXmlDump(
-          _aaptDataWithLauncherAndDefaultActivity,
-          BufferLogger.test(),
-        )!;
+    testWithoutContext('Parsing manifest with Activity that has multiple category, android.intent.category.LAUNCHER and android.intent.category.DEFAULT', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithLauncherAndDefaultActivity,
+        BufferLogger.test(),
+      )!;
 
-        expect(data, isNotNull);
-        expect(data.packageName, 'io.flutter.examples.hello_world');
-        expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
-      },
-    );
+      expect(data, isNotNull);
+      expect(data.packageName, 'io.flutter.examples.hello_world');
+      expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
+    });
+
+    testWithoutContext('Parses manifest with an ActivityAlias as the main launcher activity', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithActivityAlias,
+        BufferLogger.test(),
+      )!;
+
+      expect(data, isNotNull);
+      expect(data.packageName, 'io.flutter.examples.hello_world');
+      expect(data.launchableActivityName, 'io.flutter.examples.hello_world.LauncherAlias');
+    });
 
     testWithoutContext('Parses manifest with missing application tag', () async {
       final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
@@ -543,183 +659,229 @@ void main() {
   });
 
   group('PrebuiltIOSApp', () {
+    late MemoryFileSystem fileSystem;
+    late BufferLogger logger;
     late FakeOperatingSystemUtils os;
     late FakePlistParser testPlistParser;
+    late FakeToolContext toolContext;
 
     final overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      PlistParser: () => testPlistParser,
-      OperatingSystemUtils: () => os,
     };
 
     setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      logger = BufferLogger.test();
       os = FakeOperatingSystemUtils();
       testPlistParser = FakePlistParser();
+      toolContext = FakeToolContext(
+        config: Config.test(),
+        fs: fileSystem,
+        logger: logger,
+        os: os,
+        platform: FakePlatform(operatingSystem: 'macos'),
+      );
     });
 
-    testUsingContext('Error on non-existing file', () {
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('not_existing.ipa')) as PrebuiltIOSApp?;
+    testWithoutContext('Error on non-existing file', () {
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('not_existing.ipa'),
+        plistParser: testPlistParser,
+        toolContext: toolContext,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         'File "not_existing.ipa" does not exist. Use an app bundle or an ipa.\n',
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Error on non-app-bundle folder', () {
-      globals.fs.directory('regular_folder').createSync();
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('regular_folder')) as PrebuiltIOSApp?;
+    testWithoutContext('Error on non-app-bundle folder', () {
+      fileSystem.directory('regular_folder').createSync();
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('regular_folder'),
+        plistParser: testPlistParser,
+        toolContext: toolContext,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
-      expect(testLogger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
-    }, overrides: overrides);
+      expect(logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
+    });
 
-    testUsingContext('Error on no info.plist', () {
-      globals.fs.directory('bundle.app').createSync();
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp?;
+    testWithoutContext('Error on no info.plist', () {
+      fileSystem.directory('bundle.app').createSync();
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('bundle.app'),
+        plistParser: testPlistParser,
+        toolContext: toolContext,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
-      expect(testLogger.errorText, 'Invalid prebuilt iOS app. Does not contain Info.plist.\n');
-    }, overrides: overrides);
+      expect(logger.errorText, 'Invalid prebuilt iOS app. Does not contain Info.plist.\n');
+    });
 
-    testUsingContext('Error on bad info.plist', () {
-      globals.fs.directory('bundle.app').createSync();
-      globals.fs.file('bundle.app/Info.plist').createSync();
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp?;
+    testWithoutContext('Error on bad info.plist', () {
+      fileSystem.directory('bundle.app').createSync();
+      fileSystem.file('bundle.app/Info.plist').createSync();
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('bundle.app'),
+        plistParser: testPlistParser,
+        toolContext: toolContext,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n'),
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Success with app bundle', () {
-      globals.fs.directory('bundle.app').createSync();
-      globals.fs.file('bundle.app/Info.plist').createSync();
+    testWithoutContext('Success with app bundle', () {
+      fileSystem.directory('bundle.app').createSync();
+      fileSystem.file('bundle.app/Info.plist').createSync();
       testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app'))! as PrebuiltIOSApp;
-      expect(testLogger.errorText, isEmpty);
+      final iosApp =
+          IOSApp.fromPrebuiltApp(
+                fileSystem.file('bundle.app'),
+                plistParser: testPlistParser,
+                toolContext: toolContext,
+              )!
+              as PrebuiltIOSApp;
+      expect(logger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, 'bundle.app');
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
-      expect(iosApp.applicationPackage.path, globals.fs.directory('bundle.app').path);
-    }, overrides: overrides);
+      expect(iosApp.applicationPackage.path, fileSystem.directory('bundle.app').path);
+    });
 
-    testUsingContext('Bad ipa zip-file, no payload dir', () {
-      globals.fs.file('app.ipa').createSync();
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp?;
+    testWithoutContext('Bad ipa zip-file, no payload dir', () {
+      fileSystem.file('app.ipa').createSync();
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('app.ipa'),
+        plistParser: testPlistParser,
+        toolContext: toolContext,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.\n',
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Bad ipa zip-file, two app bundles', () {
-      globals.fs.file('app.ipa').createSync();
+    testWithoutContext('Bad ipa zip-file, two app bundles', () {
+      fileSystem.file('app.ipa').createSync();
       os.onUnzip = (File zipFile, Directory targetDirectory) {
         if (zipFile.path != 'app.ipa') {
           return;
         }
-        final String bundlePath1 = globals.fs.path.join(
+        final String bundlePath1 = fileSystem.path.join(
           targetDirectory.path,
           'Payload',
           'bundle1.app',
         );
-        final String bundlePath2 = globals.fs.path.join(
+        final String bundlePath2 = fileSystem.path.join(
           targetDirectory.path,
           'Payload',
           'bundle2.app',
         );
-        globals.fs.directory(bundlePath1).createSync(recursive: true);
-        globals.fs.directory(bundlePath2).createSync(recursive: true);
+        fileSystem.directory(bundlePath1).createSync(recursive: true);
+        fileSystem.directory(bundlePath2).createSync(recursive: true);
       };
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp?;
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('app.ipa'),
+        plistParser: testPlistParser,
+        toolContext: toolContext,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
-      expect(
-        testLogger.errorText,
-        'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n',
-      );
-    }, overrides: overrides);
+      expect(logger.errorText, 'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n');
+    });
 
-    testUsingContext('Success with ipa', () {
-      globals.fs.file('app.ipa').createSync();
+    testWithoutContext('Success with ipa', () {
+      fileSystem.file('app.ipa').createSync();
       os.onUnzip = (File zipFile, Directory targetDirectory) {
         if (zipFile.path != 'app.ipa') {
           return;
         }
-        final Directory bundleAppDir = globals.fs.directory(
-          globals.fs.path.join(targetDirectory.path, 'Payload', 'bundle.app'),
+        final Directory bundleAppDir = fileSystem.directory(
+          fileSystem.path.join(targetDirectory.path, 'Payload', 'bundle.app'),
         );
         bundleAppDir.createSync(recursive: true);
         testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
-        globals.fs.file(globals.fs.path.join(bundleAppDir.path, 'Info.plist')).createSync();
+        fileSystem.file(fileSystem.path.join(bundleAppDir.path, 'Info.plist')).createSync();
       };
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa'))! as PrebuiltIOSApp;
-      expect(testLogger.errorText, isEmpty);
+      final iosApp =
+          IOSApp.fromPrebuiltApp(
+                fileSystem.file('app.ipa'),
+                plistParser: testPlistParser,
+                toolContext: toolContext,
+              )!
+              as PrebuiltIOSApp;
+      expect(logger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, endsWith('bundle.app'));
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
-      expect(iosApp.applicationPackage.path, globals.fs.file('app.ipa').path);
-    }, overrides: overrides);
+      expect(iosApp.applicationPackage.path, fileSystem.file('app.ipa').path);
+    });
 
-    testUsingContext('returns null when there is no ios or .ios directory', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      final iosApp =
-          await IOSApp.fromIosProject(
-                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-                null,
-              )
-              as BuildableIOSApp?;
-
-      expect(iosApp, null);
-    }, overrides: overrides);
-
-    testUsingContext('returns null when there is no Runner.xcodeproj', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
-      final iosApp =
-          await IOSApp.fromIosProject(
-                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-                null,
-              )
-              as BuildableIOSApp?;
+    testWithoutContext('returns null when there is no ios or .ios directory', () async {
+      fileSystem.file('pubspec.yaml').createSync();
+      final iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
+        null,
+        toolContext: toolContext,
+      ) as BuildableIOSApp?;
 
       expect(iosApp, null);
-    }, overrides: overrides);
+    });
 
-    testUsingContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
-      final iosApp =
-          await IOSApp.fromIosProject(
-                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-                null,
-              )
-              as BuildableIOSApp?;
+    testWithoutContext('returns null when there is no Runner.xcodeproj', () async {
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('ios/FooBar.xcodeproj').createSync(recursive: true);
+      final iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
+        null,
+        toolContext: toolContext,
+      ) as BuildableIOSApp?;
 
       expect(iosApp, null);
-    }, overrides: overrides);
+      expect(logger.errorText, contains('Expected ios/Runner.xcodeproj but this file is missing.'));
+    });
 
-    testUsingContext('returns null when there with no product identifier', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      final Directory project = globals.fs.directory('ios/Runner.xcodeproj')
+    testWithoutContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.directory('ios/Runner.xcodeproj').createSync(recursive: true);
+      final iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
+        null,
+        toolContext: toolContext,
+      ) as BuildableIOSApp?;
+
+      expect(iosApp, null);
+      expect(
+        logger.errorText,
+        contains('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.'),
+      );
+    });
+
+    testWithoutContext('returns null when there with no product identifier', () async {
+      fileSystem.file('pubspec.yaml').createSync();
+      final Directory project = fileSystem.directory('ios/Runner.xcodeproj')
         ..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
-      final iosApp =
-          await IOSApp.fromIosProject(
-                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-                null,
-              )
-              as BuildableIOSApp?;
+      final iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
+        null,
+        toolContext: toolContext,
+      ) as BuildableIOSApp?;
 
       expect(iosApp, null);
-    }, overrides: overrides);
+      expect(logger.errorText, isEmpty);
+    });
 
-    testUsingContext('handles project paths with periods in app name', () async {
+    testWithoutContext('handles project paths with periods in app name', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Name.With.Dots',
+        toolContext: toolContext,
       );
       expect(iosApp.name, 'Name.With.Dots');
       expect(iosApp.archiveBundleOutputPath, 'build/ios/archive/Name.With.Dots.xcarchive');
@@ -729,37 +891,41 @@ void main() {
         iosApp.builtInfoPlistPathAfterArchive,
         'build/ios/archive/Name.With.Dots.xcarchive/Products/Applications/Name.With.Dots.app/Info.plist',
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('returns project app icon dirname', () async {
+    testWithoutContext('returns project app icon dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String iconDirSuffix = globals.fs.path.join(
+      final String iconDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'AppIcon.appiconset',
       );
-      expect(iosApp.projectAppIconDirName, globals.fs.path.join('ios', iconDirSuffix));
-    }, overrides: overrides);
+      expect(iosApp.projectAppIconDirName, fileSystem.path.join('ios', iconDirSuffix));
+    });
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String iconDirSuffix = globals.fs.path.join(
+      final String iconDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'AppIcon.appiconset',
       );
       expect(
         iosApp.templateAppIconDirNameForContentsJson,
-        globals.fs.path.join(
-          Cache.flutterRoot!,
+        fileSystem.path.join(
+          getFlutterRoot(),
           'packages',
           'flutter_tools',
           'templates',
@@ -771,13 +937,13 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for images', () async {
-      final String toolsDir = globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-      final String packageConfigPath = globals.fs.path.join(
+      final String toolsDir = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
+      final String packageConfigPath = fileSystem.path.join(
         toolsDir,
         '.dart_tool',
         'package_config.json',
       );
-      globals.fs.file(packageConfigPath)
+      fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 {
@@ -793,18 +959,21 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String iconDirSuffix = globals.fs.path.join(
+      final String iconDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'AppIcon.appiconset',
       );
       expect(
         await iosApp.templateAppIconDirNameForImages,
-        globals.fs.path.absolute(
+        fileSystem.path.absolute(
           'flutter_template_images',
           'templates',
           'app',
@@ -814,35 +983,39 @@ void main() {
       );
     }, overrides: overrides);
 
-    testUsingContext('returns project launch image dirname', () async {
+    testWithoutContext('returns project launch image dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String launchImageDirSuffix = globals.fs.path.join(
+      final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'LaunchImage.imageset',
       );
-      expect(iosApp.projectLaunchImageDirName, globals.fs.path.join('ios', launchImageDirSuffix));
-    }, overrides: overrides);
+      expect(iosApp.projectLaunchImageDirName, fileSystem.path.join('ios', launchImageDirSuffix));
+    });
 
     testUsingContext('returns template launch image dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String launchImageDirSuffix = globals.fs.path.join(
+      final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'LaunchImage.imageset',
       );
       expect(
         iosApp.templateLaunchImageDirNameForContentsJson,
-        globals.fs.path.join(
-          Cache.flutterRoot!,
+        fileSystem.path.join(
+          getFlutterRoot(),
           'packages',
           'flutter_tools',
           'templates',
@@ -854,13 +1027,13 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template launch image dirname for images', () async {
-      final String toolsDir = globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-      final String packageConfigPath = globals.fs.path.join(
+      final String toolsDir = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
+      final String packageConfigPath = fileSystem.path.join(
         toolsDir,
         '.dart_tool',
         'package_config.json',
       );
-      globals.fs.file(packageConfigPath)
+      fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 {
@@ -876,18 +1049,21 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String launchImageDirSuffix = globals.fs.path.join(
+      final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'LaunchImage.imageset',
       );
       expect(
         await iosApp.templateLaunchImageDirNameForImages,
-        globals.fs.path.absolute(
+        fileSystem.path.absolute(
           'flutter_template_images',
           'templates',
           'app',
@@ -1192,5 +1368,35 @@ flutter:
   module:
     androidPackage: com.example
 ''');
-  return FlutterProject.fromDirectory(directory);
+  return FlutterProject.fromDirectory(directory, logger: globals.logger);
 }
+
+const String _aaptDataWithActivityAlias = '''
+N: android=http://schemas.android.com/apk/res/android
+  E: manifest (line=7)
+    A: android:versionCode(0x0101021b)=(type 0x10)0x1
+    A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
+    A: package="io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
+    E: uses-sdk (line=12)
+      A: android:minSdkVersion(0x0101020c)=(type 0x10)0x10
+      A: android:targetSdkVersion(0x01010270)=(type 0x10)0x1b
+    E: uses-permission (line=21)
+      A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
+    E: application (line=29)
+      A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
+      A: android:icon(0x01010002)=@0x7f010000
+      A: android:name(0x01010003)="io.flutter.app.FlutterApplication" (Raw: "io.flutter.app.FlutterApplication")
+      A: android:debuggable(0x0101000f)=(type 0x12)0xffffffff
+      E: activity (line=34)
+        A: android:theme(0x01010000)=@0x1030009
+        A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
+        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
+        A: android:launchMode(0x0101001d)=(type 0x10)0x1
+      E: activity-alias (line=38)
+        A: android:name(0x01010003)="io.flutter.examples.hello_world.LauncherAlias" (Raw: "io.flutter.examples.hello_world.LauncherAlias")
+        A: android:targetActivity(0x01010202)="io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
+        E: intent-filter (line=42)
+          E: action (line=43)
+            A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
+          E: category (line=45)
+            A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';

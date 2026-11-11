@@ -83,3 +83,15 @@ SKWASM_EXPORT void paragraphStyle_setApplyRoundingHack(
     bool apply_rounding_hack) {
   style->skia_paragraph_style.setApplyRoundingHack(apply_rounding_hack);
 }
+
+SKWASM_EXPORT void paragraphStyle_setRenderSoftHyphens(
+    Skwasm::ParagraphStyle* style,
+    bool render_soft_hyphens) {
+  style->skia_paragraph_style.setRenderSoftHyphens(render_soft_hyphens);
+}
+
+SKWASM_EXPORT void paragraphStyle_setSoftHyphenString(
+    Skwasm::ParagraphStyle* style,
+    SkString* soft_hyphen_string) {
+  style->skia_paragraph_style.setSoftHyphenString(*soft_hyphen_string);
+}

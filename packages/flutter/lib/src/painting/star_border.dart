@@ -11,6 +11,7 @@ import 'dart:ui' as ui show lerpDouble;
 import 'package:flutter/foundation.dart';
 
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
+
 import 'basic_types.dart';
 import 'borders.dart';
 import 'circle_border.dart';

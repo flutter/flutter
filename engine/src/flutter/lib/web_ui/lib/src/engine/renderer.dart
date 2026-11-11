@@ -9,7 +9,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
-    // ignore: deprecated_web_configuration
+    // ignore: deprecated_web_configuration, https://github.com/dart-lang/sdk/issues/61464
     if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -96,7 +96,10 @@ abstract class Renderer {
     rasterizer.dispose();
   }
 
-  ui.Paint createPaint();
+  /// Creates a native paint for a single draw call from [paint].
+  ///
+  /// The caller owns the result and must dispose it after the draw call.
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode});
 
   BackendVertices createVertices(
     ui.VertexMode mode,
@@ -176,6 +179,14 @@ abstract class Renderer {
   /// Whether this renderer natively supports resizing/scaling animated images during decoding.
   bool get supportsResizingAnimatedImages;
 
+  /// Whether this renderer can decode images itself via [createAnimatedImage].
+  ///
+  /// When this is false, [createAnimatedImage] must not be called for any
+  /// image, animated or not, and callers must fall back to a browser-provided
+  /// decoder. Some backends (notably the Impeller-based skwasm variants) are
+  /// built without the builtin image codecs.
+  bool get supportsAnimatedImages;
+
   BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight});
 
   BackendImage createImageFromImageSource(ImageSource source);
@@ -216,12 +227,18 @@ abstract class Renderer {
   }) async {
     var textureSource = object;
     final originalTextureSource = object;
-    final bool needsClone = !transferOwnership || (isMultiThreaded && !_isTransferable(object));
+    final bool isVideoFrame = object.isA<VideoFrame>();
+    // Although VideoFrame is transferable across threads, drawing directly from a
+    // VideoFrame to a WebGL texture can result in incorrect orientation due to EXIF
+    // metadata handling. Converting it to an ImageBitmap avoids this problem.
+    final bool needsClone =
+        isVideoFrame || !transferOwnership || (isMultiThreaded && !_isTransferable(object));
     if (needsClone) {
-      textureSource = (await createImageBitmap(
-        object,
-        bounds: (x: 0, y: 0, width: width, height: height),
-      )).toJSAnyShallow;
+      textureSource =
+          (await (isVideoFrame
+                  ? createImageBitmap(object)
+                  : createImageBitmap(object, bounds: (x: 0, y: 0, width: width, height: height))))
+              .toJSAnyShallow;
       if (transferOwnership) {
         if (originalTextureSource.isA<VideoFrame>()) {
           (originalTextureSource as VideoFrame).close();
@@ -254,7 +271,7 @@ abstract class Renderer {
   }
 
   bool _isTransferable(JSAny object) =>
-      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
+      object.isA<DomImageBitmap>() || object.isA<DomOffscreenCanvas>() || object.isA<VideoFrame>();
 
   Future<ui.Codec> instantiateImageCodec(
     Uint8List list, {
@@ -334,77 +351,14 @@ abstract class Renderer {
 
   BackendPathConstructors get pathConstructors;
 
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  });
-
-  ui.TextStyle createTextStyle({
-    required ui.Color? color,
-    required ui.TextDecoration? decoration,
-    required ui.Color? decorationColor,
-    required ui.TextDecorationStyle? decorationStyle,
-    required double? decorationThickness,
-    required ui.FontWeight? fontWeight,
-    required ui.FontStyle? fontStyle,
-    required ui.TextBaseline? textBaseline,
-    required String? fontFamily,
-    required List<String>? fontFamilyFallback,
-    required double? fontSize,
-    required double? letterSpacing,
-    required double? wordSpacing,
-    required double? height,
-    required ui.TextLeadingDistribution? leadingDistribution,
-    required ui.Locale? locale,
-    required ui.Paint? background,
-    required ui.Paint? foreground,
-    required List<ui.Shadow>? shadows,
-    required List<ui.FontFeature>? fontFeatures,
-    required List<ui.FontVariation>? fontVariations,
-  });
-
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-  });
-
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  });
-
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style);
 
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph);
 
   /// Map from view id to the associated [ViewRasterizer] for that view.
   final Map<int, ViewRasterizer> rasterizers = <int, ViewRasterizer>{};
 
-  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) async {
+  Future<void> renderScene(ui.Scene scene, EngineFlutterView view, {required ui.Size size}) async {
     assert(
       rasterizers.containsKey(view.viewId),
       "Unable to render to a view which hasn't been registered",
@@ -419,11 +373,11 @@ abstract class Renderer {
       // so that the scene view always displays the most recently requested scene.
       renderQueue.next?.completer.complete();
       final completer = Completer<void>();
-      renderQueue.next = (scene: scene, completer: completer, recorder: recorder);
+      renderQueue.next = (scene: scene, size: size, completer: completer, recorder: recorder);
       return completer.future;
     }
     final completer = Completer<void>();
-    renderQueue.current = (scene: scene, completer: completer, recorder: recorder);
+    renderQueue.current = (scene: scene, size: size, completer: completer, recorder: recorder);
     unawaited(_kickRenderLoop(rasterizer));
     return completer.future;
   }
@@ -432,7 +386,7 @@ abstract class Renderer {
     final RenderQueue renderQueue = rasterizer.queue;
     final RenderRequest current = renderQueue.current!;
     try {
-      await _renderScene(current.scene, rasterizer, current.recorder);
+      await _renderScene(current.scene, current.size, rasterizer, current.recorder);
       current.completer.complete();
     } catch (error, stackTrace) {
       current.completer.completeError(error, stackTrace);
@@ -448,10 +402,11 @@ abstract class Renderer {
 
   Future<void> _renderScene(
     ui.Scene scene,
+    ui.Size size,
     ViewRasterizer rasterizer,
     FrameTimingRecorder? recorder,
   ) async {
-    await rasterizer.draw((scene as LayerScene).layerTree, recorder);
+    await rasterizer.draw((scene as LayerScene).layerTree, size, recorder);
     recorder?.submitTimings();
   }
 

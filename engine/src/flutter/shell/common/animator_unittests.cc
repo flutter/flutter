@@ -52,6 +52,20 @@ class FakeAnimatorDelegate : public Animator::Delegate {
   bool notify_idle_called_ = false;
 };
 
+class CountingVsyncWaiter : public VsyncWaiter {
+ public:
+  explicit CountingVsyncWaiter(const TaskRunners& task_runners)
+      : VsyncWaiter(task_runners) {}
+
+  int await_vsync_call_count() const { return await_vsync_call_count_; }
+
+ protected:
+  void AwaitVSync() override { await_vsync_call_count_++; }
+
+ private:
+  int await_vsync_call_count_ = 0;
+};
+
 TEST_F(ShellTest, VSyncTargetTime) {
   // Add native callbacks to listen for window.onBeginFrame
   int64_t target_time;
@@ -63,6 +77,7 @@ TEST_F(ShellTest, VSyncTargetTime) {
   };
   AddFfiNativeCallback("NativeOnBeginFrame",
                        CREATE_FFI_LAMBDA(nativeOnBeginFrame));
+  AddFfiNativeCallback("NotifyNative", CREATE_FFI_LAMBDA([&]() {}));
 
   // Create all te prerequisites for a shell.
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
@@ -112,6 +127,23 @@ TEST_F(ShellTest, VSyncTargetTime) {
   // teardown.
   DestroyShell(std::move(shell), task_runners);
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, RequestFrameAwaitsVsyncSynchronously) {
+  FakeAnimatorDelegate delegate;
+
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  auto vsync_waiter = std::make_unique<CountingVsyncWaiter>(task_runners);
+  const auto* counting_vsync_waiter = vsync_waiter.get();
+  Animator animator(delegate, task_runners, std::move(vsync_waiter));
+
+  animator.RequestFrame(/*regenerate_layer_trees=*/false);
+
+  EXPECT_EQ(counting_vsync_waiter->await_vsync_call_count(), 1);
 }
 
 TEST_F(ShellTest, AnimatorDoesNotNotifyIdleBeforeRender) {

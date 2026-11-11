@@ -30,18 +30,16 @@ class DriverTestImportValidator {
   ///
   /// Required arguments:
   /// * [fileSystem]: Used to read files and resolve canonical paths.
-  /// * [logger]: Used to log trace messages during parsing failures.
-  /// * [packageConfig]: Used to resolve `package:` URIs within the project.
+  /// * [_logger]: Used to log trace messages during parsing failures.
+  /// * [_packageConfig]: Used to resolve `package:` URIs within the project.
   /// * [projectRootPath]: The root directory of the Flutter project, used as a
   ///   boundary to restrict transitive analysis to project-local sources.
   DriverTestImportValidator({
     required FileSystem fileSystem,
-    required Logger logger,
-    required PackageConfig packageConfig,
+    required this._logger,
+    required this._packageConfig,
     required String projectRootPath,
   }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _packageConfig = packageConfig,
        _projectRootPath = fileSystem.path.canonicalize(projectRootPath);
 
   final FileSystem _fileSystem;

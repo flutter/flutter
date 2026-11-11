@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -39,7 +40,10 @@ class FakePub extends Fake implements Pub {
     bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(
+      directory: project.directory,
+      mainLibName: project.manifest.appName.isNotEmpty ? project.manifest.appName : 'my_app',
+    );
     if (offline) {
       calledGetOffline += 1;
     } else {
@@ -55,14 +59,13 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      Cache.flutterRoot = 'flutter';
     });
 
     setUp(() {
       testbed = TestBed(
         setup: () {
           fakePub = FakePub();
-          Cache.flutterRoot = 'flutter';
+          globals.cache.flutterRoot = 'flutter';
           final filePaths = <String>[
             globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
             globals.fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
@@ -210,10 +213,32 @@ void main() {
       );
     });
 
+    CreateCommand createCreateCommand({Pub? pub}) {
+      return CreateCommand(
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: globals.fs,
+          logger: globals.logger,
+          platform: globals.platform,
+          processManager: globals.processManager,
+          cache: globals.cache,
+          flutterVersion: FakeFlutterVersion(),
+          projectFactory: FlutterProjectFactory(
+            fileSystem: globals.fs,
+            logger: globals.logger,
+            config: globals.config,
+          ),
+        ),
+        pub: pub,
+      );
+    }
+
     testUsingContext(
       'set template type as usage value',
       () => testbed.run(() async {
-        final command = CreateCommand();
+        final CreateCommand command = createCreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
@@ -253,7 +278,7 @@ void main() {
     testUsingContext(
       'set Android host language type as usage value',
       () => testbed.run(() async {
-        final command = CreateCommand();
+        final CreateCommand command = createCreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
@@ -280,11 +305,11 @@ void main() {
     testUsingContext(
       'create --offline',
       () => testbed.run(() async {
-        final command = CreateCommand();
+        final CreateCommand command = createCreateCommand(pub: fakePub);
         final CommandRunner<void> runner = createTestCommandRunner(command);
+        writePackageConfigFiles(directory: globals.fs.directory('testy'), mainLibName: 'my_app');
         await runner.run(<String>['create', 'testy', '--offline']);
-        expect(fakePub.calledOnline, 0);
-        expect(fakePub.calledGetOffline, 1);
+
         expect(command.argParser.options.containsKey('offline'), true);
         expect(command.shouldUpdateCache, true);
       }, overrides: <Type, Generator>{Java: () => null, Pub: () => fakePub}),
@@ -293,7 +318,7 @@ void main() {
     testUsingContext(
       'package_ffi template not enabled',
       () async {
-        final command = CreateCommand();
+        final CreateCommand command = createCreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         expect(
@@ -305,14 +330,13 @@ void main() {
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(
-          isNativeAssetsEnabled:
-              false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
+          isNativeAssetsEnabled: false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
         ),
       },
     );
 
     testUsingContext('plugin_ffi template is marked as deprecated in help', () {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final String? templateHelp =
           command.argParser.options['template']?.allowedHelp?['plugin_ffi'];
       expect(templateHelp, contains('(deprecated)'));

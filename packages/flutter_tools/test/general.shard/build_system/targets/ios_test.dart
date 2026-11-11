@@ -7,16 +7,16 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -83,6 +83,22 @@ void main() {
       fileSystem: fileSystem,
       engineVersion: '2',
       analytics: fakeAnalytics,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'strawberry'],
+        ),
+      ),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: processManager,
+        ),
+      ),
     );
   });
 
@@ -279,9 +295,8 @@ void main() {
 
       await const DebugIosApplicationBundle().build(environment);
 
-      final fakeStdio = globals.stdio as FakeStdio;
       expect(
-        fakeStdio.buffer.toString(),
+        logger.errorText,
         contains(
           'warning: Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures.',
         ),
@@ -292,7 +307,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macPlatform,
-      Stdio: () => FakeStdio(),
     },
   );
   testUsingContext(
@@ -480,8 +494,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macPlatform,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 
@@ -805,6 +817,54 @@ void main() {
   );
 
   testUsingContext(
+    'iOS targets throw ToolExit if sdk root is unrecognized iOS SDK',
+    () async {
+      const unsupportedSdkRoot = 'path/to/XROS1.0.sdk';
+      const expectedErrorMessage =
+          'Unsupported iOS SDK root "$unsupportedSdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK. '
+          "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+          '(SDKROOT) and Supported Destinations in Xcode.';
+      final fileSystem = MemoryFileSystem.test();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{
+          kTargetPlatform: 'ios',
+          kSdkRoot: unsupportedSdkRoot,
+          kBuildMode: 'release',
+          kIosArchs: 'arm64',
+        },
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+
+      await expectLater(
+        const AotAssemblyRelease().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      await expectLater(
+        const DebugUniversalFramework().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      await expectLater(
+        const DebugUnpackIOS().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      await expectLater(
+        const DebugIosLLDBInit().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
     'AotAssemblyRelease throws exception if sdk root is missing',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -874,7 +934,11 @@ void main() {
           'chmod',
           '-R',
           'u+w',
-          outputDir.childDirectory('Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical').path,
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+              )
+              .path,
         ],
       );
 
@@ -890,7 +954,6 @@ void main() {
           outputDir.path,
         ],
       );
-
 
       copyPhysicalFrameworkDsymCommandFailure = FakeCommand(
         command: <String>[
@@ -928,7 +991,11 @@ void main() {
           'chmod',
           '-R',
           'u+w',
-          outputDir.childDirectory('Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator').path,
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+              )
+              .path,
         ],
       );
     });
@@ -1413,11 +1480,9 @@ void main() {
   });
 
   group('DebugIosLLDBInit', () {
-    late FakeStdio fakeStdio;
     late MemoryFileSystem testFileSystem;
 
     setUp(() {
-      fakeStdio = FakeStdio();
       testFileSystem = MemoryFileSystem.test();
     });
 
@@ -1451,7 +1516,7 @@ flutter:
         await const DebugIosLLDBInit().build(testEnvironment);
 
         expect(
-          fakeStdio.buffer.toString(),
+          logger.errorText,
           contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
         );
       },
@@ -1459,7 +1524,6 @@ flutter:
         FileSystem: () => testFileSystem,
         ProcessManager: () => processManager,
         Platform: () => macPlatform,
-        Stdio: () => fakeStdio,
       },
     );
 
@@ -1488,7 +1552,7 @@ flutter:
         await const DebugIosLLDBInit().build(testEnvironment);
 
         expect(
-          fakeStdio.buffer.toString(),
+          logger.errorText,
           isNot(
             contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
           ),
@@ -1498,7 +1562,6 @@ flutter:
         FileSystem: () => testFileSystem,
         ProcessManager: () => processManager,
         Platform: () => macPlatform,
-        Stdio: () => fakeStdio,
       },
     );
 
@@ -1531,7 +1594,7 @@ flutter:
 
         await const DebugIosLLDBInit().build(testEnvironment);
         expect(
-          fakeStdio.buffer.toString(),
+          logger.errorText,
           isNot(
             contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
           ),
@@ -1573,7 +1636,7 @@ flutter:
 
         await const DebugIosLLDBInit().build(testEnvironment);
         expect(
-          fakeStdio.buffer.toString(),
+          logger.errorText,
           isNot(
             contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
           ),
@@ -1654,14 +1717,5 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     String? projectFilename,
   }) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
-  }
-}
-
-class FakeStdio extends Fake implements Stdio {
-  final buffer = StringBuffer();
-
-  @override
-  void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
-    buffer.writeln(message);
   }
 }

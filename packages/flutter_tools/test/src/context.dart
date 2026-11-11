@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
@@ -25,6 +26,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -61,8 +63,7 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String? testOn,
-  bool?
-  skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
+  bool? skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
     fail(
@@ -105,12 +106,12 @@ void testUsingContext(
               AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
               Config: () => buildConfig(globals.fs),
               DeviceManager: () => FakeDeviceManager(),
-              Doctor: () => FakeDoctor(globals.logger),
+              Doctor: () => _ContextFakeDoctor(globals.logger),
               FlutterVersion: () => FakeFlutterVersion(),
               HttpClient: () => FakeHttpClient.any(),
               IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
               OutputPreferences: () => OutputPreferences.test(),
-              Logger: () => BufferLogger.test(),
+              Logger: () => BufferLogger.test(outputPreferences: context.get<OutputPreferences>()),
               OperatingSystemUtils: () => FakeOperatingSystemUtils(),
               PersistentToolState: () => buildPersistentToolState(globals.fs),
               XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
@@ -141,10 +142,17 @@ void testUsingContext(
                       overrides: overrides,
                       name: 'test-specific overrides',
                       body: () async {
-                        if (initializeFlutterRoot) {
+                        if (initializeFlutterRoot &&
+                            overrides[Cache] == null &&
+                            (overrides[Platform] == null ||
+                                !globals.platform.environment.containsKey(
+                                  kFlutterRootEnvironmentVariableName,
+                                ))) {
                           // Provide a sane default for the flutterRoot directory. Individual
-                          // tests can override this either in the test or during setup.
-                          Cache.flutterRoot ??= getFlutterRoot();
+                          // tests can override this in the test. Skipped when a Platform
+                          // override supplies FLUTTER_ROOT, so FlutterCache resolves it via
+                          // Cache.defaultFlutterRoot.
+                          globals.cache.flutterRoot = getFlutterRoot();
                         }
                         return await testMethod();
                       },
@@ -314,8 +322,15 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
 
-class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger, {super.clock = const SystemClock()}) : super(logger: logger);
+class _ContextFakeDoctor extends Doctor {
+  _ContextFakeDoctor(Logger logger, {super.clock = const SystemClock()})
+    : super(
+        analytics: globals.analytics,
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        logger: logger,
+        validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
+            context.get<DoctorValidatorsProvider>()!,
+      );
 
   // True for testing.
   @override
@@ -352,14 +367,11 @@ class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   FakeXcodeProjectInterpreter({
-    bool isInstalled = true,
-    String? versionText = 'Xcode 15',
-    Version? version = const Version.withText(15, 0, 0, '15.0.0'),
-    String? build = '15A240D',
-  }) : _isInstalled = isInstalled,
-       _versionText = versionText,
-       _version = version,
-       _build = build;
+    this._isInstalled = true,
+    this._versionText = 'Xcode 15',
+    this._version = const Version.withText(15, 0, 0, '15.0.0'),
+    this._build = '15A240D',
+  });
 
   final bool _isInstalled;
   final String? _versionText;
@@ -381,7 +393,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    XcodeProjectBuildContext? buildContext,
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -405,7 +417,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(
+  Future<XcodeProjectInfo?> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,

@@ -11,6 +11,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -21,9 +23,12 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Bundle;
+import android.view.View;
 import androidx.activity.BackEventCompat;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
@@ -32,13 +37,16 @@ import io.flutter.Build;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterFragmentTest {
@@ -69,7 +77,7 @@ public class FlutterFragmentTest {
     assertNull(fragment.getDartEntrypointLibraryUri());
     assertNull(fragment.getDartEntrypointArgs());
     assertEquals("/", fragment.getInitialRoute());
-    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
+    assertTrue(fragment.getFlutterEngineFlags().isEmpty());
     assertTrue(fragment.shouldAttachEngineToActivity());
     assertFalse(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
@@ -100,7 +108,7 @@ public class FlutterFragmentTest {
     assertEquals("package:foo/bar.dart", fragment.getDartEntrypointLibraryUri());
     assertEquals("/custom/route", fragment.getInitialRoute());
     assertArrayEquals(new String[] {"foo", "bar"}, fragment.getDartEntrypointArgs().toArray());
-    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
+    assertTrue(fragment.getFlutterEngineFlags().isEmpty());
     assertFalse(fragment.shouldAttachEngineToActivity());
     assertTrue(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
@@ -129,7 +137,7 @@ public class FlutterFragmentTest {
     assertEquals("my_cached_engine_group", fragment.getCachedEngineGroupId());
     assertEquals("custom_entrypoint", fragment.getDartEntrypointFunctionName());
     assertEquals("/custom/route", fragment.getInitialRoute());
-    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
+    assertTrue(fragment.getFlutterEngineFlags().isEmpty());
     assertFalse(fragment.shouldAttachEngineToActivity());
     assertTrue(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
@@ -342,6 +350,49 @@ public class FlutterFragmentTest {
   }
 
   @Test
+  @Config(sdk = {Build.API_LEVELS.API_33, Build.API_LEVELS.API_34})
+  public void itPreservesFrameworkBackStateReplayedDuringAttach() {
+    FlutterFragment fragment =
+        FlutterFragment.withCachedEngine("my_cached_engine")
+            .shouldAutomaticallyHandleOnBackPressed(true)
+            .build();
+    FlutterActivityAndFragmentDelegate mockDelegate =
+        mock(FlutterActivityAndFragmentDelegate.class);
+    when(mockDelegate.isAttached()).thenReturn(true);
+    when(mockDelegate.onCreateView(any(), any(), any(), anyInt(), anyBoolean()))
+        .thenReturn(new View(ctx));
+    doAnswer(
+            invocation -> {
+              // PlatformPlugin replays the cached engine's back state during onAttach.
+              fragment.setFrameworkHandlesBack(true);
+              return null;
+            })
+        .when(mockDelegate)
+        .onAttach(any());
+    fragment.setDelegateFactory(new TestDelegateFactory(mockDelegate));
+
+    try (ActivityScenario<FragmentActivity> scenario =
+        ActivityScenario.launch(FragmentActivity.class)) {
+      scenario.onActivity(
+          activity -> {
+            activity
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .add(android.R.id.content, fragment)
+                .commitNow();
+
+            activity.getOnBackPressedDispatcher().onBackPressed();
+
+            if (android.os.Build.VERSION.SDK_INT >= Build.API_LEVELS.API_34) {
+              verify(mockDelegate).commitBackGesture();
+            } else {
+              verify(mockDelegate).onBackPressed();
+            }
+          });
+    }
+  }
+
+  @Test
   @Config(sdk = Build.API_LEVELS.API_34)
   @TargetApi(Build.API_LEVELS.API_34)
   public void itDelegatesOnBackPressedWithSetFrameworkHandlesBackForSdk34OrHigher() {
@@ -493,5 +544,93 @@ public class FlutterFragmentTest {
     fragment.onDetach();
     verify(spyCtx, times(1)).registerComponentCallbacks(any());
     verify(spyCtx, times(1)).unregisterComponentCallbacks(any());
+  }
+
+  @Test
+  public void newEngineFragmentBuilderSetsFlutterEngineFlags() {
+    List<String> flags = Arrays.asList("--trace-startup", "--verbose-logging");
+    FlutterFragment fragment = FlutterFragment.withNewEngine().flutterEngineFlags(flags).build();
+
+    assertEquals(flags, fragment.getFlutterEngineFlags());
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void newEngineFragmentBuilderSetsFlutterShellArgsViaFlutterEngineFlags() {
+    FlutterShellArgs shellArgs =
+        new FlutterShellArgs(new String[] {"--trace-startup", "--verbose-logging"});
+    FlutterFragment fragment = FlutterFragment.withNewEngine().flutterShellArgs(shellArgs).build();
+
+    assertEquals(
+        Arrays.asList("--trace-startup", "--verbose-logging"), fragment.getFlutterEngineFlags());
+  }
+
+  @Test
+  public void flutterFragment_forwardsOverriddenFlutterShellArgsToEngineFlags() {
+    FragmentWithOverriddenShellArgs fragment = new FragmentWithOverriddenShellArgs();
+    Bundle args = new Bundle();
+    fragment.setArguments(args);
+
+    List<String> flags = fragment.getFlutterEngineFlags();
+    assertEquals(2, flags.size());
+    assertTrue(flags.contains("--frag-flag-1"));
+    assertTrue(flags.contains("--frag-flag-2"));
+
+    List<ShadowLog.LogItem> logs = ShadowLog.getLogsForTag("FlutterFragment");
+    boolean hasDeprecationWarning = false;
+    for (ShadowLog.LogItem log : logs) {
+      if (log.msg.contains("FlutterShellArgs is deprecated")) {
+        hasDeprecationWarning = true;
+        break;
+      }
+    }
+    assertTrue(hasDeprecationWarning);
+  }
+
+  @Test
+  public void flutterFragment_superGetFlutterShellArgsDoesNotCauseRecursion() {
+    FragmentWithSuperShellArgs fragment = new FragmentWithSuperShellArgs();
+    Bundle args = new Bundle();
+    fragment.setArguments(args);
+
+    List<String> flags = fragment.getFlutterEngineFlags();
+    assertEquals(1, flags.size());
+    assertTrue(flags.contains(FragmentWithSuperShellArgs.APPENDED_FLAG));
+  }
+
+  @Test
+  public void flutterFragment_superGetFlutterShellArgsIncludesInitialFlagsAndAppendedFlag() {
+    FragmentWithSuperShellArgs fragment = new FragmentWithSuperShellArgs();
+    Bundle args = new Bundle();
+    args.putStringArray(
+        FlutterFragment.ARG_FLUTTER_INITIALIZATION_ARGS, new String[] {"--frag-flag-1"});
+    fragment.setArguments(args);
+
+    List<String> flags = fragment.getFlutterEngineFlags();
+    assertEquals(2, flags.size());
+    assertTrue(flags.contains("--frag-flag-1"));
+    assertTrue(flags.contains(FragmentWithSuperShellArgs.APPENDED_FLAG));
+  }
+
+  public static class FragmentWithOverriddenShellArgs extends FlutterFragment {
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {"--frag-flag-1", "--frag-flag-2"});
+    }
+  }
+
+  public static class FragmentWithSuperShellArgs extends FlutterFragment {
+    public static final String APPENDED_FLAG = "--appended-frag-flag";
+
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      FlutterShellArgs args = super.getFlutterShellArgs();
+      args.add(APPENDED_FLAG);
+      return args;
+    }
   }
 }

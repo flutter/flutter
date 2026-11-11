@@ -662,8 +662,7 @@ class _MergeableMaterialListBody extends ListBody {
 }
 
 class _RenderMergeableMaterialListBody extends RenderListBody {
-  _RenderMergeableMaterialListBody({super.axisDirection, double elevation = 0.0})
-    : _elevation = elevation;
+  _RenderMergeableMaterialListBody({super.axisDirection, this._elevation = 0.0});
 
   double get elevation => _elevation;
   double _elevation;

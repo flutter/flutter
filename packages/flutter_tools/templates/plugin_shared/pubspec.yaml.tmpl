@@ -15,6 +15,9 @@ dependencies:
     sdk: flutter
   web: ^1.0.0
 {{/web}}
+{{#withPlatformChannelPluginHook}}
+  meta: ^1.19.0
+{{/withPlatformChannelPluginHook}}
   plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
@@ -25,6 +28,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+{{#withPlatformChannelPluginHook}}
+  pigeon: ^29.0.1
+{{/withPlatformChannelPluginHook}}
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

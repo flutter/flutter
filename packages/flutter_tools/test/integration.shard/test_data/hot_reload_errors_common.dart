@@ -34,30 +34,25 @@ void testAll({
       tryToDelete(tempDir);
     });
 
-    testWithoutContext(
-      'hot reload displays a formatted error message when removing a field from a const class, and hot restart succeeds',
-      () async {
-        await flutter.run(
-          device: chrome
-              ? GoogleChromeDevice.kChromeDeviceId
-              : FlutterTesterDevices.kTesterDeviceId,
-          additionalCommandArgs: additionalCommandArgs,
-        );
+    testWithoutContext('hot reload displays a formatted error message when removing a field from a const class, and hot restart succeeds', () async {
+      await flutter.run(
+        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
 
-        project.removeFieldFromConstClass();
-        await expectLater(
-          flutter.hotReload(),
-          throwsA(
-            isA<Exception>().having(
-              (Exception e) => e.toString(),
-              'message',
-              contains('Try performing a hot restart instead.'),
-            ),
+      project.removeFieldFromConstClass();
+      await expectLater(
+        flutter.hotReload(),
+        throwsA(
+          isA<Exception>().having(
+            (Exception e) => e.toString(),
+            'message',
+            contains('Try performing a hot restart instead.'),
           ),
-        );
-        await expectLater(flutter.hotRestart(), completes);
-      },
-    );
+        ),
+      );
+      await expectLater(flutter.hotRestart(), completes);
+    });
 
     testWithoutContext(
       'Expression evaluation succeeds after a hot reload rejection error',
