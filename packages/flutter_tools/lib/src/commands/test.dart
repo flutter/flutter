@@ -68,16 +68,14 @@ const _kIntegrationTestDirectory = 'integration_test';
 /// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
-    required TemplateRenderer templateRenderer,
+    required this._templateRenderer,
     required super.toolContext,
     this.nativeAssetsBuilder,
     FlutterTestRunner? testRunner,
     this.testWrapper = const TestWrapper(),
     this.verbose = false,
     super.verboseHelp = false,
-  }) : _testRunner =
-           testRunner ??
-           FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext!) {
+  }) : _customTestRunner = testRunner {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       DdsAndDevToolsOptionsBundle(includeDevTools: false),
@@ -377,14 +375,20 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'Set "--no-uninstall" to keep the app installed on the device.',
   );
 
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
   /// The interface for starting and configuring the tester.
   final TestWrapper testWrapper;
 
+  final TemplateRenderer _templateRenderer;
+  final FlutterTestRunner? _customTestRunner;
+
   /// Interface for running the tester process.
-  final FlutterTestRunner _testRunner;
+  late final FlutterTestRunner _testRunner =
+      _customTestRunner ??
+      FlutterTestRunner(
+        analytics: analytics,
+        templateRenderer: _templateRenderer,
+        toolContext: toolContext,
+      );
 
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
