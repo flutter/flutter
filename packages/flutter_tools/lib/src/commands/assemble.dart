@@ -4,7 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
-    show ExtensionBuildTarget, ExtensionNativeAssetsConfig;
+    show ExtensionAssembleTarget, ExtensionBuildTarget, ExtensionNativeAssetsConfig;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -28,13 +28,16 @@ import '../build_system/targets/macos.dart';
 import '../build_system/targets/native_assets.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../experimental/extension_build_manager.dart';
 import '../features.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import '../windows/visual_studio.dart';
 
 /// All currently implemented targets.
 var _kDefaultTargets = <Target>[
@@ -106,9 +109,11 @@ var _kDefaultTargets = <Target>[
 /// system.
 class AssembleCommand extends FlutterCommand {
   AssembleCommand({
+    required this._androidContext,
     required this._buildSystem,
     required this._featureFlags,
-    required ToolContext super.toolContext,
+    required super.toolContext,
+    required this._xcode,
     this._extensionBuildManager,
     super.verboseHelp = false,
   }) {
@@ -188,13 +193,12 @@ class AssembleCommand extends FlutterCommand {
     help: 'The maximum number of concurrent tasks the build system will run.',
   );
 
+  final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
   final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
+  final Xcode? _xcode;
   var _extensionDefinesResolved = false;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   bool get hidden => !verboseHelp;
@@ -313,7 +317,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   /// The target(s) we are building.
-  List<Target> createTargets() {
+  Future<List<Target>> createTargets() async {
     final ArgResults argumentResults = argResults!;
     if (argumentResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
@@ -322,6 +326,34 @@ class AssembleCommand extends FlutterCommand {
     final targetMap = <String, Target>{
       for (final Target target in _kDefaultTargets) target.name: target,
     };
+    if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?
+        when argumentResults.rest.any((String targetName) => !targetMap.containsKey(targetName))) {
+      for (final ExtensionAssembleTarget target
+          in await extensionBuildManager.getAssembleTargets()) {
+        final String extensionName = extensionBuildManager.extensionNameForAssembleTarget(
+          target.name,
+        );
+        if (targetMap.containsKey(target.name)) {
+          toolContext.logger.printWarning(
+            'Skipping custom assemble target "${target.name}" from extension "$extensionName" because a target with that name already exists.',
+          );
+          continue;
+        }
+        targetMap[target.name] = ExtensionTarget(
+          assembleTarget: target,
+          buildManager: extensionBuildManager,
+          dependencyResolver: (String dependencyName) {
+            final Target? dependency = targetMap[dependencyName];
+            if (dependency == null) {
+              throwToolExit(
+                'Target "$dependencyName" required by "${target.name}" from extension "$extensionName" not found. It might not be registered.',
+              );
+            }
+            return dependency;
+          },
+        );
+      }
+    }
     final results = <Target>[
       for (final String targetName in argumentResults.rest)
         if (targetMap.containsKey(targetName)) targetMap[targetName]!,
@@ -363,6 +395,7 @@ class AssembleCommand extends FlutterCommand {
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = toolContext;
     final FlutterProject project = this.project;
     String? output = getValue(_output);
@@ -400,7 +433,11 @@ class AssembleCommand extends FlutterCommand {
       logger: logger,
       processManager: processManager,
       analytics: analytics,
+      androidSdkBuilder: () => _androidContext.androidSdk,
       platform: platform,
+      projectFactory: projectFactory,
+      visualStudio: VisualStudio(toolContext: toolContext),
+      xcode: _xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
@@ -447,7 +484,7 @@ class AssembleCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     await _resolveExtensionEnvironmentDefines();
     final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
-    final List<Target> targets = createTargets();
+    final List<Target> targets = await createTargets();
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
     for (final target in targets) {

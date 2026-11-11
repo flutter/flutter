@@ -12,7 +12,6 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart' hide BuildMode;
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -773,10 +772,12 @@ environment:
       });
       final cache = FakeCache(fileSystem: fileSystem, flutterRoot: '/flutter');
       final assembleCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
         buildSystem: buildSystem,
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
         toolContext: FakeToolContext(cache: cache, fs: fileSystem, logger: logger),
+        xcode: null,
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(assembleCommand);
       await commandRunner.run(<String>[
@@ -818,6 +819,7 @@ environment:
       };
 
       final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
+        androidSdkProvider: null,
         buildDirectory: fileSystem.directory('/project/build'),
         buildMode: BuildMode.debug,
         environmentDefines: defines,
@@ -827,6 +829,7 @@ environment:
           SupportedAssetTypes.dataAssets,
         ],
         targetPlatform: TargetPlatform.unsupported,
+        visualStudio: null,
       );
 
       expect(targets, hasLength(1));
@@ -1032,6 +1035,7 @@ environment:
       fileSystem.file('/opt/custom-sdk/llvm/bin/ld.lld').createSync();
 
       final List<AssetBuildTarget> customTargets = AssetBuildTarget.targetsFor(
+        androidSdkProvider: null,
         buildDirectory: fileSystem.directory('/project/build'),
         buildMode: BuildMode.debug,
         environmentDefines: <String, String>{
@@ -1047,6 +1051,7 @@ environment:
           SupportedAssetTypes.dataAssets,
         ],
         targetPlatform: TargetPlatform.unsupported,
+        visualStudio: null,
       );
 
       expect(customTargets, hasLength(1));

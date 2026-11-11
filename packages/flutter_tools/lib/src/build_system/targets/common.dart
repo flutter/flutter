@@ -11,11 +11,9 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
-import '../../context_runner.dart' show GlobalToolContext;
 import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show projectFactory;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/targets.dart' show parseNativeOS;
 import '../../project.dart';
@@ -388,8 +386,7 @@ class KernelSnapshot extends Target {
     );
 
     if (darwinPlatform != null) {
-      // TODO(bkonyi): Inject FlutterProjectFactory through Environment.
-      final FlutterProject flutterProject = globals.projectFactory.fromDirectory(
+      final FlutterProject flutterProject = environment.projectFactory.fromDirectory(
         environment.projectDir,
       );
       final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
@@ -443,9 +440,16 @@ abstract class AotSnapshotBase extends Target {
     final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     // TODO(team-windows): Support PE/COFF AOT snapshots for Windows Arm64.
     // See: https://github.com/flutter/flutter/issues/190897
-    final String? windowsLinkerPath = targetPlatform == TargetPlatform.windows_x64
-        ? VisualStudio(toolContext: const GlobalToolContext()).linkPath
-        : null;
+    final String? windowsLinkerPath;
+    if (targetPlatform == TargetPlatform.windows_x64) {
+      final VisualStudio? visualStudio = environment.visualStudio;
+      if (visualStudio == null) {
+        throw StateError('VisualStudio is required to build Windows AOT snapshots.');
+      }
+      windowsLinkerPath = visualStudio.linkPath;
+    } else {
+      windowsLinkerPath = null;
+    }
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
