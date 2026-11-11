@@ -97,10 +97,23 @@ class IMockGLESImpl {
   virtual void DeleteQueriesEXT(GLsizei size, const GLuint* queries) {}
   virtual void GenBuffers(GLsizei n, GLuint* buffers) {}
   virtual void DeleteBuffers(GLsizei n, const GLuint* buffers) {}
+  virtual void BindBuffer(GLenum target, GLuint buffer) {}
+  virtual void BufferData(GLenum target,
+                          GLsizeiptr size,
+                          const void* data,
+                          GLenum usage) {}
   virtual void BufferSubData(GLenum target,
                              GLintptr offset,
                              GLsizeiptr size,
                              const void* data) {}
+  virtual void EnableVertexAttribArray(GLuint index) {}
+  virtual void DisableVertexAttribArray(GLuint index) {}
+  virtual void VertexAttribPointer(GLuint index,
+                                   GLint size,
+                                   GLenum type,
+                                   GLboolean normalized,
+                                   GLsizei stride,
+                                   const void* pointer) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
   virtual GLboolean IsProgram(GLuint program) { return true; }
   virtual void DiscardFramebufferEXT(GLenum target,
@@ -312,11 +325,27 @@ class MockGLESImpl : public IMockGLESImpl {
               DeleteBuffers,
               (GLsizei n, const GLuint* buffers),
               (override));
+  MOCK_METHOD(void, BindBuffer, (GLenum target, GLuint buffer), (override));
+  MOCK_METHOD(void,
+              BufferData,
+              (GLenum target, GLsizeiptr size, const void* data, GLenum usage),
+              (override));
   MOCK_METHOD(
       void,
       BufferSubData,
       (GLenum target, GLintptr offset, GLsizeiptr size, const void* data),
       (override));
+  MOCK_METHOD(void, EnableVertexAttribArray, (GLuint index), (override));
+  MOCK_METHOD(void, DisableVertexAttribArray, (GLuint index), (override));
+  MOCK_METHOD(void,
+              VertexAttribPointer,
+              (GLuint index,
+               GLint size,
+               GLenum type,
+               GLboolean normalized,
+               GLsizei stride,
+               const void* pointer),
+              (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
   MOCK_METHOD(GLboolean, IsProgram, (GLuint program), (override));
   MOCK_METHOD(void,
