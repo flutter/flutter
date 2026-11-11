@@ -418,6 +418,26 @@ void main() {
     expect(paragraph.debugNeedsLayout, isTrue);
   });
 
+  test('RenderParagraph hyphenCharacter control test', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello'),
+      textDirection: TextDirection.ltr,
+    );
+    expect(paragraph.hyphenCharacter, isNull);
+    layout(paragraph);
+    pumpFrame(phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+
+    // Setting the same value is a no-op.
+    paragraph.hyphenCharacter = null;
+    expect(paragraph.debugNeedsLayout, isFalse);
+
+    // A new value triggers relayout.
+    paragraph.hyphenCharacter = '\u2010';
+    expect(paragraph.hyphenCharacter, '\u2010');
+    expect(paragraph.debugNeedsLayout, isTrue);
+  });
+
   test('RenderParagraph devicePixelRatio control test', () {
     final paragraph = RenderParagraph(
       const TextSpan(text: 'Hello'),

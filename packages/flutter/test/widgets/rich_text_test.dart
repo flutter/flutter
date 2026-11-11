@@ -207,6 +207,7 @@ void main() {
       textWidthBasis: TextWidthBasis.longestLine,
       textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
       hyphens: Hyphens.hidden,
+      hyphenCharacter: '\u2010',
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -233,6 +234,7 @@ void main() {
           contains('applyHeightToLastDescent: true'),
         ),
         contains('hyphens: hidden'),
+        contains('hyphenCharacter: "\u2010"'),
       ]),
     );
   });

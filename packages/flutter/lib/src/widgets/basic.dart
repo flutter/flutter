@@ -6586,6 +6586,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
     this.hyphens = ui.Hyphens.manual,
+    this.hyphenCharacter,
     this.selectionRegistrar,
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
@@ -6686,6 +6687,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.painting.textPainter.hyphens}
   final ui.Hyphens hyphens;
 
+  /// {@macro flutter.painting.textPainter.hyphenCharacter}
+  final String? hyphenCharacter;
+
   /// The [SelectionRegistrar] this rich text is subscribed to.
   ///
   /// If this is set, [selectionColor] must be non-null.
@@ -6718,6 +6722,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       hyphens: hyphens,
+      hyphenCharacter: hyphenCharacter,
       locale: locale ?? Localizations.maybeLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
@@ -6740,6 +6745,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
       ..hyphens = hyphens
+      ..hyphenCharacter = hyphenCharacter
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
@@ -6785,6 +6791,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ),
     );
     properties.add(EnumProperty<Hyphens>('hyphens', hyphens, defaultValue: Hyphens.manual));
+    properties.add(StringProperty('hyphenCharacter', hyphenCharacter, defaultValue: null));
   }
 }
 

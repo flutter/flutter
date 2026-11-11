@@ -1307,6 +1307,40 @@ void main() {
     painter.dispose();
   });
 
+  test('TextPainter set hyphenCharacter test', () {
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
+
+    expect(painter.hyphenCharacter, isNull);
+    painter.hyphenCharacter = '\u2010';
+    expect(painter.hyphenCharacter, '\u2010');
+    painter.dispose();
+  });
+
+  test('TextPainter renders hyphenCharacter at a soft hyphen line break', () {
+    // "abc" + soft hyphen + "def" is 60 wide unbroken, so a max width of 59
+    // breaks it at the soft hyphen. With "--", the first line is 50 wide.
+    final painter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..textWidthBasis = TextWidthBasis.longestLine
+      ..hyphenCharacter = '--'
+      ..text = const TextSpan(text: 'abc\u00ADdef', style: TextStyle(fontSize: 10.0))
+      ..layout(maxWidth: 59);
+
+    expect(painter.computeLineMetrics(), hasLength(2));
+    expect(painter.width, 50);
+    painter.dispose();
+  });
+
+  test('Changing TextPainter.hyphenCharacter after layout changes the width', () {
+    final TextPainter painter = softHyphenPainter(Hyphens.manual)..layout(maxWidth: 49);
+    expect(painter.width, 40);
+
+    painter.hyphenCharacter = '';
+    painter.layout(maxWidth: 49);
+    expect(painter.width, 30);
+    painter.dispose();
+  });
+
   test('TextPainter line metrics', () {
     final painter = TextPainter()..textDirection = TextDirection.ltr;
 
