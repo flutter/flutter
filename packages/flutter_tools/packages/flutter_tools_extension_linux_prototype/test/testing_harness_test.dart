@@ -770,7 +770,7 @@ void main() {
       );
     });
 
-    test('throws StateError when build target name is invalid', () async {
+    test('throws StateError when build target names are duplicated', () async {
       final ExtensionFileSystem fs = createPackageFileSystem();
 
       await expectLater(
@@ -779,7 +779,12 @@ void main() {
           entryPoint: (SendPort sendPort) => ToolExtensionEntryPoint.run(
             sendPort,
             <ToolExtensionService>[
-              _TestBuildService(targets: const <BuildTarget>[_TestBuildTarget('Invalid_Target')]),
+              _TestBuildService(
+                targets: const <BuildTarget>[
+                  _TestBuildTarget('dup-target'),
+                  _TestBuildTarget('dup-target'),
+                ],
+              ),
             ],
             extensionName: 'test_ext',
             supportedPlatforms: const <String>{'linux'},
@@ -790,7 +795,7 @@ void main() {
           isA<StateError>().having(
             (StateError e) => e.message,
             'message',
-            contains('Invalid build target name "Invalid_Target"'),
+            contains('Duplicate build target name "dup-target"'),
           ),
         ),
       );

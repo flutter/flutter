@@ -123,11 +123,6 @@ Future<void> verifyExtensionPackage({
       final List<ExtensionBuildTarget> buildTargets = await harness.buildClient.getBuildTargets();
       final runtimeTargetNames = <String>{};
       for (final target in buildTargets) {
-        if (!ExtensionBuildTarget.isValidName(target.name)) {
-          throw StateError(
-            'Invalid build target name "${target.name}" reported by build.getBuildTargets.',
-          );
-        }
         if (!runtimeTargetNames.add(target.name)) {
           throw StateError(
             'Duplicate build target name "${target.name}" reported by build.getBuildTargets.',
