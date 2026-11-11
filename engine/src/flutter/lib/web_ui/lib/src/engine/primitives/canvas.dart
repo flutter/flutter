@@ -30,14 +30,12 @@ class EngineCanvas implements LayerCanvas {
   /// When recording, [recorder] is the picture recorder that owns the native
   /// canvas, and [tracker] retains the image sources drawn into it. Canvases
   /// that draw directly into a surface pass neither.
-  EngineCanvas(this._backend, {Object? recorder, PictureImageTracker? tracker})
+  EngineCanvas(this._backend, {ui.PictureRecorder? recorder, PictureImageTracker? tracker})
     : _recorder = recorder,
       _tracker = tracker;
 
   /// Checks that [recorder] can start a new recording, and returns the cull
   /// rect to record with.
-  ///
-  /// This is the shared part of [ui.Canvas.new] for every renderer.
   static ui.Rect resolveCullRect(ui.PictureRecorder recorder, ui.Rect? cullRect) {
     if (recorder.isRecording) {
       throw ArgumentError('"recorder" must not already be associated with another Canvas.');
@@ -51,7 +49,7 @@ class EngineCanvas implements LayerCanvas {
   // of the recorder while this canvas is active. This ensures the recorder's
   // finalizer does not run prematurely to release tracked image sources.
   // ignore: unused_field
-  final Object? _recorder;
+  final ui.PictureRecorder? _recorder;
 
   PictureImageTracker? _tracker;
 

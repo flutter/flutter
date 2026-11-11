@@ -17,16 +17,15 @@ void main() {
 
 typedef _CanvasCall = void Function(ui.Canvas canvas);
 
-/// Matches the [ArgumentError] that native `dart:ui` throws, by its message.
-Matcher _throwsNativeArgumentError(String message) =>
+/// Matches an [ArgumentError] with the given [message].
+Matcher _throwsArgumentError(String message) =>
     throwsA(isA<ArgumentError>().having((ArgumentError e) => e.message, 'message', message));
 
-/// Matches the [AssertionError] of a native `dart:ui` canvas assert.
+/// Matches an [AssertionError] with an optional [message].
 ///
-/// Native asserts such as `assert(!image.debugDisposed)` have no message, so
-/// [message] is null for them. The asserts that check geometry carry the
-/// message of the validator that failed.
-Matcher _throwsNativeAssertionError([String? message]) =>
+/// Asserts such as `assert(!image.debugDisposed)` have no message, so
+/// [message] is null for them.
+Matcher _throwsAssertionError([String? message]) =>
     throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', message));
 
 Future<void> testMain() async {
@@ -76,7 +75,7 @@ Future<void> testMain() async {
     recorder.endRecording().dispose();
   }
 
-  group('ui.Canvas throws the native ArgumentError', () {
+  group('ui.Canvas throws ArgumentError on invalid inputs', () {
     final cases = <(String, _CanvasCall, String)>[
       (
         'transform with 15 entries',
@@ -161,12 +160,12 @@ Future<void> testMain() async {
     ];
     for (final (String name, _CanvasCall call, String message) in cases) {
       test(name, () {
-        expectThrowsAndRecordingSurvives(call, _throwsNativeArgumentError(message));
+        expectThrowsAndRecordingSurvives(call, _throwsArgumentError(message));
       });
     }
   });
 
-  group('ui.Canvas fails the native assert', () {
+  group('ui.Canvas asserts on invalid inputs', () {
     const nanRect = ui.Rect.fromLTRB(double.nan, 0, 10, 10);
     final cases = <(String, _CanvasCall, String?)>[
       (
@@ -254,7 +253,7 @@ Future<void> testMain() async {
     ];
     for (final (String name, _CanvasCall call, String? message) in cases) {
       test(name, () {
-        expectThrowsAndRecordingSurvives(call, _throwsNativeAssertionError(message));
+        expectThrowsAndRecordingSurvives(call, _throwsAssertionError(message));
       });
     }
   });

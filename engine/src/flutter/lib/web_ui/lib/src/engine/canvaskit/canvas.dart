@@ -49,7 +49,7 @@ class CkCanvas implements BackendCanvas {
       (paint as CkPaint).skiaObject,
       bounds == null ? null : toSkRect(bounds),
       null,
-      null,
+      0,
       canvasKit.TileMode.Clamp,
     );
   }

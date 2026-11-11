@@ -160,9 +160,23 @@ Future<void> testMain() async {
     };
     for (final MapEntry<String, void Function()>(key: String name, value: void Function() call)
         in rejectedCalls.entries) {
-      expect(call, throwsA(anyOf(isA<ArgumentError>(), isA<AssertionError>())), reason: name);
-      expect(canvas.getSaveCount(), 2, reason: 'save count after $name');
-      expect(canvas.getTransform(), transformBefore, reason: 'transform after $name');
+      expect(
+        call,
+        throwsA(anyOf(isA<ArgumentError>(), isA<AssertionError>())),
+        reason: '$name was given invalid arguments and should be rejected upfront.',
+      );
+      expect(
+        canvas.getSaveCount(),
+        2,
+        reason:
+            'Validation runs before backend calls, so a rejected $name call must not alter the save stack.',
+      );
+      expect(
+        canvas.getTransform(),
+        transformBefore,
+        reason:
+            'Validation runs before backend calls, so a rejected $name call must not alter the transform.',
+      );
     }
     canvas.restore();
     final ui.Picture picture = recorder.endRecording();
