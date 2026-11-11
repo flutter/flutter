@@ -280,7 +280,7 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (BuildContext context, DialogWindowController? dialogController, Widget? child) {
         return ViewAnchor(
           view: dialogController != null
-              ? DialogWindow(
+              ? Window(
                   controller: dialogController,
                   child: MyDialogPage(controller: dialogController),
                 )
