@@ -5,7 +5,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/semantics.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -623,6 +624,348 @@ void main() {
     },
     skip: kIsWeb, // [intended] the web engine handles the traversal order itself.
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/193235.
+  testWidgets(
+    'Semantics update sends previously merged descendants when an ancestor stops merging',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+      SemanticsUpdateBuilderSpy.observations.clear();
+      final engine = _EmbedderSemanticsTree();
+
+      // Two levels of nodes under the toggled node, so that un-merging has to
+      // reach past the immediate child.
+      const Widget subtree = Semantics.fromProperties(
+        container: true,
+        properties: SemanticsProperties(label: 'inner'),
+        child: Semantics.fromProperties(
+          container: true,
+          properties: SemanticsProperties(label: 'leaf'),
+          child: SizedBox(width: 100, height: 40),
+        ),
+      );
+      Widget build({required bool isMerging}) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: _ToggleableMergeSemantics(isMerging: isMerging, child: subtree),
+        );
+      }
+
+      await tester.pumpWidget(build(isMerging: true));
+      engine.apply(SemanticsUpdateBuilderSpy.observations);
+      // Merged nodes are not sent: only the root (#0) and the merging node.
+      expect(SemanticsUpdateBuilderSpy.observations, hasLength(2));
+      final int outerId = SemanticsUpdateBuilderSpy.observations.keys.singleWhere(
+        (int id) => id != 0,
+      );
+      expect(SemanticsUpdateBuilderSpy.observations[outerId]!.childrenInTraversalOrder, isEmpty);
+      expect(SemanticsUpdateBuilderSpy.observations[outerId]!.label, contains('leaf'));
+      SemanticsUpdateBuilderSpy.observations.clear();
+
+      // Stop merging without touching the subtree. `inner` and `leaf` now have
+      // to be sent as standalone nodes in the same update that first lists
+      // them as children.
+      await tester.pumpWidget(build(isMerging: false));
+      expect(tester.takeException(), isNull);
+      engine.apply(SemanticsUpdateBuilderSpy.observations);
+      final int innerId =
+          SemanticsUpdateBuilderSpy.observations[outerId]!.childrenInTraversalOrder.single;
+      final int leafId =
+          SemanticsUpdateBuilderSpy.observations[innerId]!.childrenInTraversalOrder.single;
+      expect(SemanticsUpdateBuilderSpy.observations[outerId]!.label, 'outer');
+      expect(SemanticsUpdateBuilderSpy.observations[innerId]!.label, 'inner');
+      expect(SemanticsUpdateBuilderSpy.observations[leafId]!.label, 'leaf');
+      SemanticsUpdateBuilderSpy.observations.clear();
+
+      // Start merging again: the subtree collapses back into the merging node
+      // and the standalone nodes are not sent anymore.
+      await tester.pumpWidget(build(isMerging: true));
+      expect(tester.takeException(), isNull);
+      engine.apply(SemanticsUpdateBuilderSpy.observations);
+      expect(SemanticsUpdateBuilderSpy.observations[outerId]!.childrenInTraversalOrder, isEmpty);
+      expect(SemanticsUpdateBuilderSpy.observations[outerId]!.label, contains('leaf'));
+      expect(SemanticsUpdateBuilderSpy.observations, isNot(contains(innerId)));
+      expect(SemanticsUpdateBuilderSpy.observations, isNot(contains(leafId)));
+      SemanticsUpdateBuilderSpy.observations.clear();
+
+      // The embedder forgot `inner` and `leaf` when they became unreachable, so
+      // un-merging again has to send them again.
+      await tester.pumpWidget(build(isMerging: false));
+      expect(tester.takeException(), isNull);
+      engine.apply(SemanticsUpdateBuilderSpy.observations);
+      expect(SemanticsUpdateBuilderSpy.observations, containsPair(innerId, anything));
+      expect(SemanticsUpdateBuilderSpy.observations, containsPair(leafId, anything));
+
+      SemanticsUpdateBuilderSpy.observations.clear();
+      handle.dispose();
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/193235.
+  //
+  // RenderParagraph creates the SemanticsNodes for its inline spans itself in
+  // assembleSemanticsNode and caches them across builds, so unlike nodes
+  // produced by render objects they are never rebuilt when an ancestor's merge
+  // state changes. Their isMergedIntoParent has to be refreshed from the parent
+  // node.
+  testWidgets('Semantics update sends cached inline span nodes when an ancestor stops merging', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+    SemanticsUpdateBuilderSpy.observations.clear();
+    final engine = _EmbedderSemanticsTree();
+    final recognizer = TapGestureRecognizer()..onTap = () {};
+    addTearDown(recognizer.dispose);
+
+    Widget build({required bool isMerging}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: _ToggleableMergeSemantics(
+          isMerging: isMerging,
+          child: Text.rich(
+            TextSpan(
+              style: const TextStyle(fontSize: 14),
+              children: <InlineSpan>[
+                const TextSpan(text: 'Read the '),
+                TextSpan(text: 'docs', recognizer: recognizer),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(isMerging: true));
+    engine.apply(SemanticsUpdateBuilderSpy.observations);
+    expect(SemanticsUpdateBuilderSpy.observations, hasLength(2));
+    final int outerId = SemanticsUpdateBuilderSpy.observations.keys.singleWhere(
+      (int id) => id != 0,
+    );
+    expect(SemanticsUpdateBuilderSpy.observations[outerId]!.childrenInTraversalOrder, isEmpty);
+    SemanticsUpdateBuilderSpy.observations.clear();
+
+    await tester.pumpWidget(build(isMerging: false));
+    expect(tester.takeException(), isNull);
+    // Every child id the paragraph lists must be part of this update.
+    engine.apply(SemanticsUpdateBuilderSpy.observations);
+    final int paragraphId =
+        SemanticsUpdateBuilderSpy.observations[outerId]!.childrenInTraversalOrder.single;
+    final Int32List spanIds =
+        SemanticsUpdateBuilderSpy.observations[paragraphId]!.childrenInTraversalOrder;
+    expect(spanIds, hasLength(2));
+    expect(spanIds.map((int id) => SemanticsUpdateBuilderSpy.observations[id]!.label), <String>[
+      'Read the ',
+      'docs',
+    ]);
+    // The cached span nodes themselves have to know they are no longer
+    // merged; nothing but their parent node ever updates that flag for them.
+    final SemanticsNode paragraphNode = tester.renderObject(find.byType(RichText)).debugSemantics!;
+    expect(paragraphNode.id, paragraphId);
+    expect(paragraphNode.isMergedIntoParent, isFalse);
+    paragraphNode.visitChildren((SemanticsNode span) {
+      expect(span.isMergedIntoParent, isFalse, reason: 'span #${span.id}');
+      return true;
+    });
+    SemanticsUpdateBuilderSpy.observations.clear();
+
+    // Merge again: the cached span nodes have to become merged too, so they
+    // are folded into the merging node instead of being sent on their own.
+    await tester.pumpWidget(build(isMerging: true));
+    expect(tester.takeException(), isNull);
+    engine.apply(SemanticsUpdateBuilderSpy.observations);
+    expect(SemanticsUpdateBuilderSpy.observations[outerId]!.childrenInTraversalOrder, isEmpty);
+    expect(SemanticsUpdateBuilderSpy.observations[outerId]!.label, contains('docs'));
+    expect(SemanticsUpdateBuilderSpy.observations.keys, isNot(contains(paragraphId)));
+    for (final spanId in spanIds) {
+      expect(SemanticsUpdateBuilderSpy.observations.keys, isNot(contains(spanId)));
+    }
+    expect(paragraphNode.isMergedIntoParent, isTrue);
+    paragraphNode.visitChildren((SemanticsNode span) {
+      expect(span.isMergedIntoParent, isTrue, reason: 'span #${span.id}');
+      return true;
+    });
+
+    SemanticsUpdateBuilderSpy.observations.clear();
+    handle.dispose();
+  });
+
+  testWidgets(
+    'Semantics node that moves into a merging sibling stays merged when its old ancestor stops merging',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final GlobalKey movedKey = GlobalKey();
+      final Widget moved = Semantics(
+        key: movedKey,
+        container: true,
+        label: 'moved',
+        child: const SizedBox(width: 100, height: 20),
+      );
+
+      // While `moved` lives under `inner`, the outer node merges everything.
+      // In the frame where it moves under `MergeSemantics`, the outer node
+      // stops merging, so `inner` is un-merged while its stale child list
+      // still refers to `moved`, which by then belongs to `MergeSemantics`.
+      //
+      // The extra render objects around `MergeSemantics` make it deeper than
+      // `inner`, so its semantics are rebuilt first and it adopts `moved`
+      // before `inner` is updated.
+      Widget build({required bool hasMoved}) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: _ToggleableMergeSemantics(
+            isMerging: !hasMoved,
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.zero,
+                  child: Padding(
+                    padding: EdgeInsets.zero,
+                    child: MergeSemantics(
+                      child: Column(
+                        children: <Widget>[
+                          Semantics(
+                            container: true,
+                            label: 'static',
+                            child: const SizedBox(width: 100, height: 20),
+                          ),
+                          if (hasMoved) moved,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Semantics(
+                  container: true,
+                  label: 'inner',
+                  child: Column(
+                    children: <Widget>[
+                      if (!hasMoved) moved,
+                      const SizedBox(width: 100, height: 20),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+      SemanticsUpdateBuilderSpy.observations.clear();
+      await tester.pumpWidget(build(hasMoved: false));
+      SemanticsUpdateBuilderSpy.observations.clear();
+      await tester.pumpWidget(build(hasMoved: true));
+      expect(tester.takeException(), isNull);
+
+      // `moved` is merged into the MergeSemantics node, not sent on its own.
+      // (getSemantics would skip past merged nodes, so read the node directly.)
+      final SemanticsNode movedNode = tester.renderObject(find.byKey(movedKey)).debugSemantics!;
+      expect(movedNode.isMergedIntoParent, isTrue);
+      expect(movedNode.parent!.mergeAllDescendantsIntoThisNode, isTrue);
+      expect(
+        SemanticsUpdateBuilderSpy.observations.values.map(
+          (SemanticsNodeUpdateObservation observation) => observation.label,
+        ),
+        isNot(contains('moved')),
+      );
+      expect(
+        SemanticsUpdateBuilderSpy.observations.values.any(
+          (SemanticsNodeUpdateObservation observation) =>
+              observation.label.contains('static') && observation.label.contains('moved'),
+        ),
+        isTrue,
+      );
+
+      SemanticsUpdateBuilderSpy.observations.clear();
+      handle.dispose();
+    },
+  );
+}
+
+/// Mirrors how an embedder maintains its copy of the semantics tree from the
+/// incremental updates it receives: a node has to be sent before, or in the
+/// same update as, any parent that references it, every updated node has to be
+/// reachable from the root, and nodes that become unreachable are discarded.
+class _EmbedderSemanticsTree {
+  final Map<int, SemanticsNodeUpdateObservation> _nodes = <int, SemanticsNodeUpdateObservation>{};
+
+  void apply(Map<int, SemanticsNodeUpdateObservation> update) {
+    _nodes.addAll(update);
+    for (final MapEntry<int, SemanticsNodeUpdateObservation> entry in update.entries) {
+      for (final childId in <int>{
+        ...entry.value.childrenInTraversalOrder,
+        ...entry.value.childrenInHitTestOrder,
+      }) {
+        expect(
+          _nodes,
+          contains(childId),
+          reason:
+              'Node #${entry.key} lists child #$childId, which the embedder '
+              'has never received.',
+        );
+      }
+    }
+    final reachable = <int>{};
+    void visit(int id) {
+      if (!reachable.add(id)) {
+        return;
+      }
+      _nodes[id]!.childrenInTraversalOrder.forEach(visit);
+    }
+
+    visit(0);
+    for (final int updatedId in update.keys) {
+      expect(reachable, contains(updatedId), reason: 'Updated node #$updatedId is an orphan.');
+    }
+    _nodes.removeWhere((int id, SemanticsNodeUpdateObservation _) => !reachable.contains(id));
+  }
+}
+
+/// A test widget that allows toggling the merging of its descendants' semantics
+/// without replacing the underlying render object.
+class _ToggleableMergeSemantics extends SingleChildRenderObjectWidget {
+  const _ToggleableMergeSemantics({required this.isMerging, super.child});
+
+  final bool isMerging;
+
+  @override
+  _RenderToggleableMergeSemantics createRenderObject(BuildContext context) {
+    return _RenderToggleableMergeSemantics(isMerging);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderToggleableMergeSemantics renderObject) {
+    renderObject.isMerging = isMerging;
+  }
+}
+
+/// Like [MergeSemantics], but merging can be switched off and on again without
+/// replacing the render object (and therefore without replacing its
+/// [SemanticsNode]).
+class _RenderToggleableMergeSemantics extends RenderProxyBox {
+  _RenderToggleableMergeSemantics(this._isMerging);
+
+  bool get isMerging => _isMerging;
+  bool _isMerging;
+  set isMerging(bool value) {
+    if (_isMerging == value) {
+      return;
+    }
+    _isMerging = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config
+      ..isSemanticBoundary = true
+      ..isMergingSemanticsOfDescendants = _isMerging
+      ..label = 'outer'
+      ..textDirection = TextDirection.ltr;
+  }
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
