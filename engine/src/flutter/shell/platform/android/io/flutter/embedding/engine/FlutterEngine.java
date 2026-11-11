@@ -497,8 +497,17 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   }
 
   /**
-   * Cleans up all components within this {@code FlutterEngine} and destroys the associated Dart
-   * Isolate. All state held by the Dart Isolate, such as the Flutter Elements tree, is lost.
+   * Cleans up all components within this {@code FlutterEngine} and destroys the associated root
+   * Dart Isolate. All state held by the root Dart Isolate, such as the Flutter Elements tree, is
+   * lost.
+   *
+   * <p>This method does not terminate background child isolates spawned via Dart's {@code
+   * Isolate.spawn}. Child isolates that outlive {@code destroy()} keep the shared Dart isolate
+   * group heap alive, which can retain native GPU resources or cause crashes during subsequent
+   * garbage collection. Terminate any spawned child isolates before destroying the engine, retain
+   * the engine across host recreation (for example via {@link FlutterEngineCache} and {@link
+   * io.flutter.embedding.android.FlutterActivity#shouldDestroyEngineWithHost()}), or run
+   * independent background work in a separate {@code FlutterEngine}.
    *
    * <p>This {@code FlutterEngine} instance should be discarded after invoking this method.
    */
