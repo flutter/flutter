@@ -154,6 +154,42 @@ void main() {
     );
 
     testUsingContext(
+      'implicit pub get prints its normal output without --machine',
+      () async {
+        final flutterCommand = DummyMachineFlutterCommandWithPub();
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummypub']);
+
+        expect(lockCheckingPub.pubGetCalled, isTrue);
+        expect(lockCheckingPub.outputMode, PubOutputMode.all);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => lockTrackingCache,
+        Pub: () => lockCheckingPub,
+      },
+    );
+
+    testUsingContext(
+      'implicit pub get keeps its normal output off stdout with --machine',
+      () async {
+        final flutterCommand = DummyMachineFlutterCommandWithPub();
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummypub', '--machine']);
+
+        expect(lockCheckingPub.pubGetCalled, isTrue);
+        expect(lockCheckingPub.outputMode, PubOutputMode.failuresOnly);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => lockTrackingCache,
+        Pub: () => lockCheckingPub,
+      },
+    );
+
+    testUsingContext(
       "throws toolExit if flutter_tools source dir doesn't exist",
       () async {
         final flutterCommand = DummyFlutterCommand(
@@ -2366,6 +2402,7 @@ class FakeLockCheckingPub extends Fake implements Pub {
   final FakeLockTrackingCache _cache;
   bool pubGetCalled = false;
   bool lockWasHeldDuringPubGet = false;
+  PubOutputMode? outputMode;
 
   @override
   Future<void> get({
@@ -2381,6 +2418,7 @@ class FakeLockCheckingPub extends Fake implements Pub {
   }) async {
     pubGetCalled = true;
     lockWasHeldDuringPubGet = _cache.isLockHeld;
+    this.outputMode = outputMode;
   }
 }
 
@@ -2436,6 +2474,12 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
 class DummyMachineFlutterCommand extends DummyFlutterCommand {
   DummyMachineFlutterCommand() : super(name: 'dummy') {
+    CommonOptions.machine.addTo(argParser);
+  }
+}
+
+class DummyMachineFlutterCommandWithPub extends DummyFlutterCommandWithPub {
+  DummyMachineFlutterCommandWithPub() {
     CommonOptions.machine.addTo(argParser);
   }
 }

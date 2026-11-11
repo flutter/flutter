@@ -1237,6 +1237,9 @@ abstract class FlutterCommand extends Command<void> {
         context: PubContext.getVerifyContext(name),
         project: project,
         checkUpToDate: cachePubGet,
+        // Pub's progress output goes to stdout, where it would break the JSON
+        // stream that --machine produces. Failures are still reported.
+        outputMode: outputMachineFormat ? PubOutputMode.failuresOnly : PubOutputMode.all,
       );
     }
     return project;
