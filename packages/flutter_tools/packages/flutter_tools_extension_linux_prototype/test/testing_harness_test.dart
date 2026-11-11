@@ -479,15 +479,14 @@ void main() {
         final ExtensionFileSystem fs = createManifestFileSystem(
           yamlContent: '''
 name: test_ext
-protocolVersion: 1
 entrypoint: bin/test_ext.dart
-supportedPlatforms:
+host_platforms:
   - linux
 services:
   - diagnostics
   - build
   - template
-buildTargets:
+build_targets:
   - custom-target
 templates:
   - custom-app
@@ -606,11 +605,10 @@ services: [diagnostics]
       final ExtensionFileSystem fs = createManifestFileSystem(
         yamlContent: '''
 name: test_ext
-protocolVersion: 1
 entrypoint: bin/test_ext.dart
-supportedPlatforms: [linux]
+host_platforms: [linux]
 services: [diagnostics, build, template]
-buildTargets: [wrong-target]
+build_targets: [wrong-target]
 ''',
       );
 
@@ -634,11 +632,10 @@ buildTargets: [wrong-target]
       final ExtensionFileSystem fs = createManifestFileSystem(
         yamlContent: '''
 name: test_ext
-protocolVersion: 1
 entrypoint: bin/test_ext.dart
-supportedPlatforms: [linux]
+host_platforms: [linux]
 services: [diagnostics, build, template]
-buildTargets: [custom-target]
+build_targets: [custom-target]
 templates: [wrong-template]
 ''',
       );
@@ -663,11 +660,10 @@ templates: [wrong-template]
       final ExtensionFileSystem quotedCommaFs = createManifestFileSystem(
         yamlContent: '''
 name: test_ext
-protocolVersion: 1
 entrypoint: bin/test_ext.dart
-supportedPlatforms: [linux]
+host_platforms: [linux]
 services: [diagnostics, build, template]
-buildTargets: ["target,with,comma"]
+build_targets: ["target,with,comma"]
 ''',
       );
 

@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:stream_channel/isolate_channel.dart';
 
@@ -14,8 +13,8 @@ import 'service.dart';
 /// Entrypoint runner for a Flutter Tool Extension running in an Isolate.
 ///
 /// Extension packages invoke [ToolExtensionEntryPoint.run] in their isolate
-/// entrypoint function, passing the initial Isolate send port and list of supported
-/// extension services.
+/// entrypoint function, passing the initial Isolate send port and list of
+/// supported extension services.
 class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to query extension capabilities.
   static const String getCapabilitiesMethod = 'extension.getCapabilities';
@@ -25,35 +24,26 @@ class ToolExtensionEntryPoint {
     ToolExtensionService.logNotificationMethod,
   };
 
-  /// Standard `main(List<String> args, Object? message)` adapter for spawning
-  /// an extension isolate via [Isolate.spawnUri].
-  static Future<void> runMain(
-    List<String> _,
-    Object? message,
-    FutureOr<void> Function(SendPort sendPort) entryPoint,
-  ) async {
-    if (message is! SendPort) {
-      throw ArgumentError.value(
-        message,
-        'message',
-        'Expected a SendPort when spawning a tool extension isolate.',
-      );
-    }
-    await entryPoint(message);
-  }
-
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
-  /// If provided, [extensionName] should be the name of the extension package
-  /// and is surfaced by the host tool in error messages and artifact cache
-  /// directories.
+  /// Validates that [sendPort] is a [SendPort] (throwing an [ArgumentError]
+  /// otherwise). If provided, [extensionName] should be the name of the
+  /// extension package and is surfaced by the host tool in error messages and
+  /// artifact cache directories.
   static Future<void> run(
-    SendPort sendPort,
+    Object? sendPort,
     List<ToolExtensionService> services, {
     Set<String>? supportedPlatforms,
     void Function(String message)? logger,
     String? extensionName,
   }) async {
+    if (sendPort is! SendPort) {
+      throw ArgumentError.value(
+        sendPort,
+        'sendPort',
+        'Expected a SendPort as the initial isolate message.',
+      );
+    }
     final rpcHandlers = <String, ExtensionRpcHandler>{};
 
     for (final service in services) {
@@ -76,7 +66,7 @@ class ToolExtensionEntryPoint {
 
     final capabilities = ToolExtensionCapabilities(
       extensionName: extensionName,
-      supportedPlatforms: supportedPlatforms ?? ExtensionPackageConfig.defaultSupportedPlatforms,
+      supportedPlatforms: supportedPlatforms ?? const <String>{'linux', 'macos', 'windows'},
       services: services.map((ToolExtensionService s) => s.namespace).toList(),
     );
 

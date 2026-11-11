@@ -642,17 +642,17 @@ Future<void> verifyExtensionPackage({
       : packageRoot.replace(path: '${packageRoot.path}/');
 
   final ExtensionFile manifestFile = fileSystem.file(
-    rootUri.resolve(ExtensionPackageConfig.manifestRelativePath),
+    rootUri.resolve('extension/flutter_tools/config.yaml'),
   );
   if (!manifestFile.existsSync()) {
     throw StateError(
       'Extension manifest not found at ${manifestFile.path} '
-      '(expected ${ExtensionPackageConfig.manifestRelativePath}).',
+      '(expected extension/flutter_tools/config.yaml).',
     );
   }
 
   final Map<String, Object?> manifestMap = _parseSimpleYamlMap(manifestFile.readAsStringSync());
-  final manifest = ExtensionPackageConfig.fromJson(manifestMap);
+  final manifest = ExtensionPackageConfig.fromMap(manifestMap);
 
   for (final String service in manifest.services) {
     if (ExtensionService.tryFromNamespace(service) == null) {
@@ -664,13 +664,6 @@ Future<void> verifyExtensionPackage({
         'Valid services are: $validNames.',
       );
     }
-  }
-
-  if (manifest.protocolVersion != ToolExtensionCapabilities.currentProtocolVersion) {
-    throw StateError(
-      'Unsupported ${ExtensionPackageConfig.protocolVersionKey} ${manifest.protocolVersion} in config.yaml; '
-      'expected ${ToolExtensionCapabilities.currentProtocolVersion}.',
-    );
   }
 
   final Uri entrypointUri = rootUri.resolve(manifest.entrypoint);
@@ -698,13 +691,6 @@ Future<void> verifyExtensionPackage({
       );
     }
 
-    if (harness.capabilities.protocolVersion != manifest.protocolVersion) {
-      throw StateError(
-        'Protocol version mismatch: config.yaml declares ${manifest.protocolVersion}, '
-        'but runtime capabilities reported ${harness.capabilities.protocolVersion}.',
-      );
-    }
-
     final Set<String> runtimeServices = harness.capabilities.services.toSet();
     if (!_setsEqual(runtimeServices, manifest.services)) {
       throw StateError(
@@ -714,9 +700,10 @@ Future<void> verifyExtensionPackage({
     }
 
     final Set<String> runtimePlatforms = harness.capabilities.supportedPlatforms.toSet();
-    if (!_setsEqual(runtimePlatforms, manifest.supportedPlatforms)) {
+    if (manifest.hostPlatforms.isNotEmpty &&
+        !_setsEqual(runtimePlatforms, manifest.hostPlatforms)) {
       throw StateError(
-        'Supported platforms mismatch: config.yaml declares ${manifest.supportedPlatforms}, '
+        'Supported platforms mismatch: config.yaml declares ${manifest.hostPlatforms}, '
         'but runtime capabilities reported $runtimePlatforms.',
       );
     }

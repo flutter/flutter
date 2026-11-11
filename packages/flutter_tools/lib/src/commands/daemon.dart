@@ -82,9 +82,6 @@ class DaemonCommand extends FlutterCommand {
   Java? get _java => _androidContext.java;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   final name = 'daemon';
 
   @override
@@ -1395,7 +1392,7 @@ class DeviceDomain extends Domain {
   /// Stops a log reader that was previously started.
   Future<void> stopLogReader(Map<String, Object?> args) async {
     final String? id = _getStringArg(args, 'id', required: true);
-    _logReaders.remove(id)?.dispose();
+    await _logReaders.remove(id)?.dispose();
   }
 
   /// Starts an app on a device.

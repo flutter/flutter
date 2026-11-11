@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
 import 'package:meta/meta.dart';
 
@@ -137,18 +136,13 @@ class ToolExtensionCapabilities {
   const ToolExtensionCapabilities({
     required this.services,
     this.extensionName,
-    this.protocolVersion = currentProtocolVersion,
-    this.supportedPlatforms = ExtensionPackageConfig.defaultSupportedPlatforms,
+    this.supportedPlatforms = const <String>{'linux', 'macos', 'windows'},
   });
 
   /// Deserializes [ToolExtensionCapabilities] from a JSON map payload.
   factory ToolExtensionCapabilities.fromJson(Map<String, Object?> json) {
     return ToolExtensionCapabilities(
       extensionName: json.nullableField<String>(extensionNameKey),
-      protocolVersion: json.optionalField<int>(
-        protocolVersionKey,
-        defaultValue: currentProtocolVersion,
-      ),
       services: json.stringIterable(servicesKey).toList(),
       supportedPlatforms: json
           .stringIterable(supportedPlatformsKey)
@@ -157,14 +151,8 @@ class ToolExtensionCapabilities {
     );
   }
 
-  /// Current protocol version supported by `package:flutter_tools_extension`.
-  static const int currentProtocolVersion = ExtensionPackageConfig.currentProtocolVersion;
-
   /// Map key for [extensionName].
   static const String extensionNameKey = 'extensionName';
-
-  /// Map key for [protocolVersion].
-  static const String protocolVersionKey = 'protocolVersion';
 
   /// Map key for [services].
   static const String servicesKey = 'services';
@@ -177,9 +165,6 @@ class ToolExtensionCapabilities {
   /// When provided, this should match the extension's package name. The host
   /// tool uses this identifier in error messages and artifact cache paths.
   final String? extensionName;
-
-  /// The protocol version implemented by the extension isolate.
-  final int protocolVersion;
 
   /// The list of service namespace identifiers supported by the extension.
   final List<String> services;
@@ -195,7 +180,6 @@ class ToolExtensionCapabilities {
   /// Serializes capabilities to a map payload.
   Map<String, Object?> toMap() => <String, Object?>{
     extensionNameKey: ?extensionName,
-    protocolVersionKey: protocolVersion,
     servicesKey: services,
     supportedPlatformsKey: supportedPlatforms.toList(),
   };

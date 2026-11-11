@@ -2,146 +2,189 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
 
 /// Static metadata parsed from an extension package's
-/// `extension/flutter_tools/config.yaml` manifest.
+/// `extension/flutter_tools/config.yaml` file.
+///
+/// Tool extension packages publish this manifest at
+/// `<package_root>/extension/flutter_tools/config.yaml` so `flutter_tools` can
+/// discover extension capabilities via `package:extension_discovery` without
+/// compiling or spawning extension isolates up front.
+///
+/// ### Schema
+///
+/// - `name` (`String`, required): The Dart package name of the extension. If
+///   `packageName` is provided to [ExtensionPackageConfig.fromMap], `name` must
+///   match `packageName`.
+/// - `entrypoint` (`String`, optional): Relative POSIX path within the package
+///   to the `.dart` isolate entrypoint script (must not be absolute, contain
+///   `\`, include `.` or `..` segments, or specify a URI scheme, authority,
+///   query, or fragment). Defaults to `'bin/<name>.dart'`.
+/// - `host_platforms` (`List<String>`, optional): Host operating systems on
+///   which the extension can run (normalized to lowercase, e.g., `'linux'`,
+///   `'macos'`, `'windows'`). Platform-agnostic extensions omit this field to
+///   run on all host platforms (when omitted or empty, [supportsHostPlatform]
+///   imposes no static host platform filter before spawning). Extensions with
+///   host-specific native tools or dependencies must explicitly declare their
+///   supported host operating systems.
+/// - `services` (`List<String>`, optional): RPC service namespaces implemented
+///   by the extension (e.g., `'diagnostics'`, `'config'`, `'template'`,
+///   `'device'`, `'build'`). Defaults to empty. Entries must be non-empty
+///   lowercase service namespace identifiers matching known tool services
+///   (`'build'`, `'device'`, `'template'`, `'config'`, `'diagnostics'`,
+///   `'clean'`, `'artifact'`).
+/// - `build_targets` (`List<String>`, optional): Lowercase kebab-case
+///   subcommand target names contributed to `flutter build` (e.g.
+///   `'custom-target'`).
+/// - `templates` (`List<String>`, optional): Lowercase kebab-case template
+///   names contributed to `flutter create -t` (e.g. `'custom-app'`).
+/// - `target_platforms` (`List<String>`, optional): Custom target platform
+///   identifiers supported for `flutter create --platforms=<platform>`. Each
+///   entry must be a lowercase snake_case identifier starting with a letter and
+///   containing only lowercase letters, digits, and underscores (e.g.
+///   `'custom_os'`).
+///
+/// ### Example `extension/flutter_tools/config.yaml`
+///
+/// ```yaml
+/// name: my_custom_extension
+/// entrypoint: bin/my_custom_extension.dart
+/// host_platforms:
+///   - linux
+///   - macos
+/// services:
+///   - diagnostics
+///   - config
+///   - template
+///   - device
+///   - build
+/// build_targets:
+///   - custom-target
+/// templates:
+///   - custom-app
+/// target_platforms:
+///   - custom_os
+/// ```
 @immutable
 final class ExtensionPackageConfig {
   ExtensionPackageConfig({
     required this.name,
-    required Iterable<String> services,
     Iterable<String> buildTargets = const <String>{},
     String? entrypoint,
-    Iterable<String> platforms = const <String>{},
-    this.protocolVersion = currentProtocolVersion,
-    Iterable<String> supportedPlatforms = defaultSupportedPlatforms,
+    Iterable<String> hostPlatforms = const <String>{},
+    Iterable<String> services = const <String>{},
+    Iterable<String> targetPlatforms = const <String>{},
     Iterable<String> templates = const <String>{},
-  }) : buildTargets = Set<String>.unmodifiable(buildTargets),
-       entrypoint = _validateEntrypoint(entrypoint ?? 'bin/$name.dart'),
-       platforms = Set<String>.unmodifiable(platforms),
-       services = Set<String>.unmodifiable(services),
-       supportedPlatforms = Set<String>.unmodifiable(
-         supportedPlatforms.map((String p) => p.toLowerCase()),
+  }) : entrypoint = _validateEntrypoint(entrypoint ?? 'bin/$name.dart'),
+       hostPlatforms = Set<String>.unmodifiable(
+         hostPlatforms.map((String p) => p.trim().toLowerCase()),
        ),
-       templates = Set<String>.unmodifiable(templates);
+       services = Set<String>.unmodifiable(services.map((String s) => s.trim())),
+       buildTargets = Set<String>.unmodifiable(buildTargets.map((String t) => t.trim())),
+       templates = Set<String>.unmodifiable(templates.map((String t) => t.trim())),
+       targetPlatforms = _validateTargetPlatforms(targetPlatforms);
 
-  /// Deserializes an [ExtensionPackageConfig] from a decoded manifest [json] map.
+  /// Parses an [ExtensionPackageConfig] from a decoded YAML or JSON [json] map.
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
-  factory ExtensionPackageConfig.fromJson(Map<String, Object?> json, {String? packageName}) {
-    final String rawName = json
-        .optionalField<String>(nameKey, defaultValue: packageName ?? '')
-        .trim();
-    if (rawName.isEmpty) {
+  factory ExtensionPackageConfig.fromMap(Map<String, Object?> json, {String? packageName}) {
+    final String name = json.requiredField<String>(nameKey).trim();
+    if (name.isEmpty) {
       throw const FormatException(
         'Extension config.yaml must specify a non-empty string for "$nameKey".',
       );
     }
-    if (packageName != null && rawName != packageName) {
+
+    if (packageName != null && name != packageName) {
       throw FormatException(
-        'Extension config.yaml "$nameKey" ("$rawName") must match package name ("$packageName").',
+        'Extension config.yaml "$nameKey" ("$name") must match package name ("$packageName").',
       );
     }
 
-    final int protocolVersion = json.optionalField<int>(
-      protocolVersionKey,
-      defaultValue: currentProtocolVersion,
-    );
-
-    final String? entrypoint = json.nullableField<String>(entrypointKey);
-
-    final List<String> parsedServices = json.stringIterable(servicesKey).toList();
-    if (parsedServices.isEmpty) {
-      throw const FormatException(
-        'Extension config.yaml must specify a non-empty list of services for "$servicesKey".',
-      );
-    }
-
-    final List<String> parsedPlatforms = json.stringIterable(supportedPlatformsKey).toList();
+    final String? rawEntrypoint = json.nullableField<String>(entrypointKey);
+    final String entrypoint = _validateEntrypoint(rawEntrypoint ?? 'bin/$name.dart');
 
     return ExtensionPackageConfig(
-      buildTargets: json.stringIterable(buildTargetsKey),
+      name: name,
       entrypoint: entrypoint,
-      name: rawName,
-      platforms: json.stringIterable(platformsKey),
-      protocolVersion: protocolVersion,
-      services: parsedServices,
-      supportedPlatforms: parsedPlatforms.isEmpty ? defaultSupportedPlatforms : parsedPlatforms,
-      templates: json.stringIterable(templatesKey),
+      hostPlatforms: json.stringSet(hostPlatformsKey, rejectEmpty: true, trim: true),
+      services: json.stringSet(servicesKey, rejectEmpty: true, trim: true),
+      buildTargets: json.stringSet(buildTargetsKey, rejectEmpty: true, trim: true),
+      templates: json.stringSet(templatesKey, rejectEmpty: true, trim: true),
+      targetPlatforms: json.stringSet(targetPlatformsKey, rejectEmpty: true, trim: true),
     );
   }
 
-  /// Current supported extension protocol version.
-  static const int currentProtocolVersion = 1;
-
-  /// Relative path from the extension package root to the manifest file.
-  static const String manifestRelativePath = 'extension/flutter_tools/config.yaml';
-
-  /// Default host operating system platforms supported when omitted.
-  static const defaultSupportedPlatforms = <String>{'linux', 'macos', 'windows'};
-
-  /// Manifest key for [name].
+  /// Map key for [name].
   static const String nameKey = 'name';
 
-  /// Manifest key for [protocolVersion].
-  static const String protocolVersionKey = 'protocolVersion';
-
-  /// Manifest key for [entrypoint].
+  /// Map key for [entrypoint].
   static const String entrypointKey = 'entrypoint';
 
-  /// Manifest key for [supportedPlatforms].
-  static const String supportedPlatformsKey = 'supportedPlatforms';
+  /// Map key for [hostPlatforms].
+  static const String hostPlatformsKey = 'host_platforms';
 
-  /// Manifest key for [services].
+  /// Map key for [services].
   static const String servicesKey = 'services';
 
-  /// Manifest key for [buildTargets].
-  static const String buildTargetsKey = 'buildTargets';
+  /// Map key for [buildTargets].
+  static const String buildTargetsKey = 'build_targets';
 
-  /// Manifest key for [templates].
+  /// Map key for [templates].
   static const String templatesKey = 'templates';
 
-  /// Manifest key for [platforms].
-  static const String platformsKey = 'platforms';
+  /// Map key for [targetPlatforms].
+  static const String targetPlatformsKey = 'target_platforms';
+
+  static final RegExp _platformIdentifierPattern = RegExp(r'^[a-z][a-z0-9_]*$');
 
   /// The Dart package name of the extension.
   final String name;
 
-  /// The extension protocol version targeted by this package.
-  final int protocolVersion;
-
-  /// Relative POSIX path from the extension package root to the isolate entrypoint script.
+  /// Relative path from the extension package root to the isolate entrypoint script.
   final String entrypoint;
 
-  /// Host platforms supported by this extension in lowercase (e.g. `{'linux', 'macos', 'windows'}`).
-  final Set<String> supportedPlatforms;
+  /// Host platforms supported by this extension (e.g. `{'linux', 'macos', 'windows'}`).
+  ///
+  /// If empty, the extension is assumed to support all host platforms.
+  final Set<String> hostPlatforms;
 
   /// Service namespaces provided by this extension (e.g. `{'diagnostics', 'config', 'build'}`).
   final Set<String> services;
 
-  /// Custom `flutter build` target names provided by this extension.
+  /// Custom build target names provided by this extension.
   final Set<String> buildTargets;
 
-  /// Custom `flutter create` project template names provided by this extension.
+  /// Custom project template names provided by this extension.
   final Set<String> templates;
 
   /// Custom target platform names provided by this extension for `--platforms`.
-  final Set<String> platforms;
+  final Set<String> targetPlatforms;
+
+  /// Whether this extension supports the given [hostPlatform] (case-insensitive).
+  bool supportsHostPlatform(String hostPlatform) {
+    if (hostPlatforms.isEmpty) {
+      return true;
+    }
+    return hostPlatforms.contains(hostPlatform.toLowerCase());
+  }
 
   /// Serializes this [ExtensionPackageConfig] to a JSON-compatible map.
-  Map<String, Object?> toMap() => <String, Object?>{
-    nameKey: name,
-    protocolVersionKey: protocolVersion,
-    entrypointKey: entrypoint,
-    supportedPlatformsKey: supportedPlatforms.toList(),
-    servicesKey: services.toList(),
-    buildTargetsKey: buildTargets.toList(),
-    templatesKey: templates.toList(),
-    platformsKey: platforms.toList(),
-  };
+  Map<String, Object?> toMap() {
+    return <String, Object?>{
+      nameKey: name,
+      entrypointKey: entrypoint,
+      hostPlatformsKey: hostPlatforms.toList(),
+      servicesKey: services.toList(),
+      buildTargetsKey: buildTargets.toList(),
+      templatesKey: templates.toList(),
+      targetPlatformsKey: targetPlatforms.toList(),
+    };
+  }
 
   static String _validateEntrypoint(String entrypoint) {
     final String trimmed = entrypoint.trim();
@@ -149,56 +192,77 @@ final class ExtensionPackageConfig {
     if (trimmed.isEmpty ||
         trimmed.startsWith('/') ||
         trimmed.contains(r'\') ||
-        trimmed.split('/').contains('..') ||
+        !trimmed.endsWith('.dart') ||
         parsedUri == null ||
-        parsedUri.hasScheme) {
+        parsedUri.hasScheme ||
+        parsedUri.hasAuthority ||
+        parsedUri.hasQuery ||
+        parsedUri.hasFragment ||
+        parsedUri.path != trimmed ||
+        parsedUri.pathSegments.isEmpty ||
+        parsedUri.pathSegments.contains('') ||
+        parsedUri.pathSegments.contains('.') ||
+        parsedUri.pathSegments.contains('..') ||
+        parsedUri.pathSegments.last == '.dart') {
       throw FormatException(
-        'Extension config.yaml "$entrypointKey" must be a relative path within the package, '
-        'got: "$entrypoint".',
+        'Extension config.yaml "$entrypointKey" must be a relative path to a ".dart" file '
+        'within the package, got: "$entrypoint".',
       );
     }
     return trimmed;
   }
 
-  static bool _setEquals(Set<String> a, Set<String> b) {
-    return identical(a, b) || (a.length == b.length && a.containsAll(b));
+  static Set<String> _validateTargetPlatforms(Iterable<String> targetPlatforms) {
+    final validated = <String>{};
+    for (final platform in targetPlatforms) {
+      final String trimmed = platform.trim();
+      if (!_platformIdentifierPattern.hasMatch(trimmed)) {
+        throw FormatException(
+          'Extension config.yaml "$targetPlatformsKey" entries must be lowercase snake_case '
+          'identifiers starting with a letter (e.g. "custom_os"), got: "$platform".',
+        );
+      }
+      validated.add(trimmed);
+    }
+    return Set<String>.unmodifiable(validated);
   }
+
+  static const SetEquality<String> _stringSetEquality = SetEquality<String>();
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other is ExtensionPackageConfig &&
-            other.name == name &&
-            other.protocolVersion == protocolVersion &&
-            other.entrypoint == entrypoint &&
-            _setEquals(other.supportedPlatforms, supportedPlatforms) &&
-            _setEquals(other.services, services) &&
-            _setEquals(other.buildTargets, buildTargets) &&
-            _setEquals(other.templates, templates) &&
-            _setEquals(other.platforms, platforms));
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is ExtensionPackageConfig &&
+        other.name == name &&
+        other.entrypoint == entrypoint &&
+        _stringSetEquality.equals(other.hostPlatforms, hostPlatforms) &&
+        _stringSetEquality.equals(other.services, services) &&
+        _stringSetEquality.equals(other.buildTargets, buildTargets) &&
+        _stringSetEquality.equals(other.templates, templates) &&
+        _stringSetEquality.equals(other.targetPlatforms, targetPlatforms);
   }
 
   @override
   int get hashCode => Object.hash(
     name,
-    protocolVersion,
     entrypoint,
-    Object.hashAllUnordered(supportedPlatforms),
-    Object.hashAllUnordered(services),
-    Object.hashAllUnordered(buildTargets),
-    Object.hashAllUnordered(templates),
-    Object.hashAllUnordered(platforms),
+    _stringSetEquality.hash(hostPlatforms),
+    _stringSetEquality.hash(services),
+    _stringSetEquality.hash(buildTargets),
+    _stringSetEquality.hash(templates),
+    _stringSetEquality.hash(targetPlatforms),
   );
 
   @override
   String toString() =>
       'ExtensionPackageConfig('
       'name: $name, '
-      'protocolVersion: $protocolVersion, '
       'entrypoint: $entrypoint, '
-      'supportedPlatforms: $supportedPlatforms, '
+      'hostPlatforms: $hostPlatforms, '
       'services: $services, '
       'buildTargets: $buildTargets, '
       'templates: $templates, '
-      'platforms: $platforms)';
+      'targetPlatforms: $targetPlatforms)';
 }

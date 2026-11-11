@@ -3,9 +3,8 @@
 # found in the LICENSE file.
 
 name: flutter_tools_extension_linux_prototype
-protocolVersion: 1
 entrypoint: bin/flutter_tools_extension_linux_prototype.dart
-supportedPlatforms:
+host_platforms:
   - linux
 services:
   - diagnostics
@@ -14,9 +13,10 @@ services:
   - device
   - build
   - clean
-buildTargets:
+  - artifact
+build_targets:
   - custom-linux-build
 templates:
   - custom-linux-app
-platforms:
+target_platforms:
   - custom_linux

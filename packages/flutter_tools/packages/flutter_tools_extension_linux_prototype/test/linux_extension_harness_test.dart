@@ -38,14 +38,18 @@ void main() {
       addTearDown(harness.dispose);
 
       expect(harness.capabilities.extensionName, 'flutter_tools_extension_linux_prototype');
-      expect(
-        harness.capabilities.protocolVersion,
-        ToolExtensionCapabilities.currentProtocolVersion,
-      );
       expect(harness.capabilities.supportedPlatforms, <String>{'linux'});
       expect(
         harness.capabilities.services,
-        unorderedEquals(<String>['diagnostics', 'config', 'template', 'device', 'build', 'clean']),
+        unorderedEquals(<String>[
+          'diagnostics',
+          'config',
+          'template',
+          'device',
+          'build',
+          'clean',
+          'artifact',
+        ]),
       );
 
       expect(await harness.diagnosticsClient.getTitle(), 'Linux Custom Extension Prototype');
