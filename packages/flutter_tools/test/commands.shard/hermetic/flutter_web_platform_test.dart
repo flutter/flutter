@@ -223,6 +223,13 @@ void main() {
         await sourcemapResponse.readAsString(),
         HostArtifact.webPrecompiledDDCCanarySdkSourcemaps.name,
       );
+
+      final shelf.Response missingWasmResponse = await handler(
+        shelf.Request('GET', Uri.parse('http://localhost/main.dart.wasm')),
+      );
+      expect(missingWasmResponse.statusCode, HttpStatus.notFound);
+      await missingWasmResponse.read().drain<void>();
+
       await webPlatform.close();
     },
     overrides: <Type, Generator>{
@@ -246,6 +253,10 @@ void main() {
       );
       expect(htmlResponse.statusCode, HttpStatus.ok);
       expect(htmlResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+      expect(
+        htmlResponse.headers[HttpHeaders.contentLengthHeader],
+        '<html></html>'.length.toString(),
+      );
       expect(htmlResponse.headers['Cross-Origin-Opener-Policy'], 'same-origin');
       expect(htmlResponse.headers['Cross-Origin-Embedder-Policy'], 'credentialless');
       await htmlResponse.read().drain<void>();
@@ -255,6 +266,7 @@ void main() {
       );
       expect(jsResponse.statusCode, HttpStatus.ok);
       expect(jsResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+      expect(jsResponse.headers[HttpHeaders.contentLengthHeader], '// asset'.length.toString());
       expect(jsResponse.headers['Cross-Origin-Opener-Policy'], isNull);
       await jsResponse.read().drain<void>();
     },

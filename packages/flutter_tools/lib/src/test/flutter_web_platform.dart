@@ -49,14 +49,13 @@ shelf.Response _cachedFileResponse(
   File file, {
   String? contentType,
   Map<String, String> extraHeaders = const <String, String>{},
-  bool includeContentLength = false,
 }) {
   return shelf.Response.ok(
     file.openRead(),
     headers: <String, Object>{
       HttpHeaders.contentTypeHeader: ?contentType,
       HttpHeaders.cacheControlHeader: _kStaticAssetCacheControl,
-      if (includeContentLength) HttpHeaders.contentLengthHeader: file.lengthSync().toString(),
+      HttpHeaders.contentLengthHeader: file.lengthSync().toString(),
       ...extraHeaders,
     },
   );
@@ -415,7 +414,10 @@ window.\$dartLoader.loader.nextAttempt();
     } else {
       return shelf.Response.notFound('Not Found');
     }
-    return _cachedFileResponse(file, contentType: contentType, includeContentLength: true);
+    if (!file.existsSync()) {
+      return shelf.Response.notFound('Not Found');
+    }
+    return _cachedFileResponse(file, contentType: contentType);
   }
 
   FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) async {
@@ -503,7 +505,7 @@ window.\$dartLoader.loader.nextAttempt();
     }
 
     final File canvasKitFile = _fileSystem.file(filePath);
-    return _cachedFileResponse(canvasKitFile, contentType: contentType, includeContentLength: true);
+    return _cachedFileResponse(canvasKitFile, contentType: contentType);
   }
 
   String _makeBuildConfigString() {
