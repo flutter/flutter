@@ -51,6 +51,8 @@ class MockableJNIEnv : public JNIEnv {
     // Replace the JNIEnv's function table with wrappers that invoke the
     // mockable virtual methods in this class.
     functions = &jni_;
+    jni_.CallIntMethod = WrapCallIntMethod;
+    jni_.CallIntMethodV = WrapCallIntMethodV;
     jni_.CallObjectMethod = WrapCallObjectMethod;
     jni_.CallObjectMethodV = WrapCallObjectMethodV;
     jni_.CallVoidMethod = WrapCallVoidMethod;
@@ -68,14 +70,29 @@ class MockableJNIEnv : public JNIEnv {
     jni_.GetObjectRefType = WrapGetObjectRefType;
     jni_.GetStaticFieldID = WrapGetStaticFieldID;
     jni_.GetStaticMethodID = WrapGetStaticMethodID;
+    jni_.GetStaticObjectField = WrapGetStaticObjectField;
+    jni_.NewFloatArray = WrapNewFloatArray;
     jni_.NewGlobalRef = WrapNewGlobalRef;
     jni_.NewLocalRef = WrapNewLocalRef;
+    jni_.NewObject = WrapNewObject;
+    jni_.NewObjectArray = WrapNewObjectArray;
+    jni_.NewObjectV = WrapNewObjectV;
+    jni_.NewString = WrapNewString;
     jni_.NewWeakGlobalRef = WrapNewWeakGlobalRef;
+    jni_.PopLocalFrame = WrapPopLocalFrame;
+    jni_.PushLocalFrame = WrapPushLocalFrame;
     jni_.RegisterNatives = WrapRegisterNatives;
     jni_.GetArrayLength = WrapGetArrayLength;
     jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
+    jni_.GetObjectArrayElement = WrapGetObjectArrayElement;
+    jni_.SetObjectArrayElement = WrapSetObjectArrayElement;
+    jni_.SetFloatArrayRegion = WrapSetFloatArrayRegion;
+    jni_.GetStringChars = WrapGetStringChars;
+    jni_.GetStringLength = WrapGetStringLength;
+    jni_.ReleaseStringChars = WrapReleaseStringChars;
   }
 
+  virtual jint CallIntMethodV(jobject, jmethodID, va_list) = 0;
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
   virtual void CallVoidMethodV(jobject, jmethodID, va_list) = 0;
   virtual void DeleteGlobalRef(jobject) = 0;
@@ -91,14 +108,47 @@ class MockableJNIEnv : public JNIEnv {
   virtual jobjectRefType GetObjectRefType(jobject) = 0;
   virtual jfieldID GetStaticFieldID(jclass, const char*, const char*) = 0;
   virtual jmethodID GetStaticMethodID(jclass, const char*, const char*) = 0;
+  virtual jobject GetStaticObjectField(jclass, jfieldID) = 0;
+  virtual jfloatArray NewFloatArray(jsize) = 0;
   virtual jobject NewGlobalRef(jobject) = 0;
   virtual jobject NewLocalRef(jobject) = 0;
+  virtual jobjectArray NewObjectArray(jsize, jclass, jobject) = 0;
+  virtual jobject NewObjectV(jclass, jmethodID, va_list) = 0;
+  virtual jstring NewString(const jchar*, jsize) = 0;
   virtual jweak NewWeakGlobalRef(jobject) = 0;
+  virtual jobject PopLocalFrame(jobject) = 0;
+  virtual jint PushLocalFrame(jint) = 0;
   virtual jint RegisterNatives(jclass, const JNINativeMethod*, jint) = 0;
   virtual jsize GetArrayLength(jarray) = 0;
   virtual void GetIntArrayRegion(jintArray, jsize, jsize, jint*) = 0;
+  virtual jobject GetObjectArrayElement(jobjectArray, jsize) = 0;
+  virtual void SetObjectArrayElement(jobjectArray, jsize, jobject) = 0;
+  virtual void SetFloatArrayRegion(jfloatArray,
+                                   jsize,
+                                   jsize,
+                                   const jfloat*) = 0;
+  virtual const jchar* GetStringChars(jstring, jboolean*) = 0;
+  virtual jsize GetStringLength(jstring) = 0;
+  virtual void ReleaseStringChars(jstring, const jchar*) = 0;
 
  private:
+  static jint WrapCallIntMethod(JNIEnv* env,
+                                jobject obj,
+                                jmethodID methodID,
+                                ...) {
+    va_list args;
+    va_start(args, methodID);
+    jint result = WrapCallIntMethodV(env, obj, methodID, args);
+    va_end(args);
+    return result;
+  }
+  static jint WrapCallIntMethodV(JNIEnv* env,
+                                 jobject obj,
+                                 jmethodID methodID,
+                                 va_list args) {
+    return static_cast<MockableJNIEnv*>(env)->CallIntMethodV(obj, methodID,
+                                                             args);
+  }
   static jobject WrapCallObjectMethod(JNIEnv* env,
                                       jobject obj,
                                       jmethodID methodID,
@@ -184,14 +234,54 @@ class MockableJNIEnv : public JNIEnv {
     return static_cast<MockableJNIEnv*>(env)->GetStaticMethodID(clazz, name,
                                                                 sig);
   }
+  static jobject WrapGetStaticObjectField(JNIEnv* env,
+                                          jclass clazz,
+                                          jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticObjectField(clazz,
+                                                                   fieldID);
+  }
+  static jfloatArray WrapNewFloatArray(JNIEnv* env, jsize len) {
+    return static_cast<MockableJNIEnv*>(env)->NewFloatArray(len);
+  }
   static jobject WrapNewGlobalRef(JNIEnv* env, jobject ref) {
     return static_cast<MockableJNIEnv*>(env)->NewGlobalRef(ref);
   }
   static jobject WrapNewLocalRef(JNIEnv* env, jobject ref) {
     return static_cast<MockableJNIEnv*>(env)->NewLocalRef(ref);
   }
+  static jobject WrapNewObject(JNIEnv* env,
+                               jclass clazz,
+                               jmethodID methodID,
+                               ...) {
+    va_list args;
+    va_start(args, methodID);
+    jobject result = WrapNewObjectV(env, clazz, methodID, args);
+    va_end(args);
+    return result;
+  }
+  static jobjectArray WrapNewObjectArray(JNIEnv* env,
+                                         jsize len,
+                                         jclass clazz,
+                                         jobject init) {
+    return static_cast<MockableJNIEnv*>(env)->NewObjectArray(len, clazz, init);
+  }
+  static jobject WrapNewObjectV(JNIEnv* env,
+                                jclass clazz,
+                                jmethodID methodID,
+                                va_list args) {
+    return static_cast<MockableJNIEnv*>(env)->NewObjectV(clazz, methodID, args);
+  }
+  static jstring WrapNewString(JNIEnv* env, const jchar* unicode, jsize len) {
+    return static_cast<MockableJNIEnv*>(env)->NewString(unicode, len);
+  }
   static jweak WrapNewWeakGlobalRef(JNIEnv* env, jobject ref) {
     return static_cast<MockableJNIEnv*>(env)->NewWeakGlobalRef(ref);
+  }
+  static jobject WrapPopLocalFrame(JNIEnv* env, jobject result) {
+    return static_cast<MockableJNIEnv*>(env)->PopLocalFrame(result);
+  }
+  static jint WrapPushLocalFrame(JNIEnv* env, jint capacity) {
+    return static_cast<MockableJNIEnv*>(env)->PushLocalFrame(capacity);
   }
   static jint WrapRegisterNatives(JNIEnv* env,
                                   jclass clazz,
@@ -211,12 +301,46 @@ class MockableJNIEnv : public JNIEnv {
     static_cast<MockableJNIEnv*>(env)->GetIntArrayRegion(array, start, len,
                                                          buf);
   }
+  static jobject WrapGetObjectArrayElement(JNIEnv* env,
+                                           jobjectArray array,
+                                           jsize index) {
+    return static_cast<MockableJNIEnv*>(env)->GetObjectArrayElement(array,
+                                                                    index);
+  }
+  static void WrapSetObjectArrayElement(JNIEnv* env,
+                                        jobjectArray array,
+                                        jsize index,
+                                        jobject val) {
+    static_cast<MockableJNIEnv*>(env)->SetObjectArrayElement(array, index, val);
+  }
+  static void WrapSetFloatArrayRegion(JNIEnv* env,
+                                      jfloatArray array,
+                                      jsize start,
+                                      jsize len,
+                                      const jfloat* buf) {
+    static_cast<MockableJNIEnv*>(env)->SetFloatArrayRegion(array, start, len,
+                                                           buf);
+  }
+  static const jchar* WrapGetStringChars(JNIEnv* env,
+                                         jstring str,
+                                         jboolean* isCopy) {
+    return static_cast<MockableJNIEnv*>(env)->GetStringChars(str, isCopy);
+  }
+  static jsize WrapGetStringLength(JNIEnv* env, jstring str) {
+    return static_cast<MockableJNIEnv*>(env)->GetStringLength(str);
+  }
+  static void WrapReleaseStringChars(JNIEnv* env,
+                                     jstring str,
+                                     const jchar* chars) {
+    static_cast<MockableJNIEnv*>(env)->ReleaseStringChars(str, chars);
+  }
 
   JNINativeInterface jni_ = {};
 };
 
 class MockJNIEnv : public MockableJNIEnv {
  public:
+  MOCK_METHOD(jint, CallIntMethodV, (jobject, jmethodID, va_list), (override));
   MOCK_METHOD(jobject,
               CallObjectMethodV,
               (jobject, jmethodID, va_list),
@@ -247,9 +371,19 @@ class MockJNIEnv : public MockableJNIEnv {
               GetStaticMethodID,
               (jclass, const char*, const char*),
               (override));
+  MOCK_METHOD(jobject, GetStaticObjectField, (jclass, jfieldID), (override));
+  MOCK_METHOD(jfloatArray, NewFloatArray, (jsize), (override));
   MOCK_METHOD(jobject, NewGlobalRef, (jobject), (override));
   MOCK_METHOD(jobject, NewLocalRef, (jobject), (override));
+  MOCK_METHOD(jobjectArray,
+              NewObjectArray,
+              (jsize, jclass, jobject),
+              (override));
+  MOCK_METHOD(jobject, NewObjectV, (jclass, jmethodID, va_list), (override));
+  MOCK_METHOD(jstring, NewString, (const jchar*, jsize), (override));
   MOCK_METHOD(jweak, NewWeakGlobalRef, (jobject), (override));
+  MOCK_METHOD(jobject, PopLocalFrame, (jobject), (override));
+  MOCK_METHOD(jint, PushLocalFrame, (jint), (override));
   MOCK_METHOD(jint,
               RegisterNatives,
               (jclass, const JNINativeMethod*, jint),
@@ -259,6 +393,21 @@ class MockJNIEnv : public MockableJNIEnv {
               GetIntArrayRegion,
               (jintArray, jsize, jsize, jint*),
               (override));
+  MOCK_METHOD(jobject,
+              GetObjectArrayElement,
+              (jobjectArray, jsize),
+              (override));
+  MOCK_METHOD(void,
+              SetObjectArrayElement,
+              (jobjectArray, jsize, jobject),
+              (override));
+  MOCK_METHOD(void,
+              SetFloatArrayRegion,
+              (jfloatArray, jsize, jsize, const jfloat*),
+              (override));
+  MOCK_METHOD(const jchar*, GetStringChars, (jstring, jboolean*), (override));
+  MOCK_METHOD(jsize, GetStringLength, (jstring), (override));
+  MOCK_METHOD(void, ReleaseStringChars, (jstring, const jchar*), (override));
 };
 
 }  // namespace flutter
