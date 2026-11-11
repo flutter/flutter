@@ -736,7 +736,7 @@ class ExtensionBackedDevice extends Device {
         if (existingReader.appId != resolvedAppId) {
           if (!existingReader.hasActiveSubscriber) {
             await existingReader.reconfigureAppId(resolvedAppId, clearPendingLines: true);
-          } else if (existingReader.appId != null && resolvedAppId == null) {
+          } else if (existingReader.appId != null) {
             await existingReader.reconfigureAppId(null);
           }
         }
@@ -748,7 +748,8 @@ class ExtensionBackedDevice extends Device {
       }
     }
 
-    late final Future<ExtensionDeviceLogReader> readerFuture;
+    var readerDisposed = false;
+    Future<ExtensionDeviceLogReader>? readerFuture;
     readerFuture = ExtensionDeviceLogReader.create(
       appId: resolvedAppId,
       connection: connection,
@@ -757,12 +758,15 @@ class ExtensionBackedDevice extends Device {
       logger: logger,
       name: name,
       onDispose: () {
-        if (identical(_logReader, readerFuture)) {
+        readerDisposed = true;
+        if (readerFuture != null && identical(_logReader, readerFuture)) {
           _logReader = null;
         }
       },
     );
-    _logReader = readerFuture;
+    if (!readerDisposed) {
+      _logReader = readerFuture;
+    }
     final ExtensionDeviceLogReader reader = await readerFuture;
     if (_disposed) {
       await reader.dispose();

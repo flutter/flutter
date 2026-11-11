@@ -1845,12 +1845,24 @@ void main() {
       await pumpEventQueue();
       expect(r1Closed, isFalse);
 
-      // Scenario C: Active app-scoped subscriber widens to device-wide (app: null) in place without closing.
-      final DeviceLogReader widened = await device.getLogReader();
+      // Scenario C: Active app-scoped subscriber widens to device-wide (app: null) in place when a second app is requested.
+      final secondAppPkg = ExtensionBackedApplicationPackage(id: 'com.example.other_app');
+      final DeviceLogReader widened = await device.getLogReader(app: secondAppPkg);
       expect(identical(widened, concurrent[0]), isTrue);
       expect(r1Closed, isFalse);
       await pumpEventQueue();
       expect(startedLogAppIds, <String?>[null, 'com.example.app', null]);
+
+      // Scenario D: Calling getLogReader after connection is already disposed handles synchronous failure without LateInitializationError.
+      await widened.dispose();
+      await conn.dispose();
+      logger.clear();
+      final DeviceLogReader postCloseReader = await device.getLogReader(app: appPkg);
+      expect((postCloseReader as ExtensionDeviceLogReader).isDisposed, isTrue);
+      expect(
+        logger.warningText,
+        contains('Failed to start log stream for extension device "ext-log-device"'),
+      );
     });
 
     testWithoutContext('handles !supportsInstall no-op semantics, catches RPC and peer-exit exceptions with printError, and propagates host errors', () async {
