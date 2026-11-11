@@ -758,6 +758,9 @@ void main() {
               children: <Widget>[
                 AnimatedPositionedDirectional(
                   duration: Duration(milliseconds: 300),
+                  top: 0.0,
+                  bottom: 1.0,
+                  start: 0.0,
                   child: Text('X'),
                 ),
               ],
@@ -778,7 +781,13 @@ void main() {
           child: SizedBox.shrink(
             child: Stack(
               children: <Widget>[
-                AnimatedPositioned(duration: Duration(milliseconds: 300), child: Text('X')),
+                AnimatedPositioned(
+                  duration: Duration(milliseconds: 300),
+                  top: 0.0,
+                  bottom: 1.0,
+                  left: 0.0,
+                  child: Text('X'),
+                ),
               ],
             ),
           ),

@@ -137,7 +137,9 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Stack(children: [Positioned(child: Placeholder())]),
+          child: Stack(
+            children: [Positioned(top: 0.0, bottom: 1.0, left: 0.0, child: Placeholder())],
+          ),
         ),
       ),
     );
@@ -151,7 +153,11 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Stack(children: [PositionedDirectional(child: Placeholder())]),
+          child: Stack(
+            children: [
+              PositionedDirectional(top: 0.0, bottom: 1.0, start: 0.0, child: Placeholder()),
+            ],
+          ),
         ),
       ),
     );
