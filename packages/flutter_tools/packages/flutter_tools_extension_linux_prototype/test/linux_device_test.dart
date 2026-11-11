@@ -180,28 +180,6 @@ void main() {
         ),
       );
 
-      final ExtensionRpcHandler startLogStreamHandler = handlers['startLogStream']!;
-      expect(
-        await startLogStreamHandler(<String, Object?>{
-          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
-          DeviceService.appIdParam: 'com.example.test_app',
-        }),
-        isNull,
-      );
-      await expectLater(
-        startLogStreamHandler(<String, Object?>{
-          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
-          DeviceService.appIdParam: '',
-        }),
-        _throwsInvalidParams('Parameter "${DeviceService.appIdParam}" must not be empty.'),
-      );
-      await expectLater(
-        startLogStreamHandler(<String, Object?>{
-          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
-          DeviceService.appIdParam: 123,
-        }),
-        _throwsInvalidParams('Invalid "${DeviceService.appIdParam}": expected String?, got int.'),
-      );
       await expectLater(
         launchAppHandler(<String, Object?>{}),
         _throwsInvalidParams(

@@ -270,8 +270,16 @@ class ExtensionDebuggingOptions {
   /// The port on the target device where the Dart VM Service should listen, if specified.
   final int? deviceVmServicePort;
 
-  /// Flutter engine CLI switches computed by the host tool for this launch
-  /// (for example, `'enable-dart-profiling=true'` or `'start-paused=true'`).
+  /// Embedder-agnostic `key=value` Flutter engine switches pre-computed by the
+  /// host tool for this launch (with no leading `--`, matching `DesktopDevice`'s
+  /// `FLUTTER_ENGINE_SWITCH_*` format, such as `'enable-dart-profiling=true'`
+  /// or `'start-paused=true'`).
+  ///
+  /// When [route] or [deviceVmServicePort] is set, this list already includes
+  /// `'route=<route>'` and `'vm-service-port=<deviceVmServicePort>'`, so
+  /// extensions must not append them to the engine command line a second time
+  /// ([route] and [deviceVmServicePort] are provided as typed hints for
+  /// platform launchers and port forwarders).
   final List<String> engineSwitches;
 
   /// The port on the host machine to bind for the Dart VM Service, if specified.
@@ -306,15 +314,17 @@ class ExtensionDebuggingOptions {
       'route: $route, '
       'uninstallFirst: $uninstallFirst)';
 
+  static const ListEquality<String> _stringListEquality = ListEquality<String>();
+
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ExtensionDebuggingOptions &&
             other.buildMode == buildMode &&
-            const ListEquality<String>().equals(other.dartEntrypointArgs, dartEntrypointArgs) &&
+            _stringListEquality.equals(other.dartEntrypointArgs, dartEntrypointArgs) &&
             other.debuggingEnabled == debuggingEnabled &&
             other.deviceVmServicePort == deviceVmServicePort &&
-            const ListEquality<String>().equals(other.engineSwitches, engineSwitches) &&
+            _stringListEquality.equals(other.engineSwitches, engineSwitches) &&
             other.hostVmServicePort == hostVmServicePort &&
             other.route == route &&
             other.uninstallFirst == uninstallFirst);
@@ -323,10 +333,10 @@ class ExtensionDebuggingOptions {
   @override
   int get hashCode => Object.hash(
     buildMode,
-    Object.hashAll(dartEntrypointArgs),
+    _stringListEquality.hash(dartEntrypointArgs),
     debuggingEnabled,
     deviceVmServicePort,
-    Object.hashAll(engineSwitches),
+    _stringListEquality.hash(engineSwitches),
     hostVmServicePort,
     route,
     uninstallFirst,

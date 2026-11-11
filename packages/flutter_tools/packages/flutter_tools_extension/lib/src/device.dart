@@ -51,9 +51,6 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
 
-  /// RPC parameter key for the optional application package identifier.
-  static const String appIdParam = 'appId';
-
   /// RPC parameter key for the serialized [ExtensionFlutterProject].
   static const String projectParam = 'project';
 
@@ -117,15 +114,12 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// Starts streaming log output for the device identified by [deviceId].
   ///
-  /// When [appId] is provided, implementations may filter the device log stream
-  /// to entries originating from the specified application package.
-  ///
   /// Invoked by the host tool when a log consumer (such as `flutter logs` or
   /// `flutter run`) begins reading logs from [deviceId]. Implementations should
   /// return once log streaming has been initiated rather than awaiting the
   /// lifetime of the stream, and forward each log line (without a trailing
   /// newline) to the host by calling [emitLogLine].
-  Future<void> startLogStream({required String deviceId, String? appId}) async {}
+  Future<void> startLogStream({required String deviceId}) async {}
 
   /// Stops streaming log output for the device identified by [deviceId].
   ///
@@ -247,17 +241,7 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {
-    final String deviceId = _parseDeviceId(params);
-    final String? appId;
-    try {
-      appId = params.nullableField<String>(appIdParam);
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams(e.message);
-    }
-    if (appId != null && appId.isEmpty) {
-      throw RpcException.invalidParams('Parameter "$appIdParam" must not be empty.');
-    }
-    await startLogStream(deviceId: deviceId, appId: appId);
+    await startLogStream(deviceId: _parseDeviceId(params));
     return null;
   }
 

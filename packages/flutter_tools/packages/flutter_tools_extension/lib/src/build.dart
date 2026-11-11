@@ -21,20 +21,10 @@ class ExtensionBuildContext {
     required this.outputDir,
     required this.projectRoot,
     required this.resolvedArtifacts,
-    this.dartDefines = const <String, String>{},
-    this.flavor,
-    this.targetDeviceId,
-    this.targetPlatform,
   });
 
   /// The compilation mode for the build.
   final BuildMode buildMode;
-
-  /// Compile-time environment definitions passed via `--dart-define` or `--dart-define-from-file`.
-  final Map<String, String> dartDefines;
-
-  /// The build flavor (`--flavor`), if specified.
-  final String? flavor;
 
   /// The absolute directory URI (ending with `/`) to the Flutter SDK root directory.
   final Uri flutterRoot;
@@ -52,12 +42,6 @@ class ExtensionBuildContext {
   ///
   /// Keys correspond to [ExtensionArtifact.name] or [ExtensionHostArtifact.name] values.
   final Map<String, String> resolvedArtifacts;
-
-  /// The identifier of the target device when this build was triggered for a specific device.
-  final String? targetDeviceId;
-
-  /// The resolved target platform identifier (for example, `'linux-x64'`) when specified.
-  final String? targetPlatform;
 }
 
 /// Context passed to an extension target's [AssembleTarget.build] method.
@@ -71,10 +55,6 @@ class ExtensionAssembleContext extends ExtensionBuildContext {
     required super.outputDir,
     required super.projectRoot,
     required super.resolvedArtifacts,
-    super.dartDefines,
-    super.flavor,
-    super.targetDeviceId,
-    super.targetPlatform,
   });
 
   /// The absolute directory URI (ending with `/`) used for intermediate build
@@ -201,12 +181,6 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC parameter key for the build mode.
   static const String buildModeParam = 'buildMode';
 
-  /// RPC parameter key for the map of compile-time Dart defines.
-  static const String dartDefinesParam = 'dartDefines';
-
-  /// RPC parameter key for the optional build flavor.
-  static const String flavorParam = 'flavor';
-
   /// RPC parameter key for the Flutter SDK root directory.
   static const String flutterRootParam = 'flutterRoot';
 
@@ -222,14 +196,8 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC parameter key for the map of resolved engine artifacts.
   static const String resolvedArtifactsParam = 'resolvedArtifacts';
 
-  /// RPC parameter key for the optional target device ID.
-  static const String targetDeviceIdParam = 'targetDeviceId';
-
   /// RPC parameter key for the target name.
   static const String targetNameParam = 'targetName';
-
-  /// RPC parameter key for the optional resolved target platform.
-  static const String targetPlatformParam = 'targetPlatform';
 
   static const String _getBuildTargetsRpcMethod = 'getBuildTargets';
   static const String _getAssembleTargetsRpcMethod = 'getAssembleTargets';
@@ -307,10 +275,6 @@ abstract base class BuildService extends ToolExtensionService {
     final Uri outputDirUri;
     final Uri flutterRootUri;
     final Map<String, Object?> rawResolvedArtifacts;
-    final Map<String, String> dartDefines;
-    final String? flavor;
-    final String? targetDeviceId;
-    final String? targetPlatform;
     try {
       targetName = params.requiredField<String>(targetNameParam);
       projectRootUri = _requireAbsoluteDirectoryUri(params, projectRootParam);
@@ -319,12 +283,6 @@ abstract base class BuildService extends ToolExtensionService {
       outputDirUri = _requireAbsoluteDirectoryUri(params, outputDirParam);
       flutterRootUri = _requireAbsoluteDirectoryUri(params, flutterRootParam);
       rawResolvedArtifacts = params.requiredField<Map<String, Object?>>(resolvedArtifactsParam);
-      dartDefines = params[dartDefinesParam] != null
-          ? params.stringMap(dartDefinesParam)
-          : const <String, String>{};
-      flavor = params.nullableField<String>(flavorParam);
-      targetDeviceId = params.nullableField<String>(targetDeviceIdParam);
-      targetPlatform = params.nullableField<String>(targetPlatformParam);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
@@ -347,15 +305,11 @@ abstract base class BuildService extends ToolExtensionService {
 
     final context = ExtensionBuildContext(
       buildMode: mode,
-      dartDefines: dartDefines,
-      flavor: flavor,
       flutterRoot: flutterRootUri,
       mainPath: mainPath,
       outputDir: outputDirUri,
       projectRoot: projectRootUri,
       resolvedArtifacts: resolvedArtifacts,
-      targetDeviceId: targetDeviceId,
-      targetPlatform: targetPlatform,
     );
     return (targetName, context);
   }
@@ -373,15 +327,11 @@ abstract base class BuildService extends ToolExtensionService {
     final context = ExtensionAssembleContext(
       buildDir: buildDirUri,
       buildMode: buildContext.buildMode,
-      dartDefines: buildContext.dartDefines,
-      flavor: buildContext.flavor,
       flutterRoot: buildContext.flutterRoot,
       mainPath: buildContext.mainPath,
       outputDir: buildContext.outputDir,
       projectRoot: buildContext.projectRoot,
       resolvedArtifacts: buildContext.resolvedArtifacts,
-      targetDeviceId: buildContext.targetDeviceId,
-      targetPlatform: buildContext.targetPlatform,
     );
     return (targetName, context);
   }

@@ -7,6 +7,7 @@ import 'dart:isolate';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -14,7 +15,7 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
-import 'package:flutter_tools/src/linux/application_package.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
@@ -107,13 +108,12 @@ final class _StreamingTestDeviceService extends DeviceService {
   Future<bool> stopApp({required String deviceId}) async => false;
 
   @override
-  Future<void> startLogStream({required String deviceId, String? appId}) async {
+  Future<void> startLogStream({required String deviceId}) async {
     if (throwOnStart) {
       throw StateError('Simulated startLogStream failure');
     }
     eventSendPort.send(<String, Object?>{
       _eventTypeKey: _startEventType,
-      DeviceService.appIdParam: ?appId,
       DeviceService.deviceIdParam: deviceId,
     });
     for (final MapEntry(key: String sourceDeviceId, value: List<String> lines)
@@ -147,6 +147,7 @@ final class _FakeExtensionBuildManager extends ExtensionBuildManager {
            targets ??
            <ExtensionBuildTarget>[
              ExtensionBuildTarget(
+               artifacts: const <ExtensionArtifact>{BuiltInArtifacts.genSnapshot},
                description: 'Custom Linux Build',
                name: 'custom-linux-build',
                outputDir: '{OUTPUT_DIR}/linux/{TARGET_PLATFORM}/{BUILD_MODE}',
@@ -170,23 +171,15 @@ final class _FakeExtensionBuildManager extends ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
-    Map<String, String> dartDefines = const <String, String>{},
-    String? flavor,
-    String? targetDeviceId,
-    String? targetPlatform,
   }) async {
     buildCalls.add(<String, Object?>{
       'buildMode': buildMode,
-      'dartDefines': dartDefines,
-      'flavor': flavor,
       'flutterRoot': flutterRoot,
       'mainPath': mainPath,
       'outputDir': outputDir,
       'projectRoot': projectRoot,
       'resolvedArtifacts': resolvedArtifacts,
-      'targetDeviceId': targetDeviceId,
       'targetName': targetName,
-      'targetPlatform': targetPlatform,
     });
     return buildResult;
   }
@@ -708,77 +701,7 @@ void main() {
       },
     );
 
-    testWithoutContext('ExtensionBackedDevice.getLogReader forwards non-empty app.id to DeviceService.startLogStream', () async {
-      final eventPort = ReceivePort();
-      addTearDown(eventPort.close);
-      final Stream<Map<String, Object?>> events = eventPort
-          .cast<Map<String, Object?>>()
-          .asBroadcastStream();
-      final SendPort eventSendPort = eventPort.sendPort;
-
-      void entryPoint(SendPort sendPort) {
-        unawaited(
-          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-            _StreamingTestDeviceService(eventSendPort: eventSendPort),
-          ]),
-        );
-      }
-
-      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
-      addTearDown(conn.dispose);
-
-      final client = ExtensionDeviceClient(conn, logger: logger);
-      final List<TargetDevice> targetDevices = await client.getDevices();
-      final fileSystem = MemoryFileSystem.test();
-      final device = ExtensionBackedDevice(
-        buildManager: _createBuildManager(logger: logger),
-        connection: conn,
-        deviceService: client,
-        fileSystem: fileSystem,
-        logger: logger,
-        targetDevice: targetDevices.first,
-      );
-      addTearDown(device.dispose);
-
-      // First call without app starts log stream with null appId.
-      final Future<Map<String, Object?>> initialStartFuture = events.firstWhere(
-        (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
-      );
-      final DeviceLogReader initialReader = await device.getLogReader();
-      final Map<String, Object?> initialStart = await initialStartFuture;
-      expect(initialStart[DeviceService.deviceIdParam], equals(_primaryDeviceId));
-      expect(initialStart.containsKey(DeviceService.appIdParam), isFalse);
-
-      // Calling with PrebuiltApplicationPackage (whose id is a binary path) reuses null appId.
-      final DeviceLogReader prebuiltReader = await device.getLogReader(
-        app: PrebuiltLinuxApp(
-          applicationPackage: fileSystem.file('/path/to/binary'),
-          executable: '/path/to/binary',
-        ),
-      );
-      expect(prebuiltReader, same(initialReader));
-
-      // Calling with a buildable package with non-empty appId stops the previous stream and starts a new one.
-      final Future<Map<String, Object?>> stopEventFuture = events.firstWhere(
-        (Map<String, Object?> event) => event[_eventTypeKey] == _stopEventType,
-      );
-      final Future<Map<String, Object?>> startEventFuture = events.firstWhere(
-        (Map<String, Object?> event) =>
-            event[_eventTypeKey] == _startEventType && event.containsKey(DeviceService.appIdParam),
-      );
-      final DeviceLogReader appReader = await device.getLogReader(
-        app: ExtensionApplicationPackage(id: 'com.example.custom_app'),
-      );
-      expect(appReader, isNot(same(initialReader)));
-
-      final Map<String, Object?> stopEvent = await stopEventFuture;
-      expect(stopEvent[DeviceService.deviceIdParam], equals(_primaryDeviceId));
-      final Map<String, Object?> startEvent = await startEventFuture;
-      expect(startEvent[DeviceService.deviceIdParam], equals(_primaryDeviceId));
-      expect(startEvent[DeviceService.appIdParam], equals('com.example.custom_app'));
-    });
-
-    testWithoutContext('ExtensionBackedDevice.startApp forwards expanded ExtensionDebuggingOptions, build defines/flavor/targetPlatform, and supports prebuilt launch and retry reuse', () async {
+    testWithoutContext('ExtensionBackedDevice.startApp forwards expanded ExtensionDebuggingOptions, resolves build target platform artifacts, and supports prebuilt launch and retry reuse', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -812,6 +735,7 @@ void main() {
         logger: logger,
       );
       final device = ExtensionBackedDevice(
+        artifacts: Artifacts.test(fileSystem: fileSystem),
         buildManager: buildManager,
         connection: conn,
         deviceService: client,
@@ -831,7 +755,6 @@ void main() {
         const BuildInfo(
           BuildMode.debug,
           'prod',
-          dartDefines: <String>['API_URL=https://example.com', 'ENABLE_FEATURE=true'],
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
         ),
@@ -855,14 +778,11 @@ void main() {
 
       expect(buildManager.buildCalls, hasLength(1));
       final Map<String, Object?> buildCall = buildManager.buildCalls.single;
+      expect((buildCall['outputDir']! as Uri).path, endsWith('/build/linux/linux-x64/debug/'));
       expect(
-        buildCall['dartDefines'],
-        equals(<String, String>{'API_URL': 'https://example.com', 'ENABLE_FEATURE': 'true'}),
+        (buildCall['resolvedArtifacts']! as Map<String, String>).keys,
+        contains(BuiltInArtifacts.genSnapshot.name),
       );
-      expect(buildCall['flavor'], equals('prod'));
-      expect(buildCall['targetDeviceId'], equals(_primaryDeviceId));
-      expect(buildCall['targetPlatform'], equals('custom-arm64'));
-      expect((buildCall['outputDir']! as Uri).path, endsWith('/build/linux/custom-arm64/debug/'));
 
       expect(launchEvents, hasLength(1));
       final Map<String, Object?> firstLaunch = launchEvents.first;

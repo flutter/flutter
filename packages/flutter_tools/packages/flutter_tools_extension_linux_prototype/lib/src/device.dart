@@ -157,9 +157,6 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<void> startLogStream({required String deviceId, String? appId}) async {}
-
-  @override
   Future<void> shutdown() async {
     await Future.wait(
       _runningApps.keys.toList().map((String deviceId) => stopApp(deviceId: deviceId)),

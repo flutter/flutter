@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
@@ -27,6 +28,8 @@ import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
     show
         BuiltInPlaceholders,
@@ -37,9 +40,11 @@ import 'package:flutter_tools_core/flutter_tools_core.dart'
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -102,6 +107,14 @@ final class _FakeTestDeviceService extends DeviceService {
         targetPlatform: 'linux-x64',
       ),
       TargetDevice(
+        category: Category.other,
+        id: 'custom_os_test_device',
+        name: 'Custom OS Extension Device',
+        buildTarget: 'fake-test-build',
+        sdkNameAndVersion: 'Custom OS 1.0',
+        targetPlatform: 'custom-os',
+      ),
+      TargetDevice(
         category: Category.desktop,
         id: 'no_target_device',
         name: 'No Target Device',
@@ -144,7 +157,7 @@ final class _FakeTestDeviceService extends DeviceService {
     required Uri executableUri,
     bool prebuiltApplication = false,
   }) async {
-    if (deviceId == 'fake_test_device') {
+    if (deviceId == 'fake_test_device' || deviceId == 'custom_os_test_device') {
       final validUri = prebuiltApplication
           ? executableUri == Uri.file('/tmp/prebuilt_bundle/app')
           : executableUri == Uri.file('/tmp/fake_bundle/app');
@@ -167,7 +180,8 @@ final class _FakeTestDeviceService extends DeviceService {
 
   @override
   Future<Uri?> getVmServiceUri({required String deviceId}) async {
-    if (deviceId == 'fake_test_device' && _runningDevices.contains(deviceId)) {
+    if ((deviceId == 'fake_test_device' || deviceId == 'custom_os_test_device') &&
+        _runningDevices.contains(deviceId)) {
       return Uri.parse('http://127.0.0.1:8181/abcd=/');
     }
     return null;
@@ -224,8 +238,8 @@ final class _CustomLogStreamingDeviceService extends DeviceService {
   Future<bool> stopApp({required String deviceId}) async => false;
 
   @override
-  Future<void> startLogStream({required String deviceId, String? appId}) async {
-    emitLogLine(deviceId: deviceId, line: 'Custom device log line 1 (appId: $appId)');
+  Future<void> startLogStream({required String deviceId}) async {
+    emitLogLine(deviceId: deviceId, line: 'Custom device log line 1');
     emitLogLine(deviceId: deviceId, line: 'Custom device log line 2');
   }
 }
@@ -579,7 +593,9 @@ flutter:
         expect(missingPrebuiltResult.started, isFalse);
         expect(
           logger.errorText,
-          contains('No prebuilt application package provided for Fake Test Extension Device.'),
+          contains(
+            'No prebuilt application package or prior build output available for Fake Test Extension Device.',
+          ),
         );
 
         logger.clear();
@@ -674,6 +690,108 @@ flutter:
           ),
           throwsUnsupportedError,
         );
+      });
+
+      testWithoutContext('FlutterDriverService.start launches buildable and prebuilt apps on custom TargetPlatform.unsupported extension device', () async {
+        final (_, BufferLogger logger, MemoryFileSystem fileSystem, List<Device> devices) =
+            await setUpTestDevices();
+        final Device customOsDevice = devices.firstWhere(
+          (Device d) => d.id == 'custom_os_test_device',
+        );
+        expect(await customOsDevice.targetPlatform, TargetPlatform.unsupported);
+
+        final toolContext = FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          projectFactory: FlutterProjectFactory(
+            config: FakeConfig(),
+            fileSystem: fileSystem,
+            logger: logger,
+          ),
+        );
+        final packageFactory = FlutterApplicationPackageFactory(
+          androidSdk: null,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          plistParser: FakePlistParser(),
+          toolContext: toolContext,
+        );
+        final fakeVm = vm_service.VM(
+          isolates: <vm_service.IsolateRef>[
+            vm_service.Isolate(
+              id: '1',
+              pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
+              breakpoints: <vm_service.Breakpoint>[],
+              libraries: <vm_service.LibraryRef>[
+                vm_service.LibraryRef(id: '1', uri: 'file:///lib/main.dart', name: ''),
+              ],
+              livePorts: 0,
+              name: 'main',
+              number: '1',
+              pauseOnExit: false,
+              runnable: true,
+              startTime: 0,
+              isSystemIsolate: false,
+              isolateFlags: <vm_service.IsolateFlag>[],
+            ),
+          ],
+          pid: 1,
+          hostCPU: '',
+          isolateGroups: <vm_service.IsolateGroupRef>[],
+          targetCPU: '',
+          startTime: 0,
+          name: 'dart',
+          architectureBits: 64,
+          operatingSystem: '',
+          version: '',
+          systemIsolateGroups: <vm_service.IsolateGroupRef>[],
+          systemIsolates: <vm_service.IsolateRef>[],
+        );
+        final getVmRequest = FakeVmServiceRequest(
+          method: 'getVM',
+          args: const <String, Object>{},
+          jsonResponse: fakeVm.toJson(),
+        );
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <FakeVmServiceRequest>[getVmRequest, getVmRequest],
+        );
+
+        final driverService = FlutterDriverService(
+          applicationPackageFactory: packageFactory,
+          dartSdkPath: 'dart',
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          logFlushDelay: Duration.zero,
+          toolContext: toolContext,
+          vmServiceConnector: (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            CompressionOptions compression = CompressionOptions.compressionDefault,
+            Device? device,
+            required Logger logger,
+          }) async => fakeVmServiceHost.vmService,
+        );
+
+        await driverService.start(
+          BuildInfo.debug,
+          customOsDevice,
+          DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
+        );
+        expect(await customOsDevice.stopApp(null), isTrue);
+
+        final File prebuiltBinary = fileSystem.file('/tmp/prebuilt_bundle/app')
+          ..createSync(recursive: true);
+        await driverService.start(
+          BuildInfo.debug,
+          customOsDevice,
+          DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
+          applicationBinary: prebuiltBinary,
+        );
+        expect(await customOsDevice.stopApp(null), isTrue);
+        expect(logger.errorText, isEmpty);
       });
 
       testWithoutContext('fails when device does not specify a buildTarget', () async {

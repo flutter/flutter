@@ -8,7 +8,6 @@ import 'application_package.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'context/tool_context.dart';
-import 'experimental/extension_device_manager.dart';
 import 'features.dart';
 import 'ios/application_package.dart';
 import 'ios/plist_parser.dart';
@@ -18,6 +17,24 @@ import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/application_package.dart';
+
+/// An [ApplicationPackage] representing an application targeting a custom tool
+/// extension device.
+class ExtensionApplicationPackage extends ApplicationPackage {
+  ExtensionApplicationPackage({required super.id}) : name = id;
+
+  @override
+  final String name;
+}
+
+/// A prebuilt [ExtensionApplicationPackage] supplied via `--use-application-binary`.
+class PrebuiltExtensionApplicationPackage extends ExtensionApplicationPackage
+    implements PrebuiltApplicationPackage {
+  PrebuiltExtensionApplicationPackage({required this.applicationPackage, required super.id});
+
+  @override
+  final FileSystemEntity applicationPackage;
+}
 
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
@@ -100,9 +117,9 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             ? WindowsApp.fromWindowsProject(_currentProject().windows, toolContext: _toolContext)
             : WindowsApp.fromPrebuiltApp(applicationBinary, toolContext: _toolContext);
       case .unsupported when _featureFlags.isToolExtensionsEnabled:
-        final FlutterProject currentProject = _currentProject();
-        final String appName = currentProject.manifest.appName;
-        final String id = appName.isNotEmpty ? appName : currentProject.directory.basename;
+        // TODO(bkonyi): Replace with device-scoped DeviceService.resolveApplication
+        // once available so unsupported built-in architectures are not routed here.
+        final String id = _currentProject().manifest.appName;
         return applicationBinary == null
             ? ExtensionApplicationPackage(id: id)
             : PrebuiltExtensionApplicationPackage(applicationPackage: applicationBinary, id: id);
