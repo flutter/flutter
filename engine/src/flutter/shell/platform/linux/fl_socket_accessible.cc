@@ -96,6 +96,9 @@ static void fl_socket_accessible_class_init(FlSocketAccessibleClass* klass) {
 static void fl_socket_accessible_init(FlSocketAccessible* self) {}
 
 void fl_socket_accessible_embed(FlSocketAccessible* self, AtkPlug* plug) {
+  g_return_if_fail(FL_IS_SOCKET_ACCESSIBLE(self));
+  g_return_if_fail(ATK_IS_PLUG(plug));
+
   atk_object_set_parent(ATK_OBJECT(plug), self->accessible_socket);
 
   // AtkSocket and AtkPlug are designed for use between processes. at-spi2-atk
