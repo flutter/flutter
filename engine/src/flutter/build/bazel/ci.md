@@ -84,7 +84,10 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   the flags; a build whose own flags lack it matches without it and runs
   with LTO off (`--//engine/src/flutter/build/bazel:lto=false` after its
   configuration, in the install and the tests alike: `bazel.json`'s
-  `options`).
+  `options`). A `--thin-lto` build is such a build: a presubmit of the
+  three Linux release builders builds it without LTO, and ThinLTO runs in
+  their postsubmit builds and in every build of `linux_host_engine_test`,
+  which is no release builder.
 - **One output root for the install and the tests.** `run_tests.py` runs
   its Bazel commands from `bazel.json`'s recorded startup and build options
   rather than recomputing them: computed again from the checkout root they

@@ -51,11 +51,14 @@ flags, defines). `-c dbg` corresponds to GN's unoptimized builds (`-O0 -g2
 and `-g0`: BUILDCONFIG.gn's `symbol_level` for an optimized Linux build is
 0, so GN's `host_debug`, `host_profile` and `host_release` carry no debug
 info; `--copt=-g2` puts it back for a profile)
-without LTO -- `tools/gn --no-lto`, which every host builder in
-`ci/builders` but linux_benchmarks' `ci/host_release_benchmarks` and `et`'s
-`local_engine.json` pass; the wrapped GN builds
-set `enable_lto = false` in both modes for the same reason, so an optimized
-build is one build without LTO rather than an engine without and a VM with.
+without LTO, as `tools/gn --no-lto` has it. LTO is two settings, which a
+builder's configuration carries: `--//engine/src/flutter/build/bazel:lto`
+is GN's `enable_lto`, `-flto` on the compiles and links of an optimized
+build, and `--//engine/src/flutter/build/bazel:thin_lto` is GN's
+`use_thin_lto`, `-flto=thin` in its place (`tools/gn --thin-lto`, the flag
+of the Linux profile and release builders; it does nothing without `lto`).
+The wrapped GN builds set `enable_lto = false` in every build, so in a
+build with LTO the Dart VM's objects are not part of it, where GN's are.
 There is no component build: `.bazelrc` sets `--force_pic` and
 `--dynamic_mode=off`, as GN links everything statically with `-fPIC`.
 

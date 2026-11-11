@@ -72,6 +72,7 @@ def _configuration_transition_impl(settings, attr):
         "//command_line_option:platforms": [runtime_mode_platform(current, mode)],
         RUNTIME_MODE_FLAG: mode,
         "//engine/src/flutter/build/bazel:lto": _tristate(attr.lto, settings["//engine/src/flutter/build/bazel:lto"]),
+        "//engine/src/flutter/build/bazel:thin_lto": _tristate(attr.thin_lto, settings["//engine/src/flutter/build/bazel:thin_lto"]),
         "//engine/src/flutter/build/bazel:stripped": _tristate(attr.stripped, settings["//engine/src/flutter/build/bazel:stripped"]),
     }
 
@@ -88,6 +89,7 @@ _configuration_transition = transition(
         "//command_line_option:platforms",
         RUNTIME_MODE_FLAG,
         "//engine/src/flutter/build/bazel:lto",
+        "//engine/src/flutter/build/bazel:thin_lto",
         "//engine/src/flutter/build/bazel:stripped",
     ],
     outputs = [
@@ -95,6 +97,7 @@ _configuration_transition = transition(
         "//command_line_option:platforms",
         RUNTIME_MODE_FLAG,
         "//engine/src/flutter/build/bazel:lto",
+        "//engine/src/flutter/build/bazel:thin_lto",
         "//engine/src/flutter/build/bazel:stripped",
     ],
 )
@@ -134,6 +137,12 @@ in_configuration = rule(
             values = ["", "true", "false"],
             doc = "GN's enable_lto (//engine/src/flutter/build/bazel:lto): the current setting if empty; `true` " +
                   "for a build the builders make with it (the Android profile and release builds).",
+        ),
+        "thin_lto": attr.string(
+            values = ["", "true", "false"],
+            doc = "GN's use_thin_lto (//engine/src/flutter/build/bazel:thin_lto): the current setting if empty; " +
+                  "`false` for a build the builders make with full LTO (the Android profile and release " +
+                  "builds), whatever the build around it has.",
         ),
         "stripped": attr.string(
             values = ["", "true", "false"],

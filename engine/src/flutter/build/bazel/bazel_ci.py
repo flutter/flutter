@@ -62,7 +62,9 @@ _IGNORED_GN_ARGS = ('engine_version=',)
 # release builder's presubmit builds: a try build without LTO is a faster
 # one): a build whose own flags lack it matches without it and runs with
 # LTO off -- the Bazel setting the converter maps `--no-lto` to
-# (build/bazel/BUILD.bazel's `lto`, on in the configuration otherwise).
+# (build/bazel/BUILD.bazel's `lto`, on in the configuration otherwise). A
+# `--thin-lto` build's `thin_lto` stays on and says nothing without `lto`,
+# as tools/gn passes use_thin_lto under enable_lto alone.
 NO_LTO_FLAG = '--no-lto'
 LTO_OFF_OPTION = '--//engine/src/flutter/build/bazel:lto=false'
 

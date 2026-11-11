@@ -96,7 +96,7 @@
                 "--runtime-mode",
                 "release",
                 "--prebuilt-dart-sdk",
-                "--no-lto",
+                "--thin-lto",
                 "--no-rbe",
                 "--no-goma",
                 "--bazel"
