@@ -2,11 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:macrobenchmarks/common.dart';
 import 'package:macrobenchmarks/main.dart';
+
+const Duration _initialSettleDelay = Duration(milliseconds: 50);
+const Duration _tapSyncDelay = Duration(milliseconds: 200);
+const Offset _flingOffset = Offset(0.0, -1000.0);
+const double _flingSpeed = 10000.0;
 
 Future<void> endOfAnimation() async {
   do {
@@ -15,8 +22,44 @@ Future<void> endOfAnimation() async {
 }
 
 Future<void> main() async {
-  runApp(const MacrobenchmarksApp(initialRoute: kLargeImagesRouteName));
+  final ready = Completer<void>();
+  runApp(
+    GestureDetector(
+      onTap: () {
+        if (!ready.isCompleted) {
+          debugPrint('==== MEMORY BENCHMARK ==== TAPPED ====');
+          ready.complete();
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: const IgnorePointer(child: MacrobenchmarksApp(initialRoute: kLargeImagesRouteName)),
+    ),
+  );
   await endOfAnimation();
-  await Future<void>.delayed(const Duration(milliseconds: 50));
+  await Future<void>.delayed(_initialSettleDelay);
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
+
+  await ready.future;
+  debugPrint('Continuing...');
+
+  // Wait out any errant taps due to synchronization.
+  await Future<void>.delayed(_tapSyncDelay);
+
+  // Remove onTap handler, enable pointer events for app.
+  runApp(
+    GestureDetector(
+      child: const IgnorePointer(
+        ignoring: false,
+        child: MacrobenchmarksApp(initialRoute: kLargeImagesRouteName),
+      ),
+    ),
+  );
+  await endOfAnimation();
+
+  final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
+  debugPrint('Flinging...');
+  await controller.fling(find.byType(Scrollable), _flingOffset, _flingSpeed);
+  await endOfAnimation();
+
+  debugPrint('==== MEMORY BENCHMARK ==== DONE ====');
 }
