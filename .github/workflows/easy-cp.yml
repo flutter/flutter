@@ -219,13 +219,16 @@ jobs:
         id: create-pr
         run: |
           PR_TITLE=$(cat "$RUNNER_TEMP/cp/title.txt")
+          git show upstream/master:.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md \
+            | sed "s/<ORIGINAL_PR_NUMBER>/${PR_NUMBER}/g" > "$RUNNER_TEMP/cp/body.md"
           git push origin "cp-${CHANNEL}-${MERGE_COMMIT_SHA}"
-          pr_url=$(gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ".github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md" --base "${RELEASE_BRANCH}" --label "cp: review" --repo flutter/flutter --head "flutteractionsbot:cp-${CHANNEL}-${MERGE_COMMIT_SHA}")
+          pr_url=$(gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file "$RUNNER_TEMP/cp/body.md" --base "${RELEASE_BRANCH}" --label "cp: review" --repo flutter/flutter --head "flutteractionsbot:cp-${CHANNEL}-${MERGE_COMMIT_SHA}")
           echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
         env:
           CHANNEL: ${{ steps.validate.outputs.channel }}
           RELEASE_BRANCH: ${{ steps.validate.outputs.release_branch }}
           MERGE_COMMIT_SHA: ${{ steps.validate.outputs.merge_commit_sha }}
+          PR_NUMBER: ${{ steps.validate.outputs.pr_number }}
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       - name: Leave Comment on CP success

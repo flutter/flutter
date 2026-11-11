@@ -65,7 +65,7 @@
                 "profile",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe"
             ],
             "name": "ci/host_profile_test",
@@ -116,7 +116,7 @@
                 "release",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe"
             ],
             "name": "ci/host_release_test",
