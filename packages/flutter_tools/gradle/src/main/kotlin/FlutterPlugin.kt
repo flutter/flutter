@@ -511,7 +511,7 @@ class FlutterPlugin : Plugin<Project> {
                         "Flutter could not register its generated assets for variant " +
                             "'${variant.name}' because the Android Gradle Plugin did not " +
                             "expose an assets source set for it. Please file an issue at " +
-                            "https://github.com/flutter/flutter/issues."
+                            "https://github.com/flutter/flutter/issues"
                     )
             assetSources.addGeneratedSourceDirectory(
                 copyFlutterAssetsTaskProvider,

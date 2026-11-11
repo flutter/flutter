@@ -132,4 +132,5 @@ const kPlatformViewHybridCompositionPlusPlusTest =
 // =============================================================================
 
 /// Substring used to identify blank/empty screenshot errors in exceptions.
-const String errorBlankScreenshot = 'blank/empty';
+// Keep in sync with _detectRetryableFailureReason in run_android_hardware_smoke_tests.dart.
+const String errorBlankScreenshot = 'Captured screenshot is blank/empty';
