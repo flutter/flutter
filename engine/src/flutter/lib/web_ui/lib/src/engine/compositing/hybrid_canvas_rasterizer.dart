@@ -122,14 +122,14 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
   OnscreenSurface? get debugDirectSurface => _directSurface;
 
   @override
-  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) =>
+  Future<void> draw(LayerTree layerTree, ui.Size frameSize, FrameTimingRecorder? recorder) =>
       rasterizer._draw(() async {
         if (isDisposed) {
           return;
         }
         _drawing = true;
         try {
-          await super.draw(layerTree, recorder);
+          await super.draw(layerTree, frameSize, recorder);
         } finally {
           _discardPendingBitmaps();
           _drawing = false;
@@ -268,7 +268,11 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
       final deadline = Stopwatch()..start();
       var reads = 0;
       while (!isDisposed && reads < 3 && deadline.elapsedMilliseconds < 100) {
-        if (!await _nextObservation(Duration(milliseconds: 100 - deadline.elapsedMilliseconds))) {
+        // Animation callbacks can be suspended even while worker pixels are
+        // available. Yield between bounded observations; the pixel comparison,
+        // rather than a scheduling callback, determines whether entry is safe.
+        await Future<void>.delayed(const Duration(milliseconds: 16));
+        if (isDisposed || deadline.elapsedMilliseconds >= 100) {
           break;
         }
         final source = surface.canvasImageSource as DomHTMLCanvasElement;
@@ -276,6 +280,10 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
           continue;
         }
         reads++;
+        // drawImage can do nothing while the worker's placeholder is not ready.
+        // Do not mistake pixels left by the reference or an earlier observation
+        // for a newly published frame.
+        context.clearRect(0, 0, size.width, size.height);
         context.drawImage(source, 0, 0);
         final Int32List observed = _readPixels(context, size);
         // Synchronous readback cannot be interrupted. Accept verified pixels
@@ -310,30 +318,6 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
     return true;
   }
 
-  Future<bool> _nextObservation(Duration budget) async {
-    final completer = Completer<void>();
-    final DomMessageChannel channel = createDomMessageChannel();
-    final DomEventListener listener = createDomEventListener((_) {
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
-    });
-    channel.port1.addEventListener('message', listener);
-    channel.port1.start();
-    final double id = domWindow.requestAnimationFrame((_) => channel.port2.postMessage(null));
-    try {
-      await completer.future.timeout(budget);
-      return true;
-    } on TimeoutException {
-      return false;
-    } finally {
-      domWindow.cancelAnimationFrame(id);
-      channel.port1.removeEventListener('message', listener);
-      channel.port1.close();
-      channel.port2.close();
-    }
-  }
-
   @override
   void commitFrame() {
     if (isDisposed) {
@@ -364,6 +348,9 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
       if (_directCanvas != null) {
         _directSurface!.setIsOverlay(_directCanvas!._isOverlay);
       }
+      // Staging is only needed while observing an entry candidate. Keep the
+      // published scene limited to its composition canvases and platform views.
+      _stagingHost.remove();
       _lastSize = currentFrameSize;
       // Changes arriving during native work belong to the next frame. Reading
       // live metrics here would hide them from that frame's change detection.

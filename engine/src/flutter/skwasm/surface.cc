@@ -49,6 +49,8 @@ namespace {
 // would result in an unrecoverable busy-spin on the main browser thread.
 std::atomic<bool> g_raster_thread_initialized{false};
 unsigned long g_raster_thread = 0;
+
+// Main thread only: callback IDs are shared across all surfaces.
 uint32_t g_next_callback_id = 0;
 
 uint32_t NextCallbackId() {
@@ -102,10 +104,18 @@ void Skwasm::Surface::SetCallbackHandler(CallbackHandler* callback_handler) {
 }
 
 void Skwasm::Surface::Dispose() {
-  if (gl_context_) {
-    skwasm_destroyContext(gl_context_);
-  }
+  DestroyContext();
   delete this;
+}
+
+void Skwasm::Surface::DestroyContext() {
+  if (gl_context_) {
+    // GPU resources must be deleted in the context that owns them.
+    Skwasm::makeCurrent(gl_context_);
+    render_context_.reset();
+    skwasm_destroyContext(gl_context_);
+    gl_context_ = 0;
+  }
 }
 
 // Main thread only
@@ -113,8 +123,8 @@ uint32_t Skwasm::Surface::SetCanvas(SkwasmObject canvas) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callback_id = NextCallbackId();
 
-  // Allocated here instead of on the worker so that callback IDs are unique
-  // across all surfaces sharing the callback handler.
+  // Allocated here instead of on the worker so that g_next_callback_id is
+  // only ever modified on the main thread.
   context_lost_callback_id_ = NextCallbackId();
 
   skwasm_dispatchTransferCanvas(GetRasterThread(), this, canvas, callback_id);
@@ -123,23 +133,25 @@ uint32_t Skwasm::Surface::SetCanvas(SkwasmObject canvas) {
 
 void Skwasm::Surface::OnInitialized(uint32_t callback_id, bool success) {
   assert(emscripten_is_main_browser_thread());
-  callback_handler_(
-      callback_id,
-      success ? reinterpret_cast<void*>(context_lost_callback_id_) : nullptr,
-      __builtin_wasm_ref_null_extern());
+  // A context of 0 signals that initialization failed. Valid context lost
+  // callback ids are always non-zero.
+  callback_handler_(callback_id,
+                    success ? (void*)context_lost_callback_id_ : nullptr,
+                    __builtin_wasm_ref_null_extern());
 }
 
 // Worker thread only
 void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
                                             uint32_t callback_id) {
-  if (render_context_) {
-    render_context_.reset();
-  }
+  DestroyContext();
   canvas_width_ = 1;
   canvas_height_ = 1;
   bool antialias = skwasm_isWimp();
   gl_context_ = skwasm_getGlContextForCanvas(canvas, antialias, this);
   if (!gl_context_) {
+    printf("Failed to create context!\n");
+    // Report the failure so the main thread doesn't wait forever for a
+    // surface that will never be initialized.
     skwasm_reportInitialized(this, callback_id, false);
     return;
   }
@@ -208,6 +220,7 @@ uint32_t Skwasm::Surface::RenderPictures(flutter::DisplayList** pictures,
                                          int height,
                                          bool capture_image_bitmaps) {
   assert(emscripten_is_main_browser_thread());
+  assert(capture_image_bitmaps || count == 1);
   uint32_t callback_id = NextCallbackId();
   std::unique_ptr<sk_sp<flutter::DisplayList>[]> picture_pointers =
       std::make_unique<sk_sp<flutter::DisplayList>[]>(count);
@@ -320,11 +333,6 @@ void Skwasm::Surface::OnContextLossTriggered(uint32_t callback_id) {
   callback_handler_(callback_id, nullptr, __builtin_wasm_ref_null_extern());
 }
 
-void Skwasm::Surface::ReportContextLost(uint32_t callback_id) {
-  assert(emscripten_is_main_browser_thread());
-  callback_handler_(callback_id, nullptr, __builtin_wasm_ref_null_extern());
-}
-
 void Skwasm::Surface::TriggerContextLossOnWorker(uint32_t callback_id) {
   Skwasm::makeCurrent(gl_context_);
   skwasm_triggerContextLossOnCanvas();
@@ -336,7 +344,8 @@ void Skwasm::Surface::OnContextLost() {
     printf("Received context lost event but never set callback handler!\n");
     return;
   }
-  skwasm_reportContextLost(this, context_lost_callback_id_);
+  // The surface can be disposed before the main thread receives this message.
+  skwasm_reportContextLost(callback_handler_, context_lost_callback_id_);
 }
 
 // Other
@@ -452,9 +461,11 @@ SKWASM_EXPORT void surface_onContextLossTriggered(Skwasm::Surface* surface,
   surface->OnContextLossTriggered(callback_id);
 }
 
-SKWASM_EXPORT void surface_reportContextLost(Skwasm::Surface* surface,
-                                             uint32_t callback_id) {
-  surface->ReportContextLost(callback_id);
+SKWASM_EXPORT void surface_reportContextLost(
+    Skwasm::Surface::CallbackHandler* callback_handler,
+    uint32_t callback_id) {
+  assert(emscripten_is_main_browser_thread());
+  callback_handler(callback_id, nullptr, __builtin_wasm_ref_null_extern());
 }
 
 SKWASM_EXPORT void surface_setCallbackHandler(

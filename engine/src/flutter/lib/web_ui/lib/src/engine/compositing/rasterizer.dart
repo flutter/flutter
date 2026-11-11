@@ -39,6 +39,7 @@ abstract class ViewRasterizer {
   /// The queue of render requests for this view.
   final RenderQueue queue = RenderQueue();
 
+  /// Whether this rasterizer has been disposed.
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
 
@@ -60,15 +61,23 @@ abstract class ViewRasterizer {
   /// The last layer tree that was rendered. Only non-null if in debug mode.
   LayerTree? _lastRenderedLayerTree;
 
-  /// Draws the [layerTree] to the screen for the view associated with this
-  /// rasterizer.
-  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
+  /// Draws the [layerTree] at [frameSize] (in physical pixels) to the screen
+  /// for the view associated with this rasterizer.
+  Future<void> draw(LayerTree layerTree, ui.Size frameSize, FrameTimingRecorder? recorder) async {
     if (isDisposed) {
       return;
     }
-    final ui.Size frameSize = view.physicalSize;
-    if (frameSize.isEmpty) {
-      // Available drawing area is empty. Skip drawing.
+    // The [frameSize] may be slightly imprecise if the `devicePixelRatio` isn't
+    // an integer. For example, if you zoom to 110% in Chrome on a Macbook, the
+    // `devicePixelRatio` is `2.200000047683716`, so when the physical size is
+    // computed by multiplying the logical size by the device pixel ratio, the
+    // result is slightly imprecise as well. Nevertheless, the number should
+    // be close to an integer, so round the frame size to be more precise.
+    final BitmapSize bitmapSize = frameSize.isEmpty
+        ? BitmapSize.zero
+        : BitmapSize.fromSize(frameSize);
+    if (bitmapSize.isEmpty) {
+      // Available drawing area is empty (or rounds to 0 physical pixels). Skip drawing.
       // Record all the draw steps as happening instantly so we don't crash
       // when submitting frame timings.
       recorder?.recordBuildFinish();
@@ -77,14 +86,6 @@ abstract class ViewRasterizer {
       return;
     }
 
-    // The [frameSize] may be slightly imprecise if the `devicePixelRatio` isn't
-    // an integer. For example, is you zoom to 110% in Chrome on a Macbook, the
-    // `devicePixelRatio` is `2.200000047683716`, so when the physical size is
-    // computed by multiplying the logical size by the device pixel ratio, the
-    // result is slightly imprecise as well. Nevertheless, the number should
-    // be close to an integer, so round the frame size to be more precise.
-    final bitmapSize = BitmapSize.fromSize(frameSize);
-
     currentFrameSize = bitmapSize;
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
@@ -92,11 +93,19 @@ abstract class ViewRasterizer {
     compositorFrame.raster(layerTree, currentFrameSize, recorder);
     _lastRenderedLayerTree = layerTree;
 
+    final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
     await prepareToDraw();
     if (isDisposed) {
       return;
     }
     await viewEmbedder.submitFrame(recorder);
+    if (presentationTimer != null) {
+      presentationTimer.stop();
+      Profiler.instance.benchmark(
+        kProfilePresentationDuration,
+        presentationTimer.elapsedMicroseconds.toDouble(),
+      );
+    }
   }
 
   /// Do some initialization to prepare to draw a frame.
@@ -115,8 +124,8 @@ abstract class ViewRasterizer {
     FrameTimingRecorder? recorder,
   );
 
-  /// Publishes any staged canvas contents in the same task as the composition's
-  /// DOM update. Rasterizers that draw directly need no additional commit.
+  /// Publishes staged canvas contents with the composition's DOM update.
+  /// Rasterizers that draw directly need no additional commit.
   void commitFrame() {}
 
   /// Get a [DisplayCanvas] to use as an overlay.
@@ -188,10 +197,12 @@ abstract class DisplayCanvas {
   void dispose();
 }
 
-/// Encapsulates a request to render a [ui.Scene]. Contains the scene to render
-/// and a [Completer] which completes when the scene has been rendered.
+/// Encapsulates a request to render a [ui.Scene] at a given physical [size].
+/// Contains the scene to render and a [Completer] which completes when the
+/// scene has been rendered.
 typedef RenderRequest = ({
   ui.Scene scene,
+  ui.Size size,
   Completer<void> completer,
   FrameTimingRecorder? recorder,
 });

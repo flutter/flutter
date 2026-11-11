@@ -741,9 +741,9 @@ TEST_P(AiksTest, ForegroundPipelineBlendAppliesTransformCorrectly) {
 
 // Draws an image through a DlBlendColorFilter with the given Porter-Duff mode.
 // `Canvas::AttemptColorFilterOptimization` turns the draw into an AtlasContents
-// draw that selects the matching `PorterDuffBlend` pipeline variant without
-// inverting the mode, so each test exercises one specialization of that shader
-// on every backend.
+// draw with the `PorterDuffBlend` pipeline, which takes the mode, without
+// inverting it, as uniforms (see `SetPorterDuffCoefficients`). Each test
+// exercises the shader with one mode's coefficients on every backend.
 static void DrawImageWithPorterDuffBlendColorFilter(AiksTest* test,
                                                     DlBlendMode mode) {
   auto image = DlImageImpeller::Make(
@@ -763,9 +763,8 @@ static void DrawImageWithPorterDuffBlendColorFilter(AiksTest* test,
   ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
 }
 
-// One test per Porter-Duff mode that ContentContext builds a PorterDuffBlend
-// variant for. kDst is left out because DlBlendColorFilter::Make folds it to no
-// filter at all, and kScreen because the atlas path never selects it.
+// One test per Porter-Duff mode, kClear through kModulate. kDst is left out
+// because DlBlendColorFilter::Make folds it to no filter at all.
 #define PORTER_DUFF_BLEND_COLOR_FILTER_TEST(mode)                        \
   TEST_P(AiksTest, DrawImageWithPorterDuffBlendColorFilter##mode) {      \
     DrawImageWithPorterDuffBlendColorFilter(this, DlBlendMode::k##mode); \

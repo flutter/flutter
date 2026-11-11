@@ -11,6 +11,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 @JS('OffscreenCanvas.prototype.getContext')
 external JSFunction get _getOffscreenContext;
@@ -150,6 +151,62 @@ void testMain() {
     }
   }, timeout: const Timeout(Duration(minutes: 1)));
 
+  test(
+    'disposing surfaces does not evict a live WebGL context',
+    () async {
+      final provider = _CountingCanvasProvider();
+      final surface = SkwasmOffscreenSurface(provider);
+      final ui.Picture picture = _solidPicture(const ui.Color(0xFF00FF00));
+      try {
+        await surface.initialized;
+        // Exceed the browser's active-context limit without retaining the
+        // temporary surfaces. Their resources must not wait for garbage collection.
+        for (var i = 0; i < 32; i++) {
+          final temporaryProvider = OffscreenCanvasProvider();
+          final temporary = SkwasmOffscreenSurface(temporaryProvider);
+          try {
+            await temporary.initialized;
+          } finally {
+            temporary.dispose();
+            temporaryProvider.dispose();
+          }
+          // Disposal is dispatched to the worker, and browsers can finish
+          // releasing the context asynchronously on a subsequent event-loop turn.
+          await Future<void>.delayed(Duration.zero);
+        }
+        final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(2, 2),
+          <ui.Picture>[picture],
+        );
+        try {
+          final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 2, height: 2);
+          try {
+            canvas.context2D.drawImage(bitmaps.single, 0, 0);
+            expect(canvas.context2D.getImageData(0, 0, 1, 1).data.toList(), <int>[0, 255, 0, 255]);
+          } finally {
+            canvas.width = canvas.height = 0;
+          }
+        } finally {
+          for (final bitmap in bitmaps) {
+            bitmap.close();
+          }
+        }
+        expect(
+          provider.acquisitions,
+          1,
+          reason: 'Disposal must not force another context to recover.',
+        );
+      } finally {
+        picture.dispose();
+        surface.dispose();
+        provider.dispose();
+      }
+    },
+    // WebKit retains lost contexts until GC rather than releasing them.
+    // https://bugs.webkit.org/show_bug.cgi?id=218305
+    skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit,
+  );
+
   test('onscreen surface positions overlays without moving the base canvas', () async {
     final canvasProvider = OnscreenCanvasProvider();
     final surface = SkwasmOnscreenSurface(canvasProvider);
@@ -247,6 +304,16 @@ ui.Picture _solidPicture(ui.Color color) {
   final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 2, 2));
   canvas.drawColor(color, ui.BlendMode.src);
   return recorder.endRecording();
+}
+
+class _CountingCanvasProvider extends OffscreenCanvasProvider {
+  int acquisitions = 0;
+
+  @override
+  DomOffscreenCanvas acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
+    acquisitions++;
+    return super.acquireCanvas(size, onContextLost: onContextLost);
+  }
 }
 
 Future<void> _expectOnscreenPixels(SkwasmOnscreenSurface surface, List<int> expected) async {

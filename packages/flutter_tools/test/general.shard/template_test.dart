@@ -9,12 +9,9 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/template.dart';
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/template.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 void main() {
   testWithoutContext('Template constructor throws ToolExit when source directory is missing', () {
@@ -50,24 +47,23 @@ void main() {
   });
 
   group('template image directory', () {
-    final overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    };
-    const templatePathProvider = TemplatePathProvider();
+    const flutterRoot = '/flutter';
+    const templatePathProvider = TemplatePathProvider(flutterRoot: flutterRoot);
 
-    testUsingContext(
+    testWithoutContext(
       'templatePathProvider.imageDirectory returns parent template directory if passed null name',
       () async {
-        final String packageConfigPath = globals.fs.path.join(
-          Cache.flutterRoot!,
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final String packageConfigPath = fileSystem.path.join(
+          flutterRoot,
           'packages',
           'flutter_tools',
           '.dart_tool',
           'package_config.json',
         );
 
-        globals.fs.file(packageConfigPath)
+        fileSystem.file(packageConfigPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 {
@@ -83,22 +79,23 @@ void main() {
 }
 ''');
         expect(
-          (await templatePathProvider.imageDirectory(null, globals.fs, globals.logger)).path,
-          globals.fs.path.absolute('flutter_template_images', 'templates'),
+          (await templatePathProvider.imageDirectory(null, fileSystem, logger)).path,
+          fileSystem.path.absolute('flutter_template_images', 'templates'),
         );
       },
-      overrides: overrides,
     );
 
-    testUsingContext('templatePathProvider.imageDirectory returns the directory containing the `name` template directory', () async {
-      final String packageConfigPath = globals.fs.path.join(
-        Cache.flutterRoot!,
+    testWithoutContext('templatePathProvider.imageDirectory returns the directory containing the `name` template directory', () async {
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final String packageConfigPath = fileSystem.path.join(
+        flutterRoot,
         'packages',
         'flutter_tools',
         '.dart_tool',
         'package_config.json',
       );
-      globals.fs.file(packageConfigPath)
+      fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 {
@@ -114,10 +111,10 @@ void main() {
 }
 ''');
       expect(
-        (await templatePathProvider.imageDirectory('app', globals.fs, globals.logger)).path,
-        globals.fs.path.absolute('flutter_template_images', 'templates', 'app'),
+        (await templatePathProvider.imageDirectory('app', fileSystem, logger)).path,
+        fileSystem.path.absolute('flutter_template_images', 'templates', 'app'),
       );
-    }, overrides: overrides);
+    });
   });
 
   group('renders template', () {

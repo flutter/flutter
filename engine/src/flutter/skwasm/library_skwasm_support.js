@@ -106,7 +106,7 @@ mergeInto(LibraryManager.library, {
             _surface_onContextLossTriggered(data.surface, data.callbackId);
             return;
           case 'reportContextLost':
-            _surface_reportContextLost(data.surface, data.callbackId);
+            _surface_reportContextLost(data.callbackHandler, data.callbackId);
             return;
           case 'renderPictures':
             _surface_renderPicturesOnWorker(
@@ -140,7 +140,7 @@ mergeInto(LibraryManager.library, {
             }
             associatedObjectsMap.delete(pointer);
             return;
-#if EXPORT_NAME === 'wimp'
+#if EXPORT_NAME === 'wimp' || EXPORT_NAME === 'wimp_heavy'
           // Impeller (wimp) caches textures on the worker's ContentContext, which
           // must be explicitly notified to evict them upon DlImage disposal.
           case 'disposeDlImage':
@@ -201,7 +201,7 @@ mergeInto(LibraryManager.library, {
       }, [], threadId);
     };
 
-#if EXPORT_NAME === 'wimp'
+#if EXPORT_NAME === 'wimp' || EXPORT_NAME === 'wimp_heavy'
     // Dispatches DlImage disposal to the raster worker thread. Only used by
     // Impeller (wimp) to evict cached textures from ContentContext.
     _skwasm_dispatchDisposeDlImage = function(threadId, image) {
@@ -337,10 +337,10 @@ mergeInto(LibraryManager.library, {
         callbackId,
       }, []);
     };
-    _skwasm_reportContextLost = function (surfaceHandle, callbackId) {
+    _skwasm_reportContextLost = function (callbackHandler, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'reportContextLost',
-        surface: surfaceHandle,
+        callbackHandler,
         callbackId,
       }, []);
     };
@@ -390,6 +390,12 @@ mergeInto(LibraryManager.library, {
       const handler = handleToContextLostHandlerMap.get(contextHandle);
       if (canvas && handler) {
         canvas.removeEventListener('webglcontextlost', handler);
+      }
+      // Removing Emscripten's handle does not release the browser's context.
+      // Release it now so repeated surface creation cannot evict a live one.
+      const context = GL.getContext(contextHandle);
+      if (context && !context.GLctx.isContextLost()) {
+        context.GLctx.getExtension('WEBGL_lose_context')?.loseContext();
       }
       GL.deleteContext(contextHandle);
       handleToCanvasMap.delete(contextHandle);
@@ -484,7 +490,7 @@ mergeInto(LibraryManager.library, {
   skwasm_dispatchRasterizeImage__deps: ['$skwasm_support_setup'],
   skwasm_postRasterizeResult: function() {},
   skwasm_postRasterizeResult__deps: ['$skwasm_support_setup'],
-#if EXPORT_NAME === 'wimp'
+#if EXPORT_NAME === 'wimp' || EXPORT_NAME === 'wimp_heavy'
   // DlImage disposal messaging is only used by Impeller (wimp) for texture cache eviction.
   skwasm_dispatchDisposeDlImage: function() {},
   skwasm_dispatchDisposeDlImage__deps: ['$skwasm_support_setup'],

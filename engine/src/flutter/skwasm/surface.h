@@ -63,6 +63,10 @@ class Surface {
   // same message that renders the pictures. This makes resize + render +
   // capture atomic with respect to every other operation on this surface,
   // which may be shared by multiple views and by image rasterization.
+  //
+  // When capture_image_bitmaps is false, count must be 1 because each picture
+  // clears the surface before drawing. The completion callback still runs,
+  // but returns no image bitmaps.
   uint32_t RenderPictures(flutter::DisplayList** picture,
                           int count,
                           int width,
@@ -87,7 +91,6 @@ class Surface {
   // Context Loss
   uint32_t TriggerContextLoss();
   void OnContextLossTriggered(uint32_t callback_id);
-  void ReportContextLost(uint32_t callback_id);
   void TriggerContextLossOnWorker(uint32_t callback_id);
   void OnContextLost();
 
@@ -98,6 +101,7 @@ class Surface {
       SkwasmObject textureSource);
 
  private:
+  void DestroyContext();
   void Init();
   void ResizeSurface(int width, int height);
   void RecreateSurface();
