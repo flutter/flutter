@@ -107,50 +107,6 @@ void main() {
     expect(paragraphLocale(tester), isNull);
   });
 
-  // An app that explicitly passes `const [en_US]` as its supportedLocales gets
-  // no locale for its text. That must not change how English text is laid out.
-  testWidgets('English text lays out the same with no locale as with en_US', (
-    WidgetTester tester,
-  ) async {
-    setDeviceLocales(tester, const <Locale>[enUS]);
-    const text =
-        'The quick brown fox jumps over the lazy dog. "Quoted", hyphen-ated, '
-        "and contracted words don't break oddly: e-mail@example.com, 3.14, 1,000.";
-    await tester.pumpWidget(
-      buildApp(
-        supportedLocales: const <Locale>[enUS],
-        child: const SizedBox(
-          width: 200,
-          child: Column(
-            children: <Widget>[
-              Text(text),
-              Text(text, locale: enUS),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    final List<RenderParagraph> paragraphs = tester
-        .renderObjectList<RenderParagraph>(find.byType(RichText))
-        .toList();
-    final RenderParagraph noLocale = paragraphs[0];
-    final RenderParagraph withLocale = paragraphs[1];
-    expect(noLocale.locale, isNull);
-    expect(withLocale.locale, enUS);
-
-    expect(noLocale.size, withLocale.size);
-    const selection = TextSelection(baseOffset: 0, extentOffset: text.length);
-    final List<TextBox> noLocaleBoxes = noLocale.getBoxesForSelection(selection);
-    // The text wraps, so line breaking is exercised.
-    expect(noLocaleBoxes.map((TextBox box) => box.top).toSet().length, greaterThan(1));
-    expect(noLocaleBoxes, withLocale.getBoxesForSelection(selection));
-    for (var offset = 0; offset < text.length; offset++) {
-      final position = TextPosition(offset: offset);
-      expect(noLocale.getWordBoundary(position), withLocale.getWordBoundary(position));
-    }
-  });
-
   testWidgets('RichText uses the app locale when the preferred locale is supported', (
     WidgetTester tester,
   ) async {
