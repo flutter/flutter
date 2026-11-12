@@ -497,31 +497,29 @@ class RenderSliverMainAxisGroup extends RenderSliver
     }
   }
 
-  /// Whether the end of the group has pushed this child back far enough that it
-  /// only paints behind the slivers pinned above the group, or entirely off
-  /// the viewport. This can only happen to pinned children, because
-  /// performLayout pushes them out of view by correcting their paintOffset
-  /// while their paintExtent stays positive, leaving them in the semantics
-  /// tree although nothing of them is visible.
+  /// Whether this child paints nothing that is visible: either the end of the
+  /// group pushed it completely before the start of the group, or, for a
+  /// pinned child, completely behind the slivers pinned before the group.
+  /// This can only happen to children whose paintOffset performLayout
+  /// corrected while their paintExtent stayed positive, leaving them in the
+  /// semantics tree although nothing of them is visible.
   bool _isPushedOutOfView(RenderSliver child) {
     final SliverGeometry childGeometry = child.geometry!;
-    if (childGeometry.maxScrollObstructionExtent == 0 || childGeometry.paintExtent == 0) {
+    if (childGeometry.paintExtent == 0) {
       return false;
     }
-    final Offset offset = (child.parentData! as SliverPhysicalParentData).paintOffset;
-    return switch (applyGrowthDirectionToAxisDirection(
-      constraints.axisDirection,
-      constraints.growthDirection,
-    )) {
-      AxisDirection.down =>
-        offset.dy + childGeometry.paintExtent <= constraints.overlap + precisionErrorTolerance,
-      AxisDirection.right =>
-        offset.dx + childGeometry.paintExtent <= constraints.overlap + precisionErrorTolerance,
-      AxisDirection.up =>
-        offset.dy >= geometry!.paintExtent - constraints.overlap - precisionErrorTolerance,
-      AxisDirection.left =>
-        offset.dx >= geometry!.paintExtent - constraints.overlap - precisionErrorTolerance,
-    };
+    // childMainAxisPosition undoes the flip that performLayout applies to the
+    // paintOffset for AxisDirection.up and AxisDirection.left.
+    final double childPaintEnd = childMainAxisPosition(child) + childGeometry.paintExtent;
+    // Only the paint correction in performLayout can move a child that paints
+    // something completely before the start of the group.
+    if (childPaintEnd <= precisionErrorTolerance) {
+      return true;
+    }
+    // A pinned child that paints entirely behind the slivers pinned before
+    // the group.
+    return childGeometry.maxScrollObstructionExtent > 0 &&
+        childPaintEnd <= constraints.overlap + precisionErrorTolerance;
   }
 
   static double _fixPrecisionError(double number) {
