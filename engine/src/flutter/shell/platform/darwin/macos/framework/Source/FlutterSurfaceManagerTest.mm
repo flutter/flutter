@@ -114,21 +114,16 @@ TEST(FlutterSurfaceManager, BackBufferCacheDoesNotLeak) {
   auto surface3 = [surfaceManager surfaceForSize:CGSizeMake(120, 120)];
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface3) ] atTime:0 notify:nil];
 
-  // Cache should be cleaned during present and only contain the last visible
-  // surface(s).
-  EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
+  // Earlier sizes stay cached. A request only takes a surface of the same size.
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 2ul);
   auto surfaceFromCache = [surfaceManager surfaceForSize:CGSizeMake(110, 110)];
   EXPECT_EQ(surfaceFromCache, surface2);
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
 
-  // Submit empty surfaces until the one in cache gets to age >= kSurfaceEvictionAge, in which case
-  // it should be removed.
-
-  for (int i = 0; i < 30 /* kSurfaceEvictionAge */; ++i) {
+  // Empty presents age whatever remains until kSurfaceEvictionAge drops it.
+  for (int i = 0; i < 40; ++i) {
     [surfaceManager presentSurfaces:@[] atTime:0 notify:nil];
-    EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
   }
-
-  [surfaceManager presentSurfaces:@[] atTime:0 notify:nil];
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
 }
 
@@ -196,6 +191,56 @@ TEST(FlutterSurfaceManager, BackingStoreCacheSurfaceStuckInUse) {
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface4) ] atTime:0 notify:nil];
   // Surface in use should bet old enough at this point to be evicted.
   EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/185394.
+//
+// returnSurfaces: keeps every returned surface, so a size flip-flop
+// (A -> B -> A) while the previous A surface is still held by the window
+// server leaves both sizes in the cache. B is younger than A. The next request
+// for A must still reuse A, and a later request for B must reuse B. Handing
+// back the younger wrong-size surface makes Impeller reject the texture and
+// drop the render target.
+TEST(FlutterSurfaceManager, BackBufferCacheNeverReturnsSurfaceOfDifferentSize) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView);
+
+  const CGSize sizeA = CGSizeMake(100, 100);
+  const CGSize sizeB = CGSizeMake(50, 50);
+
+  // Frame 1 at A.
+  auto surfaceA1 = [surfaceManager surfaceForSize:sizeA];
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surfaceA1) ] atTime:0 notify:nil];
+
+  // Frame 2 at B: A1 returns to the cache.
+  auto surfaceB1 = [surfaceManager surfaceForSize:sizeB];
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surfaceB1) ] atTime:0 notify:nil];
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
+
+  // The window server is still displaying A1, so it cannot be recycled yet.
+  surfaceA1.isInUseOverride = YES;
+
+  // Frame 3 at A: A1 is busy, so a fresh A surface is created and A1 stays cached.
+  auto surfaceA2 = [surfaceManager surfaceForSize:sizeA];
+  EXPECT_NE(surfaceA2, surfaceA1);
+  EXPECT_TRUE(CGSizeEqualToSize(surfaceA2.size, sizeA));
+  // Presenting A2 returns B1. Both sizes remain cached, and B1 is younger.
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surfaceA2) ] atTime:0 notify:nil];
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 2ul);
+
+  surfaceA1.isInUseOverride = NO;
+
+  // Frame 4 at A must reuse A1, not the younger B1.
+  auto surfaceA3 = [surfaceManager surfaceForSize:sizeA];
+  EXPECT_EQ(surfaceA3, surfaceA1);
+  EXPECT_TRUE(CGSizeEqualToSize(surfaceA3.size, sizeA))
+      << "cache returned " << surfaceA3.size.width << "x" << surfaceA3.size.height << " for a "
+      << sizeA.width << "x" << sizeA.height << " request";
+
+  // The B surface is still cached for a B request.
+  auto surfaceB2 = [surfaceManager surfaceForSize:sizeB];
+  EXPECT_EQ(surfaceB2, surfaceB1);
+  EXPECT_TRUE(CGSizeEqualToSize(surfaceB2.size, sizeB));
 }
 
 inline bool operator==(const CGRect& lhs, const CGRect& rhs) {

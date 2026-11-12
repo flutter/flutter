@@ -318,18 +318,16 @@ static const int kSurfaceEvictionAge = 30;
 
 - (nullable FlutterSurface*)removeSurfaceForSize:(CGSize)size {
   @synchronized(self) {
-    // Purge all cached surfaces if the size has changed.
-    if (_surfaces.firstObject != nil && !CGSizeEqualToSize(_surfaces.firstObject.size, size)) {
-      [_surfaces removeAllObjects];
-    }
+    FlutterSurface* res = nil;
 
-    FlutterSurface* res;
-
-    // Returns youngest surface that is not in use. Returning youngest surface ensures
-    // that the cache doesn't keep more surfaces than it needs to, as the unused surfaces
-    // kept in cache will have their age kept increasing until purged (inside [returnSurfaces:]).
+    // Return the youngest unused surface of this exact size. A younger surface
+    // of another size must not be handed out: the embedder wraps it with the
+    // requested size, and Impeller then drops the render target
+    // (https://github.com/flutter/flutter/issues/185394). Other sizes stay
+    // cached. Preferring the youngest keeps the cache from retaining more
+    // surfaces than it needs; unused ones age until returnSurfaces: purges them.
     for (FlutterSurface* surface in _surfaces) {
-      if (!surface.isInUse &&
+      if (!surface.isInUse && CGSizeEqualToSize(surface.size, size) &&
           (res == nil || [self ageForSurface:res] > [self ageForSurface:surface])) {
         res = surface;
       }
