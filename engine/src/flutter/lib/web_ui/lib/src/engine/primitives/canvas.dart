@@ -69,10 +69,10 @@ class EngineCanvas implements LayerCanvas {
     if (bounds != null) {
       assert(rectIsValid(bounds));
     }
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.saveLayer(bounds, backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   @override
@@ -80,7 +80,6 @@ class EngineCanvas implements LayerCanvas {
     if (bounds != null) {
       assert(rectIsValid(bounds));
     }
-    _tracker?.recordPaint(paint);
     final EngineImageFilter engineFilter;
     if (backdropFilter is ui.ColorFilter) {
       engineFilter = EngineColorFilterImageFilter(colorFilter: backdropFilter as EngineColorFilter);
@@ -103,8 +102,12 @@ class EngineCanvas implements LayerCanvas {
     final ui.TileMode backdropTileMode = engineFilter.backdropTileMode ?? ui.TileMode.mirror;
 
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
-    _backend.saveLayerWithFilter(bounds, backendPaint, backendFilter, backdropTileMode);
-    backendPaint.dispose();
+    try {
+      _backend.saveLayerWithFilter(bounds, backendPaint, backendFilter, backdropTileMode);
+    } finally {
+      backendPaint.dispose();
+    }
+    _tracker?.recordPaint(paint);
   }
 
   @override
@@ -192,95 +195,101 @@ class EngineCanvas implements LayerCanvas {
   void drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
     assert(offsetIsValid(p1));
     assert(offsetIsValid(p2));
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.drawLine(p1, p2, backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawPaint(ui.Paint paint) {
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.drawPaint(backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawRect(ui.Rect rect, ui.Paint paint) {
     assert(rectIsValid(rect));
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.drawRect(rect, backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawRRect(ui.RRect rrect, ui.Paint paint) {
     assert(rrectIsValid(rrect));
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.drawRRect(rrect, backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {
     assert(rsuperellipseIsValid(rsuperellipse));
-    _tracker?.recordPaint(paint);
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     final BackendPath backendPath = (path as EnginePath).backendPath;
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
-    _backend.translate(offset.dx, offset.dy);
-    _backend.drawPath(backendPath, backendPaint);
-    _backend.translate(-offset.dx, -offset.dy);
-    backendPaint.dispose();
+    try {
+      _backend.translate(offset.dx, offset.dy);
+      _backend.drawPath(backendPath, backendPaint);
+      _backend.translate(-offset.dx, -offset.dy);
+    } finally {
+      backendPaint.dispose();
+    }
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
     assert(rrectIsValid(outer));
     assert(rrectIsValid(inner));
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.drawDRRect(outer, inner, backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawOval(ui.Rect rect, ui.Paint paint) {
     assert(rectIsValid(rect));
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.drawOval(rect, backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawCircle(ui.Offset c, double radius, ui.Paint paint) {
     assert(offsetIsValid(c));
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.drawCircle(c, radius, backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawArc(ui.Rect rect, double startAngle, double sweepAngle, bool useCenter, ui.Paint paint) {
     assert(rectIsValid(rect));
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.drawArc(rect, startAngle, sweepAngle, useCenter, backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
-    _tracker?.recordPaint(paint);
     final BackendPath backendPath = (path as EnginePath).backendPath;
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
-    _backend.drawPath(backendPath, backendPaint);
-    backendPaint.dispose();
+    try {
+      _backend.drawPath(backendPath, backendPaint);
+    } finally {
+      backendPaint.dispose();
+    }
+    _tracker?.recordPaint(paint);
   }
 
   /// Draws [image] onto the canvas with its top-left corner at [offset].
@@ -291,14 +300,17 @@ class EngineCanvas implements LayerCanvas {
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
     assert(!image.debugDisposed);
     assert(offsetIsValid(offset));
-    _tracker?.recordImage(image);
-    _tracker?.recordPaint(paint);
     final BackendImage backendImage = (image as EngineImage).backendImage;
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
     );
-    _backend.drawImage(backendImage, offset, backendPaint, paint.filterQuality);
-    backendPaint.dispose();
+    try {
+      _backend.drawImage(backendImage, offset, backendPaint, paint.filterQuality);
+    } finally {
+      backendPaint.dispose();
+    }
+    _tracker?.recordImage(image);
+    _tracker?.recordPaint(paint);
   }
 
   @override
@@ -306,14 +318,17 @@ class EngineCanvas implements LayerCanvas {
     assert(!image.debugDisposed);
     assert(rectIsValid(src));
     assert(rectIsValid(dst));
-    _tracker?.recordImage(image);
-    _tracker?.recordPaint(paint);
     final BackendImage backendImage = (image as EngineImage).backendImage;
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
     );
-    _backend.drawImageRect(backendImage, src, dst, backendPaint, paint.filterQuality);
-    backendPaint.dispose();
+    try {
+      _backend.drawImageRect(backendImage, src, dst, backendPaint, paint.filterQuality);
+    } finally {
+      backendPaint.dispose();
+    }
+    _tracker?.recordImage(image);
+    _tracker?.recordPaint(paint);
   }
 
   @override
@@ -321,23 +336,26 @@ class EngineCanvas implements LayerCanvas {
     assert(!image.debugDisposed);
     assert(rectIsValid(center));
     assert(rectIsValid(dst));
-    _tracker?.recordImage(image);
-    _tracker?.recordPaint(paint);
     final BackendImage backendImage = (image as EngineImage).backendImage;
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
     );
-    _backend.drawImageNine(backendImage, center, dst, backendPaint, paint.filterQuality);
-    backendPaint.dispose();
+    try {
+      _backend.drawImageNine(backendImage, center, dst, backendPaint, paint.filterQuality);
+    } finally {
+      backendPaint.dispose();
+    }
+    _tracker?.recordImage(image);
+    _tracker?.recordPaint(paint);
   }
 
   @override
   void drawPicture(ui.Picture picture) {
     assert(!picture.debugDisposed);
+    _backend.drawPicture(picture);
     if (picture case LayerPicture(:final imageTracker?)) {
       _tracker?.recordFrom(imageTracker);
     }
-    _backend.drawPicture(picture);
   }
 
   /// Draws a text [paragraph] at [offset].
@@ -394,10 +412,10 @@ class EngineCanvas implements LayerCanvas {
   }
 
   void _drawPoints(ui.PointMode pointMode, Float32List points, ui.Paint paint) {
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
     _backend.drawPoints(pointMode, points, backendPaint);
     backendPaint.dispose();
+    _tracker?.recordPaint(paint);
   }
 
   /// Draws a set of triangles/vertices with optional texture coordinates and
@@ -412,10 +430,13 @@ class EngineCanvas implements LayerCanvas {
       // Vertices with no positions have no backend delegate and draw nothing.
       return;
     }
-    _tracker?.recordPaint(paint);
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint();
-    _backend.drawVertices(backendVertices, blendMode, backendPaint);
-    backendPaint.dispose();
+    try {
+      _backend.drawVertices(backendVertices, blendMode, backendPaint);
+    } finally {
+      backendPaint.dispose();
+    }
+    _tracker?.recordPaint(paint);
   }
 
   @override
@@ -538,23 +559,26 @@ class EngineCanvas implements LayerCanvas {
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
-    _tracker?.recordImage(atlas);
-    _tracker?.recordPaint(paint);
     final BackendImage backendAtlas = (atlas as EngineImage).backendImage;
     final BackendPaint backendPaint = (paint as EnginePaint).createBackendPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
     );
-    _backend.drawAtlas(
-      backendAtlas,
-      rstTransforms,
-      rects,
-      colors,
-      blendMode,
-      cullRect,
-      backendPaint,
-      paint.filterQuality,
-    );
-    backendPaint.dispose();
+    try {
+      _backend.drawAtlas(
+        backendAtlas,
+        rstTransforms,
+        rects,
+        colors,
+        blendMode,
+        cullRect,
+        backendPaint,
+        paint.filterQuality,
+      );
+    } finally {
+      backendPaint.dispose();
+    }
+    _tracker?.recordImage(atlas);
+    _tracker?.recordPaint(paint);
   }
 
   @override
