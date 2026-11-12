@@ -7,7 +7,6 @@ import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart' show Directory, FileSystem;
 import 'package:hooks/hooks.dart';
 
-import '../../android/android_sdk.dart';
 import '../../base/common.dart' show throwToolExit;
 import '../../base/process.dart' show ProcessUtils;
 import '../../build_info.dart'
@@ -22,6 +21,7 @@ import '../../build_info.dart'
         kIosArchs,
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
+import '../../context/android_context.dart' show AndroidSdkProvider;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import '../../windows/visual_studio.dart';
 import 'android/native_assets.dart'
@@ -69,7 +69,7 @@ sealed class AssetBuildTarget {
     required FileSystem fileSystem,
     required List<SupportedAssetTypes> supportedAssetTypes,
     required Directory? buildDirectory,
-    required AndroidSdk? Function()? androidSdkBuilder,
+    required AndroidSdkProvider? androidSdkProvider,
     required VisualStudio? visualStudio,
   }) {
     switch (targetPlatform) {
@@ -93,7 +93,7 @@ sealed class AssetBuildTarget {
           targetPlatform,
           environmentDefines,
           supportedAssetTypes,
-          androidSdk: androidSdkBuilder?.call(),
+          androidSdkProvider: androidSdkProvider,
         );
       case TargetPlatform.ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
@@ -164,13 +164,13 @@ sealed class AssetBuildTarget {
     TargetPlatform targetPlatform,
     Map<String, String> environmentDefines,
     List<SupportedAssetTypes> supportedAssetTypes, {
-    required AndroidSdk? androidSdk,
+    required AndroidSdkProvider? androidSdkProvider,
   }) {
     return _androidArchs(targetPlatform, environmentDefines[kAndroidArchs])
         .map(getNativeAndroidArchitecture)
         .map(
           (Architecture architecture) => AndroidAssetTarget(
-            androidSdk: androidSdk,
+            androidSdkProvider: androidSdkProvider,
             architecture: architecture,
             supportedAssetTypes: supportedAssetTypes,
             environmentDefines: environmentDefines,
@@ -409,7 +409,7 @@ final class MacOSAssetTarget extends CodeAssetTarget {
 
 final class AndroidAssetTarget extends CodeAssetTarget {
   AndroidAssetTarget({
-    required this.androidSdk,
+    required this._androidSdkProvider,
     required super.architecture,
     required Map<String, String> environmentDefines,
     required super.supportedAssetTypes,
@@ -418,14 +418,16 @@ final class AndroidAssetTarget extends CodeAssetTarget {
        ),
        super(os: OS.android);
 
-  final AndroidSdk? androidSdk;
+  final AndroidSdkProvider? _androidSdkProvider;
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override
   Future<void> setCCompilerConfig({
     required ProcessUtils processUtils,
     bool mustMatchAppBuild = true,
-  }) async => cCompilerConfigSync = await cCompilerConfigAndroid(androidSdk: androidSdk);
+  }) async => cCompilerConfigSync = await cCompilerConfigAndroid(
+    androidSdk: _androidSdkProvider?.androidSdk,
+  );
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[

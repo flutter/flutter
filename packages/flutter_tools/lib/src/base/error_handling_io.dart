@@ -255,7 +255,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
   @override
   String readAsStringSync({Encoding encoding = utf8}) {
     return _runSync<String>(
-      () => delegate.readAsStringSync(),
+      () => delegate.readAsStringSync(encoding: encoding),
       platform: _platform,
       failureMessage: 'Flutter failed to read a file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
@@ -1383,6 +1383,7 @@ void _handlePosixException(
   const eperm = 1;
   const enoent = 2;
   const eacces = 13;
+  const exdev = 18;
   const enospc = 28;
   const erofs = 30;
   // Catch errors and bail when:
@@ -1392,6 +1393,12 @@ void _handlePosixException(
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
           ' Try running "flutter clean" and try again.',
+    exdev =>
+      '${message != null && message.isNotEmpty ? '$message.\n' : ''}'
+          'A file system operation failed across different volumes or mount points.\n'
+          '$e\n'
+          'Ensure that the project, build output, and temporary directories are on the same '
+          'writable volume, or check external volume and security software settings.',
     enospc =>
       '$message. The target device is full.'
           '\n$e\n'
