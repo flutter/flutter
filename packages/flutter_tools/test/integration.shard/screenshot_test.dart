@@ -9,13 +9,17 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/runner/local_engine.dart';
 
 import '../src/common.dart';
+import '../src/fakes.dart';
+import '../src/package_config.dart';
 import 'test_utils.dart';
 
 const _frameRenderedMarker = 'APP_FRAME_RENDERED';
+const _minimalAppName = 'screenshot_test_app';
 const _startupTimeout = Duration(seconds: 60);
 
 const _minimalAppSource =
@@ -48,22 +52,18 @@ void main() {
 
 void main() {
   late String flutterRoot;
+  late String absoluteFlutterBin;
   late Artifacts artifacts;
   late Directory sharedCompileDir;
   late File compiledDill;
-  late File emptyPackageConfig;
+  late File appPackageConfig;
   late Directory tempDir;
 
   setUpAll(() async {
     Cache.disableLocking();
-    flutterRoot = getFlutterRoot();
+    flutterRoot = fileSystem.path.normalize(fileSystem.path.absolute(getFlutterRoot()));
+    absoluteFlutterBin = fileSystem.path.normalize(fileSystem.path.absolute(flutterBin));
     final logger = BufferLogger.test();
-    final osUtils = OperatingSystemUtils(
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-    );
     final cache = Cache.test(
       fileSystem: fileSystem,
       flutterRoot: flutterRoot,
@@ -72,20 +72,45 @@ void main() {
       processManager: processManager,
       rootOverride: fileSystem.directory(flutterRoot),
     );
-    artifacts = CachedArtifacts(
-      cache: cache,
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
-      operatingSystemUtils: osUtils,
+      flutterRoot: flutterRoot,
+      logger: logger,
       platform: platform,
+      userMessages: UserMessages(),
     );
+    final EngineBuildPaths? engineBuildPaths = await localEngineLocator.findEnginePath(
+      engineSourcePath: platform.environment[kLocalEngineLocation],
+      localEngine: platform.environment[kLocalEngineEnvironment],
+      localHostEngine: platform.environment[kLocalEngineHostEnvironment],
+    );
+    artifacts = switch (engineBuildPaths) {
+      final EngineBuildPaths paths => Artifacts.getLocalEngine(
+        paths,
+        toolContext: FakeToolContext(
+          cache: cache,
+          fs: fileSystem,
+          logger: logger,
+          os: cache.osUtils,
+          platform: platform,
+          processManager: processManager,
+        ),
+      ),
+      null => CachedArtifacts(
+        cache: cache,
+        fileSystem: fileSystem,
+        operatingSystemUtils: cache.osUtils,
+        platform: platform,
+      ),
+    };
 
     sharedCompileDir = createResolvedTempDirectorySync('screenshot_compile.');
     final File appSource = sharedCompileDir.childFile('main.dart')
       ..writeAsStringSync(_minimalAppSource);
-    emptyPackageConfig =
-        sharedCompileDir.childDirectory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+    appPackageConfig = writePackageConfigFiles(
+      directory: sharedCompileDir,
+      mainLibName: _minimalAppName,
+    );
     compiledDill = sharedCompileDir.childFile('app.dill');
 
     final ProcessResult compileResult = await processManager.run(<String>[
@@ -93,7 +118,7 @@ void main() {
       artifacts.getArtifactPath(.frontendServerSnapshotForEngineDartSdk),
       '--sdk-root=${artifacts.getArtifactPath(.flutterPatchedSdkPath)}/',
       '--target=flutter',
-      '--packages=${emptyPackageConfig.path}',
+      '--packages=${appPackageConfig.path}',
       '--output-dill=${compiledDill.path}',
       appSource.path,
     ]);
@@ -127,72 +152,84 @@ void main() {
       '--vm-service-port=0',
       '--icu-data-file-path=${artifacts.getArtifactPath(.icuData)}',
       if (enableImpeller) '--enable-impeller' else '--enable-software-rendering',
-      '--packages=${emptyPackageConfig.path}',
+      '--packages=${appPackageConfig.path}',
       testDill.path,
     ]);
-
-    final uriCompleter = Completer<Uri>();
-    final frameCompleter = Completer<void>();
-    final stderrBuffer = StringBuffer();
-    final vmServicePattern = RegExp(r'The Dart VM service is listening on (http://[^\s]+)');
-
-    final StreamSubscription<String> stdoutSub = tester.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen((String line) {
-          final RegExpMatch? match = vmServicePattern.firstMatch(line);
-          if (match != null && !uriCompleter.isCompleted) {
-            uriCompleter.complete(Uri.parse(match.group(1)!));
-          }
-          if (line.contains(_frameRenderedMarker) && !frameCompleter.isCompleted) {
-            frameCompleter.complete();
-          }
-        });
-    final StreamSubscription<String> stderrSub = tester.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(stderrBuffer.writeln);
-
+    StreamSubscription<String>? stdoutSub;
+    StreamSubscription<String>? stderrSub;
     addTearDown(() async {
       tester.kill();
       await tester.exitCode;
-      await stdoutSub.cancel();
-      await stderrSub.cancel();
+      await stdoutSub?.cancel();
+      await stderrSub?.cancel();
     });
 
+    final startupCompleter = Completer<Uri>();
+    final stderrDone = Completer<void>();
+    final stderrBuffer = StringBuffer();
+    final vmServicePattern = RegExp(r'The Dart VM service is listening on (http://[^\s]+)');
+    Uri? discoveredUri;
+    var frameRendered = false;
+    var startupFinished = false;
+
+    void checkReady() {
+      if (discoveredUri != null && frameRendered && !startupCompleter.isCompleted) {
+        startupCompleter.complete(discoveredUri);
+      }
+    }
+
+    stdoutSub = tester.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
+      String line,
+    ) {
+      if (discoveredUri == null) {
+        if (vmServicePattern.firstMatch(line) case final RegExpMatch match) {
+          discoveredUri = Uri.parse(match.group(1)!);
+          checkReady();
+        }
+      }
+      if (!frameRendered && line.contains(_frameRenderedMarker)) {
+        frameRendered = true;
+        checkReady();
+      }
+    });
+    stderrSub = tester.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(
+          stderrBuffer.writeln,
+          onDone: () {
+            if (!stderrDone.isCompleted) {
+              stderrDone.complete();
+            }
+          },
+        );
+    unawaited(
+      tester.exitCode.then((int exitCode) async {
+        await stderrDone.future;
+        if (!startupFinished && !startupCompleter.isCompleted) {
+          startupCompleter.completeError(
+            StateError(
+              'flutter_tester exited unexpectedly with code $exitCode. Stderr:\n$stderrBuffer',
+            ),
+          );
+        }
+      }),
+    );
+
     try {
-      final Uri vmServiceUri = await uriCompleter.future.timeout(_startupTimeout);
-      await frameCompleter.future.timeout(_startupTimeout);
-      return vmServiceUri;
+      return await startupCompleter.future.timeout(_startupTimeout);
     } on TimeoutException {
       fail('Timed out waiting for flutter_tester startup. Stderr:\n$stderrBuffer');
+    } finally {
+      startupFinished = true;
     }
   }
 
   Future<ProcessResult> runScreenshotSkia({required File outputFile, required Uri vmServiceUri}) {
-    final String toolPackageConfig = fileSystem.path.join(
-      flutterRoot,
-      'packages',
-      'flutter_tools',
-      '.dart_tool',
-      'package_config.json',
-    );
-    final String packageConfigPath = fileSystem.file(toolPackageConfig).existsSync()
-        ? toolPackageConfig
-        : fileSystem.path.join(flutterRoot, '.dart_tool', 'package_config.json');
-    final String entryScript = fileSystem.path.join(
-      flutterRoot,
-      'packages',
-      'flutter_tools',
-      'bin',
-      'flutter_tools.dart',
-    );
-
     return processManager.run(
       <String>[
-        artifacts.getArtifactPath(.engineDartBinary),
-        '--packages=$packageConfigPath',
-        entryScript,
+        absoluteFlutterBin,
+        ...getLocalEngineArguments(),
         '--suppress-analytics',
         '--no-version-check',
         'screenshot',
