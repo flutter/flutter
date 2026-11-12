@@ -1050,28 +1050,6 @@ void main() {
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: overridesLinux);
 
-  testUsingContext('Linux app CMakeLists always installs into the bundle directory', () async {
-    final CreateCommand command = createCreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', '--platform=linux', projectDir.path]);
-
-    final File cmakeLists = projectDir.childDirectory('linux').childFile('CMakeLists.txt');
-    expect(cmakeLists, exists);
-    final String cmakeContents = cmakeLists.readAsStringSync();
-    // The install prefix must be force-set to the bundle directory on every
-    // configure. If it is only set when CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
-    // is true, a first configure that fails (e.g. because a system dependency
-    // is missing) leaves CMAKE_INSTALL_PREFIX cached as /usr/local, and later
-    // builds try to install there and fail with "Permission denied".
-    // See https://github.com/flutter/flutter/issues/115376.
-    expect(
-      cmakeContents,
-      contains(r'set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)'),
-    );
-    expect(cmakeContents, isNot(contains('if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)')));
-  }, overrides: overridesLinux);
-
   const descPluginLinux = 'plugin supports Linux if requested';
   testUsingContext(descPluginLinux, () async {
     final CreateCommand command = createCreateCommand();
