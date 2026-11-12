@@ -26,6 +26,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
+import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart' show FeatureFlags;
@@ -521,7 +522,19 @@ Future<XcodeBuildResult> buildXcodeProject({
         if (!scriptOutputPipeFile!.existsSync()) {
           return;
         }
-        final List<String> lines = await scriptOutputPipeFile.readAsLines();
+        final List<String> lines;
+        try {
+          // Use openRead() instead of readAsLines() so ErrorHandlingFile does
+          // not convert ENOENT into a ToolExit if the pipe is deleted between
+          // existsSync() and opening the stream.
+          lines = await scriptOutputPipeFile
+              .openRead()
+              .transform(utf8AllowMalformed.decoder)
+              .transform(const LineSplitter())
+              .toList();
+        } on FileSystemException {
+          return;
+        }
         var inWarningBlock = false;
         var inNoteBlock = false;
         for (final line in lines) {

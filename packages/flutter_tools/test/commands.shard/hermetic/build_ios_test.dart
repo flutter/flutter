@@ -1760,6 +1760,53 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       expect(pipeFile, isNot(exists));
       expect(processManager.hasRemainingExpectations, isFalse);
     });
+
+    testWithoutContext('Do not crash if temporary build directory is deleted between existsSync and reading pipe in terminal session.', () async {
+      var deleteOnNextPipeRead = false;
+      fileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (deleteOnNextPipeRead &&
+              (op == FileSystemOp.open || op == FileSystemOp.read) &&
+              path.endsWith('pipe_to_stdout')) {
+            deleteOnNextPipeRead = false;
+            fileSystem.directory(_xcBundleDirectoryPath).parent.deleteSync(recursive: true);
+          }
+        },
+      );
+      final errorHandlingFileSystem = ErrorHandlingFileSystem(
+        delegate: fileSystem,
+        platform: macosPlatform,
+      );
+      final BuildCommand command = createTestBuildCommand(
+        fileSystem: errorHandlingFileSystem,
+        logger: _TerminalBufferLogger(),
+        osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem),
+      );
+      final Directory tempDir = errorHandlingFileSystem.directory(_xcBundleDirectoryPath).parent;
+      final File pipeFile = tempDir.childFile('pipe_to_stdout');
+      processManager.addCommand(
+        setUpFakeXcodeBuildHandler(
+          simulator: true,
+          exitCode: 1,
+          scriptOutputStreamFile: pipeFile.path,
+          onRun: (_) {
+            expect(pipeFile, exists);
+            deleteOnNextPipeRead = true;
+          },
+        ),
+      );
+
+      createMinimalMockProjectFiles();
+
+      await expectLater(
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+        throwsToolExit(message: 'Encountered error while building for simulator.'),
+      );
+      expect(tempDir, isNot(exists));
+      expect(pipeFile, isNot(exists));
+      expect(processManager.hasRemainingExpectations, isFalse);
+    });
   });
 }
 
