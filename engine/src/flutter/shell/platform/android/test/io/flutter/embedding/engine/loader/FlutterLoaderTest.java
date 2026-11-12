@@ -1239,6 +1239,17 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void itSetsEnableSDFsFromMetadata() {
+    // Test debug mode.
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.EnableSDFs", defaultFlagTestValue, "--impeller-use-sdfs");
+
+    // Test release mode.
+    testFlagFromMetadataPresentInReleaseMode(
+        "io.flutter.embedding.android.EnableSDFs", defaultFlagTestValue, "--impeller-use-sdfs");
+  }
+
+  @Test
   public void itSetsEnableOpenGLGPUTracingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.EnableOpenGLGPUTracing",
