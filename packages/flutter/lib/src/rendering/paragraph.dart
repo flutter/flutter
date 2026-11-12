@@ -1576,20 +1576,21 @@ class _SelectableFragment
     final int selectionStart = _textSelectionStart!.offset;
     final int selectionEnd = _textSelectionEnd!.offset;
     final bool isReversed = selectionStart > selectionEnd;
-    final Offset startOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(
+    Offset startOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(
       _textSelectionStart!,
     );
-    final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
+    Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
         ? startOffsetInParagraphCoordinates
         : paragraph._getOffsetForPosition(_textSelectionEnd!);
     final selection = TextSelection(baseOffset: selectionStart, extentOffset: selectionEnd);
+    final List<TextBox> selectionBoxes = paragraph.getBoxesForSelection(selection);
     final selectionRects = <Rect>[];
-    for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
+    for (final textBox in selectionBoxes) {
       selectionRects.add(textBox.toRect());
     }
     final selectionCollapsed = selectionStart == selectionEnd;
-    final TextSelectionHandleType startSelectionHandleType;
-    final TextSelectionHandleType endSelectionHandleType;
+    TextSelectionHandleType startSelectionHandleType;
+    TextSelectionHandleType endSelectionHandleType;
     if (selectionCollapsed) {
       // Always prefer collapsed handle when selection is collapsed.
       startSelectionHandleType = TextSelectionHandleType.collapsed;
@@ -1618,6 +1619,37 @@ class _SelectableFragment
       };
       startSelectionHandleType = isReversed ? lastHandleType : firstHandleType;
       endSelectionHandleType = isReversed ? firstHandleType : lastHandleType;
+
+      // On a single line that mixes text directions, the edges of the
+      // selection may be inside the highlighted area. If the highlighted area
+      // is contiguous, place the handles at its edges instead, facing away
+      // from each other, so that a dragged handle stays under the pointer. Each
+      // handle goes to the edge of the highlighted area closer to its caret.
+      final (double, double)? bounds = _getContiguousBidiLineBounds(selection, selectionBoxes);
+      if (bounds != null) {
+        final (double left, double right) = bounds;
+        final double startDx = startOffsetInParagraphCoordinates.dx;
+        final double endDx = endOffsetInParagraphCoordinates.dx;
+        final bool startAtLeft =
+            (startDx - left).abs() + (endDx - right).abs() <=
+            (startDx - right).abs() + (endDx - left).abs();
+        startOffsetInParagraphCoordinates = Offset(
+          startAtLeft ? left : right,
+          startOffsetInParagraphCoordinates.dy,
+        );
+        endOffsetInParagraphCoordinates = Offset(
+          startAtLeft ? right : left,
+          endOffsetInParagraphCoordinates.dy,
+        );
+        if (!useParagraphDirection) {
+          startSelectionHandleType = startAtLeft
+              ? TextSelectionHandleType.left
+              : TextSelectionHandleType.right;
+          endSelectionHandleType = startAtLeft
+              ? TextSelectionHandleType.right
+              : TextSelectionHandleType.left;
+        }
+      }
     }
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
@@ -3164,6 +3196,34 @@ class _SelectableFragment
     return false;
   }
 
+  // Returns the left and the right edges of the highlighted area of
+  // `selection`, whose boxes are `boxes`, if the selection is on a single line,
+  // contains both LTR and RTL text, and its highlighted area is contiguous, or
+  // null otherwise.
+  (double, double)? _getContiguousBidiLineBounds(TextSelection selection, List<TextBox> boxes) {
+    if (boxes.isEmpty || boxes.every((TextBox box) => box.direction == boxes.first.direction)) {
+      return null;
+    }
+    final TextRange line = paragraph._textPainter.getLineBoundary(
+      TextPosition(offset: selection.start),
+    );
+    if (selection.end > line.end) {
+      return null;
+    }
+    final List<TextBox> sortedBoxes = boxes.toList()
+      ..sort((TextBox a, TextBox b) => a.left.compareTo(b.left));
+    double right = sortedBoxes.first.right;
+    for (final box in sortedBoxes) {
+      // The largest gap between two boxes for them to be considered adjacent.
+      const gapTolerance = 0.5;
+      if (box.left - right > gapTolerance) {
+        return null;
+      }
+      right = math.max(right, box.right);
+    }
+    return (sortedBoxes.first.left, right);
+  }
+
   // Returns the text direction of the character after `offset`, or before it
   // if `forward` is false, or null if it cannot be determined.
   TextDirection? _getCharacterDirection(int offset, {required bool forward}) {
@@ -3193,8 +3253,15 @@ class _SelectableFragment
         anchorPosition.offset == draggedPosition.offset) {
       return null;
     }
-    final Offset anchorPoint = paragraph._getOffsetForPosition(anchorPosition);
-    final Offset draggedPoint = paragraph._getOffsetForPosition(draggedPosition);
+    // Use the locations of the handles, which may differ from the carets of the
+    // edges (see _getSelectionGeometry).
+    final SelectionPoint? startPoint = value.startSelectionPoint;
+    final SelectionPoint? endPoint = value.endSelectionPoint;
+    if (startPoint == null || endPoint == null) {
+      return null;
+    }
+    final Offset anchorPoint = isEnd ? startPoint.localPosition : endPoint.localPosition;
+    final Offset draggedPoint = isEnd ? endPoint.localPosition : startPoint.localPosition;
     final bool forward = draggedPosition.offset > anchorPosition.offset;
     final double side;
     if ((anchorPoint.dy - draggedPoint.dy).abs() <= precisionErrorTolerance) {

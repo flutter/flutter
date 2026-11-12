@@ -1205,7 +1205,7 @@ void main() {
         expect(selectWordAt(10), (TextSelectionHandleType.right, TextSelectionHandleType.left));
       });
 
-      test('edges stay next to the selected text after extending into an adjacent run', () {
+      test('handles are at the edges after extending into an adjacent run', () {
         final registrar = TestSelectionRegistrar();
         final paragraph = RenderParagraph(
           const TextSpan(text: text),
@@ -1237,14 +1237,17 @@ void main() {
           ),
         );
         expect(paragraph.selections.single.textInside(text), 'ي Here');
+        // The handles are at the edges of the highlighted area, facing away from
+        // each other: the moved end handle at the right edge of "ي", and the
+        // start handle at the left edge of "Here".
         final SelectionGeometry geometry = selectable.value;
-        // The moved end edge is at the right edge of "ي", and the other edge is
-        // after "Here", rather than at the end of the line.
         expect(geometry.endSelectionPoint!.localPosition.dx, moreOrLessEquals(yeh.right));
+        expect(geometry.endSelectionPoint!.handleType, TextSelectionHandleType.right);
         expect(
           geometry.startSelectionPoint!.localPosition.dx,
-          moreOrLessEquals(characterBox(17).right),
+          moreOrLessEquals(characterBox(14).left),
         );
+        expect(geometry.startSelectionPoint!.handleType, TextSelectionHandleType.left);
       });
 
       test('UIKit keeps the handles aligned with the paragraph direction', () {
