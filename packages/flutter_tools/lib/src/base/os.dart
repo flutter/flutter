@@ -533,12 +533,11 @@ class _WindowsUtils extends OperatingSystemUtils {
     return <File>[_fileSystem.file(lines.first.trim())];
   }
 
+  // `windir` is defined as `%SystemRoot%` on Windows, so prefer `SYSTEMROOT`
+  // and fall back to `WINDIR`, then the default install location if neither
+  // is set (`Platform.environment` lookups are case-insensitive on Windows).
   late final String _tarPath = _fileSystem.path.join(
-    _platform.environment['SystemRoot'] ??
-        _platform.environment['SYSTEMROOT'] ??
-        _platform.environment['windir'] ??
-        _platform.environment['WINDIR'] ??
-        r'C:\Windows',
+    _platform.environment['SYSTEMROOT'] ?? _platform.environment['WINDIR'] ?? r'C:\Windows',
     'System32',
     'tar.exe',
   );

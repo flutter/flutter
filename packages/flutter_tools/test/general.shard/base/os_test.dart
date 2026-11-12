@@ -410,80 +410,49 @@ void main() {
     });
 
     group('unzip on Windows', () {
-      testWithoutContext('unzips with tar when tar is available', () {
-        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-        final Directory targetDirectory = fileSystem.directory('output')
-          ..createSync(recursive: true);
-        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[kWindowsTarPath, '-xf', fakeZipFile.path, '-C', targetDirectory.path],
-          ),
-        );
-
-        final OperatingSystemUtils utils = createOSUtils(
-          FakePlatform(operatingSystem: 'windows'),
-          fileSystem: fileSystem,
-        );
-        utils.unzip(fakeZipFile, targetDirectory);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
-      testWithoutContext('resolves tar using SystemRoot environment variable', () {
-        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-        final Directory targetDirectory = fileSystem.directory('output')
-          ..createSync(recursive: true);
-        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
+      for (final (String description, Map<String, String> environment, String expectedTarPath)
+          in const <(String, Map<String, String>, String)>[
+            (
+              'resolves tar using SYSTEMROOT over WINDIR',
+              <String, String>{'SYSTEMROOT': r'D:\Windows', 'WINDIR': r'E:\WinNT'},
               r'D:\Windows\System32\tar.exe',
-              '-xf',
-              fakeZipFile.path,
-              '-C',
-              targetDirectory.path,
-            ],
-          ),
-        );
-
-        final OperatingSystemUtils utils = createOSUtils(
-          FakePlatform(
-            operatingSystem: 'windows',
-            environment: <String, String>{'SystemRoot': r'D:\Windows'},
-          ),
-          fileSystem: fileSystem,
-        );
-        utils.unzip(fakeZipFile, targetDirectory);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
-      testWithoutContext('resolves tar using windir environment variable fallback', () {
-        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-        final Directory targetDirectory = fileSystem.directory('output')
-          ..createSync(recursive: true);
-        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
+            ),
+            (
+              'resolves tar using WINDIR fallback when SYSTEMROOT is unset',
+              <String, String>{'WINDIR': r'E:\WinNT'},
               r'E:\WinNT\System32\tar.exe',
-              '-xf',
-              fakeZipFile.path,
-              '-C',
-              targetDirectory.path,
-            ],
-          ),
-        );
+            ),
+            (
+              r'resolves tar using default C:\Windows fallback when SYSTEMROOT and WINDIR are unset',
+              <String, String>{},
+              kWindowsTarPath,
+            ),
+          ]) {
+        testWithoutContext(description, () {
+          final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+          final Directory targetDirectory = fileSystem.directory('output')
+            ..createSync(recursive: true);
+          final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                expectedTarPath,
+                '-xf',
+                fakeZipFile.path,
+                '-C',
+                targetDirectory.path,
+              ],
+            ),
+          );
 
-        final OperatingSystemUtils utils = createOSUtils(
-          FakePlatform(
-            operatingSystem: 'windows',
-            environment: <String, String>{'windir': r'E:\WinNT'},
-          ),
-          fileSystem: fileSystem,
-        );
-        utils.unzip(fakeZipFile, targetDirectory);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
+          final OperatingSystemUtils utils = createOSUtils(
+            FakePlatform(operatingSystem: 'windows', environment: environment),
+            fileSystem: fileSystem,
+          );
+          utils.unzip(fakeZipFile, targetDirectory);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
+      }
 
       testWithoutContext('creates target directory if it does not exist', () {
         final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
