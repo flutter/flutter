@@ -1170,6 +1170,49 @@ void main() {
       expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     });
 
+    group('selection handles match the direction of the selected text', () {
+      // In an RTL paragraph, the runs of this text appear from right to left as
+      // "Welcome", "حبيبي", "Here".
+      const text = 'Welcome حبيبي Here';
+
+      (TextSelectionHandleType, TextSelectionHandleType) selectWordAt(int offset) {
+        final registrar = TestSelectionRegistrar();
+        final paragraph = RenderParagraph(
+          const TextSpan(text: text),
+          textDirection: TextDirection.rtl,
+          registrar: registrar,
+        );
+        layout(paragraph);
+        final TextBox box = paragraph
+            .getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + 1))
+            .single;
+        final Selectable selectable = registrar.selectables.single;
+        selectable.dispatchSelectionEvent(
+          SelectWordSelectionEvent(globalPosition: paragraph.localToGlobal(box.toRect().center)),
+        );
+        final SelectionGeometry geometry = selectable.value;
+        expect(geometry.status, SelectionStatus.uncollapsed);
+        return (geometry.startSelectionPoint!.handleType, geometry.endSelectionPoint!.handleType);
+      }
+
+      test('LTR word in an RTL paragraph', () {
+        // "Here".
+        expect(selectWordAt(15), (TextSelectionHandleType.left, TextSelectionHandleType.right));
+      });
+
+      test('RTL word in an RTL paragraph', () {
+        // "حبيبي".
+        expect(selectWordAt(10), (TextSelectionHandleType.right, TextSelectionHandleType.left));
+      });
+
+      test('UIKit keeps the handles aligned with the paragraph direction', () {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+        addTearDown(() => debugDefaultTargetPlatformOverride = null);
+        // "Here".
+        expect(selectWordAt(15), (TextSelectionHandleType.right, TextSelectionHandleType.left));
+      });
+    });
+
     test('getPositionForOffset works', () async {
       final paragraph = RenderParagraph(
         const TextSpan(text: '1234567'),

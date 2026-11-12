@@ -321,6 +321,22 @@ class EmptyTextSelectionControls extends TextSelectionControls {
 /// [TextSelectionControls].
 final TextSelectionControls emptyTextSelectionControls = EmptyTextSelectionControls();
 
+// The selection handle that stays in place while the other one is dragged.
+@immutable
+class _SelectionHandleDragAnchor {
+  const _SelectionHandleDragAnchor({required this.offset, required this.point, required this.side});
+
+  // The text offset of the handle.
+  final int offset;
+
+  // The location of the handle, in the RenderEditable's local coordinates.
+  final Offset point;
+
+  // The horizontal direction from point to the dragged handle when the drag
+  // started: 1.0 if the dragged handle was to the right, -1.0 if to the left.
+  final double side;
+}
+
 /// An object that manages a pair of text selection handles for a
 /// [RenderEditable].
 ///
@@ -752,10 +768,163 @@ class TextSelectionOverlay {
   // during the drag.
   TextSelection? _dragStartSelection;
 
+  // The handle that is not being dragged, captured when a selection handle
+  // drag starts on Android, Fuchsia, Linux and Windows. Null if the drag
+  // should not consider the visual order of the text (see _getDragAnchor).
+  _SelectionHandleDragAnchor? _endHandleDragAnchor;
+  _SelectionHandleDragAnchor? _startHandleDragAnchor;
+
+  // Returns the anchor for a drag of the handle at `dragged` while the handle
+  // at `anchor`, whose text offset is `offset`, stays in place, or null if the
+  // side of the anchor that the dragged handle belongs to is unknown.
+  //
+  // `isEndHandleDragged` is whether `dragged` is the end of the selection.
+  _SelectionHandleDragAnchor? _getDragAnchor({
+    required int offset,
+    required TextSelectionPoint anchor,
+    required TextSelectionPoint dragged,
+    required bool isEndHandleDragged,
+  }) {
+    final double side;
+    if ((anchor.point.dy - dragged.point.dy).abs() <= precisionErrorTolerance) {
+      if (anchor.point.dx == dragged.point.dx) {
+        return null;
+      }
+      side = (dragged.point.dx - anchor.point.dx).sign;
+    } else {
+      // The handles are on different lines. On the line of the anchor, the
+      // selection extends from the anchor in the direction that the anchor
+      // faces, which is where the dragged handle belongs if it is dragged onto
+      // that line.
+      side = switch ((anchor.direction ?? renderObject.textDirection, isEndHandleDragged)) {
+        (TextDirection.ltr, true) || (TextDirection.rtl, false) => 1.0,
+        (TextDirection.rtl, true) || (TextDirection.ltr, false) => -1.0,
+      };
+    }
+    return _SelectionHandleDragAnchor(offset: offset, point: anchor.point, side: side);
+  }
+
+  // Returns the smallest logical range that covers every character rendered
+  // between `anchor` and `dragTargetGlobal`, or null if the logical order of
+  // the characters between them is guaranteed to match their visual order.
+  //
+  // On a line that mixes LTR and RTL runs, the TextPosition under the dragged
+  // handle alone does not describe the selection the user sees. For example,
+  // in an RTL field containing "Welcome حبيبي Here", the characters to the
+  // right of the LTR run "Here" logically precede it, so dragging the
+  // handle at the end of "Here" to the right produces offsets that are
+  // before the start of the selection.
+  //
+  // `dragPosition` is the TextPosition at `dragTargetGlobal`.
+  TextRange? _getVisualRangeOnBidiLine({
+    required _SelectionHandleDragAnchor anchor,
+    required Offset dragTargetGlobal,
+    required TextPosition dragPosition,
+  }) {
+    final Offset dragTarget = renderObject.globalToLocal(dragTargetGlobal);
+    final double left = math.min(anchor.point.dx, dragTarget.dx);
+    final double right = math.max(anchor.point.dx, dragTarget.dx);
+    if (left == right) {
+      return null;
+    }
+    // Sample positions slightly inside of the range between the handles, so
+    // that a point on the boundary between two runs resolves to the run that
+    // is between the handles.
+    const inset = 0.5;
+    int positionAt(double dx, double dy) {
+      return renderObject.getPositionForPoint(renderObject.localToGlobal(Offset(dx, dy))).offset;
+    }
+
+    final TextSelection line = renderObject.getLineAtOffset(dragPosition);
+    final double anchorDx = dragTarget.dx > anchor.point.dx
+        ? anchor.point.dx + inset
+        : anchor.point.dx - inset;
+    // The anchor point is at the bottom of its line.
+    final int anchorOffset = positionAt(
+      anchorDx,
+      anchor.point.dy - renderObject.preferredLineHeight / 2,
+    );
+    final TextSelection anchorLine = renderObject.getLineAtOffset(
+      TextPosition(offset: anchorOffset),
+    );
+    if (anchorLine.start != line.start || anchorLine.end != line.end) {
+      return null;
+    }
+
+    final List<TextBox> boxes = renderObject.getBoxesForSelection(line);
+    if (boxes.every((TextBox box) => box.direction == boxes.first.direction)) {
+      return null;
+    }
+
+    // Within a run, the offsets are monotonic along the line, so the extreme
+    // offsets between the handles are at the handles or at run boundaries.
+    int start = math.min(anchorOffset, dragPosition.offset);
+    int end = math.max(anchorOffset, dragPosition.offset);
+    for (final box in boxes) {
+      for (final edge in <double>[box.left, box.right]) {
+        for (final dx in <double>[edge - inset, edge + inset]) {
+          if (dx <= left || dx >= right) {
+            continue;
+          }
+          final int offset = positionAt(dx, dragTarget.dy);
+          start = math.min(start, offset);
+          end = math.max(end, offset);
+        }
+      }
+    }
+    return TextRange(start: start, end: end);
+  }
+
+  // Returns the selection for a handle drag that would swap the handles on
+  // Android, Fuchsia, Linux and Windows, or null if the selection should not
+  // change.
+  //
+  // Like on native Android, the dragged handle moves to the TextPosition at
+  // the drag target as long as the handles do not swap, and the handles are
+  // not allowed to swap. However, on a line that mixes text directions, the
+  // TextPosition at the drag target may be on the other side of the anchor
+  // in the text even though the drag target is still on the dragged handle's
+  // side of the anchor on screen. Native Android stops the handle at the
+  // boundary of the run in this case, so the selection cannot be extended
+  // into the adjacent run of the opposite direction. Instead, the selection
+  // covers the text that is rendered between the anchor and the drag target.
+  TextSelection? _getSwappingHandleDragSelection({
+    required _SelectionHandleDragAnchor? anchor,
+    required Offset dragTargetGlobal,
+    required TextPosition dragPosition,
+  }) {
+    if (anchor == null) {
+      return null;
+    }
+    final double dragDx = renderObject.globalToLocal(dragTargetGlobal).dx;
+    if ((dragDx - anchor.point.dx).sign != anchor.side) {
+      return null;
+    }
+    final TextRange? range = _getVisualRangeOnBidiLine(
+      anchor: anchor,
+      dragTargetGlobal: dragTargetGlobal,
+      dragPosition: dragPosition,
+    );
+    if (range == null || range.isCollapsed) {
+      return null;
+    }
+    return TextSelection(baseOffset: range.start, extentOffset: range.end);
+  }
+
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
       return;
     }
+
+    final List<TextSelectionPoint> endpoints = _selectionOverlay.selectionEndpoints;
+    _endHandleDragAnchor = endpoints.length < 2
+        ? null
+        : _getDragAnchor(
+            offset: _selection.baseOffset,
+            anchor: endpoints.first,
+            dragged: endpoints.last,
+            isEndHandleDragged: true,
+          );
 
     _endHandleDragPosition = details.globalPosition.dy;
 
@@ -894,10 +1063,20 @@ class TextSelectionOverlay {
           _handleSelectionHandleChanged(currentSelection);
           return;
         }
-        newSelection = TextSelection(
-          baseOffset: _selection.baseOffset,
-          extentOffset: position.offset,
-        );
+        final int baseOffset = _endHandleDragAnchor?.offset ?? _selection.baseOffset;
+        if (position.offset > baseOffset) {
+          newSelection = TextSelection(baseOffset: baseOffset, extentOffset: position.offset);
+        } else {
+          final TextSelection? swappingSelection = _getSwappingHandleDragSelection(
+            anchor: _endHandleDragAnchor,
+            dragTargetGlobal: handleTargetGlobal,
+            dragPosition: position,
+          );
+          if (swappingSelection == null) {
+            return; // Don't allow order swapping.
+          }
+          newSelection = swappingSelection;
+        }
         if (newSelection.baseOffset >= newSelection.extentOffset) {
           return; // Don't allow order swapping.
         }
@@ -926,6 +1105,16 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+
+    final List<TextSelectionPoint> endpoints = _selectionOverlay.selectionEndpoints;
+    _startHandleDragAnchor = endpoints.length < 2
+        ? null
+        : _getDragAnchor(
+            offset: _selection.extentOffset,
+            anchor: endpoints.last,
+            dragged: endpoints.first,
+            isEndHandleDragged: false,
+          );
 
     _startHandleDragPosition = details.globalPosition.dy;
 
@@ -1029,10 +1218,20 @@ class TextSelectionOverlay {
           _handleSelectionHandleChanged(currentSelection);
           return;
         }
-        newSelection = TextSelection(
-          baseOffset: position.offset,
-          extentOffset: _selection.extentOffset,
-        );
+        final int extentOffset = _startHandleDragAnchor?.offset ?? _selection.extentOffset;
+        if (position.offset < extentOffset) {
+          newSelection = TextSelection(baseOffset: position.offset, extentOffset: extentOffset);
+        } else {
+          final TextSelection? swappingSelection = _getSwappingHandleDragSelection(
+            anchor: _startHandleDragAnchor,
+            dragTargetGlobal: handleTargetGlobal,
+            dragPosition: position,
+          );
+          if (swappingSelection == null) {
+            return; // Don't allow order swapping.
+          }
+          newSelection = swappingSelection;
+        }
         if (newSelection.baseOffset >= newSelection.extentOffset) {
           return; // Don't allow order swapping.
         }
@@ -1056,6 +1255,8 @@ class TextSelectionOverlay {
       return;
     }
     _dragStartSelection = null;
+    _endHandleDragAnchor = null;
+    _startHandleDragAnchor = null;
     final bool draggingHandles =
         _selectionOverlay.isDraggingStartHandle || _selectionOverlay.isDraggingEndHandle;
     if (selectionControls is! TextSelectionHandleControls) {

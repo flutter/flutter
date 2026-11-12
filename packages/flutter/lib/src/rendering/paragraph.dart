@@ -1545,6 +1545,12 @@ class _SelectableFragment
 
   bool _selectableContainsOriginTextBoundary = false;
 
+  // The selection edge that stays in place while the other edge is moved by
+  // consecutive SelectionEdgeUpdateEvents with TextGranularity.character, or
+  // null if the edges are not both in this fragment or no such update has
+  // happened since the selection last changed by other means.
+  _SelectionEdgeDragAnchor? _edgeDragAnchor;
+
   LayerLink? _startHandleLayerLink;
   LayerLink? _endHandleLayerLink;
 
@@ -1576,22 +1582,43 @@ class _SelectableFragment
     final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
         ? startOffsetInParagraphCoordinates
         : paragraph._getOffsetForPosition(_textSelectionEnd!);
-    final flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
     final selection = TextSelection(baseOffset: selectionStart, extentOffset: selectionEnd);
     final selectionRects = <Rect>[];
     for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
       selectionRects.add(textBox.toRect());
     }
     final selectionCollapsed = selectionStart == selectionEnd;
-    final (
-      TextSelectionHandleType startSelectionHandleType,
-      TextSelectionHandleType endSelectionHandleType,
-    ) = switch ((selectionCollapsed, flipHandles)) {
+    final TextSelectionHandleType startSelectionHandleType;
+    final TextSelectionHandleType endSelectionHandleType;
+    if (selectionCollapsed) {
       // Always prefer collapsed handle when selection is collapsed.
-      (true, _) => (TextSelectionHandleType.collapsed, TextSelectionHandleType.collapsed),
-      (false, true) => (TextSelectionHandleType.right, TextSelectionHandleType.left),
-      (false, false) => (TextSelectionHandleType.left, TextSelectionHandleType.right),
-    };
+      startSelectionHandleType = TextSelectionHandleType.collapsed;
+      endSelectionHandleType = TextSelectionHandleType.collapsed;
+    } else {
+      // The handle at the logical start of the selection faces away from the
+      // first selected character, and the handle at the logical end faces away
+      // from the last selected character, so that both handles hug the
+      // selection even when it starts or ends in a run whose text direction
+      // differs from the paragraph's. UIKit keeps the handles aligned with the
+      // paragraph's direction instead.
+      final useParagraphDirection = defaultTargetPlatform == TargetPlatform.iOS;
+      final TextDirection firstDirection =
+          (useParagraphDirection ? null : _getCharacterDirection(selection.start, forward: true)) ??
+          paragraph.textDirection;
+      final TextDirection lastDirection =
+          (useParagraphDirection ? null : _getCharacterDirection(selection.end, forward: false)) ??
+          paragraph.textDirection;
+      final TextSelectionHandleType firstHandleType = switch (firstDirection) {
+        TextDirection.ltr => TextSelectionHandleType.left,
+        TextDirection.rtl => TextSelectionHandleType.right,
+      };
+      final TextSelectionHandleType lastHandleType = switch (lastDirection) {
+        TextDirection.ltr => TextSelectionHandleType.right,
+        TextDirection.rtl => TextSelectionHandleType.left,
+      };
+      startSelectionHandleType = isReversed ? lastHandleType : firstHandleType;
+      endSelectionHandleType = isReversed ? firstHandleType : lastHandleType;
+    }
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
         localPosition: startOffsetInParagraphCoordinates,
@@ -1614,6 +1641,9 @@ class _SelectableFragment
     late final SelectionResult result;
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
+    if (event is! SelectionEdgeUpdateEvent || event.granularity != TextGranularity.character) {
+      _edgeDragAnchor = null;
+    }
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
@@ -1989,6 +2019,9 @@ class _SelectableFragment
   }
 
   SelectionResult _updateSelectionEdge(Offset globalPosition, {required bool isEnd}) {
+    if (_edgeDragAnchor?.isEnd != isEnd) {
+      _edgeDragAnchor = _getEdgeDragAnchor(isEnd: isEnd);
+    }
     _setSelectionPosition(null, isEnd: isEnd);
     final Matrix4 transform = paragraph.getTransformTo(null);
     transform.invert();
@@ -2013,6 +2046,29 @@ class _SelectableFragment
       paragraph.getPositionForOffset(adjustedOffset),
     );
     _setSelectionPosition(position, isEnd: isEnd);
+    final _SelectionEdgeDragAnchor? anchor = _edgeDragAnchor;
+    if (anchor != null) {
+      // The other edge stays where it was when the edge update started, even if
+      // a previous update moved it (see below).
+      _setSelectionPosition(anchor.position, isEnd: !isEnd);
+      final TextRange? visualRange = _getSwappingEdgeDragRange(
+        anchor: anchor,
+        dragTarget: adjustedOffset,
+        dragPosition: position,
+      );
+      if (visualRange != null) {
+        final bool dragTowardsStart = position.offset < anchor.offset;
+        _setSelectionPosition(
+          TextPosition(offset: dragTowardsStart ? visualRange.start : visualRange.end),
+          isEnd: isEnd,
+        );
+        _setSelectionPosition(
+          TextPosition(offset: dragTowardsStart ? visualRange.end : visualRange.start),
+          isEnd: !isEnd,
+        );
+        return SelectionResult.end;
+      }
+    }
     if (position.offset == range.end) {
       return SelectionResult.next;
     }
@@ -3110,6 +3166,154 @@ class _SelectableFragment
     return false;
   }
 
+  // Returns the text direction of the character after `offset`, or before it
+  // if `forward` is false, or null if it cannot be determined.
+  TextDirection? _getCharacterDirection(int offset, {required bool forward}) {
+    final int? other = forward
+        ? paragraph._textPainter.getOffsetAfter(offset)
+        : paragraph._textPainter.getOffsetBefore(offset);
+    if (other == null) {
+      return null;
+    }
+    final List<TextBox> boxes = paragraph.getBoxesForSelection(
+      TextSelection(baseOffset: offset, extentOffset: other),
+    );
+    return boxes.isEmpty ? null : boxes.first.direction;
+  }
+
+  // Returns the anchor for updating the start edge, or the end edge if `isEnd`
+  // is true, while the other edge stays in place, or null if this fragment
+  // does not contain both edges.
+  _SelectionEdgeDragAnchor? _getEdgeDragAnchor({required bool isEnd}) {
+    final TextPosition? anchorPosition = isEnd ? _textSelectionStart : _textSelectionEnd;
+    final TextPosition? draggedPosition = isEnd ? _textSelectionEnd : _textSelectionStart;
+    // An edge at the boundary of this fragment may be in another selectable.
+    if (anchorPosition == null ||
+        draggedPosition == null ||
+        anchorPosition.offset <= range.start ||
+        anchorPosition.offset >= range.end ||
+        anchorPosition.offset == draggedPosition.offset) {
+      return null;
+    }
+    final Offset anchorPoint = paragraph._getOffsetForPosition(anchorPosition);
+    final Offset draggedPoint = paragraph._getOffsetForPosition(draggedPosition);
+    final bool forward = draggedPosition.offset > anchorPosition.offset;
+    final double side;
+    if ((anchorPoint.dy - draggedPoint.dy).abs() <= precisionErrorTolerance) {
+      if (anchorPoint.dx == draggedPoint.dx) {
+        return null;
+      }
+      side = (draggedPoint.dx - anchorPoint.dx).sign;
+    } else {
+      // The edges are on different lines. On the line of the anchor, the
+      // selection extends from the anchor in the direction of the text next to
+      // the anchor, which is where the dragged edge belongs if it is moved onto
+      // that line.
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(
+        forward
+            ? TextSelection(
+                baseOffset: anchorPosition.offset,
+                extentOffset:
+                    paragraph._textPainter.getOffsetAfter(anchorPosition.offset) ??
+                    anchorPosition.offset,
+              )
+            : TextSelection(
+                baseOffset:
+                    paragraph._textPainter.getOffsetBefore(anchorPosition.offset) ??
+                    anchorPosition.offset,
+                extentOffset: anchorPosition.offset,
+              ),
+      );
+      if (boxes.isEmpty) {
+        return null;
+      }
+      side = (boxes.first.direction == TextDirection.ltr) == forward ? 1.0 : -1.0;
+    }
+    return _SelectionEdgeDragAnchor(
+      isEnd: isEnd,
+      position: anchorPosition,
+      point: anchorPoint,
+      side: side,
+      forward: forward,
+    );
+  }
+
+  // Returns the range that covers the text rendered between the anchor and
+  // `dragTarget` if moving the edge to `dragPosition` would place it on the
+  // other side of the anchor in the text even though `dragTarget` is still on
+  // the edge's side of the anchor on screen, or null otherwise.
+  //
+  // This happens on a line that mixes text directions. For example, in an RTL
+  // paragraph "Welcome حبيبي Here", the characters to the right of the LTR run
+  // "Here" precede it in the text, so moving the end edge of the selection
+  // "Here" to the right would otherwise select "ي " instead of "ي Here".
+  //
+  // `dragTarget` is in the paragraph's local coordinates.
+  TextRange? _getSwappingEdgeDragRange({
+    required _SelectionEdgeDragAnchor anchor,
+    required Offset dragTarget,
+    required TextPosition dragPosition,
+  }) {
+    final bool dragForward = dragPosition.offset > anchor.offset;
+    if (dragForward == anchor.forward && dragPosition.offset != anchor.offset) {
+      return null;
+    }
+    if ((dragTarget.dx - anchor.point.dx).sign != anchor.side) {
+      return null;
+    }
+    final double left = math.min(anchor.point.dx, dragTarget.dx);
+    final double right = math.max(anchor.point.dx, dragTarget.dx);
+    // Sample positions slightly inside of the range between the anchor and the
+    // drag target, so that a point on the boundary between two runs resolves
+    // to the run that is between them.
+    const inset = 0.5;
+    int positionAt(double dx, double dy) {
+      return _clampTextPosition(paragraph.getPositionForOffset(Offset(dx, dy))).offset;
+    }
+
+    final TextRange line = paragraph._textPainter.getLineBoundary(dragPosition);
+    final double lineCenter = paragraph._textPainter.preferredLineHeight / 2;
+    final int anchorOffset = positionAt(
+      dragTarget.dx > anchor.point.dx ? anchor.point.dx + inset : anchor.point.dx - inset,
+      // The anchor point is at the bottom of its line.
+      anchor.point.dy - lineCenter,
+    );
+    final TextRange anchorLine = paragraph._textPainter.getLineBoundary(
+      TextPosition(offset: anchorOffset),
+    );
+    if (anchorLine != line) {
+      return null;
+    }
+    final List<TextBox> boxes = paragraph.getBoxesForSelection(
+      TextSelection(baseOffset: line.start, extentOffset: line.end),
+    );
+    if (boxes.every((TextBox box) => box.direction == boxes.first.direction)) {
+      return null;
+    }
+
+    // Within a run, the offsets are monotonic along the line, so the extreme
+    // offsets between the anchor and the drag target are at either of them or
+    // at run boundaries.
+    int start = math.min(anchorOffset, dragPosition.offset);
+    int end = math.max(anchorOffset, dragPosition.offset);
+    for (final box in boxes) {
+      for (final edge in <double>[box.left, box.right]) {
+        for (final dx in <double>[edge - inset, edge + inset]) {
+          if (dx <= left || dx >= right) {
+            continue;
+          }
+          final int offset = positionAt(dx, dragTarget.dy);
+          start = math.min(start, offset);
+          end = math.max(end, offset);
+        }
+      }
+    }
+    if (start == end) {
+      return null;
+    }
+    return TextRange(start: start, end: end);
+  }
+
   TextPosition _clampTextPosition(TextPosition position) {
     // Affinity of range.end is upstream.
     if (position.offset > range.end ||
@@ -3710,4 +3914,38 @@ class _SelectableFragment
     properties.add(DiagnosticsProperty<TextRange>('range', range));
     properties.add(DiagnosticsProperty<String>('fullText', fullText));
   }
+}
+
+// The selection edge that stays in place while the other edge of a selection
+// in a _SelectableFragment is moved.
+@immutable
+class _SelectionEdgeDragAnchor {
+  const _SelectionEdgeDragAnchor({
+    required this.isEnd,
+    required this.position,
+    required this.point,
+    required this.side,
+    required this.forward,
+  });
+
+  // Whether the edge that is moved is the end edge of the selection.
+  final bool isEnd;
+
+  // The text position of the anchor.
+  final TextPosition position;
+
+  // The text offset of the anchor.
+  int get offset => position.offset;
+
+  // The location of the anchor, at the bottom of its line, in the paragraph's
+  // local coordinates.
+  final Offset point;
+
+  // The horizontal direction from point to the moved edge when the anchor was
+  // created: 1.0 if the moved edge was to the right, -1.0 if to the left.
+  final double side;
+
+  // Whether the moved edge was after the anchor in the text when the anchor
+  // was created.
+  final bool forward;
 }

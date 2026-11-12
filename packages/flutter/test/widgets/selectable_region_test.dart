@@ -4633,6 +4633,66 @@ void main() {
       await gesture.up();
     });
 
+    testWidgets(
+      'can drag end selection handle into the adjacent run of the opposite text direction',
+      (WidgetTester tester) async {
+        // In an RTL paragraph, the runs of this text appear from right to left as
+        // "Welcome", "حبيبي", "Here". The characters to the right of "Here"
+        // precede it in the text.
+        const text = 'Welcome حبيبي Here';
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Directionality(
+              textDirection: TextDirection.rtl,
+              child: SelectableRegion(
+                selectionControls: _testDraggableSelectionControls,
+                child: const Text(text, style: TextStyle(fontSize: 20.0)),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+        TextBox characterBox(int offset) {
+          return paragraph
+              .getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + 1))
+              .single;
+        }
+
+        Offset handleLevel(double dx) {
+          return globalize(Offset(dx, characterBox(14).bottom + 4.0), paragraph);
+        }
+
+        final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraph, 15),
+        ); // at the 'e' of "Here"
+        addTearDown(gesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        await gesture.up();
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 14, extentOffset: 18));
+
+        // The end handle is at the right edge of "Here".
+        await gesture.down(handleLevel(characterBox(17).right));
+        // Drag onto the right part of "ي", the last letter of the Arabic word,
+        // which is rendered next to "Here".
+        await gesture.moveTo(handleLevel(characterBox(12).right - 1.0));
+        await tester.pump();
+        expect(paragraph.selections[0].textInside(text), 'ي Here');
+        // The end edge is under the pointer.
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 18, extentOffset: 12));
+
+        // Like on native Android, dragging back into "Here" moves the end edge to
+        // the position under the pointer.
+        await gesture.moveTo(handleLevel(characterBox(16).left + 1.0));
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 14, extentOffset: 16));
+        await gesture.up();
+      },
+    );
+
     testWidgets('can select all from toolbar', (WidgetTester tester) async {
       await tester.pumpWidget(
         TestWidgetsApp(
