@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -673,6 +675,97 @@ void main() {
 
     // This fails to start due to VM Service discovery issues.
     expect(launchResult.started, false);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('AndroidDevice.startApp fails with an INTERNET permission hint when the VM service cannot bind', () async {
+    final logger = BufferLogger.test();
+    final device = AndroidDevice(
+      '1234',
+      modelID: 'TestModel',
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+      platform: FakePlatform(),
+      androidSdk: androidSdk,
+    );
+    final File apkFile = fileSystem.file('app-debug.apk')..createSync();
+    final apk = AndroidApk(
+      id: 'FlutterApp',
+      applicationPackage: apkFile,
+      launchActivity: 'FlutterActivity',
+      versionCode: 1,
+    );
+
+    processManager.addCommand(kAdbVersionCommand);
+    processManager.addCommand(kStartServer);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        stdout: '[ro.product.cpu.abi]: [x86_64]',
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
+      ),
+    );
+    processManager.addCommand(kShaCommand);
+    // Keep logcat running, as on a real device, so that discovery can only
+    // finish by recognizing the failure.
+    final logcatCompleter = Completer<void>();
+    processManager.addCommand(
+      FakeCommand(
+        command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
+        stdout:
+            '11-10 08:18:52.698 I/flutter ( 4369): Could not start Dart VM service HTTP server:\n'
+            '11-10 08:18:52.698 I/flutter ( 4369): SocketException: Failed to create server socket '
+            '(OS Error: Operation not permitted, errno = 1), address = 127.0.0.1, port = 0\n'
+            '11-10 08:18:52.698 I/flutter ( 4369): #0      _NativeSocket.bind (dart:io-patch/socket_patch.dart:1248:7)\n',
+        completer: logcatCompleter,
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'adb', '-s', '1234', 'shell', 'am', 'start',
+          '-a', 'android.intent.action.MAIN',
+          '-c', 'android.intent.category.LAUNCHER',
+          '-f', '0x20000000',
+          // The DebuggingOptions arguments for a debug build.
+          '--ez', 'enable-dart-profiling', 'true',
+          '--ez', 'enable-checked-mode', 'true',
+          '--ez', 'verify-entry-points', 'true',
+          'FlutterActivity',
+        ],
+      ),
+    );
+
+    final LaunchResult launchResult = await device.startApp(
+      apk,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, dynamic>{},
+    );
+    logcatCompleter.complete();
+
+    expect(launchResult.started, false);
+    expect(
+      logger.errorText,
+      contains(
+        'Error waiting for a debug connection: The Dart VM service failed to start: '
+        'SocketException: Failed to create server socket (OS Error: Operation not permitted, errno = 1)',
+      ),
+    );
+    expect(
+      logger.errorText,
+      contains('<uses-permission android:name="android.permission.INTERNET"/>'),
+    );
     expect(processManager, hasNoRemainingExpectations);
   });
 

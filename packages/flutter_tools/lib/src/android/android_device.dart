@@ -653,6 +653,18 @@ class AndroidDevice extends Device {
         }
       }
       return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+    } on VmServiceStartException catch (error) {
+      _logger.printError('Error waiting for a debug connection: $error');
+      if (error.reason case final String reason
+          when _socketPermissionDeniedRegExp.hasMatch(reason)) {
+        _logger.printError(
+          'Ensure the debug and profile AndroidManifest.xml files declare '
+          '<uses-permission android:name="android.permission.INTERNET"/>.',
+        );
+      }
+      // Return a failed LaunchResult rather than throwToolExit,
+      // so callers can name the device and clean up.
+      return LaunchResult.failed();
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
@@ -778,6 +790,14 @@ class AndroidDevice extends Device {
       adbPath: adbPath,
     );
   }();
+
+  /// Matches the errno of a socket error caused by the app lacking the
+  /// INTERNET permission: EPERM (1) on newer Android versions, EACCES (13) on
+  /// older ones.
+  ///
+  /// For example, `SocketException: Failed to create server socket (OS Error:
+  /// Operation not permitted, errno = 1), address = 127.0.0.1, port = 0`.
+  static final _socketPermissionDeniedRegExp = RegExp(r'errno = (1|13)\b');
 
   static final _timeRegExp = RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
