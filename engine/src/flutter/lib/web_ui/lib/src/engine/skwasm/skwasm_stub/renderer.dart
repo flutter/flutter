@@ -138,7 +138,7 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Paint createPaint() {
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
