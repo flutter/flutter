@@ -107,9 +107,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: ShaderMask(
-            shaderCallback: (Rect bounds) => const RadialGradient(
-              colors: <Color>[Color(0x00000000), Color(0x00001111)],
-            ).createShader(bounds),
+            shaderCallback: (Rect bounds) =>
+                const RadialGradient(colors: <Color>[Color(0x00000000), Color(0x00001111)])
+                    .createShader(bounds),
+            child: const Text('X'),
           ),
         ),
       ),

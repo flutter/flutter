@@ -225,7 +225,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Opacity(opacity: 0.5)),
+        child: Center(child: Opacity(opacity: 0.5, child: Text('X'))),
       ),
     );
     expect(tester.getSize(find.byType(Opacity)), Size.zero);
