@@ -87,8 +87,29 @@ ViewConfiguration _viewConfiguration({double devicePixelRatio = 1.0}) {
   );
 }
 
+/// A [TestRenderingFlutterBinding] whose [drawFrame] can skip calling
+/// `super.drawFrame()`, to verify that the hit-test region pass runs as part of
+/// [RendererBinding.drawFrame] rather than from a separate frame callback.
+class _TestRenderingBinding extends TestRenderingFlutterBinding {
+  bool skipSuperDrawFrame = false;
+
+  @override
+  void drawFrame() {
+    if (skipSuperDrawFrame) {
+      rootPipelineOwner.flushLayout();
+      rootPipelineOwner.flushCompositingBits();
+      rootPipelineOwner.flushPaint();
+      for (final RenderView renderView in renderViews) {
+        renderView.compositeFrame();
+      }
+      return;
+    }
+    super.drawFrame();
+  }
+}
+
 void main() {
-  final TestRenderingFlutterBinding binding = TestRenderingFlutterBinding.ensureInitialized();
+  final binding = _TestRenderingBinding();
   late ViewConfiguration initialConfiguration;
 
   setUp(() {
@@ -99,6 +120,8 @@ void main() {
   });
 
   tearDown(() {
+    binding.skipSuperDrawFrame = false;
+    binding.phase = EnginePhase.composite;
     binding.automaticPointerInterceptorsEnabled = false;
     debugEnableHitTestRegionsOnAllPlatforms = false;
     binding.renderView.configuration = initialConfiguration;
@@ -145,19 +168,121 @@ void main() {
 
   group('gating and delivery', () {
     test('the pass does not run while the flag is off, nor off the web without the debug flag', () {
+      FlutterTimeline.debugCollectionEnabled = true;
+      addTearDown(() {
+        FlutterTimeline.debugReset();
+        FlutterTimeline.debugCollectionEnabled = false;
+      });
+      const claim = Rect.fromLTWH(10, 20, 100, 50);
       binding.automaticPointerInterceptorsEnabled = false;
       final RenderStack root = _stack(<RenderBox>[
         _at(const Rect.fromLTWH(0, 0, 400, 400), _platformView(1)),
-        _at(const Rect.fromLTWH(10, 20, 100, 50), _hitTarget()),
+        _at(claim, _hitTarget()),
       ]);
       expect(regionsFor(root), isNull);
+      expect(FlutterTimeline.debugCollect().getAggregated('HIT TEST REGIONS (root)').count, 0);
 
       if (!kIsWeb) {
         debugEnableHitTestRegionsOnAllPlatforms = false;
         binding.automaticPointerInterceptorsEnabled = true;
         expect(regionsAfterFrame(), isNull);
+        expect(FlutterTimeline.debugCollect().getAggregated('HIT TEST REGIONS (root)').count, 0);
       }
+
+      debugEnableHitTestRegionsOnAllPlatforms = true;
+      binding.automaticPointerInterceptorsEnabled = true;
+      expect(
+        regionsAfterFrame(),
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[claim]),
+        ]),
+      );
+      expect(FlutterTimeline.debugCollect().getAggregated('HIT TEST REGIONS (root)').count, 1);
     });
+
+    test(
+      'runs in the composite phase of drawFrame, after compositing, and not in the paint phase',
+      () {
+        final link = LayerLink();
+        const followerOffset = Offset(10, 15);
+        const size = Size(80, 40);
+        final RenderBox leader = _at(const Offset(40, 50) & size, RenderLeaderLayer(link: link));
+        final RenderStack root = _stack(<RenderBox>[
+          _at(const Rect.fromLTWH(0, 0, 400, 400), _platformView(1)),
+          leader,
+          _at(
+            Offset.zero & size,
+            RenderFollowerLayer(link: link, offset: followerOffset, child: _hitTarget()),
+          ),
+        ]);
+
+        // Stopping at paint computes no regions, even across a full frame
+        // lifecycle.
+        layout(root, phase: EnginePhase.paint);
+        expect(binding.rootPipelineOwner.debugLastHitTestRegions, isNull);
+        binding.pumpCompleteFrame();
+        expect(binding.rootPipelineOwner.debugLastHitTestRegions, isNull);
+
+        // Pumping through composite in drawFrame composites the follower layer
+        // first and then computes regions using that frame's leader position.
+        pumpFrame(phase: EnginePhase.composite);
+        expect(
+          binding.rootPipelineOwner.debugLastHitTestRegions,
+          _payload(<(int, List<Rect>)>[
+            (1, <Rect>[(const Offset(40, 50) + followerOffset) & size]),
+          ]),
+        );
+
+        // Moving the leader and stopping at paint leaves the previous composite
+        // payload untouched until composite runs again.
+        (leader.parentData! as StackParentData)
+          ..left = 120
+          ..top = 140;
+        root.markNeedsLayout();
+        pumpFrame(phase: EnginePhase.paint);
+        binding.pumpCompleteFrame();
+        expect(
+          binding.rootPipelineOwner.debugLastHitTestRegions,
+          _payload(<(int, List<Rect>)>[
+            (1, <Rect>[(const Offset(40, 50) + followerOffset) & size]),
+          ]),
+        );
+
+        pumpFrame(phase: EnginePhase.composite);
+        expect(
+          binding.rootPipelineOwner.debugLastHitTestRegions,
+          _payload(<(int, List<Rect>)>[
+            (1, <Rect>[(const Offset(120, 140) + followerOffset) & size]),
+          ]),
+        );
+      },
+    );
+
+    test(
+      'a RendererBinding subclass whose drawFrame skips super.drawFrame computes no regions',
+      () {
+        binding.skipSuperDrawFrame = true;
+        const claim = Rect.fromLTWH(10, 20, 100, 50);
+        layout(
+          _stack(<RenderBox>[
+            _at(const Rect.fromLTWH(0, 0, 400, 400), _platformView(1)),
+            _at(claim, _hitTarget()),
+          ]),
+          phase: EnginePhase.composite,
+        );
+        binding.pumpCompleteFrame();
+        expect(binding.rootPipelineOwner.debugLastHitTestRegions, isNull);
+
+        binding.skipSuperDrawFrame = false;
+        binding.pumpCompleteFrame();
+        expect(
+          binding.rootPipelineOwner.debugLastHitTestRegions,
+          _payload(<(int, List<Rect>)>[
+            (1, <Rect>[claim]),
+          ]),
+        );
+      },
+    );
 
     test(
       'sends regions while a platform view is attached, then one empty payload after it detaches',

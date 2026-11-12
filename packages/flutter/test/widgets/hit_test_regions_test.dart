@@ -240,4 +240,79 @@ void main() {
       1: <Rect>{button},
     });
   });
+
+  testWidgets(
+    'CompositedTransformFollower uses the current frame target position after composite, and paint-only pumps do not update regions',
+    (WidgetTester tester) async {
+      enablePass(tester);
+      final link = LayerLink();
+      const followerOffset = Offset(10, 15);
+      const followerSize = Size(80, 40);
+      final targetOffset = ValueNotifier<Offset>(const Offset(40, 50));
+      addTearDown(targetOffset.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Positioned.fromRect(
+                rect: const Rect.fromLTWH(0, 0, 500, 500),
+                child: _platformView(1),
+              ),
+              ValueListenableBuilder<Offset>(
+                valueListenable: targetOffset,
+                builder: (_, Offset offset, _) => Positioned(
+                  left: offset.dx,
+                  top: offset.dy,
+                  width: followerSize.width,
+                  height: followerSize.height,
+                  child: CompositedTransformTarget(link: link),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                top: 0,
+                width: followerSize.width,
+                height: followerSize.height,
+                child: CompositedTransformFollower(
+                  link: link,
+                  offset: followerOffset,
+                  child: const Listener(behavior: HitTestBehavior.opaque),
+                ),
+              ),
+            ],
+          ),
+        ),
+        phase: EnginePhase.paint,
+      );
+
+      // Stopping at paint does not run the pass.
+      expect(RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions, isNull);
+
+      // Pumping to composite runs compositeFrame first, so the follower already
+      // knows the target's position in that same frame.
+      tester.binding.scheduleFrame();
+      await tester.pump(null, EnginePhase.composite);
+      expect(_lastRegions(), <int, Set<Rect>>{
+        1: <Rect>{(const Offset(40, 50) + followerOffset) & followerSize},
+      });
+
+      // Moving the target and pumping only through paint keeps the previous
+      // composite regions.
+      targetOffset.value = const Offset(120, 160);
+      await tester.pump(null, EnginePhase.paint);
+      expect(_lastRegions(), <int, Set<Rect>>{
+        1: <Rect>{(const Offset(40, 50) + followerOffset) & followerSize},
+      });
+
+      // Moving the target and calling a single tester.pump() updates regions to
+      // that frame's new target position.
+      targetOffset.value = const Offset(200, 220);
+      await tester.pump();
+      expect(_lastRegions(), <int, Set<Rect>>{
+        1: <Rect>{(const Offset(200, 220) + followerOffset) & followerSize},
+      });
+    },
+  );
 }
