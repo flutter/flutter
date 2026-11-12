@@ -814,29 +814,6 @@
       }
     },
     {
-      "name": "linux/wasm_release",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Linux"
-      ],
-      "gclient_variables": {
-        "download_android_deps": false,
-        "download_emsdk": true
-      },
-      "gn": [
-        "--web",
-        "--runtime-mode=release",
-        "--no-rbe"
-      ],
-      "ninja": {
-        "config": "wasm_release",
-        "targets": [
-          "flutter/web_sdk:flutter_web_sdk_archive"
-        ]
-      },
-      "cas_archive": false
-    },
-    {
       "name": "macos/wasm_release",
       "drone_dimensions": [
         "device_type=none",
