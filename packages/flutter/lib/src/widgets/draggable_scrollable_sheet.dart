@@ -967,12 +967,15 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
           ..animateWith(simulation).whenComplete(_end);
   }
 
-  final double _initialVelocity;
   late final AnimationController _controller;
-  _DraggableScrollableSheetScrollPosition get _position =>
-      delegate as _DraggableScrollableSheetScrollPosition;
+  final double _initialVelocity;
+
   late double _lastPosition = _position.extent.currentPixels;
-  bool _disposed = false;
+  bool _isDisposed = false;
+
+  _DraggableScrollableSheetScrollPosition get _position {
+    return delegate as _DraggableScrollableSheetScrollPosition;
+  }
 
   // Intentionally do not override resetActivity() or applyNewDimensions()
   // so that layout changes during snapping do not restart the simulation.
@@ -986,9 +989,11 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
       delegate.goBallistic(0.0);
       return;
     }
+
     final double delta = _controller.value - _lastPosition;
     _lastPosition = _controller.value;
     _position.extent.addPixelDelta(delta, _position.context.notificationContext!);
+
     if ((_initialVelocity > 0 && _controller.velocity > 0 && _position.extent.isAtMax) ||
         (_initialVelocity < 0 && _controller.velocity < 0 && _position.extent.isAtMin)) {
       // Make sure we pass along enough velocity to keep scrolling - otherwise
@@ -1003,32 +1008,42 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    if (!_disposed) {
-      // Update the extent value after the snap animation completes to
-      // avoid rounding errors that could prevent the sheet from closing when
-      // it reaches minSize.
-      final double? snapSize = _position._getCurrentSnapSize();
-      if (snapSize != null) {
-        _position.extent.updateSize(snapSize, _position.context.notificationContext!);
-      }
-      _position._superGoBallistic(0.0);
+    if (_isDisposed) {
+      return;
     }
+
+    // Update the extent value after the snap animation completes to
+    // avoid rounding errors that could prevent the sheet from closing when
+    // it reaches minSize.
+    final double? snapSize = _position._getCurrentSnapSize();
+    if (snapSize != null) {
+      _position.extent.updateSize(snapSize, _position.context.notificationContext!);
+    }
+    _position._superGoBallistic(0.0);
   }
 
+  // Whether the scrollable should ignore pointer events while the sheet is
+  // snapping or animating.
   @override
   final bool shouldIgnorePointer;
 
+  // The scrollable is actively in motion while the sheet animates, so this
+  // remains true even though the list's scroll velocity is 0.0.
   @override
   bool get isScrolling => true;
 
-  @override
   // The scroll offset is stationary while the sheet itself animates size, so
   // the scroll offset velocity is 0.0.
+  @override
   double get velocity => 0.0;
 
   @override
   void dispose() {
-    _disposed = true;
+    if (_isDisposed) {
+      return;
+    }
+
+    _isDisposed = true;
     _controller.dispose();
     super.dispose();
   }

@@ -2052,9 +2052,12 @@ void main() {
           controller: controller,
           snap: true,
           snapSizes: const <double>[0.5, 1.0],
-          builder: (BuildContext context, ScrollController sc) {
-            innerController = sc;
-            return SingleChildScrollView(controller: sc, child: const SizedBox(height: 1000));
+          builder: (BuildContext context, ScrollController scrollController) {
+            innerController = scrollController;
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000),
+            );
           },
         ),
       ),
@@ -2236,10 +2239,10 @@ void main() {
       TestWidgetsApp(
         home: DraggableScrollableSheet(
           controller: controller,
-          builder: (BuildContext context, ScrollController sc) {
-            innerController = sc;
+          builder: (BuildContext context, ScrollController scrollController) {
+            innerController = scrollController;
             return SingleChildScrollView(
-              controller: sc,
+              controller: scrollController,
               child: Column(children: <Widget>[for (var i = 0; i < 40; i++) Text('Item $i')]),
             );
           },
@@ -2277,10 +2280,10 @@ void main() {
         TestWidgetsApp(
           home: DraggableScrollableSheet(
             controller: controller,
-            builder: (BuildContext context, ScrollController sc) {
-              innerController = sc;
+            builder: (BuildContext context, ScrollController scrollController) {
+              innerController = scrollController;
               return ListView.builder(
-                controller: sc,
+                controller: scrollController,
                 itemCount: 100,
                 itemBuilder: (BuildContext context, int index) =>
                     SizedBox(height: 50.0, child: Text('Item $index')),
