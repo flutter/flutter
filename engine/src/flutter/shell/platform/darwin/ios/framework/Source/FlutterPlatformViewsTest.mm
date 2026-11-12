@@ -5132,6 +5132,57 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.count, 0ul);
 }
 
+- (void)testResetDiscardsPendingDisposals {
+  // Create a platform views controller and register a platform view factory.
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+
+  // Create the platform view.
+  FlutterResult result = ^(id value) {
+  };
+  FlutterMethodCall* create =
+      [FlutterMethodCall methodCallWithMethodName:@"create"
+                                        arguments:@{
+                                          @"id" : @0,
+                                          @"viewType" : @"MockFlutterPlatformView",
+                                          @"gestureBlockingPolicy" : @"eager"
+                                        }];
+  [flutterPlatformViewsController onMethodCall:create result:result];
+
+  // Set the Flutter view.
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  // Submit a frame with the view, so that the frame without it below is presented.
+  // `submitFrame:` doesn't present a frame without platform views if the previous frame had none.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+
+  // Dispose the view, and reset while its disposal is still pending.
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"dispose" arguments:@0]
+            result:result];
+  [flutterPlatformViewsController reset];
+
+  // Recreate the view with the same ID, and submit a frame without it.
+  [flutterPlatformViewsController onMethodCall:create result:result];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
+  [flutterPlatformViewsController submitFrame:CreateTestSurfaceFrame()
+                               withIosContext:std::make_shared<FakeIOSContext>()];
+
+  // Verify the recreated view was not disposed.
+  XCTAssertNotNil([flutterPlatformViewsController platformViewForId:0]);
+}
+
 - (void)testNilPlatformViewDoesntCrash {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
