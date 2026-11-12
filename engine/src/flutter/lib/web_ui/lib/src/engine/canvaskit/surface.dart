@@ -244,6 +244,9 @@ abstract class CkSurface extends Surface {
       );
     }
     _skSurface?.dispose();
+    // Clear the disposed surface so that it is not disposed again if creating
+    // the new one throws.
+    _skSurface = null;
     _skSurface = _createSoftwareSkSurface();
     if (_skSurface == null) {
       throw Exception('Failed to initialize CanvasKit SkSurface.');

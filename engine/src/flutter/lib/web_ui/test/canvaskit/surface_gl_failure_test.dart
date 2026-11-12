@@ -201,6 +201,19 @@ void testMain() {
       expect(surface.isSoftware, isTrue);
       expect(surface.onContextLost, throwsA(isA<AssertionError>()));
     });
+
+    test('clears disposed SkSurface when recreating software surface throws', () async {
+      CkSurface.debugForceGLFailure = true;
+      final CkOnscreenSurface surface = await createOnscreenSurface();
+      expect(surface.skSurface, isNotNull);
+
+      JSAny? throwingSurface(JSAny? canvas) => throw StateError('No software surface');
+      canvasKit['MakeSWCanvasSurface'] = throwingSurface.toJS;
+
+      expect(() => surface.setSize(const BitmapSize(10, 10)), throwsA(isA<StateError>()));
+      expect(surface.skSurface, isNull);
+      expect(surface.dispose, returnsNormally);
+    });
   });
 
   group('CkOffscreenSurface WebGL failure recovery', () {
