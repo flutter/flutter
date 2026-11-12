@@ -90,8 +90,8 @@ import java.util.List;
   @NonNull private Host host;
   @Nullable private FlutterEngine flutterEngine;
   @VisibleForTesting @Nullable FlutterView flutterView;
+  // Kept separately from activityScopedPlugins because onPostResume() calls into it directly.
   @Nullable private PlatformPlugin platformPlugin;
-  @Nullable private SensitiveContentPlugin sensitiveContentPlugin;
   // Every embedding component created for the currently attached Activity. They are destroyed, in
   // creation order, when the Activity is detached. See ActivityScopedPlugin.
   @NonNull private final List<ActivityScopedPlugin> activityScopedPlugins = new ArrayList<>();
@@ -146,7 +146,7 @@ import java.util.List;
     this.flutterEngine = null;
     this.flutterView = null;
     this.platformPlugin = null;
-    this.sensitiveContentPlugin = null;
+    this.activityScopedPlugins.clear();
   }
 
   /**
@@ -185,7 +185,8 @@ import java.util.List;
    * <ol>
    *   <li>Initializes the Flutter system.
    *   <li>Obtains or creates a {@link io.flutter.embedding.engine.FlutterEngine}.
-   *   <li>Creates and configures a {@link PlatformPlugin}.
+   *   <li>Creates and configures the {@link ActivityScopedPlugin}s bound to the surrounding {@code
+   *       Activity}, such as the {@link PlatformPlugin} and the {@link SensitiveContentPlugin}.
    *   <li>Attaches the {@link io.flutter.embedding.engine.FlutterEngine} to the surrounding {@code
    *       Activity}, if desired.
    *   <li>Configures the {@link io.flutter.embedding.engine.FlutterEngine} via {@link
@@ -226,8 +227,7 @@ import java.util.List;
     final Activity hostActivity = host.getActivity();
     platformPlugin = host.providePlatformPlugin(hostActivity, flutterEngine);
     addActivityScopedPlugin(platformPlugin);
-    sensitiveContentPlugin = host.provideSensitiveContentPlugin(hostActivity, flutterEngine);
-    addActivityScopedPlugin(sensitiveContentPlugin);
+    addActivityScopedPlugin(host.provideSensitiveContentPlugin(hostActivity, flutterEngine));
 
     host.configureFlutterEngine(flutterEngine);
     isAttached = true;
@@ -253,7 +253,6 @@ import java.util.List;
     }
     activityScopedPlugins.clear();
     platformPlugin = null;
-    sensitiveContentPlugin = null;
   }
 
   @Override
@@ -769,7 +768,8 @@ import java.util.List;
    * <ol>
    *   <li>Detaches this delegate's {@link io.flutter.embedding.engine.FlutterEngine} from its
    *       surrounding {@code Activity}, if it was previously attached.
-   *   <li>Destroys this delegate's {@link PlatformPlugin}.
+   *   <li>Destroys every {@link ActivityScopedPlugin} created in {@link #onAttach(Context)}, such
+   *       as the {@link PlatformPlugin} and the {@link SensitiveContentPlugin}.
    *   <li>Destroys this delegate's {@link io.flutter.embedding.engine.FlutterEngine} if {@link
    *       Host#shouldDestroyEngineWithHost()} ()} returns true.
    * </ol>

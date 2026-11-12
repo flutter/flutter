@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -75,6 +76,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -1458,9 +1460,10 @@ public class FlutterActivityAndFragmentDelegateTest {
             delegate.onDestroyView();
             delegate.onDetach();
 
-            // --- Verify that each plugin was destroyed exactly once ---
-            verify(mockPlatformPlugin, times(1)).destroy();
-            verify(mockSensitiveContentPlugin, times(1)).destroy();
+            // --- Verify that each plugin was destroyed exactly once, in creation order ---
+            InOrder inOrder = inOrder(mockPlatformPlugin, mockSensitiveContentPlugin);
+            inOrder.verify(mockPlatformPlugin, times(1)).destroy();
+            inOrder.verify(mockSensitiveContentPlugin, times(1)).destroy();
           });
     }
   }
@@ -1502,8 +1505,8 @@ public class FlutterActivityAndFragmentDelegateTest {
   @Test
   public void itToleratesHostsThatProvideNoActivityScopedPlugins() {
     // ---- Test setup ----
-    // The mocked host returns null from both provide*Plugin() hooks, as a FlutterFragment without
-    // an Activity does.
+    // The mocked host is left with Mockito's defaults, so both provide*Plugin() hooks return null,
+    // which Host implementations are allowed to do.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
