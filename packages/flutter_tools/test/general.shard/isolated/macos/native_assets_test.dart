@@ -346,6 +346,7 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            featureFlags: featureFlags,
             logger: logger,
             buildRunner: buildRunner,
             buildCodeAssets: BuildCodeAssetsOptions(
