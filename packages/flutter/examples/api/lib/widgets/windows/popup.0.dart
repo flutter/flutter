@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
 
     if (_popupController != null) {
       children.add(
-        PopupWindow(
+        Window(
           controller: _popupController!,
           child: Container(
             padding: const .all(8),

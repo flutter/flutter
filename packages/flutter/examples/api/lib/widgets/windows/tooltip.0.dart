@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
 
     if (_tooltipController != null) {
       children.add(
-        TooltipWindow(
+        Window(
           controller: _tooltipController!,
           child: Container(
             padding: const .all(8),
