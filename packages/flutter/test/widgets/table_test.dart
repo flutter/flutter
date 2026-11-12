@@ -1116,6 +1116,14 @@ void main() {
       for (final cell in <Widget>[
         const TableCell(child: SizedBox(height: 20.0, child: Text('B'))),
         const SizedBox(height: 20.0, child: Text('B')),
+        // A semantics boundary whose size stays the same keeps its semantics
+        // node as it is when it moves.
+        Semantics(
+          container: true,
+          label: 'B',
+          textDirection: TextDirection.ltr,
+          child: const SizedBox(height: 20.0),
+        ),
       ]) {
         height.value = 40.0;
         await tester.pumpWidget(buildTable(cell: cell, tight: tight));
@@ -1125,8 +1133,8 @@ void main() {
           height.value = rowHeight;
           await tester.pump();
           expect(
-            rectInTable(tester.getSemantics(find.text('B'))),
-            tester.getRect(find.text('B')),
+            rectInTable(tester.getSemantics(find.bySemanticsLabel('B'))),
+            tester.getRect(find.bySemanticsLabel('B')),
             reason: 'tight: $tight, ${cell.runtimeType}, row height: $rowHeight',
           );
         }
@@ -1135,6 +1143,64 @@ void main() {
 
     handle.dispose();
   });
+
+  testWidgets(
+    'Table semantics of a semantics boundary stay in place when the table is laid out again',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      Widget buildTable() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            // A table with tight constraints is a relayout boundary.
+            child: SizedBox(
+              width: 200.0,
+              height: 200.0,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                children: <TableRow>[
+                  const TableRow(
+                    children: <Widget>[
+                      SizedBox(height: 50.0, child: Text('Header')),
+                      SizedBox(height: 50.0),
+                    ],
+                  ),
+                  TableRow(
+                    children: <Widget>[
+                      Semantics(
+                        container: true,
+                        button: true,
+                        label: 'Action',
+                        child: const SizedBox(width: 100.0, height: 50.0),
+                      ),
+                      const SizedBox(height: 50.0, child: Text('Row 1')),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildTable());
+      final SemanticsNode action = tester.getSemantics(find.bySemanticsLabel('Action'));
+      expect(action.parent!.parent!.role, SemanticsRole.row);
+      expect(action.parent!.parent!.indexInParent, 1);
+      expect(rectInTable(action), const Rect.fromLTRB(0.0, 50.0, 100.0, 100.0));
+
+      // The table is laid out again, while the size and the semantics of the
+      // cell stay the same.
+      await tester.pumpWidget(buildTable());
+      expect(tester.getSemantics(find.bySemanticsLabel('Action')), same(action));
+      expect(action.parent!.parent!.role, SemanticsRole.row);
+      expect(action.parent!.parent!.indexInParent, 1);
+      expect(rectInTable(action), const Rect.fromLTRB(0.0, 50.0, 100.0, 100.0));
+
+      handle.dispose();
+    },
+  );
 
   testWidgets('Table semantics follow keyed rows that move up', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/194545.
