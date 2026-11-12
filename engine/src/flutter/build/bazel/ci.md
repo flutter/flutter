@@ -79,15 +79,15 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   `exec N>&-` did the same on a host whose `/bin/sh` is bash; the bots' is
   dash, which has no descriptors above 9 (`exec: 10: not found`, the first
   presubmit run), and Python's `close_fds` has no such limit.
-- **The recipe's `--no-lto`.** cocoon sets the `no_lto` property on a
-  release builder's presubmit builds and the recipe appends `--no-lto` to
-  the flags; a build whose own flags lack it matches without it and runs
-  with LTO off (`--//engine/src/flutter/build/bazel:lto=false` after its
-  configuration, in the install and the tests alike: `bazel.json`'s
-  `options`). A `--thin-lto` build is such a build: a presubmit of the
-  three Linux release builders builds it without LTO, and ThinLTO runs in
-  their postsubmit builds and in every build of `linux_host_engine_test`,
-  which is no release builder.
+- **The recipe's `--no-lto`.** cocoon sets the `no_lto` property on the
+  engine builds of a presubmit -- on every one, a release builder's or not
+  (all 127 engine drones of one presubmit run carried it) -- and the recipe
+  appends `--no-lto` to the flags; a build whose own flags lack it matches
+  without it and runs with LTO off
+  (`--//engine/src/flutter/build/bazel:lto=false` after its configuration,
+  in the install and the tests alike: `bazel.json`'s `options`). So no
+  presubmit builds with LTO, full or thin: the LTO builds, the `--thin-lto`
+  builds of `linux_host_engine_test` among them, run in postsubmit alone.
 - **One output root for the install and the tests.** `run_tests.py` runs
   its Bazel commands from `bazel.json`'s recorded startup and build options
   rather than recomputing them: computed again from the checkout root they

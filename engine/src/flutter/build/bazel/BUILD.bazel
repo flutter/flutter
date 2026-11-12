@@ -341,8 +341,8 @@ config_setting(
 # --thin-lto): which LTO a build with LTO has -- ThinLTO, -flto=thin where
 # full LTO has -flto. Nothing without `lto`: tools/gn passes the argument
 # under enable_lto alone, so --no-lto on top of --thin-lto (the recipe's, in
-# a release builder's presubmit) is a build without LTO. Off by default, as
-# GN's argument is.
+# every presubmit) is a build without LTO. Off by default, as GN's argument
+# is.
 bool_flag(
     name = "thin_lto",
     build_setting_default = False,

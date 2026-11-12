@@ -119,7 +119,7 @@ class MatchBuildTest(unittest.TestCase):
     self.assertEqual(build, {**HOST_DEBUG_UNOPT, 'options': []})
 
   def test_the_recipes_no_lto_turns_lto_off(self):
-    # cocoon's no_lto property on a release builder's presubmit builds:
+    # cocoon's no_lto property on a presubmit's engine builds:
     # the recipe appends --no-lto to flags that lack it.
     build = bazel_ci.match_build(BUILDS, HOST_DEBUG_UNOPT['gn'] + ['--bazel', '--no-lto'])
     self.assertEqual(build['name'], HOST_DEBUG_UNOPT['name'])
