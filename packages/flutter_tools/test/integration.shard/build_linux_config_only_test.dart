@@ -106,7 +106,10 @@ void main() {
         final ProcessResult failedResult = await processManager.run(
           buildCommand,
           workingDirectory: workingDirectory,
-          environment: <String, String>{'PKG_CONFIG_LIBDIR': '/nonexistent'},
+          environment: <String, String>{
+            'PKG_CONFIG_LIBDIR': '/nonexistent',
+            'PKG_CONFIG_PATH': '/nonexistent',
+          },
         );
         expect(failedResult.exitCode, isNot(0));
 
