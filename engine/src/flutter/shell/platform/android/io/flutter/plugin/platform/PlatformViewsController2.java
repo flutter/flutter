@@ -35,7 +35,6 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.util.SparseArrayKt;
-
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
@@ -438,6 +437,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     coords.y = (float) ((double) coordsList.get(8) * density);
     return coords;
   }
+
   private void disposeAllViews() {
     while (SparseArrayKt.isNotEmpty(platformViews)) {
       final int viewId = platformViews.keyAt(0);

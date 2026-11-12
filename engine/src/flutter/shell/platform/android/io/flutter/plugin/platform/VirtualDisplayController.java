@@ -23,8 +23,7 @@ import androidx.annotation.VisibleForTesting;
 class VirtualDisplayController {
   private static String TAG = "VirtualDisplayController";
 
-  private static VirtualDisplay.Callback callback =
-      new VirtualDisplay.Callback() {};
+  private static VirtualDisplay.Callback callback = new VirtualDisplay.Callback() {};
 
   public static VirtualDisplayController create(
       Context context,
