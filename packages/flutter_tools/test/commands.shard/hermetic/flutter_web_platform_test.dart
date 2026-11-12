@@ -378,148 +378,150 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'FlutterWebPlatform sets Cache-Control headers on static and Wasm test assets',
-    () async {
-      final chromiumLauncher = ChromiumLauncher(
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-        browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
-        logger: logger,
-      );
-      final server = FakeServer();
-      final Directory buildDirectory = fileSystem.directory('build')..createSync(recursive: true);
-      buildDirectory.childFile('main.dart.mjs').writeAsStringSync('export default {}');
-      buildDirectory.childFile('main.dart.wasm').writeAsBytesSync(<int>[0, 97, 115, 109]);
-
-      final Directory flutterJsDir = fileSystem.directory(
-        artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-      )..createSync(recursive: true);
-      flutterJsDir.childFile('flutter.js').writeAsStringSync('// flutter.js');
-
-      final String dartSdkPath = artifacts.getArtifactPath(
-        Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
-      );
-      fileSystem.file(
-          fileSystem.path.join(dartSdkPath, 'lib', 'dev_compiler', 'ddc', 'ddc_module_loader.js'),
-        )
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// ddc_module_loader.js');
-      fileSystem.file(
-          fileSystem.path.join(
-            dartSdkPath,
-            'lib',
-            'dev_compiler',
-            'web',
-            'dart_stack_trace_mapper.js',
-          ),
-        )
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// mapper.js');
-
-      final Directory testPkgDir = fileSystem.directory('test_pkg')..createSync(recursive: true);
-      testPkgDir.childFile('dart.js').writeAsStringSync('// dart.js');
-      testPkgDir.childFile('src/runner/browser/static/host.dart.js')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// host.dart.js');
-
-      final File ahemFile =
-          fileSystem.file(
-              fileSystem.path.join(
-                FakeToolContext(
-                  artifacts: artifacts,
-                  fs: fileSystem,
-                  logger: logger,
-                  processManager: processManager,
-                ).cache.flutterRoot,
-                'packages',
-                'flutter_tools',
-                'static',
-                'Ahem.ttf',
-              ),
-            )
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(<int>[1, 2, 3]);
-
-      final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
-        'ProjectRoot',
-        buildDirectory: buildDirectory,
-        buildInfo: const BuildInfo(
-          BuildMode.debug,
-          '',
-          packageConfigPath: '.dart_tool/package_config.json',
-          treeShakeIcons: false,
-        ),
-        chromiumLauncher: chromiumLauncher,
-        crossOriginIsolation: true,
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
-        flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        toolContext: FakeToolContext(
-          artifacts: artifacts,
-          fs: fileSystem,
-          logger: logger,
+  for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
+    final os = style == FileSystemStyle.windows ? 'windows' : 'linux';
+    testWithoutContext(
+      'FlutterWebPlatform sets Cache-Control headers on static and Wasm test assets ($os)',
+      () async {
+        final testFs = MemoryFileSystem.test(style: style);
+        final testPlatform = FakePlatform(operatingSystem: os);
+        final testArtifacts = Artifacts.test(fileSystem: testFs);
+        final Directory projectDir = testFs.systemTempDirectory.createTempSync(
+          'flutter_web_platform_test.',
+        );
+        final chromiumLauncher = ChromiumLauncher(
+          fileSystem: testFs,
+          platform: testPlatform,
           processManager: processManager,
-        ),
-        useWasm: true,
-        webMemoryFS: WebMemoryFS(),
-        webRenderer: WebRendererMode.skwasm,
-        serverFactory: () async => server,
-        testPackageUri: testPkgDir.uri,
-        templateRenderer: const MustacheTemplateRenderer(),
-      );
-      final shelf.Handler handler = server.mountedHandler!;
-
-      for (final assetPath in <String>[
-        'flutter.js',
-        'ddc_module_loader.js',
-        'dart_stack_trace_mapper.js',
-        'static/dart.js',
-        'host.dart.js',
-        'ahem.ttf',
-        'main.dart.mjs',
-        'main.dart.wasm',
-      ]) {
-        final shelf.Response response = await handler(
-          shelf.Request('GET', Uri.parse('http://localhost/$assetPath')),
+          operatingSystemUtils: operatingSystemUtils,
+          browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+          logger: logger,
         );
-        expect(response.statusCode, HttpStatus.ok, reason: assetPath);
+        final server = FakeServer();
+        final Directory buildDirectory = testFs.directory('build')..createSync(recursive: true);
+        buildDirectory.childFile('main.dart.mjs').writeAsStringSync('export default {}');
+        buildDirectory.childFile('main.dart.wasm').writeAsBytesSync(<int>[0, 97, 115, 109]);
+
+        final Directory flutterJsDir = testFs.directory(
+          testArtifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+        )..createSync(recursive: true);
+        flutterJsDir.childFile('flutter.js').writeAsStringSync('// flutter.js');
+
+        final String dartSdkPath = testArtifacts.getArtifactPath(
+          Artifact.engineDartSdkPath,
+          platform: TargetPlatform.web_javascript,
+        );
+        testFs.file(
+            testFs.path.join(dartSdkPath, 'lib', 'dev_compiler', 'ddc', 'ddc_module_loader.js'),
+          )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('// ddc_module_loader.js');
+        testFs.file(
+            testFs.path.join(
+              dartSdkPath,
+              'lib',
+              'dev_compiler',
+              'web',
+              'dart_stack_trace_mapper.js',
+            ),
+          )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('// mapper.js');
+
+        final Directory testPkgDir = testFs.directory('test_pkg')..createSync(recursive: true);
+        testPkgDir.childFile('dart.js').writeAsStringSync('// dart.js');
+        testPkgDir.childFile(testFs.path.join('src', 'runner', 'browser', 'static', 'host.dart.js'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('// host.dart.js');
+
+        final toolContext = FakeToolContext(
+          artifacts: testArtifacts,
+          cache: FakeCache(fileSystem: testFs, flutterRoot: testFs.directory('flutter').path),
+          fs: testFs,
+          logger: logger,
+          platform: testPlatform,
+          processManager: processManager,
+        );
+        final File ahemFile =
+            testFs.file(
+                testFs.path.join(
+                  toolContext.cache.flutterRoot,
+                  'packages',
+                  'flutter_tools',
+                  'static',
+                  'Ahem.ttf',
+                ),
+              )
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(<int>[1, 2, 3]);
+
+        final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
+          'ProjectRoot',
+          buildDirectory: buildDirectory,
+          buildInfo: const BuildInfo(
+            BuildMode.debug,
+            '',
+            packageConfigPath: '.dart_tool/package_config.json',
+            treeShakeIcons: false,
+          ),
+          chromiumLauncher: chromiumLauncher,
+          crossOriginIsolation: true,
+          flutterProject: FlutterProject.fromDirectoryTest(projectDir),
+          flutterTesterBinPath: testArtifacts.getArtifactPath(Artifact.flutterTester),
+          toolContext: toolContext,
+          useWasm: true,
+          webMemoryFS: WebMemoryFS(),
+          webRenderer: WebRendererMode.skwasm,
+          serverFactory: () async => server,
+          testPackageUri: testPkgDir.uri,
+          templateRenderer: const MustacheTemplateRenderer(),
+        );
+        final shelf.Handler handler = server.mountedHandler!;
+
+        for (final assetPath in <String>[
+          'flutter.js',
+          'ddc_module_loader.js',
+          'dart_stack_trace_mapper.js',
+          'static/dart.js',
+          'host.dart.js',
+          'ahem.ttf',
+          'main.dart.mjs',
+          'main.dart.wasm',
+        ]) {
+          final shelf.Response response = await handler(
+            shelf.Request('GET', Uri.parse('http://localhost/$assetPath')),
+          );
+          expect(response.statusCode, HttpStatus.ok, reason: assetPath);
+          expect(
+            response.headers[HttpHeaders.cacheControlHeader],
+            'public, max-age=3600',
+            reason: assetPath,
+          );
+          await response.read().drain<void>();
+        }
+
+        final shelf.Response ahemResponse = await handler(
+          shelf.Request('GET', Uri.parse('http://localhost/ahem.ttf')),
+        );
         expect(
-          response.headers[HttpHeaders.cacheControlHeader],
-          'public, max-age=3600',
-          reason: assetPath,
+          ahemResponse.headers[HttpHeaders.contentLengthHeader],
+          ahemFile.lengthSync().toString(),
         );
-        await response.read().drain<void>();
-      }
+        await ahemResponse.read().drain<void>();
 
-      final shelf.Response ahemResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/ahem.ttf')),
-      );
-      expect(
-        ahemResponse.headers[HttpHeaders.contentLengthHeader],
-        ahemFile.lengthSync().toString(),
-      );
-      await ahemResponse.read().drain<void>();
+        final shelf.Response wrapperResponse = await handler(
+          shelf.Request('GET', Uri.parse('http://localhost/rendering/sample_test.html')),
+        );
+        expect(wrapperResponse.statusCode, HttpStatus.ok);
+        expect(wrapperResponse.headers[HttpHeaders.cacheControlHeader], isNull);
+        final String wrapperHtml = await wrapperResponse.readAsString();
+        expect(wrapperHtml, contains('mainWasmPath: "/main.dart.wasm"'));
+        expect(wrapperHtml, contains('jsSupportRuntimePath: "/main.dart.mjs"'));
 
-      final shelf.Response wrapperResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/rendering/sample_test.html')),
-      );
-      expect(wrapperResponse.statusCode, HttpStatus.ok);
-      expect(wrapperResponse.headers[HttpHeaders.cacheControlHeader], isNull);
-      final String wrapperHtml = await wrapperResponse.readAsString();
-      expect(wrapperHtml, contains('mainWasmPath: "/main.dart.wasm"'));
-      expect(wrapperHtml, contains('jsSupportRuntimePath: "/main.dart.mjs"'));
-
-      await webPlatform.close();
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Logger: () => logger,
-    },
-  );
+        await webPlatform.close();
+      },
+    );
+  }
 
   testUsingContext(
     'FlutterWebPlatform launches Chrome with scale factor and window size flags for goldens alignment',
