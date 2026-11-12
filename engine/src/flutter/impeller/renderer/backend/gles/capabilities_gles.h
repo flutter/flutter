@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 
+#include <array>
 #include <cstddef>
 
 #include "impeller/base/backend_cast.h"
@@ -79,6 +80,10 @@ class CapabilitiesGLES final
 
   /// Whether uploads must reset a stale shared-context texture binding.
   bool NeedsTextureUploadRebind() const;
+
+  /// Whether uniform data must be stored in GL buffers that are never also
+  /// bound as vertex or index buffers.
+  bool NeedsSeparateUniformBuffers() const;
 
   /// @brief Whether this is an ES GL variant or (if false) desktop GL.
   bool IsES() const;
@@ -187,6 +192,9 @@ class CapabilitiesGLES final
   // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
 
+  // |Capabilities|
+  ComputeLimits GetComputeLimits() const override;
+
  private:
   bool supports_texture_to_texture_blits_ = false;
   bool supports_framebuffer_fetch_ = false;
@@ -197,6 +205,7 @@ class CapabilitiesGLES final
   bool supports_texture_max_level_ = false;
   bool supports_texture_array_ = false;
   bool needs_texture_upload_rebind_ = false;
+  bool needs_separate_uniform_buffers_ = false;
   bool is_angle_ = false;
   bool is_es_ = false;
   bool supports_texture_compression_bc_ = false;

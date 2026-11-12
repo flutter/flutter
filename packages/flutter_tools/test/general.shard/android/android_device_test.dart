@@ -16,15 +16,14 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeConfig;
 
 void main() {
   testWithoutContext('AndroidDevice stores the requested id', () {
@@ -202,6 +201,7 @@ flutter:
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      config: FakeConfig(),
     ).fromDirectory(fileSystem.currentDirectory);
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
 
@@ -215,6 +215,7 @@ flutter:
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      config: FakeConfig(),
     ).fromDirectory(fileSystem.currentDirectory);
 
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
@@ -228,6 +229,7 @@ flutter:
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      config: FakeConfig(),
     ).fromDirectory(fileSystem.currentDirectory);
 
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
@@ -526,10 +528,10 @@ Uptime: 441088659 Realtime: 521464097
     expect(await device.stopApp(null), isFalse);
   });
 
-  testUsingContext(
+  testWithoutContext(
     'AdbLogReader.provideVmService catches any RPCError due to VM service disconnection by text',
     () async {
-      final logger = globals.logger as BufferLogger;
+      final logger = BufferLogger.test();
       final vmService = FlutterVmService(_MyFakeVmServiceConnectionDisposedText());
       final logReader = AdbLogReader.test(FakeProcess(), 'foo', logger);
       await logReader.provideVmService(vmService);
@@ -544,13 +546,12 @@ Uptime: 441088659 Realtime: 521464097
         'Unable to communicate with the VM service.\n',
       );
     },
-    overrides: <Type, Generator>{Logger: () => BufferLogger.test()},
   );
 
-  testUsingContext(
+  testWithoutContext(
     'AdbLogReader.provideVmService catches any RPCError due to VM service disconnection by code',
     () async {
-      final logger = globals.logger as BufferLogger;
+      final logger = BufferLogger.test();
       final vmService = FlutterVmService(_MyFakeVmServiceConnectionDisposedCode());
       final logReader = AdbLogReader.test(FakeProcess(), 'foo', logger);
       await logReader.provideVmService(vmService);
@@ -565,7 +566,6 @@ Uptime: 441088659 Realtime: 521464097
         'Unable to communicate with the VM service.\n',
       );
     },
-    overrides: <Type, Generator>{Logger: () => BufferLogger.test()},
   );
 
   testWithoutContext('AdbLogReader filters logs by default (adbLogFiltering = true)', () async {

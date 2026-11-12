@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart';
@@ -142,10 +143,11 @@ void main() {
       architecture: Architecture.x64,
     );
 
-    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(<FlutterCodeAsset>[
-      asset1,
-      asset2,
-    ], null);
+    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(
+      <FlutterCodeAsset>[asset1, asset2],
+      null,
+      logger: BufferLogger.test(),
+    );
 
     expect(result.length, equals(1));
     final Uri path = result.keys.single;
@@ -195,12 +197,11 @@ void main() {
       architecture: Architecture.x64,
     );
 
-    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(<FlutterCodeAsset>[
-      assetA1,
-      assetB1,
-      assetA2,
-      assetB2,
-    ], null);
+    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(
+      <FlutterCodeAsset>[assetA1, assetB1, assetA2, assetB2],
+      null,
+      logger: BufferLogger.test(),
+    );
 
     expect(result.length, equals(2));
 
@@ -236,14 +237,18 @@ void main() {
     final assets = <FlutterCodeAsset>[asset];
 
     final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest =
-        assetTargetLocationsMacOS(assets, null);
+        assetTargetLocationsMacOS(assets, null, logger: BufferLogger.test());
     expect(
       (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
       equals('@rpath/my_asset.framework/my_asset'),
     );
 
     // The framework itself is still bundled without the install name prefix.
-    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsMacOS(assets, null);
+    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsMacOS(
+      assets,
+      null,
+      logger: BufferLogger.test(),
+    );
     expect(bundled.keys.single.path, equals('my_asset.framework/my_asset'));
   });
 
@@ -262,9 +267,11 @@ void main() {
     // The tester loads the dylib from where it was built instead of from a
     // bundle, and its install name is set to that same absolute path.
     final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest =
-        assetTargetLocationsMacOS(<FlutterCodeAsset>[
-          asset,
-        ], Uri.parse('file:///build/native_assets/macos/'));
+        assetTargetLocationsMacOS(
+          <FlutterCodeAsset>[asset],
+          Uri.parse('file:///build/native_assets/macos/'),
+          logger: BufferLogger.test(),
+        );
     expect(
       (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
       equals(Uri.parse('file:///build/native_assets/macos/libmy_asset.dylib').toFilePath()),
@@ -286,13 +293,17 @@ void main() {
 
     final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest = assetTargetLocationsIOS(
       assets,
+      logger: BufferLogger.test(),
     );
     expect(
       (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
       equals('@rpath/my_asset.framework/my_asset'),
     );
 
-    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsIOS(assets);
+    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsIOS(
+      assets,
+      logger: BufferLogger.test(),
+    );
     expect(bundled.keys.single.path, equals('my_asset.framework/my_asset'));
   });
 }

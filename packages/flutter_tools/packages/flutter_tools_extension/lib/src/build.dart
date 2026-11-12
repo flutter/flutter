@@ -67,7 +67,7 @@ class ExtensionAssembleContext extends ExtensionBuildContext {
 /// Extensions should extend this class to contribute top-level `flutter build`
 /// subcommands via [BuildService.buildTargets].
 @immutable
-abstract class BuildTarget {
+abstract base class BuildTarget {
   const BuildTarget({
     required this.description,
     required this.outputDir,
@@ -75,6 +75,8 @@ abstract class BuildTarget {
   });
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
+  ///
+  /// Must match [ExtensionBuildTarget.isValidName].
   String get name;
 
   /// Description of what this target builds.
@@ -119,7 +121,7 @@ abstract class BuildTarget {
 /// Extensions should extend this class to contribute `flutter assemble` targets
 /// with tracked [dependencies], [inputs], and [outputs] via [BuildService.assembleTargets].
 @immutable
-abstract class AssembleTarget {
+abstract base class AssembleTarget {
   const AssembleTarget({required this.description, required this.targetPlatform});
 
   /// The user-readable name of the assemble target.

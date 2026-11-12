@@ -6,11 +6,13 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include <android/hardware_buffer_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/impeller/core/formats.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/snapshot_surface_producer.h"
@@ -43,6 +45,12 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
 class PlatformViewAndroid final : public PlatformView {
  public:
   static bool Register(JNIEnv* env);
+
+  /// @brief Creates the AndroidContext::ContextSettings from engine Settings,
+  ///        gating SurfaceControl swapchain usage on Android API 34+ (HCPP).
+  static AndroidContext::ContextSettings CreateContextSettings(
+      const Settings& p_settings,
+      int api_level);
 
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       const flutter::TaskRunners& task_runners,
@@ -137,6 +145,14 @@ class PlatformViewAndroid final : public PlatformView {
   std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
   bool android_meets_hcpp_criteria_ = false;
+  // The color format that |SetupImpellerContext| warmed the default pipelines
+  // for, if it warmed them. Raster thread only.
+  std::optional<impeller::PixelFormat> warmed_color_format_;
+
+  // Asserts that the surface renders to the color format that the default
+  // pipelines were warmed for. Otherwise the warm-up was wasted. Raster thread
+  // only.
+  void CheckWarmedColorFormat() const;
 
   // |PlatformView|
   void UpdateSemantics(

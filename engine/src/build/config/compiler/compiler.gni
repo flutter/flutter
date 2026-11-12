@@ -9,6 +9,11 @@ declare_args() {
   build_with_chromium = false
   use_libfuzzer = false
   is_apple = is_ios || is_mac
+
+  # When LTO is enabled (see `enable_lto` in //build/toolchain/clang.gni), use
+  # ThinLTO instead of full LTO. ThinLTO links are parallelized and
+  # significantly faster than full LTO links, while retaining most of the
+  # benefits.
   use_thin_lto = false
 
   # zlib uses this identifier

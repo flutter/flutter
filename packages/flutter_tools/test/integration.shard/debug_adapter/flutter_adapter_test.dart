@@ -6,9 +6,7 @@ import 'dart:async';
 
 import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../test_data/basic_project.dart';
@@ -23,10 +21,6 @@ void main() {
   late Directory tempDir;
   late DapTestSession dap;
   final relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
-
-  setUpAll(() {
-    Cache.flutterRoot = getFlutterRoot();
-  });
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_adapter_test.');
@@ -645,13 +639,13 @@ The relevant error-causing widget was:
         final project = BasicProject();
         await project.setUpIn(tempDir);
 
-        final String breakpointFilePath = globals.fs.path.join(
+        final String breakpointFilePath = fileSystem.path.join(
           project.dir.path,
           'lib',
           'main.dart',
         );
         final int breakpointLine = project.topLevelFunctionBreakpointLine;
-        final String expectedPrintLibraryPath = globals.fs.path.join(
+        final String expectedPrintLibraryPath = fileSystem.path.join(
           'pkg',
           'sky_engine',
           'lib',
@@ -709,7 +703,7 @@ The relevant error-causing widget was:
       await project.setUpIn(tempDir);
       testProcess = await SimpleFlutterRunner.start(tempDir);
 
-      breakpointFilePath = globals.fs.path.join(project.dir.path, 'lib', 'main.dart');
+      breakpointFilePath = fileSystem.path.join(project.dir.path, 'lib', 'main.dart');
       breakpointLine = project.buildMethodBreakpointLine;
     });
 
