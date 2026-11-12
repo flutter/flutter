@@ -333,6 +333,8 @@ class KernelCompiler {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
 
+    depFilePath = fileSystemRoots == null || fileSystemRoots.isEmpty ? depFilePath : null;
+
     // Check if there's a Dart plugin registrant.
     // This is contained in the file `dart_plugin_registrant.dart` under `.dart_tools/flutter_build/`.
     final File? dartPluginRegistrant = checkDartPluginRegistry
@@ -343,20 +345,14 @@ class KernelCompiler {
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
 
-      final dartPluginRegistrantPackageUri = packageConfig
+      dartPluginRegistrantUri = packageConfig
           .toPackageUriForWorkspace(dartPluginRegistrantFileUri)
           ?.toString();
-      if (dartPluginRegistrantPackageUri != null) {
-        dartPluginRegistrantUri = dartPluginRegistrantPackageUri;
-      } else {
+
+      if (dartPluginRegistrantUri == null) {
         fileSystemScheme ??= kDartPluginRegistrantScheme;
         fileSystemRoots = <String>[...?fileSystemRoots, dartPluginRegistrant.parent.path];
-        dartPluginRegistrantUri = toMultiRootPath(
-          dartPluginRegistrantFileUri,
-          fileSystemScheme,
-          fileSystemRoots,
-          _fileSystem.path.separator == r'\',
-        );
+        dartPluginRegistrantUri = '$fileSystemScheme:///${dartPluginRegistrant.basename}';
       }
     }
 
@@ -406,11 +402,7 @@ class KernelCompiler {
           ],
           if (packagesPath != null) ...<String>['--packages', packagesPath],
           if (outputFilePath != null) ...<String>['--output-dill', outputFilePath],
-          if (depFilePath != null &&
-              (fileSystemRoots == null || fileSystemRoots.isEmpty)) ...<String>[
-            '--depfile',
-            depFilePath,
-          ],
+          if (depFilePath != null) ...<String>['--depfile', depFilePath],
           if (fileSystemRoots != null)
             for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
           if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme],
