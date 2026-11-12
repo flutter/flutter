@@ -224,7 +224,8 @@ abstract class Pub {
   /// Runs pub in 'interactive' mode.
   ///
   /// This will run the pub process with [ProcessStartMode.inheritStdio] unless
-  /// `stdio` overrides the process stdout or stderr streams (for testing).
+  /// `stdio` overrides the process stdin, stdout, or stderr streams (for
+  /// testing).
   ///
   /// The pub process will be run in current working directory, so `--directory`
   /// should be passed appropriately in [arguments]. This ensures output from
@@ -439,7 +440,7 @@ class _DefaultPub implements Pub {
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
   ///
   /// Uses [ProcessStartMode.normal] and [_stdio] when [_stdio] overrides the
-  /// process stdout or stderr streams (for example, in tests).
+  /// process stdin, stdout, or stderr streams (for example, in tests).
   ///
   /// Prints the stdout and stderr of the whole run, unless silenced using
   /// [outputMode].

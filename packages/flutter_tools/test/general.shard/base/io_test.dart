@@ -243,7 +243,7 @@ void main() {
     },
   );
 
-  testWithoutContext('hasStdioStreamOverrides detects overridden stdout or stderr', () {
+  testWithoutContext('hasStdioStreamOverrides detects overridden streams', () {
     expect(hasStdioStreamOverrides(Stdio()), false);
     expect(
       hasStdioStreamOverrides(
@@ -251,6 +251,7 @@ void main() {
       ),
       true,
     );
+    expect(hasStdioStreamOverrides(_StdinOverrideStdio()), true);
   });
 }
 
@@ -297,4 +298,9 @@ class FakeIOSink extends Fake implements io.IOSink {
   final _completer = Completer<void>();
   @override
   Future<void> get done => _completer.future;
+}
+
+class _StdinOverrideStdio extends Stdio {
+  @override
+  Stream<List<int>> get stdin => const Stream<List<int>>.empty();
 }
