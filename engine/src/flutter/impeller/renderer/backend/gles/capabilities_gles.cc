@@ -64,6 +64,13 @@ static const constexpr char* kAppleTextureMaxLevelExt =
 static const constexpr char* kTextureFilterAnisotropicExt =
     "GL_EXT_texture_filter_anisotropic";
 
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_parallel_shader_compile.txt
+static const constexpr char* kParallelShaderCompileKHRExt =
+    "GL_KHR_parallel_shader_compile";
+// https://registry.khronos.org/OpenGL/extensions/ARB/ARB_parallel_shader_compile.txt
+static const constexpr char* kParallelShaderCompileARBExt =
+    "GL_ARB_parallel_shader_compile";
+
 static bool MaliDriverNeedsTextureUploadRebind(const std::string& version) {
   // Arm's version string includes a driver release, for example:
   // "OpenGL ES 3.2 v1.r18p0-01rel0...". If it is unavailable, retain the
@@ -214,6 +221,12 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
       (HasPrefix(desc->GetRenderer(), "Mali-G") ||
        HasPrefix(desc->GetRenderer(), "Immortalis-G")) &&
       MaliDriverNeedsTextureUploadRebind(desc->GetGlVersionString());
+  // Mesa's svga driver (VMware) keeps separate host surfaces for a buffer when
+  // it is used as both a uniform buffer and a vertex or index buffer, and
+  // updates to one surface are not copied to the other. This results in stale
+  // uniform data being used.
+  // https://github.com/flutter/flutter/issues/192915
+  needs_separate_uniform_buffers_ = HasPrefix(desc->GetRenderer(), "SVGA3D");
 
   // ETC2 and EAC are mandatory in OpenGL ES 3.0. BC and ASTC are gated behind
   // extensions and are not present on most mobile or desktop GLES. The whole BC
@@ -264,14 +277,31 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     // but is always an integer in practice, so floor it.
     max_sampler_anisotropy_ = static_cast<uint32_t>(std::max(value, 2.0f));
   }
+
+  // The KHR and ARB parallel shader compile extensions share the same enum for
+  // the maximum number of compiler threads.
+  if (desc->HasExtension(kParallelShaderCompileKHRExt) ||
+      desc->HasExtension(kParallelShaderCompileARBExt)) {
+    GLint value = 0;
+    gl.GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, &value);
+    max_shader_compiler_threads_ = value;
+  }
 }
 
 bool CapabilitiesGLES::NeedsTextureUploadRebind() const {
   return needs_texture_upload_rebind_;
 }
 
+bool CapabilitiesGLES::NeedsSeparateUniformBuffers() const {
+  return needs_separate_uniform_buffers_;
+}
+
 bool CapabilitiesGLES::IsES() const {
   return is_es_;
+}
+
+int32_t CapabilitiesGLES::GetMaxShaderCompilerThreads() const {
+  return max_shader_compiler_threads_;
 }
 
 bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
@@ -424,6 +454,12 @@ bool CapabilitiesGLES::NeedsPartitionedHostBuffer() const {
 #else
   return false;
 #endif
+}
+
+// The OpenGL ES backend does not support compute, so it reports no compute
+// limits.
+ComputeLimits CapabilitiesGLES::GetComputeLimits() const {
+  return {};
 }
 
 }  // namespace impeller

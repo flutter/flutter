@@ -1223,6 +1223,26 @@ enum ResizeImagePolicy {
   /// </tr>
   /// </table>
   fit,
+
+  /// Scales the image as necessary to ensure that it covers the bounding box
+  /// specified by [ResizeImage.width] and [ResizeImage.height] while
+  /// maintaining its aspect ratio.
+  ///
+  /// Both [ResizeImage.width] and [ResizeImage.height] must be non-null. The
+  /// aspect ratio comes from the intrinsic size of the image, so the caller
+  /// does not need to know the size of the image in advance. One side of the
+  /// decoded image is usually larger than the bounding box.
+  ///
+  /// If [ResizeImage.allowUpscaling] is true, the image will be scaled up or
+  /// down to cover the bounding box; otherwise it will only ever be scaled
+  /// down. If the image is too small to cover the bounding box and
+  /// [ResizeImage.allowUpscaling] is false, the image is decoded at its
+  /// intrinsic size.
+  ///
+  /// This is conceptually similar to [BoxFit.cover]. Use this policy for an
+  /// image that is painted with [BoxFit.cover], to decode the fewest pixels
+  /// that still fill the box without loss of detail.
+  cover,
 }
 
 /// Instructs Flutter to decode the image at the specified dimensions
@@ -1263,7 +1283,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// defined by `width` and `height`. The image will lose detail and
   /// use less memory if resized to a size smaller than the native size.
   ///
-  /// At least one of `width` and `height` must be non-null.
+  /// At least one of `width` and `height` must be non-null. If `policy` is
+  /// [ResizeImagePolicy.cover], both must be non-null.
   ///
   /// {@macro flutter.painting.ResizeImage.useLogicalSize}
   const ResizeImage(
@@ -1273,7 +1294,11 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     this.policy = ResizeImagePolicy.exact,
     this.allowUpscaling = false,
     this.useLogicalSize = false,
-  }) : assert(width != null || height != null);
+  }) : assert(width != null || height != null),
+       assert(
+         policy != ResizeImagePolicy.cover || (width != null && height != null),
+         'ResizeImagePolicy.cover needs both width and height.',
+       );
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -1282,15 +1307,19 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// [useLogicalSize] is true.
   ///
   /// At least one of this and [height] must be non-null.
+  /// Both must be non-null if [policy] is [ResizeImagePolicy.cover].
   final int? width;
 
   /// The height the image should decode to and cache, in physical pixels unless
   /// [useLogicalSize] is true.
   ///
   /// At least one of this and [width] must be non-null.
+  /// Both must be non-null if [policy] is [ResizeImagePolicy.cover].
   final int? height;
 
   /// The policy that determines how [width] and [height] are interpreted.
+  ///
+  /// [ResizeImagePolicy.cover] requires both [width] and [height].
   ///
   /// Defaults to [ResizeImagePolicy.exact].
   final ResizeImagePolicy policy;
@@ -1342,6 +1371,10 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     }
     return provider;
   }
+
+  @override
+  ImageStream createStream(ImageConfiguration configuration) =>
+      imageProvider.createStream(configuration);
 
   @override
   @Deprecated(
@@ -1412,6 +1445,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
               return ui.TargetImageSize(width: targetWidth, height: targetHeight);
             case ResizeImagePolicy.fit:
+              // A very thin image can derive a side of 0, which cannot be decoded.
+              // Clamp only the derived sides, so that a given side of 0 still fails.
               final double aspectRatio = intrinsicWidth / intrinsicHeight;
               final int maxWidth = effectiveWidth ?? intrinsicWidth;
               final int maxHeight = effectiveHeight ?? intrinsicHeight;
@@ -1420,30 +1455,47 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
               if (targetWidth > maxWidth) {
                 targetWidth = maxWidth;
-                targetHeight = targetWidth ~/ aspectRatio;
+                targetHeight = math.max(1, targetWidth ~/ aspectRatio);
               }
 
               if (targetHeight > maxHeight) {
                 targetHeight = maxHeight;
-                targetWidth = (targetHeight * aspectRatio).floor();
+                targetWidth = math.max(1, (targetHeight * aspectRatio).floor());
               }
 
               if (allowUpscaling) {
                 if (effectiveWidth == null) {
                   assert(effectiveHeight != null);
                   targetHeight = effectiveHeight!;
-                  targetWidth = (targetHeight * aspectRatio).floor();
+                  targetWidth = math.max(1, (targetHeight * aspectRatio).floor());
                 } else if (effectiveHeight == null) {
                   targetWidth = effectiveWidth;
-                  targetHeight = targetWidth ~/ aspectRatio;
+                  targetHeight = math.max(1, targetWidth ~/ aspectRatio);
                 } else {
-                  final int derivedMaxWidth = (maxHeight * aspectRatio).floor();
-                  final int derivedMaxHeight = maxWidth ~/ aspectRatio;
+                  final int derivedMaxWidth = math.max(1, (maxHeight * aspectRatio).floor());
+                  final int derivedMaxHeight = math.max(1, maxWidth ~/ aspectRatio);
                   targetWidth = math.min(maxWidth, derivedMaxWidth);
                   targetHeight = math.min(maxHeight, derivedMaxHeight);
                 }
               }
 
+              return ui.TargetImageSize(width: targetWidth, height: targetHeight);
+            case ResizeImagePolicy.cover:
+              final int boxWidth = effectiveWidth!;
+              final int boxHeight = effectiveHeight!;
+              assert(boxWidth > 0 && boxHeight > 0);
+              // Integer math: a double scale can round 3000 * (448 / 3000) up to 449.
+              final bool widthCovers = boxWidth * intrinsicHeight >= boxHeight * intrinsicWidth;
+              final int targetWidth = widthCovers
+                  ? boxWidth
+                  : (boxHeight * intrinsicWidth + intrinsicHeight - 1) ~/ intrinsicHeight;
+              final int targetHeight = widthCovers
+                  ? (boxWidth * intrinsicHeight + intrinsicWidth - 1) ~/ intrinsicWidth
+                  : boxHeight;
+              if (!allowUpscaling &&
+                  (targetWidth >= intrinsicWidth || targetHeight >= intrinsicHeight)) {
+                return const ui.TargetImageSize();
+              }
               return ui.TargetImageSize(width: targetWidth, height: targetHeight);
           }
         },
