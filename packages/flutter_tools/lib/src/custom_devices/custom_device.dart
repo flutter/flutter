@@ -411,14 +411,14 @@ class CustomDeviceAppSession {
     return result;
   }
 
-  void dispose() {
+  Future<void> dispose() async {
     if (_process != null) {
       _maybeUnforwardPort();
       _processManager.killPid(_process!.pid);
       _process = null;
     }
 
-    unawaited(logReader.dispose());
+    await logReader.dispose();
   }
 }
 
@@ -624,9 +624,10 @@ class CustomDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    _sessions
-      ..forEach((_, CustomDeviceAppSession session) => session.dispose())
-      ..clear();
+    await Future.wait(<Future<void>>[
+      for (final CustomDeviceAppSession session in _sessions.values) session.dispose(),
+    ]);
+    _sessions.clear();
     _globalLogReaderProcess?.kill();
     _globalLogReaderProcess = null;
   }

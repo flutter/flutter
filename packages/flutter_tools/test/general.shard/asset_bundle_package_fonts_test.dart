@@ -6,25 +6,25 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/package_config.dart';
 
 void main() {
+  late FileSystem testFileSystem;
+
   String fixPath(String path) {
     // The in-memory file system is strict about slashes on Windows being the
     // correct way so until https://github.com/google/file.dart/issues/112 is
     // fixed we fix them here.
     // TODO(dantup): Remove this function once the above issue is fixed and
     // rolls into Flutter.
-    return path.replaceAll('/', globals.fs.path.separator);
+    return path.replaceAll('/', testFileSystem.path.separator);
   }
 
   void writePubspecFile(
@@ -44,7 +44,7 @@ $fontsSection
 ''';
     }
 
-    globals.fs.file(fixPath(path))
+    testFileSystem.file(fixPath(path))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: $name
@@ -88,19 +88,17 @@ $fontsSection
   }
 
   void writeFontAsset(String path, String font) {
-    globals.fs.file(fixPath('$path$font'))
+    testFileSystem.file(fixPath('$path$font'))
       ..createSync(recursive: true)
       ..writeAsStringSync(font);
   }
 
   group('AssetBundle fonts from packages', () {
-    FileSystem? testFileSystem;
-
     setUp(() async {
       testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+        style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
       );
-      testFileSystem!.currentDirectory = testFileSystem!.systemTempDirectory.createTempSync(
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync(
         'flutter_asset_bundle_test.',
       );
     });
@@ -111,7 +109,7 @@ $fontsSection
         final deps = <String, String>{'test_package': 'p/p/'};
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           packages: deps,
           mainLibName: 'test',
         );
@@ -144,7 +142,7 @@ $fontsSection
         writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
 
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
 
           packages: <String, String>{'test_package': 'p/p/'},
           mainLibName: 'my_app',
@@ -180,7 +178,7 @@ $fontsSection
 ''';
         writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
 
           packages: <String, String>{'test_package': 'p/p/'},
           mainLibName: 'my_app',
@@ -211,7 +209,7 @@ $fontsSection
         final deps = <String, String>{'test_package': 'p/p/'};
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
 
           packages: deps,
           mainLibName: 'test',
@@ -248,7 +246,7 @@ $fontsSection
         final deps = <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'};
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
 
           packages: deps,
           mainLibName: 'test',
@@ -286,7 +284,7 @@ $fontsSection
         final deps = <String, String>{'test_package': 'p/p/'};
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
 
           packages: deps,
           mainLibName: 'test',
@@ -330,7 +328,7 @@ $fontsSection
 ''';
         writePubspecFile('pubspec.yaml', 'test', fontsSection: fontsSection);
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           packages: deps,
           mainLibName: 'test',
         );
