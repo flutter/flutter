@@ -9,67 +9,9 @@
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
+#import "flutter/shell/platform/darwin/ios/platform_view_layer_conversion.h"
 
 FLUTTER_ASSERT_ARC
-
-namespace {
-static CGRect GetCGRectFromDlRect(const flutter::DlRect& clipDlRect) {
-  return CGRectMake(clipDlRect.GetX(),      //
-                    clipDlRect.GetY(),      //
-                    clipDlRect.GetWidth(),  //
-                    clipDlRect.GetHeight());
-}
-
-CATransform3D GetCATransform3DFromDlMatrix(const flutter::DlMatrix& matrix) {
-  CATransform3D transform = CATransform3DIdentity;
-  transform.m11 = matrix.m[0];
-  transform.m12 = matrix.m[1];
-  transform.m13 = matrix.m[2];
-  transform.m14 = matrix.m[3];
-
-  transform.m21 = matrix.m[4];
-  transform.m22 = matrix.m[5];
-  transform.m23 = matrix.m[6];
-  transform.m24 = matrix.m[7];
-
-  transform.m31 = matrix.m[8];
-  transform.m32 = matrix.m[9];
-  transform.m33 = matrix.m[10];
-  transform.m34 = matrix.m[11];
-
-  transform.m41 = matrix.m[12];
-  transform.m42 = matrix.m[13];
-  transform.m43 = matrix.m[14];
-  transform.m44 = matrix.m[15];
-  return transform;
-}
-
-class CGPathReceiver final : public flutter::DlPathReceiver {
- public:
-  void MoveTo(const flutter::DlPoint& p2, bool will_be_closed) override {  //
-    CGPathMoveToPoint(path_ref_, nil, p2.x, p2.y);
-  }
-  void LineTo(const flutter::DlPoint& p2) override {
-    CGPathAddLineToPoint(path_ref_, nil, p2.x, p2.y);
-  }
-  void QuadTo(const flutter::DlPoint& cp, const flutter::DlPoint& p2) override {
-    CGPathAddQuadCurveToPoint(path_ref_, nil, cp.x, cp.y, p2.x, p2.y);
-  }
-  // bool conic_to(...) { CGPath has no equivalent to the conic curve type }
-  void CubicTo(const flutter::DlPoint& cp1,
-               const flutter::DlPoint& cp2,
-               const flutter::DlPoint& p2) override {
-    CGPathAddCurveToPoint(path_ref_, nil,  //
-                          cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
-  }
-  void Close() override { CGPathCloseSubpath(path_ref_); }
-
-  CGMutablePathRef TakePath() const { return path_ref_; }
-
- private:
-  CGMutablePathRef path_ref_ = CGPathCreateMutable();
-};
-}  // namespace
 
 @interface PlatformViewFilter ()
 
@@ -318,20 +260,19 @@ static BOOL _preparedOnce = NO;
         [self shapeLayer].path = paths_.at(0);
       } else {
         // Multiple paths, all paths must be rects.
-        CGPathRef pathSoFar = CGPathCreateWithRect(rectSoFar_, nil);
+        fml::CFRef<CGPathRef> pathSoFar(CGPathCreateWithRect(rectSoFar_, nil));
         [self shapeLayer].path = pathSoFar;
-        CGPathRelease(pathSoFar);
       }
     }
   }
 }
 
 - (void)clipRect:(const flutter::DlRect&)clipDlRect matrix:(const flutter::DlMatrix&)matrix {
-  CGRect clipRect = GetCGRectFromDlRect(clipDlRect);
-  CGPathRef path = CGPathCreateWithRect(clipRect, nil);
+  CGRect clipRect = flutter::GetCGRectFromDlRect(clipDlRect);
+  fml::CFRef<CGPathRef> path(CGPathCreateWithRect(clipRect, nil));
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
   CATransform3D matrixInPoints =
-      CATransform3DConcat(GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
+      CATransform3DConcat(flutter::GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
   paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
   CGAffineTransform affine = [self affineWithMatrix:matrixInPoints];
   // Make sure the rect is not rotated (only translated or scaled).
@@ -349,14 +290,14 @@ static BOOL _preparedOnce = NO;
     [self clipRect:clipDlRRect.GetBounds() matrix:matrix];
     return;
   } else {
-    CGPathRef pathRef = nullptr;
+    fml::CFRef<CGPathRef> pathRef;
     containsNonRectPath_ = YES;
 
     if (clipDlRRect.GetRadii().AreAllCornersSame()) {
-      CGRect clipRect = GetCGRectFromDlRect(clipDlRRect.GetBounds());
+      CGRect clipRect = flutter::GetCGRectFromDlRect(clipDlRRect.GetBounds());
       auto radii = clipDlRRect.GetRadii();
-      pathRef =
-          CGPathCreateWithRoundedRect(clipRect, radii.top_left.width, radii.top_left.height, nil);
+      pathRef.Reset(
+          CGPathCreateWithRoundedRect(clipRect, radii.top_left.width, radii.top_left.height, nil));
     } else {
       CGMutablePathRef mutablePathRef = CGPathCreateMutable();
       // Complex types, we manually add each corner.
@@ -407,11 +348,11 @@ static BOOL _preparedOnce = NO;
                             left + top_left.width, top,  //
                             left + top_left.width, top);
       CGPathCloseSubpath(mutablePathRef);
-      pathRef = mutablePathRef;
+      pathRef.Reset(mutablePathRef);
     }
     // The `matrix` is based on the physical pixels, convert it to UIKit points.
     CATransform3D matrixInPoints =
-        CATransform3DConcat(GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
+        CATransform3DConcat(flutter::GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
     // TODO(cyanglaz): iOS does not seem to support hard edge on CAShapeLayer. It clearly stated
     // that the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard
     // edge clipping on iOS.
@@ -422,17 +363,12 @@ static BOOL _preparedOnce = NO;
 - (void)clipPath:(const flutter::DlPath&)dlPath matrix:(const flutter::DlMatrix&)matrix {
   containsNonRectPath_ = YES;
 
-  CGPathReceiver receiver;
-
-  // TODO(flar): https://github.com/flutter/flutter/issues/164826
-  // CGPaths do not have an inherit fill type, we would need to remember
-  // the fill type and employ it when we use the path.
-  dlPath.Dispatch(receiver);
+  fml::CFRef<CGPathRef> path = flutter::GetCGPathFromDlPath(dlPath);
 
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
   CATransform3D matrixInPoints =
-      CATransform3DConcat(GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
-  paths_.push_back([self getTransformedPath:receiver.TakePath() matrix:matrixInPoints]);
+      CATransform3DConcat(flutter::GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
+  paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
 }
 
 - (CGAffineTransform)affineWithMatrix:(CATransform3D)matrix {
@@ -442,10 +378,7 @@ static BOOL _preparedOnce = NO;
 
 - (fml::CFRef<CGPathRef>)getTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix {
   CGAffineTransform affine = [self affineWithMatrix:matrix];
-  CGPathRef transformedPath = CGPathCreateCopyByTransformingPath(path, &affine);
-
-  CGPathRelease(path);
-  return fml::CFRef<CGPathRef>(transformedPath);
+  return fml::CFRef<CGPathRef>(CGPathCreateCopyByTransformingPath(path, &affine));
 }
 
 @end
