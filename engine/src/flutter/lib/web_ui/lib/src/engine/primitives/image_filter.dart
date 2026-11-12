@@ -4,12 +4,9 @@
 
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-final Finalizer _imageFilterFinalizer = NativeMemoryFinalizer((Object filter) {
-  (filter as BackendImageFilter).dispose();
-});
 
 /// A shared engine representation of an [ImageFilter].
 abstract class EngineImageFilter implements ui.ImageFilter {
@@ -41,9 +38,16 @@ abstract class EngineImageFilter implements ui.ImageFilter {
     required EngineImageFilter inner,
   }) = EngineComposeImageFilter;
 
+  /// Disposes a [BackendImageFilter] once the Dart object that owns it is
+  /// garbage collected.
+  @visibleForTesting
+  static Finalizer finalizer = NativeMemoryFinalizer((Object filter) {
+    (filter as BackendImageFilter).dispose();
+  });
+
   /// Attaches the native backend object to this Dart object's finalizer.
   BackendImageFilter _cacheAndAttach(BackendImageFilter filter) {
-    _imageFilterFinalizer.attach(this, filter, detach: filter);
+    finalizer.attach(this, filter, detach: filter);
     return filter;
   }
 
@@ -90,9 +94,12 @@ class EngineColorFilterImageFilter extends EngineImageFilter {
     if (cached != null) {
       return cached;
     }
-    final BackendImageFilter backendFilter = _cacheAndAttach(
-      renderer.createColorFilterImageFilter(filter: colorFilter.backendFilter),
+    final BackendImageFilter backendFilter = renderer.createColorFilterImageFilter(
+      filter: colorFilter.backendFilter,
     );
+    // The backend filter is cached on, and must live as long as, the color
+    // filter rather than this throwaway wrapper.
+    EngineImageFilter.finalizer.attach(colorFilter, backendFilter, detach: backendFilter);
     _colorFilterImageFilters[colorFilter] = backendFilter;
     return backendFilter;
   }
@@ -151,7 +158,7 @@ class EngineBlurImageFilter extends EngineImageFilter {
     }
 
     if (_cachedFilter != null) {
-      _imageFilterFinalizer.detach(_cachedFilter!);
+      EngineImageFilter.finalizer.detach(_cachedFilter!);
       _cachedFilter!.dispose();
     }
 
@@ -293,7 +300,7 @@ class EngineComposeImageFilter extends EngineImageFilter {
     }
 
     if (_cachedFilter != null) {
-      _imageFilterFinalizer.detach(_cachedFilter!);
+      EngineImageFilter.finalizer.detach(_cachedFilter!);
       _cachedFilter!.dispose();
     }
 

@@ -78,7 +78,8 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  ui.Paint createPaint() => CkPaint();
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) =>
+      CkPaint(paint, defaultBlurTileMode: defaultBlurTileMode);
 
   @override
   BackendVertices createVertices(

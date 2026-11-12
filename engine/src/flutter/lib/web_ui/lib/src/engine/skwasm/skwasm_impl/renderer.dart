@@ -159,7 +159,8 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.Paint createPaint() => SkwasmPaint();
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) =>
+      SkwasmPaint(paint, defaultBlurTileMode: defaultBlurTileMode);
 
   @override
   BackendColorFilter createColorFilter(EngineColorFilter filter) => SkwasmColorFilter(filter);

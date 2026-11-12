@@ -9,12 +9,15 @@
 
 #include "flutter/common/task_runners.h"
 #include "flutter/display_list/image/dl_image_skia.h"
+#include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/fml/thread.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/testing/mocks.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/testing/post_task_sync.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -590,6 +593,80 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImageTextureSizeMismatch) {
       },
       snapshot_delegate.GetWeakPtr(), context);
   EXPECT_TRUE(did_call);
+}
+
+namespace {
+// For an IO-owned image and the given context, returns the thread that reads
+// back the image's texture: `raster_thread` or `io_thread`.
+const fml::Thread* GetReadbackThreadForIOImage(
+    const std::shared_ptr<impeller::Context>& context,
+    const fml::Thread& raster_thread,
+    const fml::Thread& io_thread) {
+  fml::RefPtr<fml::TaskRunner> raster_task_runner =
+      raster_thread.GetTaskRunner();
+  fml::RefPtr<fml::TaskRunner> io_task_runner = io_thread.GetTaskRunner();
+
+  sk_sp<MockDlImage> image(new MockDlImage());
+  EXPECT_EQ(image->owning_context(), DlImage::OwningContext::kIO);
+  const fml::Thread* readback_thread = nullptr;
+  EXPECT_CALL(*image, GetImpellerTexture(_))
+      .WillOnce(
+          [&](impeller::ContentContext&) -> std::shared_ptr<impeller::Texture> {
+            if (raster_task_runner->RunsTasksOnCurrentThread()) {
+              readback_thread = &raster_thread;
+            } else if (io_task_runner->RunsTasksOnCurrentThread()) {
+              readback_thread = &io_thread;
+            }
+            // Stop the conversion here. Only the thread matters to this test.
+            return nullptr;
+          });
+
+  // Weak pointers check that they're used on the thread that created them, even
+  // when empty. The raster thread uses `snapshot_delegate`, so create it there.
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate;
+  PostTaskSync(raster_task_runner, [&] { snapshot_delegate = {}; });
+
+  // Image encoding starts the conversion on the IO thread.
+  fml::AutoResetWaitableEvent conversion_done;
+  io_task_runner->PostTask([&] {
+    ImageEncodingImpeller::ConvertImageToRaster(
+        image,
+        [&](const absl::StatusOr<sk_sp<SkImage>>&) {
+          conversion_done.Signal();
+        },
+        raster_task_runner, io_task_runner, snapshot_delegate,
+        std::make_shared<fml::SyncSwitch>(false), context);
+  });
+  conversion_done.Wait();
+
+  return readback_thread;
+}
+}  // namespace
+
+TEST(ImageEncodingImpellerTest, ConvertIOImageToRasterOnRasterThreadForGLES) {
+  auto context = std::make_shared<MockImpellerContext>();
+  EXPECT_CALL(*context, GetBackendType)
+      .WillRepeatedly(Return(impeller::Context::BackendType::kOpenGLES));
+  fml::Thread raster_thread("raster");
+  fml::Thread io_thread("io");
+
+  const fml::Thread* readback_thread =
+      GetReadbackThreadForIOImage(context, raster_thread, io_thread);
+
+  EXPECT_EQ(readback_thread, &raster_thread);
+}
+
+TEST(ImageEncodingImpellerTest, ConvertIOImageToRasterOnIOThreadForVulkan) {
+  auto context = std::make_shared<MockImpellerContext>();
+  EXPECT_CALL(*context, GetBackendType)
+      .WillRepeatedly(Return(impeller::Context::BackendType::kVulkan));
+  fml::Thread raster_thread("raster");
+  fml::Thread io_thread("io");
+
+  const fml::Thread* readback_thread =
+      GetReadbackThreadForIOImage(context, raster_thread, io_thread);
+
+  EXPECT_EQ(readback_thread, &io_thread);
 }
 
 TEST(ImageEncodingImpellerTest, PngEncoding10XR) {
