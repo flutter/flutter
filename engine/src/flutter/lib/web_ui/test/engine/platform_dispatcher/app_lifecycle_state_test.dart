@@ -68,8 +68,9 @@ void testMain() {
       viewManager.moveView(view.viewId, newHost);
 
       // The lifecycle state should remain resumed because the view is still
-      // visible in the same document.
-      expect(states, [ui.AppLifecycleState.detached, ui.AppLifecycleState.resumed]);
+      // visible. No transient `detached` must be emitted, since apps may start
+      // cleanups when they observe it.
+      expect(states, isEmpty);
       expect(state.appLifecycleState, ui.AppLifecycleState.resumed);
 
       view.dispose();
