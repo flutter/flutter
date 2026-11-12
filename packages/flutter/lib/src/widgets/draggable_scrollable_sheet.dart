@@ -966,7 +966,7 @@ class _DraggableSheetBallisticScrollActivity extends ScrollActivity {
           ..addListener(_tick)
           ..animateWith(simulation).whenComplete(_end);
   }
-  
+
   final double _initialVelocity;
   late final AnimationController _controller;
   _DraggableScrollableSheetScrollPosition get _position =>
