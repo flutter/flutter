@@ -717,9 +717,7 @@ void main() {
     // [View] may schedule a frame here when it mirrors lifecycle into
     // [View.hasFocusOf] (frames stay enabled while inactive). Drain it so the
     // remainder of this test still checks scheduler gating, not that rebuild.
-    if (tester.binding.hasScheduledFrame) {
-      await tester.pump();
-    }
+    await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     await setAppLifeCycleState(AppLifecycleState.paused);
