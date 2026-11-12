@@ -2057,15 +2057,13 @@ class _SelectableFragment
         dragPosition: position,
       );
       if (visualRange != null) {
+        // Associate each edge with the character inside the selection, so that
+        // the caret of an edge at a text direction boundary is next to it.
+        final rangeStart = TextPosition(offset: visualRange.start);
+        final rangeEnd = TextPosition(offset: visualRange.end, affinity: TextAffinity.upstream);
         final bool dragTowardsStart = position.offset < anchor.offset;
-        _setSelectionPosition(
-          TextPosition(offset: dragTowardsStart ? visualRange.start : visualRange.end),
-          isEnd: isEnd,
-        );
-        _setSelectionPosition(
-          TextPosition(offset: dragTowardsStart ? visualRange.end : visualRange.start),
-          isEnd: !isEnd,
-        );
+        _setSelectionPosition(dragTowardsStart ? rangeStart : rangeEnd, isEnd: isEnd);
+        _setSelectionPosition(dragTowardsStart ? rangeEnd : rangeStart, isEnd: !isEnd);
         return SelectionResult.end;
       }
     }

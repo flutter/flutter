@@ -1205,6 +1205,48 @@ void main() {
         expect(selectWordAt(10), (TextSelectionHandleType.right, TextSelectionHandleType.left));
       });
 
+      test('edges stay next to the selected text after extending into an adjacent run', () {
+        final registrar = TestSelectionRegistrar();
+        final paragraph = RenderParagraph(
+          const TextSpan(text: text),
+          textDirection: TextDirection.rtl,
+          registrar: registrar,
+        );
+        layout(paragraph);
+        TextBox characterBox(int offset) {
+          return paragraph
+              .getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + 1))
+              .single;
+        }
+
+        final Selectable selectable = registrar.selectables.single;
+        // Select "Here".
+        selectable.dispatchSelectionEvent(
+          SelectWordSelectionEvent(
+            globalPosition: paragraph.localToGlobal(characterBox(15).toRect().center),
+          ),
+        );
+        expect(paragraph.selections.single, const TextSelection(baseOffset: 14, extentOffset: 18));
+
+        // Move the end edge onto the right part of "ي", which is rendered next
+        // to "Here" but precedes it in the text.
+        final Rect yeh = characterBox(12).toRect();
+        selectable.dispatchSelectionEvent(
+          SelectionEdgeUpdateEvent.forEnd(
+            globalPosition: paragraph.localToGlobal(Offset(yeh.right - 1.0, yeh.center.dy)),
+          ),
+        );
+        expect(paragraph.selections.single.textInside(text), 'ي Here');
+        final SelectionGeometry geometry = selectable.value;
+        // The moved end edge is at the right edge of "ي", and the other edge is
+        // after "Here", rather than at the end of the line.
+        expect(geometry.endSelectionPoint!.localPosition.dx, moreOrLessEquals(yeh.right));
+        expect(
+          geometry.startSelectionPoint!.localPosition.dx,
+          moreOrLessEquals(characterBox(17).right),
+        );
+      });
+
       test('UIKit keeps the handles aligned with the paragraph direction', () {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
         addTearDown(() => debugDefaultTargetPlatformOverride = null);
