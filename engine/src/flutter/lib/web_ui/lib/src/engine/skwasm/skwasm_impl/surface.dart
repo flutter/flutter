@@ -156,11 +156,9 @@ class SkwasmSurface extends OffscreenSurface {
       if (!_initializedCompleter.isCompleted) {
         _initializedCompleter.complete();
       }
-      SkwasmCallbackHandler.instance
-          .registerCallback(contextLostId)
-          .then((_) {
-            onContextLost();
-          });
+      SkwasmCallbackHandler.instance.registerCallback(contextLostId).then((_) {
+        onContextLost();
+      });
     });
   }
 
