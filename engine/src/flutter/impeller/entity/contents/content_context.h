@@ -129,6 +129,26 @@ class ContentContext {
 
   ~ContentContext();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Requests the default pipelines that every `ContentContext`
+  ///             creates, without creating a `ContentContext`.
+  ///
+  ///             The pipelines are requested asynchronously from the pipeline
+  ///             library of `context`, which keeps them for the life of the
+  ///             context. `ContentContext`s created with `context` afterwards
+  ///             find them there, compiled or in flight, instead of compiling
+  ///             them again. This lets embedders start compiling pipelines as
+  ///             soon as a context is available, before there is a surface to
+  ///             render to.
+  ///
+  ///             This must be called on the thread that the `ContentContext`s
+  ///             for `context` are used on, since some pipeline libraries
+  ///             (OpenGL ES) are not thread-safe.
+  ///
+  /// @param[in]  context  The context whose pipeline library to warm.
+  ///
+  static void WarmDefaultPipelines(const Context& context);
+
   bool IsValid() const;
 
   Tessellator& GetTessellator() const;
@@ -361,6 +381,14 @@ class ContentContext {
 
   struct Pipelines;
   std::unique_ptr<Pipelines> pipelines_;
+
+  /// Requests the default variant of every pipeline from the pipeline library
+  /// of `context`.
+  ///
+  /// @return     The pipelines holding the default variants, or nullptr if a
+  ///             default pipeline descriptor could not be created.
+  static std::unique_ptr<Pipelines> CreateDefaultPipelines(
+      const Context& context);
 
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;
