@@ -42,6 +42,12 @@ bool DlImage::Equals(const DlImage* other) const {
     // Impeller images have pointer equality (handled by this == other)
     return false;
   }
+  if (owning_context() == OwningContext::kRaster ||
+      other->owning_context() == OwningContext::kRaster) {
+    // Skia raster-owned images also have pointer equality (handled by
+    // this == other).
+    return false;
+  }
   return skia_this->skia_image() == skia_other->skia_image();
 }
 
