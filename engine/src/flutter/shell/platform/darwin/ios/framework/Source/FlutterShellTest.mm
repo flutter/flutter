@@ -10,6 +10,7 @@
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell_Internal.h"
@@ -139,28 +140,18 @@ flutter::TaskRunners MakeTaskRunners(FlutterShell* shell) {
 - (void)testAdoptTaskRunners {
   FlutterShell* shell = [[FlutterShell alloc] init];
   [shell createThreadHostWithLabelPrefix:@"foo"];
-  [shell adoptTaskRunners:MakeTaskRunners(shell)];
+  flutter::TaskRunners taskRunners = MakeTaskRunners(shell);
+  [shell adoptTaskRunners:taskRunners];
 
+  // The wrappers wrap the runners that were passed in.
   XCTAssertNotNil(shell.platformTaskRunner);
   XCTAssertNotNil(shell.rasterTaskRunner);
+  XCTAssertEqual(shell.platformTaskRunner.taskRunner, taskRunners.GetPlatformTaskRunner());
+  XCTAssertEqual(shell.rasterTaskRunner.taskRunner, taskRunners.GetRasterTaskRunner());
+
   // The platform and UI threads are always merged on iOS.
   XCTAssertEqual(shell.uiTaskRunner, shell.platformTaskRunner);
   XCTAssertNotEqual(shell.rasterTaskRunner, shell.platformTaskRunner);
-
-  // The platform task runner is the calling thread.
-  XCTAssertTrue([shell.platformTaskRunner runsTasksOnCurrentThread]);
-  XCTAssertFalse([shell.rasterTaskRunner runsTasksOnCurrentThread]);
-
-  // The raster task runner runs tasks on the thread host's raster thread.
-  fml::AutoResetWaitableEvent latch;
-  fml::AutoResetWaitableEvent* latchPtr = &latch;
-  __block BOOL ranOnRasterThread = NO;
-  [shell.rasterTaskRunner postTask:^{
-    ranOnRasterThread = [shell.rasterTaskRunner runsTasksOnCurrentThread];
-    latchPtr->Signal();
-  }];
-  latch.Wait();
-  XCTAssertTrue(ranOnRasterThread);
 
   [shell resetTaskRunners];
   [shell destroyThreadHost];
@@ -171,6 +162,7 @@ flutter::TaskRunners MakeTaskRunners(FlutterShell* shell) {
   [shell createThreadHostWithLabelPrefix:@"foo"];
   [shell adoptTaskRunners:MakeTaskRunners(shell)];
   XCTAssertNotNil(shell.platformTaskRunner);
+  XCTAssertNotNil(shell.uiTaskRunner);
   XCTAssertNotNil(shell.rasterTaskRunner);
 
   [shell resetTaskRunners];
@@ -181,6 +173,7 @@ flutter::TaskRunners MakeTaskRunners(FlutterShell* shell) {
   // Resetting again is a no-op.
   [shell resetTaskRunners];
   XCTAssertNil(shell.platformTaskRunner);
+  XCTAssertNil(shell.uiTaskRunner);
   XCTAssertNil(shell.rasterTaskRunner);
 
   [shell destroyThreadHost];

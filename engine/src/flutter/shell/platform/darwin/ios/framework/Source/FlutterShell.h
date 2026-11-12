@@ -24,7 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// adopted and after `resetTaskRunners`.
 @property(nonatomic, readonly, nullable) FlutterFMLTaskRunner* platformTaskRunner;
 
-/// The task runner for the UI thread, where framework code runs.
+/// The task runner for the UI thread, where framework code runs, or nil before task runners are
+/// adopted and after `resetTaskRunners`.
 ///
 /// The platform and UI threads are always merged on iOS, so this is the platform task runner.
 @property(nonatomic, readonly, nullable) FlutterFMLTaskRunner* uiTaskRunner;
