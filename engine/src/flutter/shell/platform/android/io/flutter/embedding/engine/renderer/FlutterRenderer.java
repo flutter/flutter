@@ -66,13 +66,15 @@ public class FlutterRenderer implements TextureRegistry {
   /**
    * Returns true if this device has a known {@link android.hardware.HardwareBuffer} defect.
    *
-   * <p>Huawei devices on API 29 or below have {@link android.media.ImageReader} issues that cause
-   * video playback failures due to defective HardwareBuffer implementations.
+   * <p>Huawei HiSilicon (Kirin) chips have defective HardwareBuffer implementations that cause
+   * video playback failures via {@link android.media.ImageReader}. This includes older devices on
+   * API 29 or below, and newer Kirin 9000S devices (such as the Huawei Mate 60 series and Mate X5).
    *
    * @see <a href="https://github.com/flutter/flutter/issues/166481">#166481</a> See <a
    *     href="https://github.com/flutter/flutter/issues/156459">#156459</a> See <a
    *     href="https://github.com/flutter/flutter/issues/154068">#154068</a> See <a
-   *     href="https://github.com/flutter/engine/pull/54879">engine pr #54879</a>
+   *     href="https://github.com/flutter/engine/pull/54879">engine pr #54879</a> See <a
+   *     href="https://github.com/flutter/flutter/issues/195782">#195782</a>
    */
   private static boolean hasAndroidHardwareBufferDefect() {
     // To test if some device should be added from this list app developers first should attempt to
@@ -84,8 +86,19 @@ public class FlutterRenderer implements TextureRegistry {
     // app.
     /// If the video plays then that is a strong signal that this method should be updated to
     // include the tested device.
-    return Build.VERSION.SDK_INT <= API_LEVELS.API_29
-        && "HUAWEI".equalsIgnoreCase(Build.MANUFACTURER);
+    if (!"HUAWEI".equalsIgnoreCase(Build.MANUFACTURER)) {
+      return false;
+    }
+    // Older Huawei devices (API ≤ 29) all used HiSilicon Kirin chips and are affected.
+    if (Build.VERSION.SDK_INT <= API_LEVELS.API_29) {
+      return true;
+    }
+    // Newer Kirin 9000S devices (Huawei Mate 60 series: ALN-*; Mate X5: ALT-*) also have
+    // the defect.
+    final String model = Build.MODEL;
+    return model != null
+        && (model.regionMatches(true, 0, "ALN-", 0, 4)
+            || model.regionMatches(true, 0, "ALT-", 0, 4));
   }
 
   /** Whether to disable clearing of the Surface used to render platform views. */
