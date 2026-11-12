@@ -55,12 +55,16 @@ class FlutterCompileOptionsTest {
     fun `from splits multiple file system roots`() {
         val project =
             projectWithProperties(
-                FlutterCompileOptions.FILE_SYSTEM_ROOTS_PROPERTY to "root1|root2|root3"
+                FlutterCompileOptions.FILE_SYSTEM_ROOTS_PROPERTY to
+                    "root1|C:\\workspace\\app|/workspace/root with spaces"
             )
 
         val options = FlutterCompileOptions.from(project)
 
-        assertEquals(listOf("root1", "root2", "root3"), options.fileSystemRoots)
+        assertEquals(
+            listOf("root1", "C:\\workspace\\app", "/workspace/root with spaces"),
+            options.fileSystemRoots
+        )
     }
 
     @Test
