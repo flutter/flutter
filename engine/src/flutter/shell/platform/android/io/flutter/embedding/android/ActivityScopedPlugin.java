@@ -18,8 +18,8 @@ import android.app.Activity;
  * {@code Activity} stays reachable through the engine's channels and leaks.
  *
  * <p>{@code FlutterActivityAndFragmentDelegate} tracks every {@code ActivityScopedPlugin} that was
- * created while attaching to an {@code Activity} and calls {@link #destroy()} on each of them when
- * it detaches, so a component that implements this interface cannot be forgotten on detach.
+ * registered while attaching to an {@code Activity} and calls {@link #destroy()} on each of them
+ * when it detaches, so a component that implements this interface cannot be forgotten on detach.
  *
  * <p>This is not the plugin API used by Flutter plugins from pub.dev. Those implement {@link
  * io.flutter.embedding.engine.plugins.FlutterPlugin} and, when they need an {@code Activity},
@@ -31,7 +31,7 @@ public interface ActivityScopedPlugin {
    * example by removing itself as the handler of the channel it was listening on, so that neither
    * this component nor the {@link Activity} it was created for stays reachable from the engine.
    *
-   * <p>Called exactly once, when the hosting {@code Activity} is detached from the engine. No other
+   * <p>Called at most once, when the hosting {@code Activity} is detached from the engine. No other
    * method may be invoked on this component afterwards.
    */
   void destroy();
