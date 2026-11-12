@@ -28,6 +28,8 @@ import 'dart/package_map.dart';
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
 
+const kDartPluginRegistrantScheme = 'org-dartlang-plugin-registrant';
+
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
 class TargetModel {
@@ -321,7 +323,7 @@ class KernelCompiler {
       if (dartPluginRegistrantPackageUri != null) {
         dartPluginRegistrantUri = dartPluginRegistrantPackageUri;
       } else {
-        fileSystemScheme ??= 'org-dartlang-plugin-registrant';
+        fileSystemScheme ??= kDartPluginRegistrantScheme;
         fileSystemRoots = <String>[...?fileSystemRoots, dartPluginRegistrant.parent.path];
         dartPluginRegistrantUri = toMultiRootPath(
           dartPluginRegistrantFileUri,
