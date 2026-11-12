@@ -83,7 +83,7 @@ PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
 final _defaultBotDetector = BotDetector(platform: platform);
-Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
+bool get isRunningOnBot => botDetector.isRunningOnBot;
 
 // Analytics instance for package:unified_analytics for analytics
 // reporting for all Flutter and Dart related tooling
@@ -273,12 +273,14 @@ FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
       FlutterProjectFactory(
         config: config,
-        featureFlags: featureFlags,
+        featureFlagsBuilder: () => featureFlags,
         fileSystem: fs,
         logger: logger,
         plistParser: plistParser,
-        xcode: xcode,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        // Lazy builders avoid an AppContext dependency cycle during early startup
+        // (e.g. Analytics -> Cache -> Xcode -> XcodeProjectInterpreter).
+        xcodeBuilder: () => xcode,
+        xcodeProjectInterpreterBuilder: () => xcodeProjectInterpreter,
       );
 }
 

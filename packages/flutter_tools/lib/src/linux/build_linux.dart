@@ -53,6 +53,7 @@ Future<void> buildLinux(
 }) async {
   final ToolContext(
     :Artifacts artifacts,
+    :Cache cache,
     :FileSystem fs,
     :FileSystemUtils fileSystemUtils,
     :Logger logger,
@@ -89,7 +90,7 @@ Future<void> buildLinux(
     environmentConfig['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
     environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, buildInfo, environmentConfig, logger);
+  writeGeneratedCmakeConfig(cache.flutterRoot, linuxProject, buildInfo, environmentConfig, logger);
 
   createPluginSymlinks(linuxProject.parent, featureFlags: featureFlags, os: os, platform: platform);
 

@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
@@ -2637,7 +2636,7 @@ flutter:
       late Directory tempDir;
 
       setUp(() {
-        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_plugin_test.');
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_plugin_test.');
         projectDir = tempDir.childDirectory('flutter_project');
       });
 
@@ -2651,7 +2650,7 @@ flutter:
           ..writeAsStringSync(yamlString);
       }
 
-      testUsingContext('validatePubspecForPlugin works', () async {
+      testWithoutContext('validatePubspecForPlugin works', () async {
         const pluginYaml = '''
   flutter:
     plugin:
@@ -2677,6 +2676,7 @@ flutter:
           pluginClass: 'SomePlugin',
           expectedPlatforms: <String>['ios', 'macos', 'windows', 'linux', 'android', 'web'],
           androidIdentifier: 'AndroidPackage',
+          fileSystem: fs,
           webFileName: 'lib/SomeFile.dart',
         );
       });
@@ -2699,7 +2699,6 @@ platforms:
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: fs,
               isDevDependency: false,
             ),
             throwsToolExit(message: 'Invalid plugin specification evil_plugin'),
@@ -2723,7 +2722,6 @@ platforms:
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: fs,
               isDevDependency: false,
             ),
             throwsToolExit(),
@@ -2748,7 +2746,6 @@ platforms:
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: fs,
               isDevDependency: false,
             ),
             throwsToolExit(message: 'Invalid plugin specification evil_dart_plugin'),
@@ -2774,7 +2771,6 @@ pluginClass: "Evil(); evilInjectedCall(); //"
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: fs,
               isDevDependency: false,
             ),
             throwsToolExit(message: 'The "pluginClass" must be a valid identifier'),
@@ -2796,7 +2792,6 @@ pluginClass: EvilPlugin
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: fs,
               isDevDependency: false,
             ),
             throwsToolExit(message: 'The "androidPackage" must be a valid identifier'),
@@ -2817,7 +2812,6 @@ iosPrefix: "FLT; evilInjectedCall(); //"
             loadYaml(maliciousYaml) as YamlMap,
             null,
             const <String>[],
-            fileSystem: fs,
             isDevDependency: false,
           ),
           throwsToolExit(message: 'The "iosPrefix" must be a valid identifier'),
@@ -2840,7 +2834,6 @@ platforms:
             loadYaml(malformedYaml) as YamlMap,
             null,
             const <String>[],
-            fileSystem: fs,
             isDevDependency: false,
           ),
           throwsToolExit(
@@ -2863,7 +2856,6 @@ platforms:
             loadYaml(malformedYaml) as YamlMap,
             null,
             const <String>[],
-            fileSystem: fs,
             isDevDependency: false,
           ),
           throwsToolExit(
@@ -2890,7 +2882,6 @@ platforms:
             loadYaml(malformedYaml) as YamlMap,
             null,
             const <String>[],
-            fileSystem: fs,
             isDevDependency: false,
           ),
           throwsToolExit(
@@ -2916,7 +2907,6 @@ platforms:
           loadYaml(yamlWithEmptyFileName) as YamlMap,
           null,
           const <String>[],
-          fileSystem: fs,
           isDevDependency: false,
         );
         expect(plugin.pluginDartClassPlatforms['windows']?.dartFileName, 'sample_plugin.dart');
@@ -2937,7 +2927,6 @@ iosPrefix: "FLT; evilInjectedCall(); //"
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: fs,
               isDevDependency: false,
             ),
             throwsToolExit(
@@ -2963,7 +2952,6 @@ iosPrefix: FLT
           loadYaml(legacyYaml) as YamlMap,
           null,
           const <String>[],
-          fileSystem: fs,
           isDevDependency: false,
         );
 
@@ -2993,12 +2981,7 @@ iosPrefix: FLT
       testWithoutContext('Platform plugin parseFromYaml methods perform validation', () {
         final invalidYaml = YamlMap.wrap(<String, Object?>{'pluginClass': 123});
         expect(
-          AndroidPlugin.parseFromYaml(
-            'foo',
-            invalidYaml,
-            pluginPath: '',
-            fileSystem: MemoryFileSystem.test(),
-          ),
+          AndroidPlugin.parseFromYaml('foo', invalidYaml, pluginPath: ''),
           isA<ParseResultFail<AndroidPlugin?>>(),
         );
         expect(IOSPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<IOSPlugin?>>());
@@ -3230,11 +3213,26 @@ iosPrefix: FLT
       },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'Symlink ERROR_ACCESS_DENIED failures show developers paths that were used',
       () async {
+        final handle = FileExceptionHandler();
+        final fileSystem = ErrorHandlingFileSystem(
+          platform: FakePlatform(operatingSystem: 'windows'),
+          delegate: MemoryFileSystem.test(
+            style: FileSystemStyle.windows,
+            opHandle: handle.opHandle,
+          ),
+        );
+        const pluginSymlinkPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
+        handle.addError(
+          fileSystem.link(pluginSymlinkPath),
+          FileSystemOp.create,
+          const FileSystemException('', '', OSError('', 5)),
+        );
+
         final flutterProject = FakeFlutterProject()
-          ..directory = globals.fs.currentDirectory.childDirectory('app');
+          ..directory = fileSystem.currentDirectory.childDirectory('app');
         final Directory windowsManagedDirectory = flutterProject.directory
             .childDirectory('windows')
             .childDirectory('flutter');
@@ -3282,28 +3280,6 @@ iosPrefix: FLT
           ),
           throwsToolExit(message: expectedMessage),
         );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () {
-          final handle = FileExceptionHandler();
-          final fileSystem = ErrorHandlingFileSystem(
-            platform: FakePlatform(),
-            delegate: MemoryFileSystem.test(
-              style: FileSystemStyle.windows,
-              opHandle: handle.opHandle,
-            ),
-          );
-          const pluginSymlinkPath =
-              r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
-          handle.addError(
-            fileSystem.link(pluginSymlinkPath),
-            FileSystemOp.create,
-            const FileSystemException('', '', OSError('', 5)),
-          );
-          return fileSystem;
-        },
-        Platform: () => FakePlatform(operatingSystem: 'windows'),
-        ProcessManager: () => FakeProcessManager.empty(),
       },
     );
 
@@ -3665,81 +3641,70 @@ iosPrefix: FLT
     });
   });
 
-  testUsingContext(
-    'exits tool when deleting .plugin_symlinks fails',
-    () async {
-      final flutterProject = FakeFlutterProject()
-        ..directory = globals.fs.currentDirectory.childDirectory('app');
-      final flutterManifest = FakeFlutterManifest();
-      final Directory windowsManagedDirectory = flutterProject.directory
-          .childDirectory('windows')
-          .childDirectory('flutter');
-      final windowsProject = FakeWindowsProject()
-        ..managedDirectory = windowsManagedDirectory
-        ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
-        ..generatedPluginCmakeFile = windowsManagedDirectory.childFile('generated_plugins.mk')
-        ..pluginSymlinkDirectory = windowsManagedDirectory
-            .childDirectory('ephemeral')
-            .childDirectory('.plugin_symlinks')
-        ..exists = true;
+  testWithoutContext('exits tool when deleting .plugin_symlinks fails', () async {
+    final handle = FileExceptionHandler();
+    final fileSystem = ErrorHandlingFileSystem(
+      platform: FakePlatform(operatingSystem: 'windows'),
+      delegate: MemoryFileSystem.test(style: FileSystemStyle.windows, opHandle: handle.opHandle),
+    );
+    const symlinkDirectoryPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks';
+    handle.addError(
+      fileSystem.directory(symlinkDirectoryPath),
+      FileSystemOp.delete,
+      const PathNotFoundException(
+        symlinkDirectoryPath,
+        OSError('The system cannot find the path specified.', 3),
+      ),
+    );
 
-      flutterProject
-        ..manifest = flutterManifest
-        ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
-          '.flutter-plugins-dependencies',
-        )
-        ..windows = windowsProject;
+    final flutterProject = FakeFlutterProject()
+      ..directory = fileSystem.currentDirectory.childDirectory('app');
+    final flutterManifest = FakeFlutterManifest();
+    final Directory windowsManagedDirectory = flutterProject.directory
+        .childDirectory('windows')
+        .childDirectory('flutter');
+    final windowsProject = FakeWindowsProject()
+      ..managedDirectory = windowsManagedDirectory
+      ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
+      ..generatedPluginCmakeFile = windowsManagedDirectory.childFile('generated_plugins.mk')
+      ..pluginSymlinkDirectory = windowsManagedDirectory
+          .childDirectory('ephemeral')
+          .childDirectory('.plugin_symlinks')
+      ..exists = true;
 
-      writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
+    flutterProject
+      ..manifest = flutterManifest
+      ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
+        '.flutter-plugins-dependencies',
+      )
+      ..windows = windowsProject;
 
-      createPluginSymlinks(
+    writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
+
+    createPluginSymlinks(
+      flutterProject,
+      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+      force: true,
+      os: FakeOperatingSystemUtils(''),
+      platform: FakePlatform(operatingSystem: 'windows'),
+    );
+
+    expect(
+      () => createPluginSymlinks(
         flutterProject,
         featureFlags: TestFeatureFlags(isWindowsEnabled: true),
         force: true,
         os: FakeOperatingSystemUtils(''),
         platform: FakePlatform(operatingSystem: 'windows'),
-      );
-
-      expect(
-        () => createPluginSymlinks(
-          flutterProject,
-          featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-          force: true,
-          os: FakeOperatingSystemUtils(''),
-          platform: FakePlatform(operatingSystem: 'windows'),
+      ),
+      throwsToolExit(
+        message: RegExp(
+          'Unable to delete file or directory at '
+          r'"C:\\app\\windows\\flutter\\ephemeral\\\.plugin_symlinks"',
         ),
-        throwsToolExit(
-          message: RegExp(
-            'Unable to delete file or directory at '
-            r'"C:\\app\\windows\\flutter\\ephemeral\\\.plugin_symlinks"',
-          ),
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () {
-        final handle = FileExceptionHandler();
-        final fileSystem = ErrorHandlingFileSystem(
-          platform: FakePlatform(),
-          delegate: MemoryFileSystem.test(
-            style: FileSystemStyle.windows,
-            opHandle: handle.opHandle,
-          ),
-        );
-        const symlinkDirectoryPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks';
-        handle.addError(
-          fileSystem.directory(symlinkDirectoryPath),
-          FileSystemOp.delete,
-          const PathNotFoundException(
-            symlinkDirectoryPath,
-            OSError('The system cannot find the path specified.', 3),
-          ),
-        );
-        return fileSystem;
-      },
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
-  );
+      ),
+    );
+  });
 
   group('resolvePluginImplementationsForPlatform', () {
     testWithoutContext('filters plugins based on platformKey', () {
@@ -3787,7 +3752,6 @@ iosPrefix: FLT
     });
 
     testWithoutContext('ensures the correct federated implementation is selected', () {
-      final fs = MemoryFileSystem.test();
       final appFacingPlugin = Plugin(
         name: 'foo',
         path: '',
@@ -3830,12 +3794,11 @@ iosPrefix: FLT
         implementsPackage: 'foo',
         defaultPackagePlatforms: const <String, String>{},
         pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-        platforms: <String, PluginPlatform>{
+        platforms: const <String, PluginPlatform>{
           AndroidPlugin.kConfigKey: AndroidPlugin(
             name: 'foo_android',
             package: 'com.example',
             pluginPath: '',
-            fileSystem: fs,
           ),
         },
         dependencies: const <String>[],
