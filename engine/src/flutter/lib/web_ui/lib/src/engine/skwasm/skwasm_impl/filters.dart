@@ -55,14 +55,14 @@ class SkwasmBlurImageFilter extends SkwasmImageFilter {
     // Wimp (Impeller) renders [bounds] as a bounded blur. skwasm-Skia ignores
     // it and draws an unbounded blur, like native Skia.
     // https://github.com/flutter/flutter/issues/175899
-    _handle = withStackScope(
-      (StackScope s) => imageFilterCreateBlur(
-        sigmaX,
-        sigmaY,
-        tileMode.index,
-        bounds != null ? s.convertRectToNative(bounds) : nullptr,
-      ),
-    );
+    if (bounds != null) {
+      _handle = withStackScope(
+        (StackScope s) =>
+            imageFilterCreateBlur(sigmaX, sigmaY, tileMode.index, s.convertRectToNative(bounds)),
+      );
+    } else {
+      _handle = imageFilterCreateBlur(sigmaX, sigmaY, tileMode.index, nullptr);
+    }
   }
 }
 
