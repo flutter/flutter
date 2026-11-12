@@ -24,6 +24,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.util.SparseArrayKt;
+
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
@@ -1131,7 +1133,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   private void disposeAllViews() {
-    while (platformViews.size() > 0) {
+    while (SparseArrayKt.isNotEmpty(platformViews)) {
       final int viewId = platformViews.keyAt(0);
       // Dispose deletes the entry from platformViews and clears associated resources.
       channelHandler.dispose(viewId);

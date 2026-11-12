@@ -135,10 +135,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private static final float DISABLED_TRANSITION_ANIMATION_SCALE = 0.0f;
 
   /// Value is derived from ACTION_TYPE_MASK in AccessibilityNodeInfo.java
-  private static int FIRST_RESOURCE_ID = 267386881;
+  private static final int FIRST_RESOURCE_ID = 267386881;
 
   /// The index value that indicates no string is specified.
-  private static int EMPTY_STRING_INDEX = -1;
+  private static final int EMPTY_STRING_INDEX = -1;
 
   // Real Android View, which internally holds a Flutter UI.
   @NonNull private final View rootAccessibilityView;
@@ -1885,28 +1885,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   @VisibleForTesting
   public AccessibilityEvent obtainAccessibilityEvent(int eventType) {
     return AccessibilityEvent.obtain(eventType);
-  }
-
-  /**
-   * Reads the {@code layoutInDisplayCutoutMode} value from the window attribute and returns whether
-   * a left cutout inset is required.
-   *
-   * <p>The {@code layoutInDisplayCutoutMode} is added after API level 28.
-   */
-  @RequiresApi(API_LEVELS.API_28)
-  private boolean doesLayoutInDisplayCutoutModeRequireLeftInset() {
-    Context context = rootAccessibilityView.getContext();
-    Activity activity = ViewUtils.getActivity(context);
-    if (activity == null || activity.getWindow() == null) {
-      // The activity is not visible, it does not matter whether to apply left inset
-      // or not.
-      return false;
-    }
-    int layoutInDisplayCutoutMode = activity.getWindow().getAttributes().layoutInDisplayCutoutMode;
-    return layoutInDisplayCutoutMode
-            == WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
-        || layoutInDisplayCutoutMode
-            == WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
   }
 
   /**

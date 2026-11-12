@@ -34,12 +34,11 @@ public class MouseCursorPlugin {
    * <p>This method guarantees to return a non-null object.
    */
   private PointerIcon resolveSystemCursor(@NonNull String kind) {
-    if (MouseCursorPlugin.systemCursorConstants == null) {
       // Initialize the map when first used, because the map can grow big in the future (~70)
       // and most mobile devices will not use them.
       MouseCursorPlugin.systemCursorConstants =
           new HashMap<String, Integer>() {
-            private static final long serialVersionUID = 1L;
+//            private static final long serialVersionUID = 1L;
 
             {
               put("alias", PointerIcon.TYPE_ALIAS);
@@ -68,7 +67,6 @@ public class MouseCursorPlugin {
               put("resizeRow", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
               put("resizeUp", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
               put("resizeUpDown", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
-              put("resizeUpLeft", PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW);
               put("resizeUpRight", PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW);
               put("resizeUpLeftDownRight", PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW);
               put("resizeUpRightDownLeft", PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW);
@@ -78,7 +76,6 @@ public class MouseCursorPlugin {
               put("zoomOut", PointerIcon.TYPE_ZOOM_OUT);
             }
           };
-    }
 
     final int cursorConstant =
         MouseCursorPlugin.systemCursorConstants.getOrDefault(kind, PointerIcon.TYPE_ARROW);
