@@ -5,21 +5,11 @@
 #import "shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #include "display_list/geometry/dl_geometry_types.h"
 
-#include "flutter/flow/surface_frame.h"
-#include "flutter/flow/view_slicer.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/make_copyable.h"
-#include "flutter/fml/synchronization/count_down_latch.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewFrame.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#import "flutter/shell/platform/darwin/ios/platform_view_layer_conversion.h"
-
-using flutter::DlRect;
 
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
@@ -38,9 +28,6 @@ static void ResetAnchor(CALayer* layer) {
 }
 
 @interface FlutterPlatformViewsController ()
-
-// The pool of reusable view layers. The pool allows to recycle layer in each frame.
-@property(nonatomic, readonly) flutter::OverlayLayerPool* layerPool;
 
 @property(nonatomic, readonly) FlutterClippingMaskViewPool* maskViewPool;
 
@@ -70,33 +57,10 @@ static void ResetAnchor(CALayer* layer) {
 /// This state must only be accessed on the platform thread.
 @property(nonatomic, readonly) NSMutableSet<NSNumber*>* viewsToDispose;
 
-/// Whether the previous frame had any platform views in active composition order.
-///
-/// This state is tracked so that the first frame after removing the last platform view
-/// runs through the platform view rendering code path, giving us a chance to remove the
-/// platform view from the UIView hierarchy.
-///
-/// Only accessed from the raster thread.
-@property(nonatomic, assign) BOOL hadPlatformViews;
-
 /// Whether blurred backdrop filters can be applied.
 ///
 /// Defaults to YES, but becomes NO if blurred backdrop filters cannot be applied.
 @property(nonatomic, assign) BOOL canApplyBlurBackdrop;
-
-/// Populate any missing overlay layers.
-///
-/// This requires posting a task to the platform thread and blocking on its completion.
-- (void)createMissingOverlays:(size_t)requiredOverlayLayers
-               withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext;
-
-/// Update the buffers and mutate the platform views in CATransaction on the platform thread.
-///
-/// This method composites only the platform views whose layers in `frame` differ from the layers
-/// they were last composited with.
-///
-/// Must run on the platform thread.
-- (void)presentFrame:(FlutterPlatformViewFrame*)frame;
 
 /// Sets the frames and accessibility identifiers of the views in `overlay`.
 ///
@@ -139,12 +103,6 @@ static void ResetAnchor(CALayer* layer) {
 - (void)bringOverlaysIntoView:(NSDictionary<NSNumber*, FlutterPlatformViewOverlay*>*)overlays
          withCompositionOrder:(const std::vector<int64_t>&)compositionOrder;
 
-- (std::shared_ptr<flutter::OverlayLayer>)nextLayerInPool;
-
-/// Runs on the platform thread.
-- (void)createLayerWithIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-                      pixelFormat:(MTLPixelFormat)pixelFormat;
-
 /// Removes overlay views and platform views that aren't needed in the current frame.
 /// Must run on the platform thread.
 - (void)removeUnusedOverlayViews:(NSArray<UIView*>*)unusedOverlayViews
@@ -160,13 +118,7 @@ static void ResetAnchor(CALayer* layer) {
 @end
 
 @implementation FlutterPlatformViewsController {
-  // TODO(cbracken): Replace with Obj-C types and use @property declarations to automatically
-  // synthesize the ivars.
-  //
-  // These ivars are required because we're transitioning the previous C++ implementation to Obj-C.
-  // We require ivars to declare the concrete types and then wrap with @property declarations that
-  // return a reference to the ivar, allowing for use like `self.layerPool`.
-  std::unique_ptr<flutter::OverlayLayerPool> _layerPool;
+  // TODO(cbracken): Use @property declarations to automatically synthesize the ivars.
   NSMutableDictionary<NSString*, NSObject<FlutterPlatformViewFactory>*>* _factories;
   NSMutableDictionary<NSString*, NSNumber*>* _gestureRecognizersBlockingPoliciesByType;
   FlutterFMLTaskRunner* _platformTaskRunner;
@@ -177,7 +129,6 @@ static void ResetAnchor(CALayer* layer) {
 
 - (id)init {
   if (self = [super init]) {
-    _layerPool = std::make_unique<flutter::OverlayLayerPool>();
     _factories = [[NSMutableDictionary alloc] init];
     _gestureRecognizersBlockingPoliciesByType = [[NSMutableDictionary alloc] init];
     _platformViews = [[NSMutableDictionary alloc] init];
@@ -185,7 +136,6 @@ static void ResetAnchor(CALayer* layer) {
     _previousCompositionOrder = [[NSMutableArray alloc] init];
     _maskViewPool =
         [[FlutterClippingMaskViewPool alloc] initWithCapacity:kFlutterClippingMaskViewPoolCapacity];
-    _hadPlatformViews = NO;
     _canApplyBlurBackdrop = YES;
   }
   return self;
@@ -600,181 +550,12 @@ static void ResetAnchor(CALayer* layer) {
   }];
 }
 
-- (void)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)background_frame
-       withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-            frameSize:(flutter::DlISize)frameSize
-     devicePixelRatio:(CGFloat)devicePixelRatio
-     compositionOrder:(const std::vector<int64_t>&)compositionOrder
-    compositionParams:
-        (const std::unordered_map<int64_t, flutter::EmbeddedViewParams>&)compositionParams
-               slices:(std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>>&)
-                          slices {
-  TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
-
-  // No platform views to render.
-  if (self.flutterView == nil || (compositionOrder.empty() && !self.hadPlatformViews)) {
-    // No platform views to render but the FlutterView may need to be resized.
-    __weak FlutterPlatformViewsController* weakSelf = self;
-    if (self.flutterView != nil) {
-      [self.taskRunner runNowOrPostTask:^{
-        FlutterPlatformViewsController* strongSelf = weakSelf;
-        if (!strongSelf) {
-          return;
-        }
-        [strongSelf performResize:frameSize];
-      }];
-    }
-
-    self.hadPlatformViews = NO;
-    background_frame->Submit();
-    return;
-  }
-  self.hadPlatformViews = !compositionOrder.empty();
-
-  NSMutableArray<FlutterPlatformViewLayer*>* layers =
-      [NSMutableArray arrayWithCapacity:compositionOrder.size()];
-  NSMutableDictionary<NSNumber*, FlutterPlatformViewOverlay*>* overlays =
-      [NSMutableDictionary dictionary];
-  std::vector<std::shared_ptr<flutter::OverlayLayer>> usedLayers;
-  std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
-  surfaceFrames.reserve(compositionOrder.size());
-  std::unordered_map<int64_t, DlRect> viewRects;
-
-  for (int64_t viewId : compositionOrder) {
-    const flutter::EmbeddedViewParams& params = compositionParams.at(viewId);
-    viewRects[viewId] = params.finalBoundingRect();
-    [layers addObject:flutter::GetPlatformViewLayerFromEmbeddedViewParams(viewId, params,
-                                                                          devicePixelRatio)];
-  }
-
-  std::unordered_map<int64_t, DlRect> overlayLayers =
-      SliceViews(background_frame->Canvas(), compositionOrder, slices, viewRects);
-
-  size_t requiredOverlayLayers = 0;
-  for (int64_t viewId : compositionOrder) {
-    std::unordered_map<int64_t, DlRect>::const_iterator overlay = overlayLayers.find(viewId);
-    if (overlay == overlayLayers.end()) {
-      continue;
-    }
-    requiredOverlayLayers++;
-  }
-
-  // If there are not sufficient overlay layers, we must construct them on the platform
-  // thread, at least until we've refactored iOS surface creation to use IOSurfaces
-  // instead of CALayers.
-  [self createMissingOverlays:requiredOverlayLayers withIosContext:iosContext];
-
-  for (int64_t viewId : compositionOrder) {
-    std::unordered_map<int64_t, DlRect>::const_iterator overlay = overlayLayers.find(viewId);
-    if (overlay == overlayLayers.end()) {
-      continue;
-    }
-    std::shared_ptr<flutter::OverlayLayer> layer = self.nextLayerInPool;
-    if (!layer) {
-      continue;
-    }
-
-    std::unique_ptr<flutter::SurfaceFrame> frame = layer->surface->AcquireFrame(frameSize);
-    // If frame is null, AcquireFrame already printed out an error message.
-    if (!frame) {
-      continue;
-    }
-    flutter::DlCanvas* overlayCanvas = frame->Canvas();
-    int restoreCount = overlayCanvas->GetSaveCount();
-    overlayCanvas->Save();
-    overlayCanvas->ClipRect(overlay->second);
-    overlayCanvas->Clear(flutter::DlColor::kTransparent());
-    slices[viewId]->render_into(overlayCanvas);
-    overlayCanvas->RestoreToCount(restoreCount);
-
-    // This flutter view is never the last in a frame, since we always submit the
-    // underlay view last.
-    frame->set_submit_info({.frame_boundary = false, .present_with_transaction = true});
-    frame->Encode();
-    const DlRect& rect = overlay->second;
-    overlays[@(viewId)] = [[FlutterPlatformViewOverlay alloc]
-        initWithView:layer->overlay_view
-        clippingView:layer->overlay_view_wrapper
-                rect:CGRectMake(rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight())];
-    usedLayers.push_back(layer);
-    surfaceFrames.push_back(std::move(frame));
-  }
-
-  auto previousSubmitInfo = background_frame->submit_info();
-  background_frame->set_submit_info({
-      .frame_damage = previousSubmitInfo.frame_damage,
-      .buffer_damage = previousSubmitInfo.buffer_damage,
-      .present_with_transaction = true,
-  });
-  background_frame->Encode();
-  surfaceFrames.push_back(std::move(background_frame));
-
-  // Mark all layers as available, so they can be used in the next frame.
-  std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
-      self.layerPool->RemoveUnusedLayers();
-  self.layerPool->RecycleLayers();
-
-  NSMutableArray<UIView*>* unusedOverlayViews =
-      [NSMutableArray arrayWithCapacity:unusedLayers.size()];
-  for (const std::shared_ptr<flutter::OverlayLayer>& layer : unusedLayers) {
-    [unusedOverlayViews addObject:layer->overlay_view_wrapper];
-  }
-
-  // The block holds the overlay layers so that their surfaces are not destroyed before the frame
-  // has been presented.
-  auto submitSurfaceFrames = fml::MakeCopyable([surfaceFrames = std::move(surfaceFrames),  //
-                                                usedLayers = std::move(usedLayers),        //
-                                                unusedLayers = std::move(unusedLayers)]() {
-    for (const auto& frame : surfaceFrames) {
-      frame->Submit();
-    }
-  });
-  FlutterPlatformViewFrame* frame =
-      [[FlutterPlatformViewFrame alloc] initWithLayers:layers
-                                              overlays:overlays
-                                    unusedOverlayViews:unusedOverlayViews
-                                      devicePixelRatio:devicePixelRatio
-                                               present:^{
-                                                 submitSurfaceFrames();
-                                               }];
-
-  [self.taskRunner runNowOrPostTask:^{
-    [self presentFrame:frame];
-  }];
-}
-
-- (void)createMissingOverlays:(size_t)requiredOverlayLayers
-               withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext {
-  TRACE_EVENT0("flutter", "PlatformViewsController::CreateMissingLayers");
-
-  if (requiredOverlayLayers <= self.layerPool->size()) {
-    return;
-  }
-  auto missingLayerCount = requiredOverlayLayers - self.layerPool->size();
-
-  // If the raster thread isn't merged, create layers on the platform thread and block until
-  // complete. The self-capture here is fine since this is effectively synchronous (we block on the
-  // latch right below).
-  auto latch = std::make_shared<fml::CountDownLatch>(1u);
-  [self.taskRunner runNowOrPostTask:^{
-    for (auto i = 0u; i < missingLayerCount; i++) {
-      [self createLayerWithIosContext:iosContext
-                          pixelFormat:((FlutterView*)self.flutterView).pixelFormat];
-    }
-    latch->CountDown();
-  }];
-  if (![[NSThread currentThread] isMainThread]) {
-    latch->Wait();
-  }
-}
-
-- (void)performResize:(const flutter::DlISize&)frameSize {
+- (void)performResize:(CGSize)frameSize {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformResize");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
 
   if (self.flutterView != nil) {
-    [(FlutterView*)self.flutterView
-        setIntrinsicContentSize:CGSizeMake(frameSize.width, frameSize.height)];
+    [(FlutterView*)self.flutterView setIntrinsicContentSize:frameSize];
   }
 }
 
@@ -899,15 +680,6 @@ static void ResetAnchor(CALayer* layer) {
   }
 }
 
-- (std::shared_ptr<flutter::OverlayLayer>)nextLayerInPool {
-  return self.layerPool->GetNextLayer();
-}
-
-- (void)createLayerWithIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-                      pixelFormat:(MTLPixelFormat)pixelFormat {
-  self.layerPool->CreateLayer(iosContext, pixelFormat);
-}
-
 - (void)removeUnusedOverlayViews:(NSArray<UIView*>*)unusedOverlayViews
             withCompositionOrder:(const std::vector<int64_t>&)compositionOrder {
   for (UIView* view in unusedOverlayViews) {
@@ -954,10 +726,6 @@ static void ResetAnchor(CALayer* layer) {
 }
 
 #pragma mark - Properties
-
-- (flutter::OverlayLayerPool*)layerPool {
-  return _layerPool.get();
-}
 
 - (NSArray<NSNumber*>*)previousCompositionOrder {
   return [_previousCompositionOrder copy];
