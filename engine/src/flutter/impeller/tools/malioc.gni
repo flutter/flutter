@@ -45,11 +45,16 @@ template("malioc_analyze_shaders") {
                 backend_ext == "gles" || backend_ext == "vkspv",
                 "Shader for unsupported backend passed to malioc: {{source}}")
             shader_file_name = get_path_info(source, "name")
+            shader_kind_ext = get_path_info(shader_file_name, "extension")
             analysis_target =
                 "${target_name}_${shader_file_name}_${core.core}_malioc"
             if ((backend_ext == "gles" &&
                  defined(invoker.gles_language_version) &&
                  core.opengles_max_version < invoker.gles_language_version) ||
+                (backend_ext == "gles" && shader_kind_ext == "frag" &&
+                 defined(invoker.require_framebuffer_fetch) &&
+                 invoker.require_framebuffer_fetch &&
+                 !core.supports_framebuffer_fetch) ||
                 (backend_ext == "vkspv" &&
                  defined(invoker.vulkan_language_version) &&
                  core.vulkan_max_version < invoker.vulkan_language_version)) {
@@ -58,6 +63,7 @@ template("malioc_analyze_shaders") {
               }
             } else {
               target_deps += [ ":$analysis_target" ]
+
               action(analysis_target) {
                 forward_variables_from(invoker,
                                        "*",
@@ -67,21 +73,19 @@ template("malioc_analyze_shaders") {
                                          "inputs",
                                          "outputs",
                                          "pool",
+                                         "require_framebuffer_fetch",
                                          "script",
                                        ])
 
                 script = "//build/gn_run_malioc.py"
                 pool = "//build/toolchain:toolchain_pool"
 
-                # Nest all malioc output under its own subdirectory of root_gen_dir
-                # so that it's easier to diff it against the state before any changes.
+                # Nest all malioc output under its own subdirectory of
+                # root_gen_dir so that it's easier to diff it against the state
+                # before any changes.
                 subdir = rebase_path(target_gen_dir, root_gen_dir)
                 output_file = "$root_gen_dir/malioc/$subdir/${shader_file_name}.${backend_ext}.${core.core}.json"
                 outputs = [ output_file ]
-
-                # Determine the kind of the shader from the file name
-                name = get_path_info(source, "name")
-                shader_kind_ext = get_path_info(name, "extension")
 
                 if (shader_kind_ext == "comp") {
                   shader_kind_flag = "--compute"

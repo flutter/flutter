@@ -39,7 +39,7 @@ TEST(Time, FloatConversions) {
 }
 
 TEST(Time, TimespecConversions) {
-  struct timespec ts;
+  struct timespec ts{};
   ts.tv_sec = 5;
   ts.tv_nsec = 7;
   TimeDelta from_timespec = TimeDelta::FromTimespec(ts);
