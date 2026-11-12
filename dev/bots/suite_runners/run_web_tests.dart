@@ -655,8 +655,8 @@ class WebTestsSuite {
           TestFileReporterResults.fromFile(metricFile),
           workingDirectory: workingDirectory,
         );
+        metricFile.deleteSync();
       }
-      metricFile.deleteSync();
     }
   }
 
