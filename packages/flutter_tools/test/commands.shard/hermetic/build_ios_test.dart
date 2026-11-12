@@ -1708,6 +1708,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     );
 
     testWithoutContext('Do not crash or recreate pipe if temporary build directory is deleted after existsSync in terminal session.', () async {
+      // POSIX errno for ENOENT (No such file or directory).
+      const kEnoent = 2;
       var deleteOnNextPipeWrite = false;
       fileSystem = MemoryFileSystem.test(
         opHandle: (String path, FileSystemOp op) {
@@ -1719,7 +1721,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             throw FileSystemException(
               'Cannot open file',
               path,
-              const OSError('No such file or directory', 2),
+              const OSError('No such file or directory', kEnoent),
             );
           }
         },

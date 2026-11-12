@@ -28,7 +28,7 @@ import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
-import '../features.dart';
+import '../features.dart' show FeatureFlags;
 import '../macos/cocoapods.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -74,6 +74,7 @@ class IOSSimulatorUtils {
   IOSSimulatorUtils({
     required this._analytics,
     required this._cocoaPods,
+    required this._featureFlags,
     required this._plistParser,
     required this._templateRenderer,
     required this._toolContext,
@@ -89,6 +90,7 @@ class IOSSimulatorUtils {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Analytics _analytics;
   final CocoaPods _cocoaPods;
+  final FeatureFlags _featureFlags;
   final PlistParser _plistParser;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
@@ -118,6 +120,7 @@ class IOSSimulatorUtils {
             analytics: _analytics,
             cocoaPods: _cocoaPods,
             cpuArch: cpuArch,
+            featureFlags: _featureFlags,
             name: name,
             plistParser: _plistParser,
             simControl: _simControl,
@@ -390,6 +393,7 @@ class IOSSimulator extends Device {
     required this._analytics,
     required this._cocoaPods,
     required this._cpuArch,
+    required this._featureFlags,
     required this.name,
     required this._plistParser,
     required this._simControl,
@@ -415,6 +419,7 @@ class IOSSimulator extends Device {
   final CpuArch _cpuArch;
   final Analytics _analytics;
   final CocoaPods _cocoaPods;
+  final FeatureFlags _featureFlags;
   final PlistParser _plistParser;
   final TemplateRenderer _templateRenderer;
   final Xcode _xcode;
@@ -627,7 +632,7 @@ class IOSSimulator extends Device {
       analytics: _analytics,
       app: app,
       buildInfo: buildInfo,
-      featureFlags: featureFlags,
+      featureFlags: _featureFlags,
       plistParser: _plistParser,
       templateRenderer: _templateRenderer,
       toolContext: toolContext,
