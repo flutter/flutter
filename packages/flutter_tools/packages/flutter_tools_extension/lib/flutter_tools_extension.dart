@@ -13,6 +13,7 @@ export 'src/artifacts.dart';
 export 'src/build.dart';
 export 'src/clean.dart';
 export 'src/config.dart';
+export 'src/dependencies.dart';
 export 'src/device.dart';
 export 'src/diagnostics.dart';
 export 'src/protocol_base/provider.dart';

@@ -15,7 +15,7 @@ services:
   - clean
   - artifact
 build_targets:
-  - custom-linux
+  - custom-linux-build
 templates:
   - custom-linux-app
 target_platforms:
