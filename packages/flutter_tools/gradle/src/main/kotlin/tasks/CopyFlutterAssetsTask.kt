@@ -6,6 +6,7 @@ package com.flutter.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -16,6 +17,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import javax.inject.Inject
 
 /**
  * Adds the `flutter_assets` directory produced by the Flutter build to the variant's merged
@@ -54,11 +56,18 @@ abstract class CopyFlutterAssetsTask : DefaultTask() {
     @get:OutputDirectory
     abstract val destinationDir: DirectoryProperty
 
+    @get:Inject
+    abstract val fileSystemOperations: FileSystemOperations
+
     @TaskAction
     fun copy() {
         val destination: File = destinationDir.get().asFile
         // Remove everything from a previous run, so assets that are no longer produced are pruned.
-        destination.deleteRecursively()
+        // Unlike File.deleteRecursively(), Gradle's delete fails the build if a file can't be
+        // deleted, instead of leaving it to be packaged as a stale asset.
+        fileSystemOperations.delete {
+            delete(destinationDir)
+        }
         destination.mkdirs()
         copyTree(mergedAssetsDir.get().asFile.toPath(), destination.toPath())
         // The engine loads assets from `flutter_assets/` by default, so keep the prefix.
