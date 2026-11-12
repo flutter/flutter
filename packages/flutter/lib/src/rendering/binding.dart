@@ -59,7 +59,6 @@ mixin RendererBinding
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
     addPersistentFrameCallback(_handlePersistentFrameCallback);
-    addPersistentFrameCallback(_handleHitTestRegionsFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
@@ -560,32 +559,14 @@ mixin RendererBinding
     _scheduleMouseTrackerUpdate();
   }
 
-  // Runs every frame, after [_handlePersistentFrameCallback] (and therefore
-  // after [drawFrame]) because it is registered right after it in
-  // [initInstances]. The hit-test region pass has to run after the frame has
-  // been composited, because some render objects (such as
-  // [RenderFollowerLayer]) only learn their final paint transform while the
-  // scene is being built.
-  //
-  // This is a separate persistent frame callback rather than a step in
-  // [drawFrame] so that it also runs for bindings that override [drawFrame]
-  // without calling the superclass implementation (such as the test bindings
-  // in package:flutter_test). As a consequence, it does not observe the
-  // `EnginePhase` early exits of those test bindings: it runs even if a
-  // test frame stopped before compositing.
-  void _handleHitTestRegionsFrameCallback(Duration timeStamp) {
-    if (sendFramesToEngine && _shouldFlushHitTestRegions) {
-      rootPipelineOwner.flushHitTestRegions();
-    }
-  }
-
   bool _automaticPointerInterceptorsEnabled = false;
 
   /// Whether the framework automatically computes hit-test regions that overlap
   /// platform views and sends them to the engine each frame.
   ///
-  /// When enabled, [PipelineOwner.flushHitTestRegions] runs after every frame
-  /// and reports the regions through [PipelineOwner.onHitTestRegionsUpdate].
+  /// When enabled, [PipelineOwner.flushHitTestRegions] runs during [drawFrame]
+  /// after compositing each frame and reports the regions through
+  /// [PipelineOwner.onHitTestRegionsUpdate].
   ///
   /// This flag is experimental and only has an effect on the web (unless
   /// [debugEnableHitTestRegionsOnAllPlatforms] is enabled in tests).
@@ -608,7 +589,19 @@ mixin RendererBinding
   // true.
   bool get _hitTestRegionsSupportedOnPlatform => kIsWeb || debugEnableHitTestRegionsOnAllPlatforms;
 
-  bool get _shouldFlushHitTestRegions =>
+  /// Whether [drawFrame] should call [PipelineOwner.flushHitTestRegions] after
+  /// compositing the frame.
+  ///
+  /// Subclasses (such as test bindings) that override [drawFrame] without
+  /// calling `super.drawFrame()` can check this getter after compositing to
+  /// decide whether to flush hit-test regions on [rootPipelineOwner].
+  ///
+  /// This getter is part of the experimental automatic pointer-interceptor
+  /// hit-test region pass (see [automaticPointerInterceptorsEnabled]). It is
+  /// true only when [automaticPointerInterceptorsEnabled] is true and hit-test
+  /// regions are supported on the current platform.
+  @protected
+  bool get shouldFlushHitTestRegions =>
       _automaticPointerInterceptorsEnabled && _hitTestRegionsSupportedOnPlatform;
 
   bool _debugMouseTrackerUpdateScheduled = false;
@@ -725,14 +718,19 @@ mixin RendererBinding
   /// 6. The compositing phase: The layer tree is turned into a [Scene] and
   /// sent to the GPU.
   ///
-  /// 7. The semantics phase: All the dirty [RenderObject]s in the system have
+  /// 7. The hit-test region phase: When [automaticPointerInterceptorsEnabled]
+  /// is enabled on a supported platform, the hit-test regions of Flutter
+  /// content overlapping platform views are computed and reported (see
+  /// [PipelineOwner.flushHitTestRegions]).
+  ///
+  /// 8. The semantics phase: All the dirty [RenderObject]s in the system have
   /// their semantics updated. This generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
   ///
-  /// For more details on steps 3-7, see [PipelineOwner].
+  /// For more details on steps 3-8, see [PipelineOwner].
   ///
-  /// 8. The finalization phase: After [drawFrame] returns, [handleDrawFrame]
+  /// 9. The finalization phase: After [drawFrame] returns, [handleDrawFrame]
   /// then invokes post-frame callbacks (registered with [addPostFrameCallback]).
   ///
   /// Some bindings (for example, the [WidgetsBinding]) add extra steps to this
@@ -747,6 +745,9 @@ mixin RendererBinding
     if (sendFramesToEngine) {
       for (final RenderView renderView in renderViews) {
         renderView.compositeFrame(); // this sends the bits to the GPU
+      }
+      if (shouldFlushHitTestRegions) {
+        rootPipelineOwner.flushHitTestRegions();
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;

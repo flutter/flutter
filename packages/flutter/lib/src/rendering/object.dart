@@ -1768,6 +1768,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// Each pipeline owner only walks its own render tree, and only while it has
   /// platform views attached; child pipeline owners are always visited, since
   /// in a multi-view app the root pipeline owner has no render tree of its own.
+  ///
+  /// This pass is experimental (see
+  /// [RendererBinding.automaticPointerInterceptorsEnabled]).
   void flushHitTestRegions() {
     Float64List? regions;
     if (_attachedPlatformViewCount > 0 && rootNode != null) {
@@ -4153,6 +4156,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// while the pass is enabled. The new value takes effect on the next frame.
   ///
   /// Defaults to true.
+  @internal
   @protected
   bool get hitTestsChildren => true;
 

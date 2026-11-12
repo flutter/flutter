@@ -3753,6 +3753,8 @@ class RenderIgnorePointer extends RenderProxyBox {
   }
 
   @override
+  @internal
+  @protected
   bool get hitTestsChildren => !ignoring;
 
   @override
@@ -3957,6 +3959,8 @@ class RenderAbsorbPointer extends RenderProxyBox {
   }
 
   @override
+  @internal
+  @protected
   bool get hitTestsChildren => !absorbing;
 
   @override

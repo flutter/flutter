@@ -204,6 +204,9 @@ class TestRenderingFlutterBinding extends BindingBase
       for (final RenderView renderView in renderViews) {
         renderView.compositeFrame();
       }
+      if (shouldFlushHitTestRegions) {
+        rootPipelineOwner.flushHitTestRegions();
+      }
       if (phase == EnginePhase.composite) {
         return;
       }
