@@ -3119,7 +3119,6 @@ targets:
   - name: Linux_pixel_7pro integration_ui_keyboard_inset_jump
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
