@@ -35,7 +35,9 @@ class ExtensionManager {
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
   bool _isDisabled = false;
+  bool _isDisposed = false;
   Future<void>? _initFuture;
+  Future<void>? _disposeFuture;
   final _diagnosticsExtensions = <DiagnosticsExtension>[];
   final _configurationExtensions = <ConfigurationExtension>[];
   final _deviceExtensions = <DeviceService>[];
@@ -48,7 +50,12 @@ class ExtensionManager {
   }
 
   /// Ensures entrypoints are initialized; idempotent.
+  ///
+  /// Returns immediately as a no-op if [dispose] has already been called.
   Future<void> ensureInitialized() {
+    if (_isDisposed) {
+      return Future<void>.value();
+    }
     return _initFuture ??= _doInitialize();
   }
 
@@ -58,7 +65,7 @@ class ExtensionManager {
       return;
     }
     if (_entryPoints.isNotEmpty) {
-      await initialize(entryPoints: _entryPoints);
+      await _initialize(entryPoints: _entryPoints);
     } else {
       _isInitialized = true;
     }
@@ -75,18 +82,32 @@ class ExtensionManager {
 
   /// Spawns entrypoints without host OS checks; disposes any extension that reports
   /// it does not support [hostPlatform].
-  Future<void> initialize({
-    List<ExtensionEntryPoint> entryPoints = const <ExtensionEntryPoint>[],
-  }) async {
+  ///
+  /// Returns immediately as a no-op if [dispose] has already been called.
+  Future<void> initialize({List<ExtensionEntryPoint> entryPoints = const <ExtensionEntryPoint>[]}) {
+    if (_isDisposed) {
+      return Future<void>.value();
+    }
+    return _initFuture = _initialize(entryPoints: entryPoints);
+  }
+
+  Future<void> _initialize({required List<ExtensionEntryPoint> entryPoints}) async {
     _logger.printTrace(
       'ExtensionManager initializing for platform "$hostPlatformName" with ${entryPoints.length} entrypoint(s).',
     );
     for (final entryPoint in entryPoints) {
+      if (_isDisposed) {
+        return;
+      }
       // ignore: invalid_use_of_visible_for_testing_member, transitional until #194774.
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         entryPoint,
         logger: _logger,
       );
+      if (_isDisposed) {
+        await connection.dispose();
+        return;
+      }
       if (connection.capabilities.supportsHostPlatform(hostPlatformName) ||
           connection.capabilities.supportsHostPlatform(hostPlatform.cliName)) {
         _logger.printTrace(
@@ -105,6 +126,9 @@ class ExtensionManager {
     _configurationExtensions.clear();
     _deviceExtensions.clear();
     for (final ExtensionConnection connection in _discovery.connections) {
+      if (_isDisposed) {
+        return;
+      }
       if (connection.capabilities.services.contains(DiagnosticsExtension.serviceNamespace)) {
         final client = DiagnosticsExtensionClient(connection, logger: _logger);
         await client.fetchTitle();
@@ -120,13 +144,16 @@ class ExtensionManager {
         _deviceExtensions.add(client);
       }
     }
+    if (_isDisposed) {
+      return;
+    }
     _isInitialized = true;
   }
 
   /// Active [DiagnosticsExtension] proxies for extensions supporting `'diagnostics'`.
   List<DiagnosticsExtension> get diagnosticsExtensions {
     assert(
-      _isInitialized,
+      _isInitialized || _isDisposed,
       'ExtensionManager.ensureInitialized() must be called before accessing diagnosticsExtensions.',
     );
     return List<DiagnosticsExtension>.unmodifiable(_diagnosticsExtensions);
@@ -135,7 +162,7 @@ class ExtensionManager {
   /// Active [ConfigurationExtension] proxies for extensions supporting `'config'`.
   List<ConfigurationExtension> get configurationExtensions {
     assert(
-      _isInitialized,
+      _isInitialized || _isDisposed,
       'ExtensionManager.ensureInitialized() must be called before accessing configurationExtensions.',
     );
     return List<ConfigurationExtension>.unmodifiable(_configurationExtensions);
@@ -144,20 +171,33 @@ class ExtensionManager {
   /// Active [DeviceService] proxies for extensions supporting `'device'`.
   List<DeviceService> get deviceExtensions {
     assert(
-      _isInitialized,
+      _isInitialized || _isDisposed,
       'ExtensionManager.ensureInitialized() must be called before accessing deviceExtensions.',
     );
     return List<DeviceService>.unmodifiable(_deviceExtensions);
   }
 
   /// Disposes all active extension isolate connections.
-  Future<void> dispose() async {
+  ///
+  /// If initialization is currently in flight, waits for it to finish before
+  /// disposing registered connections. Subsequent calls to [ensureInitialized]
+  /// or [initialize] after [dispose] is invoked are no-ops.
+  Future<void> dispose() {
+    _isDisposed = true;
+    return _disposeFuture ??= _doDispose();
+  }
+
+  Future<void> _doDispose() async {
     _logger.printTrace('ExtensionManager disposing all active connections.');
+    try {
+      await _initFuture;
+    } on Object {
+      // Ignore initialization errors during disposal so cleanup still runs.
+    }
     _diagnosticsExtensions.clear();
     _configurationExtensions.clear();
     _deviceExtensions.clear();
     _isInitialized = false;
-    _initFuture = null;
     await _discovery.dispose();
   }
 }

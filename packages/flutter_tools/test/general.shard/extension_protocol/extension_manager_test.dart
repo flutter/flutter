@@ -34,6 +34,35 @@ final class _ShutdownNotifyingService extends ToolExtensionService {
   }
 }
 
+final class _GatedLifecycleService extends ToolExtensionService {
+  _GatedLifecycleService({this.initStartedPort, this.shutdownStartedPort});
+
+  final SendPort? initStartedPort;
+  final SendPort? shutdownStartedPort;
+
+  @override
+  String get namespace => 'lifecycle';
+
+  static Future<void> _waitForGate(SendPort? port) async {
+    if (port == null) {
+      return;
+    }
+    final gatePort = ReceivePort();
+    port.send(gatePort.sendPort);
+    await gatePort.first;
+    gatePort.close();
+  }
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    await _waitForGate(initStartedPort);
+    return <String, ExtensionRpcHandler>{};
+  }
+
+  @override
+  Future<void> shutdown() => _waitForGate(shutdownStartedPort);
+}
+
 void _shutdownNotifyingEntryPoint(SendPort sendPort) {
   unawaited(
     ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ShutdownNotifyingService()]),
@@ -194,5 +223,216 @@ void main() {
         );
       },
     );
+
+    testWithoutContext('dispose awaits in-flight ensureInitialized, shuts down spawned connection, and skips remaining entrypoints', () async {
+      final logger = BufferLogger.test();
+      final initStartedPort = ReceivePort();
+      final shutdownStartedPort = ReceivePort();
+      final secondEntryPointSpawnedPort = ReceivePort();
+      addTearDown(initStartedPort.close);
+      addTearDown(shutdownStartedPort.close);
+      addTearDown(secondEntryPointSpawnedPort.close);
+
+      final SendPort initStartedSendPort = initStartedPort.sendPort;
+      final SendPort shutdownStartedSendPort = shutdownStartedPort.sendPort;
+      final SendPort secondSpawnedSendPort = secondEntryPointSpawnedPort.sendPort;
+      var secondEntryPointSpawned = false;
+      secondEntryPointSpawnedPort.listen((Object? _) {
+        secondEntryPointSpawned = true;
+      });
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[
+          (SendPort sendPort) {
+            unawaited(
+              ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+                _GatedLifecycleService(
+                  initStartedPort: initStartedSendPort,
+                  shutdownStartedPort: shutdownStartedSendPort,
+                ),
+              ]),
+            );
+          },
+          (SendPort sendPort) {
+            secondSpawnedSendPort.send(null);
+            _dummyExtensionEntryPoint(sendPort);
+          },
+        ],
+      );
+
+      final Future<void> initFuture = manager.ensureInitialized();
+      final initGateSendPort = await initStartedPort.first as SendPort;
+
+      var disposeCompleted = false;
+      final Future<void> disposeFuture = manager.dispose().then((_) {
+        disposeCompleted = true;
+      });
+
+      await Future<void>.value();
+      expect(disposeCompleted, isFalse);
+      expect(manager.diagnosticsExtensions, isEmpty);
+      expect(manager.configurationExtensions, isEmpty);
+      expect(manager.deviceExtensions, isEmpty);
+
+      // Allow the in-flight entrypoint to finish initializing; dispose() must
+      // then run its shutdown() hook before completing.
+      initGateSendPort.send(null);
+      final shutdownGateSendPort = await shutdownStartedPort.first as SendPort;
+      expect(disposeCompleted, isFalse);
+      shutdownGateSendPort.send(null);
+
+      await Future.wait<void>(<Future<void>>[initFuture, disposeFuture]);
+      expect(disposeCompleted, isTrue);
+      expect(secondEntryPointSpawned, isFalse);
+      expect(manager.connections, isEmpty);
+      expect(manager.isInitialized, isFalse);
+    });
+
+    testWithoutContext(
+      'ensureInitialized and initialize are no-ops after dispose begins or completes',
+      () async {
+        final logger = BufferLogger.test();
+        final spawnedPort = ReceivePort();
+        final shutdownStartedPort = ReceivePort();
+        addTearDown(spawnedPort.close);
+        addTearDown(shutdownStartedPort.close);
+        final SendPort spawnedSendPort = spawnedPort.sendPort;
+        final SendPort shutdownStartedSendPort = shutdownStartedPort.sendPort;
+        var spawnCount = 0;
+        spawnedPort.listen((Object? _) {
+          spawnCount++;
+        });
+        void countingEntryPoint(SendPort sendPort) {
+          spawnedSendPort.send(null);
+          unawaited(
+            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+              _GatedLifecycleService(shutdownStartedPort: shutdownStartedSendPort),
+            ]),
+          );
+        }
+
+        final preDisposedManager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          entryPoints: <ExtensionEntryPoint>[countingEntryPoint],
+        );
+
+        await preDisposedManager.dispose();
+        await preDisposedManager.ensureInitialized();
+        await preDisposedManager.initialize(entryPoints: <ExtensionEntryPoint>[countingEntryPoint]);
+        expect(spawnCount, 0);
+        expect(preDisposedManager.connections, isEmpty);
+        expect(preDisposedManager.isInitialized, isFalse);
+        expect(preDisposedManager.deviceExtensions, isEmpty);
+
+        final initializedManager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          entryPoints: <ExtensionEntryPoint>[countingEntryPoint],
+        );
+
+        await initializedManager.ensureInitialized();
+        expect(spawnCount, 1);
+        expect(initializedManager.connections, hasLength(1));
+        expect(initializedManager.isInitialized, isTrue);
+
+        final Future<void> disposeFuture = initializedManager.dispose();
+        final shutdownGateSendPort = await shutdownStartedPort.first as SendPort;
+
+        // Calling ensureInitialized() or initialize() while dispose() is in flight is a no-op.
+        await initializedManager.ensureInitialized();
+        await initializedManager.initialize(entryPoints: <ExtensionEntryPoint>[countingEntryPoint]);
+        expect(spawnCount, 1);
+
+        shutdownGateSendPort.send(null);
+        await disposeFuture;
+        expect(initializedManager.connections, isEmpty);
+        expect(initializedManager.isInitialized, isFalse);
+
+        // Calling ensureInitialized() or initialize() after dispose() completes is also a no-op.
+        await initializedManager.ensureInitialized();
+        await initializedManager.initialize(entryPoints: <ExtensionEntryPoint>[countingEntryPoint]);
+        expect(spawnCount, 1);
+        expect(initializedManager.connections, isEmpty);
+        expect(initializedManager.isInitialized, isFalse);
+      },
+    );
+
+    testWithoutContext('dispose completes cleanly when in-flight initialize throws and concurrent dispose calls await cleanup', () async {
+      final logger = BufferLogger.test();
+      final secondInitStartedPort = ReceivePort();
+      final firstShutdownStartedPort = ReceivePort();
+      addTearDown(secondInitStartedPort.close);
+      addTearDown(firstShutdownStartedPort.close);
+
+      final SendPort secondInitStartedSendPort = secondInitStartedPort.sendPort;
+      final SendPort firstShutdownStartedSendPort = firstShutdownStartedPort.sendPort;
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+      );
+
+      final Future<void> initFuture = manager.initialize(
+        entryPoints: <ExtensionEntryPoint>[
+          (SendPort sendPort) {
+            unawaited(
+              ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+                _GatedLifecycleService(shutdownStartedPort: firstShutdownStartedSendPort),
+              ]),
+            );
+          },
+          (SendPort _) async {
+            await _GatedLifecycleService._waitForGate(secondInitStartedSendPort);
+            throw StateError('Simulated extension initialization failure.');
+          },
+        ],
+      );
+      final Future<void> initErrorExpectation = expectLater(
+        initFuture,
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Simulated extension initialization failure'),
+          ),
+        ),
+      );
+
+      final secondGateSendPort = await secondInitStartedPort.first as SendPort;
+      expect(manager.connections, hasLength(1));
+
+      var firstDisposeCompleted = false;
+      var secondDisposeCompleted = false;
+      final Future<void> firstDispose = manager.dispose().then((_) {
+        firstDisposeCompleted = true;
+      });
+      final Future<void> secondDispose = manager.dispose().then((_) {
+        secondDisposeCompleted = true;
+      });
+
+      // Unblock the failing second entrypoint so initialize() throws while dispose() is awaiting it.
+      secondGateSendPort.send(null);
+      await initErrorExpectation;
+
+      // Both concurrent dispose() calls must still await disposal of the first connection.
+      final firstShutdownGateSendPort = await firstShutdownStartedPort.first as SendPort;
+      expect(firstDisposeCompleted, isFalse);
+      expect(secondDisposeCompleted, isFalse);
+
+      firstShutdownGateSendPort.send(null);
+      await Future.wait<void>(<Future<void>>[firstDispose, secondDispose]);
+
+      expect(firstDisposeCompleted, isTrue);
+      expect(secondDisposeCompleted, isTrue);
+      expect(manager.connections, isEmpty);
+      expect(manager.isInitialized, isFalse);
+    });
   });
 }
