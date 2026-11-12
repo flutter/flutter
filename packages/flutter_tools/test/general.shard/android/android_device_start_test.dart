@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -675,6 +677,161 @@ void main() {
     expect(launchResult.started, false);
     expect(processManager, hasNoRemainingExpectations);
   });
+
+  for (final (
+        String description,
+        String reason,
+        bool internetHint,
+        int? privilegedPort,
+        int? portInUse,
+      )
+      in <(String, String, bool, int?, int?)>[
+        (
+          'EPERM',
+          'SocketException: Failed to create server socket '
+              '(OS Error: Operation not permitted, errno = 1), address = 127.0.0.1, port = 0',
+          true,
+          null,
+          null,
+        ),
+        (
+          'EACCES on the lowest privileged port',
+          'SocketException: Failed to create server socket '
+              '(OS Error: Permission denied, errno = 13), address = 127.0.0.1, port = 1',
+          true,
+          1,
+          null,
+        ),
+        (
+          'EACCES on the highest privileged port',
+          'SocketException: Failed to create server socket '
+              '(OS Error: Permission denied, errno = 13), address = 127.0.0.1, port = 1023',
+          true,
+          1023,
+          null,
+        ),
+        (
+          'a port in use',
+          'SocketException: Failed to create server socket '
+              '(OS Error: Address already in use, errno = 98), address = 127.0.0.1, port = 8181',
+          false,
+          null,
+          8181,
+        ),
+        (
+          'a non-socket EPERM',
+          'FileSystemException: Cannot open file (OS Error: Operation not permitted, errno = 1)',
+          false,
+          null,
+          null,
+        ),
+      ]) {
+    testWithoutContext(
+      'AndroidDevice.startApp fails with the right hints when the VM service cannot start, for $description',
+      () async {
+        final logger = BufferLogger.test();
+        final device = AndroidDevice(
+          '1234',
+          modelID: 'TestModel',
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: logger,
+          platform: FakePlatform(),
+          androidSdk: androidSdk,
+        );
+        final File apkFile = fileSystem.file('app-debug.apk')..createSync();
+        final apk = AndroidApk(
+          id: 'FlutterApp',
+          applicationPackage: apkFile,
+          launchActivity: 'FlutterActivity',
+          versionCode: 1,
+        );
+
+        processManager.addCommand(kAdbVersionCommand);
+        processManager.addCommand(kStartServer);
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+            stdout: '[ro.product.cpu.abi]: [x86_64]',
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
+          ),
+        );
+        processManager.addCommand(kShaCommand);
+        // Keep logcat running, as on a real device, so that discovery can only
+        // finish by recognizing the failure.
+        final logcatCompleter = Completer<void>();
+        processManager.addCommand(
+          FakeCommand(
+            command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
+            stdout:
+                '11-10 08:18:52.698 I/flutter ( 4369): Could not start Dart VM service HTTP server:\n'
+                '11-10 08:18:52.698 I/flutter ( 4369): $reason\n'
+                '11-10 08:18:52.698 I/flutter ( 4369): #0      _NativeSocket.bind (dart:io-patch/socket_patch.dart:1248:7)\n',
+            completer: logcatCompleter,
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'adb', '-s', '1234', 'shell', 'am', 'start',
+              '-a', 'android.intent.action.MAIN',
+              '-c', 'android.intent.category.LAUNCHER',
+              '-f', '0x20000000',
+              // The DebuggingOptions arguments for a debug build.
+              '--ez', 'enable-dart-profiling', 'true',
+              '--ez', 'enable-checked-mode', 'true',
+              '--ez', 'verify-entry-points', 'true',
+              'FlutterActivity',
+            ],
+          ),
+        );
+
+        final LaunchResult launchResult = await device.startApp(
+          apk,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          platformArgs: <String, dynamic>{},
+        );
+        logcatCompleter.complete();
+
+        expect(launchResult.started, false);
+        expect(
+          logger.errorText,
+          contains(
+            'Error waiting for a debug connection: The Dart VM service failed to start: $reason',
+          ),
+        );
+        expect(
+          logger.errorText,
+          internetHint
+              ? contains('<uses-permission android:name="android.permission.INTERNET"/>')
+              : isNot(contains('android.permission.INTERNET')),
+        );
+        expect(
+          logger.errorText,
+          privilegedPort != null
+              ? contains('port $privilegedPort being a privileged port')
+              : isNot(contains('privileged')),
+        );
+        expect(
+          logger.errorText,
+          portInUse != null
+              ? contains('Port $portInUse is already in use on the device.')
+              : isNot(contains('already in use on the device')),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+  }
 
   testWithoutContext('AndroidDevice.startApp fails when am start returns Error type 3', () async {
     final device = AndroidDevice(

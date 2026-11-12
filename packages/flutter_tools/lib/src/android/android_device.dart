@@ -653,11 +653,44 @@ class AndroidDevice extends Device {
         }
       }
       return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+    } on VmServiceStartException catch (error) {
+      _logger.printError('Error waiting for a debug connection: $error');
+      if (error.reason case final String reason) {
+        _printVmServiceStartFailureCauses(reason);
+      }
+      // Return a failed LaunchResult rather than throwToolExit,
+      // so callers can name the device and clean up.
+      return LaunchResult.failed();
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {
       await vmServiceDiscovery?.cancel();
+    }
+  }
+
+  /// Prints the likely causes of the VM service failing to start with
+  /// [reason], when they can be told from it.
+  void _printVmServiceStartFailureCauses(String reason) {
+    final int? port = int.tryParse(_socketPortRegExp.firstMatch(reason)?.group(1) ?? '');
+    if (_socketPermissionDeniedRegExp.hasMatch(reason)) {
+      _logger.printError(
+        'This may be due to the app lacking the android.permission.INTERNET permission. '
+        'Ensure the debug and profile AndroidManifest.xml files declare '
+        '<uses-permission android:name="android.permission.INTERNET"/>.',
+      );
+      if (port != null && port > 0 && port < 1024) {
+        _logger.printError(
+          'This may also be due to port $port being a privileged port (below 1024), '
+          'which apps cannot listen on. $_vmServicePortSettingAdvice '
+          'and use a port of 1024 or higher.',
+        );
+      }
+    } else if (_socketAddressInUseRegExp.hasMatch(reason) && port != null) {
+      _logger.printError(
+        'Port $port is already in use on the device. '
+        '$_vmServicePortSettingAdvice and use a different port.',
+      );
     }
   }
 
@@ -778,6 +811,36 @@ class AndroidDevice extends Device {
       adbPath: adbPath,
     );
   }();
+
+  /// Matches a socket error that a missing INTERNET permission causes:
+  /// EPERM (1) on newer Android versions, EACCES (13) on older ones. Binding a
+  /// privileged port also causes EACCES.
+  ///
+  /// For example, `SocketException: Failed to create server socket (OS Error:
+  /// Operation not permitted, errno = 1), address = 127.0.0.1, port = 0`.
+  static final _socketPermissionDeniedRegExp = RegExp(
+    r'^SocketException: .*\(OS Error: [^)]*, errno = (1|13)\)',
+  );
+
+  /// Matches a socket error caused by the port already being in use:
+  /// EADDRINUSE (98 on Linux, and so on Android).
+  ///
+  /// For example, `SocketException: Failed to create server socket (OS Error:
+  /// Address already in use, errno = 98), address = 127.0.0.1, port = 8181`.
+  static final _socketAddressInUseRegExp = RegExp(
+    r'^SocketException: .*\(OS Error: [^)]*, errno = 98\)',
+  );
+
+  /// Where to look when the VM service port the app listens on is the problem.
+  static const _vmServicePortSettingAdvice =
+      'Check where the VM service port is set (such as the '
+      'io.flutter.embedding.android.VMServicePort meta-data in AndroidManifest.xml)';
+
+  /// Matches the port at the end of a socket error, capturing it.
+  ///
+  /// For example, `80` in `SocketException: Failed to create server socket
+  /// (OS Error: Permission denied, errno = 13), address = 127.0.0.1, port = 80`.
+  static final _socketPortRegExp = RegExp(r', port = (\d+)$');
 
   static final _timeRegExp = RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
