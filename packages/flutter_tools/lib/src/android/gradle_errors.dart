@@ -18,15 +18,14 @@ import 'java.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
-typedef GradleErrorHandler =
-    Future<GradleBuildStatus> Function({
-      required utils.GradleUtils gradleUtils,
-      required String line,
-      required FlutterProject project,
-      required ToolContext toolContext,
-      required bool usesAndroidX,
-      Java? java,
-    });
+typedef GradleErrorHandler = Future<GradleBuildStatus> Function({
+  required utils.GradleUtils gradleUtils,
+  required String line,
+  required FlutterProject project,
+  required ToolContext toolContext,
+  required bool usesAndroidX,
+  Java? java,
+});
 
 /// A Gradle error handled by the tool.
 class GradleHandledError {
@@ -308,8 +307,8 @@ final flavorUndefinedHandler = GradleHandledError(
           if (_defaultBuildTypes.contains(variant)) {
             continue;
           }
-          // In multi-dimension setups, Gradle only generates assemble<Flavor><BuildType>
-          // tasks for complete flavor combinations, filtering out intermediate dimension tasks.
+          // `assemble<Flavor><BuildType>` tasks are only generated for complete
+          // flavor combinations across all flavor dimensions.
           if (_defaultBuildTypes.any(
             (String buildType) => variants.contains('$variant$buildType'),
           )) {

@@ -551,8 +551,7 @@ Command: /home/android/gradlew assembleRelease
     testWithoutContext('handler', () async {
       await licenseNotAcceptedHandler.handler(
         gradleUtils: FakeGradleUtils(),
-        line:
-            'You have not accepted the license agreements of the following SDK components: [foo, bar]',
+        line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         toolContext: toolContext,
         usesAndroidX: true,
