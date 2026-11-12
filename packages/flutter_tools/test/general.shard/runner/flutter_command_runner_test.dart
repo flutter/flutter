@@ -6,16 +6,15 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/experimental/extension_arg_parser.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -58,176 +57,189 @@ void main() {
     });
 
     group('run', () {
-      testUsingContext(
-        'checks that Flutter installation is up-to-date',
-        () async {
-          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+      testWithoutContext('checks that Flutter installation is up-to-date', () async {
+        final version = FakeFlutterVersion();
+        final toolContext = FakeToolContext(
+          botDetector: const FakeBotDetector(false),
+          flutterVersion: version,
+          fs: fileSystem,
+          outputPreferences: OutputPreferences.test(),
+          platform: platform,
+        );
+        final runner = createTestCommandRunner(
+          DummyFlutterCommand(toolContext: toolContext),
+          null,
+          toolContext,
+        ) as FlutterCommandRunner;
 
-          await runner.run(<String>['dummy']);
+        await runner.run(<String>['dummy']);
 
-          expect(version.didCheckFlutterVersionFreshness, true);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => platform,
-          FlutterVersion: () => FakeFlutterVersion(),
-          BotDetector: () => const FakeBotDetector(false),
-          OutputPreferences: () => OutputPreferences.test(),
-        },
-      );
+        expect(version.didCheckFlutterVersionFreshness, true);
+      });
 
-      testUsingContext(
+      testWithoutContext(
         'does not check that Flutter installation is up-to-date with --machine flag',
         () async {
-          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = FakeFlutterVersion();
+          final toolContext = FakeToolContext(
+            botDetector: const FakeBotDetector(true),
+            flutterVersion: version,
+            fs: fileSystem,
+            outputPreferences: OutputPreferences.test(),
+            platform: platform,
+          );
+          final runner = createTestCommandRunner(
+            DummyFlutterCommand(toolContext: toolContext),
+            null,
+            toolContext,
+          ) as FlutterCommandRunner;
 
           await runner.run(<String>['dummy', '--machine', '--version']);
 
           expect(version.didCheckFlutterVersionFreshness, false);
         },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => platform,
-          FlutterVersion: () => FakeFlutterVersion(),
-          OutputPreferences: () => OutputPreferences.test(),
-        },
       );
 
-      testUsingContext(
-        'does not check that Flutter installation is up-to-date with --machine flag present anywhere',
-        () async {
-          final runner = createTestCommandRunner(
-            _FlutterCommandWithItsOwnMachineFlag(verboseHelp: false),
-          ) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+      testWithoutContext('does not check that Flutter installation is up-to-date with --machine flag present anywhere', () async {
+        final version = FakeFlutterVersion();
+        final toolContext = FakeToolContext(
+          botDetector: const FakeBotDetector(true),
+          flutterVersion: version,
+          fs: fileSystem,
+          outputPreferences: OutputPreferences.test(),
+          platform: platform,
+        );
+        final runner = createTestCommandRunner(
+          _FlutterCommandWithItsOwnMachineFlag(verboseHelp: false, toolContext: toolContext),
+          null,
+          toolContext,
+        ) as FlutterCommandRunner;
 
-          await runner.run(<String>['dummy-with-machine', '--machine']);
+        await runner.run(<String>['dummy-with-machine', '--machine']);
 
-          expect(version.didCheckFlutterVersionFreshness, false);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => platform,
-          FlutterVersion: () => FakeFlutterVersion(),
-          OutputPreferences: () => OutputPreferences.test(),
-        },
-      );
+        expect(version.didCheckFlutterVersionFreshness, false);
+      });
 
-      testUsingContext(
+      testWithoutContext(
         'does not check that Flutter installation is up-to-date with CI=true in environment',
         () async {
-          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = FakeFlutterVersion();
+          final toolContext = FakeToolContext(
+            botDetector: const FakeBotDetector(true),
+            flutterVersion: version,
+            fs: fileSystem,
+            platform: platform,
+          );
+          final runner = createTestCommandRunner(
+            DummyFlutterCommand(toolContext: toolContext),
+            null,
+            toolContext,
+          ) as FlutterCommandRunner;
 
           await runner.run(<String>['dummy', '--version']);
 
           expect(version.didCheckFlutterVersionFreshness, false);
         },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => platform,
-          BotDetector: () => const FakeBotDetector(true),
-        },
-        initializeFlutterRoot: false,
       );
 
-      testUsingContext(
-        'checks that Flutter installation is up-to-date with CI=true and --machine when explicit --version-check',
-        () async {
-          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+      testWithoutContext('checks that Flutter installation is up-to-date with CI=true and --machine when explicit --version-check', () async {
+        final version = FakeFlutterVersion();
+        final toolContext = FakeToolContext(
+          botDetector: const FakeBotDetector(true),
+          flutterVersion: version,
+          fs: fileSystem,
+          platform: platform,
+        );
+        final runner = createTestCommandRunner(
+          DummyFlutterCommand(toolContext: toolContext),
+          null,
+          toolContext,
+        ) as FlutterCommandRunner;
 
-          await runner.run(<String>['dummy', '--version', '--machine', '--version-check']);
+        await runner.run(<String>['dummy', '--version', '--machine', '--version-check']);
 
-          expect(version.didCheckFlutterVersionFreshness, true);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => platform,
-          BotDetector: () => const FakeBotDetector(true),
-        },
-        initializeFlutterRoot: false,
-      );
+        expect(version.didCheckFlutterVersionFreshness, true);
+      });
 
-      testUsingContext(
+      testWithoutContext(
         'checks that Flutter installation is up-to-date if shell completion to terminal',
         () async {
-          final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
-          final runner = createTestCommandRunner(command) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = FakeFlutterVersion();
+          final toolContext = FakeToolContext(
+            botDetector: const FakeBotDetector(false),
+            flutterVersion: version,
+            fs: fileSystem,
+            platform: platform,
+            stdio: FakeStdio(hasFakeTerminal: true),
+          );
+          final FlutterCommand command = DummyFlutterCommand(
+            name: 'bash-completion',
+            toolContext: toolContext,
+          );
+          final runner =
+              createTestCommandRunner(command, null, toolContext) as FlutterCommandRunner;
 
           await runner.run(<String>['bash-completion']);
 
           expect(version.didCheckFlutterVersionFreshness, true);
         },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => platform,
-          FlutterVersion: () => FakeFlutterVersion(),
-          BotDetector: () => const FakeBotDetector(false),
-          Stdio: () => FakeStdio(hasFakeTerminal: true),
-        },
       );
 
-      testUsingContext(
+      testWithoutContext(
         'does not check that Flutter installation is up-to-date if redirecting shell completion',
         () async {
-          final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
-          final runner = createTestCommandRunner(command) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+          final version = FakeFlutterVersion();
+          final toolContext = FakeToolContext(
+            botDetector: const FakeBotDetector(false),
+            flutterVersion: version,
+            fs: fileSystem,
+            platform: platform,
+            stdio: FakeStdio(hasFakeTerminal: false),
+          );
+          final FlutterCommand command = DummyFlutterCommand(
+            name: 'bash-completion',
+            toolContext: toolContext,
+          );
+          final runner =
+              createTestCommandRunner(command, null, toolContext) as FlutterCommandRunner;
 
           await runner.run(<String>['bash-completion']);
 
           expect(version.didCheckFlutterVersionFreshness, false);
         },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => platform,
-          FlutterVersion: () => FakeFlutterVersion(),
-          BotDetector: () => const FakeBotDetector(false),
-          Stdio: () => FakeStdio(hasFakeTerminal: false),
-        },
       );
 
-      testUsingContext(
-        'Fetches tags when --version is used',
-        () async {
-          final runner =
-              createTestCommandRunner(DummyFlutterCommand(), fakeAnalytics) as FlutterCommandRunner;
-          final version = globals.flutterVersion as FakeFlutterVersion;
+      testWithoutContext('Fetches tags when --version is used', () async {
+        final os = FakeOperatingSystemUtils();
+        final version = FakeFlutterVersion();
+        final toolContext = FakeToolContext(
+          botDetector: const FakeBotDetector(true),
+          flutterVersion: version,
+          fs: fileSystem,
+          os: os,
+          outputPreferences: OutputPreferences.test(),
+          platform: platform,
+        );
+        final runner = createTestCommandRunner(
+          DummyFlutterCommand(toolContext: toolContext),
+          fakeAnalytics,
+          toolContext,
+        ) as FlutterCommandRunner;
 
-          await runner.run(<String>['--version']);
-          expect(version.didFetchTagsAndUpdate, true);
-          expect(
-            fakeAnalytics.sentEvents,
-            contains(
-              Event.flutterCommandResult(
-                commandPath: 'version',
-                result: 'success',
-                commandHasTerminal: false,
-                hostArch: globals.os.hostPlatform.cliName,
-              ),
+        await runner.run(<String>['--version']);
+        expect(version.didFetchTagsAndUpdate, true);
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterCommandResult(
+              commandPath: 'version',
+              result: 'success',
+              commandHasTerminal: false,
+              hostArch: os.hostPlatform.cliName,
             ),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => platform,
-          FlutterVersion: () => FakeFlutterVersion(),
-          OutputPreferences: () => OutputPreferences.test(),
-          Analytics: () => fakeAnalytics,
-        },
-      );
+          ),
+        );
+      });
 
       // TODO(bkonyi): remove when ready to serve DevTools from DDS.
       group('${FlutterGlobalOptions.kPrintDtd} flag', () {
@@ -453,10 +465,10 @@ void main() {
           expect(runner.toolContext, same(fakeToolContext));
         });
 
-        test('command attached to runner inherits runner toolContext', () {
+        test('command preserves provided toolContext', () {
           final fakeToolContext = FakeToolContext();
           final runner = FlutterCommandRunner(toolContext: fakeToolContext);
-          final command = FakeFlutterCommand();
+          final command = FakeFlutterCommand(toolContext: fakeToolContext);
           runner.addCommand(command);
           expect(command.toolContext, same(fakeToolContext));
         });
@@ -835,7 +847,7 @@ void main() {
 
             Artifacts? artifactsInsideCommand;
             fakeCommand.onRun = () {
-              artifactsInsideCommand = globals.artifacts;
+              artifactsInsideCommand = fakeCommand.toolContext.artifacts;
             };
 
             await runner.run(<String>[
@@ -865,6 +877,9 @@ void main() {
 }
 
 class FakeFlutterCommand extends FlutterCommand {
+  FakeFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   bool ran = false;
   late OutputPreferences preferences;
   void Function()? onRun;
@@ -872,7 +887,7 @@ class FakeFlutterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() {
     ran = true;
-    preferences = globals.outputPreferences;
+    preferences = toolContext.outputPreferences;
     onRun?.call();
     return Future<FlutterCommandResult>.value(const FlutterCommandResult(ExitStatus.success));
   }
@@ -902,7 +917,8 @@ class FakeStdio extends Stdio {
 }
 
 final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
-  _FlutterCommandWithItsOwnMachineFlag({required bool verboseHelp}) {
+  _FlutterCommandWithItsOwnMachineFlag({required bool verboseHelp, ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
   }
 
@@ -919,7 +935,8 @@ final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
 }
 
 final class _FakeParentFlutterCommand extends FlutterCommand {
-  _FakeParentFlutterCommand({required FlutterCommand subcommand, super.toolContext}) {
+  _FakeParentFlutterCommand({required FlutterCommand subcommand, ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     addSubcommand(subcommand);
   }
 
@@ -939,8 +956,8 @@ final class _FakeDynamicFlutterCommand extends FlutterCommand with ExtensionArgP
   _FakeDynamicFlutterCommand({
     this.commandName = 'dynamic-cmd',
     FlutterCommand? subcommand,
-    super.toolContext,
-  }) {
+    ToolContext? toolContext,
+  }) : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     if (subcommand != null) {
       addSubcommand(subcommand);
     }
