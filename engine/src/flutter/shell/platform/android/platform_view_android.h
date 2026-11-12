@@ -138,9 +138,12 @@ class PlatformViewAndroid final : public PlatformView {
 
   std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
-  // Incremented on the platform thread in NotifyCreated and NotifyDestroyed so
-  // deferred raster tasks from a superseded or destroyed surface are skipped.
-  std::atomic<uint64_t> surface_generation_{0};
+  // Incremented on the platform thread in NotifyCreated, NotifyDestroyed, and
+  // the destructor so deferred raster tasks from a superseded or destroyed
+  // surface are skipped. Shared with those tasks because a resize task can
+  // outlive this object.
+  const std::shared_ptr<std::atomic<uint64_t>> surface_generation_ =
+      std::make_shared<std::atomic<uint64_t>>(0);
   bool android_meets_hcpp_criteria_ = false;
 
   // |PlatformView|

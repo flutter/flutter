@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
@@ -364,6 +365,74 @@ TEST(AndroidShellHolder, SupersededNotifyCreatedAndNotifyChangedAreSkipped) {
   ASSERT_FALSE(raster_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(10)));
   EXPECT_FALSE(setup_ran_for_superseded_generation);
   EXPECT_TRUE(setup_ran_for_active_generation);
+
+  holder->GetPlatformView()->NotifyDestroyed();
+}
+
+// With hybrid composition the raster task queue can be merged onto the platform
+// thread while surface setup or an earlier resize is still queued. A resize
+// requested on the platform thread at that point must queue behind them rather
+// than run inline.
+TEST(AndroidShellHolder, NotifyChangedStaysBehindQueuedSetupWhenThreadsMerge) {
+  // Declared before `holder` so they outlive the raster thread on every exit
+  // path.
+  fml::AutoResetWaitableEvent raster_entered;
+  fml::AutoResetWaitableEvent unblock_raster;
+  fml::AutoResetWaitableEvent raster_done;
+  bool setup_ran_before_resize = false;
+
+  Settings settings;
+  settings.enable_software_rendering = false;
+  settings.enable_impeller = false;
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kSkiaOpenGLES);
+  ASSERT_NE(holder, nullptr);
+  ASSERT_TRUE(holder->IsValid());
+
+  const TaskRunners& task_runners =
+      holder->GetShellForTesting()->GetTaskRunners();
+  auto raster_runner = task_runners.GetRasterTaskRunner();
+  const fml::TaskQueueId platform_queue_id =
+      task_runners.GetPlatformTaskRunner()->GetTaskQueueId();
+  const fml::TaskQueueId raster_queue_id = raster_runner->GetTaskQueueId();
+  auto* task_queues = fml::MessageLoopTaskQueues::GetInstance();
+
+  raster_runner->PostTask([&raster_entered, &unblock_raster]() {
+    raster_entered.Signal();
+    unblock_raster.Wait();
+  });
+  raster_entered.Wait();
+
+  // Surface setup is now queued behind the blocked raster task.
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
+  holder->GetPlatformView()->NotifyCreated(window);
+
+  // While merged, the raster task runner reports that it runs tasks on this
+  // thread, so a run-now-or-post resize would execute here, ahead of setup.
+  // `AndroidSurfaceGLSkia::OnScreenSurfaceResize` requires the onscreen surface
+  // that setup creates, so a resize that runs first crashes the test.
+  const bool merged = task_queues->Merge(platform_queue_id, raster_queue_id);
+  const bool raster_runs_on_platform =
+      raster_runner->RunsTasksOnCurrentThread();
+  holder->GetPlatformView()->NotifyChanged(DlISize(1080, 1920));
+  const bool unmerged =
+      task_queues->Unmerge(platform_queue_id, raster_queue_id);
+
+  raster_runner->PostTask([shell_ptr = holder->GetShellForTesting().get(),
+                           &setup_ran_before_resize, &raster_done]() {
+    setup_ran_before_resize =
+        shell_ptr->GetRasterizer()->GetGrContext() != nullptr;
+    raster_done.Signal();
+  });
+  unblock_raster.Signal();
+
+  EXPECT_TRUE(merged);
+  EXPECT_TRUE(raster_runs_on_platform);
+  EXPECT_TRUE(unmerged);
+  EXPECT_FALSE(raster_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(10)));
+  EXPECT_TRUE(setup_ran_before_resize);
 
   holder->GetPlatformView()->NotifyDestroyed();
 }
