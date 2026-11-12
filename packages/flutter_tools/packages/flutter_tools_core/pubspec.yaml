@@ -3,7 +3,7 @@ description: Core shared data models, interfaces, and DTO contracts for Flutter 
 resolution: workspace
 
 environment:
-  sdk: ^3.13.0-0
+  sdk: ^3.14.0-0
 
 dependencies:
   collection: 1.19.1
