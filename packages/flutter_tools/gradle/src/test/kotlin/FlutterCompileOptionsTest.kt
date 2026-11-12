@@ -52,6 +52,18 @@ class FlutterCompileOptionsTest {
     }
 
     @Test
+    fun `from splits multiple file system roots`() {
+        val project =
+            projectWithProperties(
+                FlutterCompileOptions.FILE_SYSTEM_ROOTS_PROPERTY to "root1|root2|root3"
+            )
+
+        val options = FlutterCompileOptions.from(project)
+
+        assertEquals(listOf("root1", "root2", "root3"), options.fileSystemRoots)
+    }
+
+    @Test
     fun `from falls back to defaults when no properties are set`() {
         val options = FlutterCompileOptions.from(projectWithProperties())
 
