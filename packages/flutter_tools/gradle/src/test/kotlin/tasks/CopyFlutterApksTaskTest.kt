@@ -64,11 +64,15 @@ class CopyFlutterApksTaskTest {
 
         val armCopy = destinationDir.resolve("app-armeabi-v7a-free-release.apk")
         val arm64Copy = destinationDir.resolve("app-arm64-v8a-free-release.apk")
-        assertEquals(setOf(armCopy, arm64Copy), destinationDir.listFiles()!!.toSet())
+        val armVersioned = destinationDir.resolve("myapp-1.2.3+45-armeabi-v7a-free-release.apk")
+        val arm64Versioned = destinationDir.resolve("myapp-1.2.3+45-arm64-v8a-free-release.apk")
+        val all = setOf(armCopy, arm64Copy, armVersioned, arm64Versioned)
+        assertEquals(all, destinationDir.listFiles()!!.toSet())
         assertEquals("app-free-armeabi-v7a-release.apk", armCopy.readText())
         assertEquals("app-free-arm64-v8a-release.apk", arm64Copy.readText())
+        assertEquals("app-free-armeabi-v7a-release.apk", armVersioned.readText())
         // Reading task.outputs also checks that Gradle resolves the provider.
-        assertEquals(setOf(armCopy, arm64Copy), task.outputs.files.files)
+        assertEquals(all, task.outputs.files.files)
     }
 
     @Test
@@ -93,8 +97,9 @@ class CopyFlutterApksTaskTest {
 
         task.copyApks()
 
-        assertEquals(setOf(destinationDir.resolve("app-debug.apk")), destinationDir.listFiles()!!.toSet())
-        assertEquals(setOf(destinationDir.resolve("app-debug.apk")), task.outputs.files.files)
+        val both = setOf(destinationDir.resolve("app-debug.apk"), destinationDir.resolve("myapp-1.2.3+45-debug.apk"))
+        assertEquals(both, destinationDir.listFiles()!!.toSet())
+        assertEquals(both, task.outputs.files.files)
     }
 
     @Test
@@ -193,6 +198,8 @@ class CopyFlutterApksTaskTest {
             task.apkDirectory.set(apkDir)
             task.builtArtifactsLoader.set(loader)
             task.outputAbis.set(outputAbis)
+            task.appName.set("myapp")
+            task.outputVersions.set(outputAbis.map { "1.2.3+45" })
             task.flavorName.set(flavorName)
             task.buildMode.set(buildMode)
             task.destinationDir.set(destinationDir)

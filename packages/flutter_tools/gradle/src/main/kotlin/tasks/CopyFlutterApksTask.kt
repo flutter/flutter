@@ -56,6 +56,14 @@ abstract class CopyFlutterApksTask : DefaultTask() {
     @get:Input
     abstract val flavorName: Property<String>
 
+    /** The Flutter project's name, the prefix of the versioned APK copies. */
+    @get:Input
+    abstract val appName: Property<String>
+
+    /** `<versionName>+<versionCode>` of each variant output, parallel to [outputAbis]. */
+    @get:Input
+    abstract val outputVersions: ListProperty<String>
+
     /** The Flutter build mode: "debug", "profile" or "release". */
     @get:Input
     abstract val buildMode: Property<String>
@@ -68,8 +76,13 @@ abstract class CopyFlutterApksTask : DefaultTask() {
     @get:OutputFiles
     val outputApks: Provider<List<RegularFile>>
         get() =
-            destinationDir.zip(outputAbis) { dir, abis ->
-                abis.map { abi -> dir.file(apkFileName(abi, flavorName.orNull, buildMode.get())) }
+            destinationDir.zip(outputAbis.zip(outputVersions) { abis, versions -> abis.zip(versions) }) { dir, abiVersions ->
+                abiVersions.flatMap { (abi, version) ->
+                    listOf(
+                        apkFileName(abi, flavorName.orNull, buildMode.get()),
+                        versionedApkFileName(appName.get(), version, abi, flavorName.orNull, buildMode.get())
+                    ).map { dir.file(it) }
+                }
             }
 
     @get:Inject
@@ -108,6 +121,20 @@ abstract class CopyFlutterApksTask : DefaultTask() {
                 into(destinationDir)
                 rename { fileName }
             }
+            // Also write `<app>-<version>+<build>-...apk`, for people who want self-describing files.
+            val versioned =
+                versionedApkFileName(
+                    appName.get(),
+                    outputVersions.get()[declaredAbis.indexOf(abi)],
+                    abi,
+                    flavorName.orNull,
+                    buildMode.get()
+                )
+            fileSystemOperations.copy {
+                from(artifact.outputFile)
+                into(destinationDir)
+                rename { versioned }
+            }
         }
     }
 
@@ -133,6 +160,15 @@ abstract class CopyFlutterApksTask : DefaultTask() {
             val flavorPart = if (flavorName.isNullOrEmpty()) "" else "-${flavorName.lowercase()}"
             return "app$abiPart$flavorPart-$buildMode.apk"
         }
+
+        /** [apkFileName] with `app` replaced by `<appName>-<version>`, e.g. `myapp-1.2.3+45-release.apk`. */
+        internal fun versionedApkFileName(
+            appName: String,
+            version: String,
+            abi: String,
+            flavorName: String?,
+            buildMode: String
+        ): String = "$appName-$version" + apkFileName(abi, flavorName, buildMode).removePrefix("app")
 
         private fun transformedApkError(
             problem: String,

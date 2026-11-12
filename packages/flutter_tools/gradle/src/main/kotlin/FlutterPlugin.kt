@@ -716,6 +716,15 @@ class FlutterPlugin : Plugin<Project> {
                     builtArtifactsLoader.set(variant.artifacts.getBuiltArtifactsLoader())
                     outputAbis.set(variant.outputs.map { CopyFlutterApksTask.abiOf(it.filters) })
                     flavorName.set(variant.flavorName?.takeIf { it.isNotEmpty() })
+                    // The Flutter project directory is the parent of the `android` root project.
+                    appName.set(project.rootProject.projectDir.parentFile.name)
+                    outputVersions.set(
+                        project.provider {
+                            variant.outputs.map {
+                                (it.versionName.orNull?.let { name -> "$name+" } ?: "") + it.versionCode.get()
+                            }
+                        }
+                    )
                     buildMode.set(flutterBuildModeFor(variant))
                     destinationDir.set(project.layout.buildDirectory.dir("outputs/flutter-apk"))
                 }
