@@ -516,16 +516,21 @@ void FlutterWindow::SetDirectManipulationNeedsUpdate(bool needs_update) {
     return;
   }
   if (needs_update) {
-    // Preserve the existing gesture polling cadence. A request of 16 ms can
-    // be rounded up to about 32 ms by SetTimer on some systems, so use 14 ms.
+    // SetTimer is not precise, if a 16 ms interval is requested, it will instead
+    // often fire in an interval of 32 ms. Providing a value of 14 will ensure it
+    // runs every 16 ms, which will allow for 60 Hz trackpad gesture events, which
+    // is the maximal frequency supported by SetTimer.
+    // See relevant investigation:
+    // https://github.com/flutter-team-archive/engine/pull/37154#issuecomment-1301672538
     direct_manipulation_timer_running_ =
-        SetTimer(window_handle_, kDirectManipulationTimer, 14, nullptr) != 0;
+        windows_proc_table_->SetTimer(window_handle_, kDirectManipulationTimer,
+                                      14, nullptr) != 0;
     if (!direct_manipulation_timer_running_) {
       FML_LOG(ERROR) << "Failed to start DirectManipulation timer";
     }
   } else {
     direct_manipulation_timer_running_ = false;
-    KillTimer(window_handle_, kDirectManipulationTimer);
+    windows_proc_table_->KillTimer(window_handle_, kDirectManipulationTimer);
   }
 }
 
