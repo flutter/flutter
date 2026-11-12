@@ -659,7 +659,11 @@ class EnginePath implements ui.Path, Collectable {
       builder = constructors.createNew();
     }
 
-    builder.fillType = _fillType ??= builder.fillType;
+    if (_fillType == null) {
+      _fillType = builder.fillType;
+    } else {
+      builder.fillType = _fillType!;
+    }
     for (final PathCommand command in _commands) {
       command.apply(builder);
     }
