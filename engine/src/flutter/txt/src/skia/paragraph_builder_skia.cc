@@ -5,10 +5,13 @@
 #include "paragraph_builder_skia.h"
 #include "paragraph_skia.h"
 
+#include <unicode/ustring.h>
+
 #include "third_party/skia/modules/skparagraph/include/ParagraphStyle.h"
 #include "third_party/skia/modules/skparagraph/include/TextStyle.h"
 #include "third_party/skia/modules/skunicode/include/SkUnicode_icu.h"
 #include "txt/paragraph_style.h"
+#include "txt/text_direction_util.h"
 
 namespace skt = skia::textlayout;
 
@@ -36,20 +39,39 @@ ParagraphBuilderSkia::ParagraphBuilderSkia(
     const ParagraphStyle& style,
     const std::shared_ptr<FontCollection>& font_collection,
     const bool impeller_enabled)
-    : base_style_(style.GetTextStyle()), impeller_enabled_(impeller_enabled) {
+    : base_style_(style.GetTextStyle()),
+      original_style_(style),
+      font_collection_(font_collection),
+      direction_is_auto_(!style.text_direction.has_value()),
+      impeller_enabled_(impeller_enabled) {
+  if (direction_is_auto_) {
+    original_style_.text_direction =
+        style.default_text_direction.value_or(TextDirection::ltr);
+  }
   builder_ = skt::ParagraphBuilder::make(
-      TxtToSkia(style), font_collection->CreateSktFontCollection(),
+      TxtToSkia(original_style_), font_collection->CreateSktFontCollection(),
       SkUnicodes::ICU::Make());
 }
 
 ParagraphBuilderSkia::~ParagraphBuilderSkia() = default;
 
 void ParagraphBuilderSkia::PushStyle(const TextStyle& style) {
+  if (direction_is_auto_) {
+    RecordedOp op;
+    op.kind = RecordedOp::Kind::kPushStyle;
+    op.style = style;
+    recorded_ops_.push_back(std::move(op));
+  }
   builder_->pushStyle(TxtToSkia(style));
   txt_style_stack_.push(style);
 }
 
 void ParagraphBuilderSkia::Pop() {
+  if (direction_is_auto_) {
+    RecordedOp op;
+    op.kind = RecordedOp::Kind::kPop;
+    recorded_ops_.push_back(std::move(op));
+  }
   builder_->pop();
   txt_style_stack_.pop();
 }
@@ -59,15 +81,49 @@ const TextStyle& ParagraphBuilderSkia::PeekStyle() {
 }
 
 void ParagraphBuilderSkia::AddText(const std::u16string& text) {
+  if (direction_is_auto_) {
+    RecordedOp op;
+    op.kind = RecordedOp::Kind::kUtf16;
+    op.utf16_text = text;
+    recorded_ops_.push_back(std::move(op));
+    accumulated_text_.append(text);
+  }
   builder_->addText(text);
 }
 
 void ParagraphBuilderSkia::AddText(const uint8_t* utf8_data,
                                    size_t byte_length) {
+  if (direction_is_auto_) {
+    RecordedOp op;
+    op.kind = RecordedOp::Kind::kUtf8;
+    op.utf8_text.assign(reinterpret_cast<const char*>(utf8_data), byte_length);
+    recorded_ops_.push_back(std::move(op));
+    UErrorCode status = U_ZERO_ERROR;
+    int32_t destCapacity = 0;
+    // 先计算所需长度
+    u_strFromUTF8(nullptr, 0, &destCapacity,
+                  reinterpret_cast<const char*>(utf8_data), byte_length, &status);
+    if (destCapacity > 0) {
+      status = U_ZERO_ERROR;
+      auto dest = std::make_unique<UChar[]>(destCapacity + 1);
+      u_strFromUTF8(dest.get(), destCapacity + 1, nullptr,
+                    reinterpret_cast<const char*>(utf8_data), byte_length, &status);
+      if (U_SUCCESS(status)) {
+        accumulated_text_.append(reinterpret_cast<const char16_t*>(dest.get()), destCapacity);
+      }
+    }
+  }
   builder_->addText(reinterpret_cast<const char*>(utf8_data), byte_length);
 }
 
 void ParagraphBuilderSkia::AddPlaceholder(PlaceholderRun& span) {
+  if (direction_is_auto_) {
+    RecordedOp op;
+    op.kind = RecordedOp::Kind::kPlaceholder;
+    op.placeholder = span;
+    recorded_ops_.push_back(std::move(op));
+  }
+
   skt::PlaceholderStyle placeholder_style;
   placeholder_style.fHeight = span.height;
   placeholder_style.fWidth = span.width;
@@ -79,9 +135,79 @@ void ParagraphBuilderSkia::AddPlaceholder(PlaceholderRun& span) {
   builder_->addPlaceholder(placeholder_style);
 }
 
+TextDirection ParagraphBuilderSkia::ResolveEffectiveDirection() const {
+  if (!direction_is_auto_) {
+    return original_style_.text_direction.value();
+  }
+  std::optional<TextDirection> resolved =
+      ResolveTextDirectionByContent(accumulated_text_);
+  if (resolved.has_value()) {
+    return resolved.value();
+  }
+  return original_style_.default_text_direction.value_or(TextDirection::ltr);
+}
+
+void ParagraphBuilderSkia::ReplayOperations(
+    skia::textlayout::ParagraphBuilder& target) {
+  for (const auto& op : recorded_ops_) {
+    switch (op.kind) {
+      case RecordedOp::Kind::kPushStyle:
+        target.pushStyle(TxtToSkia(op.style));
+        break;
+      case RecordedOp::Kind::kPop:
+        target.pop();
+        break;
+      case RecordedOp::Kind::kUtf16:
+        target.addText(op.utf16_text);
+        break;
+      case RecordedOp::Kind::kUtf8:
+        target.addText(op.utf8_text.data(), op.utf8_text.size());
+        break;
+      case RecordedOp::Kind::kPlaceholder: {
+        const auto& span = op.placeholder.value();
+        skt::PlaceholderStyle placeholder_style;
+        placeholder_style.fHeight = span.height;
+        placeholder_style.fWidth = span.width;
+        placeholder_style.fBaseline =
+            static_cast<skt::TextBaseline>(span.baseline);
+        placeholder_style.fBaselineOffset = span.baseline_offset;
+        placeholder_style.fAlignment =
+            static_cast<skt::PlaceholderAlignment>(span.alignment);
+        target.addPlaceholder(placeholder_style);
+        break;
+      }
+    }
+  }
+}
+
 std::unique_ptr<Paragraph> ParagraphBuilderSkia::Build() {
-  return std::make_unique<ParagraphSkia>(
-      builder_->Build(), std::move(dl_paints_), impeller_enabled_);
+  if (!direction_is_auto_) {
+    return std::make_unique<ParagraphSkia>(
+        builder_->Build(), std::move(dl_paints_), impeller_enabled_,
+        original_style_.text_direction.value());
+  }
+
+  TextDirection resolved_direction = ResolveEffectiveDirection();
+
+  if (resolved_direction == original_style_.text_direction.value()) {
+    return std::make_unique<ParagraphSkia>(
+        builder_->Build(), std::move(dl_paints_), impeller_enabled_,
+        resolved_direction);
+  }
+
+  original_style_.text_direction = resolved_direction;
+
+  dl_paints_.clear();
+
+  builder_ = skt::ParagraphBuilder::make(
+      TxtToSkia(original_style_), font_collection_->CreateSktFontCollection(),
+      SkUnicodes::ICU::Make());
+
+  ReplayOperations(*builder_);
+
+  return std::make_unique<ParagraphSkia>(builder_->Build(),
+                                         std::move(dl_paints_),
+                                         impeller_enabled_, resolved_direction);
 }
 
 skt::ParagraphPainter::PaintID ParagraphBuilderSkia::CreatePaintID(
@@ -130,7 +256,9 @@ skt::ParagraphStyle ParagraphBuilderSkia::TxtToSkia(const ParagraphStyle& txt) {
   skia.setStrutStyle(strut_style);
 
   skia.setTextAlign(static_cast<skt::TextAlign>(txt.text_align));
-  skia.setTextDirection(static_cast<skt::TextDirection>(txt.text_direction));
+  skia.setTextDirection(
+      static_cast<skt::TextDirection>(txt.text_direction.value_or(
+          txt.default_text_direction.value_or(TextDirection::ltr))));
   skia.setMaxLines(txt.max_lines);
   skia.setEllipsis(txt.ellipsis);
   skia.setTextHeightBehavior(

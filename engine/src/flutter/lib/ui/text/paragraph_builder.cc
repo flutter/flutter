@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/text/paragraph_builder.h"
 
 #include <cstring>
+#include <optional>
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
@@ -98,6 +99,10 @@ const int kPSRenderSoftHyphensEncodeIndex = 7;
 // Like ellipsis, soft_hyphen_string is passed separately and only claims a
 // mask bit.
 const int kPSSoftHyphenStringIndex = 14;
+// default_text_direction claims the next free mask bit (15) and stores its
+// value in the next free encode slot (8).
+const int kPSDefaultTextDirectionIndex = 15;
+const int kPSDefaultTextDirectionEncodeIndex = 8;
 
 const int kPSTextAlignMask = 1 << kPSTextAlignIndex;
 const int kPSTextDirectionMask = 1 << kPSTextDirectionIndex;
@@ -105,6 +110,7 @@ const int kPSFontWeightMask = 1 << kPSFontWeightIndex;
 const int kPSFontStyleMask = 1 << kPSFontStyleIndex;
 const int kPSMaxLinesMask = 1 << kPSMaxLinesIndex;
 const int kPSFontFamilyMask = 1 << kPSFontFamilyIndex;
+const int kPSDefaultTextDirectionMask = 1 << kPSDefaultTextDirectionIndex;
 const int kPSFontSizeMask = 1 << kPSFontSizeIndex;
 const int kPSHeightMask = 1 << kPSHeightIndex;
 const int kPSTextHeightBehaviorMask = 1 << kPSTextHeightBehaviorIndex;
@@ -254,6 +260,15 @@ ParagraphBuilder::ParagraphBuilder(
     if (mask & kPSTextDirectionMask) {
       style.text_direction =
           static_cast<txt::TextDirection>(encoded[kPSTextDirectionIndex]);
+    } else {
+      style.text_direction = std::nullopt;
+    }
+
+    if (mask & kPSDefaultTextDirectionMask) {
+      style.default_text_direction = static_cast<txt::TextDirection>(
+          encoded[kPSDefaultTextDirectionEncodeIndex]);
+    } else {
+      style.default_text_direction = std::nullopt;
     }
 
     if (mask & kPSFontWeightMask) {

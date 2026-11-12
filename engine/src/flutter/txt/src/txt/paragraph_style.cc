@@ -31,12 +31,13 @@ bool ParagraphStyle::ellipsized() const {
 }
 
 TextAlign ParagraphStyle::effective_align() const {
+  const TextDirection resolved = text_direction.value_or(
+      default_text_direction.value_or(TextDirection::ltr));
+  const bool is_ltr = resolved == TextDirection::ltr;
   if (text_align == TextAlign::start) {
-    return (text_direction == TextDirection::ltr) ? TextAlign::left
-                                                  : TextAlign::right;
+    return is_ltr ? TextAlign::left : TextAlign::right;
   } else if (text_align == TextAlign::end) {
-    return (text_direction == TextDirection::ltr) ? TextAlign::right
-                                                  : TextAlign::left;
+    return is_ltr ? TextAlign::right : TextAlign::left;
   } else {
     return text_align;
   }

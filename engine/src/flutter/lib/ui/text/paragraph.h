@@ -33,6 +33,7 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
   double alphabeticBaseline();
   double ideographicBaseline();
   bool didExceedMaxLines();
+  int32_t getTextResolvedDirection();
 
   void layout(double width);
   void paint(Canvas* canvas, double x, double y);
