@@ -2699,7 +2699,7 @@ Gradle Crashed
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('build apk uses a Bazel local engine through its manifest', () async {
+    testWithoutContext('build apk uses a Bazel local engine through its manifest', () async {
       // A Bazel build directory: the manifest names the build (which the
       // directory's own name does not) and maps GN's root-level Maven files
       // to where Bazel built them.
@@ -2743,7 +2743,6 @@ Gradle Crashed
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: bazelOut.path,
           localEngineHost: bazelHostOut.path,
@@ -2818,9 +2817,9 @@ Gradle Crashed
           'bazel-bin/engine/src/flutter/shell/platform/android/arm64_v8a_debug.jar',
         ),
       );
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('honors --no-android-gradle-daemon setting', () async {
+    testWithoutContext('honors --no-android-gradle-daemon setting', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,

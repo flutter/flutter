@@ -39,7 +39,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/host_debug_desktop",
                 "--bazel"
@@ -82,7 +81,6 @@
                 "--prebuilt-dart-sdk",
                 "--thin-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/host_profile_desktop",
                 "--bazel"
@@ -125,7 +123,6 @@
                 "--prebuilt-dart-sdk",
                 "--thin-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/host_release_desktop",
                 "--bazel"

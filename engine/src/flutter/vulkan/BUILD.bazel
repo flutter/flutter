@@ -43,6 +43,7 @@ cc_library(
         "vulkan_device.h",
         "vulkan_image.h",
         "vulkan_native_surface.h",
+        "vulkan_provider.h",
         "vulkan_skia_proc_table.h",
         "vulkan_surface.h",
         "vulkan_swapchain.h",

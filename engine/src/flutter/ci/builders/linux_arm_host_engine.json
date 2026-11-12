@@ -46,7 +46,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/linux_debug_arm64",

@@ -40,7 +40,6 @@
                 "profile",
                 "--android",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -62,7 +61,6 @@
                     "profile",
                     "--android",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -102,7 +100,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -125,7 +122,6 @@
                     "--android",
                     "--android-cpu=arm64",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -165,7 +161,6 @@
                 "--android",
                 "--android-cpu=x64",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -188,7 +183,6 @@
                     "--android",
                     "--android-cpu=x64",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -227,7 +221,6 @@
                 "release",
                 "--android",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -249,7 +242,6 @@
                     "release",
                     "--android",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -289,7 +281,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -312,7 +303,6 @@
                     "--android",
                     "--android-cpu=arm64",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -352,7 +342,6 @@
                 "--android",
                 "--android-cpu=x64",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -375,7 +364,6 @@
                     "--android",
                     "--android-cpu=x64",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },

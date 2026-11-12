@@ -28,7 +28,6 @@
                 "--asan",
                 "--dart-debug",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/host_debug_unopt",
@@ -138,7 +137,6 @@
                 "--target-dir",
                 "ci/host_debug_unopt_impeller_tests",
                 "--no-rbe",
-                "--no-goma",
                 "--use-glfw-swiftshader",
                 "--bazel"
             ],
@@ -197,7 +195,6 @@
                 "ci/android_embedder_debug_unopt",
                 "--unoptimized",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_embedder_debug_unopt",
@@ -228,7 +225,6 @@
                 "--no-lto",
                 "--enable-vulkan-validation-layers",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug_arm64_validation_layers",
@@ -263,7 +259,6 @@
                 "--android",
                 "--unoptimized",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug_unopt",
@@ -310,7 +305,6 @@
                 "release",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/host_release_licenses",
@@ -354,7 +348,6 @@
                 "--android-cpu=arm",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug_test",

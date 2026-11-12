@@ -259,7 +259,7 @@ flutter_display_test_variant(
     name = "impeller_vulkan_sync_validation_unittests",
     size = "large",
     args = [
-        "--gtest_filter=Play/BlitPassTest.CanBlitSmallRegionToUninitializedTexture/Vulkan:Play/BlitPassTest.CanResizeTextures/Vulkan:Play/TypographerTest.GlyphAtlasTextureWillGrowTilMaxTextureSize/Vulkan:Play/RendererTest.CanSepiaToneWithSubpasses/Vulkan:Play/EntityPassTargetTest.SwapWithMSAAImplicitResolve/Vulkan:Compute/ComputeTest.MultiStageInputAndOutput/Vulkan",
+        "--gtest_filter=Play/BlitPassTest.CanBlitSmallRegionToUninitializedTexture/Vulkan:Play/BlitPassTest.CanResizeTextures/Vulkan:Play/RendererTest.CanBlitTextureToBuffer/Vulkan:Play/RendererTest.CanGenerateMipmaps/Vulkan:Play/TypographerTest.GlyphAtlasTextureWillGrowTilMaxTextureSize/Vulkan:Play/RendererTest.CanRenderToTexture/Vulkan:Play/RendererTest.CachesRenderPassAndFramebufferMixed/Vulkan:Play/RendererTest.CanSepiaToneWithSubpasses/Vulkan:Play/EntityPassTargetTest.SwapWithMSAAImplicitResolve/Vulkan:Compute/ComputeTest.MultiStageInputAndOutput/Vulkan:Play/AiksTest.CanRenderImage/Vulkan:Play/AiksTest.CanRenderClips/Vulkan:Play/AiksTest.CanRenderTextFrame/Vulkan:Play/AiksTest.CanRenderBackdropBlur/Vulkan:Play/AiksTest.CanRenderAdvancedBlendColorFilterWithSaveLayer/Vulkan:Play/AiksTest.CanRenderNestedBackdropBlur/Vulkan:Play/AiksTest.GaussianBlurBackdropTinyMipMap/Vulkan",
         "--",
         "--enable_vulkan_sync_validation",
     ],

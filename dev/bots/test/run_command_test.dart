@@ -99,4 +99,120 @@ void main() {
       resetErrorStatus();
     }
   }, skip: !io.Platform.isLinux); // [intended] See comments above.
+
+  test('checkExitCode: false skips foundError on non-zero and zero exits', () async {
+    final String failingScript = writeDartScript('''
+stdout.writeln('probe output');
+exitCode = 7;''');
+    final CommandResult nonZeroResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[failingScript],
+      checkExitCode: false,
+      outputMode: OutputMode.capture,
+    );
+    expect(nonZeroResult.exitCode, 7, reason: log.join('\n'));
+    expect(nonZeroResult.flattenedStdout, 'probe output');
+    expect(nonZeroResult.flattenedStderr, isEmpty);
+    expect(hasError, isFalse);
+
+    final String passingScript = writeDartScript("stdout.writeln('ok');");
+    final CommandResult zeroResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[passingScript],
+      checkExitCode: false,
+      outputMode: OutputMode.capture,
+    );
+    expect(zeroResult.exitCode, 0, reason: log.join('\n'));
+    expect(zeroResult.flattenedStdout, 'ok');
+    expect(hasError, isFalse);
+
+    await expectLater(
+      runCommand(
+        io.Platform.resolvedExecutable,
+        <String>[passingScript],
+        checkExitCode: false,
+        expectNonZeroExit: true,
+      ),
+      throwsA(isA<AssertionError>()),
+    );
+    await expectLater(
+      runCommand(
+        io.Platform.resolvedExecutable,
+        <String>[passingScript],
+        checkExitCode: false,
+        expectedExitCode: 7,
+      ),
+      throwsA(isA<AssertionError>()),
+    );
+  });
+
+  test('decodes malformed UTF-8 bytes on stdout and stderr without FormatException', () async {
+    final String script = writeDartScript(r'''
+stdout.add(<int>[...'ok'.codeUnits, 0xFF, 0xFE, ...'-tail\nline2\n'.codeUnits]);
+stderr.add(<int>[...'err'.codeUnits, 0x80, ...'-tail\nerr2\n'.codeUnits]);''');
+    final CommandResult result = await runCommand(io.Platform.resolvedExecutable, <String>[
+      script,
+    ], outputMode: OutputMode.capture);
+    expect(result.exitCode, 0, reason: log.join('\n'));
+    expect(result.flattenedStdout, 'ok\uFFFD\uFFFD-tail\nline2');
+    expect(result.flattenedStderr, 'err\uFFFD-tail\nerr2');
+    expect(hasError, isFalse);
+  });
+
+  test(
+    'outputListener and stderrListener receive stream lines alongside captured output',
+    () async {
+      final String script = writeDartScript('''
+stdout.writeln('out-line');
+stderr.writeln('err-line-1');
+stderr.writeln('err-line-2');''');
+      final stdoutLines = <String>[];
+      final stderrLines = <String>[];
+      io.Process? stdoutProcess;
+      io.Process? stderrProcess;
+      final CommandResult result = await runCommand(
+        io.Platform.resolvedExecutable,
+        <String>[script],
+        outputMode: OutputMode.capture,
+        outputListener: (String line, io.Process process) {
+          stdoutProcess = process;
+          stdoutLines.add(line);
+        },
+        stderrListener: (String line, io.Process process) {
+          stderrProcess = process;
+          stderrLines.add(line);
+        },
+      );
+      expect(result.exitCode, 0, reason: log.join('\n'));
+      expect(stdoutLines, <String>['out-line\n']);
+      expect(stderrLines, <String>['err-line-1\n', 'err-line-2\n']);
+      expect(result.flattenedStdout, 'out-line');
+      expect(result.flattenedStderr, 'err-line-1\nerr-line-2');
+      expect(stdoutProcess?.pid, greaterThan(0));
+      expect(stdoutProcess, same(stderrProcess));
+      expect(hasError, isFalse);
+    },
+  );
+
+  test('stderrListener can terminate a running process on stderr output', () async {
+    final String script = writeDartScript('''
+stderr.writeln('hang-sentinel');
+Timer(const Duration(minutes: 1), () {});''');
+    var killedFromStderr = false;
+    final CommandResult result = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[script],
+      checkExitCode: false,
+      outputMode: OutputMode.capture,
+      stderrListener: (String line, io.Process process) {
+        if (!killedFromStderr && line.contains('hang-sentinel')) {
+          killedFromStderr = true;
+          process.kill();
+        }
+      },
+    );
+    expect(killedFromStderr, isTrue, reason: log.join('\n'));
+    expect(result.exitCode, isNot(0));
+    expect(hasError, isFalse);
+  });
 }

@@ -101,7 +101,7 @@ flutter_android_device_test(
         "-Wno-suggest-override",  # from :flutter_shell_native_src
         "-Wno-unused-private-field",  # from :flutter_shell_native_src
         "-Wno-unused-variable",  # from :flutter_shell_native_src
-        "-Wno-inconsistent-missing-override",  # from //flutter/third_party/googletest:gmock
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/renderer/testing:mocks
     ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["TESTING"],
     target_compatible_with = select({
@@ -113,6 +113,7 @@ flutter_android_device_test(
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
         "//engine/src/flutter/shell/platform/android/jni:jni_mock",
         "//engine/src/flutter/shell/platform/android/jni:mock_jni_env",
         "@googletest//:gtest",

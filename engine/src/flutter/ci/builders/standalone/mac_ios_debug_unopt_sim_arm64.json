@@ -20,7 +20,6 @@
         "--simulator-cpu",
         "arm64",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--target-dir",
         "ci/ios_debug_unopt_sim_arm64",

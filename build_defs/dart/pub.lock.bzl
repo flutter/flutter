@@ -207,9 +207,9 @@ PUB_HOSTED = {
         deps = [],
     ),
     "code_assets": struct(
-        version = "2.1.0",
-        sha256 = "828110d598123b5ea96c00c9f3c72105bf79f8ee36c20a39b26209ade421ec57",
-        url = "https://pub.dev/api/archives/code_assets-2.1.0.tar.gz",
+        version = "2.2.0",
+        sha256 = "1ef22a0be3af9370bd9481ac76db114db92bfe75d5ca2b2d7bc911764478a4d9",
+        url = "https://pub.dev/api/archives/code_assets-2.2.0.tar.gz",
         deps = [
             "collection",
             "hooks",
@@ -291,9 +291,9 @@ PUB_HOSTED = {
         deps = [],
     ),
     "cupertino_ui": struct(
-        version = "1.1.5",
-        sha256 = "e003b87afde18cb396ec15928c7894063d64af04462c68df9a1404c461316dd2",
-        url = "https://pub.dev/api/archives/cupertino_ui-1.1.5.tar.gz",
+        version = "1.1.6",
+        sha256 = "369e39a1c5c030a6212589c3da1809920b1c2cfade7b02aade7695bfa4b88c3a",
+        url = "https://pub.dev/api/archives/cupertino_ui-1.1.6.tar.gz",
         deps = [
             "collection",
             "flutter",
@@ -425,9 +425,9 @@ PUB_HOSTED = {
         ],
     ),
     "dwds": struct(
-        version = "27.2.0",
-        sha256 = "b23d026f3f27d8446d9978836356a7025f32e9e8102a53143b86af53b7dad76e",
-        url = "https://pub.dev/api/archives/dwds-27.2.0.tar.gz",
+        version = "27.2.1",
+        sha256 = "6d7b931386a211398f6173ab2d29a8c45d48b1c54fa050a47b901d04ec1aacb8",
+        url = "https://pub.dev/api/archives/dwds-27.2.1.tar.gz",
         deps = [
             "async",
             "collection",
@@ -649,9 +649,9 @@ PUB_HOSTED = {
         ],
     ),
     "googleapis_auth": struct(
-        version = "2.3.5",
-        sha256 = "e15d48204e2f3c852dc1091a49705a163a8ba5897823f9abe1c0795e512357c4",
-        url = "https://pub.dev/api/archives/googleapis_auth-2.3.5.tar.gz",
+        version = "2.3.7",
+        sha256 = "6c37e60a7e9139b6cb143615b740663f427ffd5162f47c06eb8b9632fc217520",
+        url = "https://pub.dev/api/archives/googleapis_auth-2.3.7.tar.gz",
         deps = [
             "crypto",
             "google_cloud",
@@ -893,9 +893,9 @@ PUB_HOSTED = {
         ],
     ),
     "material_ui": struct(
-        version = "1.9.0",
-        sha256 = "feb289df1e5f9ed9522f9fe3d909432a7f7bc76943f16abad09f80a16cd25196",
-        url = "https://pub.dev/api/archives/material_ui-1.9.0.tar.gz",
+        version = "1.11.0",
+        sha256 = "474c135fd46b56ff1d35ca982155e8863d28fbc6464d1192acf4ee53a738680e",
+        url = "https://pub.dev/api/archives/material_ui-1.11.0.tar.gz",
         deps = [
             "collection",
             "cupertino_ui",
@@ -955,9 +955,9 @@ PUB_HOSTED = {
         ],
     ),
     "native_toolchain_c": struct(
-        version = "0.19.5",
-        sha256 = "90eaad8059ebc2004a63810a4696ea9acdb02473e47ed3b6b3bafb100ac77e31",
-        url = "https://pub.dev/api/archives/native_toolchain_c-0.19.5.tar.gz",
+        version = "0.19.6",
+        sha256 = "120b6fc66acd8a5ddeaeb1e59b78836bb3ec9919bd9d9dfb1e2401985710c2c0",
+        url = "https://pub.dev/api/archives/native_toolchain_c-0.19.6.tar.gz",
         deps = [
             "code_assets",
             "file",
@@ -1272,16 +1272,18 @@ PUB_HOSTED = {
         ],
     ),
     "skills_lint": struct(
-        version = "0.5.1",
-        sha256 = "5daeff89c8c9d812cfa811e119ae88a32bb81d28c73aa7e899155885b2e63a63",
-        url = "https://pub.dev/api/archives/skills_lint-0.5.1.tar.gz",
+        version = "0.5.3",
+        sha256 = "b7af62b95189d9f80c397c13133bb9a5dfae079cc18a7e3236ab3ea2d79edc41",
+        url = "https://pub.dev/api/archives/skills_lint-0.5.3.tar.gz",
         deps = [
             "args",
-            "io",
             "json_annotation",
             "logging",
             "meta",
             "path",
+            "pubspec_parse",
+            "source_span",
+            "tar",
             "yaml",
         ],
     ),
@@ -1368,6 +1370,16 @@ PUB_HOSTED = {
         sha256 = "7f0cd72eca000d2e026bcd6f990b81d0ca06022ef4e32fb257b30d3d1014a961",
         url = "https://pub.dev/api/archives/sync_http-0.3.1.tar.gz",
         deps = [],
+    ),
+    "tar": struct(
+        version = "2.0.3",
+        sha256 = "af61a6382fb7a702b93a7b400492405793e0ebf3d2bea5d698d5ca39823ca46f",
+        url = "https://pub.dev/api/archives/tar-2.0.3.tar.gz",
+        deps = [
+            "async",
+            "meta",
+            "typed_data",
+        ],
     ),
     "term_glyph": struct(
         version = "1.2.2",
@@ -1460,9 +1472,9 @@ PUB_HOSTED = {
         ],
     ),
     "unified_analytics": struct(
-        version = "8.3.0",
-        sha256 = "f4405e1c205ef4ec54e428cae6c32cf1f9dab67e13cf7b82560ab50ac6e04dbc",
-        url = "https://pub.dev/api/archives/unified_analytics-8.3.0.tar.gz",
+        version = "8.4.0",
+        sha256 = "4013958a461aafcd9b80baf96b85e1537ae10991a05e7b05f34e4bee6202dfb0",
+        url = "https://pub.dev/api/archives/unified_analytics-8.4.0.tar.gz",
         deps = [
             "clock",
             "convert",

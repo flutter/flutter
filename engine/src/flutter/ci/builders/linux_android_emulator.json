@@ -24,7 +24,6 @@
                 "--android-cpu=x64",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/android_emulator_debug_x64",
                 "--bazel"

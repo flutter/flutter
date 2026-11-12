@@ -31,7 +31,6 @@
         "--simulator",
         "--no-lto",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true",
         "--bazel"
@@ -52,7 +51,6 @@
           "--simulator",
           "--no-lto",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true",
           "--bazel"
         ]
@@ -84,7 +82,6 @@
         "--simulator-cpu=arm64",
         "--no-lto",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true",
         "--bazel"
@@ -106,7 +103,6 @@
           "--simulator-cpu=arm64",
           "--no-lto",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true",
           "--bazel"
         ]
@@ -135,7 +131,6 @@
         "--runtime-mode",
         "debug",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true",
         "--bazel"
@@ -158,7 +153,6 @@
           "--runtime-mode",
           "debug",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true",
           "--bazel"
         ]
@@ -187,7 +181,6 @@
         "--runtime-mode",
         "release",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true",
         "--bazel"
@@ -210,7 +203,6 @@
           "--runtime-mode",
           "release",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true",
           "--bazel"
         ]

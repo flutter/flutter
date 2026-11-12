@@ -386,7 +386,7 @@ flutter_cc_test(
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:opengles": [
-            "compositing/scene_impeller_gles_unittests.cc",  # impeller_enable_opengles
+            "impeller_gles_without_surface_unittests.cc",  # impeller_enable_opengles
         ],
         "//conditions:default": [],
     }),

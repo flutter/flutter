@@ -40,7 +40,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--gn-args=dart_dynamic_modules=true",
                 "--bazel"
             ],

@@ -37,7 +37,6 @@
                 "--mac-cpu",
                 "arm64",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -88,7 +87,6 @@
                 "--mac-cpu",
                 "arm64",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -140,7 +138,6 @@
                 "--simulator-cpu",
                 "arm64",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
