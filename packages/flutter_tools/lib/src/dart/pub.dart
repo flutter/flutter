@@ -223,8 +223,8 @@ abstract class Pub {
 
   /// Runs pub in 'interactive' mode.
   ///
-  /// This will run the pub process with StdioInherited (unless `stdio` is set
-  /// for testing).
+  /// This will run the pub process with [ProcessStartMode.inheritStdio] unless
+  /// `stdio` overrides the process stdout or stderr streams (for testing).
   ///
   /// The pub process will be run in current working directory, so `--directory`
   /// should be passed appropriately in [arguments]. This ensures output from
@@ -438,8 +438,8 @@ class _DefaultPub implements Pub {
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
   ///
-  /// Uses [ProcessStartMode.normal] and [_stdio] if [Pub.test] constructor
-  /// was used.
+  /// Uses [ProcessStartMode.normal] and [_stdio] when [_stdio] overrides the
+  /// process stdout or stderr streams (for example, in tests).
   ///
   /// Prints the stdout and stderr of the whole run, unless silenced using
   /// [outputMode].
@@ -467,7 +467,7 @@ class _DefaultPub implements Pub {
     try {
       if (outputMode != PubOutputMode.failuresOnly) {
         final io.Stdio? stdio = _stdio;
-        if (stdio == null) {
+        if (stdio == null || !io.hasStdioStreamOverrides(stdio)) {
           // Let pub inherit stdio and output directly to the tool's stdout and
           // stderr handles.
           final io.Process process = await _processUtils.start(

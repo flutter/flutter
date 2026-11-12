@@ -242,6 +242,16 @@ void main() {
       expect(crashed, false);
     },
   );
+
+  testWithoutContext('hasStdioStreamOverrides detects overridden stdout or stderr', () {
+    expect(hasStdioStreamOverrides(Stdio()), false);
+    expect(
+      hasStdioStreamOverrides(
+        Stdio.test(stdout: CrashingStdout(asyncError: false), stderr: FakeIOSink()),
+      ),
+      true,
+    );
+  });
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {

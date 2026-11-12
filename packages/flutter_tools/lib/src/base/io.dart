@@ -460,3 +460,8 @@ Future<List<NetworkInterface>> listNetworkInterfaces({
   );
   return interfaces.map((io.NetworkInterface interface) => NetworkInterface(interface)).toList();
 }
+
+/// Returns whether [stdio] uses custom output or error stream overrides (such as
+/// test fakes or [Stdio.test]) instead of the process standard streams.
+bool hasStdioStreamOverrides(Stdio stdio) =>
+    !identical(stdio.stdout, io.stdout) || !identical(stdio.stderr, io.stderr);
