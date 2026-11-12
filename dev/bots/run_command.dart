@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' as io;
@@ -10,42 +9,6 @@ import 'dart:io' as io;
 import 'package:path/path.dart' as path;
 
 import 'utils.dart';
-
-/// Runs the `executable` and returns standard output as a stream of lines.
-///
-/// The returned stream reaches its end immediately after the command exits.
-///
-/// If `expectNonZeroExit` is false and the process exits with a non-zero exit
-/// code fails the test immediately by exiting the test process with exit code
-/// 1.
-Stream<String> runAndGetStdout(
-  String executable,
-  List<String> arguments, {
-  String? workingDirectory,
-  Map<String, String>? environment,
-  bool expectNonZeroExit = false,
-}) async* {
-  final output = StreamController<String>();
-  final Future<CommandResult?> command = runCommand(
-    executable,
-    arguments,
-    workingDirectory: workingDirectory,
-    environment: environment,
-    expectNonZeroExit: expectNonZeroExit,
-    // Capture the output so it's not printed to the console by default.
-    outputMode: OutputMode.capture,
-    outputListener: (String line, io.Process process) {
-      output.add(line);
-    },
-  );
-
-  // Close the stream controller after the command is complete. Otherwise,
-  // the yield* will never finish.
-  // ignore: unawaited_futures
-  command.whenComplete(output.close);
-
-  yield* output.stream;
-}
 
 /// Represents a running process launched using [startCommand].
 class Command {
@@ -234,20 +197,12 @@ String? _discoverBestNdkPath() {
 
 /// Runs the `executable` and waits until the process exits.
 ///
-/// Exit code validation is controlled by `checkExitCode`, `expectNonZeroExit`,
-/// and `expectedExitCode`:
-/// * When `checkExitCode` is true (the default), unexpected exit codes record a
-///   shard failure via [foundError] (which does not terminate execution):
-///   - By default (`expectNonZeroExit` is false and `expectedExitCode` is null),
-///     any non-zero exit code fails.
-///   - If `expectNonZeroExit` is true, exit code `0` fails and any non-zero exit
-///     code succeeds (unless `expectedExitCode` is also set to require a
-///     specific non-zero exit code).
-/// * When `checkExitCode` is false, exit code validation is skipped and
-///   [foundError] is never called, allowing callers (such as retry loops or
-///   readiness probes) to inspect [CommandResult.exitCode] directly. Both
-///   `expectNonZeroExit` and `expectedExitCode` must be left at their defaults
-///   when `checkExitCode` is false.
+/// Exit code validation is controlled by [expectedExit] (which defaults to
+/// [ExpectedExit.zero]). When the process exits with an unexpected code, a
+/// shard failure is recorded via [foundError] without terminating execution.
+/// Pass [ExpectedExit.any] to skip exit-code validation so callers (such as
+/// retry loops or readiness probes) can inspect [CommandResult.exitCode]
+/// directly.
 ///
 /// `outputListener` is called for every line of standard output from the
 /// process, and `stderrListener` is called for every line of standard error.
@@ -259,25 +214,18 @@ String? _discoverBestNdkPath() {
 ///
 /// `outputMode` controls where the standard output and standard error from the
 /// command process go. See [OutputMode].
-// TODO(andywolff): Consolidate checkExitCode, expectNonZeroExit, and expectedExitCode, https://github.com/flutter/flutter/issues/196126
 Future<CommandResult> runCommand(
   String executable,
   List<String> arguments, {
   String? workingDirectory,
   Map<String, String>? environment,
-  bool checkExitCode = true,
-  bool expectNonZeroExit = false,
-  int? expectedExitCode,
+  ExpectedExit expectedExit = ExpectedExit.zero,
   String? failureMessage,
   OutputMode outputMode = OutputMode.print,
   bool Function(String)? removeLine,
   void Function(String, io.Process)? outputListener,
   void Function(String, io.Process)? stderrListener,
 }) async {
-  assert(
-    checkExitCode || (!expectNonZeroExit && expectedExitCode == null),
-    'expectNonZeroExit and expectedExitCode cannot be set when checkExitCode is false.',
-  );
   final commandDescription =
       '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = workingDirectory ?? path.relative(io.Directory.current.path);
@@ -309,9 +257,13 @@ Future<CommandResult> runCommand(
     await command._savedStderr,
   );
 
-  if (checkExitCode &&
-      ((result.exitCode == 0) == expectNonZeroExit ||
-          (expectedExitCode != null && result.exitCode != expectedExitCode))) {
+  final String? expectedExitDescription = switch (expectedExit) {
+    _ExpectedExitCode(:final int exitCode) when result.exitCode != exitCode =>
+      exitCode == 0 ? 'zero' : '$exitCode',
+    _ExpectedNonZeroExit() when result.exitCode == 0 => 'non-zero',
+    _ExpectedExitCode() || _ExpectedNonZeroExit() || _ExpectedAnyExit() => null,
+  };
+  if (expectedExitDescription != null) {
     // Print the output when we get unexpected results (unless output was
     // printed already).
     switch (outputMode) {
@@ -326,7 +278,7 @@ Future<CommandResult> runCommand(
       ?failureMessage,
       '${bold}Command: $green$commandDescription$reset',
       if (failureMessage == null)
-        '$bold${red}Command exited with exit code ${result.exitCode} but expected ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'} exit code.$reset',
+        '$bold${red}Command exited with exit code ${result.exitCode} but expected $expectedExitDescription exit code.$reset',
       '${bold}Working directory: $cyan${path.absolute(relativeWorkingDir)}$reset',
       if (allOutput.isNotEmpty && allOutput.length < 512)
         '${bold}stdout and stderr output:\n$allOutput',
@@ -358,6 +310,46 @@ String _prettyPrintRunCommand(String executable, List<String> arguments, String?
   return output.toString();
 }
 
+/// Specifies which process exit codes [runCommand] treats as successful.
+sealed class ExpectedExit {
+  const ExpectedExit();
+
+  /// Expects the process to exit with [exitCode].
+  ///
+  /// Any other exit code records a shard failure via [foundError].
+  const factory ExpectedExit.code(int exitCode) = _ExpectedExitCode;
+
+  /// Expects exit code `0` (the default for [runCommand]).
+  ///
+  /// Any non-zero exit code records a shard failure via [foundError].
+  static const ExpectedExit zero = _ExpectedExitCode(0);
+
+  /// Expects any non-zero exit code.
+  ///
+  /// Exit code `0` records a shard failure via [foundError].
+  static const ExpectedExit nonZero = _ExpectedNonZeroExit();
+
+  /// Accepts any exit code without calling [foundError].
+  ///
+  /// Useful for retry loops or readiness probes that inspect
+  /// [CommandResult.exitCode] directly.
+  static const ExpectedExit any = _ExpectedAnyExit();
+}
+
+final class _ExpectedExitCode extends ExpectedExit {
+  const _ExpectedExitCode(this.exitCode);
+
+  final int exitCode;
+}
+
+final class _ExpectedNonZeroExit extends ExpectedExit {
+  const _ExpectedNonZeroExit();
+}
+
+final class _ExpectedAnyExit extends ExpectedExit {
+  const _ExpectedAnyExit();
+}
+
 /// Specifies what to do with the command output from [runCommand] and [startCommand].
 enum OutputMode {
   /// Forwards standard output and standard error lines to [print] while also
@@ -366,6 +358,6 @@ enum OutputMode {
 
   /// Saves standard output and standard error in memory on the returned
   /// [CommandResult] without forwarding lines to [print] (unless [runCommand]
-  /// records an unexpected exit when `checkExitCode` is true).
+  /// records an unexpected exit per [ExpectedExit]).
   capture,
 }
