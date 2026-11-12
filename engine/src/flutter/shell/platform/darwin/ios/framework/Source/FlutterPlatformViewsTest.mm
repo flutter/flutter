@@ -3916,8 +3916,16 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
                                                      }]
             result:result];
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @1,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
 
-  // First frame, |embeddedViewCount| is not empty after preroll.
+  // First frame, which is prerolled but not submitted.
   embedder->PrepareFlutterView(flutter::DlISize(300, 300), [UIScreen mainScreen].scale);
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
@@ -3925,17 +3933,18 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(300, 300), stack);
   embedder->PrerollCompositeEmbeddedView(0, std::move(embeddedViewParams1));
 
-  XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
-
-  // Second frame, |embeddedViewCount| should be empty at the start
+  // Second frame, with view 1.
+  // We submit this frame so we can check which views were presented.
+  // No earlier frame was submitted, so this frame is only presented if it has a platform view.
   embedder->PrepareFlutterView(flutter::DlISize(300, 300), [UIScreen mainScreen].scale);
-  XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 0UL);
-
   auto embeddedViewParams2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(300, 300), stack);
-  embedder->PrerollCompositeEmbeddedView(0, std::move(embeddedViewParams2));
+  embedder->PrerollCompositeEmbeddedView(1, std::move(embeddedViewParams2));
+  embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
+                              CreateTestSurfaceFrame());
 
-  XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
+  // Verify that view 0 from the first frame was not carried over.
+  XCTAssertEqualObjects(flutterPlatformViewsController.previousCompositionOrder, (@[ @1 ]));
 }
 
 - (void)
@@ -4454,8 +4463,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
         finalMatrix, flutter::DlSize(300, 300), stack);
     embedder->PrerollCompositeEmbeddedView(1, std::move(embeddedViewParams1));
 
-    XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
-
     XCTestExpectation* expectation = [self expectationWithDescription:@"dispose call ended."];
     FlutterResult disposeResult = ^(id result) {
       [expectation fulfill];
@@ -4471,7 +4478,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                 std::move(mock_surface));
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
-    XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
+    XCTAssertEqualObjects(flutterPlatformViewsController.previousCompositionOrder, (@[ @0, @1 ]));
     XCTAssertNotNil([flutterPlatformViewsController platformViewForId:0]);
     XCTAssertNotNil([flutterPlatformViewsController platformViewForId:1]);
   }
@@ -4490,8 +4497,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
                                 std::move(mock_surface));
 
-    // Disposing won't remove embedded views until the view is removed from the composition_order_
-    XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
+    // View 0 is no longer in the composition order, so it was disposed.
+    XCTAssertEqualObjects(flutterPlatformViewsController.previousCompositionOrder, (@[ @1 ]));
     XCTAssertNil([flutterPlatformViewsController platformViewForId:0]);
     XCTAssertNotNil([flutterPlatformViewsController platformViewForId:1]);
   }
