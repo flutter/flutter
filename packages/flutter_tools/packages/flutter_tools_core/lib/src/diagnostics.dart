@@ -154,7 +154,7 @@ class ValidationResult {
       const ValidationMessage.error(
         'Due to an error, the doctor check did not complete. '
         'If the error message below is not helpful, '
-        'please let us know about this issue at https://github.com/flutter/flutter/issues.',
+        'please let us know about this issue at https://github.com/flutter/flutter/issues',
       ),
       ValidationMessage.error('$error'),
       if (stackTrace != null) ValidationMessage('$stackTrace'),

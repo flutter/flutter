@@ -7,7 +7,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
@@ -16,7 +15,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -51,16 +50,17 @@ void main() {
         project,
         FlutterDarwinPlatform.ios,
         BuildInfo.debug,
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-        logger: testLogger,
-        fileSystem: memoryFileSystem,
-        plistParser: FakePlistParser(),
-        config: FakeConfig(),
         analytics: fakeAnalytics,
-        hostPlatform: FakePlatform(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        flutterVersion: FakeFlutterVersion(),
-        reportCrashes: true,
+        plistParser: FakePlistParser(),
+        toolContext: FakeToolContext(
+          config: FakeConfig(),
+          flutterVersion: FakeFlutterVersion(),
+          fs: memoryFileSystem,
+          logger: testLogger,
+          os: FakeOperatingSystemUtils(),
+          platform: FakePlatform(),
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       );
       await projectMigration.migrate();
       expect(
@@ -87,16 +87,17 @@ void main() {
         ),
         FlutterDarwinPlatform.ios,
         BuildInfo.debug,
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-        logger: testLogger,
-        fileSystem: memoryFileSystem,
-        plistParser: FakePlistParser(),
-        config: FakeConfig(),
         analytics: fakeAnalytics,
-        hostPlatform: FakePlatform(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        flutterVersion: FakeFlutterVersion(),
-        reportCrashes: true,
+        plistParser: FakePlistParser(),
+        toolContext: FakeToolContext(
+          config: FakeConfig(),
+          flutterVersion: FakeFlutterVersion(),
+          fs: memoryFileSystem,
+          logger: testLogger,
+          os: FakeOperatingSystemUtils(),
+          platform: FakePlatform(),
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       );
       await projectMigration.migrate();
       expect(
@@ -127,16 +128,17 @@ void main() {
         project,
         FlutterDarwinPlatform.ios,
         BuildInfo.debug,
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-        logger: testLogger,
-        fileSystem: memoryFileSystem,
-        plistParser: FakePlistParser(),
-        config: FakeConfig(),
         analytics: fakeAnalytics,
-        hostPlatform: FakePlatform(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        flutterVersion: FakeFlutterVersion(),
-        reportCrashes: true,
+        plistParser: FakePlistParser(),
+        toolContext: FakeToolContext(
+          config: FakeConfig(),
+          flutterVersion: FakeFlutterVersion(),
+          fs: memoryFileSystem,
+          logger: testLogger,
+          os: FakeOperatingSystemUtils(),
+          platform: FakePlatform(),
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       );
       await expectLater(
         () => projectMigration.migrate(),
@@ -176,16 +178,17 @@ void main() {
           project,
           FlutterDarwinPlatform.ios,
           BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(),
-          config: FakeConfig(),
           analytics: fakeAnalytics,
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
-          reportCrashes: true,
+          plistParser: FakePlistParser(),
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -224,16 +227,17 @@ void main() {
           project,
           FlutterDarwinPlatform.ios,
           BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(),
-          config: FakeConfig(),
           analytics: fakeAnalytics,
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
-          reportCrashes: true,
+          plistParser: FakePlistParser(),
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -269,16 +273,17 @@ void main() {
           project,
           FlutterDarwinPlatform.ios,
           BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(),
-          config: FakeConfig(),
           analytics: fakeAnalytics,
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
-          reportCrashes: true,
+          plistParser: FakePlistParser(),
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -333,16 +338,17 @@ void main() {
             treeShakeIcons: false,
             packageConfigPath: '',
           ),
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(),
-          config: FakeConfig(),
           analytics: fakeAnalytics,
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
-          reportCrashes: true,
+          plistParser: FakePlistParser(),
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -387,16 +393,17 @@ void main() {
         project,
         FlutterDarwinPlatform.ios,
         BuildInfo.debug,
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-        logger: testLogger,
-        fileSystem: memoryFileSystem,
-        plistParser: FakePlistParser(),
-        config: FakeConfig(),
         analytics: fakeAnalytics,
-        hostPlatform: FakePlatform(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        flutterVersion: FakeFlutterVersion(),
-        reportCrashes: true,
+        plistParser: FakePlistParser(),
+        toolContext: FakeToolContext(
+          config: FakeConfig(),
+          flutterVersion: FakeFlutterVersion(),
+          fs: memoryFileSystem,
+          logger: testLogger,
+          os: FakeOperatingSystemUtils(),
+          platform: FakePlatform(),
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       );
       await projectMigration.migrate();
       expect(testLogger.traceText, isEmpty);
@@ -431,16 +438,17 @@ void main() {
           project,
           FlutterDarwinPlatform.ios,
           BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-          config: FakeConfig(),
           analytics: const NoOpAnalytics(),
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
-          reportCrashes: true,
+          plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
         await expectLater(() => projectMigration.migrate(), throwsToolExit());
         expect(testLogger.traceText, contains('Runner.xcscheme already migrated. Skipping...'));
@@ -467,16 +475,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -515,16 +524,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(),
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
 
               await expectLater(
@@ -574,16 +584,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(),
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
 
               await expectLater(
@@ -633,16 +644,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(),
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
 
               await expectLater(
@@ -683,16 +695,17 @@ void main() {
               project,
               platform,
               BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: FakePlistParser(),
-              config: FakeConfig(),
               analytics: fakeAnalytics,
-              hostPlatform: FakePlatform(),
-              operatingSystemUtils: FakeOperatingSystemUtils(),
-              flutterVersion: FakeFlutterVersion(),
-              reportCrashes: true,
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
+                fs: memoryFileSystem,
+                logger: testLogger,
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             );
 
             await expectLater(
@@ -733,16 +746,17 @@ void main() {
               project,
               platform,
               BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: FakePlistParser(),
-              config: FakeConfig(),
               analytics: fakeAnalytics,
-              hostPlatform: FakePlatform(),
-              operatingSystemUtils: FakeOperatingSystemUtils(),
-              flutterVersion: FakeFlutterVersion(),
-              reportCrashes: true,
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
+                fs: memoryFileSystem,
+                logger: testLogger,
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             );
 
             await expectLater(
@@ -785,16 +799,17 @@ void main() {
               project,
               platform,
               BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: plistParser,
-              config: FakeConfig(),
               analytics: const NoOpAnalytics(),
-              hostPlatform: FakePlatform(),
-              operatingSystemUtils: FakeOperatingSystemUtils(),
-              flutterVersion: FakeFlutterVersion(),
-              reportCrashes: true,
+              plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
+                fs: memoryFileSystem,
+                logger: testLogger,
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             );
 
             await projectMigration.migrate();
@@ -827,16 +842,17 @@ void main() {
               project,
               platform,
               BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: plistParser,
-              config: FakeConfig(),
               analytics: const NoOpAnalytics(),
-              hostPlatform: FakePlatform(),
-              operatingSystemUtils: FakeOperatingSystemUtils(),
-              flutterVersion: FakeFlutterVersion(),
-              reportCrashes: true,
+              plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
+                fs: memoryFileSystem,
+                logger: testLogger,
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             );
 
             await projectMigration.migrate();
@@ -869,16 +885,17 @@ void main() {
               project,
               platform,
               BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: plistParser,
-              config: FakeConfig(),
               analytics: const NoOpAnalytics(),
-              hostPlatform: FakePlatform(),
-              operatingSystemUtils: FakeOperatingSystemUtils(),
-              flutterVersion: FakeFlutterVersion(),
-              reportCrashes: true,
+              plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
+                fs: memoryFileSystem,
+                logger: testLogger,
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             );
 
             await projectMigration.migrate();
@@ -916,16 +933,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
 
               await projectMigration.migrate();
@@ -999,16 +1017,17 @@ void main() {
               project,
               platform,
               BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: plistParser,
-              config: FakeConfig(),
               analytics: const NoOpAnalytics(),
-              hostPlatform: FakePlatform(),
-              operatingSystemUtils: FakeOperatingSystemUtils(),
-              flutterVersion: FakeFlutterVersion(),
-              reportCrashes: true,
+              plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
+                fs: memoryFileSystem,
+                logger: testLogger,
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             );
 
             await projectMigration.migrate();
@@ -1095,16 +1114,17 @@ void main() {
           project,
           FlutterDarwinPlatform.ios,
           BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-          config: FakeConfig(),
           analytics: const NoOpAnalytics(),
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
-          reportCrashes: true,
+          plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
         await projectMigration.migrate();
         expect(testLogger.traceText, isEmpty);
@@ -1129,16 +1149,17 @@ void main() {
             project,
             FlutterDarwinPlatform.ios,
             BuildInfo.debug,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-            logger: testLogger,
-            fileSystem: memoryFileSystem,
-            plistParser: FakePlistParser(),
-            config: FakeConfig(),
             analytics: fakeAnalytics,
-            hostPlatform: FakePlatform(),
-            operatingSystemUtils: FakeOperatingSystemUtils(),
-            flutterVersion: FakeFlutterVersion(),
-            reportCrashes: true,
+            plistParser: FakePlistParser(),
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -1174,16 +1195,17 @@ void main() {
             project,
             FlutterDarwinPlatform.ios,
             BuildInfo.debug,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-            logger: testLogger,
-            fileSystem: memoryFileSystem,
-            plistParser: FakePlistParser(json: '[]'),
-            config: FakeConfig(),
             analytics: fakeAnalytics,
-            hostPlatform: FakePlatform(),
-            operatingSystemUtils: FakeOperatingSystemUtils(),
-            flutterVersion: FakeFlutterVersion(),
-            reportCrashes: true,
+            plistParser: FakePlistParser(json: '[]'),
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -1219,16 +1241,17 @@ void main() {
             project,
             FlutterDarwinPlatform.ios,
             BuildInfo.debug,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-            logger: testLogger,
-            fileSystem: memoryFileSystem,
-            plistParser: FakePlistParser(json: 'this is not json'),
-            config: FakeConfig(),
             analytics: fakeAnalytics,
-            hostPlatform: FakePlatform(),
-            operatingSystemUtils: FakeOperatingSystemUtils(),
-            flutterVersion: FakeFlutterVersion(),
-            reportCrashes: true,
+            plistParser: FakePlistParser(json: 'this is not json'),
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -1267,16 +1290,17 @@ void main() {
             project,
             FlutterDarwinPlatform.ios,
             BuildInfo.debug,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-            logger: testLogger,
-            fileSystem: memoryFileSystem,
-            plistParser: FakePlistParser(),
-            config: FakeConfig(),
             analytics: fakeAnalytics,
-            hostPlatform: FakePlatform(),
-            operatingSystemUtils: FakeOperatingSystemUtils(),
-            flutterVersion: FakeFlutterVersion(),
-            reportCrashes: true,
+            plistParser: FakePlistParser(),
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -1313,16 +1337,17 @@ void main() {
             project,
             FlutterDarwinPlatform.ios,
             BuildInfo.debug,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-            logger: testLogger,
-            fileSystem: memoryFileSystem,
-            plistParser: FakePlistParser(),
-            config: FakeConfig(),
             analytics: fakeAnalytics,
-            hostPlatform: FakePlatform(),
-            operatingSystemUtils: FakeOperatingSystemUtils(),
-            flutterVersion: FakeFlutterVersion(),
-            reportCrashes: true,
+            plistParser: FakePlistParser(),
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -1359,16 +1384,17 @@ void main() {
             project,
             FlutterDarwinPlatform.ios,
             BuildInfo.debug,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-            logger: testLogger,
-            fileSystem: memoryFileSystem,
-            plistParser: FakePlistParser(),
-            config: FakeConfig(),
             analytics: fakeAnalytics,
-            hostPlatform: FakePlatform(),
-            operatingSystemUtils: FakeOperatingSystemUtils(),
-            flutterVersion: FakeFlutterVersion(),
-            reportCrashes: true,
+            plistParser: FakePlistParser(),
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -1405,16 +1431,17 @@ void main() {
             project,
             FlutterDarwinPlatform.ios,
             BuildInfo.debug,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-            logger: testLogger,
-            fileSystem: memoryFileSystem,
-            plistParser: FakePlistParser(),
-            config: FakeConfig(),
             analytics: fakeAnalytics,
-            hostPlatform: FakePlatform(),
-            operatingSystemUtils: FakeOperatingSystemUtils(),
-            flutterVersion: FakeFlutterVersion(),
-            reportCrashes: true,
+            plistParser: FakePlistParser(),
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -1467,16 +1494,17 @@ void main() {
                 project,
                 FlutterDarwinPlatform.ios,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(),
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1525,16 +1553,17 @@ void main() {
                 project,
                 FlutterDarwinPlatform.ios,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(),
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1576,16 +1605,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1620,16 +1650,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1665,16 +1696,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1718,16 +1750,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1775,16 +1808,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1819,16 +1853,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1864,16 +1899,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1913,16 +1949,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1989,16 +2026,17 @@ void main() {
                     project,
                     platform,
                     BuildInfo.debug,
-                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                    logger: testLogger,
-                    fileSystem: memoryFileSystem,
-                    plistParser: plistParser,
-                    config: FakeConfig(),
                     analytics: const NoOpAnalytics(),
-                    hostPlatform: FakePlatform(),
-                    operatingSystemUtils: FakeOperatingSystemUtils(),
-                    flutterVersion: FakeFlutterVersion(),
-                    reportCrashes: true,
+                    plistParser: plistParser,
+                    toolContext: FakeToolContext(
+                      config: FakeConfig(),
+                      flutterVersion: FakeFlutterVersion(),
+                      fs: memoryFileSystem,
+                      logger: testLogger,
+                      os: FakeOperatingSystemUtils(),
+                      platform: FakePlatform(),
+                    ),
+                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                   );
                   await projectMigration.migrate();
                   expect(testLogger.errorText, isEmpty);
@@ -2047,16 +2085,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2093,16 +2132,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2144,16 +2184,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2193,16 +2234,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2254,16 +2296,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: fakeAnalytics,
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2318,16 +2361,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2371,16 +2415,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2431,16 +2476,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2483,16 +2529,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2524,16 +2571,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2569,16 +2617,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2620,16 +2669,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2678,16 +2728,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2732,16 +2783,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2812,16 +2864,17 @@ void main() {
                     project,
                     platform,
                     BuildInfo.debug,
-                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                    logger: testLogger,
-                    fileSystem: memoryFileSystem,
-                    plistParser: plistParser,
-                    config: FakeConfig(),
                     analytics: const NoOpAnalytics(),
-                    hostPlatform: FakePlatform(),
-                    operatingSystemUtils: FakeOperatingSystemUtils(),
-                    flutterVersion: FakeFlutterVersion(),
-                    reportCrashes: true,
+                    plistParser: plistParser,
+                    toolContext: FakeToolContext(
+                      config: FakeConfig(),
+                      flutterVersion: FakeFlutterVersion(),
+                      fs: memoryFileSystem,
+                      logger: testLogger,
+                      os: FakeOperatingSystemUtils(),
+                      platform: FakePlatform(),
+                    ),
+                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                   );
                   await projectMigration.migrate();
                   expect(testLogger.errorText, isEmpty);
@@ -2868,16 +2921,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2915,16 +2969,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2975,16 +3030,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: fakeAnalytics,
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -3033,16 +3089,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -3084,16 +3141,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -3145,16 +3203,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: plistParser,
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -3202,16 +3261,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: plistParser,
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -3265,16 +3325,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: plistParser,
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -3316,16 +3377,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -3363,16 +3425,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -3416,16 +3479,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -3462,16 +3526,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: fakeAnalytics,
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -3520,16 +3585,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  config: FakeConfig(),
                   analytics: fakeAnalytics,
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -3590,16 +3656,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: plistParser,
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -3645,16 +3712,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: plistParser,
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -3708,16 +3776,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: plistParser,
-                  config: FakeConfig(),
                   analytics: const NoOpAnalytics(),
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -3754,16 +3823,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -3802,16 +3872,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -3857,16 +3928,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -3915,16 +3987,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -3962,16 +4035,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -4007,16 +4081,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -4062,16 +4137,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -4120,16 +4196,17 @@ void main() {
                 project,
                 platform,
                 BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                config: FakeConfig(),
                 analytics: const NoOpAnalytics(),
-                hostPlatform: FakePlatform(),
-                operatingSystemUtils: FakeOperatingSystemUtils(),
-                flutterVersion: FakeFlutterVersion(),
-                reportCrashes: true,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -4173,16 +4250,17 @@ void main() {
               project,
               platform,
               BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: plistParser,
-              config: FakeConfig(),
               analytics: fakeAnalytics,
-              hostPlatform: FakePlatform(),
-              operatingSystemUtils: FakeOperatingSystemUtils(),
-              flutterVersion: FakeFlutterVersion(),
-              reportCrashes: true,
+              plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
+                fs: memoryFileSystem,
+                logger: testLogger,
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             );
             await expectLater(
               () => projectMigration.migrate(),
@@ -4264,16 +4342,17 @@ void main() {
               project,
               platform,
               BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: plistParser,
-              config: FakeConfig(),
               analytics: fakeAnalytics,
-              hostPlatform: FakePlatform(),
-              operatingSystemUtils: FakeOperatingSystemUtils(),
-              flutterVersion: FakeFlutterVersion(),
-              reportCrashes: true,
+              plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
+                fs: memoryFileSystem,
+                logger: testLogger,
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             );
             await projectMigration.migrate();
             expect(
@@ -4346,16 +4425,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: plistParser,
-                  config: FakeConfig(),
                   analytics: fakeAnalytics,
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await projectMigration.migrate();
                 expect(
@@ -4428,16 +4508,17 @@ void main() {
                   project,
                   platform,
                   BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: plistParser,
-                  config: FakeConfig(),
                   analytics: fakeAnalytics,
-                  hostPlatform: FakePlatform(),
-                  operatingSystemUtils: FakeOperatingSystemUtils(),
-                  flutterVersion: FakeFlutterVersion(),
-                  reportCrashes: true,
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -4481,6 +4562,7 @@ void main() {
           fs: memoryFileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
         );
+        final crashReportSender = FakeCrashReportSender();
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final project = FakeXcodeProject(
           platform: platform.name,
@@ -4501,16 +4583,18 @@ void main() {
           project,
           platform,
           BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: plistParser,
-          config: FakeConfig(),
           analytics: fakeAnalytics,
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
-          reportCrashes: true,
+          crashReportSenderFactory: () => crashReportSender,
+          plistParser: plistParser,
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -4526,7 +4610,19 @@ void main() {
             ),
           ),
         );
-        expect(testLogger.traceText, contains('Sending crash report to Google.'));
+        expect(crashReportSender.sentReports, hasLength(1));
+        final SentCrashReport report = crashReportSender.sentReports.single;
+        expect(report.command, 'swiftpm-migration');
+        expect(
+          report.error,
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'Unable to get Xcode project information',
+          ),
+        );
+        expect(report.flutterVersion, 'master/11111111111111111111');
+        expect(report.typeId, 'XcodeBuildError');
       });
 
       testWithoutContext('throw if settings fail to compile due to package dependencies', () async {
@@ -4536,6 +4632,7 @@ void main() {
           fs: memoryFileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
         );
+        final crashReportSender = FakeCrashReportSender();
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final project = FakeXcodeProject(
           platform: platform.name,
@@ -4556,18 +4653,20 @@ void main() {
           project,
           platform,
           BuildInfo.debug,
+          analytics: fakeAnalytics,
+          crashReportSenderFactory: () => crashReportSender,
+          plistParser: plistParser,
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
             errorMessageOnGetInfo: 'Could not resolve package dependencies: network error',
           ),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: plistParser,
-          config: FakeConfig(),
-          analytics: fakeAnalytics,
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
-          reportCrashes: true,
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -4583,10 +4682,81 @@ void main() {
             ),
           ),
         );
-        expect(testLogger.traceText, contains('Sending crash report to Google.'));
+        expect(crashReportSender.sentReports, hasLength(1));
+        final SentCrashReport report = crashReportSender.sentReports.single;
+        expect(report.command, 'swiftpm-migration');
+        expect(
+          report.error,
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'Could not resolve package dependencies: network error',
+          ),
+        );
+        expect(report.flutterVersion, 'master/11111111111111111111');
+        expect(report.typeId, 'XcodeBuildError');
       });
 
-      testWithoutContext('does not send crash report if reportCrashes is false', () async {
+      testWithoutContext(
+        'does not send crash report if crashReportSenderFactory is null',
+        () async {
+          final memoryFileSystem = MemoryFileSystem();
+          final testLogger = BufferLogger.test();
+          final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            fs: memoryFileSystem,
+            fakeFlutterVersion: FakeFlutterVersion(),
+          );
+          const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
+          final project = FakeXcodeProject(
+            platform: platform.name,
+            fileSystem: memoryFileSystem,
+            logger: testLogger,
+          );
+          _createProjectFiles(project, platform);
+          project.xcodeProjectInfoFile.writeAsStringSync(
+            _projectSettings(_allSectionsUnmigrated(platform)),
+          );
+
+          final plistParser = FakePlistParser.multiple(<String>[
+            _plutilOutput(_allSectionsUnmigratedAsJson(platform)),
+            _plutilOutput(_allSectionsMigratedAsJson(platform)),
+          ]);
+
+          final projectMigration = SwiftPackageManagerIntegrationMigration(
+            project,
+            platform,
+            BuildInfo.debug,
+            analytics: fakeAnalytics,
+            plistParser: plistParser,
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
+          );
+          await expectLater(
+            () => projectMigration.migrate(),
+            throwsToolExit(message: 'Unable to get Xcode project information'),
+          );
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'swiftpm-migration-failure',
+                parameter: 'full',
+                result: 'Xcode failed for unknown reason.',
+              ),
+            ),
+          );
+          expect(testLogger.traceText, isNot(contains('Sending crash report to Google.')));
+        },
+      );
+
+      testWithoutContext('does not invoke crashReportSenderFactory if settings compile', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -4613,32 +4783,25 @@ void main() {
           project,
           platform,
           BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: plistParser,
-          config: FakeConfig(),
           analytics: fakeAnalytics,
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
-          reportCrashes: false,
+          crashReportSenderFactory: () =>
+              fail('crashReportSenderFactory should not be invoked when settings compile'),
+          plistParser: plistParser,
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
-        await expectLater(
-          () => projectMigration.migrate(),
-          throwsToolExit(message: 'Unable to get Xcode project information'),
-        );
+        await projectMigration.migrate();
         expect(
           fakeAnalytics.sentEvents,
-          contains(
-            Event.appleUsageEvent(
-              workflow: 'swiftpm-migration-failure',
-              parameter: 'full',
-              result: 'Xcode failed for unknown reason.',
-            ),
-          ),
+          contains(Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full')),
         );
-        expect(testLogger.traceText, isNot(contains('Sending crash report to Google.')));
       });
 
       testWithoutContext('restore project settings from backup on failure', () async {
@@ -4665,15 +4828,17 @@ void main() {
           project,
           platform,
           BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
           plistParser: plistParser,
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
           validateBackup: true,
-          config: FakeConfig(),
-          hostPlatform: FakePlatform(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          flutterVersion: FakeFlutterVersion(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
         );
         await expectLater(() async => projectMigration.migrate(), throwsToolExit());
         expect(testLogger.traceText, contains('Restoring project settings from backup file...'));
@@ -5881,23 +6046,12 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
     super.project,
     super.platform,
     super.buildInfo, {
-    required super.xcodeProjectInterpreter,
-    required super.logger,
-    required super.fileSystem,
-    required super.plistParser,
-    this.validateBackup = false,
-    required super.config,
     super.analytics = const NoOpAnalytics(),
-    Platform? hostPlatform,
-    OperatingSystemUtils? operatingSystemUtils,
-    FlutterVersion? flutterVersion,
-    super.reportCrashes = true,
-  }) : _xcodeProject = project,
-       super(
-         hostPlatform: hostPlatform ?? FakePlatform(),
-         operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
-         flutterVersion: flutterVersion ?? FakeFlutterVersion(),
-       );
+    required super.plistParser,
+    required super.toolContext,
+    this.validateBackup = false,
+    required super.xcodeProjectInterpreter,
+  }) : _xcodeProject = project;
 
   final XcodeBasedProject _xcodeProject;
 
@@ -5941,4 +6095,26 @@ class FakePlugin extends Fake implements Plugin {
 class FakeConfig extends Fake implements Config {
   @override
   Object? getValue(String key) => null;
+}
+
+typedef SentCrashReport = ({String command, Object error, String flutterVersion, String? typeId});
+
+class FakeCrashReportSender extends Fake implements CrashReportSender {
+  final sentReports = <SentCrashReport>[];
+
+  @override
+  Future<void> sendReport({
+    required Object error,
+    required StackTrace stackTrace,
+    required String Function() getFlutterVersion,
+    required String command,
+    String? typeId,
+  }) async {
+    sentReports.add((
+      command: command,
+      error: error,
+      flutterVersion: getFlutterVersion(),
+      typeId: typeId,
+    ));
+  }
 }
