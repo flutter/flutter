@@ -46,14 +46,14 @@ class CustomElementEmbeddingStrategy implements EmbeddingStrategy {
 
   @override
   void attachViewRoot(DomElement rootElement) {
+    // `touchAction = 'none'` is needed so the browser lets flutter handle all
+    // pointer events it receives, without canceling them.
     rootElement
       ..style.width = '100%'
       ..style.height = '100%'
       ..style.display = 'block'
       ..style.overflow = 'hidden'
       ..style.position = 'relative'
-      // This is needed so the browser lets flutter handle all pointer events
-      // it receives, without canceling them.
       ..style.touchAction = 'none';
 
     if (!hostElement.contains(rootElement)) {

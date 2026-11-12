@@ -60,8 +60,9 @@ class FlutterViewManager {
 
   JsFlutterViewOptions? moveView(int viewId, DomElement newHostElement) {
     final EngineFlutterView? view = _viewData[viewId];
-    final JsFlutterViewOptions options =
-        _jsViewOptions[viewId] ??= JsFlutterViewOptions(hostElement: newHostElement);
+    final JsFlutterViewOptions options = _jsViewOptions[viewId] ??= JsFlutterViewOptions(
+      hostElement: newHostElement,
+    );
     if (view == null) {
       return null;
     }
