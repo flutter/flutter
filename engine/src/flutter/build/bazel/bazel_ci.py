@@ -58,8 +58,8 @@ _INFRA_VALUE_FLAGS = ('--rbe-server-address',)
 # the checkout (@engine_version), so the flag is matched away too.
 _IGNORED_GN_ARGS = ('engine_version=',)
 
-# What the recipe appends under its `no_lto` property (cocoon sets it on a
-# release builder's presubmit builds: a try build without LTO is a faster
+# What the recipe appends under its `no_lto` property (cocoon sets it on
+# every engine build of a presubmit: a try build without LTO is a faster
 # one): a build whose own flags lack it matches without it and runs with
 # LTO off -- the Bazel setting the converter maps `--no-lto` to
 # (build/bazel/BUILD.bazel's `lto`, on in the configuration otherwise). A
