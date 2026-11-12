@@ -185,7 +185,7 @@ class EngineFlutterView implements ui.FlutterView {
     if (size != null) {
       handleFrameworkResize(size);
     }
-    platformDispatcher.render(scene, this);
+    platformDispatcher.render(scene, this, size);
   }
 
   @override
@@ -353,7 +353,9 @@ class EngineFlutterView implements ui.FlutterView {
     // to the smaller visible size, it would break the `viewInsets` logic
     // on subsequent calculations.
     if (!_shouldPreservePhysicalSizeOnResize) {
-      // Force an update of the physicalSize so it's ready for the renderer.
+      // Re-measure the host element now that `<flutter-view>` has been resized,
+      // so `physicalSize` doesn't return a stale cached value. This may differ
+      // from `newPhysicalSize` when the host element is constrained by CSS.
       _physicalSize = _computePhysicalSize();
     }
   }

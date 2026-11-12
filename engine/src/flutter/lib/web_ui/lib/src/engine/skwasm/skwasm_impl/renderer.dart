@@ -19,13 +19,19 @@ class SkwasmRenderer extends Renderer {
   @override
   bool get supportsResizingAnimatedImages => true;
 
+  @override
+  bool get supportsAnimatedImages => skwasmSupportsAnimatedImages();
+
   bool get isWimp => skwasmIsWimp();
 
   @override
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
+  /// The Skwasm font registry behind [fontCollection].
+  final SkwasmFontCollection skwasmFontCollection = SkwasmFontCollection();
+
   @override
-  final SkwasmFontCollection fontCollection = SkwasmFontCollection();
+  late final EngineFontCollection fontCollection = EngineFontCollection(skwasmFontCollection);
 
   @override
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
@@ -147,7 +153,8 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.Paint createPaint() => SkwasmPaint();
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) =>
+      SkwasmPaint(paint, defaultBlurTileMode: defaultBlurTileMode);
 
   @override
   BackendColorFilter createColorFilter(EngineColorFilter filter) => SkwasmColorFilter(filter);
@@ -157,7 +164,7 @@ class SkwasmRenderer extends Renderer {
 
   @override
   BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style) =>
-      SkwasmParagraphBuilder(style, fontCollection);
+      SkwasmParagraphBuilder(style, skwasmFontCollection);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) {

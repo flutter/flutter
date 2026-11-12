@@ -3,15 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/screenshot.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -45,6 +48,7 @@ void main() {
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               CompressionOptions compression = CompressionOptions.compressionDefault,
               Device? device,
@@ -159,6 +163,20 @@ void main() {
         ),
       );
     });
+
+    testWithoutContext(
+      'succeeds for binary non-UTF-8 file under 1000 bytes on ErrorHandlingFileSystem',
+      () {
+        final fs = ErrorHandlingFileSystem(
+          delegate: MemoryFileSystem.test(),
+          platform: FakePlatform(),
+        );
+        final File outputFile = fs.file('flutter_01.skp')
+          ..writeAsBytesSync(const <int>[0x89, 0x50, 0x4E, 0x47, 0xFF, 0xFE, 0xFD]);
+
+        expect(() => ScreenshotCommand.ensureOutputIsNotJsonRpcError(outputFile), returnsNormally);
+      },
+    );
   });
 
   group('Screenshot for devices unsupported for project', () {
@@ -235,12 +253,14 @@ Device 2 (mobile) • 456 • android • 1.2.3
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               CompressionOptions compression = CompressionOptions.compressionDefault,
               Device? device,
               required Logger logger,
             }) async {
               expect(uri.toString(), 'http://localhost:8181');
+              expect(flutterVersion, same(toolContext.flutterVersion));
               return fakeVmService;
             },
       );
@@ -274,6 +294,7 @@ Device 2 (mobile) • 456 • android • 1.2.3
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               CompressionOptions compression = CompressionOptions.compressionDefault,
               Device? device,
@@ -348,7 +369,8 @@ class _ScreenshotDevice extends Fake implements Device {
 }
 
 class _TestDeviceManager extends DeviceManager {
-  _TestDeviceManager({required super.logger});
+  _TestDeviceManager({required super.logger, FileSystem? fileSystem})
+    : super(fileSystem: fileSystem ?? MemoryFileSystem.test());
   List<Device> devices = <Device>[];
 
   @override
