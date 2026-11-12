@@ -48,12 +48,8 @@ import 'test_time_recorder.dart';
 /// serves a cached copy without asking the server until `max-age` elapses.
 /// This is only safe because the cache cannot outlive the invocation:
 /// [ChromiumLauncher.launch] creates a fresh `--user-data-dir` for every
-/// launch, and the tool deletes that directory when it exits.
-///
-/// If Chrome profiles are ever reused across invocations, a later run that
-/// binds the same port can load stale compiled test code from the previous
-/// run. Before reusing profiles, either add a per-invocation validator or put
-/// a per-invocation token in the asset URLs.
+/// launch, and the tool deletes that directory when it exits. The code that
+/// creates the directory carries a matching warning.
 const _kStaticAssetCacheControl = 'public, max-age=3600';
 
 shelf.Response _cachedFileResponse(
@@ -957,6 +953,11 @@ class BrowserManager {
     required Logger logger,
     required SystemClock systemClock,
   }) async {
+    // WARNING: Do not pass a reused `--user-data-dir` here. The cached test
+    // assets (see [_kStaticAssetCacheControl]) have no validator, so a Chrome
+    // HTTP cache that survives this invocation can serve stale compiled test
+    // code to a later run. [ChromiumLauncher.launch] creates a fresh profile
+    // when no `--user-data-dir` flag is given.
     final Chromium chrome = await chromiumLauncher.launch(
       url.toString(),
       headless: headless,
