@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/linux.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../../src/common.dart';
@@ -202,34 +201,31 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'DebugBundleLinuxAssets bundles assets for the selected flavor',
-    () async {
-      final FileSystem flavorFileSystem = globals.fs;
-      final environment = Environment.test(
-        flavorFileSystem.currentDirectory,
-        artifacts: Artifacts.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: flavorFileSystem,
-        logger: BufferLogger.test(),
-        defines: <String, String>{kBuildMode: 'debug', kFlavor: 'strawberry'},
-        engineVersion: '2',
-      );
+  testWithoutContext('DebugBundleLinuxAssets bundles assets for the selected flavor', () async {
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{kBuildMode: 'debug', kFlavor: 'strawberry'},
+      engineVersion: '2',
+    );
 
-      environment.buildDir.childFile('app.dill').createSync(recursive: true);
-      environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
-      flavorFileSystem
-          .file(
-            environment.artifacts.getArtifactPath(
-              Artifact.vmserviceKernelDill,
-              mode: BuildMode.debug,
-            ),
-          )
-          .createSync();
+    environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
+    fileSystem
+        .file(
+          environment.artifacts.getArtifactPath(
+            Artifact.vmserviceKernelDill,
+            mode: BuildMode.debug,
+          ),
+        )
+        .createSync();
 
-      flavorFileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -242,30 +238,25 @@ flutter:
         - strawberry
 ''');
 
-      flavorFileSystem.file('assets/common/image.png').createSync(recursive: true);
-      flavorFileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
-      flavorFileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
-      writePackageConfigFiles(directory: flavorFileSystem.currentDirectory, mainLibName: 'example');
+    fileSystem.file('assets/common/image.png').createSync(recursive: true);
+    fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+    fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-      await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(environment);
+    await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(environment);
 
-      final Uint8List assetManifestData = environment.outputDir
-          .childDirectory('flutter_assets')
-          .childFile('AssetManifest.bin')
-          .readAsBytesSync();
-      final assetManifest = const StandardMessageCodec().decodeMessage(
-        ByteData.sublistView(assetManifestData),
-      ) as Map<Object?, Object?>;
+    final Uint8List assetManifestData = environment.outputDir
+        .childDirectory('flutter_assets')
+        .childFile('AssetManifest.bin')
+        .readAsBytesSync();
+    final assetManifest = const StandardMessageCodec().decodeMessage(
+      ByteData.sublistView(assetManifestData),
+    ) as Map<Object?, Object?>;
 
-      expect(assetManifest.containsKey('assets/common/image.png'), isTrue);
-      expect(assetManifest.containsKey('assets/strawberry/ice-cream.png'), isTrue);
-      expect(assetManifest.containsKey('assets/vanilla/ice-cream.png'), isFalse);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(assetManifest.containsKey('assets/common/image.png'), isTrue);
+    expect(assetManifest.containsKey('assets/strawberry/ice-cream.png'), isTrue);
+    expect(assetManifest.containsKey('assets/vanilla/ice-cream.png'), isFalse);
+  });
 
   testWithoutContext("DebugBundleLinuxAssets' name depends on target platforms", () async {
     expect(
