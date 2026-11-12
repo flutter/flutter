@@ -78,10 +78,59 @@ bool checkForbiddenNativeSymbols({
   return true;
 }
 
+/// Prefixes of the symbols that libunwind defines: the `_Unwind_*` ABI, the
+/// `unw_*` API and its `__unw_*` implementation, and the
+/// `__register_frame*`/`__deregister_frame*` frame registration functions.
+const List<String> unwindSymbolPrefixes = <String>[
+  '_Unwind_',
+  'unw_',
+  '__unw_',
+  '__register_frame',
+  '__deregister_frame',
+];
+
+/// Checks the dynamic symbol table of the ELF shared library at [binaryPath]
+/// using `llvm-nm` at [nmPath] and returns `true` if it doesn't export any
+/// unwinder symbols.
+bool checkNoExportedUnwindSymbols({required String nmPath, required String binaryPath}) {
+  final ProcessResult nmResult = Process.runSync(nmPath, <String>[
+    '--dynamic',
+    '--defined-only',
+    binaryPath,
+  ]);
+  if (nmResult.exitCode != 0) {
+    stderr.writeln(
+      'ERROR: failed to execute "$nmPath --dynamic --defined-only $binaryPath":\n'
+      '${nmResult.stderr}',
+    );
+    return false;
+  }
+
+  final found = <String>[
+    for (final String line in LineSplitter.split(nmResult.stdout as String))
+      if (unwindSymbolPrefixes.any(line.trim().split(' ').last.startsWith)) line,
+  ];
+
+  if (found.isNotEmpty) {
+    stderr.writeln('ERROR: $binaryPath exports unwinder symbols:');
+    for (final symbol in found) {
+      stderr.writeln('  - $symbol');
+    }
+    stderr.writeln(
+      "These interpose on the host process's unwinder and break C++ exceptions "
+      'in plugins. Hide them, for example with -Wl,--exclude-libs. '
+    );
+    return false;
+  }
+
+  return true;
+}
+
 void _printUsage() {
   stderr.writeln(
     'Usage: dart check_forbidden_native_symbols.dart '
-    '--nm <path> --library <path> [--stamp <path>] [--unoptimized]',
+    '--nm <path> --library <path> [--stamp <path>] [--unoptimized] '
+    '[--forbid-exported-unwind-symbols]',
   );
 }
 
@@ -90,11 +139,14 @@ void main(List<String> arguments) {
   String? binaryPath;
   String? stampPath;
   var unoptimized = false;
+  var forbidExportedUnwindSymbols = false;
 
   for (var i = 0; i < arguments.length; i++) {
     final String arg = arguments[i];
     if (arg == '--unoptimized') {
       unoptimized = true;
+    } else if (arg == '--forbid-exported-unwind-symbols') {
+      forbidExportedUnwindSymbols = true;
     } else if ((arg == '--nm' || arg == '--library' || arg == '--binary' || arg == '--stamp') &&
         i + 1 < arguments.length) {
       final String value = arguments[++i];
@@ -126,11 +178,15 @@ void main(List<String> arguments) {
     exit(1);
   }
 
-  if (!checkForbiddenNativeSymbols(
+  bool passed = checkForbiddenNativeSymbols(
     nmPath: nmPath,
     binaryPath: binaryPath,
     unoptimized: unoptimized,
-  )) {
+  );
+  if (forbidExportedUnwindSymbols) {
+    passed = checkNoExportedUnwindSymbols(nmPath: nmPath, binaryPath: binaryPath) && passed;
+  }
+  if (!passed) {
     exit(1);
   }
 
