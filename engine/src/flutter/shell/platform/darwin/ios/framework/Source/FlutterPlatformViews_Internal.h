@@ -7,19 +7,13 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 
-#include <Metal/Metal.h>
+#import <UIKit/UIKit.h>
 
-#include "flutter/flow/surface.h"
-#include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/task_runner.h"
-#include "flutter/fml/trace_event.h"
-#include "flutter/impeller/base/thread_safety.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewLayer.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
-#include "flutter/shell/platform/darwin/ios/ios_context.h"
 
 // A UIView that acts as a clipping mask for the |ChildClippingView|.
 //

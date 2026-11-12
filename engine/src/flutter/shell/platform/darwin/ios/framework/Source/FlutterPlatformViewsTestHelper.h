@@ -50,7 +50,8 @@ FlutterPlatformViewsController* CreateTestPlatformViewsController(NSString* labe
 /**
  * Returns an IOSExternalViewEmbedder for `controller` using a FakeIOSContext.
  *
- * The embedder holds `controller` weakly, and aborts if called after `controller` is deallocated.
+ * The embedder holds a weak reference to `controller`, and will abort if called after `controller`
+ * is deallocated.
  */
 std::unique_ptr<ExternalViewEmbedder> CreateTestExternalViewEmbedder(
     FlutterPlatformViewsController* controller);

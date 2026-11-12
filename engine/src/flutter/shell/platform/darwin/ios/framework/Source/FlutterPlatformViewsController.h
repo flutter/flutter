@@ -5,23 +5,13 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWSCONTROLLER_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWSCONTROLLER_H_
 
-#include <Metal/Metal.h>
-#include <memory>
-#include <unordered_map>
-#include <unordered_set>
-
-#include "flutter/flow/surface.h"
-#include "flutter/fml/task_runner.h"
-#include "flutter/fml/trace_event.h"
-#include "impeller/base/thread_safety.h"
+#import <UIKit/UIKit.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
-#import "flutter/shell/platform/darwin/ios/ios_context.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
