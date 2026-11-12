@@ -137,7 +137,7 @@ static void ResetAnchor(CALayer* layer) {
 // Appends the overlay views and platform view and sets their z index based on the composition
 // order.
 - (void)bringOverlaysIntoView:(NSDictionary<NSNumber*, FlutterPlatformViewOverlay*>*)overlays
-         withCompositionOrder:(const std::vector<int64_t>&)compositionOrder;
+         withCompositionOrder:(NSArray<NSNumber*>*)compositionOrder;
 
 - (std::shared_ptr<flutter::OverlayLayer>)nextLayerInPool;
 
@@ -148,7 +148,7 @@ static void ResetAnchor(CALayer* layer) {
 /// Removes overlay views and platform views that aren't needed in the current frame.
 /// Must run on the platform thread.
 - (void)removeUnusedOverlayViews:(NSArray<UIView*>*)unusedOverlayViews
-            withCompositionOrder:(const std::vector<int64_t>&)compositionOrder;
+            withCompositionOrder:(NSArray<NSNumber*>*)compositionOrder;
 
 /// Returns the views to be disposed (as requested via the `dispose` method channel call) and
 /// removes them from `self.platformViews`. Any views still in `compositionOrder` are not returned,
@@ -156,7 +156,7 @@ static void ResetAnchor(CALayer* layer) {
 ///
 /// Must run on the platform thread.
 - (NSArray<UIView*>*)computeViewsToDisposeWithCompositionOrder:
-    (const std::vector<int64_t>&)compositionOrder;
+    (NSArray<NSNumber*>*)compositionOrder;
 @end
 
 @implementation FlutterPlatformViewsController {
@@ -782,10 +782,10 @@ static void ResetAnchor(CALayer* layer) {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformSubmit");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
 
-  std::vector<int64_t> compositionOrder;
-  compositionOrder.reserve(frame.layers.count);
+  NSMutableArray<NSNumber*>* compositionOrder =
+      [NSMutableArray arrayWithCapacity:frame.layers.count];
   for (FlutterPlatformViewLayer* layer in frame.layers) {
-    compositionOrder.push_back(layer.viewId);
+    [compositionOrder addObject:@(layer.viewId)];
   }
 
   [CATransaction begin];
@@ -859,22 +859,21 @@ static void ResetAnchor(CALayer* layer) {
 }
 
 - (void)bringOverlaysIntoView:(NSDictionary<NSNumber*, FlutterPlatformViewOverlay*>*)overlays
-         withCompositionOrder:(const std::vector<int64_t>&)compositionOrder {
+         withCompositionOrder:(NSArray<NSNumber*>*)compositionOrder {
   UIView* flutterView = self.flutterView;
   if (flutterView == nil) {
     return;
   }
 
-  [_previousCompositionOrder removeAllObjects];
+  [_previousCompositionOrder setArray:compositionOrder];
   NSMutableArray* desiredPlatformSubviews = [NSMutableArray array];
-  for (int64_t platformViewId : compositionOrder) {
-    [_previousCompositionOrder addObject:@(platformViewId)];
-    UIView* platformViewRoot = self.platformViews[@(platformViewId)].rootView;
+  for (NSNumber* platformViewId in compositionOrder) {
+    UIView* platformViewRoot = self.platformViews[platformViewId].rootView;
     if (platformViewRoot != nil) {
       [desiredPlatformSubviews addObject:platformViewRoot];
     }
 
-    FlutterPlatformViewOverlay* overlay = overlays[@(platformViewId)];
+    FlutterPlatformViewOverlay* overlay = overlays[platformViewId];
     if (overlay != nil) {
       [desiredPlatformSubviews addObject:overlay.clippingView];
     }
@@ -909,18 +908,14 @@ static void ResetAnchor(CALayer* layer) {
 }
 
 - (void)removeUnusedOverlayViews:(NSArray<UIView*>*)unusedOverlayViews
-            withCompositionOrder:(const std::vector<int64_t>&)compositionOrder {
+            withCompositionOrder:(NSArray<NSNumber*>*)compositionOrder {
   for (UIView* view in unusedOverlayViews) {
     [view removeFromSuperview];
   }
 
-  std::unordered_set<int64_t> compositionOrderSet;
-  for (int64_t viewId : compositionOrder) {
-    compositionOrderSet.insert(viewId);
-  }
   // Remove unused platform views.
   for (NSNumber* viewId in _previousCompositionOrder) {
-    if (compositionOrderSet.find(viewId.longLongValue) == compositionOrderSet.end()) {
+    if (![compositionOrder containsObject:viewId]) {
       FlutterPlatformViewInfo* info = self.platformViews[viewId];
       [info.rootView removeFromSuperview];
       // Clear the layer so that the view is composited in the next frame that includes it.
@@ -930,16 +925,15 @@ static void ResetAnchor(CALayer* layer) {
 }
 
 - (NSArray<UIView*>*)computeViewsToDisposeWithCompositionOrder:
-    (const std::vector<int64_t>&)compositionOrder {
+    (NSArray<NSNumber*>*)compositionOrder {
   if (self.viewsToDispose.count == 0) {
     return @[];
   }
 
-  std::unordered_set<int64_t> viewsToComposite(compositionOrder.begin(), compositionOrder.end());
   NSMutableArray<UIView*>* views = [NSMutableArray array];
   NSMutableSet<NSNumber*>* viewsToDelayDispose = [NSMutableSet set];
   for (NSNumber* viewId in self.viewsToDispose) {
-    if (viewsToComposite.count(viewId.longLongValue)) {
+    if ([compositionOrder containsObject:viewId]) {
       [viewsToDelayDispose addObject:viewId];
       continue;
     }
