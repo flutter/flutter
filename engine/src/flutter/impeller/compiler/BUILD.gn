@@ -40,6 +40,7 @@ impeller_component("compiler_lib") {
     "constants.h",
     "glsl_minifier.cc",
     "glsl_minifier.h",
+    "glsl_uniforms.h",
     "include_dir.h",
     "includer.cc",
     "includer.h",

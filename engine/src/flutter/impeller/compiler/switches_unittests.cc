@@ -126,6 +126,16 @@ TEST(SwitchesTest, MinifyFlagIsPropagatedToSourceOptions) {
   EXPECT_TRUE(minify_switches.CreateSourceOptions().minify);
 }
 
+TEST(SwitchesTest, GLESUniformVectorLimitIsPropagatedToSourceOptions) {
+  EXPECT_EQ(
+      MakeSwitchesDesktopGL().CreateSourceOptions().gles_uniform_vector_limit,
+      0u);
+  EXPECT_EQ(MakeSwitchesDesktopGL({"--gles-uniform-vector-limit=4096"})
+                .CreateSourceOptions()
+                .gles_uniform_vector_limit,
+            4096u);
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller

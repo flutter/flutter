@@ -109,6 +109,10 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << optional_multiple_prefix << "--define=<define>" << std::endl;
   stream << optional_prefix << "--depfile=<depfile_path>" << std::endl;
   stream << optional_prefix << "--gles-language-version=<number>" << std::endl;
+  stream << optional_prefix
+         << "--gles-uniform-vector-limit=<number> (emit eligible ESSL 300 "
+            "fragment UBOs as plain uniforms within this vector budget)"
+         << std::endl;
   stream << optional_prefix << "--json" << std::endl;
   stream << optional_prefix
          << "--use-half-textures (force openGL semantics when "
@@ -198,6 +202,9 @@ Switches::Switches(const fml::CommandLine& command_line)
       gles_language_version(
           stoi(command_line.GetOptionValueWithDefault("gles-language-version",
                                                       "0"))),
+      gles_uniform_vector_limit(stoul(
+          command_line.GetOptionValueWithDefault("gles-uniform-vector-limit",
+                                                 "0"))),
       metal_version(
           command_line.GetOptionValueWithDefault("metal-version", "1.2")),
       entry_point(
@@ -337,6 +344,7 @@ SourceOptions Switches::CreateSourceOptions() const {
           source_file_name, options.type, options.source_language, entry_point);
   options.json_format = json_format;
   options.gles_language_version = gles_language_version;
+  options.gles_uniform_vector_limit = gles_uniform_vector_limit;
   options.metal_version = metal_version;
   options.use_half_textures = use_half_textures;
   options.require_framebuffer_fetch = require_framebuffer_fetch;

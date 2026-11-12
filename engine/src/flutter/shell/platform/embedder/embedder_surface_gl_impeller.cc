@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "flutter/fml/build_config.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
@@ -15,6 +16,12 @@
 #include "impeller/entity/gles3/modern_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+
+#if FML_OS_LINUX
+#include "impeller/entity/gles3/entity_plain_shaders_gles.h"
+#include "impeller/entity/gles3/framebuffer_blend_plain_shaders_gles.h"
+#include "impeller/renderer/backend/gles/fragment_uniforms_gles.h"
+#endif
 
 namespace flutter {
 
@@ -105,7 +112,23 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
 
   const auto is_gles3 =
       gl->GetDescription()->GetGlVersion().IsAtLeast(impeller::Version(3));
-  const auto shader_mappings = GetShaderMappings(is_gles3);
+  auto shader_mappings = GetShaderMappings(is_gles3);
+#if FML_OS_LINUX
+  if (impeller::ShouldUsePlainFragmentUniforms(
+          gl->GetDescription()->GetRenderer(),
+          gl->GetDescription()->GetGlVersionString(),
+          gl->GetCapabilities()->max_fragment_uniform_vectors)) {
+    // ShaderLibraryGLES lets later archives replace same-name entry points.
+    // These archives contain only builtin fragment shaders, so vertex, SSBO,
+    // and subsequently registered runtime shaders keep their original source.
+    shader_mappings.push_back(std::make_shared<fml::NonOwnedMapping>(
+        impeller_entity_plain_shaders_gles3_data,
+        impeller_entity_plain_shaders_gles3_length));
+    shader_mappings.push_back(std::make_shared<fml::NonOwnedMapping>(
+        impeller_framebuffer_blend_plain_shaders_gles3_data,
+        impeller_framebuffer_blend_plain_shaders_gles3_length));
+  }
+#endif
 
   impeller_context_ = impeller::ContextGLES::Create(
       impeller_flags, std::move(gl), shader_mappings,

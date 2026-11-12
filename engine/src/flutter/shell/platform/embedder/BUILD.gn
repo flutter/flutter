@@ -129,6 +129,12 @@ template("embedder_source_set") {
           "embedder_surface_gl_impeller.h",
         ]
         deps += [ "//flutter/impeller/renderer/backend/gles" ]
+        if (is_linux) {
+          deps += [
+            "//flutter/impeller/entity:gles3_plain_entity_shaders",
+            "//flutter/impeller/entity:gles3_plain_framebuffer_blend_entity_shaders",
+          ]
+        }
       }
     }
 

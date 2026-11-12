@@ -36,6 +36,9 @@ template("impeller_shaders_gles") {
     if (defined(invoker.gles_language_version)) {
       gles_language_version = invoker.gles_language_version
     }
+    if (defined(invoker.gles_uniform_vector_limit)) {
+      gles_uniform_vector_limit = invoker.gles_uniform_vector_limit
+    }
 
     # Metal reflectors generate a superset of information.
     if (impeller_enable_metal || impeller_enable_vulkan) {
@@ -46,6 +49,10 @@ template("impeller_shaders_gles") {
         intermediates_subdir = "gles"
         mnemonic = "IMPELLERC_GLES2"
       }
+    }
+    if (defined(invoker.gles_uniform_vector_limit)) {
+      intermediates_subdir = "gles3_plain"
+      mnemonic = "IMPELLERC_GLES3_PLAIN"
     }
     shader_target_flags = [ "--opengl-es" ]
 
@@ -119,7 +126,8 @@ template("impeller_shaders_gles") {
       public_deps += [ ":$analyze_lib" ]
     }
 
-    if (!impeller_enable_metal && !impeller_enable_vulkan) {
+    if (!impeller_enable_metal && !impeller_enable_vulkan &&
+        !defined(invoker.gles_uniform_vector_limit)) {
       public_deps += [ ":$reflect_gles" ]
     }
   }

@@ -19,6 +19,7 @@
 #include "impeller/compiler/compiler_backend.h"
 #include "impeller/compiler/constants.h"
 #include "impeller/compiler/glsl_minifier.h"
+#include "impeller/compiler/glsl_uniforms.h"
 #include "impeller/compiler/includer.h"
 #include "impeller/compiler/logger.h"
 #include "impeller/compiler/spirv_compiler.h"
@@ -237,6 +238,12 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
   }
 
   spirv_cross::CompilerGLSL::Options sl_options;
+  sl_options.emit_uniform_buffer_as_plain_uniforms =
+      source_options.target_platform == TargetPlatform::kOpenGLES &&
+      source_options.type == SourceType::kFragmentShader &&
+      source_options.gles_language_version == 300 &&
+      CanEmitPlainUniforms(*gl_compiler,
+                           source_options.gles_uniform_vector_limit);
   sl_options.force_zero_initialized_variables = true;
   sl_options.vertex.fixup_clipspace = true;
   if (source_options.target_platform == TargetPlatform::kOpenGLES ||
