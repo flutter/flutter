@@ -481,39 +481,44 @@ void main() {
       );
     });
 
-    test(
-      'sendRequest with timeout: null completes with StateError when isolate exits unexpectedly',
-      () async {
-        final logger = BufferLogger.test();
-        final ExtensionConnection connection = await ExtensionConnection.spawn(
-          _exitingExtensionEntryPoint,
-          logger: logger,
-        );
-        addTearDown(connection.dispose);
+    test('sendRequest with timeout: null completes with ExtensionConnectionException when isolate exits unexpectedly', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _exitingExtensionEntryPoint,
+        extensionName: 'exiting_extension',
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
 
-        final Stream<Map<String, Object?>> notificationStream = connection.onNotification(
-          'notify.customEvent',
-        );
-        final Future<void> streamDone = expectLater(notificationStream, emitsDone);
+      final Stream<Map<String, Object?>> notificationStream = connection.onNotification(
+        'notify.customEvent',
+      );
+      final Future<void> streamDone = expectLater(notificationStream, emitsDone);
 
-        await expectLater(
-          connection.sendRequest('exit.triggerExit', timeout: null),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('The client closed with pending request "exit.triggerExit"'),
-            ),
-          ),
-        );
-        await streamDone;
-      },
-    );
+      await expectLater(
+        connection.sendRequest('exit.triggerExit', timeout: null),
+        throwsA(
+          isA<ExtensionConnectionException>()
+              .having(
+                (ExtensionConnectionException e) => e.extensionName,
+                'extensionName',
+                'exiting_extension',
+              )
+              .having(
+                (ExtensionConnectionException e) => e.message,
+                'message',
+                contains('The client closed with pending request "exit.triggerExit"'),
+              ),
+        ),
+      );
+      await streamDone;
+    });
 
-    test('sendRequest with timeout: null completes with StateError when isolate throws unhandled async error', () async {
+    test('sendRequest with timeout: null completes with ExtensionConnectionException when isolate throws unhandled async error', () async {
       final logger = BufferLogger.test();
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         _asyncErrorExtensionEntryPoint,
+        extensionName: 'async_error_extension',
         logger: logger,
       );
       addTearDown(connection.dispose);
@@ -521,14 +526,47 @@ void main() {
       await expectLater(
         connection.sendRequest('error.triggerUnhandledError', timeout: null),
         throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('The client closed with pending request "error.triggerUnhandledError"'),
-          ),
+          isA<ExtensionConnectionException>()
+              .having(
+                (ExtensionConnectionException e) => e.extensionName,
+                'extensionName',
+                'async_error_extension',
+              )
+              .having(
+                (ExtensionConnectionException e) => e.message,
+                'message',
+                contains('The client closed with pending request "error.triggerUnhandledError"'),
+              ),
         ),
       );
       expect(logger.errorText, contains('Simulated unhandled async error'));
+    });
+
+    test('sendRequest throws ExtensionConnectionException after dispose', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _dummyExtensionEntryPoint,
+        extensionName: 'disposed_extension',
+        logger: logger,
+      );
+      await connection.dispose();
+
+      await expectLater(
+        connection.sendRequest('test.ping'),
+        throwsA(
+          isA<ExtensionConnectionException>()
+              .having(
+                (ExtensionConnectionException e) => e.extensionName,
+                'extensionName',
+                'disposed_extension',
+              )
+              .having(
+                (ExtensionConnectionException e) => e.message,
+                'message',
+                contains('ExtensionConnection for "disposed_extension" has been disposed.'),
+              ),
+        ),
+      );
     });
   });
 }

@@ -40,6 +40,7 @@ import 'context/tool_context.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'experimental/extension_device_manager.dart';
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
@@ -379,15 +380,16 @@ class FlutterDevice {
       'on ${device!.displayName} in $modeName mode...',
     );
 
-    final TargetPlatform targetPlatform = await device!.targetPlatform;
-    package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
-      targetPlatform,
+    package = await getApplicationPackageForDevice(
+      device!,
+      factoryBuilder: () => ApplicationPackageFactory.instance!,
       buildInfo: hotRunner.debuggingOptions.buildInfo,
       applicationBinary: hotRunner.applicationBinary,
     );
     final ApplicationPackage? applicationPackage = package;
 
     if (applicationPackage == null) {
+      final TargetPlatform targetPlatform = await device!.targetPlatform;
       var message = 'No application found for $targetPlatform.';
       final String? hint = await getMissingPackageHintForPlatform(
         targetPlatform,
@@ -433,15 +435,16 @@ class FlutterDevice {
   Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
         _toolContext;
-    final TargetPlatform targetPlatform = await device!.targetPlatform;
-    package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
-      targetPlatform,
+    package = await getApplicationPackageForDevice(
+      device!,
+      factoryBuilder: () => ApplicationPackageFactory.instance!,
       buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
     );
     final ApplicationPackage? applicationPackage = package;
 
     if (applicationPackage == null) {
+      final TargetPlatform targetPlatform = await device!.targetPlatform;
       var message = 'No application found for $targetPlatform.';
       final String? hint = await getMissingPackageHintForPlatform(
         targetPlatform,

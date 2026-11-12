@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'build.dart';
 import 'json_utils.dart';
+import 'project.dart';
 
 /// A description of the kind of workflow the device supports.
 enum Category {
@@ -52,6 +53,9 @@ class TargetDevice {
     this.ephemeral = true,
     this.isSupported = true,
     this.sdkNameAndVersion,
+    this.supportsInstall = false,
+    this.supportsScreenRecording = false,
+    this.supportsScreenshot = false,
     this.targetPlatform,
   });
 
@@ -67,6 +71,12 @@ class TargetDevice {
       ephemeral: json.optionalField<bool>(ephemeralKey, defaultValue: true),
       isSupported: json.optionalField<bool>(isSupportedKey, defaultValue: true),
       sdkNameAndVersion: json.nullableField<String>(sdkNameAndVersionKey),
+      supportsInstall: json.optionalField<bool>(supportsInstallKey, defaultValue: false),
+      supportsScreenRecording: json.optionalField<bool>(
+        supportsScreenRecordingKey,
+        defaultValue: false,
+      ),
+      supportsScreenshot: json.optionalField<bool>(supportsScreenshotKey, defaultValue: false),
       targetPlatform: json.nullableField<String>(targetPlatformKey),
     );
   }
@@ -92,6 +102,15 @@ class TargetDevice {
   /// Map key for [sdkNameAndVersion].
   static const String sdkNameAndVersionKey = 'sdkNameAndVersion';
 
+  /// Map key for [supportsInstall].
+  static const String supportsInstallKey = 'supportsInstall';
+
+  /// Map key for [supportsScreenshot].
+  static const String supportsScreenshotKey = 'supportsScreenshot';
+
+  /// Map key for [supportsScreenRecording].
+  static const String supportsScreenRecordingKey = 'supportsScreenRecording';
+
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
 
@@ -116,7 +135,8 @@ class TargetDevice {
   final String name;
 
   /// The [ExtensionBuildTarget.name] of the extension build target used to
-  /// build an application for this device during `flutter run`.
+  /// build an application for this device (for example, during `flutter run`,
+  /// `flutter drive`, or `flutter test`).
   ///
   /// Must match [ExtensionBuildTarget.isValidName].
   final String? buildTarget;
@@ -137,6 +157,20 @@ class TargetDevice {
   /// Operating system SDK name and version string (e.g. `'Custom Linux 1.0.0'`).
   final String? sdkNameAndVersion;
 
+  /// Whether the device supports application installation management via
+  /// `DeviceService.installApp`, `DeviceService.uninstallApp`, and
+  /// `DeviceService.isAppInstalled`.
+  final bool supportsInstall;
+
+  /// Whether the device supports capturing screenshots via `DeviceService.takeScreenshot`.
+  final bool supportsScreenshot;
+
+  /// Whether the device supports screen recording via
+  /// `DeviceService.startScreenRecording`,
+  /// `DeviceService.waitForScreenRecording`, and
+  /// `DeviceService.stopScreenRecording`.
+  final bool supportsScreenRecording;
+
   /// Target platform identifier string (e.g. `'linux-x64'`, `'linux-arm64'`, `'android-arm64'`).
   final String? targetPlatform;
 
@@ -149,6 +183,9 @@ class TargetDevice {
     ephemeralKey: ephemeral,
     isSupportedKey: isSupported,
     sdkNameAndVersionKey: ?sdkNameAndVersion,
+    supportsInstallKey: supportsInstall,
+    supportsScreenshotKey: supportsScreenshot,
+    supportsScreenRecordingKey: supportsScreenRecording,
     targetPlatformKey: ?targetPlatform,
   };
 
@@ -157,7 +194,10 @@ class TargetDevice {
       'TargetDevice(id: $id, name: $name, category: $category, '
       'targetPlatform: $targetPlatform, sdkNameAndVersion: $sdkNameAndVersion, '
       'ephemeral: $ephemeral, isSupported: $isSupported, '
-      'buildTarget: $buildTarget)';
+      'buildTarget: $buildTarget, '
+      'supportsInstall: $supportsInstall, '
+      'supportsScreenshot: $supportsScreenshot, '
+      'supportsScreenRecording: $supportsScreenRecording)';
 
   @override
   bool operator ==(Object other) {
@@ -170,6 +210,9 @@ class TargetDevice {
             other.ephemeral == ephemeral &&
             other.isSupported == isSupported &&
             other.sdkNameAndVersion == sdkNameAndVersion &&
+            other.supportsInstall == supportsInstall &&
+            other.supportsScreenshot == supportsScreenshot &&
+            other.supportsScreenRecording == supportsScreenRecording &&
             other.targetPlatform == targetPlatform);
   }
 
@@ -182,6 +225,9 @@ class TargetDevice {
     ephemeral,
     isSupported,
     sdkNameAndVersion,
+    supportsInstall,
+    supportsScreenshot,
+    supportsScreenRecording,
     targetPlatform,
   );
 }
@@ -196,17 +242,13 @@ class ExtensionDebuggingOptions {
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
   factory ExtensionDebuggingOptions.fromJson(Map<String, Object?> json) {
-    final BuildMode buildMode = _parseBuildMode(json.requiredField<String>(buildModeKey), json);
+    final BuildMode buildMode = _parseBuildMode(
+      json.requiredField<String>(buildModeKey),
+      buildModeKey,
+      json,
+    );
     final bool debuggingEnabled = json.requiredField<bool>(debuggingEnabledKey);
     return ExtensionDebuggingOptions(buildMode: buildMode, debuggingEnabled: debuggingEnabled);
-  }
-
-  static BuildMode _parseBuildMode(String modeName, Map<String, Object?> json) {
-    try {
-      return BuildMode.fromCliName(modeName);
-    } on ArgumentError catch (e) {
-      throw FormatException('Invalid "$buildModeKey": ${e.message}', json);
-    }
   }
 
   /// Map key for [buildMode].
@@ -241,4 +283,200 @@ class ExtensionDebuggingOptions {
 
   @override
   int get hashCode => Object.hash(buildMode, debuggingEnabled);
+}
+
+/// Context passed to `DeviceService.resolveApplication` when resolving the
+/// platform application identity and expected bundle output path for a device.
+@immutable
+final class ExtensionApplicationResolutionContext {
+  ExtensionApplicationResolutionContext({
+    required this.buildMode,
+    required this.deviceId,
+    required this.project,
+    this.applicationBinaryUri,
+    this.flavor,
+  }) {
+    if (deviceId.isEmpty) {
+      throw const FormatException('Invalid "$deviceIdKey": must not be empty.');
+    }
+    if (applicationBinaryUri case final Uri uri when !uri.isValidArtifactUri) {
+      throw const FormatException(
+        'Invalid "$applicationBinaryUriKey": must be a non-root absolute "file:" URI.',
+      );
+    }
+    if (flavor case '') {
+      throw const FormatException('Invalid "$flavorKey": must not be empty.');
+    }
+  }
+
+  /// Deserializes an [ExtensionApplicationResolutionContext] from a
+  /// JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if required fields are missing or invalid.
+  factory ExtensionApplicationResolutionContext.fromJson(Map<String, Object?> json) {
+    final String deviceId = json.requiredField<String>(deviceIdKey);
+    final BuildMode buildMode = _parseBuildMode(
+      json.requiredField<String>(buildModeKey),
+      buildModeKey,
+    );
+    final project = ExtensionFlutterProject.fromJson(
+      json.requiredField<Map<String, Object?>>(projectKey),
+    );
+    final Uri? applicationBinaryUri = _parseOptionalArtifactUri(json, applicationBinaryUriKey);
+    final String? flavor = json.nullableField<String>(flavorKey);
+    return ExtensionApplicationResolutionContext(
+      applicationBinaryUri: applicationBinaryUri,
+      buildMode: buildMode,
+      deviceId: deviceId,
+      flavor: flavor,
+      project: project,
+    );
+  }
+
+  /// Map key for [applicationBinaryUri].
+  static const String applicationBinaryUriKey = 'applicationBinaryUri';
+
+  /// Map key for [buildMode].
+  static const String buildModeKey = 'buildMode';
+
+  /// Map key for [deviceId].
+  static const String deviceIdKey = 'deviceId';
+
+  /// Map key for [flavor].
+  static const String flavorKey = 'flavor';
+
+  /// Map key for [project].
+  static const String projectKey = 'project';
+
+  /// User-supplied prebuilt application binary, archive, or bundle directory
+  /// URI passed via `--use-application-binary`, or `null` when resolving from
+  /// [project].
+  final Uri? applicationBinaryUri;
+
+  /// Target compilation mode (`debug`, `profile`, `release`, or `jitRelease`).
+  final BuildMode buildMode;
+
+  /// Target device identifier for which the application package is being
+  /// resolved.
+  final String deviceId;
+
+  /// Optional application flavor specified via `--flavor`.
+  final String? flavor;
+
+  /// The Flutter project being resolved.
+  final ExtensionFlutterProject project;
+
+  /// Serializes the application resolution context to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    applicationBinaryUriKey: ?applicationBinaryUri?.toString(),
+    buildModeKey: buildMode.cliName,
+    deviceIdKey: deviceId,
+    flavorKey: ?flavor,
+    projectKey: project.toMap(),
+  };
+
+  @override
+  String toString() =>
+      'ExtensionApplicationResolutionContext(deviceId: $deviceId, '
+      'buildMode: $buildMode, project: $project, '
+      'applicationBinaryUri: $applicationBinaryUri, flavor: $flavor)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionApplicationResolutionContext &&
+            other.applicationBinaryUri == applicationBinaryUri &&
+            other.buildMode == buildMode &&
+            other.deviceId == deviceId &&
+            other.flavor == flavor &&
+            other.project == project);
+  }
+
+  @override
+  int get hashCode => Object.hash(applicationBinaryUri, buildMode, deviceId, flavor, project);
+}
+
+/// Resolved platform application identity and expected bundle location for a
+/// custom target device.
+@immutable
+final class ExtensionApplicationPackage {
+  ExtensionApplicationPackage({required this.appId, this.bundleUri}) {
+    if (appId.isEmpty) {
+      throw const FormatException('Invalid "$appIdKey": must not be empty.');
+    }
+    if (bundleUri case final Uri uri when !uri.isValidArtifactUri) {
+      throw const FormatException(
+        'Invalid "$bundleUriKey": must be a non-root absolute "file:" URI.',
+      );
+    }
+  }
+
+  /// Deserializes an [ExtensionApplicationPackage] from a JSON-serializable
+  /// map.
+  ///
+  /// Throws a [FormatException] if [appIdKey] is missing or empty, or if
+  /// [bundleUriKey] is not a valid non-root absolute `file:` URI.
+  factory ExtensionApplicationPackage.fromJson(Map<String, Object?> json) {
+    final String appId = json.requiredField<String>(appIdKey);
+    final Uri? bundleUri = _parseOptionalArtifactUri(json, bundleUriKey);
+    return ExtensionApplicationPackage(appId: appId, bundleUri: bundleUri);
+  }
+
+  /// Map key for [appId].
+  static const String appIdKey = 'appId';
+
+  /// Map key for [bundleUri].
+  static const String bundleUriKey = 'bundleUri';
+
+  /// Platform-specific application or bundle identifier (for example,
+  /// `'com.example.my_app'` from a platform manifest or prebuilt archive).
+  final String appId;
+
+  /// Expected application bundle or package URI for the requested
+  /// [ExtensionApplicationResolutionContext.buildMode] and
+  /// [ExtensionApplicationResolutionContext.flavor] (or
+  /// [ExtensionApplicationResolutionContext.applicationBinaryUri] when
+  /// supplied), or `null` only when the bundle location cannot be determined
+  /// without building.
+  final Uri? bundleUri;
+
+  /// Serializes the resolved application package to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    appIdKey: appId,
+    bundleUriKey: ?bundleUri?.toString(),
+  };
+
+  @override
+  String toString() => 'ExtensionApplicationPackage(appId: $appId, bundleUri: $bundleUri)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionApplicationPackage &&
+            other.appId == appId &&
+            other.bundleUri == bundleUri);
+  }
+
+  @override
+  int get hashCode => Object.hash(appId, bundleUri);
+}
+
+BuildMode _parseBuildMode(String modeName, String fieldKey, [Map<String, Object?>? source]) {
+  try {
+    return BuildMode.fromCliName(modeName);
+  } on ArgumentError catch (e) {
+    throw FormatException('Invalid "$fieldKey": ${e.message}', source);
+  }
+}
+
+Uri? _parseOptionalArtifactUri(Map<String, Object?> json, String key) {
+  final String? rawUri = json.nullableField<String>(key);
+  if (rawUri == null) {
+    return null;
+  }
+  final Uri? uri = Uri.tryParse(rawUri);
+  if (uri != null && uri.isValidArtifactUri) {
+    return uri;
+  }
+  throw FormatException('Invalid "$key": must be a non-root absolute "file:" URI.');
 }

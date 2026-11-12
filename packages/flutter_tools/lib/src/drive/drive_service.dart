@@ -22,6 +22,7 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../experimental/extension_device_manager.dart';
 import '../resident_runner.dart';
 import '../version.dart';
 import '../vmservice.dart';
@@ -180,12 +181,15 @@ class FlutterDriverService extends DriverService {
       );
     }
     _device = device;
-    final TargetPlatform targetPlatform = await device.targetPlatform;
-    _applicationPackage = await _applicationPackageFactory.getPackageForPlatform(
-      targetPlatform,
+    _applicationPackage = await getApplicationPackageForDevice(
+      device,
+      factoryBuilder: () => _applicationPackageFactory,
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
+    if (_applicationPackage == null && device is ExtensionBackedDevice) {
+      throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
+    }
     var attempt = 0;
     LaunchResult? result;
     var prebuiltApplication = applicationBinary != null;

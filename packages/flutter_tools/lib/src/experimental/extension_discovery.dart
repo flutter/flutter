@@ -21,6 +21,22 @@ import '../base/logger.dart';
 /// [ExtensionConnection.spawnUri].
 typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 
+/// Exception thrown when an [ExtensionConnection] cannot send or complete an
+/// RPC request because the connection has been disposed or the extension
+/// isolate closed.
+class ExtensionConnectionException implements Exception {
+  const ExtensionConnectionException({required this.extensionName, required this.message});
+
+  /// The resolved package or extension name of the disconnected extension.
+  final String extensionName;
+
+  /// Description of the connection failure.
+  final String message;
+
+  @override
+  String toString() => 'ExtensionConnectionException($extensionName): $message';
+}
+
 /// Represents an active host-side connection to a running tool extension isolate.
 class ExtensionConnection {
   ExtensionConnection._({
@@ -87,8 +103,9 @@ class ExtensionConnection {
   /// automatically close when the remote isolate exits. Closing [_receivePort]
   /// when the `onExit` port fires causes the JSON-RPC [json_rpc.Peer] to close
   /// immediately, failing any in-flight [sendRequest] calls (such as
-  /// long-running `timeout: null` build requests) with a [StateError] and
-  /// closing active notification streams instead of hanging indefinitely.
+  /// long-running `timeout: null` build requests) with an
+  /// [ExtensionConnectionException] and closing active notification streams
+  /// instead of hanging indefinitely.
   void _handleIsolateExit() {
     _logger.printTrace('Extension isolate "$extensionName" exited unexpectedly.');
     unawaited(dispose());
@@ -128,7 +145,10 @@ class ExtensionConnection {
     Duration? timeout = const Duration(seconds: 5),
   }) async {
     if (_isDisposed) {
-      throw StateError('ExtensionConnection has been disposed.');
+      throw ExtensionConnectionException(
+        extensionName: extensionName,
+        message: 'ExtensionConnection for "$extensionName" has been disposed.',
+      );
     }
     _logger.printTrace('ExtensionConnection sending RPC request "$method"...');
     try {
@@ -136,6 +156,9 @@ class ExtensionConnection {
       final Object? result = await (timeout != null ? request.timeout(timeout) : request);
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
+    } on StateError catch (error) {
+      _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
+      throw ExtensionConnectionException(extensionName: extensionName, message: error.message);
     } catch (error) {
       _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
       rethrow;
