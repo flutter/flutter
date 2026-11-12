@@ -450,9 +450,16 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (void)replaceChildAtIndex:(NSInteger)index withChild:(SemanticsObject*)child {
   SemanticsObject* oldChild = _children[index];
+  NSUInteger hitTestIndex = [_childrenInHitTestOrder indexOfObjectIdenticalTo:oldChild];
   oldChild.parent = nil;
   child.parent = self;
   [_children replaceObjectAtIndex:index withObject:child];
+  if (hitTestIndex != NSNotFound) {
+    // Hit-test and traversal orders can differ; replace the same object in both.
+    NSMutableArray<SemanticsObject*>* hitTestChildren = [_childrenInHitTestOrder mutableCopy];
+    [hitTestChildren replaceObjectAtIndex:hitTestIndex withObject:child];
+    self.childrenInHitTestOrder = hitTestChildren;
+  }
 }
 
 - (NSString*)routeName {
