@@ -285,6 +285,18 @@ void testMain() {
         expect(_pixelOnCanvas(surface.canvas), _red);
       },
     );
+
+    test('dispose releases canvas and resets glContext', () async {
+      final CkOffscreenSurface surface = await createOffscreenSurface();
+      final glCanvas = surface.canvas as DomOffscreenCanvas;
+      expect(surface.glContext, isNot(-1));
+
+      surface.dispose();
+
+      expect(surface.skSurface, isNull);
+      expect(surface.glContext, -1);
+      expect(glCanvas.getGlContext(webGLVersion).isContextLost(), isTrue);
+    }, skip: _skipContextLoss);
   });
 }
 

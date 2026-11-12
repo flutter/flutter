@@ -268,7 +268,8 @@ abstract class CkSurface extends Surface {
   /// Releases the current [canvas], along with its WebGL context and the Skia
   /// objects backed by it.
   ///
-  /// The caller must assign a new [canvas] afterwards.
+  /// Unless the surface is being disposed, the caller must assign a new
+  /// [canvas] afterwards.
   void _releaseCanvas() {
     _skSurface?.dispose();
     _skSurface = null;
@@ -603,33 +604,6 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     }
   }
 
-  /// Releases the current canvas, explicitly loses its WebGL context so the
-  /// browser frees the context slot immediately, and tears down the Skia
-  /// objects bound to it.
-  void _releaseCanvasAndContext() {
-    final offscreenCanvas = canvas as DomOffscreenCanvas;
-    // Release the canvas first so that its `webglcontextlost` listener is
-    // removed and [onContextLost] does not fire for the deliberate loss below.
-    _canvasProvider.releaseCanvas(offscreenCanvas);
-    if (supportsWebGl) {
-      final WebGLContext gl = offscreenCanvas.getGlContext(webGLVersion);
-      // An already-lost context holds no slot to free and exposes no
-      // extensions.
-      if (!gl.isContextLost()) {
-        gl.loseContextExtension.loseContext();
-      }
-    }
-
-    // Unlike `_adoptCanvas`, which only drops its references,
-    // dispose the SkSurface before abandoning and deleting the GrContext so the
-    // Skia objects bound to the old context are freed now.
-    _skSurface?.dispose();
-    _skSurface = null;
-    _grContext?.releaseResourcesAndAbandonContext();
-    _grContext?.delete();
-    _grContext = null;
-  }
-
   /// Replaces the current canvas with a new one of [size] and attempts to
   /// create a fresh WebGL context for it, falling back to software rendering
   /// if that fails.
@@ -653,7 +627,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     if (_isDisposed) {
       return;
     }
-    _releaseCanvasAndContext();
+    _releaseCanvas();
     super.dispose();
   }
 }
