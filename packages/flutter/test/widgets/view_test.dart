@@ -4,12 +4,26 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'multi_view_testing.dart';
+
+// The test binding reuses the root [View] [State] across tests, so view-focus
+// and app-lifecycle flags can leak from earlier tests in the same shard.
+void _resetViewFocusAndLifecycle(WidgetTester tester) {
+  tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  tester.platformDispatcher.notifyViewFocusChanged(
+    ViewFocusEvent(
+      viewId: tester.view.viewId,
+      state: ViewFocusState.focused,
+      direction: ViewFocusDirection.undefined,
+    ),
+  );
+}
 
 void main() {
   const green = Color(0xff00ff00);
@@ -568,6 +582,9 @@ void main() {
         },
       ),
     );
+    _resetViewFocusAndLifecycle(tester);
+    await tester.pump();
+    addTearDown(() => _resetViewFocusAndLifecycle(tester));
 
     expect(View.hasFocusOf(viewContext), isTrue);
     expect(View.maybeHasFocusOf(viewContext), isTrue);
@@ -607,6 +624,9 @@ void main() {
         },
       ),
     );
+    _resetViewFocusAndLifecycle(tester);
+    await tester.pump();
+    addTearDown(() => _resetViewFocusAndLifecycle(tester));
 
     expect(View.hasFocusOf(viewContext), isTrue);
 
@@ -631,6 +651,9 @@ void main() {
           },
         ),
       );
+      _resetViewFocusAndLifecycle(tester);
+      await tester.pump();
+      addTearDown(() => _resetViewFocusAndLifecycle(tester));
 
       expect(View.hasFocusOf(viewContext), isTrue);
 
@@ -642,6 +665,9 @@ void main() {
       await tester.pump();
       expect(View.hasFocusOf(viewContext), isTrue);
     },
+    // Web always mirrors lifecycle (same policy as [FocusManager]); this test
+    // is about native mobile embedders only.
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
       TargetPlatform.iOS,
