@@ -28,13 +28,14 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import io.flutter.Log;
+import io.flutter.embedding.android.ActivityScopedPlugin;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
 /** Android implementation of the platform plugin. */
-public class PlatformPlugin {
+public class PlatformPlugin implements ActivityScopedPlugin {
   public static final int DEFAULT_SYSTEM_UI =
       View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
@@ -178,6 +179,7 @@ public class PlatformPlugin {
    *
    * <p>Do not invoke any methods on a {@code PlatformPlugin} after invoking this method.
    */
+  @Override
   public void destroy() {
     this.platformChannel.setPlatformMessageHandler(null);
   }

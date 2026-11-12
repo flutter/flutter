@@ -63,9 +63,11 @@ import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
+import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
+import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1406,6 +1408,127 @@ public class FlutterActivityAndFragmentDelegateTest {
             verify(mockFlutterEngine, never()).destroy();
           });
     }
+  }
+
+  @Test
+  public void itCreatesActivityScopedPluginsWhenAttached() {
+    // ---- Test setup ----
+    PlatformPlugin mockPlatformPlugin = mock(PlatformPlugin.class);
+    SensitiveContentPlugin mockSensitiveContentPlugin = mock(SensitiveContentPlugin.class);
+    when(mockHost.providePlatformPlugin(any(), any())).thenReturn(mockPlatformPlugin);
+    when(mockHost.provideSensitiveContentPlugin(any(), any()))
+        .thenReturn(mockSensitiveContentPlugin);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    delegate.onAttach(ctx);
+
+    // --- Verify that both Activity-scoped plugins were requested from the host for the
+    // attached Activity and engine ---
+    Activity hostActivity = mockHost.getActivity();
+    verify(mockHost, times(1)).providePlatformPlugin(hostActivity, mockFlutterEngine);
+    verify(mockHost, times(1)).provideSensitiveContentPlugin(hostActivity, mockFlutterEngine);
+    verify(mockPlatformPlugin, never()).destroy();
+    verify(mockSensitiveContentPlugin, never()).destroy();
+  }
+
+  @Test
+  public void itDestroysActivityScopedPluginsExactlyOnceWhenDetached() {
+    // ---- Test setup ----
+    PlatformPlugin mockPlatformPlugin = mock(PlatformPlugin.class);
+    SensitiveContentPlugin mockSensitiveContentPlugin = mock(SensitiveContentPlugin.class);
+    when(mockHost.providePlatformPlugin(any(), any())).thenReturn(mockPlatformPlugin);
+    when(mockHost.provideSensitiveContentPlugin(any(), any()))
+        .thenReturn(mockSensitiveContentPlugin);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
+
+            // --- Execute the behavior under test ---
+            // Push the delegate through all lifecycle methods all the way to destruction.
+            delegate.onAttach(ctx);
+            delegate.onCreateView(null, null, null, 0, true);
+            delegate.onStart();
+            delegate.onResume();
+            delegate.onPostResume();
+            delegate.onPause();
+            delegate.onStop();
+            delegate.onDestroyView();
+            delegate.onDetach();
+
+            // --- Verify that each plugin was destroyed exactly once ---
+            verify(mockPlatformPlugin, times(1)).destroy();
+            verify(mockSensitiveContentPlugin, times(1)).destroy();
+          });
+    }
+  }
+
+  @Test
+  public void itRecreatesActivityScopedPluginsWhenReattached() {
+    // ---- Test setup ----
+    // Simulate a retained engine being attached to a new Activity after a configuration change.
+    when(mockHost.shouldDestroyEngineWithHost()).thenReturn(false);
+    PlatformPlugin firstPlatformPlugin = mock(PlatformPlugin.class);
+    PlatformPlugin secondPlatformPlugin = mock(PlatformPlugin.class);
+    SensitiveContentPlugin firstSensitiveContentPlugin = mock(SensitiveContentPlugin.class);
+    SensitiveContentPlugin secondSensitiveContentPlugin = mock(SensitiveContentPlugin.class);
+    when(mockHost.providePlatformPlugin(any(), any()))
+        .thenReturn(firstPlatformPlugin, secondPlatformPlugin);
+    when(mockHost.provideSensitiveContentPlugin(any(), any()))
+        .thenReturn(firstSensitiveContentPlugin, secondSensitiveContentPlugin);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    delegate.onAttach(ctx);
+    delegate.onDetach();
+    delegate.onAttach(ctx);
+
+    // --- Verify that the first plugins were destroyed and fresh ones were created ---
+    verify(mockHost, times(2)).providePlatformPlugin(any(), any());
+    verify(mockHost, times(2)).provideSensitiveContentPlugin(any(), any());
+    verify(firstPlatformPlugin, times(1)).destroy();
+    verify(firstSensitiveContentPlugin, times(1)).destroy();
+    verify(secondPlatformPlugin, never()).destroy();
+    verify(secondSensitiveContentPlugin, never()).destroy();
+
+    delegate.onDetach();
+    verify(firstPlatformPlugin, times(1)).destroy();
+    verify(secondPlatformPlugin, times(1)).destroy();
+    verify(secondSensitiveContentPlugin, times(1)).destroy();
+  }
+
+  @Test
+  public void itToleratesHostsThatProvideNoActivityScopedPlugins() {
+    // ---- Test setup ----
+    // The mocked host returns null from both provide*Plugin() hooks, as a FlutterFragment without
+    // an Activity does.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    delegate.onAttach(ctx);
+    delegate.onPostResume();
+    delegate.onDetach();
+
+    // --- Verify that nothing was destroyed and nothing crashed ---
+    verify(mockHost, times(1)).providePlatformPlugin(any(), any());
+    verify(mockHost, times(1)).provideSensitiveContentPlugin(any(), any());
+  }
+
+  @Test
+  public void itForwardsPostResumeToThePlatformPlugin() {
+    // ---- Test setup ----
+    PlatformPlugin mockPlatformPlugin = mock(PlatformPlugin.class);
+    when(mockHost.providePlatformPlugin(any(), any())).thenReturn(mockPlatformPlugin);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    delegate.onAttach(ctx);
+    delegate.onPostResume();
+
+    // --- Verify that the system UI overlays were refreshed through the PlatformPlugin ---
+    verify(mockPlatformPlugin, times(1)).updateSystemUiOverlays();
   }
 
   @Test

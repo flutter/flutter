@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.os.Build;
 import android.view.View;
 import androidx.annotation.NonNull;
+import io.flutter.embedding.android.ActivityScopedPlugin;
 import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
 
 /**
@@ -21,7 +22,7 @@ import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
  * io.flutter.embedding.engine.systemchannels.SensitiveContentChannel}.
  */
 public class SensitiveContentPlugin
-    implements SensitiveContentChannel.SensitiveContentMethodHandler {
+    implements SensitiveContentChannel.SensitiveContentMethodHandler, ActivityScopedPlugin {
 
   private Activity mFlutterActivity;
   private final int mFlutterViewId;
@@ -120,6 +121,7 @@ public class SensitiveContentPlugin
    *
    * <p>Do not invoke any methods on a {@code SensitiveContentPlugin} after invoking this method.
    */
+  @Override
   public void destroy() {
     this.mSensitiveContentChannel.setSensitiveContentMethodHandler(null);
     this.mFlutterActivity = null;

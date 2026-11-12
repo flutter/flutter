@@ -229,6 +229,7 @@ android_java_sources = [
   "io/flutter/FlutterInjector.java",
   "io/flutter/Log.java",
   "io/flutter/app/FlutterApplication.java",
+  "io/flutter/embedding/android/ActivityScopedPlugin.java",
   "io/flutter/embedding/android/AndroidTouchProcessor.java",
   "io/flutter/embedding/android/ContentSizingFlag.java",
   "io/flutter/embedding/android/ExclusiveAppComponent.java",
