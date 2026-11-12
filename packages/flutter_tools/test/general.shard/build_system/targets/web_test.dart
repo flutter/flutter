@@ -3391,7 +3391,7 @@ _flutter.loader.load({
   );
 
   test(
-    'WebReleaseBundle includes templated index.html and flutter_bootstrap.js in outputs for all builds',
+    'WebReleaseBundle includes templated index.html and flutter_bootstrap.js in outputs for all builds, but in inputs only when webContentHash is true',
     () => testbed.run(() async {
       final hashedBundle = WebReleaseBundle(
         const <WebCompilerConfig>[JsCompilerConfig(webContentHash: true)],
