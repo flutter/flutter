@@ -21,7 +21,6 @@
         "--mac-cpu",
         "arm64",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--use-glfw-swiftshader",
         "--bazel"

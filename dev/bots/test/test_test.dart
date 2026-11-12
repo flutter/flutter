@@ -231,7 +231,10 @@ void main() {
       );
       expectExitCode(result, 0);
       expect(result.stdout, contains('SHARD=tool_tests_commands_bazel'));
-      expect(result.stdout, contains(RegExp(r'Selecting subshard 1 of 3 \(tests 1-\d+ of \d+\)')));
+      expect(
+        result.stdout,
+        contains(RegExp(r'Selecting subshard 1 of 3 \(\d+ of \d+ tests, estimated weight \d+\)')),
+      );
       expect(result.stdout, contains('precache'));
       expect(result.stdout, contains('//packages/flutter_tools:test_commands.shard_'));
       expect(result.stdout, isNot(contains('//packages/flutter_tools:commands_shard_hermetic')));

@@ -316,6 +316,7 @@ Future<CommandResult> runCommand(
   );
 
   final bool unexpected =
+      checkExitCode &&
       !acceptedExitCodes.contains(result.exitCode) &&
       ((result.exitCode == 0) == expectNonZeroExit ||
           (expectedExitCode != null && result.exitCode != expectedExitCode));

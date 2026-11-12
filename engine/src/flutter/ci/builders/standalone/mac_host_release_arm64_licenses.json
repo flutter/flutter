@@ -19,7 +19,6 @@
         "arm64",
         "--no-lto",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--bazel"
     ],

@@ -27,7 +27,6 @@
         "--no-lto",
         "--prebuilt-dart-sdk",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--use-glfw-swiftshader",
         "--bazel"

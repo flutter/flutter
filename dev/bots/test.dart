@@ -271,7 +271,6 @@ Future<void> _runCommandsToolTests() async {
     );
   }
 
-  final List<String> testPaths = selectIndexOfTotalSubshard<String>(allTests);
   if (useBazel) {
     // The permeable half runs the tool over the cache's facsimile: the
     // desktop's and the web's engine artifacts must be in bin/cache.
@@ -307,7 +306,6 @@ Future<void> _runWebToolTests() async {
     );
   }
 
-  final List<String> testPaths = selectIndexOfTotalSubshard<String>(allTests);
   if (useBazel) {
     await precacheForBazelToolTests();
     final shard = BazelShard();
@@ -333,11 +331,6 @@ Future<void> _runIntegrationToolTests() async {
   if (testPaths == null) {
     return;
   }
-  final List<int> known = durations.values.toList()..sort();
-  final int defaultDuration = known.isEmpty ? 0 : known[known.length ~/ 2];
-  int weight(String testPath) {
-    return durations[path.posix.joinAll(path.split(testPath))] ?? defaultDuration;
-  }
 
   Future<void> runTests(List<String> testPaths, {bool allowNoTests = false}) {
     return runDartTest(
@@ -349,7 +342,6 @@ Future<void> _runIntegrationToolTests() async {
     );
   }
 
-  final List<String> testPaths = selectWeightedSubshard<String>(allTests, weight: weight);
   if (useBazel) {
     // The tests build through the tool from the cache's facsimile: the
     // desktop's and the web's engine artifacts must be in bin/cache.

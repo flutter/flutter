@@ -23,7 +23,6 @@
                 "--build-embedder-examples",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/host_debug_test",
@@ -72,7 +71,6 @@
                 "--build-embedder-examples",
                 "--thin-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/host_profile_test",
@@ -127,7 +125,6 @@
                 "--build-embedder-examples",
                 "--thin-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/host_release_test",

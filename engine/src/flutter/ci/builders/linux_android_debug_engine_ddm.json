@@ -40,7 +40,6 @@
                 "--no-lto",
                 "--gn-args=dart_dynamic_modules=true",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug_arm64_ddm",
@@ -82,7 +81,6 @@
                 "--no-lto",
                 "--gn-args=dart_dynamic_modules=true",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug_x64_ddm",
