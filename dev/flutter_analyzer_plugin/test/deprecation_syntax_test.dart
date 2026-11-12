@@ -6,9 +6,8 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/deprecation_syntax.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class DeprecationSyntaxTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -18,13 +17,14 @@ class DeprecationSyntaxTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => DeprecationSyntax.code.name;
+}
 
-  static const String _invalidAnnotation =
-      '@Deprecated(\n'
-      "        'This is an invalid deprecation message. ' // missing version\n"
-      '      )';
+const String _invalidAnnotation =
+    '@Deprecated(\n'
+    "        'This is an invalid deprecation message. ' // missing version\n"
+    '      )';
 
-  static const String source = '''
+const String _source = '''
       @Deprecated(
         'This is a valid deprecation message. '
         'This feature was deprecated after v3.12.0-1.0.pre.'
@@ -35,16 +35,19 @@ class DeprecationSyntaxTest extends AnalysisRuleTest {
       void bar() {}
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_deprecation_syntax() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(source.indexOf(_invalidAnnotation), _invalidAnnotation.length),
-    ]);
-  }
-}
-
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(DeprecationSyntaxTest);
+  late DeprecationSyntaxTest testSuite;
+
+  setUp(() {
+    testSuite = DeprecationSyntaxTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('deprecation syntax', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(_source.indexOf(_invalidAnnotation), _invalidAnnotation.length),
+    ]);
   });
 }

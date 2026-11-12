@@ -96,9 +96,8 @@ class _ChipsTile extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   'None',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall!.copyWith(fontStyle: FontStyle.italic),
+                  style: Theme.of(context).textTheme.bodySmall!
+                      .copyWith(fontStyle: FontStyle.italic),
                 ),
               ),
             ),

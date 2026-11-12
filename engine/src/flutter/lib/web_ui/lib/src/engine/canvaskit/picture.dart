@@ -8,6 +8,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../layer/layer_painting.dart';
 import '../primitives/image.dart';
+import '../primitives/image_source.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
@@ -18,18 +19,30 @@ import 'surface.dart';
 
 /// Implements [ui.Picture] on top of [SkPicture].
 class CkPicture implements LayerPicture, StackTraceDebugger {
-  CkPicture(SkPicture skPicture) : _isClone = false {
-    _ref = CkCountedRef<CkPicture, SkPicture>(skPicture, this, 'Picture');
+  CkPicture(SkPicture skPicture, [this.imageTracker]) : _isClone = false {
+    _ref = CkCountedRef<CkPicture, SkPicture>(
+      skPicture,
+      this,
+      'Picture',
+      onDispose: imageTracker == null
+          ? null
+          : (SkPicture _) {
+              imageTracker!.releaseAll();
+            },
+    );
     _initStackTrace();
   }
 
-  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref) : _isClone = true {
+  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref, this.imageTracker) : _isClone = true {
     _ref = ref;
     ref.ref(this);
     _initStackTrace();
   }
 
   final bool _isClone;
+
+  /// Retained image sources for images recorded onto this picture.
+  final PictureImageTracker? imageTracker;
 
   late final CkCountedRef<CkPicture, SkPicture> _ref;
 
@@ -91,6 +104,9 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
   @override
   void dispose() {
     assert(debugCheckNotDisposed('Cannot dispose picture.'));
+    if (_isDisposed) {
+      return;
+    }
     assert(() {
       _debugDisposalStackTrace = StackTrace.current;
       return true;
@@ -152,7 +168,7 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
 
   @override
   LayerPicture clone() {
-    return CkPicture._clone(_ref);
+    return CkPicture._clone(_ref, imageTracker);
   }
 
   void _initStackTrace() {

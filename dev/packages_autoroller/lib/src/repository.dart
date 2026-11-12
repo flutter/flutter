@@ -19,7 +19,7 @@ enum RemoteName { upstream, mirror }
 
 /// Git remote locations.
 final class Remote {
-  const Remote._({required RemoteName name, required this.url}) : _name = name, assert(url != '');
+  const Remote._({required this._name, required this.url}) : assert(url != '');
 
   const Remote.mirror(String url) : this._(name: RemoteName.mirror, url: url);
   const Remote.upstream(String url) : this._(name: RemoteName.upstream, url: url);
@@ -51,7 +51,7 @@ final class Remote {
 /// have the git checkout present on disk, depending on what commands were
 /// previously run; and
 /// 2. The need to provide overrides for integration tests (in particular
-/// the ability to mark a [Repository] instance as a [localUpstream] made
+/// the ability to mark a [Repository] instance as a `localUpstream` made
 /// integration tests more hermetic, at the cost of complexity in the
 /// implementation).
 ///
@@ -80,10 +80,9 @@ abstract class Repository {
     required this.fileSystem,
     required this.parentDirectory,
     this.initialRef,
-    String? previousCheckoutLocation,
+    this._previousCheckoutLocation,
     required this.mirrorRemote,
-  }) : _previousCheckoutLocation = previousCheckoutLocation,
-       git = Git(processManager),
+  }) : git = Git(processManager),
        assert(upstreamRemote.url.isNotEmpty);
 
   final String name;
@@ -250,7 +249,7 @@ abstract class Repository {
     return revisionHash;
   }
 
-  /// Push [commit] to the release channel [branch].
+  /// Push [commit] to the release channel `branch`.
   Future<void> pushRef({
     required String fromRef,
     required String remote,

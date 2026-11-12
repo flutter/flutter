@@ -175,30 +175,24 @@ void main() {
       expect(secondLoadStructuredBinaryDataResult, 'two');
     });
 
-    test(
-      'for a given key, subsequent loadStructuredData calls are synchronous after the first call resolves',
-      () async {
-        final bundle = TestAssetBundle();
-        await bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(1));
-        final Future<int> data = bundle.loadStructuredData(
-          'one',
-          (String data) => SynchronousFuture<int>(2),
-        );
-        expect(data, isA<SynchronousFuture<int>>());
-        expect(await data, 1);
-      },
-    );
+    test('for a given key, subsequent loadStructuredData calls are synchronous after the first call resolves', () async {
+      final bundle = TestAssetBundle();
+      await bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(1));
+      final Future<int> data = bundle.loadStructuredData(
+        'one',
+        (String data) => SynchronousFuture<int>(2),
+      );
+      expect(data, isA<SynchronousFuture<int>>());
+      expect(await data, 1);
+    });
 
-    test(
-      'for a given key, subsequent loadStructuredBinaryData calls are synchronous after the first call resolves',
-      () async {
-        final bundle = TestAssetBundle();
-        await bundle.loadStructuredBinaryData('one', (ByteData data) => 1);
-        final Future<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 2);
-        expect(data, isA<SynchronousFuture<int>>());
-        expect(await data, 1);
-      },
-    );
+    test('for a given key, subsequent loadStructuredBinaryData calls are synchronous after the first call resolves', () async {
+      final bundle = TestAssetBundle();
+      await bundle.loadStructuredBinaryData('one', (ByteData data) => 1);
+      final Future<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 2);
+      expect(data, isA<SynchronousFuture<int>>());
+      expect(await data, 1);
+    });
 
     testWidgets('loadStructuredData handles exceptions correctly', (WidgetTester tester) async {
       final bundle = TestAssetBundle();

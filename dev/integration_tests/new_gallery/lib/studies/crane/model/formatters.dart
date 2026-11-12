@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../../../gallery_localizations.dart';
 
 // Duration of time (e.g. 16h 12m)

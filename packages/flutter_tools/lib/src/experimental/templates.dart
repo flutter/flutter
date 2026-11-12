@@ -9,7 +9,6 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../cache.dart';
 import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
@@ -24,18 +23,17 @@ const Duration _kRpcTimeout = Duration(seconds: 5);
 base class ExtensionTemplateManager extends TemplateService {
   /// Creates an [ExtensionTemplateManager].
   ExtensionTemplateManager({
-    required ExtensionManager extensionManager,
-    required FeatureFlags featureFlags,
-    required FileSystem fileSystem,
-    required Logger logger,
-  }) : _extensionManager = extensionManager,
-       _featureFlags = featureFlags,
-       _fileSystem = fileSystem,
-       _logger = logger;
+    required this._extensionManager,
+    required this._featureFlags,
+    required this._fileSystem,
+    required this._flutterRoot,
+    required this._logger,
+  });
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
   final FileSystem _fileSystem;
+  final String _flutterRoot;
   final Logger _logger;
 
   List<ProjectTemplate>? _cachedTemplates;
@@ -97,7 +95,7 @@ base class ExtensionTemplateManager extends TemplateService {
     if (templatePath.startsWith('package:flutter_tools/')) {
       final String relativePath = templatePath.substring('package:flutter_tools/'.length);
       final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
+        _flutterRoot,
         'packages',
         'flutter_tools',
         'lib',
@@ -111,7 +109,7 @@ base class ExtensionTemplateManager extends TemplateService {
         'package:flutter_tools_extension_linux_prototype/'.length,
       );
       final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
+        _flutterRoot,
         'packages',
         'flutter_tools',
         'packages',
@@ -147,10 +145,13 @@ base class ExtensionTemplateManager extends TemplateService {
     for (final connection in connections) {
       try {
         final Object? result = await connection
-            .sendRequest(TemplateService.generateTemplateParametersMethod, <String, Object?>{
-              'templateName': templateName,
-              'toolParameters': toolParameters,
-            })
+            .sendRequest(
+              TemplateService.generateTemplateParametersMethod,
+              params: <String, Object?>{
+                'templateName': templateName,
+                'toolParameters': toolParameters,
+              },
+            )
             .timeout(_kRpcTimeout);
         if (result is Map) {
           return result.cast<String, Object?>();

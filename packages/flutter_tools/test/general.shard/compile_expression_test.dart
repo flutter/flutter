@@ -120,24 +120,21 @@ void main() {
     final List<String> stdinLines = frontendServerStdIn.getAndClear().trim().split('\n');
     expect(stdinLines, hasLength(2));
     expect(stdinLines[0], 'JSON_INPUT');
-    expect(
-      json.decode(stdinLines[1]),
-      <String, Object?>{
-        'type': 'COMPILE_EXPRESSION',
-        'data': <String, Object?>{
-          'expression': '2+2',
-          'definitions': <String>[],
-          'definitionTypes': <String>[],
-          'typeDefinitions': <String>[],
-          'typeBounds': <String>[],
-          'typeDefaults': <String>[],
-          'libraryUri': '',
-          'class': null,
-          'method': null,
-          'static': false,
-        },
+    expect(json.decode(stdinLines[1]), <String, Object?>{
+      'type': 'COMPILE_EXPRESSION',
+      'data': <String, Object?>{
+        'expression': '2+2',
+        'definitions': <String>[],
+        'definitionTypes': <String>[],
+        'typeDefinitions': <String>[],
+        'typeBounds': <String>[],
+        'typeDefaults': <String>[],
+        'libraryUri': '',
+        'class': null,
+        'method': null,
+        'static': false,
       },
-    );
+    });
     await stdoutController.close();
   });
 
@@ -193,24 +190,21 @@ void main() {
     final List<String> stdinLines = frontendServerStdIn.getAndClear().trim().split('\n');
     expect(stdinLines, hasLength(2));
     expect(stdinLines[0], 'JSON_INPUT');
-    expect(
-      json.decode(stdinLines[1]),
-      <String, Object?>{
-        'type': 'COMPILE_EXPRESSION',
-        'data': <String, Object?>{
-          'expression': multilineExpression,
-          'definitions': <String>['def1'],
-          'definitionTypes': <String>['int'],
-          'typeDefinitions': <String>['TypeDef1'],
-          'typeBounds': <String>['TypeBound1'],
-          'typeDefaults': <String>['TypeDefault1'],
-          'libraryUri': 'package:foo/foo.dart',
-          'class': 'FooClass',
-          'method': 'fooMethod',
-          'static': false,
-        },
+    expect(json.decode(stdinLines[1]), <String, Object?>{
+      'type': 'COMPILE_EXPRESSION',
+      'data': <String, Object?>{
+        'expression': multilineExpression,
+        'definitions': <String>['def1'],
+        'definitionTypes': <String>['int'],
+        'typeDefinitions': <String>['TypeDef1'],
+        'typeBounds': <String>['TypeBound1'],
+        'typeDefaults': <String>['TypeDefault1'],
+        'libraryUri': 'package:foo/foo.dart',
+        'class': 'FooClass',
+        'method': 'fooMethod',
+        'static': false,
       },
-    );
+    });
     await stdoutController.close();
   });
 

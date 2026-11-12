@@ -7,13 +7,19 @@ import 'dart:convert';
 
 import 'package:dtd/dtd.dart';
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
+import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
+import '../src/fakes.dart';
 import 'test_utils.dart';
 
 final RegExp launchingOnDeviceRegExp = RegExp(
@@ -39,6 +45,27 @@ final List<Pattern> subsequentLaunchMessagesWeb = <Pattern>[
 
 const ProcessManager _processManager = LocalProcessManager();
 
+Artifacts createWidgetPreviewTestArtifacts({
+  Logger? logger,
+  ProcessManager processManager = _processManager,
+}) {
+  final String flutterRoot = getFlutterRoot();
+  final cache = Cache.test(
+    rootOverride: fileSystem.directory(flutterRoot),
+    flutterRoot: flutterRoot,
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
+  return CachedArtifacts(
+    fileSystem: fileSystem,
+    cache: cache,
+    platform: platform,
+    operatingSystemUtils: cache.osUtils,
+  );
+}
+
 Future<Stream<String>> startWidgetPreview({
   required Directory tempDir,
   Uri? dtdUri,
@@ -47,6 +74,32 @@ Future<Stream<String>> startWidgetPreview({
   bool legacyPreviewDetection = false,
   ProcessManager processManager = _processManager, // Allow overriding for testing if needed
 }) async {
+  if (dtdUri != null && !legacyPreviewDetection) {
+    final logger = BufferLogger.test();
+    final Artifacts artifacts = createWidgetPreviewTestArtifacts(
+      logger: logger,
+      processManager: processManager,
+    );
+    final analysisServer = AnalysisServer(
+      artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+      <String>[tempDir.path],
+      suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        terminal: AnsiTerminal(stdio: Stdio(), platform: platform),
+      ),
+    );
+    addTearDown(() async {
+      await analysisServer.dispose();
+      await analysisServer.onExit;
+    });
+    await analysisServer.start();
+    await analysisServer.connectToDtd(dtdUri: dtdUri);
+  }
+
   final Process process = await processManager.start(<String>[
     flutterBin,
     'widget-preview',

@@ -4,7 +4,6 @@
 
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -12,18 +11,19 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 
 final _FakeAnalytics fakeAnalytics = _FakeAnalytics();
 
 class _FakeAnalytics extends Fake implements Analytics {
   @override
-  bool get telemetryEnabled => false;
+  bool get okToSend => false;
 }
 
 final Platform windowsPlatform = FakePlatform(
@@ -155,8 +155,11 @@ void main() {
 
   group('throws ToolExit on Windows', () {
     const kDeviceFull = 112;
+    const kFilenameExcedRange = 206;
     const kUserMappedSectionOpened = 1224;
     const kUserPermissionDenied = 5;
+    const kWriteProtect = 19;
+    const kPrivilegeNotHeld = 1314;
     const kFatalDeviceHardwareError = 483;
     const kDeviceDoesNotExist = 433;
 
@@ -225,6 +228,29 @@ void main() {
       expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when write protected or privilege not held', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kWriteProtect)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kPrivilegeNotHeld)),
+      );
+
+      const expectedMessage = 'The flutter tool cannot access the file';
+      expect(() async => file.writeAsString(''), throwsToolExit(message: expectedMessage));
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
     });
 
@@ -414,17 +440,120 @@ void main() {
         throwsToolExit(message: 'The flutter tool cannot access the file or directory'),
       );
     });
+
+    testWithoutContext('when the filename or extension is too long', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kFilenameExcedRange)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', kFilenameExcedRange)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kFilenameExcedRange)),
+      );
+
+      const expectedMessage = 'The filename or extension is too long.';
+      await expectLater(
+        () => file.writeAsBytes(<int>[0]),
+        throwsToolExit(message: expectedMessage),
+      );
+      await expectLater(() => file.writeAsString(''), throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('throws ToolExit on Linux', () {
     const eperm = 1;
     const enospc = 28;
     const eacces = 13;
+    const exdev = 18;
+    const erofs = 30;
 
     late FileExceptionHandler exceptionHandler;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
+    });
+
+    testWithoutContext('when on a read-only file system (erofs)', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', erofs)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', erofs)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.delete,
+        FileSystemException('', file.path, const OSError('', erofs)),
+      );
+
+      const writeMessage =
+          'Flutter failed to write to a file at "dir/file".\n'
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
+      expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() async => file.writeAsString(''), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: writeMessage));
+
+      const createMessage =
+          'Flutter failed to create file at "dir/file".\n'
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
+      expect(() => file.createSync(), throwsToolExit(message: createMessage));
+      expect(() async => file.createSync(recursive: true), throwsToolExit(message: createMessage));
+
+      final Directory parent = fileSystem.directory('parent')..createSync();
+      final Directory childDir = parent.childDirectory('childDir');
+
+      exceptionHandler.addError(
+        childDir,
+        FileSystemOp.create,
+        FileSystemException('', childDir.path, const OSError('', erofs)),
+      );
+      exceptionHandler.addError(
+        childDir,
+        FileSystemOp.delete,
+        FileSystemException('', childDir.path, const OSError('', erofs)),
+      );
+
+      const dirCreateMessage =
+          'Flutter failed to create a directory at "parent/childDir".\n'
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
+      expect(() async => childDir.create(), throwsToolExit(message: dirCreateMessage));
+      expect(() => childDir.createSync(), throwsToolExit(message: dirCreateMessage));
+      expect(
+        () async => childDir.createSync(recursive: true),
+        throwsToolExit(message: dirCreateMessage),
+      );
     });
 
     testWithoutContext('when access is denied', () async {
@@ -637,16 +766,140 @@ void main() {
         throwsToolExit(message: 'The file or directory could not be found'),
       );
     });
+
+    testWithoutContext('when a cross-device link error occurs (exdev)', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file')..createSync();
+
+      exceptionHandler
+        ..addError(
+          file,
+          FileSystemOp.delete,
+          FileSystemException(
+            'Cannot delete file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.copy,
+          FileSystemException(
+            'Cannot copy file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.write,
+          FileSystemException(
+            'Cannot write file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        );
+
+      const expectedCrossDeviceMessage =
+          'A file system operation failed across different volumes or mount points.';
+      await expectLater(() => file.delete(), throwsToolExit(message: expectedCrossDeviceMessage));
+      expect(() => file.deleteSync(), throwsToolExit(message: expectedCrossDeviceMessage));
+      expect(
+        () => ErrorHandlingFileSystem.deleteIfExists(file, recursive: true),
+        throwsToolExit(message: expectedCrossDeviceMessage),
+      );
+      await expectLater(
+        () => file.copy('dir/copied'),
+        throwsToolExit(message: expectedCrossDeviceMessage),
+      );
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedCrossDeviceMessage));
+      expect(
+        () => ErrorHandlingFileSystem.noExitOnFailure(() => file.deleteSync()),
+        throwsFileSystemException(),
+      );
+    });
   });
 
   group('throws ToolExit on macOS', () {
     const eperm = 1;
     const enospc = 28;
     const eacces = 13;
+    const exdev = 18;
+    const erofs = 30;
     late FileExceptionHandler exceptionHandler;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
+    });
+
+    testWithoutContext('when on a read-only file system (erofs)', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', erofs)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', erofs)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.delete,
+        FileSystemException('', file.path, const OSError('', erofs)),
+      );
+
+      const writeMessage =
+          'Flutter failed to write to a file at "dir/file".\n'
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
+      expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() async => file.writeAsString(''), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: writeMessage));
+
+      const createMessage =
+          'Flutter failed to create file at "dir/file".\n'
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
+      expect(() => file.createSync(), throwsToolExit(message: createMessage));
+      expect(() async => file.createSync(recursive: true), throwsToolExit(message: createMessage));
+
+      final Directory parent = fileSystem.directory('parent')..createSync();
+      final Directory childDir = parent.childDirectory('childDir');
+
+      exceptionHandler.addError(
+        childDir,
+        FileSystemOp.create,
+        FileSystemException('', childDir.path, const OSError('', erofs)),
+      );
+      exceptionHandler.addError(
+        childDir,
+        FileSystemOp.delete,
+        FileSystemException('', childDir.path, const OSError('', erofs)),
+      );
+
+      const dirCreateMessage =
+          'Flutter failed to create a directory at "parent/childDir".\n'
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
+      expect(() async => childDir.create(), throwsToolExit(message: dirCreateMessage));
+      expect(() => childDir.createSync(), throwsToolExit(message: dirCreateMessage));
+      expect(
+        () async => childDir.createSync(recursive: true),
+        throwsToolExit(message: dirCreateMessage),
+      );
     });
 
     testWithoutContext('when access is denied', () async {
@@ -858,6 +1111,54 @@ void main() {
         throwsToolExit(message: 'The flutter tool cannot access the file or directory'),
       );
     });
+
+    testWithoutContext('when a cross-device link error occurs (exdev)', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file')..createSync();
+
+      exceptionHandler
+        ..addError(
+          file,
+          FileSystemOp.delete,
+          FileSystemException(
+            'Cannot delete file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.write,
+          FileSystemException(
+            'Cannot write file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        );
+
+      const expectedDeleteMessage =
+          'Flutter failed to delete file at "dir/file".\n'
+          'A file system operation failed across different volumes or mount points.';
+      await expectLater(() => file.delete(), throwsToolExit(message: expectedDeleteMessage));
+      expect(() => file.deleteSync(), throwsToolExit(message: expectedDeleteMessage));
+      expect(
+        () => ErrorHandlingFileSystem.deleteIfExists(file, recursive: true),
+        throwsToolExit(message: expectedDeleteMessage),
+      );
+
+      const expectedWriteMessage =
+          'Flutter failed to write to a file at "dir/file".\n'
+          'A file system operation failed across different volumes or mount points.';
+      await expectLater(
+        () => file.writeAsString(''),
+        throwsToolExit(message: expectedWriteMessage),
+      );
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedWriteMessage));
+    });
   });
 
   testWithoutContext('Caches path context correctly', () {
@@ -961,29 +1262,27 @@ Please ensure that the SDK and/or project is installed in a location that has re
     },
   );
 
-  testWithoutContext(
-    "ErrorHandlingFileSystem.systemTempDirectory handles any exception thrown by the delegate's systemTempDirectory implementation",
-    () {
-      final exceptionHandler = FileExceptionHandler();
-      exceptionHandler.addTempError(
-        FileSystemOp.create,
-        const FileSystemException(
-          'Creation of temporary directory failed',
-          'some/temp/path',
-          OSError('No space left on device', 28),
-        ),
-      );
+  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory handles any exception thrown by the delegate's systemTempDirectory implementation", () {
+    final exceptionHandler = FileExceptionHandler();
+    exceptionHandler.addTempError(
+      FileSystemOp.create,
+      const FileSystemException(
+        'Creation of temporary directory failed',
+        'some/temp/path',
+        OSError('No space left on device', 28),
+      ),
+    );
 
-      final delegate = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+    final delegate = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
 
-      final FileSystem fs = ErrorHandlingFileSystem(delegate: delegate, platform: FakePlatform());
+    final FileSystem fs = ErrorHandlingFileSystem(delegate: delegate, platform: FakePlatform());
 
-      expect(() => fs.systemTempDirectory, throwsToolExit(message: 'Free up space and try again.'));
-    },
-  );
+    expect(() => fs.systemTempDirectory, throwsToolExit(message: 'Free up space and try again.'));
+  });
 
   group('ProcessManager on windows throws tool exit', () {
     const kDeviceFull = 112;
+    const kFilenameExcedRange = 206;
     const kUserMappedSectionOpened = 1224;
     const kUserPermissionDenied = 5;
     const kApplicationControlPolicyBlocked = 4551;
@@ -1180,6 +1479,62 @@ Please ensure that the SDK and/or project is installed in a location that has re
           r'Flutter failed to run "C:\path\to\dart". The flutter tool cannot access the file or directory.';
       expect(
         () async => processManager.canRun(r'C:\path\to\dart'),
+        throwsToolExit(message: expectedMessage),
+      );
+    });
+
+    testWithoutContext('when the filename or extension is too long', () async {
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['foo', '--bar'],
+          exception: ProcessException(
+            'foo',
+            <String>['--bar'],
+            'The filename or extension is too long',
+            kFilenameExcedRange,
+          ),
+        ),
+        const FakeCommand(
+          command: <String>['foo', '--bar'],
+          exception: ProcessException(
+            'foo',
+            <String>['--bar'],
+            'The filename or extension is too long',
+            kFilenameExcedRange,
+          ),
+        ),
+        const FakeCommand(
+          command: <String>['foo', '--bar'],
+          exception: ProcessException(
+            'foo',
+            <String>['--bar'],
+            'The filename or extension is too long',
+            kFilenameExcedRange,
+          ),
+        ),
+      ]);
+
+      final ProcessManager processManager = createProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
+
+      const expectedMessage =
+          'Flutter failed to run "foo --bar". The filename or extension is too long.\n'
+          'ProcessException: The filename or extension is too long\n'
+          '  Command: foo --bar\n'
+          'Please consider moving the Flutter SDK and/or project to a shorter path, '
+          'or enabling long paths on Windows.';
+      await expectLater(
+        () => processManager.start(<String>['foo', '--bar']),
+        throwsToolExit(message: expectedMessage),
+      );
+      await expectLater(
+        () => processManager.run(<String>['foo', '--bar']),
+        throwsToolExit(message: expectedMessage),
+      );
+      expect(
+        () => processManager.runSync(<String>['foo', '--bar']),
         throwsToolExit(message: expectedMessage),
       );
     });
@@ -1813,6 +2168,34 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
       expect(fileSystem.typeSync(file.path, followLinks: false), FileSystemEntityType.notFound);
     });
+  });
+
+  group('readAsStringSync', () {
+    const invalidUtf8Bytes = <int>[0xFF, 0xFE, 0x41];
+
+    for (final (String encodingName, Encoding encoding, String expected)
+        in <(String, Encoding, String)>[
+          ('AsciiCodec(allowInvalid: true)', const AsciiCodec(allowInvalid: true), '\uFFFD\uFFFDA'),
+          ('latin1', latin1, '\u00FF\u00FEA'),
+        ]) {
+      testWithoutContext('forwards $encodingName to LocalFileSystem delegate', () {
+        final localFileSystem = LocalFileSystem.test(signals: FakeSignals());
+        addTearDown(localFileSystem.dispose);
+        final Directory tempDir = localFileSystem.systemTempDirectory.createTempSync(
+          'flutter_tools_read_as_string_sync_test.',
+        );
+        addTearDown(() => tryToDelete(tempDir));
+
+        final fileSystem = ErrorHandlingFileSystem(
+          delegate: localFileSystem,
+          platform: linuxPlatform,
+        );
+        final File file = fileSystem.file(fileSystem.path.join(tempDir.path, 'binary.bin'))
+          ..writeAsBytesSync(invalidUtf8Bytes);
+
+        expect(file.readAsStringSync(encoding: encoding), expected);
+      });
+    }
   });
 }
 

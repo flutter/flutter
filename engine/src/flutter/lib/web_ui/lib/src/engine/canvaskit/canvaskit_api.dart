@@ -1929,6 +1929,8 @@ extension type SkParagraphStyleProperties._(JSObject _) implements JSObject {
   external set strutStyle(SkStrutStyleProperties? strutStyle);
   external set replaceTabCharacters(bool? bool);
   external set applyRoundingHack(bool applyRoundingHack);
+  external set renderSoftHyphens(bool renderSoftHyphens);
+  external set softHyphenString(String? softHyphenString);
 }
 
 extension type SkTextStyle(JSObject _) implements JSObject {}
@@ -2105,7 +2107,9 @@ extension type SkFontVariation._(JSObject _) implements JSObject {
 
 extension type SkTypeface(JSObject _) implements JSObject {
   /// Returns the family name of the typeface.
-  external String? getFamilyName();
+  external String getFamilyName();
+
+  external void delete();
 }
 
 @JS('window.flutterCanvasKit.Font')
@@ -2387,14 +2391,12 @@ extension type SkPartialImageInfo._(JSObject _) implements JSObject {
 
 @JS('window.flutterCanvasKit.RuntimeEffect')
 extension type SkRuntimeEffect(JSObject _) implements JSObject {
-  @JS('makeShader')
-  external SkShader? _makeShader(JSAny uniforms);
-  SkShader? makeShader(SkFloat32List uniforms) => _makeShader(uniforms.toJSAnyShallow);
+  external SkShader? makeShader(JSFloat32Array uniforms);
 
   @JS('makeShaderWithChildren')
-  external SkShader? _makeShaderWithChildren(JSAny uniforms, JSAny children);
-  SkShader? makeShaderWithChildren(SkFloat32List uniforms, List<Object?> children) =>
-      _makeShaderWithChildren(uniforms.toJSAnyShallow, children.toJSAnyShallow);
+  external SkShader? _makeShaderWithChildren(JSFloat32Array uniforms, JSAny children);
+  SkShader? makeShaderWithChildren(JSFloat32Array uniforms, List<Object?> children) =>
+      _makeShaderWithChildren(uniforms, children.toJSAnyShallow);
 }
 
 @JS('window.flutterCanvasKit.RuntimeEffect.Make')
@@ -2425,9 +2427,8 @@ List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
 }
 
 Iterable<String> get _canvasKitJsUrls {
-  return getCanvasKitJsFileNames(
-    configuration.canvasKitVariant,
-  ).map((String filename) => '$_canvasKitBaseUrl$filename');
+  return getCanvasKitJsFileNames(configuration.canvasKitVariant)
+      .map((String filename) => '$_canvasKitBaseUrl$filename');
 }
 
 @visibleForTesting
@@ -2436,7 +2437,7 @@ String canvasKitWasmModuleUrl(String file, String canvasKitBase) => canvasKitBas
 /// Download and initialize the CanvasKit module.
 ///
 /// Downloads the CanvasKit JavaScript, then calls `CanvasKitInit` to download
-/// and intialize the CanvasKit wasm.
+/// and initialize the CanvasKit wasm.
 Future<CanvasKit> downloadCanvasKit() async {
   final CanvasKitModule canvasKitModule = await _downloadOneOf(_canvasKitJsUrls);
 

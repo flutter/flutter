@@ -14,9 +14,11 @@
 #include <utility>
 
 #include "flutter/fml/paths.h"
+#include "flutter/third_party/re2/re2/re2.h"
 #include "impeller/base/allocation.h"
 #include "impeller/compiler/compiler_backend.h"
 #include "impeller/compiler/constants.h"
+#include "impeller/compiler/glsl_minifier.h"
 #include "impeller/compiler/includer.h"
 #include "impeller/compiler/logger.h"
 #include "impeller/compiler/spirv_compiler.h"
@@ -210,7 +212,9 @@ static CompilerBackend CreateVulkanCompiler(
 
 static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
                                           const SourceOptions& source_options) {
-  auto gl_compiler = std::make_shared<spirv_cross::CompilerGLSL>(ir);
+  std::shared_ptr<spirv_cross::CompilerGLSL> gl_compiler =
+      source_options.minify ? std::make_shared<MinifyingCompilerGLSL>(ir)
+                            : std::make_shared<spirv_cross::CompilerGLSL>(ir);
 
   // Walk the variables and insert the external image extension if any of them
   // begins with the external texture prefix. Unfortunately, we can't walk
@@ -397,6 +401,56 @@ void CanonicalizeUniformBlockInstanceNamesForGL(
   }
 }
 
+/// Checks if the fragment shader source contains multiple return statements or
+/// an early return within the `main()` function.
+static bool CheckHasMultipleReturnsInMain(std::string_view source) {
+  std::string clean_source = StripGLSLComments(source);
+
+  // Match the declaration of main(...) {
+  static const re2::LazyRE2 kMainPattern = {R"((\bmain\s*\([^)]*\)\s*\{))"};
+  re2::StringPiece match;
+  if (!re2::RE2::PartialMatch(clean_source, *kMainPattern, &match)) {
+    return false;
+  }
+
+  size_t main_offset = match.data() - clean_source.data();
+  size_t open_brace = clean_source.find('{', main_offset);
+  if (open_brace == std::string::npos) {
+    return false;
+  }
+
+  // Find the matching closing brace for main().
+  int brace_depth = 1;
+  size_t pos = open_brace + 1;
+  while (pos < clean_source.size() && brace_depth > 0) {
+    char c = clean_source[pos];
+    if (c == '{') {
+      brace_depth++;
+    } else if (c == '}') {
+      brace_depth--;
+    }
+    pos++;
+  }
+
+  size_t main_body_len =
+      (pos > open_brace + 1) ? (pos - 1) - (open_brace + 1) : 0;
+  re2::StringPiece main_body(clean_source.data() + open_brace + 1,
+                             main_body_len);
+
+  static const re2::LazyRE2 kReturnPattern = {R"(\breturn\b)"};
+  return re2::RE2::PartialMatch(main_body, *kReturnPattern);
+}
+
+static bool CheckHasSamplers(const CompilerBackend& sl_compiler) {
+  if (!sl_compiler.GetCompiler()) {
+    return false;
+  }
+  auto resources = sl_compiler.GetCompiler()->get_shader_resources();
+  return !resources.sampled_images.empty() ||
+         !resources.separate_samplers.empty() ||
+         !resources.separate_images.empty();
+}
+
 }  // namespace
 
 Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
@@ -578,10 +632,14 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
 
   // GL vertex shaders get a y-flip epilogue; see
   // https://github.com/flutter/flutter/issues/186554.
-  if (IsGLTargetPlatform(source_options.target_platform) &&
-      source_options.type == SourceType::kVertexShader) {
-    sl_compilation_result_str =
-        InjectYFlipForGLESVertexShader(std::move(sl_compilation_result_str));
+  if (IsGLTargetPlatform(source_options.target_platform)) {
+    if (source_options.type == SourceType::kVertexShader) {
+      sl_compilation_result_str =
+          InjectYFlipForGLESVertexShader(std::move(sl_compilation_result_str));
+    }
+    if (source_options.minify) {
+      sl_compilation_result_str = MinifyGLSL(sl_compilation_result_str);
+    }
   }
 
   auto sl_compilation_result =
@@ -620,6 +678,22 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     COMPILER_ERROR(error_stream_)
         << "Could not complete reflection on generated shader.";
     return;
+  }
+
+  std::string source_str(
+      reinterpret_cast<const char*>(source_mapping->GetMapping()),
+      source_mapping->GetSize());
+  if (source_options.type == SourceType::kFragmentShader &&
+      CheckHasSamplers(sl_compiler) &&
+      CheckHasMultipleReturnsInMain(source_str)) {
+    COMPILER_WARNING(warning_stream_)
+        << "Fragment shader uses texture samplers alongside multiple 'return' "
+           "statements in `main()`. "
+        << "This has the potential to cause compilation errors during shader "
+           "compilation on Windows. \n"
+        << "To avoid crashes on Windows, consider removing multiple 'return;' "
+           "statements in `main()`."
+        << "See https://github.com/flutter/flutter/issues/190809 for details.";
   }
 
   is_valid_ = true;
@@ -700,6 +774,10 @@ std::string Compiler::GetSourcePrefix() const {
 
 std::string Compiler::GetErrorMessages() const {
   return error_stream_.str();
+}
+
+std::string Compiler::GetWarningMessages() const {
+  return warning_stream_.str();
 }
 
 std::string Compiler::GetVerboseErrorMessages() const {

@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+
 import 'animation.dart';
 
 const double contentHeight = 80.0;

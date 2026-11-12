@@ -845,9 +845,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus 8.0 pixels in each
     // direction.
-    return BoxConstraints.loose(
-      constraints.biggest,
-    ).deflate(const EdgeInsets.all(_kMenuScreenPadding) + padding);
+    return BoxConstraints.loose(constraints.biggest)
+        .deflate(const EdgeInsets.all(_kMenuScreenPadding) + padding);
   }
 
   @override
@@ -1091,8 +1090,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///  * [RelativeRect.fromRect], which creates a [RelativeRect] from two [Rect]s,
 ///    one representing the size of the popup menu and one representing the size
 ///    of the overlay.
-typedef PopupMenuPositionBuilder =
-    RelativeRect Function(BuildContext context, BoxConstraints constraints);
+typedef PopupMenuPositionBuilder = RelativeRect Function(
+  BuildContext context,
+  BoxConstraints constraints,
+);
 
 /// Shows a popup menu that contains the `items` at `position`.
 ///

@@ -76,7 +76,8 @@ class AssetManager {
     if (Uri.parse(asset).hasScheme) {
       return Uri.encodeFull(asset);
     }
-    return Uri.encodeFull('$_baseUrl$assetsDir/$asset');
+    final String resolvedAsset = resolveContentHashedAsset(asset);
+    return Uri.encodeFull('$_baseUrl$assetsDir/$resolvedAsset');
   }
 
   /// Loads an asset and returns the server response.

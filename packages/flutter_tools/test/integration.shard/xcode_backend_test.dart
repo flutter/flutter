@@ -6,7 +6,6 @@ import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -78,7 +77,7 @@ void main() {
     late File infoPlist;
 
     setUp(() {
-      buildDirectory = globals.fs.systemTempDirectory.createTempSync(
+      buildDirectory = fileSystem.systemTempDirectory.createTempSync(
         'flutter_tools_xcode_backend_test.',
       );
       infoPlist = buildDirectory.childFile('Info.plist');
@@ -128,45 +127,42 @@ void main() {
 
     for (final buildConfiguration in <String>['Debug', 'Profile']) {
       for (final verbose in <bool>[true, false]) {
-        test(
-          'add keys in $buildConfiguration under ${verbose ? 'verbose' : 'non-verbose'} mode',
-          () async {
-            infoPlist.writeAsStringSync(emptyPlist);
-            final File pipe = buildDirectory.childFile('pipe')..createSync(recursive: true);
+        test('add keys in $buildConfiguration under ${verbose ? 'verbose' : 'non-verbose'} mode', () async {
+          infoPlist.writeAsStringSync(emptyPlist);
+          final File pipe = buildDirectory.childFile('pipe')..createSync(recursive: true);
 
-            final ProcessResult result = await Process.run(
-              xcodeBackendPath,
-              <String>['test_vm_service_bonjour_service'],
-              environment: <String, String>{
-                'CONFIGURATION': buildConfiguration,
-                'BUILT_PRODUCTS_DIR': buildDirectory.path,
-                'INFOPLIST_PATH': 'Info.plist',
-                if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
-                'SCRIPT_OUTPUT_STREAM_FILE': pipe.path,
-              },
-            );
+          final ProcessResult result = await Process.run(
+            xcodeBackendPath,
+            <String>['test_vm_service_bonjour_service'],
+            environment: <String, String>{
+              'CONFIGURATION': buildConfiguration,
+              'BUILT_PRODUCTS_DIR': buildDirectory.path,
+              'INFOPLIST_PATH': 'Info.plist',
+              if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+              'SCRIPT_OUTPUT_STREAM_FILE': pipe.path,
+            },
+          );
 
-            final String actualInfoPlist = infoPlist.readAsStringSync();
-            expect(actualInfoPlist, contains('NSBonjourServices'));
-            expect(actualInfoPlist, contains('dartVmService'));
-            expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
+          final String actualInfoPlist = infoPlist.readAsStringSync();
+          expect(actualInfoPlist, contains('NSBonjourServices'));
+          expect(actualInfoPlist, contains('dartVmService'));
+          expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
 
-            // Make sure no Xcode compilation error.
-            expect(result.stderr, isNot(startsWith('error:')));
+          // Make sure no Xcode compilation error.
+          expect(result.stderr, isNot(startsWith('error:')));
 
-            const plutilErrorMessage =
-                'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
-            expect(pipe.readAsStringSync(), isNot(contains(plutilErrorMessage)));
-            expect(result.stderr, isNot(contains(plutilErrorMessage)));
-            if (verbose) {
-              expect(result.stdout, contains(plutilErrorMessage));
-            } else {
-              expect(result.stdout, isNot(contains(plutilErrorMessage)));
-            }
+          const plutilErrorMessage =
+              'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
+          expect(pipe.readAsStringSync(), isNot(contains(plutilErrorMessage)));
+          expect(result.stderr, isNot(contains(plutilErrorMessage)));
+          if (verbose) {
+            expect(result.stdout, contains(plutilErrorMessage));
+          } else {
+            expect(result.stdout, isNot(contains(plutilErrorMessage)));
+          }
 
-            expect(result, const ProcessResultMatcher());
-          },
-        );
+          expect(result, const ProcessResultMatcher());
+        });
       }
     }
 

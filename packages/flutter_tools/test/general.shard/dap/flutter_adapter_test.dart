@@ -9,11 +9,11 @@ import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/debug_adapters/error_formatter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
-import 'package:flutter_tools/src/globals.dart' as globals show fs, platform;
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
@@ -22,7 +22,7 @@ import 'mocks.dart';
 
 void main() {
   // Use the real platform as a base so that Windows bots test paths.
-  final platform = FakePlatform.fromPlatform(globals.platform);
+  final platform = FakePlatform.fromPlatform(const LocalPlatform());
   final FileSystemStyle fsStyle = platform.isWindows
       ? FileSystemStyle.windows
       : FileSystemStyle.posix;
@@ -32,10 +32,6 @@ void main() {
     final expectedFlutterExecutable = platform.isWindows
         ? r'C:\fake\flutter\bin\flutter.bat'
         : '/fake/flutter/bin/flutter';
-
-    setUpAll(() {
-      Cache.flutterRoot = flutterRoot;
-    });
 
     group('launchRequest', () {
       test('runs "flutter run" with --machine', () async {
@@ -353,6 +349,47 @@ void main() {
         // Also ensure we got console output with the error.
         expect(consoleOutputMessages, contains('App stopped due to an error\n'));
       });
+
+      test(
+        'does not throw unhandled exception if process exits before debugger initialized',
+        () async {
+          final debuggerCompleter = Completer<void>();
+          final adapter = FakeFlutterDebugAdapter(
+            fileSystem: MemoryFileSystem.test(style: fsStyle),
+            platform: platform,
+            customDebuggerInitialized: debuggerCompleter.future,
+          );
+          final responseCompleter = Completer<void>();
+          final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+
+          final consoleOutputMessages = <String>[];
+          final StreamSubscription<String> consoleOutputMessagesSubscription = adapter
+              .dapToClientMessages
+              .where((Map<String, Object?> message) => message['event'] == 'output')
+              .map((Map<String, Object?> message) => message['body']! as Map<String, Object?>)
+              .where(
+                (Map<String, Object?> body) =>
+                    body['category'] == 'console' || body['category'] == null,
+              )
+              .map((Map<String, Object?> body) => body['output']! as String)
+              .listen(consoleOutputMessages.add);
+
+          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+          await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
+          await responseCompleter.future;
+
+          expect(adapter.waitingForDebugger, isTrue);
+
+          adapter.handleExitCode(255);
+          await pumpEventQueue();
+          await consoleOutputMessagesSubscription.cancel();
+
+          expect(
+            consoleOutputMessages,
+            contains('Session terminated before debugger initialized: (255)\n'),
+          );
+        },
+      );
     });
 
     group('attachRequest', () {
@@ -422,14 +459,20 @@ void main() {
       });
 
       test('runs "flutter attach" with --debug-uri if vmServiceInfoFile exists', () async {
-        final adapter = FakeFlutterDebugAdapter(
-          fileSystem: MemoryFileSystem.test(style: fsStyle),
-          platform: platform,
+        // LocalFileSystem is required here because dap_adapters' waitForVmServiceInfoFile uses .watch(),
+        // which is unsupported in MemoryFileSystem.
+        final fs = LocalFileSystem(
+          LocalSignals.instance,
+          Signals.defaultExitSignals,
+          ShutdownHooks(),
         );
+        final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
         final responseCompleter = Completer<void>();
-        final File serviceInfoFile = globals.fs.systemTempDirectory
-            .createTempSync('dap_flutter_attach_vmServiceInfoFile')
-            .childFile('vmServiceInfo.json');
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'dap_flutter_attach_vmServiceInfoFile',
+        );
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final File serviceInfoFile = tempDir.childFile('vmServiceInfo.json');
 
         final args = FlutterAttachRequestArguments(
           cwd: '.',
@@ -460,14 +503,20 @@ void main() {
       test(
         'runs "flutter attach" with --debug-uri if vmServiceInfoFile is created later',
         () async {
-          final adapter = FakeFlutterDebugAdapter(
-            fileSystem: MemoryFileSystem.test(style: fsStyle),
-            platform: platform,
+          // LocalFileSystem is required here because dap_adapters' waitForVmServiceInfoFile uses .watch(),
+          // which is unsupported in MemoryFileSystem.
+          final fs = LocalFileSystem(
+            LocalSignals.instance,
+            Signals.defaultExitSignals,
+            ShutdownHooks(),
           );
+          final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
           final responseCompleter = Completer<void>();
-          final File serviceInfoFile = globals.fs.systemTempDirectory
-              .createTempSync('dap_flutter_attach_vmServiceInfoFile')
-              .childFile('vmServiceInfo.json');
+          final Directory tempDir = fs.systemTempDirectory.createTempSync(
+            'dap_flutter_attach_vmServiceInfoFile',
+          );
+          addTearDown(() => tempDir.deleteSync(recursive: true));
+          final File serviceInfoFile = tempDir.childFile('vmServiceInfo.json');
 
           final args = FlutterAttachRequestArguments(
             cwd: '.',
@@ -545,6 +594,47 @@ void main() {
 
         expect(adapter.dapToFlutterRequests, contains('app.detach'));
       });
+
+      test(
+        'does not throw unhandled exception if process exits before debugger initialized',
+        () async {
+          final debuggerCompleter = Completer<void>();
+          final adapter = FakeFlutterDebugAdapter(
+            fileSystem: MemoryFileSystem.test(style: fsStyle),
+            platform: platform,
+            customDebuggerInitialized: debuggerCompleter.future,
+          );
+          final responseCompleter = Completer<void>();
+          final args = FlutterAttachRequestArguments(cwd: '.');
+
+          final consoleOutputMessages = <String>[];
+          final StreamSubscription<String> consoleOutputMessagesSubscription = adapter
+              .dapToClientMessages
+              .where((Map<String, Object?> message) => message['event'] == 'output')
+              .map((Map<String, Object?> message) => message['body']! as Map<String, Object?>)
+              .where(
+                (Map<String, Object?> body) =>
+                    body['category'] == 'console' || body['category'] == null,
+              )
+              .map((Map<String, Object?> body) => body['output']! as String)
+              .listen(consoleOutputMessages.add);
+
+          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+          await adapter.attachRequest(FakeRequest(), args, responseCompleter.complete);
+          await responseCompleter.future;
+
+          expect(adapter.waitingForDebugger, isTrue);
+
+          adapter.handleExitCode(255);
+          await pumpEventQueue();
+          await consoleOutputMessagesSubscription.cancel();
+
+          expect(
+            consoleOutputMessages,
+            contains('Session terminated before debugger initialized: (255)\n'),
+          );
+        },
+      );
     });
 
     group('forwards events', () {
@@ -683,6 +773,9 @@ void main() {
       });
     });
 
+    // Check --start-paused, which is also a proxy for whether we are generally
+    // enabling debug mode (and therefore expected the debugger to initialize,
+    // for example to delay forwarding `app.started` events).
     group('--start-paused', () {
       test('is passed for debug mode', () async {
         final adapter = FakeFlutterDebugAdapter(
@@ -716,45 +809,34 @@ void main() {
         expect(adapter.processArgs, isNot(contains('--start-paused')));
       });
 
-      test('is not passed if toolArgs contains --profile', () async {
-        final adapter = FakeFlutterDebugAdapter(
-          fileSystem: MemoryFileSystem.test(style: fsStyle),
-          platform: platform,
-        );
-        final responseCompleter = Completer<void>();
+      for (final argField in ['toolArgs', 'args']) {
+        final useToolArgs = argField == 'toolArgs';
+        final bool useArgs = !useToolArgs;
 
-        final args = FlutterLaunchRequestArguments(
-          cwd: '.',
-          program: 'foo.dart',
-          toolArgs: <String>['--profile'],
-        );
+        // Test each flag we expect to disable debugging.
+        for (final flag in <String>['--profile', '--release', '--wasm']) {
+          test('is not passed if $argField contains $flag', () async {
+            final adapter = FakeFlutterDebugAdapter(
+              fileSystem: MemoryFileSystem.test(style: fsStyle),
+              platform: platform,
+            );
+            final responseCompleter = Completer<void>();
 
-        await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-        await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
-        await responseCompleter.future;
+            final args = FlutterLaunchRequestArguments(
+              cwd: '.',
+              program: 'foo.dart',
+              toolArgs: useToolArgs ? <String>[flag] : null,
+              args: useArgs ? <String>[flag] : null,
+            );
 
-        expect(adapter.processArgs, isNot(contains('--start-paused')));
-      });
+            await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+            await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
+            await responseCompleter.future;
 
-      test('is not passed if toolArgs contains --release', () async {
-        final adapter = FakeFlutterDebugAdapter(
-          fileSystem: MemoryFileSystem.test(style: fsStyle),
-          platform: platform,
-        );
-        final responseCompleter = Completer<void>();
-
-        final args = FlutterLaunchRequestArguments(
-          cwd: '.',
-          program: 'foo.dart',
-          toolArgs: <String>['--release'],
-        );
-
-        await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-        await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
-        await responseCompleter.future;
-
-        expect(adapter.processArgs, isNot(contains('--start-paused')));
-      });
+            expect(adapter.processArgs, isNot(contains('--start-paused')));
+          });
+        }
+      }
     });
 
     test('includes toolArgs', () async {

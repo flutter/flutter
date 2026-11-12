@@ -73,9 +73,6 @@ abstract class FeatureFlags {
   /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
 
-  /// Whether accessibility evaluations is enabled.
-  bool get isAccessibilityEvaluationsEnabled;
-
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 
@@ -116,7 +113,6 @@ abstract class FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
-    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
@@ -275,15 +271,6 @@ const windowingFeature = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
-/// Whether accessibility evaluations is enabled.
-const accessibilityEvaluationsFeature = Feature(
-  name: 'support for accessibility evaluations',
-  configSetting: 'enable-accessibility-evaluations',
-  environmentOverride: 'FLUTTER_ACCESSIBILITY_EVALUATIONS',
-  runtimeId: 'accessibility_evaluations',
-  master: FeatureChannelSetting(available: true),
-);
-
 /// Enable LLDB debugging for physical iOS devices. When LLDB debugging is off,
 /// Xcode debugging is used instead.
 ///
@@ -358,6 +345,15 @@ const hcpp = Feature(
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true),
 );
+
+/// Environment variable that disables all tool extensions when set to `'1'`, `'true'`, or `'yes'`.
+const kFlutterNoExtensionsEnv = 'FLUTTER_NO_EXTENSIONS';
+
+/// Whether [environment] sets [kFlutterNoExtensionsEnv] to a truthy value (`1`, `true`, or `yes`).
+bool isSafeModeActive(Map<String, String> environment) {
+  final String? value = environment[kFlutterNoExtensionsEnv]?.trim().toLowerCase();
+  return value == '1' || value == 'true' || value == 'yes';
+}
 
 /// Enable tool extensions feature.
 const toolExtensionsFeature = Feature(

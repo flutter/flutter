@@ -6,15 +6,21 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -29,11 +35,11 @@ CommandRunner<void> createTestCommandRunner([
   ToolContext? toolContext,
   FeatureFlags? featureFlags,
 ]) {
-  final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
+  final ToolContext? resolvedToolContext = toolContext ?? command?.toolContext;
   final runner = TestFlutterCommandRunner(
     analytics: analytics,
     featureFlags: featureFlags,
-    toolContext: effectiveToolContext,
+    toolContext: resolvedToolContext,
   );
   if (command != null) {
     runner.addCommand(command);
@@ -48,10 +54,16 @@ Future<String> createProject(
   Directory temp, {
   String name = 'flutter_project',
   List<String>? arguments,
+  ToolContext? toolContext,
 }) async {
   arguments ??= <String>['--no-pub'];
   final String projectPath = temp.fileSystem.path.join(temp.path, name);
-  final command = CreateCommand();
+  final command = CreateCommand(
+    androidContext: FakeAndroidContext(),
+    appleContext: FakeAppleContext(),
+    templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: DelegatingToolContext(fs: temp.fileSystem),
+  );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
@@ -60,28 +72,37 @@ Future<String> createProject(
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   TestFlutterCommandRunner({
     Analytics? analytics,
+    CocoaPods? cocoaPods,
+    DeviceManager? deviceManager,
+    Doctor? doctor,
     FeatureFlags? featureFlags,
+    GradleUtils? gradleUtils,
+    PlistParser? plistParser,
+    TemplateRenderer? templateRenderer,
     ToolContext? toolContext,
   }) : super(
-         analytics: analytics ?? _defaultAnalytics(),
-         featureFlags: featureFlags ?? _defaultFeatureFlags(),
-         toolContext: toolContext ?? DelegatingToolContext(),
+         analytics: analytics ?? _defaultFromContext<Analytics>() ?? const NoOpAnalytics(),
+         androidContext: FakeAndroidContext(
+           gradleUtils: gradleUtils ?? _defaultFromContext<GradleUtils>(),
+         ),
+         cocoaPods: cocoaPods ?? _defaultFromContext<CocoaPods>(),
+         deviceManager: deviceManager ?? _defaultFromContext<DeviceManager>(),
+         doctor: doctor ?? _defaultFromContext<Doctor>(),
+         featureFlags: featureFlags ?? _defaultFromContext<FeatureFlags>(),
+         plistParser: plistParser ?? _defaultFromContext<PlistParser>(),
+         templateRenderer:
+             templateRenderer ??
+             _defaultFromContext<TemplateRenderer>() ??
+             const MustacheTemplateRenderer(),
+         toolContext: toolContext ?? const DelegatingToolContext(),
        );
 
-  static Analytics _defaultAnalytics() {
-    try {
-      return context.get<Analytics>() ?? const NoOpAnalytics();
-    } on UnsupportedError {
-      return const NoOpAnalytics();
+  static T? _defaultFromContext<T>() {
+    if (Zone.current[contextKey] case final AppContext appContext
+        when appContext.runtimeType == AppContext) {
+      return appContext.get<T>();
     }
-  }
-
-  static FeatureFlags? _defaultFeatureFlags() {
-    try {
-      return context.get<FeatureFlags>();
-    } on UnsupportedError {
-      return null;
-    }
+    return null;
   }
 
   @override
@@ -96,14 +117,10 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-          platform: toolContext.platform,
-          fileSystem: toolContext.fs,
-          userMessages: UserMessages(),
-        );
+        final Cache cache = toolContext.cache;
         // For compatibility with tests that set this to a relative path.
         final FileSystem fs = toolContext.fs;
-        Cache.flutterRoot = fs.path.normalize(fs.path.absolute(Cache.flutterRoot!));
+        cache.flutterRoot = fs.path.normalize(fs.path.absolute(cache.flutterRoot));
         return super.runCommand(topLevelResults);
       },
     );

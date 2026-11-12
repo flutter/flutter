@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../image_data.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
 
 void main() {
@@ -365,45 +366,43 @@ void main() {
   });
 
   group('layout', () {
-    testWidgets(
-      'Flings with high velocity should not break the children lower and upper limits',
-      (WidgetTester tester) async {
-        // Regression test for https://github.com/flutter/flutter/issues/112526
-        final controller = FixedExtentScrollController();
-        addTearDown(controller.dispose);
+    testWidgets('Flings with high velocity should not break the children lower and upper limits', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/112526
+      final controller = FixedExtentScrollController();
+      addTearDown(controller.dispose);
 
-        Widget buildFrame() {
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: ListWheelScrollView.useDelegate(
-              physics: const FixedExtentScrollPhysics(),
-              controller: controller,
-              itemExtent: 400.0,
-              onSelectedItemChanged: (_) {},
-              childDelegate: ListWheelChildBuilderDelegate(
-                builder: (BuildContext context, int index) {
-                  if (index < 0 || index > 5) {
-                    return null;
-                  }
-                  return SizedBox(width: 400.0, height: 400.0, child: Text(index.toString()));
-                },
-              ),
+      Widget buildFrame() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView.useDelegate(
+            physics: const FixedExtentScrollPhysics(),
+            controller: controller,
+            itemExtent: 400.0,
+            onSelectedItemChanged: (_) {},
+            childDelegate: ListWheelChildBuilderDelegate(
+              builder: (BuildContext context, int index) {
+                if (index < 0 || index > 5) {
+                  return null;
+                }
+                return SizedBox(width: 400.0, height: 400.0, child: Text(index.toString()));
+              },
             ),
-          );
-        }
+          ),
+        );
+      }
 
-        await tester.pumpWidget(buildFrame());
-        expect(tester.renderObject(find.text('0')).attached, true);
-        expect(tester.renderObject(find.text('1')).attached, true);
-        expect(find.text('2'), findsNothing);
-        expect(controller.selectedItem, 0);
+      await tester.pumpWidget(buildFrame());
+      expect(tester.renderObject(find.text('0')).attached, true);
+      expect(tester.renderObject(find.text('1')).attached, true);
+      expect(find.text('2'), findsNothing);
+      expect(controller.selectedItem, 0);
 
-        // Flings with high velocity and stop at the child boundary.
-        await tester.fling(find.byType(ListWheelScrollView), const Offset(0.0, 40000.0), 8000.0);
-        expect(controller.selectedItem, 0);
-      },
-      variant: TargetPlatformVariant(TargetPlatform.values.toSet()),
-    );
+      // Flings with high velocity and stop at the child boundary.
+      await tester.fling(find.byType(ListWheelScrollView), const Offset(0.0, 40000.0), 8000.0);
+      expect(controller.selectedItem, 0);
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
 
     // Regression test for https://github.com/flutter/flutter/issues/90953
     testWidgets('ListWheelScrollView childDelegate update test 2', (WidgetTester tester) async {
@@ -2061,4 +2060,65 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelViewport)), Size.zero);
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/125997.
+  testWidgets('ListWheelScrollView can resolve images during its first layout', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(imageCache.clear);
+    addTearDown(imageCache.clearLiveImages);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListWheelScrollView.useDelegate(
+          itemExtent: 100.0,
+          // A null childCount makes the viewport apply content dimensions after
+          // it builds the children.
+          childDelegate: ListWheelChildBuilderDelegate(
+            builder: (BuildContext context, int index) =>
+                Image.memory(Uint8List.fromList(kTransparentImage)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Image), findsWidgets);
+    expect(imageCache.liveImageCount, greaterThan(0));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/125997.
+  for (final initialItem in <int>[7, -3]) {
+    testWidgets(
+      'Looping ListWheelScrollView can read selectedItem during its first layout (initialItem: $initialItem)',
+      (WidgetTester tester) async {
+        final controller = FixedExtentScrollController(initialItem: initialItem);
+        addTearDown(controller.dispose);
+        final selectedItems = <int>[];
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListWheelScrollView.useDelegate(
+              controller: controller,
+              itemExtent: 100.0,
+              childDelegate: ListWheelChildLoopingListDelegate(
+                children: List<Widget>.generate(
+                  10,
+                  (int index) => LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      selectedItems.add(controller.selectedItem);
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+        expect(selectedItems, isNotEmpty);
+        expect(selectedItems, everyElement(initialItem));
+        expect(controller.selectedItem, initialItem);
+      },
+    );
+  }
 }

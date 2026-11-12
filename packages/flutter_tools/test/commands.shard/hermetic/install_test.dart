@@ -84,9 +84,9 @@ void main() {
       testDeviceManager.addAttachedDevice(device);
 
       expect(
-        () async => createTestCommandRunner(
-          command,
-        ).run(<String>['install', '--use-application-binary', 'bogus']),
+        () async =>
+            createTestCommandRunner(command)
+                .run(<String>['install', '--use-application-binary', 'bogus']),
         throwsToolExit(message: 'Prebuilt binary bogus does not exist'),
       );
     });
@@ -99,9 +99,8 @@ void main() {
       testDeviceManager.addAttachedDevice(device);
       fileSystem.file('binary').createSync(recursive: true);
 
-      await createTestCommandRunner(
-        command,
-      ).run(<String>['install', '--use-application-binary', 'binary']);
+      await createTestCommandRunner(command)
+          .run(<String>['install', '--use-application-binary', 'binary']);
       expect(logger.statusText, contains('Installing FakeAndroidApk to Android...'));
     });
 

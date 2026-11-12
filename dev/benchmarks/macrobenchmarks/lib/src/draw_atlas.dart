@@ -29,13 +29,12 @@ class _DrawAtlasPageState extends State<DrawAtlasPage> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    loadImage('packages/flutter_gallery_assets/food/butternut_squash_soup.png').then((
-      ui.Image pending,
-    ) {
-      setState(() {
-        image = pending;
-      });
-    });
+    loadImage('packages/flutter_gallery_assets/food/butternut_squash_soup.png')
+        .then((ui.Image pending) {
+          setState(() {
+            image = pending;
+          });
+        });
     controller = AnimationController(vsync: this, duration: const Duration(hours: 1));
     controller.addListener(() {
       setState(() {

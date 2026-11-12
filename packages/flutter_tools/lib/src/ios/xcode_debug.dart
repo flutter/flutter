@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -30,12 +31,10 @@ class XcodeDebug {
   XcodeDebug({
     required Logger logger,
     required ProcessManager processManager,
-    required Xcode xcode,
-    required FileSystem fileSystem,
+    required this._xcode,
+    required this._fileSystem,
   }) : _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _xcode = xcode,
-       _fileSystem = fileSystem;
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final ProcessUtils _processUtils;
   final Logger _logger;
@@ -443,12 +442,14 @@ and ensure "Debug executable" is checked in the "Info" tab.
     required BuildInfo buildInfo,
     String? mainPath,
     required String configurationBuildDir,
+    required ToolContext toolContext,
   }) async {
     await updateGeneratedXcodeProperties(
       project: project,
       buildInfo: buildInfo,
       targetOverride: mainPath,
       configurationBuildDir: configurationBuildDir,
+      toolContext: toolContext,
     );
   }
 }

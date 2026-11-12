@@ -71,20 +71,26 @@ ValidationResult invalidWindowsValidationResult = ValidationResult(
   statusInfo: 'Unable to confirm if installed Windows version is 10 or greater',
 );
 
-ValidationResult ofdFoundRunning =
-    ValidationResult(ValidationType.partial, const <ValidationMessage>[
-      ValidationMessage.hint(
-        'The Topaz OFD Security Module was detected on your machine. '
-        'You may need to disable it to build Flutter applications.',
-      ),
-    ], statusInfo: 'Problem detected with Windows installation');
+ValidationResult ofdFoundRunning = ValidationResult(
+  ValidationType.partial,
+  const <ValidationMessage>[
+    ValidationMessage.hint(
+      'The Topaz OFD Security Module was detected on your machine. '
+      'You may need to disable it to build Flutter applications.',
+    ),
+  ],
+  statusInfo: 'Problem detected with Windows installation',
+);
 
-ValidationResult powershellUnavailableResult =
-    ValidationResult(ValidationType.partial, const <ValidationMessage>[
-      ValidationMessage.hint(
-        'Failed to find ${ProcessLister.powershell} or ${ProcessLister.pwsh} on PATH',
-      ),
-    ], statusInfo: 'Problem detected with Windows installation');
+ValidationResult powershellUnavailableResult = ValidationResult(
+  ValidationType.partial,
+  const <ValidationMessage>[
+    ValidationMessage.hint(
+      'Failed to find ${ProcessLister.powershell} or ${ProcessLister.pwsh} on PATH',
+    ),
+  ],
+  statusInfo: 'Problem detected with Windows installation',
+);
 
 ValidationResult getProcessFailed = ValidationResult(
   ValidationType.partial,

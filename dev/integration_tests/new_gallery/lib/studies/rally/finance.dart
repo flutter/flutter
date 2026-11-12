@@ -208,9 +208,8 @@ FinancialEntityCategoryView buildFinancialEntityFromAccountData(
     suffix: const Icon(Icons.chevron_right, color: Colors.grey),
     title: model.name,
     subtitle: '• • • • • • $shortAccountNumber',
-    semanticsLabel: GalleryLocalizations.of(
-      context,
-    )!.rallyAccountAmount(model.name, shortAccountNumber, amount),
+    semanticsLabel: GalleryLocalizations.of(context)!
+        .rallyAccountAmount(model.name, shortAccountNumber, amount),
     indicatorColor: RallyColors.accountColor(accountDataIndex),
     indicatorFraction: 1,
     amount: amount,
@@ -227,9 +226,8 @@ FinancialEntityCategoryView buildFinancialEntityFromBillData(
     suffix: const Icon(Icons.chevron_right, color: Colors.grey),
     title: model.name,
     subtitle: model.dueDate,
-    semanticsLabel: GalleryLocalizations.of(
-      context,
-    )!.rallyBillAmount(model.name, model.dueDate, amount),
+    semanticsLabel: GalleryLocalizations.of(context)!
+        .rallyBillAmount(model.name, model.dueDate, amount),
     indicatorColor: RallyColors.billColor(billDataIndex),
     indicatorFraction: 1,
     amount: amount,
@@ -248,15 +246,13 @@ FinancialEntityCategoryView buildFinancialEntityFromBudgetData(
   return FinancialEntityCategoryView(
     suffix: Text(
       GalleryLocalizations.of(context)!.rallyFinanceLeft,
-      style: Theme.of(
-        context,
-      ).textTheme.bodyMedium!.copyWith(color: RallyColors.gray60, fontSize: 10),
+      style: Theme.of(context).textTheme.bodyMedium!
+          .copyWith(color: RallyColors.gray60, fontSize: 10),
     ),
     title: model.name,
     subtitle: '$amountUsed / $primaryAmount',
-    semanticsLabel: GalleryLocalizations.of(
-      context,
-    )!.rallyBudgetAmount(model.name, model.amountUsed, model.primaryAmount, amount),
+    semanticsLabel: GalleryLocalizations.of(context)!
+        .rallyBudgetAmount(model.name, model.amountUsed, model.primaryAmount, amount),
     indicatorColor: RallyColors.budgetColor(budgetDataIndex),
     indicatorFraction: model.amountUsed / model.primaryAmount,
     amount: amount,

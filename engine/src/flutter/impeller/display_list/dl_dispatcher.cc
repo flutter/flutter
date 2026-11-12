@@ -993,29 +993,52 @@ void FirstPassDispatcher::save() {
   cull_rect_state_.push_back(cull_rect_state_.back());
 }
 
+namespace {
+void RecordBackdropData(
+    std::unordered_map<int64_t, BackdropData>* backdrop_data,
+    int64_t backdrop_id,
+    const std::shared_ptr<flutter::DlImageFilter>& shared_backdrop,
+    const Rect& layer_coverage) {
+  auto existing = backdrop_data->find(backdrop_id);
+  if (existing == backdrop_data->end()) {
+    (*backdrop_data)[backdrop_id] =
+        BackdropData{.backdrop_count = 1,
+                     .all_filters_equal = true,
+                     .texture_slot = nullptr,
+                     .shared_filter_snapshot = std::nullopt,
+                     .last_backdrop = shared_backdrop,
+                     .coverage_union = layer_coverage};
+  } else {
+    BackdropData& data = existing->second;
+    data.backdrop_count++;
+    if (data.all_filters_equal) {
+      data.all_filters_equal = (*data.last_backdrop == *shared_backdrop);
+      data.last_backdrop = shared_backdrop;
+    }
+    data.coverage_union = data.coverage_union.Union(layer_coverage);
+  }
+}
+}  // namespace
+
 void FirstPassDispatcher::saveLayer(const DlRect& bounds,
                                     const flutter::SaveLayerOptions options,
                                     const flutter::DlImageFilter* backdrop,
                                     std::optional<int64_t> backdrop_id) {
   save();
 
+  const bool has_layer_bounds =
+      !bounds.IsMaximum() &&
+      (!bounds.IsEmpty() || options.bounds_from_caller());
+
   backdrop_count_ += (backdrop == nullptr ? 0 : 1);
   if (backdrop != nullptr && backdrop_id.has_value()) {
-    std::shared_ptr<flutter::DlImageFilter> shared_backdrop =
-        backdrop->shared();
-    std::unordered_map<int64_t, BackdropData>::iterator existing =
-        backdrop_data_.find(backdrop_id.value());
-    if (existing == backdrop_data_.end()) {
-      backdrop_data_[backdrop_id.value()] =
-          BackdropData{.backdrop_count = 1, .last_backdrop = shared_backdrop};
-    } else {
-      BackdropData& data = existing->second;
-      data.backdrop_count++;
-      if (data.all_filters_equal) {
-        data.all_filters_equal = (*data.last_backdrop == *shared_backdrop);
-        data.last_backdrop = shared_backdrop;
-      }
+    Rect layer_coverage = cull_rect_state_.back();
+    if (has_layer_bounds) {
+      layer_coverage =
+          layer_coverage.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
     }
+    RecordBackdropData(&backdrop_data_, backdrop_id.value(), backdrop->shared(),
+                       layer_coverage);
   }
 
   // This dispatcher does not track enough state to accurately compute
@@ -1023,14 +1046,9 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
   auto global_cull_rect = cull_rect_state_.back();
   if (has_image_filter_ || global_cull_rect.IsMaximum()) {
     cull_rect_state_.back() = Rect::MakeMaximum();
-  } else {
-    auto global_save_bounds = bounds.TransformBounds(matrix_);
-    auto new_cull_rect = global_cull_rect.Intersection(global_save_bounds);
-    if (new_cull_rect.has_value()) {
-      cull_rect_state_.back() = new_cull_rect.value();
-    } else {
-      cull_rect_state_.back() = Rect::MakeLTRB(0, 0, 0, 0);
-    }
+  } else if (has_layer_bounds) {
+    cull_rect_state_.back() =
+        global_cull_rect.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
   }
 }
 
@@ -1038,6 +1056,54 @@ void FirstPassDispatcher::restore() {
   matrix_ = stack_.back();
   stack_.pop_back();
   cull_rect_state_.pop_back();
+}
+
+namespace {
+void Clip(std::vector<Rect>& cull_rect_state,
+          const Matrix& matrix,
+          const DlRect& bounds,
+          flutter::DlClipOp clip_op) {
+  if (clip_op == flutter::DlClipOp::kIntersect) {
+    auto global_rect = bounds.TransformBounds(matrix);
+    cull_rect_state.back() =
+        cull_rect_state.back().IntersectionOrEmpty(global_rect);
+  }
+}
+}  // namespace
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipRect(const DlRect& rect,
+                                   flutter::DlClipOp clip_op,
+                                   bool is_aa) {
+  Clip(cull_rect_state_, matrix_, rect, clip_op);
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipOval(const DlRect& bounds,
+                                   flutter::DlClipOp clip_op,
+                                   bool is_aa) {
+  Clip(cull_rect_state_, matrix_, bounds, clip_op);
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipRoundRect(const DlRoundRect& rrect,
+                                        flutter::DlClipOp clip_op,
+                                        bool is_aa) {
+  Clip(cull_rect_state_, matrix_, rrect.GetBounds(), clip_op);
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipPath(const DlPath& path,
+                                   flutter::DlClipOp clip_op,
+                                   bool is_aa) {
+  Clip(cull_rect_state_, matrix_, path.GetBounds(), clip_op);
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                                                flutter::DlClipOp clip_op,
+                                                bool is_aa) {
+  Clip(cull_rect_state_, matrix_, rse.GetBounds(), clip_op);
 }
 
 void FirstPassDispatcher::translate(DlScalar tx, DlScalar ty) {

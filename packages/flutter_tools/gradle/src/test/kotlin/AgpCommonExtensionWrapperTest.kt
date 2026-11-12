@@ -8,6 +8,7 @@ import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.DynamicFeatureExtension
+import com.android.build.api.dsl.ExternalNativeBuild
 import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.Splits
@@ -195,6 +196,20 @@ class AgpCommonExtensionWrapperTest {
     }
 
     @Test
+    fun `externalNativeBuild delegates to application, library, dynamicFeature, and test extensions`() {
+        val mockExternalNativeBuild = mockk<ExternalNativeBuild>(relaxed = true)
+        val appExt = mockk<ApplicationExtension>(relaxed = true) { every { externalNativeBuild } returns mockExternalNativeBuild }
+        val libExt = mockk<LibraryExtension>(relaxed = true) { every { externalNativeBuild } returns mockExternalNativeBuild }
+        val dfExt = mockk<DynamicFeatureExtension>(relaxed = true) { every { externalNativeBuild } returns mockExternalNativeBuild }
+        val testExt = mockk<TestExtension>(relaxed = true) { every { externalNativeBuild } returns mockExternalNativeBuild }
+
+        assertSame(mockExternalNativeBuild, AgpCommonExtensionWrapper(appExt).externalNativeBuild)
+        assertSame(mockExternalNativeBuild, AgpCommonExtensionWrapper(libExt).externalNativeBuild)
+        assertSame(mockExternalNativeBuild, AgpCommonExtensionWrapper(dfExt).externalNativeBuild)
+        assertSame(mockExternalNativeBuild, AgpCommonExtensionWrapper(testExt).externalNativeBuild)
+    }
+
+    @Test
     fun `wrapper throws for an unsupported backing extension type`() {
         val wrapper = AgpCommonExtensionWrapper("not an android extension")
 
@@ -210,5 +225,6 @@ class AgpCommonExtensionWrapperTest {
         assertFailsWith<IllegalArgumentException> { wrapper.ndkVersion = "29.0.0" }
         assertFailsWith<IllegalArgumentException> { wrapper.getDefaultProguardFile("proguard-android.txt") }
         assertFailsWith<IllegalArgumentException> { wrapper.compileOptions {} }
+        assertFailsWith<IllegalArgumentException> { wrapper.externalNativeBuild }
     }
 }

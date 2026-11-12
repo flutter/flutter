@@ -22,8 +22,7 @@ import 'test_page_tester.dart';
 /// close enough to remain inside the test surface for the layouts these
 /// tests use.
 Future<void> _tapOutside(WidgetTester tester, Key regionKey) async {
-  final RenderBox renderBox =
-      tester.renderObject<RenderBox>(find.byKey(regionKey));
+  final RenderBox renderBox = tester.renderObject<RenderBox>(find.byKey(regionKey));
   final Rect rect = renderBox.localToGlobal(Offset.zero) & renderBox.size;
   final Offset tapPoint = rect.bottomRight + const Offset(1, 1);
   final Size surfaceSize = tester.view.physicalSize / tester.view.devicePixelRatio;
@@ -1093,9 +1092,8 @@ void main() {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
                   Navigator.of(tester.element(find.byKey(fabKey))).push(
-                    TestPage<void>(
-                      child: Center(child: tapRegion2),
-                    ).createRoute(tester.element(find.byKey(fabKey))),
+                    TestPage<void>(child: Center(child: tapRegion2))
+                        .createRoute(tester.element(find.byKey(fabKey))),
                   );
                 },
                 child: const SizedBox(width: 56, height: 56),
@@ -1399,5 +1397,41 @@ void main() {
 
     expect(outsideCalls, equals(<String>['region']));
     handle.dispose();
+  });
+
+  testWidgets('TapRegionSurface does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: TapRegionSurface(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TapRegionSurface)), Size.zero);
+  });
+
+  testWidgets('TapRegion does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: TapRegion(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TapRegion)), Size.zero);
+  });
+
+  testWidgets('TextFieldTapRegion does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: TextFieldTapRegion(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextFieldTapRegion)), Size.zero);
   });
 }

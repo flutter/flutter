@@ -631,7 +631,7 @@ TEST_F(FlutterEngineTest, DartEntrypointArguments) {
   engine.embedderAPI.Initialize = MOCK_ENGINE_PROC(
       Initialize, ([&called, &original_init](size_t version, const FlutterRendererConfig* config,
                                              const FlutterProjectArgs* args, void* user_data,
-                                             FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                                             FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         called = true;
         EXPECT_EQ(args->dart_entrypoint_argc, 2);
         NSString* arg1 = [[NSString alloc] initWithCString:args->dart_entrypoint_argv[0]
@@ -951,6 +951,9 @@ TEST_F(FlutterEngineTest, CanGetEngineForId) {
   if (!engineId.has_value()) {
     return;
   }
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+  EXPECT_EQ(engine.engineIdentifier, *engineId);
+  EXPECT_EQ(registrar.engineIdentifier, *engineId);
   EXPECT_EQ(engine, [FlutterEngine engineForIdentifier:*engineId]);
   ShutDownEngine();
 }

@@ -34,9 +34,8 @@ class ExtensionSettingsGroup {
 
 /// A host-side configuration manager that delegates feature flag and option queries to extensions.
 class ExtensionConfiguration {
-  ExtensionConfiguration({required List<ConfigurationExtension> extensions, required Logger logger})
-    : extensions = List<ConfigurationExtension>.unmodifiable(extensions),
-      _logger = logger;
+  ExtensionConfiguration({required List<ConfigurationExtension> extensions, required this._logger})
+    : extensions = List<ConfigurationExtension>.unmodifiable(extensions);
 
   /// The active extension services executing configuration queries.
   final List<ConfigurationExtension> extensions;
@@ -119,10 +118,9 @@ class ExtensionConfiguration {
 class ConfigurationExtensionClient extends ConfigurationExtension {
   ConfigurationExtensionClient(
     this.connection, {
-    required Logger logger,
-    String defaultTitle = 'Tool Extension Configuration',
-  }) : _defaultTitle = defaultTitle,
-       _logger = logger;
+    required this._logger,
+    this._defaultTitle = 'Tool Extension Configuration',
+  });
 
   /// The active extension isolate connection.
   final ExtensionConnection connection;

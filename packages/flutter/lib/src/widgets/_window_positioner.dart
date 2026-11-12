@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
+
 import '_window.dart';
 
 /// Defines how a child window will be placed relative to the anchor rectangle
