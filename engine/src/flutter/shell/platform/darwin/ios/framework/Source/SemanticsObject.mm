@@ -450,7 +450,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (void)replaceChildAtIndex:(NSInteger)index withChild:(SemanticsObject*)child {
   SemanticsObject* oldChild = _children[index];
-  NSUInteger hitTestIndex = [_childrenInHitTestOrder indexOfObjectIdenticalTo:oldChild];
+  NSUInteger hitTestIndex = _childrenInHitTestOrder
+                                ? [_childrenInHitTestOrder indexOfObjectIdenticalTo:oldChild]
+                                : NSNotFound;
   oldChild.parent = nil;
   child.parent = self;
   [_children replaceObjectAtIndex:index withObject:child];
