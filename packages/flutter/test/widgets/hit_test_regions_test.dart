@@ -315,4 +315,157 @@ void main() {
       });
     },
   );
+
+  testWidgets(
+    'deferFirstFrame suppresses the pass until allowFirstFrame lets a frame reach the engine',
+    (WidgetTester tester) async {
+      enablePass(tester);
+      FlutterTimeline.debugCollectionEnabled = true;
+      addTearDown(() {
+        FlutterTimeline.debugReset();
+        FlutterTimeline.debugCollectionEnabled = false;
+      });
+
+      const button = Rect.fromLTWH(20, 30, 80, 40);
+      var deferred = true;
+      RendererBinding.instance.deferFirstFrame();
+      addTearDown(() {
+        if (deferred) {
+          RendererBinding.instance.allowFirstFrame();
+        }
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Positioned.fromRect(
+                rect: const Rect.fromLTWH(0, 0, 500, 500),
+                child: _platformView(1),
+              ),
+              Positioned.fromRect(
+                rect: button,
+                child: const Listener(behavior: HitTestBehavior.opaque),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(RendererBinding.instance.sendFramesToEngine, isFalse);
+      expect(RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions, isNull);
+      expect(FlutterTimeline.debugCollect().getAggregated('HIT TEST REGIONS').count, 0);
+
+      RendererBinding.instance.allowFirstFrame();
+      deferred = false;
+      expect(RendererBinding.instance.sendFramesToEngine, isTrue);
+      expect(RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions, isNull);
+
+      tester.binding.scheduleFrame();
+      await tester.pump();
+      expect(_lastRegions(), <int, Set<Rect>>{
+        1: <Rect>{button},
+      });
+      expect(FlutterTimeline.debugCollect().getAggregated('HIT TEST REGIONS').count, 1);
+    },
+  );
+
+  testWidgets(
+    'flushes hit-test regions after compositing and before semantics and post-frame callbacks',
+    (WidgetTester tester) async {
+      enablePass(tester);
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      FlutterTimeline.debugCollectionEnabled = true;
+      addTearDown(() {
+        FlutterTimeline.debugReset();
+        FlutterTimeline.debugCollectionEnabled = false;
+      });
+
+      final link = LayerLink();
+      const followerOffset = Offset(10, 15);
+      const followerSize = Size(80, 40);
+      final targetOffset = ValueNotifier<Offset>(const Offset(40, 50));
+      addTearDown(targetOffset.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Positioned.fromRect(
+                rect: const Rect.fromLTWH(0, 0, 500, 500),
+                child: _platformView(1),
+              ),
+              ValueListenableBuilder<Offset>(
+                valueListenable: targetOffset,
+                builder: (_, Offset offset, _) => Positioned(
+                  left: offset.dx,
+                  top: offset.dy,
+                  width: followerSize.width,
+                  height: followerSize.height,
+                  child: CompositedTransformTarget(link: link),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                top: 0,
+                width: followerSize.width,
+                height: followerSize.height,
+                child: CompositedTransformFollower(
+                  link: link,
+                  offset: followerOffset,
+                  child: Semantics(
+                    label: 'Action',
+                    button: true,
+                    container: true,
+                    child: const Listener(behavior: HitTestBehavior.opaque),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final events = <String>[];
+      Map<int, Set<Rect>>? regionsDuringSemantics;
+      Map<int, Set<Rect>>? regionsInPostFrame;
+      final SemanticsOwner semanticsOwner =
+          RendererBinding.instance.renderViews.single.owner!.semanticsOwner!;
+      void onSemantics() {
+        events.add('semantics');
+        regionsDuringSemantics = _lastRegions();
+      }
+
+      semanticsOwner.addListener(onSemantics);
+      try {
+        targetOffset.value = const Offset(150, 170);
+        RendererBinding.instance.addPostFrameCallback((_) {
+          events.add('postFrame');
+          regionsInPostFrame = _lastRegions();
+        });
+        FlutterTimeline.debugReset();
+        await tester.pump();
+
+        const tracked = <String>{'COMPOSITING', 'HIT TEST REGIONS', 'SEMANTICS'};
+        final timelineOrder = <String>[
+          for (final TimedBlock block in FlutterTimeline.debugCollect().timedBlocks)
+            if (tracked.contains(block.name)) block.name,
+        ];
+        expect(timelineOrder, <String>['COMPOSITING', 'HIT TEST REGIONS', 'SEMANTICS']);
+        expect(events, <String>['semantics', 'postFrame']);
+
+        final expected = <int, Set<Rect>>{
+          1: <Rect>{(const Offset(150, 170) + followerOffset) & followerSize},
+        };
+        expect(regionsDuringSemantics, expected);
+        expect(regionsInPostFrame, expected);
+      } finally {
+        semanticsOwner.removeListener(onSemantics);
+        semantics.dispose();
+      }
+    },
+  );
 }

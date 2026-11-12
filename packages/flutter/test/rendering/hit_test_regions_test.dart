@@ -129,7 +129,7 @@ void main() {
     binding.renderView.child = null;
   });
 
-  /// Runs a full binding frame, which runs the hit-test region pass after
+  /// Runs a full binding frame, which runs the hit-test region pass during
   /// drawFrame, and returns the payload computed for the root view.
   Float64List? regionsAfterFrame() {
     binding.pumpCompleteFrame();
@@ -411,6 +411,139 @@ void main() {
       },
       skip: kIsWeb, // [intended] On the web, the pass always runs.
     );
+
+    test('skips layout and compositingBits phases, and flushes between composite and semantics in later phases', () {
+      final SemanticsHandle semantics = binding.ensureSemantics();
+      FlutterTimeline.debugCollectionEnabled = true;
+      addTearDown(() {
+        semantics.dispose();
+        FlutterTimeline.debugReset();
+        FlutterTimeline.debugCollectionEnabled = false;
+      });
+
+      const firstClaim = Rect.fromLTWH(10, 20, 100, 50);
+      const secondClaim = Rect.fromLTWH(40, 60, 100, 50);
+      final RenderBox annotatedTarget = _at(
+        firstClaim,
+        RenderSemanticsAnnotations(
+          properties: const SemanticsProperties(label: 'tap', button: true),
+          container: true,
+          textDirection: TextDirection.ltr,
+          child: _hitTarget(),
+        ),
+      );
+      final RenderStack root = _stack(<RenderBox>[
+        _at(const Rect.fromLTWH(0, 0, 400, 400), _platformView(1)),
+        annotatedTarget,
+      ]);
+
+      // layout() defaults to EnginePhase.layout.
+      layout(root);
+      binding.pumpCompleteFrame();
+      expect(binding.rootPipelineOwner.debugLastHitTestRegions, isNull);
+
+      pumpFrame(phase: EnginePhase.compositingBits);
+      binding.pumpCompleteFrame();
+      expect(binding.rootPipelineOwner.debugLastHitTestRegions, isNull);
+
+      List<String> phaseOrder() {
+        const tracked = <String>{'COMPOSITING', 'HIT TEST REGIONS (root)', 'SEMANTICS (root)'};
+        return <String>[
+          for (final TimedBlock block in FlutterTimeline.debugCollect().timedBlocks)
+            if (tracked.contains(block.name)) block.name,
+        ];
+      }
+
+      FlutterTimeline.debugReset();
+      pumpFrame(phase: EnginePhase.flushSemantics);
+      expect(
+        binding.rootPipelineOwner.debugLastHitTestRegions,
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[firstClaim]),
+        ]),
+      );
+      expect(phaseOrder(), <String>['COMPOSITING', 'HIT TEST REGIONS (root)', 'SEMANTICS (root)']);
+
+      (annotatedTarget.parentData! as StackParentData)
+        ..left = secondClaim.left
+        ..top = secondClaim.top;
+      root.markNeedsLayout();
+      FlutterTimeline.debugReset();
+      pumpFrame(phase: EnginePhase.sendSemanticsUpdate);
+      expect(
+        binding.rootPipelineOwner.debugLastHitTestRegions,
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[secondClaim]),
+        ]),
+      );
+      expect(phaseOrder(), <String>['COMPOSITING', 'HIT TEST REGIONS (root)', 'SEMANTICS (root)']);
+    });
+
+    test('rapidly toggling the flag schedules frames only on changes and avoids duplicate empty payloads', () {
+      final updates1 = <Float64List>[];
+      final updates2 = <Float64List>[];
+      const claim1 = Rect.fromLTWH(10, 20, 50, 40);
+      const claim2 = Rect.fromLTWH(30, 40, 70, 60);
+      final PlatformViewRenderBox pv2 = _platformView(2);
+      final RenderStack root2 = _stack(<RenderBox>[
+        _at(const Rect.fromLTWH(0, 0, 300, 300), pv2),
+        _at(claim2, _hitTarget()),
+      ]);
+      final PipelineOwner owner1 = createViewOwner(
+        _stack(<RenderBox>[
+          _at(const Rect.fromLTWH(0, 0, 300, 300), _platformView(1)),
+          _at(claim1, _hitTarget()),
+        ]),
+        updates1,
+        parent: binding.rootPipelineOwner,
+      );
+      final PipelineOwner owner2 = createViewOwner(
+        root2,
+        updates2,
+        parent: binding.rootPipelineOwner,
+      );
+
+      binding.pumpCompleteFrame();
+      final Float64List expected1 = _payload(<(int, List<Rect>)>[
+        (1, <Rect>[claim1]),
+      ]);
+      final Float64List expected2 = _payload(<(int, List<Rect>)>[
+        (2, <Rect>[claim2]),
+      ]);
+      expect(updates1, <Float64List>[expected1]);
+      expect(updates2, <Float64List>[expected2]);
+      expect(binding.hasScheduledFrame, isFalse);
+
+      // Setting the flag to its current value is a no-op.
+      binding.automaticPointerInterceptorsEnabled = true;
+      expect(binding.hasScheduledFrame, isFalse);
+      expect(owner1.debugLastHitTestRegions, expected1);
+      expect(updates1, hasLength(1));
+
+      // Flipping false -> false -> true within the same frame clears once,
+      // schedules a frame, and resets each owner's non-empty tracking so a
+      // platform view detached before the next frame sends no second empty
+      // payload.
+      binding.automaticPointerInterceptorsEnabled = false;
+      binding.automaticPointerInterceptorsEnabled = false;
+      binding.automaticPointerInterceptorsEnabled = true;
+      expect(binding.hasScheduledFrame, isTrue);
+      expect(owner1.debugLastHitTestRegions, isNull);
+      expect(owner2.debugLastHitTestRegions, isNull);
+      expect(updates1, <Float64List>[expected1, Float64List(0)]);
+      expect(updates2, <Float64List>[expected2, Float64List(0)]);
+
+      root2.remove(pv2);
+      binding.phase = EnginePhase.paint;
+      binding.pumpCompleteFrame();
+      expect(updates1, hasLength(2));
+      expect(updates2, hasLength(2));
+
+      binding.phase = EnginePhase.composite;
+      binding.pumpCompleteFrame();
+      expect(updates1, <Float64List>[expected1, Float64List(0), expected1]);
+      expect(updates2, <Float64List>[expected2, Float64List(0)]);
+    });
   });
 
   group('geometry', () {
@@ -495,6 +628,38 @@ void main() {
         ..add(_at(const Rect.fromLTWH(0, 0, 300, 300), _platformView(2)))
         ..add(_at(const Rect.fromLTWH(50, 50, 0, 0), _hitTarget()));
       expect(regionsAfterFrame(), _payload(<(int, List<Rect>)>[(2, <Rect>[])]));
+    });
+
+    test('boxes scaled to zero or only touching a platform view edge claim nothing', () {
+      const pvRect = Rect.fromLTRB(100, 100, 300, 300);
+      final RenderStack root = _stack(<RenderBox>[
+        _at(pvRect, _platformView(1)),
+        // Non-empty boxes over the platform view collapsed by zero-scale transforms.
+        _at(
+          const Rect.fromLTWH(120, 120, 80, 40),
+          RenderTransform(transform: Matrix4.diagonal3Values(0, 1, 1), child: _hitTarget()),
+        ),
+        _at(
+          const Rect.fromLTWH(120, 120, 80, 40),
+          RenderTransform(transform: Matrix4.diagonal3Values(1, 0, 1), child: _hitTarget()),
+        ),
+        // Boxes sharing an exact edge or corner with pvRect, without interior overlap.
+        _at(const Rect.fromLTRB(50, 100, 100, 300), _hitTarget()),
+        _at(const Rect.fromLTRB(100, 50, 300, 100), _hitTarget()),
+        _at(const Rect.fromLTRB(300, 100, 350, 300), _hitTarget()),
+        _at(const Rect.fromLTRB(100, 300, 300, 350), _hitTarget()),
+        _at(const Rect.fromLTRB(300, 300, 350, 350), _hitTarget()),
+      ]);
+      expect(regionsFor(root), _payload(<(int, List<Rect>)>[(1, <Rect>[])]));
+
+      const onePixelOverlap = Rect.fromLTRB(299, 299, 350, 350);
+      root.add(_at(onePixelOverlap, _hitTarget()));
+      expect(
+        regionsAfterFrame(),
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[onePixelOverlap]),
+        ]),
+      );
     });
 
     test('claims are grouped under the platform view painted most recently before them', () {
