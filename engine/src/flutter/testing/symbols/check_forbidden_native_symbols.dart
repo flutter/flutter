@@ -108,7 +108,7 @@ bool checkNoExportedUnwindSymbols({required String nmPath, required String binar
 
   final found = <String>[
     for (final String line in LineSplitter.split(nmResult.stdout as String))
-      if (unwindSymbolPrefixes.any(line.trim().split(' ').last.startsWith)) line,
+      if (unwindSymbolPrefixes.any(line.trim().split(RegExp(r'\s+')).last.startsWith)) line,
   ];
 
   if (found.isNotEmpty) {
@@ -118,7 +118,7 @@ bool checkNoExportedUnwindSymbols({required String nmPath, required String binar
     }
     stderr.writeln(
       "These interpose on the host process's unwinder and break C++ exceptions "
-      'in plugins. Hide them, for example with -Wl,--exclude-libs. '
+      'in plugins. Hide them, for example with -Wl,--exclude-libs. ',
     );
     return false;
   }
