@@ -77,7 +77,27 @@ class FrameService {
   /// Unregisters [window].
   void unregisterWindow(DomWindow window) {
     _registeredWindows.remove(window);
+
+    // If the pending frame was requested on [window], its animation frame
+    // callback may never fire (e.g. a Document Picture-in-Picture window that
+    // is being closed). In that case [_isFrameScheduled] would be stuck in the
+    // `true` state and the app would freeze. Invalidate the pending request and
+    // reschedule it on one of the remaining windows.
+    if (_isFrameScheduled && _scheduledFrameWindow == window) {
+      _isFrameScheduled = false;
+      _scheduledFrameWindow = null;
+      _frameRequestId++;
+      scheduleFrame();
+    }
   }
+
+  /// The window on which the currently pending animation frame was requested.
+  DomWindow? _scheduledFrameWindow;
+
+  /// Incremented every time a pending animation frame request is invalidated,
+  /// so that a stale callback (from a window that was unregistered but not
+  /// closed) does not render an extra frame.
+  int _frameRequestId = 0;
 
   /// The windows currently registered for frame scheduling.
   ///
@@ -118,7 +138,15 @@ class FrameService {
 
     _isFrameScheduled = true;
 
-    _pickWindowForFrame().requestAnimationFrame((JSNumber highResTime) {
+    final DomWindow window = _pickWindowForFrame();
+    final int requestId = _frameRequestId;
+    _scheduledFrameWindow = window;
+    window.requestAnimationFrame((JSNumber highResTime) {
+      if (requestId != _frameRequestId) {
+        // This request was invalidated (and rescheduled on another window) in
+        // [unregisterWindow].
+        return;
+      }
       // Reset immediately for two reasons:
       //
       // * While drawing a frame the framework may attempt to schedule a new
@@ -128,6 +156,7 @@ class FrameService {
       //   safest to reset this value before running any significant amount of
       //   functionality that may throw exceptions, or produce wasm traps.
       _isFrameScheduled = false;
+      _scheduledFrameWindow = null;
 
       if (_isDisposed) {
         // Skip this animation frame because the instance has been disposed, meaning there was a
