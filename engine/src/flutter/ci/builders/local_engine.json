@@ -817,7 +817,8 @@
       "name": "linux/wasm_release",
       "drone_dimensions": [
         "device_type=none",
-        "os=Linux"
+        "os=Linux",
+        "cores=32"
       ],
       "gclient_variables": {
         "download_android_deps": false,
