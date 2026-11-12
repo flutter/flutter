@@ -35,7 +35,6 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -60,7 +59,6 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -104,7 +102,6 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -130,7 +127,6 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -161,7 +157,6 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -185,7 +180,6 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -226,7 +220,6 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -249,7 +242,6 @@
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -279,7 +271,6 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -302,7 +293,6 @@
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -332,7 +322,6 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -355,7 +344,6 @@
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -398,7 +386,6 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -423,7 +410,6 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -454,7 +440,6 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -478,7 +463,6 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -509,7 +493,6 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -533,7 +516,6 @@
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -578,7 +560,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -605,7 +586,6 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -637,7 +617,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -663,7 +642,6 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -695,7 +673,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -720,7 +697,6 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -763,7 +739,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -788,7 +763,6 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -820,7 +794,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -845,7 +818,6 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -877,7 +849,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -902,7 +873,6 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -946,7 +916,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader",
                 "--bazel"
@@ -973,7 +942,6 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--use-glfw-swiftshader",
                     "--bazel"
                 ]
@@ -1006,7 +974,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader",
                 "--bazel"
@@ -1032,7 +999,6 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--use-glfw-swiftshader",
                     "--bazel"
                 ]
@@ -1065,7 +1031,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader",
                 "--bazel"
@@ -1091,7 +1056,6 @@
                     "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--use-glfw-swiftshader",
                     "--bazel"
                 ]

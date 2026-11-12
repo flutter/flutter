@@ -45,7 +45,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/host_debug",
@@ -98,7 +97,6 @@
                 "--prebuilt-dart-sdk",
                 "--thin-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/host_release",

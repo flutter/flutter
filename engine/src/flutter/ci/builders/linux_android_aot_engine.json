@@ -43,7 +43,6 @@
                 "--android-cpu",
                 "arm",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_profile",
@@ -91,7 +90,6 @@
                 "--android-cpu",
                 "arm",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_release",
@@ -140,7 +138,6 @@
                 "--android-cpu",
                 "arm64",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_release_arm64",
@@ -204,7 +201,6 @@
                 "--android-cpu",
                 "arm64",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_profile_arm64",
@@ -253,7 +249,6 @@
                 "--android-cpu",
                 "x64",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_profile_x64",
@@ -302,7 +297,6 @@
                 "--android-cpu",
                 "x64",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_release_x64",
@@ -351,7 +345,6 @@
                 "--android-cpu",
                 "riscv64",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_profile_riscv64",
@@ -400,7 +393,6 @@
                 "--android-cpu",
                 "riscv64",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_release_riscv64",

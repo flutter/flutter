@@ -43,16 +43,16 @@ dart_package_tests(
     # The Dart SDK, as ../../bin/cache/dart-sdk/bin/dart.
     cache = {HOST_DART_SDK + "//:dart": "dart-sdk"},
     # The fixture trees the tests read; the repository root's DEPS, by which
-    # tool_integration_test_durations_test finds the root, with the durations
-    # file it checks against the integration shard's test files.
+    # tool_test_durations_test finds the root, with the durations file it
+    # checks against the three tool shards' test files.
     data = glob([
         "test/analyze-snippet-code-test-dart-ui/**",
         "test/analyze-snippet-code-test-input/**",
         "test/analyze-test-input/**",
     ]) + [
-        "tool_integration_test_durations.json",
+        "tool_test_durations.json",
         "//:DEPS",
-        "//packages/flutter_tools:integration_shard_test_files",
+        "//packages/flutter_tools:durations_shard_test_files",
     ],
     package = "tests_on_bots",
     packages = {"//dev/devicelab:sources": "flutter_devicelab"},

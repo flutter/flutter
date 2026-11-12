@@ -45,7 +45,6 @@
                 "--android-cpu=arm",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug",
@@ -95,7 +94,6 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug_arm64",
@@ -142,7 +140,6 @@
                 "--android-cpu=x64",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug_x64",
@@ -189,7 +186,6 @@
                 "--android-cpu=riscv64",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug_riscv64",

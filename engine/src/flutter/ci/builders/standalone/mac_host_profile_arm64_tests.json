@@ -21,7 +21,6 @@
         "--prebuilt-dart-sdk",
         "--build-embedder-examples",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--bazel"
     ],

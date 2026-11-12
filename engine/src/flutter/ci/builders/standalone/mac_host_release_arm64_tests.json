@@ -22,7 +22,6 @@
         "--build-embedder-examples",
         "--use-glfw-swiftshader",
         "--no-rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--bazel"
     ],

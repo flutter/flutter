@@ -31,7 +31,6 @@
                 "--simulator",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -51,7 +50,6 @@
                     "--simulator",
                     "--no-lto",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -82,7 +80,6 @@
                 "--simulator-cpu=arm64",
                 "--no-lto",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -103,7 +100,6 @@
                     "--simulator-cpu=arm64",
                     "--no-lto",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -131,7 +127,6 @@
                 "--runtime-mode",
                 "debug",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -153,7 +148,6 @@
                     "--runtime-mode",
                     "debug",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -181,7 +175,6 @@
                 "--runtime-mode",
                 "profile",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -203,7 +196,6 @@
                     "--runtime-mode",
                     "profile",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -231,7 +223,6 @@
                 "--runtime-mode",
                 "release",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -253,7 +244,6 @@
                     "--runtime-mode",
                     "release",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -284,7 +274,6 @@
                 "--no-lto",
                 "--darwin-extension-safe",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -305,7 +294,6 @@
                     "--no-lto",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -337,7 +325,6 @@
                 "--no-lto",
                 "--darwin-extension-safe",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -359,7 +346,6 @@
                     "--no-lto",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -388,7 +374,6 @@
                 "debug",
                 "--darwin-extension-safe",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -411,7 +396,6 @@
                     "debug",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -440,7 +424,6 @@
                 "profile",
                 "--darwin-extension-safe",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -463,7 +446,6 @@
                     "profile",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },
@@ -492,7 +474,6 @@
                 "release",
                 "--darwin-extension-safe",
                 "--no-rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--bazel"
             ],
@@ -515,7 +496,6 @@
                     "release",
                     "--darwin-extension-safe",
                     "--no-rbe",
-                    "--no-goma",
                     "--bazel"
                 ]
             },

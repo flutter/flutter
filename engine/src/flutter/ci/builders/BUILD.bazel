@@ -1225,7 +1225,7 @@ install(
     trees = everything_trees(),
 )
 
-# ci/host_debug_arm64_tests's tests: run_tests.py --type dart,dart-host,engine,font-subset.
+# ci/host_debug_arm64_tests's tests: run_tests.py --type engine,dart,dart-host,font-subset.
 test_suite(
     name = "host_debug_arm64_tests_tests",
     tags = ["manual"],
@@ -1287,7 +1287,7 @@ install(
     trees = everything_trees(),
 )
 
-# ci/host_debug_unopt_arm64's tests: run_tests.py --type dart,dart-host,engine,impeller-golden.
+# ci/host_debug_unopt_arm64's tests: run_tests.py --type engine,dart,dart-host,impeller-golden.
 # ci/host_debug_unopt_arm64's steps that run a script of the checkout, as Bazel tests: //engine/src/flutter:gn_test.
 test_suite(
     name = "host_debug_unopt_arm64_tests",
@@ -1605,7 +1605,7 @@ install(
     trees = everything_trees(),
 )
 
-# ci/host_profile_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
+# ci/host_profile_arm64_tests's tests: run_tests.py --type engine,dart,dart-host.
 test_suite(
     name = "host_profile_arm64_tests_tests",
     tags = ["manual"],
@@ -1688,7 +1688,7 @@ install(
     trees = everything_trees(),
 )
 
-# ci/host_release_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
+# ci/host_release_arm64_tests's tests: run_tests.py --type engine,dart,dart-host.
 test_suite(
     name = "host_release_arm64_tests_tests",
     tags = ["manual"],

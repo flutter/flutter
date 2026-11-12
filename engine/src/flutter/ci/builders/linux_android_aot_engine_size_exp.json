@@ -44,7 +44,6 @@
                 "arm64",
                 "--no-dart-secure-socket",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_release_arm64_size_exp",
@@ -99,7 +98,6 @@
                 "--no-lto",
                 "--no-dart-secure-socket",
                 "--no-rbe",
-                "--no-goma",
                 "--bazel"
             ],
             "name": "ci/android_debug_arm64_size_exp",

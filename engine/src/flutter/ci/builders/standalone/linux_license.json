@@ -16,7 +16,6 @@
         "release",
         "--no-lto",
         "--no-rbe",
-        "--no-goma",
         "--enable-minimal-linux",
         "--bazel"
     ],
