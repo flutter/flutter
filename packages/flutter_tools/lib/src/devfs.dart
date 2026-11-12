@@ -501,6 +501,7 @@ class DevFS {
     r'^(?:FileSystemException|PathAccessException|PathExistsException|PathNotFoundException):',
   );
   static final _newlinePattern = RegExp(r'\r?\n');
+  static final _stackTraceStartPattern = RegExp(r'\r?\n#0');
 
   static String? _extractTargetFileSystemError(vm_service.RPCError rpcException) {
     if (rpcException.code != vm_service.RPCErrorKind.kInternalError.code) {
@@ -510,7 +511,7 @@ class DevFS {
     if (details == null) {
       return null;
     }
-    String errorText = details.split('\n#0').first.trim();
+    String errorText = details.split(_stackTraceStartPattern).first.trim();
     if (errorText.startsWith(_kCreateDevFSUnexpectedPrefix)) {
       errorText = errorText.substring(_kCreateDevFSUnexpectedPrefix.length).trim();
     }
