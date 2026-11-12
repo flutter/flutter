@@ -73,12 +73,14 @@ extern const intptr_t kPlatformStrongDillSize;
 // embedder/BUILD.gn variable impeller_supports_rendering is disabled.
 #ifdef SHELL_ENABLE_GL
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
+#include "flutter/shell/platform/embedder/embedder_surface_gl_skia.h"  // nogncheck
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
+#if IMPELLER_ENABLE_OPENGLES
 #include "flutter/shell/platform/embedder/embedder_surface_gl_impeller.h"  // nogncheck
-#include "flutter/shell/platform/embedder/embedder_surface_gl_skia.h"  // nogncheck
+#endif
 #include "impeller/core/texture.h"                        // nogncheck
 #include "impeller/renderer/backend/gles/context_gles.h"  // nogncheck
 #include "impeller/renderer/backend/gles/texture_gles.h"  // nogncheck
@@ -317,6 +319,13 @@ InferOpenGLPlatformViewCreationCallback(
   if (config->type != kOpenGL) {
     return nullptr;
   }
+#if !(IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_OPENGLES)
+  if (enable_impeller) {
+    FML_LOG(ERROR)
+        << "This engine was built without the Impeller GLES backend.";
+    return nullptr;
+  }
+#endif
 
   auto gl_make_current = [ptr = config->open_gl.make_current,
                           user_data]() -> bool { return ptr(user_data); };
@@ -483,12 +492,11 @@ InferOpenGLPlatformViewCreationCallback(
   };
 
   return fml::MakeCopyable(
-      [gl_dispatch_table, fbo_reset_after_present, platform_dispatch_table,
-       enable_impeller, impeller_flags,
-       external_view_embedder =
-           std::move(external_view_embedder)](flutter::Shell& shell) mutable {
+      [=, external_view_embedder = std::move(external_view_embedder)](
+          flutter::Shell& shell) mutable {
         std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
             std::move(external_view_embedder);
+#if IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_OPENGLES
         if (enable_impeller) {
           return std::make_unique<flutter::PlatformViewEmbedder>(
               shell,                   // delegate
@@ -501,6 +509,7 @@ InferOpenGLPlatformViewCreationCallback(
               view_embedder             // external view embedder
           );
         }
+#endif
         return std::make_unique<flutter::PlatformViewEmbedder>(
             shell,                   // delegate
             shell.GetTaskRunners(),  // task runners

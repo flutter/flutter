@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <optional>
 
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/unique_fd.h"
@@ -40,7 +41,7 @@ class Switches {
   bool json_format = false;
   SourceLanguage source_language = SourceLanguage::kUnknown;
   uint32_t gles_language_version = 0;
-  uint32_t gles_uniform_vector_limit = 0;
+  std::optional<uint32_t> gles_uniform_vector_limit = 0;
   std::string metal_version = "";
   std::string entry_point = "";
   std::string entry_point_prefix = "";
