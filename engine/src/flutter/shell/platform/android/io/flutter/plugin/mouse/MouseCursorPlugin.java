@@ -34,48 +34,48 @@ public class MouseCursorPlugin {
    * <p>This method guarantees to return a non-null object.
    */
   private PointerIcon resolveSystemCursor(@NonNull String kind) {
-      // Initialize the map when first used, because the map can grow big in the future (~70)
-      // and most mobile devices will not use them.
-      MouseCursorPlugin.systemCursorConstants =
-          new HashMap<String, Integer>() {
-//            private static final long serialVersionUID = 1L;
+    // Initialize the map when first used, because the map can grow big in the future (~70)
+    // and most mobile devices will not use them.
+    MouseCursorPlugin.systemCursorConstants =
+        new HashMap<String, Integer>() {
+          //            private static final long serialVersionUID = 1L;
 
-            {
-              put("alias", PointerIcon.TYPE_ALIAS);
-              put("allScroll", PointerIcon.TYPE_ALL_SCROLL);
-              put("basic", PointerIcon.TYPE_ARROW);
-              put("cell", PointerIcon.TYPE_CELL);
-              put("click", PointerIcon.TYPE_HAND);
-              put("contextMenu", PointerIcon.TYPE_CONTEXT_MENU);
-              put("copy", PointerIcon.TYPE_COPY);
-              put("forbidden", PointerIcon.TYPE_NO_DROP);
-              put("grab", PointerIcon.TYPE_GRAB);
-              put("grabbing", PointerIcon.TYPE_GRABBING);
-              put("help", PointerIcon.TYPE_HELP);
-              put("move", PointerIcon.TYPE_ALL_SCROLL);
-              put("none", PointerIcon.TYPE_NULL);
-              put("noDrop", PointerIcon.TYPE_NO_DROP);
-              put("precise", PointerIcon.TYPE_CROSSHAIR);
-              put("text", PointerIcon.TYPE_TEXT);
-              put("resizeColumn", PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW);
-              put("resizeDown", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
-              put("resizeUpLeft", PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW);
-              put("resizeDownRight", PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW);
-              put("resizeLeft", PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW);
-              put("resizeLeftRight", PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW);
-              put("resizeRight", PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW);
-              put("resizeRow", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
-              put("resizeUp", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
-              put("resizeUpDown", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
-              put("resizeUpRight", PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW);
-              put("resizeUpLeftDownRight", PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW);
-              put("resizeUpRightDownLeft", PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW);
-              put("verticalText", PointerIcon.TYPE_VERTICAL_TEXT);
-              put("wait", PointerIcon.TYPE_WAIT);
-              put("zoomIn", PointerIcon.TYPE_ZOOM_IN);
-              put("zoomOut", PointerIcon.TYPE_ZOOM_OUT);
-            }
-          };
+          {
+            put("alias", PointerIcon.TYPE_ALIAS);
+            put("allScroll", PointerIcon.TYPE_ALL_SCROLL);
+            put("basic", PointerIcon.TYPE_ARROW);
+            put("cell", PointerIcon.TYPE_CELL);
+            put("click", PointerIcon.TYPE_HAND);
+            put("contextMenu", PointerIcon.TYPE_CONTEXT_MENU);
+            put("copy", PointerIcon.TYPE_COPY);
+            put("forbidden", PointerIcon.TYPE_NO_DROP);
+            put("grab", PointerIcon.TYPE_GRAB);
+            put("grabbing", PointerIcon.TYPE_GRABBING);
+            put("help", PointerIcon.TYPE_HELP);
+            put("move", PointerIcon.TYPE_ALL_SCROLL);
+            put("none", PointerIcon.TYPE_NULL);
+            put("noDrop", PointerIcon.TYPE_NO_DROP);
+            put("precise", PointerIcon.TYPE_CROSSHAIR);
+            put("text", PointerIcon.TYPE_TEXT);
+            put("resizeColumn", PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW);
+            put("resizeDown", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
+            put("resizeUpLeft", PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW);
+            put("resizeDownRight", PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW);
+            put("resizeLeft", PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW);
+            put("resizeLeftRight", PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW);
+            put("resizeRight", PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW);
+            put("resizeRow", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
+            put("resizeUp", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
+            put("resizeUpDown", PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW);
+            put("resizeUpRight", PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW);
+            put("resizeUpLeftDownRight", PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW);
+            put("resizeUpRightDownLeft", PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW);
+            put("verticalText", PointerIcon.TYPE_VERTICAL_TEXT);
+            put("wait", PointerIcon.TYPE_WAIT);
+            put("zoomIn", PointerIcon.TYPE_ZOOM_IN);
+            put("zoomOut", PointerIcon.TYPE_ZOOM_OUT);
+          }
+        };
 
     final int cursorConstant =
         MouseCursorPlugin.systemCursorConstants.getOrDefault(kind, PointerIcon.TYPE_ARROW);
