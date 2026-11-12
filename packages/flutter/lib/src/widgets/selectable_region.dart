@@ -1625,13 +1625,19 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   bool? _adjustingSelectionEnd;
-  bool _determineIsAdjustingSelectionEnd(bool forward) {
+
+  // Returns null if it cannot be determined because a selection edge has no
+  // location, for example when it is scrolled out of view.
+  bool? _determineIsAdjustingSelectionEnd(bool forward) {
     if (_adjustingSelectionEnd != null) {
-      return _adjustingSelectionEnd!;
+      return _adjustingSelectionEnd;
+    }
+    final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
+    final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
+    if (start == null || end == null) {
+      return null;
     }
     final bool isReversed;
-    final SelectionPoint start = _selectionDelegate.value.startSelectionPoint!;
-    final SelectionPoint end = _selectionDelegate.value.endSelectionPoint!;
     if (start.localPosition.dy > end.localPosition.dy) {
       isReversed = true;
     } else if (start.localPosition.dy < end.localPosition.dy) {
@@ -1648,12 +1654,12 @@ class SelectableRegionState extends State<SelectableRegion>
     if (!_selectionDelegate.value.hasSelection) {
       return;
     }
+    final bool? isEnd = _determineIsAdjustingSelectionEnd(forward);
+    if (isEnd == null) {
+      return;
+    }
     _selectable?.dispatchSelectionEvent(
-      GranularlyExtendSelectionEvent(
-        forward: forward,
-        isEnd: _determineIsAdjustingSelectionEnd(forward),
-        granularity: granularity,
-      ),
+      GranularlyExtendSelectionEvent(forward: forward, isEnd: isEnd, granularity: granularity),
     );
     _updateSelectedContentIfNeeded();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
@@ -1666,18 +1672,24 @@ class SelectableRegionState extends State<SelectableRegion>
     if (!_selectionDelegate.value.hasSelection) {
       return;
     }
-    final bool adjustingSelectionExtend = _determineIsAdjustingSelectionEnd(forward);
-    final SelectionPoint baseLinePoint = adjustingSelectionExtend
-        ? _selectionDelegate.value.endSelectionPoint!
-        : _selectionDelegate.value.startSelectionPoint!;
-    _directionalHorizontalBaseline ??= baseLinePoint.localPosition.dx;
+    final bool? adjustingSelectionExtend = _determineIsAdjustingSelectionEnd(forward);
+    if (adjustingSelectionExtend == null) {
+      return;
+    }
+    final SelectionPoint? baseLinePoint = adjustingSelectionExtend
+        ? _selectionDelegate.value.endSelectionPoint
+        : _selectionDelegate.value.startSelectionPoint;
+    _directionalHorizontalBaseline ??= baseLinePoint?.localPosition.dx;
+    if (_directionalHorizontalBaseline == null) {
+      return;
+    }
     final Offset globalSelectionPointOffset = MatrixUtils.transformPoint(
       context.findRenderObject()!.getTransformTo(null),
       Offset(_directionalHorizontalBaseline!, 0),
     );
     _selectable?.dispatchSelectionEvent(
       DirectionallyExtendSelectionEvent(
-        isEnd: _adjustingSelectionEnd!,
+        isEnd: adjustingSelectionExtend,
         direction: forward
             ? SelectionExtendDirection.nextLine
             : SelectionExtendDirection.previousLine,
