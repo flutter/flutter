@@ -83,9 +83,14 @@ include(flutter/generated_plugins.cmake)
 # By default, "installing" just makes a relocatable bundle in the build
 # directory.
 set(BUILD_BUNDLE_DIR "${PROJECT_BINARY_DIR}/bundle")
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
-endif()
+# Always set the install prefix to the bundle directory. Only setting it
+# when the prefix was initialized to its default value is not enough:
+# if the first configure fails (e.g. because a system dependency is
+# missing), CMake already caches the prefix as the default (/usr/local)
+# and the flag is false on the next configure, so a later successful
+# build tries to install into /usr/local and fails with
+# "Permission denied". See https://github.com/flutter/flutter/issues/115376.
+set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
 
 # Start with a clean build bundle directory every time.
 install(CODE "
