@@ -666,7 +666,6 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     }
   }
 
-
   /// Replaces the current canvas with a new one of [size] and attempts to
   /// create a fresh WebGL context for it, falling back to software rendering
   /// if that fails.
