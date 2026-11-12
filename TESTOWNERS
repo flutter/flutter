@@ -374,6 +374,7 @@
 # coverage @christopherfujino @flutter/infra
 # customer_testing @justinmc @flutter/framework
 # customer_testing_devtools @justinmc @flutter/framework
+# customer_testing_flame @justinmc @flutter/framework
 # docs @justinmc @flutter/framework
 # snippets @justinmc @flutter/framework
 # flutter_packaging @christopherfujino @flutter/infra
