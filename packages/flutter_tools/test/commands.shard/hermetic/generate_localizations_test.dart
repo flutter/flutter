@@ -561,6 +561,31 @@ format: false
     );
   });
 
+  testWithoutContext('use-explicit-plural-values is forwarded from the command line', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "itemCount": "{count,plural, =1{exactly one} one{{count} item} other{{count} items}}",
+  "@itemCount": {
+    "description": "Sample description"
+  }
+}''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+    final command = GenerateLocalizationsCommand(toolContext: toolContext);
+    await createTestCommandRunner(command)
+        .run(<String>['gen-l10n', '--use-explicit-plural-values']);
+
+    final File outputFile = fileSystem.file(
+      fileSystem.path.join('lib', 'l10n', 'app_localizations_en.dart'),
+    );
+    expect(outputFile.existsSync(), isTrue);
+    final String content = outputFile.readAsStringSync();
+    expect(content, contains('count == 1'));
+    expect(content, contains(r"one: '$count item',"));
+  });
+
   testWithoutContext('throw when generate: false when run with l10n.yaml', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
