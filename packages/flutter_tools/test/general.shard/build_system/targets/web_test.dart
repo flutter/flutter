@@ -3391,7 +3391,7 @@ _flutter.loader.load({
   );
 
   test(
-    'WebReleaseBundle includes templated index.html and flutter_bootstrap.js in inputs and outputs only when webContentHash is true',
+    'WebReleaseBundle includes templated index.html and flutter_bootstrap.js in outputs for all builds',
     () => testbed.run(() async {
       final hashedBundle = WebReleaseBundle(
         const <WebCompilerConfig>[JsCompilerConfig(webContentHash: true)],
@@ -3434,8 +3434,8 @@ _flutter.loader.load({
           .toSet();
       expect(unhashedInputBasenames, isNot(contains('index.html')));
       expect(unhashedInputBasenames, isNot(contains('flutter_bootstrap.js')));
-      expect(unhashedOutputBasenames, isNot(contains('index.html')));
-      expect(unhashedOutputBasenames, isNot(contains('flutter_bootstrap.js')));
+      expect(unhashedOutputBasenames, contains('index.html'));
+      expect(unhashedOutputBasenames, contains('flutter_bootstrap.js'));
     }),
   );
 
