@@ -48,10 +48,7 @@ void main() async {
   }
 
   // Create a client.
-  final skiaGoldClient = SkiaGoldClient(
-    engine.flutterDir,
-    goldctlTimeoutPolicy: const GoldctlNoTimeout(),
-  );
+  final skiaGoldClient = SkiaGoldClient(engine.flutterDir);
 
   // Authenticate the client.
   await skiaGoldClient.auth();

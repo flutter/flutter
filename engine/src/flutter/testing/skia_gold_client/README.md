@@ -21,10 +21,7 @@ void main() async {
   // Create a temporary working directory.
   final io.Directory tmpDirectory = io.Directory.systemTemp.createTempSync('skia_gold_wd');
   try {
-    final SkiaGoldClient client = SkiaGoldClient(
-      tmpDirectory,
-      goldctlTimeoutPolicy: const GoldctlNoTimeout(),
-    );
+    final SkiaGoldClient client = SkiaGoldClient(tmpDirectory);
     await client.auth();
     // ...
   } finally {

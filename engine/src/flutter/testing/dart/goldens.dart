@@ -38,12 +38,7 @@ class ImageComparer {
       'impeller_backend': impellerBackend ?? 'none',
     };
     final SkiaGoldClient client = SkiaGoldClient.isAvailable() && _useSkiaGold
-        ? SkiaGoldClient(
-            workDirectory,
-            dimensions: dimensions,
-            verbose: verbose,
-            goldctlTimeoutPolicy: const GoldctlNoTimeout(),
-          )
+        ? SkiaGoldClient(workDirectory, dimensions: dimensions, verbose: verbose)
         : _FakeSkiaGoldClient(workDirectory, dimensions, verbose: verbose);
 
     await client.auth();

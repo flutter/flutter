@@ -52,7 +52,7 @@ void main() {
     Map<String, String>? dimensions,
     String? prefix,
     bool verbose = false,
-    GoldctlTimeoutPolicy goldctlTimeoutPolicy = const GoldctlNoTimeout(),
+    GoldctlTimeoutPolicy? goldctlTimeoutPolicy,
     io.ProcessResult Function(FakeCommandLogEntry entry) onRun = _runUnhandled,
     io.Process Function(FakeCommandLogEntry entry) onStart = _startUnhandled,
   }) {
@@ -667,8 +667,8 @@ void main() {
     }
   });
 
-  group('with GoldctlRetryOnTimeout', () {
-    const retryOnTimeout = GoldctlRetryOnTimeout(
+  group('with goldctlTimeoutPolicy', () {
+    const GoldctlTimeoutPolicy timeoutPolicy = (
       timeout: Duration(milliseconds: 10),
       maxAttempts: 2,
     );
@@ -688,7 +688,7 @@ void main() {
         final SkiaGoldClient client = createClient(
           fixture,
           environment: postsubmitEnv,
-          goldctlTimeoutPolicy: retryOnTimeout,
+          goldctlTimeoutPolicy: timeoutPolicy,
           onRun: runGit,
           onStart: (FakeCommandLogEntry entry) {
             if (entry.command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
@@ -723,7 +723,7 @@ void main() {
         final SkiaGoldClient client = createClient(
           fixture,
           environment: postsubmitEnv,
-          goldctlTimeoutPolicy: retryOnTimeout,
+          goldctlTimeoutPolicy: timeoutPolicy,
           onRun: runGit,
           onStart: (FakeCommandLogEntry entry) {
             if (entry.command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
@@ -771,7 +771,7 @@ void main() {
         final SkiaGoldClient client = createClient(
           fixture,
           environment: postsubmitEnv,
-          goldctlTimeoutPolicy: retryOnTimeout,
+          goldctlTimeoutPolicy: timeoutPolicy,
           onRun: runGit,
           onStart: (FakeCommandLogEntry entry) {
             if (entry.command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {

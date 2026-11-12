@@ -110,13 +110,7 @@ class SkiaGoldHarvester implements Harvester {
     StringSink stderr,
     io.Directory workDirectory,
   ) async {
-    // Harvesting runs every `goldctl imgtest add` concurrently, so a slow
-    // command is expected and shouldn't be killed.
-    final client = SkiaGoldClient(
-      workDirectory,
-      dimensions: digests.dimensions,
-      goldctlTimeoutPolicy: const GoldctlNoTimeout(),
-    );
+    final client = SkiaGoldClient(workDirectory, dimensions: digests.dimensions);
     return SkiaGoldHarvester._init(digests, stderr, workDirectory, client);
   }
 
