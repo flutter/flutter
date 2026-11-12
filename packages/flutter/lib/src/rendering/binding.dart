@@ -746,6 +746,8 @@ mixin RendererBinding
       for (final RenderView renderView in renderViews) {
         renderView.compositeFrame(); // this sends the bits to the GPU
       }
+      // Runs after compositeFrame() because render objects such as
+      // RenderFollowerLayer learn their final paint transform while building the scene.
       if (shouldFlushHitTestRegions) {
         rootPipelineOwner.flushHitTestRegions();
       }

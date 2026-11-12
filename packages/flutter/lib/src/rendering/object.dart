@@ -998,7 +998,12 @@ class _LocalSemanticsHandle implements SemanticsHandle {
 /// 3. [flushPaint] visits any render objects that need to paint. During this
 ///    phase, render objects get a chance to record painting commands into
 ///    [PictureLayer]s and construct other composited [Layer]s.
-/// 4. Finally, if semantics are enabled, [flushSemantics] will compile the
+/// 4. After the composited layer tree has been sent to the engine (see
+///    [RenderView.compositeFrame]), if
+///    [RendererBinding.automaticPointerInterceptorsEnabled] is enabled on a
+///    supported platform, [flushHitTestRegions] computes and reports the
+///    hit-test regions of Flutter content overlapping platform views.
+/// 5. Finally, if semantics are enabled, [flushSemantics] will compile the
 ///    semantics for the render objects. This semantic information is used by
 ///    assistive technology to improve the accessibility of the render tree.
 ///
@@ -1070,17 +1075,19 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// platform views attached to this pipeline owner.
   ///
   /// While a platform view with a non-empty size is attached, this is called on
-  /// every
-  /// [flushHitTestRegions] with the latest payload (even if it is unchanged).
-  /// The payload is a flat list of groups, one per platform view in paint
-  /// order, each encoded as the platform view ID, the number of rectangles
-  /// `n`, and then `n` rectangles as left, top, right, bottom values in the
-  /// root render object's coordinate space (physical pixels for a
+  /// every [flushHitTestRegions] with the latest payload (even if it is
+  /// unchanged). The payload is a flat list of groups, one per platform view in
+  /// paint order, each encoded as the platform view ID, the number of
+  /// rectangles `n`, and then `n` rectangles as left, top, right, bottom values
+  /// in the root render object's coordinate space (physical pixels for a
   /// [RenderView]).
   ///
   /// An empty list means that any previously reported regions should be
   /// discarded. It is sent once when the last platform view goes away, and by
   /// [clearHitTestRegions].
+  ///
+  /// This callback is part of the experimental hit-test region pass (see
+  /// [RendererBinding.automaticPointerInterceptorsEnabled]).
   final ValueSetter<Float64List>? onHitTestRegionsUpdate;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
@@ -1805,6 +1812,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// Unlike [flushHitTestRegions], this always sends the empty list, even if no
   /// regions were reported before, so that turning the feature off is
   /// guaranteed to reset the engine's state.
+  ///
+  /// This method is part of the experimental hit-test region pass (see
+  /// [RendererBinding.automaticPointerInterceptorsEnabled]).
   void clearHitTestRegions() {
     _lastHitTestRegions = null;
     _sentNonEmptyHitTestRegions = false;
@@ -1957,6 +1967,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     assert(debugMaybeDispatchDisposed(this));
     _semanticsOwner?.dispose();
     _semanticsOwner = null;
+    _lastHitTestRegions = null;
+    _sentNonEmptyHitTestRegions = false;
     _nodesNeedingLayout.clear();
     _nodesNeedingCompositingBitsUpdate.clear();
     _nodesNeedingPaint.clear();

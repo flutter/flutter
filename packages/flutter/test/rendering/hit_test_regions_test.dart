@@ -138,7 +138,7 @@ void main() {
 
   Float64List? regionsFor(RenderBox root) {
     layout(root, phase: EnginePhase.composite);
-    return regionsAfterFrame();
+    return binding.rootPipelineOwner.debugLastHitTestRegions;
   }
 
   /// Creates a pipeline owner for a view showing [child] that records every
@@ -159,7 +159,9 @@ void main() {
     view.prepareInitialFrame();
     view.child = child;
     addTearDown(() {
+      view.child = null;
       owner.rootNode = null;
+      view.dispose();
       parent?.dropChild(owner);
       owner.dispose();
     });

@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 // These tests drive the hit-test region pass through real widgets (routes,
-// showGeneralDialog and its barrier) under the flutter_test binding. The
-// geometry, claim rules and bookkeeping are covered in
+// showGeneralDialog and its barrier, overlays, and followers) and verify
+// AutomatedTestWidgetsFlutterBinding frame-phase and deferFirstFrame
+// integration. The geometry, claim rules and bookkeeping are covered in
 // test/rendering/hit_test_regions_test.dart.
 
 import 'package:flutter/foundation.dart';
@@ -26,13 +27,13 @@ const double _devicePixelRatio = 2.0;
 /// built from several nested boxes that each claim the same rect.
 Map<int, Set<Rect>> _lastRegions() {
   final Float64List payload = RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions!;
-  double at(int i) => payload[i] / _devicePixelRatio;
+  double logicalAt(int i) => payload[i] / _devicePixelRatio;
   final regions = <int, Set<Rect>>{};
   for (var i = 0; i < payload.length;) {
     final Set<Rect> rects = regions[payload[i].toInt()] = <Rect>{};
     final int end = i + 2 + 4 * payload[i + 1].toInt();
     for (i += 2; i < end; i += 4) {
-      rects.add(Rect.fromLTRB(at(i), at(i + 1), at(i + 2), at(i + 3)));
+      rects.add(Rect.fromLTRB(logicalAt(i), logicalAt(i + 1), logicalAt(i + 2), logicalAt(i + 3)));
     }
   }
   return regions;
@@ -54,6 +55,40 @@ Widget _app(Widget home) {
       pageBuilder: (BuildContext context, _, _) => builder(context),
     ),
     home: home,
+  );
+}
+
+Widget _followerOverPlatformView({
+  required LayerLink link,
+  required ValueListenable<Offset> targetOffset,
+  required Offset followerOffset,
+  required Size followerSize,
+  Widget child = const Listener(behavior: HitTestBehavior.opaque),
+}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Stack(
+      children: <Widget>[
+        Positioned.fromRect(rect: const Rect.fromLTWH(0, 0, 500, 500), child: _platformView(1)),
+        ValueListenableBuilder<Offset>(
+          valueListenable: targetOffset,
+          builder: (_, Offset offset, _) => Positioned(
+            left: offset.dx,
+            top: offset.dy,
+            width: followerSize.width,
+            height: followerSize.height,
+            child: CompositedTransformTarget(link: link),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          top: 0,
+          width: followerSize.width,
+          height: followerSize.height,
+          child: CompositedTransformFollower(link: link, offset: followerOffset, child: child),
+        ),
+      ],
+    ),
   );
 }
 
@@ -252,37 +287,11 @@ void main() {
       addTearDown(targetOffset.dispose);
 
       await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Positioned.fromRect(
-                rect: const Rect.fromLTWH(0, 0, 500, 500),
-                child: _platformView(1),
-              ),
-              ValueListenableBuilder<Offset>(
-                valueListenable: targetOffset,
-                builder: (_, Offset offset, _) => Positioned(
-                  left: offset.dx,
-                  top: offset.dy,
-                  width: followerSize.width,
-                  height: followerSize.height,
-                  child: CompositedTransformTarget(link: link),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                top: 0,
-                width: followerSize.width,
-                height: followerSize.height,
-                child: CompositedTransformFollower(
-                  link: link,
-                  offset: followerOffset,
-                  child: const Listener(behavior: HitTestBehavior.opaque),
-                ),
-              ),
-            ],
-          ),
+        _followerOverPlatformView(
+          link: link,
+          targetOffset: targetOffset,
+          followerOffset: followerOffset,
+          followerSize: followerSize,
         ),
         phase: EnginePhase.paint,
       );
@@ -390,41 +399,16 @@ void main() {
       addTearDown(targetOffset.dispose);
 
       await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Positioned.fromRect(
-                rect: const Rect.fromLTWH(0, 0, 500, 500),
-                child: _platformView(1),
-              ),
-              ValueListenableBuilder<Offset>(
-                valueListenable: targetOffset,
-                builder: (_, Offset offset, _) => Positioned(
-                  left: offset.dx,
-                  top: offset.dy,
-                  width: followerSize.width,
-                  height: followerSize.height,
-                  child: CompositedTransformTarget(link: link),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                top: 0,
-                width: followerSize.width,
-                height: followerSize.height,
-                child: CompositedTransformFollower(
-                  link: link,
-                  offset: followerOffset,
-                  child: Semantics(
-                    label: 'Action',
-                    button: true,
-                    container: true,
-                    child: const Listener(behavior: HitTestBehavior.opaque),
-                  ),
-                ),
-              ),
-            ],
+        _followerOverPlatformView(
+          link: link,
+          targetOffset: targetOffset,
+          followerOffset: followerOffset,
+          followerSize: followerSize,
+          child: Semantics(
+            label: 'Action',
+            button: true,
+            container: true,
+            child: const Listener(behavior: HitTestBehavior.opaque),
           ),
         ),
       );
