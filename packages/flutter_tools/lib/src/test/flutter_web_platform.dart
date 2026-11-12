@@ -43,6 +43,17 @@ import 'test_time_recorder.dart';
 
 /// Cache-Control header applied to test server assets that remain immutable
 /// for the lifetime of a single `flutter test` invocation.
+///
+/// These responses carry no validator (`ETag` or `Last-Modified`), so Chrome
+/// serves a cached copy without asking the server until `max-age` elapses.
+/// This is only safe because the cache cannot outlive the invocation:
+/// [ChromiumLauncher.launch] creates a fresh `--user-data-dir` for every
+/// launch, and the tool deletes that directory when it exits.
+///
+/// If Chrome profiles are ever reused across invocations, a later run that
+/// binds the same port can load stale compiled test code from the previous
+/// run. Before reusing profiles, either add a per-invocation validator or put
+/// a per-invocation token in the asset URLs.
 const _kStaticAssetCacheControl = 'public, max-age=3600';
 
 shelf.Response _cachedFileResponse(
