@@ -48,7 +48,7 @@ void testMain() {
         const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
       );
 
-      final paint = CkPaint()..shader = gradient;
+      final paint = ui.Paint()..shader = gradient;
 
       canvas.drawRect(region, paint);
 

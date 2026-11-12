@@ -64,10 +64,11 @@ class BuildSwiftPackage extends BuildSubCommand {
   BuildSwiftPackage({
     required this._analytics,
     required this._buildSystem,
+    required this._cocoaPods,
     required this._codesign,
     required this._featureFlags,
     required this._templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     required this._xcode,
   }) : super(logger: toolContext.logger) {
@@ -118,9 +119,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   final TemplateRenderer _templateRenderer;
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
+  final CocoaPods _cocoaPods;
 
   @override
   bool get supported => toolContext.platform.isMacOS;
@@ -207,7 +206,8 @@ class BuildSwiftPackage extends BuildSubCommand {
   late BuildSwiftPackageUtils utils = BuildSwiftPackageUtils(
     analytics: _analytics,
     buildSystem: _buildSystem,
-    flutterRoot: Cache.flutterRoot!,
+    cocoaPods: _cocoaPods,
+    flutterRoot: toolContext.cache.flutterRoot,
     project: project,
     templateRenderer: _templateRenderer,
     toolContext: toolContext,
@@ -249,22 +249,17 @@ class BuildSwiftPackage extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fileSystem = toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     final String outputArgument =
         getValue(_output) ??
-        fileSystem.path.join(
-          fileSystem.currentDirectory.path,
-          'build',
-          _targetPlatform.name,
-          'SwiftPackages',
-        );
+        fs.path.join(fs.currentDirectory.path, 'build', _targetPlatform.name, 'SwiftPackages');
 
     if (outputArgument.isEmpty) {
       throwToolExit('Please provide a value for --output.');
     }
 
-    final Directory outputDirectory = fileSystem.directory(
-      fileSystem.path.absolute(fileSystem.path.normalize(outputArgument)),
+    final Directory outputDirectory = fs.directory(
+      fs.path.absolute(fs.path.normalize(outputArgument)),
     );
     final Directory cacheDirectory = outputDirectory.childDirectory('.cache')
       ..createSync(recursive: true);
@@ -535,6 +530,7 @@ class FlutterPluginRegistrantSwiftPackage {
     required Directory sourceDirectory,
     required List<Plugin> plugins,
   }) async {
+    final Logger logger = _utils.toolContext.logger;
     ErrorHandlingFileSystem.deleteIfExists(
       sourceDirectory.childDirectory(kPluginSwiftPackageName),
       recursive: true,
@@ -547,6 +543,7 @@ class FlutterPluginRegistrantSwiftPackage {
         await writeIOSPluginRegistrant(
           _utils.project,
           plugins,
+          logger: logger,
           swiftPluginRegistrant: swiftFile,
           templateRenderer: _utils.templateRenderer,
         );
@@ -554,6 +551,7 @@ class FlutterPluginRegistrantSwiftPackage {
         await writeMacOSPluginRegistrant(
           _utils.project,
           plugins,
+          logger: logger,
           pluginRegistrantImplementation: swiftFile,
           templateRenderer: _utils.templateRenderer,
           // The registrant needs to be public to be accessible in the app, since it's within a
@@ -1230,6 +1228,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       :Logger logger,
       platform: Platform hostPlatform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = _utils.toolContext;
     final environment = Environment(
       projectDir: fileSystem.currentDirectory,
@@ -1251,6 +1250,10 @@ class AppFrameworkAndNativeAssetsDependencies {
       processManager: processManager,
       platform: hostPlatform,
       analytics: _utils.analytics,
+      androidSdkBuilder: null,
+      projectFactory: projectFactory,
+      visualStudio: null,
+      xcode: _utils.xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
@@ -1518,6 +1521,7 @@ class CocoaPodPluginDependencies {
         await writeIOSPluginRegistrant(
           _utils.project,
           [],
+          logger: logger,
           templateRenderer: _utils.templateRenderer,
         );
       }
@@ -1580,6 +1584,9 @@ class CocoaPodPluginDependencies {
       xcodeProject,
       _targetPlatform.buildDirectory(config: config, fileSystem: fileSystem),
       buildInfo.mode,
+      cocoaPods: _utils.cocoaPods,
+      templateRenderer: _utils.templateRenderer,
+      toolContext: _utils.toolContext,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
       // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods
       // separately, we need to force SwiftPM to be enabled so that CocoaPods will skip processing
@@ -2161,6 +2168,7 @@ class BuildSwiftPackageUtils {
   BuildSwiftPackageUtils({
     required this.analytics,
     required this.buildSystem,
+    required this.cocoaPods,
     required this.flutterRoot,
     required this.project,
     required this.templateRenderer,
@@ -2170,9 +2178,18 @@ class BuildSwiftPackageUtils {
 
   final Analytics analytics;
   final BuildSystem buildSystem;
+  final CocoaPods cocoaPods;
   final String flutterRoot;
   final FlutterProject project;
   final TemplateRenderer templateRenderer;
   final ToolContext toolContext;
   final Xcode xcode;
+
+  Artifacts get artifacts => toolContext.artifacts;
+  Cache get cache => toolContext.cache;
+  FileSystem get fileSystem => toolContext.fs;
+  FlutterVersion get flutterVersion => toolContext.flutterVersion;
+  Logger get logger => toolContext.logger;
+  Platform get platform => toolContext.platform;
+  ProcessManager get processManager => toolContext.processManager;
 }

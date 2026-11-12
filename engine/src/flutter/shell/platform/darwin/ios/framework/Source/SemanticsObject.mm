@@ -188,6 +188,26 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return _scrollView;
 }
 
+- (BOOL)isAccessibilityElement {
+  if ([self hasChildren]) {
+    return NO;
+  }
+  return [super isAccessibilityElement];
+}
+
+- (id)accessibilityContainer {
+  if (!self.bridge) {
+    return nil;
+  }
+  // `FlutterScrollableSemanticsObject` itself does not appear in the UIKit
+  // accessibility tree (`nativeAccessibility` is `self.scrollView`), so UIKit
+  // queries `[self.scrollView accessibilityContainer]` instead when this node is
+  // a leaf. This method is only called by the bridge when this node acts as a
+  // container for children or is the root semantics node.
+  FML_DCHECK([self hasChildren] || self.uid == kRootNodeId);
+  return self.scrollView;
+}
+
 // private methods
 
 - (UIView*)reattachScrollViewToCurrentBridgeView {
@@ -208,9 +228,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (void)updateScrollViewGeometry {
   // In order to make iOS think this UIScrollView is scrollable, the following
-  // requirements must be true.
+  // requirements must be true:
   // 1. contentSize must be bigger than the frame size.
-  // 2. The scrollable isAccessibilityElement must return YES
+  // 2. Consistent with a regular UIScrollView, either isAccessibilityElement
+  //    returns YES (when it has no children) or it acts as an accessibility
+  //    container for its children.
   //
   // Once the requirements are met, the iOS uses contentOffset to determine
   // what scroll actions are available. e.g. If the view scrolls vertically and
@@ -345,6 +367,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 #pragma mark - Semantic object property accesser
 
 - (NSArray<SemanticsObject*>*)children {
+  if (_inDealloc) {
+    return nil;
+  }
   return [_children copy];
 }
 
@@ -507,7 +532,17 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return false;
   }
 
-  return [self isFocusable];
+  // If the node is scrollable AND hidden OR
+  // The node has a label, value, or hint OR
+  // The node has non-scrolling related actions.
+  //
+  // The kIsHidden flag set with the scrollable flag means this node is now
+  // hidden but still is a valid target for a11y focus in the tree, e.g. a list
+  // item that is currently off screen but the a11y navigation needs to know
+  // about.
+  return (self.node.flags.hasImplicitScrolling && self.node.flags.isHidden) ||
+         !self.node.label.empty() || !self.node.value.empty() || !self.node.hint.empty() ||
+         (self.node.actions & ~flutter::kScrollableSemanticsActions) != 0;
 }
 
 - (NSString*)accessibilityLanguage {
@@ -520,21 +555,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return @(self.node.locale.data());
   }
   return bridge->GetDefaultLocale();
-}
-
-- (bool)isFocusable {
-  // If the node is scrollable AND hidden OR
-  // The node has a label, value, or hint OR
-  // The node has non-scrolling related actions.
-  //
-  // The kIsHidden flag set with the scrollable flag means this node is now
-  // hidden but still is a valid target for a11y focus in the tree, e.g. a list
-  // item that is currently off screen but the a11y navigation needs to know
-  // about.
-  return (self.node.flags.hasImplicitScrolling && self.node.flags.isHidden)
-
-         || !self.node.label.empty() || !self.node.value.empty() || !self.node.hint.empty() ||
-         (self.node.actions & ~flutter::kScrollableSemanticsActions) != 0;
 }
 
 - (void)collectRoutes:(NSMutableArray<SemanticsObject*>*)edges {
@@ -602,17 +622,21 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 // Finds the first eligiable semantics object in hit test order.
 - (id)search:(CGPoint)point {
+  if (![self containsPoint:point]) {
+    return nil;
+  }
   // Search children in hit test order.
   for (SemanticsObject* child in [self childrenInHitTestOrder]) {
-    if ([child containsPoint:point]) {
-      id childSearchResult = [child search:point];
-      if (childSearchResult != nil) {
-        return childSearchResult;
-      }
+    id childSearchResult = [child search:point];
+    if (childSearchResult != nil) {
+      return childSearchResult;
     }
   }
-  // Check if the current semantic object should be returned.
-  if ([self containsPoint:point] && [self isFocusable]) {
+  // Check if the current semantic object should be returned. Hidden elements
+  // (e.g. off-screen or obscured scroll children that still report a non-empty
+  // accessibilityFrame for VoiceOver linear navigation) cannot gain focus via
+  // touch exploration.
+  if (!self.node.flags.isHidden && [self isAccessibilityElement]) {
     return self.nativeAccessibility;
   }
   return nil;
@@ -625,11 +649,23 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 // goes to the smallest object before IOS 16, but to the top-left object in
 // IOS 16. Overrides this method to focus the first eligiable semantics
 // object in hit test order.
+//
+// `point` is in the local coordinate space of `bridgeView` (`FlutterView`),
+// because UIKit only converts hit-test points when traversing into a `UIView`
+// or `CALayer` child and passes `bridgeView`'s local coordinates unchanged to
+// non-view accessibility elements (`SemanticsObjectContainer` / `SemanticsObject`).
+//
+// TODO(LongCatIsLooong): Replace this private override with a public equivalent.
+// https://github.com/flutter/flutter/issues/195775.
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
-  if (!self.bridge) {
+  UIView* containerView = [self bridgeView];
+  if (!containerView) {
     return nil;
   }
-  return [self search:point];
+  CGPoint globalPoint = UIAccessibilityConvertFrameToScreenCoordinates(
+                            CGRectMake(point.x, point.y, 0, 0), containerView)
+                            .origin;
+  return [self search:globalPoint];
 }
 
 // iOS calls this method when this item is swipe-to-focusd in VoiceOver.
@@ -712,10 +748,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 - (CGRect)accessibilityFrame {
   if (!self.bridge) {
     return CGRectZero;
-  }
-
-  if (self.node.flags.isHidden) {
-    return [super accessibilityFrame];
   }
   return [self globalRect];
 }
@@ -1010,7 +1042,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   for (size_t i = 0; i < [children count]; i++) {
     SemanticsObject* child = children[i];
     if ((![child hasChildren] && child.nativeAccessibility == element) ||
-        ([child hasChildren] && [child.nativeAccessibility accessibilityContainer] == element)) {
+        ([child hasChildren] && [child accessibilityContainer] == element)) {
       return i + 1;
     }
   }
@@ -1028,8 +1060,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   // Even if it's marked accessible, VoiceControl labels will not appear if it's too
   // spatially distant. Set the frame to be the max screen size so all children are guaraenteed
   // to be contained.
-
-  return UIScreen.mainScreen.bounds;
+  //
+  // Prefer the screen that the view is on. Fallback to main screen if not available (e.g. the
+  // Flutter view hasn't been added to any screen).
+  UIScreen* screen = self.semanticsObject.bridgeView.window.windowScene.screen;
+  return (screen ?: UIScreen.mainScreen).bounds;
 }
 
 - (id)accessibilityContainer {
@@ -1042,6 +1077,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
   return [self.semanticsObject accessibilityScroll:direction];
+}
+
+- (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
+  return [self.semanticsObject _accessibilityHitTest:point withEvent:event];
 }
 
 @end
