@@ -914,7 +914,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     required this._buildSystem,
     required this._featureFlags,
     required this._templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
     registerOptionBundles(const <OptionBundle>[
@@ -942,10 +942,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
-
-  @visibleForTesting
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{

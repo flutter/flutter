@@ -44,6 +44,7 @@ import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../plugins.dart';
 import '../project.dart';
+import '../reporting/crash_reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
 import 'migrations/host_app_info_plist_migration.dart';
@@ -172,8 +173,15 @@ Future<XcodeBuildResult> buildXcodeProject({
       darwinPlatform,
       buildInfo,
       analytics: analytics,
+      crashReportSenderFactory: botDetector.isRunningOnBot
+          ? null
+          : () => CrashReportSender(
+              platform: platform,
+              logger: logger,
+              operatingSystemUtils: os,
+              analytics: analytics,
+            ),
       plistParser: plistParser,
-      reportCrashes: !(await botDetector.isRunningOnBot),
       toolContext: toolContext,
       xcodeProjectInterpreter: xcodeProjectInterpreter,
     ),

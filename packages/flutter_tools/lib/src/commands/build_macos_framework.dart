@@ -24,6 +24,7 @@ import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build_ios_framework.dart';
@@ -285,6 +286,7 @@ end
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = toolContext;
 
     final Status status = logger.startProgress(' ├─Building App.xcframework...');
@@ -310,6 +312,10 @@ end
         processManager: processManager,
         platform: platform,
         analytics: analytics,
+        androidSdkBuilder: null,
+        projectFactory: projectFactory,
+        visualStudio: null,
+        xcode: appleContext.xcode,
         engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );
