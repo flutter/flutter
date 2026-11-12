@@ -774,9 +774,10 @@ class TextField extends StatefulWidget {
   /// If this property is null, [WidgetStateMouseCursor.textable] will be used.
   ///
   /// The [mouseCursor] is the only property of [TextField] that controls the
-  /// appearance of the mouse pointer. All other properties related to "cursor"
-  /// stand for the text cursor, which is usually a blinking vertical line at
-  /// the editing position.
+  /// appearance of the mouse pointer over the text. The scrollbar uses
+  /// [SystemMouseCursors.basic] while the pointer is over it. All other
+  /// properties related to "cursor" stand for the text cursor, which is usually
+  /// a blinking vertical line at the editing position.
   final MouseCursor? mouseCursor;
 
   /// Callback that generates a custom [InputDecoration.counter] widget.

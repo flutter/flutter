@@ -15338,6 +15338,55 @@ void main() {
     await gesture.moveTo(center);
   });
 
+  testWidgets('multiline TextField uses the basic cursor over its scrollbar', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(
+      text: List<String>.generate(40, (int index) => 'Line $index: Text content.').join('\n'),
+    );
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: TextField(controller: controller, maxLines: null, expands: true)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Rect scrollbarRect = tester.getRect(find.byType(Scrollbar));
+    // The Material thumb is 8 pixels wide with a 2 pixel margin from the
+    // trailing edge of the scroll view.
+    final overScrollbar = Offset(scrollbarRect.right - 6.0, scrollbarRect.top + 20.0);
+    final Offset overText = scrollbarRect.center;
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture.removePointer);
+
+    await gesture.addPointer(location: overText);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+
+    await gesture.moveTo(overScrollbar);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    await gesture.moveTo(overText);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
   testWidgets('TextField icons change mouse cursor when hovered', (WidgetTester tester) async {
     // Test default cursor in icons area.
     await tester.pumpWidget(
