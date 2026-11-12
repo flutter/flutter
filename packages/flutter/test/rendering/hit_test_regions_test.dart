@@ -88,8 +88,8 @@ ViewConfiguration _viewConfiguration({double devicePixelRatio = 1.0}) {
 }
 
 /// A [TestRenderingFlutterBinding] whose [drawFrame] can skip calling
-/// `super.drawFrame()`, to verify that the hit-test region pass runs as part of
-/// [RendererBinding.drawFrame] rather than from a separate frame callback.
+/// `super.drawFrame()`, to verify that the hit-test region pass is driven by
+/// [drawFrame] rather than by a separate persistent frame callback.
 class _TestRenderingBinding extends TestRenderingFlutterBinding {
   bool skipSuperDrawFrame = false;
 
@@ -412,7 +412,7 @@ void main() {
       skip: kIsWeb, // [intended] On the web, the pass always runs.
     );
 
-    test('skips layout and compositingBits phases, and flushes between composite and semantics in later phases', () {
+    test('skips layout and compositingBits phases, and flushes between composite and semantics in later phases', () async {
       final SemanticsHandle semantics = binding.ensureSemantics();
       FlutterTimeline.debugCollectionEnabled = true;
       addTearDown(() {
@@ -423,6 +423,7 @@ void main() {
 
       const firstClaim = Rect.fromLTWH(10, 20, 100, 50);
       const secondClaim = Rect.fromLTWH(40, 60, 100, 50);
+      const thirdClaim = Rect.fromLTWH(70, 90, 100, 50);
       final RenderBox annotatedTarget = _at(
         firstClaim,
         RenderSemanticsAnnotations(
@@ -474,6 +475,44 @@ void main() {
         binding.rootPipelineOwner.debugLastHitTestRegions,
         _payload(<(int, List<Rect>)>[
           (1, <Rect>[secondClaim]),
+        ]),
+      );
+      expect(phaseOrder(), <String>['COMPOSITING', 'HIT TEST REGIONS (root)', 'SEMANTICS (root)']);
+
+      // EnginePhase.sendSemanticsUpdate delegates to RendererBinding.drawFrame,
+      // which respects sendFramesToEngine while the first frame is deferred.
+      (annotatedTarget.parentData! as StackParentData)
+        ..left = thirdClaim.left
+        ..top = thirdClaim.top;
+      root.markNeedsLayout();
+      binding.resetFirstFrameSent();
+      var deferred = true;
+      binding.deferFirstFrame();
+      addTearDown(() {
+        if (deferred) {
+          binding.allowFirstFrame();
+        }
+      });
+      FlutterTimeline.debugReset();
+      pumpFrame(phase: EnginePhase.sendSemanticsUpdate);
+      expect(binding.sendFramesToEngine, isFalse);
+      expect(
+        binding.rootPipelineOwner.debugLastHitTestRegions,
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[secondClaim]),
+        ]),
+      );
+      expect(phaseOrder(), isEmpty);
+
+      FlutterTimeline.debugReset();
+      binding.allowFirstFrame();
+      deferred = false;
+      await binding.endOfFrame;
+      expect(binding.sendFramesToEngine, isTrue);
+      expect(
+        binding.rootPipelineOwner.debugLastHitTestRegions,
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[thirdClaim]),
         ]),
       );
       expect(phaseOrder(), <String>['COMPOSITING', 'HIT TEST REGIONS (root)', 'SEMANTICS (root)']);
@@ -632,16 +671,32 @@ void main() {
 
     test('boxes scaled to zero or only touching a platform view edge claim nothing', () {
       const pvRect = Rect.fromLTRB(100, 100, 300, 300);
+      const claim = Rect.fromLTWH(120, 120, 80, 40);
       final RenderStack root = _stack(<RenderBox>[
         _at(pvRect, _platformView(1)),
-        // Non-empty boxes over the platform view collapsed by zero-scale transforms.
+        // Non-empty boxes over the platform view collapsed by zero-scale or
+        // singular 2D transforms.
         _at(
-          const Rect.fromLTWH(120, 120, 80, 40),
+          claim,
           RenderTransform(transform: Matrix4.diagonal3Values(0, 1, 1), child: _hitTarget()),
         ),
         _at(
-          const Rect.fromLTWH(120, 120, 80, 40),
+          claim,
           RenderTransform(transform: Matrix4.diagonal3Values(1, 0, 1), child: _hitTarget()),
+        ),
+        _at(
+          claim,
+          RenderTransform(
+            transform: Matrix4(1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+            child: _hitTarget(),
+          ),
+        ),
+        _at(
+          claim,
+          RenderTransform(
+            transform: Matrix4(0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1),
+            child: _hitTarget(),
+          ),
         ),
         // Boxes sharing an exact edge or corner with pvRect, without interior overlap.
         _at(const Rect.fromLTRB(50, 100, 100, 300), _hitTarget()),
@@ -660,6 +715,53 @@ void main() {
           (1, <Rect>[onePixelOverlap]),
         ]),
       );
+
+      // Zero-scaled or Matrix4.zero() platform views alone start no group.
+      expect(
+        regionsFor(
+          _stack(<RenderBox>[
+            _at(
+              pvRect,
+              RenderTransform(transform: Matrix4.diagonal3Values(0, 1, 1), child: _platformView(1)),
+            ),
+            _at(pvRect, RenderTransform(transform: Matrix4.zero(), child: _platformView(2))),
+          ]),
+        ),
+        isNull,
+      );
+
+      // A zero-scaled platform view between PV1 and a later overlapping box
+      // starts no group, so the box remains attributed to PV1.
+      expect(
+        regionsFor(
+          _stack(<RenderBox>[
+            _at(pvRect, _platformView(1)),
+            _at(
+              pvRect,
+              RenderTransform(transform: Matrix4.diagonal3Values(0, 1, 1), child: _platformView(2)),
+            ),
+            _at(claim, _hitTarget()),
+          ]),
+        ),
+        _payload(<(int, List<Rect>)>[
+          (1, <Rect>[claim]),
+        ]),
+      );
+
+      // An unlaid-out root RenderClipRect returns null without throwing inside
+      // describeApproximatePaintClip.
+      final PlatformViewRenderBox laidOutPv = _platformView(1);
+      layout(laidOutPv);
+      binding.renderView.child = null;
+      final unlaidOutRoot = RenderClipRect(child: laidOutPv);
+      final unlaidOutOwner = PipelineOwner()..rootNode = unlaidOutRoot;
+      addTearDown(() {
+        unlaidOutOwner.rootNode = null;
+        unlaidOutRoot.child = null;
+        unlaidOutOwner.dispose();
+      });
+      unlaidOutOwner.flushHitTestRegions();
+      expect(unlaidOutOwner.debugLastHitTestRegions, isNull);
     });
 
     test('claims are grouped under the platform view painted most recently before them', () {

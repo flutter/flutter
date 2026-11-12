@@ -67,9 +67,10 @@ typedef _PlatformViewHitTestGroup = ({int viewId, Rect platformViewRect, List<Re
 ///   and each child's clip with [RenderObject.describeApproximatePaintClip],
 ///   so the rectangles are in the same coordinate space as the root (physical
 ///   pixels when [root] is a [RenderView]).
-/// * Subtrees that cannot receive pointer events are skipped: offstage
-///   subtrees ([RenderOffstage]) and render boxes that have never been laid
-///   out are not visited at all, and no descendant of a render object whose
+/// * Subtrees that cannot be painted or receive pointer events are skipped:
+///   offstage subtrees ([RenderOffstage]), render boxes that have never been
+///   laid out, and subtrees with singular or non-finite paint transforms are
+///   not visited at all, and no descendant of a render object whose
 ///   [RenderObject.hitTestsChildren] is false (such as an ignoring
 ///   [RenderIgnorePointer] or an absorbing [RenderAbsorbPointer]) claims a
 ///   region. Such a render object may still claim its own bounds, and a
@@ -146,8 +147,27 @@ Float64List? computeHitTestRegions(RenderObject root) {
   // when pointer events cannot reach [node] because an ancestor's
   // [RenderObject.hitTestsChildren] is false.
   void visit(RenderObject node, Matrix4 transform, Rect? clip, {required bool canClaim}) {
-    // Offstage subtrees are neither painted nor hit tested.
-    if (node is RenderOffstage && node.offstage) {
+    // Offstage subtrees and boxes that have never been laid out are neither
+    // painted nor hit tested, and computing clips or transforms may read size.
+    if ((node is RenderOffstage && node.offstage) || (node is RenderBox && !node.hasSize)) {
+      return;
+    }
+
+    // Subtrees whose paint transform is singular or non-finite are neither
+    // painted (for example, RenderTransform skips painting when determinant()
+    // is zero, and RenderFittedBox / keep-alive slivers apply Matrix4.zero())
+    // nor 2D hit tested (BoxHitTestResult.addWithPaintTransform rejects
+    // transforms whose 2D projection after removing perspective is singular).
+    final double det = transform.determinant();
+    if (det == 0.0 || !det.isFinite) {
+      return;
+    }
+    final Float64List s = transform.storage;
+    final double det2d =
+        s[0] * (s[5] * s[15] - s[13] * s[7]) -
+        s[4] * (s[1] * s[15] - s[13] * s[3]) +
+        s[12] * (s[1] * s[7] - s[5] * s[3]);
+    if (det2d == 0.0 || !det2d.isFinite) {
       return;
     }
 
@@ -165,8 +185,11 @@ Float64List? computeHitTestRegions(RenderObject root) {
     // A platform view starts a new group. Everything visited after this point
     // paints on top of it.
     if (node is PlatformViewRenderBox) {
-      if (node.hasSize && !node.size.isEmpty) {
+      if (!node.size.isEmpty) {
         Rect platformViewRect = MatrixUtils.transformRect(transform, Offset.zero & node.size);
+        if (!platformViewRect.isFinite || platformViewRect.isEmpty) {
+          return;
+        }
         if (clip != null) {
           platformViewRect = platformViewRect.intersect(clip);
         }
@@ -181,7 +204,7 @@ Float64List? computeHitTestRegions(RenderObject root) {
 
     // Nothing can cover a platform view until one has been painted, and
     // render objects that pointer events cannot reach never claim a region.
-    if (groups.isNotEmpty && canClaim && node is RenderBox && node.hasSize && !node.size.isEmpty) {
+    if (groups.isNotEmpty && canClaim && node is RenderBox && !node.size.isEmpty) {
       if (node is RenderAbsorbPointer) {
         // An absorbing AbsorbPointer claims its own bounds. Its subtree is
         // still visited (with claiming suppressed, because its
