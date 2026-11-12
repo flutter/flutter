@@ -8,6 +8,7 @@ import 'package:file/file.dart' show Directory, FileSystem;
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
+import '../../base/process.dart' show ProcessUtils;
 import '../../build_info.dart'
     show
         BuildMode,
@@ -20,7 +21,9 @@ import '../../build_info.dart'
         kIosArchs,
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
+import '../../context/android_context.dart' show AndroidSdkProvider;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
+import '../../windows/visual_studio.dart';
 import 'android/native_assets.dart'
     show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
 import 'ios/native_assets.dart' show getIOSSdk, getNativeIOSArchitecture, targetIOSVersion;
@@ -66,10 +69,12 @@ sealed class AssetBuildTarget {
     required FileSystem fileSystem,
     required List<SupportedAssetTypes> supportedAssetTypes,
     required Directory? buildDirectory,
+    required AndroidSdkProvider? androidSdkProvider,
+    required VisualStudio? visualStudio,
   }) {
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
-        return _windowsTarget(supportedAssetTypes, Architecture.x64);
+        return _windowsTarget(supportedAssetTypes, Architecture.x64, visualStudio: visualStudio);
       case TargetPlatform.linux_x64:
         return _linuxTarget(supportedAssetTypes, Architecture.x64, buildMode, buildDirectory);
       case TargetPlatform.linux_arm64:
@@ -77,20 +82,25 @@ sealed class AssetBuildTarget {
       case TargetPlatform.linux_riscv64:
         return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildMode, buildDirectory);
       case TargetPlatform.windows_arm64:
-        return _windowsTarget(supportedAssetTypes, Architecture.arm64);
+        return _windowsTarget(supportedAssetTypes, Architecture.arm64, visualStudio: visualStudio);
       case TargetPlatform.darwin:
         return _macTargets(environmentDefines, supportedAssetTypes);
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-        return _androidTargets(targetPlatform, environmentDefines, supportedAssetTypes);
+        return _androidTargets(
+          targetPlatform,
+          environmentDefines,
+          supportedAssetTypes,
+          androidSdkProvider: androidSdkProvider,
+        );
       case TargetPlatform.ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
       case TargetPlatform.web_javascript:
         return _webTarget(supportedAssetTypes);
       case TargetPlatform.tester:
-        return _flutterTesterTarget(supportedAssetTypes);
+        return _flutterTesterTarget(supportedAssetTypes, visualStudio: visualStudio);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.unsupported:
@@ -123,10 +133,15 @@ sealed class AssetBuildTarget {
 
   static List<AssetBuildTarget> _windowsTarget(
     List<SupportedAssetTypes> supportedAssetTypes,
-    Architecture architecture,
-  ) {
+    Architecture architecture, {
+    required VisualStudio? visualStudio,
+  }) {
     return <AssetBuildTarget>[
-      WindowsAssetTarget(architecture: architecture, supportedAssetTypes: supportedAssetTypes),
+      WindowsAssetTarget(
+        architecture: architecture,
+        supportedAssetTypes: supportedAssetTypes,
+        visualStudio: visualStudio,
+      ),
     ];
   }
 
@@ -148,12 +163,14 @@ sealed class AssetBuildTarget {
   static List<AndroidAssetTarget> _androidTargets(
     TargetPlatform targetPlatform,
     Map<String, String> environmentDefines,
-    List<SupportedAssetTypes> supportedAssetTypes,
-  ) {
+    List<SupportedAssetTypes> supportedAssetTypes, {
+    required AndroidSdkProvider? androidSdkProvider,
+  }) {
     return _androidArchs(targetPlatform, environmentDefines[kAndroidArchs])
         .map(getNativeAndroidArchitecture)
         .map(
           (Architecture architecture) => AndroidAssetTarget(
+            androidSdkProvider: androidSdkProvider,
             architecture: architecture,
             supportedAssetTypes: supportedAssetTypes,
             environmentDefines: environmentDefines,
@@ -187,9 +204,15 @@ sealed class AssetBuildTarget {
       <AssetBuildTarget>[WebAssetTarget(supportedAssetTypes: supportedAssetTypes)];
 
   static List<AssetBuildTarget> _flutterTesterTarget(
-    List<SupportedAssetTypes> supportedAssetTypes,
-  ) {
-    return <AssetBuildTarget>[FlutterTesterAssetTarget(supportedAssetTypes: supportedAssetTypes)];
+    List<SupportedAssetTypes> supportedAssetTypes, {
+    required VisualStudio? visualStudio,
+  }) {
+    return <AssetBuildTarget>[
+      FlutterTesterAssetTarget(
+        supportedAssetTypes: supportedAssetTypes,
+        visualStudio: visualStudio,
+      ),
+    ];
   }
 }
 
@@ -227,7 +250,10 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   /// could not be found. For `flutter test` setups where no app is compiled, we _prefer_ to use the
   /// same toolchain but would allow not passing a [CCompilerConfig] if that fails. This allows
   /// hooks that only download code assets instead of compiling them to still function.
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true});
+  Future<void> setCCompilerConfig({
+    required ProcessUtils processUtils,
+    bool mustMatchAppBuild = true,
+  });
 
   List<CodeAssetExtension> get codeAssetExtensions {
     return <CodeAssetExtension>[
@@ -246,8 +272,13 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
 }
 
 class WindowsAssetTarget extends CodeAssetTarget {
-  WindowsAssetTarget({required super.supportedAssetTypes, required super.architecture})
-    : super(os: OS.windows);
+  WindowsAssetTarget({
+    required super.architecture,
+    required super.supportedAssetTypes,
+    required this.visualStudio,
+  }) : super(os: OS.windows);
+
+  final VisualStudio? visualStudio;
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -256,8 +287,19 @@ class WindowsAssetTarget extends CodeAssetTarget {
   ];
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigWindows(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({
+    required ProcessUtils processUtils,
+    bool mustMatchAppBuild = true,
+  }) async {
+    final VisualStudio? visualStudio = this.visualStudio;
+    if (visualStudio == null) {
+      throw StateError('VisualStudio is required to build Windows native assets.');
+    }
+    cCompilerConfigSync = await cCompilerConfigWindows(
+      throwIfNotFound: mustMatchAppBuild,
+      visualStudio: visualStudio,
+    );
+  }
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
@@ -272,7 +314,10 @@ final class LinuxAssetTarget extends CodeAssetTarget {
   final Directory? cmakeBuildDirectory;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
+  Future<void> setCCompilerConfig({
+    required ProcessUtils processUtils,
+    bool mustMatchAppBuild = true,
+  }) async {
     final bool isNativeAppBuild = cmakeBuildDirectory != null && cmakeBuildDirectory!.existsSync();
 
     cCompilerConfigSync = await cCompilerConfigLinux(
@@ -300,8 +345,13 @@ final class IOSAssetTarget extends CodeAssetTarget {
   final FileSystem fileSystem;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({
+    required ProcessUtils processUtils,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigMacOS(
+    processUtils: processUtils,
+    throwIfNotFound: mustMatchAppBuild,
+  );
 
   IOSCodeConfig _getIOSConfig(Map<String, String> environmentDefines, FileSystem fileSystem) {
     final String? sdkRoot = environmentDefines[kSdkRoot];
@@ -348,12 +398,18 @@ final class MacOSAssetTarget extends CodeAssetTarget {
   }
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({
+    required ProcessUtils processUtils,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigMacOS(
+    processUtils: processUtils,
+    throwIfNotFound: mustMatchAppBuild,
+  );
 }
 
 final class AndroidAssetTarget extends CodeAssetTarget {
   AndroidAssetTarget({
+    required this._androidSdkProvider,
     required super.architecture,
     required Map<String, String> environmentDefines,
     required super.supportedAssetTypes,
@@ -362,11 +418,16 @@ final class AndroidAssetTarget extends CodeAssetTarget {
        ),
        super(os: OS.android);
 
+  final AndroidSdkProvider? _androidSdkProvider;
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigAndroid();
+  Future<void> setCCompilerConfig({
+    required ProcessUtils processUtils,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigAndroid(
+    androidSdk: _androidSdkProvider?.androidSdk,
+  );
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -383,8 +444,10 @@ final class AndroidAssetTarget extends CodeAssetTarget {
 }
 
 final class FlutterTesterAssetTarget extends CodeAssetTarget {
-  FlutterTesterAssetTarget({required super.supportedAssetTypes})
-    : super(architecture: Architecture.current, os: OS.current) {
+  FlutterTesterAssetTarget({
+    required super.supportedAssetTypes,
+    required VisualStudio? visualStudio,
+  }) : super(architecture: Architecture.current, os: OS.current) {
     subtarget = switch (os) {
       OS.linux => LinuxAssetTarget(
         supportedAssetTypes: supportedAssetTypes,
@@ -394,6 +457,7 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
       OS.windows => WindowsAssetTarget(
         supportedAssetTypes: supportedAssetTypes,
         architecture: architecture,
+        visualStudio: visualStudio,
       ),
       OS.macOS => MacOSAssetTarget(
         supportedAssetTypes: supportedAssetTypes,
@@ -414,8 +478,10 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
   CCompilerConfig? get cCompilerConfigSync => subtarget.cCompilerConfigSync;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) =>
-      subtarget.setCCompilerConfig(mustMatchAppBuild: false);
+  Future<void> setCCompilerConfig({
+    required ProcessUtils processUtils,
+    bool mustMatchAppBuild = true,
+  }) => subtarget.setCCompilerConfig(processUtils: processUtils, mustMatchAppBuild: false);
 }
 
 List<CpuArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {

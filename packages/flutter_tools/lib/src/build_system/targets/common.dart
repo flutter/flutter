@@ -10,7 +10,6 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
-import '../../context_runner.dart' show GlobalToolContext;
 import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
@@ -328,7 +327,9 @@ class KernelSnapshot extends Target {
     );
 
     if (darwinPlatform != null) {
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final FlutterProject flutterProject = environment.projectFactory.fromDirectory(
+        environment.projectDir,
+      );
       final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
       flavor = await xcodeProject.parseFlavorFromConfiguration(environment);
     } else {
@@ -383,9 +384,16 @@ abstract class AotSnapshotBase extends Target {
     final windowsX64Elf = environment.defines[kWindowsAotFormat] == 'elf';
     final bool buildingWindowsPeCoff =
         targetPlatform == TargetPlatform.windows_x64 && !windowsX64Elf;
-    final String? windowsLinkerPath = buildingWindowsPeCoff
-        ? VisualStudio(toolContext: const GlobalToolContext()).linkPath
-        : null;
+    final String? windowsLinkerPath;
+    if (buildingWindowsPeCoff) {
+      final VisualStudio? visualStudio = environment.visualStudio;
+      if (visualStudio == null) {
+        throw StateError('VisualStudio is required to build Windows AOT snapshots.');
+      }
+      windowsLinkerPath = visualStudio.linkPath;
+    } else {
+      windowsLinkerPath = null;
+    }
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,

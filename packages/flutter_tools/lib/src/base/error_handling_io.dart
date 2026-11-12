@@ -255,7 +255,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
   @override
   String readAsStringSync({Encoding encoding = utf8}) {
     return _runSync<String>(
-      () => delegate.readAsStringSync(),
+      () => delegate.readAsStringSync(encoding: encoding),
       platform: _platform,
       failureMessage: 'Flutter failed to read a file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
@@ -1239,8 +1239,9 @@ class ErrorHandlingProcessManager extends ProcessManager {
     // bump), and when analytics are suppressed for this invocation
     // (`--suppress-analytics`).
     //
-    // Like `package:unified_analytics`, only the exact (case-sensitive) string
-    // `true` is treated as a request to suppress analytics.
+    // This matches `areAnalyticsSuppressed` in `package:unified_analytics`
+    // (which uses case-sensitive `bool.parse`) and the `dart` CLI: only the
+    // exact string `true` requests suppression.
     final String suppressKey = DashEnvVar.suppressAnalytics.name;
     final bool suppressionRequested =
         _platform.environment[suppressKey] == 'true' || environmentResult[suppressKey] == 'true';
@@ -1382,6 +1383,7 @@ void _handlePosixException(
   const eperm = 1;
   const enoent = 2;
   const eacces = 13;
+  const exdev = 18;
   const enospc = 28;
   const erofs = 30;
   // Catch errors and bail when:
@@ -1391,6 +1393,12 @@ void _handlePosixException(
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
           ' Try running "flutter clean" and try again.',
+    exdev =>
+      '${message != null && message.isNotEmpty ? '$message.\n' : ''}'
+          'A file system operation failed across different volumes or mount points.\n'
+          '$e\n'
+          'Ensure that the project, build output, and temporary directories are on the same '
+          'writable volume, or check external volume and security software settings.',
     enospc =>
       '$message. The target device is full.'
           '\n$e\n'
@@ -1474,6 +1482,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kSharingViolation = 32;
   const kLockViolation = 33;
   const kDeviceFull = 112;
+  const kFilenameExcedRange = 206;
   const kDeviceDoesNotExist = 433;
   const kSystemIntegrityPolicyViolation = 454;
   const kFatalDeviceHardwareError = 483;
@@ -1497,6 +1506,11 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The target device is full.'
           '\n$e\n'
           'Free up space and try again.',
+    kFilenameExcedRange =>
+      '${message != null ? "$message. " : ""}The filename or extension is too long.\n'
+          '$e\n'
+          'Please consider moving the Flutter SDK and/or project to a shorter path, '
+          'or enabling long paths on Windows.',
     kSharingViolation || kLockViolation || kUserMappedSectionOpened =>
       '$message. The file is being used by another program.'
           '\n$e\n'

@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -71,6 +72,22 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'chocolate'],
+        ),
+      ),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
     );
     iosEnvironment.buildDir.createSync(recursive: true);
   });
@@ -460,7 +477,7 @@ void main() {
     ]);
   });
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if ios app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -512,14 +529,9 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
     },
-    overrides: <Type, Generator>{
-      Config: () => Config.test(directory: fileSystem.currentDirectory),
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
-    },
   );
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if macos app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -569,11 +581,6 @@ void main() {
       );
 
       expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      Config: () => Config.test(directory: fileSystem.currentDirectory),
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
   );
 
@@ -960,6 +967,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   final bool isInstalled;
 
   List<String> schemes;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
   Future<XcodeProjectInfo?> getInfo(
