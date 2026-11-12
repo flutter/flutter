@@ -1218,6 +1218,9 @@ void updateLocalProperties({
   }
 
   changeIfNecessary('flutter.sdk', fsUtils.escapePath(cache.flutterRoot));
+  // Used to name the versioned APK copies, e.g. `myapp-1.2.3+45-release.apk`.
+  final String appName = project.manifest.appName;
+  changeIfNecessary('flutter.appName', appName.isEmpty ? null : appName);
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(

@@ -716,8 +716,17 @@ class FlutterPlugin : Plugin<Project> {
                     builtArtifactsLoader.set(variant.artifacts.getBuiltArtifactsLoader())
                     outputAbis.set(variant.outputs.map { CopyFlutterApksTask.abiOf(it.filters) })
                     flavorName.set(variant.flavorName?.takeIf { it.isNotEmpty() })
-                    // The Flutter project directory is the parent of the `android` root project.
-                    appName.set(project.rootProject.projectDir.parentFile?.name ?: project.rootProject.name)
+                    // The tool writes the pubspec `name:` to local.properties; fall back to the
+                    // Flutter project directory (the parent of the `android` root project).
+                    val localProperties = Properties()
+                    project.rootProject.file("local.properties").takeIf { it.exists() }?.reader(StandardCharsets.UTF_8)?.use {
+                        localProperties.load(it)
+                    }
+                    appName.set(
+                        localProperties.getProperty("flutter.appName")
+                            ?: project.rootProject.projectDir.parentFile?.name
+                            ?: project.rootProject.name
+                    )
                     outputVersions.set(
                         project.provider {
                             variant.outputs.map {

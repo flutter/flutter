@@ -334,6 +334,7 @@ void main() {
       final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
       expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
       expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
+      expect(propertyFor('flutter.appName', localPropertiesFile), isNotNull);
     }
 
     testWithoutContext('extract build name and number from pubspec.yaml', () async {
