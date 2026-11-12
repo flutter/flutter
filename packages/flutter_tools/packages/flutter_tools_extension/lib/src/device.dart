@@ -60,6 +60,9 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for debugging options.
   static const String debuggingOptionsParam = 'debuggingOptions';
 
+  /// RPC parameter key indicating whether the launched binary is a prebuilt application.
+  static const String prebuiltApplicationParam = 'prebuiltApplication';
+
   /// RPC response key for the VM service URI.
   static const String vmServiceUriKey = 'vmServiceUri';
 
@@ -83,12 +86,16 @@ abstract base class DeviceService extends ToolExtensionService {
   /// using the given [debuggingOptions].
   ///
   /// [executableUri] is guaranteed to be an absolute `file:` URI pointing to
-  /// the built application binary or bundle. Returns `true` once the
-  /// application process has been started, or `false` if launching failed.
+  /// the built application binary or bundle. When [prebuiltApplication] is
+  /// `true`, [executableUri] points to a prebuilt package supplied by the user
+  /// (for example via `--use-application-binary`) rather than an output from an
+  /// in-session build. Returns `true` once the application process has been
+  /// started, or `false` if launching failed.
   Future<bool> launchApp({
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
+    bool prebuiltApplication = false,
   });
 
   /// Returns the VM Service URI for a running application on [deviceId].
@@ -181,9 +188,14 @@ abstract base class DeviceService extends ToolExtensionService {
     final String deviceId = _parseDeviceId(params);
     final String executableUriStr;
     final Map<String, Object?> optionsMap;
+    final bool prebuiltApplication;
     try {
       executableUriStr = params.requiredField<String>(executableUriParam);
       optionsMap = params.requiredField<Map<String, Object?>>(debuggingOptionsParam);
+      prebuiltApplication = params.optionalField<bool>(
+        prebuiltApplicationParam,
+        defaultValue: false,
+      );
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
@@ -193,6 +205,7 @@ abstract base class DeviceService extends ToolExtensionService {
       debuggingOptions: debuggingOptions,
       deviceId: deviceId,
       executableUri: executableUri,
+      prebuiltApplication: prebuiltApplication,
     );
   }
 

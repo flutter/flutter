@@ -161,9 +161,25 @@ void main() {
           },
           DeviceService.deviceIdParam: 'unknown_device',
           DeviceService.executableUriParam: 'file:///nonexistent/app',
+          DeviceService.prebuiltApplicationParam: true,
         }),
         isFalse,
       );
+      await expectLater(
+        launchAppHandler(<String, Object?>{
+          DeviceService.debuggingOptionsParam: <String, Object?>{
+            'buildMode': 'debug',
+            'debuggingEnabled': true,
+          },
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.executableUriParam: 'file:///nonexistent/app',
+          DeviceService.prebuiltApplicationParam: 'not_a_bool',
+        }),
+        _throwsInvalidParams(
+          'Invalid "${DeviceService.prebuiltApplicationParam}": expected bool, got String.',
+        ),
+      );
+
       await expectLater(
         launchAppHandler(<String, Object?>{}),
         _throwsInvalidParams(
@@ -231,8 +247,13 @@ void main() {
       addTearDown(() => tempDir.deleteSync(recursive: true));
 
       final scriptFile = File('${tempDir.path}/fake_app.sh');
+      final envCaptureFile = File('${tempDir.path}/captured_env.txt');
       scriptFile.writeAsStringSync('''
 #!/bin/sh
+echo "ARGS=\$*" > "${envCaptureFile.path}"
+echo "SWITCHES=\$FLUTTER_ENGINE_SWITCHES" >> "${envCaptureFile.path}"
+echo "SWITCH_1=\$FLUTTER_ENGINE_SWITCH_1" >> "${envCaptureFile.path}"
+echo "SWITCH_2=\$FLUTTER_ENGINE_SWITCH_2" >> "${envCaptureFile.path}"
 echo "The Dart VM service is listening on http://127.0.0.1:41187/wXxrm1n2GUI=/"
 exec sleep 30
 ''');
@@ -244,10 +265,13 @@ exec sleep 30
       final bool launched = await service.launchApp(
         debuggingOptions: const ExtensionDebuggingOptions(
           buildMode: .debug,
+          dartEntrypointArgs: <String>['--entry-arg', 'value'],
           debuggingEnabled: true,
+          engineSwitches: <String>['enable-dart-profiling=true', 'start-paused=true'],
         ),
         deviceId: LinuxDeviceService.customLinuxDeviceId,
         executableUri: scriptFile.absolute.uri,
+        prebuiltApplication: true,
       );
       expect(launched, isTrue);
 
@@ -255,6 +279,11 @@ exec sleep 30
         deviceId: LinuxDeviceService.customLinuxDeviceId,
       );
       expect(vmServiceUri, Uri.parse('http://127.0.0.1:41187/wXxrm1n2GUI=/'));
+      final String capturedEnv = envCaptureFile.readAsStringSync();
+      expect(capturedEnv, contains('ARGS=--entry-arg value'));
+      expect(capturedEnv, contains('SWITCHES=2'));
+      expect(capturedEnv, contains('SWITCH_1=enable-dart-profiling=true'));
+      expect(capturedEnv, contains('SWITCH_2=start-paused=true'));
 
       final bool stopped = await service.stopApp(deviceId: LinuxDeviceService.customLinuxDeviceId);
       expect(stopped, isTrue);

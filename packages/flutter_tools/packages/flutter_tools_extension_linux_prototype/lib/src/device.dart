@@ -61,6 +61,7 @@ final class LinuxDeviceService extends DeviceService {
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
+    bool prebuiltApplication = false,
   }) async {
     if (deviceId != customLinuxDeviceId) {
       return false;
@@ -74,11 +75,20 @@ final class LinuxDeviceService extends DeviceService {
     await stopApp(deviceId: deviceId);
 
     final uriCompleter = Completer<Uri?>();
+    final environment = <String, String>{};
+    final List<String> engineSwitches = debuggingOptions.engineSwitches;
+    for (var i = 0; i < engineSwitches.length; i++) {
+      environment['FLUTTER_ENGINE_SWITCH_${i + 1}'] = engineSwitches[i];
+    }
+    if (engineSwitches.isNotEmpty) {
+      environment['FLUTTER_ENGINE_SWITCHES'] = engineSwitches.length.toString();
+    }
 
     try {
       final Process process = await Process.start(
         executable.path,
-        const <String>[],
+        debuggingOptions.dartEntrypointArgs,
+        environment: environment.isEmpty ? null : environment,
         workingDirectory: executable.parent.path,
       );
       final runningApp = _RunningApp(process: process, vmServiceCompleter: uriCompleter);
