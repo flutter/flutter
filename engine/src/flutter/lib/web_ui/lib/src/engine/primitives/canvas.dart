@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -52,10 +51,6 @@ class EngineCanvas implements LayerCanvas {
   final ui.PictureRecorder? _recorder;
 
   PictureImageTracker? _tracker;
-
-  /// The backend canvas this canvas forwards to.
-  @visibleForTesting
-  BackendCanvas get debugBackend => _backend;
 
   /// Clears the tracker reference when recording finishes so subsequent
   /// operations (if any) do not retain images.
@@ -515,6 +510,7 @@ class EngineCanvas implements LayerCanvas {
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
+    assert(!atlas.debugDisposed);
     assert(colors == null || blendMode != null);
 
     final int rectCount = rects.length;

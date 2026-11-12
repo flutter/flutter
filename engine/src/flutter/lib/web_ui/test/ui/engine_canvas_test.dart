@@ -19,12 +19,11 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(setUpTestViewDimensions: false);
 
-  test('ui.Canvas is an EngineCanvas over a BackendCanvas', () {
+  test('ui.Canvas is an EngineCanvas', () {
     final recorder = ui.PictureRecorder();
     final canvas = ui.Canvas(recorder);
 
     expect(canvas, isA<EngineCanvas>());
-    expect((canvas as EngineCanvas).debugBackend, isA<BackendCanvas>());
     recorder.endRecording().dispose();
   });
 
@@ -111,7 +110,6 @@ Future<void> testMain() async {
     final ImageSource source = (image as EngineImage).imageSource!;
     final shader = ui.ImageShader(image, ui.TileMode.clamp, ui.TileMode.clamp, _identity);
     final shaderPaint = ui.Paint()..shader = shader;
-    final paint = ui.Paint();
     const nanRect = ui.Rect.fromLTRB(double.nan, 0, 4, 4);
     final nanRSuperellipse = ui.RSuperellipse.fromLTRBR(
       double.nan,
@@ -151,7 +149,7 @@ Future<void> testMain() async {
         Int32List(2),
         ui.BlendMode.srcOver,
         null,
-        paint,
+        shaderPaint,
       ),
       'drawPoints': () => canvas.drawPoints(ui.PointMode.points, const <ui.Offset>[
         ui.Offset(1, 1),
@@ -397,7 +395,7 @@ Future<void> testMain() async {
   test('calls that fail unwrapping or in the backend do not retain image sources', () async {
     final ui.Image sourceDonor = await _createImageWithSource();
     final ImageSource foreignSource = (sourceDonor as EngineImage).imageSource!;
-    final foreignImage = EngineImage(_ForeignBackendImage(), 4, 4, imageSource: foreignSource);
+    final foreignImage = EngineImage(ForeignBackendImage(), 4, 4, imageSource: foreignSource);
     sourceDonor.dispose();
     expect(foreignSource.debugIsClosed, isFalse);
 
@@ -442,10 +440,10 @@ Future<void> testMain() async {
       'saveLayerWithFilter (unwrap throws)': () =>
           (canvas as LayerCanvas).saveLayerWithFilter(rect, shaderPaint, _ThrowingImageFilter()),
       'saveLayerWithFilter (backend throws)': () =>
-          (canvas as LayerCanvas).saveLayerWithFilter(rect, shaderPaint, _ForeignImageFilter()),
-      'drawPath': () => canvas.drawPath(_ForeignPath(), shaderPaint),
+          (canvas as LayerCanvas).saveLayerWithFilter(rect, shaderPaint, ForeignImageFilter()),
+      'drawPath': () => canvas.drawPath(ForeignPath(), shaderPaint),
       'drawVertices': () =>
-          canvas.drawVertices(_ForeignVertices(), ui.BlendMode.srcOver, shaderPaint),
+          canvas.drawVertices(ForeignVertices(), ui.BlendMode.srcOver, shaderPaint),
       'drawPicture': () => canvas.drawPicture(foreignPicture),
     };
 
@@ -459,7 +457,7 @@ Future<void> testMain() async {
     }
 
     final superellipseTracker = PictureImageTracker();
-    final throwingCanvas = EngineCanvas(_ThrowingBackendCanvas(), tracker: superellipseTracker);
+    final throwingCanvas = EngineCanvas(ThrowingBackendCanvas(), tracker: superellipseTracker);
     expect(
       () => throwingCanvas.drawRSuperellipse(ui.RSuperellipse.fromRectXY(rect, 1, 1), shaderPaint),
       throwsStateError,
@@ -483,65 +481,11 @@ Future<void> testMain() async {
   });
 }
 
-class _ForeignBackendImage implements BackendImage {
-  @override
-  void dispose() {}
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _ForeignBackendImageFilter implements BackendImageFilter {
-  @override
-  void dispose() {}
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
 class _ThrowingImageFilter extends EngineImageFilter {
   @override
   BackendImageFilter getBackendFilter({required ui.TileMode defaultBlurTileMode}) {
     throw StateError('filter failed');
   }
-}
-
-class _ForeignImageFilter extends EngineImageFilter {
-  @override
-  BackendImageFilter getBackendFilter({required ui.TileMode defaultBlurTileMode}) =>
-      _ForeignBackendImageFilter();
-}
-
-class _ForeignBackendPath implements BackendPath {
-  @override
-  void dispose() {}
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _ForeignPath implements EnginePath {
-  @override
-  BackendPath get backendPath => _ForeignBackendPath();
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _ForeignBackendVertices implements BackendVertices {
-  @override
-  void dispose() {}
-}
-
-class _ForeignVertices implements EngineVertices {
-  @override
-  bool get debugDisposed => false;
-
-  @override
-  BackendVertices? get delegate => _ForeignBackendVertices();
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _ForeignLayerPicture implements LayerPicture {
@@ -552,19 +496,6 @@ class _ForeignLayerPicture implements LayerPicture {
 
   @override
   bool get debugDisposed => false;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _ThrowingBackendCanvas implements BackendCanvas {
-  @override
-  void translate(double dx, double dy) {}
-
-  @override
-  void drawPath(BackendPath path, BackendPaint paint) {
-    throw StateError('drawPath failed');
-  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

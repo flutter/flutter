@@ -76,7 +76,7 @@ Future<void> testMain() async {
 
   test('calls that fail in the backend still free the native paint they created', () {
     final int baseline = _livePaintCount();
-    final foreignImage = EngineImage(_ForeignBackendImage(), 4, 4);
+    final foreignImage = EngineImage(ForeignBackendImage(), 4, 4);
     const rect = ui.Rect.fromLTRB(0, 0, 4, 4);
     final recorder = ui.PictureRecorder();
     final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 8, 8));
@@ -104,12 +104,12 @@ Future<void> testMain() async {
         ui.Paint(),
       ),
       'saveLayerWithFilter': () =>
-          (canvas as LayerCanvas).saveLayerWithFilter(rect, ui.Paint(), _ForeignImageFilter()),
-      'drawPath': () => canvas.drawPath(_ForeignPath(), ui.Paint()),
+          (canvas as LayerCanvas).saveLayerWithFilter(rect, ui.Paint(), ForeignImageFilter()),
+      'drawPath': () => canvas.drawPath(ForeignPath(), ui.Paint()),
       'drawVertices': () =>
-          canvas.drawVertices(_ForeignVertices(), ui.BlendMode.srcOver, ui.Paint()),
+          canvas.drawVertices(ForeignVertices(), ui.BlendMode.srcOver, ui.Paint()),
       'drawRSuperellipse': () =>
-          EngineCanvas(_ThrowingBackendCanvas())
+          EngineCanvas(ThrowingBackendCanvas())
               .drawRSuperellipse(ui.RSuperellipse.fromRectXY(rect, 1, 1), ui.Paint()),
     };
 
@@ -130,71 +130,4 @@ Future<void> testMain() async {
     recorder.endRecording().dispose();
     foreignImage.dispose();
   });
-}
-
-class _ForeignBackendImage implements BackendImage {
-  @override
-  void dispose() {}
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _ForeignBackendImageFilter implements BackendImageFilter {
-  @override
-  void dispose() {}
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _ForeignImageFilter extends EngineImageFilter {
-  @override
-  BackendImageFilter getBackendFilter({required ui.TileMode defaultBlurTileMode}) =>
-      _ForeignBackendImageFilter();
-}
-
-class _ForeignBackendPath implements BackendPath {
-  @override
-  void dispose() {}
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _ForeignPath implements EnginePath {
-  @override
-  BackendPath get backendPath => _ForeignBackendPath();
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _ForeignBackendVertices implements BackendVertices {
-  @override
-  void dispose() {}
-}
-
-class _ForeignVertices implements EngineVertices {
-  @override
-  bool get debugDisposed => false;
-
-  @override
-  BackendVertices? get delegate => _ForeignBackendVertices();
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _ThrowingBackendCanvas implements BackendCanvas {
-  @override
-  void translate(double dx, double dy) {}
-
-  @override
-  void drawPath(BackendPath path, BackendPaint paint) {
-    throw StateError('drawPath failed');
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
