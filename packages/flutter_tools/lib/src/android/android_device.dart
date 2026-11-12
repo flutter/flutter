@@ -918,7 +918,7 @@ AndroidMemoryInfo parseMeminfoDump(String input) {
       .forEach((String line) {
         final List<String> sections = line.trim().split(':');
         final String key = sections.first.trim();
-        final int value = int.tryParse(sections.last.trim().split(RegExp(r'\s+')).first) ?? 0;
+        final int value = int.tryParse(sections.last.trim().split(' ').first) ?? 0;
         switch (key) {
           case AndroidMemoryInfo._kJavaHeapKey:
             androidMemoryInfo.javaHeap = value;
