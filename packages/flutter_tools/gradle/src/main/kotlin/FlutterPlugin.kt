@@ -717,11 +717,13 @@ class FlutterPlugin : Plugin<Project> {
                     outputAbis.set(variant.outputs.map { CopyFlutterApksTask.abiOf(it.filters) })
                     flavorName.set(variant.flavorName?.takeIf { it.isNotEmpty() })
                     // The Flutter project directory is the parent of the `android` root project.
-                    appName.set(project.rootProject.projectDir.parentFile.name)
+                    appName.set(project.rootProject.projectDir.parentFile?.name ?: project.rootProject.name)
                     outputVersions.set(
                         project.provider {
                             variant.outputs.map {
-                                (it.versionName.orNull?.let { name -> "$name+" } ?: "") + it.versionCode.get()
+                                val name = it.versionName.orNull
+                                val code = it.versionCode.orNull
+                                if (name != null && code != null) "$name+$code" else name ?: code?.toString() ?: ""
                             }
                         }
                     )

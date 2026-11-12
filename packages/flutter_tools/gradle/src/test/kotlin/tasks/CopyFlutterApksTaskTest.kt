@@ -40,6 +40,15 @@ class CopyFlutterApksTaskTest {
     }
 
     @Test
+    fun `versionedApkFileName omits the version when it is unknown`() {
+        assertEquals("myapp-release.apk", CopyFlutterApksTask.versionedApkFileName("myapp", "", CopyFlutterApksTask.NO_ABI, null, "release"))
+        assertEquals(
+            "myapp-1.2.3+45-arm64-v8a-release.apk",
+            CopyFlutterApksTask.versionedApkFileName("myapp", "1.2.3+45", "arm64-v8a", null, "release")
+        )
+    }
+
+    @Test
     fun `copies split APKs under per-ABI names and declares exactly those files as outputs`(
         @TempDir tempDir: Path
     ) {

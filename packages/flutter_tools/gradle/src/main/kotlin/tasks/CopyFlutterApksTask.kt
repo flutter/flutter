@@ -125,7 +125,7 @@ abstract class CopyFlutterApksTask : DefaultTask() {
             val versioned =
                 versionedApkFileName(
                     appName.get(),
-                    outputVersions.get()[declaredAbis.indexOf(abi)],
+                    outputVersions.get().getOrNull(declaredAbis.indexOf(abi)) ?: "",
                     abi,
                     flavorName.orNull,
                     buildMode.get()
@@ -168,7 +168,7 @@ abstract class CopyFlutterApksTask : DefaultTask() {
             abi: String,
             flavorName: String?,
             buildMode: String
-        ): String = "$appName-$version" + apkFileName(abi, flavorName, buildMode).removePrefix("app")
+        ): String = (if (version.isEmpty()) appName else "$appName-$version") + apkFileName(abi, flavorName, buildMode).removePrefix("app")
 
         private fun transformedApkError(
             problem: String,
