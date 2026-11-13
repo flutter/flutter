@@ -47,7 +47,7 @@ void main() {
   });
 
   test('root pipeline owner cannot manage root node', () {
-    final RenderObject rootNode = RenderProxyBox();
+    final rootNode = RenderProxyBox();
     expect(
       () => RendererBinding.instance.rootPipelineOwner.rootNode = rootNode,
       throwsA(

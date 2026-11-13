@@ -27,6 +27,7 @@ import 'package:flutter/semantics.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'view.dart';
 
 export 'package:flutter/foundation.dart'
     show
@@ -975,6 +976,10 @@ class _LocalSemanticsHandle implements SemanticsHandle {
   }
 }
 
+/// Signature for a function that is called when the pipeline owner and child owner
+/// finished the paint phase.
+typedef FlushedPaintCallback = void Function(bool isDirty);
+
 /// The pipeline owner manages the rendering pipeline.
 ///
 /// The pipeline owner provides an interface for driving the rendering pipeline
@@ -1029,6 +1034,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     this.onSemanticsOwnerCreated,
     this.onSemanticsUpdate,
     this.onSemanticsOwnerDisposed,
+    this.onFlushedPaint,
   }) {
     assert(debugMaybeDispatchCreated('rendering', 'PipelineOwner', this));
   }
@@ -1062,6 +1068,11 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   ///
   /// Typical implementations will tear down the semantics tree.
   final VoidCallback? onSemanticsOwnerDisposed;
+
+  /// Called when this pipeline owner and child owner have finished the paint phase.
+  ///
+  /// The isDirty parameter is true if the pipeline owner has dirty render objects that needed to be painted.
+  final FlushedPaintCallback? onFlushedPaint;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
   ///
@@ -1336,6 +1347,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       for (final PipelineOwner child in _children) {
         child.flushPaint();
       }
+      onFlushedPaint?.call(dirtyNodes.isNotEmpty);
       assert(
         _nodesNeedingPaint.isEmpty,
         'Child PipelineOwners must not dirty nodes in their parent.',
