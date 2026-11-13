@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "flutter/lib/gpu/context.h"
+#include "flutter/lib/gpu/retain_stamp.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/core/shader_types.h"
@@ -82,6 +83,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
     std::vector<const UniformBinding*> uniform_struct_order;
     std::vector<const TextureBinding*> uniform_texture_order;
     std::vector<const StorageBufferBinding*> storage_buffer_order;
+    RetainStamp retain_stamp;
   };
 
   ~Shader() override;

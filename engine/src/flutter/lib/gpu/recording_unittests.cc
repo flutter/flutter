@@ -13,6 +13,7 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
+#include "flutter/lib/gpu/allocation_counter.h"
 #include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/context.h"
@@ -90,7 +91,8 @@ class FakePipeline : public impeller::Pipeline<impeller::PipelineDescriptor> {
   bool IsValid() const override { return true; }
 };
 
-// A render pass that logs what a test wants to look at.
+// A render pass that keeps nothing, so that any allocation is the replayer's,
+// and logs what a test wants to look at.
 class FakeRenderPass : public impeller::RenderPass {
  public:
   FakeRenderPass(std::shared_ptr<const impeller::Context> context,
@@ -139,6 +141,8 @@ class FakeRenderPass : public impeller::RenderPass {
     if (log_binds) {
       buffer_offsets.push_back(view.GetRange().offset);
     }
+    // Replay must not make backends take shared ownership per bind.
+    owning_binds += view.TakeBuffer() ? 1 : 0;
     binds++;
     return true;
   }
@@ -150,6 +154,7 @@ class FakeRenderPass : public impeller::RenderPass {
       const impeller::ShaderMetadata* metadata,
       std::shared_ptr<const impeller::Texture> texture,
       impeller::raw_ptr<const impeller::Sampler> sampler) override {
+    owning_binds += impeller::IsBorrowedTexture(texture) ? 0 : 1;
     binds++;
     return true;
   }
@@ -169,6 +174,7 @@ class FakeRenderPass : public impeller::RenderPass {
   size_t binds = 0;
   size_t draws = 0;
   size_t pipelines = 0;
+  size_t owning_binds = 0;
   size_t element_count = 0;
   size_t last_vertex_buffer_count = 0;
   impeller::IndexType last_index_type = impeller::IndexType::kUnknown;
@@ -230,6 +236,7 @@ class FlutterGpuRecordingTest : public ::testing::Test {
     ON_CALL(*pipeline_library_, GetPipeline(_, _, _))
         .WillByDefault([this](impeller::PipelineDescriptor descriptor,
                               bool async, bool threadsafe) {
+          pipeline_builds_++;
           std::promise<
               std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>>
               promise;
@@ -295,7 +302,7 @@ class FlutterGpuRecordingTest : public ::testing::Test {
     const impeller::SamplerDescriptor sampler;
     for (size_t i = 0; i < draws; i++) {
       pass.ClearBindings();
-      pass.SetPipeline(pipeline_);
+      pass.SetPipeline(pipeline_.get());
       pass.SetCullMode(i % 2 == 0 ? impeller::CullMode::kBackFace
                                   : impeller::CullMode::kFrontFace);
       pass.BindVertexBuffer(0, *buffer_, 0, 1024);
@@ -313,6 +320,17 @@ class FlutterGpuRecordingTest : public ::testing::Test {
     }
   }
 
+  // Records and submits a frame, so that the pools and scratch storage hold
+  // what the next frame of the same size needs.
+  void RunFrame(size_t draws) {
+    auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
+    auto pass = MakePass();
+    EXPECT_TRUE(pass->Begin(*command_buffer));
+    RecordDraws(*pass, draws);
+    pass->End();
+    EXPECT_TRUE(command_buffer->Submit());
+  }
+
   std::shared_ptr<NiceMock<MockImpellerContext>> context_;
   std::shared_ptr<NiceMock<MockCommandBuffer>> impeller_command_buffer_;
   std::shared_ptr<NiceMock<MockCommandQueue>> command_queue_;
@@ -326,8 +344,91 @@ class FlutterGpuRecordingTest : public ::testing::Test {
   fml::RefPtr<RenderPipeline> pipeline_;
   fml::RefPtr<DeviceBuffer> buffer_;
   fml::RefPtr<Texture> texture_;
+  size_t pipeline_builds_ = 0;
   bool build_fails_ = false;
 };
+
+// The tests below are only as good as the counter.
+TEST(FlutterGpuAllocationCounterTest, SeesAllocations) {
+  AllocationCounter counter;
+  // Volatile, or the optimizer may remove these allocations.
+  int* volatile single = new int(0);
+  int* volatile array = new int[2];
+  delete single;
+  delete[] array;
+  EXPECT_GE(counter.Stop(), 2u);
+}
+
+// Recording is on the thread that runs the app's Dart code. Thousands of draws
+// a frame go through here, so a steady frame must not touch the heap at all.
+TEST_F(FlutterGpuRecordingTest, RecordingDrawsDoesNotAllocate) {
+  constexpr size_t kDraws = 2000;
+  RunFrame(kDraws);
+
+  auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
+  auto pass = MakePass();
+  ASSERT_TRUE(pass->Begin(*command_buffer));
+
+  AllocationCounter counter;
+  RecordDraws(*pass, kDraws);
+  EXPECT_EQ(counter.Stop(), 0u);
+
+  pass->End();
+  EXPECT_TRUE(command_buffer->Submit());
+}
+
+// The same goes for the replay thread, and for what it hands the backend.
+TEST_F(FlutterGpuRecordingTest, ReplayingDrawsDoesNotAllocate) {
+  constexpr size_t kDraws = 2000;
+  RunFrame(kDraws);
+
+  auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
+  auto pass = MakePass();
+  ASSERT_TRUE(pass->Begin(*command_buffer));
+  RecordDraws(*pass, kDraws);
+  PassRecording* recording = pass->GetRecordingForTesting();
+
+  auto queue = std::make_shared<ReplayQueue>(context_, nullptr);
+  FakeRenderPass target(context_, recording->render_target);
+  // The first replay on a queue fills its samplers and binding tables.
+  queue->GetReplayer().ReplayRender(*recording, target);
+  target.draws = 0;
+
+  AllocationCounter counter;
+  queue->GetReplayer().ReplayRender(*recording, target);
+  EXPECT_EQ(counter.Stop(), 0u);
+
+  EXPECT_EQ(target.draws, kDraws);
+  EXPECT_EQ(target.owning_binds, 0u);
+  pass->End();
+  EXPECT_TRUE(command_buffer->Submit());
+}
+
+// Only a change of state costs a lookup, and only a new state costs a build.
+TEST_F(FlutterGpuRecordingTest, PipelinesBuildOncePerState) {
+  RunFrame(100);
+  // The back and front face culling states, across every frame so far.
+  EXPECT_EQ(pipeline_builds_, 2u);
+  RunFrame(100);
+  EXPECT_EQ(pipeline_builds_, 2u);
+  EXPECT_EQ(last_pass_->pipelines, 100u);
+  EXPECT_EQ(last_pass_->draws, 100u);
+}
+
+// A reload replaces a shader's code, so what was built from it can't be used
+// for new work.
+TEST_F(FlutterGpuRecordingTest, ReplacingAShaderRebuildsPipelines) {
+  auto context = fml::MakeRefCounted<Context>(context_);
+  vertex_->ScheduleRegistration(*context);
+  RunFrame(1);
+  const size_t builds = pipeline_builds_;
+  ASSERT_GT(builds, 0u);
+
+  vertex_->ResetFrom(*MakeShader(impeller::ShaderStage::kVertex));
+  vertex_->ScheduleRegistration(*context);
+  RunFrame(1);
+  EXPECT_GT(pipeline_builds_, builds);
+}
 
 // A build failure is only discovered at replay. That draw is dropped, and later
 // draws with the same state fail when recorded, so the caller sees it.
@@ -338,7 +439,7 @@ TEST_F(FlutterGpuRecordingTest, KnownBuildFailuresFailDrawsWhenRecorded) {
   auto first_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto first = MakePass();
   ASSERT_TRUE(first->Begin(*first_buffer));
-  first->SetPipeline(pipeline_);
+  first->SetPipeline(pipeline_.get());
   EXPECT_TRUE(first->Draw(3, 1, /*indexed=*/false));
   first->End();
   EXPECT_EQ(last_pass_->draws, 0u);
@@ -347,7 +448,7 @@ TEST_F(FlutterGpuRecordingTest, KnownBuildFailuresFailDrawsWhenRecorded) {
   auto second_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto second = MakePass();
   ASSERT_TRUE(second->Begin(*second_buffer));
-  second->SetPipeline(pipeline_);
+  second->SetPipeline(pipeline_.get());
   EXPECT_FALSE(second->Draw(3, 1, /*indexed=*/false));
 
   // Different state is unaffected.
@@ -362,13 +463,13 @@ TEST_F(FlutterGpuRecordingTest, ReplayFollowsBindingRules) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto pass = MakePass();
   ASSERT_TRUE(pass->Begin(*command_buffer));
-  pass->SetPipeline(pipeline_);
+  pass->SetPipeline(pipeline_.get());
 
   auto set = fml::MakeRefCounted<BindingSet>();
   ASSERT_TRUE(set->AddUniform(*vertex_, 0, buffer_->GetBuffer(), 256, 64));
-  pass->BindSet(0, set);
-  pass->BindSet(0, set);
-  pass->BindSet(RenderPass::kMaxBindingSets, set);
+  pass->BindSet(0, set.get());
+  pass->BindSet(0, set.get());
+  pass->BindSet(RenderPass::kMaxBindingSets, set.get());
   pass->BindUniform(*vertex_, vertex_->GetUniformStructAt(0), *buffer_, 512,
                     64);
   // Rebinding replaces the earlier bind of the same binding.
@@ -399,7 +500,7 @@ TEST_F(FlutterGpuRecordingTest, ReplayKeepsDrawState) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto pass = MakePass();
   ASSERT_TRUE(pass->Begin(*command_buffer));
-  pass->SetPipeline(pipeline_);
+  pass->SetPipeline(pipeline_.get());
   pass->BindVertexBuffer(0, *buffer_, 0, 64);
   pass->BindVertexBuffer(1, *buffer_, 64, 64);
   pass->BindIndexBuffer(*buffer_, 128, 64, impeller::IndexType::k32bit);
@@ -426,6 +527,7 @@ TEST(FlutterGpuOpStreamTest, ForEachCrossesChunks) {
   for (uint32_t i = 0; i < kOps; i++) {
     stream.Append<SetStencilReferenceOp>()->reference = i;
   }
+  EXPECT_GT(stream.GetAllocatedSize(), RecordingChunk::kSize);
 
   uint32_t next = 0;
   stream.ForEach([&](const OpHeader& header) {
@@ -437,7 +539,93 @@ TEST(FlutterGpuOpStreamTest, ForEachCrossesChunks) {
   EXPECT_EQ(next, kOps);
 
   stream.Reset();
+  EXPECT_EQ(stream.GetAllocatedSize(), 0u);
   stream.ForEach([](const OpHeader& header) { FAIL(); });
+}
+
+TEST(FlutterGpuOpStreamTest, ChunksAreReused) {
+  {
+    OpStream warm;
+    warm.Append<ClearBindingsOp>();
+  }
+  AllocationCounter counter;
+  OpStream stream;
+  stream.Append<ClearBindingsOp>();
+  stream.Reset();
+  EXPECT_EQ(counter.Stop(), 0u);
+}
+
+// Binding an object again costs nothing, and interleaved recordings each end
+// up holding it.
+TEST(FlutterGpuRetainTest, RetainsOncePerRecording) {
+  auto object = std::make_shared<int>(0);
+  RetainStamp stamp;
+  {
+    auto first = PassRecording::Acquire(PassRecording::Kind::kRender);
+    auto second = PassRecording::Acquire(PassRecording::Kind::kRender);
+    for (int i = 0; i < 100; i++) {
+      first->Retain(stamp, object);
+    }
+    EXPECT_EQ(object.use_count(), 2);
+
+    second->Retain(stamp, object);
+    first->Retain(stamp, object);
+    EXPECT_GE(object.use_count(), 3);
+  }
+  EXPECT_EQ(object.use_count(), 1);
+}
+
+TEST(FlutterGpuRetainTest, RecyclingAStampedRecordingRetainsAgain) {
+  auto object = std::make_shared<int>(0);
+  RetainStamp stamp;
+  {
+    auto recording = PassRecording::Acquire(PassRecording::Kind::kRender);
+    recording->Retain(stamp, object);
+  }
+  EXPECT_EQ(object.use_count(), 1);
+  auto recording = PassRecording::Acquire(PassRecording::Kind::kRender);
+  recording->Retain(stamp, object);
+  EXPECT_EQ(object.use_count(), 2);
+}
+
+TEST(FlutterGpuPipelineStateTest, ComparesOnlyUsedAttachments) {
+  PipelineState a;
+  a.color_attachment_count = 1;
+  PipelineState b = a;
+  EXPECT_EQ(a, b);
+  EXPECT_EQ(a.GetHash(), b.GetHash());
+
+  // Beyond the used attachments, which a recording does not copy.
+  b.colors[1].blending_enabled = true;
+  EXPECT_EQ(a, b);
+  EXPECT_EQ(a.GetHash(), b.GetHash());
+
+  b.colors[0].blending_enabled = true;
+  EXPECT_FALSE(a == b);
+  EXPECT_NE(a.GetHash(), b.GetHash());
+}
+
+TEST(FlutterGpuPipelineStateTest, ToDescriptorKeepsTheState) {
+  PipelineState state;
+  state.cull_mode = impeller::CullMode::kBackFace;
+  state.sample_count = impeller::SampleCount::kCount4;
+  state.depth_format = impeller::PixelFormat::kD32FloatS8UInt;
+  state.depth.depth_write_enabled = true;
+  state.color_attachment_count = 2;
+  state.colors[0].format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  state.colors[1].format = impeller::PixelFormat::kUnknown;
+
+  const impeller::PipelineDescriptor descriptor = state.ToDescriptor();
+  EXPECT_EQ(descriptor.GetCullMode(), impeller::CullMode::kBackFace);
+  EXPECT_EQ(descriptor.GetSampleCount(), impeller::SampleCount::kCount4);
+  EXPECT_EQ(descriptor.GetDepthPixelFormat(),
+            impeller::PixelFormat::kD32FloatS8UInt);
+  ASSERT_TRUE(descriptor.GetDepthStencilAttachmentDescriptor().has_value());
+  EXPECT_TRUE(
+      descriptor.GetDepthStencilAttachmentDescriptor()->depth_write_enabled);
+  EXPECT_EQ(descriptor.GetColorAttachmentDescriptors().size(), 1u);
+  EXPECT_EQ(descriptor.GetStencilPixelFormat(),
+            impeller::PixelFormat::kUnknown);
 }
 
 TEST(FlutterGpuSamplerKeyTest, KeysRoundTrip) {

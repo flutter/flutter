@@ -4,6 +4,8 @@
 
 #include "flutter/lib/gpu/render_pass.h"
 
+#include <algorithm>
+#include <cstring>
 #include <memory>
 
 #include "flutter/lib/gpu/formats.h"
@@ -35,50 +37,44 @@ const impeller::RenderTarget& RenderPass::GetRenderTarget() const {
   return render_target_;
 }
 
-impeller::ColorAttachmentDescriptor& RenderPass::ColorAttachmentDescriptorAt(
-    size_t color_attachment_index) {
-  auto color = color_descriptors_.find(color_attachment_index);
-  if (color == color_descriptors_.end()) {
-    return color_descriptors_[color_attachment_index] = {};
-  }
-  return color->second;
-}
-
-impeller::ColorAttachmentDescriptor& RenderPass::GetColorAttachmentDescriptor(
-    size_t color_attachment_index) {
-  pipeline_state_dirty_ = true;
-  return ColorAttachmentDescriptorAt(color_attachment_index);
-}
-
-impeller::DepthAttachmentDescriptor&
-RenderPass::GetDepthAttachmentDescriptor() {
-  pipeline_state_dirty_ = true;
-  return depth_desc_;
-}
-
-impeller::StencilAttachmentDescriptor&
-RenderPass::GetStencilFrontAttachmentDescriptor() {
-  pipeline_state_dirty_ = true;
-  return stencil_front_desc_;
-}
-
-impeller::StencilAttachmentDescriptor&
-RenderPass::GetStencilBackAttachmentDescriptor() {
-  pipeline_state_dirty_ = true;
-  return stencil_back_desc_;
-}
-
-impeller::PipelineDescriptor& RenderPass::GetPipelineDescriptor() {
-  pipeline_state_dirty_ = true;
-  return pipeline_descriptor_;
-}
-
 bool RenderPass::IsPipelineStateDirtyForTesting() const {
   return pipeline_state_dirty_;
 }
 
 void RenderPass::ClearPipelineStateDirtyForTesting() {
   pipeline_state_dirty_ = false;
+}
+
+void RenderPass::CaptureRenderTargetState() {
+  pipeline_state_.sample_count = render_target_.GetSampleCount();
+
+  const impeller::PixelFormat color_format =
+      render_target_.GetRenderTargetPixelFormat();
+  uint8_t color_attachment_count = 0;
+  render_target_.IterateAllColorAttachments(
+      [&](size_t index, const impeller::ColorAttachment& attachment) -> bool {
+        if (index < PipelineState::kMaxColorAttachments) {
+          pipeline_state_.colors[index].format = color_format;
+          color_attachment_count =
+              std::max(color_attachment_count, static_cast<uint8_t>(index + 1));
+        }
+        return true;
+      });
+  pipeline_state_.color_attachment_count = color_attachment_count;
+
+  const auto& stencil = render_target_.GetStencilAttachment();
+  pipeline_state_.stencil_format =
+      stencil && impeller::IsStencilWritable(
+                     stencil->texture->GetTextureDescriptor().format)
+          ? stencil->texture->GetTextureDescriptor().format
+          : impeller::PixelFormat::kUnknown;
+
+  const auto& depth = render_target_.GetDepthAttachment();
+  pipeline_state_.depth_format =
+      depth && impeller::IsDepthWritable(
+                   depth->texture->GetTextureDescriptor().format)
+          ? depth->texture->GetTextureDescriptor().format
+          : impeller::PixelFormat::kUnknown;
 }
 
 bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
@@ -92,6 +88,7 @@ bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
   }
   recording->render_target = render_target_;
   command_buffer_ = fml::Ref(&command_buffer);
+  CaptureRenderTargetState();
   pipeline_state_dirty_ = true;
   return true;
 }
@@ -102,55 +99,65 @@ void RenderPass::End() {
   }
 }
 
-void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
-  if (render_pipeline_.get() == pipeline.get()) {
+void RenderPass::SetPipeline(RenderPipeline* pipeline) {
+  if (render_pipeline_.get() == pipeline) {
     return;
   }
   pipeline_state_dirty_ = true;
-  // On debug this makes a difference, but not on release builds.
-  // NOLINTNEXTLINE(performance-move-const-arg)
-  render_pipeline_ = std::move(pipeline);
+  render_pipeline_ = fml::Ref(pipeline);
 }
 
-// The setters below assign through the pipeline descriptor directly rather
-// than through GetPipelineDescriptor, which would dirty the state
-// unconditionally. Callers re-send the same fixed-function state ahead of
-// most draws, and dirtying on a redundant assignment would record the
-// pipeline state for every one of them.
+// Callers re-send the same fixed-function state ahead of most draws, and
+// dirtying on a redundant assignment would record the pipeline state for
+// every one of them.
+template <typename T>
+void RenderPass::SetPipelineStateField(T& field, const T& value) {
+  if (!(field == value)) {
+    field = value;
+    pipeline_state_dirty_ = true;
+  }
+}
 
 void RenderPass::SetCullMode(impeller::CullMode mode) {
-  if (pipeline_descriptor_.GetCullMode() == mode) {
-    return;
-  }
-  pipeline_descriptor_.SetCullMode(mode);
-  pipeline_state_dirty_ = true;
+  SetPipelineStateField(pipeline_state_.cull_mode, mode);
 }
 
 void RenderPass::SetWindingOrder(impeller::WindingOrder order) {
-  if (pipeline_descriptor_.GetWindingOrder() == order) {
-    return;
-  }
-  pipeline_descriptor_.SetWindingOrder(order);
-  pipeline_state_dirty_ = true;
+  SetPipelineStateField(pipeline_state_.winding_order, order);
 }
 
 void RenderPass::SetPrimitiveType(impeller::PrimitiveType type) {
-  if (pipeline_descriptor_.GetPrimitiveType() == type) {
-    return;
-  }
-  pipeline_descriptor_.SetPrimitiveType(type);
-  pipeline_state_dirty_ = true;
+  SetPipelineStateField(pipeline_state_.primitive_type, type);
 }
 
 void RenderPass::SetPolygonMode(impeller::PolygonMode mode) {
-  if (pipeline_descriptor_.GetPolygonMode() == mode) {
-    return;
-  }
-  pipeline_descriptor_.SetPolygonMode(mode);
-  pipeline_state_dirty_ = true;
+  SetPipelineStateField(pipeline_state_.polygon_mode, mode);
 }
 
-void RenderPass::BindSet(size_t slot, const fml::RefPtr<BindingSet>& set) {
+void RenderPass::SetColorAttachmentDescriptor(
+    size_t color_attachment_index,
+    const impeller::ColorAttachmentDescriptor& descriptor) {
+  FML_DCHECK(color_attachment_index < PipelineState::kMaxColorAttachments);
+  SetPipelineStateField(pipeline_state_.colors[color_attachment_index],
+                        descriptor);
+}
+
+void RenderPass::SetDepthAttachmentDescriptor(
+    const impeller::DepthAttachmentDescriptor& descriptor) {
+  SetPipelineStateField(pipeline_state_.depth, descriptor);
+}
+
+void RenderPass::SetStencilFrontAttachmentDescriptor(
+    const impeller::StencilAttachmentDescriptor& descriptor) {
+  SetPipelineStateField(pipeline_state_.stencil_front, descriptor);
+}
+
+void RenderPass::SetStencilBackAttachmentDescriptor(
+    const impeller::StencilAttachmentDescriptor& descriptor) {
+  SetPipelineStateField(pipeline_state_.stencil_back, descriptor);
+}
+
+void RenderPass::BindSet(size_t slot, BindingSet* set) {
   PassRecording* recording = GetRecording();
   if (!recording || slot >= kMaxBindingSets) {
     return;
@@ -161,7 +168,7 @@ void RenderPass::BindSet(size_t slot, const fml::RefPtr<BindingSet>& set) {
   if (set) {
     const std::shared_ptr<const BindingSet::Contents>& contents =
         set->Snapshot();
-    recording->Retain(contents);
+    recording->Retain(contents->retain_stamp, contents);
     op->contents = contents.get();
   }
 }
@@ -180,7 +187,7 @@ static bool IsRenderStage(impeller::ShaderStage stage) {
 }
 
 // Whether a view fits in [buffer]. Written so that neither term can overflow.
-static bool IsViewInBounds(DeviceBuffer& buffer,
+static bool IsViewInBounds(const DeviceBuffer& buffer,
                            size_t offset_in_bytes,
                            size_t length_in_bytes) {
   const size_t size = buffer.GetBuffer()->GetDeviceBufferDescriptor().size;
@@ -199,14 +206,15 @@ bool RenderPass::BindUniform(Shader& shader,
   }
   const std::shared_ptr<const Shader::Reflection>& reflection =
       shader.GetReflection();
-  recording->Retain(reflection);
-  recording->Retain(buffer.GetBuffer());
+  recording->Retain(reflection->retain_stamp, reflection);
+  recording->Retain(buffer.GetRetainStamp(), buffer.GetBuffer());
   auto* op = recording->ops.Append<BindUniformOp>();
   op->stage = shader.GetShaderStage();
   op->binding = binding;
   op->buffer = buffer.GetBuffer().get();
   op->offset = static_cast<uint32_t>(offset_in_bytes);
   op->length = static_cast<uint32_t>(length_in_bytes);
+  recording->uniform_bind_count++;
   return true;
 }
 
@@ -220,13 +228,14 @@ bool RenderPass::BindTexture(Shader& shader,
   }
   const std::shared_ptr<const Shader::Reflection>& reflection =
       shader.GetReflection();
-  recording->Retain(reflection);
-  recording->Retain(texture.GetTexture());
+  recording->Retain(reflection->retain_stamp, reflection);
+  recording->Retain(texture.GetRetainStamp(), texture.GetTexture());
   auto* op = recording->ops.Append<BindTextureOp>();
   op->stage = shader.GetShaderStage();
   op->binding = binding;
   op->texture = texture.GetTexture().get();
   op->sampler_key = impeller::SamplerDescriptor::ToKey(sampler);
+  recording->texture_bind_count++;
   return true;
 }
 
@@ -239,12 +248,13 @@ void RenderPass::BindVertexBuffer(size_t slot,
       !IsViewInBounds(buffer, offset_in_bytes, length_in_bytes)) {
     return;
   }
-  recording->Retain(buffer.GetBuffer());
+  recording->Retain(buffer.GetRetainStamp(), buffer.GetBuffer());
   auto* op = recording->ops.Append<BindVertexBufferOp>();
   op->slot = static_cast<uint32_t>(slot);
   op->buffer = buffer.GetBuffer().get();
   op->offset = static_cast<uint32_t>(offset_in_bytes);
   op->length = static_cast<uint32_t>(length_in_bytes);
+  recording->vertex_buffer_bind_count++;
 }
 
 void RenderPass::BindIndexBuffer(DeviceBuffer& buffer,
@@ -256,7 +266,7 @@ void RenderPass::BindIndexBuffer(DeviceBuffer& buffer,
     return;
   }
   index_buffer_type_ = type;
-  recording->Retain(buffer.GetBuffer());
+  recording->Retain(buffer.GetRetainStamp(), buffer.GetBuffer());
   auto* op = recording->ops.Append<BindIndexBufferOp>();
   op->type = type;
   op->buffer = buffer.GetBuffer().get();
@@ -287,58 +297,18 @@ void RenderPass::SetViewport(const impeller::Viewport& viewport) {
 
 void RenderPass::RecordPipelineState(PassRecording& recording) {
   pipeline_state_dirty_ = false;
-
-  // Infer the pipeline layout based on the shape of the RenderTarget.
-  auto descriptor =
-      std::make_shared<impeller::PipelineDescriptor>(pipeline_descriptor_);
-
-  descriptor->SetSampleCount(render_target_.GetSampleCount());
-
-  render_target_.IterateAllColorAttachments(
-      [&](size_t index, const impeller::ColorAttachment& attachment) -> bool {
-        auto& color = ColorAttachmentDescriptorAt(index);
-        color.format = render_target_.GetRenderTargetPixelFormat();
-        return true;
-      });
-
-  descriptor->SetColorAttachmentDescriptors(color_descriptors_);
-
-  {
-    auto stencil = render_target_.GetStencilAttachment();
-    if (stencil && impeller::IsStencilWritable(
-                       stencil->texture->GetTextureDescriptor().format)) {
-      descriptor->SetStencilPixelFormat(
-          stencil->texture->GetTextureDescriptor().format);
-      descriptor->SetStencilAttachmentDescriptors(stencil_front_desc_,
-                                                  stencil_back_desc_);
-    } else {
-      descriptor->ClearStencilAttachments();
-    }
-  }
-
-  {
-    auto depth = render_target_.GetDepthAttachment();
-    if (depth && impeller::IsDepthWritable(
-                     depth->texture->GetTextureDescriptor().format)) {
-      descriptor->SetDepthPixelFormat(
-          depth->texture->GetTextureDescriptor().format);
-      descriptor->SetDepthStencilAttachmentDescriptor(depth_desc_);
-    } else {
-      descriptor->ClearDepthAttachment();
-    }
-  }
-
   const std::shared_ptr<const RenderPipeline::Core>& core =
       render_pipeline_->GetCore();
-  pipeline_known_failed_ = core->HasBuildFailed(*descriptor);
+  pipeline_known_failed_ = core->HasBuildFailed(pipeline_state_);
   if (pipeline_known_failed_) {
     return;
   }
-  recording.Retain(core);
-  auto* op = recording.ops.Append<SetPipelineStateOp>();
+  recording.Retain(core->GetRetainStamp(), core);
+  auto* op = recording.ops.Append<SetPipelineStateOp>(
+      SetPipelineStateOp::SizeFor(pipeline_state_));
   op->core = core.get();
-  op->descriptor = descriptor.get();
-  recording.Retain(std::move(descriptor));
+  std::memcpy(static_cast<void*>(&op->state), &pipeline_state_,
+              pipeline_state_.GetUsedSize());
 }
 
 bool RenderPass::Draw(size_t element_count,
@@ -369,6 +339,7 @@ bool RenderPass::Draw(size_t element_count,
   op->indexed = indexed;
   op->element_count = static_cast<uint32_t>(element_count);
   op->instance_count = static_cast<uint32_t>(instance_count);
+  recording->draw_count++;
   return true;
 }
 
@@ -478,8 +449,7 @@ Dart_Handle InternalFlutterGpu_RenderPass_End(
 void InternalFlutterGpu_RenderPass_BindPipeline(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::RenderPipeline* pipeline) {
-  auto ref = fml::RefPtr<flutter::gpu::RenderPipeline>(pipeline);
-  wrapper->SetPipeline(std::move(ref));
+  wrapper->SetPipeline(pipeline);
 }
 
 void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
@@ -610,7 +580,7 @@ void InternalFlutterGpu_RenderPass_BindSet(
   if (slot < 0) {
     return;
   }
-  wrapper->BindSet(slot, fml::RefPtr<flutter::gpu::BindingSet>(binding_set));
+  wrapper->BindSet(slot, binding_set);
 }
 
 void InternalFlutterGpu_RenderPass_ClearBindings(
@@ -618,12 +588,23 @@ void InternalFlutterGpu_RenderPass_ClearBindings(
   wrapper->ClearBindings();
 }
 
+// Whether [index] names a color attachment a pass can configure.
+static bool IsColorAttachmentIndex(int index) {
+  return index >= 0 && static_cast<size_t>(index) <
+                           flutter::gpu::PipelineState::kMaxColorAttachments;
+}
+
 void InternalFlutterGpu_RenderPass_SetColorBlendEnable(
     flutter::gpu::RenderPass* wrapper,
     int color_attachment_index,
     bool enable) {
-  auto& color = wrapper->GetColorAttachmentDescriptor(color_attachment_index);
+  if (!IsColorAttachmentIndex(color_attachment_index)) {
+    return;
+  }
+  impeller::ColorAttachmentDescriptor color =
+      wrapper->GetPipelineState().colors[color_attachment_index];
   color.blending_enabled = enable;
+  wrapper->SetColorAttachmentDescriptor(color_attachment_index, color);
 }
 
 void InternalFlutterGpu_RenderPass_SetColorBlendEquation(
@@ -635,7 +616,11 @@ void InternalFlutterGpu_RenderPass_SetColorBlendEquation(
     int alpha_blend_operation,
     int source_alpha_blend_factor,
     int destination_alpha_blend_factor) {
-  auto& color = wrapper->GetColorAttachmentDescriptor(color_attachment_index);
+  if (!IsColorAttachmentIndex(color_attachment_index)) {
+    return;
+  }
+  impeller::ColorAttachmentDescriptor color =
+      wrapper->GetPipelineState().colors[color_attachment_index];
   color.color_blend_op =
       flutter::gpu::ToImpellerBlendOperation(color_blend_operation);
   color.src_color_blend_factor =
@@ -648,21 +633,24 @@ void InternalFlutterGpu_RenderPass_SetColorBlendEquation(
       flutter::gpu::ToImpellerBlendFactor(source_alpha_blend_factor);
   color.dst_alpha_blend_factor =
       flutter::gpu::ToImpellerBlendFactor(destination_alpha_blend_factor);
+  wrapper->SetColorAttachmentDescriptor(color_attachment_index, color);
 }
 
 void InternalFlutterGpu_RenderPass_SetDepthWriteEnable(
     flutter::gpu::RenderPass* wrapper,
     bool enable) {
-  auto& depth = wrapper->GetDepthAttachmentDescriptor();
+  impeller::DepthAttachmentDescriptor depth = wrapper->GetPipelineState().depth;
   depth.depth_write_enabled = enable;
+  wrapper->SetDepthAttachmentDescriptor(depth);
 }
 
 void InternalFlutterGpu_RenderPass_SetDepthCompareOperation(
     flutter::gpu::RenderPass* wrapper,
     int compare_operation) {
-  auto& depth = wrapper->GetDepthAttachmentDescriptor();
+  impeller::DepthAttachmentDescriptor depth = wrapper->GetPipelineState().depth;
   depth.depth_compare =
       flutter::gpu::ToImpellerCompareFunction(compare_operation);
+  wrapper->SetDepthAttachmentDescriptor(depth);
 }
 
 void InternalFlutterGpu_RenderPass_SetStencilReference(
@@ -723,10 +711,10 @@ void InternalFlutterGpu_RenderPass_SetStencilConfig(
 
   // Corresponds to the `StencilFace` enum in `gpu/lib/src/render_pass.dart`.
   if (target_face != 2 /* both or front */) {
-    wrapper->GetStencilFrontAttachmentDescriptor() = desc;
+    wrapper->SetStencilFrontAttachmentDescriptor(desc);
   }
   if (target_face != 1 /* both or back */) {
-    wrapper->GetStencilBackAttachmentDescriptor() = desc;
+    wrapper->SetStencilBackAttachmentDescriptor(desc);
   }
 }
 

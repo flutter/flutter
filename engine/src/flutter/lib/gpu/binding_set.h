@@ -12,6 +12,7 @@
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/device_buffer.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/retain_stamp.h"
 #include "flutter/lib/gpu/shader.h"
 #include "flutter/lib/gpu/texture.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -67,6 +68,7 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
     std::vector<TextureBinding> texture_bindings;
     std::vector<BufferBinding> storage_buffer_bindings;
     std::vector<std::shared_ptr<const Shader::Reflection>> reflections;
+    RetainStamp retain_stamp;
   };
 
   BindingSet();

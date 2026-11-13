@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include "flutter/fml/closure.h"
@@ -30,7 +31,8 @@
 namespace flutter {
 namespace gpu {
 
-/// Replays recordings into Impeller passes.
+/// Replays recordings into Impeller passes. Its working storage lasts between
+/// passes, so that replaying allocates nothing once it has warmed up.
 ///
 /// Every method must run on the replay thread.
 class PassReplayer {
@@ -60,6 +62,11 @@ class PassReplayer {
   void Draw(impeller::RenderPass& pass, const DrawOp& op);
 
   impeller::Context& context_;
+
+  // A frame uses a handful of samplers across thousands of binds, and the
+  // sampler library owns them for the context's lifetime.
+  std::vector<std::pair<uint64_t, impeller::raw_ptr<const impeller::Sampler>>>
+      samplers_;
 
   // The state bound at the current point in the pass. The ops are stable in
   // the recording, so these point at them rather than copying.
@@ -120,7 +127,7 @@ class ReplayQueue {
 /// The Impeller command buffer a Flutter GPU command buffer encodes into.
 ///
 /// Created on the recording thread and used on the replay thread. Dropping
-/// the last reference, which happens once the GPU finishes, frees the
+/// the last reference, which happens once the GPU finishes, recycles the
 /// recordings. Everything they point at stays alive until then, which is why
 /// replay can hand Impeller non-owning references.
 class CommandBufferEncoder {

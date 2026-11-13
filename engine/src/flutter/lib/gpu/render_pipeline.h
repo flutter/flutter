@@ -6,6 +6,7 @@
 #define FLUTTER_LIB_GPU_RENDER_PIPELINE_H_
 
 #include <atomic>
+#include <cstdint>
 #include <future>
 #include <memory>
 #include <mutex>
@@ -13,12 +14,15 @@
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/pipeline_state.h"
+#include "flutter/lib/gpu/retain_stamp.h"
 #include "flutter/lib/gpu/shader.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/vertex_descriptor.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "third_party/abseil-cpp/absl/container/flat_hash_set.h"
 
 namespace flutter {
@@ -49,17 +53,28 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
         impeller::ShaderLibrary& library,
         impeller::PipelineDescriptor& desc) const;
 
-    /// The backend pipeline for [state], a descriptor without shaders or a
-    /// vertex layout, or null if it fails to build. Only for use on the replay
-    /// thread.
-    std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> Resolve(
-        impeller::Context& context,
-        const impeller::PipelineDescriptor& state) const;
+    /// A backend pipeline, or null if it failed to build.
+    struct ResolvedPipeline {
+      std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
+          pipeline;
+      RetainStamp retain_stamp;
+    };
+
+    /// The backend pipeline for [state], built on first use. Only for use on
+    /// the replay thread. The result is only valid until the next call.
+    ///
+    /// Keyed on plain data so that a state change costs one hash, instead of
+    /// building a descriptor and looking it up in the pipeline library.
+    const ResolvedPipeline& Resolve(impeller::Context& context,
+                                    const PipelineState& state) const;
 
     /// Whether the backend failed to build the pipeline for [state], so that
     /// draws with that state fail on the recording thread instead of being
     /// dropped at replay.
-    bool HasBuildFailed(const impeller::PipelineDescriptor& state) const;
+    bool HasBuildFailed(const PipelineState& state) const;
+
+    /// Tracks which recording last retained this core.
+    const RetainStamp& GetRetainStamp() const { return retain_stamp_; }
 
    private:
     const std::string vertex_name_;
@@ -69,8 +84,12 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
     const std::string fragment_entrypoint_;
     const std::shared_future<bool> fragment_registration_;
     const std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor_;
+    RetainStamp retain_stamp_;
 
     // Replay thread only.
+    mutable absl::
+        flat_hash_map<PipelineState, ResolvedPipeline, PipelineState::Hash>
+            resolved_;
     mutable uint64_t resolved_generation_ = 0;
 
     // Keeps the check on the recording thread free of locks and hashing,

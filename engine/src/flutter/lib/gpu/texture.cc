@@ -43,10 +43,6 @@ Texture::Texture(std::shared_ptr<impeller::Texture> texture)
 
 Texture::~Texture() = default;
 
-std::shared_ptr<impeller::Texture> Texture::GetTexture() {
-  return texture_;
-}
-
 // Returns the size in pixels of the given dimension at `mip_level`, clamped
 // at 1, matching standard mip-chain semantics. The Dart-side helper
 // `Texture.getMipLevelSizeInBytes` uses the same `max(1, dim >> level)`

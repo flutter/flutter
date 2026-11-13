@@ -38,7 +38,7 @@ PassRecording* CommandBuffer::BeginPass(PassRecording::Kind kind,
     return nullptr;
   }
   EndOpenPass();
-  open_pass_ = std::make_unique<PassRecording>(kind);
+  open_pass_ = PassRecording::Acquire(kind);
   open_pass_owner_ = owner;
   return open_pass_.get();
 }
@@ -88,8 +88,8 @@ bool CommandBuffer::CopyBufferToTexture(DeviceBuffer& source,
   if (!blits) {
     return false;
   }
-  blits->Retain(source.GetBuffer());
-  blits->Retain(destination.GetTexture());
+  blits->Retain(source.GetRetainStamp(), source.GetBuffer());
+  blits->Retain(destination.GetRetainStamp(), destination.GetTexture());
   auto* op = blits->ops.Append<CopyBufferToTextureOp>();
   op->source = source.GetBuffer().get();
   op->source_offset = source_offset;
@@ -109,8 +109,8 @@ bool CommandBuffer::CopyTextureToBuffer(Texture& source,
   if (!blits) {
     return false;
   }
-  blits->Retain(source.GetTexture());
-  blits->Retain(destination.GetBuffer());
+  blits->Retain(source.GetRetainStamp(), source.GetTexture());
+  blits->Retain(destination.GetRetainStamp(), destination.GetBuffer());
   auto* op = blits->ops.Append<CopyTextureToBufferOp>();
   op->source = source.GetTexture().get();
   op->destination = destination.GetBuffer().get();
@@ -127,8 +127,8 @@ bool CommandBuffer::CopyTextureToTexture(Texture& source,
   if (!blits) {
     return false;
   }
-  blits->Retain(source.GetTexture());
-  blits->Retain(destination.GetTexture());
+  blits->Retain(source.GetRetainStamp(), source.GetTexture());
+  blits->Retain(destination.GetRetainStamp(), destination.GetTexture());
   auto* op = blits->ops.Append<CopyTextureToTextureOp>();
   op->source = source.GetTexture().get();
   op->destination = destination.GetTexture().get();
