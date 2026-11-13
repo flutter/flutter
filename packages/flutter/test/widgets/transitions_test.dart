@@ -235,42 +235,44 @@ void main() {
     });
   });
 
-  testWidgets('PositionedTransition does not crash at zero area', (WidgetTester tester) async {
-    tester.view.physicalSize = Size.zero;
-    final controller = AnimationController(
-      vsync: const TestVSync(),
-      value: 1,
-      duration: const Duration(seconds: 2),
-    );
-    final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
-    addTearDown(tester.view.reset);
-    addTearDown(controller.dispose);
-    addTearDown(curvedAnimation.dispose);
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Stack(
-            children: [
-              PositionedTransition(
-                rect: RelativeRectTween(
-                  begin: RelativeRect.fromRect(
-                    const Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
-                    const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
-                  ),
-                  end: RelativeRect.fromRect(
-                    const Rect.fromLTRB(81.0, 91.0, 91.0, 101.0),
-                    const Rect.fromLTRB(1.0, 11.0, 101.0, 111.0),
-                  ),
-                ).animate(curvedAnimation),
-                child: const Placeholder(),
-              ),
-            ],
+  group('PositionedTransition', () {
+    testWidgets(' does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Stack(
+              children: [
+                PositionedTransition(
+                  rect: RelativeRectTween(
+                    begin: RelativeRect.fromRect(
+                      const Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
+                      const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
+                    ),
+                    end: RelativeRect.fromRect(
+                      const Rect.fromLTRB(81.0, 91.0, 91.0, 101.0),
+                      const Rect.fromLTRB(1.0, 11.0, 101.0, 111.0),
+                    ),
+                  ).animate(curvedAnimation),
+                  child: const Placeholder(),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-    expect(tester.getSize(find.byType(PositionedTransition)), Size.zero);
+      );
+      expect(tester.getSize(find.byType(PositionedTransition)), Size.zero);
+    });
   });
 
   group('RelativePositionedTransition', () {
