@@ -46,5 +46,10 @@ template("check_forbidden_native_symbols") {
     if (is_debug) {
       args += [ "--unoptimized" ]
     }
+    if (is_linux) {
+      # The engine statically links libunwind on Linux, and it must not leak
+      # into the host process.
+      args += [ "--forbid-exported-unwind-symbols" ]
+    }
   }
 }

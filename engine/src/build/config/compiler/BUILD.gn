@@ -646,7 +646,13 @@ config("runtime_library") {
     if (is_linux) {
       # Our custom libcxx doesn't include the unwinder, which is included in
       # libc++.a. Link the libunwind directly.
-      ldflags += [ "--unwindlib=libunwind" ]
+      #
+      # Keep libunwind's symbols out of the dynamic symbol table of shared
+      # libraries we link it into.
+      ldflags += [
+        "--unwindlib=libunwind",
+        "-Wl,--exclude-libs,libunwind.a",
+      ]
     }
   }
 
