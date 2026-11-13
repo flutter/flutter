@@ -34,6 +34,7 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
   final bool _isClone;
 
   /// Retained image sources for images recorded onto this picture.
+  @override
   final PictureImageTracker? imageTracker;
 
   void _init() {
@@ -140,23 +141,22 @@ class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
     (tracker as PictureImageTracker).releaseAll();
   });
 
-  SkwasmCanvas? _recordingCanvas;
+  EngineCanvas? _recordingCanvas;
 
   /// Tracks [ImageSource] references for draw operations recorded on this recorder.
   final PictureImageTracker tracker = PictureImageTracker();
 
-  /// The active recording canvas, or null if not recording.
-  SkwasmCanvas? get recordingCanvas => _recordingCanvas;
-
   /// Begins recording canvas commands within the specified [bounds].
-  SkwasmCanvas beginRecording(ui.Rect bounds) {
+  EngineCanvas beginRecording(ui.Rect bounds) {
     if (isRecording) {
       throw StateError('PictureRecorder is already recording');
     }
     _isRecording = true;
-    final canvas = SkwasmCanvas.fromHandle(
-      withStackScope(
-        (StackScope s) => pictureRecorderBeginRecording(handle, s.convertRectToNative(bounds)),
+    final canvas = EngineCanvas(
+      SkwasmCanvas(
+        withStackScope(
+          (StackScope s) => pictureRecorderBeginRecording(handle, s.convertRectToNative(bounds)),
+        ),
       ),
       recorder: this,
       tracker: tracker,

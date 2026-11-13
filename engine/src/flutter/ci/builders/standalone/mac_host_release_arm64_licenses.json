@@ -18,7 +18,6 @@
         "arm64",
         "--no-lto",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks"
     ],
     "name": "ci/host_release_arm64_licenses",
