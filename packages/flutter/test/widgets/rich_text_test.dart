@@ -310,6 +310,36 @@ void main() {
     expect(paragraph.devicePixelRatio, 1.0);
   });
 
+  testWidgets('RichText updates semantics when only TextSpan semantics fields change', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    Widget buildText({required String semanticsLabel, required Locale locale}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(text: 'hello', semanticsLabel: semanticsLabel, locale: locale),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildText(semanticsLabel: 'first', locale: const Locale('en')));
+    expect(tester.getSemantics(find.byType(RichText)).label, 'first');
+
+    await tester.pumpWidget(buildText(semanticsLabel: 'second', locale: const Locale('en')));
+    expect(tester.getSemantics(find.byType(RichText)).label, 'second');
+
+    await tester.pumpWidget(buildText(semanticsLabel: 'second', locale: const Locale('fr')));
+    final List<StringAttribute> attributes = tester
+        .getSemantics(find.byType(RichText))
+        .attributedLabel
+        .attributes;
+    expect(attributes, hasLength(1));
+    expect((attributes.single as LocaleStringAttribute).locale, const Locale('fr'));
+
+    handle.dispose();
+  });
+
   testWidgets('RichText does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);

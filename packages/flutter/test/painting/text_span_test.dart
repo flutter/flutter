@@ -202,6 +202,43 @@ void main() {
     expect(textSpan1.compareTo(textSpan6), RenderComparison.layout);
   });
 
+  test('TextSpan compareTo reports semantics changes as metadata', () {
+    const base = TextSpan(text: 'a');
+    expect(
+      base.compareTo(const TextSpan(text: 'a', semanticsLabel: 'label')),
+      RenderComparison.metadata,
+    );
+    expect(
+      base.compareTo(const TextSpan(text: 'a', semanticsIdentifier: 'id')),
+      RenderComparison.metadata,
+    );
+    expect(
+      base.compareTo(const TextSpan(text: 'a', locale: Locale('fr'))),
+      RenderComparison.metadata,
+    );
+    expect(base.compareTo(const TextSpan(text: 'a', spellOut: true)), RenderComparison.metadata);
+    expect(
+      const TextSpan(
+        text: 'a',
+        locale: Locale('fr'),
+        spellOut: true,
+      ).compareTo(const TextSpan(text: 'a', locale: Locale('fr'), spellOut: true)),
+      RenderComparison.identical,
+    );
+  });
+
+  test('TextSpan equality and hashCode include locale and spellOut', () {
+    const base = TextSpan(text: 'a');
+    const withLocale = TextSpan(text: 'a', locale: Locale('fr'));
+    const withSpellOut = TextSpan(text: 'a', spellOut: true);
+    expect(base, isNot(withLocale));
+    expect(base, isNot(withSpellOut));
+    expect(base.hashCode, isNot(withLocale.hashCode));
+    expect(base.hashCode, isNot(withSpellOut.hashCode));
+    expect(withLocale, const TextSpan(text: 'a', locale: Locale('fr')));
+    expect(withLocale.hashCode, const TextSpan(text: 'a', locale: Locale('fr')).hashCode);
+  });
+
   test('TextSpan nested widget change test', () {
     const textSpan1 = TextSpan(
       text: 'a',
