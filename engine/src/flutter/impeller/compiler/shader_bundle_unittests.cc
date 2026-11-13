@@ -539,9 +539,9 @@ TEST(ShaderBundleTest, GenerateShaderBundleEscapesSpacesInDepfile) {
   const std::string contents(
       reinterpret_cast<const char*>(depfile->GetMapping()), depfile->GetSize());
 
-  EXPECT_NE(contents.find("out\ bundle.shaderbundle: "), std::string::npos)
+  EXPECT_NE(contents.find("out\\ bundle.shaderbundle: "), std::string::npos)
       << contents;
-  EXPECT_NE(contents.find("with\ space/unlit.frag"), std::string::npos)
+  EXPECT_NE(contents.find("with\\ space/unlit.frag"), std::string::npos)
       << contents;
   EXPECT_EQ(contents.find("with space"), std::string::npos) << contents;
 }
