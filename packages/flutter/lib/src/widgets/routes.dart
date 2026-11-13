@@ -2432,6 +2432,11 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   of changes to the [Navigator]'s session history.
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
+
+  /// Doubly-linked list of active routes of type [R] on the observed [Navigator].
+  ///
+  /// Uses [Expando] so [RouteObserver] neither retains [Route] instances after
+  /// they are disposed nor invokes getters on mocked [Route] objects in tests.
   final Expando<R> _routeAbove = Expando<R>();
   final Expando<R> _routeBelow = Expando<R>();
 
@@ -2462,6 +2467,11 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   }
 
   /// Subscribe [routeAware] to be informed about changes to [route].
+  ///
+  /// Subscribing immediately calls [RouteAware.didPush] on [routeAware]. If
+  /// another route of type [R] is already on top of [route], it also calls
+  /// [RouteAware.didPushNext]. If [routeAware] is already subscribed to
+  /// [route], this method does nothing.
   ///
   /// Going forward, [routeAware] will be informed about qualifying changes
   /// to [route], e.g. when [route] is covered by another route or when [route]
