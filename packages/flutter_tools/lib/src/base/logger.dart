@@ -1104,6 +1104,10 @@ class VerboseLogger extends DelegatingLogger {
 class PrefixedErrorLogger extends DelegatingLogger {
   PrefixedErrorLogger(super.parent);
 
+  /// Not in the `error:` form, which MSBuild reports as a build error even
+  /// when the command succeeds.
+  static const prefix = '[ERROR] ';
+
   @override
   void printError(
     String message, {
@@ -1115,12 +1119,17 @@ class PrefixedErrorLogger extends DelegatingLogger {
     bool? wrap,
   }) {
     hadErrorOutput = true;
+    if (stackTrace != null) {
+      message = '$message\n$stackTrace';
+    }
     if (message.trim().isNotEmpty) {
-      message = 'ERROR: $message';
+      message = message
+          .split('\n')
+          .map((String line) => line.trim().isEmpty ? line : '$prefix$line')
+          .join('\n');
     }
     super.printError(
       message,
-      stackTrace: stackTrace,
       emphasis: emphasis,
       color: color,
       indent: indent,
