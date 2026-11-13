@@ -1320,8 +1320,7 @@ void main() {
       ]);
 
       // The 24 hour format announces onAlwaysUse24HourFormatChanged and
-      // onPlatformConfigurationChanged, and onMetricsChanged is what tells the
-      // framework to re-read it.
+      // onPlatformConfigurationChanged.
       notifications.clear();
       debugSetViewMetricsOverride(
         1,
@@ -1333,7 +1332,7 @@ void main() {
           alwaysUse24HourFormat: true,
         ),
       );
-      expect(notifications, <String>['configuration', 'alwaysUse24HourFormat', 'metrics']);
+      expect(notifications, <String>['configuration', 'alwaysUse24HourFormat']);
 
       // A table that scales differently but reports the same factor is still a
       // change of text scaling.
@@ -1385,7 +1384,7 @@ void main() {
         notifications.clear();
         debugSetViewMetricsOverride(1, entry.value(_fullyPopulated));
         expect(notifications.toSet(), switch (entry.key) {
-          'alwaysUse24HourFormat' => <String>{'configuration', 'alwaysUse24HourFormat', 'metrics'},
+          'alwaysUse24HourFormat' => <String>{'configuration', 'alwaysUse24HourFormat'},
           'textScaling' => <String>{'configuration', 'textScaleFactor'},
           'platformBrightness' => <String>{'configuration', 'platformBrightness'},
           final String metric when viewMetrics.contains(metric) => <String>{'metrics'},
