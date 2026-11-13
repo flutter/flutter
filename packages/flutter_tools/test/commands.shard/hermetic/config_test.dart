@@ -551,7 +551,7 @@ class FakeExtensionManager extends Fake implements ExtensionManager {
   Future<void> ensureInitialized() async {}
 }
 
-class FakeConfigurationExtension extends Fake implements ConfigurationExtension {
+final class FakeConfigurationExtension extends ConfigurationExtension {
   FakeConfigurationExtension({
     required this.title,
     required this.featureFlags,

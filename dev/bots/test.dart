@@ -156,6 +156,7 @@ Future<void> main(List<String> args) async {
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
       'customer_testing_devtools': customerTestingDevtoolsRunner,
+      'customer_testing_flame': customerTestingFlameRunner,
       'analyze': analyzeRunner,
       'fuchsia_precache': fuchsiaPrecacheRunner,
       'snippets': _runSnippetsTests,
