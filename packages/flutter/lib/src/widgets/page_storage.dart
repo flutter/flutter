@@ -39,9 +39,11 @@ class PageStorageKey<T> extends ValueKey<T> {
 
 @immutable
 class _StorageEntryIdentifier {
-  const _StorageEntryIdentifier(this.keys);
+  const _StorageEntryIdentifier(this.keys, this.namespace);
 
   final List<PageStorageKey<dynamic>> keys;
+
+  final Type? namespace;
 
   bool get isNotEmpty => keys.isNotEmpty;
 
@@ -51,15 +53,17 @@ class _StorageEntryIdentifier {
       return false;
     }
     return other is _StorageEntryIdentifier &&
+        other.namespace == namespace &&
         listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
 
   @override
-  int get hashCode => Object.hashAll(keys);
+  int get hashCode => Object.hash(namespace, Object.hashAll(keys));
 
   @override
   String toString() {
-    return 'StorageEntryIdentifier(${keys.join(":")})';
+    final namespaceString = namespace == null ? '' : ', namespace: $namespace';
+    return 'StorageEntryIdentifier(${keys.join(":")}$namespaceString)';
   }
 }
 
@@ -77,8 +81,6 @@ class PageStorageBucket {
     return widget is! PageStorage;
   }
 
-  // _ExpansibleState._computeStorageIdentifier in expansible.dart collects the
-  // keys the same way and must be kept in sync with this.
   List<PageStorageKey<dynamic>> _allKeys(BuildContext context) {
     final keys = <PageStorageKey<dynamic>>[];
     if (_maybeAddKey(context, keys)) {
@@ -89,8 +91,8 @@ class PageStorageBucket {
     return keys;
   }
 
-  _StorageEntryIdentifier _computeIdentifier(BuildContext context) {
-    return _StorageEntryIdentifier(_allKeys(context));
+  _StorageEntryIdentifier _computeIdentifier(BuildContext context, Type? namespace) {
+    return _StorageEntryIdentifier(_allKeys(context), namespace);
   }
 
   Map<Object, dynamic>? _storage;
@@ -103,12 +105,23 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
-  void writeState(BuildContext context, dynamic data, {Object? identifier}) {
+  ///
+  /// {@template flutter.widgets.PageStorageBucket.namespace}
+  /// The `namespace` keeps this data apart from data saved by other kinds of
+  /// widgets under the same [PageStorageKey]s. It is typically the type of the
+  /// widget that owns the data, e.g. `namespace: MyWidget`. Prefer the type
+  /// literal over `runtimeType` so that subclasses share the slot.
+  ///
+  /// Defaults to null, the slot shared by widgets that do not pass a namespace,
+  /// such as [Scrollable]. Must be null if `identifier` is provided.
+  /// {@endtemplate}
+  void writeState(BuildContext context, dynamic data, {Object? identifier, Type? namespace}) {
+    assert(identifier == null || namespace == null);
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
       _storage![identifier] = data;
     } else {
-      final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
+      final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context, namespace);
       if (contextIdentifier.isNotEmpty) {
         _storage![contextIdentifier] = data;
       }
@@ -123,14 +136,17 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
-  dynamic readState(BuildContext context, {Object? identifier}) {
+  ///
+  /// {@macro flutter.widgets.PageStorageBucket.namespace}
+  dynamic readState(BuildContext context, {Object? identifier, Type? namespace}) {
+    assert(identifier == null || namespace == null);
     if (_storage == null) {
       return null;
     }
     if (identifier != null) {
       return _storage![identifier];
     }
-    final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
+    final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context, namespace);
     return contextIdentifier.isNotEmpty ? _storage![contextIdentifier] : null;
   }
 }
