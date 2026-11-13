@@ -98,23 +98,40 @@ void main() {
     });
   });
 
-  testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
+  testWithoutContext('dartName returns name used in Dart SDK', () {
     expect(CpuArch.armv7.dartName, 'armv7');
     expect(CpuArch.arm64.dartName, 'arm64');
+    expect(CpuArch.x86.dartName, 'x86');
     expect(CpuArch.x64.dartName, 'x64');
+    expect(CpuArch.riscv64.dartName, 'riscv64');
+    expect(() => CpuArch.unknown.dartName, throwsUnsupportedError);
+    expect(() => CpuArch('ppc64le').dartName, throwsUnsupportedError);
   });
 
   testWithoutContext('darwinArchName returns Apple names', () {
     expect(CpuArch.armv7.darwinArchName, 'armv7');
     expect(CpuArch.arm64.darwinArchName, 'arm64');
     expect(CpuArch.x64.darwinArchName, 'x86_64');
+    expect(() => CpuArch.riscv64.darwinArchName, throwsUnsupportedError);
   });
 
-  testWithoutContext('CpuArch.fromHostPlatform maps standard and custom host platforms', () {
-    expect(CpuArch.fromHostPlatform(HostPlatform.linux_x64), CpuArch.x64);
-    expect(CpuArch.fromHostPlatform(HostPlatform.darwin_arm64), CpuArch.arm64);
-    expect(CpuArch.fromHostPlatform(HostPlatform.linux_riscv64), CpuArch.riscv64);
-    expect(CpuArch.fromHostPlatform(HostPlatform('freebsd-x64', 'x64')), CpuArch.x64);
+  testWithoutContext('androidArchName and androidPlatformName return Android names', () {
+    expect(CpuArch.armv7.androidArchName, 'armeabi-v7a');
+    expect(CpuArch.arm64.androidArchName, 'arm64-v8a');
+    expect(CpuArch.x64.androidArchName, 'x86_64');
+    expect(() => CpuArch.riscv64.androidArchName, throwsUnsupportedError);
+
+    expect(CpuArch.armv7.androidPlatformName, 'android-arm');
+    expect(CpuArch.arm64.androidPlatformName, 'android-arm64');
+    expect(CpuArch.x64.androidPlatformName, 'android-x64');
+    expect(() => CpuArch.riscv64.androidPlatformName, throwsUnsupportedError);
+  });
+
+  testWithoutContext('HostPlatform.cpuArch maps standard and custom host platforms', () {
+    expect(HostPlatform.linux_x64.cpuArch, CpuArch.x64);
+    expect(HostPlatform.darwin_arm64.cpuArch, CpuArch.arm64);
+    expect(HostPlatform.linux_riscv64.cpuArch, CpuArch.riscv64);
+    expect(HostPlatform('freebsd', .x64).cpuArch, CpuArch.x64);
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
@@ -547,7 +564,8 @@ void main() {
     expect(CpuArch.fromName('x64'), CpuArch.x64);
     expect(CpuArch.fromName('x86_64'), CpuArch.x64);
     expect(CpuArch.fromName('riscv64'), CpuArch.riscv64);
-    expect(() => CpuArch.fromName('bogus'), throwsException);
+    expect(CpuArch.fromName('ppc64le'), CpuArch('ppc64le'));
+    expect(() => CpuArch.fromName('invalid-arch'), throwsFormatException);
 
     expect(CpuArch.unknown.name, 'unknown');
     expect(CpuArch.armv7.name, 'armv7');

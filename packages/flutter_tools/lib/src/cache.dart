@@ -643,7 +643,7 @@ class Cache {
   }
 
   String getHostPlatformArchName() {
-    return _osUtils.hostPlatform.platformName;
+    return _osUtils.hostPlatform.cpuArchName;
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.

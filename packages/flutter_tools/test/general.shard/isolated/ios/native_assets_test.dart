@@ -261,6 +261,7 @@ void main() {
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: featureFlags,
           logger: logger,
           buildRunner: buildRunner,
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
