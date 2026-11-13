@@ -32,21 +32,22 @@ static uint64_t lookup_hash_table(GHashTable* table, uint64_t key) {
       g_hash_table_lookup(table, uint64_to_gpointer(key)));
 }
 
-static gboolean hash_table_find_equal_value(gpointer key,
-                                            gpointer value,
-                                            gpointer user_data) {
-  return gpointer_to_uint64(value) == gpointer_to_uint64(user_data);
-}
-
-// Look up a hash table that maps a uint64_t to a uint64_t; given its key,
-// find its value.
+// Look up a hash table that maps a uint64_t to a uint64_t; given its value,
+// find its key.
 //
 // Returns 0 if not found.
 //
 // Both key and value should be directly hashed.
 static uint64_t reverse_lookup_hash_table(GHashTable* table, uint64_t value) {
-  return gpointer_to_uint64(g_hash_table_find(
-      table, hash_table_find_equal_value, uint64_to_gpointer(value)));
+  GHashTableIter iter;
+  g_hash_table_iter_init(&iter, table);
+  gpointer key, found_value;
+  while (g_hash_table_iter_next(&iter, &key, &found_value)) {
+    if (gpointer_to_uint64(found_value) == value) {
+      return gpointer_to_uint64(key);
+    }
+  }
+  return 0;
 }
 
 static uint64_t to_lower(uint64_t n) {
@@ -380,18 +381,15 @@ static void synchronize_pressed_states(FlKeyEmbedderResponder* self,
           any_pressed_by_record || this_key_pressed_before_event;
 
       if (this_key_pressed_before_event && !any_pressed_by_state) {
-        const uint64_t recorded_physical_key =
-            lookup_hash_table(self->mapping_records, logical_key);
-        // Since this key has been pressed before, there must have been a
-        // recorded physical key.
-        g_return_if_fail(recorded_physical_key != 0);
-        // In rare cases #recorded_logical_key is different from #logical_key.
-        const uint64_t recorded_logical_key =
-            lookup_hash_table(self->pressing_records, recorded_physical_key);
-        synthesize_simple_event(self, kFlutterKeyEventTypeUp,
-                                recorded_physical_key, recorded_logical_key,
-                                timestamp);
-        update_pressing_state(self, recorded_physical_key, 0);
+        // Release every physical key that is pressed as this logical key.
+        uint64_t physical_key = pressing_physical_key;
+        while (physical_key != 0) {
+          synthesize_simple_event(self, kFlutterKeyEventTypeUp, physical_key,
+                                  logical_key, timestamp);
+          update_pressing_state(self, physical_key, 0);
+          physical_key =
+              reverse_lookup_hash_table(self->pressing_records, logical_key);
+        }
       }
     }
     // If the modifier should be pressed, synthesize a down event for its
