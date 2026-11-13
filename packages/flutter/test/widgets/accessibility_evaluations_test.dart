@@ -96,6 +96,96 @@ void main() {
       );
       handle.dispose();
     });
+
+    testWidgets('passes for labeled links', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            link: true,
+            linkUrl: Uri.parse('https://flutter.dev'),
+            label: 'Flutter',
+            child: const SizedBox.square(dimension: 48.0),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('fails for unlabeled links', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            link: true,
+            linkUrl: Uri.parse('https://flutter.dev'),
+            child: const SizedBox.square(dimension: 48.0),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, hasLength(1));
+      expect(result.violations.first.reason, contains('expected link node to have semantic label'));
+      handle.dispose();
+    });
+
+    testWidgets('passes when the link label is on an unmerged child', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            link: true,
+            linkUrl: Uri.parse('https://flutter.dev'),
+            child: Semantics(
+              container: true,
+              label: 'Flutter',
+              child: const SizedBox.square(dimension: 48.0),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('skips unlabeled links without a url', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            link: true,
+            child: const SizedBox.square(dimension: 48.0),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('skips unlabeled links with an empty url', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            link: true,
+            linkUrl: Uri(),
+            child: const SizedBox.square(dimension: 48.0),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
   });
 
   group('MinimumTextContrastEvaluation', () {

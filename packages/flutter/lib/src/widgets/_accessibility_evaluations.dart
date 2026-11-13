@@ -226,8 +226,9 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
-/// An evaluation which enforces that all nodes with a tap or long press action
-/// also have a label.
+/// An evaluation which enforces that all nodes with a tap or long press action,
+/// and all link nodes that have a URL, also have a label. A link node can also
+/// take its label from a descendant.
 @internal
 class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
   const LabeledTapTargetEvaluation();
@@ -262,20 +263,37 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
       return violations;
     }
     final SemanticsData data = node.getSemanticsData();
-    // Skip node if it has no actions, or is marked as hidden.
-    if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap)) {
+    final bool isTappable =
+        data.hasAction(ui.SemanticsAction.longPress) || data.hasAction(ui.SemanticsAction.tap);
+    final bool isLink =
+        data.flagsCollection.isLink && (data.linkUrl?.toString().isNotEmpty ?? false);
+    // Skip the node if it is neither tappable nor a link.
+    if (!isTappable && !isLink) {
       return violations;
     }
-    if ((data.label.isEmpty) && (data.tooltip.isEmpty)) {
+    if (data.label.isEmpty &&
+        data.tooltip.isEmpty &&
+        (isTappable || !_hasLabeledDescendant(node))) {
+      final kind = isTappable ? 'tappable' : 'link';
       violations.add(
         Violation(
           node,
-          '$node: expected tappable node to have semantic label, '
+          '$node: expected $kind node to have semantic label, '
           'but none was found.',
         ),
       );
     }
     return violations;
+  }
+
+  static bool _hasLabeledDescendant(SemanticsNode node) {
+    var found = false;
+    node.visitChildren((SemanticsNode child) {
+      final SemanticsData data = child.getSemanticsData();
+      found = data.label.isNotEmpty || data.tooltip.isNotEmpty || _hasLabeledDescendant(child);
+      return !found;
+    });
+    return found;
   }
 }
 
