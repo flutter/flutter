@@ -44,6 +44,12 @@ class PlatformViewAndroid final : public PlatformView {
  public:
   static bool Register(JNIEnv* env);
 
+  /// @brief Creates the AndroidContext::ContextSettings from engine Settings,
+  ///        gating SurfaceControl swapchain usage on Android API 34+ (HCPP).
+  static AndroidContext::ContextSettings CreateContextSettings(
+      const Settings& p_settings,
+      int api_level);
+
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       const flutter::TaskRunners& task_runners,
                       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
