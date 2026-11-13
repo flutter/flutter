@@ -280,11 +280,7 @@ class CopyAssets extends Target {
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    LinkHooks(),
-    KernelSnapshot(),
-    InstallCodeAssets(),
-  ];
+  List<Target> get dependencies => const <Target>[LinkHooks(), KernelSnapshot()];
 
   @override
   List<Source> get inputs => const <Source>[
@@ -315,16 +311,9 @@ class CopyAssets extends Target {
     final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
-    final File nativeAssetsFile = environment.buildDir.childFile(
-      InstallCodeAssets.nativeAssetsFilename,
-    );
     final Depfile depfile = await copyAssets(
       environment,
       output,
-      additionalContent: <String, DevFSContent>{
-        if (nativeAssetsFile.existsSync())
-          'NativeAssetsManifest.json': DevFSFileContent(nativeAssetsFile),
-      },
       dartHookResult: dartHookResult,
       targetPlatform: targetPlatform,
       buildMode: buildMode,

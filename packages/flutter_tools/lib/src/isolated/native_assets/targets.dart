@@ -4,6 +4,7 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionNativeAssetsConfig;
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
@@ -87,6 +88,14 @@ sealed class AssetBuildTarget {
     );
     if (customTarget != null) {
       final (OS os, Architecture architecture) = customTarget;
+      if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets) &&
+          (os == OS.android || os == OS.iOS || os == OS.macOS)) {
+        throwToolExit(
+          'Custom native assets configuration with "$kExtensionTargetOs=${os.name}" is not '
+          'supported because "${os.name}" code assets require platform SDK version '
+          'configuration; use a built-in target platform or a custom OS identifier.',
+        );
+      }
       return <AssetBuildTarget>[
         CustomCodeAssetTarget(
           architecture: architecture,
@@ -131,14 +140,20 @@ sealed class AssetBuildTarget {
       case TargetPlatform.fuchsia_x64:
         throwToolExit('No targets defined for target platform $targetPlatform.');
       case TargetPlatform.unsupported:
-        if (hasExtensionPlatformDefines(environmentDefines)) {
+        // Also allow data-asset-only hook runs (`buildCodeAssets == null`, such
+        // as `FlutterHookRunnerNative.runHooks` during `flutter run` DevFS sync
+        // on an `ExtensionBackedDevice`) where `flutter assemble` defines are
+        // not populated on `ResidentRunner`'s environment.
+        if (hasExtensionPlatformDefines(environmentDefines) ||
+            !supportedAssetTypes.contains(SupportedAssetTypes.codeAssets)) {
           final String targetPlatformName =
-              environmentDefines[kTargetPlatform] ?? targetPlatform.name;
-          throwToolExit(
-            'Dart build and link hooks require "$kExtensionTargetOs" and '
-            '"$kExtensionTargetArch" (via BuildTarget.resolveNativeAssetsConfig) '
-            'for custom target platform "$targetPlatformName".',
-          );
+              _emptyToNull(environmentDefines[kTargetPlatform]) ?? targetPlatform.name;
+          return <AssetBuildTarget>[
+            CustomDataAssetTarget(
+              supportedAssetTypes: supportedAssetTypes,
+              targetString: targetPlatformName,
+            ),
+          ];
         }
         throwToolExit('No targets defined for target platform $targetPlatform.');
     }
@@ -262,6 +277,19 @@ final class WebAssetTarget extends AssetBuildTarget {
   String get targetString => 'web';
 }
 
+/// Data-assets-only [AssetBuildTarget] used for custom extension target
+/// platforms that do not configure `CodeAsset` cross-compilation via
+/// `BuildTarget.resolveNativeAssetsConfig`.
+final class CustomDataAssetTarget extends AssetBuildTarget {
+  CustomDataAssetTarget({required super.supportedAssetTypes, required this.targetString});
+
+  @override
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[...dataAssetExtensions];
+
+  @override
+  final String targetString;
+}
+
 sealed class CodeAssetTarget extends AssetBuildTarget {
   CodeAssetTarget({
     required this.architecture,
@@ -332,7 +360,11 @@ final class CustomCodeAssetTarget extends CodeAssetTarget {
     required ProcessUtils processUtils,
     bool mustMatchAppBuild = true,
   }) async {
-    cCompilerConfigSync = cCompilerConfigFromDefines(environmentDefines, fileSystem: fileSystem);
+    cCompilerConfigSync = cCompilerConfigFromDefines(
+      environmentDefines,
+      fileSystem: fileSystem,
+      targetOs: os,
+    );
   }
 }
 
@@ -594,8 +626,11 @@ String? _emptyToNull(String? input) {
 /// `HookConfig.code.targetOS`.
 OS parseNativeOS(String rawOs) {
   final String normalized = rawOs.trim().toLowerCase();
-  if (normalized.isEmpty) {
-    throwToolExit('Unsupported native assets target OS "$rawOs".');
+  if (!ExtensionNativeAssetsConfig.isValidTargetOs(normalized)) {
+    throwToolExit(
+      'Unsupported native assets target OS "$rawOs": must start with a lowercase '
+      'ASCII letter and contain only lowercase ASCII letters, digits, and underscores.',
+    );
   }
   if (normalized == 'darwin') {
     return OS.macOS;
@@ -617,8 +652,12 @@ OS parseNativeOS(String rawOs) {
 /// [Architecture.fromString].
 Architecture parseNativeArchitecture(String rawArch) {
   final String normalized = rawArch.trim().toLowerCase();
-  if (normalized.isEmpty) {
-    throwToolExit('Unsupported native assets target architecture "$rawArch".');
+  if (!ExtensionNativeAssetsConfig.isValidTargetArchitecture(normalized)) {
+    throwToolExit(
+      'Unsupported native assets target architecture "$rawArch": must start with '
+      'a lowercase ASCII letter and contain only lowercase ASCII letters, digits, '
+      'and underscores.',
+    );
   }
   return switch (normalized) {
     'arm' || 'armv7' => Architecture.arm,
@@ -656,6 +695,7 @@ Architecture parseNativeArchitecture(String rawArch) {
 CCompilerConfig? cCompilerConfigFromDefines(
   Map<String, String> environmentDefines, {
   required FileSystem fileSystem,
+  OS? targetOs,
 }) {
   final String? cc = _emptyToNull(environmentDefines[kExtensionCCompilerCc]);
   final String? ar = _emptyToNull(environmentDefines[kExtensionCCompilerAr]);
@@ -691,9 +731,8 @@ CCompilerConfig? cCompilerConfigFromDefines(
     archiver: _parseExecutableUri(ar, kExtensionCCompilerAr, fileSystem: fileSystem),
     compiler: _parseExecutableUri(cc, kExtensionCCompilerCc, fileSystem: fileSystem),
     linker: _parseExecutableUri(ld, kExtensionCCompilerLd, fileSystem: fileSystem),
-    windows: envScript == null
-        ? null
-        : WindowsCCompilerConfig(
+    windows: envScript != null
+        ? WindowsCCompilerConfig(
             developerCommandPrompt: DeveloperCommandPrompt(
               script: _parseExecutableUri(
                 envScript,
@@ -702,7 +741,8 @@ CCompilerConfig? cCompilerConfigFromDefines(
               ),
               arguments: envScriptArgs,
             ),
-          ),
+          )
+        : (targetOs == OS.windows ? WindowsCCompilerConfig() : null),
   );
 }
 

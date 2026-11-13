@@ -713,6 +713,7 @@ abstract class FlutterCommand extends Command<void> {
     final String? flavor = cliFlavor ?? defaultFlavor;
 
     _ensureReservedDartDefineIsUnset(kAppFlavor, dartDefines);
+    _ensureReservedDartDefineIsUnset(kFlutterCustomPlatformDartDefine, dartDefines);
     if (flavor != null) {
       dartDefines.add('$kAppFlavor=$flavor');
     }

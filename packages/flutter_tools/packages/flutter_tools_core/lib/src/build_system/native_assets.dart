@@ -145,21 +145,29 @@ class ExtensionNativeAssetsConfig {
     required this.targetArchitecture,
     required this.targetOs,
     this.cCompilerConfig,
-  }) : assert(targetArchitecture.trim().isNotEmpty, 'targetArchitecture cannot be empty.'),
-       assert(targetOs.trim().isNotEmpty, 'targetOs cannot be empty.');
+  }) : assert(
+         isValidTargetArchitecture(targetArchitecture),
+         'Invalid targetArchitecture "$targetArchitecture": $_invalidIdentifierMessage',
+       ),
+       assert(
+         isValidTargetOs(targetOs),
+         'Invalid targetOs "$targetOs": $_invalidIdentifierMessage',
+       );
 
   /// Deserializes an [ExtensionNativeAssetsConfig] from a JSON-serializable map.
   factory ExtensionNativeAssetsConfig.fromJson(Map<String, Object?> json) {
     final String targetArchitecture = json.requiredField<String>(targetArchitectureKey);
-    if (targetArchitecture.trim().isEmpty) {
-      throw const FormatException(
-        'Missing or invalid "$targetArchitectureKey" for ExtensionNativeAssetsConfig.',
+    if (!isValidTargetArchitecture(targetArchitecture)) {
+      throw FormatException(
+        'Missing or invalid "$targetArchitectureKey" ("$targetArchitecture") for '
+        'ExtensionNativeAssetsConfig: $_invalidIdentifierMessage',
       );
     }
     final String targetOs = json.requiredField<String>(targetOsKey);
-    if (targetOs.trim().isEmpty) {
-      throw const FormatException(
-        'Missing or invalid "$targetOsKey" for ExtensionNativeAssetsConfig.',
+    if (!isValidTargetOs(targetOs)) {
+      throw FormatException(
+        'Missing or invalid "$targetOsKey" ("$targetOs") for '
+        'ExtensionNativeAssetsConfig: $_invalidIdentifierMessage',
       );
     }
     final Map<String, Object?>? rawCompilerConfig = json.nullableField<Map<String, Object?>>(
@@ -173,6 +181,19 @@ class ExtensionNativeAssetsConfig {
           : null,
     );
   }
+
+  static final _validIdentifierPattern = RegExp(r'^[a-z][a-z0-9_]*$');
+  static const String _invalidIdentifierMessage =
+      'Identifiers must start with a lowercase ASCII letter and contain only '
+      'lowercase ASCII letters, digits, and underscores.';
+
+  /// Returns whether [value] is a valid target operating system identifier
+  /// (`^[a-z][a-z0-9_]*$`).
+  static bool isValidTargetOs(String value) => _validIdentifierPattern.hasMatch(value);
+
+  /// Returns whether [value] is a valid target CPU architecture identifier
+  /// (`^[a-z][a-z0-9_]*$`).
+  static bool isValidTargetArchitecture(String value) => _validIdentifierPattern.hasMatch(value);
 
   /// Map key for [cCompilerConfig].
   @visibleForTesting

@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionBuildTarget;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/template.dart';
 import '../../build_info.dart';
@@ -16,17 +18,24 @@ import '../../project.dart';
 import '../build_system.dart';
 
 /// Resolves the custom extension plugin platform key from [defines], or returns
-/// `null` if none is configured or if the key matches a built-in Flutter
-/// platform.
+/// `null` if [kExtensionPluginPlatformKey] is unset or matches a built-in
+/// Flutter platform.
+///
+/// Throws a [ToolExit] if [kExtensionPluginPlatformKey] is non-empty and does
+/// not match [ExtensionBuildTarget.isValidPluginPlatformKey].
 String? resolveCustomPluginPlatformKey(Map<String, String> defines) {
-  final String? rawPluginPlatformKey = defines[kExtensionPluginPlatformKey]?.trim();
-  final String? customPlatformKey = rawPluginPlatformKey != null && rawPluginPlatformKey.isNotEmpty
-      ? rawPluginPlatformKey
-      : defines[kExtensionTargetOs]?.trim().toLowerCase();
+  final String? customPlatformKey = defines[kExtensionPluginPlatformKey]?.trim();
   if (customPlatformKey == null ||
       customPlatformKey.isEmpty ||
       Plugin.builtInPlatformKeys.contains(customPlatformKey)) {
     return null;
+  }
+  if (!ExtensionBuildTarget.isValidPluginPlatformKey(customPlatformKey)) {
+    throwToolExit(
+      'Invalid "$kExtensionPluginPlatformKey" define "$customPlatformKey": '
+      'plugin platform keys must start with a lowercase ASCII letter and contain '
+      'only lowercase ASCII letters, digits, and underscores.',
+    );
   }
   return customPlatformKey;
 }

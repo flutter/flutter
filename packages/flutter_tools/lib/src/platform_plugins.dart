@@ -662,7 +662,7 @@ class CustomPlatformPlugin extends PluginPlatform implements NativePlugin, DartP
         return null;
       }
       return CustomPlatformPlugin(
-        configuration: _yamlToMap(yaml),
+        configuration: yamlMapToPlatformConfiguration(yaml),
         name: name,
         platformKey: platformKey,
         dartFileName: dartPluginFields?.dartFileName,
@@ -693,21 +693,25 @@ class CustomPlatformPlugin extends PluginPlatform implements NativePlugin, DartP
     'name': name,
     'platformKey': platformKey,
   };
+}
 
-  static Map<String, Object?> _yamlToMap(YamlMap yaml) {
-    return <String, Object?>{
-      for (final MapEntry(:Object? key, :Object? value) in yaml.entries)
-        if (key is String) key: _convertYamlValue(value),
-    };
-  }
+/// Recursively converts a `pubspec.yaml` [YamlMap] into a plain JSON-safe
+/// `Map<String, Object?>` suitable for crossing isolate boundaries.
+Map<String, Object?> yamlMapToPlatformConfiguration(YamlMap yaml) {
+  return <String, Object?>{
+    for (final MapEntry(:Object? key, :Object? value) in yaml.entries)
+      if (key is String) key: _convertYamlConfigurationValue(value),
+  };
+}
 
-  static Object? _convertYamlValue(Object? value) {
-    return switch (value) {
-      final YamlMap map => _yamlToMap(map),
-      final YamlList list => <Object?>[for (final Object? item in list) _convertYamlValue(item)],
-      _ => value,
-    };
-  }
+Object? _convertYamlConfigurationValue(Object? value) {
+  return switch (value) {
+    final YamlMap map => yamlMapToPlatformConfiguration(map),
+    final YamlList list => <Object?>[
+      for (final Object? item in list) _convertYamlConfigurationValue(item),
+    ],
+    _ => value,
+  };
 }
 
 final _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');

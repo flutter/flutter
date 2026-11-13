@@ -1726,6 +1726,10 @@ List<Plugin> resolvePluginImplementationsForPlatform(
 
 /// Resolves and serializes [ExtensionPlugin]s for [platformKey] from [plugins].
 ///
+/// When [includeDevDependencies] is `false` (for example in release builds),
+/// dev-only plugins ([Plugin.isDevDependency]) are excluded before resolution,
+/// matching [injectPlugins].
+///
 /// If [quiet] is true, validation and resolution errors or warnings will not
 /// be printed.
 List<ExtensionPlugin> resolveExtensionPluginsForPlatform(
@@ -1733,10 +1737,14 @@ List<ExtensionPlugin> resolveExtensionPluginsForPlatform(
   String platformKey, {
   required FileSystem fileSystem,
   required Logger logger,
+  bool includeDevDependencies = true,
   bool quiet = false,
 }) {
+  final List<Plugin> candidatePlugins = includeDevDependencies
+      ? plugins
+      : plugins.where((Plugin plugin) => !plugin.isDevDependency).toList();
   final List<Plugin> resolved = resolvePluginImplementationsForPlatform(
-    plugins,
+    candidatePlugins,
     platformKey,
     logger: logger,
     quiet: quiet,
@@ -1746,11 +1754,13 @@ List<ExtensionPlugin> resolveExtensionPluginsForPlatform(
       ExtensionPlugin(
         name: plugin.name,
         path: fileSystem.directory(plugin.path).uri,
-        configuration: switch (plugin.platforms[platformKey]) {
-          final CustomPlatformPlugin custom => custom.configuration,
-          final PluginPlatform platform => platform.toMap(fileSystem: fileSystem),
-          null => const <String, Object?>{},
-        },
+        configuration:
+            plugin.rawPlatformConfigurations[platformKey] ??
+            switch (plugin.platforms[platformKey]) {
+              final CustomPlatformPlugin custom => custom.configuration,
+              final PluginPlatform platform => platform.toMap(fileSystem: fileSystem),
+              null => const <String, Object?>{},
+            },
       ),
   ];
 }

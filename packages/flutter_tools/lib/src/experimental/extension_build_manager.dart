@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../build_info.dart' show kExtensionPluginPlatformKey;
+import '../build_info.dart' show kExtensionBuildTarget, kExtensionPluginPlatformKey;
 import '../features.dart';
 import '../flutter_plugins.dart';
 import '../plugins.dart';
@@ -65,9 +65,10 @@ base class ExtensionBuildManager {
       ExtensionConnection.defaultExtensionName;
 
   /// Returns the `flutter assemble` environment defines for [targetName],
-  /// including `kExtensionTargetOs`, `kExtensionTargetArch`, `kExtensionCCompiler*`
-  /// from [nativeAssetsConfig], and `kExtensionPluginPlatformKey` when configured
-  /// on the [ExtensionBuildTarget].
+  /// including `kExtensionBuildTarget`, `kExtensionTargetOs`,
+  /// `kExtensionTargetArch`, `kExtensionCCompiler*` from [nativeAssetsConfig],
+  /// and `kExtensionPluginPlatformKey` when configured on the
+  /// [ExtensionBuildTarget].
   Map<String, String> environmentDefinesForTarget(
     String targetName, {
     ExtensionNativeAssetsConfig? nativeAssetsConfig,
@@ -77,6 +78,7 @@ base class ExtensionBuildManager {
       return const <String, String>{};
     }
     return <String, String>{
+      kExtensionBuildTarget: target.name,
       ...?nativeAssetsConfig?.toEnvironmentDefines(),
       if (target.pluginPlatformKey case final String key when key.isNotEmpty)
         kExtensionPluginPlatformKey: key,
@@ -134,6 +136,7 @@ base class ExtensionBuildManager {
       final Object? result = await connection.sendRequest(
         BuildService.resolveNativeAssetsConfigMethod,
         params: params,
+        timeout: null,
       );
       if (result == null) {
         return null;
@@ -146,6 +149,10 @@ base class ExtensionBuildManager {
       );
     } on ToolExit {
       rethrow;
+    } on ToolExtensionException catch (e) {
+      throwToolExit(
+        'Failed to resolve native assets config from extension "${connection.extensionName}" for target "$targetName": ${e.message}',
+      );
     } on Object catch (e) {
       throwToolExit(
         'Failed to resolve native assets config from extension "${connection.extensionName}" for target "$targetName": $e',
@@ -284,6 +291,7 @@ base class ExtensionBuildManager {
       mainPath: mainPath,
       outputDir: outputDir,
       projectRoot: projectRoot,
+      resolvePluginPlatformKey: () => _buildTargetsByName[targetName]?.pluginPlatformKey,
       resolvedArtifacts: resolvedArtifacts,
       rpcMethod: BuildService.buildMethod,
       targetKind: 'build',
@@ -315,8 +323,8 @@ base class ExtensionBuildManager {
       flutterRoot: flutterRoot,
       mainPath: mainPath,
       outputDir: outputDir,
-      pluginPlatformKey: pluginPlatformKey,
       projectRoot: projectRoot,
+      resolvePluginPlatformKey: () => pluginPlatformKey,
       resolvedArtifacts: resolvedArtifacts,
       rpcMethod: BuildService.assembleMethod,
       targetKind: 'assemble',
@@ -332,12 +340,12 @@ base class ExtensionBuildManager {
     required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
+    required String? Function() resolvePluginPlatformKey,
     required Map<String, String> resolvedArtifacts,
     required String rpcMethod,
     required String targetKind,
     required String targetName,
     Uri? buildDir,
-    String? pluginPlatformKey,
   }) async {
     _validateRequestUris(
       buildDir: buildDir,
@@ -378,9 +386,7 @@ base class ExtensionBuildManager {
       flutterRoot: flutterRoot,
       mainPath: mainPath,
       outputDir: outputDir,
-      pluginPlatformKey: buildDir == null
-          ? _buildTargetsByName[targetName]?.pluginPlatformKey
-          : pluginPlatformKey,
+      pluginPlatformKey: resolvePluginPlatformKey(),
       projectRoot: projectRoot,
       resolvedArtifacts: resolvedArtifacts,
       targetName: targetName,
@@ -437,6 +443,7 @@ base class ExtensionBuildManager {
     final List<ExtensionPlugin> resolvedPlugins = await _resolvePluginsForTarget(
       projectRoot,
       pluginPlatformKey,
+      buildMode: buildMode,
     );
     return <String, Object?>{
       BuildService.buildDirParam: ?buildDir?.toString(),
@@ -456,16 +463,17 @@ base class ExtensionBuildManager {
 
   Future<List<ExtensionPlugin>> _resolvePluginsForTarget(
     Uri projectRoot,
-    String? pluginPlatformKey,
-  ) async {
+    String? pluginPlatformKey, {
+    required BuildMode buildMode,
+  }) async {
     if (pluginPlatformKey == null || pluginPlatformKey.isEmpty) {
       return const <ExtensionPlugin>[];
     }
     final Directory projectDir = _fileSystem.directory(projectRoot);
-    if (!projectDir.childFile('pubspec.yaml').existsSync()) {
+    final FlutterProject project = _projectFactory.fromDirectory(projectDir);
+    if (!project.pubspecFile.existsSync()) {
       return const <ExtensionPlugin>[];
     }
-    final FlutterProject project = _projectFactory.fromDirectory(projectDir);
     final List<Plugin> foundPlugins = await findPlugins(
       project,
       extraPlatformKeys: <String>{pluginPlatformKey},
@@ -479,6 +487,7 @@ base class ExtensionBuildManager {
       foundPlugins,
       pluginPlatformKey,
       fileSystem: _fileSystem,
+      includeDevDependencies: !buildMode.isRelease,
       logger: _logger,
     );
   }

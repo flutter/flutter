@@ -1247,7 +1247,7 @@ void main() {
       );
       addTearDown(manager.dispose);
 
-      final buildManager = ExtensionBuildManager(
+      final ExtensionBuildManager buildManager = _createTestBuildManager(
         extensionManager: manager,
         featureFlags: featureFlags,
         logger: logger,

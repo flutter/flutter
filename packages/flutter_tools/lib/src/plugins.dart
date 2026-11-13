@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionBuildTarget;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
@@ -22,6 +23,7 @@ class Plugin {
     required this.isDirectDependency,
     required this.isDevDependency,
     this.implementsPackage,
+    this.rawPlatformConfigurations = const <String, Map<String, Object?>>{},
   });
 
   /// Parses [Plugin] specification from the provided pluginYaml.
@@ -175,8 +177,10 @@ class Plugin {
     }
     final YamlMap platformsYaml = platformsValue;
 
+    final bool retainRawConfigurations = extraPlatformKeys.isNotEmpty;
     final errors = <String>[];
     final platforms = <String, PluginPlatform>{};
+    final rawPlatformConfigurations = <String, Map<String, Object?>>{};
     // TODO(stuartmorgan): Consider merging web into this common handling; the
     //  fact that its implementation of Dart-only plugins and default packages
     //  are separate is legacy.
@@ -217,6 +221,12 @@ class Plugin {
               defaultPackages[platformKey] = defaultPackage;
             } else if (parsed != null) {
               platforms[platformKey] = parsed;
+              if (retainRawConfigurations) {
+                rawPlatformConfigurations[platformKey] = switch (parsed) {
+                  final CustomPlatformPlugin custom => custom.configuration,
+                  _ => yamlMapToPlatformConfiguration(yamlValue),
+                };
+              }
             } else {
               return .fail(<String>['Invalid "$platformKey" plugin specification.']);
             }
@@ -250,10 +260,10 @@ class Plugin {
       (YamlMap yaml) => WindowsPlugin.parseFromYaml(name, yaml),
     );
     for (final String key in extraPlatformKeys.toSet()) {
-      if (builtInPlatformKeys.contains(key) || platformsYaml[key] == null) {
+      if (builtInPlatformKeys.contains(key) || !platformsYaml.containsKey(key)) {
         continue;
       }
-      if (!_customPlatformKeyPattern.hasMatch(key)) {
+      if (!ExtensionBuildTarget.isValidPluginPlatformKey(key)) {
         errors.add('Invalid "$key" plugin specification.');
         continue;
       }
@@ -279,6 +289,7 @@ class Plugin {
         name: name,
         path: path,
         platforms: platforms,
+        rawPlatformConfigurations: rawPlatformConfigurations,
         defaultPackagePlatforms: defaultPackages,
         pluginDartClassPlatforms: dartPluginClasses,
         flutterConstraint: flutterConstraint,
@@ -396,12 +407,6 @@ class Plugin {
     WindowsPlugin.kConfigKey,
   };
 
-  /// Platform keys under `flutter.plugin.platforms` must be lowercase ASCII
-  /// identifiers (`a-z`, `0-9`, `_`) matching `pubspec.yaml` platform stanza
-  /// conventions, and because custom keys are interpolated into generated
-  /// Dart plugin registrant source files.
-  static final _customPlatformKeyPattern = RegExp(r'^[a-z][a-z0-9_]*$');
-
   static List<String> validatePluginYaml(
     YamlMap? yaml, {
     required String packageName,
@@ -437,6 +442,9 @@ class Plugin {
 
   /// This is a mapping from platform config key to the plugin platform spec.
   final Map<String, PluginPlatform> platforms;
+
+  /// Raw parsed `pubspec.yaml` platform configuration maps keyed by platform.
+  final Map<String, Map<String, Object?>> rawPlatformConfigurations;
 
   /// This is a mapping from platform config key to the default package implementation.
   final Map<String, String> defaultPackagePlatforms;

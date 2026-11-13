@@ -287,6 +287,7 @@ void main() {
       );
       expect(ExtensionBuildTarget.isValidPluginPlatformKey('custom_os_2'), isTrue);
       expect(ExtensionBuildTarget.isValidPluginPlatformKey('custom-os'), isFalse);
+      expect(ExtensionBuildTarget.buildTargetDefine, 'ExtensionBuildTarget');
     });
 
     test('listFromJson handles valid and invalid lists', () {
@@ -721,6 +722,35 @@ void main() {
       expect(
         () => ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: ' '),
         throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: '../../escape'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x86-64', targetOs: 'linux'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x64',
+          'targetOs': '../escape',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'arm/64',
+          'targetOs': 'linux',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x64',
+          'targetOs': 'custom-os',
+        }),
+        throwsFormatException,
       );
       expect(
         () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{

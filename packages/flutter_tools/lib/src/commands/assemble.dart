@@ -11,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -231,8 +232,8 @@ class AssembleCommand extends FlutterCommand {
     try {
       targetPlatform = TargetPlatform.fromName(platform);
     } on Exception {
-      await _resolveExtensionEnvironmentDefines();
-      if (hasExtensionPlatformDefines(_environment.defines)) {
+      if (hasExtensionPlatformDefines(_environment.defines) ||
+          await _isRegisteredExtensionPlatform(platform)) {
         return super.requiredArtifacts;
       }
       rethrow;
@@ -244,29 +245,103 @@ class AssembleCommand extends FlutterCommand {
     return super.requiredArtifacts;
   }
 
+  Future<bool> _isRegisteredExtensionPlatform(String platform) async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return false;
+    }
+    final ExtensionBuildManager? buildManager = _extensionBuildManager;
+    if (buildManager == null) {
+      return false;
+    }
+    final List<ExtensionBuildTarget> buildTargets = await buildManager.getBuildTargets();
+    if (buildTargets.any(
+      (ExtensionBuildTarget t) => t.name == platform || t.targetPlatform == platform,
+    )) {
+      return true;
+    }
+    final List<ExtensionAssembleTarget> assembleTargets = await buildManager.getAssembleTargets();
+    return assembleTargets.any((ExtensionAssembleTarget t) => t.targetPlatform == platform);
+  }
+
+  static const _cCompilerDefineKeys = <String>{
+    kExtensionCCompilerCc,
+    kExtensionCCompilerAr,
+    kExtensionCCompilerLd,
+    kExtensionCCompilerEnvScript,
+    kExtensionCCompilerEnvScriptArgs,
+  };
+
   Future<void> _resolveExtensionEnvironmentDefines() async {
-    if (_extensionDefinesResolved || !_featureFlags.isToolExtensionsEnabled) {
+    // `requiredArtifacts` evaluates `_environment` before `validateCommand()`
+    // runs; refresh the cached environment if `project.directory` changed.
+    if (_cachedEnvironment != null &&
+        _cachedEnvironment!.projectDir.path != project.directory.path) {
+      _cachedEnvironment = _createEnvironment();
+    }
+    if (_extensionDefinesResolved) {
       return;
     }
     _extensionDefinesResolved = true;
+    final String? explicitTargetName = _environment.defines[kExtensionBuildTarget]?.trim();
+    final bool hasExplicitBuildTarget = explicitTargetName != null && explicitTargetName.isNotEmpty;
     final ExtensionBuildManager? buildManager = _extensionBuildManager;
-    if (buildManager == null) {
+    if (!_featureFlags.isToolExtensionsEnabled || buildManager == null) {
+      if (hasExplicitBuildTarget) {
+        throwToolExit(
+          '"$kExtensionBuildTarget" requires the tool extensions feature to be enabled.',
+        );
+      }
       return;
     }
     final String? platform = _environment.defines[kTargetPlatform];
-    if (platform == null || platform.isEmpty) {
+    var isBuiltInTargetPlatform = false;
+    if (platform != null && platform.isNotEmpty) {
+      try {
+        TargetPlatform.fromName(platform);
+        isBuiltInTargetPlatform = true;
+      } on Exception {
+        isBuiltInTargetPlatform = false;
+      }
+    }
+    if (!hasExplicitBuildTarget &&
+        (platform == null || platform.isEmpty || isBuiltInTargetPlatform)) {
       return;
     }
-    try {
-      TargetPlatform.fromName(platform);
-      return;
-    } on Exception {
-      // Custom target platform; query extension build targets below.
-    }
+
     final List<ExtensionBuildTarget> buildTargets = await buildManager.getBuildTargets();
-    final ExtensionBuildTarget? matchedTarget =
-        buildTargets.where((ExtensionBuildTarget t) => t.name == platform).firstOrNull ??
-        buildTargets.where((ExtensionBuildTarget t) => t.targetPlatform == platform).firstOrNull;
+    final ExtensionBuildTarget? matchedTarget;
+    if (hasExplicitBuildTarget) {
+      matchedTarget = buildTargets
+          .where((ExtensionBuildTarget t) => t.name == explicitTargetName)
+          .firstOrNull;
+      if (matchedTarget == null) {
+        throwToolExit(
+          'Unknown extension build target "$explicitTargetName" specified in "$kExtensionBuildTarget".',
+        );
+      }
+    } else {
+      final ExtensionBuildTarget? nameMatch = buildTargets
+          .where((ExtensionBuildTarget t) => t.name == platform)
+          .firstOrNull;
+      if (nameMatch != null) {
+        matchedTarget = nameMatch;
+      } else {
+        final List<ExtensionBuildTarget> platformMatches = buildTargets
+            .where((ExtensionBuildTarget t) => t.targetPlatform == platform)
+            .toList();
+        if (platformMatches.length > 1) {
+          final String matchingNames = platformMatches
+              .map((ExtensionBuildTarget t) => '"${t.name}"')
+              .join(', ');
+          throwToolExit(
+            'Ambiguous custom target platform "$platform" matches multiple extension '
+            'build targets ($matchingNames); pass -d$kExtensionBuildTarget=<name> to '
+            'select a specific build target.',
+          );
+        }
+        matchedTarget = platformMatches.firstOrNull;
+      }
+    }
     if (matchedTarget == null) {
       final List<ExtensionAssembleTarget> assembleTargets = await buildManager.getAssembleTargets();
       if (assembleTargets.any((ExtensionAssembleTarget t) => t.targetPlatform == platform) &&
@@ -293,25 +368,37 @@ class AssembleCommand extends FlutterCommand {
       buildMode: buildMode,
       target: matchedTarget,
     );
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
+    final Directory targetOutputDir = resolveExtensionOutputDir(
+      buildMode: buildMode,
+      buildOutputDir: _environment.projectDir.childDirectory(getBuildDirectory(config, fs)),
+      fileSystem: fs,
+      projectDir: _environment.projectDir,
+      target: matchedTarget,
+    );
     final ExtensionNativeAssetsConfig? nativeAssetsConfig = await buildManager
         .resolveNativeAssetsConfig(
           buildMode: buildMode,
           flutterRoot: _environment.flutterRootDir.uri,
           mainPath: mainPath,
-          outputDir: _environment.outputDir.uri,
+          outputDir: targetOutputDir.uri,
           projectRoot: _environment.projectDir.uri,
           resolvedArtifacts: resolvedArtifacts,
           targetName: matchedTarget.name,
         );
     final extensionDefines = <String, String>{
-      kExtensionCustomTargetPlatform: 'true',
+      if (!isBuiltInTargetPlatform) kExtensionCustomTargetPlatform: 'true',
       ...buildManager.environmentDefinesForTarget(
         matchedTarget.name,
         nativeAssetsConfig: nativeAssetsConfig,
       ),
     };
+    final bool hasCliCompilerOverride = _cCompilerDefineKeys.any(_environment.defines.containsKey);
     var addedDefines = false;
     for (final MapEntry(:String key, :String value) in extensionDefines.entries) {
+      if (hasCliCompilerOverride && _cCompilerDefineKeys.contains(key)) {
+        continue;
+      }
       _environment.defines.putIfAbsent(key, () {
         addedDefines = true;
         return value;

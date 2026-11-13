@@ -203,6 +203,23 @@ runFlutterSpecificBuildHooks({
       .map((AssetBuildTarget target) => target.targetString)
       .join(', ');
   logger.printTrace('Running build hooks for $targetString.');
+  for (final target in targets) {
+    if (target is CodeAssetTarget) {
+      if (!OS.values.contains(target.os) || !Architecture.values.contains(target.architecture)) {
+        logger.printTrace(
+          'Using custom native assets target OS="${target.os.name}" '
+          'arch="${target.architecture.name}".',
+        );
+      }
+    } else if (target is CustomDataAssetTarget &&
+        buildCodeAssets != null &&
+        featureFlags.isNativeAssetsEnabled) {
+      logger.printTrace(
+        'Skipping code asset compilation for Dart hooks on "${target.targetString}"; '
+        'implement BuildTarget.resolveNativeAssetsConfig to support CodeAsset hooks.',
+      );
+    }
+  }
 
   final results = <String, Map<String, Object?>>{};
   final dependencies = <Uri>{};

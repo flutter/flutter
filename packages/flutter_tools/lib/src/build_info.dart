@@ -1140,14 +1140,22 @@ const String kExtensionCCompilerEnvScriptArgs =
 /// Dart plugins on an extension target.
 const kExtensionPluginPlatformKey = 'ExtensionPluginPlatformKey';
 
+/// Optional explicit [tools_core.ExtensionBuildTarget.name] used to resolve
+/// extension native assets and plugin defines in `flutter assemble`.
+const String kExtensionBuildTarget = tools_core.ExtensionBuildTarget.buildTargetDefine;
+
 /// Marks [kTargetPlatform] as a custom target platform registered by an active
 /// tool extension (`'true'`).
 const kExtensionCustomTargetPlatform = 'ExtensionCustomTargetPlatform';
 
 /// Whether [defines] contains custom platform configuration from a tool
-/// extension ([kExtensionTargetOs], [kExtensionPluginPlatformKey], or
-/// [kExtensionCustomTargetPlatform]).
+/// extension ([kExtensionBuildTarget], [kExtensionTargetOs],
+/// [kExtensionPluginPlatformKey], or [kExtensionCustomTargetPlatform]).
 bool hasExtensionPlatformDefines(Map<String, String> defines) {
+  final String? extensionBuildTarget = defines[kExtensionBuildTarget];
+  if (extensionBuildTarget != null && extensionBuildTarget.trim().isNotEmpty) {
+    return true;
+  }
   final String? extensionTargetOs = defines[kExtensionTargetOs];
   if (extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) {
     return true;

@@ -21,7 +21,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../dart/package_map.dart';
-import '../../features.dart' show featureFlags;
+import '../../features.dart' show FeatureFlags, featureFlags;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../../isolated/native_assets/targets.dart' show resolveCustomNativeTarget;
@@ -34,9 +34,14 @@ enum HookPlatform { native, web }
 
 /// Runs the dart build of the app.
 class BuildHooks extends Target {
-  const BuildHooks({this.platform = HookPlatform.native, @visibleForTesting this._buildRunner});
+  const BuildHooks({
+    this.platform = HookPlatform.native,
+    @visibleForTesting this._buildRunner,
+    @visibleForTesting this._featureFlags,
+  });
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
+  final FeatureFlags? _featureFlags;
 
   final HookPlatform platform;
 
@@ -65,7 +70,7 @@ class BuildHooks extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
-      featureFlags: featureFlags,
+      featureFlags: _featureFlags ?? featureFlags,
       logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
@@ -133,19 +138,24 @@ class LinkHooks extends Target {
     this.platform = HookPlatform.native,
     this.extraDependencies = const <Target>[],
     this._buildRunner,
+    @visibleForTesting this._featureFlags,
   });
 
   final HookPlatform platform;
   final List<Target> extraDependencies;
   final FlutterNativeAssetsBuildRunner? _buildRunner;
+  final FeatureFlags? _featureFlags;
+
+  FeatureFlags get _activeFeatureFlags => _featureFlags ?? featureFlags;
 
   @override
   List<Target> get dependencies => <Target>[
     if (platform == HookPlatform.web)
-      const BuildHooks(platform: HookPlatform.web)
+      BuildHooks(platform: HookPlatform.web, featureFlags: _featureFlags)
     else
-      const BuildHooks(),
-    if (platform == HookPlatform.native && featureFlags.isRecordUseEnabled) const KernelSnapshot(),
+      BuildHooks(featureFlags: _featureFlags),
+    if (platform == HookPlatform.native && _activeFeatureFlags.isRecordUseEnabled)
+      const KernelSnapshot(),
     ...extraDependencies, // Dart2WasmTarget, Dart2JSTarget
   ];
 
@@ -162,12 +172,12 @@ class LinkHooks extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{BUILD_DIR}/${BuildHooks.resultFilename}'),
-    if (featureFlags.isRecordUseEnabled)
+    if (_activeFeatureFlags.isRecordUseEnabled)
       for (final String filename in _recordedUsesFileNames) Source.pattern('{BUILD_DIR}/$filename'),
   ];
 
   File? getRecordedUsesFile(Environment environment, BuildMode buildMode) {
-    if (!featureFlags.isRecordUseEnabled) {
+    if (!_activeFeatureFlags.isRecordUseEnabled) {
       return null;
     }
     if (platform == HookPlatform.native && !buildMode.isPrecompiled) {
@@ -229,7 +239,7 @@ class LinkHooks extends Target {
         targetPlatform: targetPlatform,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: _activeFeatureFlags,
         logger: environment.logger,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
         buildDataAssets: true,
@@ -245,7 +255,7 @@ class LinkHooks extends Target {
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       fileSystem: fileSystem,
-      featureFlags: featureFlags,
+      featureFlags: _activeFeatureFlags,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
       buildResults: buildResults,
@@ -359,11 +369,22 @@ class InstallCodeAssets extends Target {
         targetUri: targetUri,
       );
     }
-    assert(fileSystem.file(nativeAssetsFileUri).existsSync());
+    final File nativeAssetsFile = fileSystem.file(nativeAssetsFileUri);
+    assert(nativeAssetsFile.existsSync());
+
+    final allInstalledFiles = <File>[...installedFiles];
+    if (hasExtensionPlatformDefines(environment.defines)) {
+      final File flutterAssetsManifest = environment.buildDir
+          .childDirectory('flutter_assets')
+          .childFile('NativeAssetsManifest.json');
+      flutterAssetsManifest.parent.createSync(recursive: true);
+      await nativeAssetsFile.copy(flutterAssetsManifest.path);
+      allInstalledFiles.add(flutterAssetsManifest);
+    }
 
     final depfile = Depfile(<File>[
       for (final Uri file in combinedResult.filesToBeBundled) fileSystem.file(file),
-    ], installedFiles);
+    ], allInstalledFiles);
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     environment.depFileService.writeToFile(depfile, outputDepfile);
     if (!outputDepfile.existsSync()) {
