@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/screenshot.dart';
@@ -161,6 +163,20 @@ void main() {
         ),
       );
     });
+
+    testWithoutContext(
+      'succeeds for binary non-UTF-8 file under 1000 bytes on ErrorHandlingFileSystem',
+      () {
+        final fs = ErrorHandlingFileSystem(
+          delegate: MemoryFileSystem.test(),
+          platform: FakePlatform(),
+        );
+        final File outputFile = fs.file('flutter_01.skp')
+          ..writeAsBytesSync(const <int>[0x89, 0x50, 0x4E, 0x47, 0xFF, 0xFE, 0xFD]);
+
+        expect(() => ScreenshotCommand.ensureOutputIsNotJsonRpcError(outputFile), returnsNormally);
+      },
+    );
   });
 
   group('Screenshot for devices unsupported for project', () {
@@ -296,6 +312,54 @@ Device 2 (mobile) • 456 • android • 1.2.3
         contains('The Skia picture request failed, probably because the device was disconnected'),
       );
     });
+
+    testWithoutContext('throws ToolExit when screenshotSkp fails with RPCError', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final toolContext = FakeToolContext(fs: fs, logger: logger);
+
+      final fakeVmService = _FakeFlutterVmService(
+        rpcError: vm_service.RPCError(
+          kScreenshotSkpMethod,
+          vm_service.RPCErrorKind.kServerError.code,
+          'Cannot capture SKP screenshot with Impeller enabled.',
+        ),
+      );
+
+      final command = ScreenshotCommand(
+        toolContext: toolContext,
+        vmServiceConnector:
+            (
+              Uri uri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              CompressionOptions compression = CompressionOptions.compressionDefault,
+              Device? device,
+              required Logger logger,
+            }) async {
+              return fakeVmService;
+            },
+      );
+
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>[
+          'screenshot',
+          '--type=skia',
+          '--vm-service-url=http://localhost:8181',
+          '--out=screenshot.skp',
+        ]),
+        throwsToolExit(
+          message:
+              'The Skia picture request failed: '
+              'Cannot capture SKP screenshot with Impeller enabled.',
+        ),
+      );
+      expect(fs.file('screenshot.skp').existsSync(), isFalse);
+    });
   });
 }
 
@@ -366,10 +430,16 @@ class _TestDeviceManager extends DeviceManager {
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
-  _FakeFlutterVmService({this.response});
+  _FakeFlutterVmService({this.response, this.rpcError});
 
   final vm_service.Response? response;
+  final vm_service.RPCError? rpcError;
 
   @override
-  Future<vm_service.Response?> screenshotSkp() async => response;
+  Future<vm_service.Response?> screenshotSkp() async {
+    if (rpcError case final error?) {
+      throw error;
+    }
+    return response;
+  }
 }

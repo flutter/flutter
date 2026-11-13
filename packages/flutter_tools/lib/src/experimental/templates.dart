@@ -4,8 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../features.dart';
@@ -124,6 +126,9 @@ base class ExtensionTemplateManager {
   }) async {
     try {
       return await connection.sendRequest(method);
+    } on ToolExtensionException catch (e) {
+      _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
+      return null;
     } on Object catch (e) {
       _logger.printTrace('Failed to get results from extension for $method: $e');
       return null;
@@ -233,6 +238,8 @@ base class ExtensionTemplateManager {
       if (result is Map<String, Object?>) {
         return result;
       }
+    } on ToolExtensionException catch (e) {
+      throwToolExit(e.message);
     } on Object catch (e) {
       _logger.printTrace(
         'Failed to generate platform template parameters from extension '

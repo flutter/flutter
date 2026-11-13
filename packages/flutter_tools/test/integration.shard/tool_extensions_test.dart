@@ -96,4 +96,23 @@ void main() {
     expect(devicesResult.stdout, isNot(contains('Linux Custom Extension Prototype Device')));
     expect(devicesResult.exitCode, 0);
   });
+
+  testWithoutContext(
+    'flutter devices -v gracefully shuts down active tool extensions on exit',
+    () async {
+      final ProcessResult result = await processManager.run(
+        <String>[flutterBin, 'devices', '-v'],
+        environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+      );
+
+      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+      if (isLinux) {
+        expect(
+          result.stdout,
+          contains('[ToolExtensionIsolate] Handling extension.shutdown request.'),
+        );
+        expect(result.stdout, contains('ExtensionConnection disposing isolate connection.'));
+      }
+    },
+  );
 }

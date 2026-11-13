@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
@@ -93,6 +95,34 @@ void _combinedAppAndPluginLinuxExtensionEntryPoint(SendPort sendPort) {
     <ToolExtensionService>[_CombinedAppAndPluginLinuxTemplateService()],
     extensionName: 'combined_linux_extension',
     supportedPlatforms: const <String>{'linux'},
+  );
+}
+
+final class _DomainErrorTemplateService extends TemplateService {
+  static const customPlatformName = 'custom_os';
+
+  @override
+  Map<String, String> get appPlatformTemplates => const <String, String>{
+    customPlatformName: LinuxTemplateService.customLinuxTemplateUri,
+  };
+
+  @override
+  Future<Map<String, Object?>> generatePlatformTemplateParameters({
+    required String platformName,
+    required Map<String, Object?> toolParameters,
+  }) async {
+    throw const ToolExtensionException('Template parameter generation failed.');
+  }
+}
+
+void _domainErrorTemplateEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_DomainErrorTemplateService()],
+      extensionName: 'custom_template_ext',
+      supportedPlatforms: const <String>{'linux'},
+    ),
   );
 }
 
@@ -472,6 +502,39 @@ void main() {
       expect(
         () => templateManager.resolveTemplateDirectory('invalid_path/foo'),
         throwsArgumentError,
+      );
+    });
+
+    testWithoutContext('generatePlatformTemplateParameters throws ToolExit when extension throws ToolExtensionException', () async {
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        featureFlags: featureFlags,
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      addTearDown(manager.dispose);
+      await manager.initialize(entryPoints: <ExtensionEntryPoint>[_domainErrorTemplateEntryPoint]);
+
+      final templateManager = ExtensionTemplateManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        fileSystem: fs,
+        flutterRoot: '/flutter',
+        logger: logger,
+      );
+
+      await expectLater(
+        templateManager.generatePlatformTemplateParameters(
+          platformName: _DomainErrorTemplateService.customPlatformName,
+          toolParameters: const <String, Object?>{'projectName': 'my_app'},
+        ),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'Template parameter generation failed.',
+          ),
+        ),
       );
     });
   });
