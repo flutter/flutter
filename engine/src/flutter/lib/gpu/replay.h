@@ -6,9 +6,11 @@
 #define FLUTTER_LIB_GPU_REPLAY_H_
 
 #include <array>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -113,6 +115,17 @@ class ReplayQueue {
   /// Whether `Post` runs tasks before returning.
   bool RunsOnCallingThread() const { return !task_runner_; }
 
+  /// Counts [bytes] of submitted recordings as in flight. When too many are,
+  /// this first waits for the replay thread and GPU to catch up, so that a
+  /// thread submitting in a loop cannot queue work without bound.
+  ///
+  /// Frames are normally paced well below the limit. The wait is bounded so
+  /// that a stalled GPU cannot hang the calling thread.
+  void AddInFlightBytes(size_t bytes);
+
+  /// Counts [bytes] as finished.
+  void RemoveInFlightBytes(size_t bytes);
+
   /// The replayer, for use on the replay thread.
   PassReplayer& GetReplayer() { return replayer_; }
 
@@ -120,6 +133,10 @@ class ReplayQueue {
   const std::shared_ptr<impeller::Context> context_;
   const fml::RefPtr<fml::TaskRunner> task_runner_;
   PassReplayer replayer_;
+
+  std::mutex in_flight_mutex_;
+  std::condition_variable in_flight_changed_;
+  size_t in_flight_bytes_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ReplayQueue);
 };
@@ -139,11 +156,12 @@ class CommandBufferEncoder {
   /// Encodes a finished pass.
   void Encode(PassRecording::Ptr recording);
 
-  /// Encodes anything deferred and submits. [completion] runs when the work
-  /// finishes, with `kError` if anything failed. Returns whether the work was
-  /// submitted.
+  /// Encodes anything deferred and submits. [completion] runs once when the
+  /// work finishes, with `kError` if anything failed. [in_flight_bytes] is
+  /// released when the GPU finishes. Returns whether the work was submitted.
   static bool Submit(std::shared_ptr<CommandBufferEncoder> encoder,
-                     impeller::CommandBuffer::CompletionCallback completion);
+                     impeller::CommandBuffer::CompletionCallback completion,
+                     size_t in_flight_bytes);
 
  private:
   /// A pass that OpenGL ES encodes at submit. Encoding hands the reactor raw
@@ -170,6 +188,7 @@ class CommandBufferEncoder {
   std::shared_ptr<impeller::CommandBuffer> command_buffer_;
   std::vector<DeferredPass> deferred_passes_;
   std::vector<PassRecording::Ptr> recordings_;
+  size_t in_flight_bytes_ = 0;
   bool failed_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferEncoder);

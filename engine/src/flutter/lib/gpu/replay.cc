@@ -5,6 +5,7 @@
 #include "flutter/lib/gpu/replay.h"
 
 #include <algorithm>
+#include <chrono>
 
 #include "dart_api.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -18,6 +19,12 @@ namespace flutter {
 namespace gpu {
 
 namespace {
+
+// Comfortably more than a heavy frame's recordings, so reaching it means the
+// caller is running ahead of the GPU rather than rendering frames.
+constexpr size_t kMaxInFlightBytes = 32 * 1024 * 1024;
+
+constexpr std::chrono::seconds kMaxInFlightWait(1);
 
 // The recording keeps the buffer alive until the GPU finishes, so the view
 // does not need to own it. Binding through an owning view would cost atomics
@@ -342,10 +349,37 @@ void ReplayQueue::Post(const fml::closure& task) {
   task_runner_->PostTask(task);
 }
 
+void ReplayQueue::AddInFlightBytes(size_t bytes) {
+  // Merged threads can't make progress while this one waits.
+  const bool can_wait =
+      task_runner_ && !task_runner_->RunsTasksOnCurrentThread();
+  std::unique_lock lock(in_flight_mutex_);
+  if (can_wait) {
+    in_flight_changed_.wait_for(lock, kMaxInFlightWait, [this]() {
+      return in_flight_bytes_ <= kMaxInFlightBytes;
+    });
+  }
+  in_flight_bytes_ += bytes;
+}
+
+void ReplayQueue::RemoveInFlightBytes(size_t bytes) {
+  {
+    std::scoped_lock lock(in_flight_mutex_);
+    in_flight_bytes_ -= bytes;
+  }
+  in_flight_changed_.notify_all();
+}
+
 CommandBufferEncoder::CommandBufferEncoder(std::shared_ptr<ReplayQueue> queue)
     : queue_(std::move(queue)) {}
 
-CommandBufferEncoder::~CommandBufferEncoder() = default;
+CommandBufferEncoder::~CommandBufferEncoder() {
+  // Recycled before the queue hears that the memory is free.
+  recordings_.clear();
+  if (in_flight_bytes_ > 0) {
+    queue_->RemoveInFlightBytes(in_flight_bytes_);
+  }
+}
 
 bool CommandBufferEncoder::DeferredPass::EncodeCommands() const {
   return render_pass ? render_pass->EncodeCommands()
@@ -430,7 +464,9 @@ void CommandBufferEncoder::EncodeBlitPass(const PassRecording& recording) {
 
 bool CommandBufferEncoder::Submit(
     std::shared_ptr<CommandBufferEncoder> encoder,
-    impeller::CommandBuffer::CompletionCallback completion) {
+    impeller::CommandBuffer::CompletionCallback completion,
+    size_t in_flight_bytes) {
+  encoder->in_flight_bytes_ = in_flight_bytes;
   const std::shared_ptr<impeller::Context> context =
       encoder->queue_->GetContext();
 

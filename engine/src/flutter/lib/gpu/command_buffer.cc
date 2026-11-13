@@ -54,6 +54,7 @@ void CommandBuffer::EndOpenPass() {
     return;
   }
   open_pass_owner_ = nullptr;
+  recorded_bytes_ += open_pass_->ops.GetAllocatedSize();
   replay_queue_->Post(fml::MakeCopyable(
       [encoder = encoder_, recording = std::move(open_pass_)]() mutable {
         encoder->Encode(std::move(recording));
@@ -176,14 +177,18 @@ bool CommandBuffer::Submit(
         };
   }
 
+  replay_queue_->AddInFlightBytes(recorded_bytes_);
   if (replay_queue_->RunsOnCallingThread()) {
-    return CommandBufferEncoder::Submit(
-        std::move(encoder_), std::move(combined_completion_callback));
+    return CommandBufferEncoder::Submit(std::move(encoder_),
+                                        std::move(combined_completion_callback),
+                                        recorded_bytes_);
   }
-  replay_queue_->Post(fml::MakeCopyable(
-      [encoder = std::move(encoder_),
-       completion = std::move(combined_completion_callback)]() mutable {
-        CommandBufferEncoder::Submit(std::move(encoder), std::move(completion));
+  replay_queue_->Post(
+      fml::MakeCopyable([encoder = std::move(encoder_),
+                         completion = std::move(combined_completion_callback),
+                         bytes = recorded_bytes_]() mutable {
+        CommandBufferEncoder::Submit(std::move(encoder), std::move(completion),
+                                     bytes);
       }));
   return true;
 }

@@ -677,5 +677,47 @@ TEST_F(FlutterGpuRecordingTest, EndedPassesEncodeBeforeSubmit) {
   replay_thread.Join();
 }
 
+// Without a bound, a thread submitting in a loop could queue work forever.
+TEST_F(FlutterGpuRecordingTest, InFlightBytesAreBounded) {
+  fml::Thread replay_thread("replay");
+  ReplayQueue queue(context_, replay_thread.GetTaskRunner());
+
+  constexpr size_t kOverLimit = 64 * 1024 * 1024;
+  queue.AddInFlightBytes(kOverLimit);
+
+  std::atomic<bool> added = false;
+  std::thread submitter([&]() {
+    queue.AddInFlightBytes(1);
+    added = true;
+  });
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  EXPECT_FALSE(added);
+
+  queue.RemoveInFlightBytes(kOverLimit);
+  submitter.join();
+  EXPECT_TRUE(added);
+  queue.RemoveInFlightBytes(1);
+  replay_thread.Join();
+}
+
+// When the replay thread is this thread nothing can finish during a wait, so
+// there must not be one.
+TEST_F(FlutterGpuRecordingTest, NothingWaitsForItsOwnThread) {
+  fml::Thread replay_thread("replay");
+  auto task_runner = replay_thread.GetTaskRunner();
+  fml::AutoResetWaitableEvent finished;
+  task_runner->PostTask([&]() {
+    ReplayQueue queue(context_, task_runner);
+    queue.AddInFlightBytes(64 * 1024 * 1024);
+    const auto start = std::chrono::steady_clock::now();
+    queue.AddInFlightBytes(1);
+    EXPECT_LT(std::chrono::steady_clock::now() - start,
+              std::chrono::milliseconds(500));
+    finished.Signal();
+  });
+  finished.Wait();
+  replay_thread.Join();
+}
+
 }  // namespace
 }  // namespace flutter::gpu
