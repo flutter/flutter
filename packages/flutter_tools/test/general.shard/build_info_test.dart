@@ -168,6 +168,43 @@ void main() {
     }
   });
 
+  testWithoutContext(
+    'TargetPlatform.cpuArch maps architecture-specific platforms and throws for others',
+    () {
+      const expected = <TargetPlatform, CpuArch>{
+        .android_arm: .armv7,
+        .android_arm64: .arm64,
+        .android_x64: .x64,
+        .fuchsia_arm64: .arm64,
+        .fuchsia_x64: .x64,
+        .linux_arm64: .arm64,
+        .linux_riscv64: .riscv64,
+        .linux_x64: .x64,
+        .windows_arm64: .arm64,
+        .windows_x64: .x64,
+      };
+      const unsupported = <TargetPlatform>{
+        .android,
+        .darwin,
+        .ios,
+        .tester,
+        .web_javascript,
+        .unsupported,
+      };
+      // Every TargetPlatform value must be covered by this test.
+      expect(<TargetPlatform>{
+        ...expected.keys,
+        ...unsupported,
+      }, containsAll(TargetPlatform.values));
+      for (final MapEntry(:TargetPlatform key, :CpuArch value) in expected.entries) {
+        expect(key.cpuArch, value, reason: '$key');
+      }
+      for (final platform in unsupported) {
+        expect(() => platform.cpuArch, throwsUnsupportedError, reason: '$platform');
+      }
+    },
+  );
+
   testUsingContext(
     'defaultIOSArchsForEnvironment',
     () {
@@ -686,6 +723,13 @@ void main() {
       );
       expect(
         getLinuxBuildDirectory(
+          TargetPlatform.linux_riscv64,
+          toolContext: FakeToolContext(config: config, fs: fileSystem),
+        ),
+        fileSystem.path.join('custom_build_out', 'linux', 'riscv64'),
+      );
+      expect(
+        getLinuxBuildDirectory(
           null,
           toolContext: FakeToolContext(
             config: config,
@@ -704,6 +748,26 @@ void main() {
           flavor: 'prod',
         ),
         fileSystem.path.join('custom_build_out', 'windows', 'x64', 'prod'),
+      );
+      expect(
+        getWindowsBuildDirectory(
+          TargetPlatform.windows_arm64,
+          config: config,
+          fileSystem: fileSystem,
+        ),
+        fileSystem.path.join('custom_build_out', 'windows', 'arm64'),
+      );
+      expect(
+        () => getLinuxBuildDirectory(
+          TargetPlatform.darwin,
+          toolContext: FakeToolContext(config: config, fs: fileSystem),
+        ),
+        throwsUnsupportedError,
+      );
+      expect(
+        () =>
+            getWindowsBuildDirectory(TargetPlatform.darwin, config: config, fileSystem: fileSystem),
+        throwsUnsupportedError,
       );
     });
   });
