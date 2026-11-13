@@ -121,6 +121,8 @@ def main() -> int:
   test_cases = build_test_cases([t for t in tests if variant(t)])
   assert test_cases, 'No tests matched variant ' + VARIANT
 
+  _force_symlink(SDK_ROOT, os.path.join(OUT_DIR, 'fuchsia-sdk'))
+  _force_symlink(IMAGES_ROOT, os.path.join(OUT_DIR, 'fuchsia-images'))
   setup_cmd = [
       sys.executable,
       os.path.join(TEST_SCRIPTS_DIR, 'test_env_setup.py'),
@@ -130,8 +132,6 @@ def main() -> int:
   if VARIANT.endswith('_arm64') or VARIANT.endswith('_arm64_tester'):
     setup_cmd.append('--product=terminal.qemu-arm64')
   elif VARIANT.endswith('_x64') or VARIANT.endswith('_x64_tester'):
-    _force_symlink(SDK_ROOT, os.path.join(OUT_DIR, 'fuchsia-sdk'))
-    _force_symlink(IMAGES_ROOT, os.path.join(OUT_DIR, 'fuchsia-images'))
     setup_cmd.append('--orchestrate')
   else:
     assert False, 'Unsupported variant ' + VARIANT

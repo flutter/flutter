@@ -198,8 +198,10 @@ class RunTestsTest(unittest.TestCase):
         setup_cmd = mock_popen.call_args[0][0]
         self.assertIn('--product=terminal.qemu-arm64', setup_cmd)
         self.assertFalse(any(arg.startswith('--orchestrate') for arg in setup_cmd))
-        self.assertFalse(os.path.lexists(os.path.join(temp_dir, 'fuchsia-sdk')))
-        self.assertFalse(os.path.lexists(os.path.join(temp_dir, 'fuchsia-images')))
+        self.assertEqual(os.readlink(os.path.join(temp_dir, 'fuchsia-sdk')), run_tests.SDK_ROOT)
+        self.assertEqual(
+            os.readlink(os.path.join(temp_dir, 'fuchsia-images')), run_tests.IMAGES_ROOT
+        )
         setup_proc.terminate.assert_called_once()
         setup_proc.wait.assert_called_once()
 
