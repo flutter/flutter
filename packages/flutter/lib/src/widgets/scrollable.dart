@@ -750,6 +750,13 @@ class ScrollableState extends State<Scrollable>
 
   final GlobalKey _scrollSemanticsKey = GlobalKey();
 
+  late final _ScrollableSemanticsGestureDelegate _semanticsGestureDelegate =
+      _createSemanticsGestureDelegate();
+
+  _ScrollableSemanticsGestureDelegate _createSemanticsGestureDelegate() {
+    return _ScrollableSemanticsGestureDelegate(state: this);
+  }
+
   @override
   @protected
   void setSemanticsActions(Set<SemanticsAction> actions) {
@@ -1032,6 +1039,7 @@ class ScrollableState extends State<Scrollable>
           gestures: _gestureRecognizers,
           behavior: widget.hitTestBehavior,
           excludeFromSemantics: widget.excludeFromSemantics,
+          semantics: _semanticsGestureDelegate,
           child: Semantics(
             explicitChildNodes: !widget.excludeFromSemantics,
             child: IgnorePointer(
@@ -1766,6 +1774,58 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }
 }
 
+// The [SemanticsGestureDelegate] for the [RawGestureDetector] of a
+// [Scrollable].
+//
+// A semantic scroll action is turned into a synthesized drag whose length is
+// a fixed fraction of the viewport, so near the edge of the content it
+// overshoots the scroll extents. This delegate replays the same drag sequence
+// as the default delegate of [RawGestureDetector], with
+// [ScrollPosition.semanticsScrollInProgress] set for its duration, so that the
+// position stops at its bounds instead of overscrolling. Drags from pointer
+// gestures are unaffected.
+class _ScrollableSemanticsGestureDelegate extends SemanticsGestureDelegate {
+  _ScrollableSemanticsGestureDelegate({required this.state});
+
+  final ScrollableState state;
+
+  // Whether the gesture recognizers of [state] handle drags along `axis`.
+  bool _canDrag(Axis axis) => state._gestureRecognizers.isNotEmpty && state.widget.axis == axis;
+
+  @override
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+    void handleDragUpdate(DragUpdateDetails details) => _performSemanticDrag(renderObject, details);
+    renderObject
+      ..onHorizontalDragUpdate = _canDrag(Axis.horizontal) ? handleDragUpdate : null
+      ..onVerticalDragUpdate = _canDrag(Axis.vertical) ? handleDragUpdate : null;
+  }
+
+  // Replays the drag sequence of the default delegate: down, start, a single
+  // update, and an end without velocity.
+  void _performSemanticDrag(RenderSemanticsGestureHandler renderObject, DragUpdateDetails details) {
+    final Offset localCenter = renderObject.size.center(Offset.zero);
+    final Offset globalCenter = renderObject.localToGlobal(localCenter);
+    final Offset localEnd = localCenter + details.delta;
+    final Offset globalEnd = renderObject.localToGlobal(localEnd);
+    final ScrollPosition position = state.position;
+    position.semanticsScrollInProgress = true;
+    try {
+      state._handleDragDown(
+        DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+      );
+      state._handleDragStart(
+        DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+      );
+      state._handleDragUpdate(details);
+      state._handleDragEnd(
+        DragEndDetails(primaryVelocity: 0.0, localPosition: localEnd, globalPosition: globalEnd),
+      );
+    } finally {
+      position.semanticsScrollInProgress = false;
+    }
+  }
+}
+
 // Not using a RestorableDouble because we want to allow null values and override
 // [enabled].
 class _RestorableScrollOffset extends RestorableValue<double?> {
@@ -2198,11 +2258,47 @@ class _VerticalOuterDimension extends Scrollable {
   _VerticalOuterDimensionState createState() => _VerticalOuterDimensionState();
 }
 
+// The [_ScrollableSemanticsGestureDelegate] of the vertical dimension of a
+// [TwoDimensionalScrollable].
+//
+// With diagonal dragging, a [PanGestureRecognizer] handles the drags of both
+// axes and the horizontal deltas are forwarded to the horizontal scrollable.
+class _TwoDimensionalScrollableSemanticsGestureDelegate
+    extends _ScrollableSemanticsGestureDelegate {
+  _TwoDimensionalScrollableSemanticsGestureDelegate({
+    required _VerticalOuterDimensionState super.state,
+  });
+
+  @override
+  _VerticalOuterDimensionState get state => super.state as _VerticalOuterDimensionState;
+
+  @override
+  bool _canDrag(Axis axis) {
+    return super._canDrag(axis) || state._gestureRecognizers.containsKey(PanGestureRecognizer);
+  }
+
+  @override
+  void _performSemanticDrag(RenderSemanticsGestureHandler renderObject, DragUpdateDetails details) {
+    final ScrollPosition horizontalPosition = state.horizontalScrollable.position;
+    horizontalPosition.semanticsScrollInProgress = true;
+    try {
+      super._performSemanticDrag(renderObject, details);
+    } finally {
+      horizontalPosition.semanticsScrollInProgress = false;
+    }
+  }
+}
+
 class _VerticalOuterDimensionState extends ScrollableState {
   DiagonalDragBehavior get diagonalDragBehavior =>
       (widget as _VerticalOuterDimension).diagonalDragBehavior;
   ScrollableState get horizontalScrollable =>
       (widget as _VerticalOuterDimension).horizontalKey.currentState!;
+
+  @override
+  _ScrollableSemanticsGestureDelegate _createSemanticsGestureDelegate() {
+    return _TwoDimensionalScrollableSemanticsGestureDelegate(state: this);
+  }
 
   Axis? lockedAxis;
   Offset? lastDragOffset;
