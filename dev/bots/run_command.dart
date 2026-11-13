@@ -257,13 +257,7 @@ Future<CommandResult> runCommand(
     await command._savedStderr,
   );
 
-  final String? expectedExitDescription = switch (expectedExit) {
-    _ExpectedExitCode(:final int exitCode) when result.exitCode != exitCode =>
-      exitCode == 0 ? 'zero' : '$exitCode',
-    _ExpectedNonZeroExit() when result.exitCode == 0 => 'non-zero',
-    _ExpectedExitCode() || _ExpectedNonZeroExit() || _ExpectedAnyExit() => null,
-  };
-  if (expectedExitDescription != null) {
+  if (!expectedExit.matches(result.exitCode)) {
     // Print the output when we get unexpected results (unless output was
     // printed already).
     switch (outputMode) {
@@ -278,7 +272,7 @@ Future<CommandResult> runCommand(
       ?failureMessage,
       '${bold}Command: $green$commandDescription$reset',
       if (failureMessage == null)
-        '$bold${red}Command exited with exit code ${result.exitCode} but expected $expectedExitDescription exit code.$reset',
+        '$bold${red}Command exited with exit code ${result.exitCode} but expected ${expectedExit.description} exit code.$reset',
       '${bold}Working directory: $cyan${path.absolute(relativeWorkingDir)}$reset',
       if (allOutput.isNotEmpty && allOutput.length < 512)
         '${bold}stdout and stderr output:\n$allOutput',
@@ -334,20 +328,44 @@ sealed class ExpectedExit {
   /// Useful for retry loops or readiness probes that inspect
   /// [CommandResult.exitCode] directly.
   static const ExpectedExit any = _ExpectedAnyExit();
+
+  /// Short human-readable label used in unexpected-exit failure messages.
+  String get description;
+
+  /// Whether [actualExitCode] satisfies this expectation.
+  bool matches(int actualExitCode);
 }
 
 final class _ExpectedExitCode extends ExpectedExit {
   const _ExpectedExitCode(this.exitCode);
 
   final int exitCode;
+
+  @override
+  String get description => exitCode == 0 ? 'zero' : '$exitCode';
+
+  @override
+  bool matches(int actualExitCode) => actualExitCode == exitCode;
 }
 
 final class _ExpectedNonZeroExit extends ExpectedExit {
   const _ExpectedNonZeroExit();
+
+  @override
+  String get description => 'non-zero';
+
+  @override
+  bool matches(int actualExitCode) => actualExitCode != 0;
 }
 
 final class _ExpectedAnyExit extends ExpectedExit {
   const _ExpectedAnyExit();
+
+  @override
+  String get description => 'any';
+
+  @override
+  bool matches(int actualExitCode) => true;
 }
 
 /// Specifies what to do with the command output from [runCommand] and [startCommand].

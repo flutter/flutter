@@ -189,6 +189,26 @@ exitCode = 7;''');
     expect(hasError, isFalse);
   });
 
+  test('ExpectedExit matches and description reflect each variant', () {
+    expect(ExpectedExit.zero.description, 'zero');
+    expect(ExpectedExit.zero.matches(0), isTrue);
+    expect(ExpectedExit.zero.matches(1), isFalse);
+
+    expect(ExpectedExit.nonZero.description, 'non-zero');
+    expect(ExpectedExit.nonZero.matches(0), isFalse);
+    expect(ExpectedExit.nonZero.matches(1), isTrue);
+
+    const exit7 = ExpectedExit.code(7);
+    expect(exit7.description, '7');
+    expect(exit7.matches(7), isTrue);
+    expect(exit7.matches(0), isFalse);
+    expect(exit7.matches(1), isFalse);
+
+    expect(ExpectedExit.any.description, 'any');
+    expect(ExpectedExit.any.matches(0), isTrue);
+    expect(ExpectedExit.any.matches(7), isTrue);
+  });
+
   test('decodes malformed UTF-8 bytes on stdout and stderr without FormatException', () async {
     final String script = writeDartScript(r'''
 stdout.add(<int>[...'ok'.codeUnits, 0xFF, 0xFE, ...'-tail\nline2\n'.codeUnits]);
