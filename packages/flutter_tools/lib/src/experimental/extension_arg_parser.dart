@@ -25,11 +25,6 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   ArgParser? _dynamicArgParser;
   bool _buildingBaseParser = false;
 
-  /// Hook called by the command runner before parsing arguments,
-  /// allowing the command to perform asynchronous initialization
-  /// (e.g. querying extensions) to populate its dynamic options.
-  Future<void> initializeDynamicOptions() async {}
-
   /// Creates and configures the static base `ArgParser` for this command.
   ///
   /// Subclasses should override this method to register their static options
@@ -37,9 +32,7 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   /// base parser to be cloned and dynamically rebuilt when extension options change.
   @protected
   ArgParser createBaseArgParser() {
-    final OutputPreferences? preferences = toolContext?.outputPreferences;
-    final bool wrapText = preferences?.wrapText ?? false;
-    final int? wrapColumn = preferences?.wrapColumn;
+    final OutputPreferences(:bool wrapText, :int? wrapColumn) = toolContext.outputPreferences;
     return ArgParser(allowTrailingOptions: false, usageLineLength: wrapText ? wrapColumn : null);
   }
 
@@ -115,6 +108,7 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   }
 
   /// Returns the base static `ArgParser` for this command, initializing it if needed.
+  @override
   ArgParser get baseArgParser {
     if (_baseArgParser != null) {
       return _baseArgParser!;

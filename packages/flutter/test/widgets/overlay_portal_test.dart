@@ -662,6 +662,106 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final bounded in <bool>[false, true]) {
+    for (final useLayoutBuilder in <bool>[false, true]) {
+      for (final tightAnchor in <bool>[false, true]) {
+        testWidgets('OverlayPortal opens in a shrink-wrapped Overlay '
+            '(bounded: $bounded, layoutBuilder: $useLayoutBuilder, tightAnchor: $tightAnchor)', (
+          WidgetTester tester,
+        ) async {
+          // Regression test for https://github.com/flutter/flutter/issues/192861.
+          final controller = OverlayPortalController();
+          const overlayChildKey = ValueKey<String>('overlay child');
+          const anchorDimension = 40.0;
+          double dimension = 100;
+          OverlayChildLayoutInfo? layoutInfo;
+
+          Widget portal = useLayoutBuilder
+              ? OverlayPortal.overlayChildLayoutBuilder(
+                  controller: controller,
+                  overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
+                    layoutInfo = info;
+                    return const SizedBox(key: overlayChildKey);
+                  },
+                  child: const SizedBox.square(dimension: anchorDimension),
+                )
+              : OverlayPortal(
+                  controller: controller,
+                  overlayChildBuilder: (BuildContext context) =>
+                      const SizedBox(key: overlayChildKey),
+                  child: const SizedBox.square(dimension: anchorDimension),
+                );
+          if (tightAnchor) {
+            // Tight constraints make the layout surrogate its own relayout
+            // boundary instead of a shallower ancestor, so layout starts at
+            // the surrogate and it lays out the deferred child from the
+            // theater's cached constraints.
+            portal = SizedBox.square(dimension: anchorDimension, child: portal);
+          }
+
+          final overlayEntry = OverlayEntry(
+            canSizeOverlay: true,
+            builder: (BuildContext context) {
+              return SizedBox.square(
+                dimension: dimension,
+                child: Center(child: portal),
+              );
+            },
+          );
+          addTearDown(
+            () => overlayEntry
+              ..remove()
+              ..dispose(),
+          );
+          final Widget overlay = Overlay(
+            alwaysSizeToContent: bounded,
+            initialEntries: <OverlayEntry>[overlayEntry],
+          );
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: bounded ? Center(child: overlay) : UnconstrainedBox(child: overlay),
+            ),
+          );
+          expect(tester.getSize(find.byType(Overlay)), const Size.square(100));
+          expect(find.byKey(overlayChildKey), findsNothing);
+
+          controller.show();
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+          expect(tester.getSize(find.byKey(overlayChildKey)), const Size.square(100));
+          if (useLayoutBuilder) {
+            expect(layoutInfo?.overlaySize, const Size.square(100));
+            expect(layoutInfo?.childSize, const Size.square(anchorDimension));
+          }
+          verifyTreeIsClean();
+
+          dimension = 200;
+          overlayEntry.markNeedsBuild();
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+          expect(tester.getSize(find.byType(Overlay)), const Size.square(200));
+          expect(tester.getSize(find.byKey(overlayChildKey)), const Size.square(200));
+          if (useLayoutBuilder) {
+            expect(layoutInfo?.overlaySize, const Size.square(200));
+            expect(layoutInfo?.childSize, const Size.square(anchorDimension));
+          }
+          verifyTreeIsClean();
+
+          controller.hide();
+          await tester.pump();
+          expect(find.byKey(overlayChildKey), findsNothing);
+
+          controller.show();
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+          expect(tester.getSize(find.byKey(overlayChildKey)), const Size.square(200));
+          verifyTreeIsClean();
+        });
+      }
+    }
+  }
+
   testWidgets('show/hide works', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(

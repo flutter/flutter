@@ -6,10 +6,11 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../base/user_messages.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../doctor.dart';
 import '../ios/devices.dart';
 
 const _checkingForWirelessDevicesMessage = 'Checking for wireless devices...';
@@ -48,34 +49,42 @@ String flutterSpecifiedDeviceUnpaired(String deviceName) =>
 /// a flutter application on.
 class TargetDevices {
   factory TargetDevices({
-    required Platform platform,
     required DeviceManager deviceManager,
-    required Logger logger,
+    required Doctor doctor,
+    required ToolContext toolContext,
     DeviceConnectionInterface? deviceConnectionInterface,
   }) {
-    if (platform.isMacOS) {
+    if (toolContext.platform.isMacOS) {
       return TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
-        logger: logger,
+        doctor: doctor,
+        toolContext: toolContext,
         deviceConnectionInterface: deviceConnectionInterface,
       );
     }
     return TargetDevices._private(
       deviceManager: deviceManager,
-      logger: logger,
+      doctor: doctor,
+      toolContext: toolContext,
       deviceConnectionInterface: deviceConnectionInterface,
     );
   }
 
   TargetDevices._private({
     required this._deviceManager,
-    required this._logger,
-    required this.deviceConnectionInterface,
+    required this._doctor,
+    required this._toolContext,
+    this.deviceConnectionInterface,
   });
 
   final DeviceManager _deviceManager;
-  final Logger _logger;
+  final Doctor _doctor;
+  final ToolContext _toolContext;
   final DeviceConnectionInterface? deviceConnectionInterface;
+
+  Logger get _logger => _toolContext.logger;
+  AnsiTerminal get _terminal => _toolContext.terminal;
+  UserMessages get _userMessages => _toolContext.userMessages;
 
   bool get _includeAttachedDevices =>
       deviceConnectionInterface == null ||
@@ -154,8 +163,8 @@ class TargetDevices {
     Duration? deviceDiscoveryTimeout,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    if (!globals.doctor!.canLaunchAnything) {
-      _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
+    if (!_doctor.canLaunchAnything) {
+      _logger.printError(_userMessages.flutterNoDevelopmentDevice);
       return null;
     }
 
@@ -216,7 +225,7 @@ class TargetDevices {
     _logger.printStatus(
       _deviceManager.hasSpecifiedAllDevices
           ? _noDevicesFoundMessage
-          : globals.userMessages.flutterNoSupportedDevices,
+          : _userMessages.flutterNoSupportedDevices,
     );
     await _printUnsupportedDevice(unsupportedDevices);
     return null;
@@ -244,7 +253,7 @@ class TargetDevices {
       return <Device>[ephemeralDevice];
     }
 
-    if (canPrompt && globals.terminal.stdinHasTerminal) {
+    if (canPrompt && _terminal.stdinHasTerminal) {
       return _selectFromMultipleDevices(attachedDevices, wirelessDevices);
     } else {
       return _printMultipleDevices(attachedDevices, wirelessDevices);
@@ -275,7 +284,7 @@ class TargetDevices {
         supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutter(),
       );
 
-      _logger.printStatus(globals.userMessages.flutterSpecifyDeviceWithAllOption);
+      _logger.printStatus(_userMessages.flutterSpecifyDeviceWithAllOption);
       _logger.printStatus('');
     }
 
@@ -328,20 +337,16 @@ class TargetDevices {
 
   Future<void> _printUnsupportedDevice(List<Device> unsupportedDevices) async {
     if (unsupportedDevices.isNotEmpty) {
-      final result = StringBuffer();
-      result.writeln();
-      result.writeln(_foundButUnsupportedDevicesMessage);
-      result.writeAll(
-        (await Device.descriptions(unsupportedDevices)).map((String desc) => desc).toList(),
-        '\n',
+      final String descriptions = (await Device.descriptions(unsupportedDevices)).join('\n');
+      final String platformMessage = _userMessages.flutterMissPlatformProjects(
+        Device.devicesPlatformTypes(unsupportedDevices),
       );
-      result.writeln();
-      result.writeln(
-        globals.userMessages.flutterMissPlatformProjects(
-          Device.devicesPlatformTypes(unsupportedDevices),
-        ),
-      );
-      _logger.printStatus(result.toString(), newline: false);
+      _logger.printStatus('''
+
+$_foundButUnsupportedDevicesMessage
+$descriptions
+$platformMessage
+''', newline: false);
     }
   }
 
@@ -366,14 +371,10 @@ class TargetDevices {
 
   Future<String> _readUserInput(int deviceCount) async {
     if (deviceCount >= 10) {
-      return _readDeviceChoiceLine(
-        terminal: globals.terminal,
-        logger: _logger,
-        deviceCount: deviceCount,
-      );
+      return _readDeviceChoiceLine(deviceCount: deviceCount, logger: _logger, terminal: _terminal);
     }
-    globals.terminal.usesTerminalUi = true;
-    final String result = await globals.terminal.promptForCharInput(
+    _terminal.usesTerminalUi = true;
+    final String result = await _terminal.promptForCharInput(
       <String>[for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
       displayAcceptedCharacters: false,
       logger: _logger,
@@ -387,7 +388,8 @@ class TargetDevices {
 class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   TargetDevicesWithExtendedWirelessDeviceDiscovery({
     required super.deviceManager,
-    required super.logger,
+    required super.doctor,
+    required super.toolContext,
     super.deviceConnectionInterface,
   }) : super._private();
 
@@ -396,8 +398,10 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   @visibleForTesting
   bool waitForWirelessBeforeInput = false;
 
+  late final _deviceSelection = TargetDeviceSelection(_logger, terminal: _terminal);
+
   @visibleForTesting
-  late final deviceSelection = TargetDeviceSelection(_logger);
+  TargetDeviceSelection get deviceSelection => _deviceSelection;
 
   @override
   void startExtendedWirelessDeviceDiscovery({Duration? deviceDiscoveryTimeout}) {
@@ -476,8 +480,8 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     try {
-      if (!globals.doctor!.canLaunchAnything) {
-        _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
+      if (!_doctor.canLaunchAnything) {
+        _logger.printError(_userMessages.flutterNoDevelopmentDevice);
         return null;
       }
 
@@ -645,7 +649,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       return <Device>[ephemeralDevice];
     }
 
-    if (!canPrompt || !globals.terminal.stdinHasTerminal || !_logger.supportsColor) {
+    if (!canPrompt || !_terminal.stdinHasTerminal || !_logger.supportsColor) {
       _logger.printStatus(_checkingForWirelessDevicesMessage);
       final List<Device> wirelessDevices = await futureWirelessDevices;
       if (attachedDevices.length + wirelessDevices.length == 1) {
@@ -654,7 +658,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       _logger.printStatus('');
       // If the terminal has stdin but does not support color/ANSI (which is
       // needed to clear lines), fallback to standard selection of device.
-      if (canPrompt && globals.terminal.stdinHasTerminal && !_logger.supportsColor) {
+      if (canPrompt && _terminal.stdinHasTerminal && !_logger.supportsColor) {
         return _handleMultipleDevices(attachedDevices, wirelessDevices, canPrompt: canPrompt);
       }
       // If terminal does not have stdin, print out device list.
@@ -772,7 +776,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   /// Clear [numLinesToClear] lines from terminal. Print message and list of
   /// wireless devices.
   Future<void> _printWirelessDevices(List<Device> wirelessDevices, int numLinesToClear) async {
-    _logger.printStatus(globals.terminal.clearLines(numLinesToClear), newline: false);
+    _logger.printStatus(_terminal.clearLines(numLinesToClear), newline: false);
     _logger.printStatus('');
     if (wirelessDevices.isEmpty) {
       _logger.printStatus(_noWirelessDevicesFoundMessage);
@@ -785,10 +789,11 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 
 @visibleForTesting
 class TargetDeviceSelection {
-  TargetDeviceSelection(this._logger);
+  TargetDeviceSelection(this._logger, {required this._terminal});
 
   List<Device> devices = <Device>[];
   final Logger _logger;
+  final AnsiTerminal _terminal;
   int invalidAttempts = 0;
 
   /// Prompt user to select a device and wait until they select a valid device.
@@ -820,9 +825,9 @@ class TargetDeviceSelection {
   Future<String> readUserInput() async {
     if (devices.length >= 10) {
       return _readDeviceChoiceLine(
-        terminal: globals.terminal,
-        logger: _logger,
         deviceCount: devices.length,
+        logger: _logger,
+        terminal: _terminal,
         onInvalidInput: () {
           invalidAttempts++;
         },
@@ -830,24 +835,24 @@ class TargetDeviceSelection {
     }
     final pattern = RegExp(r'\d+$|q', caseSensitive: false);
     String? choice;
-    globals.terminal.singleCharMode = true;
+    _terminal.singleCharMode = true;
     while (choice == null || choice.length > 1 || !pattern.hasMatch(choice)) {
       _logger.printStatus(_chooseOneMessage, emphasis: true, newline: false);
       // prompt ends with ': '
       _logger.printStatus(': ', emphasis: true, newline: false);
-      choice = (await globals.terminal.keystrokes.first).trim();
+      choice = (await _terminal.keystrokes.first).trim();
       _logger.printStatus(choice);
       invalidAttempts++;
     }
-    globals.terminal.singleCharMode = false;
+    _terminal.singleCharMode = false;
     return choice;
   }
 }
 
 Future<String> _readDeviceChoiceLine({
-  required Terminal terminal,
-  required Logger logger,
   required int deviceCount,
+  required Logger logger,
+  required Terminal terminal,
   void Function()? onInvalidInput,
 }) async {
   while (true) {

@@ -22,10 +22,12 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/signals.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -36,6 +38,8 @@ import '../custom_devices/custom_devices_config.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../emulator.dart';
+import '../experimental/extension_build_manager.dart';
+import '../experimental/extension_clean_manager.dart';
 import '../experimental/extension_discovery.dart';
 import '../experimental/extension_manager.dart';
 import '../features.dart';
@@ -88,15 +92,21 @@ class ToolDependencies {
   ToolDependencies({
     required this.analytics,
     required this.androidContext,
+    required this.androidWorkflow,
     required this.appleContext,
     required this.buildSystem,
+    required this.buildTargets,
     required this.crashReporter,
     required this.deviceManager,
     required this.doctor,
     required this.emulatorManager,
     required this.featureFlags,
+    required this.macOSWorkflow,
+    required this.templateRenderer,
     required this.toolContext,
-    this.buildTargets,
+    required this.windowsWorkflow,
+    this.extensionBuildManager,
+    this.extensionCleanManager,
     this.extensionManager,
   });
 
@@ -106,6 +116,9 @@ class ToolDependencies {
   /// Sub-context containing Android-specific platform services.
   final AndroidContext androidContext;
 
+  /// Evaluates host readiness and toolchain requirements for Android workflows.
+  final AndroidWorkflow androidWorkflow;
+
   /// Sub-context containing Apple platform services.
   final AppleContext appleContext;
 
@@ -113,7 +126,7 @@ class ToolDependencies {
   final BuildSystem buildSystem;
 
   /// Factory interface for constructing compile and bundle build targets.
-  final BuildTargets? buildTargets;
+  final BuildTargets buildTargets;
 
   /// Captures and submits unhandled tool crash reports and stack traces.
   final CrashReporter crashReporter;
@@ -127,14 +140,29 @@ class ToolDependencies {
   /// Manager for discovering, launching, and creating emulators.
   final EmulatorManager emulatorManager;
 
+  /// Manager for querying custom build targets and executing builds via tool extensions.
+  final ExtensionBuildManager? extensionBuildManager;
+
+  /// Manager for delegating project-specific clean operations to tool extensions.
+  final ExtensionCleanManager? extensionCleanManager;
+
   /// Manager for discovering and communicating with active tool extensions.
   final ExtensionManager? extensionManager;
 
   /// Feature flags that govern tool capabilities and rollouts.
   final FeatureFlags featureFlags;
 
+  /// Evaluates host readiness and toolchain requirements for macOS workflows.
+  final MacOSWorkflow macOSWorkflow;
+
+  /// Renderer for mustache project and platform templates.
+  final TemplateRenderer templateRenderer;
+
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
+
+  /// Evaluates host readiness and toolchain requirements for Windows workflows.
+  final WindowsWorkflow windowsWorkflow;
 
   /// Bootstraps the dependency graph and constructs all three contexts.
   ///
@@ -145,9 +173,12 @@ class ToolDependencies {
   /// gets a lazy callback that returns [NoOpAnalytics] until [Analytics] has
   /// been constructed.
   static Future<ToolDependencies> bootstrap({
+    required TemplateRenderer templateRenderer,
     Analytics? analytics,
     AndroidSdk? androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
     AndroidStudio? androidStudio,
+    AndroidStudio? Function()? androidStudioBuilder,
     AndroidWorkflow? androidWorkflow,
     Artifacts? artifacts,
     BotDetector? botDetector,
@@ -155,22 +186,31 @@ class ToolDependencies {
     BuildTargets? buildTargets,
     Cache? cache,
     CocoaPods? cocoaPods,
+    CocoaPods? Function()? cocoaPodsBuilder,
     CocoaPodsValidator? cocoapodsValidator,
+    CocoaPodsValidator? Function()? cocoapodsValidatorBuilder,
     Config? config,
     CrashReporter? crashReporter,
     CustomDevicesConfig? customDevicesConfig,
     DeviceManager? deviceManager,
     Doctor? doctor,
+    DoctorValidatorsProvider? doctorValidatorsProvider,
     EmulatorManager? emulatorManager,
     List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
+    String? flutterRoot,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
+    GradleUtils Function()? gradleUtilsBuilder,
+    HttpClientFactory? httpClientFactory,
     IOSSimulatorUtils? iosSimulatorUtils,
+    IOSSimulatorUtils? Function()? iosSimulatorUtilsBuilder,
     IOSWorkflow? iosWorkflow,
+    IOSWorkflow? Function()? iosWorkflowBuilder,
     Java? java,
+    Java? Function()? javaBuilder,
     LocalEngineLocator? localEngineLocator,
     Logger? logger,
     MacOSWorkflow? macOSWorkflow,
@@ -179,25 +219,90 @@ class ToolDependencies {
     PersistentToolState? persistentToolState,
     Platform? platform,
     PlistParser? plistParser,
+    PlistParser? Function()? plistParserBuilder,
     PreRunValidator? preRunValidator,
+    PreRunValidator Function({required Cache cache, required FileSystem fileSystem})?
+    preRunValidatorBuilder,
     ProcessInfo? processInfo,
     ProcessManager? processManager,
     FlutterProjectFactory? projectFactory,
     ShutdownHooks? shutdownHooks,
+    Signals? signals,
     Stdio? stdio,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
     UserMessages? userMessages,
     WindowsWorkflow? windowsWorkflow,
     XCDevice? xcdevice,
+    XCDevice? Function()? xcdeviceBuilder,
     Xcode? xcode,
+    Xcode? Function()? xcodeBuilder,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
+    XcodeProjectInterpreter? Function()? xcodeProjectInterpreterBuilder,
   }) async {
+    assert(
+      androidSdk == null || androidSdkBuilder == null,
+      'Cannot provide both androidSdk and androidSdkBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      androidStudio == null || androidStudioBuilder == null,
+      'Cannot provide both androidStudio and androidStudioBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      cocoaPods == null || cocoaPodsBuilder == null,
+      'Cannot provide both cocoaPods and cocoaPodsBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      cocoapodsValidator == null || cocoapodsValidatorBuilder == null,
+      'Cannot provide both cocoapodsValidator and cocoapodsValidatorBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      gradleUtils == null || gradleUtilsBuilder == null,
+      'Cannot provide both gradleUtils and gradleUtilsBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      iosSimulatorUtils == null || iosSimulatorUtilsBuilder == null,
+      'Cannot provide both iosSimulatorUtils and iosSimulatorUtilsBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      iosWorkflow == null || iosWorkflowBuilder == null,
+      'Cannot provide both iosWorkflow and iosWorkflowBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      java == null || javaBuilder == null,
+      'Cannot provide both java and javaBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      plistParser == null || plistParserBuilder == null,
+      'Cannot provide both plistParser and plistParserBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      preRunValidator == null || preRunValidatorBuilder == null,
+      'Cannot provide both preRunValidator and preRunValidatorBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      xcdevice == null || xcdeviceBuilder == null,
+      'Cannot provide both xcdevice and xcdeviceBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      xcode == null || xcodeBuilder == null,
+      'Cannot provide both xcode and xcodeBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      xcodeProjectInterpreter == null || xcodeProjectInterpreterBuilder == null,
+      'Cannot provide both xcodeProjectInterpreter and xcodeProjectInterpreterBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      cache == null || flutterRoot == null,
+      'Cannot provide both cache and flutterRoot to ToolDependencies.bootstrap.',
+    );
+
     // 1. Core Platform Inputs
     final Platform finalPlatform = platform ?? const LocalPlatform();
     final SystemClock finalSystemClock = systemClock ?? const SystemClock();
     final UserMessages finalUserMessages = userMessages ?? UserMessages();
     final ShutdownHooks finalShutdownHooks = shutdownHooks ?? ShutdownHooks();
+    final Signals finalSignals = signals ?? LocalSignals.instance;
     final Stdio finalStdio = stdio ?? Stdio();
 
     // 2. Terminal and Preferences
@@ -207,6 +312,9 @@ class ToolDependencies {
           stdio: finalStdio,
           platform: finalPlatform,
           now: finalSystemClock.now(),
+          // So that we don't animate anything before calling applyFeatureFlags, default
+          // the animations to disabled in real apps.
+          defaultCliAnimationEnabled: false,
           shutdownHooks: finalShutdownHooks,
         );
 
@@ -236,11 +344,7 @@ class ToolDependencies {
     // 4. File System
     final finalFS = fs == null
         ? ErrorHandlingFileSystem(
-            delegate: LocalFileSystem(
-              LocalSignals.instance,
-              Signals.defaultExitSignals,
-              finalShutdownHooks,
-            ),
+            delegate: LocalFileSystem(finalSignals, Signals.defaultExitSignals, finalShutdownHooks),
             platform: finalPlatform,
           )
         : ErrorHandlingFileSystem(delegate: fs, platform: finalPlatform);
@@ -250,15 +354,9 @@ class ToolDependencies {
         persistentToolState ??
         PersistentToolState(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
-    final BotDetector finalBotDetector =
-        botDetector ??
-        BotDetector(
-          httpClientFactory: () => HttpClient(),
-          platform: finalPlatform,
-          persistentToolState: finalPersistentToolState,
-        );
+    final BotDetector finalBotDetector = botDetector ?? BotDetector(platform: finalPlatform);
 
-    final bool isBot = await finalBotDetector.isRunningOnBot;
+    final bool isBot = finalBotDetector.isRunningOnBot;
 
     final Config finalConfig =
         config ??
@@ -287,34 +385,49 @@ class ToolDependencies {
     final Git finalGit =
         git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
-    // 7. Flutter Version and Cache
-    final String flutterRoot =
-        Cache.flutterRoot ??
+    // 7. Project Factory, Operating System Utilities, and Cache
+    final String finalFlutterRoot =
+        flutterRoot ??
+        cache?.flutterRoot ??
         Cache.defaultFlutterRoot(
           platform: finalPlatform,
           fileSystem: finalFS,
           userMessages: finalUserMessages,
         );
-    Cache.flutterRoot ??= flutterRoot;
 
-    final FlutterVersion finalFlutterVersion =
-        flutterVersion ?? FlutterVersion(fs: finalFS, flutterRoot: flutterRoot, git: finalGit);
+    // FeatureFlags depends on FlutterVersion, which depends on Cache, which
+    // depends on FlutterProjectFactory. The project factory resolves feature
+    // flags lazily to break this cycle.
+    late final FeatureFlags finalFeatureFlags;
 
-    // 8. Analytics
-    finalAnalytics =
-        analytics ??
-        getAnalytics(
-          runningOnBot: isBot,
-          flutterVersion: finalFlutterVersion,
-          environment: finalPlatform.environment,
-          clientIde: finalPlatform.environment['FLUTTER_HOST'],
-          config: finalConfig,
-        );
-    finalAnalyticsInitialized = true;
+    late final PlistParser finalPlistParser =
+        plistParser ??
+        plistParserBuilder?.call() ??
+        PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
-    // 9. Project Factory and Operating System Utilities
+    late final ToolContext finalToolContext;
+
+    late final XcodeProjectInterpreter finalXcodeProjectInterpreter =
+        xcodeProjectInterpreter ??
+        xcodeProjectInterpreterBuilder?.call() ??
+        XcodeProjectInterpreter(analytics: finalAnalytics, toolContext: finalToolContext);
+
+    late final Xcode finalXcode =
+        xcode ??
+        xcodeBuilder?.call() ??
+        Xcode(toolContext: finalToolContext, xcodeProjectInterpreter: finalXcodeProjectInterpreter);
+
     final FlutterProjectFactory finalProjectFactory =
-        projectFactory ?? FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
+        projectFactory ??
+        FlutterProjectFactory(
+          config: finalConfig,
+          featureFlagsBuilder: () => finalFeatureFlags,
+          fileSystem: finalFS,
+          logger: finalLogger,
+          plistParser: finalPlistParser,
+          xcodeBuilder: () => finalXcode,
+          xcodeProjectInterpreterBuilder: () => finalXcodeProjectInterpreter,
+        );
 
     final finalOS = OperatingSystemUtils(
       fileSystem: finalFS,
@@ -326,6 +439,7 @@ class ToolDependencies {
     final Cache finalCache =
         cache ??
         FlutterCache(
+          flutterRoot: finalFlutterRoot,
           fileSystem: finalFS,
           logger: finalLogger,
           platform: finalPlatform,
@@ -334,12 +448,58 @@ class ToolDependencies {
           stdio: finalStdio,
         );
 
+    // 8. Flutter Version
+    final FlutterVersion finalFlutterVersion =
+        flutterVersion ??
+        FlutterVersion(
+          cache: finalCache,
+          flutterRoot: finalFlutterRoot,
+          fs: finalFS,
+          git: finalGit,
+          logger: finalLogger,
+          platform: finalPlatform,
+        );
+
+    // 9. Analytics and Feature Flags
+    finalAnalytics =
+        analytics ??
+        getAnalytics(
+          runningOnBot: isBot,
+          flutterVersion: finalFlutterVersion,
+          environment: finalPlatform.environment,
+          clientIde: finalPlatform.environment['FLUTTER_HOST'],
+          config: finalConfig,
+        );
+    finalAnalyticsInitialized = true;
+    if (finalSignals is LocalSignals) {
+      finalSignals.configureExit(analytics: finalAnalytics, logger: finalLogger);
+    }
+
+    final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
+    final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
+      finalFS.path.join(projectRoot, 'pubspec.yaml'),
+      fileSystem: finalFS,
+      logger: finalLogger,
+    );
+
+    finalFeatureFlags =
+        featureFlags ??
+        FlutterFeatureFlags(
+          flutterVersion: finalFlutterVersion,
+          featuresConfig: FlutterFeaturesConfig(
+            globalConfig: finalConfig,
+            platform: finalPlatform,
+            projectManifest: projectManifest,
+          ),
+          platform: finalPlatform,
+        );
+
     // 10. Remaining ToolContext Dependencies
     final BuildSystem finalBuildSystem =
         buildSystem ??
         FlutterBuildSystem(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
-    final finalBuildTargets = buildTargets;
+    final BuildTargets finalBuildTargets = buildTargets ?? const NoOpBuildTargets();
 
     final CrashReporter finalCrashReporter =
         crashReporter ??
@@ -351,10 +511,17 @@ class ToolDependencies {
 
     final CustomDevicesConfig finalCustomDevicesConfig =
         customDevicesConfig ??
-        CustomDevicesConfig(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
+        CustomDevicesConfig(
+          cache: finalCache,
+          fileSystem: finalFS,
+          logger: finalLogger,
+          platform: finalPlatform,
+        );
 
     final PreRunValidator finalPreRunValidator =
-        preRunValidator ?? PreRunValidator(fileSystem: finalFS);
+        preRunValidator ??
+        preRunValidatorBuilder?.call(cache: finalCache, fileSystem: finalFS) ??
+        const NoOpPreRunValidator();
 
     final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
 
@@ -365,46 +532,10 @@ class ToolDependencies {
           logger: finalLogger,
           platform: finalPlatform,
           fileSystem: finalFS,
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
         );
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
-
-    // 11. AppleContext Dependencies
-    final XcodeProjectInterpreter finalXcodeProjectInterpreter =
-        xcodeProjectInterpreter ??
-        XcodeProjectInterpreter(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-        );
-
-    final Xcode finalXcode =
-        xcode ??
-        Xcode(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          userMessages: finalUserMessages,
-        );
-
-    final CocoaPods finalCocoaPods =
-        cocoaPods ??
-        CocoaPods(
-          fileSystem: finalFS,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          platform: finalPlatform,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          analytics: finalAnalytics,
-        );
-
-    final CocoaPodsValidator finalCocoapodsValidator =
-        cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
     // Artifacts will be updated later if a local engine is used.
     final Artifacts finalArtifacts = switch (artifacts) {
@@ -420,104 +551,153 @@ class ToolDependencies {
       ),
     };
 
-    final XCDevice finalXCDevice =
+    finalToolContext = ToolContext(
+      artifacts: finalArtifacts,
+      botDetector: finalBotDetector,
+      cache: finalCache,
+      config: finalConfig,
+      customDevicesConfig: finalCustomDevicesConfig,
+      flutterVersion: finalFlutterVersion,
+      fs: finalFS,
+      git: finalGit,
+      localEngineLocator: finalLocalEngineLocator,
+      logger: finalLogger,
+      nativeAssetsBuilder: finalNativeAssetsBuilder,
+      os: finalOS,
+      outputPreferences: finalOutputPreferences,
+      persistentToolState: finalPersistentToolState,
+      platform: finalPlatform,
+      preRunValidator: finalPreRunValidator,
+      processInfo: finalProcessInfo,
+      processManager: finalProcessManager,
+      processUtils: finalProcessUtils,
+      projectFactory: finalProjectFactory,
+      shutdownHooks: finalShutdownHooks,
+      signals: finalSignals,
+      stdio: finalStdio,
+      systemClock: finalSystemClock,
+      terminal: finalTerminal,
+      userMessages: finalUserMessages,
+    );
+
+    // 11. AppleContext Dependencies
+    late final CocoaPods finalCocoaPods =
+        cocoaPods ??
+        cocoaPodsBuilder?.call() ??
+        CocoaPods(
+          analytics: finalAnalytics,
+          toolContext: finalToolContext,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+        );
+
+    late final CocoaPodsValidator finalCocoapodsValidator =
+        cocoapodsValidator ??
+        cocoapodsValidatorBuilder?.call() ??
+        CocoaPodsValidator(finalCocoaPods, finalUserMessages);
+
+    late final XCDevice finalXCDevice =
         xcdevice ??
+        xcdeviceBuilder?.call() ??
         XCDevice(
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          artifacts: finalArtifacts,
-          cache: finalCache,
-          platform: finalPlatform,
-          xcode: finalXcode,
+          analytics: finalAnalytics,
+          cocoaPods: finalCocoaPods,
           iproxy: IProxy(
             artifacts: finalArtifacts,
             logger: finalLogger,
             processManager: finalProcessManager,
             dyLdLibEntry: finalCache.dyLdLibEntry,
           ),
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-          shutdownHooks: finalShutdownHooks,
+          plistParser: finalPlistParser,
+          templateRenderer: templateRenderer,
+          toolContext: finalToolContext,
+          xcode: finalXcode,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
 
-    final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
-    final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
-      finalFS.path.join(projectRoot, 'pubspec.yaml'),
-      fileSystem: finalFS,
-      logger: finalLogger,
-    );
-
-    final FeatureFlags finalFeatureFlags =
-        featureFlags ??
-        FlutterFeatureFlags(
-          flutterVersion: finalFlutterVersion,
-          featuresConfig: FlutterFeaturesConfig(
-            globalConfig: finalConfig,
-            platform: finalPlatform,
-            projectManifest: projectManifest,
-          ),
-          platform: finalPlatform,
-        );
-
-    final IOSWorkflow finalIOSWorkflow =
+    late final IOSWorkflow finalIOSWorkflow =
         iosWorkflow ??
+        iosWorkflowBuilder?.call() ??
         IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
 
-    final IOSSimulatorUtils finalIOSSimulatorUtils =
+    late final IOSSimulatorUtils finalIOSSimulatorUtils =
         iosSimulatorUtils ??
+        iosSimulatorUtilsBuilder?.call() ??
         IOSSimulatorUtils(
-          logger: finalLogger,
-          operatingSystemUtils: finalOS,
-          processManager: finalProcessManager,
+          analytics: finalAnalytics,
+          cocoaPods: finalCocoaPods,
+          plistParser: finalPlistParser,
+          templateRenderer: templateRenderer,
+          toolContext: finalToolContext,
           xcode: finalXcode,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
-
-    final PlistParser finalPlistParser =
-        plistParser ??
-        PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
-    final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();
+    final AndroidSdk? Function() finalAndroidSdkBuilder =
+        androidSdkBuilder ??
+        (androidSdk != null
+            ? () => androidSdk
+            : () => AndroidSdk.locateAndroidSdk(toolContext: finalToolContext));
 
-    final AndroidSdk? finalAndroidSdk = androidSdk ?? AndroidSdk.locateAndroidSdk();
+    final AndroidStudio? Function() finalAndroidStudioBuilder =
+        androidStudioBuilder ??
+        (androidStudio != null
+            ? () => androidStudio
+            : () => AndroidStudio.latestValid(
+                plistParser: finalPlistParser,
+                toolContext: finalToolContext,
+              ));
 
-    final Java? finalJava =
-        java ??
-        Java.find(
-          config: finalConfig,
-          androidStudio: finalAndroidStudio,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-        );
+    late final AndroidContext finalAndroidContext;
 
-    final GradleUtils finalGradleUtils =
-        gradleUtils ??
-        GradleUtils(
-          platform: finalPlatform,
-          logger: finalLogger,
-          cache: finalCache,
-          operatingSystemUtils: finalOS,
-        );
+    final Java? Function() finalJavaBuilder =
+        javaBuilder ??
+        (java != null
+            ? () => java
+            : () => Java.find(
+                androidStudioBuilder: () => finalAndroidContext.androidStudio,
+                config: finalConfig,
+                fileSystem: finalFS,
+                logger: finalLogger,
+                platform: finalPlatform,
+                processManager: finalProcessManager,
+              ));
 
-    // 13. Doctor, EmulatorManager, and DeviceManager Dependencies
-    final Doctor finalDoctor =
-        doctor ?? Doctor(clock: finalSystemClock, logger: finalLogger, analytics: finalAnalytics);
+    final GradleUtils Function() finalGradleUtilsBuilder =
+        gradleUtilsBuilder ??
+        (gradleUtils != null
+            ? () => gradleUtils
+            : () => GradleUtils(
+                platform: finalPlatform,
+                logger: finalLogger,
+                cache: finalCache,
+                operatingSystemUtils: finalOS,
+              ));
 
+    finalAndroidContext = AndroidContext(
+      androidSdkBuilder: finalAndroidSdkBuilder,
+      androidStudioBuilder: finalAndroidStudioBuilder,
+      gradleUtilsBuilder: finalGradleUtilsBuilder,
+      javaBuilder: finalJavaBuilder,
+    );
+
+    // 13. EmulatorManager and DeviceManager Dependencies
     final AndroidWorkflow finalAndroidWorkflow =
         androidWorkflow ??
-        AndroidWorkflow(androidSdk: finalAndroidSdk, featureFlags: finalFeatureFlags);
+        AndroidWorkflow(
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          featureFlags: finalFeatureFlags,
+        );
 
     final EmulatorManager finalEmulatorManager =
         emulatorManager ??
         EmulatorManager(
           androidWorkflow: finalAndroidWorkflow,
-          fileSystem: finalFS,
-          java: finalJava,
-          logger: finalLogger,
-          processManager: finalProcessManager,
-          androidSdk: finalAndroidSdk,
+          iosWorkflow: finalIOSWorkflow,
+          javaBuilder: () => finalAndroidContext.java,
+          toolContext: finalToolContext,
+          xcode: finalXcode,
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
         );
 
     final MacOSWorkflow finalMacOSWorkflow =
@@ -533,85 +713,88 @@ class ToolDependencies {
       hostPlatform: finalOS.hostPlatform,
       logger: finalLogger,
     );
+    finalShutdownHooks.addShutdownHook(extensionManager.dispose);
+
+    final appleContext = AppleContext(
+      cocoaPodsBuilder: () => finalCocoaPods,
+      cocoapodsValidatorBuilder: () => finalCocoapodsValidator,
+      iosSimulatorUtilsBuilder: () => finalIOSSimulatorUtils,
+      iosWorkflowBuilder: () => finalIOSWorkflow,
+      plistParserBuilder: () => finalPlistParser,
+      xcdeviceBuilder: () => finalXCDevice,
+      xcodeBuilder: () => finalXcode,
+      xcodeProjectInterpreterBuilder: () => finalXcodeProjectInterpreter,
+    );
+
+    final extensionBuildManager = ExtensionBuildManager(
+      extensionManager: extensionManager,
+      featureFlags: finalFeatureFlags,
+      logger: finalLogger,
+    );
+
+    final extensionCleanManager = ExtensionCleanManager(
+      extensionManager: extensionManager,
+      featureFlags: finalFeatureFlags,
+      logger: finalLogger,
+    );
 
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
-          logger: finalLogger,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          fileSystem: finalFS,
-          androidSdk: finalAndroidSdk,
-          featureFlags: finalFeatureFlags,
-          iosSimulatorUtils: finalIOSSimulatorUtils,
-          xcDevice: finalXCDevice,
+          analytics: finalAnalytics,
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
           androidWorkflow: finalAndroidWorkflow,
-          iosWorkflow: finalIOSWorkflow,
-          flutterVersion: finalFlutterVersion,
-          artifacts: finalArtifacts,
-          macOSWorkflow: finalMacOSWorkflow,
-          userMessages: finalUserMessages,
-          operatingSystemUtils: finalOS,
-          windowsWorkflow: finalWindowsWorkflow,
-          customDevicesConfig: finalCustomDevicesConfig,
-          nativeAssetsBuilder: finalNativeAssetsBuilder,
+          appleContext: appleContext,
+          buildSystem: finalBuildSystem,
+          buildTargets: finalBuildTargets,
+          extensionBuildManager: extensionBuildManager,
           extensionManager: extensionManager,
+          featureFlags: finalFeatureFlags,
+          macOSWorkflow: finalMacOSWorkflow,
+          templateRenderer: templateRenderer,
+          toolContext: finalToolContext,
+          windowsWorkflow: finalWindowsWorkflow,
+        );
+
+    // 14. Doctor
+    final Doctor finalDoctor =
+        doctor ??
+        Doctor(
+          analytics: finalAnalytics,
+          cache: finalCache,
+          clock: finalSystemClock,
+          logger: finalLogger,
+          validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
+              doctorValidatorsProvider ??
+              DoctorValidatorsProvider.create(
+                appleContext: appleContext,
+                deviceManager: finalDeviceManager,
+                extensionManager: extensionManager,
+                featureFlags: finalFeatureFlags,
+                httpClientFactory: httpClientFactory,
+                toolContext: finalToolContext,
+              ),
         );
 
     return ToolDependencies(
       analytics: finalAnalytics,
-      androidContext: AndroidContext(
-        androidSdk: finalAndroidSdk,
-        androidStudio: finalAndroidStudio,
-        gradleUtils: finalGradleUtils,
-        java: finalJava,
-      ),
-      appleContext: AppleContext(
-        cocoaPods: finalCocoaPods,
-        cocoapodsValidator: finalCocoapodsValidator,
-        iosSimulatorUtils: finalIOSSimulatorUtils,
-        iosWorkflow: finalIOSWorkflow,
-        plistParser: finalPlistParser,
-        xcdevice: finalXCDevice,
-        xcode: finalXcode,
-        xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-      ),
+      androidContext: finalAndroidContext,
+      androidWorkflow: finalAndroidWorkflow,
+      appleContext: appleContext,
       buildSystem: finalBuildSystem,
+      buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
       deviceManager: finalDeviceManager,
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
+      extensionBuildManager: extensionBuildManager,
+      extensionCleanManager: extensionCleanManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
-      toolContext: ToolContext(
-        artifacts: finalArtifacts,
-        botDetector: finalBotDetector,
-        cache: finalCache,
-        config: finalConfig,
-        customDevicesConfig: finalCustomDevicesConfig,
-        flutterVersion: finalFlutterVersion,
-        fs: finalFS,
-        git: finalGit,
-        localEngineLocator: finalLocalEngineLocator,
-        logger: finalLogger,
-        nativeAssetsBuilder: finalNativeAssetsBuilder,
-        os: finalOS,
-        outputPreferences: finalOutputPreferences,
-        persistentToolState: finalPersistentToolState,
-        platform: finalPlatform,
-        preRunValidator: finalPreRunValidator,
-        processInfo: finalProcessInfo,
-        processManager: finalProcessManager,
-        processUtils: finalProcessUtils,
-        projectFactory: finalProjectFactory,
-        shutdownHooks: finalShutdownHooks,
-        signals: LocalSignals.instance,
-        stdio: finalStdio,
-        systemClock: finalSystemClock,
-        terminal: finalTerminal,
-        userMessages: finalUserMessages,
-      ),
-      buildTargets: finalBuildTargets,
+      macOSWorkflow: finalMacOSWorkflow,
+      templateRenderer: templateRenderer,
+      toolContext: finalToolContext,
+      windowsWorkflow: finalWindowsWorkflow,
     );
   }
 }

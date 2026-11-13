@@ -16,30 +16,28 @@ import 'image_stream.dart';
 /// still be displayed if an HTML element is used.
 class WebImageInfo implements ImageInfo {
   /// Creates a new [WebImageInfo] from a given HTML element.
-  WebImageInfo(this.htmlImage, {this.debugLabel});
+  WebImageInfo(web.HTMLImageElement htmlImage, {this.debugLabel})
+    : _handle = _HtmlImageElementHandle(_HtmlImageElementRef(htmlImage));
+
+  WebImageInfo._(this._handle, {this.debugLabel});
+
+  final _HtmlImageElementHandle _handle;
 
   /// The HTML element used to display this image. This HTML element has already
   /// decoded the image, so size information can be retrieved from it.
-  final web.HTMLImageElement htmlImage;
+  web.HTMLImageElement get htmlImage => _handle.htmlImage;
 
   @override
   final String? debugLabel;
 
   @override
   WebImageInfo clone() {
-    // There is no need to actually clone the <img> element here. We create
-    // another reference to the <img> element and let the browser garbage
-    // collect it when there are no more live references.
-    return WebImageInfo(htmlImage, debugLabel: debugLabel);
+    return WebImageInfo._(_handle.clone(), debugLabel: debugLabel);
   }
 
   @override
   void dispose() {
-    // There is nothing to do here. There is no way to delete an element
-    // directly, the most we can do is remove it from the DOM. But the <img>
-    // element here is never even added to the DOM. The browser will
-    // automatically garbage collect the element when there are no longer any
-    // live references to it.
+    _handle.dispose();
   }
 
   @override
@@ -64,4 +62,50 @@ class WebImageInfo implements ImageInfo {
 
   @override
   int get sizeBytes => (4 * htmlImage.naturalWidth * htmlImage.naturalHeight).toInt();
+}
+
+class _HtmlImageElementHandle {
+  _HtmlImageElementHandle(this._ref);
+
+  final _HtmlImageElementRef _ref;
+  bool _disposed = false;
+
+  web.HTMLImageElement get htmlImage => _ref.htmlImage;
+
+  _HtmlImageElementHandle clone() {
+    assert(!_disposed, 'Cannot clone a disposed WebImageInfo.');
+    _ref.retain();
+    return _HtmlImageElementHandle(_ref);
+  }
+
+  void dispose() {
+    assert(!_disposed, 'Cannot dispose a WebImageInfo that has already been disposed.');
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    _ref.release();
+  }
+}
+
+class _HtmlImageElementRef {
+  _HtmlImageElementRef(this.htmlImage);
+
+  final web.HTMLImageElement htmlImage;
+  int _refCount = 1;
+
+  void retain() {
+    assert(_refCount > 0);
+    _refCount++;
+  }
+
+  void release() {
+    assert(_refCount > 0);
+    _refCount--;
+    if (_refCount == 0) {
+      // Clear the src attribute of the image element to eagerly release the
+      // decoded image buffer in the browser (especially WebKit on iOS).
+      htmlImage.src = '';
+    }
+  }
 }

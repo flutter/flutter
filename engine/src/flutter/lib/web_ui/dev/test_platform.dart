@@ -91,7 +91,7 @@ class BrowserPlatform extends PlatformPlugin {
         .add(_createAbsolutePackageUrlHandler())
         .add(_screenshotHandler)
         // Generates and serves a test payload of given length, split into chunks
-        // of given size. Reponds to requests to /long_test_payload.
+        // of given size. Responds to requests to /long_test_payload.
         .add(_testPayloadGenerator)
         // If none of the handlers above handled the request, return 404.
         .add(_fileNotFoundCatcher);
@@ -465,6 +465,7 @@ class BrowserPlatform extends PlatformPlugin {
     '.gif': 'image/gif',
     '.webp': 'image/webp',
     '.bmp': 'image/bmp',
+    '.avif': 'image/avif',
     '.svg': 'image/svg+xml',
     '.json': 'application/json',
     '.map': 'application/json',

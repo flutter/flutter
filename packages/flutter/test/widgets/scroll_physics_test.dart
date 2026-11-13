@@ -497,8 +497,12 @@ FlutterError
     ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
     final ScrollPosition firstPosition = scrollable.position;
     expect(
-      (firstPosition.physics as BouncingScrollPhysics).decelerationRate,
-      ScrollDecelerationRate.normal,
+      firstPosition.physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.normal,
+      ),
     );
 
     // Identical configuration should not recreate ScrollPosition.
@@ -506,8 +510,12 @@ FlutterError
     scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
     expect(scrollable.position, same(firstPosition));
     expect(
-      (scrollable.position.physics as BouncingScrollPhysics).decelerationRate,
-      ScrollDecelerationRate.normal,
+      scrollable.position.physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.normal,
+      ),
     );
 
     // Different decelerationRate should recreate ScrollPosition.
@@ -518,8 +526,12 @@ FlutterError
     final ScrollPosition secondPosition = scrollable.position;
     expect(secondPosition, isNot(same(firstPosition)));
     expect(
-      (secondPosition.physics as BouncingScrollPhysics).decelerationRate,
-      ScrollDecelerationRate.fast,
+      secondPosition.physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.fast,
+      ),
     );
   });
 
@@ -576,6 +588,82 @@ FlutterError
 
     expect(identical(physicsB1, physicsC2), isTrue);
     expect(physicsB1.shouldUpdate(physicsC2), isFalse);
+  });
+
+  test('ScrollPhysics supports shorthands for AlwaysScrollableScrollPhysics', () {
+    ScrollPhysics physics = const .alwaysScrollable();
+
+    expect(physics, isA<AlwaysScrollableScrollPhysics>());
+    expect(physics.parent, isNull);
+
+    physics = const .alwaysScrollable(parent: ClampingScrollPhysics());
+
+    expect(physics, isA<AlwaysScrollableScrollPhysics>());
+    expect(physics.parent, isA<ClampingScrollPhysics>());
+  });
+
+  test('ScrollPhysics supports shorthands for BouncingScrollPhysics', () {
+    const ScrollPhysics physics = .bouncing();
+
+    expect(physics.parent, isNull);
+    expect(
+      physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.normal,
+      ),
+    );
+
+    const ScrollPhysics physics2 = .bouncing(
+      parent: ClampingScrollPhysics(),
+      decelerationRate: ScrollDecelerationRate.fast,
+    );
+    expect(
+      physics2,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.fast,
+      ),
+    );
+    expect(physics2.parent, isA<ClampingScrollPhysics>());
+  });
+
+  test('ScrollPhysics supports shorthands for ClampingScrollPhysics', () {
+    ScrollPhysics physics = const .clamping();
+
+    expect(physics, isA<ClampingScrollPhysics>());
+    expect(physics.parent, isNull);
+
+    physics = const .clamping(parent: AlwaysScrollableScrollPhysics());
+
+    expect(physics, isA<ClampingScrollPhysics>());
+    expect(physics.parent, isA<AlwaysScrollableScrollPhysics>());
+  });
+
+  test('ScrollPhysics supports shorthands for NeverScrollableScrollPhysics', () {
+    ScrollPhysics physics = const .neverScrollable();
+
+    expect(physics, isA<NeverScrollableScrollPhysics>());
+    expect(physics.parent, isNull);
+
+    physics = const .neverScrollable(parent: ClampingScrollPhysics());
+
+    expect(physics, isA<NeverScrollableScrollPhysics>());
+    expect(physics.parent, isA<ClampingScrollPhysics>());
+  });
+
+  test('ScrollPhysics supports shorthands for RangeMaintainingScrollPhysics', () {
+    ScrollPhysics physics = const .rangeMaintaining();
+
+    expect(physics, isA<RangeMaintainingScrollPhysics>());
+    expect(physics.parent, isNull);
+
+    physics = const .rangeMaintaining(parent: ClampingScrollPhysics());
+
+    expect(physics, isA<RangeMaintainingScrollPhysics>());
+    expect(physics.parent, isA<ClampingScrollPhysics>());
   });
 }
 

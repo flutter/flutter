@@ -25,8 +25,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import '_web_browser_detection_io.dart'
-    if (dart.library.js_interop) '_web_browser_detection_web.dart';
 import 'actions.dart';
 import 'app_lifecycle_listener.dart';
 import 'autofill.dart';
@@ -1196,6 +1194,8 @@ class EditableText extends StatefulWidget {
   ///
   /// It's rarely necessary to set this property. By default its value
   /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  /// If the app did not choose its locale (see [Localizations.isDefaultLocale]),
+  /// no locale is used and the platform's default locale applies.
   ///
   /// See [RenderEditable.locale] for more information.
   final Locale? locale;
@@ -2155,21 +2155,8 @@ class EditableText extends StatefulWidget {
 
   /// The default value for [selectionWidthStyle].
   ///
-  /// On web platforms, this defaults to [ui.BoxWidthStyle.max] for Apple platforms running
-  /// Safari (webkit) based browsers and [ui.BoxWidthStyle.tight] for all others.
-  ///
-  /// On non-web platforms, this defaults to [ui.BoxWidthStyle.max].
-  static ui.BoxWidthStyle get defaultSelectionWidthStyle {
-    if (kIsWeb) {
-      if (defaultTargetPlatform == TargetPlatform.iOS || WebBrowserDetection.isSafari) {
-        // On macOS web, the selection width behavior differs when running on
-        // Chrom(e|ium) (blink) or Safari (webkit).
-        return ui.BoxWidthStyle.max;
-      }
-      return ui.BoxWidthStyle.tight;
-    }
-    return ui.BoxWidthStyle.max;
-  }
+  /// Returns [ui.BoxWidthStyle.tight] on all platforms.
+  static ui.BoxWidthStyle get defaultSelectionWidthStyle => ui.BoxWidthStyle.tight;
 
   /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
@@ -2231,21 +2218,21 @@ class EditableText extends StatefulWidget {
       final showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
 
       resultButtonItem.addAll(<ContextMenuButtonItem>[
-        if (onCut != null) ContextMenuButtonItem(onPressed: onCut, type: ContextMenuButtonType.cut),
+        if (onCut != null) ContextMenuButtonItem(onPressed: onCut, kind: ContextMenuButtonKind.cut),
         if (onCopy != null)
-          ContextMenuButtonItem(onPressed: onCopy, type: ContextMenuButtonType.copy),
+          ContextMenuButtonItem(onPressed: onCopy, kind: ContextMenuButtonKind.copy),
         if (onPaste != null)
-          ContextMenuButtonItem(onPressed: onPaste, type: ContextMenuButtonType.paste),
+          ContextMenuButtonItem(onPressed: onPaste, kind: ContextMenuButtonKind.paste),
         if (onShare != null && showShareBeforeSelectAll)
-          ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+          ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
         if (onSelectAll != null)
-          ContextMenuButtonItem(onPressed: onSelectAll, type: ContextMenuButtonType.selectAll),
+          ContextMenuButtonItem(onPressed: onSelectAll, kind: ContextMenuButtonKind.selectAll),
         if (onLookUp != null)
-          ContextMenuButtonItem(onPressed: onLookUp, type: ContextMenuButtonType.lookUp),
+          ContextMenuButtonItem(onPressed: onLookUp, kind: ContextMenuButtonKind.lookUp),
         if (onSearchWeb != null)
-          ContextMenuButtonItem(onPressed: onSearchWeb, type: ContextMenuButtonType.searchWeb),
+          ContextMenuButtonItem(onPressed: onSearchWeb, kind: ContextMenuButtonKind.searchWeb),
         if (onShare != null && !showShareBeforeSelectAll)
-          ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+          ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
       ]);
     }
 
@@ -2254,7 +2241,7 @@ class EditableText extends StatefulWidget {
       resultButtonItem.add(
         ContextMenuButtonItem(
           onPressed: onLiveTextInput,
-          type: ContextMenuButtonType.liveTextInput,
+          kind: ContextMenuButtonKind.liveTextInput,
         ),
       );
     }
@@ -3196,28 +3183,28 @@ class EditableTextState extends State<EditableText>
           onPressed: () {
             cutSelection(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.cut,
+          kind: ContextMenuButtonKind.cut,
         ),
       if (toolbarOptions.copy && copyEnabled)
         ContextMenuButtonItem(
           onPressed: () {
             copySelection(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.copy,
+          kind: ContextMenuButtonKind.copy,
         ),
       if (toolbarOptions.paste && pasteEnabled)
         ContextMenuButtonItem(
           onPressed: () async {
             await _pasteTextWithReporting(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.paste,
+          kind: ContextMenuButtonKind.paste,
         ),
       if (toolbarOptions.selectAll && selectAllEnabled)
         ContextMenuButtonItem(
           onPressed: () {
             selectAll(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.selectAll,
+          kind: ContextMenuButtonKind.selectAll,
         ),
     ];
   }
@@ -6256,6 +6243,16 @@ class _Editable extends MultiChildRenderObjectWidget {
   final Color? promptRectColor;
   final Clip clipBehavior;
 
+  // A default locale that the app didn't choose isn't passed to the engine, so
+  // the platform's default locale is used for font fallback.
+  // See https://github.com/flutter/flutter/issues/194931.
+  Locale? _effectiveLocale(BuildContext context) {
+    if (locale != null) {
+      return locale;
+    }
+    return Localizations.isDefaultLocaleOf(context) ? null : Localizations.maybeLocaleOf(context);
+  }
+
   @override
   RenderEditable createRenderObject(BuildContext context) {
     return RenderEditable(
@@ -6276,7 +6273,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       textScaler: textScaler,
       textAlign: textAlign,
       textDirection: textDirection,
-      locale: locale ?? Localizations.maybeLocaleOf(context),
+      locale: _effectiveLocale(context),
       selection: value.selection,
       offset: offset,
       ignorePointer: rendererIgnoresPointer,
@@ -6320,7 +6317,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..textScaler = textScaler
       ..textAlign = textAlign
       ..textDirection = textDirection
-      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..locale = _effectiveLocale(context)
       ..selection = value.selection
       ..offset = offset
       ..ignorePointer = rendererIgnoresPointer

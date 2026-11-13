@@ -92,23 +92,57 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     };
   }
 
-  Iterable<Map<String, dynamic>> _getAllTestSteps(List<TestSuite> suites, PackageLock packageLock) {
-    return <Map<String, dynamic>>[
+  Iterable<Map<String, Object?>> _getAllTestSteps(List<TestSuite> suites, PackageLock packageLock) {
+    return <Map<String, Object?>>[
       _getAnalysisAndLicenseStep(),
-      _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.chrome),
+      ..._getChromeTestSteps(suites, packageLock),
       _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.firefox),
       _getTestStepForPlatformAndBrowser(
         suites,
         packageLock,
         'Mac',
         BrowserName.safari,
-        specificOS: 'Mac-15.7',
+        specificOS: 'Mac-26.6',
         cpu: 'arm64',
       ),
     ];
   }
 
-  Map<String, dynamic> _getTestStepForPlatformAndBrowser(
+  // Shards Chrome suites by renderer, plus one shard for engine, fallbacks
+  // and force-st suites.
+  Iterable<Map<String, Object?>> _getChromeTestSteps(
+    List<TestSuite> suites,
+    PackageLock packageLock,
+  ) {
+    final shards = <String, List<TestSuite>>{};
+    for (final TestSuite suite in suites.where(
+      (suite) => suite.runConfig.browser == BrowserName.chrome,
+    )) {
+      shards.putIfAbsent(_chromeShardName(suite), () => <TestSuite>[]).add(suite);
+    }
+    return <Map<String, Object?>>[
+      for (final MapEntry<String, List<TestSuite>> shard in shards.entries)
+        _getTestStep(
+          name: 'Linux run chrome ${shard.key} suites',
+          suites: shard.value,
+          packageLock: packageLock,
+          browser: BrowserName.chrome,
+          droneDimensions: <String>['device_type=none', 'os=Linux'],
+        ),
+    ];
+  }
+
+  String _chromeShardName(TestSuite suite) {
+    final String testSet = suite.testBundle.testSet.name;
+    if (testSet == 'engine' ||
+        testSet == 'fallbacks' ||
+        suite.runConfig.forceSingleThreadedSkwasm) {
+      return 'engine, fallbacks and force-st';
+    }
+    return suite.testBundle.compileConfigs.first.renderer.name;
+  }
+
+  Map<String, Object?> _getTestStepForPlatformAndBrowser(
     List<TestSuite> suites,
     PackageLock packageLock,
     String platform,
@@ -116,48 +150,61 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     String? specificOS,
     String? cpu,
   }) {
-    final Iterable<TestSuite> filteredSuites = suites.where(
-      (suite) => suite.runConfig.browser == browser,
-    );
-    final Set<TestBundle> bundles = filteredSuites.map((suite) => suite.testBundle).toSet();
-    return <String, dynamic>{
-      'name': '$platform run ${browser.name} suites',
-      'recipe': 'engine_v2/tester_engine',
-      'drone_dimensions': <String>[
+    return _getTestStep(
+      name: '$platform run ${browser.name} suites',
+      suites: suites.where((suite) => suite.runConfig.browser == browser),
+      packageLock: packageLock,
+      browser: browser,
+      droneDimensions: <String>[
         'device_type=none',
         'os=${specificOS ?? platform}',
         if (cpu != null) 'cpu=$cpu',
       ],
-      'gclient_variables': <String, dynamic>{'download_android_deps': false},
+    );
+  }
+
+  Map<String, Object?> _getTestStep({
+    required String name,
+    required Iterable<TestSuite> suites,
+    required PackageLock packageLock,
+    required BrowserName browser,
+    required List<String> droneDimensions,
+  }) {
+    final Set<TestBundle> bundles = suites.map((suite) => suite.testBundle).toSet();
+    return <String, Object?>{
+      'name': name,
+      'recipe': 'engine_v2/tester_engine',
+      'drone_dimensions': droneDimensions,
+      'gclient_variables': <String, Object?>{'download_android_deps': false},
       'dependencies': <String>[...bundles.map((bundle) => 'web_tests/test_bundles/${bundle.name}')],
-      'test_dependencies': <dynamic>[
-        <String, dynamic>{
+      'test_dependencies': <Object?>[
+        <String, Object?>{
           'dependency': 'goldctl',
           'version': 'git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd',
         },
         if (browser == BrowserName.chrome)
-          <String, dynamic>{
+          <String, Object?>{
             'dependency': 'chrome_and_driver',
             'version': packageLock.chromeLock.version,
           },
         if (browser == BrowserName.firefox)
-          <String, dynamic>{
+          <String, Object?>{
             'dependency': 'firefox',
             'version': 'version:${packageLock.firefoxLock.version}',
           },
       ],
-      'tasks': [
-        <String, dynamic>{
+      'tasks': <Object?>[
+        <String, Object?>{
           'name': 'copy artifacts',
           'parameters': <String>[
             'test',
             '--copy-artifacts',
-            for (final TestSuite suite in filteredSuites) '--suite=${suite.name}',
+            for (final TestSuite suite in suites) '--suite=${suite.name}',
           ],
           'script': 'flutter/lib/web_ui/dev/felt',
         },
-        ...filteredSuites.map(
-          (suite) => <String, dynamic>{
+        ...suites.map(
+          (suite) => <String, Object?>{
             'name': 'run suite ${suite.name}',
             'parameters': <String>['test', '--run', '--suite=${suite.name}'],
             'script': 'flutter/lib/web_ui/dev/felt',

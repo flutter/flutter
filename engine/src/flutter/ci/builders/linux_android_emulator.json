@@ -15,7 +15,6 @@
                 "--android-cpu=x64",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/android_emulator_debug_x64"
             ],
@@ -26,7 +25,7 @@
                 },
                 {
                     "dependency": "open_jdk",
-                    "version": "version:21"
+                    "version": "version:25.0.2"
                 }
             ],
             "name": "ci/android_emulator_debug_x64",
