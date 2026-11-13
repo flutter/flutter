@@ -98,8 +98,17 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
         delegate_.GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId();
     const auto gpu_id =
         delegate_.GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId();
-    raster_thread_merger_ = fml::RasterThreadMerger::CreateOrShareThreadMerger(
-        delegate_.GetParentRasterThreadMerger(), platform_id, gpu_id);
+    fml::RefPtr<fml::RasterThreadMerger> parent_merger =
+        delegate_.GetParentRasterThreadMerger();
+    {
+      std::scoped_lock lock(raster_thread_merger_mutex_);
+      raster_thread_merger_ =
+          fml::RasterThreadMerger::CreateOrShareThreadMerger(
+              parent_merger, platform_id, gpu_id);
+      if (thread_merger_disabled_) {
+        raster_thread_merger_->Disable();
+      }
+    }
   }
   if (raster_thread_merger_) {
     raster_thread_merger_->SetMergeUnmergeCallback([this]() {
@@ -159,12 +168,16 @@ std::optional<DrawSurfaceStatus> Rasterizer::GetLastDrawStatus(
 }
 
 void Rasterizer::EnableThreadMergerIfNeeded() {
+  std::scoped_lock lock(raster_thread_merger_mutex_);
+  thread_merger_disabled_ = false;
   if (raster_thread_merger_) {
     raster_thread_merger_->Enable();
   }
 }
 
 void Rasterizer::DisableThreadMergerIfNeeded() {
+  std::scoped_lock lock(raster_thread_merger_mutex_);
+  thread_merger_disabled_ = true;
   if (raster_thread_merger_) {
     raster_thread_merger_->Disable();
   }
@@ -468,20 +481,20 @@ sk_sp<SkImage> Rasterizer::MakeSkiaSnapshotSync(
 }
 
 void Rasterizer::MakeImpellerSnapshot(
-    sk_sp<DisplayList> display_list,
+    SnapshotDisplayListProvider provider,
     DlISize picture_size,
     std::function<void(std::shared_ptr<impeller::Texture>)> callback,
     SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeImpellerSnapshot(
-      display_list, picture_size, std::move(callback), pixel_format);
+      std::move(provider), picture_size, std::move(callback), pixel_format);
 }
 
 std::shared_ptr<impeller::Texture> Rasterizer::MakeImpellerSnapshotSync(
-    sk_sp<DisplayList> display_list,
+    SnapshotDisplayListProvider provider,
     DlISize picture_size,
     SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeImpellerSnapshotSync(
-      std::move(display_list), picture_size, pixel_format);
+      std::move(provider), picture_size, pixel_format);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
@@ -1166,6 +1179,7 @@ void Rasterizer::SetSnapshotSurfaceProducer(
 }
 
 fml::RefPtr<fml::RasterThreadMerger> Rasterizer::GetRasterThreadMerger() {
+  std::scoped_lock lock(raster_thread_merger_mutex_);
   return raster_thread_merger_;
 }
 

@@ -4,12 +4,9 @@
 
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-final Finalizer _imageFilterFinalizer = NativeMemoryFinalizer((Object filter) {
-  (filter as BackendImageFilter).dispose();
-});
 
 /// A shared engine representation of an [ImageFilter].
 abstract class EngineImageFilter implements ui.ImageFilter {
@@ -19,6 +16,7 @@ abstract class EngineImageFilter implements ui.ImageFilter {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode? tileMode,
+    ui.Rect? bounds,
   }) = EngineBlurImageFilter;
 
   factory EngineImageFilter.color({required EngineColorFilter colorFilter}) =
@@ -40,9 +38,16 @@ abstract class EngineImageFilter implements ui.ImageFilter {
     required EngineImageFilter inner,
   }) = EngineComposeImageFilter;
 
+  /// Disposes a [BackendImageFilter] once the Dart object that owns it is
+  /// garbage collected.
+  @visibleForTesting
+  static Finalizer finalizer = NativeMemoryFinalizer((Object filter) {
+    (filter as BackendImageFilter).dispose();
+  });
+
   /// Attaches the native backend object to this Dart object's finalizer.
   BackendImageFilter _cacheAndAttach(BackendImageFilter filter) {
-    _imageFilterFinalizer.attach(this, filter, detach: filter);
+    finalizer.attach(this, filter, detach: filter);
     return filter;
   }
 
@@ -89,9 +94,12 @@ class EngineColorFilterImageFilter extends EngineImageFilter {
     if (cached != null) {
       return cached;
     }
-    final BackendImageFilter backendFilter = _cacheAndAttach(
-      renderer.createColorFilterImageFilter(filter: colorFilter.backendFilter),
+    final BackendImageFilter backendFilter = renderer.createColorFilterImageFilter(
+      filter: colorFilter.backendFilter,
     );
+    // The backend filter is cached on, and must live as long as, the color
+    // filter rather than this throwaway wrapper.
+    EngineImageFilter.finalizer.attach(colorFilter, backendFilter, detach: backendFilter);
     _colorFilterImageFilters[colorFilter] = backendFilter;
     return backendFilter;
   }
@@ -109,11 +117,26 @@ class EngineColorFilterImageFilter extends EngineImageFilter {
 }
 
 class EngineBlurImageFilter extends EngineImageFilter {
-  EngineBlurImageFilter({required this.sigmaX, required this.sigmaY, required this.tileMode});
+  EngineBlurImageFilter({
+    required this.sigmaX,
+    required this.sigmaY,
+    required this.tileMode,
+    this.bounds,
+  });
 
   final double sigmaX;
   final double sigmaY;
   final ui.TileMode? tileMode;
+
+  /// The optional bounds passed to [ui.ImageFilter.blur].
+  ///
+  /// When non-null, enables "bounded blur": samples outside [bounds] are
+  /// treated as transparent. [bounds] is in the canvas's local coordinate
+  /// space. It is part of [operator ==], [hashCode] and
+  /// [debugShortDescription], and is passed to the renderer. Only wimp renders
+  /// it; CanvasKit and skwasm-Skia fall back to an unbounded blur, as native
+  /// Skia does.
+  final ui.Rect? bounds;
 
   BackendImageFilter? _cachedFilter;
   ui.TileMode? _cachedTileMode;
@@ -135,13 +158,18 @@ class EngineBlurImageFilter extends EngineImageFilter {
     }
 
     if (_cachedFilter != null) {
-      _imageFilterFinalizer.detach(_cachedFilter!);
+      EngineImageFilter.finalizer.detach(_cachedFilter!);
       _cachedFilter!.dispose();
     }
 
     _cachedTileMode = mode;
     return _cachedFilter = _cacheAndAttach(
-      renderer.createBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: mode),
+      renderer.createBlurImageFilter(
+        sigmaX: sigmaX,
+        sigmaY: sigmaY,
+        tileMode: mode,
+        bounds: bounds,
+      ),
     );
   }
 
@@ -153,14 +181,18 @@ class EngineBlurImageFilter extends EngineImageFilter {
     return other is EngineBlurImageFilter &&
         other.sigmaX == sigmaX &&
         other.sigmaY == sigmaY &&
+        other.bounds == bounds &&
         other.tileMode == tileMode;
   }
 
   @override
-  int get hashCode => Object.hash(sigmaX, sigmaY, tileMode);
+  int get hashCode => Object.hash(sigmaX, sigmaY, bounds, tileMode);
 
   @override
-  String get debugShortDescription => 'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
+  String get debugShortDescription =>
+      'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)}${_boundsString()})';
+
+  String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
 }
 
 class EngineMatrixImageFilter extends EngineImageFilter {
@@ -268,7 +300,7 @@ class EngineComposeImageFilter extends EngineImageFilter {
     }
 
     if (_cachedFilter != null) {
-      _imageFilterFinalizer.detach(_cachedFilter!);
+      EngineImageFilter.finalizer.detach(_cachedFilter!);
       _cachedFilter!.dispose();
     }
 

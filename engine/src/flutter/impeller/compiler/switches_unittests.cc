@@ -114,6 +114,18 @@ TEST(SwitchesTest, CommandLinePathUtf8) {
   ASSERT_EQ(switches.source_file_name, filename);
 }
 
+TEST(SwitchesTest, MinifyFlagIsPropagatedToSourceOptions) {
+  Switches default_switches = MakeSwitchesDesktopGL({});
+  ASSERT_TRUE(default_switches.AreValid(std::cout));
+  EXPECT_FALSE(default_switches.minify);
+  EXPECT_FALSE(default_switches.CreateSourceOptions().minify);
+
+  Switches minify_switches = MakeSwitchesDesktopGL({"--minify"});
+  ASSERT_TRUE(minify_switches.AreValid(std::cout));
+  EXPECT_TRUE(minify_switches.minify);
+  EXPECT_TRUE(minify_switches.CreateSourceOptions().minify);
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller

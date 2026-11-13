@@ -6,7 +6,7 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 /// Prototype Linux platform extension diagnostic validator check for `flutter doctor`.
-class LinuxExtensionDiagnostics extends DiagnosticsExtension {
+final class LinuxExtensionDiagnostics extends DiagnosticsExtension {
   @override
   String get title => 'Linux Custom Extension Prototype';
 

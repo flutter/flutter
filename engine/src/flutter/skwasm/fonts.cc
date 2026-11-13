@@ -8,6 +8,8 @@
 #include "flutter/skwasm/live_objects.h"
 #include "flutter/skwasm/wrappers.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
+#include "third_party/skia/include/core/SkString.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/ports/SkFontMgr_empty.h"
 #include "third_party/skia/modules/skparagraph/include/FontCollection.h"
 #include "third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h"
@@ -36,14 +38,23 @@ static sk_sp<SkFontMgr> default_fontmgr() {
 }
 
 SKWASM_EXPORT SkTypeface* typeface_create(SkData* font_data) {
-  Skwasm::live_typeface_count++;
   auto typeface = default_fontmgr()->makeFromData(sk_ref_sp<SkData>(font_data));
+  if (typeface) {
+    Skwasm::live_typeface_count++;
+  }
   return typeface.release();
 }
 
 SKWASM_EXPORT void typeface_dispose(SkTypeface* typeface) {
   Skwasm::live_typeface_count--;
   typeface->unref();
+}
+
+SKWASM_EXPORT SkString* typeface_getFamilyName(SkTypeface* typeface) {
+  Skwasm::live_string_count++;
+  SkString* family_name = new SkString();
+  typeface->getFamilyName(family_name);
+  return family_name;
 }
 
 SKWASM_EXPORT void fontCollection_registerTypeface(

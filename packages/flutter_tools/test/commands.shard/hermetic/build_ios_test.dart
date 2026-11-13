@@ -322,6 +322,7 @@ void main() {
       final bool supported = BuildIOSCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
       ).supported;
@@ -676,6 +677,60 @@ void main() {
   );
 
   testUsingContext(
+    'ios build debug config-only writes TRACK_WIDGET_CREATION=true to Generated.xcconfig by default',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--debug', '--config-only', '--no-pub']);
+
+      final File configFile = fileSystem.file('ios/Flutter/Generated.xcconfig');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains('TRACK_WIDGET_CREATION=true'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
+
+  testUsingContext(
+    'ios build debug config-only respects --no-track-widget-creation flag',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+
+      await createTestCommandRunner(command).run(const <String>[
+        'build',
+        'ios',
+        '--debug',
+        '--config-only',
+        '--no-pub',
+        '--no-track-widget-creation',
+      ]);
+
+      final File configFile = fileSystem.file('ios/Flutter/Generated.xcconfig');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains('TRACK_WIDGET_CREATION=false'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
+
+  testUsingContext(
     'ios build invokes xcode build with verbosity',
     () async {
       final BuildCommand command = createBuildCommand();
@@ -855,8 +910,22 @@ void main() {
         Platform: () => macosPlatform,
         FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-        FlutterProjectFactory: () =>
-            FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
+        FlutterProjectFactory: () => FlutterProjectFactory(
+          config: FakeConfig(),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          plistParser: PlistParser(
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.list(<FakeCommand>[
+              plutilCommand,
+              plutilCommand,
+              plutilCommand,
+              plutilCommand,
+            ]),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(),
+        ),
         PlistParser: () => PlistParser(
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
@@ -1616,4 +1685,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   int? getDirectorySize(Directory directory) => 1024;
+
+  @override
+  void chmod(FileSystemEntity file, String mode) {}
 }
