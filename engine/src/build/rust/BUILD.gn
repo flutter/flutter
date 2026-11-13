@@ -6,12 +6,20 @@ if (is_android) {
   import("//build/config/android/config.gni")
 }
 
+# C++ compiler and linker configuration required by targets linking `cxx` FFI
+# bridges and Rust `staticlib` archives.
 config("cxx_cpp_config") {
   include_dirs = [
     "//",
     "//third_party/rust/chromium_crates_io/vendor/cxx-v1/include",
   ]
+
+  # Flutter compiles C++ with `-fno-exceptions`; disable exception handling in
+  # `cxx`'s C++ runtime headers and implementation.
   defines = [ "RUST_CXX_NO_EXCEPTIONS" ]
+
+  # Platform system libraries referenced by `libstd` when linking a Rust
+  # `staticlib` into a C++ shared library or executable.
   if (is_android) {
     if (current_cpu == "arm64" || current_cpu == "aarch64") {
       _clang_arch = "aarch64"
@@ -54,6 +62,8 @@ config("cxx_cpp_config") {
   }
 }
 
+# Compiles the C++ side of the `cxx` FFI runtime (`rust::String`, `rust::Slice`,
+# `rust::Vec`, etc.).
 source_set("cxx_cpp") {
   sources = [
     "//third_party/rust/chromium_crates_io/vendor/cxx-v1/include/cxx.h",

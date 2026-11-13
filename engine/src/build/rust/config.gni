@@ -2,6 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Shared Rust toolchain, target triple, sysroot, and build-mode configuration
+# used by //build/rust/std, //build/rust/cargo_crate.gni,
+# //build/rust/cxx_library.gni, and the GN toolchain definitions.
+
 import("//build/toolchain/toolchain.gni")
 import("//flutter/common/config.gni")
 
@@ -9,7 +13,8 @@ if (is_ios) {
   import("//build/config/darwin/darwin_sdk.gni")
 }
 
-# Host Rust toolchain configuration.
+# Select the CIPD host Rust toolchain directory under //flutter/buildtools/
+# matching the current host OS and CPU.
 if (host_os == "linux") {
   if (host_cpu == "arm64") {
     rust_host_dir = "linux-arm64"
@@ -35,7 +40,8 @@ rust_toolchain_root = "$buildtools_path/$rust_host_dir/rust"
 rustc_bin = "$rust_toolchain_root/bin/$rustc_exe"
 rust_std_src_root = "$rust_toolchain_root/lib/rustlib/src/rust/library"
 
-# Target architecture normalization.
+# Normalize GN's `current_cpu` to Rust's `STD_ENV_ARCH` / target architecture
+# naming convention.
 if (current_cpu == "x64" || current_cpu == "x86_64") {
   rust_target_arch = "x86_64"
 } else if (current_cpu == "arm64" || current_cpu == "aarch64") {
@@ -52,7 +58,8 @@ if (current_cpu == "x64" || current_cpu == "x86_64") {
   rust_target_arch = ""
 }
 
-# Target triple selection across all Flutter platforms.
+# Map the current GN toolchain's target OS and architecture to a `rustc`
+# `--target=<triple>` value.
 rust_target_triple = ""
 if (is_android) {
   if (rust_target_arch == "aarch64") {
@@ -112,12 +119,15 @@ if (is_android) {
   rust_target_triple = "wasm32-unknown-unknown"
 }
 
+# Each GN toolchain stages its source-built standard library `.rlib`s into its
+# own `$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_target_triple/lib`.
 local_rustc_sysroot = "$root_out_dir/local_rustc_sysroot"
 local_rustc_sysroot_lib_dir =
     "$local_rustc_sysroot/lib/rustlib/$rust_target_triple/lib"
 rebased_local_rustc_sysroot = rebase_path(local_rustc_sysroot, root_build_dir)
 
-# Build mode flags (debug, profile, release, jit_release, and unoptimized).
+# Whether to enable `optimize_for_size` Cargo feature flags in `core`, `alloc`,
+# and `std` (mirrors C++ optimization settings in //build/config/compiler/BUILD.gn).
 rust_optimize_for_size =
     !is_debug &&
     (is_android || is_ios || is_fuchsia || is_win || optimize_for_size)
@@ -125,6 +135,7 @@ rust_optimize_for_size =
 rust_mode_flags = [ "--target=$rust_target_triple" ]
 
 if (is_debug) {
+  # Unoptimized debug build (`--unoptimized` / `is_debug = true`).
   if (is_wasm) {
     rust_mode_flags += [ "-Copt-level=1" ]
   } else {
@@ -145,12 +156,22 @@ if (is_debug) {
   }
 
   if (flutter_runtime_mode == "debug") {
+    # Optimized `debug` runtime mode: preserve formatted panic messages, debug
+    # assertions, and integer overflow checks.
     rust_mode_flags += [
       "-Cpanic=abort",
       "-Cdebug-assertions=yes",
       "-Coverflow-checks=yes",
     ]
   } else {
+    # `profile`, `release`, and `jit_release` runtime modes:
+    # - `-Cpanic=immediate-abort` turns panics and allocation failures into an
+    #   immediate hardware trap (`abort_immediate`), allowing the linker to
+    #   dead-strip panic formatting, `std::panicking::default_hook`,
+    #   `rustc_demangle`, and `libunwind`.
+    # - `-Cforce-unwind-tables=no` suppresses `.eh_frame` unwind tables.
+    # - `-Ccodegen-units=1` enables whole-crate inlining and dead-code
+    #   elimination.
     rust_mode_flags += [
       "-Zunstable-options",
       "-Cpanic=immediate-abort",
@@ -162,6 +183,7 @@ if (is_debug) {
   }
 }
 
+# Preserve frame pointers in `profile` builds for sampling profilers.
 if (flutter_runtime_mode == "profile") {
   rust_mode_flags += [ "-Cforce-frame-pointers=yes" ]
 }

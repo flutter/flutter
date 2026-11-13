@@ -5,6 +5,10 @@
 import("//build/rust/config.gni")
 
 _vendor = "//third_party/rust/chromium_crates_io/vendor"
+
+# Paths to the workspace adapter rlibs that expose `core` and `alloc` to
+# third-party crates compiled as part of the standard library (`libc`, `cfg_if`,
+# `hashbrown`, `rustc_demangle`, etc.).
 _workspace_core_rlib =
     rebase_path("$target_out_dir/librustc_std_workspace_core.rlib",
                 root_build_dir)
@@ -12,6 +16,44 @@ _workspace_alloc_rlib =
     rebase_path("$target_out_dir/librustc_std_workspace_alloc.rlib",
                 root_build_dir)
 
+# Internal helper template for compiling a crate belonging to the Rust standard
+# library sysroot (`core`, `alloc`, `std`, `proc_macro`, and their dependencies).
+#
+# Passes `RUSTC_BOOTSTRAP=1` and `-Zforce-unstable-if-unmarked` so `rustc`
+# permits `#![feature(...)]` attributes, and tags each crate with
+# `-Cmetadata=flutter_std` to avoid symbol/crate-hash collisions when a
+# downstream crate also depends on a third-party crate of the same name (such
+# as `hashbrown`, `libc`, or `cfg_if`).
+#
+# Parameters:
+#
+#   crate_root (required)
+#     [path] The root .rs source file of the standard library crate.
+#
+#   crate_name (optional)
+#     [string] Override the crate name passed to `--crate-name` (used by
+#     `std_crate("std_crate")` so the GN target name does not collide with the
+#     `copy("std")` target). Defaults to `target_name`.
+#
+#   deps (optional)
+#     [list of labels] Standard library crate dependencies.
+#
+#   edition (optional)
+#     [string] Rust edition. Defaults to "2024" (matching upstream `library/`).
+#
+#   features (optional)
+#     [list of strings] Cargo features to enable via `--cfg=feature="..."`.
+#
+#   extra_rustflags (optional)
+#     [list of strings] Additional flags appended to `rustflags` (e.g.
+#     `--extern core=...` or `--cfg=...`).
+#
+# Example usage:
+#
+#   std_crate("core") {
+#     crate_root = "$rust_std_src_root/core/src/lib.rs"
+#     features = _size_features
+#   }
 template("std_crate") {
   rust_library(target_name) {
     if (defined(invoker.crate_name)) {
@@ -55,6 +97,8 @@ template("std_crate") {
   }
 }
 
+# Enable standard library size optimizations (smaller sorting/formatting tables)
+# when optimizing for binary size.
 _size_features = []
 if (rust_optimize_for_size) {
   _size_features += [ "optimize_for_size" ]
@@ -65,6 +109,9 @@ std_crate("core") {
   features = _size_features
 }
 
+# Software intrinsics and atomic helpers required by LLVM codegen.
+# Note: `"unmangled-names"` is required so `intrinsics!` exports symbols such as
+# `__rust_enable_lse` unmangled for `std::sys::configure_builtins` on AArch64.
 std_crate("compiler_builtins") {
   crate_root =
       "$rust_std_src_root/compiler-builtins/compiler-builtins/src/lib.rs"
@@ -92,6 +139,7 @@ std_crate("compiler_builtins") {
   }
 }
 
+# Re-exports `core` for crates.io dependencies built with `rustc-dep-of-std`.
 std_crate("rustc_std_workspace_core") {
   crate_root = "$rust_std_src_root/rustc-std-workspace-core/lib.rs"
   deps = [
@@ -110,6 +158,7 @@ std_crate("alloc") {
   ]
 }
 
+# Re-exports `alloc` for crates.io dependencies built with `rustc-dep-of-std`.
 std_crate("rustc_std_workspace_alloc") {
   crate_root = "$rust_std_src_root/rustc-std-workspace-alloc/lib.rs"
   deps = [
@@ -139,6 +188,9 @@ if (is_win) {
     deps = [ ":rustc_std_workspace_core" ]
   }
 } else {
+  # Note: `libc` uses `#![no_core]` and `extern crate rustc_std_workspace_core as core;`,
+  # so do not pass `--extern core=...` on the command line (which would conflict
+  # with the macro-expanded extern crate item).
   std_crate("libc") {
     crate_root = "$_vendor/libc-v0_2/src/lib.rs"
     edition = "2021"
@@ -227,6 +279,9 @@ std_crate("std_detect") {
   ]
 }
 
+# On Fuchsia, `library/backtrace/src/print.rs` unconditionally compiles
+# `print/fuchsia.rs` even when the `backtrace` feature is disabled. Provide a
+# minimal `object` shim satisfying `NoteHeader32` and `pod::from_bytes`.
 if (is_fuchsia) {
   std_crate("object") {
     crate_root = "fuchsia_object_shim.rs"
@@ -239,6 +294,9 @@ if (is_fuchsia) {
   }
 }
 
+# Build `libstd` WITHOUT the `backtrace` Cargo feature (`addr2line`, `gimli`,
+# `object`, `miniz_oxide`), eliminating ~200+ KiB of in-process DWARF symbolizer
+# code from target binaries.
 std_crate("std_crate") {
   crate_name = "std"
   crate_root = "$rust_std_src_root/std/src/lib.rs"
@@ -264,6 +322,8 @@ std_crate("std_crate") {
   }
 }
 
+# Build `proc_macro` on the host toolchain so procedural macros (such as
+# `cxxbridge-macro`) can compile against the local sysroot.
 if (current_toolchain == host_toolchain) {
   std_crate("rustc_literal_escaper") {
     crate_root = "rustc_literal_escaper_wrapper.rs"
@@ -287,6 +347,9 @@ if (current_toolchain == host_toolchain) {
   }
 }
 
+# Stage all compiled sysroot `.rlib` files into
+# `$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_target_triple/lib/`
+# where `rustc --sysroot=...` expects to find them.
 copy("std") {
   sources = [
     "$target_out_dir/liballoc.rlib",

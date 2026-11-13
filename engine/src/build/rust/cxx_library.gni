@@ -4,6 +4,39 @@
 
 import("//build/rust/config.gni")
 
+# Defines a Rust static library with `cxx` FFI bindings exposed as a C++
+# `source_set`.
+#
+# This template compiles the Rust crate into a static archive (`.a` / `.lib`),
+# runs the host `cxxbridge` code generator on `crate_root` to emit `<crate_root>.h`
+# and `<crate_root>.cc`, and wraps the generated C++ glue, the `cxx` C++ runtime,
+# and the Rust static archive into a `source_set(target_name)` that C++ targets
+# can depend on directly.
+#
+# Parameters:
+#
+#   crate_root (required)
+#     [path] The root .rs file containing the `#[cxx::bridge]` module. The
+#     generated C++ header will be placed at `$target_gen_dir/${crate_root}.h`.
+#
+#   sources (required)
+#     [list of paths] All Rust source files belonging to this crate.
+#
+#   deps (optional)
+#     [list of labels] Additional Rust crate dependencies (`rust_library` or
+#     `cargo_crate` targets). `//build/rust/std` and `//third_party/rust/cxx/v1:lib`
+#     are added automatically.
+#
+# Example usage:
+#
+#   import("//build/rust/cxx_library.gni")
+#
+#   rust_cxx_library("flutter_rust") {
+#     crate_root = "bridge.rs"
+#     sources = [ "bridge.rs" ]
+#   }
+#
+#   # C++ targets depending on ":flutter_rust" can then `#include "flutter/rust/bridge.rs.h"`.
 template("rust_cxx_library") {
   _rust_target = "${target_name}_rust"
   _cxxgen_target = "${target_name}_cxxgen"
@@ -17,6 +50,8 @@ template("rust_cxx_library") {
     _rust_archive = "$target_out_dir/lib${_rust_target}.a"
   }
 
+  # Compile the Rust crate as a staticlib (`--crate-type staticlib`) linked
+  # against our source-built `libstd`.
   static_library(_rust_target) {
     crate_name = target_name
     crate_root = invoker.crate_root
@@ -35,6 +70,8 @@ template("rust_cxx_library") {
                 ] + rust_mode_flags
   }
 
+  # Run the host `cxxbridge` binary to generate the C++ header and source file
+  # from the `#[cxx::bridge]` module in `crate_root`.
   action(_cxxgen_target) {
     script = "//build/rust/run_cxxbridge.py"
     _cxxbridge_exe = "cxxbridge"
@@ -45,6 +82,8 @@ template("rust_cxx_library") {
         get_label_info(
             "//third_party/rust/cxxbridge_cmd/v1:cxxbridge($host_toolchain)",
             "root_out_dir") + "/$_cxxbridge_exe"
+    # List `_rust_archive` in `inputs` so Ninja links the Rust static archive
+    # before compiling/linking downstream C++ targets.
     inputs = [
       cxxbridge_bin,
       invoker.crate_root,
@@ -70,11 +109,15 @@ template("rust_cxx_library") {
     ]
   }
 
+  # Propagate the generated header directory and Rust static archive to C++
+  # dependents.
   config(_config_target) {
     include_dirs = [ target_gen_dir ]
     libs = [ _rust_archive ]
   }
 
+  # C++ source_set that compiles the generated `cxxbridge` C++ glue and pulls in
+  # the `cxx` C++ support library plus the Rust static archive.
   source_set(target_name) {
     sources = [
       _gen_cc,
