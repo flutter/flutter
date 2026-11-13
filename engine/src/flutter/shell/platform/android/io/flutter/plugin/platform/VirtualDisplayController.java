@@ -23,14 +23,7 @@ import androidx.annotation.VisibleForTesting;
 class VirtualDisplayController {
   private static String TAG = "VirtualDisplayController";
 
-  private static VirtualDisplay.Callback callback =
-      new VirtualDisplay.Callback() {
-        @Override
-        public void onPaused() {}
-
-        @Override
-        public void onResumed() {}
-      };
+  private static VirtualDisplay.Callback callback = new VirtualDisplay.Callback() {};
 
   public static VirtualDisplayController create(
       Context context,
