@@ -770,7 +770,7 @@ public class FlutterRenderer implements TextureRegistry {
           pir.close();
         }
         perImageReaders.clear();
-        if (lastDequeuedImage.size() > 0) {
+        if (!lastDequeuedImage.isEmpty()) {
           for (PerImage image : lastDequeuedImage) {
             image.image.close();
           }
