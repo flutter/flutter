@@ -37,8 +37,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../foundation/_features.dart';
-import '_accessibility_evaluations.dart';
 import '_window.dart';
+import 'accessibility_evaluations.dart';
 import 'accessibility_inspector.dart';
 import 'app.dart';
 import 'debug.dart';
