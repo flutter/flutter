@@ -12,6 +12,7 @@
 /// need to be run in the `Target`s in `flutter assemble`.
 library;
 
+import 'package:code_assets/code_assets.dart' show OS;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -23,10 +24,12 @@ import '../../dart/package_map.dart';
 import '../../features.dart' show featureFlags;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
+import '../../isolated/native_assets/targets.dart' show resolveCustomNativeTarget;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart' show MissingDefineException;
 import 'common.dart';
+import 'extension.dart' show hasExtensionPlatformDefines;
 
 enum HookPlatform { native, web }
 
@@ -324,28 +327,54 @@ class InstallCodeAssets extends Target {
     // native_asset.yaml that can be used by the final AOT compilation.
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
 
-    Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    if (targetPlatform.os case .linux || .windows) {
-      // Avoid needing migration for CMake files, keep old directory structure.
-      targetUri = targetUri.resolve('${targetPlatform.osName}/');
-    }
+    final List<File> installedFiles;
+    if (targetPlatform == TargetPlatform.unsupported &&
+        resolveCustomNativeTarget(environment.defines) == null &&
+        combinedResult.codeAssets.isEmpty) {
+      installedFiles = await writeEmptyNativeAssetsJson(
+        fileSystem: fileSystem,
+        logger: environment.logger,
+        nativeAssetsFileUri: nativeAssetsFileUri,
+      );
+    } else {
+      final OS targetOS = getNativeOSFromTargetPlatform(
+        targetPlatform,
+        environmentDefines: environment.defines,
+      );
+      Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
+      if (targetOS == OS.linux || targetOS == OS.windows || targetOS == OS.fuchsia) {
+        // Avoid needing migration for CMake files, keep old directory structure.
+        targetUri = targetUri.resolve('${targetOS.name}/');
+      }
 
-    final List<File> installedFiles = await installCodeAssets(
-      dartHookResult: combinedResult,
-      environmentDefines: environment.defines,
-      targetPlatform: targetPlatform,
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-      logger: environment.logger,
-      processManager: environment.processManager,
-      nativeAssetsFileUri: nativeAssetsFileUri,
-      targetUri: targetUri,
-    );
-    assert(fileSystem.file(nativeAssetsFileUri).existsSync());
+      installedFiles = await installCodeAssets(
+        dartHookResult: combinedResult,
+        environmentDefines: environment.defines,
+        targetPlatform: targetPlatform,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        logger: environment.logger,
+        processManager: environment.processManager,
+        nativeAssetsFileUri: nativeAssetsFileUri,
+        targetUri: targetUri,
+      );
+    }
+    final File nativeAssetsFile = fileSystem.file(nativeAssetsFileUri);
+    assert(nativeAssetsFile.existsSync());
+
+    final allInstalledFiles = <File>[...installedFiles];
+    if (hasExtensionPlatformDefines(environment.defines)) {
+      final File flutterAssetsManifest = environment.buildDir
+          .childDirectory('flutter_assets')
+          .childFile('NativeAssetsManifest.json');
+      flutterAssetsManifest.parent.createSync(recursive: true);
+      await nativeAssetsFile.copy(flutterAssetsManifest.path);
+      allInstalledFiles.add(flutterAssetsManifest);
+    }
 
     final depfile = Depfile(<File>[
       for (final Uri file in combinedResult.filesToBeBundled) fileSystem.file(file),
-    ], installedFiles);
+    ], allInstalledFiles);
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     environment.depFileService.writeToFile(depfile, outputDepfile);
     if (!outputDepfile.existsSync()) {
@@ -386,7 +415,20 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
   if (targetPlatformEnvironment == null) {
     throw MissingDefineException(kTargetPlatform, name);
   }
-  return TargetPlatform.fromName(targetPlatformEnvironment);
+  try {
+    return TargetPlatform.fromName(targetPlatformEnvironment);
+  } on Exception {
+    // Custom extension platforms are not part of the built-in TargetPlatform
+    // enum. Map recognized custom extension target platforms to
+    // TargetPlatform.unsupported so projects without hooks skip cleanly while
+    // projects with hooks validate kExtensionHookTargetOs and
+    // kExtensionHookTargetArch.
+    if (resolveCustomNativeTarget(environment.defines) != null ||
+        hasExtensionPlatformDefines(environment.defines)) {
+      return TargetPlatform.unsupported;
+    }
+    rethrow;
+  }
 }
 
 Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(

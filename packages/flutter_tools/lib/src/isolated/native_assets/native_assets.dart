@@ -203,6 +203,16 @@ runFlutterSpecificBuildHooks({
       .map((AssetBuildTarget target) => target.targetString)
       .join(', ');
   logger.printTrace('Running build hooks for $targetString.');
+  for (final target in targets) {
+    if (target is CustomDataAssetTarget &&
+        buildCodeAssets != null &&
+        featureFlags.isNativeAssetsEnabled) {
+      logger.printTrace(
+        'Skipping code asset compilation for Dart hooks on "${target.targetString}"; '
+        'implement BuildTarget.resolveNativeAssetsConfig to support CodeAsset hooks.',
+      );
+    }
+  }
 
   final results = <String, Map<String, Object?>>{};
   final dependencies = <Uri>{};
@@ -424,6 +434,9 @@ DartHooksResult combineBuildAndLinkResults({
   required SerializedBuildResults buildResults,
   required DartHooksResult linkResult,
 }) {
+  if (buildResults.isEmpty && linkResult.codeAssets.isEmpty && linkResult.dataAssets.isEmpty) {
+    return linkResult;
+  }
   final List<AssetBuildTarget> targets = _getTargets(
     androidSdkProvider: null,
     environmentDefines: environmentDefines,
@@ -537,7 +550,10 @@ Future<List<File>> installCodeAssets({
   required Uri nativeAssetsFileUri,
   required Uri targetUri,
 }) async {
-  final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
+  final OS targetOS = getNativeOSFromTargetPlatform(
+    targetPlatform,
+    environmentDefines: environmentDefines,
+  );
   final flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
@@ -565,6 +581,21 @@ Future<List<File>> installCodeAssets({
   final manifest = NativeAssetsManifest.fromTargetLocations(assetTargetLocations);
   await _writeNativeAssetsJson(manifest, nativeAssetsFileUri, fileSystem, logger: logger);
   return <File>[fileSystem.file(nativeAssetsFileUri), ...installedFiles];
+}
+
+/// Writes an empty `native_assets.json` manifest when a custom extension target
+/// platform has no bundled [FlutterCodeAsset]s and did not configure native
+/// asset target OS/architecture defines.
+Future<List<File>> writeEmptyNativeAssetsJson({
+  required FileSystem fileSystem,
+  required Logger logger,
+  required Uri nativeAssetsFileUri,
+}) async {
+  final manifest = NativeAssetsManifest.fromTargetLocations(
+    const <FlutterCodeAsset, FlutterCodeAssetTargetLocation>{},
+  );
+  await _writeNativeAssetsJson(manifest, nativeAssetsFileUri, fileSystem, logger: logger);
+  return <File>[fileSystem.file(nativeAssetsFileUri)];
 }
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.
@@ -814,7 +845,9 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsForOS(
 }) {
   final Uri? absolutePath = flutterTester ? buildUri : null;
   return switch (targetOS) {
-    OS.windows || OS.linux => _assetTargetLocationsWindowsLinux(codeAssets, absolutePath),
+    OS.windows ||
+    OS.linux ||
+    OS.fuchsia => _assetTargetLocationsWindowsLinux(codeAssets, absolutePath),
     OS.macOS => assetTargetLocationsMacOS(codeAssets, absolutePath, logger: logger),
     OS.iOS => assetTargetLocationsIOS(codeAssets, logger: logger),
     OS.android => assetTargetLocationsAndroid(codeAssets),
@@ -868,6 +901,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   switch (targetOS) {
     case OS.windows:
     case OS.linux:
+    case OS.fuchsia:
       assert(codesignIdentity == null);
       installedFiles = await _copyNativeCodeAssetsToBundleOnWindowsLinux(
         targetUri,
@@ -995,7 +1029,15 @@ Never _throwNativeAssetsLinkFailed() {
   throwToolExit('Linking native assets failed. See the logs for more details.');
 }
 
-OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
+OS getNativeOSFromTargetPlatform(
+  TargetPlatform platform, {
+  Map<String, String>? environmentDefines,
+}) {
+  if (environmentDefines != null) {
+    if (resolveCustomNativeTarget(environmentDefines) case (final OS os, _)) {
+      return os;
+    }
+  }
   switch (platform.os) {
     case .ios:
       return OS.iOS;

@@ -1110,6 +1110,11 @@ const kXcodeBuildScriptValuePrepare = 'prepare';
 /// Expects value of "true".
 const kBuildSwiftPackage = 'BuildSwiftPackage';
 
+/// Compile-time Dart environment define (`-DFLUTTER_CUSTOM_PLATFORM=<platform>`)
+/// used by `dart_plugin_registrant.dart` to select Dart plugin implementations
+/// for a custom extension target platform.
+const kFlutterCustomPlatformDartDefine = 'FLUTTER_CUSTOM_PLATFORM';
+
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
 

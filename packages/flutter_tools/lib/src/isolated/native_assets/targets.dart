@@ -4,10 +4,10 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
-import 'package:file/file.dart' show Directory, FileSystem;
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
+import '../../base/file_system.dart' show Directory, FileSystem;
 import '../../base/process.dart' show ProcessUtils;
 import '../../build_info.dart'
     show
@@ -19,9 +19,21 @@ import '../../build_info.dart'
         getCpuArchsFromEnv,
         kAndroidArchs,
         kIosArchs,
-        kSdkRoot;
+        kSdkRoot,
+        kTargetPlatform;
 import '../../build_system/exceptions.dart' show MissingDefineException;
+import '../../build_system/targets/extension.dart'
+    show
+        hasExtensionPlatformDefines,
+        kExtensionCCompilerAr,
+        kExtensionCCompilerCc,
+        kExtensionCCompilerEnvScript,
+        kExtensionCCompilerEnvScriptArgs,
+        kExtensionCCompilerLd,
+        kExtensionHookTargetArch,
+        kExtensionHookTargetOs;
 import '../../context/android_context.dart' show AndroidSdkProvider;
+import '../../convert.dart' show json;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import '../../windows/visual_studio.dart';
 import 'android/native_assets.dart'
@@ -72,6 +84,30 @@ sealed class AssetBuildTarget {
     required AndroidSdkProvider? androidSdkProvider,
     required VisualStudio? visualStudio,
   }) {
+    final (OS os, Architecture architecture)? customTarget = resolveCustomNativeTarget(
+      environmentDefines,
+    );
+    if (customTarget != null) {
+      final (OS os, Architecture architecture) = customTarget;
+      if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets) &&
+          (os == OS.android || os == OS.iOS || os == OS.macOS)) {
+        throwToolExit(
+          'Custom native assets configuration with "$kExtensionHookTargetOs=${os.name}" is not '
+          'supported because "${os.name}" code assets require platform SDK version '
+          'configuration; use a built-in target platform instead.',
+        );
+      }
+      return <AssetBuildTarget>[
+        CustomCodeAssetTarget(
+          architecture: architecture,
+          environmentDefines: environmentDefines,
+          fileSystem: fileSystem,
+          os: os,
+          supportedAssetTypes: supportedAssetTypes,
+        ),
+      ];
+    }
+
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
         return _windowsTarget(supportedAssetTypes, Architecture.x64, visualStudio: visualStudio);
@@ -103,7 +139,23 @@ sealed class AssetBuildTarget {
         return _flutterTesterTarget(supportedAssetTypes, visualStudio: visualStudio);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
+        throwToolExit('No targets defined for target platform $targetPlatform.');
       case TargetPlatform.unsupported:
+        // Also allow data-asset-only hook runs (`buildCodeAssets == null`, such
+        // as `FlutterHookRunnerNative.runHooks` during `flutter run` DevFS sync
+        // on an `ExtensionBackedDevice`) where `flutter assemble` defines are
+        // not populated on `ResidentRunner`'s environment.
+        if (hasExtensionPlatformDefines(environmentDefines) ||
+            !supportedAssetTypes.contains(SupportedAssetTypes.codeAssets)) {
+          final String targetPlatformName =
+              _emptyToNull(environmentDefines[kTargetPlatform]) ?? targetPlatform.name;
+          return <AssetBuildTarget>[
+            CustomDataAssetTarget(
+              supportedAssetTypes: supportedAssetTypes,
+              targetString: targetPlatformName,
+            ),
+          ];
+        }
         throwToolExit('No targets defined for target platform $targetPlatform.');
     }
   }
@@ -125,8 +177,8 @@ sealed class AssetBuildTarget {
     return <AssetBuildTarget>[
       LinuxAssetTarget(
         architecture: architecture,
-        supportedAssetTypes: supportedAssetTypes,
         cmakeBuildDirectory: cmakeBuildDirectory,
+        supportedAssetTypes: supportedAssetTypes,
       ),
     ];
   }
@@ -226,11 +278,24 @@ final class WebAssetTarget extends AssetBuildTarget {
   String get targetString => 'web';
 }
 
+/// Data-assets-only [AssetBuildTarget] used for custom extension target
+/// platforms that do not configure `CodeAsset` cross-compilation via
+/// `BuildTarget.resolveNativeAssetsConfig`.
+final class CustomDataAssetTarget extends AssetBuildTarget {
+  CustomDataAssetTarget({required super.supportedAssetTypes, required this.targetString});
+
+  @override
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[...dataAssetExtensions];
+
+  @override
+  final String targetString;
+}
+
 sealed class CodeAssetTarget extends AssetBuildTarget {
   CodeAssetTarget({
-    required super.supportedAssetTypes,
     required this.architecture,
     required this.os,
+    required super.supportedAssetTypes,
   });
 
   final Architecture architecture;
@@ -269,6 +334,39 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
 
   @override
   String get targetString => '${os.name}_${architecture.name}';
+}
+
+/// [CodeAssetTarget] for extension build targets configured via
+/// [kExtensionHookTargetOs] and [kExtensionHookTargetArch].
+final class CustomCodeAssetTarget extends CodeAssetTarget {
+  CustomCodeAssetTarget({
+    required super.architecture,
+    required this.environmentDefines,
+    required this.fileSystem,
+    required super.os,
+    required super.supportedAssetTypes,
+  });
+
+  final Map<String, String> environmentDefines;
+  final FileSystem fileSystem;
+
+  @override
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[
+    ...codeAssetExtensions,
+    ...dataAssetExtensions,
+  ];
+
+  @override
+  Future<void> setCCompilerConfig({
+    required ProcessUtils processUtils,
+    bool mustMatchAppBuild = true,
+  }) async {
+    cCompilerConfigSync = cCompilerConfigFromDefines(
+      environmentDefines,
+      fileSystem: fileSystem,
+      targetOs: os,
+    );
+  }
 }
 
 class WindowsAssetTarget extends CodeAssetTarget {
@@ -518,4 +616,149 @@ String? _emptyToNull(String? input) {
     return null;
   }
   return input;
+}
+
+/// Parses a known `package:code_assets` [OS] from [rawOs], throwing a
+/// `ToolExit` on unrecognized identifiers.
+OS parseNativeOS(String rawOs) {
+  final String normalized = rawOs.trim().toLowerCase();
+  for (final OS builtinOs in OS.values) {
+    if (builtinOs.name == normalized) {
+      return builtinOs;
+    }
+  }
+  throwToolExit(
+    'Unsupported native assets target OS "$rawOs". '
+    'Supported values are: ${OS.values.map((OS os) => os.name).join(', ')}.',
+  );
+}
+
+/// Parses a known `package:code_assets` [Architecture] from [rawArch], throwing
+/// a `ToolExit` on unrecognized identifiers.
+Architecture parseNativeArchitecture(String rawArch) {
+  final String normalized = rawArch.trim().toLowerCase();
+  for (final Architecture builtinArch in Architecture.values) {
+    if (builtinArch.name == normalized) {
+      return builtinArch;
+    }
+  }
+  throwToolExit(
+    'Unsupported native assets target architecture "$rawArch". '
+    'Supported values are: ${Architecture.values.map((Architecture arch) => arch.name).join(', ')}.',
+  );
+}
+
+/// Resolves the target [OS] and [Architecture] for an extension build target
+/// from [environmentDefines].
+///
+/// Returns `null` unless both [kExtensionHookTargetOs] and
+/// [kExtensionHookTargetArch] are explicitly defined.
+(OS, Architecture)? resolveCustomNativeTarget(Map<String, String> environmentDefines) {
+  final String? extensionTargetOs = _emptyToNull(environmentDefines[kExtensionHookTargetOs]);
+  final String? extensionTargetArch = _emptyToNull(environmentDefines[kExtensionHookTargetArch]);
+  if (extensionTargetOs == null || extensionTargetArch == null) {
+    return null;
+  }
+  return (parseNativeOS(extensionTargetOs), parseNativeArchitecture(extensionTargetArch));
+}
+
+/// Resolves a [CCompilerConfig] from explicit `kExtensionCCompiler*` defines in
+/// [environmentDefines], or returns `null` if no compiler defines are provided.
+///
+/// Throws a `ToolExit` if only a subset of [kExtensionCCompilerCc],
+/// [kExtensionCCompilerAr], and [kExtensionCCompilerLd] are specified, or if
+/// [kExtensionCCompilerEnvScriptArgs] is specified without
+/// [kExtensionCCompilerEnvScript].
+CCompilerConfig? cCompilerConfigFromDefines(
+  Map<String, String> environmentDefines, {
+  required FileSystem fileSystem,
+  OS? targetOs,
+}) {
+  final String? cc = _emptyToNull(environmentDefines[kExtensionCCompilerCc]);
+  final String? ar = _emptyToNull(environmentDefines[kExtensionCCompilerAr]);
+  final String? ld = _emptyToNull(environmentDefines[kExtensionCCompilerLd]);
+  final String? envScript = _emptyToNull(environmentDefines[kExtensionCCompilerEnvScript]);
+  final List<String> envScriptArgs = _parseEnvScriptArgs(
+    environmentDefines[kExtensionCCompilerEnvScriptArgs],
+  );
+  if (cc == null && ar == null && ld == null) {
+    if (envScript != null || envScriptArgs.isNotEmpty) {
+      throwToolExit(
+        'Cannot specify "$kExtensionCCompilerEnvScript" or '
+        '"$kExtensionCCompilerEnvScriptArgs" without "$kExtensionCCompilerCc", '
+        '"$kExtensionCCompilerAr", and "$kExtensionCCompilerLd".',
+      );
+    }
+    return null;
+  }
+  if (cc == null || ar == null || ld == null) {
+    throwToolExit(
+      'Partial C compiler configuration in environment defines: '
+      '"$kExtensionCCompilerCc", "$kExtensionCCompilerAr", and '
+      '"$kExtensionCCompilerLd" must all be provided together.',
+    );
+  }
+  if (envScript == null && envScriptArgs.isNotEmpty) {
+    throwToolExit(
+      'Cannot specify "$kExtensionCCompilerEnvScriptArgs" without '
+      '"$kExtensionCCompilerEnvScript".',
+    );
+  }
+  return CCompilerConfig(
+    archiver: _parseExecutableUri(ar, kExtensionCCompilerAr, fileSystem: fileSystem),
+    compiler: _parseExecutableUri(cc, kExtensionCCompilerCc, fileSystem: fileSystem),
+    linker: _parseExecutableUri(ld, kExtensionCCompilerLd, fileSystem: fileSystem),
+    windows: envScript != null
+        ? WindowsCCompilerConfig(
+            developerCommandPrompt: DeveloperCommandPrompt(
+              script: _parseExecutableUri(
+                envScript,
+                kExtensionCCompilerEnvScript,
+                fileSystem: fileSystem,
+              ),
+              arguments: envScriptArgs,
+            ),
+          )
+        : (targetOs == OS.windows ? WindowsCCompilerConfig() : null),
+  );
+}
+
+Uri _parseExecutableUri(String rawValue, String defineName, {required FileSystem fileSystem}) {
+  final Uri? parsed = Uri.tryParse(rawValue);
+  if (parsed != null && parsed.isScheme('file')) {
+    if (!parsed.isAbsolute ||
+        parsed.hasQuery ||
+        parsed.hasFragment ||
+        parsed.path.isEmpty ||
+        parsed.path.endsWith('/')) {
+      throwToolExit('Invalid "$defineName" define: expected a valid file path or file: URI.');
+    }
+    return parsed;
+  }
+  return fileSystem.file(rawValue).uri;
+}
+
+List<String> _parseEnvScriptArgs(String? rawArgs) {
+  if (rawArgs == null || rawArgs.isEmpty) {
+    return const <String>[];
+  }
+  try {
+    final Object? decoded = json.decode(rawArgs);
+    if (decoded case final List<Object?> list) {
+      return <String>[
+        for (final Object? item in list)
+          if (item is String)
+            item
+          else
+            throwToolExit(
+              'Invalid "$kExtensionCCompilerEnvScriptArgs" define: expected a JSON-encoded list of strings.',
+            ),
+      ];
+    }
+  } on FormatException {
+    // Handled by throwToolExit below.
+  }
+  throwToolExit(
+    'Invalid "$kExtensionCCompilerEnvScriptArgs" define: expected a JSON-encoded list of strings.',
+  );
 }

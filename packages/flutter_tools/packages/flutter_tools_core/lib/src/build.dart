@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'build_system/constants.dart';
@@ -83,6 +84,95 @@ enum BuildMode {
   String toString() => cliName;
 }
 
+/// Representation of a Flutter plugin resolved for an extension target platform.
+@immutable
+class ExtensionPlugin {
+  ExtensionPlugin({
+    required this.name,
+    required this.path,
+    this.configuration = const <String, Object?>{},
+  }) : assert(name.trim().isNotEmpty, 'Plugin name cannot be empty.'),
+       assert(
+         path.isValidDirectoryUri,
+         'Plugin path must be an absolute file: directory URI ending with "/": $path',
+       );
+
+  /// Deserializes an [ExtensionPlugin] from a JSON-serializable map.
+  factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (name.trim().isEmpty) {
+      throw const FormatException('Missing or invalid "$nameKey" for ExtensionPlugin.');
+    }
+    final Uri path = json.directoryUri(pathKey);
+    final Map<String, Object?> configuration = json.requiredField<Map<String, Object?>>(
+      configurationKey,
+    );
+    return ExtensionPlugin(name: name, path: path, configuration: configuration);
+  }
+
+  /// Map key for [configuration].
+  @visibleForTesting
+  static const String configurationKey = 'configuration';
+
+  /// Map key for [name].
+  @visibleForTesting
+  static const String nameKey = 'name';
+
+  /// Map key for [path].
+  @visibleForTesting
+  static const String pathKey = 'path';
+
+  /// Deserializes a list of [ExtensionPlugin] objects from RPC parameter data.
+  static List<ExtensionPlugin> listFromJson(Object? rpcResult) {
+    if (rpcResult case final List<Object?> list) {
+      return <ExtensionPlugin>[
+        for (final Object? item in list)
+          switch (item) {
+            final Map<String, Object?> map => ExtensionPlugin.fromJson(map),
+            final Object? invalid => throw FormatException(
+              'Invalid ExtensionPlugin list element: expected Map<String, Object?>, got ${invalid.runtimeType}.',
+            ),
+          },
+      ];
+    }
+    throw FormatException(
+      'Invalid ExtensionPlugin list: expected List<Object?>, got ${rpcResult.runtimeType}.',
+    );
+  }
+
+  /// The package name of the plugin.
+  final String name;
+
+  /// The absolute, trailing-slash terminated directory URI of the plugin root on disk.
+  final Uri path;
+
+  /// The raw platform-specific configuration map from `pubspec.yaml` under
+  /// `flutter.plugin.platforms.<platformKey>`.
+  final Map<String, Object?> configuration;
+
+  /// Serializes the plugin to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    nameKey: name,
+    pathKey: path.toString(),
+    configurationKey: configuration,
+  };
+
+  @override
+  String toString() => 'ExtensionPlugin(name: $name, path: $path, configuration: $configuration)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionPlugin &&
+            other.name == name &&
+            other.path == path &&
+            const DeepCollectionEquality().equals(other.configuration, configuration));
+  }
+
+  @override
+  int get hashCode => Object.hash(name, path, const DeepCollectionEquality().hash(configuration));
+}
+
 /// Representation of a custom `flutter build` subcommand target provided by a tool extension.
 @immutable
 class ExtensionBuildTarget {
@@ -93,13 +183,24 @@ class ExtensionBuildTarget {
     required this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
-  }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage');
+    this.pluginPlatformKey,
+  }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage'),
+       assert(
+         pluginPlatformKey == null || isValidPluginPlatformKey(pluginPlatformKey),
+         'Invalid pluginPlatformKey "$pluginPlatformKey". $_invalidPluginPlatformKeyMessage',
+       );
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
     final String name = json.requiredField<String>(nameKey);
     if (!isValidName(name)) {
       throw FormatException('Invalid "$nameKey" field: "$name". $_invalidNameMessage');
+    }
+    final String? pluginPlatformKey = json.nullableField<String>(pluginPlatformKeyKey);
+    if (pluginPlatformKey != null && !isValidPluginPlatformKey(pluginPlatformKey)) {
+      throw FormatException(
+        'Invalid "$pluginPlatformKeyKey" field: "$pluginPlatformKey". $_invalidPluginPlatformKeyMessage',
+      );
     }
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
@@ -113,6 +214,7 @@ class ExtensionBuildTarget {
         for (final String name in json.stringIterable(hostArtifactsKey))
           ExtensionHostArtifact(name),
       },
+      pluginPlatformKey: pluginPlatformKey,
     );
   }
 
@@ -121,12 +223,22 @@ class ExtensionBuildTarget {
       'Build target names must start with a lowercase ASCII letter and contain '
       'only lowercase ASCII letters, digits, underscores, and hyphens.';
 
+  // Plugin platform keys map to snake_case identifiers in pubspec.yaml and Dart
+  // code generation, so hyphens and uppercase characters are disallowed.
+  static final _validPluginPlatformKeyPattern = RegExp(r'^[a-z][a-z0-9_]*$');
+  static const String _invalidPluginPlatformKeyMessage =
+      'Plugin platform keys must start with a lowercase ASCII letter and contain '
+      'only lowercase ASCII letters, digits, and underscores.';
+
   /// Returns whether [name] is a valid build target name.
   ///
   /// A valid target name must start with a lowercase ASCII letter (`a-z`) and
   /// may contain only lowercase ASCII letters, digits (`0-9`), underscores
   /// (`_`), and hyphens (`-`).
   static bool isValidName(String name) => _validNamePattern.hasMatch(name);
+
+  /// Returns whether [key] is a valid plugin platform key (`^[a-z][a-z0-9_]*$`).
+  static bool isValidPluginPlatformKey(String key) => _validPluginPlatformKeyPattern.hasMatch(key);
 
   /// Map key for [artifacts].
   static const String artifactsKey = 'artifacts';
@@ -142,6 +254,10 @@ class ExtensionBuildTarget {
 
   /// Map key for [outputDir].
   static const String outputDirKey = 'outputDir';
+
+  /// Map key for [pluginPlatformKey].
+  @visibleForTesting
+  static const String pluginPlatformKeyKey = 'pluginPlatformKey';
 
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
@@ -191,6 +307,10 @@ class ExtensionBuildTarget {
   /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
   final String outputDir;
 
+  /// Optional platform key under `flutter.plugin.platforms.<key>` in `pubspec.yaml`
+  /// used to resolve plugins for this target (e.g. `'linux'`, `'custom_platform'`).
+  final String? pluginPlatformKey;
+
   /// Serializes the build target to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     descriptionKey: description,
@@ -199,13 +319,15 @@ class ExtensionBuildTarget {
     artifactsKey: artifacts.map((ExtensionArtifact a) => a.name).toList(),
     hostArtifactsKey: hostArtifacts.map((ExtensionHostArtifact a) => a.name).toList(),
     outputDirKey: outputDir,
+    pluginPlatformKeyKey: ?pluginPlatformKey,
   };
 
   @override
   String toString() =>
       'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, '
       'description: $description, artifacts: $artifacts, '
-      'hostArtifacts: $hostArtifacts, outputDir: $outputDir)';
+      'hostArtifacts: $hostArtifacts, outputDir: $outputDir, '
+      'pluginPlatformKey: $pluginPlatformKey)';
 
   @override
   bool operator ==(Object other) {
@@ -215,6 +337,7 @@ class ExtensionBuildTarget {
             other.name == name &&
             other.targetPlatform == targetPlatform &&
             other.outputDir == outputDir &&
+            other.pluginPlatformKey == pluginPlatformKey &&
             _setEquals(other.artifacts, artifacts) &&
             _setEquals(other.hostArtifacts, hostArtifacts));
   }
@@ -225,6 +348,7 @@ class ExtensionBuildTarget {
     name,
     targetPlatform,
     outputDir,
+    pluginPlatformKey,
     Object.hashAllUnordered(artifacts),
     Object.hashAllUnordered(hostArtifacts),
   );

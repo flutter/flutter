@@ -2,17 +2,44 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionBuildTarget;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/template.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../isolated/mustache_template.dart';
+import '../../plugins.dart' show Plugin;
 import '../../project.dart';
 import '../build_system.dart';
+import 'extension.dart' show hasExtensionPlatformDefines, kExtensionPluginPlatformKey;
+
+/// Resolves the custom extension plugin platform key from [defines], or returns
+/// `null` if [kExtensionPluginPlatformKey] is unset or matches a built-in
+/// Flutter platform.
+///
+/// Throws a [ToolExit] if [kExtensionPluginPlatformKey] is non-empty and does
+/// not match [ExtensionBuildTarget.isValidPluginPlatformKey].
+String? resolveCustomPluginPlatformKey(Map<String, String> defines) {
+  final String? customPlatformKey = defines[kExtensionPluginPlatformKey]?.trim();
+  if (customPlatformKey == null ||
+      customPlatformKey.isEmpty ||
+      Plugin.builtInPlatformKeys.contains(customPlatformKey)) {
+    return null;
+  }
+  if (!ExtensionBuildTarget.isValidPluginPlatformKey(customPlatformKey)) {
+    throwToolExit(
+      'Invalid "$kExtensionPluginPlatformKey" define "$customPlatformKey": '
+      'plugin platform keys must start with a lowercase ASCII letter and contain '
+      'only lowercase ASCII letters, digits, and underscores.',
+    );
+  }
+  return customPlatformKey;
+}
 
 /// Generates a new `./dart_tool/flutter_build/dart_plugin_registrant.dart`
 /// based on the current dependency map in `pubspec.lock`.
@@ -46,11 +73,14 @@ class DartPluginRegistrantTarget extends Target {
     final String targetFilePath =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFilePath);
+    final String? customPlatformKey = resolveCustomPluginPlatformKey(environment.defines);
+    final extraPlatformKeys = <String>{?customPlatformKey};
 
     await generateMainDartWithPluginRegistrant(
       project,
       packageConfig,
       mainFile,
+      extraPlatformKeys: extraPlatformKeys,
       flutterRoot: environment.flutterRootDir.path,
       logger: environment.logger,
       templateRenderer: templateRenderer,
@@ -63,9 +93,19 @@ class DartPluginRegistrantTarget extends Target {
       return true;
     }
     final String? platformName = environment.defines[kTargetPlatform];
-    final TargetPlatform? targetPlatform = platformName == null
-        ? null
-        : TargetPlatform.fromName(platformName);
+    TargetPlatform? targetPlatform;
+    if (platformName != null) {
+      try {
+        targetPlatform = TargetPlatform.fromName(platformName);
+      } on Exception {
+        if (!hasExtensionPlatformDefines(environment.defines)) {
+          rethrow;
+        }
+        // Custom extension target platforms are not part of the built-in
+        // TargetPlatform enum and should still generate a Dart plugin
+        // registrant when extension platform defines are present.
+      }
+    }
     // TODO(stuartmorgan): Investigate removing this check entirely; ideally the
     // source generation step shouldn't be platform dependent, and the generated
     // code should just do the right thing on every platform.

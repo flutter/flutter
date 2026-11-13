@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/test.dart';
 
@@ -142,13 +144,14 @@ void main() {
       final target = ExtensionBuildTarget(
         description: 'A custom Linux build target.',
         name: 'custom-linux-build',
+        outputDir: '{OUTPUT_DIR}/linux',
         targetPlatform: 'linux-x64',
         artifacts: const <ExtensionArtifact>{
           BuiltInArtifacts.icuData,
           BuiltInArtifacts.genSnapshot,
         },
         hostArtifacts: const <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
-        outputDir: '{OUTPUT_DIR}/linux',
+        pluginPlatformKey: 'linux',
       );
 
       final Map<String, Object?> map = target.toMap();
@@ -158,12 +161,14 @@ void main() {
       expect(map[ExtensionBuildTarget.artifactsKey], equals(<String>['icuData', 'genSnapshot']));
       expect(map[ExtensionBuildTarget.hostArtifactsKey], equals(<String>['impellerc']));
       expect(map[ExtensionBuildTarget.outputDirKey], '{OUTPUT_DIR}/linux');
+      expect(map[ExtensionBuildTarget.pluginPlatformKeyKey], 'linux');
 
       final parsed = ExtensionBuildTarget.fromJson(map);
       expect(parsed, equals(target));
       expect(parsed.hashCode, equals(target.hashCode));
       expect(parsed.toString(), contains('custom-linux-build'));
       expect(parsed.toString(), contains('outputDir: {OUTPUT_DIR}/linux'));
+      expect(parsed.toString(), contains('pluginPlatformKey: linux'));
     });
 
     test('deserializes with defaults when optional fields are missing', () {
@@ -179,6 +184,7 @@ void main() {
       expect(parsed.artifacts, isEmpty);
       expect(parsed.hostArtifacts, isEmpty);
       expect(parsed.outputDir, '{OUTPUT_DIR}/linux');
+      expect(parsed.pluginPlatformKey, isNull);
     });
 
     test('fromJson throws FormatException on missing required fields or malformed fields', () {
@@ -241,21 +247,46 @@ void main() {
         }),
         throwsFormatException,
       );
-    });
-
-    test('fromJson throws FormatException when fields have invalid types', () {
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          ExtensionBuildTarget.nameKey: 123,
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'pluginPlatformKey': 123,
         }),
         throwsFormatException,
       );
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          ExtensionBuildTarget.descriptionKey: false,
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'pluginPlatformKey': 'invalid-hyphen-key',
         }),
         throwsFormatException,
       );
+      expect(
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'pluginPlatformKey': 'InvalidUpper',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'pluginPlatformKey': '',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget(
+          description: 'desc',
+          name: 'custom-target',
+          outputDir: '{OUTPUT_DIR}/custom',
+          targetPlatform: 'custom-arm64',
+          pluginPlatformKey: 'invalid-hyphen-key',
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(ExtensionBuildTarget.isValidPluginPlatformKey('custom_os_2'), isTrue);
+      expect(ExtensionBuildTarget.isValidPluginPlatformKey('custom-os'), isFalse);
     });
 
     test('listFromJson handles valid and invalid lists', () {
@@ -593,6 +624,341 @@ void main() {
           ExtensionBuildResult.errorMessageKey: 404,
         }),
         throwsFormatException,
+      );
+    });
+  });
+
+  group('ExtensionNativeAssetsConfig and ExtensionCCompilerConfig', () {
+    test('serializes and deserializes with all fields', () {
+      final config = ExtensionNativeAssetsConfig(
+        targetArchitecture: 'arm64',
+        targetOs: 'linux',
+        cCompilerConfig: ExtensionCCompilerConfig(
+          ar: Uri.parse('file:///usr/bin/llvm-ar'),
+          cc: Uri.parse('file:///usr/bin/clang'),
+          envScript: Uri.parse('file:///opt/sdk/env.sh'),
+          envScriptArgs: const <String>['--arch', 'arm64'],
+          ld: Uri.parse('file:///usr/bin/ld.lld'),
+        ),
+      );
+
+      final Map<String, Object?> jsonMap = config.toMap();
+      expect(jsonMap[ExtensionNativeAssetsConfig.targetOsKey], 'linux');
+      expect(jsonMap[ExtensionNativeAssetsConfig.targetArchitectureKey], 'arm64');
+      final compilerJson =
+          jsonMap[ExtensionNativeAssetsConfig.cCompilerConfigKey]! as Map<String, Object?>;
+      expect(compilerJson[ExtensionCCompilerConfig.ccKey], 'file:///usr/bin/clang');
+      expect(compilerJson[ExtensionCCompilerConfig.arKey], 'file:///usr/bin/llvm-ar');
+      expect(compilerJson[ExtensionCCompilerConfig.ldKey], 'file:///usr/bin/ld.lld');
+      expect(compilerJson[ExtensionCCompilerConfig.envScriptKey], 'file:///opt/sdk/env.sh');
+      expect(
+        compilerJson[ExtensionCCompilerConfig.envScriptArgsKey],
+        equals(<String>['--arch', 'arm64']),
+      );
+
+      final roundTripped = jsonDecode(jsonEncode(jsonMap)) as Map<String, Object?>;
+      final parsed = ExtensionNativeAssetsConfig.fromJson(roundTripped);
+      expect(parsed, equals(config));
+      expect(parsed.hashCode, equals(config.hashCode));
+      expect(parsed.toString(), contains('targetOs: linux'));
+      expect(parsed.toString(), contains('targetArchitecture: arm64'));
+      expect(parsed.toString(), contains('cc: file:///usr/bin/clang'));
+    });
+
+    test('serializes and deserializes with required fields only', () {
+      final config = ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: 'linux');
+
+      final Map<String, Object?> jsonMap = config.toMap();
+      expect(jsonMap.containsKey(ExtensionNativeAssetsConfig.cCompilerConfigKey), isFalse);
+
+      final parsed = ExtensionNativeAssetsConfig.fromJson(jsonMap);
+      expect(parsed, equals(config));
+      expect(parsed.cCompilerConfig, isNull);
+
+      final compilerWithoutEnvArgs = ExtensionCCompilerConfig(
+        ar: Uri.parse('file:///usr/bin/llvm-ar'),
+        cc: Uri.parse('file:///usr/bin/clang'),
+        ld: Uri.parse('file:///usr/bin/ld.lld'),
+      );
+      expect(compilerWithoutEnvArgs.envScriptArgs, isEmpty);
+      final Map<String, Object?> compilerMap = compilerWithoutEnvArgs.toMap();
+      expect(compilerMap.containsKey(ExtensionCCompilerConfig.envScriptArgsKey), isFalse);
+      final parsedCompiler = ExtensionCCompilerConfig.fromJson(compilerMap);
+      expect(parsedCompiler.envScriptArgs, equals(const <String>[]));
+      expect(parsedCompiler, equals(compilerWithoutEnvArgs));
+      expect(parsedCompiler.hashCode, equals(compilerWithoutEnvArgs.hashCode));
+    });
+
+    test('fromJson throws FormatException on invalid fields', () {
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{'targetOs': 'linux'}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x64',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': '   ',
+          'targetOs': 'linux',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x64',
+          'targetOs': '   ',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: ' ', targetOs: 'linux'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: ' '),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: '../../escape'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x86-64', targetOs: 'linux'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x46', targetOs: 'linux'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: 'linxu'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: 'custom_os'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x64',
+          'targetOs': '../escape',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'arm/64',
+          'targetOs': 'linux',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x64',
+          'targetOs': 'custom_os',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x46',
+          'targetOs': 'linux',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x64',
+          'targetOs': 'linux',
+          'cCompilerConfig': 'not-a-map',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'relative/path/ar',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'https://example.com/ar',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'file:///usr/bin/llvm-ar',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+          'envScriptArgs': 'not-a-list',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'file:///usr/bin/llvm-ar',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+          'envScriptArgs': <Object?>[123],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'file:///usr/bin/llvm-ar',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+          'envScriptArgs': <Object?>['--arch', 'arm64'],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'file:///usr/bin/',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'file:///usr/bin/llvm-ar?query=1',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig(
+          ar: Uri.parse('file:///usr/bin/'),
+          cc: Uri.parse('file:///usr/bin/clang'),
+          ld: Uri.parse('file:///usr/bin/ld.lld'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionCCompilerConfig(
+          ar: Uri.parse('file:///usr/bin/llvm-ar'),
+          cc: Uri.parse('file:///usr/bin/clang'),
+          ld: Uri.parse('file:///usr/bin/ld.lld'),
+          envScriptArgs: const <String>['--arch', 'arm64'],
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('validates known package:code_assets targetOs and targetArchitecture values', () {
+      for (final targetOs in <String>['android', 'fuchsia', 'ios', 'linux', 'macos', 'windows']) {
+        expect(ExtensionNativeAssetsConfig.isValidTargetOs(targetOs), isTrue);
+      }
+      expect(ExtensionNativeAssetsConfig.isValidTargetOs('custom_os'), isFalse);
+
+      for (final arch in <String>['arm', 'arm64', 'arm64e', 'ia32', 'riscv32', 'riscv64', 'x64']) {
+        expect(ExtensionNativeAssetsConfig.isValidTargetArchitecture(arch), isTrue);
+      }
+      expect(ExtensionNativeAssetsConfig.isValidTargetArchitecture('x86_64'), isFalse);
+      expect(BuiltInTargets.installCodeAssets, 'install_code_assets');
+    });
+  });
+
+  group('ExtensionPlugin', () {
+    test('serializes, deserializes, and compares nested configuration across JSON round-trip', () {
+      final plugin = ExtensionPlugin(
+        name: 'url_launcher_linux',
+        path: Uri.parse('file:///pub-cache/url_launcher_linux/'),
+        configuration: const <String, Object?>{
+          'pluginClass': 'UrlLauncherPlugin',
+          'ffiPlugin': false,
+          'variants': <Object?>['gtk', 'wayland'],
+          'nested': <String, Object?>{
+            'flags': <Object?>['a', 'b'],
+          },
+        },
+      );
+
+      final Map<String, Object?> jsonMap = plugin.toMap();
+      expect(jsonMap[ExtensionPlugin.nameKey], 'url_launcher_linux');
+      expect(jsonMap[ExtensionPlugin.pathKey], 'file:///pub-cache/url_launcher_linux/');
+
+      final roundTripped = jsonDecode(jsonEncode(jsonMap)) as Map<String, Object?>;
+      final parsed = ExtensionPlugin.fromJson(roundTripped);
+      expect(parsed, equals(plugin));
+      expect(parsed.hashCode, equals(plugin.hashCode));
+      expect(parsed.toString(), contains('url_launcher_linux'));
+
+      final List<ExtensionPlugin> list = ExtensionPlugin.listFromJson(<Object?>[roundTripped]);
+      expect(list, equals(<ExtensionPlugin>[plugin]));
+      expect(() => ExtensionPlugin.listFromJson(null), throwsFormatException);
+      expect(() => ExtensionPlugin.listFromJson('invalid'), throwsFormatException);
+      expect(
+        () => ExtensionPlugin.listFromJson(<Object?>['secret-payload']),
+        throwsA(
+          isA<FormatException>().having(
+            (FormatException e) => e.message,
+            'message',
+            allOf(contains('got String'), isNot(contains('secret-payload'))),
+          ),
+        ),
+      );
+    });
+
+    test('fromJson and constructor validate required fields and directory URI', () {
+      expect(() => ExtensionPlugin.fromJson(const <String, Object?>{}), throwsFormatException);
+      expect(
+        () => ExtensionPlugin.fromJson(const <String, Object?>{
+          'name': '   ',
+          'path': 'file:///pub-cache/my_plugin/',
+          'configuration': <String, Object?>{},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPlugin.fromJson(const <String, Object?>{
+          'name': 'my_plugin',
+          'path': 'file:///pub-cache/my_plugin',
+          'configuration': <String, Object?>{},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPlugin.fromJson(const <String, Object?>{
+          'name': 'my_plugin',
+          'path': 'file:///pub-cache/my_plugin/',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPlugin.fromJson(const <String, Object?>{
+          'name': 'my_plugin',
+          'path': 'relative/my_plugin/',
+          'configuration': <String, Object?>{},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPlugin.fromJson(const <String, Object?>{
+          'name': 'my_plugin',
+          'path': 'file:///pub-cache/my_plugin/',
+          'configuration': 'not-a-map',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPlugin(name: ' ', path: Uri.parse('file:///pub-cache/my_plugin/')),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionPlugin(name: 'my_plugin', path: Uri.parse('file:///pub-cache/my_plugin')),
+        throwsA(isA<AssertionError>()),
       );
     });
   });

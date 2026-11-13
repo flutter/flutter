@@ -10,6 +10,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -24,6 +25,7 @@ import '../build_system/targets/extension.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
+import '../build_system/targets/native_assets.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../context/android_context.dart';
@@ -42,6 +44,7 @@ var _kDefaultTargets = <Target>[
   // Shared targets
   const CopyAssets(),
   const KernelSnapshot(),
+  const InstallCodeAssets(),
   const AotSnapshotProfile(TargetPlatform.android_arm),
   const AotSnapshotRelease(TargetPlatform.android_arm),
   const AotAssemblyProfile(),
@@ -223,12 +226,53 @@ class AssembleCommand extends FlutterCommand {
       return super.requiredArtifacts;
     }
 
-    final targetPlatform = TargetPlatform.fromName(platform);
+    final TargetPlatform targetPlatform;
+    try {
+      targetPlatform = TargetPlatform.fromName(platform);
+    } on Exception {
+      if (hasExtensionPlatformDefines(_environment.defines) ||
+          (await _extensionBuildManager?.isRegisteredTargetPlatform(platform) ?? false)) {
+        return super.requiredArtifacts;
+      }
+      rethrow;
+    }
     final DevelopmentArtifact? artifact = artifactFromTargetPlatform(targetPlatform, _featureFlags);
     if (artifact != null) {
       return <DevelopmentArtifact>{artifact};
     }
     return super.requiredArtifacts;
+  }
+
+  Future<void> _resolveExtensionEnvironmentDefines(
+    List<Target> targets, {
+    required Config config,
+  }) async {
+    final String? explicitTarget = _environment.defines[kExtensionBuildTarget]?.trim();
+    final ExtensionBuildManager? buildManager = _extensionBuildManager;
+    if (!_featureFlags.isToolExtensionsEnabled || buildManager == null) {
+      if (explicitTarget != null && explicitTarget.isNotEmpty) {
+        throwToolExit(
+          '"$kExtensionBuildTarget" requires the tool extensions feature to be enabled.',
+        );
+      }
+      return;
+    }
+    final Map<String, String> extensionDefines = await buildManager
+        .resolveAssembleEnvironmentDefines(
+          artifacts: _environment.artifacts,
+          config: config,
+          defines: _environment.defines,
+          flutterRoot: _environment.flutterRootDir.uri,
+          projectDir: _environment.projectDir,
+          requestedAssembleTargetNames: <String>[
+            for (final Target target in targets)
+              if (target is ExtensionTarget) target.assembleTarget.name,
+          ],
+        );
+    if (extensionDefines.isNotEmpty) {
+      _environment.defines.addAll(extensionDefines);
+      _cachedEnvironment = _createEnvironment(definesOverride: _environment.defines);
+    }
   }
 
   /// The target(s) we are building.
@@ -297,10 +341,11 @@ class AssembleCommand extends FlutterCommand {
     return false;
   }
 
-  late final Environment _environment = _createEnvironment();
+  Environment? _cachedEnvironment;
+  Environment get _environment => _cachedEnvironment ??= _createEnvironment();
 
   /// The environmental configuration for a build invocation.
-  Environment _createEnvironment() {
+  Environment _createEnvironment({Map<String, String>? definesOverride}) {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
@@ -338,7 +383,7 @@ class AssembleCommand extends FlutterCommand {
       buildDir: project.directory.childDirectory('.dart_tool').childDirectory('flutter_build'),
       projectDir: project.directory,
       packageConfigPath: packageConfigPath(),
-      defines: _parseDefines([...getValue(_define), ...decodedDefines]),
+      defines: definesOverride ?? _parseDefines([...getValue(_define), ...decodedDefines]),
       inputs: _parseDefines(getValue(_input)),
       cacheDir: cache.getRoot(),
       flutterRootDir: fs.directory(cache.flutterRoot),
@@ -396,8 +441,15 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    // `requiredArtifacts` evaluates `_environment` before `validateCommand()`
+    // runs; refresh the cached environment if `project.directory` changed.
+    if (_cachedEnvironment != null &&
+        _cachedEnvironment!.projectDir.path != project.directory.path) {
+      _cachedEnvironment = _createEnvironment();
+    }
+    final ToolContext(:Config config, :FileSystem fs, :Logger logger) = toolContext;
     final List<Target> targets = await createTargets();
+    await _resolveExtensionEnvironmentDefines(targets, config: config);
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
     for (final target in targets) {

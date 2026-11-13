@@ -13,8 +13,10 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/extension.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:test/fake.dart';
 
@@ -29,7 +31,13 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     : super(
         extensionManager: FakeExtensionManager(),
         featureFlags: TestFeatureFlags(),
+        fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
+        projectFactory: FlutterProjectFactory(
+          config: FakeConfig(),
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+        ),
       );
 
   final ExtensionBuildResult? buildResult;
@@ -53,6 +61,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    String? pluginPlatformKey,
   }) async {
     invokedBuildDir = buildDir;
     invokedBuildMode = buildMode;
@@ -784,6 +793,7 @@ void main() {
     expect(resolvedAssemble, equals(resolvedBuild));
 
     expect(BuiltInTargets.copyAssets, equals(const CopyAssets().name));
+    expect(BuiltInTargets.installCodeAssets, equals(const InstallCodeAssets().name));
     expect(BuiltInTargets.kernelSnapshot, equals(const KernelSnapshot().name));
   });
 }
