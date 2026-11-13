@@ -7,6 +7,7 @@
 #include <future>
 
 #include "flutter/lib/gpu/formats.h"
+#include "flutter/lib/gpu/replay.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
 #include "impeller/core/allocator.h"
@@ -91,7 +92,10 @@ std::shared_ptr<impeller::Context> Context::GetDefaultContext(
 }
 
 Context::Context(std::shared_ptr<impeller::Context> context)
-    : context_(std::move(context)) {}
+    : context_(std::move(context)),
+      replay_queue_(
+          std::make_shared<ReplayQueue>(context_,
+                                        ReplayQueue::GetCurrentTaskRunner())) {}
 
 Context::~Context() = default;
 
