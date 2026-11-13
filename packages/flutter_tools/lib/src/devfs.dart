@@ -505,11 +505,12 @@ class DevFS {
   Future<Uri> create() async {
     final Logger logger = _toolContext.logger;
     logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
-    for (var retry = true; ; retry = false) {
+    Uri? baseUri;
+    var retried = false;
+    do {
       try {
         final vm_service.Response response = await _vmService.createDevFS(fsName);
-        _baseUri = Uri.parse(response.json!['uri'] as String);
-        break;
+        baseUri = Uri.parse(response.json!['uri'] as String);
       } on vm_service.RPCError catch (rpcException) {
         if (rpcException.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
             rpcException.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
@@ -529,17 +530,19 @@ class DevFS {
             );
           }
         }
-        if (!retry || rpcException.code != _kFileSystemAlreadyExistsCode) {
+        if (retried || rpcException.code != _kFileSystemAlreadyExistsCode) {
           // Other RPCErrors are unexpected. Rethrow so it will hit crash
           // logging.
           rethrow;
         }
+        retried = true;
         logger.printTrace('DevFS: Creating failed. Destroying and trying again');
         await destroy();
       }
-    }
+    } while (baseUri == null);
+    _baseUri = baseUri;
     logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
-    return _baseUri!;
+    return baseUri;
   }
 
   Future<void> destroy() async {
