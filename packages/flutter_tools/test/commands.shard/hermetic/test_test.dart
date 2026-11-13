@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -56,8 +55,9 @@ void main() {
   late FakeToolContext toolContext;
 
   setUp(() {
+    const hostPlatform = LocalPlatform();
     fs = MemoryFileSystem.test(
-      style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      style: hostPlatform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
 
     final Directory package = fs.directory('package');
@@ -87,7 +87,7 @@ void main() {
     toolContext = FakeToolContext(
       fs: fs,
       logger: logger,
-      platform: FakePlatform(operatingSystem: globals.platform.operatingSystem),
+      platform: FakePlatform(operatingSystem: hostPlatform.operatingSystem),
       processManager: FakeProcessManager.any(),
     );
   });
@@ -1305,7 +1305,7 @@ resolution: workspace
       await commandRunner.run(const <String>['test', '--no-pub']);
 
       final bool fileExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
       );
       expect(fileExists, true);
     },
@@ -1347,11 +1347,11 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub', '--flavor', 'vanilla']);
 
       final bool vanillaExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'vanilla.txt'),
+        fs.path.join('build', 'unit_test_assets', 'vanilla.txt'),
       );
       expect(vanillaExists, true, reason: 'vanilla.txt should be bundled');
       final bool orangeExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'orange.txt'),
+        fs.path.join('build', 'unit_test_assets', 'orange.txt'),
       );
       expect(orangeExists, false, reason: 'orange.txt should not be bundled');
     },
@@ -1431,7 +1431,7 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
 
       final bool fileExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
       );
       expect(fileExists, false);
     },
@@ -1471,7 +1471,7 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub']);
 
       final String fileContent = fs
-          .file(globals.fs.path.join('build', 'unit_test_assets', 'asset.txt'))
+          .file(fs.path.join('build', 'unit_test_assets', 'asset.txt'))
           .readAsStringSync();
       expect(fileContent, '2');
     },
@@ -1511,10 +1511,10 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub']);
 
       final File bundledDataAsset = fs.file(
-        globals.fs.path.join('build', 'unit_test_assets', 'packages/my_app/data/hook_asset.txt'),
+        fs.path.join('build', 'unit_test_assets', 'packages/my_app/data/hook_asset.txt'),
       );
       final File assetManifestBin = fs.file(
-        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
       );
       expect(bundledDataAsset, exists);
       expect(bundledDataAsset.readAsStringSync(), 'from_hook');
@@ -1969,10 +1969,13 @@ resolution: workspace
     },
   );
 
-  testUsingContext(
+  testWithoutContext(
     'throws ToolExit when test argument contains Windows reserved characters',
     () async {
-      final Directory package = globals.fs.directory('package');
+      final windowsFs = MemoryFileSystem(style: FileSystemStyle.windows);
+      final windowsPlatform = FakePlatform(operatingSystem: 'windows');
+      final ProcessManager windowsProcessManager = FakeProcessManager.any();
+      final Directory package = windowsFs.directory('package');
       package.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(_pubspecContents);
@@ -1985,16 +1988,16 @@ resolution: workspace
         mainLibName: 'my_app',
         devDependencies: <String>['test_api', 'integration_test'],
       );
-      globals.fs.currentDirectory = package.path;
+      windowsFs.currentDirectory = package.path;
 
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
-          fs: globals.fs,
-          logger: logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
+          fs: windowsFs,
+          logger: BufferLogger.test(),
+          platform: windowsPlatform,
+          processManager: windowsProcessManager,
         ),
         testWrapper: fakePackageTest,
       );
@@ -2006,11 +2009,6 @@ resolution: workspace
           message: r'Invalid test path "test\foo*bar_test.dart": Illegal character in path',
         ),
       );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'windows'),
     },
   );
 
