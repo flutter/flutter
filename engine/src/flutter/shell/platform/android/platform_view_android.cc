@@ -34,7 +34,6 @@
 
 #include "fml/logging.h"
 #include "impeller/display_list/aiks_context.h"
-#include "impeller/entity/contents/content_context.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
@@ -462,9 +461,25 @@ sk_sp<GrDirectContext> PlatformViewAndroid::CreateResourceContext() const {
   if (!android_surface_) {
     return nullptr;
   }
+  const bool made_current = android_surface_->ResourceContextMakeCurrent();
+  if (made_current) {
+    // The default pipelines are warmed here, on the IO thread while the shell
+    // sets up its IO subsystem, rather than from |SetupImpellerContext|,
+    // because their compile jobs are posted to the IO thread:
+    //
+    //  * They queue reactor operations that only run once the IO thread's
+    //    resource context is current. Queued before then, nothing guarantees
+    //    they ever run, and the raster thread waits on the pipelines forever.
+    //  * They are posted to the shell's shutdown-safe IO task runner, whose
+    //    tasks wait for the shell to be set up before running. Queued ahead of
+    //    the shell's IO setup, they keep the IO thread from ever setting up, so
+    //    the shell never gets set up.
+    android_context_->StartWarmingDefaultPipelines(
+        task_runners_.GetRasterTaskRunner());
+  }
 #if !SLIMPELLER
   sk_sp<GrDirectContext> resource_context;
-  if (android_surface_->ResourceContextMakeCurrent()) {
+  if (made_current) {
     // TODO(chinmaygarde): Currently, this code depends on the fact that only
     // the OpenGL surface will be able to make a resource context current. If
     // this changes, this assumption breaks. Handle the same.
@@ -476,7 +491,6 @@ sk_sp<GrDirectContext> PlatformViewAndroid::CreateResourceContext() const {
   }
   return resource_context;
 #else
-  android_surface_->ResourceContextMakeCurrent();
   return nullptr;
 #endif  //  !SLIMPELLER
 }
@@ -576,24 +590,6 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
 void PlatformViewAndroid::SetupImpellerContext() {
   android_context_->SetupImpellerContext();
   android_surface_->SetupImpellerSurface();
-
-  // Start compiling the default pipelines now, on the raster thread where the
-  // surface's ContentContext will later look them up, instead of waiting for
-  // the first surface to be created. Compilation happens on the IO thread, so
-  // no rendering context needs to be current here. Compile work queued on the
-  // IO thread before its resource context is current runs once it is (see
-  // |AndroidContextGLImpeller::ResourceContextMakeCurrent|).
-  //
-  // This is only done for OpenGL ES. Warming every default pipeline was not a
-  // clear win on Vulkan, and may regress startup for apps that only use a few
-  // pipelines on their first frame
-  // (https://github.com/flutter/flutter/issues/196453).
-  std::shared_ptr<impeller::Context> impeller_context =
-      android_context_->GetImpellerContext();
-  if (impeller_context && impeller_context->GetBackendType() ==
-                              impeller::Context::BackendType::kOpenGLES) {
-    impeller::ContentContext::WarmDefaultPipelines(*impeller_context);
-  }
 }
 
 }  // namespace flutter

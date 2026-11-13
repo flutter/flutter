@@ -11,11 +11,13 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/thread.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/testing/post_task_sync.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "impeller/base/promise.h"
@@ -427,55 +429,127 @@ CreateImpellerContextWithoutGPU(
   return impeller_context;
 }
 
-/// Calls SetupImpellerContext on a platform view whose Android context hands
-/// out `impeller_context`, as the shell would on the raster thread.
-void SetupImpellerContext(
-    const std::shared_ptr<impeller::Context>& impeller_context) {
-  // SetupImpellerContext is called directly, so the platform view never posts
-  // any tasks.
-  TaskRunners task_runners("SetupImpellerContext", nullptr, nullptr, nullptr,
-                           nullptr);
-  Settings settings;
-  NiceMock<MockPlatformViewDelegate> delegate;
-  ON_CALL(delegate, OnPlatformViewGetSettings())
-      .WillByDefault(ReturnRef(settings));
-  PlatformViewAndroid platform_view(
-      delegate, task_runners, std::make_shared<JNIMock>(),
-      std::make_shared<FakeAndroidContext>(impeller_context));
-
-  platform_view.SetupImpellerContext();
+/// Returns a future for a pipeline that is never created.
+impeller::PipelineFuture<impeller::PipelineDescriptor> ReturnNullPipeline(
+    impeller::PipelineDescriptor descriptor,
+    bool /*async*/,
+    bool /*threadsafe*/) {
+  return impeller::PipelineFuture<impeller::PipelineDescriptor>{
+      std::move(descriptor),
+      impeller::RealizedFuture<
+          std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>>(
+          nullptr)};
 }
 
 }  // namespace
 
-TEST(AndroidPlatformView, SetupImpellerContextWarmsDefaultPipelinesForGLES) {
+/// Has a real raster thread for the default pipelines to be warmed on.
+class DefaultPipelineWarmUpTest : public ::testing::Test {
+ protected:
+  DefaultPipelineWarmUpTest()
+      : raster_thread_("raster"),
+        task_runners_("DefaultPipelineWarmUpTest",
+                      nullptr,
+                      raster_thread_.GetTaskRunner(),
+                      nullptr,
+                      nullptr) {
+    ON_CALL(delegate_, OnPlatformViewGetSettings())
+        .WillByDefault(ReturnRef(settings_));
+  }
+
+  std::unique_ptr<PlatformViewAndroid> CreatePlatformView(
+      const std::shared_ptr<AndroidContext>& android_context) {
+    return std::make_unique<PlatformViewAndroid>(
+        delegate_, task_runners_, std::make_shared<JNIMock>(), android_context);
+  }
+
+  /// Waits for the tasks posted to the raster thread so far to run.
+  void FlushRasterThread() {
+    PostTaskSync(GetRasterTaskRunner(), []() {});
+  }
+
+  fml::RefPtr<fml::TaskRunner> GetRasterTaskRunner() const {
+    return task_runners_.GetRasterTaskRunner();
+  }
+
+ private:
+  fml::Thread raster_thread_;
+  TaskRunners task_runners_;
+  Settings settings_;
+  NiceMock<MockPlatformViewDelegate> delegate_;
+};
+
+// Warming the default pipelines from SetupImpellerContext deadlocks startup.
+// See |PlatformViewAndroid::CreateResourceContext|.
+TEST_F(DefaultPipelineWarmUpTest,
+       SetupImpellerContextDoesNotWarmDefaultPipelines) {
   auto pipeline_library =
       std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+  EXPECT_CALL(*pipeline_library, GetPipeline(_, _, _)).Times(0);
+  std::unique_ptr<PlatformViewAndroid> platform_view = CreatePlatformView(
+      std::make_shared<FakeAndroidContext>(CreateImpellerContextWithoutGPU(
+          impeller::Context::BackendType::kOpenGLES, pipeline_library)));
 
-  // The pipelines are requested asynchronously, before any surface exists.
+  PostTaskSync(GetRasterTaskRunner(),
+               [&platform_view]() { platform_view->SetupImpellerContext(); });
+  FlushRasterThread();
+}
+
+TEST_F(DefaultPipelineWarmUpTest, WarmsDefaultPipelinesOnRasterThreadForGLES) {
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+  // The pipelines are requested asynchronously on the raster thread.
   EXPECT_CALL(*pipeline_library, GetPipeline(_, /*async=*/false, _)).Times(0);
   EXPECT_CALL(*pipeline_library, GetPipeline(_, /*async=*/true, _))
       .Times(AtLeast(1))
-      .WillRepeatedly([](impeller::PipelineDescriptor descriptor, bool, bool) {
-        return impeller::PipelineFuture<impeller::PipelineDescriptor>{
-            std::move(descriptor),
-            impeller::RealizedFuture<std::shared_ptr<
-                impeller::Pipeline<impeller::PipelineDescriptor>>>(nullptr)};
+      .WillRepeatedly([this](impeller::PipelineDescriptor descriptor,
+                             bool async, bool threadsafe) {
+        EXPECT_TRUE(GetRasterTaskRunner()->RunsTasksOnCurrentThread());
+        return ReturnNullPipeline(std::move(descriptor), async, threadsafe);
       });
-
-  SetupImpellerContext(CreateImpellerContextWithoutGPU(
+  FakeAndroidContext android_context(CreateImpellerContextWithoutGPU(
       impeller::Context::BackendType::kOpenGLES, pipeline_library));
+
+  // Called on this thread, standing in for the IO thread.
+  android_context.StartWarmingDefaultPipelines(GetRasterTaskRunner());
+  FlushRasterThread();
 }
 
-TEST(AndroidPlatformView,
-     SetupImpellerContextDoesNotWarmDefaultPipelinesForVulkan) {
+// Platform views that share an Android context, such as those of spawned
+// engines, only warm its default pipelines once.
+TEST_F(DefaultPipelineWarmUpTest, WarmsDefaultPipelinesOnlyOnce) {
   auto pipeline_library =
       std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+  size_t requested_pipelines = 0;
+  ON_CALL(*pipeline_library, GetPipeline(_, _, _))
+      .WillByDefault(
+          [&requested_pipelines](impeller::PipelineDescriptor descriptor,
+                                 bool async, bool threadsafe) {
+            requested_pipelines++;
+            return ReturnNullPipeline(std::move(descriptor), async, threadsafe);
+          });
+  FakeAndroidContext android_context(CreateImpellerContextWithoutGPU(
+      impeller::Context::BackendType::kOpenGLES, pipeline_library));
 
+  android_context.StartWarmingDefaultPipelines(GetRasterTaskRunner());
+  FlushRasterThread();
+  const size_t requested_by_first_warm_up = requested_pipelines;
+  EXPECT_GT(requested_by_first_warm_up, 0u);
+
+  android_context.StartWarmingDefaultPipelines(GetRasterTaskRunner());
+  FlushRasterThread();
+  EXPECT_EQ(requested_pipelines, requested_by_first_warm_up);
+}
+
+TEST_F(DefaultPipelineWarmUpTest, DoesNotWarmDefaultPipelinesForVulkan) {
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
   EXPECT_CALL(*pipeline_library, GetPipeline(_, _, _)).Times(0);
-
-  SetupImpellerContext(CreateImpellerContextWithoutGPU(
+  FakeAndroidContext android_context(CreateImpellerContextWithoutGPU(
       impeller::Context::BackendType::kVulkan, pipeline_library));
+
+  android_context.StartWarmingDefaultPipelines(GetRasterTaskRunner());
+  FlushRasterThread();
 }
 #endif  // !SLIMPELLER
 
