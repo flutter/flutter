@@ -648,9 +648,9 @@ class DebugViewMetricsOverride with Diagnosticable {
     return result;
   }
 
-  // This override laid over [fallback], which supplies each metric this
-  // override leaves alone. A metric added to this class has to be added here
-  // too.
+  // Returns this override laid over [fallback], which supplies each metric that
+  // this override leaves alone. A metric added to this class has to be added
+  // here too.
   DebugViewMetricsOverride _over(DebugViewMetricsOverride fallback) {
     return DebugViewMetricsOverride(
       devicePixelRatio: devicePixelRatio ?? fallback.devicePixelRatio,
@@ -1218,8 +1218,7 @@ bool debugClearViewMetricsOverrides() {
 }
 
 /// Wraps [dispatcher] so that it and the [ui.FlutterView]s it reports apply
-/// the entries of [debugViewMetricsOverrides] and
-/// [debugAllViewsMetricsOverride].
+/// [debugViewMetricsOverrides] and [debugAllViewsMetricsOverride].
 ///
 /// [BindingBase.platformDispatcher] applies this to
 /// [ui.PlatformDispatcher.instance], which is what makes overrides visible to

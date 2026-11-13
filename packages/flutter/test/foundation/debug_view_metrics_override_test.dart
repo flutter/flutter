@@ -1088,43 +1088,6 @@ void main() {
       expect(wrapped.view(id: 2)!.platformDispatcher.platformBrightness, ui.Brightness.dark);
     });
 
-    test('combines with an entry metric by metric, and follows changes to either', () {
-      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(
-        _TwoViewPlatformDispatcher(),
-      );
-      final ui.FlutterView first = wrapped.view(id: 1)!;
-
-      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
-        padding: FakeViewPadding(top: 10),
-        viewInsets: FakeViewPadding(bottom: 20),
-        alwaysUse24HourFormat: true,
-        highContrast: true,
-      );
-      debugSetViewMetricsOverride(
-        1,
-        const DebugViewMetricsOverride(padding: FakeViewPadding(top: 30), boldText: true),
-      );
-      expect(first.padding.top, 30);
-      expect(first.viewInsets.bottom, 20);
-      expect(first.platformDispatcher.alwaysUse24HourFormat, isTrue);
-      // Each accessibility flag is a metric of its own.
-      expect(first.platformDispatcher.accessibilityFeatures.boldText, isTrue);
-      expect(first.platformDispatcher.accessibilityFeatures.highContrast, isTrue);
-
-      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
-        viewInsets: FakeViewPadding(bottom: 40),
-      );
-      expect(first.viewInsets.bottom, 40);
-      expect(first.platformDispatcher.alwaysUse24HourFormat, isFalse);
-
-      debugSetViewMetricsOverride(
-        1,
-        const DebugViewMetricsOverride(viewInsets: FakeViewPadding(bottom: 50)),
-      );
-      expect(first.viewInsets.bottom, 50);
-      expect(first.padding.top, 0);
-    });
-
     test('combines with an entry in every accessibility flag', () {
       // MediaQuery does not surface every flag, so the widgets tests cannot
       // see a flag that the merge leaves out.

@@ -154,9 +154,8 @@ class View extends StatefulWidget {
   /// In debug mode, a view that [PlatformDispatcher.instance] reports is used
   /// through a wrapper that applies [debugViewMetricsOverrides] and
   /// [debugAllViewsMetricsOverride], and this method returns the wrapper. It
-  /// is not identical to the view that
-  /// [PlatformDispatcher.instance] reports, and its
-  /// [FlutterView.platformDispatcher] is not identical to
+  /// is not identical to the view that [PlatformDispatcher.instance] reports,
+  /// and its [FlutterView.platformDispatcher] is not identical to
   /// [PlatformDispatcher.instance]. Compare views by [FlutterView.viewId]
   /// instead.
   /// {@endtemplate}

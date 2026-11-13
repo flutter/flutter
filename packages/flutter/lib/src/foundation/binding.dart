@@ -256,14 +256,13 @@ abstract class BindingBase {
   ///
   /// In debug mode, this is [ui.PlatformDispatcher.instance] wrapped by
   /// [debugApplyViewMetricsOverrides], so that it and the views it reports apply
-  /// [debugViewMetricsOverrides] and [debugAllViewsMetricsOverride]; see
+  /// [debugViewMetricsOverrides] and [debugAllViewsMetricsOverride]. See
   /// [DebugViewMetricsOverride]. The views it reports are therefore not
-  /// identical to the ones
-  /// [ui.PlatformDispatcher.instance] reports; compare views by
-  /// [FlutterView.viewId] when both are in hand. A subclass that overrides
-  /// this accessor should build on `super.platformDispatcher`, the way
-  /// [TestWidgetsFlutterBinding] does, or apply [debugApplyViewMetricsOverrides]
-  /// to the dispatcher it supplies instead.
+  /// identical to the ones [ui.PlatformDispatcher.instance] reports. Compare
+  /// views by [FlutterView.viewId] when both are in hand. A subclass that
+  /// overrides this accessor should build on `super.platformDispatcher`, the
+  /// way [TestWidgetsFlutterBinding] does, or apply
+  /// [debugApplyViewMetricsOverrides] to the dispatcher it supplies instead.
   ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
   final ui.PlatformDispatcher _platformDispatcher = kDebugMode
       ? debugApplyViewMetricsOverrides(ui.PlatformDispatcher.instance)
@@ -720,7 +719,6 @@ abstract class BindingBase {
       }
       return _viewMetricsOverrideResult();
     }
-    // Null when the call names [debugAllViewsMetricsOverride].
     final int? viewId = int.tryParse(rawViewId);
     if (rawViewId != _allViewsId && (viewId == null || viewId < 0)) {
       throw FormatException(
@@ -740,6 +738,7 @@ abstract class BindingBase {
         ),
       };
       final bool changed;
+      // The check above leaves null only for `all`.
       if (viewId == null) {
         final DebugViewMetricsOverride? previous = debugAllViewsMetricsOverride;
         debugAllViewsMetricsOverride = override;
