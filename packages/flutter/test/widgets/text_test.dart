@@ -1780,8 +1780,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.startHover(find.byType(Text), pointer: 1);
-    addTearDown(gesture.removePointer);
+    await tester.startHover(find.byType(Text), pointer: 1);
 
     await tester.pump();
 
@@ -1844,8 +1843,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.startHover(find.byType(Text), pointer: 1);
-    addTearDown(gesture.removePointer);
+    await tester.startHover(find.byType(Text), pointer: 1);
 
     await tester.pump();
 

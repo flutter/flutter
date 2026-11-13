@@ -72,7 +72,6 @@ void main() {
 
       // Start out of hoverTarget
       final TestGesture gesture = await tester.startHoverAt(const Offset(100, 100));
-      addTearDown(gesture.removePointer);
 
       await tester.pumpWidget(subject);
       // Move into hoverTarget and tap
@@ -139,7 +138,6 @@ void main() {
 
       // Start out of hoverTarget
       final TestGesture gesture = await tester.startHoverAt(const Offset(100, 100));
-      addTearDown(gesture.removePointer);
       await tester.pumpWidget(subject);
       expect(hovered, isFalse);
 
@@ -533,7 +531,6 @@ void main() {
 
       // Start out of hoverTarget
       final TestGesture gesture = await tester.startHoverAt(const Offset(100, 100));
-      addTearDown(gesture.removePointer);
 
       await tester.pumpWidget(subject);
       // Move into hoverTarget and tap
@@ -610,7 +607,6 @@ void main() {
 
       // Start out of hoverTarget
       final TestGesture gesture = await tester.startHoverAt(const Offset(100, 100));
-      addTearDown(gesture.removePointer);
       await tester.pumpWidget(subject);
       expect(hovered, isFalse);
 
@@ -1017,8 +1013,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.startHover(find.byType(ModalBarrier), pointer: 1);
-    addTearDown(gesture.removePointer);
+    await tester.startHover(find.byType(ModalBarrier), pointer: 1);
 
     await tester.pump();
 

@@ -11426,8 +11426,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.startHover(find.byType(EditableText), pointer: 1);
-    addTearDown(gesture.removePointer);
+    await tester.startHover(find.byType(EditableText), pointer: 1);
 
     await tester.pump();
 

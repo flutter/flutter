@@ -1477,7 +1477,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer(location: const Offset(200, 200));
-    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(target(ignoring: true));
     expect(logs, isEmpty);
@@ -1699,7 +1698,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer(location: const Offset(200, 200));
-    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(target(absorbing: true));
     expect(logs, isEmpty);

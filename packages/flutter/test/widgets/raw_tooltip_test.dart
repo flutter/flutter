@@ -732,7 +732,9 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/96890
     const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
-    addTearDown(gesture.removePointer);
+    addTearDown(() async {
+      return gesture.removePointer();
+    });
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -825,7 +827,9 @@ void main() {
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
-    addTearDown(gesture.removePointer);
+    addTearDown(() async {
+      return gesture.removePointer();
+    });
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -883,7 +887,9 @@ void main() {
   ) async {
     const hoverDelay = Duration(milliseconds: 700);
     final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
-    addTearDown(gesture.removePointer);
+    addTearDown(() async {
+      return gesture.removePointer();
+    });
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -942,7 +948,9 @@ void main() {
     (WidgetTester tester) async {
       const hoverDelay = Duration(milliseconds: 700);
       final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
-      addTearDown(gesture.removePointer);
+      addTearDown(() async {
+        return gesture.removePointer();
+      });
 
       await tester.pumpWidget(
         WidgetsApp(
@@ -1030,7 +1038,9 @@ void main() {
   testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
     const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
-    addTearDown(gesture.removePointer);
+    addTearDown(() async {
+      return gesture.removePointer();
+    });
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -1270,7 +1280,9 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/54096.
     const hoverDelay = Duration(seconds: 1);
     final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
-    addTearDown(gesture.removePointer);
+    addTearDown(() async {
+      return gesture.removePointer();
+    });
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -1801,7 +1813,6 @@ void main() {
 
     const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.startHoverAt(Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -1838,7 +1849,6 @@ void main() {
   testWidgets('dismissAllToolTips dismisses hovered tooltips', (WidgetTester tester) async {
     const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.startHoverAt(Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -1888,7 +1898,6 @@ void main() {
   testWidgets('Hovered tooltips do not dismiss after touchDelay', (WidgetTester tester) async {
     const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.startHoverAt(Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(
       WidgetsApp(

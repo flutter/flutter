@@ -421,7 +421,6 @@ void main() {
       final TestGesture gesture = await tester.startHoverAt(
         tester.getCenter(find.byKey(containerKey)),
       );
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(hovering, isTrue);
@@ -461,8 +460,7 @@ void main() {
           ),
         ),
       );
-      final TestGesture gesture = await tester.startHoverAt(const Offset(1, 1), pointer: 1);
-      addTearDown(gesture.removePointer);
+      await tester.startHoverAt(const Offset(1, 1), pointer: 1);
       await tester.pump();
 
       expect(
@@ -793,7 +791,6 @@ void main() {
       final TestGesture gesture = await tester.startHoverAt(
         tester.getCenter(find.byKey(containerKey)),
       );
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(hovering, isTrue);
@@ -865,7 +862,6 @@ void main() {
       final TestGesture gesture = await tester.startHoverAt(
         tester.getCenter(find.byKey(containerKey)),
       );
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(hovering, isFalse);

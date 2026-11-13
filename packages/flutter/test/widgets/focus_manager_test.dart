@@ -1496,8 +1496,7 @@ void main() {
     ) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
       RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
-      final TestGesture gesture = await tester.startHoverAt(Offset.zero, pointer: 0);
-      addTearDown(gesture.removePointer);
+      await tester.startHoverAt(Offset.zero, pointer: 0);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.mobile());
 
@@ -1506,8 +1505,7 @@ void main() {
     ) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
       RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
-      final TestGesture gesture = await tester.startHoverAt(Offset.zero, pointer: 0);
-      addTearDown(gesture.removePointer);
+      await tester.startHoverAt(Offset.zero, pointer: 0);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.desktop());
 
