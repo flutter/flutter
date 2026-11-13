@@ -20,12 +20,6 @@ import 'framework.dart';
 import 'text.dart';
 import 'title.dart';
 
-/// {@template flutter.widgets.accessibility_evaluations.internal}
-/// Do not use in production.
-///
-/// Flutter will make breaking changes to this API, even in patch versions.
-/// {@endtemplate}
-///
 /// Types of accessibility evaluations that can be performed on the semantics tree.
 ///
 /// The `.name` of each enum value is used:
@@ -33,7 +27,6 @@ import 'title.dart';
 ///   [WidgetsServiceExtensions.accessibilityEvaluations] service extension.
 /// * As the `rule` field value in each issue map returned by the
 ///   [AccessibilityServiceExtensions.getSemanticsTree] service extension.
-@internal
 enum AccessibilityEvaluationType {
   /// Enforces that all tappable semantics nodes have a minimum size.
   ///
@@ -68,10 +61,7 @@ enum AccessibilityEvaluationType {
   title,
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// A violation of a semantics node.
-@internal
 class Violation {
   /// Creates a violation.
   const Violation(this.node, this.reason);
@@ -83,10 +73,7 @@ class Violation {
   final String reason;
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// The result of evaluating a semantics node by an [AccessibilityEvaluation].
-@internal
 class EvaluationResult {
   /// Creates a passing evaluation.
   EvaluationResult(this.violations);
@@ -95,10 +82,7 @@ class EvaluationResult {
   final List<Violation> violations;
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// A class that evaluates a single accessibility rule.
-@internal
 abstract class AccessibilityEvaluation {
   /// A const constructor allows subclasses to be const.
   const AccessibilityEvaluation();
@@ -110,11 +94,8 @@ abstract class AccessibilityEvaluation {
   FutureOr<EvaluationResult> evaluate(WidgetsBinding binding);
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// An evaluation which enforces that all tappable semantics nodes have a minimum
 /// size.
-@internal
 class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTapTargetEvaluation].
   const MinimumTapTargetEvaluation({required this.size});
@@ -224,12 +205,10 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   }
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// An evaluation which enforces that all nodes with a tap or long press action
 /// also have a label.
-@internal
 class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
+  /// Create a new [LabeledTapTargetEvaluation].
   const LabeledTapTargetEvaluation();
 
   @override
@@ -361,14 +340,11 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
   }
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// An evaluation which verifies that all nodes that contribute semantics via text
 /// meet minimum contrast levels.
 ///
 /// The evaluations are defined by the Web Content Accessibility Guidelines,
 /// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
-@internal
 class MinimumTextContrastEvaluation extends _ContrastEvaluation {
   /// Create a new [MinimumTextContrastEvaluation].
   const MinimumTextContrastEvaluation({
@@ -554,14 +530,11 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
   }
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// An evaluation which verifies that all nodes that represent non-text controls
 /// meet minimum contrast levels of 3.0.
 ///
 /// The evaluations are defined by the Web Content Accessibility Guidelines,
 /// https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
-@internal
 class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
   /// Create a new [MinimumNonTextContrastEvaluation].
   const MinimumNonTextContrastEvaluation();
@@ -754,7 +727,9 @@ Map<Color, int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, in
 Iterable<Element> _collectElementsByText(Element root, String text) {
   final result = <Element>[];
   root.visitChildren((Element child) {
-    if (child.widget is Text && (child.widget as Text).data == text) {
+    final Widget widget = child.widget;
+    if ((widget is Text && (widget.data ?? widget.textSpan?.toPlainText()) == text) ||
+        (widget is EditableText && widget.controller.text == text)) {
       result.add(child);
     }
     result.addAll(_collectElementsByText(child, text));
@@ -821,12 +796,10 @@ bool _isImportantForAccessibility(SemanticsNode node) {
   return false;
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// An evaluation which enforces that all leaf semantics nodes have a label,
 /// value, hint, or tooltip.
-@internal
 class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
+  /// Create a new [UnlabeledLeafNodeEvaluation].
   const UnlabeledLeafNodeEvaluation();
 
   @override
@@ -884,11 +857,8 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
   }
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// An evaluation which enforces that the application has at least one [Title]
 /// widget to set the web page title.
-@internal
 class TitleEvaluation extends AccessibilityEvaluation {
   /// Create a new [TitleEvaluation].
   const TitleEvaluation();
