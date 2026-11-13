@@ -8,9 +8,12 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <future>
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -68,6 +71,20 @@ class Shader : public RefCountedDartWrappable<Shader> {
     size_t runtime_array_stride = 0;
   };
 
+  /// The shader's binding reflection. Immutable once built, and replaced
+  /// wholesale on reload, so a recording that retains it keeps every binding
+  /// pointer it took valid until the recording is replayed.
+  struct Reflection {
+    std::unordered_map<std::string, UniformBinding> uniform_structs;
+    std::unordered_map<std::string, TextureBinding> uniform_textures;
+    absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers;
+    // The maps' entries in a stable order for index-based lookup. The maps
+    // are never modified once built, so entry pointers stay valid.
+    std::vector<const UniformBinding*> uniform_struct_order;
+    std::vector<const TextureBinding*> uniform_texture_order;
+    std::vector<const StorageBufferBinding*> storage_buffer_order;
+  };
+
   ~Shader() override;
 
   static fml::RefPtr<Shader> Make(
@@ -84,12 +101,24 @@ class Shader : public RefCountedDartWrappable<Shader> {
           {},
       std::optional<std::array<uint32_t, 3>> workgroup_size = std::nullopt);
 
+  /// Schedules registration of this shader's code when it changed since it
+  /// was last scheduled, or when the last registration failed. Registration
+  /// runs on the thread that encodes Flutter GPU work, after evicting
+  /// pipelines built from an earlier version, so the calling thread never
+  /// touches the shader or pipeline library.
+  void ScheduleRegistration(Context& context);
+
+  /// The latest scheduled registration, resolving to whether it succeeded.
+  /// Invalid until one is scheduled. A pipeline keeps the one current at its
+  /// creation, which was queued ahead of every replay that uses it.
+  const std::shared_future<bool>& GetRegistration() const;
+
+  /// Changes whenever a registration replaces a shader function. Pipelines
+  /// resolved before the change may be built from the replaced code.
+  static uint64_t GetRegistrationGeneration();
+
   std::shared_ptr<const impeller::ShaderFunction> GetFunctionFromLibrary(
       impeller::ShaderLibrary& library);
-
-  bool IsRegistered(Context& context);
-
-  bool RegisterSync(Context& context);
 
   /// Registers this shader with `context`'s shader library if it is not
   /// registered yet, or re-registers it if it is dirty, evicting every
@@ -98,9 +127,9 @@ class Shader : public RefCountedDartWrappable<Shader> {
   absl::Status RegisterSync(impeller::Context& context);
 
   /// Whether this shader needs to be re-registered with the impeller shader
-  /// library on next use. Fresh shaders start dirty. Set back to false by
-  /// `RegisterSync` after registration completes, and back to true by
-  /// `ResetFrom` when the underlying asset is reloaded.
+  /// library on next use. Fresh shaders start dirty. Cleared by
+  /// `ScheduleRegistration`, and set again by `ResetFrom` when the underlying
+  /// asset is reloaded.
   bool IsDirty() const;
 
   void SetClean();
@@ -164,6 +193,16 @@ class Shader : public RefCountedDartWrappable<Shader> {
   /// payload (`ResetFrom`), after which it must not be dereferenced.
   const Shader::StorageBufferBinding* GetStorageBufferAt(int index) const;
 
+  /// The current reflection. Binding pointers returned by the getters above
+  /// point into it, so retaining it keeps them valid across a reload.
+  const std::shared_ptr<const Reflection>& GetReflection() const {
+    return reflection_;
+  }
+
+  /// The name this shader is registered under in the shared impeller shader
+  /// library.
+  std::string GetScopedName() const;
+
  private:
   Shader();
 
@@ -177,25 +216,17 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::shared_ptr<fml::Mapping> code_mapping_;
   std::vector<impeller::ShaderStageIOSlot> inputs_;
   std::vector<impeller::ShaderStageBufferLayout> layouts_;
-  std::unordered_map<std::string, UniformBinding> uniform_structs_;
-  std::unordered_map<std::string, TextureBinding> uniform_textures_;
-  absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers_;
   std::optional<std::array<uint32_t, 3>> workgroup_size_;
-  // The maps' entries in a stable order for index-based lookup. The maps are
-  // never modified after they are set, only replaced (`Make`, `ResetFrom`),
-  // so entry pointers stay valid until then, and the order is rebuilt
-  // whenever they are replaced.
-  std::vector<const UniformBinding*> uniform_struct_order_;
-  std::vector<const TextureBinding*> uniform_texture_order_;
-  std::vector<const StorageBufferBinding*> storage_buffer_order_;
+  // Replaced, never mutated, so recordings may hold the old one.
+  std::shared_ptr<const Reflection> reflection_;
+  std::shared_future<bool> registration_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
   bool is_dirty_ = true;
 
-  void RebuildBindingOrder();
-
-  // Returns the scoped name to use when registering or looking up this
-  // shader's function in a shared impeller::ShaderLibrary.
-  std::string GetScopedName() const;
+  static std::shared_ptr<const Reflection> MakeReflection(
+      std::unordered_map<std::string, UniformBinding> uniform_structs,
+      std::unordered_map<std::string, TextureBinding> uniform_textures,
+      absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shader);
 };

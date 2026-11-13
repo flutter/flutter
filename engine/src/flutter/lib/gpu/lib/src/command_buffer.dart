@@ -333,10 +333,12 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
   /// Submits the recorded passes and copies to the GPU, in the order they
   /// were recorded.
   ///
-  /// This ends the open [RenderPass] or [ComputePass], if any.
-  /// [completionCallback] is called when the submitted work completes, with
-  /// `false` if it failed. A command buffer can be submitted once, and counts
-  /// as submitted even if this throws.
+  /// This ends the open [RenderPass] or [ComputePass], if any. The work is
+  /// encoded and handed to the GPU on the raster thread, after everything
+  /// submitted before it, so this returns before it is encoded.
+  /// [completionCallback] runs on this thread once the work completes, with
+  /// `false` when it could not be encoded or submitted. A command buffer can
+  /// be submitted once, and counts as submitted even if this throws.
   void submit({CompletionCallback? completionCallback}) {
     if (_submitted) {
       throw StateError('CommandBuffer has already been submitted.');

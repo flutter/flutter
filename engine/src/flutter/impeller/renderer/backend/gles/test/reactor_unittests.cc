@@ -4,6 +4,9 @@
 
 #include <algorithm>
 #include <memory>
+#include <mutex>
+#include <set>
+#include <thread>
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gmock/gmock.h"
@@ -25,6 +28,25 @@ class TestWorker : public ReactorGLES::Worker {
       const ReactorGLES& reactor) const override {
     return true;
   }
+};
+
+// Reacts only on threads that were allowed to.
+class AllowListWorker : public ReactorGLES::Worker {
+ public:
+  void AllowCurrentThread() {
+    std::scoped_lock lock(mutex_);
+    threads_.insert(std::this_thread::get_id());
+  }
+
+  bool CanReactorReactOnCurrentThreadNow(
+      const ReactorGLES& reactor) const override {
+    std::scoped_lock lock(mutex_);
+    return threads_.count(std::this_thread::get_id()) > 0;
+  }
+
+ private:
+  mutable std::mutex mutex_;
+  std::set<std::thread::id> threads_;
 };
 
 TEST(ReactorGLES, CanAttachCleanupCallbacksToHandles) {
@@ -213,6 +235,81 @@ TEST(ReactorGLES, FramebufferDeletedOnOwnerThread) {
   EXPECT_TRUE(reactor->AddOperation([](const ReactorGLES& reactor) {}));
   EXPECT_TRUE(reactor->React());
   EXPECT_EQ(cleanup_thread, std::this_thread::get_id());
+}
+
+TEST(ReactorGLES, SharedHandleDeletedOnCollectingThread) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+
+  EXPECT_CALL(*mock_gles_impl, GenTextures(1, _))
+      .WillOnce([](GLsizei size, GLuint* queries) { queries[0] = 1234; });
+
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::move(mock_gles_impl));
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  HandleGLES handle = reactor->CreateHandle(HandleType::kTexture);
+
+  std::thread::id cleanup_thread;
+  reactor->RegisterCleanupCallback(
+      handle, [&]() { cleanup_thread = std::this_thread::get_id(); });
+
+  // This thread can react, so its context may still have unflushed commands
+  // that use the texture. Another thread's reaction must not delete it.
+  reactor->CollectHandle(handle);
+
+  std::thread thread([&] {
+    EXPECT_TRUE(reactor->AddOperation([](const ReactorGLES& reactor) {}));
+    EXPECT_TRUE(reactor->React());
+  });
+  thread.join();
+
+  EXPECT_EQ(cleanup_thread, std::thread::id());
+
+  EXPECT_TRUE(reactor->AddOperation([](const ReactorGLES& reactor) {}));
+  EXPECT_TRUE(reactor->React());
+  EXPECT_EQ(cleanup_thread, std::this_thread::get_id());
+}
+
+TEST(ReactorGLES, HandleCollectedWithoutContextDeletedOnAnyReactingThread) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+
+  EXPECT_CALL(*mock_gles_impl, GenTextures(1, _))
+      .WillOnce([](GLsizei size, GLuint* queries) { queries[0] = 1234; });
+
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::move(mock_gles_impl));
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<AllowListWorker>();
+  worker->AllowCurrentThread();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  HandleGLES handle = reactor->CreateHandle(HandleType::kTexture);
+
+  std::thread::id cleanup_thread;
+  reactor->RegisterCleanupCallback(
+      handle, [&]() { cleanup_thread = std::this_thread::get_id(); });
+
+  // Collected on a thread without a context, so any reacting thread may
+  // delete it.
+  std::thread collector([&] { reactor->CollectHandle(handle); });
+  collector.join();
+
+  std::thread::id reacting_thread;
+  std::thread thread([&] {
+    worker->AllowCurrentThread();
+    reacting_thread = std::this_thread::get_id();
+    EXPECT_TRUE(reactor->AddOperation([](const ReactorGLES& reactor) {}));
+    EXPECT_TRUE(reactor->React());
+  });
+  thread.join();
+
+  EXPECT_EQ(cleanup_thread, reacting_thread);
 }
 
 }  // namespace testing
