@@ -135,17 +135,18 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       final BoxConstraints constraints = BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size middleSize = layoutChild(_ToolbarSlot.middle, constraints);
 
-      final double middleStartMargin = leadingWidth + middleSpacing;
-      var middleStart = middleStartMargin;
+      final double middleStartBoundary = leadingWidth + middleSpacing;
+      final double middleEndBoundary = size.width - trailingWidth - middleSpacing;
+      var middleStart = middleStartBoundary;
       final double middleY = (size.height - middleSize.height) / 2.0;
       // If the centered middle will not fit between the leading and trailing
       // widgets, then align its left or right edge with the adjacent boundary.
       if (centerMiddle) {
         middleStart = (size.width - middleSize.width) / 2.0;
-        if (middleStart + middleSize.width > size.width - trailingWidth) {
-          middleStart = size.width - trailingWidth - middleSize.width - middleSpacing;
-        } else if (middleStart < middleStartMargin) {
-          middleStart = middleStartMargin;
+        if (middleStart + middleSize.width > middleEndBoundary) {
+          middleStart = middleEndBoundary - middleSize.width;
+        } else if (middleStart < middleStartBoundary) {
+          middleStart = middleStartBoundary;
         }
       }
 
