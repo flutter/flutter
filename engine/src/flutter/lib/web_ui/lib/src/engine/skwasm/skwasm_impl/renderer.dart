@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -20,103 +19,150 @@ class SkwasmRenderer extends Renderer {
   @override
   bool get supportsResizingAnimatedImages => true;
 
+  @override
+  bool get supportsAnimatedImages => skwasmSupportsAnimatedImages();
+
   bool get isWimp => skwasmIsWimp();
 
   @override
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
+  /// The Skwasm font registry behind [fontCollection].
+  final SkwasmFontCollection skwasmFontCollection = SkwasmFontCollection();
+
   @override
-  final SkwasmFontCollection fontCollection = SkwasmFontCollection();
+  late final EngineFontCollection fontCollection = EngineFontCollection(skwasmFontCollection);
 
   @override
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
-    return SkwasmCanvas(recorder as SkwasmPictureRecorder, cullRect ?? ui.Rect.largest);
+    final ui.Rect rect = EngineCanvas.resolveCullRect(recorder, cullRect);
+    return (recorder as SkwasmPictureRecorder).beginRecording(rect);
   }
 
   @override
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]) => SkwasmGradient.conical(
-    focal: focal,
-    focalRadius: focalRadius,
-    center: center,
-    centerRadius: radius,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix,
-  );
-
-  @override
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
     ui.Rect? bounds,
-  }) =>
-      // TODO(dkwingsmt): `bounds` is currently not implemented in Skwasm.
-      // Fall back to unbounded blur.
-      // https://github.com/flutter/flutter/issues/175899
-      SkwasmImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  }) {
+    return SkwasmBlurImageFilter(
+      sigmaX: sigmaX,
+      sigmaY: sigmaY,
+      tileMode: tileMode,
+      bounds: bounds,
+    );
+  }
 
   @override
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      SkwasmImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY}) {
+    return SkwasmDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
 
   @override
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      SkwasmImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY}) {
+    return SkwasmErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
 
   @override
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
-  }) => SkwasmImageFilter.compose(
-    SkwasmImageFilter.fromUiFilter(outer),
-    SkwasmImageFilter.fromUiFilter(inner),
-  );
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
+  }) {
+    return SkwasmMatrixImageFilter(matrix: matrix, filterQuality: filterQuality);
+  }
 
   @override
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
-  }) => SkwasmImageFilter.matrix(matrix4, filterQuality: filterQuality);
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
+  }) {
+    return SkwasmComposeImageFilter(outer: outer, inner: inner);
+  }
 
   @override
-  ui.ImageShader createImageShader(
-    ui.Image image,
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter}) {
+    return SkwasmColorFilterImageFilter(filter as SkwasmColorFilter);
+  }
+
+  @override
+  BackendImageShader createImageShader(
+    EngineImage image,
     ui.TileMode tmx,
     ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
-  ) => SkwasmImageShader.imageShader(image, tmx, tmy, matrix4, filterQuality);
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
+  ) => SkwasmImageShader(image.backendImage as SkwasmImage, tmx, tmy, matrix4, filterQuality);
 
   @override
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) => SkwasmGradient.linear(
-    from: from,
-    to: to,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix4,
+  ) => SkwasmGradient.linear(endPoints, colors, colorStops, tileMode, matrix4);
+
+  @override
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) => SkwasmGradient.radial(centerX, centerY, radius, colors, colorStops, tileMode, matrix4);
+
+  @override
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) => SkwasmGradient.conical(
+    startX,
+    startY,
+    startRadius,
+    endX,
+    endY,
+    endRadius,
+    colors,
+    colorStops,
+    tileMode,
+    matrix4,
   );
 
   @override
-  ui.Paint createPaint() => SkwasmPaint();
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  ) => SkwasmGradient.sweep(
+    centerX,
+    centerY,
+    colors,
+    colorStops,
+    tileMode,
+    startAngle,
+    endAngle,
+    matrix4,
+  );
+
+  @override
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) =>
+      SkwasmPaint(paint, defaultBlurTileMode: defaultBlurTileMode);
 
   @override
   BackendColorFilter createColorFilter(EngineColorFilter filter) => SkwasmColorFilter(filter);
@@ -125,8 +171,8 @@ class SkwasmRenderer extends Renderer {
   BackendMaskFilter createMaskFilter(EngineMaskFilter filter) => SkwasmMaskFilter(filter);
 
   @override
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      SkwasmParagraphBuilder(style as SkwasmParagraphStyle, fontCollection);
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style) =>
+      SkwasmParagraphBuilder(style, skwasmFontCollection);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) {
@@ -134,145 +180,10 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-  }) => SkwasmParagraphStyle(
-    textAlign: textAlign,
-    textDirection: textDirection,
-    maxLines: maxLines,
-    fontFamily: fontFamily,
-    fontSize: fontSize,
-    height: height,
-    textHeightBehavior: textHeightBehavior,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    strutStyle: strutStyle,
-    ellipsis: ellipsis,
-    locale: locale,
-  );
-
-  @override
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();
 
   @override
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix4,
-  ]) => SkwasmGradient.radial(
-    center: center,
-    radius: radius,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix4,
-  );
-
-  @override
   ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
-
-  @override
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  }) => SkwasmStrutStyle(
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    leading: leading,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    forceStrutHeight: forceStrutHeight,
-  );
-
-  @override
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float32List? matrix4,
-  ]) => SkwasmGradient.sweep(
-    center: center,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    startAngle: startAngle,
-    endAngle: endAngle,
-    matrix4: matrix4,
-  );
-
-  @override
-  ui.TextStyle createTextStyle({
-    ui.Color? color,
-    ui.TextDecoration? decoration,
-    ui.Color? decorationColor,
-    ui.TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.TextBaseline? textBaseline,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    ui.Locale? locale,
-    ui.Paint? background,
-    ui.Paint? foreground,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
-  }) => SkwasmTextStyle(
-    color: color,
-    decoration: decoration,
-    decorationColor: decorationColor,
-    decorationStyle: decorationStyle,
-    decorationThickness: decorationThickness,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    textBaseline: textBaseline,
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    letterSpacing: letterSpacing,
-    wordSpacing: wordSpacing,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    locale: locale,
-    background: background,
-    foreground: foreground,
-    shadows: shadows,
-    fontFeatures: fontFeatures,
-    fontVariations: fontVariations,
-  );
 
   @override
   BackendVertices createVertices(
@@ -344,29 +255,6 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  }) => SkwasmLineMetrics(
-    hardBreak: hardBreak,
-    ascent: ascent,
-    descent: descent,
-    unscaledAscent: unscaledAscent,
-    height: height,
-    width: width,
-    left: left,
-    baseline: baseline,
-    lineNumber: lineNumber,
-  );
-
-  @override
   void dumpDebugInfo() {
     if (kDebugMode) {
       withStackScope((StackScope scope) {
@@ -382,8 +270,8 @@ class SkwasmRenderer extends Renderer {
           'strutStyleCount': counts[6],
           'textStyleCount': counts[7],
           'animatedImageCount': counts[8],
-          'countourMeasureIterCount': counts[9],
-          'countourMeasureCount': counts[10],
+          'contourMeasureIterCount': counts[9],
+          'contourMeasureCount': counts[10],
           'dataCount': counts[11],
           'colorFilterCount': counts[12],
           'imageFilterCount': counts[13],

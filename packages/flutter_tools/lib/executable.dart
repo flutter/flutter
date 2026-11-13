@@ -2,15 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:process/process.dart';
+
 import 'runner.dart' as runner;
+import 'src/android/gradle.dart';
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
-import 'src/base/template.dart';
+import 'src/base/process.dart';
+import 'src/base/signals.dart';
 import 'src/base/terminal.dart';
-import 'src/base/user_messages.dart';
-import 'src/build_system/build_targets.dart';
+import 'src/base/time.dart';
 import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
@@ -44,9 +49,12 @@ import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
-import 'src/devtools_launcher.dart';
+import 'src/context/tool_context.dart';
+import 'src/context/tool_dependencies.dart';
+import 'src/experimental/extension_discovery.dart';
+import 'src/experimental/extension_manager.dart';
+import 'src/experimental/templates.dart';
 import 'src/features.dart';
-import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
@@ -56,8 +64,8 @@ import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
 import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
-import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
+import 'src/runner/flutter_command_runner.dart';
 import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
@@ -77,225 +85,278 @@ Future<void> main(List<String> args) async {
     args[slashQuestionHelpIndex] = '-h';
   }
 
-  final bool doctor =
-      (args.isNotEmpty && args.first == 'doctor') ||
-      (args.length == 2 && verbose && args.last == 'doctor');
+  final String? commandName = FlutterCommandRunner.findCommandName(args);
+  final doctor = commandName == 'doctor';
   final bool help =
       args.contains('-h') ||
       args.contains('--help') ||
-      (args.isNotEmpty && args.first == 'help') ||
+      commandName == 'help' ||
       (args.length == 1 && verbose);
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
-  final bool daemon = args.contains('daemon');
-  final bool widgetPreviews = args.contains(WidgetPreviewCommand.kWidgetPreview);
+  final daemon = commandName == 'daemon';
+  final widgetPreviews = commandName == WidgetPreviewCommand.kWidgetPreview;
   final bool runMachine = args.contains('--machine');
-
-  // Cache.flutterRoot must be set early because other features use it (e.g.
-  // enginePath's initializer uses it). This can only work with the real
-  // instances of the platform or filesystem, so just use those.
-  Cache.flutterRoot = Cache.defaultFlutterRoot(
-    platform: const LocalPlatform(),
-    fileSystem: globals.localFileSystem,
-    userMessages: UserMessages(),
+  const Platform platform = LocalPlatform();
+  final stdio = Stdio();
+  final ShutdownHooks shutdownHooks = LocalSignals.instance.shutdownHooks;
+  final terminal = AnsiTerminal(
+    stdio: stdio,
+    platform: platform,
+    now: const SystemClock().now(),
+    // So that we don't animate anything before calling applyFeatureFlags, default
+    // the animations to disabled in real apps.
+    defaultCliAnimationEnabled: false,
+    shutdownHooks: shutdownHooks,
   );
+  final outputPreferences = OutputPreferences(
+    wrapText: stdio.hasTerminal,
+    showColor: platform.stdoutSupportsAnsi,
+    stdio: stdio,
+  );
+  final Logger logger =
+      LoggerFactory(
+        outputPreferences: outputPreferences,
+        terminal: terminal,
+        stdio: stdio,
+      ).createLogger(
+        daemon: daemon,
+        machine: runMachine,
+        verbose: verbose && !muteCommandLogging,
+        prefixedErrors: prefixedErrors,
+        windows: platform.isWindows,
+        widgetPreviews: widgetPreviews,
+      );
 
   await runner.run(
     args,
-    () => generateCommands(verboseHelp: verboseHelp, verbose: verbose),
-    verbose: verbose,
+    (ToolDependencies toolDependencies) {
+      final ToolDependencies(
+        :ExtensionManager? extensionManager,
+        :FeatureFlags featureFlags,
+        toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
+      ) = toolDependencies;
+      final ExtensionManager manager = extensionManager!;
+      final templateManager = ExtensionTemplateManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
+        logger: logger,
+      );
+      return generateCommands(
+        toolDependencies: toolDependencies,
+        verboseHelp: verboseHelp,
+        verbose: verbose,
+        extensionTemplateManager: templateManager,
+      );
+    },
+    buildTargets: const BuildTargetsImpl(),
+    extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
     muteCommandLogging: muteCommandLogging,
-    verboseHelp: verboseHelp,
+    nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
     overrides: <Type, Generator>{
+      AnsiTerminal: () => terminal,
       FlutterHookRunner: () => FlutterHookRunnerNative(),
+      Logger: () => logger,
+      OutputPreferences: () => outputPreferences,
+      Stdio: () => stdio,
       // The web runner is not supported in google3 because it depends
       // on dwds.
       WebRunnerFactory: () => DwdsWebRunnerFactory(),
-      // The mustache dependency is different in google3
-      TemplateRenderer: () => const MustacheTemplateRenderer(),
-      // The devtools launcher is not supported in google3 because it depends on
-      // devtools source code.
-      DevtoolsLauncher: () => DevtoolsServerLauncher(
-        processManager: globals.processManager,
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        botDetector: globals.botDetector,
-      ),
-      BuildTargets: () => const BuildTargetsImpl(),
-      Logger: () {
-        final loggerFactory = LoggerFactory(
-          outputPreferences: globals.outputPreferences,
-          terminal: globals.terminal,
-          stdio: globals.stdio,
-        );
-        return loggerFactory.createLogger(
-          daemon: daemon,
-          machine: runMachine,
-          verbose: verbose && !muteCommandLogging,
-          prefixedErrors: prefixedErrors,
-          windows: globals.platform.isWindows,
-          widgetPreviews: widgetPreviews,
-        );
-      },
-      AnsiTerminal: () {
-        return AnsiTerminal(
-          stdio: globals.stdio,
-          platform: globals.platform,
-          now: DateTime.now(),
-          // So that we don't animate anything before calling applyFeatureFlags, default
-          // the animations to disabled in real apps.
-          defaultCliAnimationEnabled: false,
-          shutdownHooks: globals.shutdownHooks,
-        );
-        // runner.run calls "terminal.applyFeatureFlags()"
-      },
-      PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
-      TestCompilerNativeAssetsBuilder: () => const TestCompilerNativeAssetsBuilderImpl(),
     },
-    shutdownHooks: globals.shutdownHooks,
+    preRunValidatorBuilder: PreRunValidator.new,
+    shutdownHooks: shutdownHooks,
+    templateRenderer: const MustacheTemplateRenderer(),
+    verbose: verbose,
+    verboseHelp: verboseHelp,
   );
 }
 
-List<FlutterCommand> generateCommands({required bool verboseHelp, required bool verbose}) =>
-    <FlutterCommand>[
-      AnalyzeCommand(
-        verboseHelp: verboseHelp,
-        fileSystem: globals.fs,
-        platform: globals.platform,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        artifacts: globals.artifacts!,
-        // new ProjectValidators should be added here for the --suggestions to run
-        allProjectValidators: <ProjectValidator>[
-          GeneralInfoProjectValidator(),
-          VariableDumpMachineProjectValidator(
-            logger: globals.logger,
-            fileSystem: globals.fs,
-            platform: globals.platform,
-            git: globals.git,
-          ),
-        ],
-        suppressAnalytics: !globals.analytics.okToSend,
+List<FlutterCommand> generateCommands({
+  required ToolDependencies toolDependencies,
+  required bool verbose,
+  required bool verboseHelp,
+  ExtensionTemplateManager? extensionTemplateManager,
+}) {
+  final ToolDependencies(:FeatureFlags featureFlags, :ToolContext toolContext) = toolDependencies;
+  final ToolContext(
+    :Cache cache,
+    :Logger logger,
+    :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    :Platform platform,
+    :ProcessManager processManager,
+  ) = toolContext;
+  return <FlutterCommand>[
+    AnalyzeCommand(
+      allProjectValidators: <ProjectValidator>[
+        GeneralInfoProjectValidator(
+          androidContext: toolDependencies.androidContext,
+          logger: logger,
+          processManager: processManager,
+        ),
+        VariableDumpMachineProjectValidator(toolContext: toolContext),
+      ],
+      androidBuilder: AndroidGradleBuilder.fromContexts(
+        analytics: toolDependencies.analytics,
+        androidContext: toolDependencies.androidContext,
+        toolContext: toolContext,
       ),
-      AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
-      AttachCommand(
-        verboseHelp: verboseHelp,
-        stdio: globals.stdio,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        signals: globals.signals,
-        platform: globals.platform,
-        processInfo: globals.processInfo,
-        fileSystem: globals.fs,
+      suppressAnalytics: !toolDependencies.analytics.okToSend,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    AssembleCommand(
+      androidContext: toolDependencies.androidContext,
+      buildSystem: toolDependencies.buildSystem,
+      extensionBuildManager: toolDependencies.extensionBuildManager,
+      featureFlags: featureFlags,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+      xcode: toolDependencies.appleContext.xcode,
+    ),
+    AttachCommand(
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      toolContext: toolContext,
+      xcode: toolDependencies.appleContext.xcode,
+      verboseHelp: verboseHelp,
+    ),
+    BuildCommand(
+      androidBuilder: AndroidGradleBuilder.fromContexts(
+        analytics: toolDependencies.analytics,
+        androidContext: toolDependencies.androidContext,
+        toolContext: toolContext,
       ),
-      BuildCommand(
-        fileSystem: globals.fs,
-        buildSystem: globals.buildSystem,
-        osUtils: globals.os,
-        verboseHelp: verboseHelp,
-        androidSdk: globals.androidSdk,
-        logger: globals.logger,
-        config: globals.config,
-        platform: globals.platform,
-        fileSystemUtils: globals.fsUtils,
-        terminal: globals.terminal,
-        plistParser: globals.plistParser,
-        processUtils: globals.processUtils,
-        processManager: globals.processManager,
-        templateRenderer: globals.templateRenderer,
-        xcode: globals.xcode,
-        artifacts: globals.artifacts!,
-        cache: globals.cache,
-        flutterVersion: globals.flutterVersion,
-      ),
-      ChannelCommand(verboseHelp: verboseHelp),
-      CleanCommand(verbose: verbose),
-      ConfigCommand(verboseHelp: verboseHelp),
-      CustomDevicesCommand(
-        customDevicesConfig: globals.customDevicesConfig,
-        operatingSystemUtils: globals.os,
-        terminal: globals.terminal,
-        platform: globals.platform,
-        featureFlags: featureFlags,
-        processManager: globals.processManager,
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      ),
-      CreateCommand(verboseHelp: verboseHelp),
-      DaemonCommand(hidden: !verboseHelp),
-      DebugAdapterCommand(verboseHelp: verboseHelp),
-      DevicesCommand(verboseHelp: verboseHelp),
-      DoctorCommand(verbose: verbose),
-      DowngradeCommand(verboseHelp: verboseHelp, logger: globals.logger),
-      DriveCommand(
-        verboseHelp: verboseHelp,
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-        terminal: globals.terminal,
-        outputPreferences: globals.outputPreferences,
-        signals: globals.signals,
-      ),
-      EmulatorsCommand(),
-      GenerateCommand(),
-      GenerateLocalizationsCommand(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
-      ),
-      InstallCommand(verboseHelp: verboseHelp),
-      LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
-      PackagesCommand(),
-      PrecacheCommand(
-        verboseHelp: verboseHelp,
-        cache: globals.cache,
-        logger: globals.logger,
-        platform: globals.platform,
-        featureFlags: featureFlags,
-      ),
-      RunCommand(verboseHelp: verboseHelp),
-      ScreenshotCommand(fs: globals.fs),
-      ShellCompletionCommand(),
-      TestCommand(
-        verboseHelp: verboseHelp,
-        verbose: verbose,
-        nativeAssetsBuilder: globals.nativeAssetsBuilder,
-      ),
-      WidgetPreviewCommand(
-        verboseHelp: verboseHelp,
-        logger: globals.logger,
-        fs: globals.fs,
-        projectFactory: globals.projectFactory,
-        cache: globals.cache,
-        platform: globals.platform,
-        shutdownHooks: globals.shutdownHooks,
-        os: globals.os,
-        processManager: globals.processManager,
-        artifacts: globals.artifacts!,
-        terminal: globals.terminal,
-      ),
-      UpgradeCommand(verboseHelp: verboseHelp),
-      SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),
-      // Development-only commands. These are always hidden,
-      IdeConfigCommand(),
-      UpdatePackagesCommand(verboseHelp: verboseHelp),
-    ];
+      androidContext: toolDependencies.androidContext,
+      appleContext: toolDependencies.appleContext,
+      buildSystem: toolDependencies.buildSystem,
+      extensionBuildManager: toolDependencies.extensionBuildManager,
+      featureFlags: featureFlags,
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    ChannelCommand(verboseHelp: verboseHelp, toolContext: toolContext),
+    CleanCommand(
+      extensionCleanManager: toolDependencies.extensionCleanManager,
+      verbose: verbose,
+      toolContext: toolContext,
+      xcode: toolDependencies.appleContext.xcode,
+      xcodeProjectInterpreter: toolDependencies.appleContext.xcodeProjectInterpreter,
+    ),
+    ConfigCommand(
+      verboseHelp: verboseHelp,
+      androidContext: toolDependencies.androidContext,
+      toolContext: toolContext,
+      featureFlags: featureFlags,
+      extensionManager: toolDependencies.extensionManager,
+    ),
+    CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolContext),
+    CreateCommand(
+      androidContext: toolDependencies.androidContext,
+      appleContext: toolDependencies.appleContext,
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: toolContext,
+      extensionTemplateManager: extensionTemplateManager,
+      verboseHelp: verboseHelp,
+    ),
+    DaemonCommand(
+      androidContext: toolDependencies.androidContext,
+      androidWorkflow: toolDependencies.androidWorkflow,
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      deviceManager: toolDependencies.deviceManager,
+      hidden: !verboseHelp,
+      toolContext: toolContext,
+      xcode: toolDependencies.appleContext.xcode,
+    ),
+    DebugAdapterCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    DevicesCommand(
+      deviceManager: toolDependencies.deviceManager,
+      doctor: toolDependencies.doctor,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    DoctorCommand(
+      doctor: toolDependencies.doctor,
+      extensionManager: toolDependencies.extensionManager,
+      toolContext: toolContext,
+      verbose: verbose,
+    ),
+    DowngradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    DriveCommand(
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    EmulatorsCommand(
+      doctor: toolDependencies.doctor,
+      emulatorManager: toolDependencies.emulatorManager,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    GenerateCommand(toolContext: toolContext),
+    GenerateLocalizationsCommand(toolContext: toolContext),
+    InstallCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    LogsCommand(toolContext: toolContext),
+    PackagesCommand(
+      buildSystem: toolDependencies.buildSystem,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    PrecacheCommand(
+      verboseHelp: verboseHelp,
+      cache: cache,
+      logger: logger,
+      platform: platform,
+      featureFlags: featureFlags,
+      toolContext: toolContext,
+    ),
+    RunCommand(
+      appleContext: toolDependencies.appleContext,
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      toolContext: toolContext,
+      androidContext: toolDependencies.androidContext,
+      androidWorkflow: toolDependencies.androidWorkflow,
+      deviceManager: toolDependencies.deviceManager,
+      verboseHelp: verboseHelp,
+    ),
+    ScreenshotCommand(toolContext: toolContext),
+    ShellCompletionCommand(toolContext: toolContext),
+    TestCommand(
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+      verbose: verbose,
+      nativeAssetsBuilder: nativeAssetsBuilder,
+    ),
+    WidgetPreviewCommand(
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    UpgradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    SymbolizeCommand(toolContext: toolContext),
+    // Development-only commands. These are always hidden,
+    IdeConfigCommand(toolContext: toolContext),
+    UpdatePackagesCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+  ];
+}
 
 /// An abstraction for instantiation of the correct logger type.
 ///
 /// Our logger class hierarchy and runtime requirements are overly complicated.
 class LoggerFactory {
   LoggerFactory({
-    required Terminal terminal,
-    required Stdio stdio,
-    required OutputPreferences outputPreferences,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  }) : _terminal = terminal,
-       _stdio = stdio,
-       _stopwatchFactory = stopwatchFactory,
-       _outputPreferences = outputPreferences;
+    required this._terminal,
+    required this._stdio,
+    required this._outputPreferences,
+    this._stopwatchFactory = const StopwatchFactory(),
+  });
 
   final Terminal _terminal;
   final Stdio _stdio;
@@ -334,7 +395,12 @@ class LoggerFactory {
       logger = PrefixedErrorLogger(logger);
     }
     if (widgetPreviews) {
-      return WidgetPreviewMachineAwareLogger(logger, machine: machine, verbose: verbose);
+      return WidgetPreviewMachineAwareLogger(
+        logger,
+        machine: machine,
+        verbose: verbose,
+        stdio: _stdio,
+      );
     }
     if (daemon) {
       return NotifyingLogger(verbose: verbose, parent: logger);

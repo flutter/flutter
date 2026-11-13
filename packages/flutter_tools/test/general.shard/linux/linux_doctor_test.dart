@@ -6,6 +6,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/linux/linux_doctor.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';

@@ -17,14 +17,10 @@ static constexpr int32_t kMaxSigmaDenominator = 10;
 
 TextShadowCache::TextShadowCacheKey::TextShadowCacheKey(
     Scalar p_max_basis,
-    bool p_is_single_glyph,
-    const Font& p_font,
     Sigma p_sigma,
     Color p_color,
     TextFrameFingerprint p_fingerprint)
     : max_basis(p_max_basis),
-      is_single_glyph(p_is_single_glyph),
-      font(p_font),
       rounded_sigma(Rational(std::round(p_sigma.sigma * kMaxSigmaDenominator),
                              kMaxSigmaDenominator)),
       color(p_color),

@@ -1,0 +1,155 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+import 'dart:io' show IOOverrides;
+import 'dart:isolate';
+
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:stream_channel/isolate_channel.dart';
+
+import 'service.dart';
+
+/// Entrypoint runner for a Flutter Tool Extension running in an Isolate.
+///
+/// Extension packages invoke [ToolExtensionEntryPoint.run] in their isolate
+/// entrypoint function, passing the initial Isolate send port and list of
+/// supported extension services.
+class ToolExtensionEntryPoint {
+  /// The reserved JSON-RPC method name used to query extension capabilities.
+  static const String getCapabilitiesMethod = 'extension.getCapabilities';
+
+  /// The reserved JSON-RPC method name used to request graceful extension shutdown.
+  static const String shutdownMethod = 'extension.shutdown';
+
+  /// Entrypoint function to serve [services] over the Isolate [sendPort].
+  ///
+  /// Validates that [sendPort] is a [SendPort] (throwing an [ArgumentError]
+  /// otherwise). If provided, [extensionName] should be the name of the
+  /// extension package and is surfaced by the host tool in error messages and
+  /// artifact cache directories.
+  static Future<void> run(
+    Object? sendPort,
+    List<ToolExtensionService> services, {
+    Set<String>? supportedPlatforms,
+    void Function(String message)? logger,
+    String? extensionName,
+  }) async {
+    if (sendPort is! SendPort) {
+      throw ArgumentError.value(
+        sendPort,
+        'sendPort',
+        'Expected a SendPort as the initial isolate message.',
+      );
+    }
+    await IOOverrides.runZoned(
+      () => _runInZone(
+        sendPort,
+        services,
+        supportedPlatforms: supportedPlatforms,
+        logger: logger,
+        extensionName: extensionName,
+      ),
+      exit: (int code) => throw UnsupportedError(
+        'Tool extensions must not call exit($code); throw ToolExtensionException instead.',
+      ),
+    );
+  }
+
+  static Future<void> _runInZone(
+    SendPort sendPort,
+    List<ToolExtensionService> services, {
+    Set<String>? supportedPlatforms,
+    void Function(String message)? logger,
+    String? extensionName,
+  }) async {
+    final rpcHandlers = <String, ExtensionRpcHandler>{};
+
+    for (final service in services) {
+      logger?.call(
+        '[ToolExtensionIsolate] Initializing service namespace "${service.namespace}"...',
+      );
+      final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
+      handlers.forEach((String method, ExtensionRpcHandler handler) {
+        final fullMethod = '${service.namespace}.$method';
+        if (fullMethod == getCapabilitiesMethod || fullMethod == shutdownMethod) {
+          throw StateError('Reserved RPC method registered: "$fullMethod"');
+        }
+        if (rpcHandlers.containsKey(fullMethod)) {
+          throw StateError('Duplicate RPC method registered: "$fullMethod"');
+        }
+        rpcHandlers[fullMethod] = handler;
+        logger?.call('[ToolExtensionIsolate] Registered RPC method handler: "$fullMethod"');
+      });
+    }
+
+    final capabilities = ToolExtensionCapabilities(
+      extensionName: extensionName,
+      supportedPlatforms: supportedPlatforms ?? const <String>{'linux', 'macos', 'windows'},
+      services: services.map((ToolExtensionService s) => s.namespace).toList(),
+    );
+
+    logger?.call('[ToolExtensionIsolate] Initializing isolate channel...');
+    // Connect the channel only after all fallible setup; connectSend opens a
+    // ReceivePort that keeps the isolate alive.
+    final channel = IsolateChannel<Object?>.connectSend(sendPort);
+    final peer = json_rpc.Peer.withoutJson(channel);
+
+    for (final service in services) {
+      service.notificationSender = peer.sendNotification;
+    }
+
+    peer.registerMethod(getCapabilitiesMethod, () {
+      logger?.call('[ToolExtensionIsolate] Handling extension.getCapabilities query.');
+      return capabilities.toMap();
+    });
+
+    peer.registerMethod(shutdownMethod, () async {
+      logger?.call('[ToolExtensionIsolate] Handling extension.shutdown request.');
+      await Future.wait<void>(
+        services.map((ToolExtensionService service) async {
+          try {
+            await service.shutdown();
+          } on Object catch (error, stackTrace) {
+            logger?.call(
+              '[ToolExtensionIsolate] Error shutting down service "${service.namespace}": '
+              '$error\n$stackTrace',
+            );
+          }
+        }),
+      );
+      return null;
+    });
+
+    rpcHandlers.forEach((String fullMethod, ExtensionRpcHandler handler) {
+      peer.registerMethod(fullMethod, (json_rpc.Parameters params) async {
+        logger?.call('[ToolExtensionIsolate] Handling RPC request "$fullMethod"...');
+        final Object? rawValue = params.value;
+        final Map<String, Object?> paramMap = rawValue is Map
+            ? rawValue.cast<String, Object?>()
+            : <String, Object?>{};
+        try {
+          final Object? result = await handler(paramMap);
+          logger?.call('[ToolExtensionIsolate] RPC request "$fullMethod" completed.');
+          return result;
+        } on ToolExtensionException catch (error) {
+          logger?.call(
+            '[ToolExtensionIsolate] RPC request "$fullMethod" threw ToolExtensionException: '
+            '${error.message}',
+          );
+          throw json_rpc.RpcException(ToolExtensionException.domainErrorCode, error.message);
+        } on Object catch (error, stackTrace) {
+          logger?.call(
+            '[ToolExtensionIsolate] RPC request "$fullMethod" failed: $error\n$stackTrace',
+          );
+          rethrow;
+        }
+      });
+    });
+
+    logger?.call('[ToolExtensionIsolate] Isolate peer listening for RPC requests.');
+    await peer.listen();
+  }
+}

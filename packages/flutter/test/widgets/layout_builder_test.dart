@@ -1101,8 +1101,7 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
     with
         RenderObjectWithLayoutCallbackMixin,
         RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> {
-  _RenderSmartLayoutBuilder({required double offsetPercentage, required this.onChildWasPainted})
-    : _offsetPercentage = offsetPercentage;
+  _RenderSmartLayoutBuilder({required this._offsetPercentage, required this.onChildWasPainted});
 
   double _offsetPercentage;
   double get offsetPercentage => _offsetPercentage;

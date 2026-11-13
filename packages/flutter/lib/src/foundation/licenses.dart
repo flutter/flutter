@@ -162,8 +162,13 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     final result = <LicenseParagraph>[];
 
     void addLine() {
-      assert(lineStart < currentPosition);
-      lines.add(text.substring(lineStart, currentPosition));
+      var lineEnd = currentPosition;
+      // Drop a trailing CR so CRLF line endings are treated like LF line endings.
+      if (text[lineEnd - 1] == '\r') {
+        lineEnd -= 1;
+      }
+      assert(lineStart < lineEnd);
+      lines.add(text.substring(lineStart, lineEnd));
     }
 
     LicenseParagraph getParagraph() {

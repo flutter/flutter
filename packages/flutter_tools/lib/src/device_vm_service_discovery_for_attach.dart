@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 
+import 'base/common.dart';
 import 'base/logger.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
@@ -23,6 +24,15 @@ abstract class VMServiceDiscoveryForAttach {
   /// Port forwarding is only attempted when this is invoked, for each VM
   /// Service URI in the stream.
   Stream<Uri> get uris;
+
+  /// Find the first URI discovered for attach.
+  Future<Uri> firstValidUri() async {
+    final List<Uri> candidateUris = await uris.take(1).toList();
+    if (candidateUris.isEmpty) {
+      throwToolExit('Failed to find VM Service URL.');
+    }
+    return candidateUris.first;
+  }
 }
 
 /// An implementation of [VMServiceDiscoveryForAttach] that uses log scanning
@@ -64,11 +74,12 @@ class LogScanningVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach
 class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   MdnsVMServiceDiscoveryForAttach({
     required this.device,
-    this.appId,
-    required this.usesIpv6,
     required this.useDeviceIPAsHost,
+    required this.usesIpv6,
+    this.appId,
     this.deviceVmservicePort,
     this.hostVmservicePort,
+    this.throwOnError = true,
   });
 
   final Device device;
@@ -77,6 +88,7 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   final bool useDeviceIPAsHost;
   final int? deviceVmservicePort;
   final int? hostVmservicePort;
+  final bool throwOnError;
 
   @override
   Stream<Uri> get uris {
@@ -84,15 +96,17 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
         .getVMServiceUriForAttach(
           appId,
           device,
-          usesIpv6: usesIpv6,
-          useDeviceIPAsHost: useDeviceIPAsHost,
           deviceVmservicePort: deviceVmservicePort,
           hostVmservicePort: hostVmservicePort,
+          throwOnError: throwOnError,
+          useDeviceIPAsHost: useDeviceIPAsHost,
+          usesIpv6: usesIpv6,
         );
 
-    return Stream<Uri?>.fromFuture(
-      mDNSDiscoveryFuture,
-    ).where((Uri? uri) => uri != null).cast<Uri>().asBroadcastStream();
+    return Stream<Uri?>.fromFuture(mDNSDiscoveryFuture)
+        .where((Uri? uri) => uri != null)
+        .cast<Uri>()
+        .asBroadcastStream();
   }
 }
 

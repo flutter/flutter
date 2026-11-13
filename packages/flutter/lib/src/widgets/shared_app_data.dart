@@ -152,8 +152,8 @@ class SharedAppData extends StatefulWidget {
           ),
           context.describeOwnershipChain('The ownership chain for the affected widget is'),
           ErrorHint(
-            'Typically, the SharedAppData widget is introduced by the MaterialApp '
-            'or WidgetsApp widget at the top of your application widget tree. It '
+            'Typically, the SharedAppData widget is introduced by the WidgetsApp '
+            'widget at the top of your application widget tree. It '
             'provides a key/value map of data that is shared with the entire '
             'application.',
           ),

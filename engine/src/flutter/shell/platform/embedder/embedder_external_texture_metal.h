@@ -24,15 +24,6 @@ class EmbedderExternalTextureMetal : public flutter::Texture {
 
   ~EmbedderExternalTextureMetal();
 
- private:
-  const ExternalTextureCallback& external_texture_callback_;
-  sk_sp<DlImage> last_image_;
-
-  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
-                                GrDirectContext* context,
-                                impeller::AiksContext* aiks_context,
-                                const SkISize& size);
-
   // |flutter::Texture|
   void Paint(PaintContext& context,
              const DlRect& bounds,
@@ -50,6 +41,15 @@ class EmbedderExternalTextureMetal : public flutter::Texture {
 
   // |flutter::Texture|
   void OnTextureUnregistered() override;
+
+ private:
+  const ExternalTextureCallback& external_texture_callback_;
+  sk_sp<DlImage> last_image_;
+
+  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
+                                GrDirectContext* context,
+                                impeller::AiksContext* aiks_context,
+                                const SkISize& size);
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureMetal);
 };

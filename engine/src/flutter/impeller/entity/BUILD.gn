@@ -20,6 +20,7 @@ impeller_shaders("entity_shaders") {
     "shaders/circle.vert",
     "shaders/complex_rse.frag",
     "shaders/uber_sdf.frag",
+    "shaders/uber_sdf.vert",
     "shaders/clip.frag",
     "shaders/clip.vert",
     "shaders/glyph_atlas.frag",
@@ -55,7 +56,6 @@ impeller_shaders("entity_shaders") {
     "shaders/texture_fill_strict_src.frag",
     "shaders/blending/porter_duff_blend.frag",
     "shaders/blending/porter_duff_blend.vert",
-    "shaders/filters/border_mask_blur.frag",
     "shaders/filters/color_matrix_color_filter.frag",
     "shaders/filters/filter_position.vert",
     "shaders/filters/filter_position_uv.vert",
@@ -91,6 +91,7 @@ impeller_shaders("modern_entity_shaders") {
     "shaders/gradients/linear_gradient_ssbo_fill.frag",
     "shaders/gradients/radial_gradient_ssbo_fill.frag",
     "shaders/gradients/sweep_gradient_ssbo_fill.frag",
+    "shaders/uber_sdf_ssbo.frag",
   ]
 }
 
@@ -98,8 +99,9 @@ impeller_shaders("framebuffer_blend_entity_shaders") {
   name = "framebuffer_blend"
   require_framebuffer_fetch = true
 
-  # malioc does not support analyzing shaders that use the framebuffer fetch extension on some GPUs.
-  analyze = false
+  if (impeller_enable_vulkan) {
+    vulkan_language_version = 130
+  }
 
   if (is_mac && !is_ios) {
     # Note: this needs to correspond to the Apple7 Support family
@@ -135,8 +137,6 @@ impeller_component("entity") {
     "contents/contents.h",
     "contents/filters/blend_filter_contents.cc",
     "contents/filters/blend_filter_contents.h",
-    "contents/filters/border_mask_blur_filter_contents.cc",
-    "contents/filters/border_mask_blur_filter_contents.h",
     "contents/filters/color_filter_contents.cc",
     "contents/filters/color_filter_contents.h",
     "contents/filters/color_matrix_filter_contents.cc",
@@ -175,6 +175,8 @@ impeller_component("entity") {
     "contents/gradient_generator.h",
     "contents/linear_gradient_contents.cc",
     "contents/linear_gradient_contents.h",
+    "contents/pipeline_variant_recording.cc",
+    "contents/pipeline_variant_recording.h",
     "contents/pipelines.h",
     "contents/radial_gradient_contents.cc",
     "contents/radial_gradient_contents.h",
@@ -285,12 +287,14 @@ impeller_component("entity_unittests") {
 
   sources = [
     "clip_stack_unittests.cc",
+    "contents/content_context_unittests.cc",
     "contents/filters/blend_filter_contents_unittests.cc",
     "contents/filters/gaussian_blur_filter_contents_unittests.cc",
     "contents/filters/inputs/filter_input_unittests.cc",
     "contents/filters/matrix_filter_contents_unittests.cc",
     "contents/filters/morphology_filter_contents_unittests.cc",
     "contents/host_buffer_unittests.cc",
+    "contents/pipeline_variant_recording_unittests.cc",
     "contents/text_contents_unittests.cc",
     "contents/tiled_texture_contents_unittests.cc",
     "contents/uber_sdf_contents_unittests.cc",

@@ -71,15 +71,19 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
     const SkISize& size) {
   if (!!aiks_context) {
     return ResolveTextureImpeller(texture_id, aiks_context, size);
-  } else {
+  } else if (context) {
     return ResolveTextureSkia(texture_id, context, size);
   }
+  return nullptr;
 }
 
 sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureSkia(
     int64_t texture_id,
     GrDirectContext* context,
     const SkISize& size) {
+  if (!context) {
+    return nullptr;
+  }
   context->flushAndSubmit();
   context->resetContext(kAll_GrBackendState);
   std::unique_ptr<FlutterOpenGLTexture> texture =
@@ -154,6 +158,17 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
   impeller::TextureDescriptor desc;
   desc.size = impeller::ISize(texture->width, texture->height);
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  switch (texture->target) {
+    case GL_TEXTURE_2D:
+      desc.type = impeller::TextureType::kTexture2D;
+      break;
+    case GL_TEXTURE_EXTERNAL_OES:
+      desc.type = impeller::TextureType::kTextureExternalOES;
+      break;
+    default:
+      FML_LOG(ERROR) << "Unsupported texture target " << texture->target;
+      return nullptr;
+  }
 
   impeller::ContextGLES& context =
       impeller::ContextGLES::Cast(*aiks_context->GetContext());

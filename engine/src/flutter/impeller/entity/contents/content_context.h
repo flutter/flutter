@@ -13,7 +13,6 @@
 
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/status_or.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
@@ -26,6 +25,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/typographer/lazy_glyph_atlas.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 /// Pipeline state configuration.
@@ -129,6 +129,26 @@ class ContentContext {
 
   ~ContentContext();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Requests the default pipelines that every `ContentContext`
+  ///             creates, without creating a `ContentContext`.
+  ///
+  ///             The pipelines are requested asynchronously from the pipeline
+  ///             library of `context`, which keeps them for the life of the
+  ///             context. `ContentContext`s created with `context` afterwards
+  ///             find them there, compiled or in flight, instead of compiling
+  ///             them again. This lets embedders start compiling pipelines as
+  ///             soon as a context is available, before there is a surface to
+  ///             render to.
+  ///
+  ///             This must be called on the thread that the `ContentContext`s
+  ///             for `context` are used on, since some pipeline libraries
+  ///             (OpenGL ES) are not thread-safe.
+  ///
+  /// @param[in]  context  The context whose pipeline library to warm.
+  ///
+  static void WarmDefaultPipelines(const Context& context);
+
   bool IsValid() const;
 
   Tessellator& GetTessellator() const;
@@ -149,19 +169,12 @@ class ContentContext {
   PipelineRef GetBlendSaturationPipeline(ContentContextOptions opts) const;
   PipelineRef GetBlendScreenPipeline(ContentContextOptions opts) const;
   PipelineRef GetBlendSoftLightPipeline(ContentContextOptions opts) const;
-  PipelineRef GetBorderMaskBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetCirclePipeline(ContentContextOptions opts) const;
-  PipelineRef GetClearBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetClipPipeline(ContentContextOptions opts) const;
   PipelineRef GetColorMatrixColorFilterPipeline(ContentContextOptions opts) const;
   PipelineRef GetConicalGradientFillPipeline(ContentContextOptions opts, ConicalKind kind) const;
   PipelineRef GetConicalGradientSSBOFillPipeline(ContentContextOptions opts, ConicalKind kind) const;
   PipelineRef GetConicalGradientUniformFillPipeline(ContentContextOptions opts, ConicalKind kind) const;
-  PipelineRef GetDestinationATopBlendPipeline(ContentContextOptions opts) const;
-  PipelineRef GetDestinationBlendPipeline(ContentContextOptions opts) const;
-  PipelineRef GetDestinationInBlendPipeline(ContentContextOptions opts) const;
-  PipelineRef GetDestinationOutBlendPipeline(ContentContextOptions opts) const;
-  PipelineRef GetDestinationOverBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetDownsamplePipeline(ContentContextOptions opts) const;
   PipelineRef GetDrawShadowVerticesPipeline(ContentContextOptions opts) const;
   PipelineRef GetDownsampleBoundedPipeline(ContentContextOptions opts) const;
@@ -188,22 +201,14 @@ class ContentContext {
   PipelineRef GetLinearGradientSSBOFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientUniformFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearToSrgbFilterPipeline(ContentContextOptions opts) const;
-  PipelineRef GetModulateBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetMorphologyFilterPipeline(ContentContextOptions opts) const;
-  PipelineRef GetPlusBlendPipeline(ContentContextOptions opts) const;
-  PipelineRef GetPorterDuffPipeline(BlendMode mode, ContentContextOptions opts) const;
+  PipelineRef GetPorterDuffBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetRadialGradientFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetRadialGradientSSBOFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetRadialGradientUniformFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetRRectBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetRSuperellipseBlurPipeline(ContentContextOptions opts) const;
-  PipelineRef GetScreenBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetSolidFillPipeline(ContentContextOptions opts) const;
-  PipelineRef GetSourceATopBlendPipeline(ContentContextOptions opts) const;
-  PipelineRef GetSourceBlendPipeline(ContentContextOptions opts) const;
-  PipelineRef GetSourceInBlendPipeline(ContentContextOptions opts) const;
-  PipelineRef GetSourceOutBlendPipeline(ContentContextOptions opts) const;
-  PipelineRef GetSourceOverBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetSrgbToLinearFilterPipeline(ContentContextOptions opts) const;
   PipelineRef GetSweepGradientFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetSweepGradientSSBOFillPipeline( ContentContextOptions opts) const;
@@ -211,9 +216,9 @@ class ContentContext {
   PipelineRef GetTexturePipeline(ContentContextOptions opts) const;
   PipelineRef GetTextureStrictSrcPipeline(ContentContextOptions opts) const;
   PipelineRef GetTiledTexturePipeline(ContentContextOptions opts) const;
-  PipelineRef GetXorBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetYUVToRGBFilterPipeline(ContentContextOptions opts) const;
   PipelineRef GetUberSDFPipeline(ContentContextOptions opts) const;
+  PipelineRef GetUberSDFSSBOPipeline(ContentContextOptions opts) const;
   PipelineRef GetComplexRSEPipeline(ContentContextOptions opts) const;
 #ifdef IMPELLER_ENABLE_OPENGLES
 #if !defined(FML_OS_EMSCRIPTEN)
@@ -237,7 +242,7 @@ class ContentContext {
 
   /// @brief  Creates a new texture of size `texture_size` and calls
   ///         `subpass_callback` with a `RenderPass` for drawing to the texture.
-  fml::StatusOr<RenderTarget> MakeSubpass(
+  absl::StatusOr<RenderTarget> MakeSubpass(
       std::string_view label,
       ISize texture_size,
       const std::shared_ptr<CommandBuffer>& command_buffer,
@@ -247,7 +252,7 @@ class ContentContext {
       int32_t mip_count = 1) const;
 
   /// Makes a subpass that will render to `subpass_target`.
-  fml::StatusOr<RenderTarget> MakeSubpass(
+  absl::StatusOr<RenderTarget> MakeSubpass(
       std::string_view label,
       const RenderTarget& subpass_target,
       const std::shared_ptr<CommandBuffer>& command_buffer,
@@ -297,6 +302,9 @@ class ContentContext {
 
   /// @brief Clear all cached textures.
   void ClearCachedTextures() const;
+
+  /// @brief Clear all cached render targets from the render target cache.
+  void ClearRenderTargetCache() const;
 
   /// @brief Retrieve the current host buffer for transient storage of indexes
   ///        used for indexed draws.
@@ -373,6 +381,14 @@ class ContentContext {
 
   struct Pipelines;
   std::unique_ptr<Pipelines> pipelines_;
+
+  /// Requests the default variant of every pipeline from the pipeline library
+  /// of `context`.
+  ///
+  /// @return     The pipelines holding the default variants, or nullptr if a
+  ///             default pipeline descriptor could not be created.
+  static std::unique_ptr<Pipelines> CreateDefaultPipelines(
+      const Context& context);
 
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;

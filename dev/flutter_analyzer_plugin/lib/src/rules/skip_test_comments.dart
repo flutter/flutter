@@ -10,11 +10,13 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/source/line_info.dart';
 
+import '../flutter_analysis_rule.dart';
+
 final Pattern _skipTestIntentionalPattern = RegExp(r'// .*\[intended\]');
-final Pattern _skipTestTrackingBugPattern = RegExp(r'// .*https+?://github.com/.*/issues/\d+');
+final Pattern _skipTestTrackingBugPattern = RegExp(r'// .*https?://github.com/.*/issues/\d+');
 
 /// Skipped tests should have a justification comment.
-class SkipTestComments extends AnalysisRule {
+class SkipTestComments extends FlutterAnalysisRule {
   SkipTestComments() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription =
@@ -31,7 +33,12 @@ class SkipTestComments extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
+    // Skip test comments rule only applies to test files.
+    if (!filePath.contains('/home/test') && !filePath.endsWith('_test.dart')) {
+      return;
+    }
     final visitor = _Visitor(this, context);
     registry.addMethodInvocation(this, visitor);
   }
@@ -47,44 +54,39 @@ class _Visitor extends SimpleAstVisitor<void> {
     return name.startsWith('test') || name == 'group' || name == 'expect';
   }
 
-  bool _hasInlineIgnore(AstNode node, Pattern ignoreDirectivePattern) {
-    final RuleContextUnit compilationUnit = context.currentUnit!;
-    final LineInfo lineInfo = compilationUnit.unit.lineInfo;
-    final int lineNumber = lineInfo.getLocation(node.offset).lineNumber;
-    final String content = compilationUnit.content;
-
-    final int endOffset =
-        lineNumber < lineInfo.lineCount ? lineInfo.getOffsetOfLine(lineNumber) : content.length;
-    final String textAfterNode = content.substring(node.offset, endOffset);
-    if (textAfterNode.contains(ignoreDirectivePattern)) {
-      return true;
-    }
-
-    final int previousLineNumber = lineNumber - 1;
-    if (previousLineNumber <= 0) {
-      return false;
-    }
-    return content
-        .substring(
-          lineInfo.getOffsetOfLine(previousLineNumber - 1),
-          lineInfo.getOffsetOfLine(previousLineNumber),
-        )
-        .trimLeft()
-        .contains(ignoreDirectivePattern);
+  static bool _isNonSkippingExpression(Expression expr) {
+    return expr is SimpleIdentifier || (expr is BooleanLiteral && !expr.value);
   }
 
-  bool _hasValidJustificationComment(AstNode skipLabel) {
-    return _hasInlineIgnore(skipLabel, _skipTestIntentionalPattern) ||
-        _hasInlineIgnore(skipLabel, _skipTestTrackingBugPattern);
+  bool _hasInlineIgnore(NamedArgument argument, Pattern ignoreDirectivePattern) {
+    final RuleContextUnit compilationUnit = context.currentUnit!;
+    final LineInfo lineInfo = compilationUnit.unit.lineInfo;
+    final int startLine = lineInfo.getLocation(argument.offset).lineNumber;
+    final int endLine = lineInfo.getLocation(argument.end).lineNumber;
+    final String content = compilationUnit.content;
+
+    final int scanStartLine = (startLine - 1).clamp(1, lineInfo.lineCount);
+    final int scanStartOffset = lineInfo.getOffsetOfLine(scanStartLine - 1);
+    final int scanEndOffset =
+        endLine < lineInfo.lineCount ? lineInfo.getOffsetOfLine(endLine) : content.length;
+
+    final String text = content.substring(scanStartOffset, scanEndOffset);
+    return text.contains(ignoreDirectivePattern);
+  }
+
+  bool _hasValidJustificationComment(NamedArgument argument) {
+    return _hasInlineIgnore(argument, _skipTestIntentionalPattern) ||
+        _hasInlineIgnore(argument, _skipTestTrackingBugPattern);
   }
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
     if (_isTestMethod(node.methodName.name)) {
-      for (final Expression argument in node.argumentList.arguments) {
-        if (argument is NamedExpression &&
-            argument.name.label.name == 'skip' &&
-            !_hasValidJustificationComment(argument.name.label)) {
+      for (final Argument argument in node.argumentList.arguments) {
+        if (argument is NamedArgument &&
+            argument.name.lexeme == 'skip' &&
+            !_isNonSkippingExpression(argument.argumentExpression) &&
+            !_hasValidJustificationComment(argument)) {
           rule.reportAtNode(argument);
         }
       }

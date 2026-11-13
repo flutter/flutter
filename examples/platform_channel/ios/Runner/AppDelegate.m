@@ -6,8 +6,6 @@
 #import <Flutter/Flutter.h>
 #import "GeneratedPluginRegistrant.h"
 
-@interface AppDelegate () <FlutterPluginRegistrant>
-@end
 
 @implementation AppDelegate {
   FlutterEventSink _eventSink;
@@ -15,16 +13,14 @@
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  self.pluginRegistrant = self;
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
-- (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
-  [GeneratedPluginRegistrant registerWithRegistry:registry];
-  NSObject<FlutterPluginRegistrar>* registrar = [registry registrarForPlugin:@"samples.flutter.io"];
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge> *)engineBridge {
+  [GeneratedPluginRegistrant registerWithRegistry:engineBridge.pluginRegistry];
   FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
       methodChannelWithName:@"samples.flutter.io/battery"
-            binaryMessenger:registrar.messenger];
+            binaryMessenger:engineBridge.applicationRegistrar.messenger];
   __weak typeof(self) weakSelf = self;
   [batteryChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResult result) {
@@ -44,7 +40,7 @@
 
   FlutterEventChannel* chargingChannel = [FlutterEventChannel
       eventChannelWithName:@"samples.flutter.io/charging"
-           binaryMessenger:registrar.messenger];
+           binaryMessenger:engineBridge.applicationRegistrar.messenger];
   [chargingChannel setStreamHandler:self];
 }
 
@@ -52,7 +48,11 @@
   UIDevice* device = UIDevice.currentDevice;
   device.batteryMonitoringEnabled = YES;
   if (device.batteryState == UIDeviceBatteryStateUnknown) {
+#if TARGET_OS_SIMULATOR
+    return 100;
+#else
     return -1;
+#endif
   } else {
     return ((int)(device.batteryLevel * 100));
   }
@@ -87,9 +87,13 @@
       _eventSink(@"discharging");
       break;
     default:
+#if TARGET_OS_SIMULATOR
+      _eventSink(@"charging");
+#else
       _eventSink([FlutterError errorWithCode:@"UNAVAILABLE"
                                      message:@"Charging status unavailable"
                                      details:nil]);
+#endif
       break;
   }
 }

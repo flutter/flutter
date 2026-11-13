@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// #region body
 // This example demonstrates showing the default buttons, but customizing their
 // appearance.
 
@@ -33,8 +34,7 @@ class _EditableTextToolbarBuilderExampleAppState
       BrowserContextMenu.disableContextMenu();
     }
     _controller = TextEditingController(
-      text:
-          'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
+      text: 'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
     );
   }
 
@@ -98,3 +98,4 @@ class _EditableTextToolbarBuilderExampleAppState
     );
   }
 }
+// #endregion body

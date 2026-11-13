@@ -74,6 +74,7 @@ Future<LocalizationsGenerator> generateLocalizations({
             suppressWarnings: options.suppressWarnings,
             useRelaxedSyntax: options.relaxSyntax,
             useNamedParameters: options.useNamedParameters,
+            useExplicitPluralValues: options.useExplicitPluralValues,
           )
           ..loadResources()
           ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
@@ -132,11 +133,6 @@ List<String> generateMethodParameters(
 }
 
 // Similar to above, but is used for passing arguments into helper functions.
-List<String> generateMethodArguments(Message message) {
-  return message.templatePlaceholders.values
-      .map((Placeholder placeholder) => placeholder.name)
-      .toList();
-}
 
 String generateDateFormattingLogic(Message message, LocaleInfo locale) {
   if (message.templatePlaceholders.isEmpty) {
@@ -350,9 +346,8 @@ String _generateLookupByScriptCode(
             _addSpaces(
               localesWithScriptCodes
                   .map((LocaleInfo locale) {
-                    return generateSwitchClauseTemplate(
-                      locale,
-                    ).replaceAll('@(case)', locale.scriptCode!);
+                    return generateSwitchClauseTemplate(locale)
+                        .replaceAll('@(case)', locale.scriptCode!);
                   })
                   .join('\n'),
               spaces: 8,
@@ -394,9 +389,8 @@ String _generateLookupByCountryCode(
             _addSpaces(
               localesWithCountryCodes
                   .map((LocaleInfo locale) {
-                    return generateSwitchClauseTemplate(
-                      locale,
-                    ).replaceAll('@(case)', locale.countryCode!);
+                    return generateSwitchClauseTemplate(locale)
+                        .replaceAll('@(case)', locale.countryCode!);
                   })
                   .join('\n'),
               spaces: 4,
@@ -535,6 +529,7 @@ class LocalizationsGenerator {
     bool suppressWarnings = false,
     bool useRelaxedSyntax = false,
     bool useNamedParameters = false,
+    bool useExplicitPluralValues = false,
   }) {
     final Directory projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(
@@ -574,6 +569,7 @@ class LocalizationsGenerator {
       suppressWarnings: suppressWarnings,
       useRelaxedSyntax: useRelaxedSyntax,
       useNamedParameters: useNamedParameters,
+      useExplicitPluralValues: useExplicitPluralValues,
     );
   }
 
@@ -600,6 +596,7 @@ class LocalizationsGenerator {
     this.suppressWarnings = false,
     this.useRelaxedSyntax = false,
     this.useNamedParameters = false,
+    this.useExplicitPluralValues = false,
   });
 
   final FileSystem _fs;
@@ -747,6 +744,14 @@ class LocalizationsGenerator {
   /// String helloWorld({required String name});
   /// ```
   final bool useNamedParameters;
+
+  /// Whether explicit plural values such as `=1` match only that exact value.
+  ///
+  /// If this is true, an explicit `=N` plural case is compared against the
+  /// count before the plural category (`zero`, `one`, `two`, `few`, `many`,
+  /// `other`) is resolved, and any non-negative integer is allowed for `N`.
+  /// Otherwise `=0`, `=1` and `=2` are treated as `zero`, `one` and `two`.
+  final bool useExplicitPluralValues;
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
@@ -1056,16 +1061,26 @@ class LocalizationsGenerator {
 
   String _generateSubclass(String className, AppResourceBundle bundle) {
     final LocaleInfo locale = bundle.locale;
-    final baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
+    final languageLocale = LocaleInfo.fromString(locale.languageCode);
+    var parentLocale = languageLocale;
+    if (locale.scriptCode != null && locale.countryCode != null) {
+      parentLocale = _allBundles
+          .localesForLanguage(locale.languageCode)
+          .firstWhere(
+            (LocaleInfo candidate) =>
+                candidate.scriptCode == locale.scriptCode && candidate.countryCode == null,
+            orElse: () => languageLocale,
+          );
+    }
+    final baseClassName = '$className${parentLocale.camelCase()}';
 
-    // Only mark a message as unimplemented/untranslated for a regional subclass
-    // (e.g. en_US) if it is also missing in the parent base locale (e.g. en).
-    // If it is present in the parent locale, it will be correctly inherited
-    // at runtime via Dart class inheritance, so it shouldn't be reported as missing.
-    final parentLocale = LocaleInfo.fromString(locale.languageCode);
+    // Only mark a message as unimplemented/untranslated if it is missing from
+    // every locale in the subclass's inheritance chain.
     _allMessages
         .where((Message message) {
-          return message.messages[locale] == null && message.messages[parentLocale] == null;
+          return message.messages[locale] == null &&
+              message.messages[parentLocale] == null &&
+              message.messages[languageLocale] == null;
         })
         .forEach((Message message) {
           _addUnimplementedMessage(locale, message.resourceId);
@@ -1075,12 +1090,28 @@ class LocalizationsGenerator {
         .where((Message message) => message.parsedMessages[locale] != null)
         .map((Message message) => _generateMethod(message, locale));
 
+    final bool hasRegionalSubclass =
+        locale.scriptCode != null &&
+        locale.countryCode == null &&
+        _allBundles.localesForLanguage(locale.languageCode).any((LocaleInfo candidate) {
+          return candidate.scriptCode == locale.scriptCode && candidate.countryCode != null;
+        });
+    final parentConstructor = parentLocale == languageLocale ? 'super' : 'super._withLocale';
+    final subclassName = '$className${locale.camelCase()}';
+    // Preserve the public zero-argument constructor while allowing a regional
+    // subclass to initialize the locale name through its script parent.
+    final classMembers = <String>[
+      if (hasRegionalSubclass) '  $subclassName._withLocale(String locale): super(locale);',
+      ...methods,
+    ];
+
     return subclassTemplate
+        .replaceFirst("super('@(localeName)')", "$parentConstructor('@(localeName)')")
         .replaceAll('@(language)', describeLocale(locale.toString()))
         .replaceAll('@(baseLanguageClassName)', baseClassName)
-        .replaceAll('@(class)', '$className${locale.camelCase()}')
+        .replaceAll('@(class)', subclassName)
         .replaceAll('@(localeName)', locale.toString())
-        .replaceAll('@(methods)', methods.join('\n\n'));
+        .replaceAll('@(methods)', classMembers.join('\n\n'));
   }
 
   // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
@@ -1278,6 +1309,8 @@ class LocalizationsGenerator {
 
           case ST.pluralExpr:
             final pluralLogicArgs = <String, String>{};
+            // Explicit values in reverse source order, keyed by their integer value.
+            final explicitPluralArgs = <int, String>{};
             // Recall that pluralExpr are of the form
             // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
             assert(node.children[1].type == ST.identifier);
@@ -1289,7 +1322,8 @@ class LocalizationsGenerator {
             for (final Node pluralPart in pluralParts.children.reversed) {
               String pluralCase;
               Node pluralMessage;
-              if (pluralPart.children[0].value == '=') {
+              final isExplicitValue = pluralPart.children[0].value == '=';
+              if (isExplicitValue) {
                 assert(pluralPart.children[1].type == ST.number);
                 assert(pluralPart.children[3].type == ST.message);
                 pluralCase = pluralPart.children[1].value!;
@@ -1303,7 +1337,23 @@ class LocalizationsGenerator {
                 pluralCase = pluralPart.children[0].value!;
                 pluralMessage = pluralPart.children[2];
               }
-              if (!pluralLogicArgs.containsKey(pluralCases[pluralCase])) {
+              final int? explicitValue = useExplicitPluralValues && isExplicitValue
+                  ? int.tryParse(pluralCase)
+                  : null;
+              if (useExplicitPluralValues && isExplicitValue && explicitValue == null) {
+                throw L10nParserException(
+                  '''
+The plural case "=$pluralCase" is too large to be represented as an integer.''',
+                  _inputFileNames[locale]!,
+                  message.resourceId,
+                  translationForMessage,
+                  pluralPart.positionInMessage,
+                );
+              }
+              if (explicitValue != null && !explicitPluralArgs.containsKey(explicitValue)) {
+                explicitPluralArgs[explicitValue] = generateVariables(pluralMessage);
+              } else if (explicitValue == null &&
+                  !pluralLogicArgs.containsKey(pluralCases[pluralCase])) {
                 final String pluralPartExpression = generateVariables(pluralMessage);
                 final String? transformedPluralCase = pluralCases[pluralCase];
                 // A valid plural case is one of "=0", "=1", "=2", "zero", "one", "two", "few", "many", or "other".
@@ -1332,7 +1382,19 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
               pluralVariableTemplate
                   .replaceAll('@(varName)', tempVarName)
                   .replaceAll('@(count)', identifier.value!)
-                  .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.values.join('\n')),
+                  .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.values.join('\n'))
+                  // Must run last and only once, so message text is never rewritten.
+                  .replaceFirst(
+                    '@(explicitPluralCases)',
+                    explicitPluralArgs.entries
+                        .toList()
+                        .reversed
+                        .map(
+                          (MapEntry<int, String> entry) =>
+                              '${identifier.value!} == ${entry.key}\n        ? ${entry.value}\n        : ',
+                        )
+                        .join(),
+                  ),
             );
             return '\$$tempVarName';
 

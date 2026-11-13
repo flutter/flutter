@@ -79,7 +79,7 @@ class PipelineLibraryVK final
       std::shared_ptr<const ShaderFunction> function) override;
 
   // |PipelineLibrary|
-  PipelineCompileQueue* GetPipelineCompileQueue() const override;
+  void PerformEagerly(const PipelineDescriptor& descriptor) override;
 
   std::unique_ptr<ComputePipelineVK> CreateComputePipeline(
       const ComputePipelineDescriptor& desc,

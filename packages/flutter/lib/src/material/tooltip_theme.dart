@@ -4,6 +4,7 @@
 
 /// @docImport 'app.dart';
 /// @docImport 'tooltip.dart';
+/// @docImport 'tooltip_visibility.dart';
 library;
 
 import 'dart:ui' show lerpDouble;

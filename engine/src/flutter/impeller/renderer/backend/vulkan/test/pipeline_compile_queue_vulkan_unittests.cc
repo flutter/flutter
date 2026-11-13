@@ -5,10 +5,13 @@
 #include "impeller/renderer/backend/vulkan/pipeline_compile_queue_vulkan.h"
 
 #include <atomic>
+#include <deque>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <vector>
 
+#include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/testing/testing.h"
@@ -17,21 +20,39 @@
 namespace impeller {
 namespace testing {
 
+namespace {
+
+/// A task runner that captures posted tasks so tests can run them on demand.
+class CapturingTaskRunner final : public fml::BasicTaskRunner {
+ public:
+  void PostTask(const fml::closure& task) override { tasks_.push_back(task); }
+
+  /// Runs tasks (including ones posted while running) until none remain.
+  /// Returns the number of tasks that were run.
+  size_t RunAll() {
+    size_t count = 0;
+    while (!tasks_.empty()) {
+      auto task = std::move(tasks_.front());
+      tasks_.pop_front();
+      task();
+      count++;
+    }
+    return count;
+  }
+
+ private:
+  std::deque<fml::closure> tasks_;
+};
+
+}  // namespace
+
 TEST(PipelineCompileQueueVulkanTest, CreateSucceedsWithValidTaskRunner) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   auto queue = PipelineCompileQueueVulkan::Create(loop->GetTaskRunner());
   EXPECT_NE(queue, nullptr);
 }
 
-TEST(PipelineCompileQueueVulkanTest, PostJobDoesNothingWithNullClosure) {
-  auto loop = fml::ConcurrentMessageLoop::Create();
-  auto queue = PipelineCompileQueueVulkan::Create(loop->GetTaskRunner());
-  ASSERT_NE(queue, nullptr);
-
-  queue->PostJob(nullptr);
-}
-
-TEST(PipelineCompileQueueVulkanTest, OnJobAddedProcessesJobsInParallel) {
+TEST(PipelineCompileQueueVulkanTest, ProcessesJobsInParallel) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   auto queue = PipelineCompileQueueVulkan::Create(loop->GetTaskRunner());
   ASSERT_NE(queue, nullptr);
@@ -175,6 +196,83 @@ TEST(PipelineCompileQueueVulkanTest, MultipleJobsCompleteSuccessfully) {
   latch.Wait();
 
   EXPECT_EQ(completed_jobs, 5);
+}
+
+TEST(PipelineCompileQueueVulkanTest, PostJobForDescriptorRejectsNullJob) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueVulkan::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  EXPECT_FALSE(queue->PostJobForDescriptor(PipelineDescriptor{}, nullptr));
+  EXPECT_EQ(runner->RunAll(), 0u);
+}
+
+TEST(PipelineCompileQueueVulkanTest, PerformJobEagerlyExecutesPendingJob) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueVulkan::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  PipelineDescriptor desc;
+  int executed = 0;
+  ASSERT_TRUE(queue->PostJobForDescriptor(desc, [&executed] { executed++; }));
+  EXPECT_EQ(executed, 0);
+
+  queue->PerformJobEagerly(desc);
+  EXPECT_EQ(executed, 1);
+
+  // The posted worker task must not execute the job a second time.
+  runner->RunAll();
+  EXPECT_EQ(executed, 1);
+}
+
+TEST(PipelineCompileQueueVulkanTest,
+     PerformJobEagerlyIgnoresUnknownDescriptor) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueVulkan::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  queue->PerformJobEagerly(PipelineDescriptor{});
+  EXPECT_EQ(runner->RunAll(), 0u);
+}
+
+TEST(PipelineCompileQueueVulkanTest, ExecutesJobsInInsertionOrder) {
+  constexpr size_t kJobCount = 10;
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueVulkan::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  std::vector<size_t> job_order;
+  for (size_t i = 0; i < kJobCount; i++) {
+    PipelineDescriptor desc;
+    desc.SetLabel(std::to_string(i));
+    ASSERT_TRUE(queue->PostJobForDescriptor(
+        desc, [&job_order, index = i] { job_order.push_back(index); }));
+  }
+
+  runner->RunAll();
+
+  ASSERT_EQ(job_order.size(), kJobCount);
+  for (size_t i = 0; i < kJobCount; i++) {
+    EXPECT_EQ(i, job_order[i]);
+  }
+}
+
+TEST(PipelineCompileQueueVulkanTest, DestructorFinishesPendingJobs) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueVulkan::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  int executed = 0;
+  ASSERT_TRUE(queue->PostJobForDescriptor(PipelineDescriptor{},
+                                          [&executed] { executed++; }));
+  EXPECT_EQ(executed, 0);
+
+  queue.reset();
+  EXPECT_EQ(executed, 1);
+
+  // Outstanding tasks hold a weak reference and must be no-ops now.
+  runner->RunAll();
+  EXPECT_EQ(executed, 1);
 }
 
 }  // namespace testing

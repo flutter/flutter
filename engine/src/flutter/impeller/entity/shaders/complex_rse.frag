@@ -7,6 +7,7 @@ precision mediump float;
 #include <impeller/color.glsl>
 #include <impeller/types.glsl>
 
+#include "rse_sdf.glsl"
 #include "sdf_functions.glsl"
 #include "sdf_utils.glsl"
 
@@ -40,10 +41,6 @@ frag_info;
 out vec4 frag_color;
 
 highp in vec2 v_position;
-
-float distanceFromCircle(vec2 p, float radius) {
-  return length(p) - radius;
-}
 
 float getQuadrantDistance(vec2 p,
                           float se_degree_top,
@@ -120,37 +117,11 @@ float getQuadrantDistance(vec2 p,
     axis_length = se_a_right;
   }
 
-  // Move the point to the corner circle's coordinate system.
-  vec2 p_rel = p_oct - circle_center;
-  // Grab the angle offset of the point.
-  float theta = atan(p_rel.y, p_rel.x);
+  vec3 dist_with_grad = distanceFromRSEOctantWithGrad(
+      p_oct, circle_center, radius, span, axis_length, se_degree);
 
-  // The angular distance between the point and the 45 degree midline.
-  float d_theta = theta - PI_OVER_FOUR;
-  d_theta = mod(d_theta + PI, TWO_PI) - PI;
-
-  float dist_raw;
-  vec2 grad_oct;
-
-  // If the point is within the span of the corner circle's arc,
-  // use a circle SDF.
-  // This works because the normals of the circular and superelliptical sections
-  // agree at the transition angle, the total RSE curve is continuous and
-  // the closest point on a continuous curve to a point lies along the normal.
-
-  // We also compute the gradient of the distance function for normalization.
-  if (abs(d_theta) < abs(span)) {
-    dist_raw = distanceFromCircle(p_rel, radius);
-    grad_oct = normalize(p_rel);
-  } else {
-    dist_raw = sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
-    // Clamp the coordinate to avoid division by zero
-    vec2 p_oct_clamped = max(p_oct, vec2(0.001));
-    float max_p = max(p_oct_clamped.x, p_oct_clamped.y);
-    vec2 p_safe = p_oct_clamped / max_p;
-    // Approximation of the gradient
-    grad_oct = normalize(pow(p_safe, vec2(se_degree - 1.0)));
-  }
+  float dist_raw = dist_with_grad.x;
+  vec2 grad_oct = dist_with_grad.yz;
 
   if (p_norm.y + c <= p_norm.x) {
     grad_oct = grad_oct.yx;

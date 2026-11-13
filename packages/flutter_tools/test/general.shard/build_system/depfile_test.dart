@@ -82,6 +82,65 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
     ]);
   });
 
+  testWithoutContext('Can parse depfile with windows UNC file paths', () {
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync(r'''
+\\\\server\\share\\a1.txt: \\\\server\\share\\b1.txt
+''');
+    final Depfile depfile = depfileService.parse(depfileSource);
+
+    expect(depfile.inputs.map((File e) => e.path).toList(), <String>[r'\\server\share\b1.txt']);
+    expect(depfile.outputs.map((File e) => e.path).toList(), <String>[r'\\server\share\a1.txt']);
+  });
+
+  testWithoutContext('Can parse depfile with windows long UNC file paths', () {
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync(r'''
+\\\\?\\UNC\\server\\share\\a1.txt: \\\\?\\UNC\\server\\share\\b1.txt
+''');
+    final Depfile depfile = depfileService.parse(depfileSource);
+
+    expect(depfile.inputs.map((File e) => e.path).toList(), <String>[
+      r'\\?\UNC\server\share\b1.txt',
+    ]);
+    expect(depfile.outputs.map((File e) => e.path).toList(), <String>[
+      r'\\?\UNC\server\share\a1.txt',
+    ]);
+  });
+
+  testWithoutContext(
+    'Can parse depfile with windows root-relative UNC file paths (issue 43594)',
+    () {
+      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
+      final File depfileSource = fileSystem.file('example.d')
+        ..writeAsStringSync(r'''
+\\UNC\\server\\share\\a1.txt: \\UNC\\server\\share\\b1.txt
+''');
+      final Depfile depfile = depfileService.parse(depfileSource);
+
+      expect(depfile.inputs.map((File e) => e.path).toList(), <String>[r'\\server\share\b1.txt']);
+      expect(depfile.outputs.map((File e) => e.path).toList(), <String>[r'\\server\share\a1.txt']);
+    },
+  );
+
+  testWithoutContext('Can write depfile with windows UNC file paths', () {
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
+    final File inputFile = fileSystem.file(r'\\server\share\b1.txt');
+    final File outputFile = fileSystem.file(r'\\server\share\a1.txt');
+    final depfile = Depfile(<File>[inputFile], <File>[outputFile]);
+    final File outputDepfile = fileSystem.file('depfile');
+    depfileService.writeToFile(depfile, outputDepfile);
+
+    final String output = outputDepfile.readAsStringSync();
+    expect(output, contains(r' \\\\server\\share\\a1.txt:  \\\\server\\share\\b1.txt'));
+  });
+
   testWithoutContext(
     'Can escape depfile with windows file paths and spaces in directory names',
     () {

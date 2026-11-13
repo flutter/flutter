@@ -13,7 +13,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import io.flutter.embedding.engine.FlutterEngineCache
 import org.json.JSONObject
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
@@ -41,19 +40,40 @@ class FlutterActivityTest {
         private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
         private const val TEST_TIMEOUT_SEC = 60L
 
+        // Keep in sync with _firstFatalGraphicsLogcatError in run_android_hardware_smoke_tests.dart.
+        private val FATAL_GRAPHICS_ERROR_PATTERNS =
+            listOf(
+                "EGL_NOT_INITIALIZED",
+                "EGL_BAD_ALLOC",
+                "EGL_BAD_CONFIG",
+                "EGL_BAD_CONTEXT",
+                "EGL_BAD_DISPLAY",
+                "EGL_BAD_NATIVE_WINDOW",
+                "EGL_BAD_SURFACE",
+                "EGL_CONTEXT_LOST",
+                "Failed to create EGLSurface",
+                "Failed to initialize EGL",
+                "Unable to initialize EGL",
+                "Failed to establish connection with the host",
+                "vulkan: Failed to get host connection",
+                "Could not create Vulkan instance",
+                "Could not create surface from invalid Android context"
+            )
+
         @JvmStatic
         @AfterClass
         fun tearDownClass() {
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                val engine = FlutterEngineCache.getInstance().get(MainActivity.CACHED_ENGINE_KEY)
-                engine?.destroy()
-                FlutterEngineCache.getInstance().remove(MainActivity.CACHED_ENGINE_KEY)
+                MainActivity.evictEngineCache()
             }
         }
 
         private fun verifyNoGraphicsPipelineErrors(marker: String) {
             val errors = getGraphicsPipelineErrors(marker)
             if (errors.isNotEmpty()) {
+                InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                    MainActivity.evictEngineCache()
+                }
                 throw EglInitializationException(
                     "Graphics pipeline/EGL failure detected in process logcat:\n${errors.joinToString("\n")}"
                 )
@@ -62,34 +82,38 @@ class FlutterActivityTest {
 
         private fun hasGraphicsPipelineErrors(marker: String): Boolean = getGraphicsPipelineErrors(marker).isNotEmpty()
 
+        private fun isFatalGraphicsPipelineError(line: String): Boolean {
+            if (line.contains("eglInitialize(") && line.contains(") failed (")) {
+                return true
+            }
+            // Android HWUI logs EGL_SWAP_BEHAVIOR_PRESERVED and 101010-2 'error = EGL_SUCCESS' probe
+            // warnings unconditionally during normal startup on SwiftShader and headless emulators.
+            if (line.contains("EGL_SWAP_BEHAVIOR_PRESERVED") || line.contains("error = EGL_SUCCESS")) {
+                return false
+            }
+            return FATAL_GRAPHICS_ERROR_PATTERNS.any { pattern -> line.contains(pattern) }
+        }
+
         private fun getGraphicsPipelineErrors(marker: String): List<String> {
-            val errorLogs = mutableListOf<String>()
             try {
                 val pid = android.os.Process.myPid()
                 val instrumentation = InstrumentationRegistry.getInstrumentation()
-                val pfd = instrumentation.uiAutomation.executeShellCommand("logcat -d --pid=$pid *:W")
-                android.os.ParcelFileDescriptor.AutoCloseInputStream(pfd).bufferedReader().use { reader ->
-                    var line: String?
-                    var seenMarker = false
-                    while (reader.readLine().also { line = it } != null) {
-                        val currentLine = line ?: continue
-                        if (currentLine.contains(marker)) {
-                            seenMarker = true
-                        }
-                        if (seenMarker) {
-                            if (currentLine.contains("libEGL") ||
-                                currentLine.contains("HWUI") ||
-                                currentLine.contains("EGL_")
-                            ) {
-                                errorLogs.add(currentLine)
-                            }
-                        }
-                    }
+                // Include $TAG:I alongside *:W so the Log.i(TAG, marker) boundary line is present
+                // in the dump, and filter for explicit fatal errors because Android's HWUI
+                // RenderThread runs inside this PID and emits benign warnings (such as Davey!
+                // slow-frame logs and capability probes) that would otherwise preempt
+                // BlankScreenshotException retries.
+                val pfd = instrumentation.uiAutomation.executeShellCommand("logcat -d --pid=$pid $TAG:I *:W")
+                return android.os.ParcelFileDescriptor.AutoCloseInputStream(pfd).bufferedReader().useLines { lines ->
+                    lines
+                        .dropWhile { line -> !line.contains(marker) }
+                        .filter(::isFatalGraphicsPipelineError)
+                        .toList()
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to self-inspect logcat: ${e.message}")
+                return emptyList()
             }
-            return errorLogs
         }
 
         private fun isBitmapBlank(bitmap: Bitmap): Boolean {
@@ -141,6 +165,10 @@ class FlutterActivityTest {
                 if (e is org.junit.AssumptionViolatedException) {
                     throw e
                 }
+                // Only BlankScreenshotException is retried via Activity recreation. Process-level
+                // EglInitializationException cannot be recovered via Activity recreation and must
+                // fail immediately, while golden mismatches and assertion errors must also fail on
+                // attempt 1 so real rendering regressions are not masked.
                 if (!isBlankScreenshotException(e)) {
                     throw RuntimeException(
                         "Test '$testName' failed on attempt $currentAttempt with a non-retryable error: ${e.message}",
@@ -303,8 +331,8 @@ class FlutterActivityTest {
                         candidate.recycle()
                     }
 
-                    // If EGL/graphics pipeline has failed, further retries in this process are futile.
-                    // Break early to trigger activity re-creation.
+                    // If the graphics pipeline has failed, further screenshot retries in this process
+                    // are futile. Break early so verifyNoGraphicsPipelineErrors aborts immediately.
                     if (hasGraphicsPipelineErrors(marker)) {
                         Log.w(TAG, "Graphics pipeline/EGL error detected during screenshot. Short-circuiting retries.")
                         break
@@ -319,6 +347,11 @@ class FlutterActivityTest {
                 verifyNoGraphicsPipelineErrors(marker)
 
                 if (cropped == null) {
+                    // Evict engine cache if a screenshot is blank but no logcat EGL error was detected,
+                    // ensuring any subsequent test run attempt starts with a clean engine instance.
+                    InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                        MainActivity.evictEngineCache()
+                    }
                     throw BlankScreenshotException(
                         "Captured screenshot is blank/empty after $maxAttempts attempts."
                     )

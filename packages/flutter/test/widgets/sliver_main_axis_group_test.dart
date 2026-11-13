@@ -680,9 +680,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // At a scroll offset of 630, a normal scrolling header should be out of view.
-      final renderHeader =
-          tester.renderObject(find.byType(SliverPersistentHeader, skipOffstage: false))
-              as RenderSliverPersistentHeader;
+      final renderHeader = tester.renderObject(
+        find.byType(SliverPersistentHeader, skipOffstage: false),
+      ) as RenderSliverPersistentHeader;
       expect(renderHeader.constraints.scrollOffset, equals(630));
       expect(renderHeader.geometry!.layoutExtent, equals(0.0));
     },

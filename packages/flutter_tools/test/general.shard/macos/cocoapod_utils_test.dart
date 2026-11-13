@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapod_utils.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -17,6 +20,7 @@ import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 
@@ -25,6 +29,7 @@ void main() {
     late MemoryFileSystem fs;
     late FakeCocoaPods cocoaPods;
     late BufferLogger logger;
+    late FakeToolContext toolContext;
 
     // Adds basic properties to the flutterProject and its subprojects.
     void setUpProject(
@@ -82,6 +87,7 @@ void main() {
       fs = MemoryFileSystem.test();
       cocoaPods = FakeCocoaPods();
       logger = BufferLogger.test();
+      toolContext = FakeToolContext(fs: fs, logger: logger);
     });
 
     group('for iOS', () {
@@ -96,6 +102,9 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -119,6 +128,9 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -141,6 +153,9 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -162,6 +177,9 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -187,6 +205,9 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -209,6 +230,9 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -232,6 +256,9 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
               forceCocoaPodsOnly: true,
             );
             expect(cocoaPods.processedPods, isTrue);
@@ -253,6 +280,40 @@ void main() {
             Logger: () => logger,
           },
         );
+
+        testUsingContext(
+          'sets swift_package_manager_enabled when forceSwiftPM is true',
+          () async {
+            final flutterProject = FakeFlutterProject();
+            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+
+            await processPodsIfNeeded(
+              flutterProject.ios,
+              fs.currentDirectory.childDirectory('build').path,
+              BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
+              forceSwiftPM: true,
+            );
+
+            expect(flutterProject.flutterPluginsDependenciesFile, exists);
+            final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+                .readAsStringSync();
+            final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+
+            expect(jsonContent['swift_package_manager_enabled'], <String, dynamic>{
+              'ios': true,
+              'macos': true,
+            });
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fs,
+            ProcessManager: FakeProcessManager.empty,
+            Pub: ThrowingPub.new,
+            CocoaPods: () => cocoaPods,
+          },
+        );
       });
     });
 
@@ -268,6 +329,9 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -291,6 +355,9 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -313,6 +380,9 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -334,6 +404,9 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -359,6 +432,9 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -381,6 +457,9 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -405,6 +484,9 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
               forceCocoaPodsOnly: true,
             );
             expect(cocoaPods.processedPods, isTrue);
@@ -433,6 +515,8 @@ void main() {
 }
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
+  @override
+  Logger get logger => BufferLogger.test();
   @override
   late Set<String> dependencies = <String>{};
   @override

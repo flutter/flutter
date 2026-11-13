@@ -273,8 +273,6 @@ void main() {
     semantics.dispose();
   });
 
-  // TODO(rkishan516): Cover this test with SliverAppBar in material_ui package.
-  // https://github.com/flutter/flutter/issues/189117
   testWidgets('showOnScreen works with pinned app bar and sliver list', (
     WidgetTester tester,
   ) async {

@@ -111,26 +111,23 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    "Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in release mode",
-    () {
-      final FlutterProject project = generateFakeAppBundle('fooaRelease', 'app.aab', fileSystem);
-      final File bundle = findBundleFile(
-        project,
-        const BuildInfo(
-          BuildMode.release,
-          'fooA',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        BufferLogger.test(),
-        fakeAnalytics,
-      );
+  testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in release mode", () {
+    final FlutterProject project = generateFakeAppBundle('fooaRelease', 'app.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.release,
+        'fooA',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
 
-      expect(bundle, isNotNull);
-      expect(bundle.path, '/build/app/outputs/bundle/fooaRelease/app.aab');
-    },
-  );
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/fooaRelease/app.aab');
+  });
 
   testWithoutContext('Finds app bundle when no flavor is used in release mode', () {
     final FlutterProject project = generateFakeAppBundle('release', 'app.aab', fileSystem);
@@ -229,26 +226,23 @@ void main() {
     expect(bundle.path, '/build/app/outputs/bundle/fooDebug/app.aab');
   });
 
-  testWithoutContext(
-    "Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in debug mode",
-    () {
-      final FlutterProject project = generateFakeAppBundle('fooaDebug', 'app.aab', fileSystem);
-      final File bundle = findBundleFile(
-        project,
-        const BuildInfo(
-          BuildMode.debug,
-          'fooA',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        BufferLogger.test(),
-        fakeAnalytics,
-      );
+  testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in debug mode", () {
+    final FlutterProject project = generateFakeAppBundle('fooaDebug', 'app.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.debug,
+        'fooA',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
 
-      expect(bundle, isNotNull);
-      expect(bundle.path, '/build/app/outputs/bundle/fooaDebug/app.aab');
-    },
-  );
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/fooaDebug/app.aab');
+  });
 
   testWithoutContext('Finds app bundle when no flavor is used in debug mode', () {
     final FlutterProject project = generateFakeAppBundle('debug', 'app.aab', fileSystem);
@@ -348,26 +342,23 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    "Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in profile mode",
-    () {
-      final FlutterProject project = generateFakeAppBundle('fooaProfile', 'app.aab', fileSystem);
-      final File bundle = findBundleFile(
-        project,
-        const BuildInfo(
-          BuildMode.profile,
-          'fooA',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        BufferLogger.test(),
-        fakeAnalytics,
-      );
+  testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in profile mode", () {
+    final FlutterProject project = generateFakeAppBundle('fooaProfile', 'app.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.profile,
+        'fooA',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
 
-      expect(bundle, isNotNull);
-      expect(bundle.path, '/build/app/outputs/bundle/fooaProfile/app.aab');
-    },
-  );
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/fooaProfile/app.aab');
+  });
 
   testWithoutContext('Finds app bundle when no flavor is used in profile mode', () {
     final FlutterProject project = generateFakeAppBundle('profile', 'app.aab', fileSystem);
@@ -461,30 +452,27 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 3.5',
-    () {
-      final FlutterProject project = generateFakeAppBundle(
-        'foo_barRelease',
-        'app-foo_bar-release.aab',
-        fileSystem,
-      );
-      final File bundle = findBundleFile(
-        project,
-        const BuildInfo(
-          BuildMode.release,
-          'foo_Bar',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        BufferLogger.test(),
-        fakeAnalytics,
-      );
+  testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 3.5', () {
+    final FlutterProject project = generateFakeAppBundle(
+      'foo_barRelease',
+      'app-foo_bar-release.aab',
+      fileSystem,
+    );
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.release,
+        'foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
 
-      expect(bundle, isNotNull);
-      expect(bundle.path, '/build/app/outputs/bundle/foo_barRelease/app-foo_bar-release.aab');
-    },
-  );
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barRelease/app-foo_bar-release.aab');
+  });
 
   testWithoutContext(
     'Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5',
@@ -511,80 +499,71 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 3.5',
-    () {
-      final FlutterProject project = generateFakeAppBundle(
-        'foo_barDebug',
-        'app-foo_bar-debug.aab',
-        fileSystem,
-      );
-      final File bundle = findBundleFile(
-        project,
-        const BuildInfo(
-          BuildMode.debug,
-          'foo_Bar',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        BufferLogger.test(),
-        fakeAnalytics,
-      );
+  testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 3.5', () {
+    final FlutterProject project = generateFakeAppBundle(
+      'foo_barDebug',
+      'app-foo_bar-debug.aab',
+      fileSystem,
+    );
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.debug,
+        'foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
 
-      expect(bundle, isNotNull);
-      expect(bundle.path, '/build/app/outputs/bundle/foo_barDebug/app-foo_bar-debug.aab');
-    },
-  );
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barDebug/app-foo_bar-debug.aab');
+  });
 
-  testWithoutContext(
-    'Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 4.1',
-    () {
-      final FlutterProject project = generateFakeAppBundle(
-        'foo_BarRelease',
-        'app-foo_Bar-release.aab',
-        fileSystem,
-      );
-      final File bundle = findBundleFile(
-        project,
-        const BuildInfo(
-          BuildMode.release,
-          'Foo_Bar',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        BufferLogger.test(),
-        fakeAnalytics,
-      );
+  testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 4.1', () {
+    final FlutterProject project = generateFakeAppBundle(
+      'foo_BarRelease',
+      'app-foo_Bar-release.aab',
+      fileSystem,
+    );
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.release,
+        'Foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
 
-      expect(bundle, isNotNull);
-      expect(bundle.path, '/build/app/outputs/bundle/foo_BarRelease/app-foo_Bar-release.aab');
-    },
-  );
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/foo_BarRelease/app-foo_Bar-release.aab');
+  });
 
-  testWithoutContext(
-    'Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 4.1',
-    () {
-      final FlutterProject project = generateFakeAppBundle(
-        'foo_BarDebug',
-        'app-foo_Bar-debug.aab',
-        fileSystem,
-      );
-      final File bundle = findBundleFile(
-        project,
-        const BuildInfo(
-          BuildMode.debug,
-          'Foo_Bar',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        BufferLogger.test(),
-        fakeAnalytics,
-      );
+  testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 4.1', () {
+    final FlutterProject project = generateFakeAppBundle(
+      'foo_BarDebug',
+      'app-foo_Bar-debug.aab',
+      fileSystem,
+    );
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.debug,
+        'Foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
 
-      expect(bundle, isNotNull);
-      expect(bundle.path, '/build/app/outputs/bundle/foo_BarDebug/app-foo_Bar-debug.aab');
-    },
-  );
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/foo_BarDebug/app-foo_Bar-debug.aab');
+  });
 
   testWithoutContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);

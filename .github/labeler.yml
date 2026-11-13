@@ -105,7 +105,7 @@ engine:
       - '**/gestures/*'
       - '**/*gestures*'
 
-'f: material design':
+'p: material_ui':
   - changed-files:
     - any-glob-to-any-file:
       - '**/material/*'

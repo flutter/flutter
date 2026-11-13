@@ -10,12 +10,14 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:path/path.dart' as path;
 
+import '../flutter_analysis_rule.dart';
+
 /// Checks for bad imports in `package:flutter`.
 ///
 /// Restricts `package:meta/meta.dart` imports within `lib/src/` (excluding
 /// `src/foundation/`), and prevents recursive self-imports (e.g. files under
 /// `lib/src/widgets/` importing `package:flutter/widgets.dart`).
-class NoBadImportsInFlutter extends AnalysisRule {
+class NoBadImportsInFlutter extends FlutterAnalysisRule {
   NoBadImportsInFlutter()
     : super(name: code.name, description: 'Checks for bad imports in flutter package.');
 
@@ -31,32 +33,26 @@ class NoBadImportsInFlutter extends AnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final visitor = _Visitor(this, context);
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
+    if (!filePath.contains('packages/flutter/lib/src/') && !filePath.contains('/home/test')) {
+      return;
+    }
+    final visitor = _Visitor(this, filePath);
     registry.addImportDirective(this, visitor);
   }
 }
 
 class _Visitor extends SimpleAstVisitor<void> {
-  _Visitor(this.rule, this.context);
+  _Visitor(this.rule, this.filePath);
 
   final AnalysisRule rule;
-  final RuleContext context;
+  final String filePath;
 
   @override
   void visitImportDirective(ImportDirective node) {
     if (node.uri.stringValue case final String uriStr) {
-      final String? absolutePath = context.currentUnit?.unit.declaredFragment?.source.fullName;
-      if (absolutePath == null) {
-        return;
-      }
-
-      final bool isFlutterSrc =
-          absolutePath.contains('packages/flutter/lib/src/') ||
-          absolutePath.contains(r'packages\flutter\lib\src\');
-      if (!isFlutterSrc) {
-        return;
-      }
+      final String absolutePath = filePath;
 
       if (uriStr == 'package:meta/meta.dart') {
         final bool isFoundation =

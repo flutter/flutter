@@ -180,7 +180,7 @@ bool LinearGradientContents::FastLinearGradient(const ContentContext& renderer,
       [this, &renderer, &entity](RenderPass& pass) {
         auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
-        FS::FragInfo frag_info;
+        FS::FragInfo frag_info{};
         frag_info.alpha =
             GetOpacityFactor() *
             GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());

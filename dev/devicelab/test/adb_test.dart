@@ -261,6 +261,22 @@ void main() {
             environment: <String, String>{FakeDevice.canFailKey: 'true'},
             arguments: <String>['-s', device.deviceId, 'logcat', '--clear'],
           ),
+          cmd(command: 'adb', arguments: <String>['-s', device.deviceId, 'logcat']),
+        ]);
+      });
+
+      test('getMemoryStats throws DeviceException if dumpsys meminfo fails to parse', () {
+        FakeDevice.output = 'Some garbage output';
+        expect(device.getMemoryStats('com.example'), throwsA(isA<DeviceException>()));
+      });
+
+      test('getMemoryStats returns memory stats if dumpsys meminfo parses successfully', () async {
+        FakeDevice.resetLog();
+        FakeDevice.output = 'TOTAL      12345';
+        final Map<String, dynamic> stats = await device.getMemoryStats('com.example');
+        expect(stats, <String, dynamic>{'total_kb': 12345});
+        expectLog(const <CommandArgs>[
+          CommandArgs(command: 'dumpsys', arguments: <String>['meminfo', 'com.example']),
         ]);
       });
     });
@@ -399,6 +415,12 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
+  Future<Process> startLogcat() async {
+    commandLog.add(CommandArgs(command: 'adb', arguments: <String>['-s', deviceId, 'logcat']));
+    return _FakeProcess();
+  }
+
+  @override
   Future<void> shellExec(
     String command,
     List<String> arguments, {
@@ -469,4 +491,31 @@ class _MemoryIOSink implements IOSink {
 
   @override
   Future<void> flush() async {}
+}
+
+class _FakeProcess implements Process {
+  final Completer<int> _exitCode = Completer<int>();
+
+  @override
+  Future<int> get exitCode => _exitCode.future;
+
+  @override
+  bool kill([ProcessSignal signal = ProcessSignal.sigterm]) {
+    if (!_exitCode.isCompleted) {
+      _exitCode.complete(-1);
+    }
+    return true;
+  }
+
+  @override
+  int get pid => 0;
+
+  @override
+  Stream<List<int>> get stderr => const Stream<List<int>>.empty();
+
+  @override
+  Stream<List<int>> get stdout => const Stream<List<int>>.empty();
+
+  @override
+  IOSink get stdin => throw UnimplementedError();
 }

@@ -528,6 +528,17 @@ void platformMessagePortResponseTest() async {
   }
 }
 
+/// Responds to a port that has already been closed, simulating an isolate
+/// that exits before the platform replies.
+@pragma('vm:entry-point')
+void platformMessagePortResponseClosedPortTest() {
+  final receivePort = ReceivePort();
+  final int nativePort = receivePort.sendPort.nativePort;
+  receivePort.close();
+  _callPlatformMessageResponseDartPort(nativePort);
+  _finishCallResponse(true);
+}
+
 @pragma('vm:entry-point')
 void platformMessageResponseTest() {
   _callPlatformMessageResponseDart((ByteData? result) {
@@ -681,6 +692,60 @@ Future<void> toByteDataRetryOverflows() async {
     }
   }
   _validateNotNull(result);
+}
+
+@pragma('vm:external-name', 'SceneToImageResult')
+external void _sceneToImageResult(int width, int height, String? error);
+
+/// Reproduction from https://github.com/flutter/flutter/issues/192365: a
+/// `Scene.toImage` while the view has no window surface (on Android, before
+/// `SurfaceView.surfaceCreated`).
+@pragma('vm:entry-point')
+Future<void> sceneToImageWithoutSurface() async {
+  final PictureRecorder recorder = PictureRecorder();
+  Canvas(recorder)
+      .drawRect(const Rect.fromLTWH(0, 0, 8, 8), Paint()..color = const Color(0xFF2ADEC3));
+  final Picture picture = recorder.endRecording();
+  final Scene scene = (SceneBuilder()..addPicture(Offset.zero, picture)).build();
+  try {
+    final Image image = await scene.toImage(8, 8);
+    _sceneToImageResult(image.width, image.height, null);
+    image.dispose();
+  } catch (error) {
+    _sceneToImageResult(0, 0, error.toString());
+  } finally {
+    scene.dispose();
+    picture.dispose();
+  }
+}
+
+@pragma('vm:external-name', 'ClearCurrentGLContext')
+external void _clearCurrentGLContext();
+@pragma('vm:external-name', 'ToByteDataResult')
+external void _toByteDataResult(int length, String? error);
+
+/// `Image.toByteData` on a raster-owned image while the view has no window
+/// surface (on Android, after `SurfaceView.surfaceDestroyed`).
+/// Regression test for https://github.com/flutter/flutter/issues/195627.
+@pragma('vm:entry-point')
+Future<void> imageToByteDataWithoutSurface() async {
+  final recorder = PictureRecorder();
+  Canvas(recorder)
+      .drawRect(const Rect.fromLTWH(0, 0, 8, 8), Paint()..color = const Color(0xFF2ADEC3));
+  final Picture picture = recorder.endRecording();
+  final Image image = await picture.toImage(8, 8);
+  // `Picture.toImage` leaves its offscreen context current on the raster
+  // thread. Clear it, like tearing down the window surface does.
+  _clearCurrentGLContext();
+  try {
+    final ByteData? data = await image.toByteData();
+    _toByteDataResult(data?.lengthInBytes ?? 0, null);
+  } catch (error) {
+    _toByteDataResult(0, error.toString());
+  } finally {
+    image.dispose();
+    picture.dispose();
+  }
 }
 
 @pragma('vm:entry-point')
@@ -1449,8 +1514,10 @@ void hooksTests() async {
     late Zone innerZone;
     late Zone runZoneTextScaleFactor;
     late Zone runZonePlatformBrightness;
+    late Zone runZoneAlwaysUse24HourFormat;
     late double? textScaleFactor;
     late Brightness? platformBrightness;
+    late bool? alwaysUse24HourFormat;
 
     runZoned(() {
       innerZone = Zone.current;
@@ -1461,6 +1528,10 @@ void hooksTests() async {
       window.onPlatformBrightnessChanged = () {
         runZonePlatformBrightness = Zone.current;
         platformBrightness = window.platformBrightness;
+      };
+      PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = () {
+        runZoneAlwaysUse24HourFormat = Zone.current;
+        alwaysUse24HourFormat = PlatformDispatcher.instance.alwaysUse24HourFormat;
       };
     });
 
@@ -1485,6 +1556,55 @@ void hooksTests() async {
     );
     expectIdentical(runZonePlatformBrightness, innerZone);
     expectEquals(platformBrightness, Brightness.dark);
+
+    textScaleFactor = null;
+    platformBrightness = null;
+    alwaysUse24HourFormat = null;
+
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged!();
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 0.5, "platformBrightness": "dark", "alwaysUse24HourFormat": false}',
+    );
+    expectIdentical(runZoneAlwaysUse24HourFormat, innerZone);
+    expectEquals(alwaysUse24HourFormat, false);
+
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = null;
+  });
+
+  await test('onAlwaysUse24HourFormatChanged is not invoked when unrelated user settings change', () {
+    int calls = 0;
+    final bool initialFormat = PlatformDispatcher.instance.alwaysUse24HourFormat;
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = () {
+      calls++;
+    };
+
+    // Toggle alwaysUse24HourFormat to trigger callback once.
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 1.0, "platformBrightness": "light", "alwaysUse24HourFormat": ${!initialFormat}}',
+    );
+    expectEquals(calls, 1);
+
+    // Unrelated user setting changes (platformBrightness and textScaleFactor) without changing alwaysUse24HourFormat.
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": ${!initialFormat}}',
+    );
+    expectEquals(calls, 1);
+
+    // alwaysUse24HourFormat changes back.
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": $initialFormat}',
+    );
+    expectEquals(calls, 2);
+
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = null;
   });
 
   await test('onFrameDataChanged preserves callback zone', () {

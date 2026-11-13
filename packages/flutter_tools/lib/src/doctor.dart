@@ -4,14 +4,14 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
 import 'base/async_guard.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -20,17 +20,25 @@ import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
+import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
+import 'context/apple_context.dart';
+import 'context/tool_context.dart';
 import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
+import 'experimental/diagnostics.dart';
+import 'experimental/extension_manager.dart';
 import 'features.dart';
-import 'globals.dart' as globals;
 import 'http_host_validator.dart';
+import 'ios/ios_workflow.dart';
+import 'ios/simulators.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
+import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
+import 'macos/xcode.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
@@ -48,40 +56,59 @@ const _kIntelMacWarning = ValidationMessage.hint(
 );
 
 abstract class DoctorValidatorsProvider {
-  // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
-  // [FeatureFlags].
-  factory DoctorValidatorsProvider.test({Platform? platform, required FeatureFlags featureFlags}) {
+  /// Create a [DoctorValidatorsProvider] with explicit options.
+  factory DoctorValidatorsProvider.create({
+    required AppleContext appleContext,
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+    DeviceManager? deviceManager,
+    ExtensionManager? extensionManager,
+    HttpClientFactory? httpClientFactory,
+  }) {
     return _DefaultDoctorValidatorsProvider(
+      appleContext: appleContext,
+      deviceManager: deviceManager,
+      extensionManager: extensionManager,
       featureFlags: featureFlags,
-      platform: platform ?? FakePlatform(),
+      httpClientFactory: httpClientFactory,
+      toolContext: toolContext,
     );
   }
-
-  /// The singleton instance, pulled from the [AppContext].
-  static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
-
-  static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider(
-    platform: globals.platform,
-    featureFlags: featureFlags,
-  );
 
   List<DoctorValidator> get validators;
   List<Workflow> get workflows;
 }
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
-  _DefaultDoctorValidatorsProvider({required this.platform, required this.featureFlags});
+  _DefaultDoctorValidatorsProvider({
+    required this._appleContext,
+    required this.featureFlags,
+    required this._toolContext,
+    this._deviceManager,
+    this.extensionManager,
+    this._httpClientFactory,
+  });
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
-  final Platform platform;
+  final AppleContext _appleContext;
+  final DeviceManager? _deviceManager;
   final FeatureFlags featureFlags;
+  final ExtensionManager? extensionManager;
+  final HttpClientFactory? _httpClientFactory;
+  final ToolContext _toolContext;
 
-  late final linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags);
+  late final linuxWorkflow = LinuxWorkflow(
+    platform: _toolContext.platform,
+    featureFlags: featureFlags,
+  );
 
-  late final webWorkflow = WebWorkflow(platform: platform, featureFlags: featureFlags);
+  late final webWorkflow = WebWorkflow(platform: _toolContext.platform, featureFlags: featureFlags);
 
-  late final macOSWorkflow = MacOSWorkflow(platform: platform, featureFlags: featureFlags);
+  late final macOSWorkflow = MacOSWorkflow(
+    platform: _toolContext.platform,
+    featureFlags: featureFlags,
+  );
 
   late final customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags);
 
@@ -90,73 +117,88 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     if (_validators != null) {
       return _validators!;
     }
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FlutterVersion flutterVersion,
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+      :SystemClock systemClock,
+      :UserMessages userMessages,
+    ) = _toolContext;
+    final AppleContext(
+      :CocoaPodsValidator cocoapodsValidator,
+      :IOSSimulatorUtils iosSimulatorUtils,
+      :IOSWorkflow iosWorkflow,
+      :Xcode xcode,
+    ) = _appleContext;
     final proxyValidator = ProxyValidator(platform: platform);
     return _validators = <DoctorValidator>[
       FlutterValidator(
-        fileSystem: globals.fs,
-        platform: globals.platform,
-        flutterVersion: () =>
-            globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
-        devToolsVersion: () => globals.cache.devToolsVersion,
-        processManager: globals.processManager,
-        artifacts: globals.artifacts!,
-        flutterRoot: () => Cache.flutterRoot!,
-        operatingSystemUtils: globals.os,
+        fileSystem: fs,
+        platform: platform,
+        flutterVersion: () => flutterVersion.fetchTagsAndGetVersion(clock: systemClock),
+        devToolsVersion: () => cache.devToolsVersion,
+        processManager: processManager,
+        artifacts: artifacts,
+        flutterRoot: () => cache.flutterRoot,
+        operatingSystemUtils: os,
         featureFlags: featureFlags,
       ),
       if (platform.isWindows)
         WindowsVersionValidator(
-          operatingSystemUtils: globals.os,
-          processLister: ProcessLister(globals.processManager),
-          versionExtractor: WindowsVersionExtractor(
-            processManager: globals.processManager,
-            logger: globals.logger,
-          ),
+          operatingSystemUtils: os,
+          processLister: ProcessLister(processManager),
+          versionExtractor: WindowsVersionExtractor(processManager: processManager, logger: logger),
         ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
-      if (globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
+      if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(
-            xcode: globals.xcode!,
-            userMessages: globals.userMessages,
-            iosSimulatorUtils: globals.iosSimulatorUtils!,
+            xcode: xcode,
+            userMessages: userMessages,
+            iosSimulatorUtils: iosSimulatorUtils,
           ),
-          globals.cocoapodsValidator!,
+          cocoapodsValidator,
         ]),
       if (webWorkflow.appliesToHostPlatform)
         ChromeValidator(
           chromiumLauncher: ChromiumLauncher(
             browserFinder: findChromeExecutable,
-            fileSystem: globals.fs,
-            operatingSystemUtils: globals.os,
-            platform: globals.platform,
-            processManager: globals.processManager,
-            logger: globals.logger,
+            fileSystem: fs,
+            operatingSystemUtils: os,
+            platform: platform,
+            processManager: processManager,
+            logger: logger,
           ),
-          platform: globals.platform,
+          platform: platform,
         ),
       if (linuxWorkflow.appliesToHostPlatform)
-        LinuxDoctorValidator(
-          processManager: globals.processManager,
-          userMessages: globals.userMessages,
-        ),
+        LinuxDoctorValidator(processManager: processManager, userMessages: userMessages),
+      if (extensionManager case final ExtensionManager manager)
+        for (final DiagnosticsExtension extension in manager.diagnosticsExtensions)
+          ExtensionDoctorValidator(extension: extension, logger: logger),
       if (windowsWorkflow!.appliesToHostPlatform) visualStudioValidator!,
       if (proxyValidator.shouldShow) proxyValidator,
-      if (globals.deviceManager?.canListAnything ?? false)
-        DeviceValidator(deviceManager: globals.deviceManager),
+      if (_deviceManager case final DeviceManager deviceManager when deviceManager.canListAnything)
+        DeviceValidator(deviceManager: deviceManager),
       HttpHostValidator(
-        platform: globals.platform,
+        platform: platform,
         featureFlags: featureFlags,
-        httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
+        httpClient: _httpClientFactory?.call() ?? HttpClient(),
       ),
     ];
   }
 
   @override
   List<Workflow> get workflows {
+    final IOSWorkflow iosWorkflow = _appleContext.iosWorkflow;
     return _workflows ??= <Workflow>[
-      if (globals.iosWorkflow!.appliesToHostPlatform) globals.iosWorkflow!,
+      if (iosWorkflow.appliesToHostPlatform) iosWorkflow,
       if (androidWorkflow?.appliesToHostPlatform ?? false) androidWorkflow!,
       if (linuxWorkflow.appliesToHostPlatform) linuxWorkflow,
       if (macOSWorkflow.appliesToHostPlatform) macOSWorkflow,
@@ -167,132 +209,80 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   }
 }
 
-class Doctor {
-  Doctor({required Logger logger, required SystemClock clock, Analytics? analytics})
-    : _logger = logger,
-      _clock = clock,
-      _analytics = analytics ?? globals.analytics;
+/// Builds a [DoctorValidatorsProvider], optionally including the validators
+/// contributed by the tool extensions registered with [extensionManager].
+typedef DoctorValidatorsProviderBuilder = DoctorValidatorsProvider Function({
+  ExtensionManager? extensionManager,
+});
 
+class Doctor {
+  Doctor({
+    required this._analytics,
+    required this._cache,
+    required this._clock,
+    required this._logger,
+    required this.validatorsProviderBuilder,
+  });
+
+  final Cache _cache;
   final Logger _logger;
   final SystemClock _clock;
   final Analytics _analytics;
+  final DoctorValidatorsProviderBuilder validatorsProviderBuilder;
 
-  List<DoctorValidator> get validators {
-    return DoctorValidatorsProvider._instance.validators;
-  }
+  late final DoctorValidatorsProvider _validatorsProvider = validatorsProviderBuilder();
+
+  List<DoctorValidator> get validators => _validatorsProvider.validators;
 
   /// Return a list of [ValidatorTask] objects and starts validation on all
   /// objects in [validators].
-  List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[
-    for (final DoctorValidator validator in validators)
-      ValidatorTask(
-        validator,
-        // We use an asyncGuard() here to be absolutely certain that
-        // DoctorValidators do not result in an uncaught exception. Since the
-        // Future returned by the asyncGuard() is not awaited, we pass an
-        // onError callback to it and translate errors into ValidationResults.
-        asyncGuard<ValidationResult>(
-          () {
-            final timeoutCompleter = Completer<ValidationResult>();
-            final timer = Timer(doctorDuration, () {
-              timeoutCompleter.completeError(
-                Exception(
-                  '${validator.title} exceeded maximum allowed duration of $doctorDuration',
-                ),
-              );
-            });
-            final Future<ValidationResult> validatorFuture = validator.validate();
-            return Future.any<ValidationResult>(<Future<ValidationResult>>[
-              validatorFuture,
-              // This future can only complete with an error
-              timeoutCompleter.future,
-            ]).then((ValidationResult result) async {
-              timer.cancel();
-              return result;
-            });
-          },
-          onError: (Object exception, StackTrace stackTrace) {
-            return ValidationResult.crash(exception, stackTrace);
-          },
+  Future<List<ValidatorTask>> startValidatorTasks({ExtensionManager? extensionManager}) async {
+    if (extensionManager != null) {
+      await extensionManager.ensureInitialized();
+    }
+    final List<DoctorValidator> validatorList = extensionManager != null
+        ? validatorsProviderBuilder(extensionManager: extensionManager).validators
+        : validators;
+    return <ValidatorTask>[
+      for (final DoctorValidator validator in validatorList)
+        ValidatorTask(
+          validator,
+          // We use an asyncGuard() here to be absolutely certain that
+          // DoctorValidators do not result in an uncaught exception. Since the
+          // Future returned by the asyncGuard() is not awaited, we pass an
+          // onError callback to it and translate errors into ValidationResults.
+          asyncGuard<ValidationResult>(
+            () {
+              final timeoutCompleter = Completer<ValidationResult>();
+              final timer = Timer(doctorDuration, () {
+                timeoutCompleter.completeError(
+                  Exception(
+                    '${validator.title} exceeded maximum allowed duration of $doctorDuration',
+                  ),
+                );
+              });
+              final Future<ValidationResult> validatorFuture = validator.validate();
+              return Future.any<ValidationResult>(<Future<ValidationResult>>[
+                validatorFuture,
+                // This future can only complete with an error
+                timeoutCompleter.future,
+              ]).then((ValidationResult result) async {
+                timer.cancel();
+                return result;
+              });
+            },
+            onError: (Object exception, StackTrace stackTrace) {
+              return ValidationResult.crash(exception, stackTrace);
+            },
+          ),
         ),
-      ),
-  ];
-
-  List<Workflow> get workflows {
-    return DoctorValidatorsProvider._instance.workflows;
+    ];
   }
 
-  /// Print a summary of the state of the tooling, as well as how to get more info.
-  Future<void> summary() async {
-    _logger.printStatus(await _summaryText());
-  }
-
-  Future<String> _summaryText() async {
-    final buffer = StringBuffer();
-
-    var missingComponent = false;
-    var sawACrash = false;
-
-    for (final DoctorValidator validator in validators) {
-      final lineBuffer = StringBuffer();
-      ValidationResult result;
-      try {
-        result = await asyncGuard<ValidationResult>(() => validator.validateImpl());
-      } on Exception catch (exception) {
-        // We're generating a summary, so drop the stack trace.
-        result = ValidationResult.crash(exception);
-      }
-      lineBuffer.write('${result.coloredLeadingBox} ${validator.title}: ');
-      switch (result.type) {
-        case ValidationType.crash:
-          lineBuffer.write('the doctor check crashed without a result.');
-          sawACrash = true;
-        case ValidationType.missing:
-          lineBuffer.write('is not installed.');
-        case ValidationType.partial:
-          lineBuffer.write('is partially installed; more components are available.');
-        case ValidationType.notAvailable:
-          lineBuffer.write('is not available.');
-        case ValidationType.success:
-          lineBuffer.write('is fully installed.');
-      }
-
-      if (result.statusInfo != null) {
-        lineBuffer.write(' (${result.statusInfo})');
-      }
-
-      buffer.write(
-        wrapText(
-          lineBuffer.toString(),
-          hangingIndent: result.leadingBox.length + 1,
-          columnWidth: globals.outputPreferences.wrapColumn,
-          shouldWrap: globals.outputPreferences.wrapText,
-        ),
-      );
-      buffer.writeln();
-
-      if (result.type != ValidationType.success) {
-        missingComponent = true;
-      }
-    }
-
-    if (sawACrash) {
-      buffer.writeln();
-      buffer.writeln('Run "flutter doctor" for information about why a doctor check crashed.');
-    }
-
-    if (missingComponent) {
-      buffer.writeln();
-      buffer.writeln(
-        'Run "flutter doctor" for information about installing additional components.',
-      );
-    }
-
-    return buffer.toString();
-  }
+  List<Workflow> get workflows => _validatorsProvider.workflows;
 
   Future<bool> checkRemoteArtifacts(String engineRevision) async {
-    return globals.cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);
+    return _cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
   /// Maximum allowed duration for an entire validator to take.
@@ -313,8 +303,10 @@ class Doctor {
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
+    ExtensionManager? extensionManager,
   }) async {
-    final bool showColor = globals.terminal.supportsColor;
+    final Terminal terminal = _logger.terminal;
+    final bool showColor = terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {
       return androidLicenseValidator.runLicenseManager();
     }
@@ -329,7 +321,8 @@ class Doctor {
     // were sent for each doctor validator and its result
     final int analyticsTimestamp = _clock.now().millisecondsSinceEpoch;
 
-    for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
+    for (final ValidatorTask validatorTask
+        in startedValidatorTasks ?? await startValidatorTasks(extensionManager: extensionManager)) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner(
         timeout: validator.slowWarningDuration,
@@ -405,7 +398,7 @@ class Doctor {
         return ' [$formatted]';
       }();
 
-      final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
+      final String leadingBox = showColor ? result.coloredLeadingBox(terminal) : result.leadingBox;
       if (result.statusInfo != null) {
         _logger.printStatus(
           '$leadingBox ${validator.title} (${result.statusInfo})$executionDuration',
@@ -422,7 +415,9 @@ class Doctor {
         if (!message.isInformation || verbose) {
           var hangingIndent = 2;
           var indent = 4;
-          final String indicator = showColor ? message.coloredIndicator : message.indicator;
+          final String indicator = showColor
+              ? message.coloredIndicator(terminal)
+              : message.indicator;
           for (final String line
               in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split(
                 '\n',
@@ -454,13 +449,13 @@ class Doctor {
 
     if (issues > 0) {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
+        '${showColor ? terminal.color('!', TerminalColor.yellow) : '!'}'
         ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.',
         hangingIndent: 2,
       );
     } else {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
+        '${showColor ? terminal.color('•', TerminalColor.green) : '•'}'
         ' No issues found!',
         hangingIndent: 2,
       );
@@ -486,25 +481,16 @@ class Doctor {
 /// specific commit information.
 class FlutterValidator extends DoctorValidator {
   FlutterValidator({
-    required Platform platform,
-    required FlutterVersion Function() flutterVersion,
-    required String Function() devToolsVersion,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-    required String Function() flutterRoot,
-    required OperatingSystemUtils operatingSystemUtils,
-    required FeatureFlags featureFlags,
-  }) : _flutterVersion = flutterVersion,
-       _devToolsVersion = devToolsVersion,
-       _platform = platform,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _processManager = processManager,
-       _flutterRoot = flutterRoot,
-       _operatingSystemUtils = operatingSystemUtils,
-       _featureFlags = featureFlags,
-       super('Flutter');
+    required this._platform,
+    required this._flutterVersion,
+    required this._devToolsVersion,
+    required this._fileSystem,
+    required this._artifacts,
+    required this._processManager,
+    required this._flutterRoot,
+    required this._operatingSystemUtils,
+    required this._featureFlags,
+  }) : super('Flutter');
 
   final Platform _platform;
   final FlutterVersion Function() _flutterVersion;
@@ -706,7 +692,13 @@ class FlutterValidator extends DoctorValidator {
       );
     }
     final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
-    if (!_filePathContainsDirPath(flutterRoot, resolvedFlutterPath)) {
+    var resolvedFlutterRoot = flutterRoot;
+    try {
+      resolvedFlutterRoot = _fileSystem.directory(flutterRoot).resolveSymbolicLinksSync();
+    } on FileSystemException {
+      // If the root does not exist or cannot be resolved, retain the un-resolved path.
+    }
+    if (!_filePathContainsDirPath(resolvedFlutterRoot, resolvedFlutterPath)) {
       final hint =
           'Warning: `$binary` on your path resolves to '
           '$resolvedFlutterPath, which is not inside your current Flutter '
@@ -762,10 +754,7 @@ class FlutterValidator extends DoctorValidator {
 }
 
 class DeviceValidator extends DoctorValidator {
-  // TODO(jmagman): Make required once g3 rolls and is updated.
-  DeviceValidator({DeviceManager? deviceManager})
-    : _deviceManager = deviceManager ?? globals.deviceManager!,
-      super('Connected device');
+  DeviceValidator({required this._deviceManager}) : super('Connected device');
 
   final DeviceManager _deviceManager;
 
@@ -783,9 +772,9 @@ class DeviceValidator extends DoctorValidator {
     );
     var installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages = (await Device.descriptions(
-        devices,
-      )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
+      installedMessages = (await Device.descriptions(devices))
+          .map<ValidationMessage>((String msg) => ValidationMessage(msg))
+          .toList();
     }
 
     var diagnosticMessages = <ValidationMessage>[];
@@ -819,9 +808,7 @@ class DeviceValidator extends DoctorValidator {
 
 /// Wrapper for doctor to run multiple times with PII and without, running the validators only once.
 class DoctorText {
-  DoctorText(BufferLogger logger, {SystemClock? clock, @visibleForTesting Doctor? doctor})
-    : _doctor = doctor ?? Doctor(logger: logger, clock: clock ?? globals.systemClock),
-      _logger = logger;
+  DoctorText(this._logger, {required this._doctor});
 
   final BufferLogger _logger;
   final Doctor _doctor;
@@ -831,12 +818,12 @@ class DoctorText {
   late final Future<String> piiStrippedText = _runDiagnosis(false);
 
   // Start the validator tasks only once.
-  late final List<ValidatorTask> _validatorTasks = _doctor.startValidatorTasks();
+  late final Future<List<ValidatorTask>> _validatorTasks = _doctor.startValidatorTasks();
 
   Future<String> _runDiagnosis(bool showPii) async {
     try {
       await _doctor.diagnose(
-        startedValidatorTasks: _validatorTasks,
+        startedValidatorTasks: await _validatorTasks,
         showPii: showPii,
         sendEvent: _sendDoctorEvent,
         verbose: _logger.isVerbose,

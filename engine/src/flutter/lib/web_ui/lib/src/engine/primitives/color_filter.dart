@@ -15,7 +15,7 @@ final Finalizer _colorFilterFinalizer = NativeMemoryFinalizer((Object filter) {
 
 /// A description of a color filter to apply when drawing a shape or compositing
 /// a layer with a particular [Paint].
-class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
+class EngineColorFilter implements ui.ColorFilter {
   const EngineColorFilter.mode(ui.Color this.color, ui.BlendMode this.blendMode)
     : matrix = null,
       type = ColorFilterType.mode;
@@ -79,9 +79,6 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   }
 
   @override
-  ui.Rect filterBounds(ui.Rect inputBounds) => inputBounds;
-
-  @override
   String get debugShortDescription => toString();
 
   @override
@@ -93,9 +90,6 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
       ColorFilterType.srgbToLinearGamma => 'ColorFilter.srgbToLinearGamma()',
     };
   }
-
-  @override
-  Matrix4? get transform => null;
 
   @override
   bool operator ==(Object other) {

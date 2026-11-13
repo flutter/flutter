@@ -11,7 +11,13 @@ library;
 import 'dart:math' as math;
 import 'dart:ui'
     as ui
-    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
+    show
+        Hyphens,
+        Image,
+        ImageFilter,
+        SemanticsHitTestBehavior,
+        SemanticsInputType,
+        TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -505,13 +511,21 @@ class BackdropGroup extends InheritedWidget {
 /// {@endtemplate}
 ///
 /// Multiple backdrop filters can be combined into a single rendering operation
-/// by the Flutter engine if these backdrop filters widgets all share a common
-/// [BackdropKey]. The backdrop key uniquely identifies the input for a backdrop
-/// filter, and when shared, indicates the filtering can be performed once. This
-/// can significantly reduce the overhead of using multiple backdrop filters in
-/// a scene. The key can either be provided manually via the `backdropKey`
-/// constructor parameter or looked up from a [BackdropGroup] inherited widget
-/// via the `.grouped` constructor.
+/// by the Flutter engine if these backdrop filter widgets all share a common
+/// [BackdropKey] and have equivalent filter configurations. The backdrop key
+/// uniquely identifies the input for a backdrop filter, and when shared, indicates
+/// that the backdrop capture can be shared and filtering can be performed once
+/// if the filters are identical. This can significantly reduce the overhead of
+/// using multiple backdrop filters in a scene. The key can either be provided
+/// manually via the `backdropKey` constructor parameter or looked up from a
+/// [BackdropGroup] inherited widget via the `.grouped` constructor.
+///
+/// To combine the filter passes into a single operation, the resolved filters
+/// across the group must have identical properties. For example, using a "bounded"
+/// blur ([ImageFilterConfig.blur] with `bounded: true` or [ui.ImageFilter.blur]
+/// with non-null `bounds`) assigns unique layout bounds to each widget, which
+/// prevents the engine from collapsing them into a single blur pass (though the
+/// initial backdrop capture is still shared across the group).
 ///
 /// Backdrop filters that overlap with each other should not use the same
 /// backdrop key, otherwise the results may look as if only one filter is
@@ -1994,7 +2008,7 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 /// [CompositedTransformFollower] and [CompositedTransformTarget] are
 /// incompatible with [OverlayPortal.overlayChildLayoutBuilder] and thus
 /// must not be used together. Consider using
-/// [OverlayPortal.overlayChildLayoutBuilder] instead
+/// [OverlayPortal.overlayChildLayoutBuilder] instead.
 /// {@endtemplate}
 ///
 /// See also:
@@ -3955,6 +3969,8 @@ class IgnoreBaseline extends SingleChildRenderObjectWidget {
 
 /// A sliver that contains a single box widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vWec9DrAbHE}
+///
 /// Slivers are special-purpose widgets that can be combined using a
 /// [CustomScrollView] to create custom scroll effects. A [SliverToBoxAdapter]
 /// is a basic sliver that creates a bridge back to one of the usual box-based
@@ -4397,6 +4413,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
 ///
 /// {@macro flutter.widgets.SemanticsBase}
 ///  * [Semantics], the widget variant of this sliver.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lPWrd08swlw}
+///
 @immutable
 class SliverSemantics extends _SemanticsBase {
   /// Creates a semantic annotation.
@@ -4857,19 +4876,31 @@ class Stack extends MultiChildRenderObjectWidget {
   }
 }
 
-/// A widget that controls where a child of a [Stack] is positioned.
+/// A widget that positions its child within a [Stack] or an [Overlay].
 ///
-/// A [Positioned] widget must be a descendant of a [Stack], and the path from
-/// the [Positioned] widget to its enclosing [Stack] must contain only
-/// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
-/// [RenderObjectWidget]s).
+/// A [Positioned] widget must be inside a [Stack], or inside the widget
+/// subtree that an [Overlay] lays out: the widget returned by
+/// [OverlayEntry.builder], by [OverlayPortal.overlayChildBuilder] or by the
+/// builder passed to [OverlayPortal.overlayChildLayoutBuilder]. A [Stack] and
+/// an [Overlay] both lay their children out with the stack layout algorithm
+/// (see [RenderStack]). In either case, the path from the [Positioned] up to
+/// that boundary must contain only widgets that build other widgets rather
+/// than render anything themselves, such as [StatelessWidget]s,
+/// [StatefulWidget]s and [InheritedWidget]s; it must not contain
+/// [RenderObjectWidget]s or other [ParentDataWidget]s (such as [Expanded]).
+///
+/// For a [Stack], the boundary is the [Stack] itself. For an [Overlay], it is
+/// the widget the builder returns, which is itself on that path and so must be
+/// the [Positioned] or something that builds it, rather than a
+/// [RenderObjectWidget] or another [ParentDataWidget].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EgtPleVwxBQ}
 ///
 /// If a widget is wrapped in a [Positioned], then it is a _positioned_ widget
-/// in its [Stack]. If the [top] property is non-null, the top edge of this child
-/// will be positioned [top] layout units from the top of the stack widget. The
-/// [right], [bottom], and [left] properties work analogously.
+/// in its [Stack] or [Overlay]. If the [top] property is non-null, the top edge
+/// of this child will be positioned [top] layout units from the top of the
+/// [Stack] or the [Overlay]. The [right], [bottom], and [left] properties work
+/// analogously.
 ///
 /// If both the [top] and [bottom] properties are non-null, then the child will
 /// be forced to have exactly the height required to satisfy both constraints.
@@ -4879,10 +4910,12 @@ class Stack extends MultiChildRenderObjectWidget {
 /// corresponding position property (e.g. [top] and [height]).
 ///
 /// If all three values on a particular axis are null, then the
-/// [Stack.alignment] property is used to position the child.
+/// [Stack.alignment] property is used to position the child. An [Overlay] has
+/// no such property; see [Overlay] for how it aligns such children.
 ///
-/// If all six values are null, the child is a non-positioned child. The [Stack]
-/// uses only the non-positioned children to size itself.
+/// If all six values are null, the child is a non-positioned child, and a
+/// [Stack] uses only its non-positioned children to size itself. See [Overlay]
+/// for how it sizes such children.
 ///
 /// See also:
 ///
@@ -4891,8 +4924,18 @@ class Stack extends MultiChildRenderObjectWidget {
 ///  * [PositionedTransition], which takes a provided [Animation] to transition
 ///    changes in the child's position over a given duration.
 ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
+///  * [Overlay], which lays its entries out using the same stack layout
+///    algorithm, so that an [OverlayEntry] can position its contents with a
+///    [Positioned].
+///  * [OverlayPortal], the declarative API for showing a widget on an
+///    [Overlay], whose overlay child can also be positioned with a
+///    [Positioned].
+///  * [CompositedTransformFollower], which positions its child relative to a
+///    [CompositedTransformTarget] elsewhere in the tree, an alternative way to
+///    position a widget that is shown on an [Overlay].
 class Positioned extends ParentDataWidget<StackParentData> {
-  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  /// Creates a widget that positions its child within a [Stack] or an
+  /// [Overlay].
   ///
   /// Only two out of the three horizontal values ([left], [right],
   /// [width]), and only two out of the three vertical values ([top],
@@ -4954,7 +4997,8 @@ class Positioned extends ParentDataWidget<StackParentData> {
   }) : width = null,
        height = null;
 
-  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  /// Creates a widget that positions its child within a [Stack] or an
+  /// [Overlay].
   ///
   /// Only two out of the three horizontal values (`start`, `end`,
   /// [width]), and only two out of the three vertical values ([top],
@@ -5107,22 +5151,34 @@ class Positioned extends ParentDataWidget<StackParentData> {
   }
 }
 
-/// A widget that controls where a child of a [Stack] is positioned without
+/// A widget that positions its child within a [Stack] or an [Overlay] without
 /// committing to a specific [TextDirection].
 ///
 /// The ambient [Directionality] is used to determine whether [start] is to the
 /// left or to the right.
 ///
-/// A [PositionedDirectional] widget must be a descendant of a [Stack], and the
-/// path from the [PositionedDirectional] widget to its enclosing [Stack] must
-/// contain only [StatelessWidget]s or [StatefulWidget]s (not other kinds of
-/// widgets, like [RenderObjectWidget]s).
+/// A [PositionedDirectional] widget must be inside a [Stack], or inside the
+/// widget subtree that an [Overlay] lays out: the widget returned by
+/// [OverlayEntry.builder], by [OverlayPortal.overlayChildBuilder] or by the
+/// builder passed to [OverlayPortal.overlayChildLayoutBuilder]. A [Stack] and
+/// an [Overlay] both lay their children out with the stack layout algorithm
+/// (see [RenderStack]). In either case, the path from the
+/// [PositionedDirectional] up to that boundary must contain only widgets that
+/// build other widgets rather than render anything themselves, such as
+/// [StatelessWidget]s, [StatefulWidget]s and [InheritedWidget]s; it must not
+/// contain [RenderObjectWidget]s or other [ParentDataWidget]s (such as
+/// [Expanded]).
+///
+/// For a [Stack], the boundary is the [Stack] itself. For an [Overlay], it is
+/// the widget the builder returns, which is itself on that path and so must be
+/// the [PositionedDirectional] or something that builds it, rather than a
+/// [RenderObjectWidget] or another [ParentDataWidget].
 ///
 /// If a widget is wrapped in a [PositionedDirectional], then it is a
-/// _positioned_ widget in its [Stack]. If the [top] property is non-null, the
-/// top edge of this child/ will be positioned [top] layout units from the top
-/// of the stack widget. The [start], [bottom], and [end] properties work
-/// analogously.
+/// _positioned_ widget in its [Stack] or [Overlay]. If the [top] property is
+/// non-null, the top edge of this child will be positioned [top] layout units
+/// from the top of the [Stack] or the [Overlay]. The [start], [bottom], and
+/// [end] properties work analogously.
 ///
 /// If both the [top] and [bottom] properties are non-null, then the child will
 /// be forced to have exactly the height required to satisfy both constraints.
@@ -5139,8 +5195,18 @@ class Positioned extends ParentDataWidget<StackParentData> {
 ///  * [AnimatedPositionedDirectional], which automatically transitions
 ///    the child's position over a given duration whenever the given position
 ///    changes.
+///  * [Overlay], which lays its entries out using the same stack layout
+///    algorithm, so that an [OverlayEntry] can position its contents with a
+///    [PositionedDirectional].
+///  * [OverlayPortal], the declarative API for showing a widget on an
+///    [Overlay], whose overlay child can also be positioned with a
+///    [PositionedDirectional].
+///  * [CompositedTransformFollower], which positions its child relative to a
+///    [CompositedTransformTarget] elsewhere in the tree, an alternative way to
+///    position a widget that is shown on an [Overlay].
 class PositionedDirectional extends StatelessWidget {
-  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  /// Creates a widget that positions its child within a [Stack] or an
+  /// [Overlay].
   ///
   /// Only two out of the three horizontal values (`start`, `end`,
   /// [width]), and only two out of the three vertical values ([top],
@@ -5317,10 +5383,9 @@ class Flex extends MultiChildRenderObjectWidget {
     this.spacing = 0.0,
     super.children,
   }) : assert(
-         !identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null,
+         (crossAxisAlignment != CrossAxisAlignment.baseline) || textBaseline != null,
          'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline',
        );
-  // Cannot use == in the assert above instead of identical because of https://github.com/dart-lang/language/issues/1811.
 
   /// The direction to use as the main axis.
   ///
@@ -6520,6 +6585,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    this.hyphens = ui.Hyphens.manual,
     this.selectionRegistrar,
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
@@ -6604,6 +6670,8 @@ class RichText extends MultiChildRenderObjectWidget {
   ///
   /// It's rarely necessary to set this property. By default its value
   /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  /// If the app did not choose its locale (see [Localizations.isDefaultLocale]),
+  /// no locale is used and the platform's default locale applies.
   ///
   /// See [RenderParagraph.locale] for more information.
   final Locale? locale;
@@ -6616,6 +6684,9 @@ class RichText extends MultiChildRenderObjectWidget {
 
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
+
+  /// {@macro flutter.painting.textPainter.hyphens}
+  final ui.Hyphens hyphens;
 
   /// The [SelectionRegistrar] this rich text is subscribed to.
   ///
@@ -6634,6 +6705,16 @@ class RichText extends MultiChildRenderObjectWidget {
   double _getDevicePixelRatio(BuildContext context) =>
       MediaQuery.maybeDevicePixelRatioOf(context) ?? View.maybeOf(context)?.devicePixelRatio ?? 1.0;
 
+  // A default locale that the app didn't choose isn't passed to the engine, so
+  // the platform's default locale is used for font fallback.
+  // See https://github.com/flutter/flutter/issues/194931.
+  Locale? _effectiveLocale(BuildContext context) {
+    if (locale != null) {
+      return locale;
+    }
+    return Localizations.isDefaultLocaleOf(context) ? null : Localizations.maybeLocaleOf(context);
+  }
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -6648,7 +6729,8 @@ class RichText extends MultiChildRenderObjectWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
-      locale: locale ?? Localizations.maybeLocaleOf(context),
+      hyphens: hyphens,
+      locale: _effectiveLocale(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
       devicePixelRatio: _getDevicePixelRatio(context),
@@ -6669,7 +6751,8 @@ class RichText extends MultiChildRenderObjectWidget {
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
-      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..hyphens = hyphens
+      ..locale = _effectiveLocale(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
       ..devicePixelRatio = _getDevicePixelRatio(context);
@@ -6713,6 +6796,7 @@ class RichText extends MultiChildRenderObjectWidget {
         defaultValue: null,
       ),
     );
+    properties.add(EnumProperty<Hyphens>('hyphens', hyphens, defaultValue: Hyphens.manual));
   }
 }
 
@@ -6987,7 +7071,9 @@ class RawImage extends LeafRenderObjectWidget {
     );
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
-    properties.add(EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver));
+    properties.add(
+      EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver),
+    );
   }
 }
 
@@ -7598,6 +7684,19 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// The following sample shows an [IgnorePointer] and an [AbsorbPointer] side
+/// by side, each wrapping a box that partially covers a tappable target
+/// behind it in a stack. Tapping the overlapping region on the
+/// [IgnorePointer] side taps the target behind: the [IgnorePointer] is
+/// invisible to hit testing, so the pointer event goes through to the next
+/// target in the stack. Tapping the same region on the [AbsorbPointer] side
+/// does nothing: the [AbsorbPointer] absorbs the pointer events itself, so
+/// neither its child nor the target behind it receives the tap.
+///
+/// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
+/// {@end-tool}
+///
 /// ## Semantics
 ///
 /// Using this class may also affect how the semantics subtree underneath is
@@ -7608,27 +7707,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// the semantics subtree. Otherwise, the subtree remains untouched.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.IgnorePointer.ignoringSemantics}
-/// The usages of [ignoringSemantics] are deprecated and not recommended. This
-/// property was introduced to workaround the semantics behavior of the
-/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
-///
-/// Before that version, entire semantics subtree is dropped if [ignoring] is
-/// true. Developers can only use [ignoringSemantics] to preserver the semantics
-/// subtrees.
-///
-/// After that version, with [ignoring] set to true, it only prevents semantics
-/// user actions in the semantics subtree but leaves the other
-/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
-/// longer needed.
-///
-/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
-/// the subtree will be invisible to assistive technologies.
-///
-/// If [ignoringSemantics] is false, the semantics subtree is collected as
-/// usual.
-/// {@endtemplate}
-///
 /// See also:
 ///
 ///  * [AbsorbPointer], which also prevents its children from receiving pointer
@@ -7636,16 +7714,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///  * [SliverIgnorePointer], the sliver version of this widget.
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
-  const IgnorePointer({
-    super.key,
-    this.ignoring = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    super.child,
-  });
+  const IgnorePointer({super.key, this.ignoring = true, super.child});
 
   /// Whether this widget is ignored during hit testing.
   ///
@@ -7657,37 +7726,20 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Defaults to true.
   final bool ignoring;
 
-  /// Whether the semantics of this widget is ignored when compiling the
-  /// semantics subtree.
-  ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderIgnorePointer createRenderObject(BuildContext context) {
-    return RenderIgnorePointer(ignoring: ignoring, ignoringSemantics: ignoringSemantics);
+    return RenderIgnorePointer(ignoring: ignoring);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
-    renderObject
-      ..ignoring = ignoring
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.ignoring = ignoring;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 
@@ -7699,15 +7751,17 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// from being the target of located events, because it returns true from
 /// [RenderBox.hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools).
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
 /// {@tool dartpad}
-/// The following sample has an [AbsorbPointer] widget wrapping the button on
-/// top of the stack, which absorbs pointer events, preventing its child button
-/// __and__ the button below it in the stack from receiving the pointer events.
+/// The following sample shows an [AbsorbPointer] and an [IgnorePointer] side
+/// by side, each wrapping a box that partially covers a tappable target
+/// behind it in a stack. Tapping the overlapping region on the
+/// [AbsorbPointer] side does nothing: the [AbsorbPointer] absorbs the pointer
+/// events itself, so neither its child nor the target behind it receives the
+/// tap. Tapping the same region on the [IgnorePointer] side taps the target
+/// behind: the [IgnorePointer] is invisible to hit testing, so the pointer
+/// event goes through to the next target in the stack.
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}
@@ -7722,43 +7776,13 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// the semantics subtree. Otherwise, the subtree remains untouched.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.AbsorbPointer.ignoringSemantics}
-/// The usages of [ignoringSemantics] are deprecated and not recommended. This
-/// property was introduced to workaround the semantics behavior of the
-/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
-///
-/// Before that version, entire semantics subtree is dropped if [absorbing] is
-/// true. Developers can only use [ignoringSemantics] to preserver the semantics
-/// subtrees.
-///
-/// After that version, with [absorbing] set to true, it only prevents semantics
-/// user actions in the semantics subtree but leaves the other
-/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
-/// longer needed.
-///
-/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
-/// the subtree will be invisible to assistive technologies.
-///
-/// If [ignoringSemantics] is false, the semantics subtree is collected as
-/// usual.
-/// {@endtemplate}
-///
 /// See also:
 ///
 ///  * [IgnorePointer], which also prevents its children from receiving pointer
 ///    events but is itself invisible to hit testing.
 class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that absorbs pointers during hit testing.
-  const AbsorbPointer({
-    super.key,
-    this.absorbing = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    super.child,
-  });
+  const AbsorbPointer({super.key, this.absorbing = true, super.child});
 
   /// Whether this widget absorbs pointers during hit testing.
   ///
@@ -7771,37 +7795,20 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Defaults to true.
   final bool absorbing;
 
-  /// Whether the semantics of this render object is ignored when compiling the
-  /// semantics tree.
-  ///
-  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderAbsorbPointer createRenderObject(BuildContext context) {
-    return RenderAbsorbPointer(absorbing: absorbing, ignoringSemantics: ignoringSemantics);
+    return RenderAbsorbPointer(absorbing: absorbing);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderAbsorbPointer renderObject) {
-    renderObject
-      ..absorbing = absorbing
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.absorbing = absorbing;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('absorbing', absorbing));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 
@@ -8442,10 +8449,8 @@ class ColoredBox extends SingleChildRenderObjectWidget {
 }
 
 class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
-  _RenderColoredBox({required Color color, required bool isAntiAlias})
-    : _color = color,
-      _isAntiAlias = isAntiAlias,
-      super(behavior: HitTestBehavior.opaque);
+  _RenderColoredBox({required this._color, required this._isAntiAlias})
+    : super(behavior: HitTestBehavior.opaque);
 
   /// The fill color for this render object.
   Color get color => _color;

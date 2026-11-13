@@ -98,8 +98,12 @@ vec4 IPSampleLinearWithTileMode(sampler2D tex,
                                 float x_tile_mode,
                                 float y_tile_mode,
                                 vec4 decal_border_color) {
-  if (x_tile_mode == kTileModeDecal && (coords.x < 0 || coords.x >= 1) ||
-      y_tile_mode == kTileModeDecal && (coords.y < 0 || coords.y >= 1)) {
+  // Unlike 2D image sampling which uses a half-open interval [0, 1) where 1.0
+  // is outside the texture boundary, linear sampling uses a closed interval
+  // [0, 1]. Therefore, decal mode checks the ending coordinate using > 1 rather
+  // than >= 1.
+  if (x_tile_mode == kTileModeDecal && (coords.x < 0.0 || coords.x > 1.0) ||
+      y_tile_mode == kTileModeDecal && (coords.y < 0.0 || coords.y > 1.0)) {
     return decal_border_color;
   }
 

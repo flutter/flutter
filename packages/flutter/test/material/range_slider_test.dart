@@ -33,9 +33,8 @@ void main() {
                       dragStarted = true;
                     },
                     child: MediaQuery(
-                      data: MediaQuery.of(
-                        context,
-                      ).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 20)),
+                      data: MediaQuery.of(context)
+                          .copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 20)),
                       child: RangeSlider(
                         key: sliderKey,
                         values: values,
@@ -89,9 +88,8 @@ void main() {
                       dragStarted = true;
                     },
                     child: MediaQuery(
-                      data: MediaQuery.of(
-                        context,
-                      ).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 10)),
+                      data: MediaQuery.of(context)
+                          .copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 10)),
                       child: RangeSlider(
                         key: sliderKey,
                         values: values,
@@ -3411,9 +3409,8 @@ void main() {
 
     RenderBox sliderRenderBox() {
       return tester.allRenderObjects.firstWhere(
-            (RenderObject object) => object.runtimeType.toString() == '_RenderRangeSlider',
-          )
-          as RenderBox;
+        (RenderObject object) => object.runtimeType.toString() == '_RenderRangeSlider',
+      ) as RenderBox;
     }
 
     // Test RangeSlider height and tracks spacing with zero padding.

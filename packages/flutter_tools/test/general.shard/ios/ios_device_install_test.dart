@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
@@ -22,8 +21,9 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 const kDyLdLibEntry = <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'};
 
@@ -360,39 +360,43 @@ IOSDevice setUpIOSDevice({
     artifacts: <ArtifactSet>[FakeDyldEnvironmentArtifact()],
     processManager: FakeProcessManager.any(),
   );
+  final FileSystem testFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final toolContext = FakeToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    fs: testFileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
-    logger: logger,
-    processUtils: ProcessUtils(processManager: processManager, logger: logger),
-    xcode: null,
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    toolContext: toolContext,
+    xcode: FakeXcode(),
     sdkVersion: '13.3',
     cpuArch: .arm64,
-    platform: platform,
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager,
       artifacts: artifacts,
       cache: cache,
     ),
-    iosDeploy: IOSDeploy(
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      artifacts: artifacts,
-      cache: cache,
-    ),
+    iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: FakeAnalytics(),
+    cocoaPods: FakeCocoaPods(),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
+    plistParser: FakePlistParser(),
     xcodeDebug: FakeXcodeDebug(),
+    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: interfaceType ?? DeviceConnectionInterface.attached,
     isConnected: true,
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    templateRenderer: FakeTemplateRenderer(),
   );
 }
 

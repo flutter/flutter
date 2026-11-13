@@ -15,6 +15,7 @@
 #include <android/trace.h>
 
 #include <functional>
+#include <vector>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/native_library.h"

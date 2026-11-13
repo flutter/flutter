@@ -1208,6 +1208,76 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/82115
+    testWidgets('pinching both pointers to the same point does not throw', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Center(
+          child: InteractiveViewer(
+            transformationController: transformationController,
+            // With an infinite boundary, minScale is the only floor on the scale.
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            minScale: 0.1,
+            child: const SizedBox(width: 200.0, height: 200.0),
+          ),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(SizedBox));
+      final TestGesture gesture = await tester.createGesture(pointer: 1);
+      final TestGesture gesture2 = await tester.createGesture(pointer: 2);
+      await gesture.down(center - const Offset(50.0, 50.0));
+      await gesture2.down(center + const Offset(50.0, 50.0));
+      await tester.pump();
+      // Both pointers meet at one point, so ScaleUpdateDetails.scale is 0.0.
+      await gesture.moveTo(center);
+      await gesture2.moveTo(center);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(
+        transformationController.value.storage.every((double value) => value.isFinite),
+        isTrue,
+      );
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(0.1));
+
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(0.1));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/82115
+    testWidgets('a scale pointer event with a scale of 0.0 does not throw', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Center(
+          child: InteractiveViewer(
+            transformationController: transformationController,
+            // With an infinite boundary, minScale is the only floor on the scale.
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            minScale: 0.1,
+            child: const SizedBox(width: 200.0, height: 200.0),
+          ),
+        ),
+      );
+
+      // A PointerScaleEvent is a pointer signal, so InteractiveViewer handles
+      // it in onPointerSignal and not in the scale gesture handlers.
+      final pointer = TestPointer(1, PointerDeviceKind.trackpad);
+      await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.byType(SizedBox))));
+      await tester.sendEventToBinding(pointer.scale(0.0));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(
+        transformationController.value.storage.every((double value) => value.isFinite),
+        isTrue,
+      );
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(0.1));
+    });
+
     testWidgets('scale does not jump when wrapped in GestureDetector', (WidgetTester tester) async {
       double? initialScale;
       double? scale;

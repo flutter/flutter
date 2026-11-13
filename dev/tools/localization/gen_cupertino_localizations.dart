@@ -36,11 +36,16 @@ import '../cupertino_localizations.dart';
 /// subclass.
 String generateCupertinoConstructor(LocaleInfo locale) {
   final String localeName = locale.originalString;
+  final className = 'CupertinoLocalization${locale.camelCase()}';
   return '''
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
-  const CupertinoLocalization${locale.camelCase()}({
+  @Deprecated(
+    'Use $className from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
+  const $className({
     super.localeName = '$localeName',
     required super.fullYearFormat,
     required super.dayFormat,

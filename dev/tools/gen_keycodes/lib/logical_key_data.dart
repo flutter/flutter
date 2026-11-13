@@ -601,7 +601,7 @@ class LogicalKeyEntry {
   /// A string indicating the letter on the keycap of a letter key.
   ///
   /// This is only used to generate the key label mapping in keyboard_maps.g.dart.
-  /// [LogicalKeyboardKey.keyLabel] uses a different definition and is generated
+  /// `LogicalKeyboardKey.keyLabel` uses a different definition and is generated
   /// differently.
   final String? keyLabel;
 

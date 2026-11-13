@@ -4,21 +4,20 @@
 
 package com.flutter.gradle.plugins
 
-import com.android.builder.model.BuildType
+import com.android.build.api.dsl.ApplicationBuildType
+import com.flutter.gradle.CompileSdkVersion
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.FlutterPluginUtils.addApiDependencies
 import com.flutter.gradle.FlutterPluginUtils.buildModeFor
+import com.flutter.gradle.FlutterPluginUtils.getAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.getCompileSdkFromProject
-import com.flutter.gradle.FlutterPluginUtils.getLegacyAndroidExtension
-import com.flutter.gradle.FlutterPluginUtils.isBuiltAsApp
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
-import com.android.build.gradle.internal.dsl.BuildType as dslBuildType
+import com.android.build.api.dsl.BuildType as DslBuildType
 
 /**
  * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
@@ -111,7 +110,7 @@ class PluginHandler(
             // Add plugin dependency to the app project. We only want to add dependency
             // for dev dependencies in non-release builds.
             project.afterEvaluate {
-                getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->
+                getAndroidExtension(project).buildTypes.forEach { buildType ->
                     if (!(pluginObject["dev_dependency"] as Boolean) || buildType.name != "release") {
                         project.dependencies.add("${buildType.name}Api", pluginProject)
                     }
@@ -121,12 +120,9 @@ class PluginHandler(
             // Wait until the Android plugin loaded.
             pluginProject.afterEvaluate {
                 // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
-                val projectCompileSdkVersion: String = getCompileSdkFromProject(project)
-                val pluginCompileSdkVersion: String = getCompileSdkFromProject(pluginProject)
-                // TODO(gmackall): This is doing a string comparison, which is odd and also can be wrong
-                //                 when comparing preview versions (against non preview, and also in the
-                //                 case of alphabet reset which happened with "Baklava".
-                if (pluginCompileSdkVersion > projectCompileSdkVersion) {
+                val projectCompileSdkVersion: CompileSdkVersion = getCompileSdkFromProject(project)
+                val pluginCompileSdkVersion: CompileSdkVersion = getCompileSdkFromProject(pluginProject)
+                if (pluginCompileSdkVersion.isHigherThan(projectCompileSdkVersion)) {
                     project.logger.quiet(
                         "Warning: The plugin $pluginName requires Android SDK version $pluginCompileSdkVersion or higher."
                     )
@@ -135,8 +131,37 @@ class PluginHandler(
                     )
                 }
 
-                getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->
+                copyAppBuildTypesToPlugin(project, pluginProject)
+
+                getAndroidExtension(project).buildTypes.forEach { buildType ->
                     addEmbeddingDependencyToPlugin(project, pluginProject, buildType, engineVersion)
+                }
+            }
+        }
+
+        private fun copyAppBuildTypesToPlugin(
+            project: Project,
+            pluginProject: Project
+        ) {
+            if (!pluginProject.hasProperty("android")) {
+                return
+            }
+
+            // Copy the app project's build types onto the plugin project so that its variants
+            // resolve. These are `initWith` copies, not live aliases: `initWith` copies the
+            // properties both build types understand (matchingFallbacks included), and
+            // app-specific properties are additionally copied when both sides are application
+            // build types. Library build types cannot receive app-specific properties (such
+            // as isDebuggable) through the public DSL.
+            val pluginProjectBuildTypes = getAndroidExtension(pluginProject).buildTypes
+            getAndroidExtension(project).buildTypes.forEach { appBuildType ->
+                if (pluginProjectBuildTypes.findByName(appBuildType.name) == null) {
+                    pluginProjectBuildTypes.create(appBuildType.name) {
+                        initWith(appBuildType)
+                        if (this is ApplicationBuildType && appBuildType is ApplicationBuildType) {
+                            isDebuggable = appBuildType.isDebuggable
+                        }
+                    }
                 }
             }
         }
@@ -144,7 +169,7 @@ class PluginHandler(
         private fun addEmbeddingDependencyToPlugin(
             project: Project,
             pluginProject: Project,
-            buildType: BuildType,
+            buildType: DslBuildType,
             engineVersion: String
         ) {
             val flutterBuildMode: String = buildModeFor(buildType)
@@ -158,27 +183,6 @@ class PluginHandler(
             }
             if (!pluginProject.hasProperty("android")) {
                 return
-            }
-
-            // Copy build types from the app to the plugin.
-            // This allows to build apps with plugins and custom build types or flavors.
-            // However, only copy if the plugin is also an app project, since library projects
-            // cannot have applicationIdSuffix and other app-specific properties.
-            if (isBuiltAsApp(pluginProject)) {
-                (getLegacyAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<dslBuildType>)
-                    .addAll(getLegacyAndroidExtension(project).buildTypes as NamedDomainObjectContainer<dslBuildType>)
-            } else {
-                // For library projects, create compatible build types without app-specific properties
-                getLegacyAndroidExtension(project).buildTypes.forEach { appBuildType ->
-                    if (getLegacyAndroidExtension(pluginProject).buildTypes.findByName(appBuildType.name) == null) {
-                        getLegacyAndroidExtension(pluginProject).buildTypes.create(appBuildType.name) {
-                            // Copy library-compatible properties only
-                            isDebuggable = appBuildType.isDebuggable
-                            isMinifyEnabled = appBuildType.isMinifyEnabled
-                            // Note: applicationIdSuffix and other app-specific properties are intentionally not copied
-                        }
-                    }
-                }
             }
 
             // The embedding is API dependency of the plugin, so the AGP is able to desugar
@@ -215,7 +219,10 @@ class PluginHandler(
                 }
             val pluginProject: Project = project.rootProject.findProject(":$pluginName") ?: return
 
-            getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->
+            // Warning: Iterating buildTypes causes the project-level 'implementation' dependency to be added multiple times.
+            // When an app defines 3 build types (debug, profile, release), this registers 3
+            // separate afterEvaluate actions adding the same dependencyProject.
+            getAndroidExtension(project).buildTypes.forEach { buildType ->
                 val flutterBuildMode: String = buildModeFor(buildType)
                 if (flutterBuildMode == "release" && (pluginObject["dev_dependency"] as? Boolean == true)) {
                     // This plugin is a dev dependency will not be included in the
@@ -232,7 +239,6 @@ class PluginHandler(
                     val dependencyProject =
                         project.rootProject.findProject(":$pluginDependencyName") ?: return@innerForEach
                     pluginProject.afterEvaluate {
-                        // this.dependencies.add("implementation", dependencyProject)
                         pluginProject.dependencies.add("implementation", dependencyProject)
                     }
                 }
