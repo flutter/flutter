@@ -148,6 +148,21 @@ void main() {
     );
   });
 
+  testWidgets('TestWidgetsFlutterBinding.reset clears defaultRouteNameTestValue', (
+    WidgetTester tester,
+  ) async {
+    final TestWidgetsFlutterBinding binding = retrieveTestBinding(tester);
+    binding.platformDispatcher.defaultRouteNameTestValue = 'fake_route';
+    expect(binding.platformDispatcher.defaultRouteName, 'fake_route');
+
+    binding.reset();
+
+    expect(
+      binding.platformDispatcher.defaultRouteName,
+      PlatformDispatcher.instance.defaultRouteName,
+    );
+  });
+
   testWidgets('TestPlatformDispatcher can fake accessibility features', (
     WidgetTester tester,
   ) async {
