@@ -794,6 +794,9 @@ mixin WidgetsBinding
                 this,
               );
               return _formatEvaluationResult(result.violations);
+            case AccessibilityEvaluationType.unlabeledImage:
+              final EvaluationResult result = await const UnlabeledImageEvaluation().evaluate(this);
+              return _formatEvaluationResult(result.violations);
             case AccessibilityEvaluationType.minimumNonTextContrast:
             case AccessibilityEvaluationType.unlabeledLeafNode:
             case AccessibilityEvaluationType.title:

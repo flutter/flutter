@@ -227,6 +227,7 @@ void main() {
     final tapTargetIssues = <Map<String, Object?>>[];
     final missingLabelIssues = <Map<String, Object?>>[];
     final unlabeledLeafIssues = <Map<String, Object?>>[];
+    final unlabeledImageIssues = <Map<String, Object?>>[];
 
     for (final issue in issues) {
       switch (issue[AccessibilityInspectorKeys.rule] as String?) {
@@ -236,12 +237,15 @@ void main() {
           missingLabelIssues.add(issue);
         case final String rule when rule == AccessibilityEvaluationType.unlabeledLeafNode.name:
           unlabeledLeafIssues.add(issue);
+        case final String rule when rule == AccessibilityEvaluationType.unlabeledImage.name:
+          unlabeledImageIssues.add(issue);
       }
     }
 
     expect(tapTargetIssues, isNotEmpty);
     expect(missingLabelIssues, isNotEmpty);
     expect(unlabeledLeafIssues, isNotEmpty);
+    expect(unlabeledImageIssues, hasLength(1));
 
     // The small unlabeled tap target node should have multiple issues recorded for its nodeId.
     final Object? smallTapTargetNodeId = tapTargetIssues.first[AccessibilityInspectorKeys.nodeId];
@@ -277,6 +281,14 @@ void main() {
             .contains('expected leaf semantics node to have a label, value, hint, or tooltip'),
       ),
       isTrue,
+    );
+    expect(
+      unlabeledImageIssues.first[AccessibilityInspectorKeys.description],
+      contains('expected image node to have a label, value, hint, or tooltip'),
+    );
+    expect(
+      unlabeledImageIssues.first[AccessibilityInspectorKeys.nodeId],
+      isNot(smallTapTargetNodeId),
     );
 
     // Check accessible button has no issues.
