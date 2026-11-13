@@ -207,7 +207,7 @@ void main() {
         );
         expect(
           ExtensionManager(
-            hostPlatform: HostPlatform('darwin-riscv64', 'riscv64'),
+            hostPlatform: HostPlatform('darwin', .riscv64),
             logger: logger,
             featureFlags: featureFlags,
           ).hostPlatformName,
@@ -215,7 +215,7 @@ void main() {
         );
         expect(
           ExtensionManager(
-            hostPlatform: HostPlatform('freebsd-x64', 'x64'),
+            hostPlatform: HostPlatform('freebsd', .x64),
             logger: logger,
             featureFlags: featureFlags,
           ).hostPlatformName,

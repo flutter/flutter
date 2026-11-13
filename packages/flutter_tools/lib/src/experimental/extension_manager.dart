@@ -75,10 +75,7 @@ class ExtensionManager {
   List<ExtensionConnection> get connections => _discovery.connections;
 
   /// The operating system name of the host platform (e.g. `'linux'`, `'macos'`, `'windows'`).
-  String get hostPlatformName {
-    final String os = hostPlatform.cliName.split('-').first;
-    return os == 'darwin' ? 'macos' : os;
-  }
+  String get hostPlatformName => hostPlatform.osName == 'darwin' ? 'macos' : hostPlatform.osName;
 
   /// Spawns entrypoints without host OS checks; disposes any extension that reports
   /// it does not support [hostPlatform].

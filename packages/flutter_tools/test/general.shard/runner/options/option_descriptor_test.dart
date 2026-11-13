@@ -673,6 +673,7 @@ void main() {
         BuildInfoOptions.performanceMeasurementFile,
         BuildInfoOptions.analyzeSize,
         BuildInfoOptions.codeSizeDirectory,
+        BuildInfoOptions.trackWidgetCreation,
       ];
 
       for (final descriptor in allOptions) {
