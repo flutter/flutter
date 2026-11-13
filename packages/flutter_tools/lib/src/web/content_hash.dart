@@ -405,7 +405,11 @@ String _updateBuildConfigInContent(
         );
       }
       final updatedMap = <String, Object?>{
-        ...decoded,
+        for (final MapEntry<String, Object?> entry in decoded.entries)
+          if (entry.key != 'assetManifest' &&
+              entry.key != 'fontManifest' &&
+              entry.key != 'extraAssets')
+            entry.key: entry.value,
         if (hashResult.assetManifestBinJson != null)
           'assetManifest': hashResult.assetManifestBinJson,
         if (hashResult.fontManifestJson != null) 'fontManifest': hashResult.fontManifestJson,

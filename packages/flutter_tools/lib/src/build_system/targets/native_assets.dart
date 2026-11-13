@@ -161,7 +161,8 @@ class LinkHooks extends Target {
   List<Source> get inputs => <Source>[
     const Source.pattern('{BUILD_DIR}/${BuildHooks.resultFilename}'),
     if (featureFlags.isRecordUseEnabled)
-      for (final String filename in _recordedUsesFileNames) Source.pattern('{BUILD_DIR}/$filename'),
+      for (final String filename in _recordedUsesFileNames)
+        Source.pattern('{BUILD_DIR}/$filename', optional: platform == HookPlatform.web),
   ];
 
   File? getRecordedUsesFile(Environment environment, BuildMode buildMode) {
