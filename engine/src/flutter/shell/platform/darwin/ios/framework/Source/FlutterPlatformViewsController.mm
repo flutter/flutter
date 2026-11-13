@@ -19,6 +19,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
+#import "flutter/shell/platform/darwin/ios/platform_view_layer_conversion.h"
 
 using flutter::DlISize;
 using flutter::DlMatrix;
@@ -40,31 +41,6 @@ struct LayerData {
 };
 using LayersMap = std::unordered_map<int64_t, LayerData>;
 
-// Converts a DlMatrix to CATransform3D.
-static CATransform3D GetCATransform3DFromDlMatrix(const DlMatrix& matrix) {
-  CATransform3D transform = CATransform3DIdentity;
-  transform.m11 = matrix.m[0];
-  transform.m12 = matrix.m[1];
-  transform.m13 = matrix.m[2];
-  transform.m14 = matrix.m[3];
-
-  transform.m21 = matrix.m[4];
-  transform.m22 = matrix.m[5];
-  transform.m23 = matrix.m[6];
-  transform.m24 = matrix.m[7];
-
-  transform.m31 = matrix.m[8];
-  transform.m32 = matrix.m[9];
-  transform.m33 = matrix.m[10];
-  transform.m34 = matrix.m[11];
-
-  transform.m41 = matrix.m[12];
-  transform.m42 = matrix.m[13];
-  transform.m43 = matrix.m[14];
-  transform.m44 = matrix.m[15];
-  return transform;
-}
-
 // Reset the anchor of `layer` to match the transform operation from flow.
 //
 // The position of the `layer` should be unchanged after resetting the anchor.
@@ -72,13 +48,6 @@ static void ResetAnchor(CALayer* layer) {
   // Flow uses (0, 0) to apply transform matrix so we need to match that in Quartz.
   layer.anchorPoint = CGPointZero;
   layer.position = CGPointZero;
-}
-
-static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
-  return CGRectMake(clipDlRect.GetLeft(),   //
-                    clipDlRect.GetTop(),    //
-                    clipDlRect.GetWidth(),  //
-                    clipDlRect.GetHeight());
 }
 
 @interface FlutterPlatformViewsController ()
@@ -582,7 +551,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         if (!self.canApplyBlurBackdrop || !(*iter)->GetFilterMutation().GetFilter().asBlur()) {
           break;
         }
-        CGRect filterRect = GetCGRectFromDlRect((*iter)->GetFilterMutation().GetFilterRect());
+        CGRect filterRect =
+            flutter::GetCGRectFromDlRect((*iter)->GetFilterMutation().GetFilterRect());
         // `filterRect` is in global coordinates. We need to convert to local space.
         filterRect = CGRectApplyAffineTransform(
             filterRect, CGAffineTransformMakeScale(1 / screenScale, 1 / screenScale));
@@ -692,7 +662,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   impeller::Vector3 origin = impeller::Vector3(clipView.frame.origin.x, clipView.frame.origin.y);
   transformMatrix = DlMatrix::MakeTranslation(-origin) * transformMatrix;
 
-  embeddedView.layer.transform = GetCATransform3DFromDlMatrix(transformMatrix);
+  embeddedView.layer.transform = flutter::GetCATransform3DFromDlMatrix(transformMatrix);
 }
 
 - (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params {
