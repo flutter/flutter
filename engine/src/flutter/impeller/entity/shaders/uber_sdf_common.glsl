@@ -55,7 +55,7 @@ uniform FragInfo {
   // --- Gradient Parameters ---
   /// The linear gradient's delta vector (end - start) in local coordinates.
   /// Unused (0) for radial gradients.
-  highp vec2 gradient_delta;
+  vec2 gradient_delta;
 
   // --- Superellipse Parameters ---
   /// The exponent degree (n_x, n_y) of the superellipse curvature.
@@ -103,11 +103,10 @@ uniform FragInfo {
   ///   2: Mirror
   ///   3: Decal
   float tile_mode;
-  /// Retain small reciprocals for large gradients with high precision.
   /// Inverse gradient length:
   ///   - Linear gradient: 1.0 / dot(delta, delta)
   ///   - Radial gradient: 1.0 / radius
-  highp float inv_gradient_length;
+  float inv_gradient_length;
 
   // --- Variant-Specific Gradient Parameters ---
   // Exactly one of these is used by any given entrypoint; the other is unset.
@@ -151,8 +150,8 @@ vec4 getColor() {
     // Same expressions as IPComputeLinearGradientT and
     // IPComputeRadialGradientT, with the subtraction of the gradient's origin
     // already done in the vertex shader.
-    highp vec2 gradient_position = v_gradient_position;
-    highp float t;
+    vec2 gradient_position = v_gradient_position;
+    float t;
     if (frag_info.color_source_type < 1.5) {
       // Linear gradient
       t = dot(gradient_position, frag_info.gradient_delta) *
