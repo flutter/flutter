@@ -29,10 +29,12 @@
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_test.h"
@@ -50,6 +52,7 @@
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "lib/ui/semantics/semantics_node.h"
+#include "third_party/dart/runtime/include/dart_native_api.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h"
@@ -5270,6 +5273,181 @@ TEST_F(ShellTest, MakePipelineUsageJsonReportsEachPipeline) {
           R"({"label":"PorterDuffBlend Pipeline V#1","constants":[1.0,0.0,1.0],"count":1,"eagerly_created":false})",
           R"({"label":"Runtime Stage","constants":[],"count":2,"eagerly_created":false})",
           R"({"label":"Runtime Stage","constants":[],"count":1,"eagerly_created":false})"));
+#endif
+}
+
+namespace {
+
+std::string DestroyShellCapturingLog(std::unique_ptr<Shell> shell) {
+  std::string captured;
+  fml::AutoResetWaitableEvent latch;
+  auto platform_runner = shell->GetTaskRunners().GetPlatformTaskRunner();
+  fml::TaskRunner::RunNowOrPostTask(platform_runner, [&]() {
+    fml::testing::LogCapture log_capture;
+    shell.reset();
+    captured = log_capture.str();
+    latch.Signal();
+  });
+  latch.Wait();
+  return captured;
+}
+
+}  // namespace
+
+TEST_F(ShellTest, WarnsWhenChildIsolateOutlivesShellShutdown) {
+#if FLUTTER_RELEASE
+  GTEST_SKIP() << "Isolate group leak warning is disabled in release mode.";
+#else
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  {
+    auto settings = CreateSettingsForFixture();
+    auto shell = CreateShell(settings);
+    ASSERT_TRUE(ValidateShell(shell.get()));
+    // Hold an extra VM reference so ~Shell does not block in Dart_Cleanup while
+    // the child isolate is intentionally still running.
+    auto vm_ref = DartVMRef::Create(settings);
+    ASSERT_TRUE(vm_ref);
+
+    Dart_Port child_shutdown_port = ILLEGAL_PORT;
+    fml::AutoResetWaitableEvent child_ready_latch;
+    AddFfiNativeCallback("RegisterChildShutdownPort",
+                         CREATE_FFI_LAMBDA([&](int64_t port) {
+                           child_shutdown_port = static_cast<Dart_Port>(port);
+                           child_ready_latch.Signal();
+                         }));
+    AddFfiNativeCallback("NotifyNative", CREATE_FFI_LAMBDA([]() {}));
+
+    auto configuration = RunConfiguration::InferFromSettings(settings);
+    ASSERT_TRUE(configuration.IsValid());
+    configuration.SetEntrypoint("spawnPersistentChildIsolate");
+
+    RunEngine(shell.get(), std::move(configuration));
+    child_ready_latch.Wait();
+    ASSERT_NE(child_shutdown_port, ILLEGAL_PORT);
+
+    std::string captured_log = DestroyShellCapturingLog(std::move(shell));
+    EXPECT_NE(captured_log.find(
+                  "Warning: The engine's Dart isolate group still has active "
+                  "child isolates after engine shutdown."),
+              std::string::npos)
+        << "Actual log: " << captured_log;
+    EXPECT_NE(captured_log.find("FlutterEngineCache"), std::string::npos)
+        << "Actual log: " << captured_log;
+
+    ASSERT_TRUE(Dart_PostInteger(child_shutdown_port, 0));
+  }
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+#endif
+}
+
+TEST_F(ShellTest, DoesNotWarnWhenChildIsolateExitsBeforeShellShutdown) {
+#if FLUTTER_RELEASE
+  GTEST_SKIP() << "Isolate group leak warning is disabled in release mode.";
+#else
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  Dart_Port child_shutdown_port = ILLEGAL_PORT;
+  fml::AutoResetWaitableEvent child_ready_latch;
+  fml::AutoResetWaitableEvent child_exited_latch;
+  AddFfiNativeCallback("RegisterChildShutdownPort",
+                       CREATE_FFI_LAMBDA([&](int64_t port) {
+                         child_shutdown_port = static_cast<Dart_Port>(port);
+                         child_ready_latch.Signal();
+                       }));
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&child_exited_latch]() {
+                         child_exited_latch.Signal();
+                       }));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+  configuration.SetEntrypoint("spawnPersistentChildIsolate");
+
+  RunEngine(shell.get(), std::move(configuration));
+  child_ready_latch.Wait();
+  ASSERT_NE(child_shutdown_port, ILLEGAL_PORT);
+
+  ASSERT_TRUE(Dart_PostInteger(child_shutdown_port, 0));
+  child_exited_latch.Wait();
+
+  std::string captured_log = DestroyShellCapturingLog(std::move(shell));
+  EXPECT_EQ(captured_log, "");
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+#endif
+}
+
+TEST_F(ShellTest, WarnsOnlyWhenLastSpawnedShellInGroupShutsDown) {
+#if FLUTTER_RELEASE
+  GTEST_SKIP() << "Isolate group leak warning is disabled in release mode.";
+#else
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  {
+    auto settings = CreateSettingsForFixture();
+    auto shell = CreateShell(settings);
+    ASSERT_TRUE(ValidateShell(shell.get()));
+    auto vm_ref = DartVMRef::Create(settings);
+    ASSERT_TRUE(vm_ref);
+
+    Dart_Port child_shutdown_port = ILLEGAL_PORT;
+    fml::AutoResetWaitableEvent child_ready_latch;
+    fml::AutoResetWaitableEvent spawn_ready_latch;
+    AddFfiNativeCallback("RegisterChildShutdownPort",
+                         CREATE_FFI_LAMBDA([&](int64_t port) {
+                           child_shutdown_port = static_cast<Dart_Port>(port);
+                           child_ready_latch.Signal();
+                         }));
+    AddFfiNativeCallback("NotifyNative", CREATE_FFI_LAMBDA([]() {}));
+    AddFfiNativeCallback("SayHiFromFixturesAreFunctionalMain",
+                         CREATE_FFI_LAMBDA([&spawn_ready_latch]() {
+                           spawn_ready_latch.Signal();
+                         }));
+
+    auto configuration = RunConfiguration::InferFromSettings(settings);
+    ASSERT_TRUE(configuration.IsValid());
+    configuration.SetEntrypoint("spawnPersistentChildIsolate");
+
+    RunEngine(shell.get(), std::move(configuration));
+    child_ready_latch.Wait();
+    ASSERT_NE(child_shutdown_port, ILLEGAL_PORT);
+
+    auto second_configuration = RunConfiguration::InferFromSettings(settings);
+    ASSERT_TRUE(second_configuration.IsValid());
+    second_configuration.SetEntrypoint("fixturesAreFunctionalMain");
+
+    std::unique_ptr<Shell> spawn;
+    PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
+             [&shell, &spawn, &second_configuration] {
+               spawn = shell->Spawn(
+                   std::move(second_configuration), "",
+                   ShellTestPlatformViewBuilder({}), [](Shell& shell) {
+                     return std::make_unique<Rasterizer>(shell);
+                   });
+             });
+    ASSERT_NE(spawn, nullptr);
+    ASSERT_TRUE(ValidateShell(spawn.get()));
+    spawn_ready_latch.Wait();
+
+    // Destroying the first shell while a spawned sibling shell remains active
+    // in the group must not emit the warning.
+    std::string first_shutdown_log = DestroyShellCapturingLog(std::move(shell));
+    EXPECT_EQ(first_shutdown_log, "");
+
+    // Destroying the last shell in the group while the child isolate is still
+    // active must emit the warning.
+    std::string second_shutdown_log =
+        DestroyShellCapturingLog(std::move(spawn));
+    EXPECT_NE(second_shutdown_log.find(
+                  "Warning: The engine's Dart isolate group still has "
+                  "active child isolates after engine shutdown."),
+              std::string::npos)
+        << "Actual log: " << second_shutdown_log;
+
+    ASSERT_TRUE(Dart_PostInteger(child_shutdown_port, 0));
+  }
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 #endif
 }
 

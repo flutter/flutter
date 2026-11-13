@@ -41,9 +41,11 @@ class IsolateConfiguration;
 ///             isolate.
 ///
 ///             The root isolate is special in the following ways:
-///             * The root isolate forms a new isolate group. Child isolates are
-///               added to their parents groups. When the root isolate dies, all
-///               isolates in its group are terminated.
+///             * The root isolate forms a new isolate group (or joins an
+///               existing group when spawned via `spawning_isolate`). Child
+///               isolates spawned via `Isolate.spawn` are added to their
+///               parent's group and are not automatically terminated when the
+///               root isolate shuts down.
 ///             * Only root isolates get UI bindings.
 ///             * Root isolates execute their code on engine managed threads.
 ///               All other isolates run their Dart code on Dart VM managed
@@ -51,8 +53,8 @@ class IsolateConfiguration;
 ///             * Since the engine does not know the thread on which non-root
 ///               isolates are run, the engine has no opportunity to get a
 ///               reference to non-root isolates. Such isolates can only be
-///               terminated if they terminate themselves or their isolate group
-///               is torn down.
+///               terminated if they terminate themselves, are killed via
+///               `Isolate.kill`, or the Dart VM shuts down.
 ///
 class DartIsolate : public UIDartState {
  public:
@@ -143,9 +145,11 @@ class DartIsolate : public UIDartState {
   ///             isolate.
   ///
   ///             The root isolate is special in the following ways:
-  ///             * The root isolate forms a new isolate group. Child isolates
-  ///               are added to their parents groups. When the root isolate
-  ///               dies, all isolates in its group are terminated.
+  ///             * The root isolate forms a new isolate group (or joins an
+  ///               existing group when spawned via `spawning_isolate`). Child
+  ///               isolates spawned via `Isolate.spawn` are added to their
+  ///               parent's group and are not automatically terminated when the
+  ///               root isolate shuts down.
   ///             * Only root isolates get UI bindings.
   ///             * Root isolates execute their code on engine managed threads.
   ///               All other isolates run their Dart code on Dart VM managed
@@ -153,8 +157,8 @@ class DartIsolate : public UIDartState {
   ///             * Since the engine does not know the thread on which non-root
   ///               isolates are run, the engine has no opportunity to get a
   ///               reference to non-root isolates. Such isolates can only be
-  ///               terminated if they terminate themselves or their isolate
-  ///               group is torn down.
+  ///               terminated if they terminate themselves, are killed via
+  ///               `Isolate.kill`, or the Dart VM shuts down.
   ///
   /// @param[in]  settings                    The settings used to create the
   ///                                         isolate.
@@ -405,6 +409,8 @@ class DartIsolate : public UIDartState {
   DartIsolateGroupData& GetIsolateGroupData();
 
   const DartIsolateGroupData& GetIsolateGroupData() const;
+
+  std::weak_ptr<const DartIsolateGroupData> GetWeakIsolateGroupData() const;
 
   /// Returns the "main" entrypoint of the library contained in the kernel
   /// data in `mapping`.
