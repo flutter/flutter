@@ -1,0 +1,341 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/rust/config.gni")
+
+_vendor = "//third_party/rust/chromium_crates_io/vendor"
+_workspace_core_rlib =
+    rebase_path("$target_out_dir/librustc_std_workspace_core.rlib",
+                root_build_dir)
+_workspace_alloc_rlib =
+    rebase_path("$target_out_dir/librustc_std_workspace_alloc.rlib",
+                root_build_dir)
+
+template("std_crate") {
+  rust_library(target_name) {
+    if (defined(invoker.crate_name)) {
+      crate_name = invoker.crate_name
+    } else {
+      crate_name = target_name
+    }
+    crate_root = invoker.crate_root
+    sources = [ crate_root ]
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+
+    _edition = "2024"
+    if (defined(invoker.edition)) {
+      _edition = invoker.edition
+    }
+
+    rustflags = [
+                  "--cap-lints=allow",
+                  "-Zforce-unstable-if-unmarked",
+                  "-Cmetadata=flutter_std",
+                  "--edition=$_edition",
+                  "--sysroot=$rebased_local_rustc_sysroot",
+                ] + rust_mode_flags
+
+    if (defined(invoker.features)) {
+      foreach(f, invoker.features) {
+        rustflags += [ "--cfg=feature=\"$f\"" ]
+      }
+    }
+    if (defined(invoker.extra_rustflags)) {
+      rustflags += invoker.extra_rustflags
+    }
+
+    rustenv = [
+      "RUSTC_BOOTSTRAP=1",
+      "CFG_DISABLE_UNSTABLE_FEATURES=0",
+      "STD_ENV_ARCH=$rust_target_arch",
+    ]
+  }
+}
+
+_size_features = []
+if (rust_optimize_for_size) {
+  _size_features += [ "optimize_for_size" ]
+}
+
+std_crate("core") {
+  crate_root = "$rust_std_src_root/core/src/lib.rs"
+  features = _size_features
+}
+
+std_crate("compiler_builtins") {
+  crate_root =
+      "$rust_std_src_root/compiler-builtins/compiler-builtins/src/lib.rs"
+  deps = [ ":core" ]
+  features = [
+    "compiler-builtins",
+    "unmangled-names",
+    "default",
+    "arch",
+    "rustc-dep-of-std",
+  ]
+  extra_rustflags = [
+    "--cfg=f16_enabled",
+    "--cfg=f128_enabled",
+    "--cfg=intrinsics_enabled",
+    "--cfg=arch_enabled",
+    "--cfg=optimizations_enabled",
+    "-Copt-level=2",
+    "-Coverflow-checks=no",
+    "-Ccodegen-units=10000",
+  ]
+  if (rust_target_arch == "x86_64" || rust_target_arch == "x86" ||
+      rust_target_arch == "aarch64") {
+    extra_rustflags += [ "--cfg=mem_unaligned" ]
+  }
+}
+
+std_crate("rustc_std_workspace_core") {
+  crate_root = "$rust_std_src_root/rustc-std-workspace-core/lib.rs"
+  deps = [
+    ":compiler_builtins",
+    ":core",
+  ]
+}
+
+std_crate("alloc") {
+  crate_root = "$rust_std_src_root/alloc/src/lib.rs"
+  deps = [ ":rustc_std_workspace_core" ]
+  features = _size_features
+  extra_rustflags = [
+    "--extern",
+    "core=$_workspace_core_rlib",
+  ]
+}
+
+std_crate("rustc_std_workspace_alloc") {
+  crate_root = "$rust_std_src_root/rustc-std-workspace-alloc/lib.rs"
+  deps = [
+    ":alloc",
+    ":rustc_std_workspace_core",
+  ]
+  extra_rustflags = [
+    "--extern",
+    "core=$_workspace_core_rlib",
+  ]
+}
+
+std_crate("cfg_if") {
+  crate_root = "$_vendor/cfg-if-v1/src/lib.rs"
+  edition = "2018"
+  deps = [ ":rustc_std_workspace_core" ]
+  features = [ "rustc-dep-of-std" ]
+  extra_rustflags = [
+    "--extern",
+    "core=$_workspace_core_rlib",
+  ]
+}
+
+if (is_win) {
+  std_crate("windows_link") {
+    crate_root = "$rust_std_src_root/windows_link/src/lib.rs"
+    deps = [ ":rustc_std_workspace_core" ]
+  }
+} else {
+  std_crate("libc") {
+    crate_root = "$_vendor/libc-v0_2/src/lib.rs"
+    edition = "2021"
+    deps = [ ":rustc_std_workspace_core" ]
+    features = [ "rustc-dep-of-std" ]
+    extra_rustflags = [
+      "--cfg=freebsd11",
+      "--cfg=libc_const_extern_fn",
+    ]
+  }
+}
+
+std_crate("unwind") {
+  crate_root = "$rust_std_src_root/unwind/src/lib.rs"
+  deps = [ ":rustc_std_workspace_core" ]
+  if (!is_win) {
+    deps += [ ":libc" ]
+  }
+  extra_rustflags = [
+    "--extern",
+    "core=$_workspace_core_rlib",
+  ]
+}
+
+std_crate("panic_abort") {
+  crate_root = "$rust_std_src_root/panic_abort/src/lib.rs"
+  deps = [
+    ":alloc",
+    ":rustc_std_workspace_core",
+  ]
+  if (is_android) {
+    deps += [ ":libc" ]
+  }
+  extra_rustflags = [
+    "--extern",
+    "core=$_workspace_core_rlib",
+  ]
+}
+
+std_crate("hashbrown") {
+  crate_root = "$_vendor/hashbrown-v0_17/src/lib.rs"
+  deps = [
+    ":rustc_std_workspace_alloc",
+    ":rustc_std_workspace_core",
+  ]
+  features = [
+    "rustc-dep-of-std",
+    "nightly",
+    "core",
+    "alloc",
+    "rustc-internal-api",
+  ]
+  extra_rustflags = [
+    "--extern",
+    "core=$_workspace_core_rlib",
+    "--extern",
+    "alloc=$_workspace_alloc_rlib",
+  ]
+}
+
+std_crate("rustc_demangle") {
+  crate_root = "$_vendor/rustc-demangle-v0_1/src/lib.rs"
+  edition = "2015"
+  deps = [ ":rustc_std_workspace_core" ]
+  features = [ "rustc-dep-of-std" ]
+  extra_rustflags = [
+    "--extern",
+    "core=$_workspace_core_rlib",
+  ]
+}
+
+std_crate("std_detect") {
+  crate_root = "$rust_std_src_root/std_detect/src/lib.rs"
+  deps = [
+    ":rustc_std_workspace_alloc",
+    ":rustc_std_workspace_core",
+  ]
+  if (!is_win) {
+    deps += [ ":libc" ]
+  }
+  extra_rustflags = [
+    "--extern",
+    "core=$_workspace_core_rlib",
+    "--extern",
+    "alloc=$_workspace_alloc_rlib",
+  ]
+}
+
+if (is_fuchsia) {
+  std_crate("object") {
+    crate_root = "fuchsia_object_shim.rs"
+    features = [ "rustc-dep-of-std" ]
+    deps = [ ":rustc_std_workspace_core" ]
+    extra_rustflags = [
+      "--extern",
+      "core=$_workspace_core_rlib",
+    ]
+  }
+}
+
+std_crate("std_crate") {
+  crate_name = "std"
+  crate_root = "$rust_std_src_root/std/src/lib.rs"
+  features = _size_features
+  extra_rustflags = [ "--cfg=backtrace_in_libstd" ]
+  deps = [
+    ":alloc",
+    ":cfg_if",
+    ":core",
+    ":hashbrown",
+    ":panic_abort",
+    ":rustc_demangle",
+    ":std_detect",
+    ":unwind",
+  ]
+  if (is_fuchsia) {
+    deps += [ ":object" ]
+  }
+  if (is_win) {
+    deps += [ ":windows_link" ]
+  } else {
+    deps += [ ":libc" ]
+  }
+}
+
+if (current_toolchain == host_toolchain) {
+  std_crate("rustc_literal_escaper") {
+    crate_root = "rustc_literal_escaper_wrapper.rs"
+    edition = "2021"
+    deps = [ ":rustc_std_workspace_core" ]
+    features = [ "rustc-dep-of-std" ]
+    extra_rustflags = [
+      "--extern",
+      "core=$_workspace_core_rlib",
+    ]
+  }
+
+  std_crate("proc_macro") {
+    crate_root = "$rust_std_src_root/proc_macro/src/lib.rs"
+    features = [ "rustc-dep-of-std" ]
+    deps = [
+      ":core",
+      ":rustc_literal_escaper",
+      ":std_crate",
+    ]
+  }
+}
+
+copy("std") {
+  sources = [
+    "$target_out_dir/liballoc.rlib",
+    "$target_out_dir/libcfg_if.rlib",
+    "$target_out_dir/libcompiler_builtins.rlib",
+    "$target_out_dir/libcore.rlib",
+    "$target_out_dir/libhashbrown.rlib",
+    "$target_out_dir/libpanic_abort.rlib",
+    "$target_out_dir/librustc_demangle.rlib",
+    "$target_out_dir/librustc_std_workspace_alloc.rlib",
+    "$target_out_dir/librustc_std_workspace_core.rlib",
+    "$target_out_dir/libstd.rlib",
+    "$target_out_dir/libstd_detect.rlib",
+    "$target_out_dir/libunwind.rlib",
+  ]
+  deps = [
+    ":alloc",
+    ":cfg_if",
+    ":compiler_builtins",
+    ":core",
+    ":hashbrown",
+    ":panic_abort",
+    ":rustc_demangle",
+    ":rustc_std_workspace_alloc",
+    ":rustc_std_workspace_core",
+    ":std_crate",
+    ":std_detect",
+    ":unwind",
+  ]
+  if (is_fuchsia) {
+    sources += [ "$target_out_dir/libobject.rlib" ]
+    deps += [ ":object" ]
+  }
+  if (is_win) {
+    sources += [ "$target_out_dir/libwindows_link.rlib" ]
+    deps += [ ":windows_link" ]
+  } else {
+    sources += [ "$target_out_dir/liblibc.rlib" ]
+    deps += [ ":libc" ]
+  }
+  if (current_toolchain == host_toolchain) {
+    sources += [
+      "$target_out_dir/libproc_macro.rlib",
+      "$target_out_dir/librustc_literal_escaper.rlib",
+    ]
+    deps += [
+      ":proc_macro",
+      ":rustc_literal_escaper",
+    ]
+  }
+  outputs = [ "$local_rustc_sysroot_lib_dir/{{source_file_part}}" ]
+}

@@ -1,0 +1,133 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/rust/config.gni")
+
+library_configs = [
+  "//build/config/coverage:default_coverage",
+  "//build/config/compiler:chromium_code",
+]
+executable_configs = [
+  "//build/config/coverage:default_coverage",
+  "//build/config/compiler:chromium_code",
+]
+proc_macro_configs = [
+  "//build/config/coverage:default_coverage",
+  "//build/config/compiler:chromium_code",
+]
+
+template("cargo_crate") {
+  not_needed(invoker, "*")
+
+  if (invoker.crate_type == "proc-macro" && current_toolchain != host_toolchain) {
+    group(target_name) {
+      public_deps = [ ":$target_name($host_toolchain)" ]
+    }
+  } else {
+    _crate_name = target_name
+    if (defined(invoker.crate_name)) {
+      _crate_name = invoker.crate_name
+    }
+
+    _rustflags = [
+                   "--cap-lints=allow",
+                   "--sysroot=$rebased_local_rustc_sysroot",
+                 ] + rust_mode_flags
+
+    if (defined(invoker.edition)) {
+      _rustflags += [ "--edition=${invoker.edition}" ]
+    }
+    if (defined(invoker.features)) {
+      foreach(f, invoker.features) {
+        _rustflags += [ "--cfg=feature=\"$f\"" ]
+      }
+    }
+    if (_crate_name == "proc_macro2") {
+      _rustflags += [
+        "--cfg=wrap_proc_macro",
+        "--cfg=span_locations",
+        "--extern",
+        "proc_macro",
+      ]
+    }
+
+    _pkg_version = "1.0.205"
+    if (defined(invoker.cargo_pkg_version)) {
+      _pkg_version = invoker.cargo_pkg_version
+    }
+    _pkg_name = _crate_name
+    if (defined(invoker.cargo_pkg_name)) {
+      _pkg_name = invoker.cargo_pkg_name
+    }
+    _out_dir = rebase_path(target_gen_dir)
+    if (_crate_name == "serde_core") {
+      write_file(
+          "$target_gen_dir/private.rs",
+          [
+            "#[doc(hidden)]",
+            "pub mod __private205 {",
+            "    #[doc(hidden)]",
+            "    pub use crate::private::*;",
+            "}",
+          ])
+    }
+    _rustenv = [
+      "OUT_DIR=$_out_dir",
+      "CARGO_PKG_VERSION=$_pkg_version",
+      "CARGO_PKG_VERSION_MAJOR=1",
+      "CARGO_PKG_VERSION_MINOR=0",
+      "CARGO_PKG_VERSION_PATCH=205",
+      "CARGO_PKG_NAME=$_pkg_name",
+      "CARGO_PKG_AUTHORS=flutter",
+      "CARGO_PKG_DESCRIPTION=flutter",
+      "CARGO_PKG_REPOSITORY=flutter",
+    ]
+    if (defined(invoker.rustenv)) {
+      _rustenv += invoker.rustenv
+    }
+
+    _deps = [ "//build/rust/std" ]
+    if (defined(invoker.deps)) {
+      _deps += invoker.deps
+    }
+
+    _inputs = [ "$local_rustc_sysroot_lib_dir/libstd.rlib" ]
+    if (defined(invoker.inputs)) {
+      _inputs += invoker.inputs
+    }
+
+    if (invoker.crate_type == "proc-macro") {
+      rust_proc_macro(target_name) {
+        crate_name = _crate_name
+        crate_root = invoker.crate_root
+        sources = invoker.sources
+        inputs = _inputs
+        deps = _deps
+        rustflags = _rustflags
+        rustenv = _rustenv
+      }
+    } else if (invoker.crate_type == "rlib") {
+      rust_library(target_name) {
+        crate_name = _crate_name
+        crate_root = invoker.crate_root
+        sources = invoker.sources
+        inputs = _inputs
+        deps = _deps
+        rustflags = _rustflags
+        rustenv = _rustenv
+      }
+    } else if (invoker.crate_type == "bin") {
+      executable(target_name) {
+        crate_name = _crate_name
+        crate_root = invoker.crate_root
+        sources = invoker.sources
+        inputs = _inputs
+        deps = _deps
+        no_default_deps = true
+        rustflags = _rustflags
+        rustenv = _rustenv
+      }
+    }
+  }
+}

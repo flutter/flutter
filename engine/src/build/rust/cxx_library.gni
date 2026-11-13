@@ -1,0 +1,92 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/rust/config.gni")
+
+template("rust_cxx_library") {
+  _rust_target = "${target_name}_rust"
+  _cxxgen_target = "${target_name}_cxxgen"
+  _config_target = "${target_name}_config"
+
+  _gen_header = "$target_gen_dir/${invoker.crate_root}.h"
+  _gen_cc = "$target_gen_dir/${invoker.crate_root}.cc"
+  if (is_win) {
+    _rust_archive = "$target_out_dir/${_rust_target}.lib"
+  } else {
+    _rust_archive = "$target_out_dir/lib${_rust_target}.a"
+  }
+
+  static_library(_rust_target) {
+    crate_name = target_name
+    crate_root = invoker.crate_root
+    sources = invoker.sources
+    inputs = [ "$local_rustc_sysroot_lib_dir/libstd.rlib" ]
+    deps = [
+      "//build/rust/std",
+      "//third_party/rust/cxx/v1:lib",
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    rustflags = [
+                  "--edition=2021",
+                  "--sysroot=$rebased_local_rustc_sysroot",
+                ] + rust_mode_flags
+  }
+
+  action(_cxxgen_target) {
+    script = "//build/rust/run_cxxbridge.py"
+    _cxxbridge_exe = "cxxbridge"
+    if (host_os == "win") {
+      _cxxbridge_exe = "cxxbridge.exe"
+    }
+    cxxbridge_bin =
+        get_label_info(
+            "//third_party/rust/cxxbridge_cmd/v1:cxxbridge($host_toolchain)",
+            "root_out_dir") + "/$_cxxbridge_exe"
+    inputs = [
+      cxxbridge_bin,
+      invoker.crate_root,
+      _rust_archive,
+    ]
+    outputs = [
+      _gen_header,
+      _gen_cc,
+    ]
+    args = [
+      "--cxxbridge",
+      rebase_path(cxxbridge_bin, root_build_dir),
+      "--input",
+      rebase_path(invoker.crate_root, root_build_dir),
+      "--header",
+      rebase_path(_gen_header, root_build_dir),
+      "--cc",
+      rebase_path(_gen_cc, root_build_dir),
+    ]
+    deps = [
+      ":$_rust_target",
+      "//third_party/rust/cxxbridge_cmd/v1:cxxbridge($host_toolchain)",
+    ]
+  }
+
+  config(_config_target) {
+    include_dirs = [ target_gen_dir ]
+    libs = [ _rust_archive ]
+  }
+
+  source_set(target_name) {
+    sources = [
+      _gen_cc,
+      _gen_header,
+    ]
+    deps = [
+      ":$_cxxgen_target",
+      "//build/rust:cxx_cpp",
+    ]
+    public_configs = [
+      ":$_config_target",
+      "//build/rust:cxx_cpp_config",
+    ]
+  }
+}

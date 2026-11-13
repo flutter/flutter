@@ -1,0 +1,6 @@
+import("//build/rust/cxx_library.gni")
+
+rust_cxx_library("flutter_rust") {
+  crate_root = "bridge.rs"
+  sources = [ "bridge.rs" ]
+}

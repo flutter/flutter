@@ -1,0 +1,175 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/toolchain/toolchain.gni")
+import("//flutter/common/config.gni")
+
+if (is_ios) {
+  import("//build/config/darwin/darwin_sdk.gni")
+}
+
+# Host Rust toolchain configuration.
+if (host_os == "linux") {
+  if (host_cpu == "arm64") {
+    rust_host_dir = "linux-arm64"
+  } else {
+    rust_host_dir = "linux-x64"
+  }
+  rustc_exe = "rustc"
+} else if (host_os == "mac") {
+  if (host_cpu == "arm64") {
+    rust_host_dir = "mac-arm64"
+  } else {
+    rust_host_dir = "mac-x64"
+  }
+  rustc_exe = "rustc"
+} else if (host_os == "win") {
+  rust_host_dir = "windows-x64"
+  rustc_exe = "rustc.exe"
+} else {
+  assert(false, "Unsupported host_os for Rust toolchain: $host_os")
+}
+
+rust_toolchain_root = "$buildtools_path/$rust_host_dir/rust"
+rustc_bin = "$rust_toolchain_root/bin/$rustc_exe"
+rust_std_src_root = "$rust_toolchain_root/lib/rustlib/src/rust/library"
+
+# Target architecture normalization.
+if (current_cpu == "x64" || current_cpu == "x86_64") {
+  rust_target_arch = "x86_64"
+} else if (current_cpu == "arm64" || current_cpu == "aarch64") {
+  rust_target_arch = "aarch64"
+} else if (current_cpu == "arm") {
+  rust_target_arch = "arm"
+} else if (current_cpu == "x86") {
+  rust_target_arch = "x86"
+} else if (current_cpu == "riscv64") {
+  rust_target_arch = "riscv64"
+} else if (current_cpu == "wasm") {
+  rust_target_arch = "wasm32"
+} else {
+  rust_target_arch = ""
+}
+
+# Target triple selection across all Flutter platforms.
+rust_target_triple = ""
+if (is_android) {
+  if (rust_target_arch == "aarch64") {
+    rust_target_triple = "aarch64-linux-android"
+  } else if (rust_target_arch == "arm") {
+    rust_target_triple = "armv7-linux-androideabi"
+  } else if (rust_target_arch == "x86_64") {
+    rust_target_triple = "x86_64-linux-android"
+  } else if (rust_target_arch == "x86") {
+    rust_target_triple = "i686-linux-android"
+  } else if (rust_target_arch == "riscv64") {
+    rust_target_triple = "riscv64-linux-android"
+  }
+} else if (is_ios) {
+  if (rust_target_arch == "aarch64" || rust_target_arch == "arm") {
+    if (use_ios_simulator) {
+      rust_target_triple = "aarch64-apple-ios-sim"
+    } else {
+      rust_target_triple = "aarch64-apple-ios"
+    }
+  } else if (rust_target_arch == "x86_64") {
+    rust_target_triple = "x86_64-apple-ios"
+  }
+} else if (is_mac) {
+  if (rust_target_arch == "aarch64") {
+    rust_target_triple = "aarch64-apple-darwin"
+  } else if (rust_target_arch == "x86_64") {
+    rust_target_triple = "x86_64-apple-darwin"
+  }
+} else if (is_linux) {
+  if (rust_target_arch == "x86_64") {
+    rust_target_triple = "x86_64-unknown-linux-gnu"
+  } else if (rust_target_arch == "aarch64") {
+    rust_target_triple = "aarch64-unknown-linux-gnu"
+  } else if (rust_target_arch == "arm") {
+    rust_target_triple = "armv7-unknown-linux-gnueabihf"
+  } else if (rust_target_arch == "x86") {
+    rust_target_triple = "i686-unknown-linux-gnu"
+  } else if (rust_target_arch == "riscv64") {
+    rust_target_triple = "riscv64gc-unknown-linux-gnu"
+  }
+} else if (is_win) {
+  if (rust_target_arch == "x86_64") {
+    rust_target_triple = "x86_64-pc-windows-msvc"
+  } else if (rust_target_arch == "aarch64") {
+    rust_target_triple = "aarch64-pc-windows-msvc"
+  } else if (rust_target_arch == "x86") {
+    rust_target_triple = "i686-pc-windows-msvc"
+  }
+} else if (is_fuchsia) {
+  if (rust_target_arch == "x86_64") {
+    rust_target_triple = "x86_64-unknown-fuchsia"
+  } else if (rust_target_arch == "aarch64") {
+    rust_target_triple = "aarch64-unknown-fuchsia"
+  }
+} else if (is_wasm) {
+  rust_target_triple = "wasm32-unknown-unknown"
+}
+
+local_rustc_sysroot = "$root_out_dir/local_rustc_sysroot"
+local_rustc_sysroot_lib_dir =
+    "$local_rustc_sysroot/lib/rustlib/$rust_target_triple/lib"
+rebased_local_rustc_sysroot = rebase_path(local_rustc_sysroot, root_build_dir)
+
+# Build mode flags (debug, profile, release, jit_release, and unoptimized).
+rust_optimize_for_size =
+    !is_debug &&
+    (is_android || is_ios || is_fuchsia || is_win || optimize_for_size)
+
+rust_mode_flags = [ "--target=$rust_target_triple" ]
+
+if (is_debug) {
+  if (is_wasm) {
+    rust_mode_flags += [ "-Copt-level=1" ]
+  } else {
+    rust_mode_flags += [ "-Copt-level=0" ]
+  }
+  rust_mode_flags += [
+    "-Cpanic=abort",
+    "-Cdebug-assertions=yes",
+    "-Coverflow-checks=yes",
+  ]
+} else {
+  if (is_android || is_fuchsia) {
+    rust_mode_flags += [ "-Copt-level=z" ]
+  } else if (is_ios || is_win || optimize_for_size) {
+    rust_mode_flags += [ "-Copt-level=s" ]
+  } else {
+    rust_mode_flags += [ "-Copt-level=2" ]
+  }
+
+  if (flutter_runtime_mode == "debug") {
+    rust_mode_flags += [
+      "-Cpanic=abort",
+      "-Cdebug-assertions=yes",
+      "-Coverflow-checks=yes",
+    ]
+  } else {
+    rust_mode_flags += [
+      "-Zunstable-options",
+      "-Cpanic=immediate-abort",
+      "-Cforce-unwind-tables=no",
+      "-Ccodegen-units=1",
+      "-Cdebug-assertions=no",
+      "-Coverflow-checks=no",
+    ]
+  }
+}
+
+if (flutter_runtime_mode == "profile") {
+  rust_mode_flags += [ "-Cforce-frame-pointers=yes" ]
+}
+
+if (symbol_level == 2) {
+  rust_mode_flags += [ "-Cdebuginfo=2" ]
+} else if (symbol_level == 1) {
+  rust_mode_flags += [ "-Cdebuginfo=1" ]
+} else {
+  rust_mode_flags += [ "-Cdebuginfo=0" ]
+}

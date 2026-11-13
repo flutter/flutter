@@ -1,0 +1,63 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+}
+
+config("cxx_cpp_config") {
+  include_dirs = [
+    "//",
+    "//third_party/rust/chromium_crates_io/vendor/cxx-v1/include",
+  ]
+  defines = [ "RUST_CXX_NO_EXCEPTIONS" ]
+  if (is_android) {
+    if (current_cpu == "arm64" || current_cpu == "aarch64") {
+      _clang_arch = "aarch64"
+    } else if (current_cpu == "arm") {
+      _clang_arch = "arm"
+    } else if (current_cpu == "x64" || current_cpu == "x86_64") {
+      _clang_arch = "x86_64"
+    } else if (current_cpu == "x86") {
+      _clang_arch = "i386"
+    } else if (current_cpu == "riscv64") {
+      _clang_arch = "riscv64"
+    }
+    lib_dirs = [ "$android_toolchain_root/lib/clang/19/lib/linux/$_clang_arch" ]
+    libs = [ "unwind" ]
+  } else if (is_linux) {
+    libs = [
+      "dl",
+      "pthread",
+      "rt",
+    ]
+  } else if (is_mac || is_ios) {
+    libs = [
+      "System",
+      "objc",
+    ]
+  } else if (is_win) {
+    libs = [
+      "advapi32.lib",
+      "bcrypt.lib",
+      "ntdll.lib",
+      "synchronization.lib",
+      "userenv.lib",
+      "ws2_32.lib",
+    ]
+  } else if (is_fuchsia) {
+    libs = [
+      "zircon",
+      "fdio",
+    ]
+  }
+}
+
+source_set("cxx_cpp") {
+  sources = [
+    "//third_party/rust/chromium_crates_io/vendor/cxx-v1/include/cxx.h",
+    "//third_party/rust/chromium_crates_io/vendor/cxx-v1/src/cxx.cc",
+  ]
+  public_configs = [ ":cxx_cpp_config" ]
+}

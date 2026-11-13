@@ -178,6 +178,7 @@ source_set("flutter_shell_native_src") {
     "//flutter/lib/ui",
     "//flutter/runtime",
     "//flutter/runtime:libdart",
+    "//flutter/rust:flutter_rust",
     "//flutter/shell/common",
     "//flutter/shell/platform/android/context",
     "//flutter/shell/platform/android/external_view_embedder",
