@@ -8,6 +8,7 @@
 #include <atomic>
 
 #include "dart_api.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/sampler_descriptor.h"
@@ -349,6 +350,7 @@ bool CommandBufferEncoder::EnsureCommandBuffer() {
 }
 
 void CommandBufferEncoder::Encode(PassRecording::Ptr recording) {
+  TRACE_EVENT0("flutter", "FlutterGPU::EncodePass");
   if (EnsureCommandBuffer()) {
     switch (recording->GetKind()) {
       case PassRecording::Kind::kRender:
@@ -411,6 +413,7 @@ void CommandBufferEncoder::EncodeBlitPass(const PassRecording& recording) {
 bool CommandBufferEncoder::Submit(
     std::shared_ptr<CommandBufferEncoder> encoder,
     impeller::CommandBuffer::CompletionCallback completion) {
+  TRACE_EVENT0("flutter", "FlutterGPU::Submit");
   const std::shared_ptr<impeller::Context> context =
       encoder->queue_->GetContext();
 
