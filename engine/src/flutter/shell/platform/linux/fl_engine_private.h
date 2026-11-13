@@ -72,6 +72,19 @@ FlEngine* fl_engine_new_with_binary_messenger(
 FlutterRendererType fl_engine_get_renderer_type(FlEngine* engine);
 
 /**
+ * fl_engine_get_use_subsurface:
+ * @engine: an #FlEngine.
+ *
+ * Gets whether views of this engine may present OpenGL frames through a
+ * Wayland subsurface. This is %FALSE when the FLUTTER_LINUX_RENDERER
+ * environment variable is set to "opengl-gtk", in which case frames are
+ * presented through GTK instead.
+ *
+ * Returns: %TRUE if a Wayland subsurface may be used.
+ */
+gboolean fl_engine_get_use_subsurface(FlEngine* engine);
+
+/**
  * fl_engine_get_opengl_manager:
  * @engine: an #FlEngine.
  *

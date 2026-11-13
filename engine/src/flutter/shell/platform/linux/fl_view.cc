@@ -702,7 +702,8 @@ static void setup_engine(FlView* self) {
       break;
     case kOpenGL:
     default:
-      if (GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)))) {
+      if (fl_engine_get_use_subsurface(self->engine) &&
+          GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)))) {
         self->renderer = FL_VIEW_RENDERER(fl_view_renderer_subsurface_new(
             self->engine, self->sized_to_content));
       } else {

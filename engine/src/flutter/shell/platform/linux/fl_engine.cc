@@ -50,6 +50,9 @@ struct _FlEngine {
   // Type of rendering performed.
   FlutterRendererType renderer_type;
 
+  // TRUE if views may present OpenGL frames through a Wayland subsurface.
+  gboolean use_subsurface;
+
   // Manages OpenGL contexts.
   FlOpenGLManager* opengl_manager;
 
@@ -694,6 +697,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
 
   self->project = FL_DART_PROJECT(g_object_ref(project));
   const gchar* renderer = g_getenv("FLUTTER_LINUX_RENDERER");
+  self->use_subsurface = TRUE;
   if (g_strcmp0(renderer, "software") == 0) {
     self->renderer_type = kSoftware;
     g_warning(
@@ -702,6 +706,10 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
         "\n"
         "To switch back to the default renderer, unset the "
         "FLUTTER_LINUX_RENDERER environment variable.");
+  } else if (g_strcmp0(renderer, "opengl-gtk") == 0) {
+    // OpenGL, presented through GTK rather than a Wayland subsurface.
+    self->renderer_type = kOpenGL;
+    self->use_subsurface = FALSE;
   } else {
     if (renderer != nullptr && strcmp(renderer, "opengl") != 0) {
       g_warning("Unknown renderer type '%s', defaulting to opengl", renderer);
@@ -741,6 +749,11 @@ FlEngine* fl_engine_new_with_binary_messenger(
 
 G_MODULE_EXPORT FlEngine* fl_engine_new_headless(FlDartProject* project) {
   return fl_engine_new(project);
+}
+
+gboolean fl_engine_get_use_subsurface(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  return self->use_subsurface;
 }
 
 FlutterRendererType fl_engine_get_renderer_type(FlEngine* self) {
