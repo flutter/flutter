@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
-#include <atomic>
 #include <memory>
 #include <unordered_map>
 
@@ -115,12 +114,19 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The task runners.
   const TaskRunners task_runners_;
 
-  // If the overlay layer is currently shown.
-  //
-  // The tasks that |SubmitFlutterView| posts to the platform thread share
-  // ownership of this, because they can run after the embedder is destroyed.
-  const std::shared_ptr<std::atomic_bool> overlay_layer_is_shown_ =
-      std::make_shared<std::atomic_bool>(false);
+  enum class OverlayLayerState {
+    kHidden,
+    kShown,
+    kDestroyed,
+  };
+
+  // Visibility state of the current overlay layer generation on the platform
+  // thread. Shared with tasks posted to the platform thread so they do not
+  // dereference `this` if the embedder is destroyed before they run, and
+  // marked `kDestroyed` in `DestroySurfaces` so stale tasks do not show or
+  // hide an already-destroyed overlay surface.
+  std::shared_ptr<OverlayLayerState> overlay_layer_state_ =
+      std::make_shared<OverlayLayerState>(OverlayLayerState::kHidden);
 
   // The size of the root canvas.
   DlISize frame_size_;
@@ -155,6 +161,14 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
+
+  // Shows the overlay layer if it is currently hidden.
+  static void ShowOverlayLayerIfNeeded(PlatformViewAndroidJNI* jni_facade,
+                                       OverlayLayerState* state);
+
+  // Hides the overlay layer if it is currently shown.
+  static void HideOverlayLayerIfNeeded(PlatformViewAndroidJNI* jni_facade,
+                                       OverlayLayerState* state);
 };
 
 }  // namespace flutter

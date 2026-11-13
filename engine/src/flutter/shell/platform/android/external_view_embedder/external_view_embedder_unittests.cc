@@ -1669,7 +1669,8 @@ namespace {
 // that a task that still uses the embedder fails every time, and not only when
 // the allocator has already reused the memory.
 void DestroyEmbedderBeforePlatformTaskOfLastFrame(
-    bool last_frame_has_platform_view) {
+    bool last_frame_has_platform_view,
+    bool last_frame_has_overlay_content = false) {
   auto jni_mock = std::make_shared<JNIMock>();
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
@@ -1694,7 +1695,8 @@ void DestroyEmbedderBeforePlatformTaskOfLastFrame(
   auto surface_factory =
       std::make_shared<TestAndroidSurfaceFactory>([frame_size, make_frame]() {
         auto surface = std::make_unique<SurfaceMock>();
-        EXPECT_CALL(*surface, AcquireFrame(frame_size)).WillOnce(make_frame);
+        EXPECT_CALL(*surface, AcquireFrame(frame_size))
+            .WillRepeatedly(make_frame);
         auto android_surface = std::make_unique<AndroidSurfaceMock>();
         EXPECT_CALL(*android_surface, IsValid()).WillRepeatedly(Return(true));
         EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
@@ -1732,19 +1734,23 @@ void DestroyEmbedderBeforePlatformTaskOfLastFrame(
 
   // The first frame with a platform view waits for the platform thread to
   // create the overlay layer, so draw it while the platform thread is free.
-  // It shows the overlay layer.
+  // It shows the overlay layer unless the last frame will try to transition
+  // from hidden to shown after teardown.
+  const bool first_frame_has_overlay_content = !last_frame_has_overlay_content;
   EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(100, 100));
   EXPECT_CALL(*jni_mock, createOverlaySurface2())
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               0, fml::MakeRefCounted<AndroidNativeWindow>(nullptr)))));
   EXPECT_CALL(*jni_mock, sealFrameTransactions());
-  EXPECT_CALL(*jni_mock, showOverlaySurface2());
+  if (first_frame_has_overlay_content) {
+    EXPECT_CALL(*jni_mock, showOverlaySurface2());
+  }
   EXPECT_CALL(*jni_mock,
               onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50, mutators));
   EXPECT_CALL(*jni_mock, swapTransaction());
   EXPECT_CALL(*jni_mock, onEndFrame2());
-  draw_frame(/*has_platform_view=*/true, /*has_overlay_content=*/true);
+  draw_frame(/*has_platform_view=*/true, first_frame_has_overlay_content);
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
   ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
 
@@ -1773,9 +1779,9 @@ void DestroyEmbedderBeforePlatformTaskOfLastFrame(
     EXPECT_CALL(*jni_mock, sealFrameTransactions());
     // The embedder is torn down and destroyed.
     EXPECT_CALL(*jni_mock, destroyOverlaySurface2());
-    // The platform task of the last frame runs. The frame has no overlay
-    // content, but the task does not hide the overlay layer, since tearing
-    // down the embedder already destroyed it.
+    // The platform task of the last frame runs. It must neither show nor hide
+    // the overlay layer, since tearing down the embedder already destroyed it.
+    EXPECT_CALL(*jni_mock, showOverlaySurface2()).Times(0);
     EXPECT_CALL(*jni_mock, hideOverlaySurface2()).Times(0);
     if (last_frame_has_platform_view) {
       EXPECT_CALL(*jni_mock, onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50,
@@ -1788,7 +1794,7 @@ void DestroyEmbedderBeforePlatformTaskOfLastFrame(
   }
 
   // This would block if drawing the frame had to wait for the platform thread.
-  draw_frame(last_frame_has_platform_view, /*has_overlay_content=*/false);
+  draw_frame(last_frame_has_platform_view, last_frame_has_overlay_content);
   last_frame_drawn.Signal();
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
 }
@@ -1802,6 +1808,13 @@ TEST(AndroidExternalViewEmbedder2,
      PlatformTaskOfFrameWithPlatformViewsOutlivesEmbedder) {
   DestroyEmbedderBeforePlatformTaskOfLastFrame(
       /*last_frame_has_platform_view=*/true);
+}
+
+TEST(AndroidExternalViewEmbedder2,
+     PlatformTaskOfFrameWithOverlayContentOutlivesEmbedder) {
+  DestroyEmbedderBeforePlatformTaskOfLastFrame(
+      /*last_frame_has_platform_view=*/true,
+      /*last_frame_has_overlay_content=*/true);
 }
 
 TEST(AndroidExternalViewEmbedder2,
