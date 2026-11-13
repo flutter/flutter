@@ -102,7 +102,9 @@ final class _TestAssembleTarget extends AssembleTarget {
     required super.description,
     required this.name,
     this.dependencies = const <String>[],
+    this.depfiles = const <String>[],
     this.errorMessage,
+    this.extraDefines = const <String, String>{},
     this.shouldSucceed = true,
     super.targetPlatform = 'linux-x64',
   });
@@ -113,13 +115,17 @@ final class _TestAssembleTarget extends AssembleTarget {
   @override
   final List<String> dependencies;
 
+  @override
+  final List<String> depfiles;
+
   final String? errorMessage;
+  final Map<String, String> extraDefines;
   final bool shouldSucceed;
 
   @override
   Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
     return shouldSucceed
-        ? const ExtensionBuildResult(success: true)
+        ? ExtensionBuildResult(success: true, extraDefines: extraDefines)
         : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Assemble failed.');
   }
 }
@@ -132,6 +138,12 @@ final class _SucceedingBuildService extends BuildService {
       name: 'custom-hermetic-build',
       outputDir: '${BuiltInPlaceholders.outputDir}/hermetic/${BuiltInPlaceholders.buildMode}',
     ),
+    _TestBuildTarget(
+      description: 'Hermetic platform-agnostic build target.',
+      name: 'custom-agnostic-build',
+      outputDir: '${BuiltInPlaceholders.outputDir}/agnostic/${BuiltInPlaceholders.buildMode}',
+      targetPlatform: null,
+    ),
   ];
 
   @override
@@ -139,6 +151,7 @@ final class _SucceedingBuildService extends BuildService {
     _TestAssembleTarget(
       description: 'Hermetic assemble-only target.',
       name: 'custom-hermetic-assemble-only',
+      extraDefines: <String, String>{'HermeticDefine': 'enabled'},
     ),
   ];
 }
@@ -180,6 +193,7 @@ final class _FailingAndConflictingBuildService extends BuildService {
     _TestAssembleTarget(
       description: 'Succeeding custom assemble target.',
       name: 'custom-assemble-target',
+      depfiles: <String>['custom_assemble.d'],
     ),
     _TestAssembleTarget(
       description: 'Assemble target with unknown dependency.',
@@ -802,8 +816,10 @@ void main() {
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
         await commandRunner.run(<String>['build', 'custom-hermetic-build', '--no-pub']);
+        await commandRunner.run(<String>['build', 'custom-agnostic-build', '--no-pub']);
 
         expect(command.subcommands.containsKey('custom-hermetic-build'), isTrue);
+        expect(command.subcommands.containsKey('custom-agnostic-build'), isTrue);
         expect(command.subcommands.containsKey('custom-hermetic-assemble-only'), isFalse);
 
         await manager.dispose();
@@ -947,6 +963,22 @@ void main() {
 
         expect(logger.traceText, contains('build succeeded.'));
         expect(fs.directory('/out').existsSync(), isTrue);
+
+        final ExtensionBuildResult assembleResult = await buildManager.assemble(
+          buildDir: Uri.parse('/build'),
+          buildMode: .debug,
+          flutterRoot: Uri.parse('/flutter'),
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('/out'),
+          projectRoot: Uri.parse('/'),
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'custom-hermetic-assemble-only',
+        );
+        expect(assembleResult.success, isTrue);
+        expect(
+          assembleResult.extraDefines,
+          equals(const <String, String>{'HermeticDefine': 'enabled'}),
+        );
 
         await manager.dispose();
       },
@@ -1111,6 +1143,12 @@ void main() {
             Environment environment,
           ) {
             target.dependencies;
+            if (target is CompositeTarget) {
+              final Target customTarget = target.dependencies.firstWhere(
+                (Target t) => t.name == 'custom-assemble-target',
+              );
+              expect(customTarget.depfiles, equals(<String>['custom_assemble.d']));
+            }
           }),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
