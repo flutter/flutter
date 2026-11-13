@@ -19,14 +19,14 @@ void main() {
 void testMain() {
   test('overlapping surfaces receive their own render and context-loss callbacks', () async {
     final provider = OffscreenCanvasProvider();
-    final first = SkwasmSurface(provider);
-    final second = SkwasmSurface(provider);
+    final first = SkwasmOffscreenSurface(provider);
+    final second = SkwasmOffscreenSurface(provider);
     final recorder = ui.PictureRecorder();
     ui.Canvas(recorder).drawColor(const ui.Color(0xFF00FF00), ui.BlendMode.src);
     final ui.Picture picture = recorder.endRecording();
     try {
       await Future.wait<void>(<Future<void>>[first.initialized, second.initialized]);
-      Future<void> render(SkwasmSurface surface, BitmapSize size) async {
+      Future<void> render(SkwasmOffscreenSurface surface, BitmapSize size) async {
         final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
           size,
           <ui.Picture>[picture],
@@ -67,7 +67,7 @@ void testMain() {
 
   test('rendering can complete without exporting an image bitmap', () async {
     final provider = OffscreenCanvasProvider();
-    final surface = SkwasmSurface(provider);
+    final surface = SkwasmOffscreenSurface(provider);
     final recorder = ui.PictureRecorder();
     ui.Canvas(recorder).drawColor(const ui.Color(0xFF00FF00), ui.BlendMode.src);
     final picture = recorder.endRecording() as SkwasmPicture;

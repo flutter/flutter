@@ -408,7 +408,9 @@ abstract class Renderer {
     FrameTimingRecorder? recorder,
   ) async {
     await rasterizer.draw((scene as LayerScene).layerTree, size, recorder);
-    recorder?.submitTimings();
+    if (!rasterizer.isDisposed) {
+      recorder?.submitTimings();
+    }
   }
 
   void dumpDebugInfo();
