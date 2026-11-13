@@ -4134,6 +4134,8 @@ _flutter.loader.load();
           expect(environment.outputDir.childFile('main.dart.wasm'), isNot(exists));
           expect(environment.outputDir.childFile('main.dart.mjs'), isNot(exists));
           expect(environment.outputDir.childFile('main.dart.wasm.map'), isNot(exists));
+          expect(environment.outputDir.childFile('main.dart.support.js'), isNot(exists));
+          expect(environment.buildDir.childFile('main.dart.support.js'), isNot(exists));
           expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
@@ -4291,4 +4293,72 @@ _flutter.loader.load();
       ),
     );
   });
+
+  testWithoutContext(
+    'WebCompiledArtifact.tryParse classifies hashed, unhashed, multi-dot, and negative basenames',
+    () {
+      const positiveCases = <(String, WebCompiledArtifact)>[
+        ('main.dart.js', WebCompiledArtifact.mainJs),
+        ('main.dart.a1b2c3d4.js', WebCompiledArtifact.mainJs),
+        ('main.dart.js.map', WebCompiledArtifact.mainJsMap),
+        ('main.dart.deadbeef.js.map', WebCompiledArtifact.mainJsMap),
+        ('main.dart.js.info.json', WebCompiledArtifact.jsDumpInfo),
+        ('main.dart.js_1.part.js', WebCompiledArtifact.jsPart),
+        ('main.dart.js_12.foo.bar.part.js', WebCompiledArtifact.jsPart),
+        ('main.dart.js_1.part.js.map', WebCompiledArtifact.jsPartMap),
+        ('main.dart.js_9.foo.part.js.map', WebCompiledArtifact.jsPartMap),
+        ('main.dart.wasm', WebCompiledArtifact.mainWasm),
+        ('main.dart.01234567.wasm', WebCompiledArtifact.mainWasm),
+        ('main.dart.wasm.map', WebCompiledArtifact.mainWasmMap),
+        ('main.dart.89abcdef.wasm.map', WebCompiledArtifact.mainWasmMap),
+        ('main.dart.mjs', WebCompiledArtifact.mainMjs),
+        ('main.dart.cafebabe.mjs', WebCompiledArtifact.mainMjs),
+        ('main.dart.mjs.map', WebCompiledArtifact.mainMjsMap),
+        ('main.dart.feedface.mjs.map', WebCompiledArtifact.mainMjsMap),
+        ('main.dart_module1.wasm', WebCompiledArtifact.wasmModule),
+        ('main.dart_module12.extra.wasm', WebCompiledArtifact.wasmModule),
+        ('main.dart_module1.wasm.map', WebCompiledArtifact.wasmModuleMap),
+        ('main.dart_module0.extra.wasm.map', WebCompiledArtifact.wasmModuleMap),
+      ];
+      for (final (String basename, WebCompiledArtifact expected) in positiveCases) {
+        expect(WebCompiledArtifact.tryParse(basename), expected, reason: basename);
+      }
+
+      for (final WebCompiledArtifact artifact in WebCompiledArtifact.values) {
+        expect(artifact.isJsArtifact, !artifact.isWasmArtifact, reason: artifact.name);
+      }
+      expect(WebCompiledArtifact.mainJs.isJsArtifact, isTrue);
+      expect(WebCompiledArtifact.jsDumpInfo.isJsArtifact, isTrue);
+      expect(WebCompiledArtifact.jsPartMap.isJsArtifact, isTrue);
+      expect(WebCompiledArtifact.mainWasm.isWasmArtifact, isTrue);
+      expect(WebCompiledArtifact.mainMjs.isWasmArtifact, isTrue);
+      expect(WebCompiledArtifact.wasmModuleMap.isWasmArtifact, isTrue);
+
+      const negativeCases = <String>[
+        '',
+        'index.html',
+        'flutter_bootstrap.js',
+        'flutter.js',
+        'flutter.js.map',
+        'main.dart',
+        'main.dart.dill',
+        'main.dart.support.js',
+        'main.dart.js.deps',
+        'main.dart.js.resources.json',
+        'main.dart.deadbeef.js.info.json',
+        'main.dart.ABCDEF12.js',
+        'main.dart.1234567g.wasm',
+        'main.dart..js',
+        'main.dart.js_.part.js',
+        'main.dart.js_a.part.js',
+        'main.dart.js_1.part.js.bak',
+        'main.dart_module.wasm',
+        'main.dart_moduleX.wasm',
+        'other.dart.js',
+      ];
+      for (final basename in negativeCases) {
+        expect(WebCompiledArtifact.tryParse(basename), isNull, reason: basename);
+      }
+    },
+  );
 }
