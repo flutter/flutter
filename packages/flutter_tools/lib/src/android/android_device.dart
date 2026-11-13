@@ -840,6 +840,7 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 /// Process the dumpsys info formatted in a table-like structure.
 ///
 /// Currently this only pulls information from the  "App Summary" subsection.
+/// Some devices also print an Rss(KB) column in this subsection, which is ignored.
 ///
 /// Example output:
 ///
@@ -917,7 +918,7 @@ AndroidMemoryInfo parseMeminfoDump(String input) {
       .forEach((String line) {
         final List<String> sections = line.trim().split(':');
         final String key = sections.first.trim();
-        final int value = int.tryParse(sections.last.trim()) ?? 0;
+        final int value = int.tryParse(sections.last.trim().split(' ').first) ?? 0;
         switch (key) {
           case AndroidMemoryInfo._kJavaHeapKey:
             androidMemoryInfo.javaHeap = value;
