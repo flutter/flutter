@@ -10,7 +10,10 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-bool get isWebParagraphEnabled => configuration.preferWebParagraph && browserSupportsWebParagraph;
+bool get isWebParagraphEnabled =>
+    !FlutterConfiguration.flutterWebUseSkwasm &&
+    configuration.preferWebParagraph &&
+    browserSupportsWebParagraph;
 
 class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
@@ -24,9 +27,15 @@ class CanvasKitRenderer extends Renderer {
   /// Whether the renderer is using software rendering.
   bool get isSoftware => _pictureToImageSurface.isSoftware;
 
+  /// The CanvasKit font registry behind [fontCollection].
+  ///
+  /// Not used when `WebParagraph` is enabled, in which case [fontCollection]
+  /// is a [WebFontCollection] and text is laid out by the browser.
+  late final CkFontCollection ckFontCollection = CkFontCollection();
+
   late final FlutterFontCollection _fontCollection = isWebParagraphEnabled
       ? WebFontCollection()
-      : SkiaFontCollection();
+      : EngineFontCollection(ckFontCollection);
 
   @override
   FlutterFontCollection get fontCollection => _fontCollection;
@@ -69,7 +78,8 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  ui.Paint createPaint() => CkPaint();
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) =>
+      CkPaint(paint, defaultBlurTileMode: defaultBlurTileMode);
 
   @override
   BackendVertices createVertices(
@@ -175,7 +185,11 @@ class CanvasKitRenderer extends Renderer {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   }) {
+    // TODO(harryterkelsen): CanvasKit cannot express bounded blur; falls back
+    // to unbounded like native Skia.
+    // https://github.com/flutter/flutter/issues/175899
     return CkBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
   }
 
@@ -285,6 +299,9 @@ class CanvasKitRenderer extends Renderer {
   bool get supportsResizingAnimatedImages => false;
 
   @override
+  bool get supportsAnimatedImages => true;
+
+  @override
   BackendImage decodeBackendImageFromPixels(
     Uint8List pixels, {
     required int width,
@@ -328,161 +345,8 @@ class CanvasKitRenderer extends Renderer {
   CkPathConstructors pathConstructors = CkPathConstructors();
 
   @override
-  ui.TextStyle createTextStyle({
-    ui.Color? color,
-    ui.TextDecoration? decoration,
-    ui.Color? decorationColor,
-    ui.TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.TextBaseline? textBaseline,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    ui.Locale? locale,
-    ui.Paint? background,
-    ui.Paint? foreground,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
-  }) => isWebParagraphEnabled
-      ? WebTextStyle(
-          color: color,
-          decoration: decoration,
-          decorationColor: decorationColor,
-          decorationStyle: decorationStyle,
-          decorationThickness: decorationThickness,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          textBaseline: textBaseline,
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          fontSize: fontSize,
-          letterSpacing: letterSpacing,
-          wordSpacing: wordSpacing,
-          height: height,
-          leadingDistribution: leadingDistribution,
-          locale: locale,
-          background: background as CkPaint?,
-          foreground: foreground as CkPaint?,
-          shadows: shadows,
-          fontFeatures: fontFeatures,
-          fontVariations: fontVariations,
-        )
-      : CkTextStyle(
-          color: color,
-          decoration: decoration,
-          decorationColor: decorationColor,
-          decorationStyle: decorationStyle,
-          decorationThickness: decorationThickness,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          textBaseline: textBaseline,
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          fontSize: fontSize,
-          letterSpacing: letterSpacing,
-          wordSpacing: wordSpacing,
-          height: height,
-          leadingDistribution: leadingDistribution,
-          locale: locale,
-          background: background as CkPaint?,
-          foreground: foreground as CkPaint?,
-          shadows: shadows,
-          fontFeatures: fontFeatures,
-          fontVariations: fontVariations,
-        );
-
-  @override
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-    ui.Hyphens? hyphens,
-  }) => isWebParagraphEnabled
-      ? WebParagraphStyle(
-          textAlign: textAlign,
-          textDirection: textDirection,
-          maxLines: maxLines,
-          fontFamily: fontFamily,
-          fontSize: fontSize,
-          height: height,
-          textHeightBehavior: textHeightBehavior,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          strutStyle: strutStyle as WebStrutStyle?,
-          ellipsis: ellipsis,
-          locale: locale,
-          hyphens: hyphens,
-        )
-      : CkParagraphStyle(
-          textAlign: textAlign,
-          textDirection: textDirection,
-          maxLines: maxLines,
-          fontFamily: fontFamily,
-          fontSize: fontSize,
-          height: height,
-          textHeightBehavior: textHeightBehavior,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          strutStyle: strutStyle,
-          ellipsis: ellipsis,
-          locale: locale,
-          hyphens: hyphens,
-        );
-
-  @override
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  }) => isWebParagraphEnabled
-      ? WebStrutStyle(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          fontSize: fontSize,
-          height: height,
-          leadingDistribution: leadingDistribution,
-          leading: leading,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          forceStrutHeight: forceStrutHeight,
-        )
-      : CkStrutStyle(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          fontSize: fontSize,
-          height: height,
-          leadingDistribution: leadingDistribution,
-          leading: leading,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          forceStrutHeight: forceStrutHeight,
-        );
-
-  @override
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      isWebParagraphEnabled ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style) =>
+      CkParagraphBuilder(style, ckFontCollection);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>
@@ -505,29 +369,6 @@ class CanvasKitRenderer extends Renderer {
       return CkFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
     });
   }
-
-  @override
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  }) => EngineLineMetrics(
-    hardBreak: hardBreak,
-    ascent: ascent,
-    descent: descent,
-    unscaledAscent: unscaledAscent,
-    height: height,
-    width: width,
-    left: left,
-    baseline: baseline,
-    lineNumber: lineNumber,
-  );
 
   @override
   void dumpDebugInfo() {

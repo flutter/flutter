@@ -1194,6 +1194,8 @@ class EditableText extends StatefulWidget {
   ///
   /// It's rarely necessary to set this property. By default its value
   /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  /// If the app did not choose its locale (see [Localizations.isDefaultLocale]),
+  /// no locale is used and the platform's default locale applies.
   ///
   /// See [RenderEditable.locale] for more information.
   final Locale? locale;
@@ -2216,21 +2218,21 @@ class EditableText extends StatefulWidget {
       final showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
 
       resultButtonItem.addAll(<ContextMenuButtonItem>[
-        if (onCut != null) ContextMenuButtonItem(onPressed: onCut, type: ContextMenuButtonType.cut),
+        if (onCut != null) ContextMenuButtonItem(onPressed: onCut, kind: ContextMenuButtonKind.cut),
         if (onCopy != null)
-          ContextMenuButtonItem(onPressed: onCopy, type: ContextMenuButtonType.copy),
+          ContextMenuButtonItem(onPressed: onCopy, kind: ContextMenuButtonKind.copy),
         if (onPaste != null)
-          ContextMenuButtonItem(onPressed: onPaste, type: ContextMenuButtonType.paste),
+          ContextMenuButtonItem(onPressed: onPaste, kind: ContextMenuButtonKind.paste),
         if (onShare != null && showShareBeforeSelectAll)
-          ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+          ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
         if (onSelectAll != null)
-          ContextMenuButtonItem(onPressed: onSelectAll, type: ContextMenuButtonType.selectAll),
+          ContextMenuButtonItem(onPressed: onSelectAll, kind: ContextMenuButtonKind.selectAll),
         if (onLookUp != null)
-          ContextMenuButtonItem(onPressed: onLookUp, type: ContextMenuButtonType.lookUp),
+          ContextMenuButtonItem(onPressed: onLookUp, kind: ContextMenuButtonKind.lookUp),
         if (onSearchWeb != null)
-          ContextMenuButtonItem(onPressed: onSearchWeb, type: ContextMenuButtonType.searchWeb),
+          ContextMenuButtonItem(onPressed: onSearchWeb, kind: ContextMenuButtonKind.searchWeb),
         if (onShare != null && !showShareBeforeSelectAll)
-          ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+          ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
       ]);
     }
 
@@ -2239,7 +2241,7 @@ class EditableText extends StatefulWidget {
       resultButtonItem.add(
         ContextMenuButtonItem(
           onPressed: onLiveTextInput,
-          type: ContextMenuButtonType.liveTextInput,
+          kind: ContextMenuButtonKind.liveTextInput,
         ),
       );
     }
@@ -3181,28 +3183,28 @@ class EditableTextState extends State<EditableText>
           onPressed: () {
             cutSelection(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.cut,
+          kind: ContextMenuButtonKind.cut,
         ),
       if (toolbarOptions.copy && copyEnabled)
         ContextMenuButtonItem(
           onPressed: () {
             copySelection(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.copy,
+          kind: ContextMenuButtonKind.copy,
         ),
       if (toolbarOptions.paste && pasteEnabled)
         ContextMenuButtonItem(
           onPressed: () async {
             await _pasteTextWithReporting(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.paste,
+          kind: ContextMenuButtonKind.paste,
         ),
       if (toolbarOptions.selectAll && selectAllEnabled)
         ContextMenuButtonItem(
           onPressed: () {
             selectAll(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.selectAll,
+          kind: ContextMenuButtonKind.selectAll,
         ),
     ];
   }
@@ -6241,6 +6243,16 @@ class _Editable extends MultiChildRenderObjectWidget {
   final Color? promptRectColor;
   final Clip clipBehavior;
 
+  // A default locale that the app didn't choose isn't passed to the engine, so
+  // the platform's default locale is used for font fallback.
+  // See https://github.com/flutter/flutter/issues/194931.
+  Locale? _effectiveLocale(BuildContext context) {
+    if (locale != null) {
+      return locale;
+    }
+    return Localizations.isDefaultLocaleOf(context) ? null : Localizations.maybeLocaleOf(context);
+  }
+
   @override
   RenderEditable createRenderObject(BuildContext context) {
     return RenderEditable(
@@ -6261,7 +6273,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       textScaler: textScaler,
       textAlign: textAlign,
       textDirection: textDirection,
-      locale: locale ?? Localizations.maybeLocaleOf(context),
+      locale: _effectiveLocale(context),
       selection: value.selection,
       offset: offset,
       ignorePointer: rendererIgnoresPointer,
@@ -6305,7 +6317,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..textScaler = textScaler
       ..textAlign = textAlign
       ..textDirection = textDirection
-      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..locale = _effectiveLocale(context)
       ..selection = value.selection
       ..offset = offset
       ..ignorePointer = rendererIgnoresPointer

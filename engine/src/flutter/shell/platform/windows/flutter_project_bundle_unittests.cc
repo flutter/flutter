@@ -95,6 +95,54 @@ TEST(FlutterProjectBundle, Switches) {
   EXPECT_EQ(switches[0], "--abc");
   EXPECT_EQ(switches[1], "--foo=\"bar, baz\"");
 }
+
+TEST(FlutterProjectBundle, MaxD3DFeatureLevelUnset) {
+  FlutterDesktopEngineProperties properties = {};
+  properties.assets_path = L"foo\\flutter_assets";
+  properties.icu_data_path = L"foo\\icudtl.dat";
+
+  _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "");
+
+  FlutterProjectBundle project(properties);
+
+  EXPECT_EQ(project.max_d3d_feature_level(), std::nullopt);
+}
+
+TEST(FlutterProjectBundle, MaxD3DFeatureLevel) {
+  FlutterDesktopEngineProperties properties = {};
+  properties.assets_path = L"foo\\flutter_assets";
+  properties.icu_data_path = L"foo\\icudtl.dat";
+
+  _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "10_0");
+  FlutterProjectBundle project_10_0(properties);
+
+  _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "11_1");
+  FlutterProjectBundle project_11_1(properties);
+
+  _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "");
+
+  ASSERT_TRUE(project_10_0.max_d3d_feature_level().has_value());
+  EXPECT_EQ(project_10_0.max_d3d_feature_level()->major, 10);
+  EXPECT_EQ(project_10_0.max_d3d_feature_level()->minor, 0);
+
+  ASSERT_TRUE(project_11_1.max_d3d_feature_level().has_value());
+  EXPECT_EQ(project_11_1.max_d3d_feature_level()->major, 11);
+  EXPECT_EQ(project_11_1.max_d3d_feature_level()->minor, 1);
+}
+
+TEST(FlutterProjectBundle, MaxD3DFeatureLevelMalformed) {
+  FlutterDesktopEngineProperties properties = {};
+  properties.assets_path = L"foo\\flutter_assets";
+  properties.icu_data_path = L"foo\\icudtl.dat";
+
+  for (const char* value : {"10", "10.0", "10_", "_0", "10_0 ", "ten_zero"}) {
+    _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", value);
+    FlutterProjectBundle project(properties);
+    _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "");
+
+    EXPECT_EQ(project.max_d3d_feature_level(), std::nullopt) << value;
+  }
+}
 #endif  // !FLUTTER_RELEASE
 
 }  // namespace testing

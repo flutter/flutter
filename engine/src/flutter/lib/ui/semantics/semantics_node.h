@@ -58,7 +58,8 @@ constexpr int kHorizontalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollRight);
 
 constexpr int kScrollableSemanticsActions =
-    kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions;
+    kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions |
+    static_cast<int32_t>(SemanticsAction::kScrollToOffset);
 
 /// The following actions are not user-initiated.
 constexpr int kSystemActions =
@@ -173,7 +174,7 @@ struct SemanticsNode {
   int32_t headingLevel = 0;
 
   std::string linkUrl;
-  SemanticsRole role;
+  SemanticsRole role = SemanticsRole::kNone;
   SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
   // A locale string in BCP 47 format
   std::string locale;

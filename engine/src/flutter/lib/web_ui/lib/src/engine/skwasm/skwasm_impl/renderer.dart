@@ -19,13 +19,19 @@ class SkwasmRenderer extends Renderer {
   @override
   bool get supportsResizingAnimatedImages => true;
 
+  @override
+  bool get supportsAnimatedImages => skwasmSupportsAnimatedImages();
+
   bool get isWimp => skwasmIsWimp();
 
   @override
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
+  /// The Skwasm font registry behind [fontCollection].
+  final SkwasmFontCollection skwasmFontCollection = SkwasmFontCollection();
+
   @override
-  final SkwasmFontCollection fontCollection = SkwasmFontCollection();
+  late final EngineFontCollection fontCollection = EngineFontCollection(skwasmFontCollection);
 
   @override
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
@@ -36,8 +42,14 @@ class SkwasmRenderer extends Renderer {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   }) {
-    return SkwasmBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+    return SkwasmBlurImageFilter(
+      sigmaX: sigmaX,
+      sigmaY: sigmaY,
+      tileMode: tileMode,
+      bounds: bounds,
+    );
   }
 
   @override
@@ -147,7 +159,8 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.Paint createPaint() => SkwasmPaint();
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) =>
+      SkwasmPaint(paint, defaultBlurTileMode: defaultBlurTileMode);
 
   @override
   BackendColorFilter createColorFilter(EngineColorFilter filter) => SkwasmColorFilter(filter);
@@ -156,8 +169,8 @@ class SkwasmRenderer extends Renderer {
   BackendMaskFilter createMaskFilter(EngineMaskFilter filter) => SkwasmMaskFilter(filter);
 
   @override
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      SkwasmParagraphBuilder(style as SkwasmParagraphStyle, fontCollection);
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style) =>
+      SkwasmParagraphBuilder(style, skwasmFontCollection);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) {
@@ -165,111 +178,10 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-    ui.Hyphens? hyphens,
-  }) => SkwasmParagraphStyle(
-    textAlign: textAlign,
-    textDirection: textDirection,
-    maxLines: maxLines,
-    fontFamily: fontFamily,
-    fontSize: fontSize,
-    height: height,
-    textHeightBehavior: textHeightBehavior,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    strutStyle: strutStyle,
-    ellipsis: ellipsis,
-    locale: locale,
-    hyphens: hyphens,
-  );
-
-  @override
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();
 
   @override
   ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
-
-  @override
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  }) => SkwasmStrutStyle(
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    leading: leading,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    forceStrutHeight: forceStrutHeight,
-  );
-
-  @override
-  ui.TextStyle createTextStyle({
-    ui.Color? color,
-    ui.TextDecoration? decoration,
-    ui.Color? decorationColor,
-    ui.TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.TextBaseline? textBaseline,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    ui.Locale? locale,
-    ui.Paint? background,
-    ui.Paint? foreground,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
-  }) => SkwasmTextStyle(
-    color: color,
-    decoration: decoration,
-    decorationColor: decorationColor,
-    decorationStyle: decorationStyle,
-    decorationThickness: decorationThickness,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    textBaseline: textBaseline,
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    letterSpacing: letterSpacing,
-    wordSpacing: wordSpacing,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    locale: locale,
-    background: background,
-    foreground: foreground,
-    shadows: shadows,
-    fontFeatures: fontFeatures,
-    fontVariations: fontVariations,
-  );
 
   @override
   BackendVertices createVertices(
@@ -339,29 +251,6 @@ class SkwasmRenderer extends Renderer {
       return SkwasmFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
     });
   }
-
-  @override
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  }) => SkwasmLineMetrics(
-    hardBreak: hardBreak,
-    ascent: ascent,
-    descent: descent,
-    unscaledAscent: unscaledAscent,
-    height: height,
-    width: width,
-    left: left,
-    baseline: baseline,
-    lineNumber: lineNumber,
-  );
 
   @override
   void dumpDebugInfo() {

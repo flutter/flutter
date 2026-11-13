@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_COMPILER_REFLECTOR_H_
 #define FLUTTER_IMPELLER_COMPILER_REFLECTOR_H_
 
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -245,6 +246,11 @@ class Reflector {
   std::shared_ptr<RuntimeStageData::Shader> GenerateRuntimeStageData() const;
 
   std::shared_ptr<ShaderBundleData> GenerateShaderBundleData() const;
+
+  /// The workgroup size a compute shader declares, or std::nullopt for any
+  /// other stage. A dimension of 0 means the shader sizes it with a
+  /// specialization constant.
+  std::optional<std::array<uint32_t, 3>> ReflectWorkgroupSize() const;
 
   std::shared_ptr<fml::Mapping> InflateTemplate(std::string_view tmpl) const;
 

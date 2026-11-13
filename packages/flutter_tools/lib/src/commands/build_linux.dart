@@ -22,7 +22,7 @@ import 'build.dart';
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
     required this.buildSystem,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     required this._featureFlags,
   }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
@@ -69,9 +69,6 @@ class BuildLinuxCommand extends BuildSubCommand {
   FeatureFlags get featureFlags => _featureFlags;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   final name = 'linux';
 
   @override
@@ -89,14 +86,16 @@ class BuildLinuxCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = this.logger;
-    final OperatingSystemUtils os = toolContext.os;
-    final Platform platform = toolContext.platform;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+    ) = toolContext;
 
     final BuildInfo buildInfo = await getBuildInfo();
     final TargetPlatform targetPlatform = getValue(_targetPlatformOption);
-    final needCrossBuild = os.hostPlatform.platformName != targetPlatform.simpleName;
+    final needCrossBuild = os.hostPlatform.cpuArchName != targetPlatform.simpleName;
 
     if (!_featureFlags.isLinuxEnabled) {
       throwToolExit(
@@ -127,12 +126,13 @@ class BuildLinuxCommand extends BuildSubCommand {
     await buildLinux(
       project.linux,
       buildInfo,
+      analytics: analytics,
       target: targetFile,
       sizeAnalyzer: SizeAnalyzer(fileSystem: fs, logger: logger, analytics: analytics),
       needCrossBuild: needCrossBuild,
       targetPlatform: targetPlatform,
       targetSysroot: getValue(_targetSysroot),
-      logger: logger,
+      toolContext: toolContext,
       configOnly: configOnly,
     );
     return FlutterCommandResult.success();
