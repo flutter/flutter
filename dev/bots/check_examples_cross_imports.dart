@@ -597,6 +597,38 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.0_test.dart',
     'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.1_test.dart',
     'packages/flutter/examples/api/test/widgets/selectable_region/selectable_region.0_test.dart',
+    'examples/image_list/lib/main.dart',
+    'examples/layers/rendering/touch_input.dart',
+    'examples/layers/services/isolate.dart',
+    'examples/layers/test/gestures_test.dart',
+    'examples/layers/widgets/gestures.dart',
+    'examples/layers/widgets/media_query.dart',
+    'examples/layers/widgets/sectors.dart',
+    'examples/layers/widgets/spinning_mixed.dart',
+    'examples/layers/widgets/styled_text.dart',
+    'examples/multiple_windows/lib/app/dialog_window_content.dart',
+    'examples/multiple_windows/lib/app/dialog_window_edit_dialog.dart',
+    'examples/multiple_windows/lib/app/main_window.dart',
+    'examples/multiple_windows/lib/app/popup_button.dart',
+    'examples/multiple_windows/lib/app/popup_window_content.dart',
+    'examples/multiple_windows/lib/app/popup_window_edit_dialog.dart',
+    'examples/multiple_windows/lib/app/rotated_wire_cube.dart',
+    'examples/multiple_windows/lib/app/satellite_window_content.dart',
+    'examples/multiple_windows/lib/app/satellite_window_edit_dialog.dart',
+    'examples/multiple_windows/lib/app/tooltip_button.dart',
+    'examples/multiple_windows/lib/app/tooltip_window_content.dart',
+    'examples/multiple_windows/lib/app/tooltip_window_edit_dialog.dart',
+    'examples/multiple_windows/lib/app/window_content.dart',
+    'examples/multiple_windows/lib/app/window_edit_dialog.dart',
+    'examples/multiple_windows/lib/app/window_settings_dialog.dart',
+    'examples/multiple_windows/lib/main.dart',
+    'examples/multiple_windows/test/multiple_windows_test.dart',
+    'examples/platform_channel/lib/main.dart',
+    'examples/platform_channel_swift/lib/main.dart',
+    'examples/platform_view/lib/main.dart',
+    'examples/splash/lib/main.dart',
+    'examples/splash/test/splash_test.dart',
+    'examples/texture/lib/main.dart',
   };
 
   static final RegExp _examplesPrefix = RegExp(
@@ -876,39 +908,27 @@ class ExamplesCrossImportChecker {
     // Find any cross imports that are not in the known list.
     for (final MapEntry<CrossImportCheckedLibrary, CrossImportingFiles> entry
         in crossImportsPerLibrary.entries) {
-      final Set<File> unknownCupertinoImports = getUnknowns(
-        knownExamplesCrossImports,
-        entry.value.cupertinoImports,
-        prefix: _examplesPrefix,
-      );
-      final Set<File> unknownMaterialImports = getUnknowns(
-        knownExamplesCrossImports,
-        entry.value.materialImports,
-        prefix: _examplesPrefix,
-      );
-
-      if (unknownMaterialImports.isNotEmpty) {
-        valid = false;
-        foundError(
-          getImportError(
-            flutterRoot: flutterRoot,
-            files: unknownMaterialImports,
-            checkedLibrary: entry.key,
-            importStatement: LibraryCrossImportStatementType.material,
-          ).split('\n'),
+      // Report each import type separately, so that the error names the
+      // library that was actually imported (e.g. MaterialUI vs. Material).
+      for (final LibraryCrossImportStatementType importStatement
+          in LibraryCrossImportStatementType.values) {
+        final Set<File> unknownImports = getUnknowns(
+          knownExamplesCrossImports,
+          entry.value[importStatement] ?? <File>{},
+          prefix: _examplesPrefix,
         );
-      }
 
-      if (unknownCupertinoImports.isNotEmpty) {
-        valid = false;
-        foundError(
-          getImportError(
-            flutterRoot: flutterRoot,
-            files: unknownCupertinoImports,
-            checkedLibrary: entry.key,
-            importStatement: LibraryCrossImportStatementType.cupertino,
-          ).split('\n'),
-        );
+        if (unknownImports.isNotEmpty) {
+          valid = false;
+          foundError(
+            getImportError(
+              flutterRoot: flutterRoot,
+              files: unknownImports,
+              checkedLibrary: entry.key,
+              importStatement: importStatement,
+            ).split('\n'),
+          );
+        }
       }
     }
 
@@ -928,9 +948,7 @@ class ExamplesCrossImportChecker {
         in crossImportsPerLibrary.entries) {
       final ownPrefix = '${entry.key.libraryName}/';
 
-      final Set<File> crossImportsForLibrary = entry.value.cupertinoImports.union(
-        entry.value.materialImports,
-      );
+      final Set<File> crossImportsForLibrary = getAllCrossImportingFiles(entry.value);
 
       final Set<String> knownCrossImportsForLibrary = {
         for (final String element in entry.key.knownCrossImports)
@@ -1056,12 +1074,20 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
 
   @override
   String getDisallowedImportMessage(String importedLibraryName, int filesCount) {
+    final String destination = switch (importedLibraryName) {
+      'Material' => 'material_ui',
+      'Cupertino' => 'cupertino_ui',
+      _ => importedLibraryName,
+    };
     return filesCount < 2
         ? 'The following file in $libraryName has a disallowed import of $importedLibraryName. '
-              'Refactor it or move it to the $importedLibraryName examples.\n'
+              'Refactor it or move it to the $destination examples.\n'
         : 'The following $filesCount files in $libraryName have a disallowed import of $importedLibraryName. '
-              'Refactor them or move them to the $importedLibraryName examples.\n';
+              'Refactor them or move them to the $destination examples.\n';
   }
+
+  @override
+  String toString() => '_ExamplesLibrary(libraryName:$libraryName)';
 }
 
 /// Any API example - not related to Material or Cupertino - inside
@@ -1104,11 +1130,12 @@ final class _MaterialApiExampleLibrary extends _ExamplesLibrary {
 
   @override
   bool canImport(LibraryCrossImportStatementType import) {
-    // While the Material examples under `packages/flutter/examples/api` are not allowed to import Cupertino,
-    // the actual samples have been relocated to `packages/material_ui`,
-    // where their cross imports will be addressed separately.
-    // The existing samples in `packages/flutter/examples/api` are the now defunct orginal samples.
-    // For the purpose of the checker, allow all imports.
+    // While the Material examples under `packages/flutter/examples/api` are not
+    // allowed to import Cupertino, the actual samples have been relocated to
+    // `packages/material_ui`, where their cross imports will be addressed
+    // separately. The existing samples in `packages/flutter/examples/api` are
+    // the now defunct orginal samples. For the purpose of the checker, allow
+    // all imports.
     return true;
   }
 }
@@ -1146,8 +1173,13 @@ final class _SampleTemplatesLibraryFile extends _ExamplesLibrary {
   @override
   bool canImport(LibraryCrossImportStatementType import) {
     return switch (import) {
+      // The sample templates are fundamentally about using either Material or
+      // Cupertino, and they will be migrated to the packages repo in the long
+      // term.
       LibraryCrossImportStatementType.material => _filePath.contains('material'),
+      LibraryCrossImportStatementType.materialUI => _filePath.contains('material'),
       LibraryCrossImportStatementType.cupertino => _filePath.contains('cupertino'),
+      LibraryCrossImportStatementType.cupertinoUI => _filePath.contains('cupertino'),
     };
   }
 }

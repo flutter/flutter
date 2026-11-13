@@ -97,6 +97,79 @@ void testMain() {
       expect(await matchImage(onlyTofuImage, emptyImage), isFalse);
       expect(await matchImage(unassignedTofuImage, emptyImage), isFalse);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/193695
+    test('concurrent paragraph layout and picture rasterization does not crash', () async {
+      const bounds = ui.Rect.fromLTRB(0, 0, 200, 100);
+
+      // Warm up surface sizing so subsequent image.toByteData() calls dispatch
+      // rasterizeImage directly to the Wasm worker without waiting on a resize
+      // round-trip first.
+      {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, bounds);
+        final ui.Paragraph warmup = makeSimpleText('Warmup', fontSize: 14);
+        canvas.drawParagraph(warmup, ui.Offset.zero);
+        warmup.dispose();
+        final ui.Picture picture = recorder.endRecording();
+        final ui.Image image = picture.toImageSync(200, 100);
+        picture.dispose();
+        await image.toByteData();
+        image.dispose();
+      }
+
+      // Pre-record images at distinct fractional font sizes and canvas scales
+      // so the background Wasm worker misses its thread-local SkStrikeCache and
+      // enters FreeType (FT_Face) during rasterization.
+      final workerImages = <ui.Image>[];
+      for (var i = 0; i < 16; i++) {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, bounds);
+        canvas.scale(1.0 + i * 0.031, 1.0 + i * 0.031);
+        final ui.Paragraph paragraph = makeSimpleText(
+          'Worker raster $i',
+          fontSize: 12.0 + i * 1.73,
+        );
+        canvas.drawParagraph(paragraph, ui.Offset.zero);
+        paragraph.dispose();
+        final ui.Picture picture = recorder.endRecording();
+        workerImages.add(picture.toImageSync(200, 100));
+        picture.dispose();
+      }
+
+      var completedImages = 0;
+      final imageFutures = <Future<ui.Image>>[
+        for (final ui.Image image in workerImages)
+          image.toByteData().then((_) {
+            completedImages++;
+            return image;
+          }),
+      ];
+
+      // Concurrently lay out paragraphs at fresh fractional font sizes on the
+      // UI thread across macrotask turns while the Wasm worker rasterizes the
+      // queued images.
+      var uiStep = 0;
+      for (var batch = 0; batch < 8 && completedImages < workerImages.length; batch++) {
+        await Future<void>.delayed(Duration.zero);
+        for (var j = 0; j < 16; j++) {
+          uiStep++;
+          final ui.Paragraph paragraph = makeSimpleText(
+            'Concurrent UI layout $uiStep',
+            fontSize: 14.0 + uiStep * 0.137,
+          );
+          expect(paragraph.width, greaterThan(0));
+          paragraph.dispose();
+        }
+      }
+
+      final List<ui.Image> images = await Future.wait(imageFutures);
+      for (final image in images) {
+        expect(image.width, 200);
+        expect(image.height, 100);
+        image.dispose();
+      }
+    });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }

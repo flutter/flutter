@@ -205,6 +205,17 @@ class ChromiumLauncher {
         return userDataDir;
       }
     }
+    // WARNING: `flutter test --platform chrome` depends on this directory being
+    // new for every launch. The test server in `FlutterWebPlatform` sends
+    // `Cache-Control: max-age` with no validator (`ETag` or `Last-Modified`),
+    // so Chrome serves cached test assets without asking the server. A fresh
+    // directory means an empty HTTP cache, which limits that to one invocation.
+    //
+    // If this directory (or its `Cache` and `Code Cache` subdirectories) is
+    // ever reused across invocations, a later run that binds the same port can
+    // load stale compiled test code from an earlier run. Before reusing it,
+    // either add a per-invocation validator to those responses or put a
+    // per-invocation token in the asset URLs.
     return _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
   }
 
@@ -315,9 +326,8 @@ class ChromiumLauncher {
       url,
     ];
 
-    final _SpawnResult spawnResult = await _spawnChromiumProcess(buildArgs, debugPort);
-    final Process process = spawnResult.process;
-    final int port = spawnResult.port;
+    final _SpawnResult(:Process process, :int port, :String host, :List<String> logBuffer) =
+        await _spawnChromiumProcess(buildArgs, debugPort);
 
     // When the process exits, copy the user settings back to the provided data-dir.
     if (cacheDir != null) {
@@ -333,15 +343,16 @@ class ChromiumLauncher {
         }),
       );
     }
+    final connectionHost = host.contains(':') && !host.startsWith('[') ? '[$host]' : host;
     return connect(
       Chromium(
         port,
-        ChromeConnection('localhost', port),
+        ChromeConnection(connectionHost, port),
         url: url,
         process: process,
         chromiumLauncher: this,
         logger: _logger,
-        logBuffer: spawnResult.logBuffer,
+        logBuffer: logBuffer,
       ),
       skipCheck,
     );
@@ -349,9 +360,9 @@ class ChromiumLauncher {
 
   /// Spawns Chromium, retrying on known failures.
   ///
-  /// If [debugPort] is null, a new free port is picked for every attempt, so
-  /// that losing the race inherent in [OperatingSystemUtils.findFreePort] on one
-  /// attempt does not doom the following attempts.
+  /// If [debugPort] is null, `--remote-debugging-port=0` is passed so Chromium
+  /// binds to an ephemeral port allocated atomically by the OS kernel, avoiding
+  /// TOCTOU race conditions.
   Future<_SpawnResult> _spawnChromiumProcess(
     List<String> Function(int port) buildArgs,
     int? debugPort,
@@ -362,8 +373,8 @@ class ChromiumLauncher {
     const kMaxRetries = 3;
     var retry = 0;
     while (true) {
-      final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
-      final List<String> args = buildArgs(port);
+      final int requestedPort = debugPort ?? 0;
+      final List<String> args = buildArgs(requestedPort);
       final Process process = await _processManager.start(args);
       final logBuffer = ListQueue<String>(200);
 
@@ -382,36 +393,52 @@ class ChromiumLauncher {
         },
       );
 
-      final devToolsListening = Completer<void>();
+      final devToolsListening = Completer<({String host, int port})>();
       var hitGlibcBug = false;
       var shouldRetry = false;
 
-      final StreamSubscription<String> stderrSub = process.stderr.transform(utf8LineDecoder).listen(
-        (String line) {
-          if (_isDbusError(line)) {
-            return;
-          }
-          addLog('CHROME STDERR', line);
-          if (line.contains(_kGlibcError)) {
-            hitGlibcBug = true;
-            shouldRetry = true;
-          }
-          if (line.startsWith('DevTools listening')) {
-            if (!devToolsListening.isCompleted) {
-              devToolsListening.complete();
-            }
-          }
-          // Chromium stays alive after failing to bind the debugging port, so
-          // neither "DevTools listening" nor process exit will ever unblock us.
-          if (line.contains(_kDevToolsServerFailure)) {
-            if (!devToolsListening.isCompleted) {
+      final StreamSubscription<String>
+      stderrSub = process.stderr.transform(utf8LineDecoder).listen((String line) {
+        if (_isDbusError(line)) {
+          return;
+        }
+        addLog('CHROME STDERR', line);
+        if (line.contains(_kGlibcError)) {
+          hitGlibcBug = true;
+          shouldRetry = true;
+        }
+        if (line.startsWith('DevTools listening')) {
+          if (!devToolsListening.isCompleted) {
+            final RegExpMatch? devToolsMatch = RegExp(r'DevTools listening on (ws://[^\s]+)')
+                .firstMatch(line);
+            if (devToolsMatch != null) {
+              final Uri devToolsUri = Uri.parse(devToolsMatch.group(1)!);
+              devToolsListening.complete((host: devToolsUri.host, port: devToolsUri.port));
+            } else if (requestedPort != 0) {
+              devToolsListening.complete((host: 'localhost', port: requestedPort));
+            } else {
               devToolsListening.completeError(
-                Exception('Chrome failed to start the DevTools server on port $port.'),
+                Exception(
+                  'Chrome reported "DevTools listening" but failed to provide WebSocket URL: $line',
+                ),
               );
             }
           }
-        },
-      );
+        }
+        // Chromium stays alive after failing to bind the debugging port, so
+        // neither "DevTools listening" nor process exit will ever unblock us.
+        if (line.contains(_kDevToolsServerFailure)) {
+          if (!devToolsListening.isCompleted) {
+            devToolsListening.completeError(
+              Exception(
+                requestedPort == 0
+                    ? 'Chrome failed to start the DevTools server.'
+                    : 'Chrome failed to start the DevTools server on port $requestedPort.',
+              ),
+            );
+          }
+        }
+      });
 
       // Handle premature process exit.
       unawaited(
@@ -424,8 +451,9 @@ class ChromiumLauncher {
         }),
       );
 
+      ({String host, int port})? boundAddress;
       try {
-        await devToolsListening.future.timeout(
+        boundAddress = await devToolsListening.future.timeout(
           kDevToolsListeningTimeout,
           onTimeout: () => throw Exception(
             'Chrome did not report "DevTools listening" within '
@@ -444,15 +472,16 @@ class ChromiumLauncher {
           throwToolExit(
             'Failed to launch browser. Make sure you are using an up-to-date '
             'Chrome or Edge. Otherwise, consider using -d web-server instead '
-            'and filing an issue at https://github.com/flutter/flutter/issues.\n'
+            'and filing an issue at https://github.com/flutter/flutter/issues\n'
             'Error: $error',
           );
         }
         shouldRetry = true;
       }
 
-      if (!hitGlibcBug && !shouldRetry) {
-        return _SpawnResult(process, port, logBuffer.toList());
+      if (!hitGlibcBug && !shouldRetry && boundAddress != null) {
+        final (:String host, :int port) = boundAddress;
+        return _SpawnResult(process, port, host, logBuffer.toList());
       }
 
       retry += 1;
@@ -558,7 +587,11 @@ class ChromiumLauncher {
     }
   }
 
-  // Cache, Code Cache, and GPUCache are nearly 1GB of data
+  // Cache, Code Cache, and GPUCache are nearly 1GB of data.
+  //
+  // Skipping `Cache` and `Code Cache` also keeps Chrome's HTTP cache from
+  // outliving a launch, which `flutter test --platform chrome` depends on. See
+  // the warning in [_createUserDataDirectory].
   bool _isNotCacheDirectory(Directory directory) {
     return !directory.path.endsWith('Cache') &&
         !directory.path.endsWith('Code Cache') &&
@@ -777,8 +810,9 @@ Future<ChromeTab?> getChromeTabGuarded(
 }
 
 class _SpawnResult {
-  _SpawnResult(this.process, this.port, this.logBuffer);
+  _SpawnResult(this.process, this.port, this.host, this.logBuffer);
   final Process process;
   final int port;
+  final String host;
   final List<String> logBuffer;
 }

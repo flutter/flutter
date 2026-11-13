@@ -14,6 +14,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
@@ -113,6 +114,7 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
+    required this.templateRenderer,
     required ToolContext toolContext,
     String? precompiledDillPath,
     this.testTimeRecorder,
@@ -150,7 +152,7 @@ class TestCompiler {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
     return fs.path.join(
       flutterProject!.directory.path,
-      getBuildDirectory(),
+      getBuildDirectory(config, fs),
       'test_cache',
       getDefaultCachedKernelPath(
         config: config,
@@ -172,6 +174,7 @@ class TestCompiler {
   final TestTimeRecorder? testTimeRecorder;
   final ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory();
 
+  final TemplateRenderer templateRenderer;
   final ToolContext _toolContext;
 
   ResidentCompiler? compiler;
@@ -245,7 +248,8 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = _toolContext;
+    final ToolContext(:Cache cache, :FileSystem fs, :Logger logger, :Platform platform) =
+        _toolContext;
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       logger.printTrace('Compiling ${request.mainUri}');
@@ -263,7 +267,7 @@ class TestCompiler {
         final LanguageVersion languageVersion = determineLanguageVersion(
           mainFile,
           buildInfo.packageConfig.packageOf(request.mainUri),
-          Cache.flutterRoot!,
+          cache.flutterRoot,
         );
         if (languageVersion != _registrantLanguageVersion) {
           // (Re)generate the registrant. The output is keyed only on the plugin
@@ -274,6 +278,9 @@ class TestCompiler {
             flutterProject!,
             buildInfo.packageConfig,
             mainFile,
+            flutterRoot: cache.flutterRoot,
+            logger: logger,
+            templateRenderer: templateRenderer,
           );
           invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
           _registrantLanguageVersion = languageVersion;

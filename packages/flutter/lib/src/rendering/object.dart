@@ -5,6 +5,7 @@
 /// @docImport 'dart:ui';
 ///
 /// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter/widgets.dart' as widgets;
 ///
 /// @docImport 'box.dart';
 /// @docImport 'paragraph.dart';

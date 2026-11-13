@@ -2,16 +2,43 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:isolate';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
-import 'package:test/test.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+
+final class _ShutdownNotifyingService extends ToolExtensionService {
+  @override
+  String get namespace => 'lifecycle';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async => <String, ExtensionRpcHandler>{};
+
+  @override
+  Future<void> shutdown() async {
+    sendNotification('lifecycle.shutdown', const <String, Object?>{'shuttingDown': true});
+  }
+}
+
+void _shutdownNotifyingEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ShutdownNotifyingService()]),
+  );
+}
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[]);
@@ -27,7 +54,7 @@ void _linuxOnlyExtensionEntryPoint(SendPort sendPort) {
 
 void main() {
   group('ExtensionManager Integration', () {
-    test('ExtensionManager loads extension compatible with hostPlatform', () async {
+    testWithoutContext('ExtensionManager loads extension compatible with hostPlatform', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
@@ -41,17 +68,131 @@ void main() {
       expect(manager.connections, isEmpty);
     });
 
-    test('ExtensionManager filters out extension incompatible with hostPlatform', () async {
-      final logger = BufferLogger.test();
-      final manager = ExtensionManager(
-        hostPlatform: HostPlatform.darwin_arm64,
-        logger: logger,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-      );
-      await manager.initialize(entryPoints: <ExtensionEntryPoint>[_linuxOnlyExtensionEntryPoint]);
+    testWithoutContext(
+      'ExtensionManager filters out extension incompatible with hostPlatform',
+      () async {
+        final logger = BufferLogger.test();
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.darwin_arm64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        await manager.initialize(entryPoints: <ExtensionEntryPoint>[_linuxOnlyExtensionEntryPoint]);
 
-      expect(manager.connections, isEmpty);
-      await manager.dispose();
-    });
+        expect(manager.connections, isEmpty);
+        await manager.dispose();
+      },
+    );
+
+    testWithoutContext(
+      'ensureInitialized skips spawning when tool extensions are disabled',
+      () async {
+        final logger = BufferLogger.test();
+        var spawned = false;
+
+        final disabledManager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(),
+          entryPoints: <ExtensionEntryPoint>[
+            (SendPort sendPort) {
+              spawned = true;
+              _dummyExtensionEntryPoint(sendPort);
+            },
+          ],
+        );
+
+        await disabledManager.ensureInitialized();
+        expect(spawned, isFalse);
+        expect(disabledManager.connections, isEmpty);
+        await disabledManager.dispose();
+      },
+    );
+
+    testWithoutContext(
+      'disable throws AssertionError when called after initialization has started',
+      () async {
+        final logger = BufferLogger.test();
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        await manager.ensureInitialized();
+        expect(() => manager.disable(), throwsA(isA<AssertionError>()));
+        await manager.dispose();
+      },
+    );
+
+    testWithoutContext(
+      'ToolDependencies.bootstrap registers extensionManager.dispose on shutdownHooks',
+      () async {
+        final logger = BufferLogger.test();
+        final shutdownHooks = ShutdownHooks();
+        final fs = MemoryFileSystem.test();
+        final ToolDependencies deps = await ToolDependencies.bootstrap(
+          analytics: const NoOpAnalytics(),
+          botDetector: const FakeBotDetector(true),
+          extensionEntryPoints: <ExtensionEntryPoint>[_shutdownNotifyingEntryPoint],
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          flutterVersion: FakeFlutterVersion(),
+          fs: fs,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+          stdio: FakeStdio(),
+          templateRenderer: const MustacheTemplateRenderer(),
+        );
+
+        final ExtensionManager manager = deps.extensionManager!;
+        await manager.ensureInitialized();
+        expect(manager.connections, hasLength(1));
+
+        final shutdownEvents = <Map<String, Object?>>[];
+        final StreamSubscription<Map<String, Object?>> sub = manager.connections.single
+            .onNotification('lifecycle.shutdown')
+            .listen(shutdownEvents.add);
+        addTearDown(sub.cancel);
+
+        await shutdownHooks.runShutdownHooks(logger);
+        expect(manager.connections, isEmpty);
+        expect(shutdownEvents, <Map<String, Object?>>[
+          const <String, Object?>{'shuttingDown': true},
+        ]);
+      },
+    );
+
+    testWithoutContext(
+      'hostPlatformName maps built-in and custom darwin/non-darwin host platforms',
+      () {
+        final logger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        expect(
+          ExtensionManager(
+            hostPlatform: HostPlatform.darwin_arm64,
+            logger: logger,
+            featureFlags: featureFlags,
+          ).hostPlatformName,
+          'macos',
+        );
+        expect(
+          ExtensionManager(
+            hostPlatform: HostPlatform('darwin', .riscv64),
+            logger: logger,
+            featureFlags: featureFlags,
+          ).hostPlatformName,
+          'macos',
+        );
+        expect(
+          ExtensionManager(
+            hostPlatform: HostPlatform('freebsd', .x64),
+            logger: logger,
+            featureFlags: featureFlags,
+          ).hostPlatformName,
+          'freebsd',
+        );
+      },
+    );
   });
 }

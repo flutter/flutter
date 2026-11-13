@@ -1321,7 +1321,7 @@ void main() async {
         isA<AssertionError>().having(
           (AssertionError e) => e.message,
           'message',
-          contains('Tried to accesss uniforms on a disposed Shader'),
+          contains('Tried to access uniforms on a disposed Shader'),
         ),
       ),
     );

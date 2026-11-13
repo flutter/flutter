@@ -108,10 +108,34 @@ abstract class Surface {
 /// A rendering surface that is optimized for producing `DomImageBitmap` objects.
 ///
 /// This surface is not attached to the DOM and is used for off-screen rendering.
+///
+/// A single [OffscreenSurface] may be shared by multiple views (and, in some
+/// renderers, by image rasterization). Therefore, operations that depend on the
+/// size of the surface take the size as an argument and resize the surface as
+/// part of the same indivisible operation. This guarantees that no other
+/// operation can resize the surface between the resize and the capture.
 abstract class OffscreenSurface extends Surface {
-  /// Rasterizes the given list of [pictures] into a list of `DomImageBitmap`
-  /// objects.
-  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures);
+  /// Resizes this surface to [size] and rasterizes each of the given [pictures]
+  /// into a `DomImageBitmap` of exactly [size].
+  ///
+  /// Resizing, rendering, and capturing the bitmaps happen atomically with
+  /// respect to every other operation on this surface.
+  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(BitmapSize size, List<ui.Picture> pictures);
+
+  /// Resizes this surface to [size] and rasterizes each of the given [pictures]
+  /// in order, calling [onRendered] synchronously after each picture is
+  /// rendered, while the surface's [Surface.canvasImageSource] still holds that
+  /// picture.
+  ///
+  /// This is used when the browser does not support `createImageBitmap`.
+  ///
+  /// Resizing, rendering, and every call to [onRendered] happen atomically with
+  /// respect to every other operation on this surface.
+  Future<void> rasterizeToCanvasSource(
+    BitmapSize size,
+    List<ui.Picture> pictures,
+    void Function(int index, DomCanvasImageSource source) onRendered,
+  );
 }
 
 /// A rendering surface that is also a `DisplayCanvas`.

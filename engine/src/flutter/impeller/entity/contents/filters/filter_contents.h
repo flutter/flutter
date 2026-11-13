@@ -50,12 +50,6 @@ class FilterContents : public Contents {
       BlurStyle mask_blur_style = BlurStyle::kNormal,
       const Geometry* mask_geometry = nullptr);
 
-  static std::shared_ptr<FilterContents> MakeBorderMaskBlur(
-      FilterInput::Ref input,
-      Sigma sigma_x,
-      Sigma sigma_y,
-      BlurStyle blur_style = BlurStyle::kNormal);
-
   static std::shared_ptr<FilterContents> MakeDirectionalMorphology(
       FilterInput::Ref input,
       Radius radius,
