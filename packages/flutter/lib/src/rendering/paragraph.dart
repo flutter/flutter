@@ -900,6 +900,7 @@ class RenderParagraph extends RenderBox
   void systemFontsDidChange() {
     super.systemFontsDidChange();
     _textPainter.markNeedsLayout();
+    _textIntrinsicsCache?.markNeedsLayout();
   }
 
   // Placeholder dimensions representing the sizes of child inline widgets.
