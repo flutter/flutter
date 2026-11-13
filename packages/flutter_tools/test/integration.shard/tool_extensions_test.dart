@@ -192,6 +192,39 @@ void main() {
   });
 
   testWithoutContext(
+    'flutter emulators does not expose prototype emulators or alter built-in behavior when enabled',
+    () async {
+      final String missingAndroidSdk = tempHome.childDirectory('missing_android_sdk').path;
+      final envWithoutAndroid = <String, String>{
+        ...baseEnv,
+        'ANDROID_HOME': missingAndroidSdk,
+        'ANDROID_SDK_ROOT': missingAndroidSdk,
+      };
+      final ProcessResult baseline = await processManager.run(
+        <String>[flutterBin, 'emulators'],
+        environment: <String, String>{...envWithoutAndroid, 'FLUTTER_TOOL_EXTENSIONS': 'false'},
+      );
+      final ProcessResult enabled = await processManager.run(
+        <String>[flutterBin, 'emulators'],
+        environment: <String, String>{...envWithoutAndroid, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+      );
+
+      expect(enabled.stdout, isNot(contains('Linux Custom Extension Prototype')));
+      expect(
+        enabled.exitCode,
+        baseline.exitCode,
+        reason:
+            'baseline stdout: ${baseline.stdout}\nbaseline stderr: ${baseline.stderr}\n'
+            'enabled stdout: ${enabled.stdout}\nenabled stderr: ${enabled.stderr}',
+      );
+      if (!const LocalPlatform().isMacOS || baseline.exitCode != 0) {
+        expect(enabled.exitCode, 1);
+        expect(enabled.stderr, contains('Unable to find any emulator sources.'));
+      }
+    },
+  );
+
+  testWithoutContext(
     'flutter devices -v gracefully shuts down active tool extensions on exit',
     () async {
       final ProcessResult result = await processManager.run(

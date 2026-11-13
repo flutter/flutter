@@ -8,14 +8,18 @@ import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 
 import 'protocol_base/service.dart';
 
-/// Extension service interface for retrieving target devices, managing
-/// application execution, and streaming device logs.
+/// Extension service interface for retrieving target devices and emulators,
+/// managing application execution, and streaming device logs.
 abstract base class DeviceService extends ToolExtensionService {
   /// Service namespace identifier for device services.
   static const String serviceNamespace = 'device';
 
   static const String _getDevicesRpcMethod = 'getDevices';
   static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
+  static const String _getEmulatorPlatformRpcMethod = 'getEmulatorPlatform';
+  static const String _getEmulatorsRpcMethod = 'getEmulators';
+  static const String _launchEmulatorRpcMethod = 'launchEmulator';
+  static const String _createEmulatorRpcMethod = 'createEmulator';
   static const String _launchAppRpcMethod = 'launchApp';
   static const String _getVmServiceUriRpcMethod = 'getVmServiceUri';
   static const String _stopAppRpcMethod = 'stopApp';
@@ -28,6 +32,19 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC method identifier to query whether a target device is supported for a project.
   static const String isSupportedForProjectMethod =
       '$serviceNamespace.$_isSupportedForProjectRpcMethod';
+
+  /// RPC method identifier to query the platform identifier for creating emulators.
+  static const String getEmulatorPlatformMethod =
+      '$serviceNamespace.$_getEmulatorPlatformRpcMethod';
+
+  /// RPC method identifier to query contributed target emulators.
+  static const String getEmulatorsMethod = '$serviceNamespace.$_getEmulatorsRpcMethod';
+
+  /// RPC method identifier to launch a contributed target emulator.
+  static const String launchEmulatorMethod = '$serviceNamespace.$_launchEmulatorRpcMethod';
+
+  /// RPC method identifier to create a new target emulator.
+  static const String createEmulatorMethod = '$serviceNamespace.$_createEmulatorRpcMethod';
 
   /// RPC method identifier to launch an application on a target device.
   static const String launchAppMethod = '$serviceNamespace.$_launchAppRpcMethod';
@@ -54,6 +71,15 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for the serialized [ExtensionFlutterProject].
   static const String projectParam = 'project';
 
+  /// RPC parameter key for the target emulator ID.
+  static const String emulatorIdParam = 'emulatorId';
+
+  /// RPC parameter key for whether to cold boot the target emulator.
+  static const String coldBootParam = 'coldBoot';
+
+  /// RPC parameter key for the optional emulator name passed to [createEmulator].
+  static const String emulatorNameParam = 'name';
+
   /// RPC parameter key for the executable URI to launch.
   static const String executableUriParam = 'executableUri';
 
@@ -67,6 +93,15 @@ abstract base class DeviceService extends ToolExtensionService {
   /// notifications.
   static const String lineKey = 'line';
 
+  // Platform identifiers are passed on the command line via `--platform <name>`,
+  // so restrict them to lowercase ASCII identifiers starting with a letter and
+  // containing only letters, digits, underscores, or hyphens.
+  static final RegExp _validPlatformNamePattern = RegExp(r'^[a-z][a-z0-9_-]*$');
+
+  /// Returns whether [name] is a syntactically valid emulator creation platform
+  /// identifier (`^[a-z][a-z0-9_-]*$`) for `flutter emulators --create --platform <name>`.
+  static bool isValidPlatformName(String name) => _validPlatformNamePattern.hasMatch(name);
+
   @override
   String get namespace => serviceNamespace;
 
@@ -78,6 +113,42 @@ abstract base class DeviceService extends ToolExtensionService {
     required String deviceId,
     required ExtensionFlutterProject project,
   });
+
+  /// Returns the optional platform identifier under which this extension
+  /// supports creating emulators via
+  /// `flutter emulators --create --platform <platform>` (for example,
+  /// `'custom_embedder'`), or `null` when emulator creation via
+  /// [createEmulator] is not supported by this extension.
+  ///
+  /// When non-null, must satisfy [isValidPlatformName].
+  Future<String?> getEmulatorPlatform() async => null;
+
+  /// Returns all available emulators or simulators managed by this extension.
+  ///
+  /// Defaults to returning an empty list for extensions that only provide
+  /// physical or stationary target devices.
+  Future<List<TargetEmulator>> getEmulators() async => const <TargetEmulator>[];
+
+  /// Launches a specific device emulator for the custom platform (for
+  /// `flutter emulators`), optionally performing a [coldBoot].
+  ///
+  /// Throws [UnsupportedError] when launching emulators is not supported by
+  /// this extension, or [ToolExtensionException] if launching fails.
+  Future<void> launchEmulator({required String emulatorId, bool coldBoot = false}) async {
+    throw UnsupportedError('Launching emulator $emulatorId is not supported.');
+  }
+
+  /// Creates a new device emulator instance and returns its [TargetEmulator]
+  /// descriptor (for `flutter emulators --create [--name <name>]
+  /// [--platform <platform>]`).
+  ///
+  /// The returned [TargetEmulator.id] is reported to the user as the created
+  /// emulator identifier. Throws [UnsupportedError] when emulator creation is
+  /// not supported by this extension, or [ToolExtensionException] if creation
+  /// fails.
+  Future<TargetEmulator> createEmulator({String? name}) async {
+    throw UnsupportedError('Creating emulators is not supported.');
+  }
 
   /// Launches the application at [executableUri] on the device with [deviceId]
   /// using the given [debuggingOptions].
@@ -134,6 +205,10 @@ abstract base class DeviceService extends ToolExtensionService {
     return <String, ExtensionRpcHandler>{
       _getDevicesRpcMethod: _getDevicesRpc,
       _isSupportedForProjectRpcMethod: _isSupportedForProjectRpc,
+      _getEmulatorPlatformRpcMethod: _getEmulatorPlatformRpc,
+      _getEmulatorsRpcMethod: _getEmulatorsRpc,
+      _launchEmulatorRpcMethod: _launchEmulatorRpc,
+      _createEmulatorRpcMethod: _createEmulatorRpc,
       _launchAppRpcMethod: _launchAppRpc,
       _getVmServiceUriRpcMethod: _getVmServiceUriRpc,
       _stopAppRpcMethod: _stopAppRpc,
@@ -162,6 +237,43 @@ abstract base class DeviceService extends ToolExtensionService {
       throw RpcException.invalidParams(e.message);
     }
     return isSupportedForProject(deviceId: deviceId, project: project);
+  }
+
+  Future<String?> _getEmulatorPlatformRpc(Map<String, Object?> _) => getEmulatorPlatform();
+
+  Future<List<Map<String, Object?>>> _getEmulatorsRpc(Map<String, Object?> _) async {
+    final List<TargetEmulator> emulators = await getEmulators();
+    return emulators.map((TargetEmulator e) => e.toMap()).toList();
+  }
+
+  Future<Object?> _launchEmulatorRpc(Map<String, Object?> params) async {
+    final String emulatorId;
+    final bool coldBoot;
+    try {
+      emulatorId = params.requiredField<String>(emulatorIdParam);
+      if (emulatorId.isEmpty) {
+        throw const FormatException('Invalid "$emulatorIdParam": must not be empty.');
+      }
+      coldBoot = params.optionalField<bool>(coldBootParam, defaultValue: false);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    await launchEmulator(emulatorId: emulatorId, coldBoot: coldBoot);
+    return null;
+  }
+
+  Future<Map<String, Object?>> _createEmulatorRpc(Map<String, Object?> params) async {
+    final String? name;
+    try {
+      name = params.nullableField<String>(emulatorNameParam);
+      if (name != null && name.isEmpty) {
+        throw const FormatException('Invalid "$emulatorNameParam": must not be empty.');
+      }
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    final TargetEmulator created = await createEmulator(name: name);
+    return created.toMap();
   }
 
   String _parseDeviceId(Map<String, Object?> params) {

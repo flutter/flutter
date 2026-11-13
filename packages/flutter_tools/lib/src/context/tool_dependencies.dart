@@ -689,17 +689,6 @@ class ToolDependencies {
           featureFlags: finalFeatureFlags,
         );
 
-    final EmulatorManager finalEmulatorManager =
-        emulatorManager ??
-        EmulatorManager(
-          androidWorkflow: finalAndroidWorkflow,
-          iosWorkflow: finalIOSWorkflow,
-          javaBuilder: () => finalAndroidContext.java,
-          toolContext: finalToolContext,
-          xcode: finalXcode,
-          androidSdkBuilder: () => finalAndroidContext.androidSdk,
-        );
-
     final MacOSWorkflow finalMacOSWorkflow =
         macOSWorkflow ?? MacOSWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
 
@@ -725,6 +714,18 @@ class ToolDependencies {
       xcodeBuilder: () => finalXcode,
       xcodeProjectInterpreterBuilder: () => finalXcodeProjectInterpreter,
     );
+
+    final EmulatorManager finalEmulatorManager =
+        emulatorManager ??
+        EmulatorManager(
+          androidWorkflow: finalAndroidWorkflow,
+          iosWorkflow: finalIOSWorkflow,
+          javaBuilder: () => finalAndroidContext.java,
+          toolContext: finalToolContext,
+          xcode: finalXcode,
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          extensionManager: extensionManager,
+        );
 
     final extensionBuildManager = ExtensionBuildManager(
       extensionManager: extensionManager,

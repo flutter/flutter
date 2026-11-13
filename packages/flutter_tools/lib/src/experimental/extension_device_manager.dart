@@ -7,9 +7,12 @@ import 'dart:async';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
 import 'package:flutter_tools_core/json.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -18,6 +21,7 @@ import '../build_system/targets/extension.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../emulator.dart';
 import '../project.dart';
 import '../vmservice.dart';
 import 'extension_build_manager.dart';
@@ -85,6 +89,75 @@ final class ExtensionDeviceClient extends DeviceService {
       );
     }
     return false;
+  }
+
+  @override
+  Future<String?> getEmulatorPlatform() async {
+    _logger.printTrace(
+      'ExtensionDeviceClient fetching emulator platform via RPC '
+      '("${DeviceService.getEmulatorPlatformMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(DeviceService.getEmulatorPlatformMethod);
+    if (rawResult == null) {
+      return null;
+    }
+    if (rawResult case final String platform) {
+      return platform;
+    }
+    throw FormatException(
+      'Expected String or null from ${DeviceService.getEmulatorPlatformMethod}, '
+      'got ${rawResult.runtimeType}.',
+    );
+  }
+
+  @override
+  Future<List<TargetEmulator>> getEmulators() async {
+    _logger.printTrace(
+      'ExtensionDeviceClient fetching emulators via RPC ("${DeviceService.getEmulatorsMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(DeviceService.getEmulatorsMethod);
+    final List<TargetEmulator> emulators = TargetEmulator.listFromJson(rawResult);
+    _logger.printTrace('ExtensionDeviceClient received ${emulators.length} emulator(s) via RPC.');
+    return emulators;
+  }
+
+  @override
+  Future<void> launchEmulator({required String emulatorId, bool coldBoot = false}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient launching emulator "$emulatorId" (coldBoot: $coldBoot) via RPC '
+      '("${DeviceService.launchEmulatorMethod}")...',
+    );
+    await connection.sendRequest(
+      DeviceService.launchEmulatorMethod,
+      params: <String, Object?>{
+        DeviceService.emulatorIdParam: emulatorId,
+        DeviceService.coldBootParam: coldBoot,
+      },
+      // Launching an emulator may wait on external simulator startup.
+      timeout: null,
+    );
+  }
+
+  @override
+  Future<TargetEmulator> createEmulator({String? name}) async {
+    final String? normalizedName = name != null && name.isNotEmpty ? name : null;
+    _logger.printTrace(
+      'ExtensionDeviceClient creating emulator (name: $normalizedName) via RPC '
+      '("${DeviceService.createEmulatorMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.createEmulatorMethod,
+      params: <String, Object?>{DeviceService.emulatorNameParam: ?normalizedName},
+      // Creating an emulator image or instance may exceed the default RPC timeout.
+      timeout: null,
+    );
+    if (rawResult is! Map<String, Object?>) {
+      throw FormatException(
+        'Expected Map<String, Object?> from ${DeviceService.createEmulatorMethod}, '
+        'got ${rawResult.runtimeType}.',
+      );
+    }
+    return TargetEmulator.fromJson(rawResult);
   }
 
   @override
@@ -747,4 +820,222 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
+}
+
+/// A host-side [Emulator] wrapper representing a target emulator backed by a tool extension.
+@immutable
+class ExtensionEmulator extends Emulator {
+  /// Creates an [ExtensionEmulator] wrapping a [TargetEmulator].
+  ExtensionEmulator({
+    required this._deviceService,
+    required this._logger,
+    required TargetEmulator targetEmulator,
+  }) : _targetEmulator = targetEmulator,
+       super(targetEmulator.id, true);
+
+  final DeviceService _deviceService;
+  final Logger _logger;
+  final TargetEmulator _targetEmulator;
+
+  @override
+  String get name => _targetEmulator.name;
+
+  @override
+  String? get manufacturer => _targetEmulator.manufacturer;
+
+  @override
+  Category get category => _targetEmulator.category ?? Category.other;
+
+  @override
+  PlatformType get platformType => PlatformType.custom;
+
+  @override
+  Future<void> launch({bool coldBoot = false}) async {
+    try {
+      await _deviceService.launchEmulator(emulatorId: id, coldBoot: coldBoot);
+    } on Object catch (err, stack) {
+      _logger.printTrace('$stack');
+      final String prefix = ExtensionEmulators._extensionErrorPrefix(_deviceService);
+      final String detail = ExtensionEmulators._extractErrorDetail(err);
+      throwToolExit(
+        detail.isEmpty
+            ? '${prefix}Failed to launch emulator "$id".'
+            : '${prefix}Failed to launch emulator "$id": $detail',
+      );
+    }
+  }
+}
+
+/// A host-side [EmulatorDiscovery] mechanism that discovers emulators registered by active extensions.
+class ExtensionEmulators extends EmulatorDiscovery {
+  ExtensionEmulators({required this._extensionManager, required this._logger});
+
+  final ExtensionManager _extensionManager;
+  final Logger _logger;
+  Future<Map<String, DeviceService>>? _createProvidersFuture;
+
+  static String _describeExtension(DeviceService service) => switch (service) {
+    ExtensionDeviceClient(connection: ExtensionConnection(:final String extensionName)) =>
+      'tool extension "$extensionName"',
+    _ => 'tool extension',
+  };
+
+  static String _extensionErrorPrefix(DeviceService service) => switch (service) {
+    ExtensionDeviceClient(connection: ExtensionConnection(:final String extensionName)) =>
+      'Extension "$extensionName": ',
+    _ => '',
+  };
+
+  static String _extractErrorDetail(Object error) => switch (error) {
+    ToolExtensionException(:final String message) ||
+    json_rpc.RpcException(:final String message) => message.trim(),
+    _ => '$error'.trim(),
+  };
+
+  void _warnQueryFailure(DeviceService service, String target, Object error, StackTrace stack) {
+    final String prefix = _extensionErrorPrefix(service);
+    _logger.printWarning(switch (error) {
+      ToolExtensionException(:final String message) when prefix.isNotEmpty => '$prefix$message',
+      ToolExtensionException(:final String message) =>
+        'Failed to query $target from ${_describeExtension(service)}: $message',
+      _ => 'Failed to query $target from ${_describeExtension(service)}: $error',
+    });
+    _logger.printTrace('$stack');
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  bool get canLaunchAnything => true;
+
+  /// Returns whether any active extension supports emulator creation or
+  /// currently provides emulators.
+  Future<bool> hasEmulatorSources() async =>
+      (await getCreatePlatforms()).isNotEmpty || (await _queryEmulators()).isNotEmpty;
+
+  @override
+  Future<List<Emulator>> get emulators => _queryEmulators();
+
+  Future<List<Emulator>> _queryEmulators() async {
+    _logger.printTrace('ExtensionEmulators querying active tool extension emulators...');
+    await _extensionManager.ensureInitialized();
+    final List<DeviceService> deviceServices = _extensionManager.deviceExtensions;
+    if (deviceServices.isEmpty) {
+      _logger.printTrace('ExtensionEmulators found 0 active device extensions.');
+      return <Emulator>[];
+    }
+
+    final List<List<Emulator>> emulatorsPerService = await Future.wait(
+      deviceServices.map((DeviceService service) async {
+        try {
+          final List<TargetEmulator> emulators = await service.getEmulators();
+          return <Emulator>[
+            for (final TargetEmulator targetEmulator in emulators)
+              ExtensionEmulator(
+                deviceService: service,
+                logger: _logger,
+                targetEmulator: targetEmulator,
+              ),
+          ];
+        } on Object catch (e, st) {
+          _warnQueryFailure(service, 'emulators', e, st);
+          return const <Emulator>[];
+        }
+      }),
+    );
+
+    final targetEmulators = <Emulator>[
+      for (final List<Emulator> emulatorList in emulatorsPerService) ...emulatorList,
+    ];
+
+    _logger.printTrace('ExtensionEmulators retrieved ${targetEmulators.length} emulator(s).');
+    return targetEmulators;
+  }
+
+  /// Returns the validated platform identifiers under which active extensions
+  /// support creating emulators.
+  Future<List<String>> getCreatePlatforms() async =>
+      (await _getCreateProviders()).keys.toList(growable: false);
+
+  /// Creates a new emulator on the extension registered for [platform], or
+  /// returns `null` if no active extension provides [platform].
+  Future<CreateEmulatorResult?> createEmulator({required String platform, String? name}) async {
+    final DeviceService? service = (await _getCreateProviders())[platform];
+    if (service == null) {
+      return null;
+    }
+    try {
+      final TargetEmulator created = await service.createEmulator(name: name);
+      return CreateEmulatorResult(created.id, success: true);
+    } on Object catch (err, stack) {
+      _logger.printTrace(
+        'Failed to create emulator via ${_describeExtension(service)}: $err\n$stack',
+      );
+      final String prefix = _extensionErrorPrefix(service);
+      final String detail = _extractErrorDetail(err);
+      return CreateEmulatorResult(
+        name ?? '',
+        success: false,
+        error: detail.isEmpty ? '${prefix}Failed to create emulator.' : '$prefix$detail',
+      );
+    }
+  }
+
+  Future<Map<String, DeviceService>> _getCreateProviders() =>
+      _createProvidersFuture ??= _loadCreateProviders();
+
+  Future<Map<String, DeviceService>> _loadCreateProviders() async {
+    await _extensionManager.ensureInitialized();
+    final List<DeviceService> deviceServices = _extensionManager.deviceExtensions;
+    if (deviceServices.isEmpty) {
+      return const <String, DeviceService>{};
+    }
+
+    final List<(DeviceService, String?)> results = await Future.wait(
+      deviceServices.map((DeviceService service) async {
+        try {
+          return (service, await service.getEmulatorPlatform());
+        } on Object catch (e, st) {
+          _warnQueryFailure(service, 'emulator platform', e, st);
+          return (service, null);
+        }
+      }),
+    );
+
+    final providers = <String, DeviceService>{};
+    for (final (DeviceService service, String? platform) in results) {
+      if (platform == null) {
+        continue;
+      }
+      final String description = _describeExtension(service);
+      if (platform == EmulatorManager.androidPlatform) {
+        _logger.printWarning(
+          'Ignoring emulator platform "$platform" from $description: '
+          '"${EmulatorManager.androidPlatform}" is reserved for built-in Android emulators.',
+        );
+        continue;
+      }
+      if (!DeviceService.isValidPlatformName(platform)) {
+        _logger.printWarning(
+          'Ignoring invalid emulator platform "$platform" from $description: '
+          'platform identifiers must match lowercase ASCII letters, digits, underscores, or hyphens.',
+        );
+        continue;
+      }
+      final DeviceService? existing = providers[platform];
+      if (existing != null) {
+        _logger.printWarning(
+          'Duplicate emulator platform "$platform" registered by $description and '
+          '${_describeExtension(existing)}; keeping ${_describeExtension(existing)}.',
+        );
+        continue;
+      }
+      providers[platform] = service;
+    }
+    return providers;
+  }
 }

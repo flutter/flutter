@@ -7,11 +7,19 @@ import 'package:args/args.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../doctor_validator.dart';
 import '../emulator.dart';
 import '../runner/flutter_command.dart';
+
+const _launchOption = 'launch';
+const _coldFlag = 'cold';
+const _createFlag = 'create';
+const _nameOption = 'name';
+const _platformOption = 'platform';
 
 /// The `flutter emulators` command, which lists, launches, and creates emulators.
 class EmulatorsCommand extends FlutterCommand {
@@ -21,20 +29,28 @@ class EmulatorsCommand extends FlutterCommand {
     required super.toolContext,
     super.verboseHelp,
   }) {
-    argParser.addOption('launch', help: 'The full or partial ID of the emulator to launch.');
+    argParser.addOption(_launchOption, help: 'The full or partial ID of the emulator to launch.');
     argParser.addFlag(
-      'cold',
-      help: 'Used with the "--launch" flag to cold boot the emulator instance (Android only).',
+      _coldFlag,
+      help:
+          'Used with the "--launch" flag to cold boot the emulator instance '
+          '(Android and supported tool extensions).',
       negatable: false,
     );
     argParser.addFlag(
-      'create',
-      help: 'Creates a new Android emulator based on a Pixel device.',
+      _createFlag,
+      help: 'Creates a new emulator (for example, an Android AVD or a tool extension emulator).',
       negatable: false,
     );
     argParser.addOption(
-      'name',
+      _nameOption,
       help: 'Used with the "--create" flag. Specifies a name for the emulator being created.',
+    );
+    argParser.addOption(
+      _platformOption,
+      help:
+          'Used with the "--create" flag. Specifies the target platform for the emulator being '
+          'created (for example, "android" or a tool extension platform identifier).',
     );
   }
 
@@ -56,20 +72,25 @@ class EmulatorsCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Platform platform = toolContext.platform;
+    final ArgResults argumentResults = argResults!;
 
-    if (_doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
+    if (argumentResults.wasParsed(_platformOption) && !argumentResults.wasParsed(_createFlag)) {
+      throwToolExit('The "--$_platformOption" option can only be used with "--$_createFlag".');
+    }
+
+    if (_doctor.workflows.every((Workflow w) => !w.canListEmulators) &&
+        !await _emulatorManager.hasExtensionEmulatorSources()) {
       throwToolExit(
         'Unable to find any emulator sources. Please ensure you have some\n'
         'Android AVD images ${platform.isMacOS ? 'or an iOS Simulator ' : ''}available.',
         exitCode: 1,
       );
     }
-    final ArgResults argumentResults = argResults!;
-    if (argumentResults.wasParsed('launch')) {
-      final bool coldBoot = argumentResults.wasParsed('cold');
-      await _launchEmulator(stringArg('launch')!, coldBoot: coldBoot);
-    } else if (argumentResults.wasParsed('create')) {
-      await _createEmulator(name: stringArg('name'));
+    if (argumentResults.wasParsed(_launchOption)) {
+      final bool coldBoot = argumentResults.wasParsed(_coldFlag);
+      await _launchEmulator(stringArg(_launchOption)!, coldBoot: coldBoot);
+    } else if (argumentResults.wasParsed(_createFlag)) {
+      await _createEmulator(name: stringArg(_nameOption), platform: stringArg(_platformOption));
     } else {
       final String? searchText = argumentResults.rest.firstOrNull;
       await _listEmulators(searchText);
@@ -91,19 +112,121 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _createEmulator({String? name}) async {
-    final Logger logger = toolContext.logger;
-    final CreateEmulatorResult createResult = await _emulatorManager.createEmulator(name: name);
+  Future<void> _createEmulator({String? name, String? platform}) async {
+    final ToolContext(:Logger logger, :AnsiTerminal terminal) = toolContext;
+    final String resolvedPlatform;
+    if (platform != null) {
+      if (platform.isEmpty) {
+        throwToolExit('The "--$_platformOption" option must not be empty.');
+      }
+      if (platform != EmulatorManager.androidPlatform) {
+        final List<String> availablePlatforms = await _emulatorManager
+            .getAvailableCreatePlatforms();
+        if (!availablePlatforms.contains(platform)) {
+          throwToolExit(
+            availablePlatforms.isEmpty
+                ? 'Unknown emulator creation platform "$platform". '
+                      'No emulator creation platforms are available.'
+                : 'Unknown emulator creation platform "$platform". '
+                      'Available platforms: ${availablePlatforms.join(', ')}.',
+          );
+        }
+      }
+      resolvedPlatform = platform;
+    } else {
+      final List<String> availablePlatforms = await _emulatorManager.getAvailableCreatePlatforms();
+      switch (availablePlatforms) {
+        case []:
+          resolvedPlatform = EmulatorManager.androidPlatform;
+        case [final String singlePlatform]:
+          resolvedPlatform = singlePlatform;
+        default:
+          if (!terminal.stdinHasTerminal) {
+            throwToolExit(
+              'Multiple emulator creation platforms are available '
+              '(${availablePlatforms.join(', ')}). '
+              'Specify one using "--$_platformOption <platform>".',
+            );
+          }
+          resolvedPlatform = await _promptForPlatform(
+            availablePlatforms,
+            logger: logger,
+            terminal: terminal,
+          );
+      }
+    }
+
+    final CreateEmulatorResult createResult = await _emulatorManager.createEmulator(
+      name: name,
+      platform: resolvedPlatform,
+    );
 
     if (createResult.success) {
       logger.printStatus("Emulator '${createResult.emulatorName}' created successfully.");
     } else {
-      logger.printStatus("Failed to create emulator '${createResult.emulatorName}'.\n");
+      if (createResult.emulatorName.isEmpty) {
+        logger.printStatus('Failed to create emulator.\n');
+      } else {
+        logger.printStatus("Failed to create emulator '${createResult.emulatorName}'.\n");
+      }
       final String? error = createResult.error;
-      if (error != null) {
+      if (error != null && error.trim().isNotEmpty) {
         logger.printStatus(error.trim());
       }
-      _printAdditionalInfo();
+      if (resolvedPlatform == EmulatorManager.androidPlatform) {
+        _printAdditionalInfo();
+      }
+    }
+  }
+
+  Future<String> _promptForPlatform(
+    List<String> platforms, {
+    required Logger logger,
+    required AnsiTerminal terminal,
+  }) async {
+    const prompt = 'Please choose one (or "q" to quit)';
+    logger.printStatus('Multiple emulator creation platforms are available:');
+    for (final (int index, String platform) in platforms.indexed) {
+      logger.printStatus('[${index + 1}]: $platform');
+    }
+    final String choice;
+    if (platforms.length < 10) {
+      terminal.usesTerminalUi = true;
+      choice = await terminal.promptForCharInput(
+        <String>[for (var i = 0; i < platforms.length; i++) '${i + 1}', 'q', 'Q'],
+        displayAcceptedCharacters: false,
+        logger: logger,
+        prompt: prompt,
+      );
+    } else {
+      choice = await _readPlatformChoiceLine(
+        logger: logger,
+        optionCount: platforms.length,
+        prompt: prompt,
+        terminal: terminal,
+      );
+    }
+    if (choice.toLowerCase() == 'q') {
+      throwToolExit('');
+    }
+    final String selected = platforms[int.parse(choice) - 1];
+    logger.printStatus('To skip this prompt in the future, pass "--$_platformOption $selected".');
+    return selected;
+  }
+
+  Future<String> _readPlatformChoiceLine({
+    required Logger logger,
+    required int optionCount,
+    required String prompt,
+    required AnsiTerminal terminal,
+  }) async {
+    while (true) {
+      logger.printStatus('$prompt: ', emphasis: true, newline: false);
+      final String line = (await terminal.readLine()).trim();
+      final int? number = int.tryParse(line);
+      if (line.toLowerCase() == 'q' || (number != null && number >= 1 && number <= optionCount)) {
+        return line;
+      }
     }
   }
 

@@ -242,3 +242,107 @@ class ExtensionDebuggingOptions {
   @override
   int get hashCode => Object.hash(buildMode, debuggingEnabled);
 }
+
+/// Representation of a target emulator or simulator provided by a tool extension.
+@immutable
+final class TargetEmulator {
+  /// Creates a [TargetEmulator] definition.
+  const TargetEmulator({required this.id, required this.name, this.category, this.manufacturer})
+    : assert(id != '', 'id must not be empty.'),
+      assert(name != '', 'name must not be empty.');
+
+  /// Deserializes a [TargetEmulator] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if [id] or [name] is missing, not a [String],
+  /// or empty, or if [category] or [manufacturer] is invalid.
+  factory TargetEmulator.fromJson(Map<String, Object?> json) {
+    final String id = json.requiredField<String>(idKey);
+    if (id.isEmpty) {
+      throw const FormatException('Invalid "$idKey": must not be empty.');
+    }
+    final String name = json.requiredField<String>(nameKey);
+    if (name.isEmpty) {
+      throw const FormatException('Invalid "$nameKey": must not be empty.');
+    }
+    final String? rawCategory = json.nullableField<String>(categoryKey);
+    Category? category;
+    if (rawCategory != null) {
+      category = Category.fromString(rawCategory);
+      if (category == null) {
+        throw FormatException('Invalid "$categoryKey": unknown category "$rawCategory".');
+      }
+    }
+    final String? manufacturer = json.nullableField<String>(manufacturerKey);
+    return TargetEmulator(id: id, name: name, category: category, manufacturer: manufacturer);
+  }
+
+  /// Map key for [category].
+  static const String categoryKey = 'category';
+
+  /// Map key for [id].
+  static const String idKey = 'id';
+
+  /// Map key for [manufacturer].
+  static const String manufacturerKey = 'manufacturer';
+
+  /// Map key for [name].
+  static const String nameKey = 'name';
+
+  /// Deserializes a list of [TargetEmulator] objects from RPC response data.
+  ///
+  /// Throws a [FormatException] if [rpcResult] is not a list or contains
+  /// invalid entries.
+  static List<TargetEmulator> listFromJson(Object? rpcResult) {
+    if (rpcResult is! List<Object?>) {
+      throw FormatException(
+        'Invalid target emulator list: expected a List, got ${rpcResult.runtimeType}.',
+      );
+    }
+    return <TargetEmulator>[
+      for (final Object? item in rpcResult)
+        if (item is Map<String, Object?>)
+          TargetEmulator.fromJson(item)
+        else
+          throw FormatException(
+            'Invalid target emulator entry: expected a Map<String, Object?>, got ${item.runtimeType}.',
+          ),
+    ];
+  }
+
+  /// Optional device category (e.g. [Category.mobile], [Category.desktop], [Category.other]).
+  final Category? category;
+
+  /// Unique identifier of the emulator.
+  final String id;
+
+  /// Optional manufacturer or vendor name of the emulator.
+  final String? manufacturer;
+
+  /// Display name of the emulator.
+  final String name;
+
+  /// Serializes the target emulator to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    idKey: id,
+    nameKey: name,
+    categoryKey: ?category?.value,
+    manufacturerKey: ?manufacturer,
+  };
+
+  @override
+  String toString() =>
+      'TargetEmulator(id: $id, name: $name, category: $category, manufacturer: $manufacturer)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TargetEmulator &&
+            other.id == id &&
+            other.name == name &&
+            other.category == category &&
+            other.manufacturer == manufacturer);
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, category, manufacturer);
+}

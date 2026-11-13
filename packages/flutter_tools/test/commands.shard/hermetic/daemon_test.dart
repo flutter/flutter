@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
@@ -1669,7 +1670,109 @@ void main() {
       );
       expect(hiddenCommand.hidden, true);
     });
+
+    testWithoutContext('Daemon EmulatorDomain uses injected EmulatorManager for custom emulators and creates Android emulators', () async {
+      final logger = BufferLogger.test();
+      final daemonStreams = FakeDaemonStreams();
+      addTearDown(daemonStreams.dispose);
+      final connection = DaemonConnection(daemonStreams: daemonStreams, logger: logger);
+      addTearDown(connection.dispose);
+      final localNotifyingLogger = NotifyingLogger(verbose: false, parent: logger);
+      addTearDown(localNotifyingLogger.dispose);
+
+      var launchedColdBoot = false;
+      final customEmulator = _FakeCustomEmulator(
+        'ext_sim_1',
+        onLaunch: (bool coldBoot) => launchedColdBoot = coldBoot,
+      );
+      final emulatorManager = FakeEmulatorManager(
+        availableCreatePlatforms: const <String>['android', 'custom_os'],
+        createResult: CreateEmulatorResult('created_avd', success: true),
+        emulators: <Emulator>[customEmulator],
+      );
+
+      final localDaemon = Daemon(
+        connection,
+        analytics: const NoOpAnalytics(),
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        emulatorManager: emulatorManager,
+        featureFlags: TestFeatureFlags(),
+        notifyingLogger: localNotifyingLogger,
+        toolContext: FakeToolContext(logger: logger),
+        xcode: null,
+      );
+      addTearDown(localDaemon.shutdown);
+
+      final Stream<DaemonMessage> outputStream = daemonStreams.outputs.stream.asBroadcastStream();
+
+      daemonStreams.inputs.add(
+        DaemonMessage(<String, Object?>{'id': 1, 'method': 'emulator.getEmulators'}),
+      );
+      final DaemonMessage listResponse = await outputStream.firstWhere(_notEvent);
+      expect(listResponse.data['id'], 1);
+      expect(listResponse.data['result'], <Object?>[
+        <String, Object?>{
+          'id': 'ext_sim_1',
+          'name': 'Custom Extension Simulator',
+          'category': 'mobile',
+          'platformType': 'custom',
+        },
+      ]);
+
+      daemonStreams.inputs.add(
+        DaemonMessage(<String, Object?>{
+          'id': 2,
+          'method': 'emulator.launch',
+          'params': <String, Object?>{'emulatorId': 'ext_sim_1', 'coldBoot': true},
+        }),
+      );
+      final DaemonMessage launchResponse = await outputStream.firstWhere(_notEvent);
+      expect(launchResponse.data['id'], 2);
+      expect(launchResponse.data['error'], isNull);
+      expect(launchedColdBoot, isTrue);
+
+      daemonStreams.inputs.add(
+        DaemonMessage(<String, Object?>{
+          'id': 3,
+          'method': 'emulator.create',
+          'params': <String, Object?>{'name': 'created_avd', 'platform': 'custom_os'},
+        }),
+      );
+      final DaemonMessage createResponse = await outputStream.firstWhere(_notEvent);
+      expect(createResponse.data['id'], 3);
+      expect(emulatorManager.lastCreatedName, 'created_avd');
+      expect(emulatorManager.lastCreatedPlatform, EmulatorManager.androidPlatform);
+      expect(createResponse.data['result'], <String, Object?>{
+        'success': true,
+        'emulatorName': 'created_avd',
+        'error': null,
+      });
+    });
   });
+}
+
+class _FakeCustomEmulator extends Emulator {
+  const _FakeCustomEmulator(String id, {required this.onLaunch}) : super(id, true);
+
+  final void Function(bool coldBoot) onLaunch;
+
+  @override
+  String get name => 'Custom Extension Simulator';
+
+  @override
+  String? get manufacturer => 'Acme';
+
+  @override
+  Category get category => Category.mobile;
+
+  @override
+  PlatformType get platformType => PlatformType.custom;
+
+  @override
+  Future<void> launch({bool coldBoot = false}) async {
+    onLaunch(coldBoot);
+  }
 }
 
 bool _notEvent(DaemonMessage message) => message.data['event'] == null;
