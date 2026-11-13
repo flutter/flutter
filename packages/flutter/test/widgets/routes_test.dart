@@ -512,6 +512,245 @@ void main() {
       expect(observer.debugObservingRoute(pageRoute), false);
       expect(observer.debugObservingRoute(nextPageRoute), false);
     });
+
+    testWidgets(
+      'didPushNext is called on newly pushed route when pushed simultaneously with another',
+      (WidgetTester tester) async {
+        final observer = RouteObserver<PageRoute<dynamic>>();
+        final eventsA = <String>[];
+
+        await tester.pumpWidget(
+          WidgetsApp(
+            navigatorObservers: <NavigatorObserver>[observer],
+            color: const Color(0xFFFFFFFF),
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                pageBuilder: (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => const SizedBox(),
+              );
+            },
+          ),
+        );
+
+        final BuildContext context = tester.element(find.byType(SizedBox));
+        Navigator.of(context)
+          ..push(
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
+            ),
+          )
+          ..push(
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => const Text('Route B', textDirection: TextDirection.ltr),
+            ),
+          );
+
+        await tester.pumpAndSettle();
+
+        expect(eventsA, <String>['didPush', 'didPushNext']);
+      },
+    );
+
+    testWidgets(
+      'didPushNext is not called on newly pushed route when pushed simultaneously with a non-PageRoute',
+      (WidgetTester tester) async {
+        final observer = RouteObserver<PageRoute<dynamic>>();
+        final eventsA = <String>[];
+
+        await tester.pumpWidget(
+          WidgetsApp(
+            navigatorObservers: <NavigatorObserver>[observer],
+            color: const Color(0xFFFFFFFF),
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                pageBuilder: (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => const SizedBox(),
+              );
+            },
+          ),
+        );
+
+        final BuildContext context = tester.element(find.byType(SizedBox));
+        Navigator.of(context)
+          ..push(
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
+            ),
+          )
+          ..push(
+            RawDialogRoute<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => const Text('Route B', textDirection: TextDirection.ltr),
+            ),
+          );
+
+        await tester.pumpAndSettle();
+
+        expect(eventsA, <String>[
+          'didPush',
+        ]); // didPushNext should NOT be called because RawDialogRoute is not a PageRoute
+      },
+    );
+
+    testWidgets('didPushNext is called on initial route when initialRoute pushes multiple routes', (
+      WidgetTester tester,
+    ) async {
+      final observer = RouteObserver<PageRoute<dynamic>>();
+      final eventsHome = <String>[];
+      final eventsB = <String>[];
+
+      await tester.pumpWidget(
+        WidgetsApp(
+          navigatorObservers: <NavigatorObserver>[observer],
+          color: const Color(0xFFFFFFFF),
+          initialRoute: '/b',
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return switch (settings.name) {
+                      '/' => _TestRouteAwareWidget(observer: observer, onEvent: eventsHome.add),
+                      '/b' => _TestRouteAwareWidget(observer: observer, onEvent: eventsB.add),
+                      _ => const SizedBox(),
+                    };
+                  },
+            );
+          },
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(eventsHome, <String>['didPush', 'didPushNext']);
+      expect(eventsB, <String>['didPush']);
+    });
+
+    test('didRemove updates covered state before subscribe is called', () {
+      final observer = RouteObserver<PageRoute<dynamic>>();
+      final routeA = MockPageRoute();
+      final routeB = MockPageRoute();
+      final routeC = MockPageRoute();
+
+      // Stack: [A, B, C]
+      observer.didPush(routeA, null);
+      observer.didPush(routeB, routeA);
+      observer.didPush(routeC, routeB);
+
+      // Remove middle route B -> Stack: [A, C]; A is still covered by C.
+      observer.didRemove(routeB, routeA);
+
+      final awareA = MockRouteAware();
+      observer.subscribe(awareA, routeA);
+      expect(awareA.didPushCount, 1);
+      expect(awareA.didPushNextCount, 1);
+
+      // Remove top route C -> Stack: [A]; A is no longer covered.
+      observer.didRemove(routeC, routeA);
+
+      final awareA2 = MockRouteAware();
+      observer.subscribe(awareA2, routeA);
+      expect(awareA2.didPushCount, 1);
+      expect(awareA2.didPushNextCount, 0);
+    });
+
+    test('multi-route exit via didRemove leaves remaining route uncovered', () {
+      final observer = RouteObserver<PageRoute<dynamic>>();
+      final routeA = MockPageRoute();
+      final routeB = MockPageRoute();
+      final routeC = MockPageRoute();
+
+      // Stack: [A, B, C]
+      observer.didPush(routeA, null);
+      observer.didPush(routeB, routeA);
+      observer.didPush(routeC, routeB);
+
+      // Multi-route exit [A, B, C] -> [A] notifies didRemove(C, A) then didRemove(B, A).
+      observer.didRemove(routeC, routeA);
+      observer.didRemove(routeB, routeA);
+
+      final awareA = MockRouteAware();
+      observer.subscribe(awareA, routeA);
+      expect(awareA.didPushCount, 1);
+      expect(awareA.didPushNextCount, 0);
+    });
+
+    test('inserting a route below the top route marks the inserted route as covered', () {
+      final observer = RouteObserver<PageRoute<dynamic>>();
+      final routeA = MockPageRoute();
+      final routeM = MockPageRoute();
+      final routeB = MockPageRoute();
+
+      // Stack: [A, B]
+      observer.didPush(routeA, null);
+      observer.didPush(routeB, routeA);
+
+      // Insert M below B -> Stack: [A, M, B]
+      observer.didPush(routeM, routeA);
+
+      final awareM = MockRouteAware();
+      observer.subscribe(awareM, routeM);
+      expect(awareM.didPushCount, 1);
+      expect(awareM.didPushNextCount, 1);
+    });
+
+    test('didReplace updates covered state before subscribe is called', () {
+      final observer = RouteObserver<PageRoute<dynamic>>();
+      final routeA = MockPageRoute();
+      final routeA2 = MockPageRoute();
+      final routeB = MockPageRoute();
+      final nonPageRoute = MockRoute();
+
+      // Stack: [A, B]
+      observer.didPush(routeA, null);
+      observer.didPush(routeB, routeA);
+
+      // Replace covered route A with A2 -> Stack: [A2, B]; A2 is covered by B.
+      observer.didReplace(newRoute: routeA2, oldRoute: routeA);
+
+      final awareA2 = MockRouteAware();
+      observer.subscribe(awareA2, routeA2);
+      expect(awareA2.didPushCount, 1);
+      expect(awareA2.didPushNextCount, 1);
+
+      final awareOldA = MockRouteAware();
+      observer.subscribe(awareOldA, routeA);
+      expect(awareOldA.didPushCount, 1);
+      expect(awareOldA.didPushNextCount, 0);
+
+      // Replace covering route B with a non-PageRoute -> A2 is no longer covered by a PageRoute.
+      observer.didReplace(newRoute: nonPageRoute, oldRoute: routeB);
+
+      final awareA2After = MockRouteAware();
+      observer.subscribe(awareA2After, routeA2);
+      expect(awareA2After.didPushCount, 1);
+      expect(awareA2After.didPushNextCount, 0);
+    });
   });
 
   testWidgets('Can autofocus a TextField nested in a Focus in a route.', (
@@ -3142,4 +3381,37 @@ class _ConstantVelocitySimulation extends Simulation {
     final double nowX = x(time);
     return nowX > 1.0 || nowX < 0;
   }
+}
+
+class _TestRouteAwareWidget extends StatefulWidget {
+  const _TestRouteAwareWidget({required this.observer, required this.onEvent});
+  final RouteObserver<PageRoute<dynamic>> observer;
+  final ValueChanged<String> onEvent;
+  @override
+  State<_TestRouteAwareWidget> createState() => _TestRouteAwareWidgetState();
+}
+
+class _TestRouteAwareWidgetState extends State<_TestRouteAwareWidget> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.observer.subscribe(this, ModalRoute.of(context)! as PageRoute<dynamic>);
+  }
+
+  @override
+  void dispose() {
+    widget.observer.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPush() => widget.onEvent('didPush');
+  @override
+  void didPop() => widget.onEvent('didPop');
+  @override
+  void didPushNext() => widget.onEvent('didPushNext');
+  @override
+  void didPopNext() => widget.onEvent('didPopNext');
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
