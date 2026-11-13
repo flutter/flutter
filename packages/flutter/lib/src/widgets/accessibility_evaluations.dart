@@ -73,16 +73,34 @@ class Violation {
   final String reason;
 }
 
-/// The result of evaluating a semantics node by an [AccessibilityEvaluation].
+/// The result of evaluating a widget tree by an [AccessibilityEvaluation].
 class EvaluationResult {
-  /// Creates a passing evaluation.
+  /// Creates an evaluation result with the given [violations].
   EvaluationResult(this.violations);
 
   /// A list of violations found. An empty list means the evaluation passed.
   final List<Violation> violations;
 }
 
-/// A class that evaluates a single accessibility rule.
+/// A class that evaluates a single accessibility rule against the current
+/// semantics tree.
+///
+/// Subclasses implement [evaluate] to inspect the [WidgetsBinding.renderViews]
+/// and return an [EvaluationResult] containing any [Violation]s found.
+///
+/// See also:
+///  * [MinimumTapTargetEvaluation], which checks that tappable nodes have a
+///    minimum size.
+///  * [LabeledTapTargetEvaluation], which enforces that all nodes with a tap or
+///    long press action also have a label.
+///  * [MinimumTextContrastEvaluation], which verifies that text meets WCAG
+///    contrast requirements.
+///  * [MinimumNonTextContrastEvaluation], which verifies that non-text controls
+///    meet WCAG contrast requirements.
+///  * [UnlabeledLeafNodeEvaluation], which enforces that leaf nodes have an
+///    accessible label, value, hint, or tooltip.
+///  * [TitleEvaluation], which enforces that the application has at least one
+///    [Title] widget.
 abstract class AccessibilityEvaluation {
   /// A const constructor allows subclasses to be const.
   const AccessibilityEvaluation();
@@ -94,13 +112,18 @@ abstract class AccessibilityEvaluation {
   FutureOr<EvaluationResult> evaluate(WidgetsBinding binding);
 }
 
-/// An evaluation which enforces that all tappable semantics nodes have a minimum
-/// size.
+/// {@template flutter.widgets.accessibility_evaluations.minimumTapTarget}
+/// Enforces that all tappable semantics nodes have a minimum size.
+///
+/// Each platform defines its own guidelines for minimum tap areas.
+/// {@endtemplate}
 class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTapTargetEvaluation].
   const MinimumTapTargetEvaluation({required this.size});
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTapTarget.size}
   /// The minimum allowed size of a tappable node.
+  /// {@endtemplate}
   final Size size;
 
   /// The gap between targets to their parent scrollables to be considered valid
@@ -185,10 +208,12 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
     return true;
   }
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTapTarget.shouldSkipNode}
   /// Returns whether [SemanticsNode] should be skipped for minimum tap target
   /// evaluation.
   ///
   /// Skips nodes which are link, hidden, or do not have actions.
+  /// {@endtemplate}
   bool shouldSkipNode(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
     // Skip node if it has no actions, or is marked as hidden.
@@ -205,8 +230,9 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   }
 }
 
-/// An evaluation which enforces that all nodes with a tap or long press action
-/// also have a label.
+/// {@template flutter.widgets.accessibility_evaluations.labeledTapTarget}
+/// Enforces that all nodes with a tap or long press action also have a label.
+/// {@endtemplate}
 class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
   /// Create a new [LabeledTapTargetEvaluation].
   const LabeledTapTargetEvaluation();
@@ -340,11 +366,18 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
   }
 }
 
-/// An evaluation which verifies that all nodes that contribute semantics via text
-/// meet minimum contrast levels.
+/// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast}
+/// Verifies that all nodes that contribute semantics via text meet minimum
+/// contrast levels.
 ///
-/// The evaluations are defined by the Web Content Accessibility Guidelines,
-/// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
+/// This traverses the semantics tree looking for nodes with values or labels
+/// that correspond to a [Text] or [EditableText] widget. Given the background
+/// pixels for the area around each widget, it partitions the colors into
+/// "light" and "dark" and chooses the most frequently occurring color in each
+/// partition as a representative of the foreground and background colors. The
+/// contrast ratio is calculated from these colors according to the
+/// [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef).
+/// {@endtemplate}
 class MinimumTextContrastEvaluation extends _ContrastEvaluation {
   /// Create a new [MinimumTextContrastEvaluation].
   const MinimumTextContrastEvaluation({
@@ -364,25 +397,33 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
   /// least [kBoldTextMinimumSize] (14.0) if bold.
   final double minLargeTextContrastRatio;
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast.kLargeTextMinimumSize}
   /// The minimum text size considered large for contrast checking.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@endtemplate}
   static const int kLargeTextMinimumSize = 18;
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast.kBoldTextMinimumSize}
   /// The minimum text size for bold text to be considered large for contrast
   /// checking.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@endtemplate}
   static const int kBoldTextMinimumSize = 14;
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast.kMinimumRatioNormalText}
   /// The minimum contrast ratio for normal text.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@endtemplate}
   static const double kMinimumRatioNormalText = 4.5;
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast.kMinimumRatioLargeText}
   /// The minimum contrast ratio for large text.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@endtemplate}
   static const double kMinimumRatioLargeText = 3.0;
 
   static const double _kDefaultFontSize = 12.0;
