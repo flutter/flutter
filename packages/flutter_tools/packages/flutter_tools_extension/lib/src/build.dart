@@ -91,6 +91,7 @@ abstract base class BuildTarget {
   /// [BuiltInPlaceholders.targetPlatform], and only target-platform-independent
   /// engine artifacts ([BuiltInArtifacts.flutterPatchedSdkPath] and
   /// [BuiltInArtifacts.icuData]) can be resolved in [artifacts].
+  // TODO(bkonyi): Replace with declared supported target platforms on BuildTarget and a selected target platform on ExtensionBuildContext, https://github.com/flutter/flutter/issues/194810.
   final String? targetPlatform;
 
   /// The directory pattern used by `flutter build` to determine this target's
@@ -145,8 +146,8 @@ abstract base class AssembleTarget {
 
   /// Names of `.d` dependency files written by this target into the build directory.
   ///
-  /// Extensions that declare [depfiles] can use [RawDepfile.format] to write `.d`
-  /// files into their build directory and [RawDepfile.parse] to read them back.
+  /// Extensions that declare [depfiles] can use [Depfile.format] to write `.d`
+  /// files into their build directory and [Depfile.parse] to read them back.
   ///
   /// Each entry must match [ExtensionAssembleTarget.isValidDepfileName].
   /// Relative paths inside each depfile are resolved against the project root
@@ -157,7 +158,7 @@ abstract base class AssembleTarget {
   ///
   /// See also:
   ///
-  /// * [RawDepfile], which formats and parses `.d` dependency files.
+  /// * [Depfile], which formats and parses `.d` dependency files.
   List<String> get depfiles => const <String>[];
 
   /// The input [ExtensionSource]s for this target.

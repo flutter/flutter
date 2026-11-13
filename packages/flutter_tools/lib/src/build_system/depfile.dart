@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' as core;
 
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
@@ -45,7 +45,7 @@ class DepfileService {
     } else {
       outputsToWrite = depfile.outputs;
     }
-    final rawDepfile = RawDepfile(
+    final coreDepfile = core.Depfile(
       inputs: <String>[
         for (final File file in depfile.inputs) _fileSystem.path.normalize(file.path),
       ],
@@ -53,30 +53,29 @@ class DepfileService {
         for (final File file in outputsToWrite) _fileSystem.path.normalize(file.path),
       ],
     );
-    output.writeAsStringSync(rawDepfile.format(windows: _fileSystem.path.style.separator == r'\'));
+    output.writeAsStringSync(coreDepfile.format(windows: _fileSystem.path.style.separator == r'\'));
   }
 
   /// Parse the depfile contents from [file].
   ///
-  /// If the syntax is invalid, returns an empty [Depfile].
+  /// If [allowMalformed] is `true` (the default) and the syntax is invalid,
+  /// logs an error and returns an empty [Depfile]. When [allowMalformed] is
+  /// `false`, throws a [FormatException] if [file] is malformed.
   ///
   /// If [baseDirectory] is provided, any relative paths in the depfile
   /// will be resolved relative to it.
-  Depfile parse(File file, [Directory? baseDirectory]) {
+  Depfile parse(File file, {bool allowMalformed = true, Directory? baseDirectory}) {
     final String contents = file.readAsStringSync();
-    final RawDepfile parsed;
+    final core.Depfile parsed;
     try {
-      parsed = RawDepfile.parse(contents);
+      parsed = core.Depfile.parse(contents);
     } on FormatException {
+      if (!allowMalformed) {
+        rethrow;
+      }
       _logger.printError('Invalid depfile: ${file.path}');
       return const Depfile(<File>[], <File>[]);
     }
-    return resolve(parsed, baseDirectory);
-  }
-
-  /// Resolves a [RawDepfile] into a host [Depfile] with normalized [File]
-  /// paths, resolving relative paths against [baseDirectory] when provided.
-  Depfile resolve(RawDepfile parsed, [Directory? baseDirectory]) {
     final List<File> inputs = _resolvePaths(parsed.inputs, baseDirectory);
     final List<File> outputs = _resolvePaths(parsed.outputs, baseDirectory);
     return Depfile(inputs, outputs);

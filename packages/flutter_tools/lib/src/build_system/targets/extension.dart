@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Depfile;
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
@@ -174,9 +174,13 @@ class ExtensionTarget extends Target {
         );
         continue;
       }
-      final RawDepfile parsed;
+      final Depfile depfile;
       try {
-        parsed = RawDepfile.parse(depfileFile.readAsStringSync());
+        depfile = depFileService.parse(
+          depfileFile,
+          allowMalformed: false,
+          baseDirectory: projectDir,
+        );
       } on FormatException catch (e) {
         logger.printError(
           'Invalid depfile "$depfileName" produced by extension assemble target '
@@ -187,7 +191,6 @@ class ExtensionTarget extends Target {
         ErrorHandlingFileSystem.deleteIfExists(depfileFile);
         continue;
       }
-      final Depfile depfile = depFileService.resolve(parsed, projectDir);
       depFileService.writeToFile(depfile, depfileFile, writeEmpty: true);
     }
 

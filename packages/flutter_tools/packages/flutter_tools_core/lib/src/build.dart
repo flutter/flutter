@@ -193,7 +193,7 @@ class ExtensionBuildTarget {
   /// [BuiltInPlaceholders.targetPlatform], and only target-platform-independent
   /// engine artifacts ([BuiltInArtifacts.flutterPatchedSdkPath] and
   /// [BuiltInArtifacts.icuData]) can be resolved in [artifacts].
-  // TODO(bkonyi): Support multi-platform BuildTargets and architecture placeholders, https://github.com/flutter/flutter/issues/194810.
+  // TODO(bkonyi): Replace with declared supported target platforms on BuildTarget and a selected target platform on ExtensionBuildContext, https://github.com/flutter/flutter/issues/194810.
   final String? targetPlatform;
 
   /// Engine artifacts required by this build target, resolved for [targetPlatform]
@@ -363,8 +363,8 @@ class ExtensionAssembleTarget {
 
   /// Names of `.d` dependency files written by this target into the build directory.
   ///
-  /// Extensions that declare [depfiles] can use [RawDepfile.format] to write `.d`
-  /// files into their build directory and [RawDepfile.parse] to read them back.
+  /// Extensions that declare [depfiles] can use [Depfile.format] to write `.d`
+  /// files into their build directory and [Depfile.parse] to read them back.
   ///
   /// Each entry must match [isValidDepfileName]. Relative paths inside each
   /// depfile are resolved against the project root directory and rewritten in

@@ -166,7 +166,7 @@ final class AssetTransformer {
         final depfileService = DepfileService(logger: logger, fileSystem: _fileSystem);
         final Depfile parsedDepfile = depfileService.parse(
           depfile,
-          _fileSystem.directory(workingDirectory),
+          baseDirectory: _fileSystem.directory(workingDirectory),
         );
         dependencies = parsedDepfile.inputs;
       } on Exception catch (e) {

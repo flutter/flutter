@@ -426,7 +426,7 @@ void main() {
             .directory(buildDir)
             .childFile('custom_target.d')
             .writeAsStringSync(
-              const RawDepfile(
+              const Depfile(
                 inputs: <String>['lib/extra_input.dart'],
                 outputs: <String>['build/extra_output.txt'],
               ).format(),
@@ -475,7 +475,7 @@ void main() {
           fileSystem
               .directory(buildDir)
               .childFile('missing.d')
-              .writeAsStringSync(const RawDepfile(inputs: <String>['lib/tracked.dart']).format());
+              .writeAsStringSync(const Depfile(inputs: <String>['lib/tracked.dart']).format());
         }
       },
     );

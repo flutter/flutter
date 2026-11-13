@@ -10,21 +10,21 @@ const _listEquality = ListEquality<String>();
 /// Unresolved [inputs] and [outputs] file paths parsed from or formatted to a
 /// `.d` dependency file.
 @immutable
-final class RawDepfile {
-  const RawDepfile({this.inputs = const <String>[], this.outputs = const <String>[]});
+final class Depfile {
+  const Depfile({this.inputs = const <String>[], this.outputs = const <String>[]});
 
-  /// Parses `.d` depfile [contents] (`<outputs>: <inputs>`) into a [RawDepfile].
+  /// Parses `.d` depfile [contents] (`<outputs>: <inputs>`) into a [Depfile].
   ///
   /// Throws a [FormatException] if [contents] does not contain a single `": "`
   /// separator between outputs and inputs.
-  factory RawDepfile.parse(String contents) {
+  factory Depfile.parse(String contents) {
     final List<String> colonSeparated = contents.split(': ');
     if (colonSeparated.length != 2) {
       throw const FormatException('Invalid depfile syntax: expected "<outputs>: <inputs>".');
     }
     final List<String> outputs = _processList(colonSeparated[0].trim());
     final List<String> inputs = _processList(colonSeparated[1].trim());
-    return RawDepfile(inputs: inputs, outputs: outputs);
+    return Depfile(inputs: inputs, outputs: outputs);
   }
 
   // Matches unescaped spaces separating file paths in a depfile rule.
@@ -81,12 +81,12 @@ final class RawDepfile {
   }
 
   @override
-  String toString() => 'RawDepfile(inputs: $inputs, outputs: $outputs)';
+  String toString() => 'Depfile(inputs: $inputs, outputs: $outputs)';
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other is RawDepfile &&
+        (other is Depfile &&
             _listEquality.equals(other.inputs, inputs) &&
             _listEquality.equals(other.outputs, outputs));
   }
