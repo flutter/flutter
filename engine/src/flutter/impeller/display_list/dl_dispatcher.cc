@@ -13,6 +13,7 @@
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/trace_event.h"
 #include "fml/closure.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
@@ -1390,8 +1391,12 @@ bool RenderToTarget(ContentContext& context,
                     Rect cull_rect,
                     bool reset_host_buffer,
                     bool is_onscreen) {
+  TRACE_EVENT0("impeller", "RenderToTarget");
   FirstPassDispatcher collector(context, impeller::Matrix(), cull_rect);
-  display_list->Dispatch(collector, cull_rect);
+  {
+    TRACE_EVENT0("impeller", "FirstPassDispatcher::Dispatch");
+    display_list->Dispatch(collector, cull_rect);
+  }
 
   impeller::CanvasDlDispatcher impeller_dispatcher(
       context,                                   //
@@ -1411,8 +1416,14 @@ bool RenderToTarget(ContentContext& context,
     context.GetTextShadowCache().MarkFrameEnd();
   });
 
-  display_list->Dispatch(impeller_dispatcher, cull_rect);
-  impeller_dispatcher.FinishRecording();
+  {
+    TRACE_EVENT0("impeller", "CanvasDlDispatcher::Dispatch");
+    display_list->Dispatch(impeller_dispatcher, cull_rect);
+  }
+  {
+    TRACE_EVENT0("impeller", "CanvasDlDispatcher::FinishRecording");
+    impeller_dispatcher.FinishRecording();
+  }
   context.GetLazyGlyphAtlas()->ResetTextFrames();
 
   return true;

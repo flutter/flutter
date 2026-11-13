@@ -70,7 +70,12 @@ ASurfaceTransaction* ASurfaceTransaction_fromJava(JNIEnv* env,
   INVOKE(ASurfaceTransaction_setOnComplete, 29)                    \
   INVOKE(ASurfaceTransactionStats_getPreviousReleaseFenceFd, 29)   \
   INVOKE(ASurfaceTransaction_fromJava, 34)                         \
+  INVOKE(ATrace_beginAsyncSection, 29)                             \
+  INVOKE(ATrace_beginSection, 23)                                  \
+  INVOKE(ATrace_endAsyncSection, 29)                               \
+  INVOKE(ATrace_endSection, 23)                                    \
   INVOKE(ATrace_isEnabled, 23)                                     \
+  INVOKE(ATrace_setCounter, 29)                                    \
   INVOKE(eglGetNativeClientBufferANDROID, 0)
 // clang-format on
 
