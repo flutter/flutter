@@ -5,6 +5,7 @@
 #include "flutter/lib/gpu/replay.h"
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 
 #include "dart_api.h"
@@ -470,10 +471,13 @@ bool CommandBufferEncoder::Submit(
   const std::shared_ptr<impeller::Context> context =
       encoder->queue_->GetContext();
 
+  // Backends report kError themselves for some failed submissions, so the
+  // completion runs at most once however the submission fails.
+  auto completed = std::make_shared<std::atomic<bool>>(false);
   impeller::CommandBuffer::CompletionCallback complete =
-      [completion = std::move(completion)](
+      [completed, completion = std::move(completion)](
           impeller::CommandBuffer::Status status) {
-        if (completion) {
+        if (completion && !completed->exchange(true)) {
           completion(status);
         }
       };
