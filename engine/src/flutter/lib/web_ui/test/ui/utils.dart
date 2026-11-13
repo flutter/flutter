@@ -153,6 +153,78 @@ class PaintConsumers {
   }
 }
 
+/// A fake [BackendImage] from another renderer, rejected by backend canvases.
+class ForeignBackendImage implements BackendImage {
+  @override
+  void dispose() {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _ForeignBackendImageFilter implements BackendImageFilter {
+  @override
+  void dispose() {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// An [EngineImageFilter] whose backend delegate belongs to another renderer.
+class ForeignImageFilter extends EngineImageFilter {
+  @override
+  BackendImageFilter getBackendFilter({required TileMode defaultBlurTileMode}) =>
+      _ForeignBackendImageFilter();
+}
+
+class _ForeignBackendPath implements BackendPath {
+  @override
+  void dispose() {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// An [EnginePath] whose backend delegate belongs to another renderer.
+class ForeignPath implements EnginePath {
+  @override
+  BackendPath get backendPath => _ForeignBackendPath();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _ForeignBackendVertices implements BackendVertices {
+  @override
+  void dispose() {}
+}
+
+/// An [EngineVertices] whose backend delegate belongs to another renderer.
+class ForeignVertices implements EngineVertices {
+  @override
+  bool get debugDisposed => false;
+
+  @override
+  BackendVertices? get delegate => _ForeignBackendVertices();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// A [BackendCanvas] whose [drawPath] throws after [translate] succeeds.
+class ThrowingBackendCanvas implements BackendCanvas {
+  @override
+  void translate(double dx, double dy) {}
+
+  @override
+  void drawPath(BackendPath path, BackendPaint paint) {
+    throw StateError('drawPath failed');
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 /// Draws the [Picture]. This is in preparation for a golden test.
 Future<void> drawPictureUsingCurrentRenderer(Picture picture) async {
   final sb = SceneBuilder();

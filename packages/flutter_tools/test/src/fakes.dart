@@ -1163,7 +1163,13 @@ class FakeGit extends Fake implements Git {}
 
 class FakeGradleUtils extends Fake implements GradleUtils {}
 
-class FakeCocoaPods extends Fake implements CocoaPods {}
+class FakeCocoaPods extends Fake implements CocoaPods {
+  @override
+  void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {}
+
+  @override
+  Future<void> setupPodfile(XcodeBasedProject xcodeProject) async {}
+}
 
 class FakeCocoaPodsValidator extends Fake implements CocoaPodsValidator {}
 
@@ -1252,6 +1258,11 @@ class FakeEmulatorManager extends Fake implements EmulatorManager {
     lastCreatedPlatform = platform;
     return createResult ?? CreateEmulatorResult('fake_emulator', success: true);
   }
+}
+
+class FakeExtensionManager extends Fake implements ExtensionManager {
+  @override
+  void disable() {}
 }
 
 class FakeToolDependencies extends Fake implements ToolDependencies {

@@ -9,6 +9,8 @@ library scene_painting;
 
 import 'package:ui/ui.dart' as ui;
 
+import '../primitives/image_source.dart';
+
 /// A [ui.Canvas] with the additional method [saveLayerWithFilter] which allows
 /// the caller to pass an explicit [ui.ImageFilter] which is applied to the
 /// layer when [restore] is called.
@@ -37,6 +39,9 @@ abstract class LayerPicture implements ui.Picture {
 
   /// Returns `true` if the picture has been disposed.
   bool get isDisposed;
+
+  /// The image sources retained by this picture, or null if it retains none.
+  PictureImageTracker? get imageTracker;
 }
 
 /// A [ui.PictureRecorder] which allows callers to know if it has been disposed.
