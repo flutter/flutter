@@ -3557,10 +3557,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   bool get _isTraversalParent => _traversalParentIdentifier != null;
   bool get _isTraversalChild => _traversalChildIdentifier != null;
 
-  // Whether `child` has this node as its traversal parent. A node can be the
-  // traversal parent of one OverlayPortal and the hit-test parent of another
-  // portal's overlay child, for example when the other portal's Overlay is
-  // inside this portal's child.
+  /// Whether `child` has this node as its traversal parent.
+  ///
+  /// A node can be the traversal parent of one `OverlayPortal` and the hit-test
+  /// parent of another portal's overlay child, for example when the other
+  /// portal's `Overlay` is inside this portal's child.
   bool _isTraversalParentOf(SemanticsNode child) {
     return _isTraversalParent && child._traversalChildIdentifier == _traversalParentIdentifier;
   }
