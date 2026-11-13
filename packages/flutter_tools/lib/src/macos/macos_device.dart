@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
