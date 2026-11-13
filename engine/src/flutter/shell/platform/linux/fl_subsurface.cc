@@ -40,7 +40,6 @@ FlSubsurface* fl_subsurface_new(struct wl_compositor* compositor,
   self->surface = wl_compositor_create_surface(compositor);
   self->subsurface = wl_subcompositor_get_subsurface(
       subcompositor, self->surface, parent_surface);
-  wl_subsurface_set_sync(self->subsurface);
 
   // Give the subsurface an empty input region so pointer, touch and keyboard
   // events pass through to the parent (GTK) surface, which handles all input
@@ -60,4 +59,14 @@ struct wl_surface* fl_subsurface_get_surface(FlSubsurface* self) {
 void fl_subsurface_set_position(FlSubsurface* self, gint x, gint y) {
   g_return_if_fail(FL_IS_SUBSURFACE(self));
   wl_subsurface_set_position(self->subsurface, x, y);
+}
+
+void fl_subsurface_set_sync(FlSubsurface* self) {
+  g_return_if_fail(FL_IS_SUBSURFACE(self));
+  wl_subsurface_set_sync(self->subsurface);
+}
+
+void fl_subsurface_set_desync(FlSubsurface* self) {
+  g_return_if_fail(FL_IS_SUBSURFACE(self));
+  wl_subsurface_set_desync(self->subsurface);
 }
