@@ -8,13 +8,18 @@
 #include <cstring>
 
 #include "flutter/shell/platform/linux/fl_platform_channel.h"
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_platform_handler_gtk4.h"
+#endif
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
 
 static constexpr char kInProgressError[] = "In Progress";
+#if !FLUTTER_LINUX_GTK4
 static constexpr char kUnknownClipboardFormatError[] =
     "Unknown Clipboard Format";
 
 static constexpr char kTextPlainFormat[] = "text/plain";
+#endif
 
 static constexpr char kSoundTypeAlert[] = "SystemSoundType.alert";
 static constexpr char kSoundTypeClick[] = "SystemSoundType.click";
@@ -34,7 +39,7 @@ struct _FlPlatformHandler {
 
 G_DEFINE_TYPE(FlPlatformHandler, fl_platform_handler, G_TYPE_OBJECT)
 
-// Called when clipboard text received.
+#if !FLUTTER_LINUX_GTK4
 static void clipboard_text_cb(GtkClipboard* clipboard,
                               const gchar* text,
                               gpointer user_data) {
@@ -50,14 +55,19 @@ static void clipboard_text_has_strings_cb(GtkClipboard* clipboard,
   fl_platform_channel_respond_clipboard_has_strings(
       method_call, text != nullptr && strlen(text) > 0);
 }
+#endif
 
 // Called when Flutter wants to copy to the clipboard.
 static FlMethodResponse* clipboard_set_data(FlMethodCall* method_call,
                                             const gchar* text,
                                             gpointer user_data) {
+#if FLUTTER_LINUX_GTK4
+  return fl_platform_handler_gtk4_clipboard_set_data(method_call, text);
+#else
   GtkClipboard* clipboard =
       gtk_clipboard_get_default(gdk_display_get_default());
   gtk_clipboard_set_text(clipboard, text, -1);
+#endif
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
@@ -66,6 +76,9 @@ static FlMethodResponse* clipboard_set_data(FlMethodCall* method_call,
 static FlMethodResponse* clipboard_get_data(FlMethodCall* method_call,
                                             const gchar* format,
                                             gpointer user_data) {
+#if FLUTTER_LINUX_GTK4
+  return fl_platform_handler_gtk4_clipboard_get_data(method_call, format);
+#else
   if (strcmp(format, kTextPlainFormat) != 0) {
     return FL_METHOD_RESPONSE(fl_method_error_response_new(
         kUnknownClipboardFormatError, "GTK clipboard API only supports text",
@@ -76,6 +89,7 @@ static FlMethodResponse* clipboard_get_data(FlMethodCall* method_call,
       gtk_clipboard_get_default(gdk_display_get_default());
   gtk_clipboard_request_text(clipboard, clipboard_text_cb,
                              g_object_ref(method_call));
+#endif
 
   // Will respond later.
   return nullptr;
@@ -85,10 +99,14 @@ static FlMethodResponse* clipboard_get_data(FlMethodCall* method_call,
 // be pasted, without actually accessing the clipboard content itself.
 static FlMethodResponse* clipboard_has_strings(FlMethodCall* method_call,
                                                gpointer user_data) {
+#if FLUTTER_LINUX_GTK4
+  return fl_platform_handler_gtk4_clipboard_has_strings(method_call);
+#else
   GtkClipboard* clipboard =
       gtk_clipboard_get_default(gdk_display_get_default());
   gtk_clipboard_request_text(clipboard, clipboard_text_has_strings_cb,
                              g_object_ref(method_call));
+#endif
 
   // Will respond later.
   return nullptr;

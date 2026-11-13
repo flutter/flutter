@@ -119,8 +119,7 @@ gboolean fl_view_renderer_resize_to_frame(FlViewRenderer* self,
   gint scale_factor = gtk_widget_get_scale_factor(widget);
   size_t width = allocation.width * scale_factor;
   size_t height = allocation.height * scale_factor;
-  gboolean frame_size_matches = width == frame_width && height == frame_height;
-  if (frame_size_matches) {
+  if (width == frame_width && height == frame_height) {
     return FALSE;
   }
 
@@ -128,8 +127,6 @@ gboolean fl_view_renderer_resize_to_frame(FlViewRenderer* self,
                               frame_height / scale_factor);
   GtkWidget* toplevel = gtk_widget_get_toplevel(widget);
   if (GTK_IS_WINDOW(toplevel)) {
-    // Resize to smallest size, so that the window will shrink to fit the new
-    // size of the render area.
     gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
   }
   return TRUE;

@@ -15,13 +15,18 @@ G_DECLARE_FINAL_TYPE(FlViewMonitor, fl_view_monitor, FL, VIEW_MONITOR, GObject);
  * fl_view_monitor_new:
  * @view: the view being monitored.
  * @on_first_frame: the function to call when the first frame is rendered.
+ * @on_size_changed: the function to call when the view is allocated a size,
+ * with the width and height in logical pixels.
  *
  * Helper class to allow the Flutter engine to monitor a FlView using FFI.
  * Callbacks are called in the isolate this class was created with.
  *
  * Returns: a new #FlViewMonitor.
  */
-FlViewMonitor* fl_view_monitor_new(FlView* view, void (*on_first_frame)(void));
+FlViewMonitor* fl_view_monitor_new(FlView* view,
+                                   void (*on_first_frame)(void),
+                                   void (*on_size_changed)(int width,
+                                                           int height));
 
 G_END_DECLS
 

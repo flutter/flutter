@@ -330,6 +330,7 @@ final class RunTarget {
       // Desktop (Linux).
       TargetPlatform.linuxX64 || TargetPlatform.linuxArm64 || TargetPlatform.linuxRiscv64 => [
         Label.parseGn('//flutter/shell/platform/linux:flutter_linux_gtk'),
+        Label.parseGn('//flutter/shell/platform/linux:flutter_linux_gtk4'),
       ],
 
       // Desktop (Windows).

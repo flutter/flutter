@@ -62,6 +62,12 @@ enum SupportedPlatform {
   root, // Special platform to represent the root project directory
 }
 
+class LinuxProjectDirectory {
+  LinuxProjectDirectory(this.path);
+
+  final String path;
+}
+
 class FlutterProjectFactory {
   FlutterProjectFactory({
     required this._config,
@@ -70,6 +76,7 @@ class FlutterProjectFactory {
     this._featureFlags,
     this._featureFlagsBuilder,
     this._plistParser,
+    this._linuxProjectDirectoryBuilder,
     this._xcode,
     this._xcodeBuilder,
     this._xcodeProjectInterpreter,
@@ -82,6 +89,7 @@ class FlutterProjectFactory {
   final FileSystem _fileSystem;
   final Logger _logger;
   final PlistParser? _plistParser;
+  final LinuxProjectDirectory? Function()? _linuxProjectDirectoryBuilder;
   final Xcode? _xcode;
   final Xcode? Function()? _xcodeBuilder;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
@@ -119,6 +127,7 @@ class FlutterProjectFactory {
         buildDirectory: buildDirectory,
         featureFlags: resolvedFeatureFlags,
         plistParser: _plistParser,
+        linuxProjectDirectoryBuilder: _linuxProjectDirectoryBuilder,
         projectFactory: this,
         xcode: resolvedXcode,
         xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
@@ -142,6 +151,7 @@ class FlutterProjectFactory {
         buildDirectory: buildDirectory,
         featureFlags: resolvedFeatureFlags,
         plistParser: _plistParser,
+        linuxProjectDirectoryBuilder: _linuxProjectDirectoryBuilder,
         projectFactory: this,
         xcode: resolvedXcode,
         xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
@@ -173,6 +183,7 @@ class FlutterProject {
     this._buildDirectory,
     this._featureFlags,
     this._plistParser,
+    this._linuxProjectDirectoryBuilder,
     this._projectFactory,
     this._xcode,
     this._xcodeProjectInterpreter,
@@ -182,6 +193,7 @@ class FlutterProject {
 
   final FeatureFlags? _featureFlags;
   final PlistParser? _plistParser;
+  final LinuxProjectDirectory? Function()? _linuxProjectDirectoryBuilder;
   final FlutterProjectFactory? _projectFactory;
   final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
@@ -511,7 +523,20 @@ class FlutterProject {
   );
 
   /// The Linux sub project of this project.
-  late final linux = LinuxProject.fromFlutter(this);
+  LinuxProject get linux {
+    final LinuxProjectDirectory? override = _linuxProjectDirectoryBuilder?.call();
+    if (override == null) {
+      return _linux ??= LinuxProject.fromFlutter(this);
+    }
+    final FileSystem fs = directory.fileSystem;
+    final String overridePath = override.path;
+    final Directory overrideDirectory = fs.path.isAbsolute(overridePath)
+        ? fs.directory(overridePath)
+        : directory.childDirectory(overridePath);
+    return LinuxProject.fromFlutter(this, linuxDirectoryOverride: overrideDirectory);
+  }
+
+  LinuxProject? _linux;
 
   /// The Windows sub project of this project.
   late final windows = WindowsProject.fromFlutter(this);

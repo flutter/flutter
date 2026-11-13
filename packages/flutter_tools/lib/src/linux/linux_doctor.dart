@@ -118,11 +118,15 @@ class _DriverInformation {
 
 /// A validator that checks for Clang and Make build dependencies.
 class LinuxDoctorValidator extends DoctorValidator {
-  LinuxDoctorValidator({required this._processManager, required this._userMessages})
-    : super('Linux toolchain - develop for Linux desktop');
+  LinuxDoctorValidator({
+    required this._processManager,
+    required this._userMessages,
+    this.useGtk4 = false,
+  }) : super('Linux toolchain - develop for Linux desktop');
 
   final ProcessManager _processManager;
   final UserMessages _userMessages;
+  final bool useGtk4;
 
   static const kClangBinary = 'clang++';
   static const kCmakeBinary = 'cmake';
@@ -136,7 +140,11 @@ class LinuxDoctorValidator extends DoctorValidator {
     kPkgConfigBinary: Version(0, 29, 0),
   };
 
-  final _requiredGtkLibraries = <String>['gtk+-3.0', 'glib-2.0', 'gio-2.0'];
+  List<String> get _requiredGtkLibraries => <String>[
+    if (useGtk4) 'gtk4' else 'gtk+-3.0',
+    'glib-2.0',
+    'gio-2.0',
+  ];
 
   @override
   Future<ValidationResult> validateImpl() async {
@@ -241,7 +249,13 @@ class LinuxDoctorValidator extends DoctorValidator {
       }
       if (libraryMissing) {
         validationType = ValidationType.missing;
-        messages.add(ValidationMessage.error(_userMessages.gtkLibrariesMissing));
+        messages.add(
+          ValidationMessage.error(
+            useGtk4
+                ? 'GTK4 development libraries are required. Install libgtk-4-dev or gtk4-devel.'
+                : _userMessages.gtkLibrariesMissing,
+          ),
+        );
       }
     }
 

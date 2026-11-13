@@ -46,6 +46,35 @@ void main() {
 
   group('Project', () {
     group('construction', () {
+      for (final hasManifest in <bool>[false, true]) {
+        testWithoutContext(
+          'Linux directory resolver follows command overrides (manifest: $hasManifest)',
+          () {
+            final FileSystem fs = MemoryFileSystem.test();
+            final Directory directory = fs.directory('/app')..createSync();
+            if (hasManifest) {
+              directory.childFile('pubspec.yaml').writeAsStringSync('name: app\n');
+            }
+            LinuxProjectDirectory? override;
+            final factory = FlutterProjectFactory(
+              fileSystem: fs,
+              logger: BufferLogger.test(),
+              config: FakeConfig(),
+              linuxProjectDirectoryBuilder: () => override,
+            );
+            final FlutterProject project = factory.fromDirectory(directory);
+            expect(project.linux.cmakeFile.parent.path, '/app/linux');
+            override = LinuxProjectDirectory('linux-gtk4');
+            expect(project.linux.cmakeFile.parent.path, '/app/linux-gtk4');
+            expect(factory.fromDirectory(directory).linux.cmakeFile.parent.path, '/app/linux-gtk4');
+            override = LinuxProjectDirectory('/runner');
+            expect(project.linux.cmakeFile.parent.path, '/runner');
+            override = null;
+            expect(project.linux.cmakeFile.parent.path, '/app/linux');
+          },
+        );
+      }
+
       testWithoutContext('invalid utf8 throws a tool exit', () {
         final FileSystem fileSystem = MemoryFileSystem.test();
         final projectFactory = FlutterProjectFactory(

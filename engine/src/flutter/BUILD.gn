@@ -285,8 +285,10 @@ group("unittests") {
       }
 
       if (is_linux) {
-        public_deps +=
-            [ "//flutter/shell/platform/linux:flutter_linux_unittests" ]
+        public_deps += [
+          "//flutter/shell/platform/linux:flutter_linux_gtk3_frame_pacer_tests",
+          "//flutter/shell/platform/linux:flutter_linux_unittests",
+        ]
         if (build_glfw_shell) {
           public_deps +=
               [ "//flutter/shell/platform/glfw:flutter_glfw_unittests" ]

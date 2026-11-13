@@ -37,8 +37,18 @@ void fl_ensure_gtk_init(GLogWriterFunc writer) {
   if (!gtk_initialized) {
     // Tests must not connect to a Wayland compositor; libwayland is replaced
     // with a mock (see mock_wayland.h) and GDK would be talking to that.
+#if defined(FLUTTER_LINUX_GTK4)
+    gdk_set_allowed_backends(
+        g_strcmp0(g_getenv("FLUTTER_TEST_WAYLAND_SCALE"), "1") == 0 ? "wayland"
+                                                                    : "x11");
+#else
     gdk_set_allowed_backends("x11");
+#endif
+#if defined(FLUTTER_LINUX_GTK4)
+    gtk_init();
+#else
     gtk_init(0, nullptr);
+#endif
     g_log_set_writer_func(log_writer, nullptr, nullptr);
     gtk_initialized = true;
   }

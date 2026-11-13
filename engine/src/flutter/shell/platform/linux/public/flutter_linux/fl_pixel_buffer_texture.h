@@ -25,8 +25,9 @@ G_DECLARE_DERIVABLE_TYPE(FlPixelBufferTexture,
 /**
  * FlPixelBufferTexture:
  *
- * #FlPixelBufferTexture represents an OpenGL texture generated from a pixel
- * buffer.
+ * #FlPixelBufferTexture represents a texture generated from a pixel buffer.
+ * The embedder uploads the RGBA pixels using its selected renderer (OpenGL, or
+ * Vulkan on GTK4). Plugins do not need to create a graphics context.
  *
  * The following example shows how to implement an #FlPixelBufferTexture.
  * ![<!-- language="C" -->

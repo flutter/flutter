@@ -194,6 +194,45 @@ FakeCommand _missingBinaryException(String binary) {
 }
 
 void main() {
+  testWithoutContext('GTK4 selection checks GTK4 instead of GTK3 development libraries', () async {
+    final manager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('1.10.0'),
+      _pkgConfigPresentCommand('0.29'),
+      _libraryCheckCommand('gtk4'),
+      _libraryCheckCommand('glib-2.0'),
+      _libraryCheckCommand('gio-2.0'),
+      _eglinfoPresentCommand(),
+    ]);
+    final ValidationResult result = await LinuxDoctorValidator(
+      processManager: manager,
+      userMessages: UserMessages(),
+      useGtk4: true,
+    ).validate();
+    expect(result.type, ValidationType.success);
+    expect(manager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('missing selected GTK4 development libraries is actionable', () async {
+    final manager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('1.10.0'),
+      _pkgConfigPresentCommand('0.29'),
+      _libraryCheckCommand('gtk4', exists: false),
+      _eglinfoPresentCommand(),
+    ]);
+    final ValidationResult result = await LinuxDoctorValidator(
+      processManager: manager,
+      userMessages: UserMessages(),
+      useGtk4: true,
+    ).validate();
+    expect(result.type, ValidationType.missing);
+    expect(result.messages.any((m) => m.message.contains('libgtk-4-dev')), isTrue);
+    expect(manager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext(
     'Full validation when everything is available at the necessary version',
     () async {

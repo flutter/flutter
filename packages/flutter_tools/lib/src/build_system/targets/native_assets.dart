@@ -65,7 +65,13 @@ class BuildHooks extends Target {
       fileSystem: fileSystem,
       featureFlags: featureFlags,
       logger: environment.logger,
-      buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+      buildCodeAssets: BuildCodeAssetsOptions(
+        appBuildDirectory: _buildCodeAssetsDirectory(
+          environment,
+          targetPlatform,
+          buildModeEnvironment,
+        ),
+      ),
       buildDataAssets: true,
       visualStudio: environment.visualStudio,
     );
@@ -126,6 +132,25 @@ class BuildHooks extends Target {
 }
 
 /// Runs the link phase of native assets.
+Directory _buildCodeAssetsDirectory(
+  Environment environment,
+  TargetPlatform targetPlatform,
+  String buildModeEnvironment,
+) {
+  if (targetPlatform == TargetPlatform.linux_x64 ||
+      targetPlatform == TargetPlatform.linux_arm64 ||
+      targetPlatform == TargetPlatform.linux_riscv64) {
+    final String? linuxGtkVersion = environment.defines['FLUTTER_LINUX_GTK'];
+    return environment.projectFactory
+        .fromDirectory(environment.projectDir)
+        .buildDirectory
+        .childDirectory(linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux')
+        .childDirectory(targetPlatform.simpleName)
+        .childDirectory(buildModeEnvironment);
+  }
+  return environment.outputDir;
+}
+
 class LinkHooks extends Target {
   const LinkHooks({
     this.platform = HookPlatform.native,
@@ -229,7 +254,13 @@ class LinkHooks extends Target {
         fileSystem: fileSystem,
         featureFlags: featureFlags,
         logger: environment.logger,
-        buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+        buildCodeAssets: BuildCodeAssetsOptions(
+          appBuildDirectory: _buildCodeAssetsDirectory(
+            environment,
+            targetPlatform,
+            buildModeEnvironment,
+          ),
+        ),
         buildDataAssets: true,
         buildResults: buildResults,
         recordedUsesFile: recordedUsesFileToPass,
@@ -244,7 +275,13 @@ class LinkHooks extends Target {
       targetPlatform: targetPlatform,
       fileSystem: fileSystem,
       featureFlags: featureFlags,
-      buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+      buildCodeAssets: BuildCodeAssetsOptions(
+        appBuildDirectory: _buildCodeAssetsDirectory(
+          environment,
+          targetPlatform,
+          buildModeEnvironment,
+        ),
+      ),
       buildDataAssets: true,
       buildResults: buildResults,
       linkResult: linkResult,

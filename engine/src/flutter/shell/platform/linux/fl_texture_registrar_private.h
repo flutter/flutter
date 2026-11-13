@@ -41,6 +41,11 @@ FlTexture* fl_texture_registrar_lookup_texture(FlTextureRegistrar* registrar,
  */
 void fl_texture_registrar_shutdown(FlTextureRegistrar* registrar);
 
+// Like lookup_texture, but retains the texture under the registrar lock so
+// unregistering on the platform thread cannot invalidate a raster callback.
+FlTexture* fl_texture_registrar_ref_texture(FlTextureRegistrar* registrar,
+                                            int64_t texture_id);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_TEXTURE_REGISTRAR_PRIVATE_H_

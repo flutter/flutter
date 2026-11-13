@@ -207,3 +207,29 @@ TEST_F(FlTextureRegistrarTest, RegistrarRegisterTextureInMultipleThreads) {
     EXPECT_TRUE(fl_texture_registrar_lookup_texture(registrar, ids[t]) != NULL);
   }
 }
+
+TEST_F(FlTextureRegistrarTest, RasterReferenceSurvivesUnregister) {
+  fl_engine_get_embedder_api(engine)->RegisterExternalTexture =
+      MOCK_ENGINE_PROC(RegisterExternalTexture,
+                       ([](auto, int64_t) { return kSuccess; }));
+  fl_engine_get_embedder_api(engine)->UnregisterExternalTexture =
+      MOCK_ENGINE_PROC(UnregisterExternalTexture,
+                       ([](auto, int64_t) { return kSuccess; }));
+  g_autoptr(FlTextureRegistrar) registrar = fl_texture_registrar_new(engine);
+  g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_registrar_texture_new());
+  ASSERT_TRUE(fl_texture_registrar_register_texture(registrar, texture));
+  int64_t id = fl_texture_get_id(texture);
+  bool destroyed = false;
+  g_object_weak_ref(
+      G_OBJECT(texture),
+      [](gpointer data, GObject*) { *static_cast<bool*>(data) = true; },
+      &destroyed);
+  g_autoptr(FlTexture) raster = fl_texture_registrar_ref_texture(registrar, id);
+  ASSERT_EQ(raster, texture);
+  ASSERT_TRUE(fl_texture_registrar_unregister_texture(registrar, texture));
+  EXPECT_EQ(fl_texture_registrar_ref_texture(registrar, id), nullptr);
+  g_clear_object(&texture);
+  EXPECT_FALSE(destroyed);
+  g_clear_object(&raster);
+  EXPECT_TRUE(destroyed);
+}

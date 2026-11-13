@@ -61,6 +61,21 @@ source_set("testing") {
   public_configs = [ ":dynamic_symbols" ]
 }
 
+# GTK4 tests must not link GTK3: GTK rejects processes that load both major
+# versions. Keep the generic test harness on GTK3 for existing Linux targets.
+source_set("testing_gtk4") {
+  testonly = true
+
+  sources = [ "run_all_unittests.cc" ]
+
+  if (enable_unittests && is_linux) {
+    configs += [ "//flutter/shell/platform/linux/config:gtk4" ]
+  }
+
+  public_deps = [ ":testing_lib" ]
+  public_configs = [ ":dynamic_symbols" ]
+}
+
 source_set("dart") {
   testonly = true
 

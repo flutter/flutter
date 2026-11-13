@@ -6,6 +6,11 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+#include <thread>
+#include <vector>
+
+#include <gtk/gtk.h>
+
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
@@ -19,6 +24,356 @@
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 class FlEngineTest : public flutter::testing::LinuxTest {};
+
+#if FLUTTER_LINUX_GTK4
+TEST_F(FlEngineTest, SelectVulkanWithoutInitializingDriver) {
+  g_autofree gchar* previous = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
+  g_setenv("FLUTTER_LINUX_RENDERER", "vulkan", TRUE);
+  g_autoptr(FlEngine) vulkan_engine = fl_engine_new(project);
+  if (previous) {
+    g_setenv("FLUTTER_LINUX_RENDERER", previous, TRUE);
+  } else {
+    g_unsetenv("FLUTTER_LINUX_RENDERER");
+  }
+  EXPECT_EQ(fl_engine_get_renderer_type(vulkan_engine), kVulkan);
+  EXPECT_NE(fl_engine_get_vulkan_manager(vulkan_engine), nullptr);
+}
+TEST_F(FlEngineTest, VulkanRejectsExplicitlyDisabledImpeller) {
+  g_autofree gchar* renderer = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
+  g_autofree gchar* count = g_strdup(g_getenv("FLUTTER_ENGINE_SWITCHES"));
+  g_autofree gchar* first = g_strdup(g_getenv("FLUTTER_ENGINE_SWITCH_1"));
+  g_setenv("FLUTTER_LINUX_RENDERER", "vulkan", TRUE);
+  g_setenv("FLUTTER_ENGINE_SWITCHES", "1", TRUE);
+  g_setenv("FLUTTER_ENGINE_SWITCH_1", "enable-impeller=false", TRUE);
+  g_autoptr(FlEngine) vulkan_engine = fl_engine_new(project);
+  g_autoptr(GError) error = nullptr;
+  gboolean started = fl_engine_start(vulkan_engine, &error);
+  auto restore = [](const char* key, const char* previous) {
+    if (previous) {
+      g_setenv(key, previous, TRUE);
+    } else {
+      g_unsetenv(key);
+    }
+  };
+  restore("FLUTTER_LINUX_RENDERER", renderer);
+  restore("FLUTTER_ENGINE_SWITCHES", count);
+  restore("FLUTTER_ENGINE_SWITCH_1", first);
+  EXPECT_FALSE(started);
+  ASSERT_NE(error, nullptr);
+  EXPECT_STREQ(error->message, "The Vulkan renderer requires Impeller");
+}
+#endif
+
+class FlEnginePacerPolicyTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    previous = g_strdup(g_getenv("FLUTTER_LINUX_FRAME_PACER"));
+    g_unsetenv("FLUTTER_LINUX_FRAME_PACER");
+    fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+        Initialize, ([this](size_t, const FlutterRendererConfig*,
+                            const FlutterProjectArgs* args, void*,
+                            FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+          initialized = true;
+          callback = args->vsync_callback;
+          *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+          return kSuccess;
+        }));
+    fl_engine_get_embedder_api(engine)->RunInitialized =
+        MOCK_ENGINE_PROC(RunInitialized, ([](auto) { return kSuccess; }));
+    fl_engine_get_embedder_api(engine)->Shutdown =
+        MOCK_ENGINE_PROC(Shutdown, ([](auto) { return kSuccess; }));
+  }
+
+  void TearDown() override {
+    LinuxTest::TearDown();
+    if (previous != nullptr) {
+      g_setenv("FLUTTER_LINUX_FRAME_PACER", previous, TRUE);
+    } else {
+      g_unsetenv("FLUTTER_LINUX_FRAME_PACER");
+    }
+    g_free(previous);
+  }
+
+  gchar* previous = nullptr;
+  bool initialized = false;
+  VsyncCallback callback = nullptr;
+};
+
+TEST_F(FlEnginePacerPolicyTest, DefaultPreservesGtkScheduling) {
+  StartEngine();
+  EXPECT_TRUE(initialized);
+  EXPECT_NE(callback, nullptr);
+}
+
+TEST_F(FlEnginePacerPolicyTest, ExplicitGtkInstallsCallback) {
+  g_setenv("FLUTTER_LINUX_FRAME_PACER", "gtk", TRUE);
+  StartEngine();
+  EXPECT_TRUE(initialized);
+  EXPECT_NE(callback, nullptr);
+}
+
+TEST_F(FlEnginePacerPolicyTest, EngineSelectionAtStartLeavesCallbackUnset) {
+  // The engine object already exists: selection happens at start, not creation.
+  g_setenv("FLUTTER_LINUX_FRAME_PACER", "engine", TRUE);
+  StartEngine();
+  EXPECT_TRUE(initialized);
+  EXPECT_EQ(callback, nullptr);
+}
+
+TEST_F(FlEnginePacerPolicyTest, RejectInvalidPolicyBeforeInitializingEngine) {
+  for (const gchar* value : {"timer", "GTK", ""}) {
+    g_setenv("FLUTTER_LINUX_FRAME_PACER", value, TRUE);
+    g_autoptr(GError) error = nullptr;
+    EXPECT_FALSE(fl_engine_start(engine, &error));
+    ASSERT_NE(error, nullptr);
+    EXPECT_STREQ(error->message,
+                 (std::string("Unknown FLUTTER_LINUX_FRAME_PACER '") + value +
+                  "'; expected gtk or engine")
+                     .c_str());
+    EXPECT_FALSE(initialized);
+  }
+}
+
+TEST_F(FlEngineTest, VsyncCallbackUsesMainContextAndReturnsBaton) {
+  VsyncCallback vsync_callback = nullptr;
+  void* callback_user_data = nullptr;
+  auto* expected_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&](size_t version, const FlutterRendererConfig* config,
+                       const FlutterProjectArgs* args, void* user_data,
+                       FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        vsync_callback = args->vsync_callback;
+        callback_user_data = user_data;
+        *engine_out = expected_engine;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+  fl_engine_get_embedder_api(engine)->Shutdown =
+      MOCK_ENGINE_PROC(Shutdown, ([](auto engine) { return kSuccess; }));
+
+  bool delivered = false;
+  GThread* delivery_thread = nullptr;
+  intptr_t delivered_baton = 0;
+  uint64_t frame_start_ns = 0;
+  uint64_t frame_target_ns = 0;
+  fl_engine_get_embedder_api(engine)->OnVsync = MOCK_ENGINE_PROC(
+      OnVsync,
+      ([&](auto engine, intptr_t baton, uint64_t start, uint64_t target) {
+        EXPECT_EQ(engine, expected_engine);
+        delivery_thread = g_thread_self();
+        delivered_baton = baton;
+        frame_start_ns = start;
+        frame_target_ns = target;
+        delivered = true;
+        return kSuccess;
+      }));
+
+  StartEngine();
+  ASSERT_NE(vsync_callback, nullptr);
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
+  std::thread worker([&] {
+    auto* context = g_main_context_default();
+    const gboolean acquired = g_main_context_acquire(context);
+    EXPECT_TRUE(acquired);
+    vsync_callback(callback_user_data, 0x1234);
+    if (acquired) {
+      g_main_context_release(context);
+    }
+  });
+  worker.join();
+  EXPECT_FALSE(delivered);
+
+  while (!delivered) {
+    g_main_context_iteration(nullptr, TRUE);
+  }
+  EXPECT_EQ(delivery_thread, g_thread_self());
+  EXPECT_EQ(delivered_baton, 0x1234);
+  EXPECT_GT(frame_start_ns, 0u);
+  EXPECT_GT(frame_target_ns, frame_start_ns);
+}
+
+#if FLUTTER_LINUX_GTK4
+// A mapped renderable without a renderer, for exercising GTK's real tick
+// lifecycle independently of GPU drivers and Flutter frame production.
+struct FlVsyncTestWidget {
+  GtkBox parent_instance;
+};
+struct FlVsyncTestWidgetClass {
+  GtkBoxClass parent_class;
+};
+G_DEFINE_TYPE_WITH_CODE(FlVsyncTestWidget,
+                        fl_vsync_test_widget,
+                        GTK_TYPE_BOX,
+                        G_IMPLEMENT_INTERFACE(fl_renderable_get_type(),
+                                              nullptr))
+static void fl_vsync_test_widget_class_init(FlVsyncTestWidgetClass*) {}
+static void fl_vsync_test_widget_init(FlVsyncTestWidget*) {}
+
+class FlEngineVsyncTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+        Initialize, ([this](size_t, const FlutterRendererConfig*,
+                            const FlutterProjectArgs* args, void* user_data,
+                            FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+          callback = args->vsync_callback;
+          callback_data = user_data;
+          *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+          return kSuccess;
+        }));
+    fl_engine_get_embedder_api(engine)->RunInitialized =
+        MOCK_ENGINE_PROC(RunInitialized, ([](auto) { return kSuccess; }));
+    fl_engine_get_embedder_api(engine)->Shutdown =
+        MOCK_ENGINE_PROC(Shutdown, ([](auto) { return kSuccess; }));
+    fl_engine_get_embedder_api(engine)->OnVsync = MOCK_ENGINE_PROC(
+        OnVsync,
+        ([this](auto, intptr_t baton, uint64_t start, uint64_t target) {
+          EXPECT_GT(target, start);
+          batons.push_back(baton);
+          return kSuccess;
+        }));
+    StartEngine();
+    window = GTK_WINDOW(gtk_window_new());
+    widget = GTK_WIDGET(g_object_new(fl_vsync_test_widget_get_type(), nullptr));
+    gtk_window_set_child(window, widget);
+    gtk_window_present(window);
+    ASSERT_TRUE(gtk_widget_get_mapped(widget));
+    clock = gtk_widget_get_frame_clock(widget);
+    ASSERT_NE(clock, nullptr);
+    fl_engine_set_implicit_view(engine, FL_RENDERABLE(widget));
+  }
+
+  void TearDown() override {
+    gtk_window_destroy(window);
+    LinuxTest::TearDown();
+  }
+
+  void Request(intptr_t baton) {
+    callback(callback_data, baton);
+    // The request source has higher priority than GTK's frame dispatch.
+    for (int i = 0; i < 100; i++) {
+      g_main_context_iteration(nullptr, FALSE);
+      if (TickHandler() != 0) {
+        return;
+      }
+    }
+    FAIL() << "Vsync tick callback was not scheduled";
+  }
+  gulong TickHandler() {
+    return g_signal_handler_find(clock, G_SIGNAL_MATCH_DATA, 0, 0, nullptr,
+                                 nullptr, widget);
+  }
+  void Tick() { g_signal_emit_by_name(clock, "update"); }
+  flutter::testing::MockEpoxy epoxy;
+  VsyncCallback callback = nullptr;
+  void* callback_data = nullptr;
+  GtkWindow* window = nullptr;
+  GtkWidget* widget = nullptr;
+  GdkFrameClock* clock = nullptr;
+  std::vector<intptr_t> batons;
+};
+
+TEST_F(FlEngineVsyncTest, KeepsClockUpdatingBetweenAnimationRequests) {
+  Request(1);
+  const gulong handler = TickHandler();
+  ASSERT_NE(handler, 0u);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(TickHandler(), handler);
+  Request(2);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1, 2}));
+  EXPECT_EQ(TickHandler(), handler);
+  // No new request: stop updating after one idle tick, without redelivery.
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1, 2}));
+  EXPECT_EQ(TickHandler(), 0u);
+}
+
+TEST_F(FlEngineVsyncTest, PlatformDispatchArmsTickWithoutAnotherLoopTurn) {
+  auto* context = g_main_context_default();
+  ASSERT_TRUE(g_main_context_acquire(context));
+  callback(callback_data, 1);
+  EXPECT_NE(TickHandler(), 0u);
+  EXPECT_TRUE(batons.empty());
+  g_main_context_release(context);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+}
+
+TEST_F(FlEngineVsyncTest, UnmapReturnsPendingBatonExactlyOnce) {
+  Request(1);
+  gtk_widget_set_visible(GTK_WIDGET(window), FALSE);
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+}
+
+TEST_F(FlEngineVsyncTest, UnmapReleasesRetainedTickWithoutRedelivery) {
+  Request(1);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  gtk_widget_set_visible(GTK_WIDGET(window), FALSE);
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+}
+
+TEST_F(FlEngineVsyncTest, StalledMappedClockReturnsBatonAndRemovesTick) {
+  Request(1);
+  const gulong handler = TickHandler();
+  ASSERT_NE(handler, 0u);
+  // Let GTK's main loop run, but prevent this widget from receiving ticks.
+  g_signal_handler_block(clock, handler);
+  const gint64 deadline = g_get_monotonic_time() + G_USEC_PER_SEC;
+  while (batons.empty() && g_get_monotonic_time() < deadline) {
+    g_main_context_iteration(nullptr, FALSE);
+    g_usleep(1000);
+  }
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(TickHandler(), 0u);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+}
+
+TEST_F(FlEngineVsyncTest, DeliveredBatonDoesNotKeepEngineAliveForIdleTick) {
+  Request(1);
+  bool finalized = false;
+  g_object_weak_ref(
+      G_OBJECT(engine),
+      [](gpointer data, GObject*) { *static_cast<bool*>(data) = true; },
+      &finalized);
+  g_clear_object(&engine);
+  EXPECT_FALSE(finalized);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_TRUE(finalized);
+  EXPECT_EQ(TickHandler(), 0u);
+  // Keep the weak-notify storage alive even if the lifetime regression returns.
+  if (!finalized) {
+    Tick();
+  }
+}
+
+TEST_F(FlEngineVsyncTest, DeliveredBatonCancelsStalledClockGuard) {
+  Request(1);
+  const gulong handler = TickHandler();
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  ASSERT_EQ(TickHandler(), handler);
+  g_signal_handler_block(clock, handler);
+  const gint64 deadline = g_get_monotonic_time() + 150000;
+  while (g_get_monotonic_time() < deadline) {
+    g_main_context_iteration(nullptr, FALSE);
+    g_usleep(1000);
+  }
+  // The guard must not remove the retained tick or deliver a second baton.
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(TickHandler(), handler);
+  g_signal_handler_unblock(clock, handler);
+  Tick();
+  EXPECT_EQ(TickHandler(), 0u);
+}
+#endif  // FLUTTER_LINUX_GTK4
 
 // Checks notifying display updates works.
 TEST_F(FlEngineTest, NotifyDisplayUpdate) {

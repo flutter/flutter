@@ -78,6 +78,7 @@ XCDevice? get xcdevice => context.get<XCDevice>();
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
+LinuxProjectDirectory? get linuxProjectDirectory => context.get<LinuxProjectDirectory>();
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
@@ -273,6 +274,7 @@ FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
       FlutterProjectFactory(
         config: config,
+        linuxProjectDirectoryBuilder: () => linuxProjectDirectory,
         featureFlagsBuilder: () => featureFlags,
         fileSystem: fs,
         logger: logger,
