@@ -36,4 +36,39 @@ void main() {
 
     expect(s6, isNot(equals(s7)));
   });
+
+  test('StrutStyle.merge keeps the package prefix of font families', () {
+    const strut = StrutStyle(
+      fontFamily: 'Inter',
+      fontFamilyFallback: <String>['Noto'],
+      package: 'my_fonts',
+    );
+    final StrutStyle merged = strut.merge(const StrutStyle(height: 1.5));
+    expect(merged.fontFamily, 'packages/my_fonts/Inter');
+    expect(merged.fontFamilyFallback, <String>['packages/my_fonts/Noto']);
+    expect(merged.height, 1.5);
+
+    final StrutStyle mergedInto = const StrutStyle(height: 1.5).merge(strut);
+    expect(mergedInto.fontFamily, 'packages/my_fonts/Inter');
+    expect(mergedInto.fontFamilyFallback, <String>['packages/my_fonts/Noto']);
+  });
+
+  test('StrutStyle.fromTextStyle applies the package prefix once', () {
+    final strut = StrutStyle.fromTextStyle(
+      const TextStyle(fontSize: 12),
+      fontFamily: 'Inter',
+      fontFamilyFallback: const <String>['Noto'],
+      package: 'my_fonts',
+    );
+    expect(strut.fontFamily, 'packages/my_fonts/Inter');
+    expect(strut.fontFamilyFallback, <String>['packages/my_fonts/Noto']);
+
+    final inherited = StrutStyle.fromTextStyle(
+      const TextStyle(fontFamily: 'Inter', package: 'my_fonts'),
+      fontFamilyFallback: const <String>['Noto'],
+      package: 'other_fonts',
+    );
+    expect(inherited.fontFamily, 'packages/my_fonts/Inter');
+    expect(inherited.fontFamilyFallback, <String>['packages/other_fonts/Noto']);
+  });
 }
