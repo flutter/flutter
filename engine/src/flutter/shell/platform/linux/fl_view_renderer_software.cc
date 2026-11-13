@@ -230,8 +230,6 @@ static void fl_view_renderer_software_dispose(GObject* object) {
   FlViewRendererSoftware* self = FL_VIEW_RENDERER_SOFTWARE(object);
 
   g_clear_object(&self->engine);
-  g_clear_object(&self->task_runner);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_software_parent_class)->dispose(object);
 }
@@ -239,13 +237,13 @@ static void fl_view_renderer_software_dispose(GObject* object) {
 static void fl_view_renderer_software_finalize(GObject* object) {
   FlViewRendererSoftware* self = FL_VIEW_RENDERER_SOFTWARE(object);
 
-  // The compositor is released here rather than in dispose() so it outlives a
-  // forced dispose (e.g. gtk_widget_destroy()) and is only freed once the last
-  // reference is dropped. This keeps it alive for the raster thread, which
-  // holds a strong reference on the view (and thus this renderer) while
-  // presenting.
+  // Frame presentation can outlive GTK disposal while a reference to the
+  // renderer is held, so release frame state only when that reference is
+  // dropped.
   g_clear_object(&self->compositor);
   g_clear_pointer(&self->surface, cairo_surface_destroy);
+  g_clear_object(&self->task_runner);
+  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_software_parent_class)->finalize(object);
 }
