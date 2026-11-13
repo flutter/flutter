@@ -402,6 +402,79 @@ void main() {
       },
     );
     expect(TestRenderingFlutterBinding.instance.takeFlutterErrorDetails(), isNull);
+    TestRenderingFlutterBinding.instance.onErrors = null;
+  });
+
+  test('RenderSliverFixedExtentList with spacing positions children correctly and calculates scrollExtent', () {
+    final children = <RenderBox>[
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+    ];
+    final childManager = TestRenderSliverBoxChildManager(children: children);
+    final RenderSliverFixedExtentList sliver = childManager.createRenderSliverFixedExtentList(
+      100.0,
+      spacing: 20.0,
+    );
+    final root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 0,
+      children: <RenderSliver>[sliver],
+    );
+    layout(root);
+
+    // All children that fit in viewport (height 600) are laid out:
+    // child 0: [0, 100]
+    // child 1: [120, 220]
+    // child 2: [240, 340]
+    // child 3: [360, 460]
+    expect(sliver.childScrollOffset(children[0]), 0.0);
+    expect(sliver.childScrollOffset(children[1]), 120.0);
+    expect(sliver.childScrollOffset(children[2]), 240.0);
+    expect(sliver.childScrollOffset(children[3]), 360.0);
+
+    // scrollExtent should not include trailing spacing: 4 * 100 + 3 * 20 = 460.0
+    expect(sliver.geometry!.scrollExtent, 460.0);
+    expect(sliver.geometry!.maxPaintExtent, 460.0);
+
+    // Scroll into the gap between child 0 and child 1 (scrollOffset = 110.0)
+    root.offset = ViewportOffset.fixed(110.0);
+    pumpFrame();
+    expect(children[0].attached, false); // Child 0 scrolled off
+    expect(children[1].attached, true); // Child 1 starts at 120.0 and is visible
+    expect(children[2].attached, true);
+    expect(children[3].attached, true);
+  });
+
+  test('RenderSliverVariedExtentList with spacing positions children correctly', () {
+    final children = <RenderBox>[
+      RenderSizedBox(const Size(400.0, 50.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 80.0)),
+    ];
+    final extents = <double>[50.0, 100.0, 80.0];
+    final childManager = TestRenderSliverBoxChildManager(children: children);
+    final RenderSliverVariedExtentList sliver = childManager.createRenderSliverVariedExtentList(
+      (int index, SliverLayoutDimensions? dimensions) =>
+          index < extents.length ? extents[index] : null,
+      spacing: 15.0,
+    );
+    final root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 0,
+      children: <RenderSliver>[sliver],
+    );
+    layout(root);
+
+    expect(sliver.childScrollOffset(children[0]), 0.0);
+    expect(sliver.childScrollOffset(children[1]), 65.0); // 50 + 15
+    expect(sliver.childScrollOffset(children[2]), 180.0); // 65 + 100 + 15
+
+    // Total scrollExtent = 180 + 80 = 260.0
+    expect(sliver.geometry!.scrollExtent, 260.0);
   });
 
   test('RenderSliverVariedExtentList memoizes itemExtentBuilder calls within each layout pass', () {
@@ -899,19 +972,28 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     return _renderObject! as RenderSliverFillViewport;
   }
 
-  RenderSliverFixedExtentList createRenderSliverFixedExtentList(double itemExtent) {
+  RenderSliverFixedExtentList createRenderSliverFixedExtentList(
+    double itemExtent, {
+    double spacing = 0.0,
+  }) {
     assert(_renderObject == null);
-    _renderObject = RenderSliverFixedExtentList(childManager: this, itemExtent: itemExtent);
+    _renderObject = RenderSliverFixedExtentList(
+      childManager: this,
+      itemExtent: itemExtent,
+      spacing: spacing,
+    );
     return _renderObject! as RenderSliverFixedExtentList;
   }
 
   RenderSliverVariedExtentList createRenderSliverVariedExtentList(
-    ItemExtentBuilder itemExtentBuilder,
-  ) {
+    ItemExtentBuilder itemExtentBuilder, {
+    double spacing = 0.0,
+  }) {
     assert(_renderObject == null);
     _renderObject = RenderSliverVariedExtentList(
       childManager: this,
       itemExtentBuilder: itemExtentBuilder,
+      spacing: spacing,
     );
     return _renderObject! as RenderSliverVariedExtentList;
   }
@@ -926,7 +1008,6 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     );
     return _renderObject! as ExtentOfTrackingSliverFixedExtentBoxAdaptor;
   }
-
   int? _currentlyUpdatingChildIndex;
 
   @override

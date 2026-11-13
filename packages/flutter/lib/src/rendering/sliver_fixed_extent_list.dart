@@ -42,7 +42,23 @@ import 'sliver_multi_box_adaptor.dart';
 abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAdaptor {
   /// Creates a sliver that contains multiple box children that have the same
   /// extent in the main axis.
-  RenderSliverFixedExtentBoxAdaptor({required super.childManager});
+  RenderSliverFixedExtentBoxAdaptor({required super.childManager, double spacing = 0.0})
+    : _spacing = spacing,
+      assert(spacing >= 0.0);
+
+  /// The spacing to use between children along the main axis.
+  ///
+  /// Defaults to 0.0. Must not be negative.
+  double get spacing => _spacing;
+  double _spacing;
+  set spacing(double value) {
+    assert(value >= 0.0);
+    if (_spacing == value) {
+      return;
+    }
+    _spacing = value;
+    markNeedsLayout();
+  }
 
   /// The main-axis extent of each item.
   ///
@@ -75,7 +91,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ) {
     if (itemExtentBuilder == null) {
       itemExtent = this.itemExtent!;
-      return itemExtent * index;
+      return (itemExtent + spacing) * index;
     } else {
       var offset = 0.0;
       double? itemExtent;
@@ -88,7 +104,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         if (itemExtent == null) {
           break;
         }
-        offset += itemExtent;
+        offset += itemExtent + spacing;
       }
       return offset;
     }
@@ -113,13 +129,14 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ) {
     if (itemExtentBuilder == null) {
       itemExtent = this.itemExtent!;
-      if (itemExtent > 0.0) {
-        final double actual = scrollOffset / itemExtent;
+      final double stride = itemExtent + spacing;
+      if (stride > 0.0) {
+        final double actual = (scrollOffset - itemExtent) / stride + 1.0;
         final int round = actual.round();
-        if ((actual * itemExtent - round * itemExtent).abs() < precisionErrorTolerance) {
-          return round;
+        if (((actual - round) * stride).abs() < precisionErrorTolerance) {
+          return math.max(0, round);
         }
-        return actual.floor();
+        return math.max(0, actual.floor());
       }
       return 0;
     } else {
@@ -146,10 +163,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ) {
     if (itemExtentBuilder == null) {
       itemExtent = this.itemExtent!;
-      if (itemExtent > 0.0) {
-        final double actual = scrollOffset / itemExtent - 1;
+      final double stride = itemExtent + spacing;
+      if (stride > 0.0) {
+        final double actual = scrollOffset / stride - 1;
         final int round = actual.round();
-        if ((actual * itemExtent - round * itemExtent).abs() < precisionErrorTolerance) {
+        if ((actual * stride - round * stride).abs() < precisionErrorTolerance) {
           return math.max(0, round);
         }
         return math.max(0, actual.ceil());
@@ -223,7 +241,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ) {
     if (itemExtentBuilder == null) {
       itemExtent = this.itemExtent!;
-      return childManager.childCount * itemExtent;
+      final int childCount = childManager.childCount;
+      if (childCount == 0) {
+        return 0.0;
+      }
+      return childCount * itemExtent + (childCount - 1) * spacing;
     } else {
       var offset = 0.0;
       double? itemExtent;
@@ -233,6 +255,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
           break;
         }
         offset += itemExtent;
+        if (i > 0) {
+          offset += spacing;
+        }
       }
       return offset;
     }
@@ -254,10 +279,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       if (itemExtent == null) {
         break;
       }
-      position += itemExtent;
+      position += itemExtent + spacing;
       ++index;
     }
-    return index - 1;
+    return math.max(0, index - 1);
   }
 
   /// Returns the extent of the child at the given [index].
@@ -313,21 +338,24 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       if (itemExtentBuilder == null && geometry!.scrollExtent.isFinite) {
         final double itemExtent = this.itemExtent!;
         final double scrollExtent = geometry!.scrollExtent;
-        final double count = scrollExtent / itemExtent;
-        final double diff = (count.roundToDouble() - count).abs();
-        if (diff * itemExtent > precisionErrorTolerance && diff > precisionErrorTolerance) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary(
-              'RenderSliverFixedExtentBoxAdaptor.computeMaxScrollOffset() returned a value that is not an even multiple of its itemExtent.',
-            ),
-            ErrorDescription(
-              'The itemExtent was $itemExtent, but the scrollExtent was $scrollExtent.',
-            ),
-            ErrorDescription(
-              'The difference was $diff, which is greater than precisionErrorTolerance ($precisionErrorTolerance).',
-            ),
-            describeForError('The render object in question was'),
-          ]);
+        final double stride = itemExtent + spacing;
+        if (scrollExtent > 0.0 && stride > 0.0) {
+          final double count = (scrollExtent + spacing) / stride;
+          final double diff = (count.roundToDouble() - count).abs();
+          if (diff * stride > precisionErrorTolerance && diff > precisionErrorTolerance) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary(
+                'RenderSliverFixedExtentBoxAdaptor.computeMaxScrollOffset() returned a value that is not an even multiple of its itemExtent and spacing.',
+              ),
+              ErrorDescription(
+                'The itemExtent was $itemExtent, spacing was $spacing, but the scrollExtent was $scrollExtent.',
+              ),
+              ErrorDescription(
+                'The difference was $diff, which is greater than precisionErrorTolerance ($precisionErrorTolerance).',
+              ),
+              describeForError('The render object in question was'),
+            ]);
+          }
         }
       }
       return true;
@@ -451,7 +479,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {
           // We have run out of children.
-          estimatedMaxScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
+          estimatedMaxScrollOffset = index <= 0
+              ? 0.0
+              : indexToLayoutOffset(deprecatedExtraItemExtent, index) - spacing;
           break;
         }
       } else {
@@ -468,28 +498,46 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     final int lastIndex = indexOf(lastChild!);
     final double leadingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
-    final double trailingScrollOffset = indexToLayoutOffset(
-      deprecatedExtraItemExtent,
-      lastIndex + 1,
-    );
+    final double endOfLastChild = childScrollOffset(lastChild!)! + paintExtentOf(lastChild!);
+    final bool isLastChild;
+    if (estimatedMaxScrollOffset.isFinite) {
+      isLastChild = true;
+    } else {
+      final int? childCount = childManager.estimatedChildCount;
+      if (childCount != null && lastIndex >= childCount - 1) {
+        isLastChild = true;
+      } else if (itemExtentBuilder != null &&
+          itemExtentBuilder!(lastIndex + 1, layoutDimensions) == null) {
+        isLastChild = true;
+      } else {
+        isLastChild = false;
+      }
+    }
+    final double trailingScrollOffset = isLastChild
+        ? endOfLastChild
+        : indexToLayoutOffset(deprecatedExtraItemExtent, lastIndex + 1);
+
+    if (isLastChild) {
+      estimatedMaxScrollOffset = endOfLastChild;
+    }
 
     assert(
-      firstIndex == 0 || childScrollOffset(firstChild!)! - scrollOffset <= precisionErrorTolerance,
+      firstIndex == 0 ||
+          childScrollOffset(firstChild!)! - scrollOffset <= spacing + precisionErrorTolerance,
     );
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild!) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
 
-    estimatedMaxScrollOffset = math.min(
-      estimatedMaxScrollOffset,
-      estimateMaxScrollOffset(
+    if (estimatedMaxScrollOffset.isInfinite) {
+      estimatedMaxScrollOffset = estimateMaxScrollOffset(
         constraints,
         firstIndex: firstIndex,
         lastIndex: lastIndex,
         leadingScrollOffset: leadingScrollOffset,
         trailingScrollOffset: trailingScrollOffset,
-      ),
-    );
+      );
+    }
 
     final double paintExtent = calculatePaintOffset(
       constraints,
@@ -527,6 +575,12 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     }
     childManager.didFinishLayout();
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
+  }
 }
 
 /// A sliver that places multiple box children with the same main axis extent in
@@ -552,7 +606,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that have a given
   /// extent in the main axis.
-  RenderSliverFixedExtentList({required super.childManager, required this._itemExtent});
+  RenderSliverFixedExtentList({
+    required super.childManager,
+    required this._itemExtent,
+    super.spacing,
+  });
 
   @override
   double get itemExtent => _itemExtent;
@@ -571,7 +629,11 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
 class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that have a explicit
   /// extent in the main axis.
-  RenderSliverVariedExtentList({required super.childManager, required this._itemExtentBuilder});
+  RenderSliverVariedExtentList({
+    required super.childManager,
+    required this._itemExtentBuilder,
+    super.spacing,
+  });
 
   final List<double> _itemExtentCache = <double>[];
   final List<double> _itemOffsetCache = <double>[0.0];
@@ -613,7 +675,7 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
         return null;
       }
       _itemExtentCache.add(extent);
-      _itemOffsetCache.add(_itemOffsetCache[i] + extent);
+      _itemOffsetCache.add(_itemOffsetCache[i] + extent + spacing);
     }
     return _itemOffsetCache[index];
   }
@@ -686,7 +748,12 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     )
     double itemExtent,
   ) {
-    return _getOrCreateItemOffset(childManager.childCount) ?? _itemOffsetCache.last;
+    final int childCount = childManager.childCount;
+    if (childCount == 0) {
+      return 0.0;
+    }
+    final double total = _getOrCreateItemOffset(childCount) ?? _itemOffsetCache.last;
+    return _itemExtentCache.isEmpty ? 0.0 : total - spacing;
   }
 
   @override

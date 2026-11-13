@@ -47,7 +47,8 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
     super.key,
     required super.delegate,
     required this.prototypeItem,
-  });
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0);
 
   /// A sliver that places its box children in a linear array and constrains them
   /// to have the same extent as a prototype item along the main axis.
@@ -103,7 +104,9 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0),
+       super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
            findChildIndexCallback: findChildIndexCallback,
@@ -147,7 +150,9 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0),
+       super(
          delegate: SliverChildListDelegate(
            children,
            addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -164,10 +169,29 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// cannot respond to input.
   final Widget prototypeItem;
 
+  /// The spacing between children along the main axis.
+  ///
+  /// Defaults to 0.0. Must not be negative.
+  final double spacing;
+
   @override
   RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context) {
     final element = context as _SliverPrototypeExtentListElement;
-    return _RenderSliverPrototypeExtentList(childManager: element);
+    return _RenderSliverPrototypeExtentList(childManager: element, spacing: spacing);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderSliverMultiBoxAdaptor renderObject,
+  ) {
+    (renderObject as RenderSliverFixedExtentBoxAdaptor).spacing = spacing;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
   }
 
   @override
@@ -251,7 +275,10 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
 }
 
 class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor {
-  _RenderSliverPrototypeExtentList({required _SliverPrototypeExtentListElement super.childManager});
+  _RenderSliverPrototypeExtentList({
+    required _SliverPrototypeExtentListElement super.childManager,
+    super.spacing,
+  });
 
   RenderBox? _child;
   RenderBox? get child => _child;

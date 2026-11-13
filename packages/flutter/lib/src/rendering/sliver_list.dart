@@ -40,7 +40,23 @@ import 'sliver_multi_box_adaptor.dart';
 class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   /// Creates a sliver that places multiple box children in a linear array along
   /// the main axis.
-  RenderSliverList({required super.childManager});
+  RenderSliverList({required super.childManager, double spacing = 0.0})
+    : _spacing = spacing,
+      assert(spacing >= 0.0);
+
+  /// The spacing to use between children along the main axis.
+  ///
+  /// Defaults to 0.0. Must not be negative.
+  double get spacing => _spacing;
+  double _spacing;
+  set spacing(double value) {
+    assert(value >= 0.0);
+    if (_spacing == value) {
+      return;
+    }
+    _spacing = value;
+    markNeedsLayout();
+  }
 
   @override
   void performLayout() {
@@ -150,7 +166,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         }
       }
 
-      final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild!);
+      final double firstChildScrollOffset =
+          earliestScrollOffset - paintExtentOf(firstChild!) - spacing;
       // firstChildScrollOffset may contain double precision error
       if (firstChildScrollOffset < -precisionErrorTolerance) {
         // Let's assume there is no child before the first child. We will
@@ -182,7 +199,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         // reaches zero again.
         earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
         assert(earliestUsefulChild != null);
-        final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild!);
+        final double firstChildScrollOffset =
+            earliestScrollOffset - paintExtentOf(firstChild!) - spacing;
         final childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;
         // We only need to correct if the leading child actually has a
@@ -252,7 +270,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       }
       assert(child != null);
       final childParentData = child!.parentData! as SliverMultiBoxAdaptorParentData;
-      childParentData.layoutOffset = endScrollOffset;
+      childParentData.layoutOffset = endScrollOffset + spacing;
       assert(childParentData.index == index);
       endScrollOffset = childScrollOffset(child!)! + paintExtentOf(child!);
       return true;
@@ -337,5 +355,11 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       childManager.setDidUnderflow(true);
     }
     childManager.didFinishLayout();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
   }
 }
