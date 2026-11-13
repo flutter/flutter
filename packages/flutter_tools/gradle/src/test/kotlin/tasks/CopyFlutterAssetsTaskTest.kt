@@ -66,7 +66,7 @@ class CopyFlutterAssetsTaskTest {
     }
 
     @Test
-    fun `stages flutter assets whose names AGP or Gradle would filter by default`(
+    fun `stages flutter assets whose names AGP would filter by default`(
         @TempDir tempDir: Path
     ) {
         val intermediateDir = tempDir.resolve("intermediate").toFile()
@@ -75,11 +75,7 @@ class CopyFlutterAssetsTaskTest {
                 // Dropped by AGP's default ignoreAssetsPattern (`.*` and `<dir>_*`).
                 "flutter_assets/.env",
                 "flutter_assets/assets/.hidden",
-                "flutter_assets/assets/_private/asset.txt",
-                // Dropped by Gradle's default copy excludes.
-                "flutter_assets/assets/.gitignore",
-                "flutter_assets/assets/._resource_fork",
-                "flutter_assets/assets/backup.txt~"
+                "flutter_assets/assets/_private/asset.txt"
             )
         for (path in assetPaths) {
             intermediateDir.writeFile(path, path)
@@ -92,6 +88,32 @@ class CopyFlutterAssetsTaskTest {
             val stagedAsset = destinationDir.resolve(path)
             assertTrue(stagedAsset.isFile, "expected $path to be staged")
             assertEquals(path, stagedAsset.readText())
+        }
+    }
+
+    @Test
+    fun `excludes files matched by Gradle's default excludes`(
+        @TempDir tempDir: Path
+    ) {
+        val intermediateDir = tempDir.resolve("intermediate").toFile()
+        intermediateDir.writeFile("flutter_assets/assets/asset.txt", "asset-bytes")
+        val excludedPaths =
+            listOf(
+                "flutter_assets/assets/.gitignore",
+                "flutter_assets/assets/.DS_Store",
+                "flutter_assets/assets/._resource_fork",
+                "flutter_assets/assets/backup.txt~"
+            )
+        for (path in excludedPaths) {
+            intermediateDir.writeFile(path, path)
+        }
+        val destinationDir = tempDir.resolve("staged").toFile()
+
+        runTask(tempDir, intermediateDir, emptyMergedAssetsDir(tempDir), destinationDir)
+
+        assertTrue(destinationDir.resolve("flutter_assets/assets/asset.txt").isFile, "expected the asset to be staged")
+        for (path in excludedPaths) {
+            assertFalse(destinationDir.resolve(path).exists(), "expected $path to be excluded")
         }
     }
 

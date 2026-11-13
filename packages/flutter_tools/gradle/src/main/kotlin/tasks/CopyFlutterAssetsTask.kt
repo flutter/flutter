@@ -6,6 +6,7 @@ package com.flutter.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
@@ -13,10 +14,6 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
 /**
@@ -33,8 +30,8 @@ import javax.inject.Inject
  * starts with `_`, which are valid Flutter asset paths. See
  * https://github.com/flutter/flutter/issues/196444.
  *
- * The files are copied with `java.nio` rather than a Gradle copy spec, because copy specs apply
- * Gradle's default excludes (such as `.gitignore` and `._*`), which would drop those assets too.
+ * The copy applies Gradle's default excludes (such as `.gitignore`, `.DS_Store` and `._*`), as the
+ * `Copy` task that staged Flutter's assets before Flutter 3.50 did.
  */
 @DisableCachingByDefault(because = "Copying local asset directories is faster than unpacking cache archives")
 abstract class CopyFlutterAssetsTask : DefaultTask() {
@@ -61,40 +58,23 @@ abstract class CopyFlutterAssetsTask : DefaultTask() {
 
     @TaskAction
     fun copy() {
-        val destination: File = destinationDir.get().asFile
-        // Remove everything from a previous run, so assets that are no longer produced are pruned.
-        // Unlike File.deleteRecursively(), Gradle's delete fails the build if a file can't be
-        // deleted, instead of leaving it to be packaged as a stale asset.
-        fileSystemOperations.delete {
-            delete(destinationDir)
-        }
-        destination.mkdirs()
-        copyTree(mergedAssetsDir.get().asFile.toPath(), destination.toPath())
-        // The engine loads assets from `flutter_assets/` by default, so keep the prefix.
-        val flutterAssets: File = intermediateDir.get().asFile.resolve(FLUTTER_ASSETS_DIRECTORY_NAME)
-        copyTree(flutterAssets.toPath(), destination.resolve(FLUTTER_ASSETS_DIRECTORY_NAME).toPath())
-    }
-
-    private fun copyTree(
-        source: Path,
-        destination: Path
-    ) {
-        if (!Files.isDirectory(source)) {
-            return
-        }
-        Files.walk(source).use { paths ->
-            paths.forEach { path ->
-                val target = destination.resolve(source.relativize(path).toString())
-                if (Files.isDirectory(path)) {
-                    Files.createDirectories(target)
-                } else {
-                    Files.createDirectories(target.parent)
-                    Files.copy(path, target, StandardCopyOption.REPLACE_EXISTING)
-                    // Assets inherited from the pub cache can be read-only, and a packaging step
-                    // downstream has to be able to replace the copy.
-                    val file = target.toFile()
-                    file.setReadable(true, true)
-                    file.setWritable(true, true)
+        // sync() prunes files that are no longer produced, so no separate delete is needed.
+        fileSystemOperations.sync {
+            into(destinationDir)
+            from(mergedAssetsDir)
+            // The engine loads assets from `flutter_assets/` by default, so keep the prefix.
+            from(intermediateDir.dir(FLUTTER_ASSETS_DIRECTORY_NAME)) {
+                into(FLUTTER_ASSETS_DIRECTORY_NAME)
+            }
+            // Flutter's assets are copied last, so on a path collision they replace the merged
+            // native asset, as they did before 3.50.
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            // Assets from the pub cache can be read-only, and a packaging step downstream has to be
+            // able to replace the copy.
+            filePermissions {
+                user {
+                    read = true
+                    write = true
                 }
             }
         }
