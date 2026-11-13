@@ -12,6 +12,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'binding.dart';
@@ -448,7 +449,7 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
     final Iterable<Element> elements = _collectElementsByText(
       WidgetsBinding.instance.rootElement!,
       text,
-    );
+    ).where((Element element) => _isHitTestable(element, renderView.flutterView.viewId));
     for (final element in elements) {
       violations.addAll(await _evaluateElement(node, element, image, byteData, renderView));
     }
@@ -776,6 +777,33 @@ Iterable<Element> _collectElementsByText(Element root, String text) {
     result.addAll(_collectElementsByText(child, text));
   });
   return result;
+}
+
+bool _isRenderObjectAncestorOfTarget(RenderObject renderObject, HitTestTarget target) {
+  if (target == renderObject) {
+    return true;
+  }
+  if (target is RenderObject) {
+    for (RenderObject? current = target.parent; current != null; current = current.parent) {
+      if (current == renderObject) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool _isHitTestable(Element element, int viewId) {
+  final RenderObject? object = element.renderObject;
+  if (object is! RenderBox || !object.hasSize) {
+    return false;
+  }
+  final Offset absoluteOffset = object.localToGlobal(object.size.center(Offset.zero));
+  final hitResult = HitTestResult();
+  WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
+  return hitResult.path.any(
+    (HitTestEntry entry) => _isRenderObjectAncestorOfTarget(object, entry.target),
+  );
 }
 
 final int _scrollingActions =
