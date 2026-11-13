@@ -57,9 +57,6 @@ abstract class WindowsApp extends ApplicationPackage {
     } on ProcessException {
       logger.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;
-    } on FileSystemException {
-      logger.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
-      return null;
     }
     final exeFilesFound = <FileSystemEntity>[
       for (final FileSystemEntity file in tempDir.listSync())

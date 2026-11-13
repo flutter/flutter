@@ -542,10 +542,24 @@ class _WindowsUtils extends OperatingSystemUtils {
     'tar.exe',
   );
 
-  // bsdtar rejects entries with '..' components or absolute paths unless -P is
-  // passed (zip-slip protection, see https://github.com/flutter/flutter/issues/185794).
-  // Never add -P.
+  // Windows 10 build 17063+ (version 1803) and Windows 11 include bsdtar in
+  // System32\tar.exe, which extracts both .zip and .tar.gz archives natively on
+  // disk without reading archives into Dart heap memory.
+  //
+  // Resolve System32\tar.exe explicitly to avoid invoking GNU tar from Git for
+  // Windows or MSYS2 if present earlier on PATH.
+  //
+  // bsdtar rejects entries with '..' components and strips leading '/', '\',
+  // and drive letters unless -P (--absolute-paths) is passed (zip-slip
+  // protection, see https://github.com/flutter/flutter/issues/185794). Never
+  // pass -P or --absolute-paths.
   void _unpackWithTar(File file, Directory targetDirectory) {
+    if (!_processManager.canRun(_tarPath)) {
+      throwToolExit('Unable to find "$_tarPath". Unable to extract ${file.path}.');
+    }
+    if (!targetDirectory.existsSync()) {
+      targetDirectory.createSync(recursive: true);
+    }
     _processUtils.runSync(
       <String>[_tarPath, '-xf', file.path, '-C', targetDirectory.path],
       throwOnError: true,
@@ -555,54 +569,11 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void unzip(File file, Directory targetDirectory) {
-    // Windows 10 build 17063+ includes bsdtar in System32, which can unpack both
-    // zip and tar archives significantly faster than starting a PowerShell host.
-    // Resolve the System32 binary explicitly to avoid invoking GNU tar from
-    // Git for Windows or MSYS2 if present earlier on the PATH.
-    if (_processManager.canRun(_tarPath)) {
-      if (!targetDirectory.existsSync()) {
-        targetDirectory.createSync(recursive: true);
-      }
-      _unpackWithTar(file, targetDirectory);
-      return;
-    }
-    // Fall back to PowerShell's Expand-Archive on older Windows versions.
-    // Check for both Windows PowerShell ('powershell') and PowerShell Core ('pwsh').
-    final String? powershellExec = switch (true) {
-      _ when _processManager.canRun('powershell') => 'powershell',
-      _ when _processManager.canRun('pwsh') => 'pwsh',
-      _ => null,
-    };
-    if (powershellExec != null) {
-      if (!targetDirectory.existsSync()) {
-        targetDirectory.createSync(recursive: true);
-      }
-      final String escapedFilePath = file.path.replaceAll("'", "''");
-      final String escapedTargetPath = targetDirectory.path.replaceAll("'", "''");
-      final script =
-          r"$ErrorActionPreference = 'Stop'; "
-          "Expand-Archive -LiteralPath '$escapedFilePath' -DestinationPath '$escapedTargetPath' -Force";
-      _processUtils.runSync(
-        <String>[powershellExec, '-NoProfile', '-NonInteractive', '-Command', script],
-        throwOnError: true,
-        verboseExceptions: true,
-      );
-      return;
-    }
-    throwToolExit(
-      'Unable to find "$_tarPath" or PowerShell ("powershell"/"pwsh"). '
-      'Unable to extract ${file.path}.',
-    );
+    _unpackWithTar(file, targetDirectory);
   }
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    if (!_processManager.canRun(_tarPath)) {
-      throwToolExit('Unable to find "$_tarPath". Unable to extract ${gzippedTarFile.path}.');
-    }
-    if (!targetDirectory.existsSync()) {
-      targetDirectory.createSync(recursive: true);
-    }
     _unpackWithTar(gzippedTarFile, targetDirectory);
   }
 

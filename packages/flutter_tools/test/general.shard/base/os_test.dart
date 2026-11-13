@@ -410,24 +410,25 @@ void main() {
     });
 
     group('unzip on Windows', () {
+      const tarResolutionCases = <(String, Map<String, String>, String)>[
+        (
+          'resolves tar using SYSTEMROOT over WINDIR',
+          <String, String>{'SYSTEMROOT': r'D:\Windows', 'WINDIR': r'E:\WinNT'},
+          r'D:\Windows\System32\tar.exe',
+        ),
+        (
+          'resolves tar using WINDIR fallback when SYSTEMROOT is unset',
+          <String, String>{'WINDIR': r'E:\WinNT'},
+          r'E:\WinNT\System32\tar.exe',
+        ),
+        (
+          r'resolves tar using default C:\Windows fallback when SYSTEMROOT and WINDIR are unset',
+          <String, String>{},
+          kWindowsTarPath,
+        ),
+      ];
       for (final (String description, Map<String, String> environment, String expectedTarPath)
-          in const <(String, Map<String, String>, String)>[
-            (
-              'resolves tar using SYSTEMROOT over WINDIR',
-              <String, String>{'SYSTEMROOT': r'D:\Windows', 'WINDIR': r'E:\WinNT'},
-              r'D:\Windows\System32\tar.exe',
-            ),
-            (
-              'resolves tar using WINDIR fallback when SYSTEMROOT is unset',
-              <String, String>{'WINDIR': r'E:\WinNT'},
-              r'E:\WinNT\System32\tar.exe',
-            ),
-            (
-              r'resolves tar using default C:\Windows fallback when SYSTEMROOT and WINDIR are unset',
-              <String, String>{},
-              kWindowsTarPath,
-            ),
-          ]) {
+          in tarResolutionCases) {
         testWithoutContext(description, () {
           final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
           final Directory targetDirectory = fileSystem.directory('output')
@@ -474,41 +475,35 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('falls back to powershell when tar is not available', () {
+      testWithoutContext('throws ToolExit when tar is not available', () {
         final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-        final Directory targetDirectory = fileSystem.directory('output')
-          ..createSync(recursive: true);
-        final File fakeZipFile = fileSystem.file("archive's.zip")..createSync();
+        final Directory targetDirectory = fileSystem.directory('output');
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
         fakeProcessManager.excludedExecutables.add(kWindowsTarPath);
-        const command =
-            r"$ErrorActionPreference = 'Stop'; "
-            "Expand-Archive -LiteralPath 'archive''s.zip' -DestinationPath 'output' -Force";
-        fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>['powershell', '-NoProfile', '-NonInteractive', '-Command', command],
-          ),
-        );
 
         final OperatingSystemUtils utils = createOSUtils(
           FakePlatform(operatingSystem: 'windows'),
           fileSystem: fileSystem,
         );
-        utils.unzip(fakeZipFile, targetDirectory);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(
+          () => utils.unzip(fakeZipFile, targetDirectory),
+          throwsToolExit(
+            message: 'Unable to find "$kWindowsTarPath". Unable to extract ${fakeZipFile.path}.',
+          ),
+        );
+        expect(targetDirectory.existsSync(), isFalse);
       });
 
-      testWithoutContext('falls back to pwsh when tar and powershell are not available', () {
+      testWithoutContext('never passes -P or --absolute-paths to tar', () {
         final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
         final Directory targetDirectory = fileSystem.directory('output')
           ..createSync(recursive: true);
         final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
-        fakeProcessManager.excludedExecutables.addAll(<String>[kWindowsTarPath, 'powershell']);
-        const command =
-            r"$ErrorActionPreference = 'Stop'; "
-            "Expand-Archive -LiteralPath 'archive.zip' -DestinationPath 'output' -Force";
+        // Passing -P or --absolute-paths disables bsdtar's '..' and leading-slash
+        // rejection (zip-slip protection, see https://github.com/flutter/flutter/issues/185794).
         fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>['pwsh', '-NoProfile', '-NonInteractive', '-Command', command],
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeZipFile.path, '-C', targetDirectory.path],
           ),
         );
 
@@ -519,34 +514,6 @@ void main() {
         utils.unzip(fakeZipFile, targetDirectory);
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
-
-      testWithoutContext(
-        'throws ToolExit when neither tar nor powershell nor pwsh is available',
-        () {
-          final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-          final Directory targetDirectory = fileSystem.directory('output');
-          final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
-          fakeProcessManager.excludedExecutables.addAll(<String>[
-            kWindowsTarPath,
-            'powershell',
-            'pwsh',
-          ]);
-
-          final OperatingSystemUtils utils = createOSUtils(
-            FakePlatform(operatingSystem: 'windows'),
-            fileSystem: fileSystem,
-          );
-          expect(
-            () => utils.unzip(fakeZipFile, targetDirectory),
-            throwsToolExit(
-              message:
-                  'Unable to find "$kWindowsTarPath" or PowerShell ("powershell"/"pwsh"). '
-                  'Unable to extract ${fakeZipFile.path}.',
-            ),
-          );
-          expect(targetDirectory.existsSync(), isFalse);
-        },
-      );
     });
 
     group('unpack on Windows', () {
@@ -606,6 +573,27 @@ void main() {
           ),
         );
         expect(targetDirectory.existsSync(), isFalse);
+      });
+
+      testWithoutContext('never passes -P or --absolute-paths to tar', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        // Passing -P or --absolute-paths disables bsdtar's '..' and leading-slash
+        // rejection (zip-slip protection, see https://github.com/flutter/flutter/issues/185794).
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeTarFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unpack(fakeTarFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
     });
   });

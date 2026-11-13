@@ -86,32 +86,17 @@ void main() {
       );
     });
 
-    testWithoutContext('Bad zipped app, unzip throws FileSystemException', () {
-      fileSystem.file('app.zip').createSync();
-      os.unzipOverride = (File zipFile, Directory targetDirectory) {
-        throw const FileSystemException('Corrupt archive');
-      };
-      final WindowsApp? windowsApp = WindowsApp.fromPrebuiltApp(
-        fileSystem.file('app.zip'),
-        toolContext: toolContext,
-      );
-
-      expect(windowsApp, isNull);
-      expect(
-        logger.errorText,
-        contains('Invalid prebuilt Windows app. Unable to extract from archive.'),
-      );
-    });
-
     testWithoutContext('Bad zipped app, unzip throws ToolExit', () {
       fileSystem.file('app.zip').createSync();
       os.unzipOverride = (File zipFile, Directory targetDirectory) {
-        throwToolExit(r'Unable to find "C:\Windows\System32\tar.exe" or PowerShell.');
+        throwToolExit(r'Unable to find "C:\Windows\System32\tar.exe". Unable to extract app.zip.');
       };
 
       expect(
         () => WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip'), toolContext: toolContext),
-        throwsToolExit(message: r'Unable to find "C:\Windows\System32\tar.exe" or PowerShell.'),
+        throwsToolExit(
+          message: r'Unable to find "C:\Windows\System32\tar.exe". Unable to extract app.zip.',
+        ),
       );
     });
 
