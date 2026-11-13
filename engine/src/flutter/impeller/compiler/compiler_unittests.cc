@@ -891,7 +891,7 @@ TEST(CompilerTest, DepfileEscapesSpacesInTargetsAndDependencies) {
   const std::string contents(
       reinterpret_cast<const char*>(depfile->GetMapping()), depfile->GetSize());
 
-  EXPECT_EQ(contents.rfind("out\\ dir/a.iplr: ", 0), 0u) << contents;
+  EXPECT_TRUE(contents.starts_with("out\\ dir/a.iplr: ")) << contents;
   EXPECT_NE(contents.find("with\\ space"), std::string::npos) << contents;
   EXPECT_NE(contents.find(" in\\ dir/a.frag\n"), std::string::npos) << contents;
   EXPECT_EQ(contents.find("with space"), std::string::npos) << contents;
