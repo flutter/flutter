@@ -312,7 +312,7 @@ abstract class CkSurface extends Surface {
 
     setSize(BitmapSize(engineImage.width, engineImage.height));
     final SkSurface skSurface = _skSurface!;
-    final canvas = CkCanvas.fromSkCanvas(skSurface.getCanvas());
+    final canvas = EngineCanvas(CkCanvas(skSurface.getCanvas()));
 
     canvas.clear(const ui.Color(0x00000000));
     final paint = ui.Paint();
@@ -351,7 +351,7 @@ abstract class CkSurface extends Surface {
 
   /// Synchronously clears the surface, draws [picture] into it, and flushes.
   void _drawPicture(CkPicture picture) {
-    final canvas = CkCanvas.fromSkCanvas(_skSurface!.getCanvas());
+    final canvas = EngineCanvas(CkCanvas(_skSurface!.getCanvas()));
     canvas.clear(const ui.Color(0x00000000));
     canvas.drawPicture(picture);
     _skSurface!.flush();
