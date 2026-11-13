@@ -409,6 +409,139 @@ void main() {
     expect((await output)?.outputFilename, '');
   });
 
+  testWithoutContext(
+    'KernelCompiler converts dart_plugin_registrant physical path to virtual path',
+    () async {
+      final logger = BufferLogger.test();
+      final fileSystem = MemoryFileSystem.test();
+      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
+      final Directory registrantDirectory = fileSystem.directory(
+        '/project/.dart_tool/flutter_build',
+      )..createSync(recursive: true);
+      registrantDirectory.childFile('dart_plugin_registrant.dart').createSync();
+
+      final processManager = FakeProcessManager.list([
+        const FakeCommand(
+          command: <String>[
+            'Artifact.engineDartAotRuntime',
+            'Artifact.frontendServerSnapshotForEngineDartSdk',
+            '--sdk-root',
+            'sdkroot/',
+            '--target=flutter',
+            '--no-print-incremental-dependencies',
+            '-Ddart.vm.profile=false',
+            '-Ddart.vm.product=false',
+            '--enable-asserts',
+            '--no-link-platform',
+            '--depfile',
+            '/project/build/kernel_snapshot.d',
+            '--filesystem-root',
+            '/project/.dart_tool/flutter_build',
+            '--filesystem-scheme',
+            'org-dartlang-plugin-registrant',
+            '--source',
+            'org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+            '--source',
+            'package:flutter/src/dart_plugin_registrant.dart',
+            '-Dflutter.dart_plugin_registrant=org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+            '--verbosity=error',
+            '--native-assets-only',
+          ],
+        ),
+      ]);
+
+      final kernelCompiler = KernelCompiler(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        fileSystemRoots: <String>[],
+        stdoutHandler: stdoutHandler,
+      );
+      final Future<CompilerOutput?> output = kernelCompiler.compile(
+        sdkRoot: 'sdkroot',
+        buildDir: registrantDirectory.childDirectory('somehash'),
+        checkDartPluginRegistry: true,
+        packagesPath: null,
+        depFilePath: '/project/build/kernel_snapshot.d',
+        buildMode: .debug,
+        trackWidgetCreation: false,
+        dartDefines: const <String>[],
+        packageConfig: PackageConfig.empty,
+      );
+
+      stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
+      await output;
+
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext(
+    'KernelCompiler dart_plugin_registrant URI uses forward slashes on Windows',
+    () async {
+      final logger = BufferLogger.test();
+      final fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
+      final Directory registrantDirectory = fileSystem.directory(
+        r'C:\project\.dart_tool\flutter_build',
+      )..createSync(recursive: true);
+      registrantDirectory.childFile('dart_plugin_registrant.dart').createSync();
+
+      final processManager = FakeProcessManager.list([
+        const FakeCommand(
+          command: <String>[
+            'Artifact.engineDartAotRuntime',
+            'Artifact.frontendServerSnapshotForEngineDartSdk',
+            '--sdk-root',
+            'sdkroot/',
+            '--target=flutter',
+            '--no-print-incremental-dependencies',
+            '-Ddart.vm.profile=false',
+            '-Ddart.vm.product=false',
+            '--enable-asserts',
+            '--no-link-platform',
+            '--filesystem-root',
+            r'C:\project\.dart_tool\flutter_build',
+            '--filesystem-scheme',
+            'org-dartlang-plugin-registrant',
+            '--source',
+            'org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+            '--source',
+            'package:flutter/src/dart_plugin_registrant.dart',
+            '-Dflutter.dart_plugin_registrant=org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+            '--verbosity=error',
+            '--native-assets-only',
+          ],
+        ),
+      ]);
+
+      final kernelCompiler = KernelCompiler(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        fileSystemRoots: <String>[],
+        stdoutHandler: stdoutHandler,
+      );
+      final Future<CompilerOutput?> output = kernelCompiler.compile(
+        sdkRoot: 'sdkroot',
+        buildDir: registrantDirectory.childDirectory('somehash'),
+        checkDartPluginRegistry: true,
+        packagesPath: null,
+        buildMode: .debug,
+        trackWidgetCreation: false,
+        dartDefines: const <String>[],
+        packageConfig: PackageConfig.empty,
+      );
+
+      stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
+      await output;
+
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
   testWithoutContext('KernelCompiler uses generated entrypoint', () async {
     final logger = BufferLogger.test();
     final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
@@ -435,11 +568,15 @@ void main() {
             '--no-link-platform',
             '--packages',
             '.dart_tool/package_config.json',
+            '--filesystem-root',
+            '.dart_tools/flutter_build',
+            '--filesystem-scheme',
+            'org-dartlang-plugin-registrant',
             '--source',
-            '.dart_tools/flutter_build/dart_plugin_registrant.dart',
+            'org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
             '--source',
             'package:flutter/src/dart_plugin_registrant.dart',
-            '-Dflutter.dart_plugin_registrant=.dart_tools/flutter_build/dart_plugin_registrant.dart',
+            '-Dflutter.dart_plugin_registrant=org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
             '--verbosity=error',
             'scheme:///main.dart',
           ],
