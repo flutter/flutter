@@ -58,6 +58,11 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
 
     FML_CHECK(java_metadata->window);
     android_surface->SetNativeWindow(java_metadata->window, jni_facade);
+    if (use_new_surface_methods_ && java_metadata->window->IsValid() &&
+        !requested_frame_size_.IsEmpty() &&
+        java_metadata->window->GetSize() != requested_frame_size_) {
+      android_surface->OnScreenSurfaceResize(requested_frame_size_);
+    }
     android_surface->SetupImpellerSurface();
 
     std::unique_ptr<Surface> surface =
