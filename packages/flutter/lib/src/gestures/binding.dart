@@ -421,7 +421,12 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       }
       assert(() {
         if (debugPrintHitTestResults) {
-          debugPrint('${event.toString(minLevel: DiagnosticLevel.debug)}: $hitTestResult');
+          // Hit test results can be very long. Wrap them so that platforms that
+          // truncate long log lines, such as iOS, print them in full.
+          debugPrint(
+            '${event.toString(minLevel: DiagnosticLevel.debug)}: $hitTestResult',
+            wrapWidth: 1000,
+          );
         }
         return true;
       }());

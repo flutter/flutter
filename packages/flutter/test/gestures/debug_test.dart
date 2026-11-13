@@ -204,6 +204,26 @@ void main() {
     debugPrint = oldCallback;
   });
 
+  testWidgets('debugPrintHitTestResults', (WidgetTester tester) async {
+    debugPrintHitTestResults = true;
+    final DebugPrintCallback oldCallback = debugPrint;
+    final log = <String>[];
+    final wrapWidths = <int?>[];
+    debugPrint = (String? s, {int? wrapWidth}) {
+      log.add(s ?? '');
+      wrapWidths.add(wrapWidth);
+    };
+
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(log, hasLength(1));
+    expect(log[0], startsWith('PointerDownEvent#'));
+    expect(log[0], contains('HitTestResult('));
+    expect(wrapWidths, <int?>[1000]);
+
+    debugPrintHitTestResults = false;
+    debugPrint = oldCallback;
+  });
+
   test('TapGestureRecognizer _sentTapDown toString', () {
     final tap = TapGestureRecognizer()..onTap = () {}; // Add a callback so that event can be added
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
