@@ -155,6 +155,7 @@ class ValueKey<T> extends LocalKey {
   @override
   String toString() {
     final valueString = T == String ? "<'$value'>" : '<$value>';
+    // ignore: flutter_analyzer_plugin/no_runtimetype_in_tostring
     if (runtimeType == ValueKey<T>) {
       return '[$valueString]';
     }

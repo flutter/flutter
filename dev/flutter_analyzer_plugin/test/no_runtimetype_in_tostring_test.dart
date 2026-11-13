@@ -55,23 +55,6 @@ class GoodToStringWithAssert {
     return 'GoodToStringWithAssert';
   }
 }
-
-class GoodToStringWithTypeComparison {
-  GoodToStringWithTypeComparison(this.other);
-
-  final Object other;
-
-  @override
-  String toString() {
-    if (runtimeType == GoodToStringWithTypeComparison) {
-      return 'Good';
-    }
-    if (this.runtimeType != other.runtimeType) {
-      return 'Different';
-    }
-    return 'Subclass';
-  }
-}
 ''';
 
 void main() {
