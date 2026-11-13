@@ -205,16 +205,8 @@ final class HostPlatform {
   /// (or `'darwin'`). [arch] is an architecture name matching the [cpuArchName]
   /// of one of the values in [values]. Returns `null` if no match is found.
   static HostPlatform? fromOsAndArch(String os, String arch) {
-    return switch ((os, arch.toLowerCase())) {
-      (_macosAlias || _darwinOsName, 'x64') => .darwin_x64,
-      (_macosAlias || _darwinOsName, 'arm64') => .darwin_arm64,
-      ('linux', 'x64') => .linux_x64,
-      ('linux', 'arm64') => .linux_arm64,
-      ('linux', 'riscv64') => .linux_riscv64,
-      ('windows', 'x64') => .windows_x64,
-      ('windows', 'arm64') => .windows_arm64,
-      _ => null,
-    };
+    final HostPlatform? platform = tryFromName('$os-${arch.toLowerCase()}');
+    return values.contains(platform) ? platform : null;
   }
 
   @override
@@ -262,6 +254,9 @@ sealed class ArtifactDependency {
 
   /// Creates a remote [ArtifactDependency] that the host downloads over HTTP/HTTPS,
   /// verifies against [sha256], and caches under the shared extension artifact cache.
+  ///
+  /// Throws a [FormatException] if [name], [sha256], [url], [executables], or
+  /// [isExecutable] is invalid.
   factory ArtifactDependency.remote({
     required String name,
     required String sha256,
@@ -277,7 +272,11 @@ sealed class ArtifactDependency {
   /// on the host filesystem without downloading or caching.
   ///
   /// [localUri] must point to an unpacked file or directory on disk matching the
-  /// layout expected by build targets consuming [name].
+  /// layout expected by build targets consuming [name]. Providing [stampUri] is
+  /// strongly recommended when [localUri] is a directory so `flutter assemble`
+  /// tracks only the stamp file instead of walking the directory tree.
+  ///
+  /// Throws a [FormatException] if [name], [localUri], or [stampUri] is invalid.
   factory ArtifactDependency.local({
     required Uri localUri,
     required String name,
@@ -292,9 +291,6 @@ sealed class ArtifactDependency {
   /// Throws a [FormatException] if any required field is missing or invalid.
   factory ArtifactDependency.fromJson(Map<String, Object?> json) {
     final String name = json.requiredField<String>(nameKey);
-    if (!isValidSinglePathSegment(name)) {
-      throw FormatException('Invalid artifact dependency name: "$name"');
-    }
     final String? hostPlatformName = json.nullableField<String>(hostPlatformKey);
     final HostPlatform? hostPlatform = hostPlatformName != null
         ? HostPlatform.fromName(hostPlatformName)
@@ -304,68 +300,30 @@ sealed class ArtifactDependency {
 
     switch (type) {
       case remoteType:
-        final String sha256 = json.requiredField<String>(sha256Key);
-        if (!_isValidSha256(sha256)) {
-          throw FormatException(
-            'Invalid artifact dependency sha256 (expected 64 hex characters): "$sha256"',
-          );
-        }
         final String urlStr = json.requiredField<String>(urlKey);
-        final Uri? uri = Uri.tryParse(urlStr);
-        if (uri == null || (!uri.isScheme(_httpScheme) && !uri.isScheme(_httpsScheme))) {
-          throw FormatException('Invalid artifact dependency URL (expected http/https): "$urlStr"');
-        }
-        final archiveFormat = ArchiveFormat.fromName(json.requiredField<String>(archiveFormatKey));
-        final Set<String> executables = json.stringSet(executablesKey);
-        for (final entry in executables) {
-          if (!isValidExecutableSubpath(entry)) {
-            throw FormatException('Invalid artifact dependency executable path: "$entry"');
-          }
-        }
-        final bool isExecutable = json.optionalField<bool>(isExecutableKey, defaultValue: false);
-        if (archiveFormat == .none && executables.isNotEmpty) {
-          throw FormatException(
-            'Artifact dependency "$name" cannot specify "$executablesKey" when '
-            '"$archiveFormatKey" is "${ArchiveFormat.none.cliName}"; use "$isExecutableKey" instead.',
-          );
-        }
-        if (archiveFormat != .none && isExecutable) {
-          throw FormatException(
-            'Artifact dependency "$name" cannot set "$isExecutableKey" to true when '
-            '"$archiveFormatKey" is "${archiveFormat.cliName}"; use "$executablesKey" instead.',
-          );
-        }
+        final Uri uri =
+            Uri.tryParse(urlStr) ??
+            (throw FormatException('Invalid artifact dependency URL: "$urlStr"'));
         return RemoteArtifactDependency(
           name: name,
-          sha256: sha256,
+          sha256: json.requiredField<String>(sha256Key),
           url: uri,
-          archiveFormat: archiveFormat,
-          executables: executables,
+          archiveFormat: ArchiveFormat.fromName(json.requiredField<String>(archiveFormatKey)),
+          executables: json.stringSet(executablesKey),
           hostPlatform: hostPlatform,
-          isExecutable: isExecutable,
+          isExecutable: json.optionalField<bool>(isExecutableKey, defaultValue: false),
           targetPlatform: targetPlatform,
         );
       case localType:
         final String localUriStr = json.requiredField<String>(localUriKey);
-        final Uri? localUri = Uri.tryParse(localUriStr);
-        if (localUri == null || (!localUri.isValidFileUri && !localUri.isValidDirectoryUri)) {
-          throw FormatException(
-            'Invalid artifact dependency localUri (expected absolute file: URI): "$localUriStr"',
-          );
-        }
+        final Uri localUri =
+            Uri.tryParse(localUriStr) ??
+            (throw FormatException('Invalid artifact dependency localUri: "$localUriStr"'));
         final String? stampUriStr = json.nullableField<String>(stampUriKey);
-        final Uri? stampUri;
-        if (stampUriStr != null) {
-          final Uri? parsedStampUri = Uri.tryParse(stampUriStr);
-          if (parsedStampUri == null || !parsedStampUri.isValidFileUri) {
-            throw FormatException(
-              'Invalid artifact dependency stampUri (expected absolute file: URI): "$stampUriStr"',
-            );
-          }
-          stampUri = parsedStampUri;
-        } else {
-          stampUri = null;
-        }
+        final Uri? stampUri = stampUriStr != null
+            ? (Uri.tryParse(stampUriStr) ??
+                  (throw FormatException('Invalid artifact dependency stampUri: "$stampUriStr"')))
+            : null;
         return LocalArtifactDependency(
           localUri: localUri,
           name: name,
@@ -539,6 +497,9 @@ final class RemoteArtifactDependency extends ArtifactDependency {
   /// When [archiveFormat] is omitted, it defaults to [ArchiveFormat.zip] if
   /// [url]'s path ends with `.zip` (case-insensitive), or [ArchiveFormat.none]
   /// otherwise.
+  ///
+  /// Throws a [FormatException] if [name], [sha256], [url], [executables], or
+  /// [isExecutable] is invalid.
   RemoteArtifactDependency({
     required super.name,
     required this.sha256,
@@ -549,32 +510,41 @@ final class RemoteArtifactDependency extends ArtifactDependency {
     this.isExecutable = false,
     super.targetPlatform,
   }) : archiveFormat = _resolveArchiveFormat(archiveFormat, url),
-       executables = Set<String>.unmodifiable(executables),
-       assert(
-         ArtifactDependency.isValidSinglePathSegment(name),
-         'Invalid artifact dependency name (expected a single path segment): "$name"',
-       ),
-       assert(
-         ArtifactDependency._isValidSha256(sha256),
-         'Invalid artifact dependency sha256 (expected 64 hex characters): "$sha256"',
-       ),
-       assert(
-         url.isScheme(ArtifactDependency._httpScheme) ||
-             url.isScheme(ArtifactDependency._httpsScheme),
-         'Invalid artifact dependency URL (expected http/https): "$url"',
-       ),
-       assert(
-         executables.every(ArtifactDependency.isValidExecutableSubpath),
-         'Invalid executable subpath in artifact dependency "$name": $executables',
-       ),
-       assert(
-         _resolveArchiveFormat(archiveFormat, url) != .none || executables.isEmpty,
-         'executables is only valid for archive artifacts; set isExecutable for single-file artifacts.',
-       ),
-       assert(
-         !isExecutable || _resolveArchiveFormat(archiveFormat, url) == .none,
-         'isExecutable is only valid for single-file artifacts (ArchiveFormat.none); set executables for archive artifacts.',
-       );
+       executables = Set<String>.unmodifiable(executables) {
+    if (!ArtifactDependency.isValidSinglePathSegment(name)) {
+      throw FormatException(
+        'Invalid artifact dependency name (expected a single path segment): "$name"',
+      );
+    }
+    if (!ArtifactDependency._isValidSha256(sha256)) {
+      throw FormatException(
+        'Invalid artifact dependency sha256 (expected 64 hex characters): "$sha256"',
+      );
+    }
+    if (!url.isScheme(ArtifactDependency._httpScheme) &&
+        !url.isScheme(ArtifactDependency._httpsScheme)) {
+      throw FormatException('Invalid artifact dependency URL (expected http/https): "$url"');
+    }
+    for (final String entry in this.executables) {
+      if (!ArtifactDependency.isValidExecutableSubpath(entry)) {
+        throw FormatException('Invalid artifact dependency executable path: "$entry"');
+      }
+    }
+    if (this.archiveFormat == .none && this.executables.isNotEmpty) {
+      throw FormatException(
+        'Artifact dependency "$name" cannot specify "${ArtifactDependency.executablesKey}" when '
+        '"${ArtifactDependency.archiveFormatKey}" is "${ArchiveFormat.none.cliName}"; '
+        'use "${ArtifactDependency.isExecutableKey}" instead.',
+      );
+    }
+    if (this.archiveFormat != .none && isExecutable) {
+      throw FormatException(
+        'Artifact dependency "$name" cannot set "${ArtifactDependency.isExecutableKey}" to true when '
+        '"${ArtifactDependency.archiveFormatKey}" is "${this.archiveFormat.cliName}"; '
+        'use "${ArtifactDependency.executablesKey}" instead.',
+      );
+    }
+  }
 
   static const _setEquality = SetEquality<String>();
 
@@ -668,24 +638,31 @@ final class LocalArtifactDependency extends ArtifactDependency {
   /// [stampUri], when provided, must be a valid `file:` URI pointing to a stamp
   /// file (not ending with `/`) whose modification time tracks rebuilds of
   /// directory-based local artifacts.
+  ///
+  /// Throws a [FormatException] if [name], [localUri], or [stampUri] is invalid.
   LocalArtifactDependency({
     required this.localUri,
     required super.name,
     super.hostPlatform,
     this.stampUri,
     super.targetPlatform,
-  }) : assert(
-         ArtifactDependency.isValidSinglePathSegment(name),
-         'Invalid artifact dependency name (expected a single path segment): "$name"',
-       ),
-       assert(
-         localUri.isValidFileUri || localUri.isValidDirectoryUri,
-         'Invalid artifact dependency localUri (expected absolute file: URI): "$localUri"',
-       ),
-       assert(
-         stampUri == null || stampUri.isValidFileUri,
-         'Invalid artifact dependency stampUri (expected absolute file: URI): "$stampUri"',
-       );
+  }) {
+    if (!ArtifactDependency.isValidSinglePathSegment(name)) {
+      throw FormatException(
+        'Invalid artifact dependency name (expected a single path segment): "$name"',
+      );
+    }
+    if (!localUri.isValidFileUri && !localUri.isValidDirectoryUri) {
+      throw FormatException(
+        'Invalid artifact dependency localUri (expected absolute file: URI): "$localUri"',
+      );
+    }
+    if (stampUri != null && !stampUri!.isValidFileUri) {
+      throw FormatException(
+        'Invalid artifact dependency stampUri (expected absolute file: URI): "$stampUri"',
+      );
+    }
+  }
 
   /// The `file:` URI of the local artifact file or directory on the host.
   final Uri localUri;

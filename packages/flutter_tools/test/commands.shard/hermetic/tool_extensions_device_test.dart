@@ -297,6 +297,13 @@ final class _ArtifactAwareArtifactService extends ArtifactService {
         hostPlatform: HostPlatform.linux_x64,
         targetPlatform: 'custom-embedder-arm64',
       ),
+      ArtifactDependency.remote(
+        name: 'unrequested-release-sdk',
+        sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        url: Uri.parse('https://127.0.0.1:1/unreachable.zip'),
+        hostPlatform: HostPlatform.linux_x64,
+        targetPlatform: 'custom-embedder-arm64',
+      ),
     ];
   }
 }
@@ -371,6 +378,7 @@ void main() {
           featureFlags: featureFlags,
         );
         final discovery = ExtensionDevices(
+          extensionArtifactManager: _NoOpExtensionArtifactManager(),
           extensionBuildManager: ExtensionBuildManager(
             extensionManager: manager,
             featureFlags: featureFlags,
@@ -402,6 +410,7 @@ void main() {
         final testDeviceManager = TestDeviceManager(
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
+              extensionArtifactManager: _NoOpExtensionArtifactManager(),
               extensionBuildManager: ExtensionBuildManager(
                 extensionManager: manager,
                 featureFlags: featureFlags,
@@ -505,6 +514,7 @@ flutter:
           featureFlags: featureFlags,
         );
         final discovery = ExtensionDevices(
+          extensionArtifactManager: _NoOpExtensionArtifactManager(),
           extensionBuildManager: ExtensionBuildManager(
             extensionManager: manager,
             featureFlags: featureFlags,
@@ -550,6 +560,7 @@ flutter:
         final testDeviceManager = TestDeviceManager(
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
+              extensionArtifactManager: _NoOpExtensionArtifactManager(),
               extensionBuildManager: ExtensionBuildManager(
                 extensionManager: manager,
                 featureFlags: featureFlags,
@@ -621,6 +632,7 @@ flutter:
           return TestDeviceManager(
             discoverers: <DeviceDiscovery>[
               ExtensionDevices(
+                extensionArtifactManager: _NoOpExtensionArtifactManager(),
                 extensionBuildManager: ExtensionBuildManager(
                   extensionManager: logsExtensionManager!,
                   featureFlags: featureFlags,
@@ -652,6 +664,7 @@ flutter:
         addTearDown(manager.dispose);
 
         final discovery = ExtensionDevices(
+          extensionArtifactManager: _NoOpExtensionArtifactManager(),
           extensionBuildManager: ExtensionBuildManager(
             extensionManager: manager,
             featureFlags: featureFlags,
@@ -906,4 +919,14 @@ class _FakeProcessSignal extends Fake implements ProcessSignal {
     _controller.add(this);
     return true;
   }
+}
+
+class _NoOpExtensionArtifactManager extends Fake implements ExtensionArtifactManager {
+  @override
+  Future<Map<String, ResolvedExtensionArtifact>> ensureArtifactsDownloaded({
+    Set<String>? artifactNames,
+    String? extensionName,
+    bool force = false,
+    Set<String>? targetPlatforms,
+  }) async => const <String, ResolvedExtensionArtifact>{};
 }

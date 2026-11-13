@@ -22,6 +22,35 @@ import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
 
+/// A resolved tool extension artifact on the host filesystem.
+@immutable
+final class ResolvedExtensionArtifact {
+  const ResolvedExtensionArtifact({required this.path, this.stampFile});
+
+  /// Normalized local filesystem path to the cached or local artifact file or
+  /// directory, passed to the extension in `resolvedArtifacts`.
+  final String path;
+
+  /// Optional stamp [File] used by `flutter assemble` to track staleness for
+  /// directory-based artifacts without walking the entire directory tree (the
+  /// `.sha256` completion marker for extracted remote `.zip` archives, or
+  /// [LocalArtifactDependency.stampUri] when provided).
+  final File? stampFile;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ResolvedExtensionArtifact &&
+          other.path == path &&
+          other.stampFile?.path == stampFile?.path);
+
+  @override
+  int get hashCode => Object.hash(path, stampFile?.path);
+
+  @override
+  String toString() => 'ResolvedExtensionArtifact(path: $path, stampFile: ${stampFile?.path})';
+}
+
 /// Manages querying, downloading, and verifying custom artifacts required by
 /// tool extensions in a shared content-addressed cache.
 class ExtensionArtifactManager {
@@ -44,7 +73,6 @@ class ExtensionArtifactManager {
   static const String _extractedDirName = 'extracted';
   static const String _sha256StampSuffix = '.sha256';
   static const String _lockFileSuffix = '.lock';
-  static const String _executableChmodMode = 'a+x';
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
@@ -55,7 +83,7 @@ class ExtensionArtifactManager {
   /// Tracks in-flight download futures keyed by destination path
   /// (`<cacheDir>/<extensionName>/<sha256>/<artifactName>`) to deduplicate
   /// concurrent artifact requests within the same process.
-  final _inFlightDownloads = <String, Future<String>>{};
+  final _inFlightDownloads = <String, Future<ResolvedExtensionArtifact>>{};
 
   /// The current Flutter engine revision from the tool cache, or
   /// [_defaultEngineVersion] (`'unknown'`) when the revision is empty.
@@ -139,36 +167,31 @@ class ExtensionArtifactManager {
 
   /// Queries active extensions implementing [ArtifactService] (or only the
   /// extension matching [extensionName] when specified) and ensures required
-  /// artifacts for the current engine version, host platform, and optional
-  /// [targetPlatforms] are resolved on disk or downloaded and verified in the
-  /// shared cache.
+  /// artifacts for the current engine version, host platform, optional
+  /// [targetPlatforms], and optional [artifactNames] filter are resolved on
+  /// disk or downloaded and verified in the shared cache.
   ///
-  /// When [targetPlatforms] is `null`, artifacts for all target platforms
-  /// supported by each queried extension are requested.
+  /// When [artifactNames] is non-null, only artifacts whose
+  /// [ArtifactDependency.name] is in [artifactNames] are resolved or downloaded
+  /// (returning an empty map immediately without querying extensions when
+  /// [artifactNames] is empty). When [targetPlatforms] is `null`, artifacts for
+  /// all target platforms supported by each queried extension are requested.
   ///
   /// Returns a map from each resolved artifact's [ArtifactDependency.name] to
-  /// its local filesystem path, or an empty map when tool extensions are
-  /// disabled, extension initialization fails, or no matching active extension
-  /// implements [ArtifactService]. When [extensionName] is provided (for
-  /// example, during `flutter build` or `ExtensionBackedDevice.startApp`), the
-  /// returned map is scoped strictly to that owning extension; when
-  /// [extensionName] is `null` (for example, during `flutter precache`), all
-  /// extensions' artifacts are downloaded into their isolated
-  /// `<cacheDir>/<extensionName>/<sha256>/<name>` directories.
-  ///
-  /// RPC failures when querying an extension's artifact list log a warning and
-  /// skip that extension, whereas missing local artifacts or download,
-  /// extraction, executable permission validation, or SHA-256 verification
-  /// failures throw a [ToolExit].
+  /// its [ResolvedExtensionArtifact], or an empty map when tool extensions are
+  /// disabled, [artifactNames] is empty, extension initialization fails, or no
+  /// matching active extension implements [ArtifactService].
   ///
   /// When [force] is `true`, existing cached remote artifacts are re-downloaded.
-  Future<Map<String, String>> ensureArtifactsDownloaded({
+  Future<Map<String, ResolvedExtensionArtifact>> ensureArtifactsDownloaded({
+    Set<String>? artifactNames,
     String? extensionName,
     bool force = false,
     Set<String>? targetPlatforms,
   }) async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
-      return const <String, String>{};
+    if (!_featureFlags.isToolExtensionsEnabled ||
+        (artifactNames != null && artifactNames.isEmpty)) {
+      return const <String, ResolvedExtensionArtifact>{};
     }
     final ToolContext(:Logger logger, :OperatingSystemUtils os) = _toolContext;
 
@@ -176,7 +199,7 @@ class ExtensionArtifactManager {
       await _extensionManager.ensureInitialized();
     } on Object catch (e) {
       logger.printTrace('Failed to initialize extension manager for artifacts: $e');
-      return const <String, String>{};
+      return const <String, ResolvedExtensionArtifact>{};
     }
 
     final artifactExtensions = <ExtensionConnection>[
@@ -187,13 +210,13 @@ class ExtensionArtifactManager {
     ];
 
     if (artifactExtensions.isEmpty) {
-      return const <String, String>{};
+      return const <String, ResolvedExtensionArtifact>{};
     }
 
     final HostPlatform currentHostPlatform = os.hostPlatform;
     final String engineVersion = _engineVersion;
 
-    final resolvedArtifacts = <String, String>{};
+    final resolvedArtifacts = <String, ResolvedExtensionArtifact>{};
     for (final ext in artifactExtensions) {
       if (!ArtifactDependency.isValidSinglePathSegment(ext.extensionName)) {
         logger.printWarning(
@@ -209,17 +232,14 @@ class ExtensionArtifactManager {
         targetPlatforms: targetPlatforms,
       );
 
-      final filteredDeps = <ArtifactDependency>[
-        for (final dep in dependencies)
-          if (dep.matchesPlatforms(
-            currentHostPlatform: currentHostPlatform,
-            targetPlatforms: targetPlatforms,
-          ))
-            dep,
-      ];
-
       final seenForExtension = <String>{};
-      for (final dep in filteredDeps) {
+      for (final dep in dependencies) {
+        if (!dep.matchesPlatforms(
+          currentHostPlatform: currentHostPlatform,
+          targetPlatforms: targetPlatforms,
+        )) {
+          continue;
+        }
         if (!seenForExtension.add(dep.name)) {
           logger.printWarning(
             'Extension "${ext.extensionName}" declared duplicate artifact "${dep.name}"; '
@@ -227,7 +247,10 @@ class ExtensionArtifactManager {
           );
           continue;
         }
-        final String resolvedPath = switch (dep) {
+        if (artifactNames != null && !artifactNames.contains(dep.name)) {
+          continue;
+        }
+        final ResolvedExtensionArtifact resolved = switch (dep) {
           final LocalArtifactDependency localDep => _resolveLocalArtifact(
             ext.extensionName,
             localDep,
@@ -238,7 +261,7 @@ class ExtensionArtifactManager {
             force: force,
           ),
         };
-        resolvedArtifacts.putIfAbsent(dep.name, () => resolvedPath);
+        resolvedArtifacts.putIfAbsent(dep.name, () => resolved);
       }
     }
     return resolvedArtifacts;
@@ -281,20 +304,28 @@ class ExtensionArtifactManager {
   ///
   /// Throws a [ToolExit] if [LocalArtifactDependency.localUri] or a non-null
   /// [LocalArtifactDependency.stampUri] does not exist on disk.
-  String _resolveLocalArtifact(String extensionName, LocalArtifactDependency dep) {
+  ResolvedExtensionArtifact _resolveLocalArtifact(
+    String extensionName,
+    LocalArtifactDependency dep,
+  ) {
     final FileSystem fs = _toolContext.fs;
-    if (dep.stampUri case final Uri stampUri when !fs.file(stampUri).existsSync()) {
-      throwToolExit(
-        'Stamp file for local artifact "${dep.name}" for extension "$extensionName" was not found at "${fs.path.fromUri(stampUri)}".',
-      );
+    File? stampFile;
+    if (dep.stampUri case final Uri stampUri) {
+      final File resolvedStamp = fs.file(stampUri);
+      if (!resolvedStamp.existsSync()) {
+        throwToolExit(
+          'Stamp file for local artifact "${dep.name}" for extension "$extensionName" was not found at "${fs.path.fromUri(stampUri)}".',
+        );
+      }
+      stampFile = resolvedStamp;
     }
     final File file = fs.file(dep.localUri);
     if (file.existsSync()) {
-      return fs.path.normalize(file.path);
+      return ResolvedExtensionArtifact(path: fs.path.normalize(file.path), stampFile: stampFile);
     }
     final Directory dir = fs.directory(dep.localUri);
     if (dir.existsSync()) {
-      return fs.path.normalize(dir.path);
+      return ResolvedExtensionArtifact(path: fs.path.normalize(dir.path), stampFile: stampFile);
     }
     throwToolExit(
       'Local artifact "${dep.name}" for extension "$extensionName" was not found at "${fs.path.fromUri(dep.localUri)}".',
@@ -304,18 +335,18 @@ class ExtensionArtifactManager {
   /// Ensures [dep] is present and verified in the local cache under
   /// `<cacheDir>/<extensionName>/<sha256>/<dep.name>`, deduplicating
   /// concurrent in-process requests per destination via [_inFlightDownloads].
-  Future<String> _ensureRemoteArtifactCached(
+  Future<ResolvedExtensionArtifact> _ensureRemoteArtifactCached(
     String extensionName,
     RemoteArtifactDependency dep, {
     required bool force,
   }) async {
     final Directory destDir = artifactDirectory(extensionName: extensionName, sha256: dep.sha256);
     final String destinationPath = destDir.fileSystem.path.join(destDir.path, dep.name);
-    if (_inFlightDownloads[destinationPath] case final Future<String> existing) {
+    if (_inFlightDownloads[destinationPath] case final Future<ResolvedExtensionArtifact> existing) {
       return existing;
     }
 
-    final Future<String> downloadFuture = _downloadAndVerifyArtifact(
+    final Future<ResolvedExtensionArtifact> downloadFuture = _downloadAndVerifyArtifact(
       dep: dep,
       destDir: destDir,
       extensionName: extensionName,
@@ -330,15 +361,13 @@ class ExtensionArtifactManager {
   }
 
   /// Downloads, verifies, and installs [dep] into [destDir]
-  /// (`<cacheDir>/<extensionName>/<sha256>`), returning the local filesystem
-  /// path to the cached file or extracted directory.
+  /// (`<cacheDir>/<extensionName>/<sha256>`), returning the
+  /// [ResolvedExtensionArtifact] for the cached file or extracted directory.
   ///
-  /// Uses a fast unlocked check first (`_isArtifactCachedAndVerified`) when
-  /// [force] is `false`. If a download is needed, acquires a cross-process file
-  /// lock (`<destDir>.lock` via `fs.runLocked`), re-checks the cache inside the
-  /// lock, downloads to a temporary staging directory, verifies the SHA-256
-  /// checksum, and installs the artifact followed by its `.sha256` stamp file.
-  Future<String> _downloadAndVerifyArtifact({
+  /// Because [destDir] is keyed by [RemoteArtifactDependency.sha256], single-file
+  /// artifacts are complete once atomically renamed into [destDir], while
+  /// extracted `.zip` archives also write a `.sha256` completion stamp file.
+  Future<ResolvedExtensionArtifact> _downloadAndVerifyArtifact({
     required RemoteArtifactDependency dep,
     required Directory destDir,
     required String extensionName,
@@ -350,17 +379,22 @@ class ExtensionArtifactManager {
     final File stampFile = destDir.childFile('.${dep.name}$_sha256StampSuffix');
     final File lockFile = fs.file('${destDir.path}$_lockFileSuffix');
     final bool isZip = dep.isZipArchive;
-    final String resolvedPath = isZip ? artifactDir.path : artifactFile.path;
+    final resolved = ResolvedExtensionArtifact(
+      path: isZip ? artifactDir.path : artifactFile.path,
+      stampFile: isZip ? stampFile : null,
+    );
 
     if (!force &&
-        _isArtifactCachedAndVerified(
-          destDir,
-          dep,
-          deleteStaleOnMismatch: false,
+        _isArtifactCached(
+          artifactDir: artifactDir,
+          artifactFile: artifactFile,
+          artifactName: dep.name,
           extensionName: extensionName,
+          isZip: isZip,
           logger: logger,
+          stampFile: stampFile,
         )) {
-      return resolvedPath;
+      return resolved;
     }
 
     destDir.createSync(recursive: true);
@@ -369,12 +403,14 @@ class ExtensionArtifactManager {
       logger: logger,
       scope: () async {
         if (!force &&
-            _isArtifactCachedAndVerified(
-              destDir,
-              dep,
-              deleteStaleOnMismatch: true,
+            _isArtifactCached(
+              artifactDir: artifactDir,
+              artifactFile: artifactFile,
+              artifactName: dep.name,
               extensionName: extensionName,
+              isZip: isZip,
               logger: logger,
+              stampFile: stampFile,
             )) {
           return;
         }
@@ -413,57 +449,25 @@ class ExtensionArtifactManager {
         }
       },
     );
-    return resolvedPath;
+    return resolved;
   }
 
-  /// Checks whether [dep] is already cached in [destDir] and its `.sha256`
-  /// stamp file matches [RemoteArtifactDependency.sha256].
-  ///
-  /// When [deleteStaleOnMismatch] is `true` (inside the cross-process lock),
-  /// deletes any stale cached file/directory and stamp file if the stamp does
-  /// not match [RemoteArtifactDependency.sha256].
-  bool _isArtifactCachedAndVerified(
-    Directory destDir,
-    RemoteArtifactDependency dep, {
-    required bool deleteStaleOnMismatch,
+  bool _isArtifactCached({
+    required Directory artifactDir,
+    required File artifactFile,
+    required String artifactName,
     required String extensionName,
+    required bool isZip,
     required Logger logger,
+    required File stampFile,
   }) {
-    final bool isZip = dep.isZipArchive;
-    final FileSystemEntity target = isZip
-        ? destDir.childDirectory(dep.name)
-        : destDir.childFile(dep.name);
-    final File stampFile = destDir.childFile('.${dep.name}$_sha256StampSuffix');
-    if (!target.existsSync() || !stampFile.existsSync()) {
-      return false;
+    final bool cached = isZip
+        ? artifactDir.existsSync() && stampFile.existsSync()
+        : artifactFile.existsSync();
+    if (cached) {
+      logger.printTrace('Artifact "$artifactName" for extension "$extensionName" already cached.');
     }
-    try {
-      final String recordedSha = stampFile.readAsStringSync().trim().toLowerCase();
-      if (recordedSha == dep.sha256.toLowerCase()) {
-        logger.printTrace(
-          'Artifact "${dep.name}" for extension "$extensionName" already cached and verified.',
-        );
-        return true;
-      }
-    } on FileSystemException {
-      // Fall through to re-download.
-    }
-    if (deleteStaleOnMismatch) {
-      logger.printTrace(
-        'Cached artifact "${dep.name}" failed SHA-256 verification; re-downloading.',
-      );
-      try {
-        if (target.existsSync()) {
-          target.deleteSync(recursive: isZip);
-        }
-        if (stampFile.existsSync()) {
-          stampFile.deleteSync();
-        }
-      } on FileSystemException {
-        // Ignore cleanup errors; _installStagedArtifact will overwrite.
-      }
-    }
-    return false;
+    return cached;
   }
 
   /// Streams the artifact from [RemoteArtifactDependency.url] into [stagingFile]
@@ -516,9 +520,8 @@ Actual:   $actualDigest''');
   }
 
   /// Installs a verified [stagingFile] into its final cache destination
-  /// ([artifactDir] when [isZip] is `true`, or [artifactFile] otherwise),
-  /// applies declared POSIX executable permissions, and writes [expectedSha] to
-  /// [stampFile] last via renames from [stagingDir].
+  /// ([artifactDir] with [stampFile] when [isZip] is `true`, or [artifactFile]
+  /// otherwise) and applies declared POSIX executable permissions.
   void _installStagedArtifact({
     required Directory artifactDir,
     required File artifactFile,
@@ -532,10 +535,10 @@ Actual:   $actualDigest''');
     required File stagingFile,
     required File stampFile,
   }) {
-    if (stampFile.existsSync()) {
-      stampFile.deleteSync();
-    }
     if (isZip) {
+      if (stampFile.existsSync()) {
+        stampFile.deleteSync();
+      }
       final Directory extractedDir = stagingDir.childDirectory(_extractedDirName)
         ..createSync(recursive: true);
       try {
@@ -554,23 +557,23 @@ Actual:   $actualDigest''');
         artifactDir.deleteSync(recursive: true);
       }
       extractedDir.renameSync(artifactDir.path);
+      final File stagingStamp = stagingDir.childFile(_sha256StampSuffix)
+        ..writeAsStringSync(expectedSha);
+      stagingStamp.renameSync(stampFile.path);
     } else {
       if (dep.isExecutable) {
-        os.chmod(stagingFile, _executableChmodMode);
+        os.makeExecutable(stagingFile);
       }
       if (artifactFile.existsSync()) {
         artifactFile.deleteSync();
       }
       stagingFile.renameSync(artifactFile.path);
     }
-    final File stagingStamp = stagingDir.childFile(_sha256StampSuffix)
-      ..writeAsStringSync(expectedSha);
-    stagingStamp.renameSync(stampFile.path);
   }
 
   /// Validates every entry in [RemoteArtifactDependency.executables] within
-  /// [extractedDir] (rejecting out-of-tree paths, missing files, and symbolic
-  /// links along any directory or file segment) and applies `chmod a+x`.
+  /// [extractedDir] (rejecting missing files and symbolic links along any
+  /// directory or file segment) and marks each file executable.
   void _applyArchiveExecutablePermissions({
     required RemoteArtifactDependency dep,
     required String extensionName,
@@ -611,7 +614,7 @@ Actual:   $actualDigest''');
           '"$extensionName" was not found in the extracted archive.',
         );
       }
-      os.chmod(execFile, _executableChmodMode);
+      os.makeExecutable(execFile);
     }
   }
 }

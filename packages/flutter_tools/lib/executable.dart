@@ -209,6 +209,7 @@ List<FlutterCommand> generateCommands({
     AssembleCommand(
       androidContext: toolDependencies.androidContext,
       buildSystem: toolDependencies.buildSystem,
+      extensionArtifactManager: toolDependencies.extensionArtifactManager,
       extensionBuildManager: toolDependencies.extensionBuildManager,
       featureFlags: featureFlags,
       toolContext: toolContext,

@@ -238,16 +238,16 @@ void main() {
             sha256: validSha256,
             url: Uri.parse('https://example.com/artifacts/engine.zip'),
           ),
-          throwsA(isA<AssertionError>()),
-          reason: 'Expected "$invalidName" to fail remote assertion',
+          throwsFormatException,
+          reason: 'Expected "$invalidName" to fail remote validation',
         );
         expect(
           () => ArtifactDependency.local(
             localUri: Uri.file('/path/to/local/file', windows: false),
             name: invalidName,
           ),
-          throwsA(isA<AssertionError>()),
-          reason: 'Expected "$invalidName" to fail local assertion',
+          throwsFormatException,
+          reason: 'Expected "$invalidName" to fail local validation',
         );
       }
       for (final invalidExec in <String>[
@@ -270,8 +270,8 @@ void main() {
             url: Uri.parse('https://example.com/artifacts/engine.zip'),
             executables: <String>{invalidExec},
           ),
-          throwsA(isA<AssertionError>()),
-          reason: 'Expected "$invalidExec" to fail executables assertion',
+          throwsFormatException,
+          reason: 'Expected "$invalidExec" to fail executables validation',
         );
       }
       expect(
@@ -281,7 +281,7 @@ void main() {
           url: Uri.parse('https://example.com/artifacts/gen_snapshot'),
           executables: const <String>{'gen_snapshot'},
         ),
-        throwsA(isA<AssertionError>()),
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.remote(
@@ -290,7 +290,7 @@ void main() {
           url: Uri.parse('https://example.com/artifacts/engine.zip'),
           isExecutable: true,
         ),
-        throwsA(isA<AssertionError>()),
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.remote(
@@ -298,7 +298,7 @@ void main() {
           sha256: validSha256,
           url: Uri.parse('file:///etc/passwd'),
         ),
-        throwsA(isA<AssertionError>()),
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.remote(
@@ -306,7 +306,7 @@ void main() {
           sha256: 'deadbeef',
           url: Uri.parse('https://example.com/artifacts/engine.zip'),
         ),
-        throwsA(isA<AssertionError>()),
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.remote(
@@ -314,14 +314,14 @@ void main() {
           sha256: 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
           url: Uri.parse('https://example.com/artifacts/engine.zip'),
         ),
-        throwsA(isA<AssertionError>()),
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.local(
           localUri: Uri.parse('https://example.com/file'),
           name: 'local-bin',
         ),
-        throwsA(isA<AssertionError>()),
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.local(
@@ -329,7 +329,7 @@ void main() {
           name: 'local-bin',
           stampUri: Uri.parse('https://example.com/stamp'),
         ),
-        throwsA(isA<AssertionError>()),
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.local(
@@ -337,7 +337,7 @@ void main() {
           name: 'local-bin',
           stampUri: Uri.directory('/path/to/local/stamp_dir', windows: false),
         ),
-        throwsA(isA<AssertionError>()),
+        throwsFormatException,
       );
     });
 

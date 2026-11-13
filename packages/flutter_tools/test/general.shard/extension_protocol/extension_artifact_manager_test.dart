@@ -275,43 +275,38 @@ void main() {
         ),
       );
 
-      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
-        targetPlatforms: const <String>{'linux-x64'},
-      );
+      final Map<String, ResolvedExtensionArtifact> resolved = await artifactManager
+          .ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});
 
       expect(downloadCount, 1);
       final File artifactFile = fs.file(
         '/dart_data/flutter_tool_extensions/artifacts/custom_ext/$contentSha256/my_custom_bin',
       );
-      expect(resolved, <String, String>{'my_custom_bin': artifactFile.path});
+      expect(resolved, <String, ResolvedExtensionArtifact>{
+        'my_custom_bin': ResolvedExtensionArtifact(path: artifactFile.path),
+      });
       expect(artifactFile.existsSync(), isTrue);
       expect(artifactFile.readAsBytesSync(), equals(content));
-      final File stampFile = fs.file(
-        '/dart_data/flutter_tool_extensions/artifacts/custom_ext/$contentSha256/.my_custom_bin.sha256',
+      expect(
+        fs
+            .file(
+              '/dart_data/flutter_tool_extensions/artifacts/custom_ext/$contentSha256/.my_custom_bin.sha256',
+            )
+            .existsSync(),
+        isFalse,
       );
-      expect(stampFile.existsSync(), isTrue);
-      expect(stampFile.readAsStringSync(), contentSha256);
 
-      // Second call should verify SHA-256 and skip downloading.
+      // Second call should hit the content-addressed cache and skip downloading.
       await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});
       expect(downloadCount, 1);
 
-      // Passing force: true should re-download even when cached and verified.
+      // Passing force: true should re-download even when cached.
       await artifactManager.ensureArtifactsDownloaded(
         targetPlatforms: const <String>{'linux-x64'},
         force: true,
       );
       expect(downloadCount, 2);
-
-      // Corrupt the cached stamp; next call should detect SHA-256 mismatch and re-download.
-      artifactFile.writeAsStringSync('corrupted bytes');
-      stampFile.writeAsStringSync(
-        '0000000000000000000000000000000000000000000000000000000000000000',
-      );
-      await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});
-      expect(downloadCount, 3);
       expect(artifactFile.readAsBytesSync(), equals(content));
-      expect(stampFile.readAsStringSync(), contentSha256);
     });
 
     test('unzips .zip artifacts into sha256-keyed directory and writes stamp file', () async {
@@ -367,9 +362,8 @@ void main() {
         ),
       );
 
-      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
-        targetPlatforms: const <String>{'custom-embedder-arm64'},
-      );
+      final Map<String, ResolvedExtensionArtifact> resolved = await artifactManager
+          .ensureArtifactsDownloaded(targetPlatforms: const <String>{'custom-embedder-arm64'});
 
       expect(downloadCount, 1);
       expect(unzipOsUtils.unzipCount, 1);
@@ -378,7 +372,9 @@ void main() {
           .childDirectory(zipSha256);
       final Directory extractedDir = destDir.childDirectory('engine_bundle');
       final File stampFile = destDir.childFile('.engine_bundle.sha256');
-      expect(resolved, <String, String>{'engine_bundle': extractedDir.path});
+      expect(resolved, <String, ResolvedExtensionArtifact>{
+        'engine_bundle': ResolvedExtensionArtifact(path: extractedDir.path, stampFile: stampFile),
+      });
       expect(extractedDir.existsSync(), isTrue);
       expect(extractedDir.childFile('extracted.txt').existsSync(), isTrue);
       expect(stampFile.existsSync(), isTrue);
@@ -390,6 +386,15 @@ void main() {
       );
       expect(downloadCount, 1);
       expect(unzipOsUtils.unzipCount, 1);
+
+      // Missing completion stamp (interrupted extraction) triggers re-extraction.
+      stampFile.deleteSync();
+      await artifactManager.ensureArtifactsDownloaded(
+        targetPlatforms: const <String>{'custom-embedder-arm64'},
+      );
+      expect(downloadCount, 2);
+      expect(unzipOsUtils.unzipCount, 2);
+      expect(stampFile.existsSync(), isTrue);
     });
 
     test(
@@ -452,14 +457,17 @@ void main() {
           ),
         );
 
-        final Future<Map<String, String>> call1 = artifactManager.ensureArtifactsDownloaded();
+        final Future<Map<String, ResolvedExtensionArtifact>> call1 = artifactManager
+            .ensureArtifactsDownloaded();
         await downloadStarted.future;
-        final Future<Map<String, String>> call2 = artifactManager.ensureArtifactsDownloaded();
-        final Future<Map<String, String>> call3 = artifactManager.ensureArtifactsDownloaded();
+        final Future<Map<String, ResolvedExtensionArtifact>> call2 = artifactManager
+            .ensureArtifactsDownloaded();
+        final Future<Map<String, ResolvedExtensionArtifact>> call3 = artifactManager
+            .ensureArtifactsDownloaded();
         await pumpEventQueue();
         releaseDownload.complete();
 
-        await Future.wait(<Future<Map<String, String>>>[call1, call2, call3]);
+        await Future.wait(<Future<Map<String, ResolvedExtensionArtifact>>>[call1, call2, call3]);
 
         expect(downloadCount, 1);
         final File cachedFile = cacheDir
@@ -586,9 +594,6 @@ void main() {
       destDir.childFile('linux-x64-custom-artifact')
         ..createSync(recursive: true)
         ..writeAsBytesSync(content);
-      destDir.childFile('.linux-x64-custom-artifact.sha256')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(expectedSha);
 
       var downloadTriggered = false;
       final httpClient = _FakeHttpClient((Uri url) async {
@@ -783,19 +788,87 @@ void main() {
       );
 
       // Per-extension resolution returns each extension's own cached path without re-downloading.
-      final Map<String, String> firstResolved = await artifactManager.ensureArtifactsDownloaded(
-        extensionName: 'first_ext',
-      );
-      final Map<String, String> secondResolved = await artifactManager.ensureArtifactsDownloaded(
-        extensionName: 'second_ext',
-      );
-      expect(firstResolved, <String, String>{
-        'shared_bin': '/collision_cache/first_ext/$ext1Sha256/shared_bin',
+      final Map<String, ResolvedExtensionArtifact> firstResolved = await artifactManager
+          .ensureArtifactsDownloaded(extensionName: 'first_ext');
+      final Map<String, ResolvedExtensionArtifact> secondResolved = await artifactManager
+          .ensureArtifactsDownloaded(extensionName: 'second_ext');
+      expect(firstResolved, <String, ResolvedExtensionArtifact>{
+        'shared_bin': ResolvedExtensionArtifact(
+          path: '/collision_cache/first_ext/$ext1Sha256/shared_bin',
+        ),
       });
-      expect(secondResolved, <String, String>{
-        'shared_bin': '/collision_cache/second_ext/$ext2Sha256/shared_bin',
+      expect(secondResolved, <String, ResolvedExtensionArtifact>{
+        'shared_bin': ResolvedExtensionArtifact(
+          path: '/collision_cache/second_ext/$ext2Sha256/shared_bin',
+        ),
       });
       expect(downloadedUrls, hasLength(2));
+    });
+
+    test('filters downloads to requested artifactNames and short-circuits when empty', () async {
+      final List<int> content = utf8.encode('filtered payload');
+      final contentSha256 = sha256.convert(content).toString();
+
+      void entryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeArtifactService(<ArtifactDependency>[
+              ArtifactDependency.remote(
+                name: 'requested_bin',
+                sha256: contentSha256,
+                url: Uri.parse('https://example.com/requested_bin'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+              ArtifactDependency.remote(
+                name: 'unrequested_bin',
+                sha256: contentSha256,
+                url: Uri.parse('https://example.com/unrequested_bin'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+            ]),
+          ],
+          extensionName: 'filter_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[entryPoint],
+      );
+      addTearDown(manager.dispose);
+
+      final downloadedUrls = <Uri>[];
+      final httpClient = _FakeHttpClient((Uri url) async {
+        downloadedUrls.add(url);
+        return _FakeHttpClientResponse(HttpStatus.ok, content);
+      });
+
+      final Directory cacheDir = fs.directory('/filter_cache');
+      final artifactManager = ExtensionArtifactManager(
+        cacheDir: cacheDir,
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        httpClient: httpClient,
+        toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
+      );
+
+      expect(
+        await artifactManager.ensureArtifactsDownloaded(artifactNames: const <String>{}),
+        isEmpty,
+      );
+      expect(manager.isInitialized, isFalse);
+
+      final Map<String, ResolvedExtensionArtifact> resolved = await artifactManager
+          .ensureArtifactsDownloaded(
+            artifactNames: const <String>{'requested_bin'},
+            extensionName: 'filter_ext',
+          );
+      expect(downloadedUrls, <Uri>[Uri.parse('https://example.com/requested_bin')]);
+      expect(resolved.keys, equals(const <String>{'requested_bin'}));
     });
 
     test('applies chmod a+x for isExecutable single-file artifacts and validated zip executables, and rejects missing or symlinked executables', () async {
@@ -866,11 +939,13 @@ void main() {
         ),
       );
 
-      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
-        extensionName: 'exec_ext',
+      final Map<String, ResolvedExtensionArtifact> resolved = await artifactManager
+          .ensureArtifactsDownloaded(extensionName: 'exec_ext');
+      expect(resolved['standalone_tool']?.path, '/exec_cache/exec_ext/$binSha256/standalone_tool');
+      expect(
+        resolved['toolchain_bundle']?.path,
+        '/exec_cache/exec_ext/$zipSha256/toolchain_bundle',
       );
-      expect(resolved['standalone_tool'], '/exec_cache/exec_ext/$binSha256/standalone_tool');
-      expect(resolved['toolchain_bundle'], '/exec_cache/exec_ext/$zipSha256/toolchain_bundle');
 
       // `standalone_tool`, `gen_snapshot`, and `bin/ld.lld` were chmodded `a+x`
       // (while `data_blob` and `include/header.h` were not).
@@ -1089,14 +1164,18 @@ void main() {
         toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
-      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
-        targetPlatforms: const <String>{'custom-embedder-arm64'},
-      );
+      final Map<String, ResolvedExtensionArtifact> resolved = await artifactManager
+          .ensureArtifactsDownloaded(targetPlatforms: const <String>{'custom-embedder-arm64'});
       expect(downloadCount, 0);
       expect(cacheDir.existsSync(), isFalse);
-      expect(resolved, <String, String>{
-        'local_gen_snapshot': '/local/engine/out/host_debug_unopt/gen_snapshot',
-        'local_engine_dir': '/local/engine/out/host_debug_unopt',
+      expect(resolved, <String, ResolvedExtensionArtifact>{
+        'local_gen_snapshot': const ResolvedExtensionArtifact(
+          path: '/local/engine/out/host_debug_unopt/gen_snapshot',
+        ),
+        'local_engine_dir': ResolvedExtensionArtifact(
+          path: '/local/engine/out/host_debug_unopt',
+          stampFile: localEngineStamp,
+        ),
       });
 
       // Deleting the stamp file should cause resolution to fail with ToolExit.
@@ -1143,6 +1222,9 @@ class _UnzipTrackingOsUtils extends FakeOperatingSystemUtils {
   final void Function(Directory targetDirectory)? customUnzip;
   final List<String> extractedFiles;
   int unzipCount = 0;
+
+  @override
+  void makeExecutable(File file) => chmod(file, 'a+x');
 
   @override
   void unzip(File file, Directory targetDirectory) {

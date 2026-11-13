@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/extension.dart';
+import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
@@ -103,6 +104,8 @@ ExtensionTarget _createTarget({
   FakeExtensionBuildManager? buildManager,
   List<String> dependencies = const <String>[],
   DependencyResolverCallback? dependencyResolver,
+  Map<String, ResolvedExtensionArtifact> extensionArtifacts =
+      const <String, ResolvedExtensionArtifact>{},
   List<ExtensionSource> inputs = const <ExtensionSource>[],
   String name = 'custom-target',
   List<ExtensionSource> outputs = const <ExtensionSource>[],
@@ -120,6 +123,7 @@ ExtensionTarget _createTarget({
     buildManager: buildManager ?? FakeExtensionBuildManager(),
     dependencyResolver:
         dependencyResolver ?? (String dep) => fail('Unexpected dependency lookup: $dep'),
+    extensionArtifacts: extensionArtifacts,
   );
 }
 
@@ -639,6 +643,122 @@ void main() {
             'but build target "custom-target" targets out-of-tree platform "custom-embedder-arm64".',
       ),
     );
+
+    final Map<String, String> resolvedCustomOnly = resolveExtensionBuildTargetArtifacts(
+      artifacts: artifacts,
+      buildMode: .release,
+      extensionArtifacts: const <String, ResolvedExtensionArtifact>{
+        'declared_sdk': ResolvedExtensionArtifact(path: '/cache/declared_sdk'),
+        'undeclared_sdk': ResolvedExtensionArtifact(path: '/cache/undeclared_sdk'),
+        'icuData': ResolvedExtensionArtifact(path: '/cache/shadowed_icu'),
+      },
+      target: ExtensionBuildTarget(
+        description: 'Out-of-tree build target with custom and built-in artifacts',
+        name: 'custom-target',
+        outputDir: '{OUTPUT_DIR}/custom',
+        targetPlatform: 'custom-embedder-arm64',
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.icuData,
+          ExtensionArtifact('declared_sdk'),
+        },
+      ),
+    );
+    expect(
+      resolvedCustomOnly,
+      equals(<String, String>{
+        'icuData': 'Artifact.icuData.release',
+        'declared_sdk': '/cache/declared_sdk',
+      }),
+    );
+  });
+
+  testWithoutContext('ExtensionTarget tracks stampFile for directory overrides and re-runs on stamp update without walking directory', () async {
+    final logger = BufferLogger.test();
+    final platform = FakePlatform();
+    final Directory localEngineDir = fileSystem.directory('/local/engine/out')
+      ..createSync(recursive: true);
+    final File untrackedEngineFile = localEngineDir.childFile('libflutter_engine.so')
+      ..writeAsStringSync('engine_v1');
+    final File stampFile = localEngineDir.childFile('.stamp')..writeAsStringSync('stamp_v1');
+    final File singleToolFile = fileSystem.file('/cache/custom_host_tool')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('tool_v1');
+
+    var buildInvocations = 0;
+    final buildManager = FakeExtensionBuildManager();
+    final File generatedOutput = environment.outputDir.childFile('bundle.bin');
+    final target = _StampTrackingExtensionTarget(
+      assembleTarget: ExtensionAssembleTarget(
+        description: 'Custom assemble target with local stamp-tracked engine',
+        name: 'custom-stamp-target',
+        targetPlatform: 'custom-embedder-arm64',
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(ExtensionArtifact('local_engine_dir')),
+          ExtensionSource.artifact(BuiltInArtifacts.icuData),
+          ExtensionSource.hostArtifact(ExtensionHostArtifact('custom_host_tool')),
+        ],
+        outputs: <ExtensionSource>[ExtensionSource.pattern('{OUTPUT_DIR}/bundle.bin')],
+      ),
+      buildManager: buildManager,
+      extensionArtifacts: <String, ResolvedExtensionArtifact>{
+        'local_engine_dir': ResolvedExtensionArtifact(
+          path: localEngineDir.path,
+          stampFile: stampFile,
+        ),
+        'custom_host_tool': ResolvedExtensionArtifact(path: singleToolFile.path),
+        'icuData': const ResolvedExtensionArtifact(path: '/cache/shadowed_icu'),
+      },
+      onBuild: () {
+        buildInvocations++;
+        generatedOutput
+          ..createSync(recursive: true)
+          ..writeAsStringSync('built_$buildInvocations');
+      },
+    );
+
+    fileSystem.file('Artifact.icuData.debug')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('icu');
+
+    final ResolvedFiles resolvedInputs = target.resolveInputs(environment);
+    expect(
+      resolvedInputs.sources.map((File f) => f.path),
+      equals(<String>[stampFile.path, 'Artifact.icuData.debug', singleToolFile.path]),
+    );
+    expect(
+      resolvedInputs.sources.map((File f) => f.path),
+      isNot(contains(untrackedEngineFile.path)),
+    );
+
+    final buildSystem = FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+    );
+
+    final BuildResult firstRun = await buildSystem.build(target, environment);
+    expect(firstRun.success, isTrue);
+    expect(buildInvocations, 1);
+    expect(
+      buildManager.invokedResolvedArtifacts,
+      equals(<String, String>{
+        'local_engine_dir': localEngineDir.path,
+        'icuData': 'Artifact.icuData.debug',
+        'custom_host_tool': singleToolFile.path,
+      }),
+    );
+
+    // Mutating a file inside localEngineDir without touching stampFile skips rebuild.
+    untrackedEngineFile.writeAsStringSync('engine_v2');
+    final BuildResult cachedRun = await buildSystem.build(target, environment);
+    expect(cachedRun.success, isTrue);
+    expect(buildInvocations, 1);
+
+    // Updating stampFile invalidates the target and triggers a rebuild.
+    stampFile.writeAsStringSync('stamp_v2');
+    final BuildResult rebuiltRun = await buildSystem.build(target, environment);
+    expect(rebuiltRun.success, isTrue);
+    expect(buildInvocations, 2);
   });
 
   group('resolveExtensionOutputDir', () {
@@ -786,4 +906,21 @@ void main() {
     expect(BuiltInTargets.copyAssets, equals(const CopyAssets().name));
     expect(BuiltInTargets.kernelSnapshot, equals(const KernelSnapshot().name));
   });
+}
+
+final class _StampTrackingExtensionTarget extends ExtensionTarget {
+  _StampTrackingExtensionTarget({
+    required super.assembleTarget,
+    required super.buildManager,
+    required super.extensionArtifacts,
+    required this.onBuild,
+  }) : super(dependencyResolver: (String dep) => fail('Unexpected dependency lookup: $dep'));
+
+  final void Function() onBuild;
+
+  @override
+  Future<void> build(Environment environment) async {
+    await super.build(environment);
+    onBuild();
+  }
 }
