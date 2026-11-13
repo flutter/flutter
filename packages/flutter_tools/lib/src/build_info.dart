@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter_tools_core/flutter_tools_core.dart' as tools_core;
+import 'package:flutter_tools_core/flutter_tools_core.dart' show CpuArch;
 import 'package:meta/meta.dart';
 
 import 'package:package_config/package_config_types.dart';
@@ -19,6 +20,8 @@ import 'base/platform.dart';
 import 'context/tool_context.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
+
+export 'package:flutter_tools_core/flutter_tools_core.dart' show CpuArch;
 
 /// Whether icon font subsetting is enabled by default.
 const kIconTreeShakerEnabledDefault = true;
@@ -576,83 +579,48 @@ bool isEmulatorBuildMode(BuildMode mode) {
   return mode == BuildMode.debug;
 }
 
-/// Platform-agnostic CPU architecture type.
-enum CpuArch {
-  /// Unknown architecture. Used when the architecture is not relevant.
-  unknown,
-  armv7,
-  arm64,
-  x86,
-  x64,
-  riscv64;
-
-  factory CpuArch.fromName(String name) {
-    return switch (name) {
-      'unknown' => .unknown,
-      'armv7' => .armv7,
-      'arm64' => .arm64,
-      'x86' => .x86,
-      'x64' || 'x86_64' => .x64,
-      'riscv64' => .riscv64,
-      _ => throw Exception('Unsupported CPU arch name "$name"'),
-    };
-  }
-
-  /// The [CpuArch] of the given [hostPlatform].
-  factory CpuArch.fromHostPlatform(HostPlatform hostPlatform) {
-    return switch (hostPlatform) {
-      .darwin_x64 || .linux_x64 || .windows_x64 => .x64,
-      .darwin_arm64 || .linux_arm64 || .windows_arm64 => .arm64,
-      .linux_riscv64 => .riscv64,
-    };
-  }
-
+/// Platform-specific naming helpers on [CpuArch] for built-in Flutter tool
+/// targets.
+extension CpuArchExtension on CpuArch {
   /// Returns the Dart SDK's name for the specified target architecture.
   ///
   /// When building for Darwin platforms, the tool invokes architecture-specific
   /// variants of `gen_snapshot`, one for each target architecture. The output
   /// instructions are then built into architecture-specific binaries, which are
   /// merged into a universal binary using the `lipo` tool.
-  String get dartName {
-    return switch (this) {
-      armv7 => 'armv7',
-      arm64 => 'arm64',
-      x86 => 'x86',
-      x64 => 'x64',
-      riscv64 => 'riscv64',
-      unknown => throw UnsupportedError('Unexpected CPU arch $this'),
-    };
-  }
+  String get dartName => switch (this) {
+    .armv7 || .arm64 || .x86 || .x64 || .riscv64 => name,
+    _ => throw UnsupportedError('Unexpected CPU arch $this'),
+  };
 
   /// The Apple architecture name for this architecture.
   ///
   /// This is the name understood by the Darwin toolchain (e.g. `lipo`, `clang`,
   /// and the `-arch` flag) and used for architecture-specific build output
-  /// directories on iOS and macOS. This differs from [dartName] for [x64],
-  /// which maps to `x86_64` here.
+  /// directories on iOS and macOS. This differs from [dartName] for
+  /// [CpuArch.x64], which maps to `x86_64` here.
   String get darwinArchName => switch (this) {
-    armv7 => 'armv7',
-    arm64 => 'arm64',
-    x64 => 'x86_64',
-    x86 || riscv64 || unknown => throw UnsupportedError('Unexpected Darwin CPU arch $this'),
+    .armv7 || .arm64 => name,
+    .x64 => 'x86_64',
+    _ => throw UnsupportedError('Unexpected Darwin CPU arch $this'),
   };
 
   /// The name of the Android ABI (as used in `jniLibs` directories) for this
   /// architecture.
   String get androidArchName => switch (this) {
-    armv7 => 'armeabi-v7a',
-    arm64 => 'arm64-v8a',
-    x64 => 'x86_64',
-    x86 || riscv64 || unknown => throw UnsupportedError('Unexpected Android CPU arch $this'),
+    .armv7 => 'armeabi-v7a',
+    .arm64 => 'arm64-v8a',
+    .x64 => 'x86_64',
+    _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
   };
 
   /// The `TargetPlatform` name of the Android platform for this architecture.
   String get androidPlatformName => switch (this) {
-    armv7 => 'android-arm',
-    arm64 => 'android-arm64',
-    x64 => 'android-x64',
-    x86 || riscv64 || unknown => throw UnsupportedError('Unexpected Android CPU arch $this'),
-  };
+    .armv7 => TargetPlatform.android_arm,
+    .arm64 => TargetPlatform.android_arm64,
+    .x64 => TargetPlatform.android_x64,
+    _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
+  }.getName();
 }
 
 /// The operating system (or runtime environment) that a [TargetPlatform]
@@ -957,7 +925,7 @@ String getLinuxBuildDirectory(
     null => getCurrentHostPlatform(
       operatingSystemUtils: operatingSystemUtils,
       platform: platform,
-    ).platformName,
+    ).cpuArchName,
   };
   final String subDirs = fileSystem.path.joinAll(<String>[
     'linux',

@@ -68,11 +68,7 @@ class ExtensionManager {
   List<ExtensionConnection> get connections => _discovery.connections;
 
   /// The operating system name of the host platform (e.g. `'linux'`, `'macos'`, `'windows'`).
-  String get hostPlatformName => switch (hostPlatform) {
-    HostPlatform.darwin_x64 || HostPlatform.darwin_arm64 => 'macos',
-    HostPlatform.linux_x64 || HostPlatform.linux_arm64 || HostPlatform.linux_riscv64 => 'linux',
-    HostPlatform.windows_x64 || HostPlatform.windows_arm64 => 'windows',
-  };
+  String get hostPlatformName => hostPlatform.osName == 'darwin' ? 'macos' : hostPlatform.osName;
 
   /// Spawns entrypoints without host OS checks; disposes any extension that reports
   /// it does not support [hostPlatform].

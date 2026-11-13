@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -64,6 +66,7 @@ flutter:
 
   BuildBundleCommand createBuildBundleCommand({
     Analytics? analytics,
+    AndroidContext? androidContext,
     BuildSystem? buildSystem,
     BundleBuilder? bundleBuilder,
     FeatureFlags? featureFlags,
@@ -72,20 +75,25 @@ flutter:
     ProcessManager? processManager,
     bool verboseHelp = false,
   }) {
-    final BufferLogger effectiveLogger = logger ?? BufferLogger.test();
+    final BufferLogger resolvedLogger = logger ?? BufferLogger.test();
     final ToolContext toolContext = FakeToolContext(
       cache: Cache.test(
         rootOverride: fileSystem.directory('/flutter'),
-        logger: effectiveLogger,
+        logger: resolvedLogger,
         processManager: processManager ?? FakeProcessManager.any(),
       ),
       fs: fileSystem,
-      logger: effectiveLogger,
+      logger: resolvedLogger,
       platform: platform ?? FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/flutter'}),
       processManager: processManager ?? FakeProcessManager.any(),
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: resolvedLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildBundleCommand(
+      androidContext: androidContext ?? FakeAndroidContext(),
       buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: featureFlags ?? TestFeatureFlags(),
       toolContext: toolContext,
@@ -509,6 +517,61 @@ flutter:
       '--extra-gen-snapshot-options=--testflag,--testflag2',
       '--extra-front-end-options=--testflagFront,--testflagFront2',
     ]);
+  });
+
+  testWithoutContext('forwards AndroidContext.androidSdk lazily to Environment', () async {
+    setUpMockProjectFiles();
+
+    final fakeAndroidSdk = FakeAndroidSdk();
+    var sdkEvaluations = 0;
+    final androidContext = AndroidContext(
+      androidSdkBuilder: () {
+        sdkEvaluations++;
+        return fakeAndroidSdk;
+      },
+      androidStudioBuilder: () => null,
+      gradleUtilsBuilder: FakeGradleUtils.new,
+      javaBuilder: () => null,
+    );
+    final logger = BufferLogger.test();
+    AndroidSdk? capturedAndroidSdk;
+    var evaluatedBeforeEnvironmentAccess = true;
+    final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+      Target target,
+      Environment environment,
+    ) {
+      evaluatedBeforeEnvironmentAccess = sdkEvaluations > 0;
+      capturedAndroidSdk = environment.androidSdk;
+    });
+    final command = BuildBundleCommand(
+      androidContext: androidContext,
+      buildSystem: buildSystem,
+      featureFlags: TestFeatureFlags(),
+      toolContext: FakeToolContext(
+        cache: Cache.test(
+          rootOverride: fileSystem.directory('/flutter'),
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/flutter'}),
+        processManager: FakeProcessManager.any(),
+        projectFactory: FlutterProjectFactory(
+          fileSystem: fileSystem,
+          logger: logger,
+          config: FakeConfig(),
+        ),
+      ),
+      verboseHelp: false,
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['bundle', '--no-pub', '--target-platform=android-arm']);
+
+    expect(evaluatedBeforeEnvironmentAccess, isFalse);
+    expect(sdkEvaluations, 1);
+    expect(capturedAndroidSdk, same(fakeAndroidSdk));
   });
 }
 

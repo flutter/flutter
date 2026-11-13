@@ -140,9 +140,8 @@ void main() {
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -203,9 +202,8 @@ void main() {
           xcode: xcode,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -247,9 +245,8 @@ void main() {
           xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -350,9 +347,8 @@ void main() {
           xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -498,9 +494,8 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -608,9 +603,8 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -693,9 +687,8 @@ void main() {
           xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -835,9 +828,8 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -907,9 +899,8 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -976,9 +967,8 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1029,9 +1019,8 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1113,9 +1102,8 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1195,9 +1183,8 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1298,9 +1285,8 @@ void main() {
             );
 
             setUpIOSProject(fileSystem, scheme: flavor);
-            final FlutterProject flutterProject = FlutterProject.fromDirectory(
-              fileSystem.currentDirectory,
-            );
+            final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+                .fromDirectory(fileSystem.currentDirectory);
             final buildableIOSApp = BuildableIOSApp(
               flutterProject.ios,
               'flutter',
@@ -1386,9 +1372,8 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1468,9 +1453,8 @@ void main() {
             xcode: xcode,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1526,9 +1510,8 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem, createWorkspace: false);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1585,9 +1568,8 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',

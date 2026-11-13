@@ -79,12 +79,18 @@ class CommandResult {
 /// running process.
 ///
 /// `outputListener` is called for every line of standard output from the
-/// process, and is given the [io.Process] object. This can be used to interrupt
-/// an indefinitely running process, for example, by waiting until the process
-/// emits certain output.
+/// process, and `stderrListener` is called for every line of standard error.
+/// Both are given the [io.Process] object, which can be used to interrupt an
+/// indefinitely running process (for example, after waiting until the process
+/// emits certain output).
 ///
-/// `outputMode` controls where the standard output from the command process
-/// goes. See [OutputMode].
+/// Standard output and standard error are decoded as UTF-8 with
+/// `allowMalformed: true` so non-UTF-8 bytes (such as raw crash tombstones in
+/// `adb logcat`) are replaced with U+FFFD rather than throwing a
+/// [FormatException].
+///
+/// `outputMode` controls where the standard output and standard error from the
+/// command process go. See [OutputMode].
 Future<Command> startCommand(
   String executable,
   List<String> arguments, {
@@ -93,6 +99,7 @@ Future<Command> startCommand(
   OutputMode outputMode = OutputMode.print,
   bool Function(String)? removeLine,
   void Function(String, io.Process)? outputListener,
+  void Function(String, io.Process)? stderrListener,
 }) async {
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
   final commandDescription =
@@ -118,7 +125,7 @@ Future<Command> startCommand(
     process,
     time,
     process.stdout
-        .transform<String>(const Utf8Decoder())
+        .transform<String>(const Utf8Decoder(allowMalformed: true))
         .transform(const LineSplitter())
         .where((String line) => removeLine == null || !removeLine(line))
         .map<String>((String line) {
@@ -136,9 +143,13 @@ Future<Command> startCommand(
         })
         .join('\n'),
     process.stderr
-        .transform<String>(const Utf8Decoder())
+        .transform<String>(const Utf8Decoder(allowMalformed: true))
         .transform(const LineSplitter())
         .map<String>((String line) {
+          final formattedLine = '$line\n';
+          if (stderrListener != null) {
+            stderrListener(formattedLine, process);
+          }
           switch (outputMode) {
             case OutputMode.print:
               print(line);
@@ -223,30 +234,50 @@ String? _discoverBestNdkPath() {
 
 /// Runs the `executable` and waits until the process exits.
 ///
-/// If the process exits with a non-zero exit code and `expectNonZeroExit` is
-/// false, calls foundError (which does not terminate execution!).
+/// Exit code validation is controlled by `checkExitCode`, `expectNonZeroExit`,
+/// and `expectedExitCode`:
+/// * When `checkExitCode` is true (the default), unexpected exit codes record a
+///   shard failure via [foundError] (which does not terminate execution):
+///   - By default (`expectNonZeroExit` is false and `expectedExitCode` is null),
+///     any non-zero exit code fails.
+///   - If `expectNonZeroExit` is true, exit code `0` fails and any non-zero exit
+///     code succeeds (unless `expectedExitCode` is also set to require a
+///     specific non-zero exit code).
+/// * When `checkExitCode` is false, exit code validation is skipped and
+///   [foundError] is never called, allowing callers (such as retry loops or
+///   readiness probes) to inspect [CommandResult.exitCode] directly. Both
+///   `expectNonZeroExit` and `expectedExitCode` must be left at their defaults
+///   when `checkExitCode` is false.
 ///
 /// `outputListener` is called for every line of standard output from the
-/// process, and is given the [io.Process] object. This can be used to interrupt
-/// an indefinitely running process, for example, by waiting until the process
-/// emits certain output.
+/// process, and `stderrListener` is called for every line of standard error.
+/// Both are given the [io.Process] object, which can be used to interrupt an
+/// indefinitely running process (for example, after waiting until the process
+/// emits certain output).
 ///
 /// Returns the result of the finished process.
 ///
-/// `outputMode` controls where the standard output from the command process
-/// goes. See [OutputMode].
+/// `outputMode` controls where the standard output and standard error from the
+/// command process go. See [OutputMode].
+// TODO(andywolff): Consolidate checkExitCode, expectNonZeroExit, and expectedExitCode, https://github.com/flutter/flutter/issues/196126
 Future<CommandResult> runCommand(
   String executable,
   List<String> arguments, {
   String? workingDirectory,
   Map<String, String>? environment,
+  bool checkExitCode = true,
   bool expectNonZeroExit = false,
   int? expectedExitCode,
   String? failureMessage,
   OutputMode outputMode = OutputMode.print,
   bool Function(String)? removeLine,
   void Function(String, io.Process)? outputListener,
+  void Function(String, io.Process)? stderrListener,
 }) async {
+  assert(
+    checkExitCode || (!expectNonZeroExit && expectedExitCode == null),
+    'expectNonZeroExit and expectedExitCode cannot be set when checkExitCode is false.',
+  );
   final commandDescription =
       '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = workingDirectory ?? path.relative(io.Directory.current.path);
@@ -268,6 +299,7 @@ Future<CommandResult> runCommand(
     outputMode: outputMode,
     removeLine: removeLine,
     outputListener: outputListener,
+    stderrListener: stderrListener,
   );
 
   final result = CommandResult._(
@@ -277,8 +309,9 @@ Future<CommandResult> runCommand(
     await command._savedStderr,
   );
 
-  if ((result.exitCode == 0) == expectNonZeroExit ||
-      (expectedExitCode != null && result.exitCode != expectedExitCode)) {
+  if (checkExitCode &&
+      ((result.exitCode == 0) == expectNonZeroExit ||
+          (expectedExitCode != null && result.exitCode != expectedExitCode))) {
     // Print the output when we get unexpected results (unless output was
     // printed already).
     switch (outputMode) {
@@ -327,18 +360,12 @@ String _prettyPrintRunCommand(String executable, List<String> arguments, String?
 
 /// Specifies what to do with the command output from [runCommand] and [startCommand].
 enum OutputMode {
-  /// Forwards standard output and standard error streams to the test process'
-  /// standard output stream (i.e. stderr is redirected to stdout).
-  ///
-  /// Use this mode if all you want is print the output of the command to the
-  /// console. The output is no longer available after the process exits.
+  /// Forwards standard output and standard error lines to [print] while also
+  /// saving them on the returned [CommandResult].
   print,
 
-  /// Saves standard output and standard error streams in memory.
-  ///
-  /// Captured output can be retrieved from the [CommandResult] object.
-  ///
-  /// Use this mode in tests that need to inspect the output of a command, or
-  /// when the output should not be printed to console.
+  /// Saves standard output and standard error in memory on the returned
+  /// [CommandResult] without forwarding lines to [print] (unless [runCommand]
+  /// records an unexpected exit when `checkExitCode` is true).
   capture,
 }
