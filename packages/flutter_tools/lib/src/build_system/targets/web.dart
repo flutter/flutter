@@ -198,31 +198,31 @@ bool _isWasmModulePrefix(String segment) =>
     segment.startsWith('dart_module') &&
     _isAsciiDigit(segment.codeUnitAt(11));
 
+enum _WebCompiler { js, wasm }
+
 /// Classifies compiled web entrypoint, source-map, dump-info, and deferred
 /// module filenames produced by `dart2js` and `dart2wasm`.
 @visibleForTesting
 enum WebCompiledArtifact {
-  mainJs,
-  mainJsMap,
-  jsDumpInfo,
-  jsPart,
-  jsPartMap,
-  mainWasm,
-  mainWasmMap,
-  mainMjs,
-  mainMjsMap,
-  wasmModule,
-  wasmModuleMap;
+  mainJs(_WebCompiler.js),
+  mainJsMap(_WebCompiler.js),
+  jsDumpInfo(_WebCompiler.js),
+  jsPart(_WebCompiler.js),
+  jsPartMap(_WebCompiler.js),
+  mainWasm(_WebCompiler.wasm),
+  mainWasmMap(_WebCompiler.wasm),
+  mainMjs(_WebCompiler.wasm),
+  mainMjsMap(_WebCompiler.wasm),
+  wasmModule(_WebCompiler.wasm),
+  wasmModuleMap(_WebCompiler.wasm);
 
-  bool get isJsArtifact => switch (this) {
-    mainJs || mainJsMap || jsDumpInfo || jsPart || jsPartMap => true,
-    mainWasm || mainWasmMap || mainMjs || mainMjsMap || wasmModule || wasmModuleMap => false,
-  };
+  const WebCompiledArtifact(this._compiler);
 
-  bool get isWasmArtifact => switch (this) {
-    mainWasm || mainWasmMap || mainMjs || mainMjsMap || wasmModule || wasmModuleMap => true,
-    mainJs || mainJsMap || jsDumpInfo || jsPart || jsPartMap => false,
-  };
+  final _WebCompiler _compiler;
+
+  bool get isJsArtifact => _compiler == _WebCompiler.js;
+
+  bool get isWasmArtifact => _compiler == _WebCompiler.wasm;
 
   /// Parses [basename] into a [WebCompiledArtifact], or returns `null` if
   /// [basename] is not a compiled web entrypoint or module artifact.
