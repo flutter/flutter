@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'build_system/depfile.dart';
+library;
+
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
@@ -360,10 +363,15 @@ class ExtensionAssembleTarget {
 
   /// Names of `.d` dependency files written by this target into the build directory.
   ///
-  /// Each entry must match [isValidDepfileName] and must be written on every
-  /// successful build. Relative paths inside each depfile are resolved against
-  /// the project root directory and rewritten in place with normalized paths by
-  /// the host after a successful build.
+  /// Extensions that declare [depfiles] can use [RawDepfile.format] to write `.d`
+  /// files into their build directory and [RawDepfile.parse] to read them back.
+  ///
+  /// Each entry must match [isValidDepfileName]. Relative paths inside each
+  /// depfile are resolved against the project root directory and rewritten in
+  /// place with normalized paths by the host after a successful build. If a
+  /// declared depfile is missing or invalid after a successful build, the host
+  /// logs an error and disables incremental build caching for this target
+  /// without failing the build.
   final List<String> depfiles;
 
   /// Input file patterns and artifacts.

@@ -145,14 +145,19 @@ abstract base class AssembleTarget {
 
   /// Names of `.d` dependency files written by this target into the build directory.
   ///
-  /// Each entry must match [ExtensionAssembleTarget.isValidDepfileName] and must
-  /// be written on every successful build. Relative paths inside each depfile
-  /// are resolved against the project root directory and rewritten in place with
-  /// normalized paths by the host after a successful build.
+  /// Extensions that declare [depfiles] can use [RawDepfile.format] to write `.d`
+  /// files into their build directory and [RawDepfile.parse] to read them back.
+  ///
+  /// Each entry must match [ExtensionAssembleTarget.isValidDepfileName].
+  /// Relative paths inside each depfile are resolved against the project root
+  /// directory and rewritten in place with normalized paths by the host after
+  /// a successful build. If a declared depfile is missing or invalid after a
+  /// successful build, the host logs an error and disables incremental build
+  /// caching for this target without failing the build.
   ///
   /// See also:
   ///
-  /// * [ExtensionDepfile], which formats and parses `.d` dependency files.
+  /// * [RawDepfile], which formats and parses `.d` dependency files.
   List<String> get depfiles => const <String>[];
 
   /// The input [ExtensionSource]s for this target.

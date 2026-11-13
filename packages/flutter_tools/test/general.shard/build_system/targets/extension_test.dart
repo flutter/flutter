@@ -25,7 +25,7 @@ import '../../../src/fakes.dart';
 final class FakeExtensionManager extends Fake implements ExtensionManager {}
 
 final class FakeExtensionBuildManager extends ExtensionBuildManager {
-  FakeExtensionBuildManager({this.buildResult})
+  FakeExtensionBuildManager({this.buildResult, this.onAssemble})
     : super(
         extensionManager: FakeExtensionManager(),
         featureFlags: TestFeatureFlags(),
@@ -33,7 +33,9 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
       );
 
   final ExtensionBuildResult? buildResult;
+  final void Function(Uri buildDir)? onAssemble;
 
+  int assembleCount = 0;
   Uri? invokedBuildDir;
   BuildMode? invokedBuildMode;
   Uri? invokedFlutterRoot;
@@ -54,6 +56,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     required Map<String, String> resolvedArtifacts,
     required String targetName,
   }) async {
+    assembleCount += 1;
     invokedBuildDir = buildDir;
     invokedBuildMode = buildMode;
     invokedFlutterRoot = flutterRoot;
@@ -62,6 +65,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     invokedProjectRoot = projectRoot;
     invokedResolvedArtifacts = resolvedArtifacts;
     invokedTargetName = targetName;
+    onAssemble?.call(buildDir);
     return buildResult ?? const ExtensionBuildResult(success: true);
   }
 }
@@ -416,17 +420,26 @@ void main() {
   });
 
   testWithoutContext('ExtensionTarget normalizes declared depfiles', () async {
-    final ExtensionTarget target = _createTarget(depfiles: const <String>['custom_target.d']);
+    final buildManager = FakeExtensionBuildManager(
+      onAssemble: (Uri buildDir) {
+        fileSystem
+            .directory(buildDir)
+            .childFile('custom_target.d')
+            .writeAsStringSync(
+              const RawDepfile(
+                inputs: <String>['lib/extra_input.dart'],
+                outputs: <String>['build/extra_output.txt'],
+              ).format(),
+            );
+      },
+    );
+    final ExtensionTarget target = _createTarget(
+      buildManager: buildManager,
+      depfiles: const <String>['custom_target.d'],
+    );
     expect(target.depfiles, equals(const <String>['custom_target.d']));
 
     environment.buildDir.createSync(recursive: true);
-    final File depfile = environment.buildDir.childFile('custom_target.d');
-    depfile.writeAsStringSync(
-      const ExtensionDepfile(
-        inputs: <String>['lib/extra_input.dart'],
-        outputs: <String>['build/extra_output.txt'],
-      ).format(),
-    );
 
     await target.build(environment);
 
@@ -436,46 +449,127 @@ void main() {
     expect(resolvedOutputs.sources.map((File f) => f.path), contains('/build/extra_output.txt'));
   });
 
-  testWithoutContext(
-    'ExtensionTarget throws ExtensionAssembleException when declared depfile is missing',
-    () async {
-      final ExtensionTarget missingDepfileTarget = _createTarget(
-        depfiles: const <String>['missing.d'],
-      );
-      environment.buildDir.createSync(recursive: true);
+  testWithoutContext('ExtensionTarget logs error and disables incremental caching when declared depfile is missing or omitted on rebuild', () async {
+    final logger = BufferLogger.test();
+    final buildSystem = FlutterBuildSystem(
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      logger: logger,
+    );
+    final File trackedInput = fileSystem.file('/lib/tracked.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('v1');
+    final testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+      inputs: <String, String>{},
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: FakeProcessManager.any(),
+    );
+    var writeDepfile = true;
+    final buildManager = FakeExtensionBuildManager(
+      onAssemble: (Uri buildDir) {
+        if (writeDepfile) {
+          fileSystem
+              .directory(buildDir)
+              .childFile('missing.d')
+              .writeAsStringSync(const RawDepfile(inputs: <String>['lib/tracked.dart']).format());
+        }
+      },
+    );
+    final ExtensionTarget missingDepfileTarget = _createTarget(
+      buildManager: buildManager,
+      depfiles: const <String>['missing.d'],
+    );
 
-      await expectLater(
-        () => missingDepfileTarget.build(environment),
-        throwsA(
-          isA<ExtensionAssembleException>().having(
-            (ExtensionAssembleException e) => e.errorMessage,
-            'errorMessage',
-            contains('Declared depfile "missing.d" was not written to the build directory.'),
-          ),
-        ),
-      );
-    },
-  );
+    // Run 1 writes missing.d; an unchanged incremental build skips cleanly.
+    final BuildResult firstResult = await buildSystem.build(missingDepfileTarget, testEnvironment);
+    expect(firstResult.success, isTrue);
+    expect(buildManager.assembleCount, 1);
+    expect(logger.errorText, isEmpty);
+
+    final BuildResult cachedResult = await buildSystem.build(missingDepfileTarget, testEnvironment);
+    expect(cachedResult.success, isTrue);
+    expect(buildManager.assembleCount, 1);
+
+    // Run 2 omits missing.d after trackedInput changes: stale missing.d is cleared,
+    // an error is logged, and the subsequent build does not skip.
+    writeDepfile = false;
+    trackedInput.writeAsStringSync('v2');
+    final BuildResult rebuildWithoutDepfile = await buildSystem.build(
+      missingDepfileTarget,
+      testEnvironment,
+    );
+    expect(rebuildWithoutDepfile.success, isTrue);
+    expect(buildManager.assembleCount, 2);
+    expect(
+      logger.errorText,
+      contains(
+        'Extension assemble target "custom-target" declared depfile "missing.d", '
+        'but it was not written to the build directory.',
+      ),
+    );
+    expect(logger.errorText, contains('Try upgrading the extension or running "flutter clean".'));
+
+    final BuildResult thirdResult = await buildSystem.build(missingDepfileTarget, testEnvironment);
+    expect(thirdResult.success, isTrue);
+    expect(buildManager.assembleCount, 3);
+  });
 
   testWithoutContext(
-    'ExtensionTarget throws ExtensionAssembleException when declared depfile is malformed',
+    'ExtensionTarget logs error, deletes malformed depfile, and disables incremental caching',
     () async {
+      final logger = BufferLogger.test();
+      final buildSystem = FlutterBuildSystem(
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        logger: logger,
+      );
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+        inputs: <String, String>{},
+        fileSystem: fileSystem,
+        logger: logger,
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+      );
+      final buildManager = FakeExtensionBuildManager(
+        onAssemble: (Uri buildDir) {
+          fileSystem
+              .directory(buildDir)
+              .childFile('malformed.d')
+              .writeAsStringSync('not a valid depfile');
+        },
+      );
       final ExtensionTarget malformedDepfileTarget = _createTarget(
+        buildManager: buildManager,
         depfiles: const <String>['malformed.d'],
       );
-      environment.buildDir.createSync(recursive: true);
-      environment.buildDir.childFile('malformed.d').writeAsStringSync('not a valid depfile');
 
-      await expectLater(
-        () => malformedDepfileTarget.build(environment),
-        throwsA(
-          isA<ExtensionAssembleException>().having(
-            (ExtensionAssembleException e) => e.errorMessage,
-            'errorMessage',
-            contains('Invalid depfile "malformed.d":'),
-          ),
+      final BuildResult firstResult = await buildSystem.build(
+        malformedDepfileTarget,
+        testEnvironment,
+      );
+      expect(firstResult.success, isTrue);
+      expect(buildManager.assembleCount, 1);
+      expect(
+        logger.errorText,
+        contains(
+          'Invalid depfile "malformed.d" produced by extension assemble target "custom-target":',
         ),
       );
+      expect(logger.errorText, isNot(contains('Invalid depfile: ')));
+      expect(testEnvironment.buildDir.childFile('malformed.d').existsSync(), isFalse);
+
+      final BuildResult secondResult = await buildSystem.build(
+        malformedDepfileTarget,
+        testEnvironment,
+      );
+      expect(secondResult.success, isTrue);
+      expect(buildManager.assembleCount, 2);
     },
   );
 

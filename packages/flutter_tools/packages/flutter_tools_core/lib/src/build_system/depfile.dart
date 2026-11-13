@@ -2,50 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport '../build.dart';
-library;
-
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 const _listEquality = ListEquality<String>();
-final _lineContinuationRegex = RegExp(r'\\\r?\n');
 
-/// Representation of a `.d` dependency file containing [inputs] and [outputs]
-/// file paths for an [ExtensionAssembleTarget].
-///
-/// Extensions that declare [ExtensionAssembleTarget.depfiles] can use
-/// [ExtensionDepfile.format] to write `.d` files into their build directory
-/// and [ExtensionDepfile.parse] to read them back.
-///
-/// Relative paths written to a declared depfile are resolved relative to the
-/// project root directory and rewritten in place with normalized paths by the
-/// host after a successful build. Each declared depfile must be written on
-/// every successful build.
+/// Unresolved [inputs] and [outputs] file paths parsed from or formatted to a
+/// `.d` dependency file.
 @immutable
-class ExtensionDepfile {
-  const ExtensionDepfile({this.inputs = const <String>[], this.outputs = const <String>[]});
+final class RawDepfile {
+  const RawDepfile({this.inputs = const <String>[], this.outputs = const <String>[]});
 
-  /// Parses `.d` depfile [contents] (`<outputs>: <inputs>`) into an [ExtensionDepfile].
-  ///
-  /// Supports single-rule `<outputs>: <inputs>` files, including backslash-newline
-  /// (`\`) line continuations.
+  /// Parses `.d` depfile [contents] (`<outputs>: <inputs>`) into a [RawDepfile].
   ///
   /// Throws a [FormatException] if [contents] does not contain a single `": "`
   /// separator between outputs and inputs.
-  factory ExtensionDepfile.parse(String contents) {
-    final String normalized = contents.replaceAll(_lineContinuationRegex, ' ');
-    final List<String> colonSeparated = normalized.split(': ');
+  factory RawDepfile.parse(String contents) {
+    final List<String> colonSeparated = contents.split(': ');
     if (colonSeparated.length != 2) {
       throw const FormatException('Invalid depfile syntax: expected "<outputs>: <inputs>".');
     }
     final List<String> outputs = _processList(colonSeparated[0].trim());
     final List<String> inputs = _processList(colonSeparated[1].trim());
-    return ExtensionDepfile(inputs: inputs, outputs: outputs);
+    return RawDepfile(inputs: inputs, outputs: outputs);
   }
 
-  static final RegExp _separatorExpr = RegExp(r'([^\\]) ');
-  static final RegExp _escapeExpr = RegExp(r'\\(.)');
+  // Matches unescaped spaces separating file paths in a depfile rule.
+  static final _separatorExpr = RegExp(r'([^\\]) ');
+
+  // Matches backslash-escaped characters (such as `\ ` or `\\`) in a file path.
+  static final _escapeExpr = RegExp(r'\\(.)');
 
   /// The input file paths recorded in this depfile.
   final List<String> inputs;
@@ -95,16 +81,16 @@ class ExtensionDepfile {
   }
 
   @override
-  String toString() => 'ExtensionDepfile(inputs: $inputs, outputs: $outputs)';
+  String toString() => 'RawDepfile(inputs: $inputs, outputs: $outputs)';
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other is ExtensionDepfile &&
+        (other is RawDepfile &&
             _listEquality.equals(other.inputs, inputs) &&
             _listEquality.equals(other.outputs, outputs));
   }
 
   @override
-  int get hashCode => Object.hash(Object.hashAll(inputs), Object.hashAll(outputs));
+  int get hashCode => Object.hash(_listEquality.hash(inputs), _listEquality.hash(outputs));
 }

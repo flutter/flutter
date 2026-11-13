@@ -6,7 +6,9 @@ import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
+import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
+import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../experimental/extension_build_manager.dart';
 import '../build_system.dart';
@@ -125,6 +127,7 @@ class ExtensionTarget extends Target {
       :Map<String, String> defines,
       :DepfileService depFileService,
       :FileSystem fileSystem,
+      :Logger logger,
       :Directory outputDir,
       :Directory projectDir,
     ) = environment;
@@ -140,6 +143,10 @@ class ExtensionTarget extends Target {
       buildMode: mode,
       target: assembleTarget,
     );
+
+    for (final String depfileName in depfiles) {
+      ErrorHandlingFileSystem.deleteIfExists(buildDir.childFile(depfileName));
+    }
 
     final ExtensionBuildResult result = await _buildManager.assemble(
       buildDir: buildDir.uri,
@@ -159,19 +166,26 @@ class ExtensionTarget extends Target {
     for (final String depfileName in depfiles) {
       final File depfileFile = buildDir.childFile(depfileName);
       if (!depfileFile.existsSync()) {
-        throw ExtensionAssembleException(
-          assembleTarget.name,
-          errorMessage: 'Declared depfile "$depfileName" was not written to the build directory.',
+        logger.printError(
+          'Extension assemble target "${assembleTarget.name}" declared depfile '
+          '"$depfileName", but it was not written to the build directory. '
+          'Incremental build caching for this target will be disabled. '
+          'Try upgrading the extension or running "flutter clean".',
         );
+        continue;
       }
-      final ExtensionDepfile parsed;
+      final RawDepfile parsed;
       try {
-        parsed = ExtensionDepfile.parse(depfileFile.readAsStringSync());
+        parsed = RawDepfile.parse(depfileFile.readAsStringSync());
       } on FormatException catch (e) {
-        throw ExtensionAssembleException(
-          assembleTarget.name,
-          errorMessage: 'Invalid depfile "$depfileName": ${e.message}',
+        logger.printError(
+          'Invalid depfile "$depfileName" produced by extension assemble target '
+          '"${assembleTarget.name}": ${e.message} '
+          'Incremental build caching for this target will be disabled. '
+          'Try upgrading the extension or running "flutter clean".',
         );
+        ErrorHandlingFileSystem.deleteIfExists(depfileFile);
+        continue;
       }
       final Depfile depfile = depFileService.resolve(parsed, projectDir);
       depFileService.writeToFile(depfile, depfileFile, writeEmpty: true);
@@ -179,7 +193,7 @@ class ExtensionTarget extends Target {
 
     for (final MapEntry(:String key, :String value) in result.extraDefines.entries) {
       if (_reservedEnvironmentDefines.contains(key) || defines.containsKey(key)) {
-        environment.logger.printTrace(
+        logger.printTrace(
           'Ignoring extraDefine "$key" from extension assemble target "${assembleTarget.name}" '
           'because it is reserved or already defined.',
         );

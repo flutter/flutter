@@ -45,7 +45,7 @@ class DepfileService {
     } else {
       outputsToWrite = depfile.outputs;
     }
-    final extensionDepfile = ExtensionDepfile(
+    final rawDepfile = RawDepfile(
       inputs: <String>[
         for (final File file in depfile.inputs) _fileSystem.path.normalize(file.path),
       ],
@@ -53,9 +53,7 @@ class DepfileService {
         for (final File file in outputsToWrite) _fileSystem.path.normalize(file.path),
       ],
     );
-    output.writeAsStringSync(
-      extensionDepfile.format(windows: _fileSystem.path.style.separator == r'\'),
-    );
+    output.writeAsStringSync(rawDepfile.format(windows: _fileSystem.path.style.separator == r'\'));
   }
 
   /// Parse the depfile contents from [file].
@@ -66,9 +64,9 @@ class DepfileService {
   /// will be resolved relative to it.
   Depfile parse(File file, [Directory? baseDirectory]) {
     final String contents = file.readAsStringSync();
-    final ExtensionDepfile parsed;
+    final RawDepfile parsed;
     try {
-      parsed = ExtensionDepfile.parse(contents);
+      parsed = RawDepfile.parse(contents);
     } on FormatException {
       _logger.printError('Invalid depfile: ${file.path}');
       return const Depfile(<File>[], <File>[]);
@@ -76,9 +74,9 @@ class DepfileService {
     return resolve(parsed, baseDirectory);
   }
 
-  /// Resolves an [ExtensionDepfile] into a host [Depfile] with normalized [File]
+  /// Resolves a [RawDepfile] into a host [Depfile] with normalized [File]
   /// paths, resolving relative paths against [baseDirectory] when provided.
-  Depfile resolve(ExtensionDepfile parsed, [Directory? baseDirectory]) {
+  Depfile resolve(RawDepfile parsed, [Directory? baseDirectory]) {
     final List<File> inputs = _resolvePaths(parsed.inputs, baseDirectory);
     final List<File> outputs = _resolvePaths(parsed.outputs, baseDirectory);
     return Depfile(inputs, outputs);
