@@ -781,27 +781,11 @@ bool publicHeadersChanged({
   // (e.g. simulator and physical device) for a header change. Instead, keep one for each build
   // configuration and SDK, like the TARGET_BUILD_DIR that the caller deletes on Xcode 26+ when the
   // headers have changed.
-  final Directory fingerprintDirectory = fileSystem.directory(
-    fileSystem.path.join(buildDirectory, 'framework_public_headers'),
-  );
   final String fingerprintPath = fileSystem.path.join(
-    fingerprintDirectory.path,
+    buildDirectory,
+    'framework_public_headers',
     '$configuration-${getSDKNameForIOSEnvironmentType(environmentType)}.fingerprint',
   );
-
-  // Older versions of Flutter keep a single fingerprint and don't update these. If it exists, such
-  // a version may have built the app since these were written, so discard them. Delete it as well,
-  // so that such a version sees a header change on its next build instead of trusting it.
-  final File legacyFingerprint = fileSystem.file(
-    fileSystem.path.join(buildDirectory, 'framework_public_headers.fingerprint'),
-  );
-  if (legacyFingerprint.existsSync()) {
-    legacyFingerprint.deleteSync();
-    if (fingerprintDirectory.existsSync()) {
-      fingerprintDirectory.deleteSync(recursive: true);
-    }
-  }
-
   final fingerprinter = Fingerprinter(
     fingerprintPath: fingerprintPath,
     paths: files,

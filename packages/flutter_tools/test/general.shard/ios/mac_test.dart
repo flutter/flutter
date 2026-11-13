@@ -1361,46 +1361,6 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         expect(headersChanged(build), isFalse, reason: '$build');
       }
     });
-
-    testWithoutContext('starts over when an older version of Flutter has built the app', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final Directory mockFlutterFramework = fs.systemTempDirectory.childDirectory(
-        'Flutter.framework',
-      );
-      mockFlutterFramework
-          .childDirectory('Headers')
-          .childFile('FlutterPlugin.h')
-          .createSync(recursive: true);
-      final Directory mockBuildDirectory = fs.systemTempDirectory.childDirectory('build')
-        ..createSync(recursive: true);
-
-      bool headersChanged(EnvironmentType environmentType) {
-        return publicHeadersChanged(
-          environmentType: environmentType,
-          mode: BuildMode.debug,
-          configuration: 'Debug',
-          buildDirectory: mockBuildDirectory.path,
-          artifacts: FakeArtifacts(frameworkPath: mockFlutterFramework.path),
-          fileSystem: fs,
-          logger: logger,
-        );
-      }
-
-      expect(headersChanged(EnvironmentType.physical), isTrue);
-      expect(headersChanged(EnvironmentType.simulator), isTrue);
-
-      // An older version of Flutter, which keeps a single fingerprint, built the app.
-      final File legacyFingerprint = mockBuildDirectory.childFile(
-        'framework_public_headers.fingerprint',
-      )..writeAsStringSync(correctHeaderFingerprint);
-
-      expect(headersChanged(EnvironmentType.physical), isTrue);
-      expect(legacyFingerprint.existsSync(), isFalse);
-      expect(headersChanged(EnvironmentType.simulator), isTrue);
-      expect(headersChanged(EnvironmentType.physical), isFalse);
-      expect(headersChanged(EnvironmentType.simulator), isFalse);
-    });
   });
 }
 
