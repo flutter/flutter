@@ -20,6 +20,7 @@ import com.flutter.gradle.tasks.FlutterTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -663,7 +664,10 @@ class FlutterPlugin : Plugin<Project> {
         /**
          * For `--split-per-abi`, sets each output's versionCode to
          * `ABI_VERSION[abi] * 1000 + baseVersionCode`, where [baseVersionCode] comes from the DSL
-         * (see [DslVersionCodes]). A versionCode set only in the manifest is not offset.
+         * (see [DslVersionCodes]), or, if the DSL declares none, from the `android:versionCode`
+         * of the variant's manifest sources (see [ManifestVersionCode]). If neither gives a base,
+         * the build fails when AGP reads the versionCode, because the split APKs would otherwise
+         * share one versionCode and Google Play would reject them.
          *
          * Skipped with `force-version-code-ignoring-abi`. Outputs without an ABI filter are left
          * unchanged. An `onVariants` block in the app's build script runs after this one, so a
@@ -683,24 +687,66 @@ class FlutterPlugin : Plugin<Project> {
             ) {
                 return
             }
-            if (baseVersionCode == null) {
-                // logger.error, not warn: the flutter tool runs Gradle with -q, which hides warn.
-                project.logger.error(
-                    "Warning: Flutter could not give each split APK of variant '${variant.name}' a " +
-                        "distinct versionCode because its android {} block declares no versionCode, " +
-                        "so Google Play will not accept these APKs together. Set " +
-                        "versionCode = flutter.versionCode in defaultConfig, or set versionCode on " +
-                        "each product flavor."
-                )
-                return
-            }
+            // Without a DSL versionCode, fall back to the manifest's android:versionCode. It is
+            // read when AGP needs the value, so no file is parsed during configuration.
+            val manifestVersionCode by lazy { manifestVersionCode(project, variant) }
             variant.outputs.forEach { output ->
                 val abiVersionCode =
                     FlutterPluginConstants.ABI_VERSION[CopyFlutterApksTask.abiOf(output.filters)]
                         ?: return@forEach
-                output.versionCode.set(abiVersionCode * 1000 + baseVersionCode)
+                if (baseVersionCode != null) {
+                    output.versionCode.set(abiVersionCode * 1000 + baseVersionCode)
+                } else {
+                    output.versionCode.set(manifestVersionCode.map { abiVersionCode * 1000 + it })
+                }
             }
         }
+
+        /**
+         * The `android:versionCode` of [variant]'s manifest sources (see [ManifestVersionCode]).
+         * The provider fails with a [GradleException] when queried if it cannot be resolved.
+         */
+        private fun manifestVersionCode(
+            project: Project,
+            variant: ApplicationVariant
+        ): Provider<Int> {
+            val variantName = variant.name
+            val providers = project.providers
+            // Read through fileContents, not java.io, so the configuration cache tracks the files.
+            val manifestContents =
+                variant.sources.manifests.all.flatMap { manifests ->
+                    manifests.fold(providers.provider { emptyList<Pair<String, String>>() }) { acc, file ->
+                        acc.zip(providers.fileContents(file).asText.orElse("")) { list, text ->
+                            list + (file.asFile.path to text)
+                        }
+                    }
+                }
+            return manifestContents.map { manifests ->
+                when (val result = ManifestVersionCode.from(manifests)) {
+                    is ManifestVersionCode.Result.Found -> result.versionCode
+                    is ManifestVersionCode.Result.Unresolved ->
+                        throw splitPerAbiVersionCodeException(variantName, result.reason)
+                    ManifestVersionCode.Result.None ->
+                        throw splitPerAbiVersionCodeException(variantName, "no manifest sets one")
+                }
+            }
+        }
+
+        /**
+         * The error for a `--split-per-abi` build of [variantName] whose base versionCode Flutter
+         * cannot read, because the DSL declares none and [reason].
+         */
+        private fun splitPerAbiVersionCodeException(
+            variantName: String,
+            reason: String
+        ): GradleException =
+            GradleException(
+                "Flutter cannot give each split APK of variant '$variantName' a distinct " +
+                    "versionCode: its android {} block declares no versionCode, and $reason. " +
+                    "Google Play does not accept split APKs that share a versionCode. Set " +
+                    "versionCode = flutter.versionCode in defaultConfig (or on each product " +
+                    "flavor), or pass -P ${FlutterPluginUtils.PROP_FORCE_VERSION_CODE_IGNORING_ABI}=true to keep one versionCode."
+            )
 
         /** Registers the copy of [variant]'s APKs into flutter-apk, run by `assemble<Variant>`. */
         private fun registerCopyFlutterApksTask(
