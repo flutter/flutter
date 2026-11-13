@@ -366,7 +366,7 @@ void testMain() {
         return event;
       }
 
-      test('requestViewFocusChange leaves focus ahead of the views', () {
+      test('requestViewFocusChange focuses the placeholder when nothing has focus', () {
         expect(domDocument.activeElement, isNot(view.dom.rootElement));
 
         dispatcher.requestViewFocusChange(
@@ -375,10 +375,25 @@ void testMain() {
           direction: ui.ViewFocusDirection.forward,
         );
 
-        // Focusing the view would put browser focus past the placeholder, so
-        // moving forward through the page would never reach it.
-        expect(domDocument.activeElement, isNot(view.dom.rootElement));
+        // Focusing the view would put browser focus past the placeholder, and
+        // leaving it on the body strands VoiceOver on the page itself.
+        expect(domDocument.activeElement, placeholder);
         expect(dispatchedViewFocusEvents, isEmpty);
+      });
+
+      test('requestViewFocusChange leaves focus on page content outside the views', () {
+        final DomElement input = createDomElement('input');
+        domDocument.body!.append(input);
+        input.focusWithoutScroll();
+
+        dispatcher.requestViewFocusChange(
+          viewId: view.viewId,
+          state: ui.ViewFocusState.focused,
+          direction: ui.ViewFocusDirection.forward,
+        );
+
+        expect(domDocument.activeElement, input);
+        input.remove();
       });
 
       test('requestViewFocusChange keeps focus on the placeholder', () {

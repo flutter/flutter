@@ -53,12 +53,12 @@ class SemanticsHelper {
     return _semanticsEnabler.shouldEnableSemantics(event);
   }
 
-  /// Whether a request to focus a Flutter view should leave browser focus
-  /// where it is, given that [activeElement] currently has focus.
+  /// Gives the enabler a chance to handle a request to focus a Flutter view
+  /// while [activeElement] has focus.
   ///
-  /// See [SemanticsEnabler.shouldDeferViewFocus].
-  bool shouldDeferViewFocus(DomElement? activeElement) {
-    return _semanticsEnabler.shouldDeferViewFocus(activeElement);
+  /// See [SemanticsEnabler.interceptViewFocus].
+  bool interceptViewFocus(DomElement? activeElement) {
+    return _semanticsEnabler.interceptViewFocus(activeElement);
   }
 
   /// Notifies that a Flutter view rooted at [viewRoot] was created, so that a
@@ -119,9 +119,12 @@ abstract class SemanticsEnabler {
   /// focus to the next element in its own tab order.
   bool shouldForwardTab(DomKeyboardEvent event) => true;
 
-  /// Whether a request to focus a Flutter view should leave browser focus
-  /// where it is, given that [activeElement] currently has focus.
-  bool shouldDeferViewFocus(DomElement? activeElement) => false;
+  /// Gives the enabler a chance to handle a request to focus a Flutter view
+  /// while [activeElement] has focus.
+  ///
+  /// Returns true if the enabler handled the request, in which case the view
+  /// is not focused.
+  bool interceptViewFocus(DomElement? activeElement) => false;
 
   /// Attempts to activate semantics.
   ///
@@ -287,18 +290,32 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
         EnginePlatformDispatcher.instance.viewManager.findViewForElement(element) == null;
   }
 
-  /// Leaves browser focus ahead of the views while the placeholder is waiting.
+  /// Focuses the placeholder instead of the view while the placeholder is
+  /// waiting and nothing on the page has focus.
   ///
   /// The framework asks for its view to be focused as soon as a widget gains
   /// focus, which happens at startup. Moving browser focus into the view then
   /// would put it past the placeholder, where neither Tab nor a screen reader
-  /// reading forward comes back to it. Focus that is already in a view still
-  /// moves between views, and keyboard input reaches the framework either way
-  /// because [KeyboardBinding] listens on the window.
+  /// reading forward comes back to it. Leaving focus on the body is not
+  /// enough either, because VoiceOver then starts on the page itself and does
+  /// not step into it. Focusing the placeholder lets both start on it.
+  ///
+  /// Focus on other page content outside the views is left where it is.
+  /// Focus that is already in a view still moves between views, and keyboard
+  /// input reaches the framework either way because [KeyboardBinding] listens
+  /// on the window.
   ///
   /// See https://github.com/flutter/flutter/issues/195585
   @override
-  bool shouldDeferViewFocus(DomElement? activeElement) => _isFocusAheadOfViews(activeElement);
+  bool interceptViewFocus(DomElement? activeElement) {
+    if (!_isFocusAheadOfViews(activeElement)) {
+      return false;
+    }
+    if (activeElement == null || activeElement == domDocument.body) {
+      placeholders.first.focusWithoutScroll();
+    }
+    return true;
+  }
 
   /// Lets the browser handle Tab outside the views while the placeholder is
   /// waiting.
@@ -325,11 +342,14 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       return true;
     }
 
-    // In touch screen laptops, the touch is received as a mouse click
+    // In touch screen laptops, the touch is received as a mouse click.
+    //
+    // Key events are left out on purpose. The placeholder can hold focus at
+    // startup, see [interceptViewFocus], while a widget the app autofocused
+    // expects Enter or Space, so keys go to the framework. Screen readers
+    // press the placeholder with a click.
     const kInterestingEventTypes = <String>{
       'click',
-      'keyup',
-      'keydown',
       'mouseup',
       'mousedown',
       'pointerdown',
@@ -369,7 +389,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     );
 
     // Adding roles to semantics placeholder. 'tabindex' puts the button in the
-    // tab order, ahead of the views, see [shouldDeferViewFocus]. 'aria-label'
+    // tab order, ahead of the views, see [interceptViewFocus]. 'aria-label'
     // is used to define the placeholder message to the assistive technology
     // user. 'aria-live' does not announce it, since the element has no content
     // that changes.

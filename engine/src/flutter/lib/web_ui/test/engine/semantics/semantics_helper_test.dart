@@ -98,6 +98,27 @@ void testMain() {
       },
     );
 
+    test('keys on the placeholder go to the framework, a click enables semantics', () {
+      // The placeholder holds focus at startup while a widget the app
+      // autofocused may expect Enter or Space, so no key enables semantics.
+      // Screen readers press the placeholder with a click.
+      // https://github.com/flutter/flutter/issues/195585
+      domDocument.body!.append(placeholder!);
+
+      for (final type in <String>['keydown', 'keyup']) {
+        for (final key in <String>['Enter', ' ', 'Shift', 'Escape', 'a']) {
+          final DomKeyboardEvent event = createDomKeyboardEvent(type, <String, Object>{'key': key});
+          placeholder!.dispatchEvent(event);
+          expect(desktopSemanticsEnabler.tryEnableSemantics(event), isTrue, reason: '$type $key');
+          expect(EngineSemantics.instance.semanticsEnabled, isFalse, reason: '$type $key');
+        }
+      }
+
+      placeholder!.dispatchEvent(createDomEvent('Event', 'click'));
+      expect(EngineSemantics.instance.semanticsEnabled, isTrue);
+      expect(placeholder!.isConnected, isFalse);
+    });
+
     test('Can update placeholder label', () {
       const testLabel = 'Test label for placeholder';
       desktopSemanticsEnabler.updatePlaceholderLabel(testLabel);
