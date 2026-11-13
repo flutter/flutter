@@ -25,6 +25,37 @@ import 'framework.dart';
 // void myOnElementCreated(Object element) {}
 // void myOnPlatformViewCreated(int viewId) {}
 
+// Map.== and List.== are identity comparisons, so a new collection with the
+// same entries must not be treated as a creationParams change.
+bool _creationParamsEqual(Object? a, Object? b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a is Map && b is Map) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (final Object? key in a.keys) {
+      if (!b.containsKey(key) || !_creationParamsEqual(a[key], b[key])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (a is List && b is List) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (var i = 0; i < a.length; i += 1) {
+      if (!_creationParamsEqual(a[i], b[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return a == b;
+}
+
 /// Embeds an Android view in the Widget hierarchy.
 ///
 /// Requires Android API level 23 or greater.
@@ -181,6 +212,10 @@ class AndroidView extends StatefulWidget {
   /// Passed as the args argument of [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
   ///
   /// This can be used by plugins to pass constructor parameters to the embedded Android view.
+  ///
+  /// Changing the contents disposes the current view and creates another one.
+  /// Maps and lists are compared by content, so a new collection with the same
+  /// entries does not recreate the view.
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
@@ -237,6 +272,10 @@ abstract class _DarwinView extends StatefulWidget {
   /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/ios-embedder/protocol_flutter_platform_view_factory-p.html#a4e3c4390cd6ebd982390635e9bca4edc)
   ///
   /// This can be used by plugins to pass constructor parameters to the embedded iOS view.
+  ///
+  /// Changing the contents disposes the current view and creates another one.
+  /// Maps and lists are compared by content, so a new collection with the same
+  /// entries does not recreate the view.
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
@@ -764,7 +803,8 @@ class _AndroidViewState extends State<AndroidView> {
     final didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
-    if (widget.viewType != oldWidget.viewType) {
+    if (widget.viewType != oldWidget.viewType ||
+        !_creationParamsEqual(widget.creationParams, oldWidget.creationParams)) {
       _controller.disposePostFrame();
       _createNewAndroidView();
       return;
@@ -922,7 +962,8 @@ abstract class _DarwinViewState<
     final didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
-    if (widget.viewType != oldWidget.viewType) {
+    if (widget.viewType != oldWidget.viewType ||
+        !_creationParamsEqual(widget.creationParams, oldWidget.creationParams)) {
       _controller?.dispose();
       _controller = null;
       focusNode?.dispose();
