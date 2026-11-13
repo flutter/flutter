@@ -604,6 +604,97 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual(scrollView.contentOffset.y, 0);
 }
 
+- (void)testCanHandleInfiniteScrollPosition {
+  auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  float transformScale = 0.5f;
+  float screenScale = [[bridge->view() window] screen].scale;
+  float effectivelyScale = transformScale / screenScale;
+  float x = 10;
+  float y = 10;
+  float w = 100;
+  float h = 200;
+  float scrollExtentMax = 500.0;
+  float scrollPosition = INFINITY;
+
+  flutter::SemanticsNode node;
+  node.flags.hasImplicitScrolling = true;
+  node.actions = flutter::kVerticalScrollSemanticsActions;
+  node.rect = SkRect::MakeXYWH(x, y, w, h);
+  node.scrollExtentMax = scrollExtentMax;
+  node.scrollPosition = scrollPosition;
+  node.transform = {
+      transformScale, 0, 0, 0, 0, transformScale, 0, 0, 0, 0, transformScale, 0, 0, 0, 0, 1.0};
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [scrollable setSemanticsNode:&node];
+  [scrollable accessibilityBridgeDidFinishUpdate];
+  UIScrollView* scrollView = [scrollable nativeAccessibility];
+
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.x, x * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.y, y * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.height, h * effectivelyScale,
+                             kFloatCompareEpsilon);
+
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.height,
+                             (h + scrollExtentMax) * effectivelyScale, kFloatCompareEpsilon);
+
+  XCTAssertEqual(scrollView.contentOffset.x, 0);
+  XCTAssertEqual(scrollView.contentOffset.y, 0);
+}
+
+- (void)testCanHandleInfiniteScrollExtentAndScrollPosition {
+  auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  float transformScale = 0.5f;
+  float screenScale = [[bridge->view() window] screen].scale;
+  float effectivelyScale = transformScale / screenScale;
+  float x = 10;
+  float y = 10;
+  float w = 100;
+  float h = 200;
+  float scrollExtentMax = INFINITY;
+  float scrollPosition = INFINITY;
+
+  flutter::SemanticsNode node;
+  node.flags.hasImplicitScrolling = true;
+  node.actions = flutter::kVerticalScrollSemanticsActions;
+  node.rect = SkRect::MakeXYWH(x, y, w, h);
+  node.scrollExtentMax = scrollExtentMax;
+  node.scrollPosition = scrollPosition;
+  node.transform = {
+      transformScale, 0, 0, 0, 0, transformScale, 0, 0, 0, 0, transformScale, 0, 0, 0, 0, 1.0};
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [scrollable setSemanticsNode:&node];
+  [scrollable accessibilityBridgeDidFinishUpdate];
+  UIScrollView* scrollView = [scrollable nativeAccessibility];
+
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.x, x * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.y, y * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.height, h * effectivelyScale,
+                             kFloatCompareEpsilon);
+
+  // The scroll position is treated as 0, so the content size uses kScrollExtentMaxForInf alone.
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.height,
+                             (h + kScrollExtentMaxForInf) * effectivelyScale, kFloatCompareEpsilon);
+
+  XCTAssertEqual(scrollView.contentOffset.x, 0);
+  XCTAssertEqual(scrollView.contentOffset.y, 0);
+}
+
 - (void)testFlutterScrollableSemanticsObjectIsNotHittestable {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());
