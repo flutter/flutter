@@ -17,4 +17,3 @@ export 'src/diagnostics.dart';
 export 'src/exception.dart';
 export 'src/extension_package_config.dart';
 export 'src/project.dart';
-export 'src/templates.dart';
