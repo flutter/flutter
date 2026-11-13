@@ -187,25 +187,40 @@ PlatformViewAndroid::PlatformViewAndroid(
   }
 }
 
-PlatformViewAndroid::~PlatformViewAndroid() = default;
+PlatformViewAndroid::~PlatformViewAndroid() {
+  // Turn any resize task still waiting in the raster queue into a no-op. See
+  // `NotifyChanged`.
+  ++*surface_generation_;
+}
 
 void PlatformViewAndroid::NotifyCreated(
     fml::RefPtr<AndroidNativeWindow> native_window) {
   if (android_surface_) {
     InstallFirstFrameCallback();
-
-    fml::AutoResetWaitableEvent latch;
-    fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetRasterTaskRunner(),
-        [&latch, surface = android_surface_.get(),
-         native_window = std::move(native_window), jni_facade = jni_facade_]() {
-          surface->SetNativeWindow(native_window, jni_facade);
-          latch.Signal();
-        });
-    latch.Wait();
   }
 
-  PlatformView::NotifyCreated();
+  const uint64_t generation = ++*surface_generation_;
+
+  // `this` is safe to capture without a latch: the shell only invokes this
+  // callback while its rasterizer is alive, and `Shell::~Shell()` destroys the
+  // rasterizer on the raster task runner before destroying `platform_view_`.
+  PlatformView::NotifyCreatedDeferred(
+      [this, generation, native_window = std::move(native_window),
+       jni_facade = jni_facade_]() mutable -> std::unique_ptr<Surface> {
+        if (surface_generation_->load() != generation) {
+          return nullptr;
+        }
+        if (android_surface_) {
+          android_surface_->SetNativeWindow(std::move(native_window),
+                                            jni_facade);
+        }
+        std::unique_ptr<Surface> surface = CreateRenderingSurface();
+        if (!surface || !surface->IsValid()) {
+          FML_LOG(ERROR) << "Failed to create platform view rendering surface";
+          return nullptr;
+        }
+        return surface;
+      });
 }
 
 void PlatformViewAndroid::NotifySurfaceWindowChanged(
@@ -227,6 +242,7 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
 }
 
 void PlatformViewAndroid::NotifyDestroyed() {
+  ++*surface_generation_;
   PlatformView::NotifyDestroyed();
 
   if (android_surface_) {
@@ -245,14 +261,23 @@ void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
   if (!android_surface_) {
     return;
   }
-  fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetRasterTaskRunner(),  //
-      [&latch, surface = android_surface_.get(), size]() {
+  const uint64_t generation = surface_generation_->load();
+  // Always post, even when the raster task queue is merged onto this thread
+  // (hybrid composition). Running inline would let this resize overtake the
+  // surface setup or an earlier resize still waiting in the raster queue.
+  //
+  // The task does not capture `this`: while the queues are merged,
+  // `Shell::~Shell()` runs its raster work inline without draining the raster
+  // queue, so the task can run after this object is gone. The destructor bumps
+  // the shared generation, which keeps `surface` from being used after that.
+  task_runners_.GetRasterTaskRunner()->PostTask(
+      [surface = android_surface_.get(),
+       surface_generation = surface_generation_, generation, size]() {
+        if (surface_generation->load() != generation) {
+          return;
+        }
         surface->OnScreenSurfaceResize(size);
-        latch.Signal();
       });
-  latch.Wait();
 }
 
 void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
