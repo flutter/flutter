@@ -50,8 +50,9 @@ class SliverFillViewport extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [padEnds], which adds padding to center the children in the viewport
-  ///    when [viewportFraction] is less than 1.0.
+  ///  * [padEnds], which controls whether padding is added so that the first and
+  ///    last children can be centered in the viewport when [viewportFraction] is
+  ///    less than 1.0.
   final double viewportFraction;
 
   /// Whether to add padding to both ends of the list.
