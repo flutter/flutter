@@ -126,8 +126,21 @@ class FlutterViewManager {
   ///
   /// This operation is asynchronous, but happens as soon as possible
   /// (see [Timer.run]).
+  ///
+  /// If [element] receives focus again before the transfer runs, the transfer
+  /// is skipped, so a text field that is refocused right after it was blurred
+  /// keeps the focus.
   Future<void> safeBlur(DomElement element) {
+    var refocused = false;
+    final DomEventListener focusListener = createDomEventListener((DomEvent _) {
+      refocused = true;
+    });
+    element.addEventListener('focus', focusListener);
     return Future<void>(() {
+      element.removeEventListener('focus', focusListener);
+      if (refocused) {
+        return;
+      }
       _transferFocusToViewRoot(element);
     });
   }
