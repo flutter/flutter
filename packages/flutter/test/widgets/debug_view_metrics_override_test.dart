@@ -398,7 +398,7 @@ void main() {
       expect(data.systemGestureInsets, EdgeInsets.zero);
     });
 
-    testWidgets("debugBrightnessOverride overrides the implicit view's brightness", (
+    testWidgets('debugBrightnessOverride reaches MediaQuery and yields to a test value', (
       WidgetTester tester,
     ) async {
       late MediaQueryData data;

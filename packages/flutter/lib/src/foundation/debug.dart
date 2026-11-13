@@ -169,34 +169,35 @@ String debugFormatDouble(double? value) {
   return value.toStringAsFixed(1);
 }
 
-/// Overrides the platform [Brightness] of the implicit view.
+/// Overrides the platform [Brightness] of every view.
 ///
-/// This is the [DebugViewMetricsOverride.platformBrightness] of the implicit
-/// view's entry in [debugViewMetricsOverrides].
+/// This is the [DebugViewMetricsOverride.platformBrightness] of
+/// [debugAllViewsMetricsOverride], so a view's own entry in
+/// [debugViewMetricsOverrides] outranks it.
 /// [FoundationServiceExtensions.brightnessOverride] exposes it to developer
-/// tools. Setting it replaces only that field, and removes the entry if
-/// nothing else in it is overridden. When there is no implicit view, this is
-/// null and setting it does nothing.
+/// tools. Setting it replaces only that field, and removes the override if
+/// nothing else in it is overridden.
 ///
 /// This has no effect outside of debug mode (in profile or release mode).
-ui.Brightness? get debugBrightnessOverride {
-  final int? viewId = ui.PlatformDispatcher.instance.implicitView?.viewId;
-  return viewId == null ? null : _viewMetricsOverrides[viewId]?.platformBrightness;
-}
+@Deprecated(
+  'Use the platformBrightness of debugAllViewsMetricsOverride instead. '
+  'The brightness is one of the view metrics that DebugViewMetricsOverride covers. '
+  'This feature was deprecated after v3.51.0-0.1.pre.',
+)
+ui.Brightness? get debugBrightnessOverride => debugAllViewsMetricsOverride?.platformBrightness;
 
+@Deprecated(
+  'Use the platformBrightness of debugAllViewsMetricsOverride instead. '
+  'The brightness is one of the view metrics that DebugViewMetricsOverride covers. '
+  'This feature was deprecated after v3.51.0-0.1.pre.',
+)
 set debugBrightnessOverride(ui.Brightness? value) {
   assert(() {
-    final int? viewId = ui.PlatformDispatcher.instance.implicitView?.viewId;
-    if (viewId != null) {
-      final DebugViewMetricsOverride entry =
-          _viewMetricsOverrides[viewId] ?? const DebugViewMetricsOverride();
-      debugSetViewMetricsOverride(
-        viewId,
-        value == null
-            ? entry.copyWith(clear: const <DebugViewMetric>{DebugViewMetric.platformBrightness})
-            : entry.copyWith(platformBrightness: value),
-      );
-    }
+    final DebugViewMetricsOverride allViews =
+        debugAllViewsMetricsOverride ?? const DebugViewMetricsOverride();
+    debugAllViewsMetricsOverride = value == null
+        ? allViews.copyWith(clear: const <DebugViewMetric>{DebugViewMetric.platformBrightness})
+        : allViews.copyWith(platformBrightness: value);
     return true;
   }());
 }
@@ -466,8 +467,8 @@ class DebugViewMetricsOverride with Diagnosticable {
 
   /// Overrides [ui.PlatformDispatcher.platformBrightness].
   ///
-  /// [FoundationServiceExtensions.brightnessOverride] and
-  /// [debugBrightnessOverride] set this for the implicit view.
+  /// [FoundationServiceExtensions.brightnessOverride] sets this in
+  /// [debugAllViewsMetricsOverride].
   final ui.Brightness? platformBrightness;
 
   /// Overrides [ui.FlutterView.padding], in physical pixels.

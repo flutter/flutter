@@ -698,29 +698,30 @@ void main() {
   group('debugBrightnessOverride', () {
     tearDown(debugClearViewMetricsOverrides);
 
-    test("is the brightness of the implicit view's entry", () {
-      final int viewId = ui.PlatformDispatcher.instance.implicitView!.viewId;
+    test('is the brightness of the override for every view', () {
       expect(debugBrightnessOverride, isNull);
 
       debugBrightnessOverride = ui.Brightness.dark;
-      expect(debugViewMetricsOverrides, <int, DebugViewMetricsOverride>{
-        viewId: const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
-      });
+      expect(
+        debugAllViewsMetricsOverride,
+        const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
+      );
+      expect(debugViewMetricsOverrides, isEmpty);
 
-      // It reads an entry that something else registered, such as tooling, and
+      // It reads an override that something else set, such as tooling, and
       // replaces only its brightness.
-      debugSetViewMetricsOverride(
-        viewId,
-        const DebugViewMetricsOverride(platformBrightness: ui.Brightness.light, boldText: true),
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
+        platformBrightness: ui.Brightness.light,
+        boldText: true,
       );
       expect(debugBrightnessOverride, ui.Brightness.light);
       debugBrightnessOverride = ui.Brightness.dark;
       expect(
-        debugViewMetricsOverrides[viewId],
+        debugAllViewsMetricsOverride,
         const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark, boldText: true),
       );
       debugBrightnessOverride = null;
-      expect(debugViewMetricsOverrides[viewId], const DebugViewMetricsOverride(boldText: true));
+      expect(debugAllViewsMetricsOverride, const DebugViewMetricsOverride(boldText: true));
     });
   });
 

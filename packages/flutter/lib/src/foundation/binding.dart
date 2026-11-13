@@ -656,16 +656,20 @@ abstract class BindingBase {
         name: FoundationServiceExtensions.brightnessOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
-            final ui.Brightness? previousBrightness = debugBrightnessOverride;
-            debugBrightnessOverride = switch (parameters['value']) {
-              'Brightness.light' => ui.Brightness.light,
-              'Brightness.dark' => ui.Brightness.dark,
-              _ => null,
+            final ui.Brightness? previousBrightness =
+                debugAllViewsMetricsOverride?.platformBrightness;
+            final DebugViewMetricsOverride allViews =
+                debugAllViewsMetricsOverride ?? const DebugViewMetricsOverride();
+            debugAllViewsMetricsOverride = switch (parameters['value']) {
+              'Brightness.light' => allViews.copyWith(platformBrightness: ui.Brightness.light),
+              'Brightness.dark' => allViews.copyWith(platformBrightness: ui.Brightness.dark),
+              _ => allViews.copyWith(
+                clear: const <DebugViewMetric>{DebugViewMetric.platformBrightness},
+              ),
             };
-            if (debugBrightnessOverride != previousBrightness) {
-              _postViewMetricsOverrideStateChangedEvent();
+            if (debugAllViewsMetricsOverride?.platformBrightness != previousBrightness) {
+              _postViewMetricsOverrideChangeEvents(previousBrightness);
             }
-            _postBrightnessOverrideStateChangedEvent();
           }
           return <String, dynamic>{'value': platformDispatcher.platformBrightness.toString()};
         },
@@ -700,7 +704,7 @@ abstract class BindingBase {
   Future<Map<String, Object?>> _debugHandleViewMetricsOverrideServiceExtension(
     Map<String, String> parameters,
   ) async {
-    final ui.Brightness? previousBrightness = debugBrightnessOverride;
+    final ui.Brightness? previousBrightness = debugAllViewsMetricsOverride?.platformBrightness;
     if (parameters[_clearAllParameter] == 'true') {
       if (debugClearViewMetricsOverrides()) {
         _postViewMetricsOverrideChangeEvents(previousBrightness);
@@ -775,30 +779,25 @@ abstract class BindingBase {
     };
   }
 
-  // Every override, rather than the one that changed, because one event then
-  // describes the state of the extension for a client that missed the ones
-  // before it, including the clearAll that leaves no override to report.
-  void _postViewMetricsOverrideStateChangedEvent() {
+  /// Posts the event of the viewMetricsOverride extension, and the event of the
+  /// brightnessOverride extension when the brightness of
+  /// [debugAllViewsMetricsOverride] is no longer [previousBrightness].
+  ///
+  /// The viewMetricsOverride event carries every override, rather than the one
+  /// that changed, because one event then describes the state of the extension
+  /// for a client that missed the ones before it. That includes the clearAll
+  /// that leaves no override to report.
+  void _postViewMetricsOverrideChangeEvents(ui.Brightness? previousBrightness) {
     _postExtensionStateChangedEvent(
       FoundationServiceExtensions.viewMetricsOverride.name,
       _viewMetricsOverridesWithStringKeys(),
     );
-  }
-
-  // Posts the viewMetricsOverride event, and the brightnessOverride event too
-  // when the change replaced [previousBrightness].
-  void _postViewMetricsOverrideChangeEvents(ui.Brightness? previousBrightness) {
-    _postViewMetricsOverrideStateChangedEvent();
-    if (debugBrightnessOverride != previousBrightness) {
-      _postBrightnessOverrideStateChangedEvent();
+    if (debugAllViewsMetricsOverride?.platformBrightness != previousBrightness) {
+      _postExtensionStateChangedEvent(
+        FoundationServiceExtensions.brightnessOverride.name,
+        platformDispatcher.platformBrightness.toString(),
+      );
     }
-  }
-
-  void _postBrightnessOverrideStateChangedEvent() {
-    _postExtensionStateChangedEvent(
-      FoundationServiceExtensions.brightnessOverride.name,
-      platformDispatcher.platformBrightness.toString(),
-    );
   }
 
   /// Whether [lockEvents] is currently locking events.

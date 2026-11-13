@@ -70,26 +70,34 @@ enum FoundationServiceExtensions {
   ///   registered.
   platformOverride,
 
-  /// Name of service extension that, when called, will get or set the value of
-  /// [debugBrightnessOverride].
+  /// Name of service extension that, when called, sets the
+  /// [DebugViewMetricsOverride.platformBrightness] of
+  /// [debugAllViewsMetricsOverride], and reports the platform brightness.
+  ///
+  /// Tools should call [viewMetricsOverride] with a `viewId` of `all` instead,
+  /// which reads and writes every metric of that override. This extension
+  /// remains for the tools that already call it.
   ///
   /// A `value` of `'Brightness.light'` or `'Brightness.dark'` overrides the
-  /// brightness, and any other `value` stops overriding it. A call without a
-  /// `value` changes nothing.
+  /// brightness of every view, and any other `value` stops overriding it. A
+  /// view's own entry in [debugViewMetricsOverrides] outranks it. The other
+  /// metrics of [debugAllViewsMetricsOverride] stay as they are. A call without
+  /// a `value` changes nothing.
   ///
   /// The reply's `value` is the brightness [BindingBase.platformDispatcher]
   /// reports once the call is done, such as `'Brightness.dark'`. A change
   /// shows from the next frame on, and the reply does not wait for that frame.
   ///
-  /// A call with a `value` posts a `Flutter.ServiceExtensionStateChanged`
-  /// event whose `value` is the reply's `value`, even when nothing changed. A
-  /// call that changes [debugBrightnessOverride] also posts the event of
-  /// [viewMetricsOverride].
+  /// A call that changes the brightness of [debugAllViewsMetricsOverride]
+  /// posts a `Flutter.ServiceExtensionStateChanged` event whose `value` is the
+  /// reply's `value`, and the event of [viewMetricsOverride]. That `value` can
+  /// be the same as the last one, for example when the new override matches
+  /// the platform brightness. A call that changes nothing posts no event.
   ///
   /// See also:
   ///
-  /// * [debugBrightnessOverride], which is the flag that this service
-  ///   extension exposes.
+  /// * [debugAllViewsMetricsOverride], the override whose brightness this
+  ///   service extension exposes.
   /// * [BindingBase.initServiceExtensions], where the service extension is
   ///   registered.
   brightnessOverride,
@@ -139,8 +147,8 @@ enum FoundationServiceExtensions {
   /// map, so that clients other than the caller learn about the change too. A
   /// call that changes nothing posts no event.
   ///
-  /// A call that changes [debugBrightnessOverride] also posts the event of
-  /// [brightnessOverride].
+  /// A call that changes the brightness of [debugAllViewsMetricsOverride] also
+  /// posts the event of [brightnessOverride].
   ///
   /// See also:
   ///
