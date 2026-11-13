@@ -76,8 +76,8 @@ final Map<String, _MetricChange> _perMetricChange = <String, _MetricChange>{
 /// not a finite number, or that scale text while reporting no scaling at all, by
 /// what is wrong with each.
 ///
-/// Both gates, [DebugViewMetricsOverride.fromJson] and
-/// [debugSetViewMetricsOverride], have to reject every one of them.
+/// Every gate, [DebugViewMetricsOverride.fromJson], [debugSetViewMetricsOverride]
+/// and [debugAllViewsMetricsOverride], has to reject every one of them.
 const Map<String, List<ui.Offset>> _invalidTextScaling = <String, List<ui.Offset>>{
   'no points': <ui.Offset>[],
   'zero unscaled size': <ui.Offset>[ui.Offset(0, 1)],
@@ -1080,8 +1080,8 @@ void main() {
         textScaling: <ui.Offset>[ui.Offset(1, 3)],
       );
 
-      // It names no view, so a read that has no view to resolve applies it,
-      // and still no view's entry.
+      // With no implicit view, the binding's dispatcher applies the override for
+      // every view, and no view's entry.
       expect(wrapped.textScaleFactor, 3.0);
       expect(wrapped.platformBrightness, dispatcher.platformBrightness);
       expect(wrapped.view(id: 2)!.platformDispatcher.textScaleFactor, 3.0);
@@ -1123,6 +1123,22 @@ void main() {
       );
       expect(first.viewInsets.bottom, 50);
       expect(first.padding.top, 0);
+    });
+
+    test('combines with an entry in every accessibility flag', () {
+      // MediaQuery does not surface every flag, so the widgets tests cannot
+      // see a flag that the merge leaves out.
+      final ui.FlutterView view = debugApplyViewMetricsOverrides(ui.PlatformDispatcher.instance)
+          .implicitView!;
+      debugSetViewMetricsOverride(view.viewId, _fullyPopulated);
+      final ui.AccessibilityFeatures expected = view.platformDispatcher.accessibilityFeatures;
+
+      debugSetViewMetricsOverride(
+        view.viewId,
+        const DebugViewMetricsOverride(devicePixelRatio: 2.0),
+      );
+      debugAllViewsMetricsOverride = _fullyPopulated;
+      expect(view.platformDispatcher.accessibilityFeatures, expected);
     });
   });
 
@@ -1380,7 +1396,7 @@ void main() {
       expect(textScaleFactorChanged, 2);
     });
 
-    test('once per group when several entries are cleared together', () {
+    test('once per group when several overrides are cleared together', () {
       // The dart:ui callbacks are not per view, so clearing two entries and the
       // override for every view, all of which override the view metrics, is one
       // change to the framework, not one per override.
@@ -1524,17 +1540,21 @@ void main() {
           install.value(_fullyPopulated);
           notifications.clear();
           install.value(entry.value(_fullyPopulated));
-          expect(notifications.toSet(), switch (entry.key) {
-            'alwaysUse24HourFormat' => <String>{
-              'configuration',
-              'alwaysUse24HourFormat',
-              'metrics',
-            },
-            'textScaling' => <String>{'configuration', 'textScaleFactor'},
-            'platformBrightness' => <String>{'configuration', 'platformBrightness'},
-            final String metric when viewMetrics.contains(metric) => <String>{'metrics'},
-            _ => <String>{'configuration', 'accessibilityFeatures'},
-          }, reason: 'changing ${entry.key} in ${install.key} announced $notifications');
+          expect(
+            notifications,
+            unorderedEquals(switch (entry.key) {
+              'alwaysUse24HourFormat' => <String>{
+                'configuration',
+                'alwaysUse24HourFormat',
+                'metrics',
+              },
+              'textScaling' => <String>{'configuration', 'textScaleFactor'},
+              'platformBrightness' => <String>{'configuration', 'platformBrightness'},
+              final String metric when viewMetrics.contains(metric) => <String>{'metrics'},
+              _ => <String>{'configuration', 'accessibilityFeatures'},
+            }),
+            reason: 'changing ${entry.key} in ${install.key} announced $notifications',
+          );
         }
         debugClearViewMetricsOverrides();
       }

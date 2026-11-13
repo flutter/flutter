@@ -144,8 +144,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// In debug mode, the `view` is normalized with
   /// [debugViewWithMetricsOverrides], so that a view read straight from
-  /// `dart:ui` renders with the same [debugViewMetricsOverrides] entry as one
-  /// read from the binding.
+  /// `dart:ui` renders with the same overrides as one read from the binding.
   RenderView({RenderBox? child, ViewConfiguration? configuration, required ui.FlutterView view})
     : _view = kDebugMode ? debugViewWithMetricsOverrides(view) : view {
     if (configuration != null) {

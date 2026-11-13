@@ -215,7 +215,8 @@ abstract class BindingBase {
   /// Unlike the views [platformDispatcher] reports, this window — like
   /// [ui.window] and [ui.PlatformDispatcher.instance] — reports the metrics the
   /// platform reports, and does not apply the debug-only
-  /// [debugViewMetricsOverrides] that tooling such as DevTools installs.
+  /// [debugViewMetricsOverrides] and [debugAllViewsMetricsOverride] that
+  /// tooling such as DevTools installs.
   ///
   /// See also:
   ///
@@ -255,8 +256,9 @@ abstract class BindingBase {
   ///
   /// In debug mode, this is [ui.PlatformDispatcher.instance] wrapped by
   /// [debugApplyViewMetricsOverrides], so that it and the views it reports apply
-  /// [debugViewMetricsOverrides]; see [DebugViewMetricsOverride]. The views it
-  /// reports are therefore not identical to the ones
+  /// [debugViewMetricsOverrides] and [debugAllViewsMetricsOverride]; see
+  /// [DebugViewMetricsOverride]. The views it reports are therefore not
+  /// identical to the ones
   /// [ui.PlatformDispatcher.instance] reports; compare views by
   /// [FlutterView.viewId] when both are in hand. A subclass that overrides
   /// this accessor should build on `super.platformDispatcher`, the way
@@ -718,8 +720,8 @@ abstract class BindingBase {
       }
       return _viewMetricsOverrideResult();
     }
-    // Null when the call names the all-views override.
-    final int? viewId = rawViewId == _allViewsId ? null : int.tryParse(rawViewId);
+    // Null when the call names [debugAllViewsMetricsOverride].
+    final int? viewId = int.tryParse(rawViewId);
     if (rawViewId != _allViewsId && (viewId == null || viewId < 0)) {
       throw FormatException(
         'The $_viewIdParameter parameter must be a non-negative integer or "$_allViewsId", '
@@ -763,8 +765,8 @@ abstract class BindingBase {
   }
 
   // [debugViewMetricsOverrides] with its view ids stringified, because
-  // json.encode accepts only String keys, and [debugAllViewsMetricsOverride]
-  // under `all`. It calls toJson on the values itself. Both the reply and the
+  // json.encode accepts only String keys, plus [debugAllViewsMetricsOverride]
+  // under `all`. json.encode calls toJson on the values. Both the reply and the
   // event carry this map.
   Map<String, DebugViewMetricsOverride> _viewMetricsOverridesWithStringKeys() {
     final DebugViewMetricsOverride? allViews = debugAllViewsMetricsOverride;
@@ -777,7 +779,7 @@ abstract class BindingBase {
 
   // Every override, rather than the one that changed, because one event then
   // describes the state of the extension for a client that missed the ones
-  // before it — including the clearAll that leaves no override to report.
+  // before it, including the clearAll that leaves no override to report.
   void _postViewMetricsOverrideStateChangedEvent() {
     _postExtensionStateChangedEvent(
       FoundationServiceExtensions.viewMetricsOverride.name,

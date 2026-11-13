@@ -115,11 +115,11 @@ enum FoundationServiceExtensions {
   /// Every reply has one key, whatever the call was, so that a client can
   /// resynchronize from any reply without remembering which call produced it:
   ///
-  ///  * `overrides`: every override installed once the call is done, keyed by
-  ///    stringified view id (JSON object keys must be strings), with
-  ///    [debugAllViewsMetricsOverride] under `all`, each in the format
-  ///    [DebugViewMetricsOverride.toJson] produces. A view without an entry
-  ///    has no override of its own.
+  ///  * `overrides`: every override installed once the call is done, each in
+  ///    the format [DebugViewMetricsOverride.toJson] produces. A view's entry
+  ///    is keyed by its stringified view id, because JSON object keys must be
+  ///    strings. [debugAllViewsMetricsOverride] is keyed by `all`. A view
+  ///    without an entry has no override of its own.
   ///
   /// A call that changes an override also posts a
   /// `Flutter.ServiceExtensionStateChanged` event whose `value` is that same
