@@ -8,6 +8,11 @@
 #include <gdk/gdk.h>
 #include <stdint.h>
 
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+#include <map>
+#endif
+
 struct FlVsyncTiming {
   uint64_t frame_start_ns;
   uint64_t frame_target_ns;
@@ -23,5 +28,31 @@ FlVsyncTiming fl_vsync_timing_from_refresh_info(gint64 frame_time_us,
 // Read completed clock history; the current frame's timing can be incomplete
 // during UPDATE and report no refresh interval even on a high-refresh display.
 FlVsyncTiming fl_vsync_timing_for_clock(GdkFrameClock* clock);
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+// Tracks changes within GTK's bounded history. Pending frames must be revisited
+// because display-server feedback can arrive several frame cycles later.
+class FlFrameTimingHistory {
+ public:
+  bool Update(gint64 frame,
+              gint64 history_start,
+              int result,
+              gboolean complete,
+              gint64 presentation_us);
+
+ private:
+  struct Sample {
+    int result;
+    gboolean complete;
+    gint64 presentation_us;
+  };
+  std::map<gint64, Sample> samples_;
+};
+
+// Opt-in diagnostics, sampled on the GTK thread. Does not request extra frames.
+void fl_vsync_timing_trace_history(GdkFrameClock* clock);
+
+#endif  // Debug or profile builds.
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VSYNC_TIMING_H_

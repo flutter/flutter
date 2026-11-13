@@ -91,3 +91,50 @@ clocks, pending worker dispatch, timer fallback, unmapping, stalled-clock recove
 reentrant stop, repeated stop, and final pacer release on both GTK versions.
 The GTK4 engine suite also verifies engine finalization immediately after its
 last pending baton is delivered.
+
+## Presentation feedback for benchmarks
+
+The collector and its call site are compiled only into debug and profile builds.
+Release and JIT-release builds contain no collector, environment check, optional
+symbol lookup, or history storage from this feature.
+
+Set `FLUTTER_LINUX_FRAME_TIMINGS=1` before launch and capture a Flutter engine
+trace (for example, with the engine's startup tracing options). With the `gtk`
+pacer, `LinuxFrameTiming` instant events contain a JSON `sample` argument:
+`clock`, `frame`, `result`, `complete`, `frame_time_us`, `predicted_us`,
+`presentation_us`, and `refresh_interval_us`. Times are GDK monotonic
+microseconds; the trace event timestamp is the observation time, not presentation.
+
+The optional GTK 4.24 `gdk_frame_timings_get_result` symbol is resolved at runtime,
+independently of build headers. GTK3 and older GTK4 report `result=-1` (unknown),
+while still recording their available timing fields. The compatibility validator
+rejects direct imports of this symbol. This binding lives with the timing code so
+standalone pacer tests need no renderer or accessibility runtime bindings.
+
+| Result | Meaning | Benchmark treatment |
+| --- | --- | --- |
+| -1 | Result API unavailable | Keep separate; completion does not prove display |
+| 0 | Preparing | Pending |
+| 1 | Skipped, no visual change | Exclude from rendered-frame drop rate |
+| 2 | Empty, no visual change | Timestamp is hypothetical; exclude from presented intervals |
+| 3 | Submitted, no further feedback | Outcome unknown |
+| 4 | Outstanding compositor feedback | Pending |
+| 5 | Discarded by display server | Known rendered frame not displayed |
+| 6 | Presented | Actual presentation timestamp |
+
+Deduplicate by `(process, clock, frame)`, keeping the last observation. History is
+revisited on each pacer tick, including its final idle tick, and only changed
+observations are emitted. Clock IDs are process-local and are not reused. For
+confirmed outcomes, report `discarded / (presented + discarded)` alongside the
+counts of unknown and pending frames. Compute presentation intervals only from
+result 6 with nonzero timestamps, within the same clock. Do not treat skipped,
+empty, or unavailable feedback as missed frames.
+
+This is GTK surface feedback, not a one-to-one mapping to Flutter frames or proof
+of direct scanout. Sampling adds no timer or extra requested frames. Consequently,
+feedback arriving after the last tick, or falling out of GTK's bounded history,
+can remain unresolved. Report this coverage limitation, exclude benchmark edges,
+and do not compare engine-pacer runs using this collector (they have no GTK pacer
+ticks). Keep CPU/GPU/memory measurements alongside feedback and measure tracing
+cost before treating a performance difference as meaningful. Pacing behavior is
+unchanged; these observations support a measured feedback loop for later changes.

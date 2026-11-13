@@ -19,6 +19,7 @@ import tempfile
 OPTIONAL_SYMBOLS = (
     "gdk_surface_get_scale",
     "gdk_monitor_get_scale",
+    "gdk_frame_timings_get_result",
     "gtk_accessible_update_platform_state",
     "gtk_accessible_get_first_accessible_child",
     "gtk_accessible_set_accessible_parent",

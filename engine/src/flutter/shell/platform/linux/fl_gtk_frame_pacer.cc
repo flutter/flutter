@@ -113,6 +113,10 @@ static void tick_destroy(gpointer data) {
 static gboolean frame_tick(GtkWidget*, GdkFrameClock* clock, gpointer data) {
   g_autoptr(VsyncRequest) request =
       request_ref(static_cast<VsyncRequest*>(data));
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+  fl_vsync_timing_trace_history(clock);
+#endif
   if (request->delivered) {
     return G_SOURCE_REMOVE;
   }

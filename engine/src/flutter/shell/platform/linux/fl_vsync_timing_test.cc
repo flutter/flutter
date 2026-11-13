@@ -37,3 +37,36 @@ TEST(FlVsyncTimingTest, UnknownIntervalUsesConservativeFallback) {
     EXPECT_EQ(timing.refresh_interval_us, 16667);
   }
 }
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+TEST(FlFrameTimingHistoryTest, RevisitsPendingFramesAndSuppressesDuplicates) {
+  FlFrameTimingHistory history;
+  EXPECT_TRUE(history.Update(10, 1, 0, FALSE, 0));
+  EXPECT_FALSE(history.Update(10, 1, 0, FALSE, 0));
+  EXPECT_TRUE(history.Update(10, 1, 4, FALSE, 0));
+  EXPECT_TRUE(history.Update(11, 1, 6, TRUE, 2000));
+  // Feedback can complete out of order.
+  EXPECT_TRUE(history.Update(10, 1, 6, TRUE, 1000));
+  EXPECT_FALSE(history.Update(10, 1, 6, TRUE, 1000));
+}
+
+TEST(FlFrameTimingHistoryTest, PreservesDistinctFinalOutcomes) {
+  FlFrameTimingHistory history;
+  for (int result : {1, 2, 3, 5, 6}) {
+    EXPECT_TRUE(history.Update(result, 0, result, TRUE, 0));
+    EXPECT_FALSE(history.Update(result, 0, result, TRUE, 0));
+  }
+}
+
+TEST(FlFrameTimingHistoryTest, LegacyFeedbackAndHistoryEviction) {
+  FlFrameTimingHistory history;
+  EXPECT_TRUE(history.Update(1, 0, -1, FALSE, 0));
+  EXPECT_TRUE(history.Update(1, 0, -1, TRUE, 0));
+  EXPECT_TRUE(history.Update(1, 0, -1, TRUE, 1000));
+  EXPECT_TRUE(history.Update(2, 2, -1, TRUE, 2000));
+  // Old entries were removed when the bounded history advanced.
+  EXPECT_TRUE(history.Update(1, 0, -1, TRUE, 1000));
+}
+
+#endif  // Debug or profile builds.
