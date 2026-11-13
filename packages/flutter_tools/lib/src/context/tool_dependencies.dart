@@ -713,6 +713,7 @@ class ToolDependencies {
       hostPlatform: finalOS.hostPlatform,
       logger: finalLogger,
     );
+    finalShutdownHooks.addShutdownHook(extensionManager.dispose);
 
     final appleContext = AppleContext(
       cocoaPodsBuilder: () => finalCocoaPods,

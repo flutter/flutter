@@ -604,6 +604,20 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
+  # Flame only runs its full test suites on Linux, where they take as long as
+  # the rest of the registry.
+  - name: Linux customer_testing_flame
+    bringup: true
+    enabled_branches:
+      - master
+    recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
+    timeout: 60
+    properties:
+      shard: customer_testing_flame
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
   # Despite the name, this really means "generate api_docs.zip", and "upload zip
   # to GCS", and conditionally on the "master" channel will also deploy the docs
   # to Firebase (https://main-api.flutter.dev/).
