@@ -84,27 +84,78 @@ Future<void> lipoDylibs(
 
 /// Sets the install names in a dylib with a Mach-O format.
 ///
-/// On macOS and iOS, opening a dylib at runtime fails if the path inside the
-/// dylib itself does not correspond to the path that the file is at. Therefore,
-/// native assets copied into their final location also need their install name
-/// updated with the `install_name_tool`.
+/// On macOS and iOS, native assets copied into their final location need their
+/// install names updated with the `install_name_tool`: a dylib finds its
+/// dependencies by the install names in its load commands, and in app builds
+/// the native assets manifest refers to a code asset by its install name
+/// (https://github.com/flutter/flutter/issues/190799).
 ///
 /// [oldToNewInstallNames] is a map from old to new install names, that should
 /// be applied to the dependencies of the dylib. Entries in this map for
 /// dependencies that are not present in the dylib are ignored. The install
 /// name of a dependencies needs to be updated if the location of the dependency
 /// has changed.
-Future<void> setInstallNamesDylib(
+///
+/// If [keepInstallNameIfItDoesNotFit] is true and `install_name_tool` reports
+/// that the header of [dylibFile] has no room for the updated load commands,
+/// the install name of [dylibFile] is left as it is and only its dependencies
+/// are updated. This happens for a dylib that was linked without
+/// `-headerpad_max_install_names`, such as a prebuilt one. If the dependencies
+/// do not fit either, or `install_name_tool` fails for any other reason, the
+/// tool exits.
+///
+/// Returns whether the install name of [dylibFile] was set to
+/// [newInstallName].
+Future<bool> setInstallNamesDylib(
   File dylibFile,
   String newInstallName,
   Map<String, String> oldToNewInstallNames, {
   required ProcessUtils processUtils,
+  bool keepInstallNameIfItDoesNotFit = false,
 }) async {
-  final RunResult setInstallNamesResult = await processUtils.run(<String>[
+  final RunResult setInstallNamesResult = await _runInstallNameTool(
+    dylibFile,
+    oldToNewInstallNames,
+    newInstallName: newInstallName,
+    processUtils: processUtils,
+  );
+  if (setInstallNamesResult.exitCode == 0) {
+    return true;
+  }
+  RunResult? changeDependenciesResult;
+  if (keepInstallNameIfItDoesNotFit &&
+      setInstallNamesResult.stderr.contains(_kLoadCommandsDoNotFit)) {
+    changeDependenciesResult = await _runInstallNameTool(
+      dylibFile,
+      oldToNewInstallNames,
+      processUtils: processUtils,
+    );
+    if (changeDependenciesResult.exitCode == 0) {
+      return false;
+    }
+  }
+  throwToolExit(
+    'Failed to change install names in $dylibFile'
+    '${changeDependenciesResult == null ? '' : ', also after keeping its install name'}:\n'
+    'id -> $newInstallName\n'
+    'dependencies -> $newInstallName\n'
+    '${setInstallNamesResult.stderr}'
+    '${changeDependenciesResult == null ? '' : '\nAfter keeping the install name:\n${changeDependenciesResult.stderr}'}',
+  );
+}
+
+/// Runs `install_name_tool` on [dylibFile] with a `-change` for each entry of
+/// [oldToNewInstallNames], and with `-id` when [newInstallName] is given.
+Future<RunResult> _runInstallNameTool(
+  File dylibFile,
+  Map<String, String> oldToNewInstallNames, {
+  required ProcessUtils processUtils,
+  String? newInstallName,
+}) {
+  return processUtils.run(<String>[
     'xcrun',
     'install_name_tool',
-    '-id',
-    newInstallName,
+    if (newInstallName != null) ...<String>['-id', newInstallName],
     for (final MapEntry<String, String> entry in oldToNewInstallNames.entries) ...<String>[
       '-change',
       entry.key,
@@ -112,15 +163,14 @@ Future<void> setInstallNamesDylib(
     ],
     dylibFile.path,
   ]);
-  if (setInstallNamesResult.exitCode != 0) {
-    throwToolExit(
-      'Failed to change install names in $dylibFile:\n'
-      'id -> $newInstallName\n'
-      'dependencies -> $newInstallName\n'
-      '${setInstallNamesResult.stderr}',
-    );
-  }
 }
+
+/// What `install_name_tool` prints when a dylib's header has no room for the
+/// larger load commands.
+///
+/// If a later version words this differently, the fallback in
+/// [setInstallNamesDylib] no longer applies and the tool exits as before.
+const _kLoadCommandsDoNotFit = 'larger updated load commands do not fit';
 
 Future<Set<String>> getInstallNamesDylib(
   File dylibFile, {
