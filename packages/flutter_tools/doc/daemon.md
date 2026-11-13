@@ -289,13 +289,14 @@ Return a list of all available emulators. The `params` field will be a List; eac
 The `launch()` command allows launching an emulator/simulator by its `id`.
 
 - `emulatorId`: the id of an emulator as returned by `getEmulators`.
-- `coldBoot`: an optional boolean flag which indicates if the emulator should be cold booted. Only supported for android emulators, silently ignored if emulator type is not android.
+- `coldBoot`: an optional boolean flag which indicates if the emulator should be cold booted. Supported for Android and tool extension emulators; silently ignored for other emulator types.
 
 #### emulator.create
 
-The `create()` command creates a new Android emulator with an optional `name`.
+The `create()` command creates a new emulator with an optional `name` and `platform`.
 
 - `name`: an optional name for this emulator
+- `platform`: an optional target platform identifier (for example, `'android'` or a tool extension platform identifier). When omitted, defaults to `'android'` if Android emulator creation is available, or to the single available tool extension emulator platform otherwise.
 
 The returned `params` will contain:
 
@@ -352,6 +353,7 @@ See the [source](https://github.com/flutter/flutter/blob/main/packages/flutter_t
 
 ## Changelog
 
+- 0.6.2: Added `platform` option to `emulator.create` command.
 - 0.6.1: Added `coldBoot` option to `emulator.launch` command.
 - 0.6.0: Added `debounce` option to `app.restart` command.
 - 0.5.3: Added `emulatorId` field to device.

@@ -457,12 +457,7 @@ Future<String> readNumberedChoiceLine({
   while (true) {
     logger.printStatus(prompt, emphasis: true, newline: false);
     logger.printStatus(': ', emphasis: true, newline: false);
-    final String choice;
-    try {
-      choice = (await terminal.readLine()).trim();
-    } on StateError {
-      return 'q';
-    }
+    final String choice = (await terminal.readLine()).trim();
     if (choice.toLowerCase() == 'q') {
       return choice;
     }

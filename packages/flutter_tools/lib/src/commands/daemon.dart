@@ -45,7 +45,7 @@ import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 import '../web/web_runner.dart';
 
-const protocolVersion = '0.6.1';
+const protocolVersion = '0.6.2';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns

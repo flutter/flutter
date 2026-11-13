@@ -366,50 +366,61 @@ void main() {
       });
 
       testWithoutContext(
-        'throws ToolExit when --platform is unknown and lists available platforms',
+        'prints error and omits Android links when --platform is unknown',
         () async {
           final toolContext = FakeToolContext(logger: logger, platform: platform);
-          final command = EmulatorsCommand(
-            doctor: doctor,
-            emulatorManager: FakeEmulatorManager(
-              availableCreatePlatforms: const <String>['android', 'custom_os'],
-            ),
-            toolContext: toolContext,
-          );
-
-          await expectLater(
-            () =>
-                createTestCommandRunner(command)
-                    .run(<String>['emulators', '--create', '--platform', 'unknown_os']),
-            throwsToolExit(
-              message:
+          final emulatorManager = FakeEmulatorManager(
+            availableCreatePlatforms: const <String>['android', 'custom_os'],
+            createResult: CreateEmulatorResult(
+              '',
+              success: false,
+              error:
                   'Unknown emulator creation platform "unknown_os". '
                   'Available platforms: android, custom_os.',
             ),
           );
-        },
-      );
-
-      testWithoutContext(
-        'routes directly to single extension platform without prompting when --platform is omitted',
-        () async {
-          final toolContext = FakeToolContext(logger: logger, platform: platform);
-          final emulatorManager = FakeEmulatorManager(
-            availableCreatePlatforms: const <String>['custom_os'],
-            createResult: CreateEmulatorResult('custom_sim_1', success: true),
-          );
           final command = EmulatorsCommand(
-            doctor: _FakeDoctor(canListEmulators: false),
-            emulatorManager: emulatorManager..extensionEmulatorSources = true,
+            doctor: doctor,
+            emulatorManager: emulatorManager,
             toolContext: toolContext,
           );
 
-          await createTestCommandRunner(command).run(<String>['emulators', '--create']);
+          await createTestCommandRunner(command)
+              .run(<String>['emulators', '--create', '--platform', 'unknown_os']);
 
-          expect(emulatorManager.lastCreatedPlatform, 'custom_os');
-          expect(logger.statusText, contains("Emulator 'custom_sim_1' created successfully."));
+          expect(emulatorManager.lastCreatedPlatform, 'unknown_os');
+          expect(logger.statusText, contains('Failed to create emulator.'));
+          expect(
+            logger.statusText,
+            contains(
+              'Unknown emulator creation platform "unknown_os". '
+              'Available platforms: android, custom_os.',
+            ),
+          );
+          expect(
+            logger.statusText,
+            isNot(contains('https://developer.android.com/studio/run/managing-avds')),
+          );
         },
       );
+
+      testWithoutContext('delegates to EmulatorManager without prompting when single extension platform is available', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        final emulatorManager = FakeEmulatorManager(
+          availableCreatePlatforms: const <String>['custom_os'],
+          createResult: CreateEmulatorResult('custom_sim_1', success: true),
+        );
+        final command = EmulatorsCommand(
+          doctor: _FakeDoctor(canListEmulators: false),
+          emulatorManager: emulatorManager..extensionEmulatorSources = true,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators', '--create']);
+
+        expect(emulatorManager.lastCreatedPlatform, isNull);
+        expect(logger.statusText, contains("Emulator 'custom_sim_1' created successfully."));
+      });
 
       testWithoutContext(
         'omits Android links when extension emulator creation fails without a name',

@@ -725,7 +725,6 @@ class ToolDependencies {
           xcode: finalXcode,
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
           extensionManager: extensionManager,
-          featureFlags: finalFeatureFlags,
         );
 
     final extensionBuildManager = ExtensionBuildManager(

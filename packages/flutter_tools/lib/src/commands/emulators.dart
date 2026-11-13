@@ -114,30 +114,15 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<void> _createEmulator({String? name, String? platform}) async {
     final ToolContext(:Logger logger, :AnsiTerminal terminal) = toolContext;
-    final String? resolvedPlatform;
-    if (platform != null) {
-      if (platform.isEmpty) {
+    var resolvedPlatform = platform;
+    List<String>? availablePlatforms;
+    if (resolvedPlatform != null) {
+      if (resolvedPlatform.isEmpty) {
         throwToolExit('The "--$_platformOption" option must not be empty.');
       }
-      if (platform != EmulatorManager.androidPlatform) {
-        final List<String> availablePlatforms = await _emulatorManager
-            .getAvailableCreatePlatforms();
-        if (!availablePlatforms.contains(platform)) {
-          throwToolExit(
-            availablePlatforms.isEmpty
-                ? 'Unknown emulator creation platform "$platform". '
-                      'No emulator creation platforms are available.'
-                : 'Unknown emulator creation platform "$platform". '
-                      'Available platforms: ${availablePlatforms.join(', ')}.',
-          );
-        }
-      }
-      resolvedPlatform = platform;
     } else {
-      final List<String> availablePlatforms = await _emulatorManager.getAvailableCreatePlatforms();
-      if (availablePlatforms.length == 1) {
-        resolvedPlatform = availablePlatforms.single;
-      } else if (availablePlatforms.length > 1) {
+      availablePlatforms = await _emulatorManager.getAvailableCreatePlatforms();
+      if (availablePlatforms.length > 1) {
         if (!terminal.stdinHasTerminal) {
           throwToolExit(
             'Multiple emulator creation platforms are available '
@@ -150,8 +135,6 @@ class EmulatorsCommand extends FlutterCommand {
           logger: logger,
           terminal: terminal,
         );
-      } else {
-        resolvedPlatform = null;
       }
     }
 
@@ -172,7 +155,15 @@ class EmulatorsCommand extends FlutterCommand {
       if (error != null && error.trim().isNotEmpty) {
         logger.printStatus(error.trim());
       }
-      if (resolvedPlatform == null || resolvedPlatform == EmulatorManager.androidPlatform) {
+      final bool isAndroidOrUnconfigured = switch (resolvedPlatform) {
+        EmulatorManager.androidPlatform => true,
+        null =>
+          availablePlatforms == null ||
+              availablePlatforms.isEmpty ||
+              availablePlatforms.single == EmulatorManager.androidPlatform,
+        _ => false,
+      };
+      if (isAndroidOrUnconfigured) {
         _printAdditionalInfo();
       }
     }

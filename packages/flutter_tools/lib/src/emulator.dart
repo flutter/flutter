@@ -19,7 +19,6 @@ import 'context/tool_context.dart';
 import 'device.dart';
 import 'experimental/extension_device_manager.dart';
 import 'experimental/extension_manager.dart';
-import 'features.dart';
 import 'ios/ios_emulators.dart';
 import 'ios/ios_workflow.dart';
 import 'macos/xcode.dart';
@@ -36,7 +35,6 @@ class EmulatorManager {
     required this._xcode,
     this._androidSdkBuilder,
     this._extensionManager,
-    this._featureFlags,
   });
 
   /// Platform identifier for built-in Android AVD creation (`--platform android`).
@@ -46,7 +44,6 @@ class EmulatorManager {
   late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
   final AndroidWorkflow _androidWorkflow;
   final ExtensionManager? _extensionManager;
-  final FeatureFlags? _featureFlags;
   final IOSWorkflow? _iosWorkflow;
   final Java? Function() _javaBuilder;
   late final Java? _java = _javaBuilder();
@@ -65,8 +62,7 @@ class EmulatorManager {
     );
   }();
 
-  late final ExtensionEmulators? _extensionEmulators =
-      (_featureFlags?.isToolExtensionsEnabled ?? false) && _extensionManager != null
+  late final ExtensionEmulators? _extensionEmulators = _extensionManager != null
       ? ExtensionEmulators(extensionManager: _extensionManager, logger: _toolContext.logger)
       : null;
 
@@ -146,45 +142,48 @@ class EmulatorManager {
   /// Creates a new emulator, optionally named [name], targeting [platform]
   /// (`'android'` or an extension platform identifier).
   ///
-  /// When [platform] is omitted, delegates automatically if at most one
-  /// emulator creation platform is available, or returns a failed
-  /// [CreateEmulatorResult] listing the available platforms when multiple
-  /// platforms are available.
+  /// When [platform] is omitted, defaults to Android when Android AVD creation
+  /// is available, delegates to the single extension platform when exactly one
+  /// extension supports emulator creation, or returns a failed
+  /// [CreateEmulatorResult] when multiple extension platforms are available.
   Future<CreateEmulatorResult> createEmulator({String? name, String? platform}) async {
-    if (platform == androidPlatform) {
+    if (platform == androidPlatform || (platform == null && _canCreateAndroidEmulator)) {
       return _createAndroidEmulator(name: name);
     }
 
     final ExtensionEmulators? extensionEmulators = _extensionEmulators;
-    if (platform != null && extensionEmulators != null) {
-      final CreateEmulatorResult? result = await extensionEmulators.createEmulator(
-        platform: platform,
-        name: name,
-      );
-      if (result != null) {
-        return result;
-      }
-    }
-
-    final List<String> availablePlatforms = await getAvailableCreatePlatforms();
     if (platform != null) {
+      if (extensionEmulators != null) {
+        final CreateEmulatorResult? result = await extensionEmulators.createEmulator(
+          platform: platform,
+          name: name,
+        );
+        if (result != null) {
+          return result;
+        }
+      }
+      final List<String> availablePlatforms = await getAvailableCreatePlatforms();
       return CreateEmulatorResult(
         name ?? '',
         success: false,
         error: availablePlatforms.isEmpty
-            ? 'Unknown emulator creation platform "$platform".'
+            ? 'Unknown emulator creation platform "$platform". '
+                  'No emulator creation platforms are available.'
             : 'Unknown emulator creation platform "$platform". '
                   'Available platforms: ${availablePlatforms.join(', ')}.',
       );
     }
 
-    if (availablePlatforms.isEmpty ||
-        (availablePlatforms.length == 1 && availablePlatforms.single == androidPlatform)) {
+    if (extensionEmulators == null) {
       return _createAndroidEmulator(name: name);
     }
-    if (availablePlatforms.length == 1 && extensionEmulators != null) {
+    final List<String> extensionPlatforms = await extensionEmulators.getCreatePlatforms();
+    if (extensionPlatforms.isEmpty) {
+      return _createAndroidEmulator(name: name);
+    }
+    if (extensionPlatforms case [final String singlePlatform]) {
       final CreateEmulatorResult? result = await extensionEmulators.createEmulator(
-        platform: availablePlatforms.single,
+        platform: singlePlatform,
         name: name,
       );
       if (result != null) {
@@ -196,7 +195,7 @@ class EmulatorManager {
       success: false,
       error:
           'Multiple emulator creation platforms are available '
-          '(${availablePlatforms.join(', ')}). Specify one using "--platform <platform>".',
+          '(${extensionPlatforms.join(', ')}). Specify a "platform" parameter.',
     );
   }
 

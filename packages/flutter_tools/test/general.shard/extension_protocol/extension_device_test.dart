@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -21,8 +22,10 @@ import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -863,14 +866,14 @@ void main() {
     testWithoutContext('DeviceService.isValidPlatformName validates CLI platform identifiers', () {
       expect(DeviceService.isValidPlatformName('custom_os'), isTrue);
       expect(DeviceService.isValidPlatformName('custom-embedder-2'), isTrue);
-      expect(DeviceService.isValidPlatformName('android'), isFalse);
+      expect(DeviceService.isValidPlatformName('android'), isTrue);
       expect(DeviceService.isValidPlatformName(''), isFalse);
       expect(DeviceService.isValidPlatformName('CustomOs'), isFalse);
       expect(DeviceService.isValidPlatformName('1custom'), isFalse);
       expect(DeviceService.isValidPlatformName('custom os'), isFalse);
     });
 
-    testWithoutContext('default DeviceService implementations return null platform, empty emulators, and -32002 for launch and create', () async {
+    testWithoutContext('default DeviceService implementations return null platform, empty emulators, and SERVER_ERROR for launch and create', () async {
       void entryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
           sendPort,
@@ -889,11 +892,7 @@ void main() {
         client.launchEmulator(emulatorId: 'any_id', coldBoot: true),
         throwsA(
           isA<json_rpc.RpcException>()
-              .having(
-                (json_rpc.RpcException e) => e.code,
-                'code',
-                ToolExtensionEntryPoint.unsupportedCapabilityErrorCode,
-              )
+              .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
               .having(
                 (json_rpc.RpcException e) => e.message,
                 'message',
@@ -905,11 +904,7 @@ void main() {
         client.createEmulator(name: 'any_name'),
         throwsA(
           isA<json_rpc.RpcException>()
-              .having(
-                (json_rpc.RpcException e) => e.code,
-                'code',
-                ToolExtensionEntryPoint.unsupportedCapabilityErrorCode,
-              )
+              .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
               .having(
                 (json_rpc.RpcException e) => e.message,
                 'message',
@@ -1201,10 +1196,10 @@ void main() {
         expect(discovery.canListAnything, isTrue);
         expect(discovery.canLaunchAnything, isTrue);
 
-        // hasEmulatorSources prefetches emulators once for the immediately following read.
         expect(await discovery.hasEmulatorSources(), isTrue);
-        final List<Emulator> emulators = await discovery.emulators;
         expect(emulatorsQueryCount, 1);
+        final List<Emulator> emulators = await discovery.emulators;
+        expect(emulatorsQueryCount, 2);
         expect(emulators, hasLength(1));
         expect(emulators.first.id, 'healthy_emu');
         expect(emulators.first.name, 'Healthy Emulator');
@@ -1215,7 +1210,7 @@ void main() {
 
         // Subsequent emulators reads query live state again.
         await discovery.emulators;
-        expect(emulatorsQueryCount, 2);
+        expect(emulatorsQueryCount, 3);
       },
     );
 
@@ -1293,7 +1288,7 @@ void main() {
           throwsToolExit(
             message:
                 'Extension "readonly_emu_ext": Failed to launch emulator "unsupported_emu": '
-                'Launching emulator unsupported_emu is not supported.',
+                'Unsupported operation: Launching emulator unsupported_emu is not supported.',
           ),
         );
       },
@@ -1401,8 +1396,21 @@ void main() {
       expect(await discovery.getCreatePlatforms(), equals(<String>['custom_os']));
       final String warningsAfterFirstLoad = logger.warningText;
       expect(warningsAfterFirstLoad, isNot(contains('default_device_ext')));
-      expect(warningsAfterFirstLoad, contains('android_collision_ext'));
-      expect(warningsAfterFirstLoad, contains('invalid_name_ext'));
+      expect(
+        warningsAfterFirstLoad,
+        contains(
+          'Ignoring emulator platform "android" from tool extension "android_collision_ext": '
+          '"android" is reserved for built-in Android emulators.',
+        ),
+      );
+      expect(
+        warningsAfterFirstLoad,
+        contains(
+          'Ignoring invalid emulator platform "Invalid Name!" from tool extension '
+          '"invalid_name_ext": platform identifiers must match lowercase ASCII letters, digits, '
+          'underscores, or hyphens.',
+        ),
+      );
       expect(warningsAfterFirstLoad, contains('failing_platform_ext'));
       expect(
         warningsAfterFirstLoad,
@@ -1430,48 +1438,62 @@ void main() {
       expect(failed?.error, contains('Out of disk space'));
     });
 
-    testWithoutContext('EmulatorManager does not initialize ExtensionManager when tool extensions are disabled or omitted', () async {
-      void shouldNotSpawnEntryPoint(SendPort sendPort) {
-        fail('Extension isolate should not spawn when EmulatorManager feature flag is disabled.');
-      }
+    testWithoutContext(
+      'EmulatorManager does not spawn extensions when disabled, in safe mode, or omitted',
+      () async {
+        void shouldNotSpawnEntryPoint(SendPort sendPort) {
+          fail('Extension isolate should not spawn when extensions are disabled or in safe mode.');
+        }
 
-      final enabledExtensionManager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        entryPoints: <ExtensionEntryPoint>[shouldNotSpawnEntryPoint],
-      );
-      addTearDown(enabledExtensionManager.dispose);
-
-      final disabledFlags = TestFeatureFlags();
-      for (final flags in <TestFeatureFlags?>[disabledFlags, null]) {
-        final emulatorManager = EmulatorManager(
-          androidWorkflow: AndroidWorkflow(
-            androidSdkBuilder: () => null,
-            featureFlags: disabledFlags,
-          ),
-          extensionManager: enabledExtensionManager,
-          featureFlags: flags,
-          iosWorkflow: null,
-          javaBuilder: () => null,
-          toolContext: FakeToolContext(
-            fs: MemoryFileSystem.test(),
-            logger: logger,
-            processManager: FakeProcessManager.empty(),
-          ),
-          xcode: null,
+        final disabledFlags = TestFeatureFlags();
+        final disabledExtManager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: disabledFlags,
+          entryPoints: <ExtensionEntryPoint>[shouldNotSpawnEntryPoint],
         );
+        addTearDown(disabledExtManager.dispose);
 
-        expect(await emulatorManager.hasExtensionEmulatorSources(), isFalse);
-        expect(await emulatorManager.getAvailableCreatePlatforms(), isEmpty);
-        expect(await emulatorManager.getAllAvailableEmulators(), isEmpty);
-        final CreateEmulatorResult result = await emulatorManager.createEmulator(
-          platform: 'custom_os',
-        );
-        expect(result.success, isFalse);
-        expect(enabledExtensionManager.isInitialized, isFalse);
-      }
-    });
+        final safeModeExtManager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          entryPoints: <ExtensionEntryPoint>[shouldNotSpawnEntryPoint],
+        )..disable();
+        addTearDown(safeModeExtManager.dispose);
+
+        for (final extManager in <ExtensionManager?>[
+          disabledExtManager,
+          safeModeExtManager,
+          null,
+        ]) {
+          final emulatorManager = EmulatorManager(
+            androidWorkflow: AndroidWorkflow(
+              androidSdkBuilder: () => null,
+              featureFlags: disabledFlags,
+            ),
+            extensionManager: extManager,
+            iosWorkflow: null,
+            javaBuilder: () => null,
+            toolContext: FakeToolContext(
+              fs: MemoryFileSystem.test(),
+              logger: logger,
+              processManager: FakeProcessManager.empty(),
+            ),
+            xcode: null,
+          );
+
+          expect(await emulatorManager.hasExtensionEmulatorSources(), isFalse);
+          expect(await emulatorManager.getAvailableCreatePlatforms(), isEmpty);
+          expect(await emulatorManager.getAllAvailableEmulators(), isEmpty);
+          final CreateEmulatorResult result = await emulatorManager.createEmulator(
+            platform: 'custom_os',
+          );
+          expect(result.success, isFalse);
+          expect(extManager?.connections ?? const <ExtensionConnection>[], isEmpty);
+        }
+      },
+    );
 
     testWithoutContext(
       'EmulatorManager discovers emulators, reports extension sources, and routes createEmulator',
@@ -1500,7 +1522,6 @@ void main() {
             featureFlags: featureFlags,
           ),
           extensionManager: desktopOnlyManager,
-          featureFlags: featureFlags,
           iosWorkflow: null,
           javaBuilder: () => null,
           toolContext: FakeToolContext(
@@ -1551,7 +1572,6 @@ void main() {
             featureFlags: featureFlags,
           ),
           extensionManager: singleProviderExtManager,
-          featureFlags: featureFlags,
           iosWorkflow: null,
           javaBuilder: () => null,
           toolContext: FakeToolContext(
@@ -1604,7 +1624,60 @@ void main() {
           'Unknown emulator creation platform "unknown_os". Available platforms: custom_os.',
         );
 
-        // Multiple extension providers require disambiguation when platform is omitted.
+        // When Android AVD creation is also available, omitted platform defaults
+        // to Android for backwards compatibility with IDE daemon clients.
+        final androidSdk = _FakeAndroidSdk();
+        final androidAndExtManager = EmulatorManager(
+          androidSdkBuilder: () => androidSdk,
+          androidWorkflow: AndroidWorkflow(
+            androidSdkBuilder: () => androidSdk,
+            featureFlags: featureFlags,
+          ),
+          extensionManager: singleProviderExtManager,
+          iosWorkflow: null,
+          javaBuilder: FakeJava.new,
+          toolContext: FakeToolContext(
+            fs: MemoryFileSystem.test(),
+            logger: logger,
+            processManager: FakeProcessManager.list(<FakeCommand>[
+              const FakeCommand(
+                command: <String>['avdmanager', 'list', 'device', '-c'],
+                stdout: 'pixel\n',
+              ),
+              const FakeCommand(
+                command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+                stderr: 'system-images;android-27;google_apis_playstore;x86\n',
+                exitCode: 1,
+              ),
+              const FakeCommand(
+                command: <String>[
+                  'avdmanager',
+                  'create',
+                  'avd',
+                  '-n',
+                  'ide_default_avd',
+                  '-k',
+                  'system-images;android-27;google_apis_playstore;x86',
+                  '-d',
+                  'pixel',
+                ],
+              ),
+            ]),
+          ),
+          xcode: null,
+        );
+        expect(await androidAndExtManager.getAvailableCreatePlatforms(), <String>[
+          'android',
+          'custom_os',
+        ]);
+        final CreateEmulatorResult defaultAndroidResult = await androidAndExtManager.createEmulator(
+          name: 'ide_default_avd',
+        );
+        expect(defaultAndroidResult.success, isTrue);
+        expect(defaultAndroidResult.emulatorName, 'ide_default_avd');
+
+        // Multiple extension providers require disambiguation when platform is omitted
+        // and Android AVD creation is unavailable.
         void secondOsEntryPoint(SendPort sendPort) {
           ToolExtensionEntryPoint.run(
             sendPort,
@@ -1634,7 +1707,6 @@ void main() {
             featureFlags: featureFlags,
           ),
           extensionManager: multiProviderExtManager,
-          featureFlags: featureFlags,
           iosWorkflow: null,
           javaBuilder: () => null,
           toolContext: FakeToolContext(
@@ -1654,7 +1726,7 @@ void main() {
         expect(
           ambiguousResult.error,
           'Multiple emulator creation platforms are available (custom_os, second_os). '
-          'Specify one using "--platform <platform>".',
+          'Specify a "platform" parameter.',
         );
 
         final CreateEmulatorResult disambiguatedResult = await multiEmulatorManager.createEmulator(
@@ -1711,7 +1783,6 @@ void main() {
             featureFlags: featureFlags,
           ),
           extensionManager: extManager,
-          featureFlags: featureFlags,
           iosWorkflow: null,
           javaBuilder: () => null,
           toolContext: toolContext,
@@ -1792,6 +1863,119 @@ void main() {
         });
       },
     );
+
+    testWithoutContext('ExtensionEmulators and ExtensionEmulator surface ToolExtensionException messages cleanly without duplicate prefix', () async {
+      void domainPlatformErrorEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _TestEmulatorDeviceService(
+              onGetEmulatorPlatform: () =>
+                  throw const ToolExtensionException('Emulator SDK is not configured.'),
+              onGetEmulators: () =>
+                  throw const ToolExtensionException('Emulator list command failed.'),
+            ),
+          ],
+          extensionName: 'domain_platform_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      void domainActionErrorEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _TestEmulatorDeviceService(
+              emulatorPlatform: 'custom_os',
+              emulators: const <TargetEmulator>[
+                TargetEmulator(id: 'domain_emu', name: 'Domain Error Emulator'),
+              ],
+              onLaunchEmulator: (String _, bool _) =>
+                  throw const ToolExtensionException('Simulator binary not found.'),
+              onCreateEmulator: (String? _) =>
+                  throw const ToolExtensionException('No system image installed.'),
+            ),
+          ],
+          extensionName: 'domain_action_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final extManager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: featureFlags,
+        entryPoints: <ExtensionEntryPoint>[
+          domainPlatformErrorEntryPoint,
+          domainActionErrorEntryPoint,
+        ],
+      );
+      addTearDown(extManager.dispose);
+
+      final discovery = ExtensionEmulators(extensionManager: extManager, logger: logger);
+      expect(await discovery.getCreatePlatforms(), <String>['custom_os']);
+      expect(
+        logger.warningText,
+        contains('Extension "domain_platform_ext": Emulator SDK is not configured.'),
+      );
+      expect(logger.warningText, isNot(contains('ToolExtensionException:')));
+
+      logger.clear();
+      final List<Emulator> emulators = await discovery.emulators;
+      expect(emulators, hasLength(1));
+      expect(
+        logger.warningText,
+        contains('Extension "domain_platform_ext": Emulator list command failed.'),
+      );
+      expect(logger.warningText, isNot(contains('ToolExtensionException:')));
+
+      await expectLater(
+        () => emulators.single.launch(),
+        throwsToolExit(
+          message:
+              'Extension "domain_action_ext": Failed to launch emulator "domain_emu": '
+              'Simulator binary not found.',
+        ),
+      );
+
+      final CreateEmulatorResult? createFailed = await discovery.createEmulator(
+        platform: 'custom_os',
+        name: 'sim_1',
+      );
+      expect(createFailed?.success, isFalse);
+      expect(createFailed?.error, 'Extension "domain_action_ext": No system image installed.');
+    });
+
+    testWithoutContext('linuxExtensionEntryPoint does not advertise emulator sources or create platforms in production', () async {
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final extManager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: featureFlags,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+      );
+      addTearDown(extManager.dispose);
+
+      final emulatorManager = EmulatorManager(
+        androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => null, featureFlags: featureFlags),
+        extensionManager: extManager,
+        iosWorkflow: null,
+        javaBuilder: () => null,
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          processManager: FakeProcessManager.empty(),
+        ),
+        xcode: null,
+      );
+
+      expect(await emulatorManager.hasExtensionEmulatorSources(), isFalse);
+      expect(await emulatorManager.getAvailableCreatePlatforms(), isEmpty);
+      expect(await emulatorManager.getAllAvailableEmulators(), isEmpty);
+      expect(logger.warningText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    });
   });
 }
 
@@ -1848,4 +2032,21 @@ final class _DomainErrorDeviceService extends DeviceService {
 
   @override
   Future<void> stopLogStream({required String deviceId}) async {}
+}
+
+final class _FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String? get avdManagerPath => 'avdmanager';
+
+  @override
+  String? get emulatorPath => 'emulator';
+
+  @override
+  String? get adbPath => 'adb';
+
+  @override
+  String? getAvdManagerPath() => avdManagerPath;
+
+  @override
+  String getAvdPath() => 'avd';
 }

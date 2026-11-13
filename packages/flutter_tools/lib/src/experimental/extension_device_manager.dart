@@ -851,20 +851,16 @@ class ExtensionEmulator extends Emulator {
 
   @override
   Future<void> launch({bool coldBoot = false}) async {
-    final String prefix = ExtensionEmulators._extensionErrorPrefix(_deviceService);
     try {
       await _deviceService.launchEmulator(emulatorId: id, coldBoot: coldBoot);
-    } on json_rpc.RpcException catch (err, stack) {
-      _logger.printTrace('$stack');
-      final String detail = err.message.trim();
-      throwToolExit(
-        detail.isEmpty
-            ? '${prefix}Failed to launch emulator "$id".'
-            : '${prefix}Failed to launch emulator "$id": $detail',
-      );
     } on Object catch (err, stack) {
       _logger.printTrace('$stack');
-      final String detail = '$err'.trim();
+      final String prefix = ExtensionEmulators._extensionErrorPrefix(_deviceService);
+      final String detail = switch (err) {
+        ToolExtensionException(:final String message) ||
+        json_rpc.RpcException(:final String message) => message.trim(),
+        _ => '$err'.trim(),
+      };
       throwToolExit(
         detail.isEmpty
             ? '${prefix}Failed to launch emulator "$id".'
@@ -881,7 +877,6 @@ class ExtensionEmulators extends EmulatorDiscovery {
   final ExtensionManager _extensionManager;
   final Logger _logger;
   Future<Map<String, DeviceService>>? _createProvidersFuture;
-  Future<List<Emulator>>? _prefetchedEmulators;
 
   static String _describeExtension(DeviceService service) => switch (service) {
     ExtensionDeviceClient(connection: ExtensionConnection(:final String extensionName)) =>
@@ -905,26 +900,12 @@ class ExtensionEmulators extends EmulatorDiscovery {
   bool get canLaunchAnything => true;
 
   /// Returns whether any active extension supports emulator creation or
-  /// currently provides emulators, caching any queried emulator list for the
-  /// immediately following [emulators] read.
-  Future<bool> hasEmulatorSources() async {
-    if ((await getCreatePlatforms()).isNotEmpty) {
-      return true;
-    }
-    final Future<List<Emulator>> future = _queryEmulators();
-    _prefetchedEmulators = future;
-    return (await future).isNotEmpty;
-  }
+  /// currently provides emulators.
+  Future<bool> hasEmulatorSources() async =>
+      (await getCreatePlatforms()).isNotEmpty || (await _queryEmulators()).isNotEmpty;
 
   @override
-  Future<List<Emulator>> get emulators {
-    final Future<List<Emulator>>? prefetched = _prefetchedEmulators;
-    if (prefetched != null) {
-      _prefetchedEmulators = null;
-      return prefetched;
-    }
-    return _queryEmulators();
-  }
+  Future<List<Emulator>> get emulators => _queryEmulators();
 
   Future<List<Emulator>> _queryEmulators() async {
     _logger.printTrace('ExtensionEmulators querying active tool extension emulators...');
@@ -948,7 +929,14 @@ class ExtensionEmulators extends EmulatorDiscovery {
               ),
           ];
         } on Object catch (e, st) {
-          _logger.printWarning('Failed to query emulators from ${_describeExtension(service)}: $e');
+          final String prefix = _extensionErrorPrefix(service);
+          _logger.printWarning(switch (e) {
+            ToolExtensionException(:final String message) when prefix.isNotEmpty =>
+              '$prefix$message',
+            ToolExtensionException(:final String message) =>
+              'Failed to query emulators from ${_describeExtension(service)}: $message',
+            _ => 'Failed to query emulators from ${_describeExtension(service)}: $e',
+          });
           _logger.printTrace('$st');
           return const <Emulator>[];
         }
@@ -976,25 +964,19 @@ class ExtensionEmulators extends EmulatorDiscovery {
       return null;
     }
     final String? normalizedName = name != null && name.isNotEmpty ? name : null;
-    final String prefix = _extensionErrorPrefix(service);
     try {
       final TargetEmulator created = await service.createEmulator(name: normalizedName);
       return CreateEmulatorResult(created.id, success: true);
-    } on json_rpc.RpcException catch (err, stack) {
-      _logger.printTrace(
-        'Failed to create emulator via ${_describeExtension(service)}: $err\n$stack',
-      );
-      final String detail = err.message.trim();
-      return CreateEmulatorResult(
-        normalizedName ?? '',
-        success: false,
-        error: detail.isEmpty ? '${prefix}Failed to create emulator.' : '$prefix$detail',
-      );
     } on Object catch (err, stack) {
       _logger.printTrace(
         'Failed to create emulator via ${_describeExtension(service)}: $err\n$stack',
       );
-      final String detail = '$err'.trim();
+      final String prefix = _extensionErrorPrefix(service);
+      final String detail = switch (err) {
+        ToolExtensionException(:final String message) ||
+        json_rpc.RpcException(:final String message) => message.trim(),
+        _ => '$err'.trim(),
+      };
       return CreateEmulatorResult(
         normalizedName ?? '',
         success: false,
@@ -1018,9 +1000,14 @@ class ExtensionEmulators extends EmulatorDiscovery {
         try {
           return (service, await service.getEmulatorPlatform());
         } on Object catch (e, st) {
-          _logger.printWarning(
-            'Failed to query emulator platform from ${_describeExtension(service)}: $e',
-          );
+          final String prefix = _extensionErrorPrefix(service);
+          _logger.printWarning(switch (e) {
+            ToolExtensionException(:final String message) when prefix.isNotEmpty =>
+              '$prefix$message',
+            ToolExtensionException(:final String message) =>
+              'Failed to query emulator platform from ${_describeExtension(service)}: $message',
+            _ => 'Failed to query emulator platform from ${_describeExtension(service)}: $e',
+          });
           _logger.printTrace('$st');
           return (service, null);
         }

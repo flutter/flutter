@@ -192,6 +192,30 @@ void main() {
   });
 
   testWithoutContext(
+    'flutter emulators does not expose prototype emulators or fail built-in behavior when enabled',
+    () async {
+      final String missingAndroidSdk = tempHome.childDirectory('missing_android_sdk').path;
+      final ProcessResult result = await processManager.run(
+        <String>[flutterBin, 'emulators'],
+        environment: <String, String>{
+          ...baseEnv,
+          'ANDROID_HOME': missingAndroidSdk,
+          'ANDROID_SDK_ROOT': missingAndroidSdk,
+          'FLUTTER_TOOL_EXTENSIONS': 'true',
+        },
+      );
+
+      expect(result.stdout, isNot(contains('Linux Custom Extension Prototype')));
+      if (const LocalPlatform().isMacOS) {
+        expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+      } else {
+        expect(result.exitCode, 1);
+        expect(result.stderr, contains('Unable to find any emulator sources.'));
+      }
+    },
+  );
+
+  testWithoutContext(
     'flutter devices -v gracefully shuts down active tool extensions on exit',
     () async {
       final ProcessResult result = await processManager.run(

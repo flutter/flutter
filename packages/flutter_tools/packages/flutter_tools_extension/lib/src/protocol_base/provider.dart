@@ -24,10 +24,6 @@ class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to request graceful extension shutdown.
   static const String shutdownMethod = 'extension.shutdown';
 
-  /// JSON-RPC 2.0 error code returned when an optional capability is not
-  /// supported by the extension ([UnsupportedError]).
-  static const int unsupportedCapabilityErrorCode = -32002;
-
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
   /// Validates that [sendPort] is a [SendPort] (throwing an [ArgumentError]
@@ -56,7 +52,7 @@ class ToolExtensionEntryPoint {
         logger: logger,
         extensionName: extensionName,
       ),
-      exit: (int code) => throw _ProcessExitError(
+      exit: (int code) => throw UnsupportedError(
         'Tool extensions must not call exit($code); throw ToolExtensionException instead.',
       ),
     );
@@ -145,15 +141,6 @@ class ToolExtensionEntryPoint {
           );
           throw json_rpc.RpcException(ToolExtensionException.domainErrorCode, error.message);
         } on Object catch (error, stackTrace) {
-          if (error is UnsupportedError && error is! _ProcessExitError) {
-            logger?.call(
-              '[ToolExtensionIsolate] RPC request "$fullMethod" is unsupported: ${error.message}',
-            );
-            throw json_rpc.RpcException(
-              unsupportedCapabilityErrorCode,
-              error.message ?? 'Unsupported operation.',
-            );
-          }
           logger?.call(
             '[ToolExtensionIsolate] RPC request "$fullMethod" failed: $error\n$stackTrace',
           );
@@ -165,8 +152,4 @@ class ToolExtensionEntryPoint {
     logger?.call('[ToolExtensionIsolate] Isolate peer listening for RPC requests.');
     await peer.listen();
   }
-}
-
-final class _ProcessExitError extends UnsupportedError {
-  _ProcessExitError(super.message);
 }

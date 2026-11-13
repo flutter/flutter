@@ -93,21 +93,14 @@ abstract base class DeviceService extends ToolExtensionService {
   /// notifications.
   static const String lineKey = 'line';
 
-  /// Reserved built-in emulator creation platform identifier (`'android'`).
-  static const String reservedAndroidPlatform = 'android';
-
   // Platform identifiers are passed on the command line via `--platform <name>`,
   // so restrict them to lowercase ASCII identifiers starting with a letter and
   // containing only letters, digits, underscores, or hyphens.
   static final RegExp _validPlatformNamePattern = RegExp(r'^[a-z][a-z0-9_-]*$');
 
-  /// Returns whether [name] is a valid extension emulator creation platform
-  /// identifier for `flutter emulators --create --platform <name>`.
-  ///
-  /// Valid identifiers match `^[a-z][a-z0-9_-]*$` and must not equal
-  /// [reservedAndroidPlatform] (`'android'`).
-  static bool isValidPlatformName(String name) =>
-      name != reservedAndroidPlatform && _validPlatformNamePattern.hasMatch(name);
+  /// Returns whether [name] is a syntactically valid emulator creation platform
+  /// identifier (`^[a-z][a-z0-9_-]*$`) for `flutter emulators --create --platform <name>`.
+  static bool isValidPlatformName(String name) => _validPlatformNamePattern.hasMatch(name);
 
   @override
   String get namespace => serviceNamespace;
@@ -139,18 +132,20 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Launches a specific device emulator for the custom platform (for
   /// `flutter emulators`), optionally performing a [coldBoot].
   ///
-  /// Throws [UnsupportedError] (JSON-RPC `-32002`) when launching emulators is
-  /// not supported by this extension.
+  /// Throws [UnsupportedError] when launching emulators is not supported by
+  /// this extension, or [ToolExtensionException] if launching fails.
   Future<void> launchEmulator({required String emulatorId, bool coldBoot = false}) async {
     throw UnsupportedError('Launching emulator $emulatorId is not supported.');
   }
 
   /// Creates a new device emulator instance and returns its [TargetEmulator]
   /// descriptor (for `flutter emulators --create [--name <name>]
-  /// [--platform <platform>]`).
+  /// [--platform <platform>]` and `flutter daemon` `emulator.create`).
   ///
-  /// Throws [UnsupportedError] (JSON-RPC `-32002`) when emulator creation is
-  /// not supported by this extension.
+  /// The returned [TargetEmulator.id] is reported to the user and IDE daemon as
+  /// the created emulator identifier. Throws [UnsupportedError] when emulator
+  /// creation is not supported by this extension, or [ToolExtensionException]
+  /// if creation fails.
   Future<TargetEmulator> createEmulator({String? name}) async {
     throw UnsupportedError('Creating emulators is not supported.');
   }
@@ -244,17 +239,7 @@ abstract base class DeviceService extends ToolExtensionService {
     return isSupportedForProject(deviceId: deviceId, project: project);
   }
 
-  Future<String?> _getEmulatorPlatformRpc(Map<String, Object?> _) async {
-    final String? platform = await getEmulatorPlatform();
-    if (platform != null && !isValidPlatformName(platform)) {
-      throw StateError(
-        platform == reservedAndroidPlatform
-            ? 'Invalid emulator platform "$platform": "$reservedAndroidPlatform" is reserved for built-in Android emulators.'
-            : 'Invalid emulator platform "$platform": must match lowercase ASCII letters, digits, underscores, or hyphens.',
-      );
-    }
-    return platform;
-  }
+  Future<String?> _getEmulatorPlatformRpc(Map<String, Object?> _) => getEmulatorPlatform();
 
   Future<List<Map<String, Object?>>> _getEmulatorsRpc(Map<String, Object?> _) async {
     final List<TargetEmulator> emulators = await getEmulators();
