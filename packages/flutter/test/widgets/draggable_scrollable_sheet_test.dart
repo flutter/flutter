@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -1967,6 +1968,464 @@ void main() {
       );
 
       expect(lastExtent, 1.0);
+    },
+  );
+
+  testWidgets('A touch lifted while the sheet snaps does not assert _hold == null', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/195744
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: GestureDetector(
+          // A competing gesture recognizer ensures that the drag recognizer
+          // does not win the arena unconditionally on pointer down, reproducing
+          // _handleDragCancel when a touch lifts without dragging.
+          onTap: () {},
+          child: DraggableScrollableSheet(
+            controller: controller,
+            initialChildSize: 2 / 3,
+            minChildSize: 1 / 3,
+            snap: true,
+            snapSizes: const <double>[2 / 3],
+            builder: (BuildContext context, ScrollController scrollController) {
+              return SingleChildScrollView(
+                controller: scrollController,
+                child: Column(children: <Widget>[for (int i = 0; i < 40; i++) Text('Line $i')]),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.size, 2 / 3);
+
+    final Finder line = find.text('Line 3');
+    final TestGesture drag = await tester.startGesture(tester.getCenter(line));
+    await drag.moveBy(const Offset(0.0, -60.0));
+    await tester.pump();
+    await drag.moveBy(const Offset(0.0, -60.0));
+    await tester.pump();
+    await drag.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+
+    // Assert mid-snap state: sheet has started snapping towards 2 / 3.
+    final double midSnapSize = controller.size;
+    expect(midSnapSize, greaterThan(2 / 3));
+    expect(midSnapSize, lessThan(1.0));
+
+    // Touch the sheet while it is snapping, then lift without dragging.
+    final TestGesture touch = await tester.startGesture(tester.getCenter(line));
+    await tester.pump();
+
+    // Assert hold callback contract: touching the sheet halts the snap animation
+    // and holds the position stationary.
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(controller.size, midSnapSize);
+
+    // Lifting touch releases the hold.
+    await touch.up();
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+
+    // Let the sheet finish settling to its final snapped size.
+    await tester.pumpAndSettle();
+    expect(controller.size, 2 / 3);
+  });
+
+  testWidgets('position.hold callback is called once when superseded by snap and drag', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    late ScrollController innerController;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: DraggableScrollableSheet(
+          controller: controller,
+          snap: true,
+          snapSizes: const <double>[0.5, 1.0],
+          builder: (BuildContext context, ScrollController scrollController) {
+            innerController = scrollController;
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Drag the sheet midway between 0.5 and 1.0 so extent.hasDragged is true
+    // and _shouldSnap() is true.
+    final Drag initialDrag = innerController.position.drag(DragStartDetails(), () {});
+    initialDrag.update(
+      DragUpdateDetails(
+        globalPosition: Offset.zero,
+        delta: const Offset(0.0, -90.0),
+        primaryDelta: -90.0,
+      ),
+    );
+    expect(controller.size, greaterThan(0.5));
+    expect(controller.size, lessThan(1.0));
+
+    var holdCanceledCount = 0;
+    final ScrollHoldController hold = innerController.position.hold(() {
+      holdCanceledCount++;
+    });
+    expect(holdCanceledCount, 0);
+
+    // Cancelled when superseded by snap (hold.cancel() calls goBallistic(0.0)):
+    hold.cancel();
+    expect(holdCanceledCount, 1);
+    await tester.pumpAndSettle();
+    expect(holdCanceledCount, 1);
+    expect(controller.size, 0.5);
+
+    // Re-register hold callback:
+    innerController.position.hold(() {
+      holdCanceledCount++;
+    });
+    expect(holdCanceledCount, 1);
+
+    // Cancelled when superseded by drag:
+    final Drag drag = innerController.position.drag(DragStartDetails(), () {});
+    expect(holdCanceledCount, 2);
+    drag.update(
+      DragUpdateDetails(
+        globalPosition: Offset.zero,
+        delta: const Offset(0.0, 90.0),
+        primaryDelta: 90.0,
+      ),
+    );
+    drag.end(DragEndDetails(primaryVelocity: 0.0));
+    await tester.pumpAndSettle();
+    expect(holdCanceledCount, 2);
+  });
+
+  testWidgets('snapAnimationDuration settles within the specified duration without pumpAndSettle', (
+    WidgetTester tester,
+  ) async {
+    const snapDuration = Duration(milliseconds: 500);
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: DraggableScrollableSheet(
+          controller: controller,
+          snap: true,
+          snapAnimationDuration: snapDuration,
+          snapSizes: const <double>[0.5, 1.0],
+          builder: (BuildContext context, ScrollController scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Column(children: <Widget>[for (var i = 0; i < 40; i++) Text('Item $i')]),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(controller.size, 0.5);
+
+    // Drag up past the midpoint (0.75) and release to trigger snap towards 1.0.
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 0')));
+    await drag.moveBy(const Offset(0.0, -100.0));
+    await tester.pump();
+    await drag.moveBy(const Offset(0.0, -100.0));
+    await tester.pump();
+    await drag.up();
+    await tester.pump();
+
+    // Pump 16ms frames covering snapDuration (32 frames * 16ms = 512ms >= 500ms).
+    for (var i = 0; i < 32; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    // Must be fully settled at 1.0 without pumpAndSettle().
+    expect(controller.size, 1.0);
+  });
+
+  testWidgets(
+    'Tapping child during snap halts sheet without firing child onTap, and fires onTap once settled',
+    (WidgetTester tester) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      var childTaps = 0;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: DraggableScrollableSheet(
+            controller: controller,
+            snap: true,
+            snapSizes: const <double>[0.5, 1.0],
+            builder: (BuildContext context, ScrollController scrollController) {
+              return SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  children: <Widget>[
+                    GestureDetector(
+                      onTap: () {
+                        childTaps++;
+                      },
+                      child: const SizedBox(height: 100, child: Text('Tap Target')),
+                    ),
+                    for (var i = 0; i < 40; i++) Text('Item $i'),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      expect(controller.size, 0.5);
+
+      // Drag up and release to trigger snap towards 0.5.
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 5')));
+      await drag.moveBy(const Offset(0.0, -60.0));
+      await tester.pump();
+      await drag.moveBy(const Offset(0.0, -60.0));
+      await tester.pump();
+      await drag.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 32)); // In flight
+
+      final double midSnapSize = controller.size;
+      expect(midSnapSize, greaterThan(0.5));
+      expect(midSnapSize, lessThan(1.0));
+
+      // Touch child while sheet is snapping.
+      final TestGesture touch = await tester.startGesture(
+        tester.getCenter(find.text('Tap Target')),
+      );
+      await tester.pump();
+
+      // Sheet animation is halted while held.
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.size, midSnapSize);
+
+      // Lifting touch does not fire child onTap because pointer events were ignored during snap.
+      await touch.up();
+      await tester.pump();
+      expect(childTaps, 0);
+
+      // Let sheet settle.
+      await tester.pumpAndSettle();
+
+      // Once settled, tapping child triggers onTap.
+      await tester.tap(find.text('Tap Target'));
+      await tester.pump();
+      expect(childTaps, 1);
+    },
+  );
+
+  testWidgets('flinging a non-snapping sheet downward transitions isScrollingNotifier to false', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    late ScrollController innerController;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: DraggableScrollableSheet(
+          controller: controller,
+          builder: (BuildContext context, ScrollController scrollController) {
+            innerController = scrollController;
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Column(children: <Widget>[for (var i = 0; i < 40; i++) Text('Item $i')]),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(controller.size, 0.5);
+    expect(innerController.position.isScrollingNotifier.value, isFalse);
+
+    // A short, fast drag: the drag itself leaves the sheet above minChildSize
+    // (0.25), and the fling that follows carries it the rest of the way.
+    await tester.fling(find.text('Item 1'), const Offset(0.0, 60.0), 2000.0);
+    expect(controller.size, greaterThan(0.25));
+    expect(innerController.position.isScrollingNotifier.value, isTrue);
+    // Pump frames until the sheet reaches minChildSize.
+    for (var i = 0; i < 30 && controller.size > 0.25; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(controller.size, 0.25);
+    // At minChildSize the leftover velocity goes to the scrollable, which
+    // cannot scroll any further, so the position goes idle.
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(innerController.position.isScrollingNotifier.value, isFalse);
+  });
+
+  testWidgets(
+    'sheet at 0.6 with list at maxScrollExtent, flinging up keeps pixels <= maxScrollExtent on every frame',
+    (WidgetTester tester) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      late ScrollController innerController;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: DraggableScrollableSheet(
+            controller: controller,
+            builder: (BuildContext context, ScrollController scrollController) {
+              innerController = scrollController;
+              return ListView.builder(
+                controller: scrollController,
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) =>
+                    SizedBox(height: 50.0, child: Text('Item $index')),
+              );
+            },
+          ),
+        ),
+      );
+
+      controller.jumpTo(0.6);
+      await tester.pumpAndSettle();
+      expect(controller.size, 0.6);
+
+      innerController.jumpTo(innerController.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(innerController.position.pixels, innerController.position.maxScrollExtent);
+
+      // Fling up on the list.
+      await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 2000.0);
+
+      // Verify pixels <= maxScrollExtent on every frame as the sheet expands.
+      while (tester.binding.hasScheduledFrame) {
+        expect(
+          innerController.position.pixels,
+          lessThanOrEqualTo(innerController.position.maxScrollExtent),
+        );
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(controller.size, 1.0);
+      expect(
+        innerController.position.pixels,
+        lessThanOrEqualTo(innerController.position.maxScrollExtent),
+      );
+    },
+  );
+
+  testWidgets(
+    'A snap from rest does not scroll the list when the sheet reaches its max size early',
+    (WidgetTester tester) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      late ScrollController innerController;
+      // The same list instance on every build, so that a rebuild does not start
+      // a new snap.
+      const snapSizes = <double>[0.5];
+
+      Widget buildSheet({required double maxChildSize}) {
+        return TestWidgetsApp(
+          home: DraggableScrollableSheet(
+            controller: controller,
+            maxChildSize: maxChildSize,
+            snap: true,
+            snapSizes: snapSizes,
+            builder: (BuildContext context, ScrollController scrollController) {
+              innerController = scrollController;
+              return ListView.builder(
+                controller: scrollController,
+                itemExtent: 50.0,
+                itemCount: 60,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+              );
+            },
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSheet(maxChildSize: 1.0));
+
+      // Drag from 0.5 up past the midpoint and release at rest: the sheet starts
+      // snapping towards 1.0.
+      await tester.drag(find.text('Item 1'), const Offset(0.0, -200.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(controller.size, greaterThan(0.5));
+      expect(controller.size, lessThan(0.9));
+
+      // The max size shrinks while the snap is running, so the sheet reaches its
+      // max size on the next frame, before the snap animation is done. Pump
+      // frame by frame: pumpAndSettle's 100ms steps would skip past that moment.
+      await tester.pumpWidget(buildSheet(maxChildSize: 0.9));
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await tester.pumpAndSettle();
+      expect(controller.size, 0.9);
+
+      // The drag was released at rest, so nothing should have scrolled the list.
+      expect(innerController.position.pixels, 0.0);
+    },
+  );
+
+  testWidgets(
+    'Switching the scrollable to another controller while the sheet snaps does not throw',
+    (WidgetTester tester) async {
+      final otherController = ScrollController();
+      addTearDown(otherController.dispose);
+      var useSheetController = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter stateSetter) {
+              setState = stateSetter;
+              return DraggableScrollableSheet(
+                snap: true,
+                snapSizes: const <double>[0.5, 1.0],
+                snapAnimationDuration: const Duration(seconds: 1),
+                builder: (BuildContext context, ScrollController scrollController) {
+                  return SingleChildScrollView(
+                    controller: useSheetController ? scrollController : otherController,
+                    child: Column(children: <Widget>[for (var i = 0; i < 40; i++) Text('Item $i')]),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      // Drag up and release so that the sheet starts snapping back towards 0.5.
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 5')));
+      await drag.moveBy(const Offset(0.0, -60.0));
+      await tester.pump();
+      await drag.moveBy(const Offset(0.0, -60.0));
+      await tester.pump();
+      await drag.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+
+      // The scrollable stops using the sheet's controller mid-snap, so its new
+      // ScrollPosition absorbs the activity that was moving the sheet.
+      setState(() {
+        useSheetController = false;
+      });
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(tester.takeException(), isNull);
+      expect(otherController.position.isScrollingNotifier.value, isFalse);
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
     },
   );
 }
