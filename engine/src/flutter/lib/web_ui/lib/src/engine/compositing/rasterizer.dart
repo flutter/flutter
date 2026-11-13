@@ -73,7 +73,6 @@ abstract class ViewRasterizer {
       // Available drawing area is empty (or rounds to 0 physical pixels). Skip drawing.
       // Record all the draw steps as happening instantly so we don't crash
       // when submitting frame timings.
-      recorder?.recordBuildFinish();
       recorder?.recordRasterStart();
       recorder?.recordRasterFinish();
       return;
@@ -83,7 +82,10 @@ abstract class ViewRasterizer {
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
 
-    compositorFrame.raster(layerTree, currentFrameSize, recorder);
+    // Raster time includes the engine's preroll, measure, composition
+    // optimization, and paint passes, as well as rasterizing the pictures.
+    recorder?.recordRasterStart();
+    compositorFrame.raster(layerTree, currentFrameSize);
     _lastRenderedLayerTree = layerTree;
 
     final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
