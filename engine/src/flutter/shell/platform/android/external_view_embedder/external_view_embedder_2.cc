@@ -33,6 +33,24 @@ int32_t ToPhysicalPixels(DlScalar size_points, double device_pixel_ratio) {
   return static_cast<int32_t>(std::round(size_points * device_pixel_ratio));
 }
 
+// Shows the overlay layer, unless it is already shown.
+void ShowOverlayLayerIfNeeded(PlatformViewAndroidJNI& jni_facade,
+                              std::atomic_bool& overlay_layer_is_shown) {
+  if (!overlay_layer_is_shown.load()) {
+    jni_facade.showOverlaySurface2();
+    overlay_layer_is_shown.store(true);
+  }
+}
+
+// Hides the overlay layer, unless it is already hidden.
+void HideOverlayLayerIfNeeded(PlatformViewAndroidJNI& jni_facade,
+                              std::atomic_bool& overlay_layer_is_shown) {
+  if (overlay_layer_is_shown.load()) {
+    jni_facade.hideOverlaySurface2();
+    overlay_layer_is_shown.store(false);
+  }
+}
+
 }  // namespace
 
 AndroidExternalViewEmbedder2::AndroidExternalViewEmbedder2(
@@ -96,13 +114,13 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
     jni_facade_->sealFrameTransactions();
+    // This task must not use `this`: the embedder may be destroyed before the
+    // platform thread gets to run it.
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
-        [this, jni_facade = jni_facade_,
+        [jni_facade = jni_facade_,
+         overlay_layer_is_shown = overlay_layer_is_shown_,
          views_visible_last_frame = views_visible_last_frame_]() {
-          // This pointer is guaranteed to not be dangling as long as
-          // DestroySurfaces is called before the embedder is deleted. See
-          // https://github.com/flutter/flutter/pull/176742#discussion_r2415229396.
-          this->HideOverlayLayerIfNeeded();
+          HideOverlayLayerIfNeeded(*jni_facade, *overlay_layer_is_shown);
           for (int64_t view_id : views_visible_last_frame) {
             jni_facade->hidePlatformView2(view_id);
           }
@@ -192,16 +210,19 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   // Every path that posts a platform task calling swapTransaction() must call
   // sealFrameTransactions() once to keep the per-frame queue paired 1:1.
   jni_facade_->sealFrameTransactions();
+  // This task must not use `this`: the embedder may be destroyed before the
+  // platform thread gets to run it.
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
-      [&, composition_order = composition_order_, view_params = view_params_,
+      [composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
        slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
+       overlay_layer_is_shown = overlay_layer_is_shown_,
        overlay_layer_has_content_this_frame_]() mutable -> void {
         if (overlay_layer_has_content_this_frame_) {
-          ShowOverlayLayerIfNeeded();
+          ShowOverlayLayerIfNeeded(*jni_facade, *overlay_layer_is_shown);
         } else {
-          HideOverlayLayerIfNeeded();
+          HideOverlayLayerIfNeeded(*jni_facade, *overlay_layer_is_shown);
         }
 
         for (int64_t view_id : composition_order) {
@@ -229,7 +250,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         }
 
         jni_facade->swapTransaction();
-        jni_facade_->onEndFrame2();
+        jni_facade->onEndFrame2();
       }));
 
   views_visible_last_frame_.clear();
@@ -318,21 +339,7 @@ void AndroidExternalViewEmbedder2::DestroySurfaces() {
                                       latch.Signal();
                                     });
   latch.Wait();
-  overlay_layer_is_shown_.store(false);
-}
-
-void AndroidExternalViewEmbedder2::ShowOverlayLayerIfNeeded() {
-  if (!overlay_layer_is_shown_.load()) {
-    jni_facade_->showOverlaySurface2();
-    overlay_layer_is_shown_.store(true);
-  }
-}
-
-void AndroidExternalViewEmbedder2::HideOverlayLayerIfNeeded() {
-  if (overlay_layer_is_shown_.load()) {
-    jni_facade_->hideOverlaySurface2();
-    overlay_layer_is_shown_.store(false);
-  }
+  overlay_layer_is_shown_->store(false);
 }
 
 }  // namespace flutter

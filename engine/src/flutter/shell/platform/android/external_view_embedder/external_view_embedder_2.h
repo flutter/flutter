@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
 #include <atomic>
+#include <memory>
 #include <unordered_map>
 
 #include "flutter/common/task_runners.h"
@@ -115,7 +116,11 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   const TaskRunners task_runners_;
 
   // If the overlay layer is currently shown.
-  std::atomic_bool overlay_layer_is_shown_{false};
+  //
+  // The tasks that |SubmitFlutterView| posts to the platform thread share
+  // ownership of this, because they can run after the embedder is destroyed.
+  const std::shared_ptr<std::atomic_bool> overlay_layer_is_shown_ =
+      std::make_shared<std::atomic_bool>(false);
 
   // The size of the root canvas.
   DlISize frame_size_;
@@ -150,13 +155,6 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
-
-  // Shows the overlay layer if it has content and the previous frame did not.
-  void ShowOverlayLayerIfNeeded();
-
-  // Hides the overlay layer if it does not have content and the previous
-  // frame did have content.
-  void HideOverlayLayerIfNeeded();
 };
 
 }  // namespace flutter

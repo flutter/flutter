@@ -4,7 +4,10 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <cstddef>
+#include <cstring>
 #include <memory>
+#include <new>
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
@@ -1651,6 +1654,160 @@ TEST(AndroidExternalViewEmbedder2,
   EXPECT_CALL(*jni_mock, destroyOverlaySurface2()).Times(1);
   embedder->Teardown();
   embedder.reset();
+}
+
+namespace {
+
+// Draws a frame, and destroys the embedder before the platform thread runs the
+// task that |SubmitFlutterView| posted for that frame.
+//
+// This is what happens when an activity is finished: the platform thread goes
+// from surfaceDestroyed to destroying the shell without returning to its
+// message loop, so it only gets to the task afterwards.
+//
+// The memory of the destroyed embedder is overwritten rather than freed, so
+// that a task that still uses the embedder fails every time, and not only when
+// the allocator has already reused the memory.
+void DestroyEmbedderBeforePlatformTaskOfLastFrame(
+    bool last_frame_has_platform_view) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto android_context =
+      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi | ThreadHost::Type::kRaster);
+  TaskRunners task_runners(
+      "test",
+      thread_host.platform_thread->GetTaskRunner(),  // platform
+      thread_host.raster_thread->GetTaskRunner(),    // raster
+      thread_host.ui_thread->GetTaskRunner(),        // ui
+      thread_host.io_thread->GetTaskRunner()         // io
+  );
+  const DlISize frame_size(100, 100);
+  auto make_frame = [frame_size]() {
+    return std::make_unique<SurfaceFrame>(
+        SkSurfaces::Null(frame_size.width, frame_size.height),
+        SurfaceFrame::FramebufferInfo{},
+        [](const SurfaceFrame&, DlCanvas*) { return true; },
+        [](const SurfaceFrame&) { return true; }, frame_size);
+  };
+  auto surface_factory =
+      std::make_shared<TestAndroidSurfaceFactory>([frame_size, make_frame]() {
+        auto surface = std::make_unique<SurfaceMock>();
+        EXPECT_CALL(*surface, AcquireFrame(frame_size)).WillOnce(make_frame);
+        auto android_surface = std::make_unique<AndroidSurfaceMock>();
+        EXPECT_CALL(*android_surface, IsValid()).WillRepeatedly(Return(true));
+        EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
+            .WillRepeatedly(Return(true));
+        EXPECT_CALL(*android_surface, CreateGPUSurface(_))
+            .WillOnce(Return(ByMove(std::move(surface))));
+        return android_surface;
+      });
+
+  alignas(AndroidExternalViewEmbedder2)
+      std::byte embedder_memory[sizeof(AndroidExternalViewEmbedder2)];
+  auto* embedder = new (embedder_memory) AndroidExternalViewEmbedder2(
+      *android_context, jni_mock, surface_factory, task_runners);
+
+  const int64_t view_id = 42;
+  const MutatorsStack mutators;
+  // Draws a frame on the raster thread. If `has_overlay_content` is set, the
+  // frame has content above the platform view, which goes to the overlay layer.
+  auto draw_frame = [&](bool has_platform_view, bool has_overlay_content) {
+    PostTaskSync(task_runners.GetRasterTaskRunner(), [&]() {
+      embedder->PrepareFlutterView(frame_size, 1.0);
+      if (has_platform_view) {
+        embedder->PrerollCompositeEmbeddedView(
+            view_id, std::make_unique<EmbeddedViewParams>(
+                         DlMatrix(), DlSize(50, 50), mutators));
+      }
+      if (has_overlay_content) {
+        embedder->CompositeEmbeddedView(view_id)->DrawRect(
+            DlRect::MakeXYWH(0, 0, 50, 50), DlPaint());
+      }
+      embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                  make_frame());
+    });
+  };
+
+  // The first frame with a platform view waits for the platform thread to
+  // create the overlay layer, so draw it while the platform thread is free.
+  // It shows the overlay layer.
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(100, 100));
+  EXPECT_CALL(*jni_mock, createOverlaySurface2())
+      .WillOnce(Return(
+          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+              0, fml::MakeRefCounted<AndroidNativeWindow>(nullptr)))));
+  EXPECT_CALL(*jni_mock, sealFrameTransactions());
+  EXPECT_CALL(*jni_mock, showOverlaySurface2());
+  EXPECT_CALL(*jni_mock,
+              onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50, mutators));
+  EXPECT_CALL(*jni_mock, swapTransaction());
+  EXPECT_CALL(*jni_mock, onEndFrame2());
+  draw_frame(/*has_platform_view=*/true, /*has_overlay_content=*/true);
+  PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+  ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
+
+  // Occupy the platform thread, and have it destroy the embedder like the
+  // shell does once the last frame is drawn.
+  fml::AutoResetWaitableEvent platform_occupied;
+  fml::AutoResetWaitableEvent last_frame_drawn;
+  task_runners.GetPlatformTaskRunner()->PostTask([&]() {
+    platform_occupied.Signal();
+    last_frame_drawn.Wait();
+    // Shell::OnPlatformViewDestroyed tears down the embedder on the platform
+    // thread, once the rasterizer has stopped drawing.
+    embedder->Teardown();
+    // Shell::~Shell destroys the rasterizer, which owns the embedder, on the
+    // raster thread while the platform thread waits.
+    PostTaskSync(task_runners.GetRasterTaskRunner(), [&]() {
+      embedder->~AndroidExternalViewEmbedder2();
+      std::memset(embedder_memory, 0xFF, sizeof(embedder_memory));
+    });
+  });
+  platform_occupied.Wait();
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(*jni_mock, sealFrameTransactions());
+    // The embedder is torn down and destroyed.
+    EXPECT_CALL(*jni_mock, destroyOverlaySurface2());
+    // The platform task of the last frame runs. The frame has no overlay
+    // content, but the task does not hide the overlay layer, since tearing
+    // down the embedder already destroyed it.
+    EXPECT_CALL(*jni_mock, hideOverlaySurface2()).Times(0);
+    if (last_frame_has_platform_view) {
+      EXPECT_CALL(*jni_mock, onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50,
+                                                    50, mutators));
+    } else {
+      EXPECT_CALL(*jni_mock, hidePlatformView2(view_id));
+    }
+    EXPECT_CALL(*jni_mock, swapTransaction());
+    EXPECT_CALL(*jni_mock, onEndFrame2());
+  }
+
+  // This would block if drawing the frame had to wait for the platform thread.
+  draw_frame(last_frame_has_platform_view, /*has_overlay_content=*/false);
+  last_frame_drawn.Signal();
+  PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+}
+
+}  // namespace
+
+// Regression test for a crash when an activity with a platform view is
+// finished: the platform task of the last frame used the embedder after it had
+// been destroyed.
+TEST(AndroidExternalViewEmbedder2,
+     PlatformTaskOfFrameWithPlatformViewsOutlivesEmbedder) {
+  DestroyEmbedderBeforePlatformTaskOfLastFrame(
+      /*last_frame_has_platform_view=*/true);
+}
+
+TEST(AndroidExternalViewEmbedder2,
+     PlatformTaskOfFrameWithoutPlatformViewsOutlivesEmbedder) {
+  DestroyEmbedderBeforePlatformTaskOfLastFrame(
+      /*last_frame_has_platform_view=*/false);
 }
 
 }  // namespace testing
