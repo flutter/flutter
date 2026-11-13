@@ -26,7 +26,7 @@ final class _TestArtifactService extends ArtifactService {
   }) async {
     return <ArtifactDependency>[
       for (final String targetPlatform in targetPlatforms ?? const <String>{'default-target'})
-        ArtifactDependency(
+        ArtifactDependency.remote(
           name: 'test-artifact-${hostPlatform.cliName}-$targetPlatform',
           sha256: _testSha256,
           url: Uri.parse(
@@ -74,14 +74,16 @@ void main() {
       final List<ArtifactDependency> deps = ArtifactDependency.listFromJson(response);
 
       expect(deps, hasLength(2));
-      expect(deps.first.name, 'test-artifact-linux-x64-linux-x64');
+      expect(deps.first, isA<RemoteArtifactDependency>());
+      final firstRemote = deps.first as RemoteArtifactDependency;
+      expect(firstRemote.name, 'test-artifact-linux-x64-linux-x64');
       expect(
-        deps.first.url,
+        firstRemote.url,
         Uri.parse('https://example.com/$_testEngineVersion/linux-x64/linux-x64.zip'),
       );
-      expect(deps.first.sha256, _testSha256);
-      expect(deps.first.hostPlatform, HostPlatform.linux_x64);
-      expect(deps.first.targetPlatform, 'linux-x64');
+      expect(firstRemote.sha256, _testSha256);
+      expect(firstRemote.hostPlatform, HostPlatform.linux_x64);
+      expect(firstRemote.targetPlatform, 'linux-x64');
       expect(deps.last.targetPlatform, 'linux-arm64');
 
       final Object? customHostResponse = await conn.sendRequest(
@@ -181,7 +183,7 @@ void main() {
           <ToolExtensionService>[
             LinuxArtifactService(
               artifacts: <ArtifactDependency>[
-                ArtifactDependency(
+                ArtifactDependency.remote(
                   name: 'linux-x64-custom-artifact',
                   sha256: _testSha256,
                   url: Uri.parse('https://example.com/linux-x64/artifacts.zip'),

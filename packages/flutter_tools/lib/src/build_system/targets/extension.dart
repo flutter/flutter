@@ -8,6 +8,7 @@ import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../experimental/extension_artifact_manager.dart';
 import '../../experimental/extension_build_manager.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
@@ -21,6 +22,7 @@ class ExtensionTarget extends Target {
     required this.assembleTarget,
     required this._buildManager,
     required this._dependencyResolver,
+    this._extensionArtifacts = const <String, ResolvedExtensionArtifact>{},
   });
 
   /// The extension-defined assemble target.
@@ -28,6 +30,7 @@ class ExtensionTarget extends Target {
 
   final ExtensionBuildManager _buildManager;
   final DependencyResolverCallback _dependencyResolver;
+  final Map<String, ResolvedExtensionArtifact> _extensionArtifacts;
 
   @override
   String get name => assembleTarget.name;
@@ -52,6 +55,7 @@ class ExtensionTarget extends Target {
         (ExtensionSource s) => _toHostSource(
           s,
           defaultTargetPlatform: _defaultTargetPlatform,
+          extensionArtifacts: _extensionArtifacts,
           targetPlatformName: assembleTarget.targetPlatform,
         ),
       )
@@ -68,6 +72,7 @@ class ExtensionTarget extends Target {
         (ExtensionSource s) => _toHostSource(
           s,
           defaultTargetPlatform: _defaultTargetPlatform,
+          extensionArtifacts: _extensionArtifacts,
           targetPlatformName: assembleTarget.targetPlatform,
         ),
       )
@@ -98,6 +103,7 @@ class ExtensionTarget extends Target {
             s,
             defaultBuildMode: mode,
             defaultTargetPlatform: _defaultTargetPlatform,
+            extensionArtifacts: _extensionArtifacts,
             targetPlatformName: assembleTarget.targetPlatform,
           ),
         )
@@ -130,6 +136,7 @@ class ExtensionTarget extends Target {
     final Map<String, String> resolvedArtifacts = resolveExtensionAssembleTargetArtifacts(
       artifacts: artifacts,
       buildMode: mode,
+      extensionArtifacts: _extensionArtifacts,
       target: assembleTarget,
     );
 
@@ -198,53 +205,108 @@ const _targetPlatformIndependentArtifacts = <ExtensionArtifact>{
   BuiltInArtifacts.icuData,
 };
 
-/// Resolves all engine and host artifacts declared on [target] using
-/// [artifacts] and [buildMode].
+/// Returns the non-built-in artifact names declared on [target] (excluding
+/// built-in engine and host artifacts, which always resolve from [Artifacts]).
+Set<String> customArtifactNamesForBuildTarget(ExtensionBuildTarget target) => <String>{
+  for (final ExtensionArtifact artifact in target.artifacts)
+    if (!_builtInArtifacts.containsKey(artifact.name)) artifact.name,
+  for (final ExtensionHostArtifact artifact in target.hostArtifacts)
+    if (!_builtInHostArtifacts.containsKey(artifact.name)) artifact.name,
+};
+
+/// Returns the non-built-in artifact names and target platforms requested by
+/// [target]'s inputs.
+({Set<String> artifactNames, Set<String> targetPlatforms}) customArtifactRequestsForAssembleTarget(
+  ExtensionAssembleTarget target,
+) {
+  final artifactNames = <String>{};
+  final targetPlatforms = <String>{if (target.targetPlatform.isNotEmpty) target.targetPlatform};
+  for (final ExtensionSource source in target.inputs) {
+    switch (source) {
+      case ExtensionPatternSource():
+        continue;
+      case ExtensionArtifactSource(:final ExtensionArtifact artifact, :final String? platform)
+          when !_builtInArtifacts.containsKey(artifact.name):
+        artifactNames.add(artifact.name);
+        if (platform != null && platform.isNotEmpty) {
+          targetPlatforms.add(platform);
+        }
+      case ExtensionArtifactSource():
+        continue;
+      case ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact)
+          when !_builtInHostArtifacts.containsKey(artifact.name):
+        artifactNames.add(artifact.name);
+      case ExtensionHostArtifactSource():
+        continue;
+    }
+  }
+  return (artifactNames: artifactNames, targetPlatforms: targetPlatforms);
+}
+
+/// Resolves all engine, host, and custom extension artifacts declared on
+/// [target] using [artifacts], [buildMode], and optional [extensionArtifacts].
 ///
-/// Throws a [ToolExit] if any requested artifact name is invalid or unsupported,
-/// or if a target-platform-specific artifact is requested on an out-of-tree
+/// Built-in engine and host artifacts always take precedence over
+/// [extensionArtifacts], and undeclared entries in [extensionArtifacts] are not
+/// included. Throws a [ToolExit] if any requested artifact name is neither a
+/// supported built-in artifact nor present in [extensionArtifacts], or if a
+/// target-platform-specific built-in artifact is requested on an out-of-tree
 /// target platform.
-// TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
   required ExtensionBuildTarget target,
+  Map<String, ResolvedExtensionArtifact> extensionArtifacts =
+      const <String, ResolvedExtensionArtifact>{},
 }) {
   final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionArtifact artifact in target.artifacts) {
-    final Artifact resolvedArtifact = _resolveArtifact(artifact);
-    if (targetPlatform == null && !_targetPlatformIndependentArtifacts.contains(artifact)) {
-      throwToolExit(
-        'Artifact "${artifact.name}" requires a built-in target platform, '
-        'but build target "${target.name}" targets out-of-tree platform "${target.targetPlatform}".',
+    if (_builtInArtifacts[artifact.name] case final Artifact builtIn) {
+      if (targetPlatform == null && !_targetPlatformIndependentArtifacts.contains(artifact)) {
+        throwToolExit(
+          'Artifact "${artifact.name}" requires a built-in target platform, '
+          'but build target "${target.name}" targets out-of-tree platform "${target.targetPlatform}".',
+        );
+      }
+      resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
+        builtIn,
+        platform: targetPlatform,
+        mode: buildMode,
       );
+    } else if (extensionArtifacts[artifact.name] case final ResolvedExtensionArtifact custom) {
+      resolvedArtifacts[artifact.name] = custom.path;
+    } else {
+      throwToolExit('Unsupported artifact "${artifact.name}" requested by a tool extension.');
     }
-    resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
-      resolvedArtifact,
-      platform: targetPlatform,
-      mode: buildMode,
-    );
   }
   for (final ExtensionHostArtifact artifact in target.hostArtifacts) {
-    final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
-    resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(hostArtifact).path;
+    if (_builtInHostArtifacts[artifact.name] case final HostArtifact builtIn) {
+      resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(builtIn).path;
+    } else if (extensionArtifacts[artifact.name] case final ResolvedExtensionArtifact custom) {
+      resolvedArtifacts.putIfAbsent(artifact.name, () => custom.path);
+    } else {
+      throwToolExit('Unsupported host artifact "${artifact.name}" requested by a tool extension.');
+    }
   }
   return resolvedArtifacts;
 }
 
-/// Resolves all engine and host artifact inputs declared on [target] using
-/// [artifacts] and [buildMode].
+/// Resolves all engine, host, and custom extension artifact inputs declared on
+/// [target] using [artifacts], [buildMode], and optional [extensionArtifacts].
 ///
-/// Throws a [ToolExit] if any requested artifact name or explicit artifact
-/// target platform is invalid or unsupported, if a target-platform-specific
-/// artifact resolves to a `null` target platform, or if the same artifact
-/// resolves to different paths across multiple target platforms or build modes.
-// TODO(bkonyi): Download required artifacts on demand if not already cached.
+/// Built-in engine and host artifacts always take precedence over
+/// [extensionArtifacts]. Throws a [ToolExit] if any requested artifact name or
+/// explicit built-in artifact target platform is invalid or unsupported, if a
+/// target-platform-specific built-in artifact resolves to a `null` target
+/// platform, or if the same artifact resolves to different paths across
+/// multiple target platforms or build modes.
 Map<String, String> resolveExtensionAssembleTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
   required ExtensionAssembleTarget target,
+  Map<String, ResolvedExtensionArtifact> extensionArtifacts =
+      const <String, ResolvedExtensionArtifact>{},
 }) {
   final TargetPlatform? defaultTargetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
   final resolvedArtifacts = <String, String>{};
@@ -257,18 +319,24 @@ Map<String, String> resolveExtensionAssembleTargetArtifacts({
         :final String? platform,
         :final BuildMode? mode,
       ):
-        final Artifact resolvedArtifact = _resolveArtifact(artifact);
-        final TargetPlatform? resolvedPlatform = _resolveArtifactTargetPlatform(
-          artifact: artifact,
-          defaultTargetPlatform: defaultTargetPlatform,
-          sourcePlatform: platform,
-          targetPlatformName: target.targetPlatform,
-        );
-        final String path = artifacts.getArtifactPath(
-          resolvedArtifact,
-          platform: resolvedPlatform,
-          mode: mode ?? buildMode,
-        );
+        final String path;
+        if (_builtInArtifacts[artifact.name] case final Artifact builtIn) {
+          final TargetPlatform? resolvedPlatform = _resolveArtifactTargetPlatform(
+            artifact: artifact,
+            defaultTargetPlatform: defaultTargetPlatform,
+            sourcePlatform: platform,
+            targetPlatformName: target.targetPlatform,
+          );
+          path = artifacts.getArtifactPath(
+            builtIn,
+            platform: resolvedPlatform,
+            mode: mode ?? buildMode,
+          );
+        } else if (extensionArtifacts[artifact.name] case final ResolvedExtensionArtifact custom) {
+          path = custom.path;
+        } else {
+          throwToolExit('Unsupported artifact "${artifact.name}" requested by a tool extension.');
+        }
         final String? existingPath = resolvedArtifacts[artifact.name];
         if (existingPath != null && existingPath != path) {
           throwToolExit(
@@ -278,8 +346,15 @@ Map<String, String> resolveExtensionAssembleTargetArtifacts({
         }
         resolvedArtifacts[artifact.name] = path;
       case ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact):
-        final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
-        resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(hostArtifact).path;
+        if (_builtInHostArtifacts[artifact.name] case final HostArtifact hostArtifact) {
+          resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(hostArtifact).path;
+        } else if (extensionArtifacts[artifact.name] case final ResolvedExtensionArtifact custom) {
+          resolvedArtifacts.putIfAbsent(artifact.name, () => custom.path);
+        } else {
+          throwToolExit(
+            'Unsupported host artifact "${artifact.name}" requested by a tool extension.',
+          );
+        }
     }
   }
   return resolvedArtifacts;
@@ -320,12 +395,8 @@ TargetPlatform? _tryResolveTargetPlatform(String platformName) {
     return TargetPlatform.fromName(platformName);
   } on Exception {
     // Out-of-tree extension target platforms don't map to a built-in
-    // TargetPlatform, so target-independent artifacts resolve with
-    // platform: null. Target-specific engine artifacts such as genSnapshot
-    // require an explicit built-in platform on the artifact source until
-    // extensions can provide their own artifacts.
-    // TODO(bkonyi): Support custom extension-provided artifact resolution for
-    // out-of-tree target platforms via ExtensionArtifactManager.
+    // TargetPlatform, so target-independent built-in artifacts resolve with
+    // platform: null while custom artifacts resolve via ExtensionArtifactManager.
     return null;
   }
 }
@@ -333,6 +404,7 @@ TargetPlatform? _tryResolveTargetPlatform(String platformName) {
 Source _toHostSource(
   ExtensionSource source, {
   required TargetPlatform? defaultTargetPlatform,
+  required Map<String, ResolvedExtensionArtifact> extensionArtifacts,
   required String targetPlatformName,
   BuildMode? defaultBuildMode,
 }) => switch (source) {
@@ -345,34 +417,72 @@ Source _toHostSource(
     :final String? platform,
     :final BuildMode? mode,
   ) =>
-    Source.artifact(
-      _resolveArtifact(artifact),
-      platform: _resolveArtifactTargetPlatform(
-        artifact: artifact,
-        defaultTargetPlatform: defaultTargetPlatform,
-        sourcePlatform: platform,
-        targetPlatformName: targetPlatformName,
+    switch (_builtInArtifacts[artifact.name]) {
+      final Artifact builtIn => Source.artifact(
+        builtIn,
+        platform: _resolveArtifactTargetPlatform(
+          artifact: artifact,
+          defaultTargetPlatform: defaultTargetPlatform,
+          sourcePlatform: platform,
+          targetPlatformName: targetPlatformName,
+        ),
+        mode: mode ?? defaultBuildMode,
       ),
-      mode: mode ?? defaultBuildMode,
-    ),
-  ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact) => Source.hostArtifact(
-    _resolveHostArtifact(artifact),
-  ),
+      null => switch (extensionArtifacts[artifact.name]) {
+        final ResolvedExtensionArtifact custom => _ExtensionArtifactInputSource(custom),
+        null => throwToolExit(
+          'Unsupported artifact "${artifact.name}" requested by a tool extension.',
+        ),
+      },
+    },
+  ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact) =>
+    switch (_builtInHostArtifacts[artifact.name]) {
+      final HostArtifact builtIn => Source.hostArtifact(builtIn),
+      null => switch (extensionArtifacts[artifact.name]) {
+        final ResolvedExtensionArtifact custom => _ExtensionArtifactInputSource(custom),
+        null => throwToolExit(
+          'Unsupported host artifact "${artifact.name}" requested by a tool extension.',
+        ),
+      },
+    },
 };
 
-Artifact _resolveArtifact(ExtensionArtifact artifact) => switch (artifact.name) {
-  'flutterPatchedSdkPath' => Artifact.flutterPatchedSdkPath,
-  'genSnapshot' => Artifact.genSnapshot,
-  'icuData' => Artifact.icuData,
-  'linuxDesktopPath' => Artifact.linuxDesktopPath,
-  'linuxHeaders' => Artifact.linuxHeaders,
-  final String name => throwToolExit('Unsupported artifact "$name" requested by a tool extension.'),
+final class _ExtensionArtifactInputSource implements Source {
+  const _ExtensionArtifactInputSource(this._artifact);
+
+  final ResolvedExtensionArtifact _artifact;
+
+  @override
+  bool get implicit => false;
+
+  @override
+  void accept(SourceVisitor visitor) {
+    if (_artifact.stampFile case final File stampFile) {
+      visitor.sources.add(stampFile);
+      return;
+    }
+    final FileSystem fs = visitor.environment.fileSystem;
+    if (fs.isDirectorySync(_artifact.path)) {
+      visitor.sources.addAll(<File>[
+        for (final FileSystemEntity entity
+            in fs.directory(_artifact.path).listSync(recursive: true))
+          if (entity is File) entity,
+      ]);
+      return;
+    }
+    visitor.sources.add(fs.file(_artifact.path));
+  }
+}
+
+const _builtInArtifacts = <String, Artifact>{
+  'flutterPatchedSdkPath': Artifact.flutterPatchedSdkPath,
+  'genSnapshot': Artifact.genSnapshot,
+  'icuData': Artifact.icuData,
+  'linuxDesktopPath': Artifact.linuxDesktopPath,
+  'linuxHeaders': Artifact.linuxHeaders,
 };
 
-HostArtifact _resolveHostArtifact(ExtensionHostArtifact artifact) => switch (artifact.name) {
-  'impellerc' => HostArtifact.impellerc,
-  'libtessellator' => HostArtifact.libtessellator,
-  final String name => throwToolExit(
-    'Unsupported host artifact "$name" requested by a tool extension.',
-  ),
+const _builtInHostArtifacts = <String, HostArtifact>{
+  'impellerc': HostArtifact.impellerc,
+  'libtessellator': HostArtifact.libtessellator,
 };

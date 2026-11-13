@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
+import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
@@ -25,6 +26,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -147,6 +149,7 @@ void _succeedingBuildExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_SucceedingBuildService()],
+    extensionName: 'hermetic_build_ext',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -428,6 +431,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -783,11 +787,13 @@ void main() {
           featureFlags: featureFlags,
           logger: testLogger,
         );
+        final fakeArtifactManager = _FakeExtensionArtifactManager();
 
         final command = BuildCommand(
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: fakeArtifactManager,
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -805,6 +811,9 @@ void main() {
 
         expect(command.subcommands.containsKey('custom-hermetic-build'), isTrue);
         expect(command.subcommands.containsKey('custom-hermetic-assemble-only'), isFalse);
+        expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
+        expect(fakeArtifactManager.requestedArtifactNames, isEmpty);
+        expect(fakeArtifactManager.requestedExtensionName, 'hermetic_build_ext');
 
         await manager.dispose();
       },
@@ -956,7 +965,18 @@ void main() {
       'ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters',
       () async {
         final fakeBuildManager = _RecordingExtensionBuildManager();
+        final fakeArtifactManager = _FakeExtensionArtifactManager(
+          downloadedArtifacts: const <String, ResolvedExtensionArtifact>{
+            'custom-ext-artifact': ResolvedExtensionArtifact(path: '/cache/custom-ext-artifact'),
+            'genSnapshot': ResolvedExtensionArtifact(path: '/cache/shadowed-gen-snapshot'),
+            'undeclared-artifact': ResolvedExtensionArtifact(path: '/cache/undeclared'),
+          },
+        );
         final target = ExtensionBuildTarget(
+          artifacts: const <ExtensionArtifact>{
+            BuiltInArtifacts.genSnapshot,
+            ExtensionArtifact('custom-ext-artifact'),
+          },
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir:
@@ -965,6 +985,7 @@ void main() {
         );
 
         final subCommand = ExtensionBuildSubCommand(
+          artifactManager: fakeArtifactManager,
           buildManager: fakeBuildManager,
           target: target,
           toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
@@ -973,6 +994,13 @@ void main() {
 
         final FlutterCommandResult result = await subCommand.runCommand();
         expect(result.exitStatus, ExitStatus.success);
+        expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
+        expect(
+          fakeArtifactManager.requestedArtifactNames,
+          equals(const <String>{'custom-ext-artifact'}),
+        );
+        expect(fakeArtifactManager.requestedExtensionName, 'unknown_extension');
+        expect(fakeArtifactManager.requestedTargetPlatforms, equals(const <String>{'linux-x64'}));
 
         expect(fakeBuildManager.lastBuildArgs, isNotNull);
         expect(fakeBuildManager.lastBuildArgs!['targetName'], equals('custom-hermetic-build'));
@@ -984,7 +1012,13 @@ void main() {
           fakeBuildManager.lastBuildArgs!['outputDir'],
           equals(fs.directory('/build/custom/linux-x64/release').uri),
         );
-        expect(fakeBuildManager.lastBuildArgs!['resolvedArtifacts'], isA<Map<String, String>>());
+        expect(
+          fakeBuildManager.lastBuildArgs!['resolvedArtifacts'],
+          equals(const <String, String>{
+            'custom-ext-artifact': '/cache/custom-ext-artifact',
+            'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_x64.release',
+          }),
+        );
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
@@ -1004,6 +1038,7 @@ void main() {
       );
       final config = Config.test()..setValue('build-dir', 'custom_build_root');
       final subCommand = ExtensionBuildSubCommand(
+        artifactManager: _FakeExtensionArtifactManager(),
         buildManager: buildManager,
         target: target,
         toolContext: FakeToolContext(
@@ -1034,6 +1069,7 @@ void main() {
           targetPlatform: 'linux-x64',
         );
         final subCommand = ExtensionBuildSubCommand(
+          artifactManager: _FakeExtensionArtifactManager(),
           buildManager: buildManager,
           target: target,
           toolContext: FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test()),
@@ -1069,6 +1105,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -1185,6 +1222,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -1240,5 +1278,219 @@ void main() {
       expect(result.success, isFalse);
       expect(result.errorMessage, 'Custom compiler missing.');
     });
+
+    testWithoutContext('AssembleCommand resolves custom extension artifacts and stampUri inputs for reachable assemble targets', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final Directory localSdkDir = fs.directory('/local/custom_sdk')..createSync(recursive: true);
+      localSdkDir.childFile('libcustom.so').writeAsStringSync('sdk_binary');
+      final File localSdkStamp = localSdkDir.childFile('.stamp')..writeAsStringSync('stamp_1');
+
+      final resolvedArtifactsPort = ReceivePort();
+      addTearDown(resolvedArtifactsPort.close);
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[
+          _createAssembleArtifactEntryPoint(
+            localSdkUri: localSdkDir.uri,
+            resolvedArtifactsPort: resolvedArtifactsPort.sendPort,
+            stampUri: localSdkStamp.uri,
+          ),
+        ],
+        featureFlags: featureFlags,
+      );
+      addTearDown(manager.dispose);
+
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+      final toolContext = FakeToolContext(
+        artifacts: Artifacts.test(fileSystem: fs),
+        cache: cache,
+        fs: fs,
+        logger: logger,
+        os: FakeOperatingSystemUtils(),
+        platform: FakePlatform(),
+        processManager: FakeProcessManager.any(),
+      );
+      final artifactManager = ExtensionArtifactManager(
+        cacheDir: fs.directory('/assemble_cache'),
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+      );
+      final buildSystem = FlutterBuildSystem(
+        fileSystem: fs,
+        logger: logger,
+        platform: FakePlatform(),
+      );
+      final command = AssembleCommand(
+        androidContext: FakeAndroidContext(),
+        buildSystem: buildSystem,
+        extensionArtifactManager: artifactManager,
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+        xcode: null,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'assemble',
+        '-o',
+        '/out',
+        '-d',
+        'BuildMode=release',
+        '--build-inputs',
+        '/build_inputs.txt',
+        'custom_artifact_assemble_target',
+      ]);
+
+      final Object? capturedArtifacts = await resolvedArtifactsPort.first;
+      expect(capturedArtifacts, <String, Object?>{'custom_local_sdk': localSdkDir.path});
+      final List<String> recordedInputs = fs
+          .file('/build_inputs.txt')
+          .readAsStringSync()
+          .trim()
+          .split('\n');
+      expect(recordedInputs, contains(localSdkStamp.path));
+      expect(recordedInputs, isNot(contains('/local/custom_sdk/libcustom.so')));
+    });
   });
+}
+
+final class _AssembleCustomArtifactService extends ArtifactService {
+  _AssembleCustomArtifactService(this._localSdkUri, this._stampUri);
+
+  final Uri _localSdkUri;
+  final Uri _stampUri;
+
+  @override
+  Future<List<ArtifactDependency>> listRequiredArtifacts({
+    required String engineVersion,
+    required HostPlatform hostPlatform,
+    Set<String>? targetPlatforms,
+  }) async {
+    return <ArtifactDependency>[
+      ArtifactDependency.local(
+        localUri: _localSdkUri,
+        name: 'custom_local_sdk',
+        stampUri: _stampUri,
+        hostPlatform: HostPlatform.linux_x64,
+        targetPlatform: 'custom-embedder-arm64',
+      ),
+      ArtifactDependency.remote(
+        name: 'unrequested_other_target_bin',
+        sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        url: Uri.parse('https://127.0.0.1:1/unreachable.zip'),
+        hostPlatform: HostPlatform.linux_x64,
+        targetPlatform: 'custom-embedder-arm64',
+      ),
+    ];
+  }
+}
+
+final class _AssembleCustomArtifactTarget extends AssembleTarget {
+  const _AssembleCustomArtifactTarget(this._resolvedArtifactsPort)
+    : super(
+        description: 'Assemble target consuming custom local SDK artifact',
+        targetPlatform: 'custom-embedder-arm64',
+      );
+
+  final SendPort _resolvedArtifactsPort;
+
+  @override
+  String get name => 'custom_artifact_assemble_target';
+
+  @override
+  List<ExtensionSource> get inputs => const <ExtensionSource>[
+    ExtensionSource.artifact(ExtensionArtifact('custom_local_sdk')),
+  ];
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
+    _resolvedArtifactsPort.send(context.resolvedArtifacts);
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _UnreachableAssembleTarget extends AssembleTarget {
+  const _UnreachableAssembleTarget()
+    : super(
+        description: 'Unrequested assemble target referencing unreachable remote artifact',
+        targetPlatform: 'custom-embedder-arm64',
+      );
+
+  @override
+  String get name => 'unreachable_assemble_target';
+
+  @override
+  List<ExtensionSource> get inputs => const <ExtensionSource>[
+    ExtensionSource.artifact(ExtensionArtifact('unrequested_other_target_bin')),
+  ];
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _AssembleCustomBuildService extends BuildService {
+  _AssembleCustomBuildService(this._resolvedArtifactsPort);
+
+  final SendPort _resolvedArtifactsPort;
+
+  @override
+  List<AssembleTarget> get assembleTargets => <AssembleTarget>[
+    _AssembleCustomArtifactTarget(_resolvedArtifactsPort),
+    const _UnreachableAssembleTarget(),
+  ];
+}
+
+ExtensionEntryPoint _createAssembleArtifactEntryPoint({
+  required Uri localSdkUri,
+  required SendPort resolvedArtifactsPort,
+  required Uri stampUri,
+}) {
+  return (SendPort sendPort) {
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[
+        _AssembleCustomArtifactService(localSdkUri, stampUri),
+        _AssembleCustomBuildService(resolvedArtifactsPort),
+      ],
+      extensionName: 'assemble_artifact_ext',
+      supportedPlatforms: const <String>{'linux'},
+    );
+  };
+}
+
+class _FakeExtensionArtifactManager extends Fake implements ExtensionArtifactManager {
+  _FakeExtensionArtifactManager({
+    this.downloadedArtifacts = const <String, ResolvedExtensionArtifact>{},
+  });
+
+  final Map<String, ResolvedExtensionArtifact> downloadedArtifacts;
+  bool ensureArtifactsDownloadedCalled = false;
+  Set<String>? requestedArtifactNames;
+  String? requestedExtensionName;
+  Set<String>? requestedTargetPlatforms;
+
+  @override
+  Future<Map<String, ResolvedExtensionArtifact>> ensureArtifactsDownloaded({
+    Set<String>? artifactNames,
+    String? extensionName,
+    bool force = false,
+    Set<String>? targetPlatforms,
+  }) async {
+    ensureArtifactsDownloadedCalled = true;
+    requestedArtifactNames = artifactNames;
+    requestedExtensionName = extensionName;
+    requestedTargetPlatforms = targetPlatforms;
+    return downloadedArtifacts;
+  }
 }

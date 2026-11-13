@@ -209,4 +209,33 @@ void main() {
       }
     },
   );
+
+  testWithoutContext(
+    'flutter precache queries extension ArtifactService without failing when enabled',
+    () async {
+      final String hostFlag = switch (const LocalPlatform().operatingSystem) {
+        'linux' => '--linux',
+        'macos' => '--macos',
+        'windows' => '--windows',
+        final String os => fail('Unsupported host operating system: $os'),
+      };
+      final Directory tempDataHome = tempHome.childDirectory('dart_data_home');
+      final ProcessResult result = await processManager.run(
+        <String>[flutterBin, 'precache', hostFlag, '--no-universal', '-v'],
+        environment: <String, String>{
+          ...baseEnv,
+          'DART_DATA_HOME': tempDataHome.path,
+          'FLUTTER_TOOL_EXTENSIONS': 'true',
+        },
+      );
+
+      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+      if (isLinux) {
+        expect(
+          result.stdout,
+          contains('[ToolExtensionIsolate] Handling extension.shutdown request.'),
+        );
+      }
+    },
+  );
 }
