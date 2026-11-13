@@ -152,7 +152,7 @@ void main() {
     bool hasWorkspace = true,
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
-    String hostPlatformArch = 'x86_64',
+    String? hostPlatformArch = 'x86_64',
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
       fileSystem.currentDirectory,
@@ -160,7 +160,8 @@ void main() {
     final Directory flutterBuildDir = fileSystem.directory(
       getMacOSBuildDirectory(config: Config.test(), fileSystem: fileSystem),
     );
-    final destination = configuration == 'Debug'
+    // A null hostPlatformArch expects the generic destination in debug too.
+    final destination = configuration == 'Debug' && hostPlatformArch != null
         ? 'platform=macOS,arch=$hostPlatformArch'
         : 'generic/platform=macOS';
     return FakeCommand(
@@ -1077,6 +1078,41 @@ STDERR STUFF
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+    },
+  );
+
+  testUsingContext(
+    'Build with generic destination in debug mode if host arch is in EXCLUDED_ARCHS',
+    () async {
+      createMinimalMockProjectFiles();
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Debug',
+          hostPlatformArch: null,
+          additionalCommandArguments: <String>['EXCLUDED_ARCHS=arm64'],
+        ),
+      ]);
+
+      final BuildCommand command = createFakeBuildCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      );
+
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        overrides: <String, String>{'EXCLUDED_ARCHS': 'arm64'},
+      ),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
     },
   );
