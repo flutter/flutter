@@ -1158,6 +1158,16 @@ void main() {
       addTearDown(horizontalController.dispose);
       addTearDown(verticalController.dispose);
 
+      // A 1000 by 1000 table in an 800 by 600 viewport.
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 4,
+        maxYIndex: 4,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return const SizedBox.square(dimension: 200.0);
+        },
+      );
+      addTearDown(delegate.dispose);
+
       var maxHorizontalObserved = 190.0;
       horizontalController.addListener(() {
         if (horizontalController.offset > maxHorizontalObserved) {
@@ -1180,14 +1190,7 @@ void main() {
                 controller: verticalController,
                 physics: const BouncingScrollPhysics(),
               ),
-              // A 1000 by 1000 table in an 800 by 600 viewport.
-              delegate: TwoDimensionalChildBuilderDelegate(
-                maxXIndex: 4,
-                maxYIndex: 4,
-                builder: (BuildContext context, ChildVicinity vicinity) {
-                  return const SizedBox.square(dimension: 200.0);
-                },
-              ),
+              delegate: delegate,
             ),
           ),
         ),
