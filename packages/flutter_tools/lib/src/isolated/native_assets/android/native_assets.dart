@@ -9,7 +9,6 @@ import '../../../android/gradle_utils.dart';
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
-import '../../../context_runner.dart';
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
 
@@ -92,10 +91,7 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsAndroi
 ///
 /// Typically the Flutter Gradle Plugin will install an NDK. This method will
 /// return the newest NDK if multiple NDKs are found on the system.
-Future<CCompilerConfig?> cCompilerConfigAndroid() async {
-  final AndroidSdk? androidSdk = AndroidSdk.locateAndroidSdk(
-    toolContext: const GlobalToolContext(),
-  );
+Future<CCompilerConfig?> cCompilerConfigAndroid({required AndroidSdk? androidSdk}) async {
   if (androidSdk == null) {
     throwToolExit('Android SDK could not be found.');
   }

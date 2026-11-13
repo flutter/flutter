@@ -68,7 +68,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._codesign,
     required this._featureFlags,
     required this._templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     required this._xcode,
   }) : super(logger: toolContext.logger) {
@@ -120,9 +120,6 @@ class BuildSwiftPackage extends BuildSubCommand {
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
   final CocoaPods _cocoaPods;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   bool get supported => toolContext.platform.isMacOS;
@@ -210,7 +207,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     analytics: _analytics,
     buildSystem: _buildSystem,
     cocoaPods: _cocoaPods,
-    flutterRoot: Cache.flutterRoot!,
+    flutterRoot: toolContext.cache.flutterRoot,
     project: project,
     templateRenderer: _templateRenderer,
     toolContext: toolContext,
@@ -1206,7 +1203,7 @@ class AppFrameworkAndNativeAssetsDependencies {
           frameworks: vmServiceFrameworks,
           frameworkBinaryName: _vmServiceBinaryName,
           outputDirectory: xcframeworkOutput,
-          processManager: _utils.processManager,
+          processManager: processManager,
           codesignIdentity: codesignIdentity,
           buildMode: buildInfo.mode,
         );
@@ -1255,6 +1252,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       :Logger logger,
       platform: Platform hostPlatform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = _utils.toolContext;
     final environment = Environment(
       projectDir: fileSystem.currentDirectory,
@@ -1276,6 +1274,10 @@ class AppFrameworkAndNativeAssetsDependencies {
       processManager: processManager,
       platform: hostPlatform,
       analytics: _utils.analytics,
+      androidSdkBuilder: null,
+      projectFactory: projectFactory,
+      visualStudio: null,
+      xcode: _utils.xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
@@ -1458,16 +1460,6 @@ class AppFrameworkAndNativeAssetsDependencies {
     relativePath: '$_kFrameworks/$_appBinaryName.xcframework',
   );
 
-  /// The target dependency for the VMService framework.
-  SwiftPackageTargetDependency get vmServiceTargetDependency =>
-      SwiftPackageTargetDependency.target(name: _vmServiceBinaryName);
-
-  /// The binary target for the VMService framework.
-  SwiftPackageTarget get vmServiceBinaryTarget => SwiftPackageTarget.binaryTarget(
-    name: _vmServiceBinaryName,
-    relativePath: '$_kFrameworks/$_vmServiceBinaryName.xcframework',
-  );
-
   /// Generate target dependencies and binary targets for the App.xcframework,
   /// VMService.xcframework, and any native assets.
   (List<SwiftPackageTargetDependency>, List<SwiftPackageTarget>) generateDependencies({
@@ -1484,8 +1476,13 @@ class AppFrameworkAndNativeAssetsDependencies {
     targetDependencies.add(appTargetDependency);
     packageTargets.add(appBinaryTarget);
     if (xcframeworkOutput.childDirectory('$_vmServiceBinaryName.xcframework').existsSync()) {
-      targetDependencies.add(vmServiceTargetDependency);
-      packageTargets.add(vmServiceBinaryTarget);
+      targetDependencies.add(SwiftPackageTargetDependency.target(name: _vmServiceBinaryName));
+      packageTargets.add(
+        SwiftPackageTarget.binaryTarget(
+          name: _vmServiceBinaryName,
+          relativePath: '$_kFrameworks/$_vmServiceBinaryName.xcframework',
+        ),
+      );
     }
     return (targetDependencies, packageTargets);
   }
@@ -2220,4 +2217,12 @@ class BuildSwiftPackageUtils {
   final TemplateRenderer templateRenderer;
   final ToolContext toolContext;
   final Xcode xcode;
+
+  Artifacts get artifacts => toolContext.artifacts;
+  Cache get cache => toolContext.cache;
+  FileSystem get fileSystem => toolContext.fs;
+  FlutterVersion get flutterVersion => toolContext.flutterVersion;
+  Logger get logger => toolContext.logger;
+  Platform get platform => toolContext.platform;
+  ProcessManager get processManager => toolContext.processManager;
 }

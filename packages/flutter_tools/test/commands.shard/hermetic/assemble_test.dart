@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -22,8 +23,9 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  Cache.disableLocking();
-  Cache.flutterRoot = '';
+  setUpAll(() {
+    Cache.disableLocking();
+  });
   final StackTrace stackTrace = StackTrace.current;
   late FakeAnalytics fakeAnalytics;
   late MemoryFileSystem fileSystem;
@@ -54,9 +56,11 @@ void main() {
   testWithoutContext('flutter assemble can run a build', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
@@ -64,9 +68,34 @@ void main() {
     expect(logger.traceText, contains('build succeeded.'));
   });
 
+  for (final targetName in <String>['unpack_ios_vm_service', 'unpack_macos_vm_service']) {
+    testWithoutContext('flutter assemble recognizes $targetName', () async {
+      Target? builtTarget;
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+          androidContext: FakeAndroidContext(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            builtTarget = target;
+          }),
+          featureFlags: TestFeatureFlags(),
+          toolContext: toolContext,
+          xcode: null,
+        ),
+      );
+      await commandRunner.run(<String>['assemble', '-o Output', targetName]);
+
+      expect(builtTarget?.name, targetName);
+      expect(logger.traceText, contains('build succeeded.'));
+    });
+  }
+
   testWithoutContext('flutter assemble can parse defines whose values contain =', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
@@ -75,6 +104,7 @@ void main() {
           expect(environment.defines, containsPair('FooBar', 'fizz=2'));
         }),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>[
@@ -90,6 +120,7 @@ void main() {
   testWithoutContext('flutter assemble can parse empty defines', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
@@ -98,6 +129,7 @@ void main() {
           expect(environment.defines, const {'DeferredComponents': 'false'});
         }),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>[
@@ -112,6 +144,7 @@ void main() {
 
   testWithoutContext('flutter assemble can parse inputs', () async {
     final command = AssembleCommand(
+      androidContext: FakeAndroidContext(),
       featureFlags: TestFeatureFlags(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
@@ -120,6 +153,7 @@ void main() {
         expect(environment.inputs, containsPair('Foo', 'Bar.txt'));
       }),
       toolContext: toolContext,
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>[
@@ -135,9 +169,11 @@ void main() {
 
   testWithoutContext('flutter assemble sets required artifacts from target platform', () async {
     final command = AssembleCommand(
+      androidContext: FakeAndroidContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>[
@@ -153,9 +189,11 @@ void main() {
 
   testWithoutContext('flutter assemble sends assemble-deferred-components', () async {
     final command = AssembleCommand(
+      androidContext: FakeAndroidContext(),
       featureFlags: TestFeatureFlags(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command, fakeAnalytics);
     await commandRunner.run(<String>[
@@ -179,9 +217,11 @@ void main() {
 
   testWithoutContext('flutter assemble sends usage values correctly with platform', () async {
     final command = AssembleCommand(
+      androidContext: FakeAndroidContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command, fakeAnalytics);
     await commandRunner.run(<String>[
@@ -208,9 +248,11 @@ void main() {
   testWithoutContext('flutter assemble throws ToolExit if not provided with output', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -225,9 +267,11 @@ void main() {
     () async {
       final CommandRunner<void> commandRunner = createTestCommandRunner(
         AssembleCommand(
+          androidContext: FakeAndroidContext(),
           featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           toolContext: toolContext,
+          xcode: null,
         ),
       );
 
@@ -248,9 +292,11 @@ void main() {
     () async {
       final CommandRunner<void> commandRunner = createTestCommandRunner(
         AssembleCommand(
+          androidContext: FakeAndroidContext(),
           featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           toolContext: toolContext,
+          xcode: null,
         ),
       );
 
@@ -306,9 +352,11 @@ void main() {
   testWithoutContext('flutter assemble throws ToolExit if called with non-existent rule', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -318,6 +366,7 @@ void main() {
   testWithoutContext('flutter assemble does not log stack traces during build failure', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(
           BuildResult(
@@ -328,6 +377,7 @@ void main() {
           ),
         ),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -342,6 +392,7 @@ void main() {
   testWithoutContext('flutter assemble outputs JSON performance data to provided file', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(
           BuildResult(
@@ -358,6 +409,7 @@ void main() {
           ),
         ),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -391,6 +443,7 @@ void main() {
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(
         AssembleCommand(
+          androidContext: FakeAndroidContext(),
           featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
@@ -399,6 +452,7 @@ void main() {
             expect(environment.engineVersion, isNull);
           }),
           toolContext: localToolContext,
+          xcode: null,
         ),
       );
       await commandRunner.run(<String>[
@@ -427,6 +481,7 @@ void main() {
     var buildInvoked = false;
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
@@ -441,6 +496,7 @@ void main() {
           expect(environment.engineVersion, isNull);
         }),
         toolContext: localToolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>[
@@ -480,9 +536,11 @@ void main() {
       ]);
       final CommandRunner<void> commandRunner = createTestCommandRunner(
         AssembleCommand(
+          androidContext: FakeAndroidContext(),
           featureFlags: TestFeatureFlags(),
           buildSystem: buildSystem,
           toolContext: toolContext,
+          xcode: null,
         ),
       );
       await commandRunner.run(<String>[
@@ -559,9 +617,11 @@ void main() {
   testWithoutContext('hides itself from usage unless --verbose', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.error(null),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -575,10 +635,12 @@ void main() {
   testWithoutContext('describes itself from usage if --verbose', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.error(null),
         toolContext: toolContext,
         verboseHelp: true,
+        xcode: null,
       ),
     );
 
@@ -600,9 +662,11 @@ void main() {
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        androidContext: FakeAndroidContext(),
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.error(null),
         toolContext: emptyToolContext,
+        xcode: null,
       ),
     );
 
@@ -614,7 +678,8 @@ void main() {
 }
 
 final class _StubCommand extends FlutterCommand {
-  _StubCommand({super.toolContext});
+  _StubCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
 
   @override
   String get description => 'This is a stub';

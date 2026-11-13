@@ -12,7 +12,6 @@ import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -52,6 +51,13 @@ abstract class UnpackMacOS extends UnpackDarwin {
 
   @override
   FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
+
+  @override
+  Future<bool> canSkip(Environment environment) async {
+    // The `build swift-package` command copies the FlutterMacOS.xcframework separately and
+    // therefore does not need it to be done by the build system.
+    return environment.defines[kBuildSwiftPackage] == 'true';
+  }
 
   @override
   Future<void> build(Environment environment) async {
@@ -193,6 +199,62 @@ class DebugUnpackMacOS extends UnpackMacOS {
   ];
 }
 
+const _kVmServiceFrameworkName = 'VMService.framework';
+const _kVmServiceExecutableName = 'VMService';
+
+/// Unpack the profile prebuilt VM service framework.
+class UnpackMacOSVmService extends UnpackDarwin {
+  const UnpackMacOSVmService();
+
+  @override
+  String get name => 'unpack_macos_vm_service';
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => .macos;
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.artifact(Artifact.vmserviceFramework, platform: .darwin, mode: .profile),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/$_kVmServiceExecutableName'),
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/Resources/Info.plist'),
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    await copyFramework(
+      environment,
+      buildMode: .profile,
+      framework: .vmserviceFramework,
+      targetPlatform: .darwin,
+    );
+
+    final File frameworkBinary = environment.fileSystem.file(
+      environment.fileSystem.path.join(
+        environment.outputDir.path,
+        _kVmServiceFrameworkName,
+        'Versions',
+        'A',
+        _kVmServiceExecutableName,
+      ),
+    );
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary ${frameworkBinary.path} does not exist, cannot thin');
+    }
+    await thinFramework(
+      environment,
+      frameworkBinary.path,
+      environment.defines[kDarwinArchs] ?? 'x86_64 arm64',
+    );
+  }
+}
+
 /// Create an App.framework for debug macOS targets.
 ///
 /// This framework needs to exist for the Xcode project to link/bundle,
@@ -221,7 +283,7 @@ class DebugMacOSFramework extends Target {
       ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
-    final RunResult result = await globals.xcode!.clang(<String>[
+    final RunResult result = await environment.xcode!.clang(<String>[
       '-x',
       'c',
       debugApp.path,
@@ -295,7 +357,7 @@ class CompileMacOSFramework extends Target {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode,
+      xcode: environment.xcode,
       artifacts: environment.artifacts,
       processManager: environment.processManager,
     );
@@ -443,7 +505,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
         .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = environment.projectFactory.fromDirectory(
+      environment.projectDir,
+    );
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
@@ -568,30 +632,8 @@ abstract class MacOSBundleFlutterAssets extends Target {
         'the "${environment.outputDir.path}" directory and rerunning',
       );
     }
-
-    final Directory vmServiceRootDir = environment.outputDir.childDirectory(
-      _kVmServiceFrameworkName,
-    );
-    if (vmServiceRootDir.existsSync()) {
-      vmServiceRootDir.deleteSync(recursive: true);
-    }
-    if (buildMode == BuildMode.profile) {
-      final String vmServiceArtifactPath = environment.artifacts.getArtifactPath(
-        Artifact.vmserviceFramework,
-        platform: TargetPlatform.darwin,
-        mode: BuildMode.profile,
-      );
-      copyDirectory(
-        environment.fileSystem.directory(vmServiceArtifactPath),
-        vmServiceRootDir,
-        followLinks: false,
-      );
-    }
   }
 }
-
-const _kVmServiceFrameworkName = 'VMService.framework';
-const _kVmServiceExecutableName = 'VMService';
 
 /// Bundle the debug flutter assets into the App.framework.
 class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
@@ -661,27 +703,19 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     const CompileMacOSFramework(),
     const InstallCodeAssets(),
     const ProfileUnpackMacOS(),
+    const UnpackMacOSVmService(),
   ];
 
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
     const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-    const Source.artifact(
-      Artifact.vmserviceFramework,
-      platform: TargetPlatform.darwin,
-      mode: BuildMode.profile,
-    ),
   ];
 
   @override
   List<Source> get outputs => <Source>[
     ...super.outputs,
     const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-    const Source.pattern(
-      '{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/$_kVmServiceExecutableName',
-    ),
-    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/Resources/Info.plist'),
   ];
 }
 

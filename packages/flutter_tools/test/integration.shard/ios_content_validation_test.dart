@@ -75,7 +75,7 @@ void main() {
         tryToDelete(tempDir);
       });
 
-      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+      for (final buildMode in <BuildMode>[.debug, .profile, .release]) {
         group('build in ${buildMode.cliName} mode', () {
           late Directory outputPath;
           late Directory outputApp;
@@ -84,6 +84,8 @@ void main() {
           late File outputFlutterFrameworkBinary;
           late Directory outputAppFramework;
           late File outputAppFrameworkBinary;
+          late Directory outputVmServiceFramework;
+          late File outputVmServiceFrameworkBinary;
           late File outputRunnerBinary;
           late File outputRunnerBinaryDebugDylib;
           late File outputPluginFrameworkBinary;
@@ -117,6 +119,9 @@ void main() {
 
             outputAppFramework = frameworkDirectory.childDirectory('App.framework');
             outputAppFrameworkBinary = outputAppFramework.childFile('App');
+
+            outputVmServiceFramework = frameworkDirectory.childDirectory('VMService.framework');
+            outputVmServiceFrameworkBinary = outputVmServiceFramework.childFile('VMService');
 
             outputRunnerBinary = outputApp.childFile('Runner');
             outputRunnerBinaryDebugDylib = outputApp.childFile('Runner.debug.dylib');
@@ -170,6 +175,21 @@ void main() {
             expect(outputAppFrameworkBinary, exists);
             expect(outputAppFramework.childFile('Info.plist'), exists);
 
+            if (buildMode == .profile) {
+              expect(outputVmServiceFrameworkBinary, exists);
+              expect(outputVmServiceFramework.childFile('Info.plist'), exists);
+              final ProcessResult vmServiceArchs = processManager.runSync(<String>[
+                'file',
+                outputVmServiceFrameworkBinary.path,
+              ]);
+              expect(
+                vmServiceArchs.stdout,
+                contains('Mach-O 64-bit dynamically linked shared library arm64'),
+              );
+            } else {
+              expect(outputVmServiceFramework, isNot(exists));
+            }
+
             expect(buildAppFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
 
             final File vmSnapshot = fileSystem.file(
@@ -216,7 +236,7 @@ void main() {
             final bool bonjourServicesFound = (bonjourServices.stdout as String).contains(
               '_dartVmService._tcp',
             );
-            expect(bonjourServicesFound, buildMode == BuildMode.debug);
+            expect(bonjourServicesFound, buildMode != .release);
 
             final ProcessResult localNetworkUsage = processManager.runSync(<String>[
               'plutil',
@@ -228,7 +248,7 @@ void main() {
               infoPlistPath,
             ]);
             final localNetworkUsageFound = localNetworkUsage.exitCode == 0;
-            expect(localNetworkUsageFound, buildMode == BuildMode.debug);
+            expect(localNetworkUsageFound, buildMode != .release);
           });
 
           testWithoutContext('check symbols', () {

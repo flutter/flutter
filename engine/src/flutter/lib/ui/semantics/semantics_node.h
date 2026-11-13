@@ -58,7 +58,8 @@ constexpr int kHorizontalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollRight);
 
 constexpr int kScrollableSemanticsActions =
-    kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions;
+    kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions |
+    static_cast<int32_t>(SemanticsAction::kScrollToOffset);
 
 /// The following actions are not user-initiated.
 constexpr int kSystemActions =

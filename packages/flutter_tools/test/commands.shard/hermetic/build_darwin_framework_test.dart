@@ -26,6 +26,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -36,7 +37,6 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = getFlutterRoot();
   });
 
   const storageBaseUrl = 'https://fake.googleapis.com';
@@ -205,8 +205,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -702,8 +700,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -943,9 +939,9 @@ void main() {
   });
 
   group('VMService.xcframework', () {
-    void setUpFakeProject(Directory projectDir, {required String platformSubdir}) {
-      projectDir.childDirectory(platformSubdir).createSync(recursive: true);
-      if (platformSubdir == 'ios') {
+    void setUpFakeProject(Directory projectDir, {required FlutterDarwinPlatform platform}) {
+      projectDir.childDirectory(platform.name).createSync(recursive: true);
+      if (platform == .ios) {
         projectDir
             .childDirectory('ios')
             .childDirectory('Flutter')
@@ -960,17 +956,7 @@ void main() {
             .createSync(recursive: true);
       }
       projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
-      projectDir.childDirectory('.dart_tool').childFile('package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(
-          '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
-        );
-      projectDir
-          .childDirectory('.dart_tool')
-          .childFile('package_graph.json')
-          .writeAsStringSync(
-            '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
-          );
+      writePackageConfigFiles(directory: projectDir, mainLibName: 'project');
       projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
       projectDir.childFile('.metadata').createSync();
       memoryFileSystem.currentDirectory = projectDir;
@@ -997,7 +983,7 @@ void main() {
           processManager: FakeProcessManager.any(),
         );
         final Directory projectDir = memoryFileSystem.directory('project')..createSync();
-        setUpFakeProject(projectDir, platformSubdir: 'ios');
+        setUpFakeProject(projectDir, platform: .ios);
         final Directory frameworkOutput = memoryFileSystem.directory('/output');
 
         for (final mode in <String>['debug', 'profile', 'release']) {
@@ -1135,7 +1121,7 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
       final Directory projectDir = memoryFileSystem.directory('project')..createSync();
-      setUpFakeProject(projectDir, platformSubdir: 'macos');
+      setUpFakeProject(projectDir, platform: .macos);
       final Directory frameworkOutput = memoryFileSystem.directory('/output');
 
       for (final mode in <String>['debug', 'profile', 'release']) {
@@ -1200,10 +1186,18 @@ void main() {
           output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
           if (target.name == 'profile_macos_bundle_flutter_assets') {
             output.childDirectory('App.framework.dSYM').createSync(recursive: true);
-            output
-                .childDirectory('VMService.framework')
-                .childFile('VMService')
+            final Directory vmServiceFramework = output.childDirectory('VMService.framework');
+            final Directory versionADir = vmServiceFramework
+                .childDirectory('Versions')
+                .childDirectory('A');
+            versionADir.childFile('VMService').createSync(recursive: true);
+            versionADir
+                .childDirectory('Resources')
+                .childFile('Info.plist')
                 .createSync(recursive: true);
+            vmServiceFramework.childDirectory('Versions').childLink('Current').createSync('A');
+            vmServiceFramework.childLink('VMService').createSync('Versions/Current/VMService');
+            vmServiceFramework.childLink('Resources').createSync('Versions/Current/Resources');
           }
         }),
         platform: fakePlatform,
@@ -1610,7 +1604,7 @@ void main() {
     "GROUP1": {
       "isa": "PBXGroup",
       "name": "Frameworks",
-      "children": ["REF1", "REF2", "REF3", "REF4", "REF5", "REF6"]
+      "children": ["REF1", "REF2", "REF3", "REF4", "REF5", "REF6", "REF7", "REF8"]
     },
     "REF1": {
       "isa": "PBXFileReference",
@@ -1635,6 +1629,14 @@ void main() {
     "REF6": {
       "isa": "PBXFileReference",
       "path": "some/path/VMService.xcframework"
+    },
+    "REF7": {
+      "isa": "PBXFileReference",
+      "path": "some/path/FlutterMacOS.framework"
+    },
+    "REF8": {
+      "isa": "PBXFileReference",
+      "path": "some/path/FlutterMacOS.xcframework"
     }
   }
 }
@@ -1645,6 +1647,8 @@ void main() {
       for (final framework in <String>[
         'Flutter.framework',
         'Flutter.xcframework',
+        'FlutterMacOS.framework',
+        'FlutterMacOS.xcframework',
         'App.framework',
         'App.xcframework',
         'VMService.framework',

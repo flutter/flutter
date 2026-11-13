@@ -5,14 +5,17 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -65,6 +68,22 @@ void main() {
       fileSystem: fileSystem,
       engineVersion: '2',
       analytics: fakeAnalytics,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'strawberry'],
+        ),
+      ),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: processManager,
+        ),
+      ),
     );
 
     binary = environment.outputDir
@@ -602,8 +621,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 
@@ -618,15 +635,6 @@ void main() {
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
-      fileSystem
-          .directory(
-            artifacts.getArtifactPath(
-              Artifact.vmserviceFramework,
-              platform: TargetPlatform.darwin,
-              mode: BuildMode.profile,
-            ),
-          )
-          .createSync(recursive: true);
 
       await const ProfileMacOSBundleFlutterAssets().build(
         environment..defines[kBuildMode] = 'profile',
@@ -657,83 +665,12 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'ProfileMacOSBundleFlutterAssets creates VMService.framework',
-    () async {
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
-
-      final String vmServiceFrameworkArtifactPath = artifacts.getArtifactPath(
-        Artifact.vmserviceFramework,
-        platform: TargetPlatform.darwin,
-        mode: BuildMode.profile,
-      );
-      final Directory sourceVmServiceFramework = fileSystem.directory(
-        vmServiceFrameworkArtifactPath,
-      );
-      sourceVmServiceFramework.childFile('Versions/A/VMService')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('macos_vmservice_dylib_bytes');
-      sourceVmServiceFramework.childFile('Versions/A/Resources/Info.plist')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('<string>io.flutter.flutter.vmservice</string>');
-      sourceVmServiceFramework.childLink('Versions/Current').createSync('A', recursive: true);
-      sourceVmServiceFramework
-          .childLink('Resources')
-          .createSync('Versions/Current/Resources', recursive: true);
-      sourceVmServiceFramework
-          .childLink('VMService')
-          .createSync('Versions/Current/VMService', recursive: true);
-
-      const target = ProfileMacOSBundleFlutterAssets();
-      await target.build(environment..defines[kBuildMode] = 'profile');
-
-      final Directory vmServiceRoot = environment.outputDir.childDirectory('VMService.framework');
-      final Directory vmServiceVersionDirectory = vmServiceRoot
-          .childDirectory('Versions')
-          .childDirectory('A');
-      expect(vmServiceRoot.childFile('Versions/A/VMService'), exists);
-      expect(
-        vmServiceRoot.childFile('Versions/A/VMService').readAsStringSync(),
-        'macos_vmservice_dylib_bytes',
-      );
-      expect(vmServiceRoot.childFile('Versions/A/Resources/Info.plist'), exists);
-      expect(
-        vmServiceRoot.childFile('Versions/A/Resources/Info.plist').readAsStringSync(),
-        contains('<string>io.flutter.flutter.vmservice</string>'),
-      );
-      expect(vmServiceRoot.childLink('Versions/Current').targetSync(), 'A');
-      expect(vmServiceRoot.childLink('Resources').targetSync(), 'Versions/Current/Resources');
-      expect(vmServiceRoot.childLink('VMService').targetSync(), 'Versions/Current/VMService');
-      expect(
-        target.inputs,
-        contains(
-          const Source.artifact(
-            Artifact.vmserviceFramework,
-            platform: TargetPlatform.darwin,
-            mode: BuildMode.profile,
-          ),
-        ),
-      );
-      expect(
-        target.resolveOutputs(environment).sources.map((File file) => file.path),
-        containsAll(<String>[
-          vmServiceVersionDirectory.childFile('VMService').path,
-          vmServiceVersionDirectory.childDirectory('Resources').childFile('Info.plist').path,
-        ]),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+  testWithoutContext('ProfileMacOSBundleFlutterAssets depends on UnpackMacOSVmService', () {
+    expect(
+      const ProfileMacOSBundleFlutterAssets().dependencies,
+      contains(const UnpackMacOSVmService()),
+    );
+  });
 
   testUsingContext(
     'release macOS application creates App.framework.dSYM',
@@ -749,17 +686,12 @@ void main() {
           .file('${environment.buildDir.path}/App.framework.dSYM/Contents/Resources/DWARF/App')
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
-      environment.outputDir
-          .childDirectory('VMService.framework')
-          .childFile('Versions/A/VMService')
-          .createSync(recursive: true);
 
       await const ReleaseMacOSBundleFlutterAssets().build(
         environment..defines[kBuildMode] = 'release',
       );
 
       expect(fileSystem.file('App.framework.dSYM/Contents/Resources/DWARF/App'), exists);
-      expect(environment.outputDir.childDirectory('VMService.framework'), isNot(exists));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -781,15 +713,6 @@ void main() {
             ..createSync(recursive: true)
             ..writeAsStringSync('ABC');
       fileSystem.file(environment.buildDir.childFile('native_assets.json')).createSync();
-      fileSystem
-          .directory(
-            artifacts.getArtifactPath(
-              Artifact.vmserviceFramework,
-              platform: TargetPlatform.darwin,
-              mode: BuildMode.profile,
-            ),
-          )
-          .createSync(recursive: true);
 
       await const ProfileMacOSBundleFlutterAssets().build(
         environment..defines[kBuildMode] = 'profile',
@@ -1092,6 +1015,195 @@ void main() {
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
       },
     );
+  });
+
+  group('UnpackMacOSVmService', () {
+    const target = UnpackMacOSVmService();
+    const vmServiceArtifact = 'Artifact.vmserviceFramework.TargetPlatform.darwin.profile';
+
+    testWithoutContext('declares expected inputs, outputs, and does not skip SwiftPM while UnpackMacOS skips SwiftPM', () async {
+      expect(target.inputs, const <Source>[
+        Source.artifact(Artifact.vmserviceFramework, platform: .darwin, mode: .profile),
+      ]);
+      expect(
+        target.resolveOutputs(environment).sources.map((File file) => file.path),
+        containsAll(<String>[
+          environment.outputDir
+              .childDirectory('VMService.framework')
+              .childDirectory('Versions')
+              .childDirectory('A')
+              .childFile('VMService')
+              .path,
+          environment.outputDir
+              .childDirectory('VMService.framework')
+              .childDirectory('Versions')
+              .childDirectory('A')
+              .childDirectory('Resources')
+              .childFile('Info.plist')
+              .path,
+        ]),
+      );
+
+      expect(await target.canSkip(environment), isFalse);
+
+      final swiftPmEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildSwiftPackage: 'true'},
+        artifacts: artifacts,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+      expect(await target.canSkip(swiftPmEnvironment), isFalse);
+      expect(await const DebugUnpackMacOS().canSkip(swiftPmEnvironment), isTrue);
+      expect(await const ProfileUnpackMacOS().canSkip(swiftPmEnvironment), isTrue);
+      expect(await const ReleaseUnpackMacOS().canSkip(swiftPmEnvironment), isTrue);
+      expect(await const ProfileUnpackMacOS().canSkip(environment), isFalse);
+    });
+
+    testWithoutContext('copies, updates permissions, and thins fat framework', () async {
+      final Directory outputDir = fileSystem.directory('output');
+      final File vmServiceBinary = fileSystem.file(
+        fileSystem.path.join(outputDir.path, 'VMService.framework', 'Versions', 'A', 'VMService'),
+      );
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kDarwinArchs: 'arm64'},
+        artifacts: artifacts,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store/',
+            '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+            vmServiceArtifact,
+            outputDir.path,
+          ],
+          onRun: (_) => vmServiceBinary.createSync(recursive: true),
+        ),
+        FakeCommand(
+          command: <String>['chmod', '-R', 'u+w', outputDir.childDirectory(vmServiceArtifact).path],
+        ),
+        FakeCommand(
+          command: <String>['lipo', '-info', vmServiceBinary.path],
+          stdout: 'Architectures in the fat file: x86_64 arm64',
+        ),
+        FakeCommand(command: <String>['lipo', vmServiceBinary.path, '-verify_arch', 'arm64']),
+        FakeCommand(
+          command: <String>[
+            'lipo',
+            '-output',
+            vmServiceBinary.path,
+            '-extract',
+            'arm64',
+            vmServiceBinary.path,
+          ],
+        ),
+      ]);
+
+      await target.build(testEnvironment);
+
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('skips lipo extract when non-fat binary matches arch', () async {
+      final Directory outputDir = fileSystem.directory('output');
+      final File vmServiceBinary = fileSystem.file(
+        fileSystem.path.join(outputDir.path, 'VMService.framework', 'Versions', 'A', 'VMService'),
+      )..createSync(recursive: true);
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kDarwinArchs: 'arm64'},
+        artifacts: artifacts,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store/',
+            '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+            vmServiceArtifact,
+            outputDir.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>['chmod', '-R', 'u+w', outputDir.childDirectory(vmServiceArtifact).path],
+        ),
+        FakeCommand(
+          command: <String>['lipo', '-info', vmServiceBinary.path],
+          stdout: 'Non-fat file:',
+        ),
+        FakeCommand(command: <String>['lipo', vmServiceBinary.path, '-verify_arch', 'arm64']),
+      ]);
+
+      await target.build(testEnvironment);
+
+      expect(
+        logger.traceText,
+        contains('Skipping lipo for non-fat file output/VMService.framework/Versions/A/VMService'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('throws when binary does not exist', () async {
+      final Directory outputDir = fileSystem.directory('output');
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kDarwinArchs: 'arm64'},
+        artifacts: artifacts,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store/',
+            '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+            vmServiceArtifact,
+            outputDir.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>['chmod', '-R', 'u+w', outputDir.childDirectory(vmServiceArtifact).path],
+        ),
+      ]);
+
+      await expectLater(
+        target.build(testEnvironment),
+        throwsA(
+          isException.having(
+            (Exception exception) => exception.toString(),
+            'description',
+            contains('output/VMService.framework/Versions/A/VMService does not exist, cannot thin'),
+          ),
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 }
 

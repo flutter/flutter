@@ -215,16 +215,28 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
     );
   }
 
-  checkFileExists(
-    path.join(
-      outputPath,
-      'Profile',
-      'VMService.xcframework',
-      'ios-arm64',
-      'VMService.framework',
-      'VMService',
-    ),
-  );
+  for (final slice in const <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
+    checkFileExists(
+      path.join(
+        outputPath,
+        'Profile',
+        'VMService.xcframework',
+        slice,
+        'VMService.framework',
+        'VMService',
+      ),
+    );
+    checkFileExists(
+      path.join(
+        outputPath,
+        'Profile',
+        'VMService.xcframework',
+        slice,
+        'VMService.framework',
+        'Info.plist',
+      ),
+    );
+  }
   checkDirectoryNotExists(path.join(outputPath, 'Debug', 'VMService.xcframework'));
   checkDirectoryNotExists(path.join(outputPath, 'Release', 'VMService.xcframework'));
 
@@ -443,8 +455,9 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
       await _checkDsym(path.join(appFrameworkDsymPath, 'Contents', 'Resources', 'DWARF', 'App'));
     }
 
-    if (Directory(path.join(cocoapodsOutputPath, mode, 'FlutterPluginRegistrant.xcframework'))
-            .existsSync() !=
+    if (Directory(
+          path.join(cocoapodsOutputPath, mode, 'FlutterPluginRegistrant.xcframework'),
+        ).existsSync() !=
         isModule) {
       throw TaskResult.failure('Unexpected FlutterPluginRegistrant.xcframework.');
     }
@@ -635,6 +648,17 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
       'macos-arm64_x86_64',
       'VMService.framework',
       'VMService',
+    ),
+  );
+  checkFileExists(
+    path.join(
+      outputPath,
+      'Profile',
+      'VMService.xcframework',
+      'macos-arm64_x86_64',
+      'VMService.framework',
+      'Resources',
+      'Info.plist',
     ),
   );
   checkDirectoryNotExists(path.join(outputPath, 'Debug', 'VMService.xcframework'));

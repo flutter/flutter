@@ -558,11 +558,28 @@ Future<String> _buildNativeProject({
       appBundle.childFile(plistPath).readAsStringSync(),
       contains('<string>$expectedBuildMode</string>'),
     );
+    final vmServiceFrameworkPath = platform == .macos
+        ? 'Contents/Frameworks/VMService.framework'
+        : 'Frameworks/VMService.framework';
+    final Directory embeddedVmService = appBundle.childDirectory(vmServiceFrameworkPath);
+    expect(embeddedVmService.existsSync(), targetFlutterBuildMode == 'Profile');
     if (targetFlutterBuildMode == 'Profile') {
-      final vmServiceFrameworkPath = platform == FlutterDarwinPlatform.macos
-          ? 'Contents/Frameworks/VMService.framework'
-          : 'Frameworks/VMService.framework';
-      expect(appBundle.childDirectory(vmServiceFrameworkPath).existsSync(), isTrue);
+      if (platform == .macos) {
+        expect(embeddedVmService.childDirectory('Versions').childLink('Current').targetSync(), 'A');
+        expect(embeddedVmService.childLink('VMService').targetSync(), 'Versions/Current/VMService');
+        expect(embeddedVmService.childLink('Resources').targetSync(), 'Versions/Current/Resources');
+        expect(
+          embeddedVmService
+              .childDirectory('Versions')
+              .childDirectory('A')
+              .childDirectory('Resources')
+              .childFile('Info.plist'),
+          exists,
+        );
+      } else {
+        expect(embeddedVmService.childFile('VMService'), exists);
+        expect(embeddedVmService.childFile('Info.plist'), exists);
+      }
     }
   }
   return output;
@@ -727,10 +744,34 @@ void _verifyFilesForBuildMode({
     buildDir.childDirectory('FlutterNativeIntegration/$buildMode/Frameworks/App.xcframework'),
     exists,
   );
-  expect(
-    buildDir.childDirectory('FlutterNativeIntegration/$buildMode/Frameworks/VMService.xcframework'),
-    buildMode == 'Profile' ? exists : isNot(exists),
+  final Directory vmServiceXcframework = buildDir.childDirectory(
+    'FlutterNativeIntegration/$buildMode/Frameworks/VMService.xcframework',
   );
+  expect(vmServiceXcframework, buildMode == 'Profile' ? exists : isNot(exists));
+  if (buildMode == 'Profile') {
+    if (platform == .macos) {
+      final Directory macosVmService = vmServiceXcframework
+          .childDirectory('macos-arm64_x86_64')
+          .childDirectory('VMService.framework');
+      expect(macosVmService.childLink('VMService').targetSync(), 'Versions/Current/VMService');
+      expect(
+        macosVmService
+            .childDirectory('Versions')
+            .childDirectory('A')
+            .childDirectory('Resources')
+            .childFile('Info.plist'),
+        exists,
+      );
+    } else {
+      for (final slice in const <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
+        final Directory iosVmService = vmServiceXcframework
+            .childDirectory(slice)
+            .childDirectory('VMService.framework');
+        expect(iosVmService.childFile('VMService'), exists);
+        expect(iosVmService.childFile('Info.plist'), exists);
+      }
+    }
+  }
   expect(
     buildDir.childDirectory(
       'FlutterNativeIntegration/$buildMode/Frameworks/CocoaPods/$cocoaPodsPluginName.xcframework',

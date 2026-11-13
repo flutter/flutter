@@ -220,6 +220,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
+              templateRenderer: const MustacheTemplateRenderer(),
               toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );
@@ -268,6 +269,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
+              templateRenderer: const MustacheTemplateRenderer(),
               toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );
@@ -2131,9 +2133,6 @@ let package = Package(
         final fs = MemoryFileSystem.test();
         final logger = BufferLogger.test();
         final processManager = FakeProcessManager.empty();
-        final String? originalFlutterRoot = Cache.flutterRoot;
-        addTearDown(() => Cache.flutterRoot = originalFlutterRoot);
-        Cache.flutterRoot = _flutterRoot;
         _createPodFingerprintFiles(fs: fs, platformName: 'ios');
         final Directory appDir = fs.directory(_flutterAppPath)..createSync(recursive: true);
         appDir.childFile('pubspec.yaml').writeAsStringSync('''
@@ -3065,9 +3064,28 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           generatedAppFramework.childFile('Resources/flutter_assets/NativeAssetsManifest.json')
             ..createSync(recursive: true)
             ..writeAsStringSync('{"native-assets":{}}');
-          final Directory generatedVmServiceFramework = cacheDirectory.childDirectory(
-            'Profile/macosx/VMService.framework',
-          )..createSync(recursive: true);
+          final Directory generatedVmServiceFramework = cacheDirectory
+              .childDirectory('Profile')
+              .childDirectory('macosx')
+              .childDirectory('VMService.framework');
+          final Directory vmServiceVersionA = generatedVmServiceFramework
+              .childDirectory('Versions')
+              .childDirectory('A');
+          vmServiceVersionA.childFile('VMService').createSync(recursive: true);
+          vmServiceVersionA
+              .childDirectory('Resources')
+              .childFile('Info.plist')
+              .createSync(recursive: true);
+          generatedVmServiceFramework
+              .childDirectory('Versions')
+              .childLink('Current')
+              .createSync('A');
+          generatedVmServiceFramework
+              .childLink('VMService')
+              .createSync('Versions/Current/VMService');
+          generatedVmServiceFramework
+              .childLink('Resources')
+              .createSync('Versions/Current/Resources');
 
           final processManager = FakeProcessManager.list([
             FakeCommand(
@@ -3343,9 +3361,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         // Set up templates in fs
         for (final FileSystemEntity fileEntity
             in fileSystem
-                .directory(
-                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
-                )
+                .directory('${getFlutterRoot()}/packages/flutter_tools/templates/add_to_app/darwin')
                 .listSync(recursive: true)) {
           if (fileEntity is File) {
             fs.file(fileEntity.path).createSync(recursive: true);
@@ -3355,7 +3371,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
 
         // Set up package_config.json for template imageDirectory
         final File packagesFile = fs.file(
-          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+          '${getFlutterRoot()}/packages/flutter_tools/.dart_tool/package_config.json',
         )..createSync(recursive: true);
         packagesFile.writeAsStringSync(
           json.encode(<String, Object>{
@@ -3587,9 +3603,7 @@ let package = Package(
         // Set up templates in fs
         for (final FileSystemEntity fileEntity
             in fileSystem
-                .directory(
-                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
-                )
+                .directory('${getFlutterRoot()}/packages/flutter_tools/templates/add_to_app/darwin')
                 .listSync(recursive: true)) {
           if (fileEntity is File) {
             fs.file(fileEntity.path).createSync(recursive: true);
@@ -3599,7 +3613,7 @@ let package = Package(
 
         // Set up package_config.json for template imageDirectory
         final File packagesFile = fs.file(
-          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+          '${getFlutterRoot()}/packages/flutter_tools/.dart_tool/package_config.json',
         )..createSync(recursive: true);
         packagesFile.writeAsStringSync(
           json.encode(<String, Object>{
@@ -4011,6 +4025,7 @@ class FakeCache extends Fake implements Cache {
   FakeCache(this._fileSystem, this.flutterRoot);
 
   final FileSystem _fileSystem;
+  @override
   final String flutterRoot;
 
   @override

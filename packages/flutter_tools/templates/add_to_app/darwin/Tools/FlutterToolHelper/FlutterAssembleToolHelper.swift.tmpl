@@ -205,10 +205,61 @@ public class FlutterAssembleToolHelper {
       env: env,
       fileManager: fileManager
     )
+    try verifyEmbeddedVmServiceFramework(
+      embeddedFrameworks: embeddedFrameworks,
+      packagePath: packagePath,
+      targetBuildMode: targetBuildMode,
+      fileManager: fileManager
+    )
 
     FlutterToolHelper.xcodeNote(
       message: "Verification complete."
     )
+  }
+
+  /// Verifies that `VMService.framework` is embedded if and only if building in Profile mode.
+  ///
+  /// - Parameters:
+  ///   - embeddedFrameworks: The path to the embedded frameworks directory.
+  ///   - packagePath: The path to the native integration package.
+  ///   - targetBuildMode: The build mode the app is being built for.
+  ///   - fileManager: The file manager to use for file operations.
+  /// - Throws: `XcodeErrorAndExit.error` if `VMService.framework` presence does not match the build mode.
+  private static func verifyEmbeddedVmServiceFramework(
+    embeddedFrameworks: String,
+    packagePath: String,
+    targetBuildMode: String,
+    fileManager: FlutterToolsFileManager
+  ) throws {
+    let embeddedVmServiceFrameworkPath = "\(embeddedFrameworks)/VMService.framework"
+    let hasEmbeddedVmService = fileManager.fileExists(atPath: embeddedVmServiceFrameworkPath)
+    let expectsVmService = targetBuildMode.lowercased() == "profile"
+    if expectsVmService && !hasEmbeddedVmService {
+      throw XcodeErrorAndExit.error(
+        [
+          "The Flutter framework's build mode does not match the currently targeted build mode.",
+          "Expected VMService.framework to be embedded for \(targetBuildMode) at \(embeddedVmServiceFrameworkPath).",
+          "Please complete one of the following:",
+        ]
+          + pluginInstructions(
+            targetBuildMode: targetBuildMode,
+            packagePath: packagePath
+          )
+      )
+    }
+    if !expectsVmService && hasEmbeddedVmService {
+      throw XcodeErrorAndExit.error(
+        [
+          "The Flutter framework's build mode does not match the currently targeted build mode.",
+          "Unexpected VMService.framework found for \(targetBuildMode) at \(embeddedVmServiceFrameworkPath).",
+          "Please complete one of the following:",
+        ]
+          + pluginInstructions(
+            targetBuildMode: targetBuildMode,
+            packagePath: packagePath
+          )
+      )
+    }
   }
 
   /// Resolves the embedded frameworks directory (`$TARGET_BUILD_DIR/$FRAMEWORKS_FOLDER_PATH`).
@@ -436,11 +487,7 @@ public class FlutterAssembleToolHelper {
       )
       let embeddedFrameworks = try embeddedFrameworksDirectory(env: env)
       let embeddedVmServiceFrameworkPath = "\(embeddedFrameworks)/VMService.framework"
-      if targetBuildMode.lowercased() == "profile",
-        fileManager.fileExists(
-          atPath: "\(packagePath)/\(targetBuildMode)/Frameworks/VMService.xcframework"
-        )
-      {
+      if targetBuildMode.lowercased() == "profile" {
         try copyAndCodesignFramework(
           frameworkName: "VMService",
           packagePath: packagePath,
