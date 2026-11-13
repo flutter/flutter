@@ -75,7 +75,7 @@
                 "profile",
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe",
                 "--target-dir",
                 "ci/host_profile_desktop"
@@ -114,7 +114,7 @@
                 "release",
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe",
                 "--target-dir",
                 "ci/host_release_desktop"
