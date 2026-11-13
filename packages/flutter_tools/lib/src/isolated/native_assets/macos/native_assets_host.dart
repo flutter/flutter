@@ -335,19 +335,50 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
     'arm64': Architecture.arm64,
     'x86_64': Architecture.x64,
   };
-  final architectureHeaderPattern = RegExp(r'^.+?( \(architecture (\S+)\))?:$');
+  const architectureSuffixMarker = ' (architecture ';
+  final whitespace = RegExp(r'\s');
   final Iterator<String> lines = output.trim().split('\n').iterator;
   Architecture? currentArchitecture;
   final architectureSections = <Architecture?, List<String>>{};
 
   while (lines.moveNext()) {
     final String line = lines.current;
-    final Match? architectureHeader = architectureHeaderPattern.firstMatch(line);
-    if (architectureHeader != null) {
+    // A section header is a '<path>:' or '<path> (architecture <name>):'
+    // line. The path can itself contain parentheses, including text that
+    // looks like an architecture suffix, so the architecture name is only
+    // taken from a ' (architecture <name>)' that closes the line. Only the
+    // last occurrence of the marker can be that closing suffix, so checking
+    // just that candidate keeps the scan linear in the length of the line
+    // instead of backtracking over every '(' like a regular expression.
+    // '.' in the previous expression did not match the line terminators
+    // U+000D, U+2028 and U+2029 (lines are already split on U+000A), so a
+    // line containing one is still not a header.
+    String? architectureString;
+    bool isHeader = line.length > 1 && line.endsWith(':');
+    if (isHeader) {
+      for (final int codeUnit in line.codeUnits) {
+        if (codeUnit == 0x0d || codeUnit == 0x2028 || codeUnit == 0x2029) {
+          isHeader = false;
+          break;
+        }
+      }
+    }
+    if (isHeader && line.endsWith('):')) {
+      final int markerIndex = line.lastIndexOf(architectureSuffixMarker);
+      if (markerIndex >= 1) {
+        final String name = line.substring(
+          markerIndex + architectureSuffixMarker.length,
+          line.length - 2,
+        );
+        if (name.isNotEmpty && !whitespace.hasMatch(name)) {
+          architectureString = name;
+        }
+      }
+    }
+    if (isHeader) {
       if (architectureSections.containsKey(null)) {
         throwToolExit('Expected a single architecture section in otool output: $output');
       }
-      final String? architectureString = architectureHeader.group(2);
       if (architectureString != null) {
         currentArchitecture = outputArchitectures[architectureString];
         if (currentArchitecture == null) {

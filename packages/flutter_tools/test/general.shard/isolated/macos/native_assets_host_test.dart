@@ -162,6 +162,70 @@ void main() {
         },
       );
     });
+
+    test('multiple architecture-like segments before the terminal suffix', () {
+      expect(
+        parseOtoolArchitectureSections('''
+/a (architecture arm64)/b (architecture arm)/c (architecture x86_64):
+@rpath/libfoo.dylib
+'''),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+
+    test('architecture-like segment without terminal suffix', () {
+      // A ' (architecture X)' that is not the final suffix is part of the
+      // path, not an architecture section name.
+      expect(
+        parseOtoolArchitectureSections('''
+/a (architecture arm64)/b (architecture x86_64)/c:
+@rpath/libfoo.dylib
+'''),
+        <Architecture?, List<String>>{
+          null: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+
+    test('unknown terminal architecture throws', () {
+      expect(
+        () => parseOtoolArchitectureSections('''
+/build/native_assets/ios/buz.framework/buz (architecture riscv64):
+@rpath/libfoo.dylib
+'''),
+        throwsToolExit(message: 'Unknown architecture in otool output'),
+      );
+    });
+
+    test('windows-style path containing parentheses', () {
+      expect(
+        parseOtoolArchitectureSections(r'''
+C:\Users\me\Projects (Local)\my_app\buz.framework\buz (architecture arm64):
+@rpath/libfoo.dylib
+'''),
+        <Architecture, List<String>>{
+          Architecture.arm64: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+
+    test('long path with many architecture-like segments', () {
+      // Adversarial input: a long path full of architecture-like directory
+      // names must still resolve to only the terminal suffix, in a single
+      // pass over the line.
+      final String path = '/d (architecture arm64)' * 40;
+      expect(
+        parseOtoolArchitectureSections('''
+$path/leaf (architecture x86_64):
+@rpath/libfoo.dylib
+'''),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
   });
 
   test('fatAssetTargetLocations ignores cross-architecture conflicts', () {
