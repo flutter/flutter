@@ -241,7 +241,22 @@ bool AndroidContextGLImpeller::ResourceContextMakeCurrent(
     return false;
   }
 
-  return offscreen_context_->MakeCurrent(*offscreen_surface);
+  if (!offscreen_context_->MakeCurrent(*offscreen_surface)) {
+    return false;
+  }
+
+  // Reactor operations may have been queued on this thread before it could
+  // react, such as those of pipeline compile jobs posted to the IO thread
+  // before its resource context was made current. Nothing else is guaranteed
+  // to make this thread react, so flush them now. Otherwise threads waiting on
+  // them, like the raster thread waiting on pipelines, would wait forever.
+  // See https://github.com/flutter/flutter/issues/196453.
+  if (std::shared_ptr<impeller::Context> impeller_context =
+          GetImpellerContext()) {
+    [[maybe_unused]] const bool reacted =
+        impeller::ContextGLES::Cast(*impeller_context).GetReactor()->React();
+  }
+  return true;
 }
 
 std::unique_ptr<impeller::egl::Surface>
