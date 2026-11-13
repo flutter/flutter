@@ -3557,6 +3557,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
   bool get _isTraversalParent => _traversalParentIdentifier != null;
   bool get _isTraversalChild => _traversalChildIdentifier != null;
 
+  // Whether `child` has this node as its traversal parent. A node can be the
+  // traversal parent of one OverlayPortal and the hit-test parent of another
+  // portal's overlay child, for example when the other portal's Overlay is
+  // inside this portal's child.
+  bool _isTraversalParentOf(SemanticsNode child) {
+    return _isTraversalParent && child._traversalChildIdentifier == _traversalParentIdentifier;
+  }
+
   /// A textual description of this node.
   ///
   /// The reading direction is given by [textDirection].
@@ -4203,7 +4211,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (kIsWeb) {
       return false;
     }
-    if (_isTraversalChild && !(parent?._isTraversalParent ?? false)) {
+    if (_isTraversalChild && !(parent?._isTraversalParentOf(this) ?? false)) {
       final SemanticsNode? traversalParent =
           owner!._traversalParentNodes[_traversalChildIdentifier];
       if (traversalParent == null) {
@@ -4238,7 +4246,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (_children == null) {
       return const <SemanticsNode>[];
     }
-    if (kIsWeb || _isTraversalParent) {
+    if (kIsWeb) {
       return _children!;
     }
 
@@ -4383,9 +4391,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     final updatedChildren = <SemanticsNode>[];
     for (final SemanticsNode child in _children!) {
-      if (child._isTraversalChild && !_isTraversalParent) {
+      if (child._isTraversalChild && !_isTraversalParentOf(child)) {
         // If the child node is a traversal child, but the current node is
-        // not a traversal parent, it means the child node should be
+        // not its traversal parent, it means the child node should be
         // grafted to be a child of a traversal parent node that has the
         // same identifier as the child. So this child should be removed from
         // the current node's children list; i.e., we don't add it to
