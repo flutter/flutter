@@ -74,6 +74,9 @@ The general process for submitting code to a Flutter repository is as follows:
    All submissions to Google Open Source projects need to follow
    [Google's Contributor License Agreement (CLA)](https://cla.developers.google.com/),
    in which contributors agree that their contribution is an original work of authorship.
+   Pull requests with a failing CLA check are automatically moved to a draft state and
+   will not be routed for review until the CLA is signed, the `cla/google` check passes,
+   and the PR is marked **Ready for review**.
    If you use coding assistance tools, see our
    [AI contribution guidelines](../../CONTRIBUTING.ai.md).
 

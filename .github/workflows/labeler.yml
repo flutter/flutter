@@ -7,7 +7,9 @@
 # Runs after `labeler-trigger.yml` completes. The artifact produced by that
 # workflow is UNTRUSTED (a pull request can modify the trigger workflow), so the
 # PR number is only used after binding it to the triggering run's head commit.
-# The label configuration is read from the default branch, not the PR.
+# The label configuration is read from the default branch, not the PR. Before
+# applying labels, it waits for the `cla/google` check run to complete; if the
+# CLA check fails, it skips labeling and moves the PR to a draft state.
 #
 # Pull requests from first-time contributors need a maintainer to approve their
 # `pull_request` runs. Until then, the trigger run is created already concluded
@@ -39,6 +41,7 @@ jobs:
        (github.event.action == 'requested' && github.event.workflow_run.conclusion == 'action_required'))
     permissions:
       actions: read
+      checks: read
       contents: read
       pull-requests: write
     runs-on: ubuntu-latest
@@ -92,9 +95,65 @@ jobs:
         fi
         echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
 
+    - name: Check CLA
+      id: cla
+      if: steps.validate.outputs.pr_number != ''
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ steps.validate.outputs.pr_number }}
+        REPO: ${{ github.repository }}
+        RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: |
+        set -euo pipefail
+        CLA_STATUS=""
+        CLA_CONCLUSION=""
+        for attempt in $(seq 1 12); do
+          CHECK_JSON=$(gh api -X GET "repos/$REPO/commits/$RUN_HEAD_SHA/check-runs" \
+            -f check_name="cla/google" -f filter="latest")
+          CLA_STATUS=$(echo "$CHECK_JSON" | jq -r '.check_runs[0].status // empty')
+          CLA_CONCLUSION=$(echo "$CHECK_JSON" | jq -r '.check_runs[0].conclusion // empty')
+          if [ "$CLA_STATUS" = "completed" ]; then
+            break
+          fi
+          echo "Waiting for cla/google check run to complete (attempt $attempt/12, status: ${CLA_STATUS:-not found})..."
+          sleep 5
+        done
+
+        if [ "$CLA_STATUS" != "completed" ]; then
+          echo "::warning::cla/google check run did not complete within 60 seconds (status: ${CLA_STATUS:-not found}); skipping labeling."
+          echo "cla_passed=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        if [ "$CLA_CONCLUSION" = "success" ]; then
+          echo "cla/google check passed."
+          echo "cla_passed=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo "::notice::cla/google check concluded with '$CLA_CONCLUSION' on PR #$PR_NUMBER; skipping labeling."
+        echo "cla_passed=false" >> "$GITHUB_OUTPUT"
+
+        # Re-fetch PR state in case it was closed or converted to draft while waiting.
+        PR_JSON=$(gh api "repos/$REPO/pulls/$PR_NUMBER")
+        if [ "$(echo "$PR_JSON" | jq -r '.state')" != "open" ] ||
+           [ "$(echo "$PR_JSON" | jq -r '.draft')" = "true" ]; then
+          exit 0
+        fi
+
+        echo "Converting PR #$PR_NUMBER to draft..."
+        gh pr ready "$PR_NUMBER" -R "$REPO" --undo
+
+        COMMENT_BODY="This pull request has been moved to a draft state because the \`cla/google\` check failed. Once you have signed the CLA and the \`cla/google\` check is passing, please mark this pull request as **Ready for review**."
+        ALREADY_COMMENTED=$(gh api --paginate "repos/$REPO/issues/$PR_NUMBER/comments" |
+          jq -sr --arg body "$COMMENT_BODY" '[.[][] | select(.body == $body)] | length > 0')
+        if [ "$ALREADY_COMMENTED" != "true" ]; then
+          gh pr comment "$PR_NUMBER" -R "$REPO" --body "$COMMENT_BODY"
+        fi
+
     # Source available at https://github.com/actions/labeler/blob/main/README.md
     - uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13
-      if: steps.validate.outputs.pr_number != ''
+      if: steps.validate.outputs.pr_number != '' && steps.cla.outputs.cla_passed == 'true'
       with:
         pr-number: ${{ steps.validate.outputs.pr_number }}
         sync-labels: true
