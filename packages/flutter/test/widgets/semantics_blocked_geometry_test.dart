@@ -184,4 +184,112 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(tester.getSemantics(find.bySemanticsLabel('other')), isNotNull);
   });
+
+  testWidgets('a node that becomes invisible while its branch is blocked does not '
+      'crash when an ancestor geometry cache is stale', (WidgetTester tester) async {
+    final blocked = ValueNotifier<bool>(false);
+    addTearDown(blocked.dispose);
+    final outerLabel = ValueNotifier<String>('outer');
+    addTearDown(outerLabel.dispose);
+    final offset = ValueNotifier<double>(0.0);
+    addTearDown(offset.dispose);
+    final middleLabel = ValueNotifier<String>('middle');
+    addTearDown(middleLabel.dispose);
+    final innerLabel = ValueNotifier<String>('inner');
+    addTearDown(innerLabel.dispose);
+
+    // Each part of the tree is rebuilt by its own notifier so that each frame
+    // only dirties the render objects it needs to.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: blocked,
+          builder: (BuildContext context, bool isBlocked, Widget? page) {
+            return Stack(
+              children: <Widget>[
+                page!,
+                if (isBlocked) const BlockSemantics(child: SizedBox.expand()),
+              ],
+            );
+          },
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 200.0,
+              height: 200.0,
+              // "outer" is a semantics boundary and a relayout boundary.
+              child: ValueListenableBuilder<String>(
+                valueListenable: outerLabel,
+                builder: (BuildContext context, String label, Widget? child) {
+                  return Semantics(
+                    container: true,
+                    explicitChildNodes: true,
+                    label: label,
+                    child: child,
+                  );
+                },
+                // The transform does not contribute to the semantics tree, so
+                // changing it clears the geometry of "middle".
+                child: ValueListenableBuilder<double>(
+                  valueListenable: offset,
+                  builder: (BuildContext context, double dx, Widget? child) {
+                    return Transform.translate(offset: Offset(dx, 0.0), child: child);
+                  },
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    // "middle" forms a semantics node but is not a boundary.
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: middleLabel,
+                      builder: (BuildContext context, String label, Widget? child) {
+                        return Semantics(label: label, child: child);
+                      },
+                      // "inner" is a semantics boundary with an empty rect.
+                      child: ValueListenableBuilder<String>(
+                        valueListenable: innerLabel,
+                        builder: (BuildContext context, String label, Widget? child) {
+                          return Semantics(
+                            container: true,
+                            label: label,
+                            child: const SizedBox.shrink(),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // A modal barrier blocks the page.
+    blocked.value = true;
+    await tester.pump();
+
+    // "middle" gets dirty geometry and caches "outer", which still has clean
+    // geometry, as its first ancestor with clean geometry.
+    offset.value = 1.0;
+    middleLabel.value = 'middle 2';
+    await tester.pump();
+
+    // "outer" and "middle" get dirty geometry, which cannot be recomputed
+    // while the page is blocked, and the invisible "inner" makes
+    // flushSemantics look up the first ancestor of "middle" with clean
+    // geometry. That lookup must not reuse the cache from the previous frame.
+    outerLabel.value = 'outer 2';
+    offset.value = 2.0;
+    innerLabel.value = 'inner 2';
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    // The barrier goes away.
+    blocked.value = false;
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.bySemanticsLabel('outer 2'), findsOneWidget);
+    expect(find.bySemanticsLabel('middle 2'), findsOneWidget);
+  });
 }
