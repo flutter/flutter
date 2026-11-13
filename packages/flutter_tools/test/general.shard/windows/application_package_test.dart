@@ -4,7 +4,9 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
@@ -65,6 +67,37 @@ void main() {
 
       expect(windowsApp, isNull);
       expect(logger.errorText, contains('Cannot find .exe files in the zip archive.'));
+    });
+
+    testWithoutContext('Bad zipped app, unzip throws ProcessException', () {
+      fileSystem.file('app.zip').createSync();
+      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+        throw const ProcessException('tar.exe', <String>['-xf', 'app.zip'], 'Corrupt archive');
+      };
+      final WindowsApp? windowsApp = WindowsApp.fromPrebuiltApp(
+        fileSystem.file('app.zip'),
+        toolContext: toolContext,
+      );
+
+      expect(windowsApp, isNull);
+      expect(
+        logger.errorText,
+        contains('Invalid prebuilt Windows app. Unable to extract from archive.'),
+      );
+    });
+
+    testWithoutContext('Bad zipped app, unzip throws ToolExit', () {
+      fileSystem.file('app.zip').createSync();
+      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+        throwToolExit(r'Unable to find "C:\Windows\System32\tar.exe". Unable to extract app.zip.');
+      };
+
+      expect(
+        () => WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip'), toolContext: toolContext),
+        throwsToolExit(
+          message: r'Unable to find "C:\Windows\System32\tar.exe". Unable to extract app.zip.',
+        ),
+      );
     });
 
     testWithoutContext('Bad zipped app, two .exe files', () {

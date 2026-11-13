@@ -4,7 +4,6 @@
 
 import 'dart:ffi' show Abi;
 
-import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -19,6 +18,7 @@ import '../../src/fake_process_manager.dart';
 const kExecutable = 'foo';
 const kPath1 = '/bar/bin/$kExecutable';
 const kPath2 = '/another/bin/$kExecutable';
+const kWindowsTarPath = r'C:\Windows\System32\tar.exe';
 
 const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
 
@@ -38,9 +38,9 @@ void main() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  OperatingSystemUtils createOSUtils(Platform platform, {Abi? currentAbi}) {
+  OperatingSystemUtils createOSUtils(Platform platform, {Abi? currentAbi, FileSystem? fileSystem}) {
     return OperatingSystemUtils(
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem ?? MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: platform,
       processManager: fakeProcessManager,
@@ -409,73 +409,193 @@ void main() {
       expect(utils.name, 'Pretty Name');
     });
 
-    // See https://snyk.io/research/zip-slip-vulnerability for more context
-    testWithoutContext('Windows validates paths when unzipping', () {
-      // on POSIX systems we use the `unzip` binary, which will fail to extract
-      // files with paths outside the target directory
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-      final fs = MemoryFileSystem.test();
-      final File fakeZipFile = fs.file('archive.zip');
-      final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
-      const content = 'hello, world!';
-      final archive = Archive()
-        ..addFile(
-          // This file would be extracted outside of the target extraction dir
-          ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
-        );
-      final List<int> zipData = ZipEncoder().encode(archive)!;
-      fakeZipFile.writeAsBytesSync(zipData);
-      expect(
-        () => utils.unzip(fakeZipFile, targetDirectory),
-        throwsA(
-          isA<StateError>().having(
-            (StateError error) => error.message,
-            'correct error message',
-            contains('Tried to extract the file '),
-          ),
+    group('unzip on Windows', () {
+      const tarResolutionCases = <(String, Map<String, String>, String)>[
+        (
+          'resolves tar using SYSTEMROOT over WINDIR',
+          <String, String>{'SYSTEMROOT': r'D:\Windows', 'WINDIR': r'E:\WinNT'},
+          r'D:\Windows\System32\tar.exe',
         ),
-      );
-    });
-
-    // Regression test for https://github.com/flutter/flutter/issues/185794.
-    // A canonical archive entry that resolves to a sibling directory sharing
-    // a name prefix with the extraction root (e.g. `<target>-sibling/x.txt`)
-    // must NOT be accepted: the previous `startsWith` check on canonical
-    // paths returned true for sibling directories with a name that started
-    // with the target's name.
-    testWithoutContext(
-      'Windows rejects archive entries that escape into a sibling directory with a name prefix',
-      () {
-        final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-        final fs = MemoryFileSystem.test();
-        final File fakeZipFile = fs.file('archive.zip');
-        // Extract into `<cwd>/cache/windows-x64`. A crafted archive entry of
-        // `../windows-x64-profile/poc_marker.txt` resolves to
-        // `<cwd>/cache/windows-x64-profile/poc_marker.txt`, a sibling of the
-        // target whose canonical path shares the `windows-x64` prefix.
-        final Directory targetDirectory = fs.directory('cache/windows-x64')
-          ..createSync(recursive: true);
-        const content = 'malicious';
-        final archive = Archive()
-          ..addFile(
-            ArchiveFile('../windows-x64-profile/poc_marker.txt', content.length, content.codeUnits),
+        (
+          'resolves tar using WINDIR fallback when SYSTEMROOT is unset',
+          <String, String>{'WINDIR': r'E:\WinNT'},
+          r'E:\WinNT\System32\tar.exe',
+        ),
+        (
+          r'resolves tar using default C:\Windows fallback when SYSTEMROOT and WINDIR are unset',
+          <String, String>{},
+          kWindowsTarPath,
+        ),
+      ];
+      for (final (String description, Map<String, String> environment, String expectedTarPath)
+          in tarResolutionCases) {
+        testWithoutContext(description, () {
+          final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+          final Directory targetDirectory = fileSystem.directory('output')
+            ..createSync(recursive: true);
+          final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                expectedTarPath,
+                '-xf',
+                fakeZipFile.path,
+                '-C',
+                targetDirectory.path,
+              ],
+            ),
           );
-        final List<int> zipData = ZipEncoder().encode(archive)!;
-        fakeZipFile.writeAsBytesSync(zipData);
+
+          final OperatingSystemUtils utils = createOSUtils(
+            FakePlatform(operatingSystem: 'windows', environment: environment),
+            fileSystem: fileSystem,
+          );
+          utils.unzip(fakeZipFile, targetDirectory);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
+      }
+
+      testWithoutContext('creates target directory if it does not exist', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('nonexistent_output');
+        expect(targetDirectory.existsSync(), isFalse);
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeZipFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unzip(fakeZipFile, targetDirectory);
+        expect(targetDirectory.existsSync(), isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('throws ToolExit when tar is not available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output');
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+        fakeProcessManager.excludedExecutables.add(kWindowsTarPath);
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
         expect(
           () => utils.unzip(fakeZipFile, targetDirectory),
-          throwsA(
-            isA<StateError>().having(
-              (StateError error) => error.message,
-              'correct error message',
-              contains('Tried to extract the file '),
-            ),
+          throwsToolExit(
+            message: 'Unable to find "$kWindowsTarPath". Unable to extract ${fakeZipFile.path}.',
           ),
         );
-        // The sibling file must not have been written.
-        expect(fs.file('cache/windows-x64-profile/poc_marker.txt').existsSync(), isFalse);
-      },
-    );
+        expect(targetDirectory.existsSync(), isFalse);
+      });
+
+      testWithoutContext('never passes -P or --absolute-paths to tar', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+        // Passing -P or --absolute-paths disables bsdtar's '..' and leading-slash
+        // rejection (zip-slip protection, see https://github.com/flutter/flutter/issues/185794).
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeZipFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unzip(fakeZipFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+    });
+
+    group('unpack on Windows', () {
+      testWithoutContext('unpacks with tar when tar is available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeTarFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unpack(fakeTarFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('creates target directory if it does not exist', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('nonexistent_output');
+        expect(targetDirectory.existsSync(), isFalse);
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeTarFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unpack(fakeTarFile, targetDirectory);
+        expect(targetDirectory.existsSync(), isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('throws ToolExit when tar is not available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output');
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        fakeProcessManager.excludedExecutables.add(kWindowsTarPath);
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        expect(
+          () => utils.unpack(fakeTarFile, targetDirectory),
+          throwsToolExit(
+            message: 'Unable to find "$kWindowsTarPath". Unable to extract ${fakeTarFile.path}.',
+          ),
+        );
+        expect(targetDirectory.existsSync(), isFalse);
+      });
+
+      testWithoutContext('never passes -P or --absolute-paths to tar', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        // Passing -P or --absolute-paths disables bsdtar's '..' and leading-slash
+        // rejection (zip-slip protection, see https://github.com/flutter/flutter/issues/185794).
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeTarFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unpack(fakeTarFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+    });
   });
 
   group('HostPlatform.fromOsAndArch', () {
