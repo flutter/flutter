@@ -9,19 +9,19 @@ public class FakeKeyEvent extends KeyEvent {
     super(action, keyCode);
   }
 
-  public FakeKeyEvent(int action, int keyCode, char character) {
+  public FakeKeyEvent(int action, int keyCode, int character) {
     super(action, keyCode);
     this.character = character;
   }
 
   public FakeKeyEvent(
-      int action, int scancode, int code, int repeat, char character, int metaState) {
+      int action, int scancode, int code, int repeat, int character, int metaState) {
     super(0, 0, action, code, repeat, metaState, 0, scancode);
     this.character = character;
   }
 
   public FakeKeyEvent(
-      int action, int scancode, int code, int repeat, char character, int metaState, int source) {
+      int action, int scancode, int code, int repeat, int character, int metaState, int source) {
     super(0, 0, action, code, repeat, metaState, 0, scancode, 0, source);
     this.character = character;
   }
@@ -31,7 +31,7 @@ public class FakeKeyEvent extends KeyEvent {
       int scancode,
       int code,
       int repeat,
-      char character,
+      int character,
       int metaState,
       int deviceId,
       int source) {
@@ -39,7 +39,8 @@ public class FakeKeyEvent extends KeyEvent {
     this.character = character;
   }
 
-  private char character = 0;
+  // An int so that it can carry KeyCharacterMap.COMBINING_ACCENT for dead keys.
+  private int character = 0;
 
   public final int getUnicodeChar() {
     if (getKeyCode() == KeyEvent.KEYCODE_BACK) {
