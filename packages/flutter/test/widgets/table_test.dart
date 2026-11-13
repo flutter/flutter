@@ -1202,6 +1202,54 @@ void main() {
     },
   );
 
+  testWidgets('Table semantics stay in the row when the row and the cell padding change together', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    Widget buildTable({required double rowHeight, required double padding, required bool tight}) {
+      Widget table = Table(
+        defaultColumnWidth: const FixedColumnWidth(100.0),
+        children: <TableRow>[
+          TableRow(children: <Widget>[SizedBox(height: rowHeight)]),
+          TableRow(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(top: padding),
+                child: const SizedBox(height: 20.0, child: Text('B')),
+              ),
+            ],
+          ),
+          const TableRow(children: <Widget>[SizedBox(height: 20.0, child: Text('C'))]),
+        ],
+      );
+      if (tight) {
+        // A table with tight constraints is a relayout boundary.
+        table = SizedBox(width: 100.0, height: 200.0, child: table);
+      }
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(alignment: Alignment.topLeft, child: table),
+      );
+    }
+
+    for (final tight in <bool>[false, true]) {
+      await tester.pumpWidget(buildTable(rowHeight: 30.0, padding: 30.0, tight: tight));
+      expect(
+        rectInTable(tester.getSemantics(find.text('B'))),
+        tester.getRect(find.text('B')),
+        reason: 'tight: $tight',
+      );
+
+      // B ends up where it was in its row before, relative to the table.
+      await tester.pumpWidget(buildTable(rowHeight: 20.0, padding: 10.0, tight: tight));
+      final SemanticsNode node = tester.getSemantics(find.text('B'));
+      expect(node.parent!.parent!.indexInParent, 1, reason: 'tight: $tight');
+      expect(rectInTable(node), tester.getRect(find.text('B')), reason: 'tight: $tight');
+    }
+
+    handle.dispose();
+  });
+
   testWidgets('Table semantics follow keyed rows that move up', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/194545.
     final SemanticsHandle handle = tester.ensureSemantics();

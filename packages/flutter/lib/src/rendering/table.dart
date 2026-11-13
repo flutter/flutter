@@ -677,45 +677,14 @@ class RenderTable extends RenderBox {
         !(_cachedSpannedCells?.isCovered(childParentData.x!, childParentData.y!) ?? false);
   }
 
-  final Map<SemanticsNode, _SemanticsShift> _semanticsShifts = <SemanticsNode, _SemanticsShift>{};
   final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
   final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
 
   @override
   void clearSemantics() {
     super.clearSemantics();
-    _semanticsShifts.clear();
     _cachedRows.clear();
     _cachedCells.clear();
-  }
-
-  // The transform of `child` relative to the table.
-  //
-  // assembleSemanticsNode moves the children into their rows and cell wrappers
-  // by adding an offset to their transforms. A child whose semantics have not
-  // been rebuilt since then still has that transform, so the offset is taken
-  // off again. Such a child can still have moved together with its cell, for
-  // example when it is a semantics boundary and its size stayed the same, so
-  // it is moved as far as its cell has moved since.
-  //
-  // TODO(hm21): A child that is rebuilt with exactly the transform that it was
-  // shifted to last time is taken for one that was not rebuilt. This only puts
-  // it in the wrong place if it also moved within its cell. Give the rows and
-  // cell wrappers rects in the coordinates of the table instead of shifting the
-  // children, once desktop handles parents whose rect does not start at the
-  // origin, see https://github.com/flutter/flutter/issues/196135.
-  Matrix4? _transformInTable(SemanticsNode child) {
-    final _SemanticsShift? previous = _semanticsShifts[child];
-    if (previous == null || !identical(child.transform, previous.transform)) {
-      return child.transform;
-    }
-    final RenderBox? cell = previous.cell;
-    final Offset cellMovement = cell != null && cell.parent == this
-        ? (cell.parentData! as TableCellParentData).offset - previous.cellOffset
-        : Offset.zero;
-    final Offset offset = cellMovement - previous.shift;
-    return Matrix4.translationValues(offset.dx, offset.dy, 0)
-      ..multiply(child.transform ?? Matrix4.identity());
   }
 
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
@@ -738,7 +707,7 @@ class RenderTable extends RenderBox {
     );
 
     Rect rectInTable(SemanticsNode child) {
-      final Matrix4? transform = _transformInTable(child);
+      final Matrix4? transform = child.transform;
       return transform == null ? child.rect : MatrixUtils.transformRect(transform, child.rect);
     }
 
@@ -769,20 +738,10 @@ class RenderTable extends RenderBox {
 
     // Every child is looked up in the table by where it is, so a child that
     // moved to another cell is found there.
-    final cellOfChild = <SemanticsNode, RenderBox?>{};
     for (final child in children) {
       final Rect rect = rectInTable(child);
       int y = findRowIndex(rect.top);
       int x = findColumnIndex(rect.left);
-      if (y == -1 || x == -1) {
-        continue;
-      }
-      // x counts the columns from the left, the children of the table are in
-      // the order of the text direction.
-      int column = switch (textDirection) {
-        TextDirection.ltr => x,
-        TextDirection.rtl => _columns - 1 - x,
-      };
       // A child of a spanning cell can start below or to the right of where
       // the cell starts, for example when the cell is aligned to the bottom.
       // It still belongs to the row and column that the cell starts in.
@@ -794,18 +753,13 @@ class RenderTable extends RenderBox {
             x < leftColumn + span.colSpan) {
           y = span.y;
           x = leftColumn;
-          column = span.x;
           break;
         }
       }
-      rawCells[y][x].add(child);
-      cellOfChild[child] = _children[column + y * _columns];
+      if (y != -1 && x != -1) {
+        rawCells[y][x].add(child);
+      }
     }
-
-    // Forget the children that are not part of the table anymore.
-    _semanticsShifts.removeWhere(
-      (SemanticsNode child, _SemanticsShift _) => !cellOfChild.containsKey(child),
-    );
 
     for (var y = 0; y < _rows; y++) {
       Rect rowBox = getRowBox(y);
@@ -890,19 +844,12 @@ class RenderTable extends RenderBox {
         }
         for (final child in rawChildrens) {
           // Move the child from the coordinates of the table into those of the
-          // row, or of the cell wrapper if there is one.
+          // row, or of the cell wrapper if there is one. The children come in
+          // the coordinates of the table every time, also the ones that were
+          // moved here before and were not built again since.
           final shift = Offset(addCellWrapper ? -_columnLefts!.elementAt(x) : 0.0, -rowBox.top);
           child.transform = Matrix4.translationValues(shift.dx, shift.dy, 0)
-            ..multiply(_transformInTable(child) ?? Matrix4.identity());
-          // Read the transform back, because the setter keeps the previous
-          // transform if it is equal and turns an identity matrix into null.
-          final RenderBox? cellBox = cellOfChild[child];
-          _semanticsShifts[child] = (
-            transform: child.transform,
-            shift: shift,
-            cell: cellBox,
-            cellOffset: (cellBox?.parentData as TableCellParentData?)?.offset ?? Offset.zero,
-          );
+            ..multiply(child.transform ?? Matrix4.identity());
         }
 
         cell.indexInParent = x;
@@ -2139,12 +2086,6 @@ class _Index {
 // A cell that spans several columns or rows: the cell at column x of row y,
 // which covers colSpan columns and rowSpan rows from there.
 typedef _Span = ({int x, int y, int colSpan, int rowSpan});
-
-// How RenderTable.assembleSemanticsNode last moved the semantics of a child into
-// its row or cell wrapper: the offset that it added to the transform of the
-// child, the transform that the child was left with, and the cell that the
-// child was found in, with the offset of that cell at the time.
-typedef _SemanticsShift = ({Matrix4? transform, Offset shift, RenderBox? cell, Offset cellOffset});
 
 // Records the cells of a table that span several columns or rows, and the
 // cells that they cover.
