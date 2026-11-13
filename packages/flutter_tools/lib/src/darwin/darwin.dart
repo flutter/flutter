@@ -23,6 +23,7 @@ enum FlutterDarwinPlatform {
     artifactName: 'ios',
     artifactZip: 'artifacts.zip',
     xcframeworkArtifact: Artifact.flutterXcframework,
+    archiveZipChecksumArtifact: Artifact.iosFrameworkArchiveChecksum,
     sdks: <XcodeSdk>[XcodeSdk.IPhoneOS, XcodeSdk.IPhoneSimulator],
   ),
   macos(
@@ -32,6 +33,7 @@ enum FlutterDarwinPlatform {
     artifactName: 'darwin-x64',
     artifactZip: 'framework.zip',
     xcframeworkArtifact: Artifact.flutterMacOSXcframework,
+    archiveZipChecksumArtifact: Artifact.macOSFrameworkArchiveChecksum,
     sdks: <XcodeSdk>[XcodeSdk.MacOSX],
   );
 
@@ -42,6 +44,7 @@ enum FlutterDarwinPlatform {
     required this._artifactName,
     required this.artifactZip,
     required this.xcframeworkArtifact,
+    required this.archiveZipChecksumArtifact,
     required this.sdks,
   });
 
@@ -62,6 +65,10 @@ enum FlutterDarwinPlatform {
 
   /// The [Artifact] for the xcframework for the platform.
   final Artifact xcframeworkArtifact;
+
+  /// The [Artifact] for the JSON file containing the Swift package checksum and download URL of
+  /// the [artifactZip].
+  final Artifact archiveZipChecksumArtifact;
 
   /// A list of supported [XcodeSdk].
   final List<XcodeSdk> sdks;
