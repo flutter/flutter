@@ -185,6 +185,7 @@ using ::testing::AtLeast;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
 
 class MockPlatformViewDelegate : public PlatformView::Delegate {
  public:
@@ -391,14 +392,14 @@ TEST(AndroidPlatformView,
 
 // The software backend is needed to create a platform view without a GPU.
 #if !SLIMPELLER
-TEST(AndroidPlatformView, SetupImpellerContextWarmsDefaultPipelines) {
-  // The test calls SetupImpellerContext directly, as the shell would on the
-  // raster thread, so the platform view never posts any tasks.
-  TaskRunners task_runners("SetupImpellerContextWarmsDefaultPipelines", nullptr,
-                           nullptr, nullptr, nullptr);
+namespace {
 
-  // An Impeller context with no GPU behind it, whose shader library resolves
-  // every shader.
+/// Creates an Impeller context of the given backend with no GPU behind it,
+/// whose shader library resolves every shader.
+std::shared_ptr<impeller::testing::MockImpellerContext>
+CreateImpellerContextWithoutGPU(
+    impeller::Context::BackendType backend_type,
+    const std::shared_ptr<impeller::PipelineLibrary>& pipeline_library) {
   std::shared_ptr<const impeller::Capabilities> capabilities =
       impeller::CapabilitiesBuilder()
           .SetDefaultColorFormat(impeller::PixelFormat::kR8G8B8A8UNormInt)
@@ -412,19 +413,44 @@ TEST(AndroidPlatformView, SetupImpellerContextWarmsDefaultPipelines) {
         return std::make_shared<impeller::testing::MockShaderFunction>(
             std::string(name), stage);
       });
-  auto pipeline_library =
-      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
   auto impeller_context =
       std::make_shared<NiceMock<impeller::testing::MockImpellerContext>>();
   ON_CALL(*impeller_context, IsValid()).WillByDefault(Return(true));
   ON_CALL(*impeller_context, GetBackendType())
-      .WillByDefault(Return(impeller::Context::BackendType::kOpenGLES));
+      .WillByDefault(Return(backend_type));
   ON_CALL(*impeller_context, GetCapabilities())
-      .WillByDefault(ReturnRef(capabilities));
+      .WillByDefault(ReturnRefOfCopy(capabilities));
   ON_CALL(*impeller_context, GetShaderLibrary())
       .WillByDefault(Return(shader_library));
   ON_CALL(*impeller_context, GetPipelineLibrary())
       .WillByDefault(Return(pipeline_library));
+  return impeller_context;
+}
+
+/// Calls SetupImpellerContext on a platform view whose Android context hands
+/// out `impeller_context`, as the shell would on the raster thread.
+void SetupImpellerContext(
+    const std::shared_ptr<impeller::Context>& impeller_context) {
+  // SetupImpellerContext is called directly, so the platform view never posts
+  // any tasks.
+  TaskRunners task_runners("SetupImpellerContext", nullptr, nullptr, nullptr,
+                           nullptr);
+  Settings settings;
+  NiceMock<MockPlatformViewDelegate> delegate;
+  ON_CALL(delegate, OnPlatformViewGetSettings())
+      .WillByDefault(ReturnRef(settings));
+  PlatformViewAndroid platform_view(
+      delegate, task_runners, std::make_shared<JNIMock>(),
+      std::make_shared<FakeAndroidContext>(impeller_context));
+
+  platform_view.SetupImpellerContext();
+}
+
+}  // namespace
+
+TEST(AndroidPlatformView, SetupImpellerContextWarmsDefaultPipelinesForGLES) {
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
 
   // The pipelines are requested asynchronously, before any surface exists.
   EXPECT_CALL(*pipeline_library, GetPipeline(_, /*async=*/false, _)).Times(0);
@@ -437,15 +463,19 @@ TEST(AndroidPlatformView, SetupImpellerContextWarmsDefaultPipelines) {
                 impeller::Pipeline<impeller::PipelineDescriptor>>>(nullptr)};
       });
 
-  Settings settings;
-  NiceMock<MockPlatformViewDelegate> delegate;
-  ON_CALL(delegate, OnPlatformViewGetSettings())
-      .WillByDefault(ReturnRef(settings));
-  PlatformViewAndroid platform_view(
-      delegate, task_runners, std::make_shared<JNIMock>(),
-      std::make_shared<FakeAndroidContext>(impeller_context));
+  SetupImpellerContext(CreateImpellerContextWithoutGPU(
+      impeller::Context::BackendType::kOpenGLES, pipeline_library));
+}
 
-  platform_view.SetupImpellerContext();
+TEST(AndroidPlatformView,
+     SetupImpellerContextDoesNotWarmDefaultPipelinesForVulkan) {
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+
+  EXPECT_CALL(*pipeline_library, GetPipeline(_, _, _)).Times(0);
+
+  SetupImpellerContext(CreateImpellerContextWithoutGPU(
+      impeller::Context::BackendType::kVulkan, pipeline_library));
 }
 #endif  // !SLIMPELLER
 

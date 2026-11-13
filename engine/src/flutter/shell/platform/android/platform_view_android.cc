@@ -605,16 +605,23 @@ void PlatformViewAndroid::SetupImpellerContext() {
 
   // Start compiling the default pipelines now, on the raster thread where the
   // surface's ContentContext will later look them up, instead of waiting for
-  // the first surface to be created. Compilation happens off this thread (on
-  // the IO thread for OpenGL ES, on worker threads for Vulkan), so no rendering
-  // context needs to be current here.
+  // the first surface to be created. Compilation happens on the IO thread, so
+  // no rendering context needs to be current here. Compile work queued on the
+  // IO thread before its resource context is current runs once it is (see
+  // |AndroidContextGLImpeller::ResourceContextMakeCurrent|).
   //
-  // The pipelines are keyed on the context's default color format, which the
-  // Vulkan swapchain may change once a surface exists. On Android it is always
-  // R8G8B8A8, so the pipelines warmed here are the ones the surface uses.
-  // |CheckWarmedColorFormat| asserts that this stays true.
-  if (std::shared_ptr<impeller::Context> impeller_context =
-          android_context_->GetImpellerContext()) {
+  // This is only done for OpenGL ES. Warming every default pipeline was not a
+  // clear win on Vulkan, and may regress startup for apps that only use a few
+  // pipelines on their first frame
+  // (https://github.com/flutter/flutter/issues/196453).
+  //
+  // The pipelines are keyed on the context's default color format. On Android
+  // it is always R8G8B8A8, so the pipelines warmed here are the ones the
+  // surface uses. |CheckWarmedColorFormat| asserts that this stays true.
+  std::shared_ptr<impeller::Context> impeller_context =
+      android_context_->GetImpellerContext();
+  if (impeller_context && impeller_context->GetBackendType() ==
+                              impeller::Context::BackendType::kOpenGLES) {
     warmed_color_format_ =
         impeller_context->GetCapabilities()->GetDefaultColorFormat();
     impeller::ContentContext::WarmDefaultPipelines(*impeller_context);
