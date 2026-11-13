@@ -5,14 +5,14 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 
+#include <atomic>
+#include <cstdint>
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 
 #include <android/hardware_buffer_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
-#include "flutter/impeller/core/formats.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/snapshot_surface_producer.h"
@@ -144,15 +144,13 @@ class PlatformViewAndroid final : public PlatformView {
 
   std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
+  // Incremented on the platform thread in NotifyCreated, NotifyDestroyed, and
+  // the destructor so deferred raster tasks from a superseded or destroyed
+  // surface are skipped. Shared with those tasks because a resize task can
+  // outlive this object.
+  const std::shared_ptr<std::atomic<uint64_t>> surface_generation_ =
+      std::make_shared<std::atomic<uint64_t>>(0);
   bool android_meets_hcpp_criteria_ = false;
-  // The color format that |SetupImpellerContext| warmed the default pipelines
-  // for, if it warmed them. Raster thread only.
-  std::optional<impeller::PixelFormat> warmed_color_format_;
-
-  // Asserts that the surface renders to the color format that the default
-  // pipelines were warmed for. Otherwise the warm-up was wasted. Raster thread
-  // only.
-  void CheckWarmedColorFormat() const;
 
   // |PlatformView|
   void UpdateSemantics(
