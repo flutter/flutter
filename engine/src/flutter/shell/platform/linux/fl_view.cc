@@ -8,6 +8,7 @@
 #include <gdk/gdkwayland.h>
 #include <gtk/gtk-a11y.h>
 
+#include <cstdint>
 #include <cstring>
 
 #include "flutter/common/constants.h"
@@ -277,7 +278,8 @@ static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
 
   return fl_plugin_registrar_new(self,
                                  fl_engine_get_binary_messenger(self->engine),
-                                 fl_engine_get_texture_registrar(self->engine));
+                                 fl_engine_get_texture_registrar(self->engine),
+                                 reinterpret_cast<intptr_t>(self->engine));
 }
 
 static void fl_renderable_iface_init(FlRenderableInterface* iface) {

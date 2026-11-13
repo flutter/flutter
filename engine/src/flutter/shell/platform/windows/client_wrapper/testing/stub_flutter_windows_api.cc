@@ -263,6 +263,14 @@ void FlutterDesktopPluginRegistrarPostPlatformThreadTask(
   }
 }
 
+int64_t FlutterDesktopPluginRegistrarGetEngineId(
+    FlutterDesktopPluginRegistrarRef registrar) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->PluginRegistrarGetEngineId();
+  }
+  return 0;
+}
+
 void FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopWindowProcCallback delegate,
