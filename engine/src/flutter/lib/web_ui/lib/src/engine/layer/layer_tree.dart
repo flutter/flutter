@@ -80,7 +80,7 @@ class Frame {
   final PlatformViewEmbedder? viewEmbedder;
 
   /// Rasterize the given layer tree into this frame.
-  bool raster(LayerTree layerTree, BitmapSize size, FrameTimingRecorder? recorder) {
+  bool raster(LayerTree layerTree, BitmapSize size) {
     timeAction<void>(kProfilePrerollFrame, () {
       layerTree.preroll(this);
       layerTree.measure(this, size);

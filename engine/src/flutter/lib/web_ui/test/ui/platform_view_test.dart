@@ -848,7 +848,7 @@ Future<void> testMain() async {
 
     embedder.frameSize = rasterizer.currentFrameSize;
     final Frame frame = rasterizer.context.acquireFrame(embedder);
-    frame.raster(LayerTree(rootLayer), rasterizer.currentFrameSize, null);
+    frame.raster(LayerTree(rootLayer), rasterizer.currentFrameSize);
 
     // View 0 is disposed while it is still part of the composition which is
     // about to be submitted.

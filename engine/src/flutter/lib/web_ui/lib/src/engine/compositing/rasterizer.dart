@@ -85,7 +85,7 @@ abstract class ViewRasterizer {
     // Raster time includes the engine's preroll, measure, composition
     // optimization, and paint passes, as well as rasterizing the pictures.
     recorder?.recordRasterStart();
-    compositorFrame.raster(layerTree, currentFrameSize, recorder);
+    compositorFrame.raster(layerTree, currentFrameSize);
     _lastRenderedLayerTree = layerTree;
 
     final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
