@@ -40,11 +40,15 @@ base class ExtensionBuildManager {
       _cachedAssembleTargets ?? const <ExtensionAssembleTarget>[];
 
   /// Returns the name of the extension that registered the custom `flutter build`
+  /// target [targetName], or `null` if no extension registered it.
+  String? tryExtensionNameForBuildTarget(String targetName) =>
+      _buildTargetToConnection[targetName]?.extensionName;
+
+  /// Returns the name of the extension that registered the custom `flutter build`
   /// target [targetName], or [ExtensionConnection.defaultExtensionName] if no
   /// extension registered it.
   String extensionNameForBuildTarget(String targetName) =>
-      _buildTargetToConnection[targetName]?.extensionName ??
-      ExtensionConnection.defaultExtensionName;
+      tryExtensionNameForBuildTarget(targetName) ?? ExtensionConnection.defaultExtensionName;
 
   /// Returns the name of the extension that registered the custom `flutter assemble`
   /// target [targetName], or [ExtensionConnection.defaultExtensionName] if no

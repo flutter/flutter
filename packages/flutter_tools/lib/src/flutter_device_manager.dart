@@ -22,6 +22,7 @@ import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
 import 'device.dart';
+import 'experimental/extension_artifact_manager.dart';
 import 'experimental/extension_build_manager.dart';
 import 'experimental/extension_device_manager.dart';
 import 'experimental/extension_manager.dart';
@@ -46,6 +47,7 @@ class FlutterDeviceManager extends DeviceManager {
     required this._appleContext,
     required this._buildSystem,
     required this._buildTargets,
+    required this._extensionArtifactManager,
     required this._extensionBuildManager,
     required this._extensionManager,
     required this._featureFlags,
@@ -61,6 +63,7 @@ class FlutterDeviceManager extends DeviceManager {
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final ExtensionArtifactManager _extensionArtifactManager;
   final ExtensionBuildManager _extensionBuildManager;
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
@@ -143,6 +146,7 @@ class FlutterDeviceManager extends DeviceManager {
         toolContext: _toolContext,
       ),
       ExtensionDevices(
+        extensionArtifactManager: _extensionArtifactManager,
         extensionBuildManager: _extensionBuildManager,
         extensionManager: _extensionManager,
         fileSystem: fs,

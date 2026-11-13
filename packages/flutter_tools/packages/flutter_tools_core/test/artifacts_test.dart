@@ -36,11 +36,12 @@ void main() {
   });
 
   group('HostPlatform', () {
-    test('round-trips canonical built-in platforms', () {
+    test('round-trips canonical built-in platforms and normalizes macos alias to darwin', () {
       for (final HostPlatform platform in HostPlatform.values) {
         expect(HostPlatform.fromName(platform.cliName), same(platform));
         expect(HostPlatform.fromName(platform.name), same(platform));
         expect(HostPlatform.tryFromName(platform.cliName), same(platform));
+        expect(HostPlatform(platform.osName, platform.cpuArch), same(platform));
       }
       expect(HostPlatform.linux_x64.osName, 'linux');
       expect(HostPlatform.linux_x64.cpuArch, CpuArch.x64);
@@ -50,8 +51,14 @@ void main() {
       expect(HostPlatform.darwin_arm64.cpuArchName, 'arm64');
       expect(HostPlatform.linux_riscv64.cpuArchName, 'riscv64');
       expect(HostPlatform.linux_x64.toString(), 'HostPlatform.linux_x64');
-      expect(HostPlatform.fromOsAndArch('macos', 'arm64'), HostPlatform.darwin_arm64);
-      expect(HostPlatform.fromOsAndArch('linux', 'riscv64'), HostPlatform.linux_riscv64);
+      expect(HostPlatform('macos', .arm64), same(HostPlatform.darwin_arm64));
+      expect(HostPlatform('macos', .x64), same(HostPlatform.darwin_x64));
+      expect(HostPlatform.fromName('macos-arm64'), same(HostPlatform.darwin_arm64));
+      expect(HostPlatform.fromName('macos_x64'), same(HostPlatform.darwin_x64));
+      expect(HostPlatform('macos', .riscv64), equals(HostPlatform('darwin', .riscv64)));
+      expect(HostPlatform.fromOsAndArch('macos', 'arm64'), same(HostPlatform.darwin_arm64));
+      expect(HostPlatform.fromOsAndArch('darwin', 'arm64'), same(HostPlatform.darwin_arm64));
+      expect(HostPlatform.fromOsAndArch('linux', 'riscv64'), same(HostPlatform.linux_riscv64));
       expect(HostPlatform.fromOsAndArch('freebsd', 'x64'), isNull);
     });
 
@@ -96,6 +103,7 @@ void main() {
         name: 'custom-engine-bin',
         sha256: validSha256,
         url: Uri.parse('https://example.com/artifacts/engine.zip'),
+        executables: const <String>{'gen_snapshot', 'bin/ld.lld'},
         hostPlatform: HostPlatform.linux_x64,
         targetPlatform: 'linux-x64',
       );
@@ -103,6 +111,9 @@ void main() {
       final remoteDep = dep as RemoteArtifactDependency;
       expect(remoteDep.archiveFormat, ArchiveFormat.zip);
       expect(remoteDep.isZipArchive, isTrue);
+      expect(remoteDep.executables, equals(const <String>{'gen_snapshot', 'bin/ld.lld'}));
+      expect(() => remoteDep.executables.add('extra'), throwsUnsupportedError);
+      expect(remoteDep.isExecutable, isFalse);
 
       final Map<String, Object?> json = dep.toMap();
       expect(json, <String, Object?>{
@@ -111,6 +122,7 @@ void main() {
         'url': 'https://example.com/artifacts/engine.zip',
         'sha256': validSha256,
         'archiveFormat': 'zip',
+        'executables': <String>['gen_snapshot', 'bin/ld.lld'],
         'hostPlatform': 'linux-x64',
         'targetPlatform': 'linux-x64',
       });
@@ -124,7 +136,29 @@ void main() {
         'url: https://example.com/artifacts/engine.zip, '
         'sha256: $validSha256, '
         'archiveFormat: zip, '
+        'executables: {gen_snapshot, bin/ld.lld}, '
+        'isExecutable: false, '
         'hostPlatform: HostPlatform.linux_x64, targetPlatform: linux-x64)',
+      );
+
+      final singleBinaryDep = ArtifactDependency.remote(
+        name: 'gen_snapshot_bin',
+        sha256: validSha256,
+        url: Uri.parse('https://example.com/artifacts/gen_snapshot'),
+        isExecutable: true,
+      );
+      expect(singleBinaryDep.toMap(), <String, Object?>{
+        'type': 'remote',
+        'name': 'gen_snapshot_bin',
+        'url': 'https://example.com/artifacts/gen_snapshot',
+        'sha256': validSha256,
+        'archiveFormat': 'none',
+        'isExecutable': true,
+      });
+      expect(ArtifactDependency.fromJson(singleBinaryDep.toMap()), equals(singleBinaryDep));
+      expect(
+        ArtifactDependency.fromJson(singleBinaryDep.toMap()).hashCode,
+        equals(singleBinaryDep.hashCode),
       );
 
       final customHostDep = ArtifactDependency.remote(
@@ -139,8 +173,8 @@ void main() {
 
     test('serializes and deserializes local artifact with optional stampUri and UNC paths', () {
       final localDirDep = ArtifactDependency.local(
-        name: 'local-engine-dir',
         localUri: Uri.directory('/path/to/local/engine', windows: false),
+        name: 'local-engine-dir',
         stampUri: Uri.file('/path/to/local/engine/.stamp', windows: false),
         hostPlatform: HostPlatform.linux_x64,
         targetPlatform: 'custom-embedder-arm64',
@@ -169,8 +203,8 @@ void main() {
       );
 
       final localFileDep = ArtifactDependency.local(
-        name: 'local-engine-bin',
         localUri: Uri.file('/path/to/local/gen_snapshot', windows: false),
+        name: 'local-engine-bin',
       );
       expect(localFileDep.toMap(), <String, Object?>{
         'type': 'local',
@@ -180,126 +214,167 @@ void main() {
       expect(ArtifactDependency.fromJson(localFileDep.toMap()), equals(localFileDep));
 
       final uncDep = ArtifactDependency.local(
-        name: 'unc-engine-dir',
         localUri: Uri.directory(r'\\server\share\out\host_debug_unopt', windows: true),
+        name: 'unc-engine-dir',
         stampUri: Uri.file(r'\\server\share\out\host_debug_unopt\.stamp', windows: true),
       );
       expect(ArtifactDependency.fromJson(uncDep.toMap()), equals(uncDep));
     });
 
-    test(
-      'validates name, url/localUri/stampUri scheme, and 64-character hex sha256 in constructor',
-      () {
+    test('validates name, url/localUri/stampUri scheme, sha256, and executable constraints in constructor', () {
+      expect(
+        () => ArtifactDependency.remote(
+          name: 'custom_engine-1.0.bin',
+          sha256: validSha256.toUpperCase(),
+          url: Uri.parse('https://example.com/artifacts/engine.zip'),
+          executables: const <String>{'gen_snapshot', 'toolchains/llvm/bin/clang++'},
+        ),
+        returnsNormally,
+      );
+      for (final invalidName in <String>['../evil', 'foo.', 'foo ', '.', '..']) {
         expect(
           () => ArtifactDependency.remote(
-            name: 'custom_engine-1.0.bin',
-            sha256: validSha256.toUpperCase(),
-            url: Uri.parse('https://example.com/artifacts/engine.zip'),
-          ),
-          returnsNormally,
-        );
-        for (final invalidName in <String>['../evil', 'foo.', 'foo ', '.', '..']) {
-          expect(
-            () => ArtifactDependency.remote(
-              name: invalidName,
-              sha256: validSha256,
-              url: Uri.parse('https://example.com/artifacts/engine.zip'),
-            ),
-            throwsA(isA<AssertionError>()),
-            reason: 'Expected "$invalidName" to fail remote assertion',
-          );
-          expect(
-            () => ArtifactDependency.local(
-              name: invalidName,
-              localUri: Uri.file('/path/to/local/file', windows: false),
-            ),
-            throwsA(isA<AssertionError>()),
-            reason: 'Expected "$invalidName" to fail local assertion',
-          );
-        }
-        expect(
-          () => ArtifactDependency.remote(
-            name: 'custom-engine-bin',
+            name: invalidName,
             sha256: validSha256,
-            url: Uri.parse('file:///etc/passwd'),
-          ),
-          throwsA(isA<AssertionError>()),
-        );
-        expect(
-          () => ArtifactDependency.remote(
-            name: 'custom-engine-bin',
-            sha256: 'deadbeef',
             url: Uri.parse('https://example.com/artifacts/engine.zip'),
           ),
           throwsA(isA<AssertionError>()),
-        );
-        expect(
-          () => ArtifactDependency.remote(
-            name: 'custom-engine-bin',
-            sha256: 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
-            url: Uri.parse('https://example.com/artifacts/engine.zip'),
-          ),
-          throwsA(isA<AssertionError>()),
+          reason: 'Expected "$invalidName" to fail remote assertion',
         );
         expect(
           () => ArtifactDependency.local(
-            name: 'local-bin',
-            localUri: Uri.parse('https://example.com/file'),
-          ),
-          throwsA(isA<AssertionError>()),
-        );
-        expect(
-          () => ArtifactDependency.local(
-            name: 'local-bin',
             localUri: Uri.file('/path/to/local/file', windows: false),
-            stampUri: Uri.parse('https://example.com/stamp'),
+            name: invalidName,
           ),
           throwsA(isA<AssertionError>()),
+          reason: 'Expected "$invalidName" to fail local assertion',
         );
+      }
+      for (final invalidExec in <String>[
+        '',
+        '.',
+        '..',
+        './gen_snapshot',
+        'bin/../gen_snapshot',
+        '../gen_snapshot',
+        '/usr/bin/gen_snapshot',
+        'bin/',
+        'bin//gen_snapshot',
+        r'bin\gen_snapshot',
+        'C:/bin/gen_snapshot',
+      ]) {
         expect(
-          () => ArtifactDependency.local(
-            name: 'local-bin',
-            localUri: Uri.directory('/path/to/local/dir', windows: false),
-            stampUri: Uri.directory('/path/to/local/stamp_dir', windows: false),
+          () => ArtifactDependency.remote(
+            name: 'engine-bundle',
+            sha256: validSha256,
+            url: Uri.parse('https://example.com/artifacts/engine.zip'),
+            executables: <String>{invalidExec},
           ),
           throwsA(isA<AssertionError>()),
+          reason: 'Expected "$invalidExec" to fail executables assertion',
         );
-      },
-    );
-
-    test(
-      'serializes and deserializes without optional platforms and defaults missing type to remote',
-      () {
-        final dep = ArtifactDependency.remote(
-          name: 'common-data',
+      }
+      expect(
+        () => ArtifactDependency.remote(
+          name: 'single-file',
           sha256: validSha256,
-          url: Uri.parse('https://example.com/data.bin'),
-        );
-        expect((dep as RemoteArtifactDependency).archiveFormat, ArchiveFormat.none);
-        expect(dep.isZipArchive, isFalse);
+          url: Uri.parse('https://example.com/artifacts/gen_snapshot'),
+          executables: const <String>{'gen_snapshot'},
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency.remote(
+          name: 'zip-archive',
+          sha256: validSha256,
+          url: Uri.parse('https://example.com/artifacts/engine.zip'),
+          isExecutable: true,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency.remote(
+          name: 'custom-engine-bin',
+          sha256: validSha256,
+          url: Uri.parse('file:///etc/passwd'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency.remote(
+          name: 'custom-engine-bin',
+          sha256: 'deadbeef',
+          url: Uri.parse('https://example.com/artifacts/engine.zip'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency.remote(
+          name: 'custom-engine-bin',
+          sha256: 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+          url: Uri.parse('https://example.com/artifacts/engine.zip'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency.local(
+          localUri: Uri.parse('https://example.com/file'),
+          name: 'local-bin',
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency.local(
+          localUri: Uri.file('/path/to/local/file', windows: false),
+          name: 'local-bin',
+          stampUri: Uri.parse('https://example.com/stamp'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency.local(
+          localUri: Uri.directory('/path/to/local/dir', windows: false),
+          name: 'local-bin',
+          stampUri: Uri.directory('/path/to/local/stamp_dir', windows: false),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
 
-        final Map<String, Object?> json = dep.toMap();
-        expect(json.containsKey('hostPlatform'), isFalse);
-        expect(json.containsKey('targetPlatform'), isFalse);
-        expect(json['archiveFormat'], 'none');
+    test('serializes and deserializes without optional platforms', () {
+      final dep = ArtifactDependency.remote(
+        name: 'common-data',
+        sha256: validSha256,
+        url: Uri.parse('https://example.com/data.bin'),
+      );
+      expect((dep as RemoteArtifactDependency).archiveFormat, ArchiveFormat.none);
+      expect(dep.isZipArchive, isFalse);
+      expect(dep.executables, isEmpty);
+      expect(dep.isExecutable, isFalse);
 
-        final deserialized = ArtifactDependency.fromJson(json);
-        expect(deserialized, equals(dep));
-        expect(deserialized.hostPlatform, isNull);
-        expect(deserialized.targetPlatform, isNull);
+      final Map<String, Object?> json = dep.toMap();
+      expect(json.containsKey('hostPlatform'), isFalse);
+      expect(json.containsKey('targetPlatform'), isFalse);
+      expect(json.containsKey('executables'), isFalse);
+      expect(json.containsKey('isExecutable'), isFalse);
+      expect(json['type'], 'remote');
+      expect(json['archiveFormat'], 'none');
 
-        final legacyJson = <String, Object?>{
-          'name': 'common-data',
-          'url': 'https://example.com/data.bin',
-          'sha256': validSha256,
-        };
-        expect(ArtifactDependency.fromJson(legacyJson), equals(dep));
-      },
-    );
+      final deserialized = ArtifactDependency.fromJson(json);
+      expect(deserialized, equals(dep));
+      expect(deserialized.hostPlatform, isNull);
+      expect(deserialized.targetPlatform, isNull);
+    });
 
     test('listFromJson parses valid entries and throws FormatException on invalid payloads', () {
       final List<ArtifactDependency> list = ArtifactDependency.listFromJson(<Object?>[
-        <String, Object?>{'name': 'a', 'url': 'https://example.com/a.zip', 'sha256': validSha256},
+        <String, Object?>{
+          'type': 'remote',
+          'name': 'a',
+          'url': 'https://example.com/a.zip',
+          'sha256': validSha256,
+          'archiveFormat': 'zip',
+        },
         <String, Object?>{'type': 'local', 'name': 'b', 'localUri': 'file:///path/to/local/b'},
       ]);
       expect(list, hasLength(2));
@@ -312,196 +387,241 @@ void main() {
       expect(() => ArtifactDependency.listFromJson(<Object?>['not-a-map']), throwsFormatException);
     });
 
-    test('matchesPlatforms matches exact targetPlatform and OS prefix', () {
-      final dep = ArtifactDependency.remote(
-        name: 'linux-bin',
-        sha256: validSha256,
-        url: Uri.parse('https://example.com/linux.zip'),
-        hostPlatform: HostPlatform.linux_x64,
-        targetPlatform: 'linux-x64',
-      );
+    test(
+      'matchesPlatforms matches exact targetPlatform, OS prefix, and macos/darwin host alias',
+      () {
+        final dep = ArtifactDependency.remote(
+          name: 'linux-bin',
+          sha256: validSha256,
+          url: Uri.parse('https://example.com/linux.zip'),
+          hostPlatform: HostPlatform.linux_x64,
+          targetPlatform: 'linux-x64',
+        );
 
-      expect(
-        dep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.linux_x64,
-          targetPlatforms: const <String>{'linux-x64'},
-        ),
-        isTrue,
-      );
-      expect(
-        dep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.linux_x64,
-          targetPlatforms: const <String>{'linux'},
-        ),
-        isTrue,
-      );
-      expect(
-        dep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.darwin_arm64,
-          targetPlatforms: const <String>{'linux-x64'},
-        ),
-        isFalse,
-      );
-      expect(
-        dep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.linux_x64,
-          targetPlatforms: const <String>{'android'},
-        ),
-        isFalse,
-      );
+        expect(
+          dep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.linux_x64,
+            targetPlatforms: const <String>{'linux-x64'},
+          ),
+          isTrue,
+        );
+        expect(
+          dep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.linux_x64,
+            targetPlatforms: const <String>{'linux'},
+          ),
+          isTrue,
+        );
+        expect(
+          dep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.darwin_arm64,
+            targetPlatforms: const <String>{'linux-x64'},
+          ),
+          isFalse,
+        );
+        expect(
+          dep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.linux_x64,
+            targetPlatforms: const <String>{'android'},
+          ),
+          isFalse,
+        );
 
-      final osPrefixDep = ArtifactDependency.remote(
-        name: 'linux-common',
-        sha256: validSha256,
-        url: Uri.parse('https://example.com/linux-common.zip'),
-        targetPlatform: 'linux',
-      );
-      expect(
-        osPrefixDep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.linux_x64,
-          targetPlatforms: const <String>{'linux-x64'},
-        ),
-        isTrue,
-      );
+        final osPrefixDep = ArtifactDependency.remote(
+          name: 'linux-common',
+          sha256: validSha256,
+          url: Uri.parse('https://example.com/linux-common.zip'),
+          targetPlatform: 'linux',
+        );
+        expect(
+          osPrefixDep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.linux_x64,
+            targetPlatforms: const <String>{'linux-x64'},
+          ),
+          isTrue,
+        );
 
-      final darwinDep = ArtifactDependency.remote(
-        name: 'darwin-common',
-        sha256: validSha256,
-        url: Uri.parse('https://example.com/darwin.zip'),
-        targetPlatform: 'darwin-arm64',
-      );
-      expect(
-        darwinDep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.darwin_arm64,
-          targetPlatforms: const <String>{'macos'},
-        ),
-        isTrue,
-      );
-      expect(
-        darwinDep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.darwin_arm64,
-          targetPlatforms: const <String>{'darwin'},
-        ),
-        isTrue,
-      );
-      expect(
-        darwinDep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.darwin_arm64,
-          targetPlatforms: const <String>{'macos-arm64'},
-        ),
-        isTrue,
-      );
+        final darwinDep = ArtifactDependency.remote(
+          name: 'darwin-common',
+          sha256: validSha256,
+          url: Uri.parse('https://example.com/darwin.zip'),
+          hostPlatform: HostPlatform.fromName('macos-arm64'),
+          targetPlatform: 'darwin-arm64',
+        );
+        expect(
+          darwinDep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.darwin_arm64,
+            targetPlatforms: const <String>{'macos'},
+          ),
+          isTrue,
+        );
+        expect(
+          darwinDep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.darwin_arm64,
+            targetPlatforms: const <String>{'darwin'},
+          ),
+          isTrue,
+        );
+        expect(
+          darwinDep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.darwin_arm64,
+            targetPlatforms: const <String>{'macos-arm64'},
+          ),
+          isTrue,
+        );
 
-      final macosArm64Dep = ArtifactDependency.remote(
-        name: 'macos-arm64-bin',
-        sha256: validSha256,
-        url: Uri.parse('https://example.com/macos-arm64.zip'),
-        targetPlatform: 'macos-arm64',
-      );
-      expect(
-        macosArm64Dep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.darwin_arm64,
-          targetPlatforms: const <String>{'darwin-arm64'},
-        ),
-        isTrue,
-      );
-      expect(
-        macosArm64Dep.matchesPlatforms(
-          currentHostPlatform: HostPlatform.darwin_arm64,
-          targetPlatforms: const <String>{'darwin'},
-        ),
-        isTrue,
-      );
-    });
+        final macosArm64Dep = ArtifactDependency.remote(
+          name: 'macos-arm64-bin',
+          sha256: validSha256,
+          url: Uri.parse('https://example.com/macos-arm64.zip'),
+          hostPlatform: HostPlatform('macos', .arm64),
+          targetPlatform: 'macos-arm64',
+        );
+        expect(
+          macosArm64Dep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.darwin_arm64,
+            targetPlatforms: const <String>{'darwin-arm64'},
+          ),
+          isTrue,
+        );
+        expect(
+          macosArm64Dep.matchesPlatforms(
+            currentHostPlatform: HostPlatform.darwin_arm64,
+            targetPlatforms: const <String>{'darwin'},
+          ),
+          isTrue,
+        );
+      },
+    );
 
     test('throws FormatException on invalid JSON', () {
       expect(() => ArtifactDependency.fromJson(const <String, Object?>{}), throwsFormatException);
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'name': 'missing-type',
+          'url': 'https://example.com/a.zip',
+          'sha256': validSha256,
+          'archiveFormat': 'zip',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
+          'name': 'missing-archive-format',
+          'url': 'https://example.com/a.zip',
+          'sha256': validSha256,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'test',
           'url': ':::not_a_valid_uri:::',
           'sha256': validSha256,
+          'archiveFormat': 'zip',
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'test',
           'url': 'relative/path/without/scheme.zip',
           'sha256': validSha256,
+          'archiveFormat': 'zip',
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'test',
           'url': 'file:///etc/passwd',
           'sha256': validSha256,
+          'archiveFormat': 'none',
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'test',
           'url': 'https://example.com/a.zip',
           'sha256': validSha256,
+          'archiveFormat': 'zip',
           'hostPlatform': 'invalid/host',
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'test',
           'url': 'https://example.com/a.zip',
           'sha256': validSha256,
+          'archiveFormat': 'zip',
           'targetPlatform': 42,
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': '',
           'url': 'https://example.com/a.zip',
           'sha256': validSha256,
+          'archiveFormat': 'zip',
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': '../evil',
           'url': 'https://example.com/a.zip',
           'sha256': validSha256,
+          'archiveFormat': 'zip',
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'sub/bin',
           'url': 'https://example.com/a.zip',
           'sha256': validSha256,
+          'archiveFormat': 'zip',
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'test',
           'url': 'https://example.com/a.zip',
           'sha256': '../badsha',
+          'archiveFormat': 'zip',
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'test',
           'url': 'https://example.com/a.zip',
           'sha256': 'deadbeef',
+          'archiveFormat': 'zip',
         }),
         throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'test',
           'url': 'https://example.com/a.zip',
+          'archiveFormat': 'zip',
         }),
         throwsFormatException,
       );
@@ -512,10 +632,66 @@ void main() {
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
           'name': 'test',
           'url': 'https://example.com/a.zip',
           'sha256': validSha256,
           'archiveFormat': 'tar.gz',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
+          'name': 'test',
+          'url': 'https://example.com/a.zip',
+          'sha256': validSha256,
+          'archiveFormat': 'zip',
+          'executables': <String>['../escape'],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
+          'name': 'test',
+          'url': 'https://example.com/a.zip',
+          'sha256': validSha256,
+          'archiveFormat': 'zip',
+          'executables': <Object?>[42],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
+          'name': 'test',
+          'url': 'https://example.com/a.bin',
+          'sha256': validSha256,
+          'archiveFormat': 'none',
+          'executables': <String>['gen_snapshot'],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
+          'name': 'test',
+          'url': 'https://example.com/a.zip',
+          'sha256': validSha256,
+          'archiveFormat': 'zip',
+          'isExecutable': true,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'type': 'remote',
+          'name': 'test',
+          'url': 'https://example.com/a.bin',
+          'sha256': validSha256,
+          'archiveFormat': 'none',
+          'isExecutable': 'yes',
         }),
         throwsFormatException,
       );

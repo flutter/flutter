@@ -87,7 +87,7 @@ void main() {
       expect(manager.hostPlatformName, 'linux');
 
       final customHostManager = ExtensionManager(
-        hostPlatform: HostPlatform('freebsd-x64', 'x64'),
+        hostPlatform: HostPlatform('freebsd', .x64),
         logger: logger,
         featureFlags: TestFeatureFlags(),
       );
@@ -686,9 +686,11 @@ void main() {
       },
     );
 
-    test('warns and skips conflicting artifact names across multiple extensions', () async {
-      final List<int> content = utf8.encode('shared artifact payload');
-      final contentSha256 = sha256.convert(content).toString();
+    test('isolates same-named artifacts across extensions on precache and scopes resolution by extensionName, while warning on intra-extension duplicates', () async {
+      final List<int> ext1Content = utf8.encode('ext1 artifact payload');
+      final ext1Sha256 = sha256.convert(ext1Content).toString();
+      final List<int> ext2Content = utf8.encode('ext2 artifact payload');
+      final ext2Sha256 = sha256.convert(ext2Content).toString();
 
       void firstEntryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
@@ -697,8 +699,14 @@ void main() {
             _FakeArtifactService(<ArtifactDependency>[
               ArtifactDependency.remote(
                 name: 'shared_bin',
-                sha256: contentSha256,
+                sha256: ext1Sha256,
                 url: Uri.parse('https://example.com/ext1/shared_bin'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+              ArtifactDependency.remote(
+                name: 'shared_bin',
+                sha256: ext2Sha256,
+                url: Uri.parse('https://example.com/ext1/duplicate_shared_bin'),
                 hostPlatform: HostPlatform.linux_x64,
               ),
             ]),
@@ -715,7 +723,7 @@ void main() {
             _FakeArtifactService(<ArtifactDependency>[
               ArtifactDependency.remote(
                 name: 'shared_bin',
-                sha256: contentSha256,
+                sha256: ext2Sha256,
                 url: Uri.parse('https://example.com/ext2/shared_bin'),
                 hostPlatform: HostPlatform.linux_x64,
               ),
@@ -737,7 +745,8 @@ void main() {
       final downloadedUrls = <Uri>[];
       final httpClient = _FakeHttpClient((Uri url) async {
         downloadedUrls.add(url);
-        return _FakeHttpClientResponse(HttpStatus.ok, content);
+        final payload = url.path.contains('/ext2/') ? ext2Content : ext1Content;
+        return _FakeHttpClientResponse(HttpStatus.ok, payload);
       });
 
       final Directory cacheDir = fs.directory('/collision_cache');
@@ -749,16 +758,277 @@ void main() {
         toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
-      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded();
-      expect(resolved['shared_bin'], '/collision_cache/first_ext/$contentSha256/shared_bin');
-      expect(downloadedUrls, <Uri>[Uri.parse('https://example.com/ext1/shared_bin')]);
+      // Precache (`extensionName: null`) downloads both extensions' artifacts into
+      // their own extension-scoped cache directories while skipping the duplicate
+      // declaration inside `first_ext`.
+      await artifactManager.ensureArtifactsDownloaded();
+      expect(downloadedUrls, <Uri>[
+        Uri.parse('https://example.com/ext1/shared_bin'),
+        Uri.parse('https://example.com/ext2/shared_bin'),
+      ]);
       expect(
         logger.warningText,
         contains(
-          'Artifact "shared_bin" from extension "second_ext" conflicts with an '
-          'artifact of the same name from another extension and will be ignored.',
+          'Extension "first_ext" declared duplicate artifact "shared_bin"; '
+          'keeping the first declaration.',
         ),
       );
+      expect(
+        fs.file('/collision_cache/first_ext/$ext1Sha256/shared_bin').readAsBytesSync(),
+        equals(ext1Content),
+      );
+      expect(
+        fs.file('/collision_cache/second_ext/$ext2Sha256/shared_bin').readAsBytesSync(),
+        equals(ext2Content),
+      );
+
+      // Per-extension resolution returns each extension's own cached path without re-downloading.
+      final Map<String, String> firstResolved = await artifactManager.ensureArtifactsDownloaded(
+        extensionName: 'first_ext',
+      );
+      final Map<String, String> secondResolved = await artifactManager.ensureArtifactsDownloaded(
+        extensionName: 'second_ext',
+      );
+      expect(firstResolved, <String, String>{
+        'shared_bin': '/collision_cache/first_ext/$ext1Sha256/shared_bin',
+      });
+      expect(secondResolved, <String, String>{
+        'shared_bin': '/collision_cache/second_ext/$ext2Sha256/shared_bin',
+      });
+      expect(downloadedUrls, hasLength(2));
+    });
+
+    test('applies chmod a+x for isExecutable single-file artifacts and validated zip executables, and rejects missing or symlinked executables', () async {
+      final List<int> binContent = utf8.encode('#!/bin/sh\necho hi\n');
+      final binSha256 = sha256.convert(binContent).toString();
+      final List<int> zipContent = utf8.encode('fake toolchain zip');
+      final zipSha256 = sha256.convert(zipContent).toString();
+
+      void execEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeArtifactService(<ArtifactDependency>[
+              ArtifactDependency.remote(
+                name: 'standalone_tool',
+                sha256: binSha256,
+                url: Uri.parse('https://example.com/standalone_tool'),
+                isExecutable: true,
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+              ArtifactDependency.remote(
+                name: 'data_blob',
+                sha256: binSha256,
+                url: Uri.parse('https://example.com/data_blob'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+              ArtifactDependency.remote(
+                name: 'toolchain_bundle',
+                sha256: zipSha256,
+                url: Uri.parse('https://example.com/toolchain_bundle.zip'),
+                executables: const <String>{'gen_snapshot', 'bin/ld.lld'},
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+            ]),
+          ],
+          extensionName: 'exec_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[execEntryPoint],
+      );
+      addTearDown(manager.dispose);
+
+      final httpClient = _FakeHttpClient((Uri url) async {
+        final payload = url.path.endsWith('.zip') ? zipContent : binContent;
+        return _FakeHttpClientResponse(HttpStatus.ok, payload);
+      });
+      final execOsUtils = _UnzipTrackingOsUtils(
+        extractedFiles: const <String>['gen_snapshot', 'bin/ld.lld', 'include/header.h'],
+      );
+
+      final Directory cacheDir = fs.directory('/exec_cache');
+      final artifactManager = ExtensionArtifactManager(
+        cacheDir: cacheDir,
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        httpClient: httpClient,
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          os: execOsUtils,
+          platform: FakePlatform(),
+        ),
+      );
+
+      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
+        extensionName: 'exec_ext',
+      );
+      expect(resolved['standalone_tool'], '/exec_cache/exec_ext/$binSha256/standalone_tool');
+      expect(resolved['toolchain_bundle'], '/exec_cache/exec_ext/$zipSha256/toolchain_bundle');
+
+      // `standalone_tool`, `gen_snapshot`, and `bin/ld.lld` were chmodded `a+x`
+      // (while `data_blob` and `include/header.h` were not).
+      expect(execOsUtils.chmods, hasLength(3));
+      expect(
+        execOsUtils.chmods.map((List<String> c) => c[1]).toSet(),
+        equals(const <String>{'a+x'}),
+      );
+      expect(
+        execOsUtils.chmods.map((List<String> c) => fs.path.basename(c[0])),
+        unorderedEquals(<String>['standalone_tool', 'gen_snapshot', 'ld.lld']),
+      );
+
+      // Missing declared executable in zip throws ToolExit without writing cache or stamp.
+      void missingExecEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeArtifactService(<ArtifactDependency>[
+              ArtifactDependency.remote(
+                name: 'broken_bundle',
+                sha256: zipSha256,
+                url: Uri.parse('https://example.com/broken_bundle.zip'),
+                executables: const <String>{'missing_gen_snapshot'},
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+            ]),
+          ],
+          extensionName: 'missing_exec_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final missingManager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[missingExecEntryPoint],
+      );
+      addTearDown(missingManager.dispose);
+
+      final missingArtifactManager = ExtensionArtifactManager(
+        cacheDir: cacheDir,
+        extensionManager: missingManager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        httpClient: httpClient,
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          os: _UnzipTrackingOsUtils(),
+          platform: FakePlatform(),
+        ),
+      );
+      await expectLater(
+        missingArtifactManager.ensureArtifactsDownloaded(),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            contains('Executable "missing_gen_snapshot" declared by artifact "broken_bundle"'),
+          ),
+        ),
+      );
+      expect(
+        cacheDir
+            .childDirectory('missing_exec_ext')
+            .childDirectory(zipSha256)
+            .childDirectory('broken_bundle')
+            .existsSync(),
+        isFalse,
+      );
+      expect(
+        cacheDir
+            .childDirectory('missing_exec_ext')
+            .childDirectory(zipSha256)
+            .childFile('.broken_bundle.sha256')
+            .existsSync(),
+        isFalse,
+      );
+
+      // Symlinked executable or symlinked intermediate directory throws ToolExit.
+      for (final symlinkCase in <({bool linkParentDir, String expectedMessage})>[
+        (
+          linkParentDir: false,
+          expectedMessage: 'Executable "bin/gen_snapshot" in artifact "symlink_bundle" for extension "symlink_ext" must not be a symbolic link.',
+        ),
+        (
+          linkParentDir: true,
+          expectedMessage: 'Executable "bin/gen_snapshot" in artifact "symlink_bundle" for extension "symlink_ext" traverses a symbolic link.',
+        ),
+      ]) {
+        void symlinkEntryPoint(SendPort sendPort) {
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _FakeArtifactService(<ArtifactDependency>[
+                ArtifactDependency.remote(
+                  name: 'symlink_bundle',
+                  sha256: zipSha256,
+                  url: Uri.parse('https://example.com/symlink_bundle.zip'),
+                  executables: const <String>{'bin/gen_snapshot'},
+                  hostPlatform: HostPlatform.linux_x64,
+                ),
+              ]),
+            ],
+            extensionName: 'symlink_ext',
+            supportedPlatforms: const <String>{'linux'},
+          );
+        }
+
+        final symlinkManager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          entryPoints: <ExtensionEntryPoint>[symlinkEntryPoint],
+        );
+        addTearDown(symlinkManager.dispose);
+
+        final symlinkOsUtils = _UnzipTrackingOsUtils(
+          customUnzip: (Directory targetDir) {
+            fs.file('/outside/gen_snapshot')
+              ..createSync(recursive: true)
+              ..writeAsStringSync('outside');
+            if (symlinkCase.linkParentDir) {
+              targetDir.childLink('bin').createSync('/outside', recursive: true);
+            } else {
+              targetDir.childDirectory('bin').createSync(recursive: true);
+              targetDir
+                  .childDirectory('bin')
+                  .childLink('gen_snapshot')
+                  .createSync('/outside/gen_snapshot');
+            }
+          },
+        );
+        final symlinkArtifactManager = ExtensionArtifactManager(
+          cacheDir: cacheDir,
+          extensionManager: symlinkManager,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          httpClient: httpClient,
+          toolContext: FakeToolContext(
+            fs: fs,
+            logger: logger,
+            os: symlinkOsUtils,
+            platform: FakePlatform(),
+          ),
+        );
+        await expectLater(
+          symlinkArtifactManager.ensureArtifactsDownloaded(),
+          throwsA(
+            isA<ToolExit>().having(
+              (ToolExit e) => e.message,
+              'message',
+              contains(symlinkCase.expectedMessage),
+            ),
+          ),
+        );
+        expect(symlinkOsUtils.chmods, isEmpty);
+      }
     });
 
     test('resolves LocalArtifactDependency directly on disk and throws ToolExit when localUri or stampUri is missing', () async {
@@ -868,14 +1138,29 @@ void main() {
 }
 
 class _UnzipTrackingOsUtils extends FakeOperatingSystemUtils {
+  _UnzipTrackingOsUtils({this.customUnzip, this.extractedFiles = const <String>['extracted.txt']});
+
+  final void Function(Directory targetDirectory)? customUnzip;
+  final List<String> extractedFiles;
   int unzipCount = 0;
 
   @override
   void unzip(File file, Directory targetDirectory) {
     unzipCount++;
-    targetDirectory.childFile('extracted.txt')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('extracted');
+    if (customUnzip case final void Function(Directory) callback) {
+      callback(targetDirectory);
+      return;
+    }
+    for (final String relativePath in extractedFiles) {
+      targetDirectory.fileSystem.file(
+          targetDirectory.fileSystem.path.joinAll(<String>[
+            targetDirectory.path,
+            ...relativePath.split('/'),
+          ]),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('extracted');
+    }
   }
 }
 

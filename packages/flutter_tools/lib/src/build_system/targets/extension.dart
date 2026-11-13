@@ -206,7 +206,6 @@ const _targetPlatformIndependentArtifacts = <ExtensionArtifact>{
 /// neither a supported built-in artifact nor present in [extensionArtifacts],
 /// or if a target-platform-specific built-in artifact is requested on an
 /// out-of-tree target platform.
-// TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,

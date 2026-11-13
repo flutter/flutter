@@ -324,7 +324,6 @@ List<FlutterCommand> generateCommands({
       androidContext: toolDependencies.androidContext,
       androidWorkflow: toolDependencies.androidWorkflow,
       deviceManager: toolDependencies.deviceManager,
-      extensionArtifactManager: toolDependencies.extensionArtifactManager,
       verboseHelp: verboseHelp,
     ),
     ScreenshotCommand(toolContext: toolContext),

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
@@ -11,6 +12,12 @@ import 'json_utils.dart';
 /// Hyphens and underscores are disallowed because they delimit `<os>` and
 /// `<arch>` in [HostPlatform.cliName] and [HostPlatform.name].
 final RegExp _validIdentifierRegExp = RegExp(r'^[a-z0-9]+$');
+
+// Matches a Windows drive-letter prefix such as `C:` or `d:`.
+final RegExp _windowsDrivePrefixRegExp = RegExp(r'^[A-Za-z]:');
+
+const String _darwinOsName = 'darwin';
+const String _macosAlias = 'macos';
 
 /// Platform-agnostic CPU architecture type.
 ///
@@ -94,16 +101,27 @@ final class CpuArch {
 /// Built-in host platforms are exposed as static constants (e.g. [linux_x64],
 /// [darwin_arm64]), while extensions running on non-standard host platforms can
 /// construct or parse custom `<os>-<arch>` identifiers (e.g.
-/// `HostPlatform('freebsd', CpuArch.x64)`).
+/// `HostPlatform('freebsd', CpuArch.x64)`). The `'macos'` OS alias is
+/// normalized to `'darwin'` so `HostPlatform('macos', CpuArch.arm64)` and
+/// `HostPlatform.fromName('macos-arm64')` resolve to [darwin_arm64].
 @immutable
 final class HostPlatform {
   /// Creates a [HostPlatform] with the given lowercase alphanumeric [osName]
-  /// (e.g. `'linux'`, `'darwin'`, `'freebsd'`) and [cpuArch].
-  HostPlatform(this.osName, this.cpuArch)
-    : assert(
-        _validIdentifierRegExp.hasMatch(osName),
-        'Invalid host OS name (expected lowercase alphanumeric): "$osName"',
-      );
+  /// (e.g. `'linux'`, `'darwin'`, `'macos'`, `'freebsd'`) and [cpuArch],
+  /// returning canonical constants from [values] when matched.
+  factory HostPlatform(String osName, CpuArch cpuArch) {
+    assert(
+      _validIdentifierRegExp.hasMatch(osName),
+      'Invalid host OS name (expected lowercase alphanumeric): "$osName"',
+    );
+    final String normalizedOs = osName == _macosAlias ? _darwinOsName : osName;
+    for (final HostPlatform value in values) {
+      if (value.osName == normalizedOs && value.cpuArch == cpuArch) {
+        return value;
+      }
+    }
+    return HostPlatform._(normalizedOs, cpuArch);
+  }
 
   const HostPlatform._(this.osName, this.cpuArch) : assert(osName.length > 0);
 
@@ -117,10 +135,10 @@ final class HostPlatform {
   }
 
   /// macOS (Darwin) on x64.
-  static const darwin_x64 = HostPlatform._('darwin', .x64);
+  static const darwin_x64 = HostPlatform._(_darwinOsName, .x64);
 
   /// macOS (Darwin) on ARM64 (Apple Silicon).
-  static const darwin_arm64 = HostPlatform._('darwin', .arm64);
+  static const darwin_arm64 = HostPlatform._(_darwinOsName, .arm64);
 
   /// Linux on x64.
   static const linux_x64 = HostPlatform._('linux', .x64);
@@ -166,9 +184,10 @@ final class HostPlatform {
   /// The underscore-delimited representation (e.g. `'linux_x64'`).
   String get name => '${osName}_$cpuArchName';
 
-  /// Parses a [HostPlatform] from its [cliName] or [name], returning canonical
-  /// constants from [values] when matched or a custom [HostPlatform] for
-  /// non-standard `<os>-<arch>` platforms, or `null` if [name] is invalid.
+  /// Parses a [HostPlatform] from its [cliName] or [name] (normalizing
+  /// `'macos'` to `'darwin'`), returning canonical constants from [values] when
+  /// matched or a custom [HostPlatform] for non-standard `<os>-<arch>`
+  /// platforms, or `null` if [name] is invalid.
   static HostPlatform? tryFromName(String name) {
     if (!_validNameRegExp.hasMatch(name)) {
       return null;
@@ -177,24 +196,18 @@ final class HostPlatform {
     final int separatorIndex = normalizedCli.indexOf('-');
     final String os = normalizedCli.substring(0, separatorIndex);
     final String arch = normalizedCli.substring(separatorIndex + 1);
-    final archValue = CpuArch.fromName(arch);
-    for (final HostPlatform value in values) {
-      if (value.osName == os && value.cpuArch == archValue) {
-        return value;
-      }
-    }
-    return HostPlatform(os, archValue);
+    return HostPlatform(os, CpuArch.fromName(arch));
   }
 
   /// Returns the host platform for the specified OS and architecture.
   ///
-  /// [os] is an operating system name as returned by `Platform.operatingSystem`.
-  /// [arch] is an architecture name matching the [cpuArchName] of one of the
-  /// values in [values]. Returns `null` if no match is found.
+  /// [os] is an operating system name as returned by `Platform.operatingSystem`
+  /// (or `'darwin'`). [arch] is an architecture name matching the [cpuArchName]
+  /// of one of the values in [values]. Returns `null` if no match is found.
   static HostPlatform? fromOsAndArch(String os, String arch) {
     return switch ((os, arch.toLowerCase())) {
-      ('macos', 'x64') => .darwin_x64,
-      ('macos', 'arm64') => .darwin_arm64,
+      (_macosAlias || _darwinOsName, 'x64') => .darwin_x64,
+      (_macosAlias || _darwinOsName, 'arm64') => .darwin_arm64,
       ('linux', 'x64') => .linux_x64,
       ('linux', 'arm64') => .linux_arm64,
       ('linux', 'riscv64') => .linux_riscv64,
@@ -251,10 +264,12 @@ sealed class ArtifactDependency {
   /// verifies against [sha256], and caches under the shared extension artifact cache.
   factory ArtifactDependency.remote({
     required String name,
-    required Uri url,
     required String sha256,
+    required Uri url,
     ArchiveFormat? archiveFormat,
+    Set<String> executables,
     HostPlatform? hostPlatform,
+    bool isExecutable,
     String? targetPlatform,
   }) = RemoteArtifactDependency;
 
@@ -264,8 +279,8 @@ sealed class ArtifactDependency {
   /// [localUri] must point to an unpacked file or directory on disk matching the
   /// layout expected by build targets consuming [name].
   factory ArtifactDependency.local({
-    required String name,
     required Uri localUri,
+    required String name,
     HostPlatform? hostPlatform,
     Uri? stampUri,
     String? targetPlatform,
@@ -273,8 +288,7 @@ sealed class ArtifactDependency {
 
   /// Deserializes an [ArtifactDependency] from a JSON-serializable map.
   ///
-  /// Dispatches on [typeKey] (`'remote'` or `'local'`), defaulting to
-  /// `'remote'` when [typeKey] is omitted on the wire for backward compatibility.
+  /// Dispatches on [typeKey] (`'remote'` or `'local'`).
   /// Throws a [FormatException] if any required field is missing or invalid.
   factory ArtifactDependency.fromJson(Map<String, Object?> json) {
     final String name = json.requiredField<String>(nameKey);
@@ -286,7 +300,7 @@ sealed class ArtifactDependency {
         ? HostPlatform.fromName(hostPlatformName)
         : null;
     final String? targetPlatform = json.nullableField<String>(targetPlatformKey);
-    final String type = json.optionalField<String>(typeKey, defaultValue: remoteType);
+    final String type = json.requiredField<String>(typeKey);
 
     switch (type) {
       case remoteType:
@@ -301,16 +315,34 @@ sealed class ArtifactDependency {
         if (uri == null || (!uri.isScheme(_httpScheme) && !uri.isScheme(_httpsScheme))) {
           throw FormatException('Invalid artifact dependency URL (expected http/https): "$urlStr"');
         }
-        final String? archiveFormatName = json.nullableField<String>(archiveFormatKey);
-        final ArchiveFormat? archiveFormat = archiveFormatName != null
-            ? ArchiveFormat.fromName(archiveFormatName)
-            : null;
+        final archiveFormat = ArchiveFormat.fromName(json.requiredField<String>(archiveFormatKey));
+        final Set<String> executables = json.stringSet(executablesKey);
+        for (final entry in executables) {
+          if (!isValidExecutableSubpath(entry)) {
+            throw FormatException('Invalid artifact dependency executable path: "$entry"');
+          }
+        }
+        final bool isExecutable = json.optionalField<bool>(isExecutableKey, defaultValue: false);
+        if (archiveFormat == .none && executables.isNotEmpty) {
+          throw FormatException(
+            'Artifact dependency "$name" cannot specify "$executablesKey" when '
+            '"$archiveFormatKey" is "${ArchiveFormat.none.cliName}"; use "$isExecutableKey" instead.',
+          );
+        }
+        if (archiveFormat != .none && isExecutable) {
+          throw FormatException(
+            'Artifact dependency "$name" cannot set "$isExecutableKey" to true when '
+            '"$archiveFormatKey" is "${archiveFormat.cliName}"; use "$executablesKey" instead.',
+          );
+        }
         return RemoteArtifactDependency(
           name: name,
           sha256: sha256,
           url: uri,
           archiveFormat: archiveFormat,
+          executables: executables,
           hostPlatform: hostPlatform,
+          isExecutable: isExecutable,
           targetPlatform: targetPlatform,
         );
       case localType:
@@ -335,8 +367,8 @@ sealed class ArtifactDependency {
           stampUri = null;
         }
         return LocalArtifactDependency(
-          name: name,
           localUri: localUri,
+          name: name,
           hostPlatform: hostPlatform,
           stampUri: stampUri,
           targetPlatform: targetPlatform,
@@ -349,7 +381,12 @@ sealed class ArtifactDependency {
   static const String _httpScheme = 'http';
   static const String _httpsScheme = 'https';
   static const String _zipExtension = '.zip';
+
+  // Matches a 64-character hexadecimal SHA-256 digest.
   static final RegExp _sha256RegExp = RegExp(r'^[a-fA-F0-9]{64}$');
+
+  // Matches a single non-empty ASCII filename segment containing only
+  // alphanumeric characters, dots, underscores, and hyphens.
   static final RegExp _singlePathSegmentRegExp = RegExp(r'^[A-Za-z0-9._-]+$');
 
   static bool _isValidSha256(String value) => _sha256RegExp.hasMatch(value);
@@ -358,6 +395,23 @@ sealed class ArtifactDependency {
   /// ASCII alphanumeric characters, `.`, `_`, or `-`, and not ending with `.`.
   static bool isValidSinglePathSegment(String value) {
     return _singlePathSegmentRegExp.hasMatch(value) && !value.endsWith('.');
+  }
+
+  /// Returns whether [value] is a valid relative in-tree POSIX file path
+  /// without empty, `'.'`, `'..'`, backslash, NUL, or drive-letter segments.
+  static bool isValidExecutableSubpath(String value) {
+    if (value.isEmpty ||
+        value.contains(r'\') ||
+        value.contains('\x00') ||
+        _windowsDrivePrefixRegExp.hasMatch(value)) {
+      return false;
+    }
+    for (final String segment in value.split('/')) {
+      if (segment.isEmpty || segment == '.' || segment == '..') {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Discriminator value for [RemoteArtifactDependency].
@@ -369,8 +423,14 @@ sealed class ArtifactDependency {
   /// Map key for [RemoteArtifactDependency.archiveFormat].
   static const String archiveFormatKey = 'archiveFormat';
 
+  /// Map key for [RemoteArtifactDependency.executables].
+  static const String executablesKey = 'executables';
+
   /// Map key for [hostPlatform].
   static const String hostPlatformKey = 'hostPlatform';
+
+  /// Map key for [RemoteArtifactDependency.isExecutable].
+  static const String isExecutableKey = 'isExecutable';
 
   /// Map key for [LocalArtifactDependency.localUri].
   static const String localUriKey = 'localUri';
@@ -433,11 +493,11 @@ sealed class ArtifactDependency {
   final String? targetPlatform;
 
   static String _normalizeTargetPlatform(String platform) {
-    if (platform == 'macos') {
-      return 'darwin';
+    if (platform == _macosAlias) {
+      return _darwinOsName;
     }
-    if (platform.startsWith('macos-')) {
-      return 'darwin-${platform.substring('macos-'.length)}';
+    if (platform.startsWith('$_macosAlias-')) {
+      return '$_darwinOsName-${platform.substring('$_macosAlias-'.length)}';
     }
     return platform;
   }
@@ -484,13 +544,12 @@ final class RemoteArtifactDependency extends ArtifactDependency {
     required this.sha256,
     required this.url,
     ArchiveFormat? archiveFormat,
+    Set<String> executables = const <String>{},
     super.hostPlatform,
+    this.isExecutable = false,
     super.targetPlatform,
-  }) : archiveFormat =
-           archiveFormat ??
-           (url.path.toLowerCase().endsWith(ArtifactDependency._zipExtension)
-               ? ArchiveFormat.zip
-               : ArchiveFormat.none),
+  }) : archiveFormat = _resolveArchiveFormat(archiveFormat, url),
+       executables = Set<String>.unmodifiable(executables),
        assert(
          ArtifactDependency.isValidSinglePathSegment(name),
          'Invalid artifact dependency name (expected a single path segment): "$name"',
@@ -503,19 +562,51 @@ final class RemoteArtifactDependency extends ArtifactDependency {
          url.isScheme(ArtifactDependency._httpScheme) ||
              url.isScheme(ArtifactDependency._httpsScheme),
          'Invalid artifact dependency URL (expected http/https): "$url"',
+       ),
+       assert(
+         executables.every(ArtifactDependency.isValidExecutableSubpath),
+         'Invalid executable subpath in artifact dependency "$name": $executables',
+       ),
+       assert(
+         _resolveArchiveFormat(archiveFormat, url) != .none || executables.isEmpty,
+         'executables is only valid for archive artifacts; set isExecutable for single-file artifacts.',
+       ),
+       assert(
+         !isExecutable || _resolveArchiveFormat(archiveFormat, url) == .none,
+         'isExecutable is only valid for single-file artifacts (ArchiveFormat.none); set executables for archive artifacts.',
        );
 
-  /// The download URL for the artifact.
-  final Uri url;
+  static const _setEquality = SetEquality<String>();
 
-  /// The 64-character hexadecimal SHA-256 checksum of the artifact.
-  final String sha256;
+  static ArchiveFormat _resolveArchiveFormat(ArchiveFormat? archiveFormat, Uri url) {
+    return archiveFormat ??
+        (url.path.toLowerCase().endsWith(ArtifactDependency._zipExtension) ? .zip : .none);
+  }
 
   /// The archive format of the downloaded artifact.
   final ArchiveFormat archiveFormat;
 
+  /// Relative in-tree POSIX file paths within an extracted archive that must be
+  /// marked executable (`chmod +x`) on POSIX hosts after extraction (for
+  /// example, `const <String>{'gen_snapshot'}`).
+  ///
+  /// Entries must stay strictly within the extracted directory (rejecting
+  /// `'.'`, `'..'`, absolute paths, and symlinks). For single-file binaries
+  /// ([ArchiveFormat.none]), set [isExecutable] instead.
+  final Set<String> executables;
+
+  /// Whether a single-file artifact ([ArchiveFormat.none]) must be marked
+  /// executable (`chmod +x`) on POSIX hosts after download.
+  final bool isExecutable;
+
+  /// The 64-character hexadecimal SHA-256 checksum of the artifact.
+  final String sha256;
+
+  /// The download URL for the artifact.
+  final Uri url;
+
   /// Whether this artifact is a `.zip` archive that is extracted into a directory.
-  bool get isZipArchive => archiveFormat == ArchiveFormat.zip;
+  bool get isZipArchive => archiveFormat == .zip;
 
   @override
   Map<String, Object?> toMap() => <String, Object?>{
@@ -524,6 +615,8 @@ final class RemoteArtifactDependency extends ArtifactDependency {
     ArtifactDependency.urlKey: url.toString(),
     ArtifactDependency.sha256Key: sha256,
     ArtifactDependency.archiveFormatKey: archiveFormat.cliName,
+    if (executables.isNotEmpty) ArtifactDependency.executablesKey: executables.toList(),
+    if (isExecutable) ArtifactDependency.isExecutableKey: isExecutable,
     ArtifactDependency.hostPlatformKey: ?hostPlatform?.cliName,
     ArtifactDependency.targetPlatformKey: ?targetPlatform,
   };
@@ -536,18 +629,30 @@ final class RemoteArtifactDependency extends ArtifactDependency {
             other.url == url &&
             other.sha256 == sha256 &&
             other.archiveFormat == archiveFormat &&
+            _setEquality.equals(other.executables, executables) &&
+            other.isExecutable == isExecutable &&
             other.hostPlatform == hostPlatform &&
             other.targetPlatform == targetPlatform);
   }
 
   @override
-  int get hashCode => Object.hash(name, url, sha256, archiveFormat, hostPlatform, targetPlatform);
+  int get hashCode => Object.hash(
+    name,
+    url,
+    sha256,
+    archiveFormat,
+    _setEquality.hash(executables),
+    isExecutable,
+    hostPlatform,
+    targetPlatform,
+  );
 
   @override
   String toString() =>
       'RemoteArtifactDependency(name: $name, url: $url, sha256: $sha256, '
-      'archiveFormat: ${archiveFormat.cliName}, '
-      'hostPlatform: $hostPlatform, targetPlatform: $targetPlatform)';
+      'archiveFormat: ${archiveFormat.cliName}, executables: $executables, '
+      'isExecutable: $isExecutable, hostPlatform: $hostPlatform, '
+      'targetPlatform: $targetPlatform)';
 }
 
 /// A local [ArtifactDependency] that resolves directly to [localUri] on the
@@ -564,8 +669,8 @@ final class LocalArtifactDependency extends ArtifactDependency {
   /// file (not ending with `/`) whose modification time tracks rebuilds of
   /// directory-based local artifacts.
   LocalArtifactDependency({
-    required super.name,
     required this.localUri,
+    required super.name,
     super.hostPlatform,
     this.stampUri,
     super.targetPlatform,

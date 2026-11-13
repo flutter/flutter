@@ -758,6 +758,7 @@ class ToolDependencies {
           appleContext: appleContext,
           buildSystem: finalBuildSystem,
           buildTargets: finalBuildTargets,
+          extensionArtifactManager: extensionArtifactManager,
           extensionBuildManager: extensionBuildManager,
           extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,

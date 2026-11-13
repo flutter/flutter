@@ -219,6 +219,9 @@ class PrecacheCommand extends FlutterCommand {
     if (_extensionArtifactManager != null) {
       final Set<String>? targetPlatforms;
       if (includeAllPlatforms || downloadDefaultArtifacts) {
+        // Built-in DevelopmentArtifact flags do not enumerate out-of-tree extension
+        // target platforms, so pass null on default or --all-platforms runs to let
+        // active extensions precache their own target platforms for this host.
         targetPlatforms = null;
       } else {
         targetPlatforms = <String>{

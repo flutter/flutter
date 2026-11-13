@@ -18,9 +18,6 @@ final class LinuxArtifactService extends ArtifactService {
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
   }) async {
-    if (_artifacts.isEmpty) {
-      return const <ArtifactDependency>[];
-    }
     return <ArtifactDependency>[
       for (final ArtifactDependency artifact in _artifacts)
         if (artifact.matchesPlatforms(

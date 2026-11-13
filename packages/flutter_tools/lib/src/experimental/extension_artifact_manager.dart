@@ -44,6 +44,7 @@ class ExtensionArtifactManager {
   static const String _extractedDirName = 'extracted';
   static const String _sha256StampSuffix = '.sha256';
   static const String _lockFileSuffix = '.lock';
+  static const String _executableChmodMode = 'a+x';
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
@@ -136,25 +137,33 @@ class ExtensionArtifactManager {
     return artifactsCacheDirectory.childDirectory(extensionName).childDirectory(normalizedSha256);
   }
 
-  /// Queries all active extensions implementing [ArtifactService] and ensures
-  /// required artifacts for the current engine version, host platform, and
-  /// optional [targetPlatforms] are resolved on disk or downloaded and verified
-  /// in the shared cache.
+  /// Queries active extensions implementing [ArtifactService] (or only the
+  /// extension matching [extensionName] when specified) and ensures required
+  /// artifacts for the current engine version, host platform, and optional
+  /// [targetPlatforms] are resolved on disk or downloaded and verified in the
+  /// shared cache.
   ///
   /// When [targetPlatforms] is `null`, artifacts for all target platforms
-  /// supported by each active extension are requested.
+  /// supported by each queried extension are requested.
   ///
   /// Returns a map from each resolved artifact's [ArtifactDependency.name] to
   /// its local filesystem path, or an empty map when tool extensions are
-  /// disabled, extension initialization fails, or no active extension implements
-  /// [ArtifactService].
+  /// disabled, extension initialization fails, or no matching active extension
+  /// implements [ArtifactService]. When [extensionName] is provided (for
+  /// example, during `flutter build` or `ExtensionBackedDevice.startApp`), the
+  /// returned map is scoped strictly to that owning extension; when
+  /// [extensionName] is `null` (for example, during `flutter precache`), all
+  /// extensions' artifacts are downloaded into their isolated
+  /// `<cacheDir>/<extensionName>/<sha256>/<name>` directories.
   ///
   /// RPC failures when querying an extension's artifact list log a warning and
   /// skip that extension, whereas missing local artifacts or download,
-  /// extraction, or SHA-256 verification failures throw a [ToolExit].
+  /// extraction, executable permission validation, or SHA-256 verification
+  /// failures throw a [ToolExit].
   ///
   /// When [force] is `true`, existing cached remote artifacts are re-downloaded.
   Future<Map<String, String>> ensureArtifactsDownloaded({
+    String? extensionName,
     bool force = false,
     Set<String>? targetPlatforms,
   }) async {
@@ -172,7 +181,9 @@ class ExtensionArtifactManager {
 
     final artifactExtensions = <ExtensionConnection>[
       for (final ext in _extensionManager.connections)
-        if (ext.capabilities.services.contains(ArtifactService.serviceNamespace)) ext,
+        if (ext.capabilities.services.contains(ArtifactService.serviceNamespace) &&
+            (extensionName == null || ext.extensionName == extensionName))
+          ext,
     ];
 
     if (artifactExtensions.isEmpty) {
@@ -181,12 +192,6 @@ class ExtensionArtifactManager {
 
     final HostPlatform currentHostPlatform = os.hostPlatform;
     final String engineVersion = _engineVersion;
-    if (!ArtifactDependency.isValidSinglePathSegment(engineVersion)) {
-      logger.printWarning(
-        'Skipping extension artifacts due to invalid engine version "$engineVersion".',
-      );
-      return const <String, String>{};
-    }
 
     final resolvedArtifacts = <String, String>{};
     for (final ext in artifactExtensions) {
@@ -213,15 +218,16 @@ class ExtensionArtifactManager {
             dep,
       ];
 
+      final seenForExtension = <String>{};
       for (final dep in filteredDeps) {
-        if (resolvedArtifacts.containsKey(dep.name)) {
+        if (!seenForExtension.add(dep.name)) {
           logger.printWarning(
-            'Artifact "${dep.name}" from extension "${ext.extensionName}" conflicts with an '
-            'artifact of the same name from another extension and will be ignored.',
+            'Extension "${ext.extensionName}" declared duplicate artifact "${dep.name}"; '
+            'keeping the first declaration.',
           );
           continue;
         }
-        resolvedArtifacts[dep.name] = switch (dep) {
+        final String resolvedPath = switch (dep) {
           final LocalArtifactDependency localDep => _resolveLocalArtifact(
             ext.extensionName,
             localDep,
@@ -232,6 +238,7 @@ class ExtensionArtifactManager {
             force: force,
           ),
         };
+        resolvedArtifacts.putIfAbsent(dep.name, () => resolvedPath);
       }
     }
     return resolvedArtifacts;
@@ -390,6 +397,8 @@ class ExtensionArtifactManager {
             artifactFile: artifactFile,
             dep: dep,
             expectedSha: expectedSha,
+            extensionName: extensionName,
+            fs: fs,
             isZip: isZip,
             os: os,
             stagingDir: stagingDir,
@@ -507,13 +516,16 @@ Actual:   $actualDigest''');
   }
 
   /// Installs a verified [stagingFile] into its final cache destination
-  /// ([artifactDir] when [isZip] is `true`, or [artifactFile] otherwise) and
-  /// writes [expectedSha] to [stampFile] last via renames from [stagingDir].
+  /// ([artifactDir] when [isZip] is `true`, or [artifactFile] otherwise),
+  /// applies declared POSIX executable permissions, and writes [expectedSha] to
+  /// [stampFile] last via renames from [stagingDir].
   void _installStagedArtifact({
     required Directory artifactDir,
     required File artifactFile,
     required RemoteArtifactDependency dep,
     required String expectedSha,
+    required String extensionName,
+    required FileSystem fs,
     required bool isZip,
     required OperatingSystemUtils os,
     required Directory stagingDir,
@@ -531,11 +543,21 @@ Actual:   $actualDigest''');
       } on Object catch (e) {
         throwToolExit('Failed to extract artifact "${dep.name}" from ${dep.url}: $e');
       }
+      _applyArchiveExecutablePermissions(
+        dep: dep,
+        extensionName: extensionName,
+        extractedDir: extractedDir,
+        fs: fs,
+        os: os,
+      );
       if (artifactDir.existsSync()) {
         artifactDir.deleteSync(recursive: true);
       }
       extractedDir.renameSync(artifactDir.path);
     } else {
+      if (dep.isExecutable) {
+        os.chmod(stagingFile, _executableChmodMode);
+      }
       if (artifactFile.existsSync()) {
         artifactFile.deleteSync();
       }
@@ -544,5 +566,52 @@ Actual:   $actualDigest''');
     final File stagingStamp = stagingDir.childFile(_sha256StampSuffix)
       ..writeAsStringSync(expectedSha);
     stagingStamp.renameSync(stampFile.path);
+  }
+
+  /// Validates every entry in [RemoteArtifactDependency.executables] within
+  /// [extractedDir] (rejecting out-of-tree paths, missing files, and symbolic
+  /// links along any directory or file segment) and applies `chmod a+x`.
+  void _applyArchiveExecutablePermissions({
+    required RemoteArtifactDependency dep,
+    required String extensionName,
+    required Directory extractedDir,
+    required FileSystem fs,
+    required OperatingSystemUtils os,
+  }) {
+    for (final String relativePath in dep.executables) {
+      assert(ArtifactDependency.isValidExecutableSubpath(relativePath));
+      final List<String> segments = relativePath.split('/');
+      String currentPath = extractedDir.path;
+      for (var i = 0; i < segments.length - 1; i++) {
+        currentPath = fs.path.join(currentPath, segments[i]);
+        if (fs.isLinkSync(currentPath)) {
+          throwToolExit(
+            'Executable "$relativePath" in artifact "${dep.name}" for extension '
+            '"$extensionName" traverses a symbolic link.',
+          );
+        }
+        if (!fs.directory(currentPath).existsSync()) {
+          throwToolExit(
+            'Executable "$relativePath" declared by artifact "${dep.name}" for extension '
+            '"$extensionName" was not found in the extracted archive.',
+          );
+        }
+      }
+      final String execPath = fs.path.join(currentPath, segments.last);
+      if (fs.isLinkSync(execPath)) {
+        throwToolExit(
+          'Executable "$relativePath" in artifact "${dep.name}" for extension '
+          '"$extensionName" must not be a symbolic link.',
+        );
+      }
+      final File execFile = fs.file(execPath);
+      if (!execFile.existsSync()) {
+        throwToolExit(
+          'Executable "$relativePath" declared by artifact "${dep.name}" for extension '
+          '"$extensionName" was not found in the extracted archive.',
+        );
+      }
+      os.chmod(execFile, _executableChmodMode);
+    }
   }
 }

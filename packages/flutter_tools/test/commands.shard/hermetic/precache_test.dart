@@ -581,6 +581,7 @@ class FakeExtensionArtifactManager extends Fake implements ExtensionArtifactMana
 
   @override
   Future<Map<String, String>> ensureArtifactsDownloaded({
+    String? extensionName,
     bool force = false,
     Set<String>? targetPlatforms,
   }) async {

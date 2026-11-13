@@ -149,6 +149,7 @@ void _succeedingBuildExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_SucceedingBuildService()],
+    extensionName: 'hermetic_build_ext',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -811,6 +812,7 @@ void main() {
         expect(command.subcommands.containsKey('custom-hermetic-build'), isTrue);
         expect(command.subcommands.containsKey('custom-hermetic-assemble-only'), isFalse);
         expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
+        expect(fakeArtifactManager.requestedExtensionName, 'hermetic_build_ext');
 
         await manager.dispose();
       },
@@ -991,6 +993,7 @@ void main() {
         final FlutterCommandResult result = await subCommand.runCommand();
         expect(result.exitStatus, ExitStatus.success);
         expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
+        expect(fakeArtifactManager.requestedExtensionName, 'unknown_extension');
         expect(fakeArtifactManager.requestedTargetPlatforms, equals(const <String>{'linux-x64'}));
 
         expect(fakeBuildManager.lastBuildArgs, isNotNull);
@@ -1096,7 +1099,6 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -1213,7 +1215,6 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -1277,14 +1278,17 @@ class _FakeExtensionArtifactManager extends Fake implements ExtensionArtifactMan
 
   final Map<String, String> downloadedArtifacts;
   bool ensureArtifactsDownloadedCalled = false;
+  String? requestedExtensionName;
   Set<String>? requestedTargetPlatforms;
 
   @override
   Future<Map<String, String>> ensureArtifactsDownloaded({
+    String? extensionName,
     bool force = false,
     Set<String>? targetPlatforms,
   }) async {
     ensureArtifactsDownloadedCalled = true;
+    requestedExtensionName = extensionName;
     requestedTargetPlatforms = targetPlatforms;
     return downloadedArtifacts;
   }

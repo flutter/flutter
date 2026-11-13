@@ -23,14 +23,14 @@ void main() {
   ];
 
   group('LinuxArtifactService', () {
-    test('defaults to const empty artifact list when none are configured', () async {
+    test('defaults to empty artifact list when none are configured', () async {
       final service = LinuxArtifactService();
       expect(
         await service.listRequiredArtifacts(
           engineVersion: testEngineVersion,
           hostPlatform: HostPlatform.linux_x64,
         ),
-        same(const <ArtifactDependency>[]),
+        isEmpty,
       );
     });
 

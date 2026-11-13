@@ -9,10 +9,12 @@ import 'dart:isolate';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -20,6 +22,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
@@ -28,7 +31,10 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
     show
+        ArtifactDependency,
+        BuiltInArtifacts,
         BuiltInPlaceholders,
+        ExtensionArtifact,
         ExtensionBuildResult,
         ExtensionDebuggingOptions,
         ExtensionFlutterProject,
@@ -229,6 +235,123 @@ void _fakeAppLaunchExtensionEntryPoint(SendPort sendPort) {
     <ToolExtensionService>[_FakeTestBuildService(), _FakeTestDeviceService()],
     supportedPlatforms: const <String>{'linux'},
   );
+}
+
+const _customArtifactName = 'custom_embedder_sdk';
+
+final class _ArtifactAwareBuildTarget extends BuildTarget {
+  const _ArtifactAwareBuildTarget(this._resolvedArtifactsPort)
+    : super(
+        description: 'Build target requiring custom ArtifactService artifact',
+        outputDir: '${BuiltInPlaceholders.outputDir}/custom_embedder',
+        targetPlatform: 'custom-embedder-arm64',
+      );
+
+  final SendPort _resolvedArtifactsPort;
+
+  @override
+  String get name => 'custom-embedder-build';
+
+  @override
+  Set<ExtensionArtifact> get artifacts => const <ExtensionArtifact>{
+    BuiltInArtifacts.icuData,
+    ExtensionArtifact(_customArtifactName),
+  };
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    _resolvedArtifactsPort.send(context.resolvedArtifacts);
+    return ExtensionBuildResult(
+      success: true,
+      executableUri: Uri.file('/tmp/custom_embedder/app', windows: false),
+    );
+  }
+}
+
+final class _ArtifactAwareBuildService extends BuildService {
+  _ArtifactAwareBuildService(this._resolvedArtifactsPort);
+
+  final SendPort _resolvedArtifactsPort;
+
+  @override
+  List<BuildTarget> get buildTargets => <BuildTarget>[
+    _ArtifactAwareBuildTarget(_resolvedArtifactsPort),
+  ];
+}
+
+final class _ArtifactAwareArtifactService extends ArtifactService {
+  _ArtifactAwareArtifactService(this._localSdkUri);
+
+  final Uri _localSdkUri;
+
+  @override
+  Future<List<ArtifactDependency>> listRequiredArtifacts({
+    required String engineVersion,
+    required HostPlatform hostPlatform,
+    Set<String>? targetPlatforms,
+  }) async {
+    return <ArtifactDependency>[
+      ArtifactDependency.local(
+        localUri: _localSdkUri,
+        name: _customArtifactName,
+        hostPlatform: HostPlatform.linux_x64,
+        targetPlatform: 'custom-embedder-arm64',
+      ),
+    ];
+  }
+}
+
+final class _ArtifactAwareDeviceService extends DeviceService {
+  @override
+  Future<List<TargetDevice>> getDevices() async {
+    return const <TargetDevice>[
+      TargetDevice(
+        buildTarget: 'custom-embedder-build',
+        category: Category.mobile,
+        id: 'custom_embedder_device',
+        name: 'Custom Embedder Device',
+        targetPlatform: 'custom-embedder-arm64',
+      ),
+    ];
+  }
+
+  @override
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => true;
+
+  @override
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  }) async => executableUri == Uri.file('/tmp/custom_embedder/app', windows: false);
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async =>
+      Uri.parse('http://127.0.0.1:9191/ws=/');
+
+  @override
+  Future<bool> stopApp({required String deviceId}) async => true;
+}
+
+ExtensionEntryPoint _createArtifactAwareDeviceEntryPoint({
+  required Uri localSdkUri,
+  required SendPort resolvedArtifactsPort,
+}) {
+  return (SendPort sendPort) {
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[
+        _ArtifactAwareArtifactService(localSdkUri),
+        _ArtifactAwareBuildService(resolvedArtifactsPort),
+        _ArtifactAwareDeviceService(),
+      ],
+      extensionName: 'custom_embedder_ext',
+      supportedPlatforms: const <String>{'linux'},
+    );
+  };
 }
 
 void main() {
@@ -639,6 +762,79 @@ flutter:
           expect(logger.errorText, contains('Error waiting for a debug connection.'));
           expect(await missingVmServiceDevice.stopApp(null), isTrue);
           expect(await missingVmServiceDevice.stopApp(null), isFalse);
+        },
+      );
+
+      testWithoutContext(
+        'resolves custom ArtifactService and built-in artifacts during startApp',
+        () async {
+          final logger = BufferLogger.test();
+          final fileSystem = MemoryFileSystem.test();
+          fileSystem.currentDirectory
+              .childFile('pubspec.yaml')
+              .writeAsStringSync('name: test_app\n');
+          final Directory localSdkDir = fileSystem.directory('/opt/custom_embedder/sdk')
+            ..createSync(recursive: true);
+
+          final resolvedArtifactsPort = ReceivePort();
+          addTearDown(resolvedArtifactsPort.close);
+
+          final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+          final manager = ExtensionManager(
+            entryPoints: <ExtensionEntryPoint>[
+              _createArtifactAwareDeviceEntryPoint(
+                localSdkUri: localSdkDir.uri,
+                resolvedArtifactsPort: resolvedArtifactsPort.sendPort,
+              ),
+            ],
+            featureFlags: featureFlags,
+            hostPlatform: HostPlatform.linux_x64,
+            logger: logger,
+          );
+          addTearDown(manager.dispose);
+
+          final artifacts = Artifacts.test(fileSystem: fileSystem);
+          final artifactManager = ExtensionArtifactManager(
+            cacheDir: fileSystem.directory('/cache'),
+            extensionManager: manager,
+            featureFlags: featureFlags,
+            toolContext: FakeToolContext(
+              artifacts: artifacts,
+              fs: fileSystem,
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+          );
+          final discovery = ExtensionDevices(
+            artifacts: artifacts,
+            extensionArtifactManager: artifactManager,
+            extensionBuildManager: ExtensionBuildManager(
+              extensionManager: manager,
+              featureFlags: featureFlags,
+              logger: logger,
+            ),
+            extensionManager: manager,
+            fileSystem: fileSystem,
+            logger: logger,
+          );
+
+          final List<Device> devices = await discovery.devices();
+          expect(devices, hasLength(1));
+
+          final LaunchResult launchResult = await devices.single.startApp(
+            null,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
+            mainPath: 'lib/main.dart',
+          );
+          expect(launchResult.started, isTrue);
+          expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:9191/ws=/'));
+
+          final Object? forwardedArtifacts = await resolvedArtifactsPort.first;
+          expect(forwardedArtifacts, <String, String>{
+            _customArtifactName: '/opt/custom_embedder/sdk',
+            'icuData': 'Artifact.icuData.release',
+          });
         },
       );
     });
