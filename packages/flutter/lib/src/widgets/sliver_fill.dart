@@ -47,6 +47,12 @@ class SliverFillViewport extends StatelessWidget {
   /// If this fraction is less than 1.0, more than one child will be visible at
   /// once. If this fraction is greater than 1.0, each child will be larger than
   /// the viewport in the main axis.
+  ///
+  /// See also:
+  ///
+  ///  * [padEnds], which controls whether padding is added so that the first and
+  ///    last children can be centered in the viewport when [viewportFraction] is
+  ///    less than 1.0.
   final double viewportFraction;
 
   /// Whether to add padding to both ends of the list.

@@ -147,11 +147,43 @@ class PageController extends ScrollController {
   final bool keepPage;
 
   /// {@template flutter.widgets.pageview.viewportFraction}
-  /// The fraction of the viewport that each page should occupy.
+  /// The fraction of the viewport that each page should occupy in the scrolling
+  /// direction.
   ///
   /// Defaults to 1.0, which means each page fills the viewport in the scrolling
   /// direction.
+  ///
+  /// When [viewportFraction] is less than 1.0, each page occupies a fraction of
+  /// the viewport's size in the scrolling direction, allowing multiple pages
+  /// (or portions of adjacent pages) to be visible simultaneously.
   /// {@endtemplate}
+  ///
+  /// By default, the page that the [PageView] settles on is centered in the
+  /// viewport. When [viewportFraction] is less than 1.0, this is done by
+  /// padding both ends of the scrollable content by
+  /// `(1.0 - viewportFraction) / 2` times the viewport's extent in the
+  /// scrolling direction ([ScrollMetrics.viewportDimension]), which also lets
+  /// the first and last pages be centered.
+  ///
+  /// Setting [PageView.padEnds] to false removes that padding. Each page then
+  /// settles against the leading edge of the viewport (the edge where the
+  /// first page starts) instead of in the center. Pages near the end of the
+  /// list may not be able to reach the leading edge, because the content
+  /// cannot scroll past the end of the last page. [PageView.padEnds] has no
+  /// effect when [viewportFraction] is 1.0 or greater.
+  ///
+  /// When [viewportFraction] is greater than 1.0, each page is larger than the
+  /// viewport along the scrolling axis, and pages are centered within the
+  /// viewport when snapped.
+  ///
+  /// See also:
+  ///
+  ///  * [PageView.padEnds], which controls whether edge padding is added to center
+  ///    pages when [viewportFraction] is less than 1.0.
+  ///  * [PageView.pageSnapping], which controls whether the [PageView] settles
+  ///    on a page when a scroll ends.
+  ///  * [SliverFillViewport.viewportFraction], the underlying sliver property
+  ///    that implements fractional sizing for sliver children.
   final double viewportFraction;
 
   /// The current page displayed in the controlled [PageView].
