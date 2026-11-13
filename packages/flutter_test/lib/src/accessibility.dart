@@ -114,10 +114,7 @@ abstract class AccessibilityGuideline {
   String get description;
 }
 
-/// A guideline which enforces that all tappable semantics nodes have a minimum
-/// size.
-///
-/// Each platform defines its own guidelines for minimum tap areas.
+/// {@macro flutter.widgets.accessibility_evaluations.minimumTapTarget}
 ///
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
@@ -131,7 +128,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   /// Create a new [MinimumTapTargetGuideline].
   const MinimumTapTargetGuideline({required this.size, required this.link});
 
-  /// The minimum allowed size of a tappable node.
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTapTarget.size}
   final Size size;
 
   /// A link describing the tap target guidelines for a platform.
@@ -148,10 +145,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
     return _toEvaluation(result, formatReason: formatReason);
   }
 
-  /// Returns whether [SemanticsNode] should be skipped for minimum tap target
-  /// guideline.
-  ///
-  /// Skips nodes which are link, hidden, or do not have actions.
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTapTarget.shouldSkipNode}
   bool shouldSkipNode(SemanticsNode node) =>
       MinimumTapTargetEvaluation(size: size).shouldSkipNode(node);
 
@@ -159,8 +153,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   String get description => 'Tappable objects should be at least $size';
 }
 
-/// A guideline which enforces that all nodes with a tap or long press action
-/// also have a label.
+/// {@macro flutter.widgets.accessibility_evaluations.labeledTapTarget}
 ///
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
@@ -184,11 +177,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
   }
 }
 
-/// A guideline which verifies that all nodes that contribute semantics via text
-/// meet minimum contrast levels.
-///
-/// The guidelines are defined by the Web Content Accessibility Guidelines,
-/// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
+/// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast}
 ///
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
@@ -199,25 +188,16 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Create a new [MinimumTextContrastGuideline].
   const MinimumTextContrastGuideline();
 
-  /// The minimum text size considered large for contrast checking.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast.kLargeTextMinimumSize}
   static const int kLargeTextMinimumSize = 18;
 
-  /// The minimum text size for bold text to be considered large for contrast
-  /// checking.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast.kBoldTextMinimumSize}
   static const int kBoldTextMinimumSize = 14;
 
-  /// The minimum contrast ratio for normal text.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast.kMinimumRatioNormalText}
   static const double kMinimumRatioNormalText = 4.5;
 
-  /// The minimum contrast ratio for large text.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast.kMinimumRatioLargeText}
   static const double kMinimumRatioLargeText = 3.0;
 
   static const double _kDefaultFontSize = 12.0;
@@ -568,23 +548,16 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline(
   link: 'https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/',
 );
 
-/// A guideline which requires text contrast to meet minimum values.
+/// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast}
 ///
-/// This guideline traverses the semantics tree looking for nodes with values or
-/// labels that corresponds to a Text or Editable text widget. Given the
-/// background pixels for the area around this widget, it performs a very naive
-/// partitioning of the colors into "light" and "dark" and then chooses the most
-/// frequently occurring color in each partition as a representative of the
-/// foreground and background colors. The contrast ratio is calculated from
-/// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
-///
+/// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline();
 
-/// A guideline which enforces that all nodes with a tap or long press action
-/// also have a label.
+/// {@macro flutter.widgets.accessibility_evaluations.labeledTapTarget}
 ///
+/// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
