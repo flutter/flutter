@@ -587,8 +587,24 @@ TEST_P(InteropPlaygroundTest, CanMeasureText) {
 
     ImpellerRect bounds2 = {};
     ImpellerGlyphInfoGetGraphemeClusterBounds(glyph.Get(), &bounds2);
+    ASSERT_EQ(bounds.x, bounds2.x);
+    ASSERT_EQ(bounds.y, bounds2.y);
     ASSERT_EQ(bounds.width, bounds2.width);
     ASSERT_EQ(bounds.height, bounds2.height);
+
+    // The next glyph on the same line is to the right.
+    auto next_glyph = paragraph.GlyphInfoAtCodeUnitIndex(
+        glyph.GetGraphemeClusterCodeUnitRangeEnd());
+    ASSERT_TRUE(next_glyph);
+    ASSERT_GE(next_glyph.GetGraphemeClusterBounds().x, bounds.x + bounds.width);
+
+    // The first glyph on the next line is below the first line's baseline.
+    auto line_metrics = paragraph.GetLineMetrics();
+    auto next_line_glyph = paragraph.GlyphInfoAtCodeUnitIndex(
+        line_metrics.GetCodeUnitStartIndex(1));
+    ASSERT_TRUE(next_line_glyph);
+    ASSERT_GT(next_line_glyph.GetGraphemeClusterBounds().y,
+              line_metrics.GetBaseline(0));
   }
 
   // Glyph info by coordinates.
