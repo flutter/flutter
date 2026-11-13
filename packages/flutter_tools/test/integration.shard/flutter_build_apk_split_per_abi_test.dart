@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/version.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -229,8 +230,12 @@ int _badgingVersionCode(Directory workingDirectory, File apk) {
           .childDirectory('build-tools')
           .listSync()
           .whereType<Directory>()
+          .where((Directory dir) => Version.parse(dir.basename) != null)
           .toList()
-        ..sort((Directory a, Directory b) => a.path.compareTo(b.path));
+        ..sort(
+          (Directory a, Directory b) =>
+              Version.parse(a.basename)!.compareTo(Version.parse(b.basename)!),
+        );
   final String aapt2 = buildTools.last.childFile(platform.isWindows ? 'aapt2.exe' : 'aapt2').path;
   final ProcessResult result = processManager.runSync(<String>[aapt2, 'dump', 'badging', apk.path]);
   expect(result.exitCode, 0, reason: 'aapt2 dump badging ${apk.path} failed:\n${result.stderr}');
@@ -280,7 +285,8 @@ Future<void> _assertSplitPerAbiOffsetsManifestVersionCode(
     androidDir
         .childFile('gradle.properties')
         .writeAsStringSync(
-          '\norg.gradle.configuration-cache=true\norg.gradle.configuration-cache.problems=warn\n',
+          '\norg.gradle.configuration-cache=true\norg.gradle.configuration-cache.problems=warn\n'
+          'android.newDsl=true\nandroid.builtInKotlin=true\n',
           mode: FileMode.append,
         );
   }
@@ -292,6 +298,8 @@ Future<void> _assertSplitPerAbiOffsetsManifestVersionCode(
     'apk',
     '--debug',
     '--split-per-abi',
+    // Verbose output shows whether Gradle reused the configuration cache.
+    if (configurationCache) '-v',
   ], workingDirectory: workingDirectory.path);
 
   void expectVersionCodes(ProcessResult result, int base) {
@@ -322,15 +330,22 @@ Future<void> _assertSplitPerAbiOffsetsManifestVersionCode(
   expectVersionCodes(result, 7);
 
   if (configurationCache) {
-    // A manifest edit must reach a build that reuses the configuration cache.
+    // The first build creates flutter_build.d, which Gradle tracks, so the second build stores
+    // the cache entry again. The third build reuses it.
     expectVersionCodes(build(), 7);
+    // A manifest edit must reach a build that reuses the configuration cache.
+    ProcessResult rebuild = build();
+    expect(rebuild.stdout, contains('Reusing configuration cache'));
+    expectVersionCodes(rebuild, 7);
     manifest.writeAsStringSync(
       manifest.readAsStringSync().replaceFirst(
         'android:versionCode="7"',
         'android:versionCode="6"',
       ),
     );
-    expectVersionCodes(build(), 6);
+    rebuild = build();
+    expect(rebuild.stdout, contains('Reusing configuration cache'));
+    expectVersionCodes(rebuild, 6);
   }
 }
 
@@ -385,12 +400,13 @@ void main() {
     await _assertSplitPerAbiOffsetsManifestVersionCode(appDir, compatibilityModeOff: true);
   });
 
-  testWithoutContext(
-    'APK versionCodes after --split-per-abi follow manifest edits with the configuration cache',
-    () async {
-      await _assertSplitPerAbiOffsetsManifestVersionCode(appDir, configurationCache: true);
-    },
-  );
+  testWithoutContext('APK versionCodes after --split-per-abi follow manifest edits with the configuration cache, newDsl and enableLegacyApi=false', () async {
+    await _assertSplitPerAbiOffsetsManifestVersionCode(
+      appDir,
+      compatibilityModeOff: true,
+      configurationCache: true,
+    );
+  });
 
   testWithoutContext(
     '--split-per-abi fails when neither the DSL nor the manifest sets a versionCode',

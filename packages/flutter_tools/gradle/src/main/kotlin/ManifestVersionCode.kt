@@ -5,6 +5,7 @@
 package com.flutter.gradle
 
 import org.xml.sax.InputSource
+import org.xml.sax.SAXException
 import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -37,10 +38,10 @@ internal object ManifestVersionCode {
      *
      * [manifests] pairs each manifest's path with its contents, in priority order, highest first,
      * which is the order of AGP's `ManifestFiles.all`. Empty contents (a missing file) are skipped.
-     * The result is [Result.Unresolved] if that
-     * manifest's value is not an integer (for example a `${placeholder}`), or if a higher-priority
-     * manifest removes `android:versionCode` with `tools:remove` or sets a `tools:node` other than
-     * `merge` on its root element.
+     * The result is [Result.Unresolved] if that manifest's value is not an integer (for example a
+     * `${placeholder}`), if a higher-priority manifest removes `android:versionCode` with
+     * `tools:remove` or sets a `tools:node` other than `merge` on its root element, or if a manifest
+     * cannot be parsed.
      */
     fun from(manifests: List<Pair<String, String>>): Result {
         for ((manifest, contents) in manifests) {
@@ -50,13 +51,19 @@ internal object ManifestVersionCode {
             val factory = DocumentBuilderFactory.newInstance()
             factory.isNamespaceAware = true
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
-            val root = factory.newDocumentBuilder().parse(InputSource(StringReader(contents))).documentElement
+            val root =
+                try {
+                    factory.newDocumentBuilder().parse(InputSource(StringReader(contents))).documentElement
+                } catch (e: SAXException) {
+                    return Result.Unresolved("$manifest could not be parsed (${e.message})")
+                }
             val removed = root.getAttributeNS(TOOLS_NAMESPACE, "remove").split(',').map { it.trim() }
+            if ("android:versionCode" in removed) {
+                return Result.Unresolved("$manifest removes it with tools:remove=\"android:versionCode\"")
+            }
             val node = root.getAttributeNS(TOOLS_NAMESPACE, "node")
-            if ("android:versionCode" in removed || (node.isNotEmpty() && node != "merge")) {
-                return Result.Unresolved(
-                    "$manifest uses tools:remove=\"android:versionCode\" or tools:node on <manifest>"
-                )
+            if (node.isNotEmpty() && node != "merge") {
+                return Result.Unresolved("$manifest sets tools:node=\"$node\" on <manifest>")
             }
             if (root.hasAttributeNS(ANDROID_NAMESPACE, "versionCode")) {
                 val value = root.getAttributeNS(ANDROID_NAMESPACE, "versionCode")

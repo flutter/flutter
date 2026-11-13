@@ -91,8 +91,11 @@ projects. That opt-out dies with AGP 10.
      flavor's `versionCode` in `finalizeDsl`, and `configureSplitPerAbiVersionCodes` in
      `FlutterPlugin.kt` sets `abiOffset * 1000 + base` without reading the property.
      `DslVersionCodes.forVariant` matches AGP's merge (the first flavor in dimension order
-     that sets a versionCode, then `defaultConfig`). A versionCode set only in the
-     manifest is not offset, because AGP reads it at execution time. The
+     that sets a versionCode, then `defaultConfig`). If the DSL sets none, the offset
+     uses a lazy provider that reads `android:versionCode` from the variant's manifest
+     sources (`ManifestFiles.all`, through `providers.fileContents`) when AGP queries it;
+     a placeholder or `tools:remove` there, or no versionCode at all, fails the build
+     ([#196559](https://github.com/flutter/flutter/issues/196559)). The
      `split_per_abi` integration test covers `enableLegacyApi=false`. See "Features that
      must break" item 3 for the effect on apps that change `versionCode` in their own
      `onVariants`.
