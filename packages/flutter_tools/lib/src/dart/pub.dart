@@ -110,7 +110,7 @@ enum PubOutputMode {
 /// A handle for interacting with the pub tool.
 abstract class Pub {
   /// Create a default [Pub] instance.
-  factory Pub({required ToolContext toolContext, Stdio? stdio}) {
+  factory Pub({required ToolContext toolContext}) {
     final ToolContext(
       :BotDetector botDetector,
       :Cache cache,
@@ -119,18 +119,6 @@ abstract class Pub {
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
-    if (stdio != null) {
-      return _DefaultPub.test(
-        botDetector: botDetector,
-        cache: cache,
-        fileSystem: fileSystem,
-        flutterRoot: cache.flutterRoot,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-    }
     return _DefaultPub(
       botDetector: botDetector,
       cache: cache,

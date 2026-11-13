@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -107,6 +108,16 @@ void main() {
           fileSystem: localFs,
           logger: logger,
           platform: localPlatform,
+        ),
+        pub: Pub.test(
+          botDetector: fakeBotDetector,
+          cache: localCache,
+          fileSystem: localFs,
+          flutterRoot: localCache.flutterRoot,
+          logger: logger,
+          platform: localPlatform,
+          processManager: localProcessManager,
+          stdio: mockStdio,
         ),
         toolContext: FakeToolContext(
           artifacts: localArtifacts,
@@ -674,6 +685,16 @@ flutter:
       );
       return PackagesCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        pub: Pub.test(
+          botDetector: FakeBotDetector(isBot),
+          cache: cache,
+          fileSystem: fs,
+          flutterRoot: cache.flutterRoot,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        ),
         toolContext: FakeToolContext(
           botDetector: FakeBotDetector(isBot),
           cache: cache,
