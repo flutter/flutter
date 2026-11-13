@@ -67,7 +67,7 @@ enum DeviceOrientation {
 ///
 /// Used by [SystemChrome.setApplicationSwitcherDescription].
 @immutable
-class ApplicationSwitcherDescription {
+final class ApplicationSwitcherDescription {
   /// Creates an ApplicationSwitcherDescription.
   const ApplicationSwitcherDescription({this.label, this.primaryColor});
 
@@ -232,7 +232,7 @@ enum SystemUiMode {
 /// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
 /// imperatively setting the style of the system overlays.
 @immutable
-class SystemUiOverlayStyle with Diagnosticable {
+final class SystemUiOverlayStyle with Diagnosticable {
   /// Creates a new [SystemUiOverlayStyle].
   const SystemUiOverlayStyle({
     this.systemNavigationBarColor,
@@ -384,9 +384,6 @@ class SystemUiOverlayStyle with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is SystemUiOverlayStyle &&
         other.systemNavigationBarColor == systemNavigationBarColor &&
         other.systemNavigationBarDividerColor == systemNavigationBarDividerColor &&

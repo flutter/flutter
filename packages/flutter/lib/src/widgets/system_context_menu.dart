@@ -511,7 +511,7 @@ final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
 ///  * [IOSSystemContextMenuItemDataCustom], which specifies the data to be sent
 ///    to the platform for this button.
 @immutable
-class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagnosticable {
+final class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemCustom].
   const IOSSystemContextMenuItemCustom({required this.title, required this.onPressed});
 

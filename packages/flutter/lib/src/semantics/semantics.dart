@@ -720,7 +720,7 @@ class SemanticsTag {
 /// should form.
 ///
 /// Use [ChildSemanticsConfigurationsResultBuilder] to build the result.
-class ChildSemanticsConfigurationsResult {
+final class ChildSemanticsConfigurationsResult {
   ChildSemanticsConfigurationsResult._(this.mergeUp, this.siblingMergeGroups);
 
   /// Returns the [SemanticsConfiguration]s that are supposed to be merged into

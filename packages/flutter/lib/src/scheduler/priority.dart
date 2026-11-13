@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 
 /// A task priority, as passed to [SchedulerBinding.scheduleTask].
 @immutable
-class Priority {
+final class Priority {
   const Priority._(this._value);
 
   /// Integer that describes this Priority value.
