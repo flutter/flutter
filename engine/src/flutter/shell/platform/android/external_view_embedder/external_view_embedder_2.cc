@@ -96,13 +96,12 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
     jni_facade_->sealFrameTransactions();
+    // This task must not use `this`: the embedder may be destroyed before the
+    // platform thread gets to run it.
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
-        [this, jni_facade = jni_facade_,
+        [jni_facade = jni_facade_, overlay_layer_state = overlay_layer_state_,
          views_visible_last_frame = views_visible_last_frame_]() {
-          // This pointer is guaranteed to not be dangling as long as
-          // DestroySurfaces is called before the embedder is deleted. See
-          // https://github.com/flutter/flutter/pull/176742#discussion_r2415229396.
-          this->HideOverlayLayerIfNeeded();
+          HideOverlayLayerIfNeeded(jni_facade.get(), overlay_layer_state.get());
           for (int64_t view_id : views_visible_last_frame) {
             jni_facade->hidePlatformView2(view_id);
           }
@@ -192,16 +191,19 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   // Every path that posts a platform task calling swapTransaction() must call
   // sealFrameTransactions() once to keep the per-frame queue paired 1:1.
   jni_facade_->sealFrameTransactions();
+  // This task must not use `this`: the embedder may be destroyed before the
+  // platform thread gets to run it.
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
-      [&, composition_order = composition_order_, view_params = view_params_,
+      [composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
        slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
+       overlay_layer_state = overlay_layer_state_,
        overlay_layer_has_content_this_frame_]() mutable -> void {
         if (overlay_layer_has_content_this_frame_) {
-          ShowOverlayLayerIfNeeded();
+          ShowOverlayLayerIfNeeded(jni_facade.get(), overlay_layer_state.get());
         } else {
-          HideOverlayLayerIfNeeded();
+          HideOverlayLayerIfNeeded(jni_facade.get(), overlay_layer_state.get());
         }
 
         for (int64_t view_id : composition_order) {
@@ -229,7 +231,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         }
 
         jni_facade->swapTransaction();
-        jni_facade_->onEndFrame2();
+        jni_facade->onEndFrame2();
       }));
 
   views_visible_last_frame_.clear();
@@ -312,26 +314,32 @@ void AndroidExternalViewEmbedder2::DestroySurfaces() {
     return;
   }
   fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetPlatformTaskRunner(),
-                                    [&]() {
-                                      surface_pool_->DestroyLayers(jni_facade_);
-                                      latch.Signal();
-                                    });
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(), [&]() {
+        surface_pool_->DestroyLayers(jni_facade_);
+        *overlay_layer_state_ = OverlayLayerState::kDestroyed;
+        latch.Signal();
+      });
   latch.Wait();
-  overlay_layer_is_shown_.store(false);
+  overlay_layer_state_ =
+      std::make_shared<OverlayLayerState>(OverlayLayerState::kHidden);
 }
 
-void AndroidExternalViewEmbedder2::ShowOverlayLayerIfNeeded() {
-  if (!overlay_layer_is_shown_.load()) {
-    jni_facade_->showOverlaySurface2();
-    overlay_layer_is_shown_.store(true);
+void AndroidExternalViewEmbedder2::ShowOverlayLayerIfNeeded(
+    PlatformViewAndroidJNI* jni_facade,
+    OverlayLayerState* state) {
+  if (*state == OverlayLayerState::kHidden) {
+    jni_facade->showOverlaySurface2();
+    *state = OverlayLayerState::kShown;
   }
 }
 
-void AndroidExternalViewEmbedder2::HideOverlayLayerIfNeeded() {
-  if (overlay_layer_is_shown_.load()) {
-    jni_facade_->hideOverlaySurface2();
-    overlay_layer_is_shown_.store(false);
+void AndroidExternalViewEmbedder2::HideOverlayLayerIfNeeded(
+    PlatformViewAndroidJNI* jni_facade,
+    OverlayLayerState* state) {
+  if (*state == OverlayLayerState::kShown) {
+    jni_facade->hideOverlaySurface2();
+    *state = OverlayLayerState::kHidden;
   }
 }
 
