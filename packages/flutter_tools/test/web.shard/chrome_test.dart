@@ -1249,6 +1249,50 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     expect(logger.warningText, isEmpty);
   });
 
+  testWithoutContext('Chromium close does not hang when Chrome never responds', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangGetTab: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      final process = FakeProcess(duration: const Duration(seconds: 6));
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+
+      fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
+      expect(closeCompleted, isTrue);
+      expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
+    });
+
+    expect(logger.warningText, isEmpty);
+    expect(logger.traceText, contains('Chrome did not complete a graceful shutdown within 5s.'));
+  });
+
   testWithoutContext('Chromium close returns promptly when Chrome already exited', () {
     final logger = BufferLogger.test();
     FakeAsync().run((FakeAsync fakeAsync) {
@@ -1393,17 +1437,23 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
     this.onGetTab,
     bool throwWebSocketException = false,
     bool hangBrowserClose = false,
+    this.hangGetTab = false,
   }) : _tab = FakeChromeTab(onSendCommand, throwWebSocketException, hangBrowserClose);
 
   final FakeChromeTab _tab;
   void Function()? onGetTab;
   bool throwSocketExceptions = false;
+  final bool hangGetTab;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
     onGetTab?.call();
     if (throwSocketExceptions) {
       throw const io.SocketException('test');
+    }
+    if (hangGetTab) {
+      // Simulate a Chrome that is alive but never answers.
+      return Completer<ChromeTab?>().future;
     }
     return _tab;
   }

@@ -69,16 +69,13 @@ const _kDevToolsServerFailure = 'Cannot start http server for devtools';
 @visibleForTesting
 const kDevToolsListeningTimeout = Duration(seconds: 30);
 
-/// How long to wait for a `Browser.close` response before giving up on a clean
-/// shutdown and escalating to SIGTERM/SIGKILL.
+/// How long to wait for each step of the graceful shutdown of Chromium before
+/// giving up on a clean shutdown and escalating to SIGTERM/SIGKILL.
 ///
-/// The reply is raced against process exit, so a Chrome that already exited
-/// returns immediately; this covers one that is alive but never answers.
-///
-/// If Chrome exits before its reply arrives, the pending command future in
-/// `webkit_inspection_protocol` never completes (its `_handleClose` closes the
-/// streams without completing pending completers), so an unbounded wait would
-/// hang [Chromium.close] forever.
+/// The `Browser.close` reply is raced against the process exit, so a Chrome
+/// that already exited returns immediately; this timeout covers a Chrome that
+/// is alive but never answers. Chrome can block at any step of the shutdown,
+/// so without a bound [Chromium.close] would hang forever.
 ///
 /// See: https://github.com/flutter/flutter/issues/196191
 @visibleForTesting
@@ -728,9 +725,9 @@ class Chromium {
           chromeConnection,
           (_) => true,
           retryFor: const Duration(seconds: 1),
-        );
+        ).timeout(kBrowserCloseTimeout);
         if (tab != null) {
-          final WipConnection wipConnection = await tab.connect();
+          final WipConnection wipConnection = await tab.connect().timeout(kBrowserCloseTimeout);
           // Chrome may exit before its reply arrives, so race the reply
           // against process exit to avoid waiting out the timeout.
           await Future.any<void>(<Future<void>>[
@@ -740,6 +737,11 @@ class Chromium {
           await wipConnection.close();
           sigtermDelay = const Duration(seconds: 1);
         }
+      } on TimeoutException {
+        _logger.printTrace(
+          'Chrome did not complete a graceful shutdown within '
+          '${kBrowserCloseTimeout.inSeconds}s. Falling back to SIGTERM.',
+        );
       } on IOException catch (_) {
         // Chrome is not responding to the debug protocol and probably has
         // already been closed.
