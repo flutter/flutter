@@ -41,4 +41,69 @@ class FlutterViewManagerProxy {
   JSAny? getInitialData(int viewId) {
     return _viewManager.getOptions(viewId)?.initialData;
   }
+
+  /// Adds a view to the application, embedding it into the host element specified in options.
+  int addView(FlutterViewOptions options) {
+    return _viewManager.createAndRegisterView(options).viewId;
+  }
+
+  /// Removes and disposes the view with the given [viewId].
+  void removeView(int viewId) {
+    _viewManager.disposeAndUnregisterView(viewId);
+  }
+}
+
+/// Options for creating a new Flutter view.
+///
+/// This is the same JS object that is passed to `app.addView(...)` from
+/// JavaScript.
+extension type FlutterViewOptions._(JSObject _) implements JSObject {
+  factory FlutterViewOptions({
+    required JSObject hostElement,
+    FlutterViewConstraints? viewConstraints,
+    Object? initialData,
+  }) => FlutterViewOptions._js(
+    hostElement: hostElement,
+    viewConstraints: viewConstraints,
+    initialData: initialData?.toJSAnyDeep,
+  );
+
+  external factory FlutterViewOptions._js({
+    required JSObject hostElement,
+    FlutterViewConstraints? viewConstraints,
+    JSAny? initialData,
+  });
+
+  /// The DOM element into which the Flutter view will be embedded.
+  external JSObject get hostElement;
+
+  /// The constraints for the Flutter view.
+  external FlutterViewConstraints? get viewConstraints;
+
+  /// Optional initial data to pass to the Flutter view.
+  external JSAny? get initialData;
+}
+
+/// Constraints for the size of a Flutter view.
+///
+/// Attributes are expressed in *logical* pixels.
+extension type FlutterViewConstraints._(JSObject _) implements JSObject {
+  external factory FlutterViewConstraints({
+    double? minWidth,
+    double? maxWidth,
+    double? minHeight,
+    double? maxHeight,
+  });
+
+  /// The minimum width of the Flutter view.
+  external double? get minWidth;
+
+  /// The maximum width of the Flutter view.
+  external double? get maxWidth;
+
+  /// The minimum height of the Flutter view.
+  external double? get minHeight;
+
+  /// The maximum height of the Flutter view.
+  external double? get maxHeight;
 }
