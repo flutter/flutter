@@ -34,6 +34,14 @@ PixelDeferredImageGPUImpeller::GetImpellerTexture(
   return wrapper_->texture();
 }
 
+std::shared_ptr<impeller::Texture>
+PixelDeferredImageGPUImpeller::GetResolvedTexture() const {
+  if (!wrapper_) {
+    return nullptr;
+  }
+  return wrapper_->texture();
+}
+
 bool PixelDeferredImageGPUImpeller::isOpaque() const {
   return false;
 }
