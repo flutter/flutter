@@ -1639,6 +1639,47 @@ void main() {
     await call(<String, String>{'clearAll': 'true'});
     expect(extensionChangedEvents.length, 8);
 
+    // A viewId of all names the override every view applies. The reply and the
+    // event report it under all, next to the views' own entries.
+    const allViewsOverride = <String, Object?>{'boldText': true};
+    expect(
+      await call(<String, String>{'viewId': 'all', 'overrides': '{"boldText": true}'}),
+      <String, Object?>{
+        'overrides': <String, Object?>{'all': allViewsOverride},
+      },
+    );
+    expect(debugAllViewsMetricsOverride, const DebugViewMetricsOverride(boldText: true));
+    expect(debugViewMetricsOverrides, isEmpty);
+    expect(extensionChangedEvents.length, 9);
+    expect(lastEventValue(), <String, Object?>{'all': allViewsOverride});
+
+    // Writing it again changes nothing, and says nothing.
+    await call(<String, String>{'viewId': 'all', 'overrides': '{"boldText": true}'});
+    expect(extensionChangedEvents.length, 9);
+
+    await call(<String, String>{'viewId': '$viewId', 'overrides': firstOverrideJson});
+    expect(extensionChangedEvents.length, 10);
+    expect(lastEventValue(), <String, Object?>{'all': allViewsOverride, '$viewId': firstOverride});
+
+    // Naming it in a read returns every override, as any read does.
+    expect(await call(<String, String>{'viewId': 'all'}), <String, Object?>{
+      'overrides': <String, Object?>{'all': allViewsOverride, '$viewId': firstOverride},
+    });
+
+    // An empty object removes it, and leaves the views' entries alone.
+    expect(await call(<String, String>{'viewId': 'all', 'overrides': '{}'}), firstOverrideReply);
+    expect(debugAllViewsMetricsOverride, isNull);
+    expect(extensionChangedEvents.length, 11);
+
+    // clearAll removes it too.
+    await call(<String, String>{'viewId': 'all', 'overrides': '{"boldText": true}'});
+    expect(extensionChangedEvents.length, 12);
+    expect(await call(<String, String>{'clearAll': 'true'}), <String, Object?>{
+      'overrides': <String, Object?>{},
+    });
+    expect(debugAllViewsMetricsOverride, isNull);
+    expect(extensionChangedEvents.length, 13);
+
     // The extension is the way tooling installs overrides, so the whole path
     // — handler, registry, replay, binding — is exercised once end to end. This
     // is part of this test, not a test of its own, because the tests in this
@@ -1656,7 +1697,15 @@ void main() {
     await call(<String, String>{'clearAll': 'true'});
     expect(observer.metricsChanged, 2);
     expect(binding.platformDispatcher.implicitView!.devicePixelRatio, realRatio);
-    expect(extensionChangedEvents.length, 10);
+
+    await call(<String, String>{'viewId': 'all', 'overrides': '{"devicePixelRatio": 2.5}'});
+    expect(observer.metricsChanged, 3);
+    expect(binding.platformDispatcher.implicitView!.devicePixelRatio, 2.5);
+
+    await call(<String, String>{'clearAll': 'true'});
+    expect(observer.metricsChanged, 4);
+    expect(binding.platformDispatcher.implicitView!.devicePixelRatio, realRatio);
+    expect(extensionChangedEvents.length, 17);
 
     testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
   });

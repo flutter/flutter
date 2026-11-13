@@ -444,6 +444,35 @@ void main() {
       debugClearViewMetricsOverrides();
     });
 
+    testWidgets("the override for every view applies beneath the view's own entry", (
+      WidgetTester tester,
+    ) async {
+      late MediaQueryData data;
+      await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
+
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
+        devicePixelRatio: 2.0,
+        boldText: true,
+      );
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(devicePixelRatio: 7.0),
+      );
+      await tester.pump();
+      expect(data.devicePixelRatio, 7.0);
+      expect(data.boldText, isTrue);
+
+      debugSetViewMetricsOverride(tester.view.viewId, null);
+      await tester.pump();
+      expect(data.devicePixelRatio, 2.0);
+      expect(data.boldText, isTrue);
+
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+      expect(data.devicePixelRatio, 3.0);
+      expect(data.boldText, isFalse);
+    });
+
     testWidgets('inherited platform data outranks a view override, and geometry does not', (
       WidgetTester tester,
     ) async {

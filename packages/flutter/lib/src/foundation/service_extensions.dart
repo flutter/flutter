@@ -82,12 +82,14 @@ enum FoundationServiceExtensions {
   brightnessOverride,
 
   /// Name of service extension that, when called, reads or changes the view
-  /// metric overrides in [debugViewMetricsOverrides].
+  /// metric overrides in [debugViewMetricsOverrides] and
+  /// [debugAllViewsMetricsOverride].
   ///
   /// The extension takes these parameters, all optional:
   ///
   ///  * `viewId`: the [FlutterView.viewId] to act on, as a non-negative integer
-  ///    string.
+  ///    string, or `all` to act on [debugAllViewsMetricsOverride], which every
+  ///    view applies beneath its own override.
   ///  * `overrides`: a JSON-encoded object, in the format
   ///    [DebugViewMetricsOverride.fromJson] accepts.
   ///  * `clearAll`: `'true'` to remove every override.
@@ -98,9 +100,9 @@ enum FoundationServiceExtensions {
   ///
   ///  * If `clearAll` is `'true'`, it removes every override and ignores the
   ///    other parameters.
-  ///  * If `overrides` is present, it replaces the override registered for the
-  ///    view that `viewId` names, which is then required. An empty object
-  ///    (`{}`) removes that view's override.
+  ///  * If `overrides` is present, it replaces the override that `viewId`
+  ///    names, which is then required. An empty object (`{}`) removes that
+  ///    override.
   ///  * Otherwise, it is a read, and changes nothing.
   ///
   /// A malformed `viewId` or `overrides` fails the call, and nothing changes.
@@ -114,9 +116,10 @@ enum FoundationServiceExtensions {
   /// resynchronize from any reply without remembering which call produced it:
   ///
   ///  * `overrides`: every override installed once the call is done, keyed by
-  ///    stringified view id (JSON object keys must be strings), each in the
-  ///    format [DebugViewMetricsOverride.toJson] produces. A view without an
-  ///    entry has no override.
+  ///    stringified view id (JSON object keys must be strings), with
+  ///    [debugAllViewsMetricsOverride] under `all`, each in the format
+  ///    [DebugViewMetricsOverride.toJson] produces. A view without an entry
+  ///    has no override of its own.
   ///
   /// A call that changes an override also posts a
   /// `Flutter.ServiceExtensionStateChanged` event whose `value` is that same
@@ -127,6 +130,8 @@ enum FoundationServiceExtensions {
   ///
   ///  * [DebugViewMetricsOverride], the value this service extension exposes.
   ///  * [debugViewMetricsOverrides], the map this service extension writes to.
+  ///  * [debugAllViewsMetricsOverride], the override this service extension
+  ///    writes to for a `viewId` of `all`.
   ///  * [BindingBase.initServiceExtensions], where the service extension is
   ///    registered.
   viewMetricsOverride,

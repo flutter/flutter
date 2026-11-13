@@ -690,6 +690,10 @@ abstract class BindingBase {
   static const String _overridesParameter = 'overrides';
   static const String _clearAllParameter = 'clearAll';
 
+  // The `viewId` that names [debugAllViewsMetricsOverride], and its key in the
+  // reply and the event.
+  static const String _allViewsId = 'all';
+
   /// Implements the `ext.flutter.viewMetricsOverride` service extension.
   ///
   /// See [FoundationServiceExtensions.viewMetricsOverride] for the parameters,
@@ -714,10 +718,12 @@ abstract class BindingBase {
       }
       return _viewMetricsOverrideResult();
     }
-    final int? viewId = int.tryParse(rawViewId);
-    if (viewId == null || viewId < 0) {
+    // Null when the call names the all-views override.
+    final int? viewId = rawViewId == _allViewsId ? null : int.tryParse(rawViewId);
+    if (rawViewId != _allViewsId && (viewId == null || viewId < 0)) {
       throw FormatException(
-        'The $_viewIdParameter parameter must be a non-negative integer, got "$rawViewId".',
+        'The $_viewIdParameter parameter must be a non-negative integer or "$_allViewsId", '
+        'got "$rawViewId".',
       );
     }
 
@@ -731,7 +737,15 @@ abstract class BindingBase {
           'The $_overridesParameter parameter must be a JSON object.',
         ),
       };
-      if (debugSetViewMetricsOverride(viewId, override)) {
+      final bool changed;
+      if (viewId == null) {
+        final DebugViewMetricsOverride? previous = debugAllViewsMetricsOverride;
+        debugAllViewsMetricsOverride = override;
+        changed = debugAllViewsMetricsOverride != previous;
+      } else {
+        changed = debugSetViewMetricsOverride(viewId, override);
+      }
+      if (changed) {
         _postViewMetricsOverrideStateChangedEvent();
       }
     }
@@ -749,19 +763,21 @@ abstract class BindingBase {
   }
 
   // [debugViewMetricsOverrides] with its view ids stringified, because
-  // json.encode accepts only String keys. It calls toJson on the values itself.
-  // Both the reply and the event carry this map.
+  // json.encode accepts only String keys, and [debugAllViewsMetricsOverride]
+  // under `all`. It calls toJson on the values itself. Both the reply and the
+  // event carry this map.
   Map<String, DebugViewMetricsOverride> _viewMetricsOverridesWithStringKeys() {
+    final DebugViewMetricsOverride? allViews = debugAllViewsMetricsOverride;
     return <String, DebugViewMetricsOverride>{
+      if (allViews != null) _allViewsId: allViews,
       for (final MapEntry<int, DebugViewMetricsOverride> entry in debugViewMetricsOverrides.entries)
         '${entry.key}': entry.value,
     };
   }
 
-  // The whole of [debugViewMetricsOverrides], rather than the entry that
-  // changed, because one event then describes the state of the extension for a
-  // client that missed the ones before it — including the clearAll that leaves
-  // no entry to report.
+  // Every override, rather than the one that changed, because one event then
+  // describes the state of the extension for a client that missed the ones
+  // before it — including the clearAll that leaves no override to report.
   void _postViewMetricsOverrideStateChangedEvent() {
     _postExtensionStateChangedEvent(
       FoundationServiceExtensions.viewMetricsOverride.name,

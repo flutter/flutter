@@ -91,7 +91,8 @@ bool debugAssertAllFoundationVarsUnset(
         debugDefaultTargetPlatformOverride != null ||
         debugDoublePrecision != null ||
         debugBrightnessOverride != null ||
-        debugViewMetricsOverrides.isNotEmpty) {
+        debugViewMetricsOverrides.isNotEmpty ||
+        debugAllViewsMetricsOverride != null) {
       throw FlutterError(reason);
     }
     return true;
@@ -232,11 +233,12 @@ bool debugMaybeDispatchDisposed(Object object) {
 /// before the framework reads them. A null field means "do not override this
 /// metric"; the value the platform reports is used instead.
 ///
-/// Overrides are registered per view in [debugViewMetricsOverrides] and are
-/// intended to be driven by developer tooling (DevTools, or an MCP server)
-/// through the `ext.flutter.viewMetricsOverride` service extension, so that an
-/// application can be audited under many device configurations without changing
-/// any real device setting.
+/// Overrides are registered per view in [debugViewMetricsOverrides], or for
+/// every view in [debugAllViewsMetricsOverride], and are intended to be driven
+/// by developer tooling (DevTools, or an MCP server) through the
+/// `ext.flutter.viewMetricsOverride` service extension, so that an application
+/// can be audited under many device configurations without changing any real
+/// device setting.
 ///
 /// An override changes what the framework is told about the platform, not the
 /// platform itself, so content the engine composites rather than the framework,
@@ -266,6 +268,9 @@ bool debugMaybeDispatchDisposed(Object object) {
 /// are handed with [debugViewWithMetricsOverrides], so a view read straight
 /// from `dart:ui` is treated the same way.
 ///
+/// A view applies its own entry first, and takes the metrics that entry leaves
+/// alone from [debugAllViewsMetricsOverride].
+///
 /// An override does not take precedence over values an application supplies
 /// itself, such as the data of an ancestor [MediaQuery], nor over values a
 /// test sets explicitly on a [TestFlutterView] or [TestPlatformDispatcher].
@@ -276,12 +281,14 @@ bool debugMaybeDispatchDisposed(Object object) {
 /// the implicit view's entry when read off the binding's dispatcher, which has
 /// no view of its own. A consumer that reads them there, such as
 /// [SemanticsBinding], therefore follows the implicit view however many views
-/// there are.
+/// there are. When there is no implicit view, the binding's dispatcher applies
+/// [debugAllViewsMetricsOverride] alone.
 ///
 /// See also:
 ///
 ///  * [debugViewMetricsOverrides], the map this class is registered in.
 ///  * [debugSetViewMetricsOverride], which registers an instance for a view.
+///  * [debugAllViewsMetricsOverride], which applies an instance to every view.
 @immutable
 class DebugViewMetricsOverride with Diagnosticable {
   /// Creates a set of view metric overrides.
@@ -296,8 +303,8 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// [physicalSize] and the paddings must have finite, non-negative extents,
   /// and [textScaling] has the requirements described on it, but a `const`
   /// constructor cannot inspect a [ui.Size], a [ui.ViewPadding] or a [List],
-  /// so those are checked by [DebugViewMetricsOverride.fromJson] and
-  /// [debugSetViewMetricsOverride] instead.
+  /// so those are checked by [DebugViewMetricsOverride.fromJson],
+  /// [debugSetViewMetricsOverride] and [debugAllViewsMetricsOverride] instead.
   const DebugViewMetricsOverride({
     this.devicePixelRatio,
     this.physicalSize,
@@ -436,9 +443,6 @@ class DebugViewMetricsOverride with Diagnosticable {
   final List<ui.Offset>? textScaling;
 
   /// Overrides [ui.PlatformDispatcher.platformBrightness].
-  ///
-  /// Unlike [debugBrightnessOverride], which replaces the brightness of every
-  /// view, this applies only to the view it is registered for.
   final ui.Brightness? platformBrightness;
 
   /// Overrides [ui.FlutterView.padding], in physical pixels.
@@ -480,8 +484,8 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// [MediaQueryData.disableAnimations] follows the view the [MediaQuery] was
   /// built from. [AnimationController] and the rest of the framework consult
   /// [SemanticsBinding.disableAnimations] instead, which is read off the
-  /// binding's dispatcher and so follows the implicit view's entry whichever
-  /// view the animation is in.
+  /// binding's dispatcher and so follows the implicit view whichever view the
+  /// animation is in.
   final bool? disableAnimations;
 
   /// Overrides [ui.AccessibilityFeatures.boldText].
@@ -1044,6 +1048,9 @@ class DebugViewMetricsOverride with Diagnosticable {
 /// Entries are keyed by view ID alone, so the entry matches again if a view is
 /// later created with the same [ui.FlutterView.viewId].
 ///
+/// [debugAllViewsMetricsOverride] applies to every view, beneath these
+/// entries.
+///
 /// This map is always empty outside of debug mode (in profile or release mode).
 Map<int, DebugViewMetricsOverride> get debugViewMetricsOverrides =>
     _unmodifiableViewMetricsOverrides;
@@ -1079,6 +1086,7 @@ bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override)
     } else {
       _viewMetricsOverrides[viewId] = next;
     }
+    _mergedViewMetricsOverrides.remove(viewId);
     changed = true;
     _debugNotifyViewMetricsOverrideChanged(
       (previous ?? const DebugViewMetricsOverride())._changesFrom(
@@ -1090,18 +1098,93 @@ bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override)
   return changed;
 }
 
-/// Removes every entry from [debugViewMetricsOverrides].
+/// A debug-only view metrics override that applies to every view.
+///
+/// A view applies its own entry in [debugViewMetricsOverrides] first, and
+/// takes the metrics that entry leaves alone from this override. This applies
+/// to views created after it is set too, and the binding's dispatcher applies
+/// it even when there is no implicit view.
+///
+/// Developer tooling normally sets this through the
+/// `ext.flutter.viewMetricsOverride` service extension, with a `viewId` of
+/// `all`.
+///
+/// Setting this to null, or to an override for which
+/// [DebugViewMetricsOverride.isEmpty] is true, removes it.
+/// [debugClearViewMetricsOverrides] removes it too. Like an entry, it survives
+/// a hot reload and is lost on a hot restart.
+///
+/// Tests that set this must reset it before the test body ends, because
+/// [debugAssertAllFoundationVarsUnset] treats a leftover override as a leaked
+/// debug variable.
+///
+/// This is always null, and setting it does nothing, outside of debug mode (in
+/// profile or release mode).
+DebugViewMetricsOverride? get debugAllViewsMetricsOverride => _allViewsMetricsOverride;
+set debugAllViewsMetricsOverride(DebugViewMetricsOverride? value) {
+  assert(() {
+    assert(value?._debugAssertIsValid() ?? true);
+    final DebugViewMetricsOverride? previous = _allViewsMetricsOverride;
+    final DebugViewMetricsOverride? next = value == null || value.isEmpty ? null : value;
+    if (previous == next) {
+      return true;
+    }
+    _allViewsMetricsOverride = next;
+    _mergedViewMetricsOverrides.clear();
+    _debugNotifyViewMetricsOverrideChanged(
+      (previous ?? const DebugViewMetricsOverride())._changesFrom(
+        next ?? const DebugViewMetricsOverride(),
+      ),
+    );
+    return true;
+  }());
+}
+
+DebugViewMetricsOverride? _allViewsMetricsOverride;
+
+// Each view's entry with the metrics it leaves alone taken from
+// [debugAllViewsMetricsOverride], built the first time it is read after a
+// change.
+final Map<int, DebugViewMetricsOverride> _mergedViewMetricsOverrides =
+    <int, DebugViewMetricsOverride>{};
+
+// The override the view with [viewId] applies: its entry, with the metrics the
+// entry leaves alone taken from [debugAllViewsMetricsOverride]. A null [viewId]
+// stands for no view, which applies the all-views override alone.
+DebugViewMetricsOverride? _debugViewMetricsOverrideFor(int? viewId) {
+  final DebugViewMetricsOverride? allViews = _allViewsMetricsOverride;
+  if (viewId == null) {
+    return allViews;
+  }
+  final DebugViewMetricsOverride? entry = _viewMetricsOverrides[viewId];
+  if (entry == null || allViews == null) {
+    return entry ?? allViews;
+  }
+  // Merged through the wire format, which every metric is part of, so that a
+  // metric added to the class cannot be left out of the merge.
+  return _mergedViewMetricsOverrides[viewId] ??= DebugViewMetricsOverride.fromJson(
+    <String, Object?>{...allViews.toJson(), ...entry.toJson()},
+  );
+}
+
+/// Removes every entry from [debugViewMetricsOverrides], and
+/// [debugAllViewsMetricsOverride].
 ///
 /// Returns true if anything was removed. Always returns false, and does
 /// nothing, outside of debug mode (in profile or release mode).
 bool debugClearViewMetricsOverrides() {
   var changed = false;
   assert(() {
-    if (_viewMetricsOverrides.isEmpty) {
+    final removed = <DebugViewMetricsOverride>[
+      ..._viewMetricsOverrides.values,
+      ?_allViewsMetricsOverride,
+    ];
+    if (removed.isEmpty) {
       return true;
     }
-    final List<DebugViewMetricsOverride> removed = _viewMetricsOverrides.values.toList();
     _viewMetricsOverrides.clear();
+    _allViewsMetricsOverride = null;
+    _mergedViewMetricsOverrides.clear();
     changed = true;
     // Announced once for all of them: the dart:ui callbacks are not per view,
     // so a group that several entries changed is one change to the framework.
@@ -1116,7 +1199,8 @@ bool debugClearViewMetricsOverrides() {
 }
 
 /// Wraps [dispatcher] so that it and the [ui.FlutterView]s it reports apply
-/// the entries of [debugViewMetricsOverrides].
+/// the entries of [debugViewMetricsOverrides] and
+/// [debugAllViewsMetricsOverride].
 ///
 /// [BindingBase.platformDispatcher] applies this to
 /// [ui.PlatformDispatcher.instance], which is what makes overrides visible to
@@ -1453,7 +1537,8 @@ _DebugViewMetricsFlutterView _debugWrapView(ui.FlutterView view) {
 // [debugApplyViewMetricsOverrides] returns has no view of its own and follows
 // the implicit view's entry: consumers that read these metrics off the binding
 // rather than off a view, such as SemanticsBinding, have no view to resolve
-// against.
+// against. Either way, [debugAllViewsMetricsOverride] supplies what the entry
+// leaves alone, and applies alone when there is no implicit view to follow.
 //
 // Every other member is forwarded explicitly, and a member added to dart:ui has
 // to be forwarded here too: a noSuchMethod would hand the framework null for it.
@@ -1463,10 +1548,8 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   final ui.PlatformDispatcher _dispatcher;
   final int? _viewId;
 
-  DebugViewMetricsOverride? get _override {
-    final int? viewId = _viewId ?? _dispatcher.implicitView?.viewId;
-    return viewId == null ? null : _viewMetricsOverrides[viewId];
-  }
+  DebugViewMetricsOverride? get _override =>
+      _debugViewMetricsOverrideFor(_viewId ?? _dispatcher.implicitView?.viewId);
 
   @override
   ui.AccessibilityFeatures get accessibilityFeatures {
@@ -1757,13 +1840,14 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
 }
 
 // A [ui.FlutterView] that reports the metrics of its [debugViewMetricsOverrides]
-// entry in place of the ones the platform reports.
+// entry, and of [debugAllViewsMetricsOverride] where the entry leaves them
+// alone, in place of the ones the platform reports.
 class _DebugViewMetricsFlutterView implements ui.FlutterView {
   _DebugViewMetricsFlutterView(this._view);
 
   final ui.FlutterView _view;
 
-  DebugViewMetricsOverride? get _override => _viewMetricsOverrides[_view.viewId];
+  DebugViewMetricsOverride? get _override => _debugViewMetricsOverrideFor(_view.viewId);
 
   @override
   late final ui.PlatformDispatcher platformDispatcher = _DebugViewMetricsPlatformDispatcher(

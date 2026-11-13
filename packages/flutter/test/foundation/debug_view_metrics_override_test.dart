@@ -605,11 +605,29 @@ void main() {
       expect(debugClearViewMetricsOverrides(), isFalse);
     });
 
+    test('debugAllViewsMetricsOverride is held apart from the entries', () {
+      expect(debugAllViewsMetricsOverride, isNull);
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(boldText: true);
+      expect(debugAllViewsMetricsOverride, const DebugViewMetricsOverride(boldText: true));
+      expect(debugViewMetricsOverrides, isEmpty);
+
+      // An empty override removes it rather than storing it.
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride();
+      expect(debugAllViewsMetricsOverride, isNull);
+
+      // debugClearViewMetricsOverrides removes it, and reports that it did.
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(boldText: true);
+      expect(debugClearViewMetricsOverrides(), isTrue);
+      expect(debugAllViewsMetricsOverride, isNull);
+      expect(debugClearViewMetricsOverrides(), isFalse);
+    });
+
     test('rejects values that cannot be applied, built directly', () {
       // physicalSize, the paddings and textScaling cannot assert in a const
       // constructor, and tooling payloads go through fromJson, so
-      // debugSetViewMetricsOverride is the only gate a directly built override
-      // with an invalid one of them passes through.
+      // debugSetViewMetricsOverride and debugAllViewsMetricsOverride are the
+      // only gates a directly built override with an invalid one of them
+      // passes through.
       final invalid = <DebugViewMetricsOverride>[
         const DebugViewMetricsOverride(physicalSize: ui.Size(double.nan, 100)),
         const DebugViewMetricsOverride(physicalSize: ui.Size(100, double.infinity)),
@@ -628,7 +646,13 @@ void main() {
           throwsFlutterError,
           reason: '$override was stored',
         );
+        expect(
+          () => debugAllViewsMetricsOverride = override,
+          throwsFlutterError,
+          reason: '$override was stored for every view',
+        );
         expect(debugViewMetricsOverrides, isEmpty, reason: '$override left state behind');
+        expect(debugAllViewsMetricsOverride, isNull, reason: '$override left state behind');
       }
 
       // Zero extents and scaling to zero are legal, and a rejected override
@@ -653,6 +677,10 @@ void main() {
     test('debugAssertAllFoundationVarsUnset treats a leftover override as a leak', () {
       expect(debugAssertAllFoundationVarsUnset('leak'), isTrue);
       debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(boldText: true));
+      expect(() => debugAssertAllFoundationVarsUnset('leak'), throwsFlutterError);
+      debugClearViewMetricsOverrides();
+      expect(debugAssertAllFoundationVarsUnset('leak'), isTrue);
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(boldText: true);
       expect(() => debugAssertAllFoundationVarsUnset('leak'), throwsFlutterError);
       debugClearViewMetricsOverrides();
       expect(debugAssertAllFoundationVarsUnset('leak'), isTrue);
@@ -1003,6 +1031,101 @@ void main() {
     });
   });
 
+  group('the override for every view', () {
+    tearDown(debugClearViewMetricsOverrides);
+
+    test("applies to every view, beneath each view's own entry", () {
+      final dispatcher = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
+      final ui.FlutterView first = wrapped.view(id: 1)!;
+      final ui.FlutterView second = wrapped.view(id: 2)!;
+
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
+        devicePixelRatio: 5.0,
+        textScaling: <ui.Offset>[ui.Offset(1, 2)],
+        boldText: true,
+      );
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(devicePixelRatio: 7.0, boldText: false),
+      );
+
+      // View 1's entry decides the metrics it sets, and the override for every
+      // view decides the rest.
+      expect(first.devicePixelRatio, 7.0);
+      expect(first.platformDispatcher.textScaleFactor, 2.0);
+      expect(first.platformDispatcher.accessibilityFeatures.boldText, isFalse);
+      expect(second.devicePixelRatio, 5.0);
+      expect(second.platformDispatcher.textScaleFactor, 2.0);
+      expect(second.platformDispatcher.accessibilityFeatures.boldText, isTrue);
+
+      // The dispatcher that is not tied to a view follows the implicit view.
+      expect(wrapped.textScaleFactor, 2.0);
+      expect(wrapped.accessibilityFeatures.boldText, isFalse);
+
+      // A view added later applies it too.
+      dispatcher.addView(3, 6.0);
+      expect(wrapped.view(id: 3)!.devicePixelRatio, 5.0);
+    });
+
+    test("is what the binding's dispatcher applies when there is no implicit view", () {
+      final dispatcher = _NoImplicitViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
+
+      debugSetViewMetricsOverride(
+        2,
+        const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
+      );
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
+        textScaling: <ui.Offset>[ui.Offset(1, 3)],
+      );
+
+      // It names no view, so a read that has no view to resolve applies it,
+      // and still no view's entry.
+      expect(wrapped.textScaleFactor, 3.0);
+      expect(wrapped.platformBrightness, dispatcher.platformBrightness);
+      expect(wrapped.view(id: 2)!.platformDispatcher.textScaleFactor, 3.0);
+      expect(wrapped.view(id: 2)!.platformDispatcher.platformBrightness, ui.Brightness.dark);
+    });
+
+    test('combines with an entry metric by metric, and follows changes to either', () {
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(
+        _TwoViewPlatformDispatcher(),
+      );
+      final ui.FlutterView first = wrapped.view(id: 1)!;
+
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
+        padding: FakeViewPadding(top: 10),
+        viewInsets: FakeViewPadding(bottom: 20),
+        alwaysUse24HourFormat: true,
+        highContrast: true,
+      );
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(padding: FakeViewPadding(top: 30), boldText: true),
+      );
+      expect(first.padding.top, 30);
+      expect(first.viewInsets.bottom, 20);
+      expect(first.platformDispatcher.alwaysUse24HourFormat, isTrue);
+      // Each accessibility flag is a metric of its own.
+      expect(first.platformDispatcher.accessibilityFeatures.boldText, isTrue);
+      expect(first.platformDispatcher.accessibilityFeatures.highContrast, isTrue);
+
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
+        viewInsets: FakeViewPadding(bottom: 40),
+      );
+      expect(first.viewInsets.bottom, 40);
+      expect(first.platformDispatcher.alwaysUse24HourFormat, isFalse);
+
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(viewInsets: FakeViewPadding(bottom: 50)),
+      );
+      expect(first.viewInsets.bottom, 50);
+      expect(first.padding.top, 0);
+    });
+  });
+
   group('the wrapper applies overrides', () {
     late ui.PlatformDispatcher real;
     late ui.PlatformDispatcher wrapped;
@@ -1258,9 +1381,9 @@ void main() {
     });
 
     test('once per group when several entries are cleared together', () {
-      // The dart:ui callbacks are not per view, so clearing two entries that
-      // both override the view metrics is one change to the framework, not one
-      // per entry.
+      // The dart:ui callbacks are not per view, so clearing two entries and the
+      // override for every view, all of which override the view metrics, is one
+      // change to the framework, not one per override.
       final fake = _TwoViewPlatformDispatcher();
       final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
       debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 3.0));
@@ -1271,17 +1394,24 @@ void main() {
           textScaling: <ui.Offset>[ui.Offset(1, 2)],
         ),
       );
+      debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
+        devicePixelRatio: 1.5,
+        platformBrightness: ui.Brightness.dark,
+      );
       var metricsChanged = 0;
       var textScaleFactorChanged = 0;
       var brightnessChanged = 0;
+      var accessibilityFeaturesChanged = 0;
       wrapped.onMetricsChanged = () => metricsChanged += 1;
       wrapped.onTextScaleFactorChanged = () => textScaleFactorChanged += 1;
       wrapped.onPlatformBrightnessChanged = () => brightnessChanged += 1;
+      wrapped.onAccessibilityFeaturesChanged = () => accessibilityFeaturesChanged += 1;
 
       debugClearViewMetricsOverrides();
       expect(metricsChanged, 1);
       expect(textScaleFactorChanged, 1);
-      expect(brightnessChanged, 0);
+      expect(brightnessChanged, 1);
+      expect(accessibilityFeaturesChanged, 0);
     });
 
     test('through onPlatformConfigurationChanged as well, once', () {
@@ -1380,17 +1510,33 @@ void main() {
       wrapped.onAlwaysUse24HourFormatChanged = () => notifications.add('alwaysUse24HourFormat');
       wrapped.onAccessibilityFeaturesChanged = () => notifications.add('accessibilityFeatures');
 
-      for (final MapEntry<String, _MetricChange> entry in _perMetricChange.entries) {
-        debugSetViewMetricsOverride(1, _fullyPopulated);
-        notifications.clear();
-        debugSetViewMetricsOverride(1, entry.value(_fullyPopulated));
-        expect(notifications.toSet(), switch (entry.key) {
-          'alwaysUse24HourFormat' => <String>{'configuration', 'alwaysUse24HourFormat', 'metrics'},
-          'textScaling' => <String>{'configuration', 'textScaleFactor'},
-          'platformBrightness' => <String>{'configuration', 'platformBrightness'},
-          final String metric when viewMetrics.contains(metric) => <String>{'metrics'},
-          _ => <String>{'configuration', 'accessibilityFeatures'},
-        }, reason: 'changing ${entry.key} announced $notifications');
+      final installers = <String, void Function(DebugViewMetricsOverride override)>{
+        'the entry of view 1': (DebugViewMetricsOverride override) {
+          debugSetViewMetricsOverride(1, override);
+        },
+        'the override for every view': (DebugViewMetricsOverride override) {
+          debugAllViewsMetricsOverride = override;
+        },
+      };
+      for (final MapEntry<String, void Function(DebugViewMetricsOverride)> install
+          in installers.entries) {
+        for (final MapEntry<String, _MetricChange> entry in _perMetricChange.entries) {
+          install.value(_fullyPopulated);
+          notifications.clear();
+          install.value(entry.value(_fullyPopulated));
+          expect(notifications.toSet(), switch (entry.key) {
+            'alwaysUse24HourFormat' => <String>{
+              'configuration',
+              'alwaysUse24HourFormat',
+              'metrics',
+            },
+            'textScaling' => <String>{'configuration', 'textScaleFactor'},
+            'platformBrightness' => <String>{'configuration', 'platformBrightness'},
+            final String metric when viewMetrics.contains(metric) => <String>{'metrics'},
+            _ => <String>{'configuration', 'accessibilityFeatures'},
+          }, reason: 'changing ${entry.key} in ${install.key} announced $notifications');
+        }
+        debugClearViewMetricsOverrides();
       }
     });
 
