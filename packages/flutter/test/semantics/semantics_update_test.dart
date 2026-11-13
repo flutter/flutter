@@ -625,6 +625,118 @@ void main() {
     skip: kIsWeb, // [intended] the web engine handles the traversal order itself.
   );
 
+  group('OverlayPortal in an Overlay inside another OverlayPortal', () {
+    // The inner overlay child is painted by an Overlay that is a descendant of
+    // the outer OverlayPortal's child, so its hit-test parent is the outer
+    // portal's traversal parent node rather than its own.
+    Future<void> pumpPortals(
+      WidgetTester tester,
+      OverlayPortalController inner,
+      ValueNotifier<double> opacity,
+    ) async {
+      final outer = OverlayPortalController();
+      final entry = OverlayEntry(
+        builder: (BuildContext context) => OverlayPortal(
+          controller: outer,
+          overlayChildBuilder: (BuildContext context) => const SizedBox.shrink(),
+          child: Overlay.wrap(
+            child: ValueListenableBuilder<double>(
+              valueListenable: opacity,
+              builder: (BuildContext context, double value, Widget? child) =>
+                  Opacity(opacity: value, child: child),
+              child: OverlayPortal(
+                controller: inner,
+                overlayChildBuilder: (BuildContext context) =>
+                    TestButton(onPressed: () {}, child: const Text('inner overlay')),
+                child: TestButton(onPressed: () {}, child: const Text('inner anchor')),
+              ),
+            ),
+          ),
+        ),
+      );
+      addTearDown(() {
+        entry
+          ..remove()
+          ..dispose();
+      });
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(initialEntries: <OverlayEntry>[entry]),
+        ),
+      );
+    }
+
+    testWidgets('lists the inner overlay child only under its own traversal parent', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+      SemanticsUpdateBuilderSpy.observations.clear();
+      final embedderTree = _EmbedderSemanticsTree();
+
+      final inner = OverlayPortalController()..show();
+      final opacity = ValueNotifier<double>(1.0);
+      addTearDown(opacity.dispose);
+      await pumpPortals(tester, inner, opacity);
+      embedderTree.apply(SemanticsUpdateBuilderSpy.observations);
+      expect(
+        SemanticsUpdateBuilderSpy.observations.values.map(
+          (SemanticsNodeUpdateObservation observation) => observation.label,
+        ),
+        contains('inner overlay'),
+      );
+
+      SemanticsUpdateBuilderSpy.observations.clear();
+      inner.hide();
+      await tester.pump();
+      embedderTree.apply(SemanticsUpdateBuilderSpy.observations);
+
+      SemanticsUpdateBuilderSpy.observations.clear();
+      inner.show();
+      await tester.pump();
+      embedderTree.apply(SemanticsUpdateBuilderSpy.observations);
+
+      SemanticsUpdateBuilderSpy.observations.clear();
+      handle.dispose();
+    });
+
+    testWidgets('does not send the inner overlay child while its traversal parent is missing', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+      SemanticsUpdateBuilderSpy.observations.clear();
+      final embedderTree = _EmbedderSemanticsTree();
+
+      final inner = OverlayPortalController()..show();
+      final opacity = ValueNotifier<double>(0.0);
+      addTearDown(opacity.dispose);
+      await pumpPortals(tester, inner, opacity);
+      embedderTree.apply(SemanticsUpdateBuilderSpy.observations);
+      expect(
+        SemanticsUpdateBuilderSpy.observations.values.map(
+          (SemanticsNodeUpdateObservation observation) => observation.label,
+        ),
+        isNot(contains('inner overlay')),
+      );
+
+      SemanticsUpdateBuilderSpy.observations.clear();
+      opacity.value = 1.0;
+      await tester.pump();
+      embedderTree.apply(SemanticsUpdateBuilderSpy.observations);
+      expect(
+        SemanticsUpdateBuilderSpy.observations.values.map(
+          (SemanticsNodeUpdateObservation observation) => observation.label,
+        ),
+        contains('inner overlay'),
+      );
+
+      SemanticsUpdateBuilderSpy.observations.clear();
+      handle.dispose();
+    });
+  }, skip: kIsWeb); // [intended] the web engine handles the traversal order itself.
+
   // Regression test for https://github.com/flutter/flutter/issues/193235.
   testWidgets(
     'Semantics update sends previously merged descendants when an ancestor stops merging',
@@ -908,11 +1020,20 @@ class _EmbedderSemanticsTree {
       }
     }
     final reachable = <int>{};
+    final parents = <int, int>{};
     void visit(int id) {
       if (!reachable.add(id)) {
         return;
       }
-      _nodes[id]!.childrenInTraversalOrder.forEach(visit);
+      for (final int childId in _nodes[id]!.childrenInTraversalOrder) {
+        expect(
+          parents,
+          isNot(contains(childId)),
+          reason: 'Node #$childId is listed as a child of both #${parents[childId]} and #$id.',
+        );
+        parents[childId] = id;
+        visit(childId);
+      }
     }
 
     visit(0);
