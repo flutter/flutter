@@ -45,7 +45,7 @@ import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 import '../web/web_runner.dart';
 
-const protocolVersion = '0.6.2';
+const protocolVersion = '0.6.1';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -1890,8 +1890,7 @@ class EmulatorDomain extends Domain {
 
   Future<Map<String, Object?>> create(Map<String, Object?> args) async {
     final String? name = _getStringArg(args, 'name');
-    final String? platform = _getStringArg(args, 'platform');
-    final CreateEmulatorResult res = await emulators.createEmulator(name: name, platform: platform);
+    final CreateEmulatorResult res = await emulators.createEmulator(name: name);
     return <String, Object?>{
       'success': res.success,
       'emulatorName': res.emulatorName,

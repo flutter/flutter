@@ -856,11 +856,7 @@ class ExtensionEmulator extends Emulator {
     } on Object catch (err, stack) {
       _logger.printTrace('$stack');
       final String prefix = ExtensionEmulators._extensionErrorPrefix(_deviceService);
-      final String detail = switch (err) {
-        ToolExtensionException(:final String message) ||
-        json_rpc.RpcException(:final String message) => message.trim(),
-        _ => '$err'.trim(),
-      };
+      final String detail = ExtensionEmulators._extractErrorDetail(err);
       throwToolExit(
         detail.isEmpty
             ? '${prefix}Failed to launch emulator "$id".'
@@ -889,6 +885,23 @@ class ExtensionEmulators extends EmulatorDiscovery {
       'Extension "$extensionName": ',
     _ => '',
   };
+
+  static String _extractErrorDetail(Object error) => switch (error) {
+    ToolExtensionException(:final String message) ||
+    json_rpc.RpcException(:final String message) => message.trim(),
+    _ => '$error'.trim(),
+  };
+
+  void _warnQueryFailure(DeviceService service, String target, Object error, StackTrace stack) {
+    final String prefix = _extensionErrorPrefix(service);
+    _logger.printWarning(switch (error) {
+      ToolExtensionException(:final String message) when prefix.isNotEmpty => '$prefix$message',
+      ToolExtensionException(:final String message) =>
+        'Failed to query $target from ${_describeExtension(service)}: $message',
+      _ => 'Failed to query $target from ${_describeExtension(service)}: $error',
+    });
+    _logger.printTrace('$stack');
+  }
 
   @override
   bool get supportsPlatform => true;
@@ -929,15 +942,7 @@ class ExtensionEmulators extends EmulatorDiscovery {
               ),
           ];
         } on Object catch (e, st) {
-          final String prefix = _extensionErrorPrefix(service);
-          _logger.printWarning(switch (e) {
-            ToolExtensionException(:final String message) when prefix.isNotEmpty =>
-              '$prefix$message',
-            ToolExtensionException(:final String message) =>
-              'Failed to query emulators from ${_describeExtension(service)}: $message',
-            _ => 'Failed to query emulators from ${_describeExtension(service)}: $e',
-          });
-          _logger.printTrace('$st');
+          _warnQueryFailure(service, 'emulators', e, st);
           return const <Emulator>[];
         }
       }),
@@ -963,22 +968,17 @@ class ExtensionEmulators extends EmulatorDiscovery {
     if (service == null) {
       return null;
     }
-    final String? normalizedName = name != null && name.isNotEmpty ? name : null;
     try {
-      final TargetEmulator created = await service.createEmulator(name: normalizedName);
+      final TargetEmulator created = await service.createEmulator(name: name);
       return CreateEmulatorResult(created.id, success: true);
     } on Object catch (err, stack) {
       _logger.printTrace(
         'Failed to create emulator via ${_describeExtension(service)}: $err\n$stack',
       );
       final String prefix = _extensionErrorPrefix(service);
-      final String detail = switch (err) {
-        ToolExtensionException(:final String message) ||
-        json_rpc.RpcException(:final String message) => message.trim(),
-        _ => '$err'.trim(),
-      };
+      final String detail = _extractErrorDetail(err);
       return CreateEmulatorResult(
-        normalizedName ?? '',
+        name ?? '',
         success: false,
         error: detail.isEmpty ? '${prefix}Failed to create emulator.' : '$prefix$detail',
       );
@@ -1000,15 +1000,7 @@ class ExtensionEmulators extends EmulatorDiscovery {
         try {
           return (service, await service.getEmulatorPlatform());
         } on Object catch (e, st) {
-          final String prefix = _extensionErrorPrefix(service);
-          _logger.printWarning(switch (e) {
-            ToolExtensionException(:final String message) when prefix.isNotEmpty =>
-              '$prefix$message',
-            ToolExtensionException(:final String message) =>
-              'Failed to query emulator platform from ${_describeExtension(service)}: $message',
-            _ => 'Failed to query emulator platform from ${_describeExtension(service)}: $e',
-          });
-          _logger.printTrace('$st');
+          _warnQueryFailure(service, 'emulator platform', e, st);
           return (service, null);
         }
       }),

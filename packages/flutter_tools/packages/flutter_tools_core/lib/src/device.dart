@@ -245,7 +245,7 @@ class ExtensionDebuggingOptions {
 
 /// Representation of a target emulator or simulator provided by a tool extension.
 @immutable
-class TargetEmulator {
+final class TargetEmulator {
   /// Creates a [TargetEmulator] definition.
   const TargetEmulator({required this.id, required this.name, this.category, this.manufacturer})
     : assert(id != '', 'id must not be empty.'),

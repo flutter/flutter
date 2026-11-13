@@ -11,9 +11,13 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/commands/emulators.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
@@ -32,6 +36,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const _primaryDeviceId = 'custom_device_1';
 const _secondaryDeviceId = 'custom_device_2';
@@ -1294,16 +1299,7 @@ void main() {
       },
     );
 
-    testWithoutContext('getCreatePlatforms caches providers, skips null, rejects android and invalid names, deduplicates, and isolates faults', () async {
-      final platformQueryPort = ReceivePort();
-      addTearDown(platformQueryPort.close);
-      final SendPort platformQuerySendPort = platformQueryPort.sendPort;
-      var platformQueryCount = 0;
-      final StreamSubscription<Object?> sub = platformQueryPort.listen((_) {
-        platformQueryCount++;
-      });
-      addTearDown(sub.cancel);
-
+    testWithoutContext('getCreatePlatforms skips null, rejects android and invalid names, deduplicates, and isolates faults', () async {
       void defaultEntryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
           sendPort,
@@ -1345,10 +1341,7 @@ void main() {
           sendPort,
           <ToolExtensionService>[
             _TestEmulatorDeviceService(
-              onGetEmulatorPlatform: () {
-                platformQuerySendPort.send(null);
-                return 'custom_os';
-              },
+              emulatorPlatform: 'custom_os',
               onCreateEmulator: (String? name) {
                 if (name == 'fail_create') {
                   throw StateError('Out of disk space');
@@ -1420,13 +1413,17 @@ void main() {
         ),
       );
 
-      // Subsequent queries reuse cached providers without repeating RPCs or warnings.
+      // Subsequent getCreatePlatforms and createEmulator calls reuse memoized
+      // providers so validation warnings are emitted only once.
       expect(await discovery.getCreatePlatforms(), equals(<String>['custom_os']));
       final CreateEmulatorResult? created = await discovery.createEmulator(platform: 'custom_os');
       expect(created?.success, isTrue);
       expect(created?.emulatorName, 'first_ext_sim');
-      expect(platformQueryCount, 1);
       expect(logger.warningText, equals(warningsAfterFirstLoad));
+      expect(
+        RegExp('Duplicate emulator platform "custom_os"').allMatches(logger.warningText),
+        hasLength(1),
+      );
 
       // Creation failures include Extension "<name>": attribution prefix.
       final CreateEmulatorResult? failed = await discovery.createEmulator(
@@ -1590,13 +1587,13 @@ void main() {
         expect(matching.single.id, 'ext_emu');
         expect(matching.single.name, 'Extension Emulator');
 
-        // Auto-selects the single extension provider when platform is omitted,
-        // even alongside desktopOnlyEntryPoint (emulatorPlatform == null).
-        final CreateEmulatorResult autoResult = await emulatorManager.createEmulator();
-        expect(autoResult.success, isTrue);
-        expect(autoResult.emulatorName, 'custom_os_default');
+        // Routes explicit platform (default and custom name).
+        final CreateEmulatorResult defaultNameResult = await emulatorManager.createEmulator(
+          platform: 'custom_os',
+        );
+        expect(defaultNameResult.success, isTrue);
+        expect(defaultNameResult.emulatorName, 'custom_os_default');
 
-        // Routes explicit platform and custom name.
         final CreateEmulatorResult namedResult = await emulatorManager.createEmulator(
           name: 'sim_alpha',
           platform: 'custom_os',
@@ -1624,8 +1621,7 @@ void main() {
           'Unknown emulator creation platform "unknown_os". Available platforms: custom_os.',
         );
 
-        // When Android AVD creation is also available, omitted platform defaults
-        // to Android for backwards compatibility with IDE daemon clients.
+        // Omitted platform defaults to Android ('android').
         final androidSdk = _FakeAndroidSdk();
         final androidAndExtManager = EmulatorManager(
           androidSdkBuilder: () => androidSdk,
@@ -1655,7 +1651,7 @@ void main() {
                   'create',
                   'avd',
                   '-n',
-                  'ide_default_avd',
+                  'default_android_avd',
                   '-k',
                   'system-images;android-27;google_apis_playstore;x86',
                   '-d',
@@ -1671,198 +1667,214 @@ void main() {
           'custom_os',
         ]);
         final CreateEmulatorResult defaultAndroidResult = await androidAndExtManager.createEmulator(
-          name: 'ide_default_avd',
+          name: 'default_android_avd',
         );
         expect(defaultAndroidResult.success, isTrue);
-        expect(defaultAndroidResult.emulatorName, 'ide_default_avd');
+        expect(defaultAndroidResult.emulatorName, 'default_android_avd');
 
-        // Multiple extension providers require disambiguation when platform is omitted
-        // and Android AVD creation is unavailable.
-        void secondOsEntryPoint(SendPort sendPort) {
+        // EmulatorsCommand --create queries ExtensionEmulators across
+        // hasExtensionEmulatorSources, getAvailableCreatePlatforms, and
+        // createEmulator while emitting duplicate/invalid platform warnings once.
+        Cache.disableLocking();
+        void invalidPlatformEntryPoint(SendPort sendPort) {
           ToolExtensionEntryPoint.run(
             sendPort,
-            <ToolExtensionService>[
-              _TestEmulatorDeviceService(
-                emulatorPlatform: 'second_os',
-                onCreateEmulator: (String? name) =>
-                    TargetEmulator(id: name ?? 'second_default', name: 'Second Sim'),
-              ),
-            ],
-            extensionName: 'second_os_ext',
+            <ToolExtensionService>[_TestEmulatorDeviceService(emulatorPlatform: 'Invalid Name!')],
+            extensionName: 'invalid_cli_ext',
             supportedPlatforms: const <String>{'linux'},
           );
         }
 
-        final multiProviderExtManager = ExtensionManager(
+        final cliExtManager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: logger,
           featureFlags: featureFlags,
-          entryPoints: <ExtensionEntryPoint>[customOsEntryPoint, secondOsEntryPoint],
+          entryPoints: <ExtensionEntryPoint>[invalidPlatformEntryPoint, customOsEntryPoint],
         );
-        addTearDown(multiProviderExtManager.dispose);
+        addTearDown(cliExtManager.dispose);
 
-        final multiEmulatorManager = EmulatorManager(
-          androidWorkflow: AndroidWorkflow(
-            androidSdkBuilder: () => null,
-            featureFlags: featureFlags,
-          ),
-          extensionManager: multiProviderExtManager,
-          iosWorkflow: null,
-          javaBuilder: () => null,
-          toolContext: FakeToolContext(
-            fs: MemoryFileSystem.test(),
-            logger: logger,
-            processManager: FakeProcessManager.empty(),
-          ),
-          xcode: null,
-        );
-
-        expect(await multiEmulatorManager.getAvailableCreatePlatforms(), <String>[
-          'custom_os',
-          'second_os',
-        ]);
-        final CreateEmulatorResult ambiguousResult = await multiEmulatorManager.createEmulator();
-        expect(ambiguousResult.success, isFalse);
-        expect(
-          ambiguousResult.error,
-          'Multiple emulator creation platforms are available (custom_os, second_os). '
-          'Specify a "platform" parameter.',
-        );
-
-        final CreateEmulatorResult disambiguatedResult = await multiEmulatorManager.createEmulator(
-          name: 'picked_second',
-          platform: 'second_os',
-        );
-        expect(disambiguatedResult.success, isTrue);
-        expect(disambiguatedResult.emulatorName, 'picked_second');
-      },
-    );
-
-    testWithoutContext(
-      'Daemon EmulatorDomain lists, launches (propagating errors), and creates extension emulators',
-      () async {
-        void customDaemonExtEntryPoint(SendPort sendPort) {
-          ToolExtensionEntryPoint.run(
-            sendPort,
-            <ToolExtensionService>[
-              _TestEmulatorDeviceService(
-                emulatorPlatform: 'custom_os',
-                emulators: const <TargetEmulator>[
-                  TargetEmulator(
-                    id: 'daemon_emu_1',
-                    name: 'Daemon Extension Emulator',
-                    category: Category.mobile,
-                  ),
-                ],
-                onCreateEmulator: (String? name) =>
-                    TargetEmulator(id: name ?? 'daemon_created', name: 'Daemon Created Sim'),
-              ),
-            ],
-            extensionName: 'daemon_custom_ext',
-            supportedPlatforms: const <String>{'linux'},
-          );
-        }
-
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        final extManager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          featureFlags: featureFlags,
-          entryPoints: <ExtensionEntryPoint>[customDaemonExtEntryPoint],
-        );
-        addTearDown(extManager.dispose);
-
-        final toolContext = FakeToolContext(
+        logger.clear();
+        final cliToolContext = FakeToolContext(
           fs: MemoryFileSystem.test(),
           logger: logger,
           processManager: FakeProcessManager.empty(),
         );
-        final emulatorManager = EmulatorManager(
+        final cliEmulatorManager = EmulatorManager(
           androidWorkflow: AndroidWorkflow(
             androidSdkBuilder: () => null,
             featureFlags: featureFlags,
           ),
-          extensionManager: extManager,
+          extensionManager: cliExtManager,
           iosWorkflow: null,
           javaBuilder: () => null,
-          toolContext: toolContext,
+          toolContext: cliToolContext,
           xcode: null,
         );
-
-        final streams = _TestDaemonStreams();
-        addTearDown(streams.dispose);
-        final daemonConnection = DaemonConnection(daemonStreams: streams, logger: logger);
-        addTearDown(daemonConnection.dispose);
-        final notifyingLogger = NotifyingLogger(verbose: false, parent: logger);
-        addTearDown(notifyingLogger.dispose);
-
-        final daemon = Daemon(
-          daemonConnection,
-          analytics: const NoOpAnalytics(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          buildTargets: const BuildTargetsImpl(),
-          emulatorManager: emulatorManager,
-          featureFlags: featureFlags,
-          notifyingLogger: notifyingLogger,
-          toolContext: toolContext,
-          xcode: null,
+        final command = EmulatorsCommand(
+          doctor: _NoBuiltinEmulatorsDoctor(),
+          emulatorManager: cliEmulatorManager,
+          toolContext: cliToolContext,
         );
-        addTearDown(daemon.shutdown);
-
-        bool isResponseFor(int id, DaemonMessage msg) =>
-            !msg.data.containsKey('event') && msg.data['id'] == id;
-
-        // 1. emulator.getEmulators includes extension emulators.
-        streams.inputs.add(
-          DaemonMessage(<String, Object?>{'id': 1, 'method': 'emulator.getEmulators'}),
-        );
-        final DaemonMessage listResp = await streams.outputs.stream.firstWhere(
-          (DaemonMessage m) => isResponseFor(1, m),
-        );
-        expect(listResp.data['result'], <Object?>[
-          <String, Object?>{
-            'id': 'daemon_emu_1',
-            'name': 'Daemon Extension Emulator',
-            'category': 'mobile',
-            'platformType': 'custom',
-          },
-        ]);
-
-        // 2. emulator.launch propagates extension launch failure as a daemon error response.
-        streams.inputs.add(
-          DaemonMessage(<String, Object?>{
-            'id': 2,
-            'method': 'emulator.launch',
-            'params': <String, Object?>{'emulatorId': 'daemon_emu_1'},
-          }),
-        );
-        final DaemonMessage launchResp = await streams.outputs.stream.firstWhere(
-          (DaemonMessage m) => isResponseFor(2, m),
-        );
-        expect(launchResp.data['result'], isNull);
+        await createTestCommandRunner(command)
+            .run(<String>['emulators', '--create', '--name', 'cli_sim']);
+        expect(logger.statusText, contains("Emulator 'cli_sim' created successfully."));
         expect(
-          launchResp.data['error'],
-          contains('Extension "daemon_custom_ext": Failed to launch emulator "daemon_emu_1"'),
+          RegExp('Ignoring invalid emulator platform "Invalid Name!"')
+              .allMatches(logger.warningText),
+          hasLength(1),
         );
-
-        // 3. emulator.create forwards optional platform parameter to EmulatorManager.
-        streams.inputs.add(
-          DaemonMessage(<String, Object?>{
-            'id': 3,
-            'method': 'emulator.create',
-            'params': <String, Object?>{'name': 'daemon_sim_2', 'platform': 'custom_os'},
-          }),
-        );
-        final DaemonMessage createResp = await streams.outputs.stream.firstWhere(
-          (DaemonMessage m) => isResponseFor(3, m),
-        );
-        expect(createResp.data['result'], <String, Object?>{
-          'success': true,
-          'emulatorName': 'daemon_sim_2',
-          'error': null,
-        });
       },
     );
+
+    testWithoutContext('Daemon EmulatorDomain lists and launches extension emulators while keeping emulator.create Android-only', () async {
+      void customDaemonExtEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _TestEmulatorDeviceService(
+              emulatorPlatform: 'custom_os',
+              emulators: const <TargetEmulator>[
+                TargetEmulator(
+                  id: 'daemon_emu_1',
+                  name: 'Daemon Extension Emulator',
+                  category: Category.mobile,
+                ),
+              ],
+              onCreateEmulator: (String? _) =>
+                  fail('emulator.create in flutter daemon should remain Android-only.'),
+            ),
+          ],
+          extensionName: 'daemon_custom_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final extManager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: featureFlags,
+        entryPoints: <ExtensionEntryPoint>[customDaemonExtEntryPoint],
+      );
+      addTearDown(extManager.dispose);
+
+      final androidSdk = _FakeAndroidSdk();
+      final toolContext = FakeToolContext(
+        fs: MemoryFileSystem.test(),
+        logger: logger,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['emulator', '-list-avds']),
+          const FakeCommand(command: <String>['emulator', '-list-avds']),
+          const FakeCommand(
+            command: <String>['avdmanager', 'list', 'device', '-c'],
+            stdout: 'pixel\n',
+          ),
+          const FakeCommand(
+            command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+            stderr: 'system-images;android-27;google_apis_playstore;x86\n',
+            exitCode: 1,
+          ),
+          const FakeCommand(
+            command: <String>[
+              'avdmanager',
+              'create',
+              'avd',
+              '-n',
+              'daemon_android_avd',
+              '-k',
+              'system-images;android-27;google_apis_playstore;x86',
+              '-d',
+              'pixel',
+            ],
+          ),
+        ]),
+      );
+      final emulatorManager = EmulatorManager(
+        androidSdkBuilder: () => androidSdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => androidSdk,
+          featureFlags: featureFlags,
+        ),
+        extensionManager: extManager,
+        iosWorkflow: null,
+        javaBuilder: FakeJava.new,
+        toolContext: toolContext,
+        xcode: null,
+      );
+
+      final streams = _TestDaemonStreams();
+      addTearDown(streams.dispose);
+      final daemonConnection = DaemonConnection(daemonStreams: streams, logger: logger);
+      addTearDown(daemonConnection.dispose);
+      final notifyingLogger = NotifyingLogger(verbose: false, parent: logger);
+      addTearDown(notifyingLogger.dispose);
+
+      final daemon = Daemon(
+        daemonConnection,
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        emulatorManager: emulatorManager,
+        featureFlags: featureFlags,
+        notifyingLogger: notifyingLogger,
+        toolContext: toolContext,
+        xcode: null,
+      );
+      addTearDown(daemon.shutdown);
+
+      bool isResponseFor(int id, DaemonMessage msg) =>
+          !msg.data.containsKey('event') && msg.data['id'] == id;
+
+      // 1. emulator.getEmulators includes extension emulators.
+      streams.inputs.add(
+        DaemonMessage(<String, Object?>{'id': 1, 'method': 'emulator.getEmulators'}),
+      );
+      final DaemonMessage listResp = await streams.outputs.stream.firstWhere(
+        (DaemonMessage m) => isResponseFor(1, m),
+      );
+      expect(listResp.data['result'], <Object?>[
+        <String, Object?>{
+          'id': 'daemon_emu_1',
+          'name': 'Daemon Extension Emulator',
+          'category': 'mobile',
+          'platformType': 'custom',
+        },
+      ]);
+
+      // 2. emulator.launch propagates extension launch failure as a daemon error response.
+      streams.inputs.add(
+        DaemonMessage(<String, Object?>{
+          'id': 2,
+          'method': 'emulator.launch',
+          'params': <String, Object?>{'emulatorId': 'daemon_emu_1'},
+        }),
+      );
+      final DaemonMessage launchResp = await streams.outputs.stream.firstWhere(
+        (DaemonMessage m) => isResponseFor(2, m),
+      );
+      expect(launchResp.data['result'], isNull);
+      expect(
+        launchResp.data['error'],
+        contains('Extension "daemon_custom_ext": Failed to launch emulator "daemon_emu_1"'),
+      );
+
+      // 3. emulator.create creates an Android emulator and ignores extension platforms.
+      streams.inputs.add(
+        DaemonMessage(<String, Object?>{
+          'id': 3,
+          'method': 'emulator.create',
+          'params': <String, Object?>{'name': 'daemon_android_avd'},
+        }),
+      );
+      final DaemonMessage createResp = await streams.outputs.stream.firstWhere(
+        (DaemonMessage m) => isResponseFor(3, m),
+      );
+      expect(createResp.data['result'], <String, Object?>{
+        'success': true,
+        'emulatorName': 'daemon_android_avd',
+        'error': null,
+      });
+    });
 
     testWithoutContext('ExtensionEmulators and ExtensionEmulator surface ToolExtensionException messages cleanly without duplicate prefix', () async {
       void domainPlatformErrorEntryPoint(SendPort sendPort) {
@@ -2049,4 +2061,14 @@ final class _FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   String getAvdPath() => 'avd';
+}
+
+final class _NoBuiltinEmulatorsDoctor extends Fake implements Doctor {
+  @override
+  List<Workflow> get workflows => <Workflow>[_NoBuiltinEmulatorsWorkflow()];
+}
+
+final class _NoBuiltinEmulatorsWorkflow extends Fake implements Workflow {
+  @override
+  bool get canListEmulators => false;
 }

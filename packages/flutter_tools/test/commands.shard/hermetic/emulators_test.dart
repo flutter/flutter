@@ -366,18 +366,11 @@ void main() {
       });
 
       testWithoutContext(
-        'prints error and omits Android links when --platform is unknown',
+        'throws ToolExit listing available platforms when --platform is unknown',
         () async {
           final toolContext = FakeToolContext(logger: logger, platform: platform);
           final emulatorManager = FakeEmulatorManager(
             availableCreatePlatforms: const <String>['android', 'custom_os'],
-            createResult: CreateEmulatorResult(
-              '',
-              success: false,
-              error:
-                  'Unknown emulator creation platform "unknown_os". '
-                  'Available platforms: android, custom_os.',
-            ),
           );
           final command = EmulatorsCommand(
             doctor: doctor,
@@ -385,22 +378,42 @@ void main() {
             toolContext: toolContext,
           );
 
-          await createTestCommandRunner(command)
-              .run(<String>['emulators', '--create', '--platform', 'unknown_os']);
-
-          expect(emulatorManager.lastCreatedPlatform, 'unknown_os');
-          expect(logger.statusText, contains('Failed to create emulator.'));
-          expect(
-            logger.statusText,
-            contains(
-              'Unknown emulator creation platform "unknown_os". '
-              'Available platforms: android, custom_os.',
+          await expectLater(
+            () =>
+                createTestCommandRunner(command)
+                    .run(<String>['emulators', '--create', '--platform', 'unknown_os']),
+            throwsToolExit(
+              message:
+                  'Unknown emulator creation platform "unknown_os". '
+                  'Available platforms: android, custom_os.',
             ),
           );
-          expect(
-            logger.statusText,
-            isNot(contains('https://developer.android.com/studio/run/managing-avds')),
+          expect(emulatorManager.lastCreatedPlatform, isNull);
+        },
+      );
+
+      testWithoutContext(
+        'throws ToolExit when --platform is unknown and no platforms are available',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          final emulatorManager = FakeEmulatorManager();
+          final command = EmulatorsCommand(
+            doctor: doctor,
+            emulatorManager: emulatorManager,
+            toolContext: toolContext,
           );
+
+          await expectLater(
+            () =>
+                createTestCommandRunner(command)
+                    .run(<String>['emulators', '--create', '--platform', 'unknown_os']),
+            throwsToolExit(
+              message:
+                  'Unknown emulator creation platform "unknown_os". '
+                  'No emulator creation platforms are available.',
+            ),
+          );
+          expect(emulatorManager.lastCreatedPlatform, isNull);
         },
       );
 
@@ -418,7 +431,7 @@ void main() {
 
         await createTestCommandRunner(command).run(<String>['emulators', '--create']);
 
-        expect(emulatorManager.lastCreatedPlatform, isNull);
+        expect(emulatorManager.lastCreatedPlatform, 'custom_os');
         expect(logger.statusText, contains("Emulator 'custom_sim_1' created successfully."));
       });
 
@@ -545,14 +558,50 @@ void main() {
           expect(emulatorManager.lastCreatedPlatform, isNull);
         },
       );
+
+      testWithoutContext(
+        'prompts with line input when 10 or more platforms exist and retries invalid input',
+        () async {
+          final terminal = _TestPromptTerminal(
+            stdinHasTerminal: true,
+            lines: <String>['invalid', '99', '10'],
+          );
+          final toolContext = FakeToolContext(
+            logger: logger,
+            platform: platform,
+            terminal: terminal,
+          );
+          final platforms = <String>[for (var i = 1; i <= 10; i++) 'platform_$i'];
+          final emulatorManager = FakeEmulatorManager(
+            availableCreatePlatforms: platforms,
+            createResult: CreateEmulatorResult('sim_10', success: true),
+          );
+          final command = EmulatorsCommand(
+            doctor: doctor,
+            emulatorManager: emulatorManager,
+            toolContext: toolContext,
+          );
+
+          await createTestCommandRunner(command).run(<String>['emulators', '--create']);
+
+          expect(emulatorManager.lastCreatedPlatform, 'platform_10');
+          expect(logger.statusText, contains('[10]: platform_10'));
+          expect(logger.statusText, contains("Emulator 'sim_10' created successfully."));
+        },
+      );
     });
   });
 }
 
 class _TestPromptTerminal extends FakeTerminal {
-  _TestPromptTerminal({required super.stdinHasTerminal, this.nextChoice = '1'});
+  _TestPromptTerminal({
+    required super.stdinHasTerminal,
+    this.nextChoice = '1',
+    List<String> lines = const <String>[],
+  }) : _lines = List<String>.of(lines);
 
   final String nextChoice;
+  final List<String> _lines;
 
   @override
   Future<String> promptForCharInput(
@@ -564,6 +613,11 @@ class _TestPromptTerminal extends FakeTerminal {
   }) async {
     expect(acceptedCharacters, contains(nextChoice));
     return nextChoice;
+  }
+
+  @override
+  Future<String> readLine() async {
+    return _lines.removeAt(0);
   }
 }
 

@@ -140,12 +140,12 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// Creates a new device emulator instance and returns its [TargetEmulator]
   /// descriptor (for `flutter emulators --create [--name <name>]
-  /// [--platform <platform>]` and `flutter daemon` `emulator.create`).
+  /// [--platform <platform>]`).
   ///
-  /// The returned [TargetEmulator.id] is reported to the user and IDE daemon as
-  /// the created emulator identifier. Throws [UnsupportedError] when emulator
-  /// creation is not supported by this extension, or [ToolExtensionException]
-  /// if creation fails.
+  /// The returned [TargetEmulator.id] is reported to the user as the created
+  /// emulator identifier. Throws [UnsupportedError] when emulator creation is
+  /// not supported by this extension, or [ToolExtensionException] if creation
+  /// fails.
   Future<TargetEmulator> createEmulator({String? name}) async {
     throw UnsupportedError('Creating emulators is not supported.');
   }

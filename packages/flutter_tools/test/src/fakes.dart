@@ -1253,7 +1253,10 @@ class FakeEmulatorManager extends Fake implements EmulatorManager {
   }
 
   @override
-  Future<CreateEmulatorResult> createEmulator({String? name, String? platform}) async {
+  Future<CreateEmulatorResult> createEmulator({
+    String? name,
+    String platform = EmulatorManager.androidPlatform,
+  }) async {
     lastCreatedName = name;
     lastCreatedPlatform = platform;
     return createResult ?? CreateEmulatorResult('fake_emulator', success: true);

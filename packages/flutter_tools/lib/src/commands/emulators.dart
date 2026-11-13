@@ -114,27 +114,45 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<void> _createEmulator({String? name, String? platform}) async {
     final ToolContext(:Logger logger, :AnsiTerminal terminal) = toolContext;
-    var resolvedPlatform = platform;
-    List<String>? availablePlatforms;
-    if (resolvedPlatform != null) {
-      if (resolvedPlatform.isEmpty) {
+    final String resolvedPlatform;
+    if (platform != null) {
+      if (platform.isEmpty) {
         throwToolExit('The "--$_platformOption" option must not be empty.');
       }
-    } else {
-      availablePlatforms = await _emulatorManager.getAvailableCreatePlatforms();
-      if (availablePlatforms.length > 1) {
-        if (!terminal.stdinHasTerminal) {
+      if (platform != EmulatorManager.androidPlatform) {
+        final List<String> availablePlatforms = await _emulatorManager
+            .getAvailableCreatePlatforms();
+        if (!availablePlatforms.contains(platform)) {
           throwToolExit(
-            'Multiple emulator creation platforms are available '
-            '(${availablePlatforms.join(', ')}). '
-            'Specify one using "--$_platformOption <platform>".',
+            availablePlatforms.isEmpty
+                ? 'Unknown emulator creation platform "$platform". '
+                      'No emulator creation platforms are available.'
+                : 'Unknown emulator creation platform "$platform". '
+                      'Available platforms: ${availablePlatforms.join(', ')}.',
           );
         }
-        resolvedPlatform = await _promptForPlatform(
-          availablePlatforms,
-          logger: logger,
-          terminal: terminal,
-        );
+      }
+      resolvedPlatform = platform;
+    } else {
+      final List<String> availablePlatforms = await _emulatorManager.getAvailableCreatePlatforms();
+      switch (availablePlatforms) {
+        case []:
+          resolvedPlatform = EmulatorManager.androidPlatform;
+        case [final String singlePlatform]:
+          resolvedPlatform = singlePlatform;
+        default:
+          if (!terminal.stdinHasTerminal) {
+            throwToolExit(
+              'Multiple emulator creation platforms are available '
+              '(${availablePlatforms.join(', ')}). '
+              'Specify one using "--$_platformOption <platform>".',
+            );
+          }
+          resolvedPlatform = await _promptForPlatform(
+            availablePlatforms,
+            logger: logger,
+            terminal: terminal,
+          );
       }
     }
 
@@ -155,15 +173,7 @@ class EmulatorsCommand extends FlutterCommand {
       if (error != null && error.trim().isNotEmpty) {
         logger.printStatus(error.trim());
       }
-      final bool isAndroidOrUnconfigured = switch (resolvedPlatform) {
-        EmulatorManager.androidPlatform => true,
-        null =>
-          availablePlatforms == null ||
-              availablePlatforms.isEmpty ||
-              availablePlatforms.single == EmulatorManager.androidPlatform,
-        _ => false,
-      };
-      if (isAndroidOrUnconfigured) {
+      if (resolvedPlatform == EmulatorManager.androidPlatform) {
         _printAdditionalInfo();
       }
     }
@@ -174,21 +184,50 @@ class EmulatorsCommand extends FlutterCommand {
     required Logger logger,
     required AnsiTerminal terminal,
   }) async {
+    const prompt = 'Please choose one (or "q" to quit)';
     logger.printStatus('Multiple emulator creation platforms are available:');
     for (final (int index, String platform) in platforms.indexed) {
       logger.printStatus('[${index + 1}]: $platform');
     }
-    final String choice = await promptForNumberedChoice(
-      logger: logger,
-      optionCount: platforms.length,
-      terminal: terminal,
-    );
+    final String choice;
+    if (platforms.length < 10) {
+      terminal.usesTerminalUi = true;
+      choice = await terminal.promptForCharInput(
+        <String>[for (var i = 0; i < platforms.length; i++) '${i + 1}', 'q', 'Q'],
+        displayAcceptedCharacters: false,
+        logger: logger,
+        prompt: prompt,
+      );
+    } else {
+      choice = await _readPlatformChoiceLine(
+        logger: logger,
+        optionCount: platforms.length,
+        prompt: prompt,
+        terminal: terminal,
+      );
+    }
     if (choice.toLowerCase() == 'q') {
       throwToolExit('');
     }
     final String selected = platforms[int.parse(choice) - 1];
     logger.printStatus('To skip this prompt in the future, pass "--$_platformOption $selected".');
     return selected;
+  }
+
+  Future<String> _readPlatformChoiceLine({
+    required Logger logger,
+    required int optionCount,
+    required String prompt,
+    required AnsiTerminal terminal,
+  }) async {
+    while (true) {
+      logger.printStatus('$prompt: ', emphasis: true, newline: false);
+      final String line = (await terminal.readLine()).trim();
+      final int? number = int.tryParse(line);
+      if (line.toLowerCase() == 'q' || (number != null && number >= 1 && number <= optionCount)) {
+        return line;
+      }
+    }
   }
 
   Future<void> _listEmulators(String? searchText) async {
