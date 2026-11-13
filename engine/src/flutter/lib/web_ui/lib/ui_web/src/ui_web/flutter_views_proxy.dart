@@ -44,7 +44,7 @@ class FlutterViewManagerProxy {
 
   /// Adds a view to the application, embedding it into the host element specified in options.
   int addView(FlutterViewOptions options) {
-    return _viewManager.createAndRegisterView(options as JsFlutterViewOptions).viewId;
+    return _viewManager.createAndRegisterView(options).viewId;
   }
 
   /// Removes and disposes the view with the given [viewId].
