@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/_accessibility_evaluations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -146,6 +145,27 @@ void main() {
       });
       expect(result!.violations, hasLength(1));
       expect(result.violations.first.reason, contains('Expected contrast ratio of at least 4.5'));
+      handle.dispose();
+    });
+
+    testWidgets('skips non-hit-testable text', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const TestWidgetsApp(
+          home: Stack(
+            children: <Widget>[
+              Center(
+                child: Text('obscured', style: TextStyle(color: Color(0xFF000000), fontSize: 14)),
+              ),
+              Positioned.fill(child: ColoredBox(color: Color(0xFFFFFFFF))),
+            ],
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, isEmpty);
       handle.dispose();
     });
   });

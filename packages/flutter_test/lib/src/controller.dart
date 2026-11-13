@@ -338,7 +338,7 @@ class SemanticsController {
   /// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
   //
   // TODO(quncheng): If this method is modified, please also update the copy of
-  // this method located in `packages/flutter/lib/src/widgets/_accessibility_evaluations.dart`.
+  // this method located in `packages/flutter/lib/src/widgets/accessibility_evaluations.dart`.
   bool _isImportantForAccessibility(SemanticsNode node) {
     if (node.isMergedIntoParent) {
       // If this node is merged, all its information are present on an ancestor

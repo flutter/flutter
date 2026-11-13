@@ -274,7 +274,7 @@ void main() {
         'label: "this is a test", textDirection: ltr):\n'
         'Expected contrast ratio of at least 4.5 but found 1.17 for a font '
         'size of 14.0.\n'
-        'The computed colors was:\n'
+        'The computed colors were:\n'
         'light - ${const Color(0xfffafafa)}, dark - ${const Color(0xffffeb3b)}\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
       );
@@ -306,7 +306,7 @@ void main() {
         'label: "this is a test", textDirection: ltr):\n'
         'Expected contrast ratio of at least 4.5 but found 1.16 for a font '
         'size of 14.0.\n'
-        'The computed colors was:\n'
+        'The computed colors were:\n'
         'light - ${const Color(0xfffef7ff)}, dark - ${const Color(0xffffeb3b)}\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
       );
@@ -343,7 +343,7 @@ void main() {
         'label: "this is a test", textDirection: ltr):\n'
         'Expected contrast ratio of at least 7.0 but found 1.17 for a font '
         'size of 14.0.\n'
-        'The computed colors was:\n'
+        'The computed colors were:\n'
         'light - ${const Color(0xfffafafa)}, dark - ${const Color(0xffffeb3b)}\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
       );
@@ -379,7 +379,7 @@ void main() {
         'label: "this is a test", textDirection: ltr):\n'
         'Expected contrast ratio of at least 7.0 but found 1.16 for a font '
         'size of 14.0.\n'
-        'The computed colors was:\n'
+        'The computed colors were:\n'
         'light - ${const Color(0xfffef7ff)}, dark - ${const Color(0xffffeb3b)}\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
       );

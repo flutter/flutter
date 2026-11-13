@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import '_accessibility_evaluations.dart';
+import 'accessibility_evaluations.dart';
 import 'binding.dart';
 import 'service_extensions.dart';
 

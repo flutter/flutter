@@ -17,6 +17,22 @@ import 'package:flutter/widgets.dart';
 import 'finders.dart';
 import 'widget_tester.dart';
 
+Evaluation _toEvaluation(
+  EvaluationResult result, {
+  String Function(Violation violation)? formatReason,
+}) {
+  if (result.violations.isEmpty) {
+    return const Evaluation.pass();
+  }
+  var evaluation = const Evaluation.pass();
+  for (final Violation violation in result.violations) {
+    evaluation += Evaluation.fail(
+      formatReason != null ? formatReason(violation) : violation.reason,
+    );
+  }
+  return evaluation;
+}
+
 /// The result of evaluating a semantics node by a [AccessibilityGuideline].
 class Evaluation {
   /// Create a passing evaluation.
@@ -98,10 +114,7 @@ abstract class AccessibilityGuideline {
   String get description;
 }
 
-/// A guideline which enforces that all tappable semantics nodes have a minimum
-/// size.
-///
-/// Each platform defines its own guidelines for minimum tap areas.
+/// {@macro flutter.widgets.accessibility_evaluations.minimumTapTarget}
 ///
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
@@ -115,111 +128,32 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   /// Create a new [MinimumTapTargetGuideline].
   const MinimumTapTargetGuideline({required this.size, required this.link});
 
-  /// The minimum allowed size of a tappable node.
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTapTarget.size}
   final Size size;
 
   /// A link describing the tap target guidelines for a platform.
   final String link;
 
-  /// The gap between targets to their parent scrollables to be consider as valid
-  /// tap targets.
-  ///
-  /// This avoid cases where a tap target is partially scrolled off-screen that
-  /// result in a smaller tap area.
-  static const double _kMinimumGapToBoundary = 0.001;
-
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    var result = const Evaluation.pass();
-    for (final RenderView view in tester.binding.renderViews) {
-      result += _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!);
+    final FutureOr<EvaluationResult> result = MinimumTapTargetEvaluation(size: size)
+        .evaluate(tester.binding);
+    String formatReason(Violation violation) => '${violation.reason}See also: $link';
+    if (result is Future<EvaluationResult>) {
+      return result.then((EvaluationResult r) => _toEvaluation(r, formatReason: formatReason));
     }
-
-    return result;
+    return _toEvaluation(result, formatReason: formatReason);
   }
 
-  Evaluation _traverse(ui.FlutterView view, SemanticsNode node) {
-    var result = const Evaluation.pass();
-    node.visitChildren((SemanticsNode child) {
-      result += _traverse(view, child);
-      return true;
-    });
-    if (node.isMergedIntoParent) {
-      return result;
-    }
-    if (shouldSkipNode(node)) {
-      return result;
-    }
-    Rect paintBounds = node.rect;
-    SemanticsNode? current = node;
-
-    while (current != null) {
-      final Matrix4? transform = current.transform;
-      if (transform != null) {
-        paintBounds = MatrixUtils.transformRect(transform, paintBounds);
-      }
-      // skip node if it is touching the edge scrollable, since it might
-      // be partially scrolled offscreen.
-      if (current.flagsCollection.hasImplicitScrolling &&
-          _isAtBoundary(paintBounds, current.rect)) {
-        return result;
-      }
-      current = current.parent;
-    }
-
-    final Rect viewRect = Offset.zero & view.physicalSize;
-    if (_isAtBoundary(paintBounds, viewRect)) {
-      return result;
-    }
-
-    // shrink by device pixel ratio.
-    final Size candidateSize = paintBounds.size / view.devicePixelRatio;
-    if (candidateSize.width < size.width - precisionErrorTolerance ||
-        candidateSize.height < size.height - precisionErrorTolerance) {
-      result += Evaluation.fail(
-        '$node: expected tap target size of at least $size, '
-        'but found $candidateSize\n'
-        'See also: $link',
-      );
-    }
-    return result;
-  }
-
-  static bool _isAtBoundary(Rect child, Rect parent) {
-    if (child.left - parent.left > _kMinimumGapToBoundary &&
-        parent.right - child.right > _kMinimumGapToBoundary &&
-        child.top - parent.top > _kMinimumGapToBoundary &&
-        parent.bottom - child.bottom > _kMinimumGapToBoundary) {
-      return false;
-    }
-    return true;
-  }
-
-  /// Returns whether [SemanticsNode] should be skipped for minimum tap target
-  /// guideline.
-  ///
-  /// Skips nodes which are link, hidden, or do not have actions.
-  bool shouldSkipNode(SemanticsNode node) {
-    final SemanticsData data = node.getSemanticsData();
-    // Skip node if it has no actions, or is marked as hidden.
-    if ((!data.hasAction(ui.SemanticsAction.longPress) &&
-            !data.hasAction(ui.SemanticsAction.tap)) ||
-        data.flagsCollection.isHidden) {
-      return true;
-    }
-    // Skip links https://www.w3.org/WAI/WCAG21/Understanding/target-size.html
-    if (data.flagsCollection.isLink) {
-      return true;
-    }
-    return false;
-  }
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTapTarget.shouldSkipNode}
+  bool shouldSkipNode(SemanticsNode node) =>
+      MinimumTapTargetEvaluation(size: size).shouldSkipNode(node);
 
   @override
   String get description => 'Tappable objects should be at least $size';
 }
 
-/// A guideline which enforces that all nodes with a tap or long press action
-/// also have a label.
+/// {@macro flutter.widgets.accessibility_evaluations.labeledTapTarget}
 ///
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
@@ -233,47 +167,17 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    var result = const Evaluation.pass();
-
-    for (final RenderView view in tester.binding.renderViews) {
-      result += _traverse(view.owner!.semanticsOwner!.rootSemanticsNode!);
+    final FutureOr<EvaluationResult> result = const LabeledTapTargetEvaluation().evaluate(
+      tester.binding,
+    );
+    if (result is Future<EvaluationResult>) {
+      return result.then(_toEvaluation);
     }
-
-    return result;
-  }
-
-  Evaluation _traverse(SemanticsNode node) {
-    var result = const Evaluation.pass();
-    node.visitChildren((SemanticsNode child) {
-      result += _traverse(child);
-      return true;
-    });
-    if (node.isMergedIntoParent ||
-        node.isInvisible ||
-        node.flagsCollection.isHidden ||
-        node.flagsCollection.isTextField) {
-      return result;
-    }
-    final SemanticsData data = node.getSemanticsData();
-    // Skip node if it has no actions, or is marked as hidden.
-    if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap)) {
-      return result;
-    }
-    if ((data.label.isEmpty) && (data.tooltip.isEmpty)) {
-      result += Evaluation.fail(
-        '$node: expected tappable node to have semantic label, '
-        'but none was found.',
-      );
-    }
-    return result;
+    return _toEvaluation(result);
   }
 }
 
-/// A guideline which verifies that all nodes that contribute semantics via text
-/// meet minimum contrast levels.
-///
-/// The guidelines are defined by the Web Content Accessibility Guidelines,
-/// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
+/// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast}
 ///
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
@@ -284,193 +188,31 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Create a new [MinimumTextContrastGuideline].
   const MinimumTextContrastGuideline();
 
-  /// The minimum text size considered large for contrast checking.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast.kLargeTextMinimumSize}
   static const int kLargeTextMinimumSize = 18;
 
-  /// The minimum text size for bold text to be considered large for contrast
-  /// checking.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast.kBoldTextMinimumSize}
   static const int kBoldTextMinimumSize = 14;
 
-  /// The minimum contrast ratio for normal text.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast.kMinimumRatioNormalText}
   static const double kMinimumRatioNormalText = 4.5;
 
-  /// The minimum contrast ratio for large text.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast.kMinimumRatioLargeText}
   static const double kMinimumRatioLargeText = 3.0;
 
   static const double _kDefaultFontSize = 12.0;
 
-  static const double _tolerance = -0.01;
+  MinimumTextContrastEvaluation get _evaluation => const MinimumTextContrastEvaluation(
+    minNormalTextContrastRatio: kMinimumRatioNormalText,
+    minLargeTextContrastRatio: kMinimumRatioLargeText,
+  );
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
-    var result = const Evaluation.pass();
-    for (final RenderView renderView in tester.binding.renderViews) {
-      final layer = renderView.debugLayer! as OffsetLayer;
-      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
-
-      late ui.Image image;
-      final ByteData? byteData = await tester.binding.runAsync<ByteData?>(() async {
-        // Needs to be the same pixel ratio otherwise our dimensions won't match
-        // the last transform layer.
-        final double ratio = 1 / renderView.flutterView.devicePixelRatio;
-        image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
-        final ByteData? data = await image.toByteData();
-        image.dispose();
-        return data;
-      });
-
-      result += await _evaluateNode(root, tester, image, byteData!, renderView);
-    }
-
-    return result;
-  }
-
-  Future<Evaluation> _evaluateNode(
-    SemanticsNode node,
-    WidgetTester tester,
-    ui.Image image,
-    ByteData byteData,
-    RenderView renderView,
-  ) async {
-    var result = const Evaluation.pass();
-
-    // Skip disabled nodes, as they not required to pass contrast check.
-    final isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
-
-    if (node.isInvisible ||
-        node.isMergedIntoParent ||
-        node.flagsCollection.isHidden ||
-        isDisabled) {
-      return result;
-    }
-
-    final SemanticsData data = node.getSemanticsData();
-    final children = <SemanticsNode>[];
-    node.visitChildren((SemanticsNode child) {
-      children.add(child);
-      return true;
-    });
-    for (final child in children) {
-      result += await _evaluateNode(child, tester, image, byteData, renderView);
-    }
-    if (shouldSkipNode(data)) {
-      return result;
-    }
-    final String text = data.label.isEmpty ? data.value : data.label;
-    final Iterable<Element> elements = find.text(text).hitTestable().evaluate();
-    for (final element in elements) {
-      result += await _evaluateElement(node, element, tester, image, byteData, renderView);
-    }
-    return result;
-  }
-
-  Future<Evaluation> _evaluateElement(
-    SemanticsNode node,
-    Element element,
-    WidgetTester tester,
-    ui.Image image,
-    ByteData byteData,
-    RenderView renderView,
-  ) async {
-    // Look up inherited text properties to determine text size and weight.
-    late bool isBold;
-    double? fontSize;
-
-    late final Rect screenBounds;
-    late final Rect paintBoundsWithOffset;
-
-    final RenderObject? renderBox = element.renderObject;
-    if (renderBox is! RenderBox) {
-      throw StateError('Unexpected renderObject type: $renderBox');
-    }
-
-    final Matrix4 globalTransform = renderBox.getTransformTo(null);
-    paintBoundsWithOffset = MatrixUtils.transformRect(
-      globalTransform,
-      renderBox.paintBounds.inflate(4.0),
-    );
-
-    // The semantics node transform will include root view transform, which is
-    // not included in renderBox.getTransformTo(null). Manually multiply the
-    // root transform to the global transform.
-    final rootTransform = Matrix4.identity();
-    renderView.applyPaintTransform(renderView.child!, rootTransform);
-    rootTransform.multiply(globalTransform);
-    screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
-    Rect nodeBounds = node.rect;
-    SemanticsNode? current = node;
-    while (current != null) {
-      final Matrix4? transform = current.transform;
-      if (transform != null) {
-        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
-      }
-      current = current.parent;
-    }
-    final Rect intersection = nodeBounds.intersect(screenBounds);
-    if (intersection.width <= 0 || intersection.height <= 0) {
-      // Skip this element since it doesn't correspond to the given semantic
-      // node.
-      return const Evaluation.pass();
-    }
-
-    final Widget widget = element.widget;
-    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
-    if (widget is Text) {
-      final TextStyle? style = widget.style;
-      final TextStyle effectiveTextStyle = style == null || style.inherit
-          ? defaultTextStyle.style.merge(widget.style)
-          : style;
-      isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
-      fontSize = effectiveTextStyle.fontSize;
-    } else if (widget is EditableText) {
-      isBold = widget.style.fontWeight == FontWeight.bold;
-      fontSize = widget.style.fontSize;
-    } else {
-      throw StateError('Unexpected widget type: ${widget.runtimeType}');
-    }
-
-    if (isNodeOffScreen(paintBoundsWithOffset, renderView.flutterView)) {
-      return const Evaluation.pass();
-    }
-
-    final Map<Color, int> colorHistogram = _colorsWithinRect(
-      byteData,
-      paintBoundsWithOffset,
-      image.width,
-      image.height,
-    );
-
-    // Node was too far off screen.
-    if (colorHistogram.isEmpty) {
-      return const Evaluation.pass();
-    }
-
-    final report = _ContrastReport(colorHistogram);
-
-    final double contrastRatio = report.contrastRatio();
-    final double targetContrastRatio = this.targetContrastRatio(fontSize, bold: isBold);
-
-    if (contrastRatio - targetContrastRatio >= _tolerance) {
-      return const Evaluation.pass();
-    }
-    return Evaluation.fail(
-      '$node:\n'
-      'Expected contrast ratio of at least $targetContrastRatio '
-      'but found ${contrastRatio.toStringAsFixed(2)} '
-      'for a font size of $fontSize.\n'
-      'The computed colors was:\n'
-      'light - ${report.lightColor}, dark - ${report.darkColor}\n'
-      'See also: '
-      'https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
-    );
+    final EvaluationResult result = (await tester.binding.runAsync<EvaluationResult>(
+      () async => _evaluation.evaluate(tester.binding),
+    ))!;
+    return _toEvaluation(result);
   }
 
   /// Returns whether node should be skipped.
@@ -533,6 +275,12 @@ class MinimumTextContrastGuidelineAAA extends MinimumTextContrastGuideline {
   ///
   /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
   static const double kAAAMinimumRatioNormalText = 7.0;
+
+  @override
+  MinimumTextContrastEvaluation get _evaluation => const MinimumTextContrastEvaluation(
+    minNormalTextContrastRatio: kAAAMinimumRatioNormalText,
+    minLargeTextContrastRatio: kAAAMinimumRatioLargeText,
+  );
 
   @override
   double targetContrastRatio(double? fontSize, {required bool bold}) {
@@ -800,23 +548,16 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline(
   link: 'https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/',
 );
 
-/// A guideline which requires text contrast to meet minimum values.
+/// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast}
 ///
-/// This guideline traverses the semantics tree looking for nodes with values or
-/// labels that corresponds to a Text or Editable text widget. Given the
-/// background pixels for the area around this widget, it performs a very naive
-/// partitioning of the colors into "light" and "dark" and then chooses the most
-/// frequently occurring color in each partition as a representative of the
-/// foreground and background colors. The contrast ratio is calculated from
-/// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
-///
+/// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline();
 
-/// A guideline which enforces that all nodes with a tap or long press action
-/// also have a label.
+/// {@macro flutter.widgets.accessibility_evaluations.labeledTapTarget}
 ///
+/// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
