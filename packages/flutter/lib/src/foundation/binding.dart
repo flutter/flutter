@@ -655,20 +655,18 @@ abstract class BindingBase {
         name: FoundationServiceExtensions.brightnessOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
+            final ui.Brightness? previousBrightness = debugBrightnessOverride;
             debugBrightnessOverride = switch (parameters['value']) {
               'Brightness.light' => ui.Brightness.light,
               'Brightness.dark' => ui.Brightness.dark,
               _ => null,
             };
-            _postExtensionStateChangedEvent(
-              FoundationServiceExtensions.brightnessOverride.name,
-              (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
-            );
-            await reassembleApplication();
+            if (debugBrightnessOverride != previousBrightness) {
+              _postViewMetricsOverrideStateChangedEvent();
+            }
+            _postBrightnessOverrideStateChangedEvent();
           }
-          return <String, dynamic>{
-            'value': (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
-          };
+          return <String, dynamic>{'value': platformDispatcher.platformBrightness.toString()};
         },
       );
 
@@ -693,13 +691,14 @@ abstract class BindingBase {
   /// Implements the `ext.flutter.viewMetricsOverride` service extension.
   ///
   /// See [FoundationServiceExtensions.viewMetricsOverride] for the parameters,
-  /// the reply, and the event it posts.
+  /// the reply, and the events it posts.
   Future<Map<String, Object?>> _debugHandleViewMetricsOverrideServiceExtension(
     Map<String, String> parameters,
   ) async {
+    final ui.Brightness? previousBrightness = debugBrightnessOverride;
     if (parameters[_clearAllParameter] == 'true') {
       if (debugClearViewMetricsOverrides()) {
-        _postViewMetricsOverrideStateChangedEvent();
+        _postViewMetricsOverrideChangeEvents(previousBrightness);
       }
       return _viewMetricsOverrideResult();
     }
@@ -732,7 +731,7 @@ abstract class BindingBase {
         ),
       };
       if (debugSetViewMetricsOverride(viewId, override)) {
-        _postViewMetricsOverrideStateChangedEvent();
+        _postViewMetricsOverrideChangeEvents(previousBrightness);
       }
     }
 
@@ -766,6 +765,22 @@ abstract class BindingBase {
     _postExtensionStateChangedEvent(
       FoundationServiceExtensions.viewMetricsOverride.name,
       _viewMetricsOverridesWithStringKeys(),
+    );
+  }
+
+  // Posts the viewMetricsOverride event, and the brightnessOverride event too
+  // when the change replaced [previousBrightness].
+  void _postViewMetricsOverrideChangeEvents(ui.Brightness? previousBrightness) {
+    _postViewMetricsOverrideStateChangedEvent();
+    if (debugBrightnessOverride != previousBrightness) {
+      _postBrightnessOverrideStateChangedEvent();
+    }
+  }
+
+  void _postBrightnessOverrideStateChangedEvent() {
+    _postExtensionStateChangedEvent(
+      FoundationServiceExtensions.brightnessOverride.name,
+      platformDispatcher.platformBrightness.toString(),
     );
   }
 

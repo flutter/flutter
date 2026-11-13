@@ -70,8 +70,21 @@ enum FoundationServiceExtensions {
   ///   registered.
   platformOverride,
 
-  /// Name of service extension that, when called, will override the platform
-  /// [Brightness].
+  /// Name of service extension that, when called, will get or set the value of
+  /// [debugBrightnessOverride].
+  ///
+  /// A `value` of `'Brightness.light'` or `'Brightness.dark'` overrides the
+  /// brightness, and any other `value` stops overriding it. A call without a
+  /// `value` changes nothing.
+  ///
+  /// The reply's `value` is the brightness [BindingBase.platformDispatcher]
+  /// reports once the call is done, such as `'Brightness.dark'`. A change
+  /// shows from the next frame on, and the reply does not wait for that frame.
+  ///
+  /// A call with a `value` posts a `Flutter.ServiceExtensionStateChanged`
+  /// event whose `value` is the reply's `value`, even when nothing changed. A
+  /// call that changes [debugBrightnessOverride] also posts the event of
+  /// [viewMetricsOverride].
   ///
   /// See also:
   ///
@@ -122,6 +135,9 @@ enum FoundationServiceExtensions {
   /// `Flutter.ServiceExtensionStateChanged` event whose `value` is that same
   /// map, so that clients other than the caller learn about the change too. A
   /// call that changes nothing posts no event.
+  ///
+  /// A call that changes [debugBrightnessOverride] also posts the event of
+  /// [brightnessOverride].
   ///
   /// See also:
   ///
