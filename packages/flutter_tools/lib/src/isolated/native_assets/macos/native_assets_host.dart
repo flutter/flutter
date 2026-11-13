@@ -329,25 +329,52 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   //
   // /build/native_assets/ios/buz.framework/buz:
   // @rpath/libbuz.dylib
+  //
+  // Paths can themselves contain parentheses and architecture-like text;
+  // only a trailing ' (architecture <name>)' is an architecture suffix.
 
   const outputArchitectures = <String, Architecture>{
     'arm': Architecture.arm,
     'arm64': Architecture.arm64,
     'x86_64': Architecture.x64,
   };
-  final architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
+  const architectureSuffixMarker = ' (architecture ';
+  final whitespace = RegExp(r'\s');
   final Iterator<String> lines = output.trim().split('\n').iterator;
   Architecture? currentArchitecture;
   final architectureSections = <Architecture?, List<String>>{};
 
   while (lines.moveNext()) {
     final String line = lines.current;
-    final Match? architectureHeader = architectureHeaderPattern.firstMatch(line);
-    if (architectureHeader != null) {
+    // Use string matching rather than a regex to avoid backtracking when a
+    // path contains multiple architecture-like fragments.
+    String? architectureString;
+    bool isHeader = line.length > 1 && line.endsWith(':');
+    if (isHeader) {
+      // A colon-terminated line with CR/U+2028/U+2029 is not a valid header.
+      for (final int codeUnit in line.codeUnits) {
+        if (codeUnit == 0x0d || codeUnit == 0x2028 || codeUnit == 0x2029) {
+          isHeader = false;
+          break;
+        }
+      }
+    }
+    if (isHeader && line.endsWith('):')) {
+      final int markerIndex = line.lastIndexOf(architectureSuffixMarker);
+      if (markerIndex >= 1) {
+        final String name = line.substring(
+          markerIndex + architectureSuffixMarker.length,
+          line.length - 2,
+        );
+        if (name.isNotEmpty && !whitespace.hasMatch(name)) {
+          architectureString = name;
+        }
+      }
+    }
+    if (isHeader) {
       if (architectureSections.containsKey(null)) {
         throwToolExit('Expected a single architecture section in otool output: $output');
       }
-      final String? architectureString = architectureHeader.group(2);
       if (architectureString != null) {
         currentArchitecture = outputArchitectures[architectureString];
         if (currentArchitecture == null) {
