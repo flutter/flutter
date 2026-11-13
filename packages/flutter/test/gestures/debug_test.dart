@@ -205,8 +205,12 @@ void main() {
   });
 
   testWidgets('debugPrintHitTestResults', (WidgetTester tester) async {
-    debugPrintHitTestResults = true;
     final DebugPrintCallback oldCallback = debugPrint;
+    addTearDown(() {
+      debugPrintHitTestResults = false;
+      debugPrint = oldCallback;
+    });
+    debugPrintHitTestResults = true;
     final log = <String>[];
     final wrapWidths = <int?>[];
     debugPrint = (String? s, {int? wrapWidth}) {
@@ -219,9 +223,6 @@ void main() {
     expect(log[0], startsWith('PointerDownEvent#'));
     expect(log[0], contains('HitTestResult('));
     expect(wrapWidths, <int?>[1000]);
-
-    debugPrintHitTestResults = false;
-    debugPrint = oldCallback;
   });
 
   test('TapGestureRecognizer _sentTapDown toString', () {
