@@ -34,8 +34,10 @@ class SkwasmRenderer extends Renderer {
   late final EngineFontCollection fontCollection = EngineFontCollection(skwasmFontCollection);
 
   @override
-  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
-      SkwasmCanvas(recorder, cullRect);
+  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
+    final ui.Rect rect = EngineCanvas.resolveCullRect(recorder, cullRect);
+    return (recorder as SkwasmPictureRecorder).beginRecording(rect);
+  }
 
   @override
   BackendImageFilter createBlurImageFilter({

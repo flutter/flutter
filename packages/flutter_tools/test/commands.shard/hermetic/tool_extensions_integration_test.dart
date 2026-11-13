@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_features.dart';
 import 'package:flutter_tools/src/flutter_features_config.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -253,7 +252,7 @@ void main() {
           featureFlags: featureFlags,
           extensionManager: manager,
         );
-        final runner = FlutterCommandRunner(
+        final runner = TestFlutterCommandRunner(
           toolContext: toolContext,
           featureFlags: featureFlags,
           extensionManager: manager,
@@ -305,7 +304,7 @@ void main() {
           toolContext: toolContext,
           discovery: discovery,
         );
-        final runner = FlutterCommandRunner(
+        final runner = TestFlutterCommandRunner(
           toolContext: toolContext,
           featureFlags: featureFlags,
           extensionManager: manager,
