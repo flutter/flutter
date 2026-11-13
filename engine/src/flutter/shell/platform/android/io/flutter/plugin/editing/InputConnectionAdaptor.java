@@ -9,6 +9,8 @@ import static io.flutter.Build.API_LEVELS;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -63,6 +66,14 @@ public class InputConnectionAdaptor extends BaseInputConnection
   private FlutterTextUtils flutterTextUtils;
   private final KeyboardDelegate keyboardDelegate;
   private int batchEditNestDepth = 0;
+
+  // The transform from the local coordinate system of the text input client to the coordinate
+  // system of mFlutterView, in logical pixels.
+  @Nullable private Matrix editableTransform;
+  // The bounds of the text input client in its local coordinate system.
+  @Nullable private RectF editableBounds;
+  // The caret rect in the local coordinate system of the text input client.
+  @Nullable private RectF caretRect;
 
   @SuppressWarnings("deprecation")
   public InputConnectionAdaptor(
@@ -147,7 +158,72 @@ public class InputConnectionAdaptor extends BaseInputConnection
     } else {
       mCursorAnchorInfoBuilder.setComposingText(-1, "");
     }
+
+    if (editableTransform != null && editableBounds != null && caretRect != null) {
+      // The density can change without the framework sending the geometry again.
+      final float density = mFlutterView.getResources().getDisplayMetrics().density;
+      final Matrix matrix = getViewToScreenMatrix();
+      matrix.preScale(density, density);
+      matrix.preConcat(editableTransform);
+      mCursorAnchorInfoBuilder.setMatrix(matrix);
+      // The framework doesn't report whether the caret is clipped by an ancestor, so the caret is
+      // considered visible as long as it overlaps the bounds of the text input client.
+      final boolean isCaretVisible =
+          caretRect.left <= editableBounds.right
+              && caretRect.right >= editableBounds.left
+              && caretRect.top <= editableBounds.bottom
+              && caretRect.bottom >= editableBounds.top;
+      // The baseline of the caret is unknown, so the bottom of the caret is used instead.
+      mCursorAnchorInfoBuilder.setInsertionMarkerLocation(
+          caretRect.left,
+          caretRect.top,
+          caretRect.bottom,
+          caretRect.bottom,
+          isCaretVisible
+              ? CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION
+              : CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION);
+    }
     return mCursorAnchorInfoBuilder.build();
+  }
+
+  // Returns the transform from the coordinate system of mFlutterView to screen coordinates.
+  private Matrix getViewToScreenMatrix() {
+    final Matrix matrix = new Matrix();
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+      mFlutterView.transformMatrixToGlobal(matrix);
+    } else {
+      // Unlike transformMatrixToGlobal, this ignores the scale and rotation of the view and its
+      // ancestors.
+      final int[] locationOnScreen = new int[2];
+      mFlutterView.getLocationOnScreen(locationOnScreen);
+      matrix.setTranslate(locationOnScreen[0], locationOnScreen[1]);
+    }
+    return matrix;
+  }
+
+  /**
+   * Sets the geometry of the text input client, which is used to report the location of the caret
+   * to the input method in {@link CursorAnchorInfo}.
+   *
+   * <p>If the input method is monitoring cursor updates, it is notified of the change.
+   *
+   * @param editableTransform the transform from the local coordinate system of the text input
+   *     client to the coordinate system of the FlutterView, in logical pixels, or null if unknown.
+   * @param editableBounds the bounds of the text input client in its local coordinate system, or
+   *     null if unknown.
+   * @param caretRect the caret rect in the local coordinate system of the text input client, or
+   *     null if unknown.
+   */
+  void setEditableGeometry(
+      @Nullable Matrix editableTransform,
+      @Nullable RectF editableBounds,
+      @Nullable RectF caretRect) {
+    this.editableTransform = editableTransform;
+    this.editableBounds = editableBounds;
+    this.caretRect = caretRect;
+    if (mMonitorCursorUpdate) {
+      mImm.updateCursorAnchorInfo(mFlutterView, getCursorAnchorInfo());
+    }
   }
 
   @Override
@@ -248,6 +324,14 @@ public class InputConnectionAdaptor extends BaseInputConnection
     // Enables cursor monitoring. See InputConnectionAdaptor#didChangeEditingState.
     mMonitorCursorUpdate = updated;
     return true;
+  }
+
+  @Override
+  public boolean requestCursorUpdates(int cursorUpdateMode, int cursorUpdateFilter) {
+    // The default implementation rejects every request that specifies a filter. Filters only tell
+    // which parts of the CursorAnchorInfo the input method is interested in, and they don't
+    // overlap with the update modes, so handle them the same way as unfiltered requests.
+    return requestCursorUpdates(cursorUpdateMode | cursorUpdateFilter);
   }
 
   @Override

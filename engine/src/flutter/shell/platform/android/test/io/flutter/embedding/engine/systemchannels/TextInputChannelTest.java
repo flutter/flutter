@@ -44,6 +44,24 @@ public class TextInputChannelTest {
   }
 
   @Test
+  public void setCaretRectForwardsCaretRectToHandler() throws JSONException {
+    TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    TextInputChannel.TextInputMethodHandler handler =
+        mock(TextInputChannel.TextInputMethodHandler.class);
+    textInputChannel.setTextInputMethodHandler(handler);
+    JSONObject arguments = new JSONObject();
+    arguments.put("x", 5.0);
+    arguments.put("y", 2.0);
+    arguments.put("width", 2.0);
+    arguments.put("height", 16.0);
+    MethodCall call = new MethodCall("TextInput.setCaretRect", arguments);
+    MethodChannel.Result result = mock(MethodChannel.Result.class);
+    textInputChannel.parsingMethodHandler.onMethodCall(call, result);
+    verify(handler).setCaretRect(5.0, 2.0, 2.0, 16.0);
+    verify(result).success(null);
+  }
+
+  @Test
   @TargetApi(API_LEVELS.API_24)
   @Config(sdk = API_LEVELS.API_24)
   public void configurationFromJsonParsesHintLocales() throws JSONException, NoSuchFieldException {
