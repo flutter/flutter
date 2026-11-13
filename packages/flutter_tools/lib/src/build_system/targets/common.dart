@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:code_assets/code_assets.dart' show OS;
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
@@ -15,7 +14,6 @@ import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
-import '../../isolated/native_assets/targets.dart' show parseNativeOS;
 import '../../project.dart';
 import '../../windows/visual_studio.dart';
 import '../build_system.dart';
@@ -24,6 +22,7 @@ import '../exceptions.dart';
 import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'dart_plugin_registrant.dart';
+import 'extension.dart' show hasExtensionPlatformDefines;
 import 'icon_tree_shaker.dart';
 import 'localizations.dart';
 import 'native_assets.dart';
@@ -211,7 +210,6 @@ class KernelSnapshot extends Target {
     // against the host engine (platform: null) without triggering built-in
     // platform-specific side effects such as Xcode flavor parsing.
     TargetPlatform targetPlatform;
-    OS? customTargetOs;
     var isExtensionTargetPlatform = false;
     try {
       targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
@@ -221,10 +219,6 @@ class KernelSnapshot extends Target {
       }
       isExtensionTargetPlatform = true;
       targetPlatform = TargetPlatform.unsupported;
-      final String? extensionTargetOs = environment.defines[kExtensionTargetOs];
-      if (extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) {
-        customTargetOs = parseNativeOS(extensionTargetOs);
-      }
     }
 
     // This configuration is all optional.
@@ -278,31 +272,14 @@ class KernelSnapshot extends Target {
         if (!isExtensionTargetPlatform) {
           TargetPlatform.throwUnsupportedTarget();
         }
-        forceLinkPlatform = switch (customTargetOs) {
-          OS.android || OS.fuchsia || OS.iOS => false,
-          _ => true,
-        };
+        forceLinkPlatform = true;
     }
 
-    // frontend_server's --target-os flag only accepts the six built-in VM
-    // operating systems (OS.values: 'android', 'fuchsia', 'ios', 'linux',
-    // 'macos', 'windows') and is used by AOT global type-flow analysis (TFA)
-    // to constant-fold Platform.operatingSystem and Platform.is<OS> checks.
-    // For custom extension platforms, only pass --target-os when
-    // customTargetOs is one of those six operating systems (for example, a
-    // Linux-based embedded target that sets ExtensionTargetOs=linux). For
-    // custom operating systems not in OS.values or when ExtensionTargetOs is
-    // unset, omit --target-os (null) so Platform.operatingSystem is evaluated
-    // at runtime by the embedder instead of being constant-folded.
-    final String? targetOS = isExtensionTargetPlatform
-        ? (customTargetOs != null && OS.values.contains(customTargetOs)
-              ? customTargetOs.name
-              : null)
-        : switch (targetPlatform.os) {
-            .fuchsia || .android || .macos || .ios || .linux || .windows => targetPlatform.os.name,
-            .tester || .web => null,
-            .unsupported => TargetPlatform.throwUnsupportedTarget(),
-          };
+    final String? targetOS = switch (targetPlatform.os) {
+      .fuchsia || .android || .macos || .ios || .linux || .windows => targetPlatform.os.name,
+      .tester || .web => null,
+      .unsupported => isExtensionTargetPlatform ? null : TargetPlatform.throwUnsupportedTarget(),
+    };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packagesFile,

@@ -262,10 +262,6 @@ class ExtensionBuildTarget {
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
 
-  /// Environment define key (`-dExtensionBuildTarget=...`) used to select a
-  /// specific [ExtensionBuildTarget] by [name] in `flutter assemble`.
-  static const String buildTargetDefine = 'ExtensionBuildTarget';
-
   /// Deserializes a list of [ExtensionBuildTarget] objects from RPC response data.
   static List<ExtensionBuildTarget> listFromJson(Object? rpcResult) {
     if (rpcResult case final List<Object?> list) {

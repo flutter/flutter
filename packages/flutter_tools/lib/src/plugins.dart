@@ -177,7 +177,7 @@ class Plugin {
     }
     final YamlMap platformsYaml = platformsValue;
 
-    final bool retainRawConfigurations = extraPlatformKeys.isNotEmpty;
+    final Set<String> extraKeys = extraPlatformKeys.toSet();
     final errors = <String>[];
     final platforms = <String, PluginPlatform>{};
     final rawPlatformConfigurations = <String, Map<String, Object?>>{};
@@ -221,7 +221,7 @@ class Plugin {
               defaultPackages[platformKey] = defaultPackage;
             } else if (parsed != null) {
               platforms[platformKey] = parsed;
-              if (retainRawConfigurations) {
+              if (extraKeys.contains(platformKey)) {
                 rawPlatformConfigurations[platformKey] = switch (parsed) {
                   final CustomPlatformPlugin custom => custom.configuration,
                   _ => yamlMapToPlatformConfiguration(yamlValue),
@@ -259,7 +259,7 @@ class Plugin {
       WindowsPlugin.kConfigKey,
       (YamlMap yaml) => WindowsPlugin.parseFromYaml(name, yaml),
     );
-    for (final String key in extraPlatformKeys.toSet()) {
+    for (final key in extraKeys) {
       if (builtInPlatformKeys.contains(key) || !platformsYaml.containsKey(key)) {
         continue;
       }

@@ -21,7 +21,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../dart/package_map.dart';
-import '../../features.dart' show FeatureFlags, featureFlags;
+import '../../features.dart' show featureFlags;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../../isolated/native_assets/targets.dart' show resolveCustomNativeTarget;
@@ -29,19 +29,15 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart' show MissingDefineException;
 import 'common.dart';
+import 'extension.dart' show hasExtensionPlatformDefines;
 
 enum HookPlatform { native, web }
 
 /// Runs the dart build of the app.
 class BuildHooks extends Target {
-  const BuildHooks({
-    this.platform = HookPlatform.native,
-    @visibleForTesting this._buildRunner,
-    @visibleForTesting this._featureFlags,
-  });
+  const BuildHooks({this.platform = HookPlatform.native, @visibleForTesting this._buildRunner});
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
-  final FeatureFlags? _featureFlags;
 
   final HookPlatform platform;
 
@@ -70,7 +66,7 @@ class BuildHooks extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
-      featureFlags: _featureFlags ?? featureFlags,
+      featureFlags: featureFlags,
       logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
@@ -138,24 +134,19 @@ class LinkHooks extends Target {
     this.platform = HookPlatform.native,
     this.extraDependencies = const <Target>[],
     this._buildRunner,
-    @visibleForTesting this._featureFlags,
   });
 
   final HookPlatform platform;
   final List<Target> extraDependencies;
   final FlutterNativeAssetsBuildRunner? _buildRunner;
-  final FeatureFlags? _featureFlags;
-
-  FeatureFlags get _activeFeatureFlags => _featureFlags ?? featureFlags;
 
   @override
   List<Target> get dependencies => <Target>[
     if (platform == HookPlatform.web)
-      BuildHooks(platform: HookPlatform.web, featureFlags: _featureFlags)
+      const BuildHooks(platform: HookPlatform.web)
     else
-      BuildHooks(featureFlags: _featureFlags),
-    if (platform == HookPlatform.native && _activeFeatureFlags.isRecordUseEnabled)
-      const KernelSnapshot(),
+      const BuildHooks(),
+    if (platform == HookPlatform.native && featureFlags.isRecordUseEnabled) const KernelSnapshot(),
     ...extraDependencies, // Dart2WasmTarget, Dart2JSTarget
   ];
 
@@ -172,12 +163,12 @@ class LinkHooks extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{BUILD_DIR}/${BuildHooks.resultFilename}'),
-    if (_activeFeatureFlags.isRecordUseEnabled)
+    if (featureFlags.isRecordUseEnabled)
       for (final String filename in _recordedUsesFileNames) Source.pattern('{BUILD_DIR}/$filename'),
   ];
 
   File? getRecordedUsesFile(Environment environment, BuildMode buildMode) {
-    if (!_activeFeatureFlags.isRecordUseEnabled) {
+    if (!featureFlags.isRecordUseEnabled) {
       return null;
     }
     if (platform == HookPlatform.native && !buildMode.isPrecompiled) {
@@ -239,7 +230,7 @@ class LinkHooks extends Target {
         targetPlatform: targetPlatform,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: _activeFeatureFlags,
+        featureFlags: featureFlags,
         logger: environment.logger,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
         buildDataAssets: true,
@@ -255,7 +246,7 @@ class LinkHooks extends Target {
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       fileSystem: fileSystem,
-      featureFlags: _activeFeatureFlags,
+      featureFlags: featureFlags,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
       buildResults: buildResults,
@@ -351,9 +342,8 @@ class InstallCodeAssets extends Target {
         environmentDefines: environment.defines,
       );
       Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-      if (targetOS == OS.linux || targetOS == OS.windows || !OS.values.contains(targetOS)) {
-        // Avoid needing migration for CMake files, keep old directory structure,
-        // and place custom extension OS assets under native_assets/<os>/.
+      if (targetOS == OS.linux || targetOS == OS.windows || targetOS == OS.fuchsia) {
+        // Avoid needing migration for CMake files, keep old directory structure.
         targetUri = targetUri.resolve('${targetOS.name}/');
       }
 
@@ -431,7 +421,8 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
     // Custom extension platforms are not part of the built-in TargetPlatform
     // enum. Map recognized custom extension target platforms to
     // TargetPlatform.unsupported so projects without hooks skip cleanly while
-    // projects with hooks validate kExtensionTargetOs and kExtensionTargetArch.
+    // projects with hooks validate kExtensionHookTargetOs and
+    // kExtensionHookTargetArch.
     if (resolveCustomNativeTarget(environment.defines) != null ||
         hasExtensionPlatformDefines(environment.defines)) {
       return TargetPlatform.unsupported;

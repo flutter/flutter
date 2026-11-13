@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show jsonEncode;
-
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
@@ -128,17 +126,8 @@ class ExtensionCCompilerConfig {
       Object.hash(ar, cc, ld, envScript, const ListEquality<String>().hash(envScriptArgs));
 }
 
-/// Configuration for running Dart build and link hooks (`native_assets`) for an
-/// extension build target.
-///
-/// Allows custom extension targets whose `targetPlatform` is not a built-in
-/// Flutter `TargetPlatform` (or that use a custom cross-compiler toolchain) to
-/// specify the target OS, architecture, and C compiler configuration passed to
-/// `HookConfig` when building `CodeAsset`s and `DataAsset`s.
-///
-/// Both built-in operating systems (such as `'linux'` for Linux-based custom
-/// embedders) and custom operating system identifiers are supported via
-/// `package:code_assets`'s `OS.fromString` and `Architecture.fromString`.
+/// Configuration for running Dart build and link hooks (`package:code_assets`)
+/// for an extension build target.
 @immutable
 class ExtensionNativeAssetsConfig {
   ExtensionNativeAssetsConfig({
@@ -147,12 +136,9 @@ class ExtensionNativeAssetsConfig {
     this.cCompilerConfig,
   }) : assert(
          isValidTargetArchitecture(targetArchitecture),
-         'Invalid targetArchitecture "$targetArchitecture": $_invalidIdentifierMessage',
+         'Invalid targetArchitecture "$targetArchitecture": $_invalidTargetArchitectureMessage',
        ),
-       assert(
-         isValidTargetOs(targetOs),
-         'Invalid targetOs "$targetOs": $_invalidIdentifierMessage',
-       );
+       assert(isValidTargetOs(targetOs), 'Invalid targetOs "$targetOs": $_invalidTargetOsMessage');
 
   /// Deserializes an [ExtensionNativeAssetsConfig] from a JSON-serializable map.
   factory ExtensionNativeAssetsConfig.fromJson(Map<String, Object?> json) {
@@ -160,14 +146,14 @@ class ExtensionNativeAssetsConfig {
     if (!isValidTargetArchitecture(targetArchitecture)) {
       throw FormatException(
         'Missing or invalid "$targetArchitectureKey" ("$targetArchitecture") for '
-        'ExtensionNativeAssetsConfig: $_invalidIdentifierMessage',
+        'ExtensionNativeAssetsConfig: $_invalidTargetArchitectureMessage',
       );
     }
     final String targetOs = json.requiredField<String>(targetOsKey);
     if (!isValidTargetOs(targetOs)) {
       throw FormatException(
         'Missing or invalid "$targetOsKey" ("$targetOs") for '
-        'ExtensionNativeAssetsConfig: $_invalidIdentifierMessage',
+        'ExtensionNativeAssetsConfig: $_invalidTargetOsMessage',
       );
     }
     final Map<String, Object?>? rawCompilerConfig = json.nullableField<Map<String, Object?>>(
@@ -182,18 +168,40 @@ class ExtensionNativeAssetsConfig {
     );
   }
 
-  static final _validIdentifierPattern = RegExp(r'^[a-z][a-z0-9_]*$');
-  static const String _invalidIdentifierMessage =
-      'Identifiers must start with a lowercase ASCII letter and contain only '
-      'lowercase ASCII letters, digits, and underscores.';
+  // Matches package:code_assets's known OS.values names.
+  static const _supportedTargetOperatingSystems = <String>{
+    'android',
+    'fuchsia',
+    'ios',
+    'linux',
+    'macos',
+    'windows',
+  };
 
-  /// Returns whether [value] is a valid target operating system identifier
-  /// (`^[a-z][a-z0-9_]*$`).
-  static bool isValidTargetOs(String value) => _validIdentifierPattern.hasMatch(value);
+  // Matches package:code_assets's known Architecture.values names.
+  static const _supportedTargetArchitectures = <String>{
+    'arm',
+    'arm64',
+    'arm64e',
+    'ia32',
+    'riscv32',
+    'riscv64',
+    'x64',
+  };
 
-  /// Returns whether [value] is a valid target CPU architecture identifier
-  /// (`^[a-z][a-z0-9_]*$`).
-  static bool isValidTargetArchitecture(String value) => _validIdentifierPattern.hasMatch(value);
+  static const String _invalidTargetOsMessage =
+      'Supported target operating systems are: android, fuchsia, ios, linux, macos, windows.';
+  static const String _invalidTargetArchitectureMessage =
+      'Supported target architectures are: arm, arm64, arm64e, ia32, riscv32, riscv64, x64.';
+
+  /// Returns whether [value] is a supported `package:code_assets` target OS
+  /// (`android`, `fuchsia`, `ios`, `linux`, `macos`, or `windows`).
+  static bool isValidTargetOs(String value) => _supportedTargetOperatingSystems.contains(value);
+
+  /// Returns whether [value] is a supported `package:code_assets` target CPU
+  /// architecture (`arm`, `arm64`, `arm64e`, `ia32`, `riscv32`, `riscv64`, or `x64`).
+  static bool isValidTargetArchitecture(String value) =>
+      _supportedTargetArchitectures.contains(value);
 
   /// Map key for [cCompilerConfig].
   @visibleForTesting
@@ -207,57 +215,20 @@ class ExtensionNativeAssetsConfig {
   @visibleForTesting
   static const String targetOsKey = 'targetOs';
 
-  /// Environment define key (`-dExtensionTargetOs=...`) for [targetOs].
-  static const String targetOsDefine = 'ExtensionTargetOs';
-
-  /// Environment define key (`-dExtensionTargetArch=...`) for [targetArchitecture].
-  static const String targetArchDefine = 'ExtensionTargetArch';
-
-  /// Environment define key (`-dExtensionCCompilerCc=...`) for [ExtensionCCompilerConfig.cc].
-  static const String cCompilerCcDefine = 'ExtensionCCompilerCc';
-
-  /// Environment define key (`-dExtensionCCompilerAr=...`) for [ExtensionCCompilerConfig.ar].
-  static const String cCompilerArDefine = 'ExtensionCCompilerAr';
-
-  /// Environment define key (`-dExtensionCCompilerLd=...`) for [ExtensionCCompilerConfig.ld].
-  static const String cCompilerLdDefine = 'ExtensionCCompilerLd';
-
-  /// Environment define key (`-dExtensionCCompilerEnvScript=...`) for [ExtensionCCompilerConfig.envScript].
-  static const String cCompilerEnvScriptDefine = 'ExtensionCCompilerEnvScript';
-
-  /// Environment define key (`-dExtensionCCompilerEnvScriptArgs=...`) for [ExtensionCCompilerConfig.envScriptArgs].
-  static const String cCompilerEnvScriptArgsDefine = 'ExtensionCCompilerEnvScriptArgs';
-
-  /// The target operating system for `CodeAsset` hooks (e.g. `'linux'`,
-  /// `'macos'`, `'windows'`, `'android'`, `'ios'`, or a custom OS identifier).
+  /// Target operating system for `CodeAsset` hooks (`'android'`, `'fuchsia'`,
+  /// `'ios'`, `'linux'`, `'macos'`, or `'windows'`).
+  ///
+  /// Custom extension targets currently support `'linux'`, `'windows'`, and
+  /// `'fuchsia'` directly; `'android'`, `'ios'`, and `'macos'` require platform
+  /// SDK version configuration and must use built-in target platforms.
   final String targetOs;
 
-  /// The target CPU architecture for `CodeAsset` hooks (e.g. `'x64'`,
-  /// `'arm64'`, `'arm'`, `'ia32'`, `'riscv64'`).
+  /// Target CPU architecture for `CodeAsset` hooks (`'arm'`, `'arm64'`,
+  /// `'arm64e'`, `'ia32'`, `'riscv32'`, `'riscv64'`, or `'x64'`).
   final String targetArchitecture;
 
   /// Optional C compiler toolchain configuration for `CodeAsset` hooks.
   final ExtensionCCompilerConfig? cCompilerConfig;
-
-  /// Converts this configuration into `flutter assemble` environment defines
-  /// (`-d<Key>=<Value>`) consumed by `BuildHooks`, `LinkHooks`,
-  /// `InstallCodeAssets`, and `KernelSnapshot`.
-  Map<String, String> toEnvironmentDefines() {
-    final ExtensionCCompilerConfig? compiler = cCompilerConfig;
-    return <String, String>{
-      targetOsDefine: targetOs,
-      targetArchDefine: targetArchitecture,
-      if (compiler != null) ...<String, String>{
-        cCompilerCcDefine: compiler.cc.toString(),
-        cCompilerArDefine: compiler.ar.toString(),
-        cCompilerLdDefine: compiler.ld.toString(),
-        if (compiler.envScript case final Uri envScript)
-          cCompilerEnvScriptDefine: envScript.toString(),
-        if (compiler.envScriptArgs.isNotEmpty)
-          cCompilerEnvScriptArgsDefine: jsonEncode(compiler.envScriptArgs),
-      },
-    };
-  }
 
   /// Serializes the configuration to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{

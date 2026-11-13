@@ -4,7 +4,6 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionNativeAssetsConfig;
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
@@ -18,19 +17,21 @@ import '../../build_info.dart'
         TargetPlatform,
         getCpuArchForName,
         getCpuArchsFromEnv,
-        hasExtensionPlatformDefines,
         kAndroidArchs,
+        kIosArchs,
+        kSdkRoot,
+        kTargetPlatform;
+import '../../build_system/exceptions.dart' show MissingDefineException;
+import '../../build_system/targets/extension.dart'
+    show
+        hasExtensionPlatformDefines,
         kExtensionCCompilerAr,
         kExtensionCCompilerCc,
         kExtensionCCompilerEnvScript,
         kExtensionCCompilerEnvScriptArgs,
         kExtensionCCompilerLd,
-        kExtensionTargetArch,
-        kExtensionTargetOs,
-        kIosArchs,
-        kSdkRoot,
-        kTargetPlatform;
-import '../../build_system/exceptions.dart' show MissingDefineException;
+        kExtensionHookTargetArch,
+        kExtensionHookTargetOs;
 import '../../context/android_context.dart' show AndroidSdkProvider;
 import '../../convert.dart' show json;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
@@ -91,9 +92,9 @@ sealed class AssetBuildTarget {
       if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets) &&
           (os == OS.android || os == OS.iOS || os == OS.macOS)) {
         throwToolExit(
-          'Custom native assets configuration with "$kExtensionTargetOs=${os.name}" is not '
+          'Custom native assets configuration with "$kExtensionHookTargetOs=${os.name}" is not '
           'supported because "${os.name}" code assets require platform SDK version '
-          'configuration; use a built-in target platform or a custom OS identifier.',
+          'configuration; use a built-in target platform instead.',
         );
       }
       return <AssetBuildTarget>[
@@ -336,7 +337,7 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
 }
 
 /// [CodeAssetTarget] for extension build targets configured via
-/// [kExtensionTargetOs] and [kExtensionTargetArch].
+/// [kExtensionHookTargetOs] and [kExtensionHookTargetArch].
 final class CustomCodeAssetTarget extends CodeAssetTarget {
   CustomCodeAssetTarget({
     required super.architecture,
@@ -617,68 +618,44 @@ String? _emptyToNull(String? input) {
   return input;
 }
 
-/// Parses a native [OS] from a target OS string (such as `linux`, `android`,
-/// or a custom extension OS identifier).
-///
-/// Built-in operating systems map to the corresponding [OS] constants, while
-/// custom extension operating systems are constructed via [OS.fromString] so
-/// Dart build and link hooks receive the custom target OS identifier in
-/// `HookConfig.code.targetOS`.
+/// Parses a known `package:code_assets` [OS] from [rawOs], throwing a
+/// `ToolExit` on unrecognized identifiers.
 OS parseNativeOS(String rawOs) {
   final String normalized = rawOs.trim().toLowerCase();
-  if (!ExtensionNativeAssetsConfig.isValidTargetOs(normalized)) {
-    throwToolExit(
-      'Unsupported native assets target OS "$rawOs": must start with a lowercase '
-      'ASCII letter and contain only lowercase ASCII letters, digits, and underscores.',
-    );
-  }
-  if (normalized == 'darwin') {
-    return OS.macOS;
-  }
   for (final OS builtinOs in OS.values) {
     if (builtinOs.name == normalized) {
       return builtinOs;
     }
   }
-  return OS.fromString(normalized);
+  throwToolExit(
+    'Unsupported native assets target OS "$rawOs". '
+    'Supported values are: ${OS.values.map((OS os) => os.name).join(', ')}.',
+  );
 }
 
-/// Parses a native [Architecture] from a target architecture string (such as
-/// `x64` or `arm64`).
-///
-/// Common architecture aliases (`armv7`, `aarch64`, `x86`, `x86_64`, `amd64`)
-/// are normalized to their canonical `package:code_assets` [Architecture]
-/// constants, while custom architecture identifiers are constructed via
-/// [Architecture.fromString].
+/// Parses a known `package:code_assets` [Architecture] from [rawArch], throwing
+/// a `ToolExit` on unrecognized identifiers.
 Architecture parseNativeArchitecture(String rawArch) {
   final String normalized = rawArch.trim().toLowerCase();
-  if (!ExtensionNativeAssetsConfig.isValidTargetArchitecture(normalized)) {
-    throwToolExit(
-      'Unsupported native assets target architecture "$rawArch": must start with '
-      'a lowercase ASCII letter and contain only lowercase ASCII letters, digits, '
-      'and underscores.',
-    );
+  for (final Architecture builtinArch in Architecture.values) {
+    if (builtinArch.name == normalized) {
+      return builtinArch;
+    }
   }
-  return switch (normalized) {
-    'arm' || 'armv7' => Architecture.arm,
-    'arm64' || 'aarch64' => Architecture.arm64,
-    'arm64e' => Architecture.arm64e,
-    'ia32' || 'x86' => Architecture.ia32,
-    'riscv32' => Architecture.riscv32,
-    'riscv64' => Architecture.riscv64,
-    'x64' || 'x86_64' || 'amd64' => Architecture.x64,
-    _ => Architecture.fromString(normalized),
-  };
+  throwToolExit(
+    'Unsupported native assets target architecture "$rawArch". '
+    'Supported values are: ${Architecture.values.map((Architecture arch) => arch.name).join(', ')}.',
+  );
 }
 
 /// Resolves the target [OS] and [Architecture] for an extension build target
 /// from [environmentDefines].
 ///
-/// Returns `null` unless both [kExtensionTargetOs] and [kExtensionTargetArch]
-/// are explicitly defined.
+/// Returns `null` unless both [kExtensionHookTargetOs] and
+/// [kExtensionHookTargetArch] are explicitly defined.
 (OS, Architecture)? resolveCustomNativeTarget(Map<String, String> environmentDefines) {
-  final String? extensionTargetOs = _emptyToNull(environmentDefines[kExtensionTargetOs]);
-  final String? extensionTargetArch = _emptyToNull(environmentDefines[kExtensionTargetArch]);
+  final String? extensionTargetOs = _emptyToNull(environmentDefines[kExtensionHookTargetOs]);
+  final String? extensionTargetArch = _emptyToNull(environmentDefines[kExtensionHookTargetArch]);
   if (extensionTargetOs == null || extensionTargetArch == null) {
     return null;
   }

@@ -16,6 +16,7 @@ import '../../isolated/mustache_template.dart';
 import '../../plugins.dart' show Plugin;
 import '../../project.dart';
 import '../build_system.dart';
+import 'extension.dart' show hasExtensionPlatformDefines, kExtensionPluginPlatformKey;
 
 /// Resolves the custom extension plugin platform key from [defines], or returns
 /// `null` if [kExtensionPluginPlatformKey] is unset or matches a built-in

@@ -287,7 +287,6 @@ void main() {
       );
       expect(ExtensionBuildTarget.isValidPluginPlatformKey('custom_os_2'), isTrue);
       expect(ExtensionBuildTarget.isValidPluginPlatformKey('custom-os'), isFalse);
-      expect(ExtensionBuildTarget.buildTargetDefine, 'ExtensionBuildTarget');
     });
 
     test('listFromJson handles valid and invalid lists', () {
@@ -732,6 +731,18 @@ void main() {
         throwsA(isA<AssertionError>()),
       );
       expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x46', targetOs: 'linux'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: 'linxu'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig(targetArchitecture: 'x64', targetOs: 'custom_os'),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
         () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
           'targetArchitecture': 'x64',
           'targetOs': '../escape',
@@ -748,7 +759,14 @@ void main() {
       expect(
         () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
           'targetArchitecture': 'x64',
-          'targetOs': 'custom-os',
+          'targetOs': 'custom_os',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
+          'targetArchitecture': 'x46',
+          'targetOs': 'linux',
         }),
         throwsFormatException,
       );
@@ -838,32 +856,16 @@ void main() {
       );
     });
 
-    test('toEnvironmentDefines maps targetOs, targetArchitecture, and canonical compiler URIs', () {
-      final config = ExtensionNativeAssetsConfig(
-        targetArchitecture: 'arm64',
-        targetOs: 'custom_os',
-        cCompilerConfig: ExtensionCCompilerConfig(
-          ar: Uri.parse('file:///opt/custom-sdk/llvm/bin/llvm-ar'),
-          cc: Uri.parse('file:///opt/custom-sdk/llvm/bin/clang'),
-          envScript: Uri.parse('file:///C:/sdk/vcvarsall.bat'),
-          envScriptArgs: const <String>['--arch', 'arm64 with spaces'],
-          ld: Uri.parse('file:///opt/custom-sdk/llvm/bin/ld.lld'),
-        ),
-      );
+    test('validates known package:code_assets targetOs and targetArchitecture values', () {
+      for (final targetOs in <String>['android', 'fuchsia', 'ios', 'linux', 'macos', 'windows']) {
+        expect(ExtensionNativeAssetsConfig.isValidTargetOs(targetOs), isTrue);
+      }
+      expect(ExtensionNativeAssetsConfig.isValidTargetOs('custom_os'), isFalse);
 
-      expect(
-        config.toEnvironmentDefines(),
-        equals(<String, String>{
-          ExtensionNativeAssetsConfig.targetOsDefine: 'custom_os',
-          ExtensionNativeAssetsConfig.targetArchDefine: 'arm64',
-          ExtensionNativeAssetsConfig.cCompilerCcDefine: 'file:///opt/custom-sdk/llvm/bin/clang',
-          ExtensionNativeAssetsConfig.cCompilerArDefine: 'file:///opt/custom-sdk/llvm/bin/llvm-ar',
-          ExtensionNativeAssetsConfig.cCompilerLdDefine: 'file:///opt/custom-sdk/llvm/bin/ld.lld',
-          ExtensionNativeAssetsConfig.cCompilerEnvScriptDefine: 'file:///C:/sdk/vcvarsall.bat',
-          ExtensionNativeAssetsConfig.cCompilerEnvScriptArgsDefine:
-              '["--arch","arm64 with spaces"]',
-        }),
-      );
+      for (final arch in <String>['arm', 'arm64', 'arm64e', 'ia32', 'riscv32', 'riscv64', 'x64']) {
+        expect(ExtensionNativeAssetsConfig.isValidTargetArchitecture(arch), isTrue);
+      }
+      expect(ExtensionNativeAssetsConfig.isValidTargetArchitecture('x86_64'), isFalse);
       expect(BuiltInTargets.installCodeAssets, 'install_code_assets');
     });
   });

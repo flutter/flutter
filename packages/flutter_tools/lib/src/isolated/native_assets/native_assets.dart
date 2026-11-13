@@ -204,14 +204,7 @@ runFlutterSpecificBuildHooks({
       .join(', ');
   logger.printTrace('Running build hooks for $targetString.');
   for (final target in targets) {
-    if (target is CodeAssetTarget) {
-      if (!OS.values.contains(target.os) || !Architecture.values.contains(target.architecture)) {
-        logger.printTrace(
-          'Using custom native assets target OS="${target.os.name}" '
-          'arch="${target.architecture.name}".',
-        );
-      }
-    } else if (target is CustomDataAssetTarget &&
+    if (target is CustomDataAssetTarget &&
         buildCodeAssets != null &&
         featureFlags.isNativeAssetsEnabled) {
       logger.printTrace(
@@ -852,16 +845,12 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsForOS(
 }) {
   final Uri? absolutePath = flutterTester ? buildUri : null;
   return switch (targetOS) {
-    OS.windows || OS.linux => _assetTargetLocationsWindowsLinux(codeAssets, absolutePath),
+    OS.windows ||
+    OS.linux ||
+    OS.fuchsia => _assetTargetLocationsWindowsLinux(codeAssets, absolutePath),
     OS.macOS => assetTargetLocationsMacOS(codeAssets, absolutePath, logger: logger),
     OS.iOS => assetTargetLocationsIOS(codeAssets, logger: logger),
     OS.android => assetTargetLocationsAndroid(codeAssets),
-    // Custom extension operating systems bundle dynamic libraries as
-    // standalone shared objects inside the target output directory.
-    final OS customOs when !OS.values.contains(customOs) => _assetTargetLocationsWindowsLinux(
-      codeAssets,
-      absolutePath,
-    ),
     _ => throw UnimplementedError('This should be unreachable.'),
   };
 }
@@ -912,6 +901,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   switch (targetOS) {
     case OS.windows:
     case OS.linux:
+    case OS.fuchsia:
       assert(codesignIdentity == null);
       installedFiles = await _copyNativeCodeAssetsToBundleOnWindowsLinux(
         targetUri,
@@ -955,16 +945,6 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
       installedFiles = await copyNativeCodeAssetsAndroid(
         targetUri,
         assetTargetLocations,
-        fileSystem,
-      );
-    case final OS customOs when !OS.values.contains(customOs):
-      // Custom extension operating systems copy bundled dynamic libraries
-      // directly into the target bundle directory.
-      assert(codesignIdentity == null);
-      installedFiles = await _copyNativeCodeAssetsToBundleOnWindowsLinux(
-        targetUri,
-        assetTargetLocations,
-        buildMode,
         fileSystem,
       );
     default:
