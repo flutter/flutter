@@ -28,6 +28,10 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
   c_engine_properties.impeller_switch =
       static_cast<FlutterDesktopImpellerSwitch>(project.impeller_switch());
   c_engine_properties.enable_flutter_gpu = project.enable_flutter_gpu();
+  c_engine_properties.program_cache_path =
+      project.program_cache_path().has_value()
+          ? project.program_cache_path()->c_str()
+          : nullptr;
 
   const std::vector<std::string>& entrypoint_args =
       project.dart_entrypoint_arguments();
