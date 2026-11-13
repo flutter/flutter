@@ -27,9 +27,6 @@ class CaptureCommand extends FlutterCommand {
   }
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   String get name => 'capture';
 
   @override
@@ -77,9 +74,6 @@ class CaptureRecordingCommand extends FlutterCommand {
       );
     registerOptionBundle(const DeviceDiscoveryOptionsBundle());
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'recording';

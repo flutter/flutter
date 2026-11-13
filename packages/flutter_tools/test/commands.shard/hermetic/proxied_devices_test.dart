@@ -339,6 +339,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get supportsScreenshot => true;
 
   @override
+  bool get supportsScreenRecording => false;
+
+  @override
   bool get supportsFlutterExit => true;
 
   @override
