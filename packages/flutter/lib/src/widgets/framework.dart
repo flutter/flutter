@@ -107,6 +107,7 @@ class ObjectKey extends LocalKey {
 
   @override
   String toString() {
+    // ignore: flutter_analyzer_plugin/no_runtimetype_in_tostring
     if (runtimeType == ObjectKey) {
       return '[${describeIdentity(value)}]';
     }
@@ -213,6 +214,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   @override
   String toString() {
     final label = _debugLabel != null ? ' $_debugLabel' : '';
+    // ignore: flutter_analyzer_plugin/no_runtimetype_in_tostring
     if (runtimeType == LabeledGlobalKey) {
       return '[GlobalKey#${shortHash(this)}$label]';
     }
