@@ -36,7 +36,12 @@ Future<CommandResult> _runAdb(
           );
         });
   try {
-    return await runCommand('adb', arguments, checkExitCode: false, outputMode: outputMode);
+    return await runCommand(
+      'adb',
+      arguments,
+      expectedExit: ExpectedExit.any,
+      outputMode: outputMode,
+    );
   } finally {
     slowWarningTimer?.cancel();
   }
@@ -132,7 +137,7 @@ Future<bool> _runRetryLoop(String testDir) async {
   const maxAttempts = 2;
 
   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
-    // Clear logcat with checkExitCode: false so a transient offline device on attempt 1
+    // Clear logcat with ExpectedExit.any so a transient offline device on attempt 1
     // does not call foundError and poison the global shard status.
     await _runAdb(<String>['logcat', '-c'], outputMode: OutputMode.print);
 
@@ -247,7 +252,7 @@ Future<_DriveAttemptResult> _runFlutterDrive(String testDir, List<String> driveA
     'flutter',
     driveArgs,
     workingDirectory: testDir,
-    checkExitCode: false,
+    expectedExit: ExpectedExit.any,
     outputListener: onDriveOutputLine,
     stderrListener: onDriveOutputLine,
   );
