@@ -27,9 +27,15 @@ class CanvasKitRenderer extends Renderer {
   /// Whether the renderer is using software rendering.
   bool get isSoftware => _pictureToImageSurface.isSoftware;
 
+  /// The CanvasKit font registry behind [fontCollection].
+  ///
+  /// Not used when `WebParagraph` is enabled, in which case [fontCollection]
+  /// is a [WebFontCollection] and text is laid out by the browser.
+  late final CkFontCollection ckFontCollection = CkFontCollection();
+
   late final FlutterFontCollection _fontCollection = isWebParagraphEnabled
       ? WebFontCollection()
-      : SkiaFontCollection();
+      : EngineFontCollection(ckFontCollection);
 
   @override
   FlutterFontCollection get fontCollection => _fontCollection;
@@ -72,7 +78,8 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  ui.Paint createPaint() => CkPaint();
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) =>
+      CkPaint(paint, defaultBlurTileMode: defaultBlurTileMode);
 
   @override
   BackendVertices createVertices(
@@ -90,8 +97,10 @@ class CanvasKitRenderer extends Renderer {
   );
 
   @override
-  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
-      CkCanvas(recorder, cullRect);
+  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
+    final ui.Rect rect = EngineCanvas.resolveCullRect(recorder, cullRect);
+    return (recorder as CkPictureRecorder).beginRecording(rect);
+  }
 
   @override
   BackendGradient createGradientLinear(
@@ -178,7 +187,11 @@ class CanvasKitRenderer extends Renderer {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   }) {
+    // TODO(harryterkelsen): CanvasKit cannot express bounded blur; falls back
+    // to unbounded like native Skia.
+    // https://github.com/flutter/flutter/issues/175899
     return CkBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
   }
 
@@ -335,7 +348,7 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style) =>
-      CkParagraphBuilder(style);
+      CkParagraphBuilder(style, ckFontCollection);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>

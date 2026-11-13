@@ -46,9 +46,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({
     required this.buildSystem,
     required this.buildTargets,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     super.outputPreferences,
+    super.deviceManager,
   }) {
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(defaultToRelease: false),
@@ -59,7 +60,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       EngineRenderingFlagsBundle(includeTestFlag: true),
       WebServerOptionsBundle(),
     ]);
-    CommonOptions.nativeNullAssertions.addTo(argParser, hideOverride: !verboseHelp);
+    CommonOptions.nativeNullAssertions.addTo(argParser, hide: !verboseHelp);
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
       CommonOptions.dartDefines,
       CommonOptions.dartDefineFromFile,
@@ -81,7 +82,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       DebuggingOptionDescriptors.vmserviceOutFile,
       DebuggingOptionDescriptors.disableServiceAuthCodes,
       DebuggingOptionDescriptors.disableServiceOriginCheck,
-      DebuggingOptionDescriptors.startPaused(defaultsTo: startPausedDefault),
+      _startPaused,
       DebuggingOptionDescriptors.dartFlags,
       DebuggingOptionDescriptors.endlessTraceBuffer,
       DebuggingOptionDescriptors.traceSystrace,
@@ -101,11 +102,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     ], verboseHelp: verboseHelp);
   }
 
+  late final _startPaused = FlagOptionDescriptor(
+    name: 'start-paused',
+    defaultsTo: startPausedDefault,
+    help: 'Start in a paused mode and wait for a debugger to connect.',
+  );
+
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
   bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
@@ -211,7 +215,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
-        startPaused: getValue(DebuggingOptionDescriptors.startPausedOption),
+        startPaused: getValue(_startPaused),
         disableServiceAuthCodes: disableServiceAuthCodes,
         disableServiceOriginCheck: disableServiceOriginCheck,
         cacheStartupProfile: cacheStartupProfile,
@@ -337,7 +341,7 @@ class RunCommand extends RunCommandBase {
     this.deviceManager,
     this._extensionArtifactManager,
     super.verboseHelp = false,
-  }) {
+  }) : super(deviceManager: deviceManager) {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       FilesystemOptionsBundle(),
@@ -521,18 +525,16 @@ class RunCommand extends RunCommandBase {
 
     String? androidEmbeddingVersion;
     final hostLanguage = <String>[];
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final FileSystem fs = toolContext.fs;
     if (anyAndroidDevices) {
-      final AndroidProject androidProject = projectFactory
-          .fromDirectory(fs.currentDirectory)
-          .android;
+      final AndroidProject androidProject = project.android;
       if (androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
         androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
       }
     }
     if (anyIOSDevices) {
-      final IosProject iosProject = projectFactory.fromDirectory(fs.currentDirectory).ios;
+      final IosProject iosProject = project.ios;
       if (iosProject.exists) {
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)

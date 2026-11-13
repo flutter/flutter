@@ -48,9 +48,10 @@ enum PlatformType {
 
 /// A discovery mechanism for flutter-supported development devices.
 abstract class DeviceManager {
-  DeviceManager({required this._logger});
+  DeviceManager({required this._logger, required this._fileSystem});
 
   final Logger _logger;
+  final FileSystem _fileSystem;
 
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
@@ -252,7 +253,7 @@ abstract class DeviceManager {
   }) {
     FlutterProject? flutterProject;
     if (!includeDevicesUnsupportedByProject) {
-      flutterProject = FlutterProject.current();
+      flutterProject = FlutterProject.current(_fileSystem, logger: _logger);
     }
     if (hasSpecifiedAllDevices) {
       return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProjectOrAll(
@@ -1538,7 +1539,7 @@ abstract class DeviceLogReader {
   String toString() => name;
 
   // Clean up resources allocated by log reader e.g. subprocesses
-  void dispose();
+  Future<void> dispose();
 }
 
 // An empty device log reader
@@ -1552,7 +1553,7 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   Stream<String> get logLines => const Stream<String>.empty();
 
   @override
-  void dispose() {}
+  Future<void> dispose() async {}
 
   @override
   Future<void> provideVmService(FlutterVmService connectedVmService) async {}

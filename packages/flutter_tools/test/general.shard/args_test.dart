@@ -7,6 +7,9 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -23,15 +26,18 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
+import '../src/test_flutter_command_runner.dart';
 import '../src/testbed.dart';
 import 'runner/utils.dart';
 
@@ -55,7 +61,7 @@ void main() {
         appleContext: fakeAppleContext,
         toolContext: fakeToolContext,
       );
-      final runner = FlutterCommandRunner(
+      final runner = TestFlutterCommandRunner(
         analytics: fakeToolDependencies.analytics,
         toolContext: fakeToolContext,
         verboseHelp: true,
@@ -88,7 +94,7 @@ void main() {
       },
     );
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -117,7 +123,7 @@ void main() {
 
     command.addSubcommand(subcommand);
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -141,7 +147,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -171,7 +177,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -197,7 +203,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -228,7 +234,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -501,6 +507,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   FakeToolDependencies({
     Analytics? analytics,
     AndroidContext? androidContext,
+    this._androidWorkflow,
     AppleContext? appleContext,
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
@@ -513,7 +520,10 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this.extensionCleanManager,
     this.extensionManager,
     FeatureFlags? featureFlags,
+    this._macOSWorkflow,
+    TemplateRenderer? templateRenderer,
     ToolContext? toolContext,
+    this._windowsWorkflow,
   }) : analytics = analytics ?? FakeAnalytics(),
        androidContext = androidContext ?? FakeAndroidContext(),
        appleContext = appleContext ?? FakeAppleContext(),
@@ -524,13 +534,26 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        doctor = doctor ?? FakeDoctor(),
        emulatorManager = emulatorManager ?? FakeEmulatorManager(),
        featureFlags = featureFlags ?? TestFeatureFlags(),
+       templateRenderer = templateRenderer ?? const MustacheTemplateRenderer(),
        toolContext = toolContext ?? FakeToolContext();
+
+  final AndroidWorkflow? _androidWorkflow;
+  final MacOSWorkflow? _macOSWorkflow;
+  final WindowsWorkflow? _windowsWorkflow;
 
   @override
   final Analytics analytics;
 
   @override
   final AndroidContext androidContext;
+
+  @override
+  late final AndroidWorkflow androidWorkflow =
+      _androidWorkflow ??
+      AndroidWorkflow(
+        androidSdkBuilder: () => androidContext.androidSdk,
+        featureFlags: featureFlags,
+      );
 
   @override
   final AppleContext appleContext;
@@ -569,5 +592,18 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final FeatureFlags featureFlags;
 
   @override
+  late final MacOSWorkflow macOSWorkflow =
+      _macOSWorkflow ?? MacOSWorkflow(featureFlags: featureFlags, platform: _platform);
+
+  @override
+  final TemplateRenderer templateRenderer;
+
+  @override
   final ToolContext toolContext;
+
+  @override
+  late final WindowsWorkflow windowsWorkflow =
+      _windowsWorkflow ?? WindowsWorkflow(featureFlags: featureFlags, platform: _platform);
+
+  Platform get _platform => toolContext.platform;
 }

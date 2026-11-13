@@ -9,6 +9,7 @@ import 'package:dds/dds_launcher.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -53,6 +54,7 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
+import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/native_assets.dart';
@@ -63,6 +65,7 @@ import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -422,7 +425,7 @@ class FakeBotDetector implements BotDetector {
   const FakeBotDetector(bool isRunningOnBot) : _isRunningOnBot = isRunningOnBot;
 
   @override
-  Future<bool> get isRunningOnBot async => _isRunningOnBot;
+  bool get isRunningOnBot => _isRunningOnBot;
 
   final bool _isRunningOnBot;
 }
@@ -1099,7 +1102,7 @@ class FakeCache extends Fake implements Cache {
     this.engineRevision = 'fake_engine_revision',
     FileSystem? fileSystem,
     this._flutterRoot,
-    this.olderThanToolsStamp = true,
+    this.olderThanToolsStamp,
   }) : _fileSystem = fileSystem ?? MemoryFileSystem.test();
 
   final FileSystem _fileSystem;
@@ -1160,13 +1163,22 @@ class FakeGit extends Fake implements Git {}
 
 class FakeGradleUtils extends Fake implements GradleUtils {}
 
-class FakeCocoaPods extends Fake implements CocoaPods {}
+class FakeCocoaPods extends Fake implements CocoaPods {
+  @override
+  void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {}
+
+  @override
+  Future<void> setupPodfile(XcodeBasedProject xcodeProject) async {}
+}
 
 class FakeCocoaPodsValidator extends Fake implements CocoaPodsValidator {}
 
 class FakeIOSSimulatorUtils extends Fake implements IOSSimulatorUtils {}
 
-class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
+class FakeIOSWorkflow extends Fake implements IOSWorkflow {
+  @override
+  bool get appliesToHostPlatform => false;
+}
 
 class FakeXCDevice extends Fake implements XCDevice {}
 
@@ -1233,10 +1245,16 @@ class FakeEmulatorManager extends Fake implements EmulatorManager {
   }
 }
 
+class FakeExtensionManager extends Fake implements ExtensionManager {
+  @override
+  void disable() {}
+}
+
 class FakeToolDependencies extends Fake implements ToolDependencies {
   FakeToolDependencies({
     this._analytics,
     this._androidContext,
+    this._androidWorkflow,
     this._appleContext,
     this._buildSystem,
     this._buildTargets,
@@ -1249,11 +1267,14 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this.extensionCleanManager,
     this.extensionManager,
     this._featureFlags,
+    this._macOSWorkflow,
     this._toolContext,
+    this._windowsWorkflow,
   });
 
   final Analytics? _analytics;
   final AndroidContext? _androidContext;
+  final AndroidWorkflow? _androidWorkflow;
   final AppleContext? _appleContext;
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
@@ -1262,13 +1283,23 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final Doctor? _doctor;
   final EmulatorManager? _emulatorManager;
   final FeatureFlags? _featureFlags;
+  final MacOSWorkflow? _macOSWorkflow;
   final ToolContext? _toolContext;
+  final WindowsWorkflow? _windowsWorkflow;
 
   @override
   Analytics get analytics => _analytics ?? const NoOpAnalytics();
 
   @override
   AndroidContext get androidContext => _androidContext ?? FakeAndroidContext();
+
+  @override
+  late final AndroidWorkflow androidWorkflow =
+      _androidWorkflow ??
+      AndroidWorkflow(
+        androidSdkBuilder: () => androidContext.androidSdk,
+        featureFlags: featureFlags,
+      );
 
   @override
   AppleContext get appleContext => _appleContext ?? FakeAppleContext();
@@ -1307,7 +1338,17 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
 
   @override
+  late final MacOSWorkflow macOSWorkflow =
+      _macOSWorkflow ?? MacOSWorkflow(featureFlags: featureFlags, platform: _platform);
+
+  @override
   ToolContext get toolContext => _toolContext ?? FakeToolContext();
+
+  @override
+  late final WindowsWorkflow windowsWorkflow =
+      _windowsWorkflow ?? WindowsWorkflow(featureFlags: featureFlags, platform: _platform);
+
+  Platform get _platform => toolContext.platform;
 }
 
 class FakeToolContext extends Fake implements ToolContext {

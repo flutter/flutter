@@ -1169,7 +1169,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
   TestWidgetsFlutterBinding() {
-    platformDispatcher.defaultRouteNameTestValue = '/';
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
@@ -1227,7 +1226,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void reset() {
     _restorationManager?.dispose();
     _restorationManager = null;
-    platformDispatcher.defaultRouteNameTestValue = '/';
+    platformDispatcher.clearDefaultRouteNameTestValue();
     resetGestureBinding();
     testTextInput.reset();
     if (registerTestTextInput) {

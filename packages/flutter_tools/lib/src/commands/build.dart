@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:meta/meta.dart';
 
 import '../android/android_builder.dart';
@@ -149,6 +149,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildBundleCommand(
+        androidContext: androidContext,
         buildSystem: buildSystem,
         featureFlags: featureFlags,
         toolContext: toolContext,
@@ -213,8 +214,11 @@ class BuildCommand extends FlutterCommand {
             ),
           );
         } else {
+          final String extensionName = extensionBuildManager.extensionNameForBuildTarget(
+            target.name,
+          );
           toolContext.logger.printWarning(
-            'Skipping custom build target "${target.name}" because a subcommand with that name already exists.',
+            'Skipping custom build target "${target.name}" from extension "$extensionName" because a subcommand with that name already exists.',
           );
         }
       }
@@ -226,9 +230,6 @@ class BuildCommand extends FlutterCommand {
       addSubcommand(command);
     }
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final String name = 'build';
@@ -254,7 +255,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     required this.logger,
     required super.verboseHelp,
     super.outputPreferences,
-    super.toolContext,
+    required super.toolContext,
   }) {
     requiresPubspecYaml();
     CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
@@ -273,9 +274,9 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     required this._artifactManager,
     required this._buildManager,
     required this.target,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
-  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const BuildModeOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.target,
@@ -288,9 +289,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   /// The custom build target definition provided by the tool extension.
   final ExtensionBuildTarget target;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => target.name;

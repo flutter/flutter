@@ -16,9 +16,10 @@ typedef ExtensionNotificationSender = void Function(String method, Map<String, O
 
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
-/// Extension authors implement this class to group related RPC endpoints under
-/// a specific [namespace] (e.g. `diagnostics`, `configuration`, `device`, `build`, `templates`).
-abstract class ToolExtensionService {
+/// Extension authors extend this class (via specific service base classes) to
+/// group related RPC endpoints under a specific [namespace] (e.g.
+/// `diagnostics`, `config`, `device`, `build`, `template`).
+abstract base class ToolExtensionService {
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
   ///
   /// Wired by `ToolExtensionEntryPoint.run` before the extension peer begins
@@ -50,6 +51,12 @@ abstract class ToolExtensionService {
   }
 
   /// Cleans up resources held by the service when the extension is shut down.
+  ///
+  /// Invoked by `ToolExtensionEntryPoint.run` when the host tool sends an
+  /// `extension.shutdown` RPC on CLI exit or connection disposal. Runs
+  /// concurrently across all registered services in the isolate via
+  /// `Future.wait`, with a bounded grace period of approximately 2 seconds on
+  /// the host before the extension isolate is terminated.
   Future<void> shutdown() async {}
 }
 
