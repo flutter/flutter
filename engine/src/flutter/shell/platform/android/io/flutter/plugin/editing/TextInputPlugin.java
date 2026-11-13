@@ -345,6 +345,17 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             configuration.textCapitalization);
     outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN;
 
+    // Ask the IME to report, via TextAttribute#isTextSuggestionSelected(), when the user selects
+    // a conversion suggestion (e.g. 漢字 for かんじ). InputConnectionAdaptor uses this to set
+    // TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME on accessibility text change events.
+    // outAttrs.inputType was computed above from the framework's TextInputType, and
+    // TYPE_TEXT_FLAG_*
+    // flags are only valid for TYPE_CLASS_TEXT, so skip number, phone, datetime and none fields.
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37
+        && (outAttrs.inputType & InputType.TYPE_MASK_CLASS) == InputType.TYPE_CLASS_TEXT) {
+      outAttrs.inputType |= InputType.TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED;
+    }
+
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_26
         && !configuration.enableIMEPersonalizedLearning) {
       outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING;

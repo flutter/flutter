@@ -3366,6 +3366,337 @@ public class AccessibilityBridgeTest {
     assertFalse(nonHeadingInfo.isHeading());
   }
 
+  private static final int TEXT_CHANGE_TYPE_COMMITTED_BY_IME =
+      AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME;
+  private static final int TEXT_CHANGE_TYPE_IN_COMPOSITION =
+      AccessibilityEvent.TEXT_CHANGE_TYPE_IN_COMPOSITION;
+  private static final int TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME =
+      AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
+
+  @Test
+  public void itSetsTextChangeTypesOnAPI37ForImeTextChange() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.id = 0;
+    node.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
+    node.addFlag(AccessibilityBridge.Flag.IS_FOCUSED);
+    node.value = "initial";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    accessibilityBridge.addImeTextChange("updated text", TEXT_CHANGE_TYPE_IN_COMPOSITION);
+
+    node.value = "updated text";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce())
+        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+
+    AccessibilityEvent textChangedEvent = null;
+    for (AccessibilityEvent event : eventCaptor.getAllValues()) {
+      if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+        textChangedEvent = event;
+        break;
+      }
+    }
+    assertNotNull("Expected TYPE_VIEW_TEXT_CHANGED event", textChangedEvent);
+    assertEquals("initial", textChangedEvent.getBeforeText());
+    assertEquals(1, textChangedEvent.getText().size());
+    assertEquals("updated text", textChangedEvent.getText().get(0).toString());
+    assertEquals(TEXT_CHANGE_TYPE_IN_COMPOSITION, textChangedEvent.getTextChangeTypes());
+  }
+
+  @Test
+  public void itSendsTextChangedEventImmediatelyWhenImeFinalizesUnchangedTextOnAPI37() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.id = 0;
+    node.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
+    node.addFlag(AccessibilityBridge.Flag.IS_FOCUSED);
+    node.value = "same";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    accessibilityBridge.addImeTextChange(
+        "same", TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME);
+
+    // No semantics update follows: the framework does not send one when the text is unchanged.
+
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce())
+        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+
+    AccessibilityEvent textChangedEvent = null;
+    for (AccessibilityEvent event : eventCaptor.getAllValues()) {
+      if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+        textChangedEvent = event;
+        break;
+      }
+    }
+    assertNotNull(
+        "Expected TYPE_VIEW_TEXT_CHANGED event even when text is unchanged because changeType exists",
+        textChangedEvent);
+    assertEquals(
+        TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME,
+        textChangedEvent.getTextChangeTypes());
+  }
+
+  @Test
+  public void itClearsImeTextChangesOnFocusShiftOnAPI37() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    // Set up root node with two text fields
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    TestSemanticsNode node1 = new TestSemanticsNode();
+    node1.id = 1;
+    node1.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
+    node1.addFlag(AccessibilityBridge.Flag.IS_FOCUSED);
+    node1.value = "initial1";
+
+    TestSemanticsNode node2 = new TestSemanticsNode();
+    node2.id = 2;
+    node2.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
+    node2.value = "initial2";
+
+    root.children.add(node1);
+    root.children.add(node2);
+    root.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    // Add IME text change destined for node 1
+    accessibilityBridge.addImeTextChange("stale", TEXT_CHANGE_TYPE_COMMITTED_BY_IME);
+
+    // Focus shifts to node 2
+    node1.flags &= ~AccessibilityBridge.Flag.IS_FOCUSED.value;
+    node2.addFlag(AccessibilityBridge.Flag.IS_FOCUSED);
+    root.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    reset(mockParent);
+
+    // Node 2 changes value to "stale", but without adding IME text change
+    node2.value = "stale";
+    root.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce())
+        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+
+    AccessibilityEvent textChangedEvent = null;
+    for (AccessibilityEvent event : eventCaptor.getAllValues()) {
+      if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+        textChangedEvent = event;
+        break;
+      }
+    }
+    assertNotNull(textChangedEvent);
+    assertEquals(
+        "ImeTextChanges queue should have been cleared on focus shift",
+        0,
+        textChangedEvent.getTextChangeTypes());
+  }
+
+  @Test
+  public void itClearsImeTextChangesWhenFocusLostOnAPI37() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.id = 0;
+    node.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
+    node.addFlag(AccessibilityBridge.Flag.IS_FOCUSED);
+    node.value = "initial";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    // Add IME text change
+    accessibilityBridge.addImeTextChange("pending", TEXT_CHANGE_TYPE_COMMITTED_BY_IME);
+
+    // Node loses focus
+    node.flags &= ~AccessibilityBridge.Flag.IS_FOCUSED.value;
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    // Node regains focus
+    node.addFlag(AccessibilityBridge.Flag.IS_FOCUSED);
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    reset(mockParent);
+
+    // Value changes to "pending"
+    node.value = "pending";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce())
+        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+
+    AccessibilityEvent textChangedEvent = null;
+    for (AccessibilityEvent event : eventCaptor.getAllValues()) {
+      if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+        textChangedEvent = event;
+        break;
+      }
+    }
+    assertNotNull(textChangedEvent);
+    assertEquals(
+        "ImeTextChanges queue should have been cleared when focus was lost",
+        0,
+        textChangedEvent.getTextChangeTypes());
+  }
+
+  @Test
+  public void itCombinesTextChangeTypesFoldedIntoOneSemanticsUpdateOnAPI37() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.id = 0;
+    node.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
+    node.addFlag(AccessibilityBridge.Flag.IS_FOCUSED);
+    node.value = "";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    // A Korean IME commits one syllable and starts composing the next in a single batch edit.
+    accessibilityBridge.addImeTextChange("가", TEXT_CHANGE_TYPE_COMMITTED_BY_IME);
+    accessibilityBridge.addImeTextChange("가나", TEXT_CHANGE_TYPE_IN_COMPOSITION);
+    reset(mockParent);
+
+    node.value = "가나";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce())
+        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+    AccessibilityEvent textChangedEvent = null;
+    for (AccessibilityEvent event : eventCaptor.getAllValues()) {
+      if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+        textChangedEvent = event;
+        break;
+      }
+    }
+    assertNotNull(textChangedEvent);
+    assertEquals(
+        TEXT_CHANGE_TYPE_COMMITTED_BY_IME | TEXT_CHANGE_TYPE_IN_COMPOSITION,
+        textChangedEvent.getTextChangeTypes());
+  }
+
+  @Test
+  public void itIgnoresImeTextChangesForObscuredFieldsOnAPI37() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.id = 0;
+    node.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
+    node.addFlag(AccessibilityBridge.Flag.IS_FOCUSED);
+    node.addFlag(AccessibilityBridge.Flag.IS_OBSCURED);
+    node.value = "••";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+    reset(mockParent);
+
+    accessibilityBridge.addImeTextChange("••", TEXT_CHANGE_TYPE_COMMITTED_BY_IME);
+
+    verify(mockParent, never()).requestSendAccessibilityEvent(any(), any());
+  }
+
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @Test
+  public void itDoesNotSetTextChangeTypesPreAPI37() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.id = 0;
+    node.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
+    node.addFlag(AccessibilityBridge.Flag.IS_FOCUSED);
+    node.value = "initial";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    accessibilityBridge.addImeTextChange("updated text", TEXT_CHANGE_TYPE_IN_COMPOSITION);
+
+    node.value = "updated text";
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce())
+        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+
+    AccessibilityEvent textChangedEvent = null;
+    for (AccessibilityEvent event : eventCaptor.getAllValues()) {
+      if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+        textChangedEvent = event;
+        break;
+      }
+    }
+    assertNotNull(textChangedEvent);
+    assertEquals("initial", textChangedEvent.getBeforeText());
+  }
+
   AccessibilityBridge setUpBridge() {
     return setUpBridge(null, null, null, null, null, null);
   }
