@@ -18,6 +18,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 
 import 'basic.dart';
 import 'binding.dart';
@@ -572,6 +573,21 @@ class _DraggableSheetExtent {
   /// This should only be called to respond to a user drag. To update the
   /// size in response to a programmatic call, use [updateSize] directly.
   void addPixelDelta(double delta, BuildContext context) {
+    updateSizeFromUserDrag(currentSize + pixelsToSize(delta), context);
+  }
+
+  /// Sets the fractional size in response to a user drag.
+  ///
+  /// Cancels the current sheet activity and marks the sheet as dragged and
+  /// changed so it can snap when the drag ends. If [availablePixels] is nonzero,
+  /// delegates to [updateSize] to clamp the size and dispatch a
+  /// [DraggableScrollableNotification] when the size changes.
+  ///
+  /// Accepts an exact [minSize] or [maxSize] so callers can avoid rounding errors
+  /// from converting a boundary to pixels and back.
+  ///
+  /// For programmatic size changes, use [updateSize] directly.
+  void updateSizeFromUserDrag(double newSize, BuildContext context) {
     // Stop any playing sheet animations.
     _cancelActivity?.call();
     _cancelActivity = null;
@@ -582,7 +598,7 @@ class _DraggableSheetExtent {
     if (availablePixels == 0) {
       return;
     }
-    updateSize(currentSize + pixelsToSize(delta), context);
+    updateSize(newSize, context);
   }
 
   /// Set the size to the new value. [newSize] should be a number between
@@ -875,7 +891,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   VoidCallback? _dragCancelCallback;
   final _DraggableSheetExtent Function() getExtent;
   final Set<AnimationController> _ballisticControllers = <AnimationController>{};
-  bool get listShouldScroll => pixels > 0.0;
+  bool get listShouldScroll => pixels > minScrollExtent;
 
   _DraggableSheetExtent get extent => getExtent();
 
@@ -905,12 +921,39 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 
   @override
   void applyUserOffset(double delta) {
-    if (!listShouldScroll &&
-        (!(extent.isAtMin || extent.isAtMax) ||
-            (extent.isAtMin && delta < 0) ||
-            (extent.isAtMax && delta > 0))) {
-      extent.addPixelDelta(-delta, context.notificationContext!);
+    final ScrollActivity? dragActivity = activity;
+    // A downward update that starts in the list is entirely used to scroll it.
+    if (delta > 0 && listShouldScroll) {
+      updateUserScrollDirection(ScrollDirection.forward);
+      if (!identical(activity, dragActivity)) {
+        return;
+      }
+      final double scrollDelta = physics.applyPhysicsToUserOffset(this, delta);
+      setPixels(pixels - scrollDelta);
+      return;
+    }
+
+    // Resize within the sheet's limits, then scroll with any remaining delta.
+    final double minSizeDelta = extent.sizeToPixels(extent.minSize) - extent.currentPixels;
+    final double maxSizeDelta = extent.sizeToPixels(extent.maxSize) - extent.currentPixels;
+    final double sizeDelta = clampDouble(-delta, minSizeDelta, maxSizeDelta);
+    // Preserve exact fractional boundaries instead of round-tripping through pixels.
+    final double targetSize;
+    if (-delta <= minSizeDelta) {
+      targetSize = extent.minSize;
+    } else if (-delta >= maxSizeDelta) {
+      targetSize = extent.maxSize;
     } else {
+      targetSize = extent.currentSize + extent.pixelsToSize(sizeDelta);
+    }
+    if (sizeDelta != 0 || targetSize != extent.currentSize) {
+      extent.updateSizeFromUserDrag(targetSize, context.notificationContext!);
+      if (!identical(activity, dragActivity)) {
+        return;
+      }
+      delta += sizeDelta;
+    }
+    if (delta != 0) {
       super.applyUserOffset(delta);
     }
   }
@@ -939,11 +982,36 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 
   @override
   void goBallistic(double velocity) {
+    if (velocity < 0.0 && listShouldScroll && !extent.isAtMin) {
+      final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
+      if (simulation == null) {
+        goBallistic(0.0);
+      } else {
+        beginActivity(
+          _DraggableScrollableSheetBallisticScrollActivity(
+            this,
+            simulation,
+            context.vsync,
+            shouldIgnorePointer,
+          ),
+        );
+      }
+      return;
+    }
     if ((velocity == 0.0 && !_shouldSnap()) ||
         (velocity < 0.0 && listShouldScroll) ||
         (velocity > 0.0 && extent.isAtMax)) {
       super.goBallistic(velocity);
       return;
+    }
+    // Sheet animations do not use a BallisticScrollActivity. Stop the list's
+    // activity so it cannot keep ticking or restart the animation on layout.
+    if (activity is BallisticScrollActivity) {
+      final idleActivity = IdleScrollActivity(this);
+      beginActivity(idleActivity);
+      if (!identical(activity, idleActivity)) {
+        return;
+      }
     }
     // Scrollable expects that we will dispose of its current _dragCancelCallback
     _dragCancelCallback?.call();
@@ -1017,6 +1085,52 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     // Save this so we can call it later if we have to [goBallistic] on our own.
     _dragCancelCallback = dragCancelCallback;
     return super.drag(details, dragCancelCallback);
+  }
+}
+
+/// Returns the list to its start before continuing a downward fling in the sheet.
+///
+/// Used when the sheet can still shrink but its list has already been scrolled,
+/// for example after revealing a focused text field. The list follows its
+/// configured scroll physics until it reaches [ScrollPosition.minScrollExtent].
+/// At that boundary, the remaining velocity is handed to the sheet, preserving
+/// momentum and preventing the list from bouncing past its start.
+///
+/// A completed simulation hands off zero velocity, allowing the sheet to snap.
+/// If a scroll notification cancels this activity while applying the boundary
+/// position, the handoff is also cancelled.
+class _DraggableScrollableSheetBallisticScrollActivity extends BallisticScrollActivity {
+  _DraggableScrollableSheetBallisticScrollActivity(
+    super.delegate,
+    super.simulation,
+    super.vsync,
+    super.shouldIgnorePointer,
+  );
+
+  bool _isDisposed = false;
+
+  @override
+  _DraggableScrollableSheetScrollPosition get delegate =>
+      super.delegate as _DraggableScrollableSheetScrollPosition;
+
+  @override
+  bool applyMoveTo(double value) {
+    if (value > delegate.minScrollExtent || delegate.extent.isAtMin) {
+      return super.applyMoveTo(value);
+    }
+    final double remainingVelocity = math.min(velocity, 0.0);
+    delegate.setPixels(delegate.minScrollExtent);
+    if (!_isDisposed && delegate.pixels == delegate.minScrollExtent) {
+      delegate.goBallistic(remainingVelocity);
+    }
+    // The old list activity must not go idle after the sheet takes over.
+    return true;
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }
 
