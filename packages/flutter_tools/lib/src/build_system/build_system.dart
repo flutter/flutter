@@ -20,6 +20,7 @@ import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/android_context.dart' show AndroidSdkProvider;
 import '../convert.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -333,7 +334,7 @@ class CompositeTarget extends Target {
 ///        ..writeAsStringSync('non_debug');
 ///    }
 /// ```
-class Environment {
+class Environment implements AndroidSdkProvider {
   /// Create a new [Environment] object.
   ///
   /// [engineVersion] should be set to null for local engine builds.
@@ -609,6 +610,7 @@ class Environment {
 
   /// The [AndroidSdk] used by Android build targets, lazily resolved on first
   /// access.
+  @override
   late final AndroidSdk? androidSdk = _androidSdkBuilder?.call();
 
   /// The [VisualStudio] instance used by Windows build targets, or `null` for
