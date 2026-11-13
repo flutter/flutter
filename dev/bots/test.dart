@@ -155,6 +155,8 @@ Future<void> main(List<String> args) async {
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
+      'customer_testing_devtools': customerTestingDevtoolsRunner,
+      'customer_testing_flame': customerTestingFlameRunner,
       'analyze': analyzeRunner,
       'fuchsia_precache': fuchsiaPrecacheRunner,
       'snippets': _runSnippetsTests,
@@ -385,6 +387,10 @@ Future<void> _runBuildTests() async {
           .cast<Directory>()
           .toList()
         ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
+        // Depends on the google_mobile_ads plugin, so its Android and iOS builds
+        // exercise native plugin integration that would otherwise only be built
+        // by post-submit devicelab benchmarks. See flutter/flutter#185538.
+        ..add(Directory(path.join(flutterRoot, 'dev', 'benchmarks', 'platform_views_layout')))
         ..add(
           Directory(
             path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),

@@ -72,10 +72,8 @@ class Evaluation {
 ///
 /// ```dart
 /// testWidgets('HomePage meets androidTapTargetGuideline', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
 ///   await tester.pumpWidget(const MaterialApp(home: HomePage()));
 ///   await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
-///   handle.dispose();
 /// });
 /// ```
 /// {@end-tool}

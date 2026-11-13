@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -299,6 +298,37 @@ void _throwingQueryExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_ThrowingQueryBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
+final class _DomainErrorBuildTarget extends BuildTarget {
+  const _DomainErrorBuildTarget()
+    : super(
+        description: 'Custom target throwing ToolExtensionException',
+        outputDir: '${BuiltInPlaceholders.outputDir}/custom_os',
+        targetPlatform: 'linux-x64',
+      );
+
+  @override
+  String get name => 'custom-os-bundle';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    throw const ToolExtensionException('Custom compiler missing.');
+  }
+}
+
+final class _DomainErrorBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => const <BuildTarget>[_DomainErrorBuildTarget()];
+}
+
+void _domainErrorBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_DomainErrorBuildService()],
+    extensionName: 'custom_build_ext',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -810,6 +840,7 @@ void main() {
       );
 
       final defaultCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -819,6 +850,7 @@ void main() {
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
         toolContext: toolContext,
+        xcode: null,
       );
       final CommandRunner<void> defaultRunner = createTestCommandRunner(defaultCommand);
       await defaultRunner.run(<String>[
@@ -835,6 +867,7 @@ void main() {
       expect(buildManager.cachedAssembleTargets, isEmpty);
 
       final customCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -844,6 +877,7 @@ void main() {
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
         toolContext: toolContext,
+        xcode: null,
       );
       final CommandRunner<void> customRunner = createTestCommandRunner(customCommand);
       await customRunner.run(<String>[
@@ -887,6 +921,7 @@ void main() {
           platform: FakePlatform(),
         );
         final command = AssembleCommand(
+          androidContext: FakeAndroidContext(),
           buildSystem: buildSystem,
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
@@ -897,6 +932,7 @@ void main() {
             logger: logger,
             processManager: FakeProcessManager.any(),
           ),
+          xcode: null,
         );
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -1069,6 +1105,7 @@ void main() {
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
 
         final assembleCommand = AssembleCommand(
+          androidContext: FakeAndroidContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
             Environment environment,
@@ -1084,6 +1121,7 @@ void main() {
             logger: testLogger,
             processManager: FakeProcessManager.any(),
           ),
+          xcode: null,
         );
         final CommandRunner<void> assembleRunner = createTestCommandRunner(assembleCommand);
         await assembleRunner.run(<String>[
@@ -1172,5 +1210,35 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    testWithoutContext('ExtensionBuildManager.build returns failed ExtensionBuildResult when build target throws ToolExtensionException', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[_domainErrorBuildExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      addTearDown(manager.dispose);
+
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+
+      final ExtensionBuildResult result = await buildManager.build(
+        buildMode: .debug,
+        flutterRoot: Uri.directory('/flutter'),
+        mainPath: 'lib/main.dart',
+        outputDir: Uri.directory('/project/build/custom_os'),
+        projectRoot: Uri.directory('/project'),
+        resolvedArtifacts: const <String, String>{},
+        targetName: 'custom-os-bundle',
+      );
+      expect(result.success, isFalse);
+      expect(result.errorMessage, 'Custom compiler missing.');
+    });
   });
 }
