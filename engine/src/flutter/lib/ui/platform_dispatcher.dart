@@ -1142,6 +1142,9 @@ class PlatformDispatcher {
   /// The setting indicating whether time should always be shown in the 24-hour
   /// format.
   ///
+  /// The [onAlwaysUse24HourFormatChanged] callback is called whenever this
+  /// value changes.
+  ///
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
 
@@ -1297,6 +1300,23 @@ class PlatformDispatcher {
     _onSystemFontFamilyChangedZone = Zone.current;
   }
 
+  /// A callback that is invoked whenever [alwaysUse24HourFormat] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the callback
+  /// was set.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
+  VoidCallback? get onAlwaysUse24HourFormatChanged => _onAlwaysUse24HourFormatChanged;
+  VoidCallback? _onAlwaysUse24HourFormatChanged;
+  Zone _onAlwaysUse24HourFormatChangedZone = Zone.root;
+  set onAlwaysUse24HourFormatChanged(VoidCallback? callback) {
+    _onAlwaysUse24HourFormatChanged = callback;
+    _onAlwaysUse24HourFormatChangedZone = Zone.current;
+  }
+
   // Called from the engine, via hooks.dart
   void _updateUserSettingsData(String jsonData) {
     final data = json.decode(jsonData) as Map<String, Object?>;
@@ -1363,6 +1383,9 @@ class PlatformDispatcher {
     }
     if (systemFontFamilyChanged) {
       _invoke(onSystemFontFamilyChanged, _onSystemFontFamilyChangedZone);
+    }
+    if (alwaysUse24HourFormatChanged) {
+      _invoke(onAlwaysUse24HourFormatChanged, _onAlwaysUse24HourFormatChangedZone);
     }
   }
 
@@ -1562,7 +1585,7 @@ class PlatformDispatcher {
   /// [onTextScaleFactorChanged] callback can be used to monitor such changes.
   ///
   /// Instead of directly calling this method, applications should typically use
-  /// [MediaQuery.textScalerOf] to retrive the scaled font size in a widget tree,
+  /// [MediaQuery.textScalerOf] to retrieve the scaled font size in a widget tree,
   /// so text in the app resizes properly when the text scaling preference
   /// changes.
   double scaleFontSize(double unscaledFontSize) {
@@ -2686,6 +2709,10 @@ class ViewConstraints {
 /// the shape of the display, for example [DisplayFeatureState.postureFlat] or
 /// [DisplayFeatureState.postureHalfOpened]. For [DisplayFeatureType.cutout],
 /// the state is not used and has the [DisplayFeatureState.unknown] value.
+///
+/// See also:
+///
+///  * [MediaQuery.displayFeaturesOf], to get the display features in a widget tree.
 class DisplayFeature {
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
   // ignore: public_member_api_docs
