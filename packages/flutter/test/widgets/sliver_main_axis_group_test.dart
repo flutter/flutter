@@ -1507,6 +1507,178 @@ void main() {
     semantics.dispose();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/195985.
+  testWidgets(
+    'a pinned header pushed off screen by the end of its SliverMainAxisGroup leaves the semantics tree',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      // A pinned "Morning" header is pushed off the screen once the end of its
+      // group scrolls into view, while the "Afternoon" header stays pinned. The
+      // last "Morning" items remain inside the cache extent.
+      Future<void> verify({Axis scrollDirection = Axis.vertical, bool reverse = false}) async {
+        await tester.pumpWidget(
+          _buildPushedHeaderSections(
+            controller,
+            scrollDirection: scrollDirection,
+            reverse: reverse,
+          ),
+        );
+
+        controller.jumpTo(700);
+        await tester.pump();
+
+        final labels = <String>[
+          for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+            node.label,
+        ];
+        expect(labels, contains('Afternoon'));
+        expect(labels, isNot(contains('Morning')));
+        // The last "Morning" items are still in the cache extent and remain in
+        // the semantics tree.
+        expect(labels, contains('Morning item 8'));
+      }
+
+      await verify();
+      await verify(reverse: true);
+      await verify(scrollDirection: Axis.horizontal);
+      await verify(scrollDirection: Axis.horizontal, reverse: true);
+
+      handle.dispose();
+    },
+  );
+
+  // Pinned children that are pushed back but still cover the leading edge of
+  // the group's paint area must remain in the semantics tree; only children
+  // that were pushed completely out of view are removed.
+  testWidgets(
+    'a pinned header still covering the edge of its SliverMainAxisGroup remains in the semantics tree',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      Future<void> verify({Axis scrollDirection = Axis.vertical, bool reverse = false}) async {
+        await tester.pumpWidget(
+          _buildPushedHeaderSections(
+            controller,
+            scrollDirection: scrollDirection,
+            reverse: reverse,
+          ),
+        );
+
+        // At this offset the end of the group has already pushed the "Morning"
+        // header back, but its painted interval still covers the leading edge
+        // of the group's paint area.
+        controller.jumpTo(620);
+        await tester.pump();
+        var labels = <String>[
+          for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+            node.label,
+        ];
+        expect(labels, contains('Morning'));
+        expect(labels, contains('Afternoon'));
+
+        // Once pushed completely out of view it leaves the semantics tree.
+        controller.jumpTo(700);
+        await tester.pump();
+        labels = <String>[
+          for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+            node.label,
+        ];
+        expect(labels, isNot(contains('Morning')));
+        expect(labels, contains('Afternoon'));
+      }
+
+      await verify();
+      await verify(reverse: true);
+      await verify(scrollDirection: Axis.horizontal);
+      await verify(scrollDirection: Axis.horizontal, reverse: true);
+
+      handle.dispose();
+    },
+  );
+
+  // A pinned toolbar above the groups gives them a nonzero
+  // constraints.overlap, so a pushed-out pinned header can remain inside the
+  // viewport while painting entirely behind the toolbar.
+  testWidgets(
+    'a pinned header pushed behind a sliver pinned above its SliverMainAxisGroup leaves the semantics tree',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      List<String> labels() {
+        return <String>[
+          for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+            node.label,
+        ];
+      }
+
+      Future<void> verify({Axis scrollDirection = Axis.vertical, bool reverse = false}) async {
+        await tester.pumpWidget(
+          _buildPushedHeaderSections(
+            controller,
+            scrollDirection: scrollDirection,
+            reverse: reverse,
+            pinnedToolbar: true,
+          ),
+        );
+
+        controller.jumpTo(0);
+        await tester.pump();
+        expect(labels(), containsAll(<String>['Toolbar', 'Morning']));
+
+        // The end of the "Morning" group has pushed its header back, but 10px
+        // of it are still visible below the 50px pinned "Toolbar".
+        controller.jumpTo(620);
+        await tester.pump();
+        expect(labels(), containsAll(<String>['Toolbar', 'Morning', 'Afternoon']));
+
+        // 40px of the "Morning" group are still inside the viewport, all of
+        // them behind the toolbar, and so is its header.
+        controller.jumpTo(640);
+        await tester.pump();
+        expect(labels(), containsAll(<String>['Toolbar', 'Afternoon']));
+        expect(labels(), isNot(contains('Morning')));
+      }
+
+      await verify();
+      await verify(reverse: true);
+      await verify(scrollDirection: Axis.horizontal);
+      await verify(scrollDirection: Axis.horizontal, reverse: true);
+
+      handle.dispose();
+    },
+  );
+
+  // SliverEnsureSemantics explicitly requests inclusion: its child must stay
+  // in the semantics tree even when pushed completely out of view.
+  testWidgets(
+    'a SliverEnsureSemantics pinned header pushed off screen remains in the semantics tree',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(_buildPushedHeaderSections(controller, ensureFirstHeader: true));
+
+      controller.jumpTo(700);
+      await tester.pump();
+      final labels = <String>[
+        for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+          node.label,
+      ];
+      expect(labels, contains('Morning'));
+      expect(labels, contains('Afternoon'));
+
+      handle.dispose();
+    },
+  );
+
   testWidgets(
     'nested SliverMainAxisGroup with multiple PinnedHeaderSlivers positions correctly on scroll',
     (WidgetTester tester) async {
@@ -1688,4 +1860,65 @@ class _SnapPersistentHeaderState extends State<_SnapPersistentHeader>
       delegate: TestDelegate(minExtent: 30, snap: true, tickerProvider: this),
     );
   }
+}
+
+// Two sections ("Morning" and "Afternoon") inside a scrollable with a 100px
+// lead-in, so that the end of the first SliverMainAxisGroup pushes its pinned
+// header off the screen while the second section's header is pinned.
+Widget _buildPushedHeaderSections(
+  ScrollController controller, {
+  Axis scrollDirection = Axis.vertical,
+  bool reverse = false,
+  bool ensureFirstHeader = false,
+  bool pinnedToolbar = false,
+}) {
+  List<Widget> sectionSlivers(String title, int itemCount, {bool ensureSemantics = false}) {
+    return <Widget>[
+      if (ensureSemantics)
+        SliverEnsureSemantics(
+          sliver: SliverPersistentHeader(pinned: true, delegate: _SemanticsHeaderDelegate(title)),
+        )
+      else
+        SliverPersistentHeader(pinned: true, delegate: _SemanticsHeaderDelegate(title)),
+      SliverList.list(
+        children: <Widget>[
+          for (int i = 1; i <= itemCount; i++)
+            SizedBox(height: 60, width: 60, child: Text('$title item $i')),
+        ],
+      ),
+    ];
+  }
+
+  return _buildSliverMainAxisGroup(
+    controller: controller,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    precedingSlivers: <Widget>[
+      if (pinnedToolbar)
+        SliverPersistentHeader(pinned: true, delegate: _SemanticsHeaderDelegate('Toolbar')),
+      const SliverToBoxAdapter(child: SizedBox(height: 100, width: 100)),
+    ],
+    slivers: sectionSlivers('Morning', 8, ensureSemantics: ensureFirstHeader),
+    otherSlivers: <Widget>[SliverMainAxisGroup(slivers: sectionSlivers('Afternoon', 30))],
+  );
+}
+
+class _SemanticsHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _SemanticsHeaderDelegate(this.title);
+
+  final String title;
+
+  @override
+  double get minExtent => 50;
+
+  @override
+  double get maxExtent => 50;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox(height: 50, width: 50, child: Semantics(header: true, child: Text(title)));
+  }
+
+  @override
+  bool shouldRebuild(_SemanticsHeaderDelegate oldDelegate) => false;
 }

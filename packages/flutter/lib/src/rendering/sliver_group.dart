@@ -470,11 +470,41 @@ class RenderSliverMainAxisGroup extends RenderSliver
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     RenderSliver? child = firstChild;
     while (child != null) {
-      if (child.geometry!.visible || child.geometry!.cacheExtent > 0.0 || child.ensureSemantics) {
+      // Children wrapped in SliverEnsureSemantics are always visited, even
+      // when pushed completely out of view, since they explicitly requested
+      // semantic inclusion.
+      if (child.ensureSemantics ||
+          ((child.geometry!.visible || child.geometry!.cacheExtent > 0.0) &&
+              !_isPushedOutOfView(child))) {
         visitor(child);
       }
       child = childAfter(child);
     }
+  }
+
+  /// Whether this child paints nothing that is visible: either the end of the
+  /// group pushed it completely before the start of the group, or, for a
+  /// pinned child, completely behind the slivers pinned before the group.
+  /// This can only happen to children whose paintOffset performLayout
+  /// corrected while their paintExtent stayed positive, leaving them in the
+  /// semantics tree although nothing of them is visible.
+  bool _isPushedOutOfView(RenderSliver child) {
+    final SliverGeometry childGeometry = child.geometry!;
+    if (childGeometry.paintExtent == 0) {
+      return false;
+    }
+    // childMainAxisPosition undoes the flip that performLayout applies to the
+    // paintOffset for AxisDirection.up and AxisDirection.left.
+    final double childPaintEnd = childMainAxisPosition(child) + childGeometry.paintExtent;
+    // Only the paint correction in performLayout can move a child that paints
+    // something completely before the start of the group.
+    if (childPaintEnd <= precisionErrorTolerance) {
+      return true;
+    }
+    // A pinned child that paints entirely behind the slivers pinned before
+    // the group.
+    return childGeometry.maxScrollObstructionExtent > 0 &&
+        childPaintEnd <= constraints.overlap + precisionErrorTolerance;
   }
 
   static double _fixPrecisionError(double number) {
