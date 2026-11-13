@@ -805,24 +805,32 @@ class FlutterVmService {
     return 'unknown';
   }
 
-  /// Return the current brightness value for the flutter view running with
-  /// the main isolate [isolateId].
+  /// Returns the view metrics override that applies to every view of the
+  /// application running in the isolate [isolateId], in the format of
+  /// `DebugViewMetricsOverride.toJson`.
   ///
-  /// If a non-null value is provided for [brightness], the brightness override
-  /// is updated with this value.
-  Future<Brightness?> flutterBrightnessOverride({
-    Brightness? brightness,
+  /// If a non-null value is provided for [overrides], it replaces that override
+  /// first.
+  ///
+  /// Returns null if the application does not provide the
+  /// `ext.flutter.viewMetricsOverride` service extension.
+  Future<Map<String, Object?>?> flutterAllViewsMetricsOverride({
+    Map<String, Object?>? overrides,
     required String isolateId,
   }) async {
     final Map<String, Object?>? result = await invokeFlutterExtensionRpcRaw(
-      'ext.flutter.brightnessOverride',
+      'ext.flutter.viewMetricsOverride',
       isolateId: isolateId,
-      args: brightness != null
-          ? <String, String>{'value': brightness.toString()}
-          : <String, String>{},
+      args: <String, String>{
+        'viewId': 'all',
+        if (overrides != null) 'overrides': json.encode(overrides),
+      },
     );
-    if (result != null && result['value'] is String) {
-      return result['value'] == 'Brightness.light' ? Brightness.light : Brightness.dark;
+    if (result case {'overrides': final Map<String, Object?> registry}) {
+      return switch (registry['all']) {
+        final Map<String, Object?> allViews => allViews,
+        _ => <String, Object?>{},
+      };
     }
     return null;
   }
