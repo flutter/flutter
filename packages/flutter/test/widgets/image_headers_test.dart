@@ -80,8 +80,7 @@ class MockHttpHeaders extends Fake implements HttpHeaders {
   static final Map<String, List<String>> headers = <String, List<String>>{};
 
   @override
-  void add(String key, Object value, {bool preserveHeaderCase = false}) {
-    headers[key] ??= <String>[];
-    headers[key]!.add(value.toString());
+  void set(String key, Object value, {bool preserveHeaderCase = false}) {
+    headers[key] = <String>[value.toString()];
   }
 }
