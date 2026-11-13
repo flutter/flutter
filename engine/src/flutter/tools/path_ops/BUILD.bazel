@@ -1,0 +1,36 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/tools/path_ops/BUILD.gn by gn_to_bazel; do not edit.
+
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_shared_library(
+    name = "path_ops",
+    srcs = [
+        "path_ops.cc",
+        "path_ops.h",
+    ],
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "//conditions:default": [],
+    }),
+    interface_deps = ["//engine/src/flutter:config"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    output_name = "path_ops",
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+        "@skia",
+    ],
+)

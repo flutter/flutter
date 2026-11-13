@@ -1,0 +1,108 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/core/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "core",
+    srcs = [
+        "allocator.cc",
+        "buffer_view.cc",
+        "device_buffer.cc",
+        "device_buffer_descriptor.cc",
+        "formats.cc",
+        "gpu_submission_tracker.cc",
+        "host_buffer.cc",
+        "range.cc",
+        "raw_ptr.cc",
+        "resource_binder.cc",
+        "runtime_types.cc",
+        "sampler.cc",
+        "sampler_descriptor.cc",
+        "shader_types.cc",
+        "texture.cc",
+        "texture_descriptor.cc",
+        "vertex_buffer.cc",
+    ],
+    hdrs = [
+        "allocator.h",
+        "buffer_view.h",
+        "device_buffer.h",
+        "device_buffer_descriptor.h",
+        "formats.h",
+        "gpu_submission_tracker.h",
+        "host_buffer.h",
+        "idle_waiter.h",
+        "range.h",
+        "raw_ptr.h",
+        "resource_binder.h",
+        "runtime_types.h",
+        "sampler.h",
+        "sampler_descriptor.h",
+        "shader_types.h",
+        "texture.h",
+        "texture_descriptor.h",
+        "vertex_buffer.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/geometry",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "allocator_unittests",
+    testonly = True,
+    srcs = [
+        "allocator_unittests.cc",
+        "buffer_view_unittests.cc",
+        "sampler_descriptor_unittests.cc",
+        "shader_types_unittests.cc",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/renderer/testing:mocks
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":core",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/geometry",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/testing:testing_lib",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+    alwayslink = True,
+)

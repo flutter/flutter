@@ -14,6 +14,7 @@
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
+#include "flutter/testing/sk_data_fixtures.h"
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"

@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/compiler/shader_lib/flutter/BUILD.gn by gn_to_bazel; do not edit.
+
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+
+package(default_visibility = ["//visibility:public"])
+
+gn_copy(
+    name = "flutter",
+    srcs = ["runtime_effect.glsl"],
+    outputs = ["$root_out_dir/shader_lib/flutter/{{source_file_part}}"],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["*"]),
+)

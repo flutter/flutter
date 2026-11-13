@@ -1,0 +1,24 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The package flutter_tools' isolated/record_use_* tests (integration.shard)
+# copy beside record_use_test_app: a link hook recording uses.
+
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "project",
+    srcs = glob(
+        [
+            "data/**",
+            "hook/**",
+            "lib/**",
+        ],
+        exclude = FLUTTER_PROJECT_GENERATED,
+    ) + [
+        "pubspec.yaml",
+    ],
+)

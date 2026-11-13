@@ -1307,6 +1307,28 @@ def parse_args(args):
       action='store_true',
       help='Forces glfw to use swiftshader.',
   )
+  parser.add_argument(
+      '--bazel',
+      default=False,
+      action='store_true',
+      help='Write a build directory that builds with Bazel instead of GN: the flags must '
+      'be those of a build of ci/builders/*.json, whose Bazel configuration and install '
+      'target `ninja -C <dir> <targets>` then runs (flutter/build/bazel/ci.md).',
+  )
+  parser.add_argument(
+      '--bazel-rbe',
+      dest='bazel_rbe',
+      default=None,
+      action='store_true',
+      help="With --bazel: run the build's actions on Flutter's RBE instance (the root "
+      ".bazelrc's build:rbe; Linux hosts only), which is a Linux bot's default.",
+  )
+  parser.add_argument(
+      '--no-bazel-rbe',
+      dest='bazel_rbe',
+      action='store_false',
+      help='With --bazel: build on this machine alone, RBE off (flutter/build/bazel/ci.md).',
+  )
 
   return parser.parse_args(args)
 
@@ -1325,9 +1347,42 @@ def validate_args(args):
     sys.exit(-1)
 
 
+def bazel_main(argv, args):
+  """`tools/gn --bazel <flags>`: the build directory of the Bazel build of a builder file's build.
+
+  No GN runs. The flags are matched against the builder files' builds
+  (build/bazel/builds.json, which tools/gn_to_bazel generates), and
+  the build directory gets a build.ninja whose one edge runs the build's
+  Bazel install target, with a phony edge per ninja target of the build, and
+  a bazel.json for run_tests.py; see flutter/build/bazel/ci.md.
+  """
+  sys.path.insert(0, os.path.join(SRC_ROOT, 'flutter', 'build', 'bazel'))
+  # Resolved through the sys.path insert above, which pylint cannot see.
+  import bazel_ci  # pylint: disable=import-outside-toplevel,import-error
+
+  try:
+    build = bazel_ci.match_build(bazel_ci.load_builds(SRC_ROOT), argv[1:])
+    bazelisk = bazel_ci.find_bazelisk(SRC_ROOT)
+  except bazel_ci.BazelCiError as error:
+    print(error, file=sys.stderr)
+    return 1
+  out_dir = os.path.join(SRC_ROOT, get_out_dir(args))
+  written = bazel_ci.write_build_directory(SRC_ROOT, build, out_dir, bazelisk, args.bazel_rbe)
+  print(
+      'Generating Bazel build files in: %s (%s, --config=%s, %s)' %
+      (out_dir, build['file'], build['config'], build['install'])
+  )
+  for path in written:
+    print('  ' + path)
+  return 0
+
+
 def main(argv):
   args = parse_args(argv)
   validate_args(args)
+
+  if args.bazel:
+    return bazel_main(argv, args)
 
   exe = '.exe' if sys.platform.startswith(('cygwin', 'win')) else ''
 

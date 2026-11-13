@@ -80,7 +80,10 @@ if (enable_unittests) {
         cflags_objcc = flutter_cflags_objcc
         ldflags = [ "-ObjC" ]
 
-        sources += [ "ax/platform/ax_platform_node_mac_unittest.mm" ]
+        sources += [
+          "ax/platform/ax_platform_node_mac_unittest.h",
+          "ax/platform/ax_platform_node_mac_unittest.mm",
+        ]
         frameworks = [
           "AppKit.framework",
           "CoreFoundation.framework",
@@ -105,6 +108,9 @@ if (enable_unittests) {
       }
 
       sources += [
+        # ax_node_position_unittest.cc includes it on every platform
+        # (the Windows code path it tests is header-only).
+        "//flutter/fml/platform/win/wstring_conversion.h",
         "base/logging_unittests.cc",
         "base/string_utils_unittest.cc",
         "gfx/geometry/insets_unittest.cc",

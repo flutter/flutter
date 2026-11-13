@@ -1,0 +1,53 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @openjdk: the JDK CIPD package (DEPS:
+# flutter/java/openjdk/${platform}; engine/src/flutter/third_party/java/
+# openjdk), whose javac and jar the Android embedding's build runs
+# (shell/platform/android/BUILD.gn's flutter_shell_java, through
+# build/android/gyp/javac.py, which GN hands the two programs' absolute
+# paths). The Linux and Windows packages are the JDK's own layout (bin/,
+# lib/, conf/); macOS's is a bundle with the same under Contents/Home/,
+# which is the repository's root there (synced_deps' mac_subdir), so the
+# paths below hold on every host.
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "bin/jar",
+    "bin/java",
+    "bin/javac",
+    "bin/javadoc",
+])
+
+# What the programs load at run time: the launcher's libraries and the
+# runtime image (lib/modules, lib/jrt-fs.jar), the configuration (conf/) and
+# the JDK's own modules' libraries. Omitted: jmods/ (for jlink only),
+# include/ (JNI headers), man/, legal/ and the other programs.
+# The JDK as JAVA_HOME wants it: its directories whole (for the tests that
+# run Gradle, //build_defs/android:build_tools.bzl).
+filegroup(
+    name = "home",
+    # buildifier: disable=constant-glob
+    srcs = ["release"] + glob(
+        [
+            "bin",
+            "conf",
+            "include",
+            "jmods",
+            "legal",
+            "lib",
+        ],
+        allow_empty = True,
+        exclude_directories = 0,
+    ),
+)
+
+filegroup(
+    name = "runtime",
+    srcs = ["release"] + glob([
+        "conf/**",
+        "lib/**",
+    ]),
+)

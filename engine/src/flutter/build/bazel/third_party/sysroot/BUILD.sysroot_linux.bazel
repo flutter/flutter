@@ -1,0 +1,129 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of a Debian sysroot repository (@sysroot_linux_x64, ...):
+# the tarballs pinned in build/linux/sysroot_scripts/sysroots.json, either
+# unpacked by the gclient hook or downloaded by Bazel. The toolchain passes
+# the repository root as --sysroot and needs the headers and libraries as
+# action inputs.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The toolchain derives the --sysroot path from this file's location.
+exports_files(["BUILD.bazel"])
+
+# usr/include is one directory input rather than its ~9,000 files: every
+# compile action lists the toolchain's files, and the sandbox stages each
+# input as a symlink per action, which made the sysroot most of the cost of
+# sandboxing (research/08 §5). The tree changes only with a sysroots.json
+# roll, which re-fetches the repository.
+filegroup(
+    name = "headers",
+    srcs = ["usr/include"] + glob(
+        [
+            # Headers that live next to their library, which pkg-config
+            # adds with -I (usr/lib/x86_64-linux-gnu/glib-2.0/include, ...).
+            "usr/lib/*/*/include/**",
+        ],
+        allow_empty = True,
+    ),
+)
+
+# The include directories `pkg-config --cflags gtk+-3.0` reports against this
+# sysroot (build/config/linux/pkg-config.py, which GN's pkg_config() template
+# runs: //flutter/shell/platform/linux/config), as `includes` -- Bazel puts
+# them on the compiles of whatever depends on this library with -isystem,
+# which is how GN's template passes a sysroot's. The headers themselves are
+# the toolchain's inputs (:headers). The two directories under the multiarch
+# library directory are found through a file each holds rather than named,
+# so that the arm64 sysroot reads the same file.
+cc_library(
+    name = "gtk3_include_dirs",
+    includes = [
+        "usr/include/at-spi-2.0",
+        "usr/include/at-spi2-atk/2.0",
+        "usr/include/atk-1.0",
+        "usr/include/blkid",
+        "usr/include/cairo",
+        "usr/include/dbus-1.0",
+        "usr/include/freetype2",
+        "usr/include/fribidi",
+        "usr/include/gdk-pixbuf-2.0",
+        "usr/include/gio-unix-2.0",
+        "usr/include/glib-2.0",
+        "usr/include/gtk-3.0",
+        "usr/include/harfbuzz",
+        "usr/include/libmount",
+        "usr/include/libpng16",
+        "usr/include/pango-1.0",
+        "usr/include/pixman-1",
+        "usr/include/uuid",
+    ] + [
+        header[:-len("/dbus/dbus-arch-deps.h")]
+        for header in glob(
+            ["usr/lib/*-linux-gnu*/dbus-1.0/include/dbus/dbus-arch-deps.h"],
+            allow_empty = True,
+        )
+    ] + [
+        header[:-len("/glibconfig.h")]
+        for header in glob(
+            ["usr/lib/*-linux-gnu*/glib-2.0/include/glibconfig.h"],
+            allow_empty = True,
+        )
+    ],
+)
+
+filegroup(
+    name = "libraries",
+    # Only what the linker resolves: shared objects (and the linker scripts
+    # named like them), archives and the crt objects, in the directories clang
+    # searches for a Debian multiarch sysroot. Subdirectories hold plugins,
+    # Python and Perl modules, systemd units with names Bazel cannot label, ...
+    srcs = glob(
+        [
+            "lib/*-linux-gnu*/*.so*",
+            # The dynamic linker libc.so's linker script names: lib64/ on
+            # amd64 (ld-linux-x86-64.so.2), lib/ on arm64 (ld-linux-aarch64.so.1).
+            "lib/*.so*",
+            "lib64/*",
+            "usr/lib/*-linux-gnu*/*.a",
+            "usr/lib/*-linux-gnu*/*.o",
+            "usr/lib/*-linux-gnu*/*.so*",
+            "usr/lib/gcc/*/*/*.a",
+            "usr/lib/gcc/*/*/*.o",
+            "usr/lib/gcc/*/*/*.so*",
+        ],
+        allow_empty = True,
+    ),
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        ":headers",
+        ":libraries",
+    ],
+)
+
+# What a GN build using this sysroot reads, for rules that wrap a GN build:
+# the above, plus the pkg-config metadata (build/config/linux/pkg_config.gni)
+# and the loader configuration build/linux/sysroot_ld_path.sh evaluates.
+filegroup(
+    name = "build_tree",
+    srcs = [
+        ":headers",
+        ":libraries",
+    ] + glob(
+        [
+            "etc/ld.so.conf*",
+            "etc/ld.so.conf.d/*",
+            "usr/lib/pkgconfig/*.pc",
+            "usr/lib/*-linux-gnu*/pkgconfig/*.pc",
+            "usr/share/pkgconfig/*.pc",
+        ],
+        allow_empty = True,
+    ),
+)

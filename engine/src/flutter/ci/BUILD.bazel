@@ -1,0 +1,57 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's CI configuration: the builder configurations
+# (builders/*.json, which engine_build_configs reads and `et` builds from)
+# and the scripts of the CI steps, among them package:ci_scripts (bin/ and
+# test/ here, the formatter and the license and DEPS checks).
+#
+# ci_scripts' tests are in run_tests.py's dart-host list but not here:
+# format_test.dart writes files into the checkout, adds them to the git index,
+# runs ci/format.sh over the working tree and removes them again -- a test of
+# the checkout and its git repository, which no runfiles tree holds (and which
+# a sandboxed test must not touch); run them with `dart test` in this
+# directory. The other packages of that list are dart_package_test targets
+# (//engine/src/flutter:dart_host_tests).
+
+load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# ci/host_debug_unopt's "ban GeneratedPluginRegistrant.java" and its
+# "ban_test" (linux_unopt.json): the first walks the checkout for files of
+# that name outside third_party and the one expected place, the second plants
+# one, runs the first and expects it to fail, and removes it. Both in the
+# checkout itself (the walk and the planted file are the source tree's), and
+# exclusive: the test's planted file must not be there while the check runs.
+# Both walk the whole checkout (`find` over the source tree): 8 s on an idle
+# host, over small's 60 s under a full compile load, hence medium.
+checkout_script_test(
+    name = "ban_generated_plugin_registrant_java",
+    size = "medium",
+    srcs = ["ban_generated_plugin_registrant_java.sh"],
+    in_checkout = True,
+    script = "ban_generated_plugin_registrant_java.sh",
+    tags = ["exclusive"],
+)
+
+checkout_script_test(
+    name = "ban_generated_plugin_registrant_java_test",
+    size = "medium",
+    srcs = [
+        "ban_generated_plugin_registrant_java.sh",
+        "test/ban_generated_plugin_registrant_java_test.sh",
+    ],
+    in_checkout = True,
+    script = "test/ban_generated_plugin_registrant_java_test.sh",
+    tags = ["exclusive"],
+)
+
+# The builder configurations, for the tests of the packages that read them
+# (builders/ is a package of its own: the generated install targets and
+# configurations of the builds, see builders/BUILD.bazel).
+filegroup(
+    name = "builder_configs",
+    srcs = ["//engine/src/flutter/ci/builders:json"],
+)

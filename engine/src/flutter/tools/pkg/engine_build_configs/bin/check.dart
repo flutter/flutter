@@ -235,6 +235,11 @@ List<String> checkForDuplicateConfigs(Map<String, BuilderConfig> configs) {
 List<String> checkForDuplicateArchives(Map<String, BuilderConfig> configs) {
   final zipPathPattern = RegExp(r'zip_archives/(.*\.zip)$');
   final errors = <String>[];
+  // Archives of different realms go to different places in cloud storage
+  // (the recipe's archives module puts an experimental realm's under its
+  // own prefix), so a path collides only within a realm: a Bazel variant of
+  // a builder (*_bazel.json, flutter/build/bazel/ci.md) uploads the same
+  // archives as the builder it mirrors, to the experimental realm.
   final archivePaths = <String>{};
   _forEachBuild(configs, (String name, BuilderConfig config, Build build) {
     for (final BuildArchive archive in build.archives) {
@@ -244,8 +249,8 @@ List<String> checkForDuplicateArchives(Map<String, BuilderConfig> configs) {
           continue;
         }
         final String zipPath = match.group(1)!;
-        if (!archivePaths.add(zipPath)) {
-          errors.add('$zipPath is duplicated in $name\n');
+        if (!archivePaths.add('${archive.realm}:$zipPath')) {
+          errors.add('$zipPath is duplicated in $name (realm ${archive.realm})\n');
         }
       }
     }

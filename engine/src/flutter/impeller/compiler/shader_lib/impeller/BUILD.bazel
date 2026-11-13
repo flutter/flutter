@@ -1,0 +1,42 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/compiler/shader_lib/impeller/BUILD.gn by gn_to_bazel; do not edit.
+
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+
+package(default_visibility = ["//visibility:public"])
+
+gn_copy(
+    name = "impeller",
+    srcs = [
+        "blending.glsl",
+        "branching.glsl",
+        "color.glsl",
+        "conical_gradient_fill.glsl",
+        "conical_gradient_uniform_fill.glsl",
+        "constants.glsl",
+        "dithering.glsl",
+        "external_texture_oes.glsl",
+        "gaussian.glsl",
+        "gradient.glsl",
+        "math.glsl",
+        "path.glsl",
+        "prefix_sum.glsl",
+        "rrect.glsl",
+        "texture.glsl",
+        "tile_mode.glsl",
+        "transform.glsl",
+        "types.glsl",
+    ],
+    outputs = ["$root_out_dir/shader_lib/impeller/{{source_file_part}}"],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["*"]),
+)

@@ -1,0 +1,27 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/darwin/BUILD.gn by gn_to_bazel; do not edit.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "darwin",
+    srcs = select({
+        "@platforms//os:ios": [
+            "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "//engine/src/flutter/shell/platform/darwin/macos",  # is_mac && enable_desktop_embeddings
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)

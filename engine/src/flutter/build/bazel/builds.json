@@ -1,0 +1,4379 @@
+{
+  "_comment": "Generated from ci/builders/{,standalone/}{linux,mac}_*.json by gn_to_bazel; do not edit. The builds as tools/gn --bazel and testing/run_tests.py read them (build/bazel/ci.md).",
+  "builds": {
+    "linux": [
+      {
+        "file": "linux_android_aot_engine.json",
+        "name": "ci/android_profile",
+        "gn": [
+          "--target-dir",
+          "ci/android_profile",
+          "--runtime-mode",
+          "profile",
+          "--android",
+          "--android-cpu",
+          "arm",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_profile",
+        "config": "android_profile",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_profile",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:embedding_jars",
+          "flutter/shell/platform/android:abi_jars"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine.json",
+        "name": "ci/android_release",
+        "gn": [
+          "--target-dir",
+          "ci/android_release",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu",
+          "arm",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release",
+        "config": "android_release",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_release",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:embedding_jars",
+          "flutter/shell/platform/android:abi_jars"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine.json",
+        "name": "ci/android_release_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/android_release_arm64",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu",
+          "arm64",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release_arm64",
+        "config": "ci_android_release_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_android_release_arm64",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/android:analyze_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine.json",
+        "name": "ci/android_profile_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/android_profile_arm64",
+          "--android",
+          "--runtime-mode",
+          "profile",
+          "--android-cpu",
+          "arm64",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_profile_arm64",
+        "config": "ci_android_profile_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_android_profile_arm64",
+        "ninja_targets": [
+          "clang_x64/gen_snapshot",
+          "default",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/android:analyze_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine.json",
+        "name": "ci/android_profile_x64",
+        "gn": [
+          "--target-dir",
+          "ci/android_profile_x64",
+          "--runtime-mode",
+          "profile",
+          "--android",
+          "--android-cpu",
+          "x64",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_profile_x64",
+        "config": "android_profile_x64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_profile_x64",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/android:analyze_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine.json",
+        "name": "ci/android_release_x64",
+        "gn": [
+          "--target-dir",
+          "ci/android_release_x64",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu",
+          "x64",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release_x64",
+        "config": "android_release_x64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_release_x64",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/android:analyze_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine.json",
+        "name": "ci/android_profile_riscv64",
+        "gn": [
+          "--target-dir",
+          "ci/android_profile_riscv64",
+          "--runtime-mode",
+          "profile",
+          "--android",
+          "--android-cpu",
+          "riscv64",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_profile_riscv64",
+        "config": "android_profile_riscv64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_profile_riscv64",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/android:analyze_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine.json",
+        "name": "ci/android_release_riscv64",
+        "gn": [
+          "--target-dir",
+          "ci/android_release_riscv64",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu",
+          "riscv64",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release_riscv64",
+        "config": "android_release_riscv64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_release_riscv64",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/android:analyze_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine_ddm.json",
+        "name": "ci/android_release_arm64_ddm",
+        "gn": [
+          "--target-dir",
+          "ci/android_release_arm64_ddm",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu",
+          "arm64",
+          "--gn-args=dart_dynamic_modules=true",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release_arm64_ddm",
+        "config": "android_release_arm64_ddm",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_release_arm64_ddm",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:analyze_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine_ddm.json",
+        "name": "ci/android_release_x64_ddm",
+        "gn": [
+          "--target-dir",
+          "ci/android_release_x64_ddm",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu",
+          "x64",
+          "--gn-args=dart_dynamic_modules=true",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release_x64_ddm",
+        "config": "android_release_x64_ddm",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_release_x64_ddm",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:analyze_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine_size_exp.json",
+        "name": "ci/android_release_arm64_size_exp",
+        "gn": [
+          "--target-dir",
+          "ci/android_release_arm64_size_exp",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu",
+          "arm64",
+          "--no-dart-secure-socket",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release_arm64_size_exp",
+        "config": "android_release_arm64_size_exp",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_release_arm64_size_exp",
+        "ninja_targets": [
+          "default",
+          "clang_x64/gen_snapshot",
+          "flutter/shell/platform/android:analyze_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_aot_engine_size_exp.json",
+        "name": "ci/android_debug_arm64_size_exp",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug_arm64_size_exp",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-lto",
+          "--no-dart-secure-socket",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_arm64_size_exp",
+        "config": "android_debug_arm64_size_exp",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_arm64_size_exp",
+        "ninja_targets": [
+          "flutter"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_debug_engine.json",
+        "name": "ci/android_debug",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug",
+          "--android",
+          "--android-cpu=arm",
+          "--no-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug",
+        "config": "android_debug",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug",
+        "ninja_targets": [
+          "flutter",
+          "flutter/sky/dist:zip_old_location",
+          "flutter/lib/gpu/dist:zip_old_location",
+          "flutter/shell/platform/android:embedding_jars",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/embedder:embedder-archive",
+          "flutter/impeller/toolkit/interop:sdk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_debug_engine.json",
+        "name": "ci/android_debug_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug_arm64",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_arm64",
+        "config": "android_debug_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_arm64",
+        "ninja_targets": [
+          "flutter",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/embedder:embedder-archive",
+          "flutter/impeller/toolkit/interop:sdk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_debug_engine.json",
+        "name": "ci/android_debug_x64",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug_x64",
+          "--android",
+          "--android-cpu=x64",
+          "--no-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_x64",
+        "config": "android_debug_x64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_x64",
+        "ninja_targets": [
+          "flutter",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/embedder:embedder-archive",
+          "flutter/impeller/toolkit/interop:sdk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_debug_engine.json",
+        "name": "ci/android_debug_riscv64",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug_riscv64",
+          "--android",
+          "--android-cpu=riscv64",
+          "--no-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_riscv64",
+        "config": "android_debug_riscv64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_riscv64",
+        "ninja_targets": [
+          "flutter",
+          "flutter/shell/platform/android:abi_jars",
+          "flutter/shell/platform/embedder:embedder-archive",
+          "flutter/impeller/toolkit/interop:sdk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_debug_engine_ddm.json",
+        "name": "ci/android_debug_arm64_ddm",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug_arm64_ddm",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-lto",
+          "--gn-args=dart_dynamic_modules=true",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_arm64_ddm",
+        "config": "android_debug_arm64_ddm",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_arm64_ddm",
+        "ninja_targets": [
+          "flutter"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_debug_engine_ddm.json",
+        "name": "ci/android_debug_x64_ddm",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug_x64_ddm",
+          "--android",
+          "--android-cpu=x64",
+          "--no-lto",
+          "--gn-args=dart_dynamic_modules=true",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_x64_ddm",
+        "config": "android_debug_x64_ddm",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_x64_ddm",
+        "ninja_targets": [
+          "flutter"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_android_emulator.json",
+        "name": "ci/android_emulator_debug_x64",
+        "gn": [
+          "--android",
+          "--android-cpu=x64",
+          "--no-lto",
+          "--no-rbe",
+          "--target-dir",
+          "ci/android_emulator_debug_x64",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_emulator_debug_x64",
+        "config": "android_emulator_debug_x64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_emulator_debug_x64",
+        "ninja_targets": [
+          "flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",
+          "flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests",
+          "flutter/impeller/toolkit/android:unittests",
+          "flutter/shell/platform/android:flutter_shell_native_unittests"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [
+          "flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",
+          "flutter/impeller/toolkit/android:unittests",
+          "flutter/shell/platform/android:flutter_shell_native_unittests"
+        ],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:android_emulator_debug_x64_tests",
+          "types": {
+            "android": [
+              "//engine/src/flutter/shell/platform/android:flutter_shell_native_unittests",
+              "//engine/src/flutter/impeller/toolkit/android:impeller_toolkit_android_unittests",
+              "//engine/src/flutter/impeller/renderer/backend/vulkan:impeller_vulkan_android_unittests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_arm_host_desktop_engine.json",
+        "name": "ci/linux_debug_arm64_desktop",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--enable-fontconfig",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--no-rbe",
+          "--target-dir",
+          "ci/linux_debug_arm64_desktop",
+          "--target-os=linux",
+          "--linux-cpu=arm64",
+          "--bazel"
+        ],
+        "build_directory": "ci/linux_debug_arm64_desktop",
+        "config": "linux_debug_arm64_desktop",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:linux_debug_arm64_desktop",
+        "ninja_targets": [
+          "flutter/shell/platform/linux:flutter_gtk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_arm_host_desktop_engine.json",
+        "name": "ci/linux_profile_arm64_desktop",
+        "gn": [
+          "--runtime-mode",
+          "profile",
+          "--enable-fontconfig",
+          "--prebuilt-dart-sdk",
+          "--thin-lto",
+          "--no-rbe",
+          "--target-dir",
+          "ci/linux_profile_arm64_desktop",
+          "--target-os=linux",
+          "--linux-cpu=arm64",
+          "--bazel"
+        ],
+        "build_directory": "ci/linux_profile_arm64_desktop",
+        "config": "linux_profile_arm64_desktop",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:linux_profile_arm64_desktop",
+        "ninja_targets": [
+          "flutter/shell/platform/linux:flutter_gtk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_arm_host_desktop_engine.json",
+        "name": "ci/linux_release_arm64_desktop",
+        "gn": [
+          "--runtime-mode",
+          "release",
+          "--enable-fontconfig",
+          "--prebuilt-dart-sdk",
+          "--thin-lto",
+          "--no-rbe",
+          "--target-dir",
+          "ci/linux_release_arm64_desktop",
+          "--target-os=linux",
+          "--linux-cpu=arm64",
+          "--bazel"
+        ],
+        "build_directory": "ci/linux_release_arm64_desktop",
+        "config": "linux_release_arm64_desktop",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:linux_release_arm64_desktop",
+        "ninja_targets": [
+          "flutter/shell/platform/linux:flutter_gtk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_arm_host_engine.json",
+        "name": "ci/linux_debug_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/linux_debug_arm64",
+          "--runtime-mode",
+          "debug",
+          "--target-os=linux",
+          "--linux-cpu=arm64",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/linux_debug_arm64",
+        "config": "linux_debug_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:linux_debug_arm64",
+        "ninja_targets": [
+          "flutter/build/archives:artifacts",
+          "flutter/build/archives:dart_sdk_archive",
+          "flutter/tools/font_subset",
+          "flutter/impeller/toolkit/interop:sdk",
+          "flutter/build/archives:embedder"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_benchmarks.json",
+        "name": "ci/host_release_benchmarks",
+        "gn": [
+          "--target-dir",
+          "ci/host_release_benchmarks",
+          "--runtime-mode",
+          "release",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--rbe"
+        ],
+        "build_directory": "ci/host_release_benchmarks",
+        "config": "host_release_benchmarks",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_release_benchmarks",
+        "ninja_targets": [
+          "flutter/build/dart:dart_sdk",
+          "flutter/display_list:display_list_benchmarks",
+          "flutter/display_list:display_list_builder_benchmarks",
+          "flutter/display_list:display_list_region_benchmarks",
+          "flutter/display_list:display_list_transform_benchmarks",
+          "flutter/display_list:primitive_rendering_benchmarks",
+          "flutter/fml:fml_benchmarks",
+          "flutter/impeller/geometry:geometry_benchmarks",
+          "flutter/lib/ui:ui_benchmarks",
+          "flutter/shell/common:shell_benchmarks",
+          "flutter/shell/testing",
+          "flutter/txt:txt_benchmarks",
+          "flutter/tools/path_ops",
+          "flutter/build/archives:flutter_patched_sdk",
+          "flutter:unittests"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [
+          "flutter/display_list:display_list_builder_benchmarks",
+          "flutter/fml:fml_benchmarks",
+          "flutter/impeller/geometry:geometry_benchmarks",
+          "flutter/lib/ui:ui_benchmarks",
+          "flutter/shell/common:shell_benchmarks",
+          "flutter/txt:txt_benchmarks"
+        ],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_clang_tidy.json",
+        "name": "ci/android_debug_arm64_clang_tidy",
+        "gn": [
+          "--android",
+          "--android-cpu",
+          "arm64",
+          "--no-lto",
+          "--target-dir",
+          "ci/android_debug_arm64_clang_tidy",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_arm64_clang_tidy",
+        "config": "android_debug_arm64_clang_tidy",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_arm64_clang_tidy",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_clang_tidy.json",
+        "name": "ci/host_debug_clang_tidy",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--target-dir",
+          "ci/host_debug_clang_tidy",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_clang_tidy",
+        "config": "host_debug_clang_tidy",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_clang_tidy",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_clangd.json",
+        "name": "ci/linux_unopt_debug_no_rbe",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--no-rbe",
+          "--target-dir",
+          "ci/linux_unopt_debug_no_rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/linux_unopt_debug_no_rbe",
+        "config": "linux_unopt_debug_no_rbe",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:linux_unopt_debug_no_rbe",
+        "ninja_targets": [
+          "flutter/tools/font_subset"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_host_desktop_engine.json",
+        "name": "ci/host_debug_desktop",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--enable-fontconfig",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--no-rbe",
+          "--target-dir",
+          "ci/host_debug_desktop",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_desktop",
+        "config": "host_debug_desktop",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_desktop",
+        "ninja_targets": [
+          "flutter/shell/platform/linux:flutter_gtk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_host_desktop_engine.json",
+        "name": "ci/host_profile_desktop",
+        "gn": [
+          "--runtime-mode",
+          "profile",
+          "--enable-fontconfig",
+          "--prebuilt-dart-sdk",
+          "--thin-lto",
+          "--no-rbe",
+          "--target-dir",
+          "ci/host_profile_desktop",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_profile_desktop",
+        "config": "host_profile_desktop",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_profile_desktop",
+        "ninja_targets": [
+          "flutter/shell/platform/linux:flutter_gtk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_host_desktop_engine.json",
+        "name": "ci/host_release_desktop",
+        "gn": [
+          "--runtime-mode",
+          "release",
+          "--enable-fontconfig",
+          "--prebuilt-dart-sdk",
+          "--thin-lto",
+          "--no-rbe",
+          "--target-dir",
+          "ci/host_release_desktop",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release_desktop",
+        "config": "host_release_desktop",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_release_desktop",
+        "ninja_targets": [
+          "flutter/shell/platform/linux:flutter_gtk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_host_engine.json",
+        "name": "ci/host_debug",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug",
+          "--runtime-mode",
+          "debug",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug",
+        "config": "ci_host_debug",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_host_debug",
+        "ninja_targets": [
+          "flutter/build/archives:dart_sdk_archive",
+          "flutter/build/archives:flutter_patched_sdk",
+          "flutter/build/archives:artifacts",
+          "flutter/tools/font_subset",
+          "flutter/impeller/toolkit/interop:sdk",
+          "flutter/build/archives:embedder"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_host_engine.json",
+        "name": "ci/host_release",
+        "gn": [
+          "--target-dir",
+          "ci/host_release",
+          "--runtime-mode",
+          "release",
+          "--prebuilt-dart-sdk",
+          "--thin-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release",
+        "config": "ci_host_release",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_host_release",
+        "ninja_targets": [
+          "flutter/build/archives:flutter_patched_sdk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_host_engine_ddm.json",
+        "name": "ci/host_debug_ddm",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug_ddm",
+          "--runtime-mode",
+          "debug",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--no-rbe",
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_ddm",
+        "config": "host_debug_ddm",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_ddm",
+        "ninja_targets": [
+          "flutter/build/archives:artifacts"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_host_engine_test.json",
+        "name": "ci/host_debug_test",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug_test",
+          "--runtime-mode",
+          "debug",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--no-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_test",
+        "config": "host_debug_test",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_test",
+        "ninja_targets": [
+          "flutter:unittests",
+          "flutter/build/dart:dart_sdk",
+          "flutter/shell/testing",
+          "flutter/tools/path_ops"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_debug_test_tests",
+          "types": {
+            "dart": [
+              "//engine/src/flutter/testing/dart:dart",
+              "//engine/src/flutter/testing/dart/vm_service:vm_service",
+              "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure"
+            ],
+            "dart-host": [
+              "//engine/src/flutter:dart_host_tests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_host_engine_test.json",
+        "name": "ci/host_profile_test",
+        "gn": [
+          "--target-dir",
+          "ci/host_profile_test",
+          "--runtime-mode",
+          "profile",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--thin-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_profile_test",
+        "config": "host_profile_test",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_profile_test",
+        "ninja_targets": [
+          "flutter:unittests",
+          "flutter/build/dart:dart_sdk",
+          "flutter/shell/testing",
+          "flutter/tools/path_ops"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_profile_test_tests",
+          "types": {
+            "dart": [
+              "//engine/src/flutter/testing/dart:dart",
+              "//engine/src/flutter/testing/dart/vm_service:vm_service",
+              "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure"
+            ],
+            "dart-host": [
+              "//engine/src/flutter:dart_host_tests"
+            ],
+            "engine": [
+              "//engine/src/flutter/assets:assets_unittests",
+              "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+              "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+              "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+              "//engine/src/flutter/display_list:display_list_rendertests",
+              "//engine/src/flutter/display_list:display_list_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+              "//engine/src/flutter/fml:fml_unittests",
+              "//engine/src/flutter/shell/geometry:geometry_unittests",
+              "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+              "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+              "//engine/src/flutter/runtime:runtime_unittests",
+              "//engine/src/flutter/testing:testing_unittests",
+              "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+              "//engine/src/flutter/lib/ui:ui_unittests",
+              "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+              "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+              "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+              "//engine/src/flutter/shell/common:shell_unittests",
+              "//engine/src/flutter/flow:flow_unittests",
+              "//engine/src/flutter/shell/platform/glfw:flutter_glfw_unittests",
+              "//engine/src/flutter/shell/platform/linux:flutter_linux_unittests",
+              "//engine/src/flutter/txt:txt_unittests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_host_engine_test.json",
+        "name": "ci/host_release_test",
+        "gn": [
+          "--target-dir",
+          "ci/host_release_test",
+          "--runtime-mode",
+          "release",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--thin-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release_test",
+        "config": "host_release_test",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_release_test",
+        "ninja_targets": [
+          "flutter:unittests",
+          "flutter/build/dart:dart_sdk",
+          "flutter/display_list:display_list_benchmarks",
+          "flutter/display_list:display_list_builder_benchmarks",
+          "flutter/display_list:display_list_region_benchmarks",
+          "flutter/display_list:display_list_transform_benchmarks",
+          "flutter/display_list:primitive_rendering_benchmarks",
+          "flutter/fml:fml_benchmarks",
+          "flutter/impeller/geometry:geometry_benchmarks",
+          "flutter/lib/ui:ui_benchmarks",
+          "flutter/shell/common:shell_benchmarks",
+          "flutter/shell/testing",
+          "flutter/tools/path_ops",
+          "flutter/txt:txt_benchmarks"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [
+          "flutter/display_list:display_list_builder_benchmarks",
+          "flutter/fml:fml_benchmarks",
+          "flutter/impeller/geometry:geometry_benchmarks",
+          "flutter/lib/ui:ui_benchmarks",
+          "flutter/shell/common:shell_benchmarks",
+          "flutter/txt:txt_benchmarks"
+        ],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_release_test_tests",
+          "types": {
+            "dart": [
+              "//engine/src/flutter/testing/dart:dart",
+              "//engine/src/flutter/testing/dart/vm_service:vm_service",
+              "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure"
+            ],
+            "dart-host": [
+              "//engine/src/flutter:dart_host_tests"
+            ],
+            "engine": [
+              "//engine/src/flutter/assets:assets_unittests",
+              "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+              "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+              "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+              "//engine/src/flutter/display_list:display_list_rendertests",
+              "//engine/src/flutter/display_list:display_list_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+              "//engine/src/flutter/fml:fml_unittests",
+              "//engine/src/flutter/shell/geometry:geometry_unittests",
+              "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+              "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+              "//engine/src/flutter/runtime:runtime_unittests",
+              "//engine/src/flutter/testing:testing_unittests",
+              "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+              "//engine/src/flutter/lib/ui:ui_unittests",
+              "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+              "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+              "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+              "//engine/src/flutter/shell/common:shell_unittests",
+              "//engine/src/flutter/flow:flow_unittests",
+              "//engine/src/flutter/shell/platform/glfw:flutter_glfw_unittests",
+              "//engine/src/flutter/shell/platform/linux:flutter_linux_unittests",
+              "//engine/src/flutter/txt:txt_unittests"
+            ],
+            "benchmarks": [
+              "//engine/src/flutter:benchmarks"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_license.json",
+        "name": "licenses",
+        "gn": [
+          "--target-dir",
+          "ci/host_release_licenses",
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--no-rbe",
+          "--enable-minimal-linux",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release_licenses",
+        "config": "licenses",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:licenses",
+        "ninja_targets": [
+          "flutter/tools/licenses_cpp",
+          "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [
+          "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+        ],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:licenses_tests",
+          "types": {},
+          "binaries": [
+            "//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+          ],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_unopt.json",
+        "name": "ci/host_debug_unopt",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug_unopt",
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--prebuilt-dart-sdk",
+          "--asan",
+          "--dart-debug",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_unopt",
+        "config": "ci_host_debug_unopt",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_host_debug_unopt",
+        "ninja_targets": [
+          "flutter/tools/font_subset",
+          "flutter:unittests",
+          "flutter/build/dart:dart_sdk",
+          "flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+          "flutter/shell/platform/common:common_cpp_core_unittests",
+          "flutter/shell/platform/common:common_cpp_unittests",
+          "flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+          "flutter/shell/testing",
+          "sky_engine"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [
+          "flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+          "flutter/shell/platform/common:common_cpp_core_unittests",
+          "flutter/shell/platform/common:common_cpp_unittests",
+          "flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests"
+        ],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:ci_host_debug_unopt_tests",
+          "types": {
+            "dart": [
+              "//engine/src/flutter/testing/dart:dart",
+              "//engine/src/flutter/testing/dart/vm_service:vm_service",
+              "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure"
+            ],
+            "dart-host": [
+              "//engine/src/flutter:dart_host_tests"
+            ],
+            "engine": [
+              "//engine/src/flutter/assets:assets_unittests",
+              "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+              "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+              "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+              "//engine/src/flutter/display_list:display_list_rendertests",
+              "//engine/src/flutter/display_list:display_list_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+              "//engine/src/flutter/fml:fml_unittests",
+              "//engine/src/flutter/shell/geometry:geometry_unittests",
+              "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+              "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+              "//engine/src/flutter/runtime:runtime_unittests",
+              "//engine/src/flutter/testing:testing_unittests",
+              "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+              "//engine/src/flutter/lib/ui:ui_unittests",
+              "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+              "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+              "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+              "//engine/src/flutter/shell/common:shell_unittests",
+              "//engine/src/flutter/flow:flow_unittests",
+              "//engine/src/flutter/shell/platform/glfw:flutter_glfw_unittests",
+              "//engine/src/flutter/shell/platform/linux:flutter_linux_unittests",
+              "//engine/src/flutter/txt:txt_unittests"
+            ],
+            "font-subset": [
+              "//engine/src/flutter/tools/font_subset:font_subset_test"
+            ]
+          },
+          "binaries": [],
+          "scripts": [
+            "//engine/src/flutter/ci:ban_generated_plugin_registrant_java",
+            "//engine/src/flutter/ci:ban_generated_plugin_registrant_java_test",
+            "//engine/src/flutter/shell/testing/vm_service:service_protocol_test",
+            "//engine/src/flutter/tools/pkg/engine_build_configs:check_build_configs",
+            "//engine/src/flutter:gn_test"
+          ],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_unopt.json",
+        "name": "ci/host_debug_unopt_impeller_tests",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--prebuilt-dart-sdk",
+          "--target-dir",
+          "ci/host_debug_unopt_impeller_tests",
+          "--no-rbe",
+          "--use-glfw-swiftshader",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_unopt_impeller_tests",
+        "config": "host_debug_unopt_impeller_tests",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_unopt_impeller_tests",
+        "ninja_targets": [
+          "flutter",
+          "flutter/sky/packages"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_debug_unopt_impeller_tests_tests",
+          "types": {
+            "impeller": [
+              "//engine/src/flutter/impeller:impeller_unittests"
+            ],
+            "impeller-vulkan-sync-validation": [
+              "//engine/src/flutter/impeller:impeller_vulkan_sync_validation_unittests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_unopt.json",
+        "name": "ci/android_embedder_debug_unopt",
+        "gn": [
+          "--android",
+          "--embedder-for-target",
+          "--target-dir",
+          "ci/android_embedder_debug_unopt",
+          "--unoptimized",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_embedder_debug_unopt",
+        "config": "android_embedder_debug_unopt",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_embedder_debug_unopt",
+        "ninja_targets": [
+          "flutter/shell/platform/embedder:flutter_engine"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_unopt.json",
+        "name": "ci/android_debug_arm64_validation_layers",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug_arm64_validation_layers",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-lto",
+          "--enable-vulkan-validation-layers",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_arm64_validation_layers",
+        "config": "android_debug_arm64_validation_layers",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_arm64_validation_layers",
+        "ninja_targets": [
+          "flutter",
+          "flutter/shell/platform/android:abi_jars"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_unopt.json",
+        "name": "ci/android_debug_unopt",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug_unopt",
+          "--android",
+          "--unoptimized",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_unopt",
+        "config": "android_debug_unopt",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_unopt",
+        "ninja_targets": [
+          "flutter/impeller",
+          "flutter/shell/platform/android:android_jar"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:android_debug_unopt_tests",
+          "types": {
+            "java": [
+              "//engine/src/flutter/shell/platform/android:java_tests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_unopt.json",
+        "name": "ci/host_release_licenses",
+        "gn": [
+          "--target-dir",
+          "ci/host_release_licenses",
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release_licenses",
+        "config": "host_release_licenses",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_release_licenses",
+        "ninja_targets": [
+          "flutter/tools/licenses_cpp",
+          "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [
+          "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+        ],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_release_licenses_tests",
+          "types": {},
+          "binaries": [
+            "//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+          ],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_unopt.json",
+        "name": "ci/android_debug_test",
+        "gn": [
+          "--target-dir",
+          "ci/android_debug_test",
+          "--android",
+          "--android-cpu=arm",
+          "--no-lto",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_debug_test",
+        "config": "android_debug_test",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:android_debug_test",
+        "ninja_targets": [
+          "flutter",
+          "flutter/sky/dist:zip_old_location",
+          "flutter/lib/gpu/dist:zip_old_location",
+          "flutter/shell/platform/android:embedding_jars",
+          "flutter/shell/platform/android:abi_jars"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:android_debug_test_tests",
+          "types": {
+            "java": [
+              "//engine/src/flutter/shell/platform/android:java_tests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_unopt.json",
+        "name": "ci/host_debug_no_prebuilt_dart_sdk",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug",
+          "--runtime-mode",
+          "debug",
+          "--no-prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": "ci/host_debug",
+        "config": "host_debug_no_prebuilt_dart_sdk",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_no_prebuilt_dart_sdk",
+        "ninja_targets": [
+          "default"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "linux_web_engine_build.json",
+        "name": "ci/wasm_release",
+        "gn": [
+          "--web",
+          "--runtime-mode=release",
+          "--no-rbe",
+          "--bazel"
+        ],
+        "build_directory": null,
+        "config": "wasm_release",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:wasm_release",
+        "ninja_targets": [
+          "flutter/web_sdk:flutter_web_sdk_archive"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "linux/android_debug_arm64",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_debug_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "linux/android_debug_riscv64",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--android",
+          "--android-cpu=riscv64",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_debug_riscv64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "linux/android_debug_unopt_x64",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--android",
+          "--android-cpu=x64",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_debug_unopt_x64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "linux/android_profile_arm64",
+        "gn": [
+          "--runtime-mode",
+          "profile",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_profile_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "linux/android_release_arm64",
+        "gn": [
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_release_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "linux/host_debug",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "host_debug",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "linux/host_profile",
+        "gn": [
+          "--runtime-mode",
+          "profile",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "host_profile",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "linux/host_release",
+        "gn": [
+          "--runtime-mode",
+          "release",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe",
+          "--xcode-symlinks"
+        ],
+        "build_directory": null,
+        "config": "host_release",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "linux/wasm_release",
+        "gn": [
+          "--web",
+          "--runtime-mode=release",
+          "--no-rbe"
+        ],
+        "build_directory": null,
+        "config": "wasm_release",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:wasm_release",
+        "ninja_targets": [
+          "flutter/web_sdk:flutter_web_sdk_archive"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine_common.json",
+        "name": "linux/android_debug_unopt_arm64",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_debug_unopt_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine_common.json",
+        "name": "linux/host_debug_unopt",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "host_debug_unopt",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine_common.json",
+        "name": "linux/wasm_debug_unopt",
+        "gn": [
+          "--web",
+          "--runtime-mode=debug",
+          "--unoptimized",
+          "--no-rbe"
+        ],
+        "build_directory": null,
+        "config": "wasm_debug_unopt",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:wasm_debug_unopt",
+        "ninja_targets": [
+          "flutter/web_sdk:flutter_web_sdk_archive"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      }
+    ],
+    "mac": [
+      {
+        "file": "mac_android_aot_engine.json",
+        "name": "ci/android_profile",
+        "gn": [
+          "--target-dir",
+          "ci/android_profile",
+          "--runtime-mode",
+          "profile",
+          "--android",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_profile",
+        "config": "mac_android_profile",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_android_profile",
+        "ninja_targets": [
+          "flutter/lib/snapshot",
+          "flutter/shell/platform/android:gen_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_android_aot_engine.json",
+        "name": "ci/android_profile_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/android_profile_arm64",
+          "--runtime-mode",
+          "profile",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_profile_arm64",
+        "config": "mac_android_profile_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_android_profile_arm64",
+        "ninja_targets": [
+          "flutter/lib/snapshot",
+          "flutter/shell/platform/android:gen_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_android_aot_engine.json",
+        "name": "ci/android_profile_x64",
+        "gn": [
+          "--target-dir",
+          "ci/android_profile_x64",
+          "--runtime-mode",
+          "profile",
+          "--android",
+          "--android-cpu=x64",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_profile_x64",
+        "config": "mac_android_profile_x64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_android_profile_x64",
+        "ninja_targets": [
+          "flutter/lib/snapshot",
+          "flutter/shell/platform/android:gen_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_android_aot_engine.json",
+        "name": "ci/android_release",
+        "gn": [
+          "--target-dir",
+          "ci/android_release",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release",
+        "config": "mac_android_release",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_android_release",
+        "ninja_targets": [
+          "flutter/lib/snapshot",
+          "flutter/shell/platform/android:gen_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_android_aot_engine.json",
+        "name": "ci/android_release_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/android_release_arm64",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release_arm64",
+        "config": "mac_android_release_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_android_release_arm64",
+        "ninja_targets": [
+          "flutter/lib/snapshot",
+          "flutter/shell/platform/android:gen_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_android_aot_engine.json",
+        "name": "ci/android_release_x64",
+        "gn": [
+          "--target-dir",
+          "ci/android_release_x64",
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu=x64",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/android_release_x64",
+        "config": "mac_android_release_x64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_android_release_x64",
+        "ninja_targets": [
+          "flutter/lib/snapshot",
+          "flutter/shell/platform/android:gen_snapshot"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_clang_tidy.json",
+        "name": "ci/host_debug_clang_tidy",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--target-dir",
+          "ci/host_debug_clang_tidy",
+          "--mac-cpu",
+          "arm64",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_clang_tidy",
+        "config": "mac_host_debug_clang_tidy",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_host_debug_clang_tidy",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_clang_tidy.json",
+        "name": "ci/mac_host_debug_clang_tidy_1",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--target-dir",
+          "ci/mac_host_debug_clang_tidy_1",
+          "--mac-cpu",
+          "arm64",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_host_debug_clang_tidy_1",
+        "config": "mac_host_debug_clang_tidy_1",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_host_debug_clang_tidy_1",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_clang_tidy.json",
+        "name": "ci/ios_debug_sim_clang_tidy",
+        "gn": [
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--simulator",
+          "--no-lto",
+          "--target-dir",
+          "ci/ios_debug_sim_clang_tidy",
+          "--simulator-cpu",
+          "arm64",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_sim_clang_tidy",
+        "config": "ios_debug_sim_clang_tidy",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_clang_tidy",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_clangd.json",
+        "name": "ci/mac_unopt_debug_no_rbe",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--prebuilt-dart-sdk",
+          "--no-lto",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--mac-cpu",
+          "arm64",
+          "--target-dir",
+          "ci/mac_unopt_debug_no_rbe",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_unopt_debug_no_rbe",
+        "config": "mac_unopt_debug_no_rbe",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_unopt_debug_no_rbe",
+        "ninja_targets": [
+          "flutter/tools/font_subset"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_debug_arm64_tests.json",
+        "name": "ci/host_debug_arm64_tests",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug_arm64_tests",
+          "--runtime-mode",
+          "debug",
+          "--mac-cpu",
+          "arm64",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--use-glfw-swiftshader",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_arm64_tests",
+        "config": "host_debug_arm64_tests",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_arm64_tests",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_debug_arm64_tests_tests",
+          "types": {
+            "engine": [
+              "//engine/src/flutter/assets:assets_unittests",
+              "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+              "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+              "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+              "//engine/src/flutter/display_list:display_list_rendertests",
+              "//engine/src/flutter/display_list:display_list_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+              "//engine/src/flutter/fml:fml_unittests",
+              "//engine/src/flutter/shell/geometry:geometry_unittests",
+              "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+              "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+              "//engine/src/flutter/runtime:runtime_unittests",
+              "//engine/src/flutter/testing:testing_unittests",
+              "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+              "//engine/src/flutter/lib/ui:ui_unittests",
+              "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+              "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+              "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+              "//engine/src/flutter/shell/common:shell_unittests",
+              "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:availability_version_check_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:framework_common_swift_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:framework_common_unittests",
+              "//engine/src/flutter/third_party/spring_animation:spring_animation_unittests",
+              "//engine/src/flutter/flow:flow_unittests",
+              "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests",
+              "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+              "//engine/src/flutter/impeller:impeller_unittests",
+              "//engine/src/flutter/impeller:impeller_dart_unittests"
+            ],
+            "dart": [
+              "//engine/src/flutter/testing/dart:dart",
+              "//engine/src/flutter/testing/dart/vm_service:vm_service",
+              "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure"
+            ],
+            "dart-host": [
+              "//engine/src/flutter:dart_host_tests"
+            ],
+            "font-subset": [
+              "//engine/src/flutter/tools/font_subset:font_subset_test"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_debug_unopt_arm64.json",
+        "name": "ci/host_debug_unopt_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug_unopt_arm64",
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--mac-cpu",
+          "arm64",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--use-glfw-swiftshader",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_unopt_arm64",
+        "config": "host_debug_unopt_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_unopt_arm64",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_debug_unopt_arm64_tests",
+          "types": {
+            "engine": [
+              "//engine/src/flutter/assets:assets_unittests",
+              "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+              "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+              "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+              "//engine/src/flutter/display_list:display_list_rendertests",
+              "//engine/src/flutter/display_list:display_list_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+              "//engine/src/flutter/fml:fml_unittests",
+              "//engine/src/flutter/shell/geometry:geometry_unittests",
+              "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+              "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+              "//engine/src/flutter/runtime:runtime_unittests",
+              "//engine/src/flutter/testing:testing_unittests",
+              "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+              "//engine/src/flutter/lib/ui:ui_unittests",
+              "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+              "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+              "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+              "//engine/src/flutter/shell/common:shell_unittests",
+              "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:availability_version_check_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:framework_common_swift_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:framework_common_unittests",
+              "//engine/src/flutter/third_party/spring_animation:spring_animation_unittests",
+              "//engine/src/flutter/flow:flow_unittests",
+              "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests",
+              "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+              "//engine/src/flutter/impeller:impeller_unittests",
+              "//engine/src/flutter/impeller:impeller_dart_unittests"
+            ],
+            "dart": [
+              "//engine/src/flutter/testing/dart:dart",
+              "//engine/src/flutter/testing/dart/vm_service:vm_service",
+              "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure"
+            ],
+            "dart-host": [
+              "//engine/src/flutter:dart_host_tests"
+            ],
+            "impeller-golden": [
+              "//engine/src/flutter/impeller/golden_tests:impeller_golden_tests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [
+            "//engine/src/flutter:gn_test"
+          ],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/host_debug_framework",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug_framework",
+          "--runtime-mode",
+          "debug",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--use-glfw-swiftshader",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_framework",
+        "config": "host_debug_framework",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_framework",
+        "ninja_targets": [
+          "flutter/build/archives:flutter_embedder_framework",
+          "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/host_debug",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug",
+          "--runtime-mode",
+          "debug",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--use-glfw-swiftshader",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug",
+        "config": "ci_mac_host_debug",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_mac_host_debug",
+        "ninja_targets": [
+          "flutter/build/archives:artifacts",
+          "flutter/build/archives:dart_sdk_archive",
+          "flutter/impeller/toolkit/interop:sdk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/host_debug_gen_snapshot",
+        "gn": [
+          "--target-dir",
+          "ci/host_debug_gen_snapshot",
+          "--runtime-mode",
+          "debug",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--use-glfw-swiftshader",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_debug_gen_snapshot",
+        "config": "host_debug_gen_snapshot",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_debug_gen_snapshot",
+        "ninja_targets": [
+          "flutter/lib/snapshot:create_macos_gen_snapshots"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/host_profile",
+        "gn": [
+          "--target-dir",
+          "ci/host_profile",
+          "--runtime-mode",
+          "profile",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_profile",
+        "config": "ci_mac_host_profile",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_mac_host_profile",
+        "ninja_targets": [
+          "flutter/build/archives:artifacts"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/host_profile_framework",
+        "gn": [
+          "--target-dir",
+          "ci/host_profile_framework",
+          "--runtime-mode",
+          "profile",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_profile_framework",
+        "config": "host_profile_framework",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_profile_framework",
+        "ninja_targets": [
+          "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/host_profile_gen_snapshot",
+        "gn": [
+          "--target-dir",
+          "ci/host_profile_gen_snapshot",
+          "--runtime-mode",
+          "profile",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_profile_gen_snapshot",
+        "config": "host_profile_gen_snapshot",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_profile_gen_snapshot",
+        "ninja_targets": [
+          "flutter/lib/snapshot:create_macos_gen_snapshots"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/host_release",
+        "gn": [
+          "--target-dir",
+          "ci/host_release",
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--use-glfw-swiftshader",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release",
+        "config": "ci_mac_host_release",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_mac_host_release",
+        "ninja_targets": [
+          "flutter/build/archives:artifacts",
+          "flutter/tools/font_subset"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/host_release_framework",
+        "gn": [
+          "--target-dir",
+          "ci/host_release_framework",
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--use-glfw-swiftshader",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release_framework",
+        "config": "host_release_framework",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_release_framework",
+        "ninja_targets": [
+          "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/host_release_gen_snapshot",
+        "gn": [
+          "--target-dir",
+          "ci/host_release_gen_snapshot",
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--use-glfw-swiftshader",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release_gen_snapshot",
+        "config": "host_release_gen_snapshot",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_release_gen_snapshot",
+        "ninja_targets": [
+          "flutter/lib/snapshot:create_macos_gen_snapshots"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/mac_debug_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/mac_debug_arm64",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "debug",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_debug_arm64",
+        "config": "mac_debug_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_debug_arm64",
+        "ninja_targets": [
+          "flutter/build/archives:artifacts",
+          "flutter/build/archives:dart_sdk_archive",
+          "flutter/impeller/toolkit/interop:sdk"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/mac_debug_framework_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/mac_debug_framework_arm64",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "debug",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_debug_framework_arm64",
+        "config": "mac_debug_framework_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_debug_framework_arm64",
+        "ninja_targets": [
+          "flutter/build/archives:flutter_embedder_framework",
+          "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/mac_debug_gen_snapshot_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/mac_debug_gen_snapshot_arm64",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "debug",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_debug_gen_snapshot_arm64",
+        "config": "mac_debug_gen_snapshot_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_debug_gen_snapshot_arm64",
+        "ninja_targets": [
+          "flutter/lib/snapshot:create_macos_gen_snapshots"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/mac_profile_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/mac_profile_arm64",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "profile",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_profile_arm64",
+        "config": "mac_profile_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_profile_arm64",
+        "ninja_targets": [
+          "flutter/build/archives:artifacts"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/mac_profile_framework_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/mac_profile_framework_arm64",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "profile",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_profile_framework_arm64",
+        "config": "mac_profile_framework_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_profile_framework_arm64",
+        "ninja_targets": [
+          "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/mac_profile_gen_snapshot_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/mac_profile_gen_snapshot_arm64",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "profile",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_profile_gen_snapshot_arm64",
+        "config": "mac_profile_gen_snapshot_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_profile_gen_snapshot_arm64",
+        "ninja_targets": [
+          "flutter/lib/snapshot:create_macos_gen_snapshots"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/mac_release_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/mac_release_arm64",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--use-glfw-swiftshader",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_release_arm64",
+        "config": "mac_release_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_release_arm64",
+        "ninja_targets": [
+          "flutter/build/archives:artifacts",
+          "flutter/tools/font_subset"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/mac_release_framework_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/mac_release_framework_arm64",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--use-glfw-swiftshader",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_release_framework_arm64",
+        "config": "mac_release_framework_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_release_framework_arm64",
+        "ninja_targets": [
+          "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_engine.json",
+        "name": "ci/mac_release_gen_snapshot_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/mac_release_gen_snapshot_arm64",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--use-glfw-swiftshader",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_release_gen_snapshot_arm64",
+        "config": "mac_release_gen_snapshot_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_release_gen_snapshot_arm64",
+        "ninja_targets": [
+          "flutter/lib/snapshot:create_macos_gen_snapshots"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_profile_arm64_tests.json",
+        "name": "ci/host_profile_arm64_tests",
+        "gn": [
+          "--target-dir",
+          "ci/host_profile_arm64_tests",
+          "--runtime-mode",
+          "profile",
+          "--mac-cpu",
+          "arm64",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_profile_arm64_tests",
+        "config": "host_profile_arm64_tests",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_profile_arm64_tests",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_profile_arm64_tests_tests",
+          "types": {
+            "engine": [
+              "//engine/src/flutter/assets:assets_unittests",
+              "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+              "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+              "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+              "//engine/src/flutter/display_list:display_list_rendertests",
+              "//engine/src/flutter/display_list:display_list_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+              "//engine/src/flutter/fml:fml_unittests",
+              "//engine/src/flutter/shell/geometry:geometry_unittests",
+              "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+              "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+              "//engine/src/flutter/runtime:runtime_unittests",
+              "//engine/src/flutter/testing:testing_unittests",
+              "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+              "//engine/src/flutter/lib/ui:ui_unittests",
+              "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+              "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+              "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+              "//engine/src/flutter/shell/common:shell_unittests",
+              "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:availability_version_check_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:framework_common_swift_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:framework_common_unittests",
+              "//engine/src/flutter/third_party/spring_animation:spring_animation_unittests",
+              "//engine/src/flutter/flow:flow_unittests",
+              "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests",
+              "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+              "//engine/src/flutter/impeller:impeller_unittests",
+              "//engine/src/flutter/impeller:impeller_dart_unittests"
+            ],
+            "dart": [
+              "//engine/src/flutter/testing/dart:dart",
+              "//engine/src/flutter/testing/dart/vm_service:vm_service",
+              "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure"
+            ],
+            "dart-host": [
+              "//engine/src/flutter:dart_host_tests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_release_arm64_licenses.json",
+        "name": "ci/host_release_arm64_licenses",
+        "gn": [
+          "--target-dir",
+          "ci/host_release_arm64_licenses",
+          "--runtime-mode",
+          "release",
+          "--mac-cpu",
+          "arm64",
+          "--no-lto",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release_arm64_licenses",
+        "config": "host_release_arm64_licenses",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_release_arm64_licenses",
+        "ninja_targets": [
+          "flutter/tools/licenses_cpp",
+          "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [
+          "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+        ],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_release_arm64_licenses_tests",
+          "types": {},
+          "binaries": [
+            "//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+          ],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_host_release_arm64_tests.json",
+        "name": "ci/host_release_arm64_tests",
+        "gn": [
+          "--target-dir",
+          "ci/host_release_arm64_tests",
+          "--runtime-mode",
+          "release",
+          "--mac-cpu",
+          "arm64",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--build-embedder-examples",
+          "--use-glfw-swiftshader",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/host_release_arm64_tests",
+        "config": "host_release_arm64_tests",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:host_release_arm64_tests",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:host_release_arm64_tests_tests",
+          "types": {
+            "engine": [
+              "//engine/src/flutter/assets:assets_unittests",
+              "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+              "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+              "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+              "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+              "//engine/src/flutter/display_list:display_list_rendertests",
+              "//engine/src/flutter/display_list:display_list_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+              "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+              "//engine/src/flutter/fml:fml_unittests",
+              "//engine/src/flutter/shell/geometry:geometry_unittests",
+              "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+              "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+              "//engine/src/flutter/runtime:runtime_unittests",
+              "//engine/src/flutter/testing:testing_unittests",
+              "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+              "//engine/src/flutter/lib/ui:ui_unittests",
+              "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+              "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+              "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+              "//engine/src/flutter/shell/common:shell_unittests",
+              "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:availability_version_check_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:framework_common_swift_unittests",
+              "//engine/src/flutter/shell/platform/darwin/common:framework_common_unittests",
+              "//engine/src/flutter/third_party/spring_animation:spring_animation_unittests",
+              "//engine/src/flutter/flow:flow_unittests",
+              "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests",
+              "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+              "//engine/src/flutter/impeller:impeller_unittests",
+              "//engine/src/flutter/impeller:impeller_dart_unittests"
+            ],
+            "dart": [
+              "//engine/src/flutter/testing/dart:dart",
+              "//engine/src/flutter/testing/dart/vm_service:vm_service",
+              "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure"
+            ],
+            "dart-host": [
+              "//engine/src/flutter:dart_host_tests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_debug_unopt_sim_arm64.json",
+        "name": "ci/ios_debug_unopt_sim_arm64",
+        "gn": [
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--simulator",
+          "--unoptimized",
+          "--no-lto",
+          "--simulator-cpu",
+          "arm64",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--target-dir",
+          "ci/ios_debug_unopt_sim_arm64",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_unopt_sim_arm64",
+        "config": "ios_debug_unopt_sim_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_unopt_sim_arm64",
+        "ninja_targets": [
+          "flutter/testing/ios_scenario_app",
+          "flutter/shell/platform/darwin/ios:ios_test_flutter"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:ios_debug_unopt_sim_arm64_tests",
+          "types": {
+            "objc": [
+              "//engine/src/flutter/testing/ios:ios_unit_tests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [
+            "//engine/src/flutter/testing/ios_scenario_app:ios_scenario_tests"
+          ],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_debug_unopt_sim_arm64_extension_safe.json",
+        "name": "ci/ios_debug_unopt_sim_arm64_extension_safe",
+        "gn": [
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--simulator",
+          "--unoptimized",
+          "--no-lto",
+          "--simulator-cpu",
+          "arm64",
+          "--darwin-extension-safe",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--target-dir",
+          "ci/ios_debug_unopt_sim_arm64_extension_safe",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_unopt_sim_arm64_extension_safe",
+        "config": "ios_debug_unopt_sim_arm64_extension_safe",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_unopt_sim_arm64_extension_safe",
+        "ninja_targets": [
+          "flutter/testing/ios_scenario_app",
+          "flutter/shell/platform/darwin/ios:ios_test_flutter"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:ios_debug_unopt_sim_arm64_extension_safe_tests",
+          "types": {
+            "objc": [
+              "//engine/src/flutter/testing/ios:ios_unit_tests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [
+            "//engine/src/flutter/testing/ios_scenario_app:ios_scenario_tests"
+          ],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_debug_sim",
+        "gn": [
+          "--target-dir",
+          "ci/ios_debug_sim",
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--simulator",
+          "--no-lto",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_sim",
+        "config": "ci_ios_debug_sim",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_ios_debug_sim",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_debug_sim_arm64",
+        "gn": [
+          "--target-dir",
+          "ci/ios_debug_sim_arm64",
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--simulator",
+          "--simulator-cpu=arm64",
+          "--no-lto",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_sim_arm64",
+        "config": "ios_debug_sim_arm64",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_arm64",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_debug",
+        "gn": [
+          "--target-dir",
+          "ci/ios_debug",
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug",
+        "config": "ci_ios_debug",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_ios_debug",
+        "ninja_targets": [
+          "flutter/lib/snapshot:generate_snapshot_bins",
+          "flutter/shell/platform/darwin/ios:flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_profile",
+        "gn": [
+          "--target-dir",
+          "ci/ios_profile",
+          "--ios",
+          "--runtime-mode",
+          "profile",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_profile",
+        "config": "ci_ios_profile",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_ios_profile",
+        "ninja_targets": [
+          "flutter/lib/snapshot:generate_snapshot_bins",
+          "flutter/shell/platform/darwin/ios:flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_release",
+        "gn": [
+          "--target-dir",
+          "ci/ios_release",
+          "--ios",
+          "--runtime-mode",
+          "release",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_release",
+        "config": "ci_ios_release",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ci_ios_release",
+        "ninja_targets": [
+          "flutter/lib/snapshot:generate_snapshot_bins",
+          "flutter/shell/platform/darwin/ios:flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_debug_sim_extension_safe",
+        "gn": [
+          "--target-dir",
+          "ci/ios_debug_sim_extension_safe",
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--simulator",
+          "--no-lto",
+          "--darwin-extension-safe",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_sim_extension_safe",
+        "config": "ios_debug_sim_extension_safe",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_extension_safe",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_debug_sim_arm64_extension_safe",
+        "gn": [
+          "--target-dir",
+          "ci/ios_debug_sim_arm64_extension_safe",
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--simulator",
+          "--simulator-cpu=arm64",
+          "--no-lto",
+          "--darwin-extension-safe",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_sim_arm64_extension_safe",
+        "config": "ios_debug_sim_arm64_extension_safe",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_arm64_extension_safe",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_debug_extension_safe",
+        "gn": [
+          "--target-dir",
+          "ci/ios_debug_extension_safe",
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--darwin-extension-safe",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_extension_safe",
+        "config": "ios_debug_extension_safe",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_extension_safe",
+        "ninja_targets": [
+          "flutter/lib/snapshot:generate_snapshot_bins",
+          "flutter/shell/platform/darwin/ios:flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_profile_extension_safe",
+        "gn": [
+          "--target-dir",
+          "ci/ios_profile_extension_safe",
+          "--ios",
+          "--runtime-mode",
+          "profile",
+          "--darwin-extension-safe",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_profile_extension_safe",
+        "config": "ios_profile_extension_safe",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_profile_extension_safe",
+        "ninja_targets": [
+          "flutter/lib/snapshot:generate_snapshot_bins",
+          "flutter/shell/platform/darwin/ios:flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine.json",
+        "name": "ci/ios_release_extension_safe",
+        "gn": [
+          "--target-dir",
+          "ci/ios_release_extension_safe",
+          "--ios",
+          "--runtime-mode",
+          "release",
+          "--darwin-extension-safe",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_release_extension_safe",
+        "config": "ios_release_extension_safe",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_release_extension_safe",
+        "ninja_targets": [
+          "flutter/lib/snapshot:generate_snapshot_bins",
+          "flutter/shell/platform/darwin/ios:flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine_ddm.json",
+        "name": "ci/ios_debug_sim_ddm",
+        "gn": [
+          "--target-dir",
+          "ci/ios_debug_sim_ddm",
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--simulator",
+          "--no-lto",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_sim_ddm",
+        "config": "ios_debug_sim_ddm",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_ddm",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine_ddm.json",
+        "name": "ci/ios_debug_sim_arm64_ddm",
+        "gn": [
+          "--target-dir",
+          "ci/ios_debug_sim_arm64_ddm",
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--simulator",
+          "--simulator-cpu=arm64",
+          "--no-lto",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_sim_arm64_ddm",
+        "config": "ios_debug_sim_arm64_ddm",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_arm64_ddm",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine_ddm.json",
+        "name": "ci/ios_debug_ddm",
+        "gn": [
+          "--target-dir",
+          "ci/ios_debug_ddm",
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_debug_ddm",
+        "config": "ios_debug_ddm",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_debug_ddm",
+        "ninja_targets": [
+          "flutter/lib/snapshot:generate_snapshot_bins",
+          "flutter/shell/platform/darwin/ios:flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_ios_engine_ddm.json",
+        "name": "ci/ios_release_ddm",
+        "gn": [
+          "--target-dir",
+          "ci/ios_release_ddm",
+          "--ios",
+          "--runtime-mode",
+          "release",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
+        ],
+        "build_directory": "ci/ios_release_ddm",
+        "config": "ios_release_ddm",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:ios_release_ddm",
+        "ninja_targets": [
+          "flutter/lib/snapshot:generate_snapshot_bins",
+          "flutter/shell/platform/darwin/ios:flutter_framework"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "mac_release_arm64_tests.json",
+        "name": "ci/mac_release_arm64_tests",
+        "gn": [
+          "--target-dir",
+          "ci/mac_release_arm64_tests",
+          "--mac",
+          "--mac-cpu",
+          "arm64",
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--prebuilt-dart-sdk",
+          "--no-rbe",
+          "--xcode-symlinks",
+          "--use-glfw-swiftshader",
+          "--bazel"
+        ],
+        "build_directory": "ci/mac_release_arm64_tests",
+        "config": "mac_release_arm64_tests",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:mac_release_arm64_tests",
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": "//engine/src/flutter/ci/builders:mac_release_arm64_tests_tests",
+          "types": {
+            "impeller-golden": [
+              "//engine/src/flutter/impeller/golden_tests:impeller_golden_tests"
+            ]
+          },
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/ios_debug",
+        "gn": [
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "ios_debug",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/ios_debug_unopt",
+        "gn": [
+          "--ios",
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "ios_debug_unopt",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/ios_profile",
+        "gn": [
+          "--ios",
+          "--runtime-mode",
+          "profile",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "ios_profile",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/ios_release",
+        "gn": [
+          "--ios",
+          "--runtime-mode",
+          "release",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "ios_release",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/ios_debug_sim",
+        "gn": [
+          "--ios",
+          "--simulator",
+          "--runtime-mode",
+          "debug",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "ios_debug_sim",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/android_debug_arm64",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_debug_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/android_debug_unopt",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--android",
+          "--android-cpu=arm",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_debug_unopt",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/android_debug_unopt_arm64",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_debug_unopt_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/android_profile_arm64",
+        "gn": [
+          "--runtime-mode",
+          "profile",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_profile_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/android_release_arm64",
+        "gn": [
+          "--runtime-mode",
+          "release",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "android_release_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/host_debug",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "mac_host_debug",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/host_profile_arm64",
+        "gn": [
+          "--runtime-mode",
+          "profile",
+          "--no-lto",
+          "--mac-cpu",
+          "arm64",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "host_profile_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/host_release_arm64",
+        "gn": [
+          "--runtime-mode",
+          "release",
+          "--no-lto",
+          "--mac-cpu",
+          "arm64",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "host_release_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/host_profile",
+        "gn": [
+          "--runtime-mode",
+          "profile",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "mac_host_profile",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/host_release",
+        "gn": [
+          "--runtime-mode",
+          "release",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "mac_host_release",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/wasm_release",
+        "gn": [
+          "--web",
+          "--runtime-mode=release",
+          "--no-rbe"
+        ],
+        "build_directory": null,
+        "config": "wasm_release",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:wasm_release",
+        "ninja_targets": [
+          "flutter/web_sdk:flutter_web_sdk_archive"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine.json",
+        "name": "macos/wasm_debug_unopt",
+        "gn": [
+          "--web",
+          "--runtime-mode=debug",
+          "--unoptimized",
+          "--no-rbe"
+        ],
+        "build_directory": null,
+        "config": "wasm_debug_unopt",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:wasm_debug_unopt",
+        "ninja_targets": [
+          "flutter/web_sdk:flutter_web_sdk_archive"
+        ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine_common.json",
+        "name": "macos/ios_debug_sim_unopt_arm64",
+        "gn": [
+          "--ios",
+          "--simulator",
+          "--simulator-cpu=arm64",
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "ios_debug_sim_unopt_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine_common.json",
+        "name": "macos/host_debug_unopt_arm64",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unopt",
+          "--mac-cpu",
+          "arm64",
+          "--xcode-symlinks",
+          "--rbe"
+        ],
+        "build_directory": null,
+        "config": "host_debug_unopt_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      }
+    ]
+  }
+}

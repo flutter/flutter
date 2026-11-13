@@ -31,7 +31,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -41,9 +42,11 @@
                 "--android",
                 "--android-cpu",
                 "arm",
-                "--rbe"
+                "--no-rbe",
+                "--bazel"
             ],
             "name": "ci/android_profile",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target 32-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_profile",
@@ -75,7 +78,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -85,9 +89,11 @@
                 "--android",
                 "--android-cpu",
                 "arm",
-                "--rbe"
+                "--no-rbe",
+                "--bazel"
             ],
             "name": "ci/android_release",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target 32-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_release",
@@ -120,7 +126,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -130,9 +137,11 @@
                 "--android",
                 "--android-cpu",
                 "arm64",
-                "--rbe"
+                "--no-rbe",
+                "--bazel"
             ],
             "name": "ci/android_release_arm64",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target 64-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_release_arm64",
@@ -180,7 +189,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -190,9 +200,11 @@
                 "profile",
                 "--android-cpu",
                 "arm64",
-                "--rbe"
+                "--no-rbe",
+                "--bazel"
             ],
             "name": "ci/android_profile_arm64",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target 64-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_profile_arm64",
@@ -225,7 +237,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -235,9 +248,11 @@
                 "--android",
                 "--android-cpu",
                 "x64",
-                "--rbe"
+                "--no-rbe",
+                "--bazel"
             ],
             "name": "ci/android_profile_x64",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target x64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_profile_x64",
@@ -270,7 +285,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -280,9 +296,11 @@
                 "--android",
                 "--android-cpu",
                 "x64",
-                "--rbe"
+                "--no-rbe",
+                "--bazel"
             ],
             "name": "ci/android_release_x64",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target x64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_release_x64",
@@ -315,7 +333,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -325,9 +344,11 @@
                 "--android",
                 "--android-cpu",
                 "riscv64",
-                "--rbe"
+                "--no-rbe",
+                "--bazel"
             ],
             "name": "ci/android_profile_riscv64",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target riscv64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_profile_riscv64",
@@ -360,7 +381,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -370,9 +392,11 @@
                 "--android",
                 "--android-cpu",
                 "riscv64",
-                "--rbe"
+                "--no-rbe",
+                "--bazel"
             ],
             "name": "ci/android_release_riscv64",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target riscv64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_release_riscv64",

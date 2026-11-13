@@ -1,0 +1,223 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""The Flutter repository's Bazel module.
+
+This is the bootstrap for migrating the engine build from GN to Bazel. The GN
+build remains the source of truth: this file, `.bazelrc`, `.bazelversion` and
+the generated `.bazelignore` must stay inert for GN users. Bazel is always
+driven through `bazelisk`, which reads `.bazelversion`; bazelisk itself is a
+locally installed prerequisite (like git or depot_tools) and is deliberately
+not synced by gclient.
+
+Dependency pins are mirrored from `DEPS` into
+`build_defs/repositories/deps.lock.bzl` by
+`engine/src/flutter/tools/bazel_tools/bin/gen_deps.dart`; the trees gclient
+syncs are consumed in place and listed in `.bazelignore`.
+
+See `engine/src/flutter/build/bazel/README.md` for the layout.
+"""
+
+module(
+    name = "flutter",
+    bazel_compatibility = [">=8.0.0"],
+)
+
+# The versions below track Skia's pins
+# (`engine/src/flutter/third_party/skia/MODULE.bazel`) so that the two
+# workspaces agree once Skia is consumed as a Bazel module; bump them together
+# with Skia rolls rather than independently. `.bazelversion` is the engine's
+# own (8.8.1, past Skia's 8.2.1): the Fuchsia SDK's rules need Bazel 8.3's
+# `cc_import(strip_include_prefix)`, and a Skia consumed as a module runs
+# under the consumer's Bazel regardless.
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_cc", version = "0.1.5")
+
+# Dependencies from DEPS: synced trees consumed in place, and toolchains that
+# can also be downloaded (see extensions.bzl).
+synced_deps = use_extension("//build_defs/repositories:extensions.bzl", "synced_deps")
+use_repo(
+    synced_deps,
+    "abseil-cpp",
+    "abseil_cpp_tree",
+    "android_embedding_dependencies",
+    "android_tools",
+    "angle",
+    "benchmark",
+    "boringssl",
+    "brotli",
+    "clang_linux_x64",
+    "clang_mac_arm64",
+    "clang_mac_x64",
+    "cpu_features",
+    "cpython3",
+    "dart",
+    "dart_sdk_bin_cache",
+    "dart_sdk_linux_arm64",
+    "dart_sdk_linux_x64",
+    "dart_sdk_macos_arm64",
+    "dart_sdk_macos_x64",
+    "emsdk",
+    "emsdk_lto",
+    "esbuild",
+    "expat",
+    "flatbuffers",
+    "freetype2",
+    "glfw",
+    "glslang",
+    "gn",
+    "google_fonts_for_unit_tests",
+    "googletest",
+    "googletest_tree",
+    "gtest_parallel",
+    "harfbuzz",
+    "host_files",
+    "host_platform",
+    "icu",
+    "imgui",
+    "inja",
+    "io",
+    "json",
+    "libcxx",
+    "libcxxabi",
+    "libjpeg-turbo",
+    "libpng",
+    "libtess2",
+    "libwebp",
+    "llvm_libc",
+    "macos_sdk",
+    "ninja",
+    "node_preamble",
+    "ocmock",
+    "openjdk",
+    "process",
+    "process_runner",
+    "rapidjson",
+    "re2",
+    "reclient",
+    "reclient_cfgs",
+    "shaderc",
+    "skia",
+    "spirv-cross",
+    "spirv-headers",
+    "spirv-tools",
+    "swiftshader",
+    "sysroot_linux_arm64",
+    "sysroot_linux_x64",
+    "vector_math",
+    "vulkan-headers",
+    "vulkan-utility-libraries",
+    "vulkan_deps_tree",
+    "vulkan_memory_allocator",
+    "vulkan_memory_allocator_tree",
+    "vulkan_validation_layers",
+    "wuffs",
+    "zlib",
+)
+
+# The version strings tools/gn computes when it generates a GN build (the
+# engine's git revision, the content hash, Skia's and Dart's DEPS revisions),
+# for //engine/src/flutter/shell/version.
+engine_version = use_extension("//build_defs/repositories:extensions.bzl", "engine_version")
+use_repo(engine_version, "engine_version")
+
+# The repository's pub packages, as pubspec.lock pins them: a repository per
+# hosted package behind the hub @pub (@pub//<name>:sources), each fetched
+# from pub.dev and verified against the lock's sha256 when a target first
+# reaches it -- what the framework's tests compile against under Bazel
+# (build_defs/dart/pub.bzl, flutter_test.bzl).
+pub = use_extension("//build_defs/dart:pub.bzl", "pub")
+use_repo(pub, "pub", "pub_workspace")
+
+# The Flutter SDK's cache artifacts the framework's and the tool's tests read
+# through FLUTTER_ROOT (the Material fonts, the Gradle wrapper and, on a Mac
+# host, the iOS USB dependencies; build_defs/repositories/flutter_sdk_cache.bzl).
+flutter_sdk_cache = use_extension("//build_defs/repositories:flutter_sdk_cache.bzl", "flutter_sdk_cache")
+use_repo(
+    flutter_sdk_cache,
+    "gradle_wrapper",
+    "ios_usb_ios_deploy",
+    "ios_usb_libimobiledevice",
+    "ios_usb_libimobiledeviceglue",
+    "ios_usb_libplist",
+    "ios_usb_libusbmuxd",
+    "ios_usb_openssl",
+    "material_fonts",
+)
+
+# bin/cache's prebuilt engine artifacts, for --config=prebuilt_engine
+# (build_defs/repositories/flutter_bin_cache.bzl; the aliases in
+# //build_defs/engine choose between them and the tree's engine).
+flutter_bin_cache = use_extension("//build_defs/repositories:flutter_bin_cache.bzl", "flutter_bin_cache_extension")
+use_repo(flutter_bin_cache, "flutter_bin_cache")
+
+# The browsers the web tests drive, at the versions the web engine's
+# lib/web_ui/dev/package_lock.yaml pins (build_defs/repositories/browsers.bzl):
+# Chrome for Testing, and Firefox for the web engine's Firefox suites.
+browsers = use_extension("//build_defs/repositories:browsers.bzl", "browsers")
+use_repo(browsers, "chrome", "firefox")
+
+# The system libraries those browsers load, from Debian's packages at the
+# build sysroot's versions rather than from the host
+# (build_defs/repositories/debian_runtime.bzl; the lock file beside it).
+debian_runtime = use_extension("//build_defs/repositories:debian_runtime.bzl", "debian_runtime")
+use_repo(debian_runtime, "sysroot_linux_x64_runtime")
+
+# CMake, for the Linux desktop builds flutter_tools' integration tests run
+# through the tool (build_defs/repositories/cmake.bzl; ninja and pkg-config
+# come from the runtime sysroot, the compilers from the engine's clang).
+cmake = use_extension("//build_defs/repositories:cmake.bzl", "cmake")
+use_repo(cmake, "cmake_linux_x64")
+
+# The Android embedding's Java test dependencies (Robolectric, JUnit, Mockito,
+# androidx.test and the rest), the closure Gradle resolves for
+# shell/platform/android/test_runner, pinned (build_defs/java/maven.bzl; the
+# lock file beside it).
+maven = use_extension("//build_defs/java:maven.bzl", "maven")
+use_repo(maven, "maven_android_tests")
+
+# The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler
+# found on the host (see BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN in .bazelrc).
+register_toolchains(
+    "//engine/src/flutter/build/bazel/toolchains:linux_x64_clang_toolchain",
+    # The arm64 cross build (tools/gn --target-os=linux --linux-cpu=arm64),
+    # selected through its platform, //engine/src/flutter/build/bazel/toolchains:linux_arm64.
+    "//engine/src/flutter/build/bazel/toolchains:linux_arm64_clang_toolchain",
+    # arm64 at API level 26 (the Vulkan validation layer's; GN's
+    # clang_arm64_apilevel26) before the arm64 toolchain, which matches its
+    # platform too: the first registered match wins.
+    "//engine/src/flutter/build/bazel/toolchains:android_arm64_api26_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:android_arm64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:android_x64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:android_arm_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:android_riscv64_clang_toolchain",
+    # Emscripten (wasm32), selected through its platform by wasm_module.
+    "//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten_toolchain",
+    # macOS (build/toolchain/mac's clang_arm64 and clang_x64): the host's
+    # own build and the other CPU's, from either Mac; matched only on a
+    # macOS host (their execution constraints).
+    "//engine/src/flutter/build/bazel/toolchains:macos_arm64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:macos_x64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:macos_x64_on_arm64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:macos_arm64_on_x64_clang_toolchain",
+    # iOS (build/toolchain/mac's ios_clang_arm, ios_clang_arm_sim and
+    # ios_clang_x64_sim): a device or the simulator, selected through the
+    # platforms (//engine/src/flutter/build/bazel/toolchains:ios_arm64,
+    # ios_sim_arm64, ios_sim_x64), from either Mac; matched only on a macOS
+    # host.
+    "//engine/src/flutter/build/bazel/toolchains:ios_arm64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_arm64_on_x64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_on_x64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_on_arm64_clang_toolchain",
+)
+
+# The Fuchsia Bazel SDK rules (the rules_fuchsia spike, metric 0.7) are a
+# module of their own that depends on this one:
+# engine/src/flutter/build/bazel/toolchains/fuchsia/MODULE.bazel. They bring
+# rules_python, protobuf and rules_java into whichever graph declares them,
+# which nothing in the engine's default build needs, so this graph stays the
+# five modules above (the user's call, 2026-10-20).

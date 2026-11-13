@@ -1,0 +1,59 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The web engine's rules: wasm.bzl (the Emscripten modules: wasm_module and
+# its link), esbuild.bzl (flutter.js bundled by esbuild), web_sdk.bzl (the
+# flutter_web_sdk tree: sdk_rewriter's libraries, the platform kernels, the
+# DDC compilations), web_ui_tests.bzl (lib/web_ui's tests under felt) and
+# browser_launcher.bzl (the pinned browsers with the build's libraries).
+
+load(":browser_launcher.bzl", "browser_libraries")
+
+package(default_visibility = ["//visibility:public"])
+
+# The system libraries the browsers the tests drive load (GTK, NSS, X11,
+# ALSA, D-Bus, fontconfig, Mesa, ...): the runtime sysroot's by default --
+# Debian's packages at the build sysroot's versions, pinned
+# (build_defs/repositories/debian_runtime.bzl) -- put on LD_LIBRARY_PATH by
+# browser_launcher's script, with Mesa's drivers and GLVND's EGL vendor
+# named to their loaders (and GLib's GIO modules: the sysroot's rather than
+# the host's, which GLib would load from the path built into it), and the X
+# server felt starts for Firefox run on them by display_launcher's script;
+# the host's with
+# `--//build_defs/web:browser_libraries=//build_defs/web:host_libraries`
+# (nothing set; the host's Xvfb). The C library is the host's either way
+# (browser_launcher.bzl). label_flag is Bazel's own.
+label_flag(
+    name = "browser_libraries",
+    build_setting_default = ":sysroot_libraries",
+)
+
+# What the launchers take by default: the flag on Linux, the host's
+# libraries elsewhere (a Mac's browser loads the system's frameworks; the
+# Debian runtime sysroot is Linux's, and a Mac never fetches it).
+alias(
+    name = "browser_libraries_for_os",
+    actual = select({
+        "@platforms//os:linux": ":browser_libraries",
+        "//conditions:default": ":host_libraries",
+    }),
+)
+
+browser_libraries(
+    name = "sysroot_libraries",
+    directories = ["@sysroot_linux_x64_runtime//:libraries"],
+    environment = {
+        "@sysroot_linux_x64_runtime//:dri": "LIBGL_DRIVERS_PATH",
+        "@sysroot_linux_x64_runtime//:egl_vendors": "__EGL_VENDOR_LIBRARY_DIRS",
+        "@sysroot_linux_x64_runtime//:gio_modules": "GIO_MODULE_DIR",
+    },
+    font_configuration = "@sysroot_linux_x64_runtime//:fontconfig_conf_d",
+    fonts = ["@sysroot_linux_x64_runtime//:fonts"],
+    xkb = "@sysroot_linux_x64_runtime//:xkb",
+    xvfb = "@sysroot_linux_x64_runtime//:xvfb",
+)
+
+browser_libraries(
+    name = "host_libraries",
+)

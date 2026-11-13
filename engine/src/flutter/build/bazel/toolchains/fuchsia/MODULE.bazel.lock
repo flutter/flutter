@@ -1,0 +1,2747 @@
+{
+  "lockFileVersion": 28,
+  "registryFileHashes": {
+    "https://bcr.bazel.build/bazel_registry.json": "8a28e4aff06ee60aed2a8c281907fb8bcbf3b753c91fb5a5c57da3215d5b3497",
+    "https://bcr.bazel.build/modules/abseil-cpp/20210324.2/MODULE.bazel": "7cd0312e064fde87c8d1cd79ba06c876bd23630c83466e9500321be55c96ace2",
+    "https://bcr.bazel.build/modules/abseil-cpp/20211102.0/MODULE.bazel": "70390338f7a5106231d20620712f7cccb659cd0e9d073d1991c038eb9fc57589",
+    "https://bcr.bazel.build/modules/abseil-cpp/20230125.1/MODULE.bazel": "89047429cb0207707b2dface14ba7f8df85273d484c2572755be4bab7ce9c3a0",
+    "https://bcr.bazel.build/modules/abseil-cpp/20230802.0.bcr.1/MODULE.bazel": "1c8cec495288dccd14fdae6e3f95f772c1c91857047a098fad772034264cc8cb",
+    "https://bcr.bazel.build/modules/abseil-cpp/20230802.0/MODULE.bazel": "d253ae36a8bd9ee3c5955384096ccb6baf16a1b1e93e858370da0a3b94f77c16",
+    "https://bcr.bazel.build/modules/abseil-cpp/20230802.1/MODULE.bazel": "fa92e2eb41a04df73cdabeec37107316f7e5272650f81d6cc096418fe647b915",
+    "https://bcr.bazel.build/modules/abseil-cpp/20240116.1/MODULE.bazel": "37bcdb4440fbb61df6a1c296ae01b327f19e9bb521f9b8e26ec854b6f97309ed",
+    "https://bcr.bazel.build/modules/abseil-cpp/20240116.1/source.json": "9be551b8d4e3ef76875c0d744b5d6a504a27e3ae67bc6b28f46415fd2d2957da",
+    "https://bcr.bazel.build/modules/bazel_features/1.1.1/MODULE.bazel": "27b8c79ef57efe08efccbd9dd6ef70d61b4798320b8d3c134fd571f78963dbcd",
+    "https://bcr.bazel.build/modules/bazel_features/1.11.0/MODULE.bazel": "f9382337dd5a474c3b7d334c2f83e50b6eaedc284253334cf823044a26de03e8",
+    "https://bcr.bazel.build/modules/bazel_features/1.15.0/MODULE.bazel": "d38ff6e517149dc509406aca0db3ad1efdd890a85e049585b7234d04238e2a4d",
+    "https://bcr.bazel.build/modules/bazel_features/1.17.0/MODULE.bazel": "039de32d21b816b47bd42c778e0454217e9c9caac4a3cf8e15c7231ee3ddee4d",
+    "https://bcr.bazel.build/modules/bazel_features/1.18.0/MODULE.bazel": "1be0ae2557ab3a72a57aeb31b29be347bcdc5d2b1eb1e70f39e3851a7e97041a",
+    "https://bcr.bazel.build/modules/bazel_features/1.19.0/MODULE.bazel": "59adcdf28230d220f0067b1f435b8537dd033bfff8db21335ef9217919c7fb58",
+    "https://bcr.bazel.build/modules/bazel_features/1.28.0/MODULE.bazel": "4b4200e6cbf8fa335b2c3f43e1d6ef3e240319c33d43d60cc0fbd4b87ece299d",
+    "https://bcr.bazel.build/modules/bazel_features/1.30.0/MODULE.bazel": "a14b62d05969a293b80257e72e597c2da7f717e1e69fa8b339703ed6731bec87",
+    "https://bcr.bazel.build/modules/bazel_features/1.30.0/source.json": "b07e17f067fe4f69f90b03b36ef1e08fe0d1f3cac254c1241a1818773e3423bc",
+    "https://bcr.bazel.build/modules/bazel_features/1.4.1/MODULE.bazel": "e45b6bb2350aff3e442ae1111c555e27eac1d915e77775f6fdc4b351b758b5d7",
+    "https://bcr.bazel.build/modules/bazel_features/1.9.1/MODULE.bazel": "8f679097876a9b609ad1f60249c49d68bfab783dd9be012faf9d82547b14815a",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.0.3/MODULE.bazel": "bcb0fd896384802d1ad283b4e4eb4d718eebd8cb820b0a2c3a347fb971afd9d8",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.1.1/MODULE.bazel": "1add3e7d93ff2e6998f9e118022c84d163917d912f5afafb3058e3d2f1545b5e",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.2.0/MODULE.bazel": "44fe84260e454ed94ad326352a698422dbe372b21a1ac9f3eab76eb531223686",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.2.1/MODULE.bazel": "f35baf9da0efe45fa3da1696ae906eea3d615ad41e2e3def4aeb4e8bc0ef9a7a",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.3.0/MODULE.bazel": "20228b92868bf5cfc41bda7afc8a8ba2a543201851de39d990ec957b513579c5",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.4.1/MODULE.bazel": "a0dcb779424be33100dcae821e9e27e4f2901d9dfd5333efe5ac6a8d7ab75e1d",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.4.2/MODULE.bazel": "3bd40978e7a1fac911d5989e6b09d8f64921865a45822d8b09e815eaa726a651",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.5.0/MODULE.bazel": "32880f5e2945ce6a03d1fbd588e9198c0a959bb42297b2cfaf1685b7bc32e138",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.6.1/MODULE.bazel": "8fdee2dbaace6c252131c00e1de4b165dc65af02ea278476187765e1a617b917",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.7.0/MODULE.bazel": "0db596f4563de7938de764cc8deeabec291f55e8ec15299718b93c4423e9796d",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.7.1/MODULE.bazel": "3120d80c5861aa616222ec015332e5f8d3171e062e3e804a2a0253e1be26e59b",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.7.1/source.json": "f121b43eeefc7c29efbd51b83d08631e2347297c95aac9764a701f2a6a2bb953",
+    "https://bcr.bazel.build/modules/buildozer/7.1.2/MODULE.bazel": "2e8dd40ede9c454042645fd8d8d0cd1527966aa5c919de86661e62953cd73d84",
+    "https://bcr.bazel.build/modules/buildozer/7.1.2/source.json": "c9028a501d2db85793a6996205c8de120944f50a0d570438fcae0457a5f9d1f8",
+    "https://bcr.bazel.build/modules/google_benchmark/1.8.2/MODULE.bazel": "a70cf1bba851000ba93b58ae2f6d76490a9feb74192e57ab8e8ff13c34ec50cb",
+    "https://bcr.bazel.build/modules/googletest/1.11.0/MODULE.bazel": "3a83f095183f66345ca86aa13c58b59f9f94a2f81999c093d4eeaa2d262d12f4",
+    "https://bcr.bazel.build/modules/googletest/1.14.0.bcr.1/MODULE.bazel": "22c31a561553727960057361aa33bf20fb2e98584bc4fec007906e27053f80c6",
+    "https://bcr.bazel.build/modules/googletest/1.14.0.bcr.1/source.json": "41e9e129f80d8c8bf103a7acc337b76e54fad1214ac0a7084bf24f4cd924b8b4",
+    "https://bcr.bazel.build/modules/googletest/1.14.0/MODULE.bazel": "cfbcbf3e6eac06ef9d85900f64424708cc08687d1b527f0ef65aa7517af8118f",
+    "https://bcr.bazel.build/modules/jsoncpp/1.9.5/MODULE.bazel": "31271aedc59e815656f5736f282bb7509a97c7ecb43e927ac1a37966e0578075",
+    "https://bcr.bazel.build/modules/jsoncpp/1.9.5/source.json": "4108ee5085dd2885a341c7fab149429db457b3169b86eb081fa245eadf69169d",
+    "https://bcr.bazel.build/modules/libpfm/4.11.0/MODULE.bazel": "45061ff025b301940f1e30d2c16bea596c25b176c8b6b3087e92615adbd52902",
+    "https://bcr.bazel.build/modules/platforms/0.0.10/MODULE.bazel": "8cb8efaf200bdeb2150d93e162c40f388529a25852b332cec879373771e48ed5",
+    "https://bcr.bazel.build/modules/platforms/0.0.11/MODULE.bazel": "0daefc49732e227caa8bfa834d65dc52e8cc18a2faf80df25e8caea151a9413f",
+    "https://bcr.bazel.build/modules/platforms/0.0.4/MODULE.bazel": "9b328e31ee156f53f3c416a64f8491f7eb731742655a47c9eec4703a71644aee",
+    "https://bcr.bazel.build/modules/platforms/0.0.5/MODULE.bazel": "5733b54ea419d5eaf7997054bb55f6a1d0b5ff8aedf0176fef9eea44f3acda37",
+    "https://bcr.bazel.build/modules/platforms/0.0.6/MODULE.bazel": "ad6eeef431dc52aefd2d77ed20a4b353f8ebf0f4ecdd26a807d2da5aa8cd0615",
+    "https://bcr.bazel.build/modules/platforms/0.0.7/MODULE.bazel": "72fd4a0ede9ee5c021f6a8dd92b503e089f46c227ba2813ff183b71616034814",
+    "https://bcr.bazel.build/modules/platforms/0.0.8/MODULE.bazel": "9f142c03e348f6d263719f5074b21ef3adf0b139ee4c5133e2aa35664da9eb2d",
+    "https://bcr.bazel.build/modules/platforms/1.0.0/MODULE.bazel": "f05feb42b48f1b3c225e4ccf351f367be0371411a803198ec34a389fb22aa580",
+    "https://bcr.bazel.build/modules/platforms/1.0.0/source.json": "f4ff1fd412e0246fd38c82328eb209130ead81d62dcd5a9e40910f867f733d96",
+    "https://bcr.bazel.build/modules/protobuf/21.7/MODULE.bazel": "a5a29bb89544f9b97edce05642fac225a808b5b7be74038ea3640fae2f8e66a7",
+    "https://bcr.bazel.build/modules/protobuf/23.1/MODULE.bazel": "88b393b3eb4101d18129e5db51847cd40a5517a53e81216144a8c32dfeeca52a",
+    "https://bcr.bazel.build/modules/protobuf/24.4/MODULE.bazel": "7bc7ce5f2abf36b3b7b7c8218d3acdebb9426aeb35c2257c96445756f970eb12",
+    "https://bcr.bazel.build/modules/protobuf/27.0/MODULE.bazel": "7873b60be88844a0a1d8f80b9d5d20cfbd8495a689b8763e76c6372998d3f64c",
+    "https://bcr.bazel.build/modules/protobuf/27.1/MODULE.bazel": "703a7b614728bb06647f965264967a8ef1c39e09e8f167b3ca0bb1fd80449c0d",
+    "https://bcr.bazel.build/modules/protobuf/29.0-rc2/MODULE.bazel": "6241d35983510143049943fc0d57937937122baf1b287862f9dc8590fc4c37df",
+    "https://bcr.bazel.build/modules/protobuf/29.0/MODULE.bazel": "319dc8bf4c679ff87e71b1ccfb5a6e90a6dbc4693501d471f48662ac46d04e4e",
+    "https://bcr.bazel.build/modules/protobuf/29.0/source.json": "b857f93c796750eef95f0d61ee378f3420d00ee1dd38627b27193aa482f4f981",
+    "https://bcr.bazel.build/modules/protobuf/3.19.0/MODULE.bazel": "6b5fbb433f760a99a22b18b6850ed5784ef0e9928a72668b66e4d7ccd47db9b0",
+    "https://bcr.bazel.build/modules/pybind11_bazel/2.11.1/MODULE.bazel": "88af1c246226d87e65be78ed49ecd1e6f5e98648558c14ce99176da041dc378e",
+    "https://bcr.bazel.build/modules/pybind11_bazel/2.11.1/source.json": "be4789e951dd5301282729fe3d4938995dc4c1a81c2ff150afc9f1b0504c6022",
+    "https://bcr.bazel.build/modules/re2/2023-09-01/MODULE.bazel": "cb3d511531b16cfc78a225a9e2136007a48cf8a677e4264baeab57fe78a80206",
+    "https://bcr.bazel.build/modules/re2/2023-09-01/source.json": "e044ce89c2883cd957a2969a43e79f7752f9656f6b20050b62f90ede21ec6eb4",
+    "https://bcr.bazel.build/modules/rules_android/0.1.1/MODULE.bazel": "48809ab0091b07ad0182defb787c4c5328bd3a278938415c00a7b69b50c4d3a8",
+    "https://bcr.bazel.build/modules/rules_android/0.1.1/source.json": "e6986b41626ee10bdc864937ffb6d6bf275bb5b9c65120e6137d56e6331f089e",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.1/MODULE.bazel": "cb2aa0747f84c6c3a78dad4e2049c154f08ab9d166b1273835a8174940365647",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.10/MODULE.bazel": "ec1705118f7eaedd6e118508d3d26deba2a4e76476ada7e0e3965211be012002",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.13/MODULE.bazel": "0e8529ed7b323dad0775ff924d2ae5af7640b23553dfcd4d34344c7e7a867191",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.14/MODULE.bazel": "5e343a3aac88b8d7af3b1b6d2093b55c347b8eefc2e7d1442f7a02dc8fea48ac",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.15/MODULE.bazel": "6704c35f7b4a72502ee81f61bf88706b54f06b3cbe5558ac17e2e14666cd5dcc",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.16/MODULE.bazel": "7661303b8fc1b4d7f532e54e9d6565771fea666fbdf839e0a86affcd02defe87",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.2/MODULE.bazel": "6915987c90970493ab97393024c156ea8fb9f3bea953b2f3ec05c34f19b5695c",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.6/MODULE.bazel": "abf360251023dfe3efcef65ab9d56beefa8394d4176dd29529750e1c57eaa33f",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.8/MODULE.bazel": "964c85c82cfeb6f3855e6a07054fdb159aced38e99a5eecf7bce9d53990afa3e",
+    "https://bcr.bazel.build/modules/rules_cc/0.0.9/MODULE.bazel": "836e76439f354b89afe6a911a7adf59a6b2518fafb174483ad78a2a2fde7b1c5",
+    "https://bcr.bazel.build/modules/rules_cc/0.1.1/MODULE.bazel": "2f0222a6f229f0bf44cd711dc13c858dad98c62d52bd51d8fc3a764a83125513",
+    "https://bcr.bazel.build/modules/rules_cc/0.1.5/MODULE.bazel": "88dfc9361e8b5ae1008ac38f7cdfd45ad738e4fa676a3ad67d19204f045a1fd8",
+    "https://bcr.bazel.build/modules/rules_cc/0.1.5/source.json": "4bb4fed7f5499775d495739f785a5494a1f854645fa1bac5de131264f5acdf01",
+    "https://bcr.bazel.build/modules/rules_foreign_cc/0.9.0/MODULE.bazel": "c9e8c682bf75b0e7c704166d79b599f93b72cfca5ad7477df596947891feeef6",
+    "https://bcr.bazel.build/modules/rules_fuzzing/0.5.2/MODULE.bazel": "40c97d1144356f52905566c55811f13b299453a14ac7769dfba2ac38192337a8",
+    "https://bcr.bazel.build/modules/rules_fuzzing/0.5.2/source.json": "c8b1e2c717646f1702290959a3302a178fb639d987ab61d548105019f11e527e",
+    "https://bcr.bazel.build/modules/rules_java/4.0.0/MODULE.bazel": "5a78a7ae82cd1a33cef56dc578c7d2a46ed0dca12643ee45edbb8417899e6f74",
+    "https://bcr.bazel.build/modules/rules_java/5.3.5/MODULE.bazel": "a4ec4f2db570171e3e5eb753276ee4b389bae16b96207e9d3230895c99644b86",
+    "https://bcr.bazel.build/modules/rules_java/6.0.0/MODULE.bazel": "8a43b7df601a7ec1af61d79345c17b31ea1fedc6711fd4abfd013ea612978e39",
+    "https://bcr.bazel.build/modules/rules_java/6.4.0/MODULE.bazel": "e986a9fe25aeaa84ac17ca093ef13a4637f6107375f64667a15999f77db6c8f6",
+    "https://bcr.bazel.build/modules/rules_java/6.5.2/MODULE.bazel": "1d440d262d0e08453fa0c4d8f699ba81609ed0e9a9a0f02cd10b3e7942e61e31",
+    "https://bcr.bazel.build/modules/rules_java/7.1.0/MODULE.bazel": "30d9135a2b6561c761bd67bd4990da591e6bdc128790ce3e7afd6a3558b2fb64",
+    "https://bcr.bazel.build/modules/rules_java/7.10.0/MODULE.bazel": "530c3beb3067e870561739f1144329a21c851ff771cd752a49e06e3dc9c2e71a",
+    "https://bcr.bazel.build/modules/rules_java/7.12.2/MODULE.bazel": "579c505165ee757a4280ef83cda0150eea193eed3bef50b1004ba88b99da6de6",
+    "https://bcr.bazel.build/modules/rules_java/7.2.0/MODULE.bazel": "06c0334c9be61e6cef2c8c84a7800cef502063269a5af25ceb100b192453d4ab",
+    "https://bcr.bazel.build/modules/rules_java/7.3.2/MODULE.bazel": "50dece891cfdf1741ea230d001aa9c14398062f2b7c066470accace78e412bc2",
+    "https://bcr.bazel.build/modules/rules_java/7.6.1/MODULE.bazel": "2f14b7e8a1aa2f67ae92bc69d1ec0fa8d9f827c4e17ff5e5f02e91caa3b2d0fe",
+    "https://bcr.bazel.build/modules/rules_java/8.14.0/MODULE.bazel": "717717ed40cc69994596a45aec6ea78135ea434b8402fb91b009b9151dd65615",
+    "https://bcr.bazel.build/modules/rules_java/8.14.0/source.json": "8a88c4ca9e8759da53cddc88123880565c520503321e2566b4e33d0287a3d4bc",
+    "https://bcr.bazel.build/modules/rules_jvm_external/4.4.2/MODULE.bazel": "a56b85e418c83eb1839819f0b515c431010160383306d13ec21959ac412d2fe7",
+    "https://bcr.bazel.build/modules/rules_jvm_external/5.1/MODULE.bazel": "33f6f999e03183f7d088c9be518a63467dfd0be94a11d0055fe2d210f89aa909",
+    "https://bcr.bazel.build/modules/rules_jvm_external/5.2/MODULE.bazel": "d9351ba35217ad0de03816ef3ed63f89d411349353077348a45348b096615036",
+    "https://bcr.bazel.build/modules/rules_jvm_external/5.3/MODULE.bazel": "bf93870767689637164657731849fb887ad086739bd5d360d90007a581d5527d",
+    "https://bcr.bazel.build/modules/rules_jvm_external/6.1/MODULE.bazel": "75b5fec090dbd46cf9b7d8ea08cf84a0472d92ba3585b476f44c326eda8059c4",
+    "https://bcr.bazel.build/modules/rules_jvm_external/6.3/MODULE.bazel": "c998e060b85f71e00de5ec552019347c8bca255062c990ac02d051bb80a38df0",
+    "https://bcr.bazel.build/modules/rules_jvm_external/6.3/source.json": "6f5f5a5a4419ae4e37c35a5bb0a6ae657ed40b7abc5a5189111b47fcebe43197",
+    "https://bcr.bazel.build/modules/rules_kotlin/1.9.0/MODULE.bazel": "ef85697305025e5a61f395d4eaede272a5393cee479ace6686dba707de804d59",
+    "https://bcr.bazel.build/modules/rules_kotlin/1.9.6/MODULE.bazel": "d269a01a18ee74d0335450b10f62c9ed81f2321d7958a2934e44272fe82dcef3",
+    "https://bcr.bazel.build/modules/rules_kotlin/1.9.6/source.json": "2faa4794364282db7c06600b7e5e34867a564ae91bda7cae7c29c64e9466b7d5",
+    "https://bcr.bazel.build/modules/rules_license/0.0.3/MODULE.bazel": "627e9ab0247f7d1e05736b59dbb1b6871373de5ad31c3011880b4133cafd4bd0",
+    "https://bcr.bazel.build/modules/rules_license/0.0.7/MODULE.bazel": "088fbeb0b6a419005b89cf93fe62d9517c0a2b8bb56af3244af65ecfe37e7d5d",
+    "https://bcr.bazel.build/modules/rules_license/1.0.0/MODULE.bazel": "a7fda60eefdf3d8c827262ba499957e4df06f659330bbe6cdbdb975b768bb65c",
+    "https://bcr.bazel.build/modules/rules_license/1.0.0/source.json": "a52c89e54cc311196e478f8382df91c15f7a2bfdf4c6cd0e2675cc2ff0b56efb",
+    "https://bcr.bazel.build/modules/rules_pkg/0.7.0/MODULE.bazel": "df99f03fc7934a4737122518bb87e667e62d780b610910f0447665a7e2be62dc",
+    "https://bcr.bazel.build/modules/rules_pkg/1.0.1/MODULE.bazel": "5b1df97dbc29623bccdf2b0dcd0f5cb08e2f2c9050aab1092fd39a41e82686ff",
+    "https://bcr.bazel.build/modules/rules_pkg/1.0.1/source.json": "bd82e5d7b9ce2d31e380dd9f50c111d678c3bdaca190cb76b0e1c71b05e1ba8a",
+    "https://bcr.bazel.build/modules/rules_proto/4.0.0/MODULE.bazel": "a7a7b6ce9bee418c1a760b3d84f83a299ad6952f9903c67f19e4edd964894e06",
+    "https://bcr.bazel.build/modules/rules_proto/5.3.0-21.7/MODULE.bazel": "e8dff86b0971688790ae75528fe1813f71809b5afd57facb44dad9e8eca631b7",
+    "https://bcr.bazel.build/modules/rules_proto/6.0.0-rc1/MODULE.bazel": "1e5b502e2e1a9e825eef74476a5a1ee524a92297085015a052510b09a1a09483",
+    "https://bcr.bazel.build/modules/rules_proto/6.0.2/MODULE.bazel": "ce916b775a62b90b61888052a416ccdda405212b6aaeb39522f7dc53431a5e73",
+    "https://bcr.bazel.build/modules/rules_proto/7.0.2/MODULE.bazel": "bf81793bd6d2ad89a37a40693e56c61b0ee30f7a7fdbaf3eabbf5f39de47dea2",
+    "https://bcr.bazel.build/modules/rules_proto/7.0.2/source.json": "1e5e7260ae32ef4f2b52fd1d0de8d03b606a44c91b694d2f1afb1d3b28a48ce1",
+    "https://bcr.bazel.build/modules/rules_python/0.10.2/MODULE.bazel": "cc82bc96f2997baa545ab3ce73f196d040ffb8756fd2d66125a530031cd90e5f",
+    "https://bcr.bazel.build/modules/rules_python/0.23.1/MODULE.bazel": "49ffccf0511cb8414de28321f5fcf2a31312b47c40cc21577144b7447f2bf300",
+    "https://bcr.bazel.build/modules/rules_python/0.25.0/MODULE.bazel": "72f1506841c920a1afec76975b35312410eea3aa7b63267436bfb1dd91d2d382",
+    "https://bcr.bazel.build/modules/rules_python/0.28.0/MODULE.bazel": "cba2573d870babc976664a912539b320cbaa7114cd3e8f053c720171cde331ed",
+    "https://bcr.bazel.build/modules/rules_python/0.31.0/MODULE.bazel": "93a43dc47ee570e6ec9f5779b2e64c1476a6ce921c48cc9a1678a91dd5f8fd58",
+    "https://bcr.bazel.build/modules/rules_python/0.36.0/MODULE.bazel": "a4ce1ccea92b9106c7d16ab9ee51c6183107e78ba4a37aa65055227b80cd480c",
+    "https://bcr.bazel.build/modules/rules_python/0.4.0/MODULE.bazel": "9208ee05fd48bf09ac60ed269791cf17fb343db56c8226a720fbb1cdf467166c",
+    "https://bcr.bazel.build/modules/rules_python/0.40.0/MODULE.bazel": "9d1a3cd88ed7d8e39583d9ffe56ae8a244f67783ae89b60caafc9f5cf318ada7",
+    "https://bcr.bazel.build/modules/rules_python/0.40.0/source.json": "939d4bd2e3110f27bfb360292986bb79fd8dcefb874358ccd6cdaa7bda029320",
+    "https://bcr.bazel.build/modules/rules_shell/0.2.0/MODULE.bazel": "fda8a652ab3c7d8fee214de05e7a9916d8b28082234e8d2c0094505c5268ed3c",
+    "https://bcr.bazel.build/modules/rules_shell/0.2.0/source.json": "7f27af3c28037d9701487c4744b5448d26537cc66cdef0d8df7ae85411f8de95",
+    "https://bcr.bazel.build/modules/stardoc/0.5.1/MODULE.bazel": "1a05d92974d0c122f5ccf09291442580317cdd859f07a8655f1db9a60374f9f8",
+    "https://bcr.bazel.build/modules/stardoc/0.5.3/MODULE.bazel": "c7f6948dae6999bf0db32c1858ae345f112cacf98f174c7a8bb707e41b974f1c",
+    "https://bcr.bazel.build/modules/stardoc/0.5.6/MODULE.bazel": "c43dabc564990eeab55e25ed61c07a1aadafe9ece96a4efabb3f8bf9063b71ef",
+    "https://bcr.bazel.build/modules/stardoc/0.7.0/MODULE.bazel": "05e3d6d30c099b6770e97da986c53bd31844d7f13d41412480ea265ac9e8079c",
+    "https://bcr.bazel.build/modules/stardoc/0.7.1/MODULE.bazel": "3548faea4ee5dda5580f9af150e79d0f6aea934fc60c1cc50f4efdd9420759e7",
+    "https://bcr.bazel.build/modules/stardoc/0.7.1/source.json": "b6500ffcd7b48cd72c29bb67bcac781e12701cc0d6d55d266a652583cfcdab01",
+    "https://bcr.bazel.build/modules/upb/0.0.0-20220923-a547704/MODULE.bazel": "7298990c00040a0e2f121f6c32544bab27d4452f80d9ce51349b1a28f3005c43",
+    "https://bcr.bazel.build/modules/upb/0.0.0-20230516-61a97ef/MODULE.bazel": "c0df5e35ad55e264160417fd0875932ee3c9dda63d9fccace35ac62f45e1b6f9",
+    "https://bcr.bazel.build/modules/zlib/1.2.11/MODULE.bazel": "07b389abc85fdbca459b69e2ec656ae5622873af3f845e1c9d80fe179f3effa0",
+    "https://bcr.bazel.build/modules/zlib/1.3.1.bcr.5/MODULE.bazel": "eec517b5bbe5492629466e11dae908d043364302283de25581e3eb944326c4ca",
+    "https://bcr.bazel.build/modules/zlib/1.3.1.bcr.5/source.json": "22bc55c47af97246cfc093d0acf683a7869377de362b5d1c552c2c2e16b7a806",
+    "https://bcr.bazel.build/modules/zlib/1.3.1/MODULE.bazel": "751c9940dcfe869f5f7274e1295422a34623555916eb98c174c1e945594bf198"
+  },
+  "selectedYankedVersions": {},
+  "moduleExtensions": {
+    "@@pybind11_bazel+//:python_configure.bzl%extension": {
+      "general": {
+        "bzlTransitiveDigest": "VhEtmxw1yzb9rBZVsKTdti7p+nDM/Fv1p9TmKdO45+Q=",
+        "usagesDigest": "fycyB39YnXIJkfWCIXLUKJMZzANcuLy9ZE73hRucjFk=",
+        "recordedInputs": [
+          "REPO_MAPPING:pybind11_bazel+,bazel_tools bazel_tools",
+          "FILE:@@pybind11_bazel+//MODULE.bazel 88af1c246226d87e65be78ed49ecd1e6f5e98648558c14ce99176da041dc378e"
+        ],
+        "generatedRepoSpecs": {
+          "local_config_python": {
+            "repoRuleId": "@@pybind11_bazel+//:python_configure.bzl%python_configure",
+            "attributes": {}
+          },
+          "pybind11": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@pybind11_bazel+//:pybind11.BUILD",
+              "strip_prefix": "pybind11-2.11.1",
+              "urls": [
+                "https://github.com/pybind/pybind11/archive/v2.11.1.zip"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "@@rules_fuchsia+//fuchsia/workspace:fuchsia_clang_repository.bzl%fuchsia_clang_ext": {
+      "general": {
+        "bzlTransitiveDigest": "BUjOvrdWR8URmBDIQHjMEMAWKv4HIlsau2GLk2oblEg=",
+        "usagesDigest": "aKlKFQv9EUM0oRB1Y5bi1Idf0ETsGNha5LR8ur7YpPY=",
+        "recordedInputs": [
+          "REPO_MAPPING:bazel_tools,rules_cc rules_cc+",
+          "REPO_MAPPING:rules_cc+,bazel_tools bazel_tools",
+          "REPO_MAPPING:rules_cc+,rules_cc rules_cc+",
+          "REPO_MAPPING:rules_fuchsia+,bazel_skylib bazel_skylib+",
+          "REPO_MAPPING:rules_fuchsia+,bazel_tools bazel_tools",
+          "REPO_MAPPING:rules_fuchsia+,fuchsia_sdk rules_fuchsia++fuchsia_sdk_ext+fuchsia_sdk",
+          "REPO_MAPPING:rules_fuchsia+,rules_cc rules_cc+",
+          "REPO_MAPPING:rules_fuchsia+,rules_fuchsia rules_fuchsia+"
+        ],
+        "generatedRepoSpecs": {
+          "fuchsia_clang": {
+            "repoRuleId": "@@rules_fuchsia+//fuchsia/workspace:fuchsia_clang_repository.bzl%fuchsia_clang_repository",
+            "attributes": {
+              "cipd_tag": "",
+              "sha256": {},
+              "local_archive": "",
+              "local_path": "../../../../buildtools/linux-x64/clang",
+              "extra_target_compatible_with": []
+            }
+          }
+        }
+      }
+    },
+    "@@rules_fuchsia+//fuchsia/workspace:fuchsia_sdk_repository.bzl%fuchsia_sdk_ext": {
+      "general": {
+        "bzlTransitiveDigest": "wj285ajZq6MKB7xXSMyIrWsICvf4S2WSIwRBv5tkijk=",
+        "usagesDigest": "RkwlggL2J17HNvmgRtK24HYkyeX9A7VcmI02vnP7vww=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {
+          "fuchsia_sdk": {
+            "repoRuleId": "@@rules_fuchsia+//fuchsia/workspace:fuchsia_sdk_repository.bzl%fuchsia_sdk_repository",
+            "attributes": {
+              "local_paths": [
+                "../../../../../third_party/fuchsia-sdk/sdk"
+              ],
+              "visibility_templates": {}
+            }
+          },
+          "fuchsia_sdk_toolchain_decl": {
+            "repoRuleId": "@@rules_fuchsia+//fuchsia/workspace:register_fuchsia_sdk_toolchain.bzl%fuchsia_toolchain_decl",
+            "attributes": {
+              "toolchain_path": "@fuchsia_sdk//:fuchsia_toolchain_info"
+            }
+          }
+        }
+      }
+    },
+    "@@rules_fuzzing+//fuzzing/private:extensions.bzl%non_module_dependencies": {
+      "general": {
+        "bzlTransitiveDigest": "CYUiFDCnL2VGx3uotIu/VuGabgObnZra2zzRUJCX0sU=",
+        "usagesDigest": "wy6ISK6UOcBEjj/mvJ/S3WeXoO67X+1llb9yPyFtPgc=",
+        "recordedInputs": [
+          "REPO_MAPPING:rules_fuzzing+,bazel_tools bazel_tools"
+        ],
+        "generatedRepoSpecs": {
+          "platforms": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://mirror.bazel.build/github.com/bazelbuild/platforms/releases/download/0.0.8/platforms-0.0.8.tar.gz",
+                "https://github.com/bazelbuild/platforms/releases/download/0.0.8/platforms-0.0.8.tar.gz"
+              ],
+              "sha256": "8150406605389ececb6da07cbcb509d5637a3ab9a24bc69b1101531367d89d74"
+            }
+          },
+          "rules_python": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "sha256": "d70cd72a7a4880f0000a6346253414825c19cdd40a28289bdf67b8e6480edff8",
+              "strip_prefix": "rules_python-0.28.0",
+              "url": "https://github.com/bazelbuild/rules_python/releases/download/0.28.0/rules_python-0.28.0.tar.gz"
+            }
+          },
+          "bazel_skylib": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "sha256": "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
+              "urls": [
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz",
+                "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz"
+              ]
+            }
+          },
+          "com_google_absl": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/abseil/abseil-cpp/archive/refs/tags/20240116.1.zip"
+              ],
+              "strip_prefix": "abseil-cpp-20240116.1",
+              "integrity": "sha256-7capMWOvWyoYbUaHF/b+I2U6XLMaHmky8KugWvfXYuk="
+            }
+          },
+          "rules_fuzzing_oss_fuzz": {
+            "repoRuleId": "@@rules_fuzzing+//fuzzing/private/oss_fuzz:repository.bzl%oss_fuzz_repository",
+            "attributes": {}
+          },
+          "honggfuzz": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@rules_fuzzing+//:honggfuzz.BUILD",
+              "sha256": "6b18ba13bc1f36b7b950c72d80f19ea67fbadc0ac0bb297ec89ad91f2eaa423e",
+              "url": "https://github.com/google/honggfuzz/archive/2.5.zip",
+              "strip_prefix": "honggfuzz-2.5"
+            }
+          },
+          "rules_fuzzing_jazzer": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_jar",
+            "attributes": {
+              "sha256": "ee6feb569d88962d59cb59e8a31eb9d007c82683f3ebc64955fd5b96f277eec2",
+              "url": "https://repo1.maven.org/maven2/com/code-intelligence/jazzer/0.20.1/jazzer-0.20.1.jar"
+            }
+          },
+          "rules_fuzzing_jazzer_api": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_jar",
+            "attributes": {
+              "sha256": "f5a60242bc408f7fa20fccf10d6c5c5ea1fcb3c6f44642fec5af88373ae7aa1b",
+              "url": "https://repo1.maven.org/maven2/com/code-intelligence/jazzer-api/0.20.1/jazzer-api-0.20.1.jar"
+            }
+          }
+        }
+      }
+    },
+    "@@rules_kotlin+//src/main/starlark/core/repositories:bzlmod_setup.bzl%rules_kotlin_extensions": {
+      "general": {
+        "bzlTransitiveDigest": "03Qju4tW0vE+0RBuZGuV2A4Hx6AiSkdNahYvworx2aM=",
+        "usagesDigest": "QI2z8ZUR+mqtbwsf2fLqYdJAkPOHdOV+tF2yVAUgRzw=",
+        "recordedInputs": [
+          "REPO_MAPPING:rules_kotlin+,bazel_tools bazel_tools"
+        ],
+        "generatedRepoSpecs": {
+          "com_github_jetbrains_kotlin_git": {
+            "repoRuleId": "@@rules_kotlin+//src/main/starlark/core/repositories:compiler.bzl%kotlin_compiler_git_repository",
+            "attributes": {
+              "urls": [
+                "https://github.com/JetBrains/kotlin/releases/download/v1.9.23/kotlin-compiler-1.9.23.zip"
+              ],
+              "sha256": "93137d3aab9afa9b27cb06a824c2324195c6b6f6179d8a8653f440f5bd58be88"
+            }
+          },
+          "com_github_jetbrains_kotlin": {
+            "repoRuleId": "@@rules_kotlin+//src/main/starlark/core/repositories:compiler.bzl%kotlin_capabilities_repository",
+            "attributes": {
+              "git_repository_name": "com_github_jetbrains_kotlin_git",
+              "compiler_version": "1.9.23"
+            }
+          },
+          "com_github_google_ksp": {
+            "repoRuleId": "@@rules_kotlin+//src/main/starlark/core/repositories:ksp.bzl%ksp_compiler_plugin_repository",
+            "attributes": {
+              "urls": [
+                "https://github.com/google/ksp/releases/download/1.9.23-1.0.20/artifacts.zip"
+              ],
+              "sha256": "ee0618755913ef7fd6511288a232e8fad24838b9af6ea73972a76e81053c8c2d",
+              "strip_version": "1.9.23-1.0.20"
+            }
+          },
+          "com_github_pinterest_ktlint": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "sha256": "01b2e0ef893383a50dbeb13970fe7fa3be36ca3e83259e01649945b09d736985",
+              "urls": [
+                "https://github.com/pinterest/ktlint/releases/download/1.3.0/ktlint"
+              ],
+              "executable": true
+            }
+          },
+          "rules_android": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "sha256": "cd06d15dd8bb59926e4d65f9003bfc20f9da4b2519985c27e190cddc8b7a7806",
+              "strip_prefix": "rules_android-0.1.1",
+              "urls": [
+                "https://github.com/bazelbuild/rules_android/archive/v0.1.1.zip"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "@@rules_python+//python/private/pypi:pip.bzl%pip_internal": {
+      "general": {
+        "bzlTransitiveDigest": "bYBSBIIeX+CulYH/df9NsmTLa3fE2FyvqVO6iYVL0UI=",
+        "usagesDigest": "OLoIStnzNObNalKEMRq99FqenhPGLFZ5utVLV4sz7OI=",
+        "recordedInputs": [
+          "REPO_MAPPING:bazel_features+,bazel_features_globals bazel_features++version_extension+bazel_features_globals",
+          "REPO_MAPPING:bazel_features+,bazel_features_version bazel_features++version_extension+bazel_features_version",
+          "REPO_MAPPING:rules_python+,bazel_features bazel_features+",
+          "REPO_MAPPING:rules_python+,bazel_skylib bazel_skylib+",
+          "REPO_MAPPING:rules_python+,bazel_tools bazel_tools",
+          "REPO_MAPPING:rules_python+,pypi__build rules_python++internal_deps+pypi__build",
+          "REPO_MAPPING:rules_python+,pypi__click rules_python++internal_deps+pypi__click",
+          "REPO_MAPPING:rules_python+,pypi__colorama rules_python++internal_deps+pypi__colorama",
+          "REPO_MAPPING:rules_python+,pypi__importlib_metadata rules_python++internal_deps+pypi__importlib_metadata",
+          "REPO_MAPPING:rules_python+,pypi__installer rules_python++internal_deps+pypi__installer",
+          "REPO_MAPPING:rules_python+,pypi__more_itertools rules_python++internal_deps+pypi__more_itertools",
+          "REPO_MAPPING:rules_python+,pypi__packaging rules_python++internal_deps+pypi__packaging",
+          "REPO_MAPPING:rules_python+,pypi__pep517 rules_python++internal_deps+pypi__pep517",
+          "REPO_MAPPING:rules_python+,pypi__pip rules_python++internal_deps+pypi__pip",
+          "REPO_MAPPING:rules_python+,pypi__pip_tools rules_python++internal_deps+pypi__pip_tools",
+          "REPO_MAPPING:rules_python+,pypi__pyproject_hooks rules_python++internal_deps+pypi__pyproject_hooks",
+          "REPO_MAPPING:rules_python+,pypi__setuptools rules_python++internal_deps+pypi__setuptools",
+          "REPO_MAPPING:rules_python+,pypi__tomli rules_python++internal_deps+pypi__tomli",
+          "REPO_MAPPING:rules_python+,pypi__wheel rules_python++internal_deps+pypi__wheel",
+          "REPO_MAPPING:rules_python+,pypi__zipp rules_python++internal_deps+pypi__zipp",
+          "REPO_MAPPING:rules_python+,pythons_hub rules_python++python+pythons_hub",
+          "REPO_MAPPING:rules_python++python+pythons_hub,python_3_10_host rules_python++python+python_3_10_host",
+          "REPO_MAPPING:rules_python++python+pythons_hub,python_3_11_host rules_python++python+python_3_11_host",
+          "REPO_MAPPING:rules_python++python+pythons_hub,python_3_12_host rules_python++python+python_3_12_host",
+          "REPO_MAPPING:rules_python++python+pythons_hub,python_3_8_host rules_python++python+python_3_8_host",
+          "REPO_MAPPING:rules_python++python+pythons_hub,python_3_9_host rules_python++python+python_3_9_host",
+          "ENV:RULES_PYTHON_REPO_DEBUG \\0",
+          "ENV:RULES_PYTHON_REPO_DEBUG_VERBOSITY \\0",
+          "FILE:@@rules_python+//tools/publish/requirements_darwin.txt 2994136eab7e57b083c3de76faf46f70fad130bc8e7360a7fed2b288b69e79dc",
+          "FILE:@@rules_python+//tools/publish/requirements_linux.txt 8175b4c8df50ae2f22d1706961884beeb54e7da27bd2447018314a175981997d",
+          "FILE:@@rules_python+//tools/publish/requirements_windows.txt 7673adc71dc1a81d3661b90924d7a7c0fc998cd508b3cb4174337cef3f2de556"
+        ],
+        "generatedRepoSpecs": {
+          "rules_python_publish_deps_311_backports_tarfile_py3_none_any_77e284d7": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "backports.tarfile-1.2.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "backports-tarfile==1.2.0",
+              "sha256": "77e284d754527b01fb1e6fa8a1afe577858ebe4e9dad8919e34c862cb399bc34",
+              "urls": [
+                "https://files.pythonhosted.org/packages/b9/fa/123043af240e49752f1c4bd24da5053b6bd00cad78c2be53c0d1e8b975bc/backports.tarfile-1.2.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_backports_tarfile_sdist_d75e02c2": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "backports_tarfile-1.2.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "backports-tarfile==1.2.0",
+              "sha256": "d75e02c268746e1b8144c278978b6e98e85de6ad16f8e4b0844a154557eca991",
+              "urls": [
+                "https://files.pythonhosted.org/packages/86/72/cd9b395f25e290e633655a100af28cb253e4393396264a98bd5f5951d50f/backports_tarfile-1.2.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_certifi_py3_none_any_922820b5": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "certifi-2024.8.30-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "certifi==2024.8.30",
+              "sha256": "922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8",
+              "urls": [
+                "https://files.pythonhosted.org/packages/12/90/3c9ff0512038035f59d279fddeb79f5f1eccd8859f06d6163c58798b9487/certifi-2024.8.30-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_certifi_sdist_bec941d2": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "certifi-2024.8.30.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "certifi==2024.8.30",
+              "sha256": "bec941d2aa8195e248a60b31ff9f0558284cf01a52591ceda73ea9afffd69fd9",
+              "urls": [
+                "https://files.pythonhosted.org/packages/b0/ee/9b19140fe824b367c04c5e1b369942dd754c4c5462d5674002f75c4dedc1/certifi-2024.8.30.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cffi_cp311_cp311_manylinux_2_17_aarch64_a1ed2dd2": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cffi-1.17.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cffi==1.17.1",
+              "sha256": "a1ed2dd2972641495a3ec98445e09766f077aee98a1c896dcb4ad0d303628e41",
+              "urls": [
+                "https://files.pythonhosted.org/packages/2e/ea/70ce63780f096e16ce8588efe039d3c4f91deb1dc01e9c73a287939c79a6/cffi-1.17.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cffi_cp311_cp311_manylinux_2_17_ppc64le_46bf4316": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cffi-1.17.1-cp311-cp311-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cffi==1.17.1",
+              "sha256": "46bf43160c1a35f7ec506d254e5c890f3c03648a4dbac12d624e4490a7046cd1",
+              "urls": [
+                "https://files.pythonhosted.org/packages/1c/a0/a4fa9f4f781bda074c3ddd57a572b060fa0df7655d2a4247bbe277200146/cffi-1.17.1-cp311-cp311-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cffi_cp311_cp311_manylinux_2_17_s390x_a24ed04c": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cffi-1.17.1-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cffi==1.17.1",
+              "sha256": "a24ed04c8ffd54b0729c07cee15a81d964e6fee0e3d4d342a27b020d22959dc6",
+              "urls": [
+                "https://files.pythonhosted.org/packages/62/12/ce8710b5b8affbcdd5c6e367217c242524ad17a02fe5beec3ee339f69f85/cffi-1.17.1-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cffi_cp311_cp311_manylinux_2_17_x86_64_610faea7": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cffi-1.17.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cffi==1.17.1",
+              "sha256": "610faea79c43e44c71e1ec53a554553fa22321b65fae24889706c0a84d4ad86d",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ff/6b/d45873c5e0242196f042d555526f92aa9e0c32355a1be1ff8c27f077fd37/cffi-1.17.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cffi_cp311_cp311_musllinux_1_1_aarch64_a9b15d49": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cffi-1.17.1-cp311-cp311-musllinux_1_1_aarch64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cffi==1.17.1",
+              "sha256": "a9b15d491f3ad5d692e11f6b71f7857e7835eb677955c00cc0aefcd0669adaf6",
+              "urls": [
+                "https://files.pythonhosted.org/packages/1a/52/d9a0e523a572fbccf2955f5abe883cfa8bcc570d7faeee06336fbd50c9fc/cffi-1.17.1-cp311-cp311-musllinux_1_1_aarch64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cffi_cp311_cp311_musllinux_1_1_x86_64_fc48c783": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cffi-1.17.1-cp311-cp311-musllinux_1_1_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cffi==1.17.1",
+              "sha256": "fc48c783f9c87e60831201f2cce7f3b2e4846bf4d8728eabe54d60700b318a0b",
+              "urls": [
+                "https://files.pythonhosted.org/packages/f8/4a/34599cac7dfcd888ff54e801afe06a19c17787dfd94495ab0c8d35fe99fb/cffi-1.17.1-cp311-cp311-musllinux_1_1_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cffi_sdist_1c39c601": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "cffi-1.17.1.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cffi==1.17.1",
+              "sha256": "1c39c6016c32bc48dd54561950ebd6836e1670f2ae46128f67cf49e789c52824",
+              "urls": [
+                "https://files.pythonhosted.org/packages/fc/97/c783634659c2920c3fc70419e3af40972dbaf758daa229a7d6ea6135c90d/cffi-1.17.1.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_macosx_10_9_universal2_0d99dd8f": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-macosx_10_9_universal2.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "0d99dd8ff461990f12d6e42c7347fd9ab2532fb70e9621ba520f9e8637161d7c",
+              "urls": [
+                "https://files.pythonhosted.org/packages/9c/61/73589dcc7a719582bf56aae309b6103d2762b526bffe189d635a7fcfd998/charset_normalizer-3.4.0-cp311-cp311-macosx_10_9_universal2.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_macosx_10_9_x86_64_c57516e5": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-macosx_10_9_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "c57516e58fd17d03ebe67e181a4e4e2ccab1168f8c2976c6a334d4f819fe5944",
+              "urls": [
+                "https://files.pythonhosted.org/packages/77/d5/8c982d58144de49f59571f940e329ad6e8615e1e82ef84584c5eeb5e1d72/charset_normalizer-3.4.0-cp311-cp311-macosx_10_9_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_macosx_11_0_arm64_6dba5d19": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-macosx_11_0_arm64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "6dba5d19c4dfab08e58d5b36304b3f92f3bd5d42c1a3fa37b5ba5cdf6dfcbcee",
+              "urls": [
+                "https://files.pythonhosted.org/packages/bf/19/411a64f01ee971bed3231111b69eb56f9331a769072de479eae7de52296d/charset_normalizer-3.4.0-cp311-cp311-macosx_11_0_arm64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_manylinux_2_17_aarch64_bf4475b8": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "bf4475b82be41b07cc5e5ff94810e6a01f276e37c2d55571e3fe175e467a1a1c",
+              "urls": [
+                "https://files.pythonhosted.org/packages/4c/92/97509850f0d00e9f14a46bc751daabd0ad7765cff29cdfb66c68b6dad57f/charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_manylinux_2_17_ppc64le_ce031db0": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "ce031db0408e487fd2775d745ce30a7cd2923667cf3b69d48d219f1d8f5ddeb6",
+              "urls": [
+                "https://files.pythonhosted.org/packages/e2/29/d227805bff72ed6d6cb1ce08eec707f7cfbd9868044893617eb331f16295/charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_manylinux_2_17_s390x_8ff4e7cd": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "8ff4e7cdfdb1ab5698e675ca622e72d58a6fa2a8aa58195de0c0061288e6e3ea",
+              "urls": [
+                "https://files.pythonhosted.org/packages/13/bc/87c2c9f2c144bedfa62f894c3007cd4530ba4b5351acb10dc786428a50f0/charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_manylinux_2_17_x86_64_3710a975": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "3710a9751938947e6327ea9f3ea6332a09bf0ba0c09cae9cb1f250bd1f1549bc",
+              "urls": [
+                "https://files.pythonhosted.org/packages/eb/5b/6f10bad0f6461fa272bfbbdf5d0023b5fb9bc6217c92bf068fa5a99820f5/charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_musllinux_1_2_aarch64_47334db7": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_aarch64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "47334db71978b23ebcf3c0f9f5ee98b8d65992b65c9c4f2d34c2eaf5bcaf0594",
+              "urls": [
+                "https://files.pythonhosted.org/packages/d7/a1/493919799446464ed0299c8eef3c3fad0daf1c3cd48bff9263c731b0d9e2/charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_aarch64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_musllinux_1_2_ppc64le_f1a2f519": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_ppc64le.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "f1a2f519ae173b5b6a2c9d5fa3116ce16e48b3462c8b96dfdded11055e3d6365",
+              "urls": [
+                "https://files.pythonhosted.org/packages/75/d2/0ab54463d3410709c09266dfb416d032a08f97fd7d60e94b8c6ef54ae14b/charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_ppc64le.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_musllinux_1_2_s390x_63bc5c4a": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_s390x.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "63bc5c4ae26e4bc6be6469943b8253c0fd4e4186c43ad46e713ea61a0ba49129",
+              "urls": [
+                "https://files.pythonhosted.org/packages/8d/c9/27e41d481557be53d51e60750b85aa40eaf52b841946b3cdeff363105737/charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_s390x.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_musllinux_1_2_x86_64_bcb4f8ea": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "bcb4f8ea87d03bc51ad04add8ceaf9b0f085ac045ab4d74e73bbc2dc033f0236",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ee/44/4f62042ca8cdc0cabf87c0fc00ae27cd8b53ab68be3605ba6d071f742ad3/charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_cp311_cp311_win_amd64_cee4373f": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-cp311-cp311-win_amd64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "cee4373f4d3ad28f1ab6290684d8e2ebdb9e7a1b74fdc39e4c211995f77bec27",
+              "urls": [
+                "https://files.pythonhosted.org/packages/0b/6e/b13bd47fa9023b3699e94abf565b5a2f0b0be6e9ddac9812182596ee62e4/charset_normalizer-3.4.0-cp311-cp311-win_amd64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_py3_none_any_fe9f97fe": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "charset_normalizer-3.4.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "fe9f97feb71aa9896b81973a7bbada8c49501dc73e58a10fcef6663af95e5079",
+              "urls": [
+                "https://files.pythonhosted.org/packages/bf/9b/08c0432272d77b04803958a4598a51e2a4b51c06640af8b8f0f908c18bf2/charset_normalizer-3.4.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_charset_normalizer_sdist_223217c3": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "charset_normalizer-3.4.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "charset-normalizer==3.4.0",
+              "sha256": "223217c3d4f82c3ac5e29032b3f1c2eb0fb591b72161f86d93f5719079dae93e",
+              "urls": [
+                "https://files.pythonhosted.org/packages/f2/4f/e1808dc01273379acc506d18f1504eb2d299bd4131743b9fc54d7be4df1e/charset_normalizer-3.4.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cryptography_cp39_abi3_manylinux_2_17_aarch64_846da004": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cryptography-43.0.3-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cryptography==43.0.3",
+              "sha256": "846da004a5804145a5f441b8530b4bf35afbf7da70f82409f151695b127213d5",
+              "urls": [
+                "https://files.pythonhosted.org/packages/2f/78/55356eb9075d0be6e81b59f45c7b48df87f76a20e73893872170471f3ee8/cryptography-43.0.3-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cryptography_cp39_abi3_manylinux_2_17_x86_64_0f996e72": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cryptography-43.0.3-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cryptography==43.0.3",
+              "sha256": "0f996e7268af62598f2fc1204afa98a3b5712313a55c4c9d434aef49cadc91d4",
+              "urls": [
+                "https://files.pythonhosted.org/packages/2a/2c/488776a3dc843f95f86d2f957ca0fc3407d0242b50bede7fad1e339be03f/cryptography-43.0.3-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cryptography_cp39_abi3_manylinux_2_28_aarch64_f7b178f1": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cryptography-43.0.3-cp39-abi3-manylinux_2_28_aarch64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cryptography==43.0.3",
+              "sha256": "f7b178f11ed3664fd0e995a47ed2b5ff0a12d893e41dd0494f406d1cf555cab7",
+              "urls": [
+                "https://files.pythonhosted.org/packages/7c/04/2345ca92f7a22f601a9c62961741ef7dd0127c39f7310dffa0041c80f16f/cryptography-43.0.3-cp39-abi3-manylinux_2_28_aarch64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cryptography_cp39_abi3_manylinux_2_28_x86_64_c2e6fc39": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cryptography-43.0.3-cp39-abi3-manylinux_2_28_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cryptography==43.0.3",
+              "sha256": "c2e6fc39c4ab499049df3bdf567f768a723a5e8464816e8f009f121a5a9f4405",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ac/25/e715fa0bc24ac2114ed69da33adf451a38abb6f3f24ec207908112e9ba53/cryptography-43.0.3-cp39-abi3-manylinux_2_28_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cryptography_cp39_abi3_musllinux_1_2_aarch64_e1be4655": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cryptography-43.0.3-cp39-abi3-musllinux_1_2_aarch64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cryptography==43.0.3",
+              "sha256": "e1be4655c7ef6e1bbe6b5d0403526601323420bcf414598955968c9ef3eb7d16",
+              "urls": [
+                "https://files.pythonhosted.org/packages/21/ce/b9c9ff56c7164d8e2edfb6c9305045fbc0df4508ccfdb13ee66eb8c95b0e/cryptography-43.0.3-cp39-abi3-musllinux_1_2_aarch64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cryptography_cp39_abi3_musllinux_1_2_x86_64_df6b6c6d": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "cryptography-43.0.3-cp39-abi3-musllinux_1_2_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cryptography==43.0.3",
+              "sha256": "df6b6c6d742395dd77a23ea3728ab62f98379eff8fb61be2744d4679ab678f73",
+              "urls": [
+                "https://files.pythonhosted.org/packages/2a/33/b3682992ab2e9476b9c81fff22f02c8b0a1e6e1d49ee1750a67d85fd7ed2/cryptography-43.0.3-cp39-abi3-musllinux_1_2_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_cryptography_sdist_315b9001": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "cryptography-43.0.3.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "cryptography==43.0.3",
+              "sha256": "315b9001266a492a6ff443b61238f956b214dbec9910a081ba5b6646a055a805",
+              "urls": [
+                "https://files.pythonhosted.org/packages/0d/05/07b55d1fa21ac18c3a8c79f764e2514e6f6a9698f1be44994f5adf0d29db/cryptography-43.0.3.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_docutils_py3_none_any_dafca5b9": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "docutils-0.21.2-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "docutils==0.21.2",
+              "sha256": "dafca5b9e384f0e419294eb4d2ff9fa826435bf15f15b7bd45723e8ad76811b2",
+              "urls": [
+                "https://files.pythonhosted.org/packages/8f/d7/9322c609343d929e75e7e5e6255e614fcc67572cfd083959cdef3b7aad79/docutils-0.21.2-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_docutils_sdist_3a6b1873": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "docutils-0.21.2.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "docutils==0.21.2",
+              "sha256": "3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ae/ed/aefcc8cd0ba62a0560c3c18c33925362d46c6075480bfa4df87b28e169a9/docutils-0.21.2.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_idna_py3_none_any_946d195a": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "idna-3.10-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "idna==3.10",
+              "sha256": "946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3",
+              "urls": [
+                "https://files.pythonhosted.org/packages/76/c6/c88e154df9c4e1a2a66ccf0005a88dfb2650c1dffb6f5ce603dfbd452ce3/idna-3.10-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_idna_sdist_12f65c9b": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "idna-3.10.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "idna==3.10",
+              "sha256": "12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9",
+              "urls": [
+                "https://files.pythonhosted.org/packages/f1/70/7703c29685631f5a7590aa73f1f1d3fa9a380e654b86af429e0934a32f7d/idna-3.10.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_importlib_metadata_py3_none_any_45e54197": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "importlib_metadata-8.5.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "importlib-metadata==8.5.0",
+              "sha256": "45e54197d28b7a7f1559e60b95e7c567032b602131fbd588f1497f47880aa68b",
+              "urls": [
+                "https://files.pythonhosted.org/packages/a0/d9/a1e041c5e7caa9a05c925f4bdbdfb7f006d1f74996af53467bc394c97be7/importlib_metadata-8.5.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_importlib_metadata_sdist_71522656": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "importlib_metadata-8.5.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "importlib-metadata==8.5.0",
+              "sha256": "71522656f0abace1d072b9e5481a48f07c138e00f079c38c8f883823f9c26bd7",
+              "urls": [
+                "https://files.pythonhosted.org/packages/cd/12/33e59336dca5be0c398a7482335911a33aa0e20776128f038019f1a95f1b/importlib_metadata-8.5.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_jaraco_classes_py3_none_any_f662826b": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "jaraco.classes-3.4.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "jaraco-classes==3.4.0",
+              "sha256": "f662826b6bed8cace05e7ff873ce0f9283b5c924470fe664fff1c2f00f581790",
+              "urls": [
+                "https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_jaraco_classes_sdist_47a024b5": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "jaraco.classes-3.4.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "jaraco-classes==3.4.0",
+              "sha256": "47a024b51d0239c0dd8c8540c6c7f484be3b8fcf0b2d85c13825780d3b3f3acd",
+              "urls": [
+                "https://files.pythonhosted.org/packages/06/c0/ed4a27bc5571b99e3cff68f8a9fa5b56ff7df1c2251cc715a652ddd26402/jaraco.classes-3.4.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_jaraco_context_py3_none_any_f797fc48": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "jaraco.context-6.0.1-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "jaraco-context==6.0.1",
+              "sha256": "f797fc481b490edb305122c9181830a3a5b76d84ef6d1aef2fb9b47ab956f9e4",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ff/db/0c52c4cf5e4bd9f5d7135ec7669a3a767af21b3a308e1ed3674881e52b62/jaraco.context-6.0.1-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_jaraco_context_sdist_9bae4ea5": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "jaraco_context-6.0.1.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "jaraco-context==6.0.1",
+              "sha256": "9bae4ea555cf0b14938dc0aee7c9f32ed303aa20a3b73e7dc80111628792d1b3",
+              "urls": [
+                "https://files.pythonhosted.org/packages/df/ad/f3777b81bf0b6e7bc7514a1656d3e637b2e8e15fab2ce3235730b3e7a4e6/jaraco_context-6.0.1.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_jaraco_functools_py3_none_any_ad159f13": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "jaraco.functools-4.1.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "jaraco-functools==4.1.0",
+              "sha256": "ad159f13428bc4acbf5541ad6dec511f91573b90fba04df61dafa2a1231cf649",
+              "urls": [
+                "https://files.pythonhosted.org/packages/9f/4f/24b319316142c44283d7540e76c7b5a6dbd5db623abd86bb7b3491c21018/jaraco.functools-4.1.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_jaraco_functools_sdist_70f7e0e2": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "jaraco_functools-4.1.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "jaraco-functools==4.1.0",
+              "sha256": "70f7e0e2ae076498e212562325e805204fc092d7b4c17e0e86c959e249701a9d",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ab/23/9894b3df5d0a6eb44611c36aec777823fc2e07740dabbd0b810e19594013/jaraco_functools-4.1.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_jeepney_py3_none_any_c0a454ad": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "jeepney-0.8.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "jeepney==0.8.0",
+              "sha256": "c0a454ad016ca575060802ee4d590dd912e35c122fa04e70306de3d076cce755",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ae/72/2a1e2290f1ab1e06f71f3d0f1646c9e4634e70e1d37491535e19266e8dc9/jeepney-0.8.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_jeepney_sdist_5efe48d2": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "jeepney-0.8.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "jeepney==0.8.0",
+              "sha256": "5efe48d255973902f6badc3ce55e2aa6c5c3b3bc642059ef3a91247bcfcc5806",
+              "urls": [
+                "https://files.pythonhosted.org/packages/d6/f4/154cf374c2daf2020e05c3c6a03c91348d59b23c5366e968feb198306fdf/jeepney-0.8.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_keyring_py3_none_any_5426f817": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "keyring-25.4.1-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "keyring==25.4.1",
+              "sha256": "5426f817cf7f6f007ba5ec722b1bcad95a75b27d780343772ad76b17cb47b0bf",
+              "urls": [
+                "https://files.pythonhosted.org/packages/83/25/e6d59e5f0a0508d0dca8bb98c7f7fd3772fc943ac3f53d5ab18a218d32c0/keyring-25.4.1-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_keyring_sdist_b07ebc55": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "keyring-25.4.1.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "keyring==25.4.1",
+              "sha256": "b07ebc55f3e8ed86ac81dd31ef14e81ace9dd9c3d4b5d77a6e9a2016d0d71a1b",
+              "urls": [
+                "https://files.pythonhosted.org/packages/a5/1c/2bdbcfd5d59dc6274ffb175bc29aa07ecbfab196830e0cfbde7bd861a2ea/keyring-25.4.1.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_markdown_it_py_py3_none_any_35521684": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "markdown_it_py-3.0.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "markdown-it-py==3.0.0",
+              "sha256": "355216845c60bd96232cd8d8c40e8f9765cc86f46880e43a8fd22dc1a1a8cab1",
+              "urls": [
+                "https://files.pythonhosted.org/packages/42/d7/1ec15b46af6af88f19b8e5ffea08fa375d433c998b8a7639e76935c14f1f/markdown_it_py-3.0.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_markdown_it_py_sdist_e3f60a94": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "markdown-it-py-3.0.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "markdown-it-py==3.0.0",
+              "sha256": "e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb",
+              "urls": [
+                "https://files.pythonhosted.org/packages/38/71/3b932df36c1a044d397a1f92d1cf91ee0a503d91e470cbd670aa66b07ed0/markdown-it-py-3.0.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_mdurl_py3_none_any_84008a41": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "mdurl-0.1.2-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "mdurl==0.1.2",
+              "sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8",
+              "urls": [
+                "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_mdurl_sdist_bb413d29": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "mdurl-0.1.2.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "mdurl==0.1.2",
+              "sha256": "bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba",
+              "urls": [
+                "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_more_itertools_py3_none_any_037b0d32": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "more_itertools-10.5.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "more-itertools==10.5.0",
+              "sha256": "037b0d3203ce90cca8ab1defbbdac29d5f993fc20131f3664dc8d6acfa872aef",
+              "urls": [
+                "https://files.pythonhosted.org/packages/48/7e/3a64597054a70f7c86eb0a7d4fc315b8c1ab932f64883a297bdffeb5f967/more_itertools-10.5.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_more_itertools_sdist_5482bfef": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "more-itertools-10.5.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "more-itertools==10.5.0",
+              "sha256": "5482bfef7849c25dc3c6dd53a6173ae4795da2a41a80faea6700d9f5846c5da6",
+              "urls": [
+                "https://files.pythonhosted.org/packages/51/78/65922308c4248e0eb08ebcbe67c95d48615cc6f27854b6f2e57143e9178f/more-itertools-10.5.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_macosx_10_12_x86_64_14c5a72e": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "14c5a72e9fe82aea5fe3072116ad4661af5cf8e8ff8fc5ad3450f123e4925e86",
+              "urls": [
+                "https://files.pythonhosted.org/packages/b3/89/1daff5d9ba5a95a157c092c7c5f39b8dd2b1ddb4559966f808d31cfb67e0/nh3-0.2.18-cp37-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_macosx_10_12_x86_64_7b7c2a3c": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-macosx_10_12_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "7b7c2a3c9eb1a827d42539aa64091640bd275b81e097cd1d8d82ef91ffa2e811",
+              "urls": [
+                "https://files.pythonhosted.org/packages/2c/b6/42fc3c69cabf86b6b81e4c051a9b6e249c5ba9f8155590222c2622961f58/nh3-0.2.18-cp37-abi3-macosx_10_12_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_aarch64_42c64511": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "42c64511469005058cd17cc1537578eac40ae9f7200bedcfd1fc1a05f4f8c200",
+              "urls": [
+                "https://files.pythonhosted.org/packages/45/b9/833f385403abaf0023c6547389ec7a7acf141ddd9d1f21573723a6eab39a/nh3-0.2.18-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_armv7l_0411beb0": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "0411beb0589eacb6734f28d5497ca2ed379eafab8ad8c84b31bb5c34072b7164",
+              "urls": [
+                "https://files.pythonhosted.org/packages/05/2b/85977d9e11713b5747595ee61f381bc820749daf83f07b90b6c9964cf932/nh3-0.2.18-cp37-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_ppc64_5f36b271": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-manylinux_2_17_ppc64.manylinux2014_ppc64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "5f36b271dae35c465ef5e9090e1fdaba4a60a56f0bb0ba03e0932a66f28b9189",
+              "urls": [
+                "https://files.pythonhosted.org/packages/72/f2/5c894d5265ab80a97c68ca36f25c8f6f0308abac649aaf152b74e7e854a8/nh3-0.2.18-cp37-abi3-manylinux_2_17_ppc64.manylinux2014_ppc64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_ppc64le_34c03fa7": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "34c03fa78e328c691f982b7c03d4423bdfd7da69cd707fe572f544cf74ac23ad",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ab/a7/375afcc710dbe2d64cfbd69e31f82f3e423d43737258af01f6a56d844085/nh3-0.2.18-cp37-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_s390x_19aaba96": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "19aaba96e0f795bd0a6c56291495ff59364f4300d4a39b29a0abc9cb3774a84b",
+              "urls": [
+                "https://files.pythonhosted.org/packages/c2/a8/3bb02d0c60a03ad3a112b76c46971e9480efa98a8946677b5a59f60130ca/nh3-0.2.18-cp37-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_x86_64_de3ceed6": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "de3ceed6e661954871d6cd78b410213bdcb136f79aafe22aa7182e028b8c7307",
+              "urls": [
+                "https://files.pythonhosted.org/packages/1b/63/6ab90d0e5225ab9780f6c9fb52254fa36b52bb7c188df9201d05b647e5e1/nh3-0.2.18-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_musllinux_1_2_aarch64_f0eca9ca": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-musllinux_1_2_aarch64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "f0eca9ca8628dbb4e916ae2491d72957fdd35f7a5d326b7032a345f111ac07fe",
+              "urls": [
+                "https://files.pythonhosted.org/packages/a3/da/0c4e282bc3cff4a0adf37005fa1fb42257673fbc1bbf7d1ff639ec3d255a/nh3-0.2.18-cp37-abi3-musllinux_1_2_aarch64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_musllinux_1_2_armv7l_3a157ab1": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-musllinux_1_2_armv7l.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "3a157ab149e591bb638a55c8c6bcb8cdb559c8b12c13a8affaba6cedfe51713a",
+              "urls": [
+                "https://files.pythonhosted.org/packages/de/81/c291231463d21da5f8bba82c8167a6d6893cc5419b0639801ee5d3aeb8a9/nh3-0.2.18-cp37-abi3-musllinux_1_2_armv7l.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_musllinux_1_2_x86_64_36c95d4b": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-musllinux_1_2_x86_64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "36c95d4b70530b320b365659bb5034341316e6a9b30f0b25fa9c9eff4c27a204",
+              "urls": [
+                "https://files.pythonhosted.org/packages/eb/61/73a007c74c37895fdf66e0edcd881f5eaa17a348ff02f4bb4bc906d61085/nh3-0.2.18-cp37-abi3-musllinux_1_2_x86_64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_cp37_abi3_win_amd64_8ce0f819": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "nh3-0.2.18-cp37-abi3-win_amd64.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "8ce0f819d2f1933953fca255db2471ad58184a60508f03e6285e5114b6254844",
+              "urls": [
+                "https://files.pythonhosted.org/packages/26/8d/53c5b19c4999bdc6ba95f246f4ef35ca83d7d7423e5e38be43ad66544e5d/nh3-0.2.18-cp37-abi3-win_amd64.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_nh3_sdist_94a16692": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "nh3-0.2.18.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "nh3==0.2.18",
+              "sha256": "94a166927e53972a9698af9542ace4e38b9de50c34352b962f4d9a7d4c927af4",
+              "urls": [
+                "https://files.pythonhosted.org/packages/62/73/10df50b42ddb547a907deeb2f3c9823022580a7a47281e8eae8e003a9639/nh3-0.2.18.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_pkginfo_py3_none_any_889a6da2": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "pkginfo-1.10.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "pkginfo==1.10.0",
+              "sha256": "889a6da2ed7ffc58ab5b900d888ddce90bce912f2d2de1dc1c26f4cb9fe65097",
+              "urls": [
+                "https://files.pythonhosted.org/packages/56/09/054aea9b7534a15ad38a363a2bd974c20646ab1582a387a95b8df1bfea1c/pkginfo-1.10.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_pkginfo_sdist_5df73835": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "pkginfo-1.10.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "pkginfo==1.10.0",
+              "sha256": "5df73835398d10db79f8eecd5cd86b1f6d29317589ea70796994d49399af6297",
+              "urls": [
+                "https://files.pythonhosted.org/packages/2f/72/347ec5be4adc85c182ed2823d8d1c7b51e13b9a6b0c1aae59582eca652df/pkginfo-1.10.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_pycparser_py3_none_any_c3702b6d": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "pycparser-2.22-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "pycparser==2.22",
+              "sha256": "c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc",
+              "urls": [
+                "https://files.pythonhosted.org/packages/13/a3/a812df4e2dd5696d1f351d58b8fe16a405b234ad2886a0dab9183fb78109/pycparser-2.22-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_pycparser_sdist_491c8be9": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "pycparser-2.22.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "pycparser==2.22",
+              "sha256": "491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6",
+              "urls": [
+                "https://files.pythonhosted.org/packages/1d/b2/31537cf4b1ca988837256c910a668b553fceb8f069bedc4b1c826024b52c/pycparser-2.22.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_pygments_py3_none_any_b8e6aca0": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "pygments-2.18.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "pygments==2.18.0",
+              "sha256": "b8e6aca0523f3ab76fee51799c488e38782ac06eafcf95e7ba832985c8e7b13a",
+              "urls": [
+                "https://files.pythonhosted.org/packages/f7/3f/01c8b82017c199075f8f788d0d906b9ffbbc5a47dc9918a945e13d5a2bda/pygments-2.18.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_pygments_sdist_786ff802": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "pygments-2.18.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "pygments==2.18.0",
+              "sha256": "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199",
+              "urls": [
+                "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_pywin32_ctypes_py3_none_any_8a151337": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_windows_x86_64"
+              ],
+              "filename": "pywin32_ctypes-0.2.3-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "pywin32-ctypes==0.2.3",
+              "sha256": "8a1513379d709975552d202d942d9837758905c8d01eb82b8bcc30918929e7b8",
+              "urls": [
+                "https://files.pythonhosted.org/packages/de/3d/8161f7711c017e01ac9f008dfddd9410dff3674334c233bde66e7ba65bbf/pywin32_ctypes-0.2.3-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_pywin32_ctypes_sdist_d162dc04": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "pywin32-ctypes-0.2.3.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "pywin32-ctypes==0.2.3",
+              "sha256": "d162dc04946d704503b2edc4d55f3dba5c1d539ead017afa00142c38b9885755",
+              "urls": [
+                "https://files.pythonhosted.org/packages/85/9f/01a1a99704853cb63f253eea009390c88e7131c67e66a0a02099a8c917cb/pywin32-ctypes-0.2.3.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_readme_renderer_py3_none_any_2fbca89b": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "readme_renderer-44.0-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "readme-renderer==44.0",
+              "sha256": "2fbca89b81a08526aadf1357a8c2ae889ec05fb03f5da67f9769c9a592166151",
+              "urls": [
+                "https://files.pythonhosted.org/packages/e1/67/921ec3024056483db83953ae8e48079ad62b92db7880013ca77632921dd0/readme_renderer-44.0-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_readme_renderer_sdist_8712034e": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "readme_renderer-44.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "readme-renderer==44.0",
+              "sha256": "8712034eabbfa6805cacf1402b4eeb2a73028f72d1166d6f5cb7f9c047c5d1e1",
+              "urls": [
+                "https://files.pythonhosted.org/packages/5a/a9/104ec9234c8448c4379768221ea6df01260cd6c2ce13182d4eac531c8342/readme_renderer-44.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_requests_py3_none_any_70761cfe": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "requests-2.32.3-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "requests==2.32.3",
+              "sha256": "70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6",
+              "urls": [
+                "https://files.pythonhosted.org/packages/f9/9b/335f9764261e915ed497fcdeb11df5dfd6f7bf257d4a6a2a686d80da4d54/requests-2.32.3-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_requests_sdist_55365417": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "requests-2.32.3.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "requests==2.32.3",
+              "sha256": "55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760",
+              "urls": [
+                "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_requests_toolbelt_py2_none_any_cccfdd66": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "requests_toolbelt-1.0.0-py2.py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "requests-toolbelt==1.0.0",
+              "sha256": "cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06",
+              "urls": [
+                "https://files.pythonhosted.org/packages/3f/51/d4db610ef29373b879047326cbf6fa98b6c1969d6f6dc423279de2b1be2c/requests_toolbelt-1.0.0-py2.py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_requests_toolbelt_sdist_7681a0a3": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "requests-toolbelt-1.0.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "requests-toolbelt==1.0.0",
+              "sha256": "7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6",
+              "urls": [
+                "https://files.pythonhosted.org/packages/f3/61/d7545dafb7ac2230c70d38d31cbfe4cc64f7144dc41f6e4e4b78ecd9f5bb/requests-toolbelt-1.0.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_rfc3986_py2_none_any_50b1502b": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "rfc3986-2.0.0-py2.py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "rfc3986==2.0.0",
+              "sha256": "50b1502b60e289cb37883f3dfd34532b8873c7de9f49bb546641ce9cbd256ebd",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_rfc3986_sdist_97aacf9d": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "rfc3986-2.0.0.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "rfc3986==2.0.0",
+              "sha256": "97aacf9dbd4bfd829baad6e6309fa6573aaf1be3f6fa735c8ab05e46cecb261c",
+              "urls": [
+                "https://files.pythonhosted.org/packages/85/40/1520d68bfa07ab5a6f065a186815fb6610c86fe957bc065754e47f7b0840/rfc3986-2.0.0.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_rich_py3_none_any_9836f509": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "rich-13.9.3-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "rich==13.9.3",
+              "sha256": "9836f5096eb2172c9e77df411c1b009bace4193d6a481d534fea75ebba758283",
+              "urls": [
+                "https://files.pythonhosted.org/packages/9a/e2/10e9819cf4a20bd8ea2f5dabafc2e6bf4a78d6a0965daeb60a4b34d1c11f/rich-13.9.3-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_rich_sdist_bc1e01b8": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "rich-13.9.3.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "rich==13.9.3",
+              "sha256": "bc1e01b899537598cf02579d2b9f4a415104d3fc439313a7a2c165d76557a08e",
+              "urls": [
+                "https://files.pythonhosted.org/packages/d9/e9/cf9ef5245d835065e6673781dbd4b8911d352fb770d56cf0879cf11b7ee1/rich-13.9.3.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_secretstorage_py3_none_any_f356e662": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "filename": "SecretStorage-3.3.3-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "secretstorage==3.3.3",
+              "sha256": "f356e6628222568e3af06f2eba8df495efa13b3b63081dafd4f7d9a7b7bc9f99",
+              "urls": [
+                "https://files.pythonhosted.org/packages/54/24/b4293291fa1dd830f353d2cb163295742fa87f179fcc8a20a306a81978b7/SecretStorage-3.3.3-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_secretstorage_sdist_2403533e": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "SecretStorage-3.3.3.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "secretstorage==3.3.3",
+              "sha256": "2403533ef369eca6d2ba81718576c5e0f564d5cca1b58f73a8b23e7d4eeebd77",
+              "urls": [
+                "https://files.pythonhosted.org/packages/53/a4/f48c9d79cb507ed1373477dbceaba7401fd8a23af63b837fa61f1dcd3691/SecretStorage-3.3.3.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_twine_py3_none_any_215dbe7b": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "twine-5.1.1-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "twine==5.1.1",
+              "sha256": "215dbe7b4b94c2c50a7315c0275d2258399280fbb7d04182c7e55e24b5f93997",
+              "urls": [
+                "https://files.pythonhosted.org/packages/5d/ec/00f9d5fd040ae29867355e559a94e9a8429225a0284a3f5f091a3878bfc0/twine-5.1.1-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_twine_sdist_9aa08251": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "twine-5.1.1.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "twine==5.1.1",
+              "sha256": "9aa0825139c02b3434d913545c7b847a21c835e11597f5255842d457da2322db",
+              "urls": [
+                "https://files.pythonhosted.org/packages/77/68/bd982e5e949ef8334e6f7dcf76ae40922a8750aa2e347291ae1477a4782b/twine-5.1.1.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_urllib3_py3_none_any_ca899ca0": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "urllib3-2.2.3-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "urllib3==2.2.3",
+              "sha256": "ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ce/d9/5f4c13cecde62396b0d3fe530a50ccea91e7dfc1ccf0e09c228841bb5ba8/urllib3-2.2.3-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_urllib3_sdist_e7d814a8": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "urllib3-2.2.3.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "urllib3==2.2.3",
+              "sha256": "e7d814a81dad81e6caf2ec9fdedb284ecc9c73076b62654547cc64ccdcae26e9",
+              "urls": [
+                "https://files.pythonhosted.org/packages/ed/63/22ba4ebfe7430b76388e7cd448d5478814d3032121827c12a2cc287e2260/urllib3-2.2.3.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_zipp_py3_none_any_a817ac80": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "filename": "zipp-3.20.2-py3-none-any.whl",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "zipp==3.20.2",
+              "sha256": "a817ac80d6cf4b23bf7f2828b7cabf326f15a001bea8b1f9b49631780ba28350",
+              "urls": [
+                "https://files.pythonhosted.org/packages/62/8b/5ba542fa83c90e09eac972fc9baca7a88e7e7ca4b221a89251954019308b/zipp-3.20.2-py3-none-any.whl"
+              ]
+            }
+          },
+          "rules_python_publish_deps_311_zipp_sdist_bc9eb26f": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@rules_python_publish_deps//{name}:{target}",
+              "experimental_target_platforms": [
+                "cp311_linux_aarch64",
+                "cp311_linux_arm",
+                "cp311_linux_ppc",
+                "cp311_linux_s390x",
+                "cp311_linux_x86_64",
+                "cp311_osx_aarch64",
+                "cp311_osx_x86_64",
+                "cp311_windows_x86_64"
+              ],
+              "extra_pip_args": [
+                "--index-url",
+                "https://pypi.org/simple"
+              ],
+              "filename": "zipp-3.20.2.tar.gz",
+              "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
+              "repo": "rules_python_publish_deps_311",
+              "requirement": "zipp==3.20.2",
+              "sha256": "bc9eb26f4506fda01b81bcde0ca78103b6e62f991b381fec825435c836edbc29",
+              "urls": [
+                "https://files.pythonhosted.org/packages/54/bf/5c0000c44ebc80123ecbdddba1f5dcd94a5ada602a9c225d84b5aaa55e86/zipp-3.20.2.tar.gz"
+              ]
+            }
+          },
+          "rules_python_publish_deps": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:hub_repository.bzl%hub_repository",
+            "attributes": {
+              "repo_name": "rules_python_publish_deps",
+              "extra_hub_aliases": {},
+              "whl_map": {
+                "backports_tarfile": "[{\"filename\":\"backports.tarfile-1.2.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_backports_tarfile_py3_none_any_77e284d7\",\"version\":\"3.11\"},{\"filename\":\"backports_tarfile-1.2.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_backports_tarfile_sdist_d75e02c2\",\"version\":\"3.11\"}]",
+                "certifi": "[{\"filename\":\"certifi-2024.8.30-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_certifi_py3_none_any_922820b5\",\"version\":\"3.11\"},{\"filename\":\"certifi-2024.8.30.tar.gz\",\"repo\":\"rules_python_publish_deps_311_certifi_sdist_bec941d2\",\"version\":\"3.11\"}]",
+                "cffi": "[{\"filename\":\"cffi-1.17.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl\",\"repo\":\"rules_python_publish_deps_311_cffi_cp311_cp311_manylinux_2_17_aarch64_a1ed2dd2\",\"version\":\"3.11\"},{\"filename\":\"cffi-1.17.1-cp311-cp311-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl\",\"repo\":\"rules_python_publish_deps_311_cffi_cp311_cp311_manylinux_2_17_ppc64le_46bf4316\",\"version\":\"3.11\"},{\"filename\":\"cffi-1.17.1-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl\",\"repo\":\"rules_python_publish_deps_311_cffi_cp311_cp311_manylinux_2_17_s390x_a24ed04c\",\"version\":\"3.11\"},{\"filename\":\"cffi-1.17.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_cffi_cp311_cp311_manylinux_2_17_x86_64_610faea7\",\"version\":\"3.11\"},{\"filename\":\"cffi-1.17.1-cp311-cp311-musllinux_1_1_aarch64.whl\",\"repo\":\"rules_python_publish_deps_311_cffi_cp311_cp311_musllinux_1_1_aarch64_a9b15d49\",\"version\":\"3.11\"},{\"filename\":\"cffi-1.17.1-cp311-cp311-musllinux_1_1_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_cffi_cp311_cp311_musllinux_1_1_x86_64_fc48c783\",\"version\":\"3.11\"},{\"filename\":\"cffi-1.17.1.tar.gz\",\"repo\":\"rules_python_publish_deps_311_cffi_sdist_1c39c601\",\"version\":\"3.11\"}]",
+                "charset_normalizer": "[{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-macosx_10_9_universal2.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_macosx_10_9_universal2_0d99dd8f\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-macosx_10_9_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_macosx_10_9_x86_64_c57516e5\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-macosx_11_0_arm64.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_macosx_11_0_arm64_6dba5d19\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_manylinux_2_17_aarch64_bf4475b8\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_manylinux_2_17_ppc64le_ce031db0\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_manylinux_2_17_s390x_8ff4e7cd\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_manylinux_2_17_x86_64_3710a975\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_aarch64.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_musllinux_1_2_aarch64_47334db7\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_ppc64le.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_musllinux_1_2_ppc64le_f1a2f519\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_s390x.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_musllinux_1_2_s390x_63bc5c4a\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-musllinux_1_2_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_musllinux_1_2_x86_64_bcb4f8ea\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-cp311-cp311-win_amd64.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_cp311_cp311_win_amd64_cee4373f\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_py3_none_any_fe9f97fe\",\"version\":\"3.11\"},{\"filename\":\"charset_normalizer-3.4.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_charset_normalizer_sdist_223217c3\",\"version\":\"3.11\"}]",
+                "cryptography": "[{\"filename\":\"cryptography-43.0.3-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl\",\"repo\":\"rules_python_publish_deps_311_cryptography_cp39_abi3_manylinux_2_17_aarch64_846da004\",\"version\":\"3.11\"},{\"filename\":\"cryptography-43.0.3-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_cryptography_cp39_abi3_manylinux_2_17_x86_64_0f996e72\",\"version\":\"3.11\"},{\"filename\":\"cryptography-43.0.3-cp39-abi3-manylinux_2_28_aarch64.whl\",\"repo\":\"rules_python_publish_deps_311_cryptography_cp39_abi3_manylinux_2_28_aarch64_f7b178f1\",\"version\":\"3.11\"},{\"filename\":\"cryptography-43.0.3-cp39-abi3-manylinux_2_28_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_cryptography_cp39_abi3_manylinux_2_28_x86_64_c2e6fc39\",\"version\":\"3.11\"},{\"filename\":\"cryptography-43.0.3-cp39-abi3-musllinux_1_2_aarch64.whl\",\"repo\":\"rules_python_publish_deps_311_cryptography_cp39_abi3_musllinux_1_2_aarch64_e1be4655\",\"version\":\"3.11\"},{\"filename\":\"cryptography-43.0.3-cp39-abi3-musllinux_1_2_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_cryptography_cp39_abi3_musllinux_1_2_x86_64_df6b6c6d\",\"version\":\"3.11\"},{\"filename\":\"cryptography-43.0.3.tar.gz\",\"repo\":\"rules_python_publish_deps_311_cryptography_sdist_315b9001\",\"version\":\"3.11\"}]",
+                "docutils": "[{\"filename\":\"docutils-0.21.2-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_docutils_py3_none_any_dafca5b9\",\"version\":\"3.11\"},{\"filename\":\"docutils-0.21.2.tar.gz\",\"repo\":\"rules_python_publish_deps_311_docutils_sdist_3a6b1873\",\"version\":\"3.11\"}]",
+                "idna": "[{\"filename\":\"idna-3.10-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_idna_py3_none_any_946d195a\",\"version\":\"3.11\"},{\"filename\":\"idna-3.10.tar.gz\",\"repo\":\"rules_python_publish_deps_311_idna_sdist_12f65c9b\",\"version\":\"3.11\"}]",
+                "importlib_metadata": "[{\"filename\":\"importlib_metadata-8.5.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_importlib_metadata_py3_none_any_45e54197\",\"version\":\"3.11\"},{\"filename\":\"importlib_metadata-8.5.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_importlib_metadata_sdist_71522656\",\"version\":\"3.11\"}]",
+                "jaraco_classes": "[{\"filename\":\"jaraco.classes-3.4.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_jaraco_classes_py3_none_any_f662826b\",\"version\":\"3.11\"},{\"filename\":\"jaraco.classes-3.4.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_jaraco_classes_sdist_47a024b5\",\"version\":\"3.11\"}]",
+                "jaraco_context": "[{\"filename\":\"jaraco.context-6.0.1-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_jaraco_context_py3_none_any_f797fc48\",\"version\":\"3.11\"},{\"filename\":\"jaraco_context-6.0.1.tar.gz\",\"repo\":\"rules_python_publish_deps_311_jaraco_context_sdist_9bae4ea5\",\"version\":\"3.11\"}]",
+                "jaraco_functools": "[{\"filename\":\"jaraco.functools-4.1.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_jaraco_functools_py3_none_any_ad159f13\",\"version\":\"3.11\"},{\"filename\":\"jaraco_functools-4.1.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_jaraco_functools_sdist_70f7e0e2\",\"version\":\"3.11\"}]",
+                "jeepney": "[{\"filename\":\"jeepney-0.8.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_jeepney_py3_none_any_c0a454ad\",\"version\":\"3.11\"},{\"filename\":\"jeepney-0.8.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_jeepney_sdist_5efe48d2\",\"version\":\"3.11\"}]",
+                "keyring": "[{\"filename\":\"keyring-25.4.1-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_keyring_py3_none_any_5426f817\",\"version\":\"3.11\"},{\"filename\":\"keyring-25.4.1.tar.gz\",\"repo\":\"rules_python_publish_deps_311_keyring_sdist_b07ebc55\",\"version\":\"3.11\"}]",
+                "markdown_it_py": "[{\"filename\":\"markdown-it-py-3.0.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_markdown_it_py_sdist_e3f60a94\",\"version\":\"3.11\"},{\"filename\":\"markdown_it_py-3.0.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_markdown_it_py_py3_none_any_35521684\",\"version\":\"3.11\"}]",
+                "mdurl": "[{\"filename\":\"mdurl-0.1.2-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_mdurl_py3_none_any_84008a41\",\"version\":\"3.11\"},{\"filename\":\"mdurl-0.1.2.tar.gz\",\"repo\":\"rules_python_publish_deps_311_mdurl_sdist_bb413d29\",\"version\":\"3.11\"}]",
+                "more_itertools": "[{\"filename\":\"more-itertools-10.5.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_more_itertools_sdist_5482bfef\",\"version\":\"3.11\"},{\"filename\":\"more_itertools-10.5.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_more_itertools_py3_none_any_037b0d32\",\"version\":\"3.11\"}]",
+                "nh3": "[{\"filename\":\"nh3-0.2.18-cp37-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_macosx_10_12_x86_64_14c5a72e\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-macosx_10_12_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_macosx_10_12_x86_64_7b7c2a3c\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_aarch64_42c64511\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_armv7l_0411beb0\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-manylinux_2_17_ppc64.manylinux2014_ppc64.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_ppc64_5f36b271\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_ppc64le_34c03fa7\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_s390x_19aaba96\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_manylinux_2_17_x86_64_de3ceed6\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-musllinux_1_2_aarch64.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_musllinux_1_2_aarch64_f0eca9ca\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-musllinux_1_2_armv7l.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_musllinux_1_2_armv7l_3a157ab1\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-musllinux_1_2_x86_64.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_musllinux_1_2_x86_64_36c95d4b\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18-cp37-abi3-win_amd64.whl\",\"repo\":\"rules_python_publish_deps_311_nh3_cp37_abi3_win_amd64_8ce0f819\",\"version\":\"3.11\"},{\"filename\":\"nh3-0.2.18.tar.gz\",\"repo\":\"rules_python_publish_deps_311_nh3_sdist_94a16692\",\"version\":\"3.11\"}]",
+                "pkginfo": "[{\"filename\":\"pkginfo-1.10.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_pkginfo_py3_none_any_889a6da2\",\"version\":\"3.11\"},{\"filename\":\"pkginfo-1.10.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_pkginfo_sdist_5df73835\",\"version\":\"3.11\"}]",
+                "pycparser": "[{\"filename\":\"pycparser-2.22-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_pycparser_py3_none_any_c3702b6d\",\"version\":\"3.11\"},{\"filename\":\"pycparser-2.22.tar.gz\",\"repo\":\"rules_python_publish_deps_311_pycparser_sdist_491c8be9\",\"version\":\"3.11\"}]",
+                "pygments": "[{\"filename\":\"pygments-2.18.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_pygments_py3_none_any_b8e6aca0\",\"version\":\"3.11\"},{\"filename\":\"pygments-2.18.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_pygments_sdist_786ff802\",\"version\":\"3.11\"}]",
+                "pywin32_ctypes": "[{\"filename\":\"pywin32-ctypes-0.2.3.tar.gz\",\"repo\":\"rules_python_publish_deps_311_pywin32_ctypes_sdist_d162dc04\",\"version\":\"3.11\"},{\"filename\":\"pywin32_ctypes-0.2.3-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_pywin32_ctypes_py3_none_any_8a151337\",\"version\":\"3.11\"}]",
+                "readme_renderer": "[{\"filename\":\"readme_renderer-44.0-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_readme_renderer_py3_none_any_2fbca89b\",\"version\":\"3.11\"},{\"filename\":\"readme_renderer-44.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_readme_renderer_sdist_8712034e\",\"version\":\"3.11\"}]",
+                "requests": "[{\"filename\":\"requests-2.32.3-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_requests_py3_none_any_70761cfe\",\"version\":\"3.11\"},{\"filename\":\"requests-2.32.3.tar.gz\",\"repo\":\"rules_python_publish_deps_311_requests_sdist_55365417\",\"version\":\"3.11\"}]",
+                "requests_toolbelt": "[{\"filename\":\"requests-toolbelt-1.0.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_requests_toolbelt_sdist_7681a0a3\",\"version\":\"3.11\"},{\"filename\":\"requests_toolbelt-1.0.0-py2.py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_requests_toolbelt_py2_none_any_cccfdd66\",\"version\":\"3.11\"}]",
+                "rfc3986": "[{\"filename\":\"rfc3986-2.0.0-py2.py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_rfc3986_py2_none_any_50b1502b\",\"version\":\"3.11\"},{\"filename\":\"rfc3986-2.0.0.tar.gz\",\"repo\":\"rules_python_publish_deps_311_rfc3986_sdist_97aacf9d\",\"version\":\"3.11\"}]",
+                "rich": "[{\"filename\":\"rich-13.9.3-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_rich_py3_none_any_9836f509\",\"version\":\"3.11\"},{\"filename\":\"rich-13.9.3.tar.gz\",\"repo\":\"rules_python_publish_deps_311_rich_sdist_bc1e01b8\",\"version\":\"3.11\"}]",
+                "secretstorage": "[{\"filename\":\"SecretStorage-3.3.3-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_secretstorage_py3_none_any_f356e662\",\"version\":\"3.11\"},{\"filename\":\"SecretStorage-3.3.3.tar.gz\",\"repo\":\"rules_python_publish_deps_311_secretstorage_sdist_2403533e\",\"version\":\"3.11\"}]",
+                "twine": "[{\"filename\":\"twine-5.1.1-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_twine_py3_none_any_215dbe7b\",\"version\":\"3.11\"},{\"filename\":\"twine-5.1.1.tar.gz\",\"repo\":\"rules_python_publish_deps_311_twine_sdist_9aa08251\",\"version\":\"3.11\"}]",
+                "urllib3": "[{\"filename\":\"urllib3-2.2.3-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_urllib3_py3_none_any_ca899ca0\",\"version\":\"3.11\"},{\"filename\":\"urllib3-2.2.3.tar.gz\",\"repo\":\"rules_python_publish_deps_311_urllib3_sdist_e7d814a8\",\"version\":\"3.11\"}]",
+                "zipp": "[{\"filename\":\"zipp-3.20.2-py3-none-any.whl\",\"repo\":\"rules_python_publish_deps_311_zipp_py3_none_any_a817ac80\",\"version\":\"3.11\"},{\"filename\":\"zipp-3.20.2.tar.gz\",\"repo\":\"rules_python_publish_deps_311_zipp_sdist_bc9eb26f\",\"version\":\"3.11\"}]"
+              },
+              "packages": [
+                "backports_tarfile",
+                "certifi",
+                "charset_normalizer",
+                "docutils",
+                "idna",
+                "importlib_metadata",
+                "jaraco_classes",
+                "jaraco_context",
+                "jaraco_functools",
+                "keyring",
+                "markdown_it_py",
+                "mdurl",
+                "more_itertools",
+                "nh3",
+                "pkginfo",
+                "pygments",
+                "readme_renderer",
+                "requests",
+                "requests_toolbelt",
+                "rfc3986",
+                "rich",
+                "twine",
+                "urllib3",
+                "zipp"
+              ],
+              "groups": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  "facts": {},
+  "factsVersions": {}
+}

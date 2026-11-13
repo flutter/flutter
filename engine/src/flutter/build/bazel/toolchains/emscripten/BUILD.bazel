@@ -1,0 +1,124 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Emscripten (wasm32) toolchain over the synced SDK (@emsdk): GN's
+# build/toolchain/wasm:wasm, which builds the web engine's modules. The
+# toolchain is registered in the root MODULE.bazel; wasm_module (wasm.bzl)
+# selects it through the platform below.
+
+load(
+    "@host_platform//:host.bzl",
+    "HOST_CPU_CONSTRAINT",
+    "HOST_OS",
+    "HOST_OS_CONSTRAINT",
+)
+load("@rules_cc//cc:defs.bzl", "cc_toolchain")
+load("//build_defs/config:platforms.bzl", "runtime_mode_platforms")
+load(":emscripten_cc_toolchain_config.bzl", "emscripten_cc_toolchain_config")
+
+package(default_visibility = ["//visibility:public"])
+
+# The wasm target platform; the OS constraint is the one the converter's
+# config_settings map GN's is_wasm to (build/bazel/BUILD.bazel).
+# The flags GN derives from the OS and the Bazel build keeps as flags with
+# the Linux host's defaults (impeller/tools/BUILD.bazel): Impeller's
+# backends, as impeller/tools/args.gni has them for wasm -- OpenGL ES, no
+# Vulkan, no Metal. Bazel's platform-based flags apply them to everything
+# built for this platform and its children (the web build's variants,
+# //flutter/third_party/canvaskit) -- its runtime modes' among them
+# (`wasm32_emscripten_release`, build_defs/config/platforms.bzl: the web
+# builders' configurations name the mode's platform, each mode an output
+# directory of its own).
+runtime_mode_platforms(
+    name = "wasm32_emscripten",
+    constraint_values = [
+        "@platforms//os:emscripten",
+        "@platforms//cpu:wasm32",
+    ],
+    flags = [
+        "--//engine/src/flutter/impeller/tools:enable_metal=false",
+        "--//engine/src/flutter/impeller/tools:enable_opengles=true",
+        "--//engine/src/flutter/impeller/tools:enable_vulkan=false",
+        # enable_lto, tools/gn's --lto default for the web build: -flto on
+        # the optimized build's compiles and links (the `lto` feature holds
+        # under -c opt). A variant's `enable_lto = false` turns it off.
+        "--features=lto",
+        # flutter_use_freetype_woff2, which tools/gn turns on for the web
+        # (FreeType reads WOFF2 over brotli); a variant may turn it off.
+        "--//engine/src/flutter/build/bazel/web:flutter_use_freetype_woff2=true",
+    ],
+)
+
+exports_files([
+    "emcc.sh",
+    "em++.sh",
+    "emar.sh",
+    "emscripten_config",
+])
+
+# The wrappers, the configuration they point emcc at, the SDK and the
+# Python: what every compile and link reads.
+filegroup(
+    name = "wasm32_all_files",
+    srcs = [
+        "em++.sh",
+        "emar.sh",
+        "emcc.sh",
+        "emscripten_config",
+        "@cpython3//:runtime",
+        "@emsdk//:all_files",
+    ],
+)
+
+emscripten_cc_toolchain_config(
+    name = "wasm32_emscripten_config",
+    em_config = "emscripten_config",
+    emar = "emar.sh",
+    emcc = "emcc.sh",
+    emscripten_marker = "@emsdk//:emscripten_marker",
+    emxx = "em++.sh",
+    # The synced SDK and Python are the host's binaries: a Linux host's run
+    # on the Linux workers (linux_web_engine's compiles do), a Mac's cannot.
+    host_tools_run_remotely = HOST_OS == "linux",
+    node = "@emsdk//:node",
+    python3 = "@cpython3//:bin/python3",
+    resource_include_marker = "@emsdk//:resource_include_marker",
+    toolchain_identifier = "wasm32_emscripten",
+)
+
+cc_toolchain(
+    name = "wasm32_emscripten_cc_toolchain",
+    all_files = ":wasm32_all_files",
+    ar_files = ":wasm32_all_files",
+    compiler_files = ":wasm32_all_files",
+    dwp_files = ":empty",
+    linker_files = ":wasm32_all_files",
+    objcopy_files = ":empty",
+    strip_files = ":empty",
+    supports_param_files = True,
+    toolchain_config = ":wasm32_emscripten_config",
+    toolchain_identifier = "wasm32_emscripten",
+)
+
+filegroup(name = "empty")
+
+# The toolchain runs on the host that synced the SDK (@emsdk is
+# prebuilts/emsdk, which gclient's hook fills for this machine; @cpython3 and
+# the esbuild beside it are the host's too), so its execution platform is
+# the host's -- a Linux x64 or an Apple-silicon Mac alike (the Mac's T41:
+# the web SDK in the tool tests' facsimile could not build there with the
+# Linux x64 constraints spelled out).
+toolchain(
+    name = "wasm32_emscripten_toolchain",
+    exec_compatible_with = [
+        HOST_OS_CONSTRAINT,
+        HOST_CPU_CONSTRAINT,
+    ],
+    target_compatible_with = [
+        "@platforms//os:emscripten",
+        "@platforms//cpu:wasm32",
+    ],
+    toolchain = ":wasm32_emscripten_cc_toolchain",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)

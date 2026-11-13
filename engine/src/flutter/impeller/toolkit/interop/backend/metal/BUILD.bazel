@@ -1,0 +1,130 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/toolkit/interop/backend/metal/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# `is_ios || is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_or_is_mac",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:macos",
+    ],
+)
+
+# `impeller_enable_metal && (is_ios || is_mac)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_is_ios_or_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        ":when_is_ios_or_is_mac",
+    ],
+)
+
+# The Objective-C(++) sources of metal, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); metal links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "metal_objc",
+    srcs = [
+        "context_mtl.mm",
+        "surface_mtl.mm",
+    ],
+    hdrs = [
+        "context_mtl.h",
+        "surface_mtl.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../../:interop_base
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../../:interop_base
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from ../../:interop_base
+            "-Wno-c++98-compat-extra-semi",  # from ../../:interop_base
+            "-Wno-deprecated-copy",  # from ../../:interop_base
+            "-Wno-implicit-fallthrough",  # from ../../:interop_base
+            "-Wno-nullability-completeness",  # from ../../:interop_base
+            "-Wno-suggest-destructor-override",  # from ../../:interop_base
+            "-Wno-suggest-override",  # from ../../:interop_base
+            "-Wno-unused-private-field",  # from ../../:interop_base
+            "-Wno-unused-variable",  # from ../../:interop_base
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_impeller_enable_metal_and_is_ios_or_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/toolkit/interop:interop_base",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "metal",
+    hdrs = [
+        "context_mtl.h",
+        "surface_mtl.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../../:interop_base
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../../:interop_base
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from ../../:interop_base
+            "-Wno-c++98-compat-extra-semi",  # from ../../:interop_base
+            "-Wno-deprecated-copy",  # from ../../:interop_base
+            "-Wno-implicit-fallthrough",  # from ../../:interop_base
+            "-Wno-nullability-completeness",  # from ../../:interop_base
+            "-Wno-suggest-destructor-override",  # from ../../:interop_base
+            "-Wno-suggest-override",  # from ../../:interop_base
+            "-Wno-unused-private-field",  # from ../../:interop_base
+            "-Wno-unused-variable",  # from ../../:interop_base
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/impeller/tools:metal": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":metal_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/toolkit/interop:interop_base",
+    ],
+    alwayslink = True,
+)

@@ -1,0 +1,292 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/renderer/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/impeller:shaders.bzl", "impeller_shaders")
+
+package(default_visibility = ["//visibility:public"])
+
+impeller_shaders(
+    name = "compute_shaders",
+    enable_opengles = False,
+    library_name = "compute",
+    metal_version = select({
+        "@platforms//os:ios": "2.4",
+        "@platforms//os:macos": "2.1",
+        "//conditions:default": None,
+    }),
+    shaders = [
+        "compute_3d_test.comp",
+        "computed_vertices_test.frag",
+        "computed_vertices_test.vert",
+        "increment_test.comp",
+        "oversized_workgroup_test.comp",
+        "prefix_sum_test.comp",
+        "texture_reader_test.comp",
+        "threadgroup_sizing_test.comp",
+        "vertex_writer_test.comp",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [],
+        "//engine/src/flutter/impeller/tools:metal": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    vulkan_language_version = select({
+        "//engine/src/flutter/impeller/tools:vulkan": 130,
+        "//conditions:default": None,
+    }),
+)
+
+cc_library(
+    name = "renderer",
+    srcs = [
+        "blit_command.cc",
+        "blit_pass.cc",
+        "capabilities.cc",
+        "command.cc",
+        "command_buffer.cc",
+        "command_buffer_scheduling_receipt.cc",
+        "command_queue.cc",
+        "compute_pass.cc",
+        "compute_pipeline_builder.cc",
+        "compute_pipeline_descriptor.cc",
+        "context.cc",
+        "pipeline.cc",
+        "pipeline_builder.cc",
+        "pipeline_descriptor.cc",
+        "pipeline_library.cc",
+        "render_pass.cc",
+        "render_target.cc",
+        "sampler_library.cc",
+        "shader_function.cc",
+        "shader_key.cc",
+        "shader_library.cc",
+        "snapshot.cc",
+        "surface.cc",
+        "texture_util.cc",
+        "vertex_buffer_builder.cc",
+        "vertex_descriptor.cc",
+    ],
+    hdrs = [
+        "blit_command.h",
+        "blit_pass.h",
+        "capabilities.h",
+        "command.h",
+        "command_buffer.h",
+        "command_buffer_scheduling_receipt.h",
+        "command_queue.h",
+        "compute_pass.h",
+        "compute_pipeline_builder.h",
+        "compute_pipeline_descriptor.h",
+        "context.h",
+        "pipeline.h",
+        "pipeline_builder.h",
+        "pipeline_descriptor.h",
+        "pipeline_library.h",
+        "pool.h",
+        "render_pass.h",
+        "render_target.h",
+        "sampler_library.h",
+        "shader_function.h",
+        "shader_key.h",
+        "shader_library.h",
+        "shader_stage_compatibility_checker.h",
+        "snapshot.h",
+        "surface.h",
+        "texture_util.h",
+        "vertex_buffer_builder.h",
+        "vertex_descriptor.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/core",
+        "//engine/src/flutter/impeller/geometry",
+        "//engine/src/flutter/impeller/runtime_stage",
+        "//engine/src/flutter/impeller/tessellator",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            ":compute_shaders",  # impeller_enable_compute
+        ],
+        "//engine/src/flutter/impeller/tools:metal": [
+            ":compute_shaders",  # impeller_enable_compute
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "renderer_unittests",
+    testonly = True,
+    srcs = [
+        "blit_pass_unittests.cc",
+        "capabilities_unittests.cc",
+        "command_buffer_scheduling_receipt_unittests.cc",
+        "command_queue_unittests.cc",
+        "device_buffer_unittests.cc",
+        "pipeline_descriptor_unittests.cc",
+        "pipeline_library_unittests.cc",
+        "pool_unittests.cc",
+        "renderer_golden_unittests.cc",
+        "renderer_unittests.cc",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "compute_unittests.cc",  # impeller_enable_compute
+        ],
+        "//engine/src/flutter/impeller/tools:metal": [
+            "compute_unittests.cc",  # impeller_enable_compute
+        ],
+        "//conditions:default": [],
+    }),
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":renderer",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/display_list:aiks_unittests",
+        "//engine/src/flutter/impeller/fixtures",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/impeller/tessellator:tessellator_libtess",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "renderer_unittests_golden",
+    testonly = True,
+    srcs = [
+        "blit_pass_unittests.cc",
+        "capabilities_unittests.cc",
+        "command_buffer_scheduling_receipt_unittests.cc",
+        "command_queue_unittests.cc",
+        "device_buffer_unittests.cc",
+        "pipeline_descriptor_unittests.cc",
+        "pipeline_library_unittests.cc",
+        "pool_unittests.cc",
+        "renderer_golden_unittests.cc",
+        "renderer_unittests.cc",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "compute_unittests.cc",  # impeller_enable_compute
+        ],
+        "//engine/src/flutter/impeller/tools:metal": [
+            "compute_unittests.cc",  # impeller_enable_compute
+        ],
+        "//conditions:default": [],
+    }),
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "IMPELLER_GOLDEN_TESTS",
+        "IMPELLER_ENABLE_VALIDATION=1",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":renderer",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/display_list:aiks_unittests_golden",
+        "//engine/src/flutter/impeller/fixtures",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/impeller/tessellator:tessellator_libtess",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "renderer_dart_unittests",
+    testonly = True,
+    srcs = ["renderer_dart_unittests.cc"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/runtime
+        ],
+        "//conditions:default": [],
+    }),
+    data = ["//engine/src/flutter/impeller/fixtures:flutter_gpu_shaders"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":renderer",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_fixtures",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/lib/gpu",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/testing:fixture_test",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)

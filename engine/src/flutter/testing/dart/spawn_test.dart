@@ -22,6 +22,14 @@ external Object _lookupEntryPoint(Pointer<Utf8> library, Pointer<Utf8> name);
 @Native<Void Function(Pointer<Utf8>, Pointer<Utf8>)>(symbol: 'Spawn')
 external void _spawn(Pointer<Utf8> entrypoint, Pointer<Utf8> route);
 
+/// The URI the compiler recorded for the source root (`//flutter`): `file://`
+/// and the directory's path, unless the build names it (kFlutterSrcDirectoryUri;
+/// a compiler running over a virtual root records that root's scheme).
+const String _kFlutterSrcDirectoryUri = String.fromEnvironment(
+  'kFlutterSrcDirectoryUri',
+  defaultValue: 'file://${String.fromEnvironment('kFlutterSrcDirectory')}',
+);
+
 void spawn({required SendPort port, String entrypoint = 'main', String route = '/'}) {
   assert(
     entrypoint != 'main' || route != '/',
@@ -55,9 +63,8 @@ void main() {
   });
 
   test('Lookup entrypoint and execute', () {
-    final Pointer<Utf8> libraryPath =
-        'file://${const String.fromEnvironment('kFlutterSrcDirectory')}/testing/dart/spawn_helper.dart'
-            .toNativeUtf8();
+    final Pointer<Utf8> libraryPath = '$_kFlutterSrcDirectoryUri/testing/dart/spawn_helper.dart'
+        .toNativeUtf8();
     final Pointer<Utf8> entryPoint = 'echoInt'.toNativeUtf8();
     expect((_lookupEntryPoint(libraryPath, entryPoint) as int Function(int))(42), 42);
     malloc.free(libraryPath);

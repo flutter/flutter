@@ -1,0 +1,88 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/testing/ios_scenario_app/ios/BUILD.gn by gn_to_bazel; do not edit.
+
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
+load("//build_defs/gn:gn_action.bzl", "gn_copy", "gn_copy_tree")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_shared_library(
+    name = "app_framework_dylib",
+    srcs = select({
+        "//engine/src/flutter/testing:aot_enabled": [
+            "//engine/src/flutter/testing/ios_scenario_app:ios_scenario_app_snapshot.snapshot_assembly.S",  # is_aot
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/testing:aot_enabled": [],
+        "//conditions:default": [
+            "app_stub.c",  # !(is_aot)
+        ],
+    }),
+    copts = CHROMIUM_CODE_COPTS,
+    data = ["//engine/src/flutter/testing/ios_scenario_app:ios_scenario_app_snapshot"],
+    linkopts = ["-Wl,-install_name,@rpath/App.framework/App"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    output_name = "app",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+    ],
+)
+
+gn_copy(
+    name = "copy_dylib",
+    srcs = [":app_framework_dylib"],
+    outs = ["ios_scenario_app/Scenarios/App.framework/App"],
+    outputs = ["$root_out_dir/ios_scenario_app/Scenarios/App.framework/App"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":app_framework_dylib"],
+)
+
+gn_copy(
+    name = "copy_info_plist",
+    srcs = ["AppFrameworkInfo.plist"],
+    outs = ["ios_scenario_app/Scenarios/App.framework/Info.plist"],
+    outputs = ["$root_out_dir/ios_scenario_app/Scenarios/App.framework/Info.plist"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_copy_tree(
+    name = "copy_ios_xcodeproj",
+    dest = "$root_out_dir/ios_scenario_app",
+    exclude = "*.*framework",
+    source = ".",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+filegroup(
+    name = "ios",
+    srcs = [
+        ":app_framework_dylib",
+        ":copy_dylib",
+        ":copy_info_plist",
+        ":copy_ios_xcodeproj",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)

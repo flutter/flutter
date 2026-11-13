@@ -33,7 +33,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -44,9 +45,11 @@
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe"
+                "--no-rbe",
+                "--bazel"
             ],
             "name": "ci/linux_debug_arm64",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target arm64 Linux from a Linux host.",
             "ninja": {
                 "config": "ci/linux_debug_arm64",

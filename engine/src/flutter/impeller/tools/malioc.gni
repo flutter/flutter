@@ -17,15 +17,12 @@ declare_args() {
 }
 
 if (impeller_malioc_path != "") {
-  _core_list_file = "$root_build_dir/mali_core_list.json"
-  exec_script("//flutter/impeller/tools/malioc_cores.py",
-              [
-                "--malioc",
-                rebase_path(impeller_malioc_path, root_build_dir),
-                "--output",
-                rebase_path(_core_list_file),
-              ])
-  _impeller_malioc_cores = read_file(_core_list_file, "json")
+  # The list of GPU cores known to malioc together with the maximum OpenGL ES
+  # and Vulkan versions each supports. The file is generated from the malioc
+  # binary used by CI with //flutter/impeller/tools/malioc_cores.py and checked
+  # in so that `gn gen` does not have to run malioc.
+  _impeller_malioc_cores =
+      read_file("//flutter/impeller/tools/malioc_cores.json", "json")
 }
 
 template("malioc_analyze_shaders") {

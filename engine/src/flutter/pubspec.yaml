@@ -92,11 +92,13 @@ workspace:
   - testing/symbols
   - tools/android_lint
   - tools/api_check
+  - tools/bazel_tools
   - tools/build_bucket_golden_scraper
   - tools/clang_tidy
   - tools/clangd_check
   - tools/compare_goldens
   - tools/engine_tool
+  - tools/gn_to_bazel
   - tools/header_guard_check
   - tools/gen_web_locale_keymap
   - tools/githooks

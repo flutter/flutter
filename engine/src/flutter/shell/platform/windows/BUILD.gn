@@ -178,6 +178,7 @@ source_set("flutter_windows_source") {
 
   deps = [
     ":flutter_windows_headers",
+    "//flutter/common",
     "//flutter/fml",
     "//flutter/impeller/renderer/backend/gles",
     "//flutter/shell/geometry",

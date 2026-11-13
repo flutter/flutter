@@ -1,0 +1,685 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/ui/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "ui",
+    srcs = [
+        "compositing/scene.cc",
+        "compositing/scene_builder.cc",
+        "dart_runtime_hooks.cc",
+        "dart_ui.cc",
+        "isolate_name_server/isolate_name_server.cc",
+        "isolate_name_server/isolate_name_server_natives.cc",
+        "painting/canvas.cc",
+        "painting/codec.cc",
+        "painting/color_filter.cc",
+        "painting/display_list_deferred_image_gpu_skia.cc",
+        "painting/display_list_image_gpu.cc",
+        "painting/engine_layer.cc",
+        "painting/fragment_program.cc",
+        "painting/fragment_shader.cc",
+        "painting/gradient.cc",
+        "painting/image.cc",
+        "painting/image_decoder.cc",
+        "painting/image_decoder_skia.cc",
+        "painting/image_descriptor.cc",
+        "painting/image_encoding.cc",
+        "painting/image_encoding_skia.cc",
+        "painting/image_filter.cc",
+        "painting/image_generator.cc",
+        "painting/image_generator_apng.cc",
+        "painting/image_generator_registry.cc",
+        "painting/image_shader.cc",
+        "painting/immutable_buffer.cc",
+        "painting/matrix.cc",
+        "painting/multi_frame_codec.cc",
+        "painting/paint.cc",
+        "painting/path.cc",
+        "painting/path_measure.cc",
+        "painting/picture.cc",
+        "painting/picture_recorder.cc",
+        "painting/rrect.cc",
+        "painting/rsuperellipse.cc",
+        "painting/shader.cc",
+        "painting/single_frame_codec.cc",
+        "painting/vertices.cc",
+        "plugins/callback_cache.cc",
+        "semantics/custom_accessibility_action.cc",
+        "semantics/semantics_flags.cc",
+        "semantics/semantics_node.cc",
+        "semantics/semantics_update.cc",
+        "semantics/semantics_update_builder.cc",
+        "semantics/string_attribute.cc",
+        "text/asset_manager_font_provider.cc",
+        "text/font_collection.cc",
+        "text/paragraph.cc",
+        "text/paragraph_builder.cc",
+        "ui_dart_state.cc",
+        "window/key_data.cc",
+        "window/key_data_packet.cc",
+        "window/platform_configuration.cc",
+        "window/platform_isolate.cc",
+        "window/platform_message.cc",
+        "window/platform_message_response.cc",
+        "window/platform_message_response_dart.cc",
+        "window/platform_message_response_dart_port.cc",
+        "window/pointer_data.cc",
+        "window/pointer_data_packet.cc",
+        "window/pointer_data_packet_converter.cc",
+        "window/view_focus.cc",
+        "window/viewport_metrics.cc",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "painting/display_list_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.cc",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.cc",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "painting/display_list_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.cc",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.cc",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "painting/display_list_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.cc",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.cc",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "compositing/scene.h",
+        "compositing/scene_builder.h",
+        "dart_runtime_hooks.h",
+        "dart_ui.h",
+        "dart_wrapper.h",
+        "floating_point.h",
+        "io_manager.h",
+        "isolate_name_server/isolate_name_server.h",
+        "isolate_name_server/isolate_name_server_natives.h",
+        "painting/canvas.h",
+        "painting/codec.h",
+        "painting/color_filter.h",
+        "painting/display_list_deferred_image_gpu_skia.h",
+        "painting/display_list_image_gpu.h",
+        "painting/engine_layer.h",
+        "painting/fragment_program.h",
+        "painting/fragment_shader.h",
+        "painting/gradient.h",
+        "painting/image.h",
+        "painting/image_decoder.h",
+        "painting/image_decoder_skia.h",
+        "painting/image_descriptor.h",
+        "painting/image_encoding.h",
+        "painting/image_encoding_impl.h",
+        "painting/image_encoding_skia.h",
+        "painting/image_filter.h",
+        "painting/image_generator.h",
+        "painting/image_generator_apng.h",
+        "painting/image_generator_registry.h",
+        "painting/image_shader.h",
+        "painting/immutable_buffer.h",
+        "painting/matrix.h",
+        "painting/multi_frame_codec.h",
+        "painting/paint.h",
+        "painting/path.h",
+        "painting/path_measure.h",
+        "painting/picture.h",
+        "painting/picture_recorder.h",
+        "painting/rrect.h",
+        "painting/rsuperellipse.h",
+        "painting/shader.h",
+        "painting/single_frame_codec.h",
+        "painting/vertices.h",
+        "plugins/callback_cache.h",
+        "semantics/custom_accessibility_action.h",
+        "semantics/semantics_flags.h",
+        "semantics/semantics_node.h",
+        "semantics/semantics_update.h",
+        "semantics/semantics_update_builder.h",
+        "semantics/string_attribute.h",
+        "snapshot_delegate.h",
+        "text/asset_manager_font_provider.h",
+        "text/font_collection.h",
+        "text/paragraph.h",
+        "text/paragraph_builder.h",
+        "ui_dart_state.h",
+        "window/hit_test_response.h",
+        "window/key_data.h",
+        "window/key_data_packet.h",
+        "window/platform_configuration.h",
+        "window/platform_isolate.h",
+        "window/platform_message.h",
+        "window/platform_message_response.h",
+        "window/platform_message_response_dart.h",
+        "window/platform_message_response_dart_port.h",
+        "window/point_data.h",
+        "window/pointer_data.h",
+        "window/pointer_data_packet.h",
+        "window/pointer_data_packet_converter.h",
+        "window/view_focus.h",
+        "window/viewport_metrics.h",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "painting/display_list_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.h",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.h",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "painting/display_list_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.h",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.h",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "painting/display_list_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.h",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.h",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    copts = [
+        # Dart gives us doubles. Skia and Impeller work in floats.
+        # If Dart gives us a double > FLT_MAX or < -FLT_MAX, implicit conversion
+        # will convert it to either inf/-inf or FLT_MAX/-FLT_MAX (undefined
+        # behavior). This can result in surprising and difficult to debug behavior
+        # for Flutter application developers, so it should be explicitly handled
+        # via SafeNarrow.
+        "-Wimplicit-float-conversion",
+    ] + FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/runtime_stage",
+        "//engine/src/flutter/runtime:dart_plugin_registrant",
+        "//engine/src/flutter/runtime:test_font",
+        "//engine/src/flutter/shell/common:display",
+        "//engine/src/flutter/shell/common:platform_message_handler",
+        "//engine/src/flutter/shell/common:snapshot_pixel_format",
+        "//engine/src/flutter/third_party/tonic",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+        "@rapidjson",
+        "@skia",
+        "@skia//modules/skparagraph",
+        "@zlib",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list:skia_conversions",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list:skia_conversions",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list:skia_conversions",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "ui_unittests_fixtures",
+    dart_main = "fixtures/ui_test.dart",
+    fixtures = [
+        "fixtures/DashInNooglerHat.jpg",
+        "fixtures/DashInNooglerHat%20WithSpace.jpg",
+        "fixtures/DisplayP3Logo.jpg",
+        "fixtures/DisplayP3Logo.png",
+        "fixtures/FontManifest.json",
+        "fixtures/Horizontal.jpg",
+        "fixtures/Horizontal.png",
+        "fixtures/WideGamutIndexed.png",
+        "fixtures/heart_end.png",
+        "fixtures/hello_loop_2.gif",
+        "fixtures/hello_loop_2.webp",
+        "fixtures/unmultiplied_alpha.png",
+        "//engine/src/flutter/txt:third_party/fonts/Roboto-Medium.ttf",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src/flutter/lib/ui/fixtures/shaders"],
+)
+
+cc_test(
+    name = "ui_benchmarks",
+    size = "enormous",
+    srcs = ["ui_benchmarks.cc"],
+    args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:fixture_test
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ui
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
+        "//conditions:default": [],
+    }),
+    data = ["@icu//:icudata"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = [
+        "benchmark",
+        "manual",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":ui",
+        ":ui_unittests_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/benchmarking",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/testing:fixture_test",
+    ],
+)
+
+# SwiftShader, its ICD manifest and the Vulkan loader, next to the
+# suites below (GN: data_deps of //flutter/third_party/swiftshader and
+# ANGLE).
+flutter_gpu_test_backends(
+    name = "gpu_test_backends",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+flutter_cc_test(
+    name = "ui_unittests",
+    size = "medium",
+    srcs = [
+        "compositing/scene_builder_unittests.cc",
+        "hooks_unittests.cc",
+        "painting/image_decoder_no_gl_unittests.cc",
+        "painting/image_decoder_no_gl_unittests.h",
+        "painting/image_dispose_unittests.cc",
+        "painting/image_encoding_unittests.cc",
+        "painting/image_generator_apng_unittests.cc",
+        "painting/image_generator_registry_unittests.cc",
+        "painting/paint_unittests.cc",
+        "painting/path_unittests.cc",
+        "painting/single_frame_codec_unittests.cc",
+        "semantics/semantics_update_builder_unittests.cc",
+        "window/platform_configuration_unittests.cc",
+        "window/platform_message_response_dart_port_unittests.cc",
+        "window/platform_message_response_dart_unittests.cc",
+        "window/pointer_data_packet_converter_unittests.cc",
+        "window/pointer_data_packet_unittests.cc",
+    ] + select({
+        "//engine/src/flutter/shell:enable_gl": [
+            "painting/image_decoder_unittests.cc",  # shell_enable_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "impeller_gles_without_surface_unittests.cc",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ui
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :ui_testing_mocks
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-deprecated-copy",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-implicit-fallthrough",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-nullability-completeness",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-suggest-destructor-override",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-suggest-override",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-unused-private-field",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-unused-variable",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/renderer/backend/gles:mock_gles
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-deprecated-copy",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-implicit-fallthrough",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-nullability-completeness",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-suggest-destructor-override",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-suggest-override",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-unused-private-field",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-unused-variable",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
+    }),
+    data = [":gpu_test_backends"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    runner_args = ["--timeout=90"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":display_list_deferred_image_unittests",
+        ":ui",
+        ":ui_testing_mocks",
+        ":ui_unittests_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/build/bazel/dart_wrap:elf_loader",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/impeller",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/shell/common:shell_test_fixture_sources",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:fixture_test",
+        "//engine/src/flutter/third_party/tonic",
+        "@libpng",
+    ] + select({
+        "//engine/src/flutter/shell:enable_gl": [
+            "//engine/src/flutter/testing:opengl",  # shell_enable_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/entity:entity_shaders",  # impeller_enable_opengles
+            "//engine/src/flutter/impeller/entity:framebuffer_blend_entity_shaders",  # impeller_enable_opengles
+            "//engine/src/flutter/impeller/entity:modern_entity_shaders",  # impeller_enable_opengles
+            "//engine/src/flutter/impeller/renderer/backend/gles:mock_gles",  # impeller_enable_opengles
+            "//engine/src/flutter/shell/gpu:gpu_surface_gl",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+cc_library(
+    name = "display_list_deferred_image_unittests",
+    testonly = True,
+    srcs = select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "painting/display_list_deferred_image_gpu_impeller_unittests.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "painting/display_list_deferred_image_gpu_impeller_unittests.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "painting/display_list_deferred_image_gpu_impeller_unittests.cc",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ui
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :ui_testing_mocks
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":ui",
+        ":ui_testing_mocks",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "ui_testing_mocks",
+    testonly = True,
+    hdrs = ["painting/testing/mocks.h"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":ui",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/display_list",
+        "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `is_mac || is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `test_enable_vulkan && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_vulkan_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_vulkan",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `test_enable_metal && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `impeller_enable_opengles && shell_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_shell_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+filegroup(
+    name = "dart_ui",
+    srcs = glob(["*.dart"]),
+)
+
+filegroup(
+    name = "fixture_sources",
+    srcs = glob(["fixtures/*"]),
+)
+
+# The same sources and the fix data by name, for the copies
+# sky/packages/sky_engine makes into the sky_engine package.
+exports_files(glob(["*.dart"]) + ["fix_dart_ui.yaml"])

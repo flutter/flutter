@@ -9,6 +9,7 @@ import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:meta/meta.dart';
 import 'package:process_runner/process_runner.dart';
 
+import '../bazel.dart';
 import '../build_plan.dart';
 import '../build_utils.dart';
 import '../flutter_tool_interop/device.dart';
@@ -27,7 +28,7 @@ final class RunCommand extends CommandBase {
     super.help = false,
     super.usageLineLength,
     @visibleForTesting FlutterTool? flutterTool,
-  }) {
+  }) : _configs = configs {
     builds = BuildPlan.configureArgParser(argParser, environment, configs: configs, help: help);
     argParser.addMultiOption(
       'flutter-flags',
@@ -43,6 +44,9 @@ final class RunCommand extends CommandBase {
 
   /// Flutter tool.
   late final FlutterTool _flutterTool;
+
+  /// The builder configurations (for the Bazel backend's configuration names).
+  final Map<String, BuilderConfig> _configs;
 
   /// List of compatible builds.
   late final List<Build> builds;
@@ -138,37 +142,80 @@ See `flutter run --help` for a listing
 
     final List<Label> buildTargetsForShell = target?.buildTargetsForShell ?? [];
 
-    // First build the host.
-    int r = await runBuild(
-      environment,
-      hostBuild,
-      concurrency: plan.concurrency ?? 0,
-      extraGnArgs: plan.toGnArgs(),
-      enableRbe: plan.useRbe,
-      rbeConfig: plan.toRbeConfig(),
-    );
-    if (r != 0) {
-      throw FatalError('Failed to build host (${hostBuild.name})');
-    }
-
-    // Now build the target if it isn't the same.
-    if (hostBuild.name != plan.build.name) {
-      r = await runBuild(
+    // What `flutter run --local-engine[-host]` is given below: GN's build
+    // directory names, or, for a build the flutter tool reads where Bazel
+    // built it, that directory.
+    final localEngines = <String, String>{};
+    if (plan.backend == BuildBackend.bazel) {
+      // The host build, and the target build when it is another one: a
+      // developer's build through its local engine manifest, which `flutter
+      // run --local-engine[-host]` reads in place (Android's through the
+      // Gradle plugin, given the manifest's directory as `local-engine-out`);
+      // a CI build, which names ninja targets, through its install target run
+      // into its build directory (the shell's targets are among them).
+      final bazel = Bazel(environment, _configs);
+      for (final build in <Build>[hostBuild, if (hostBuild.name != plan.build.name) plan.build]) {
+        final String? config = bazel.configFor(build);
+        if (config == null) {
+          return 1;
+        }
+        final String? installTarget = bazel.installTargetFor(build);
+        if (installTarget == null) {
+          final String? localEngine = await bazel.buildLocalEngine(config);
+          if (localEngine == null) {
+            environment.logger.error('Failed to build ${build.name}');
+            return 1;
+          }
+          localEngines[build.name] = localEngine;
+          continue;
+        }
+        final int exitCode = await bazel.run(<String>[
+          'run',
+          '--config=$config',
+          installTarget,
+          '--',
+          bazel.buildDirectoryFor(build),
+        ]);
+        if (exitCode != 0) {
+          environment.logger.error('Failed to build ${build.name}');
+          return exitCode;
+        }
+      }
+    } else {
+      // First build the host.
+      int r = await runBuild(
         environment,
-        plan.build,
+        hostBuild,
         concurrency: plan.concurrency ?? 0,
         extraGnArgs: plan.toGnArgs(),
         enableRbe: plan.useRbe,
-        targets: buildTargetsForShell,
         rbeConfig: plan.toRbeConfig(),
       );
       if (r != 0) {
-        throw FatalError('Failed to build target (${plan.build.name})');
+        throw FatalError('Failed to build host (${hostBuild.name})');
+      }
+
+      // Now build the target if it isn't the same.
+      if (hostBuild.name != plan.build.name) {
+        r = await runBuild(
+          environment,
+          plan.build,
+          concurrency: plan.concurrency ?? 0,
+          extraGnArgs: plan.toGnArgs(),
+          enableRbe: plan.useRbe,
+          targets: buildTargetsForShell,
+          rbeConfig: plan.toRbeConfig(),
+        );
+        if (r != 0) {
+          throw FatalError('Failed to build target (${plan.build.name})');
+        }
       }
     }
 
-    final String mangledBuildName = mangleConfigName(environment, plan.build.name);
-    final String mangledHostBuildName = mangleConfigName(environment, hostBuild.name);
+    final String mangledBuildName =
+        localEngines[plan.build.name] ?? mangleConfigName(environment, plan.build.name);
+    final String mangledHostBuildName =
+        localEngines[hostBuild.name] ?? mangleConfigName(environment, hostBuild.name);
     final command = <String>[
       'flutter',
       'run',

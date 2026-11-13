@@ -1,0 +1,183 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Hand-written: lib/snapshot/BUILD.gn is templates over the Dart tree's
+# tools (compile_platform from utils/compile_platform.gni, compiled_action
+# around gen_snapshot, bin_to_linkable) plus the macOS universal-binary and
+# cross-target plumbing of gen_snapshot itself, none of which the converter
+# reads yet. The pipeline below is that file's host path, target for target,
+# on the rules in //build_defs/dart:snapshot.bzl, with the
+# tools the wrapped Dart SDK build provides. The gen_snapshot/analyze_snapshot
+# exports (generate_snapshot_bins) are artifact packaging, a later phase.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/dart:snapshot.bzl", "bin_to_assembly", "compile_platform", "core_snapshot", "macos_gen_snapshots")
+load("//build_defs/gn:gn_action.bzl", "gn_generated_file")
+
+package(default_visibility = ["//visibility:public"])
+
+# compile_platform("strong_platform"): the Dart/Flutter core libraries to
+# kernel. GN's -Ddart.vm.product follows the runtime mode.
+compile_platform(
+    name = "strong_platform",
+    srcs = ["//engine/src/flutter/lib/ui:dart_ui"],
+    args = [
+        "--enable-experiment=generic-metadata",
+        "--nnbd-strong",
+        "--target=flutter",
+    ],
+    libraries_json = "libraries.json",
+    outline = "flutter_patched_sdk/vm_outline_strong.dill",
+    platform = "flutter_patched_sdk/platform_strong.dill",
+    product = select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": True,
+        "//engine/src/flutter/common:runtime_mode_release": True,
+        "//conditions:default": False,
+    }),
+    tree = {"@dart//:sdk_lib": "flutter/third_party/dart"},
+)
+
+# group("kernel_platform_files")
+filegroup(
+    name = "kernel_platform_files",
+    srcs = [":strong_platform"],
+)
+
+# generated_file("vm_isolate_snapshot_data"), ("vm_isolate_snapshot_instructions"):
+# empty, for the artifact layout (gen/flutter/lib/snapshot/, where an install
+# lays them: `outputs`).
+gn_generated_file(
+    name = "vm_isolate_snapshot_data",
+    out = "vm_isolate_snapshot.bin",
+    content = [],
+    outputs = ["$root_gen_dir/flutter/lib/snapshot/vm_isolate_snapshot.bin"],
+)
+
+gn_generated_file(
+    name = "vm_isolate_snapshot_instructions",
+    out = "vm_snapshot_instructions.bin",
+    content = [],
+    outputs = ["$root_gen_dir/flutter/lib/snapshot/vm_snapshot_instructions.bin"],
+)
+
+# GN: --enable_asserts when is_debug and the runtime mode is debug.
+selects.config_setting_group(
+    name = "asserts",
+    match_all = [
+        "//engine/src/flutter/build/bazel:unoptimized",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# compiled_action("generate_snapshot_bin")
+core_snapshot(
+    name = "generate_snapshot_bin",
+    data = "isolate_snapshot.bin",
+    enable_asserts = select({
+        ":asserts": True,
+        "//conditions:default": False,
+    }),
+    instructions = "isolate_snapshot_instructions.bin",
+    platform = ":flutter_patched_sdk/platform_strong.dill",
+    deps = [
+        ":vm_isolate_snapshot_data",
+        ":vm_isolate_snapshot_instructions",
+    ],
+)
+
+# bin_to_linkable(...): the blobs as symbols.
+bin_to_assembly(
+    name = "isolate_snapshot_data_linkable",
+    src = ":isolate_snapshot.bin",
+    symbol = "kDartSnapshotData",
+)
+
+bin_to_assembly(
+    name = "isolate_snapshot_instructions_linkable",
+    src = ":isolate_snapshot_instructions.bin",
+    executable = True,
+    symbol = "kDartSnapshotText",
+)
+
+bin_to_assembly(
+    name = "platform_strong_dill_linkable",
+    src = ":flutter_patched_sdk/platform_strong.dill",
+    size_symbol = "kPlatformStrongDillSize",
+    symbol = "kPlatformStrongDill",
+)
+
+# source_set("snapshot_headers")
+cc_library(
+    name = "snapshot_headers",
+    hdrs = ["snapshot.h"],
+    deps = ["//engine/src:include_root"],
+)
+
+# source_set("snapshot"): the assembly, which `.incbin`s the blobs.
+cc_library(
+    name = "snapshot",
+    srcs = [
+        ":isolate_snapshot_data_linkable",
+        ":isolate_snapshot_instructions_linkable",
+        ":platform_strong_dill_linkable",
+    ],
+    additional_compiler_inputs = [
+        ":isolate_snapshot.bin",
+        ":isolate_snapshot_instructions.bin",
+        ":flutter_patched_sdk/platform_strong.dill",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [":snapshot_headers"],
+    alwayslink = True,
+)
+
+# The macOS and Android gen_snapshot of a Mac host (build_mac_gen_snapshot
+# x2 and action("create_macos_gen_snapshots")): the tool as each Mac
+# toolchain builds it for the target, from the Dart wrap, copied under
+# artifacts_<cpu>/ and joined by lipo into universal/gen_snapshot<suffix>
+# (gen_snapshot.gni: the suffix is the target CPU's, `_armv7` for arm;
+# an Android target's universal binary is plain gen_snapshot). A Mac's
+# alone: the wrap builds the halves on no other host.
+macos_gen_snapshots(
+    name = "create_macos_gen_snapshots",
+    arm64 = "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_mac_arm64",
+    suffix = select({
+        "@platforms//cpu:aarch64": "_arm64",
+        "@platforms//cpu:armv7": "_armv7",
+        "@platforms//cpu:x86_64": "_x64",
+        "//conditions:default": "",
+    }),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    universal_name = select({
+        "@platforms//os:android": "gen_snapshot",
+        "//conditions:default": "",
+    }),
+    x64 = "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_mac_x64",
+)
+
+# group("generate_snapshot_bins"): the core snapshot and the platform
+# kernels, and gen_snapshot for the target -- on a Linux host (which builds
+# it directly, for every target CPU GN names) the host's gen_snapshot and
+# its analyze_snapshot (both the host toolchain's: GN names them with
+# ($host_toolchain)), the wrap's products; on a Mac the universal binary
+# above. The root group lists it.
+filegroup(
+    name = "generate_snapshot_bins",
+    srcs = [
+        ":generate_snapshot_bin",
+        ":kernel_platform_files",
+    ] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [":create_macos_gen_snapshots"],
+        "//conditions:default": [
+            "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host",
+            "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        ],
+    }),
+)

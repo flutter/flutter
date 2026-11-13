@@ -1,0 +1,13 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:flutter_web_plugins's sources, for a test that resolves a project
+# depending on it from the SDK (build_defs/dart/dart_test.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob(["lib/**"]) + ["pubspec.yaml"],
+)

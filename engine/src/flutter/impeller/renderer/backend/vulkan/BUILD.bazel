@@ -1,0 +1,350 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/renderer/backend/vulkan/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/android:native_activity_apk.bzl", "native_activity_apk")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/testing:android_device_test.bzl", "flutter_android_device_test")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "mock_vulkan",
+    testonly = True,
+    srcs = ["test/mock_vulkan.cc"],
+    hdrs = ["test/mock_vulkan.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :vulkan
+        "-Wno-c++98-compat-extra-semi",  # from :vulkan
+        "-Wno-deprecated-copy",  # from :vulkan
+        "-Wno-implicit-fallthrough",  # from :vulkan
+        "-Wno-nullability-completeness",  # from :vulkan
+        "-Wno-suggest-destructor-override",  # from :vulkan
+        "-Wno-suggest-override",  # from :vulkan
+        "-Wno-unused-private-field",  # from :vulkan
+        "-Wno-unused-variable",  # from :vulkan
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":vulkan",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "vulkan_unittests",
+    testonly = True,
+    srcs = [
+        "allocator_vk_unittests.cc",
+        "blit_pass_vk_unittests.cc",
+        "command_encoder_vk_unittests.cc",
+        "command_pool_vk_unittests.cc",
+        "command_queue_vk_unittests.cc",
+        "context_vk_unittests.cc",
+        "descriptor_pool_vk_unittests.cc",
+        "driver_info_vk_unittests.cc",
+        "fence_waiter_vk_unittests.cc",
+        "formats_vk_unittests.cc",
+        "pipeline_cache_data_vk_unittests.cc",
+        "render_pass_builder_vk_unittests.cc",
+        "render_pass_cache_unittests.cc",
+        "render_pass_vk_unittests.cc",
+        "resource_manager_vk_unittests.cc",
+        "surface_context_vk_unittests.cc",
+        "test/gpu_tracer_unittests.cc",
+        "test/mock_vulkan_unittests.cc",
+        "test/pipeline_compile_queue_vulkan_unittests.cc",
+        "test/sampler_library_vk_unittests.cc",
+        "test/swapchain_unittests.cc",
+        "texture_vk_unittests.cc",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :vulkan
+        "-Wno-c++98-compat-extra-semi",  # from :vulkan
+        "-Wno-deprecated-copy",  # from :vulkan
+        "-Wno-implicit-fallthrough",  # from :vulkan
+        "-Wno-nullability-completeness",  # from :vulkan
+        "-Wno-suggest-destructor-override",  # from :vulkan
+        "-Wno-suggest-override",  # from :vulkan
+        "-Wno-unused-private-field",  # from :vulkan
+        "-Wno-unused-variable",  # from :vulkan
+        "-Wno-inconsistent-missing-override",  # from ../../../playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../../../playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../../../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":mock_vulkan",
+        ":vulkan",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "vulkan",
+    srcs = [
+        "allocator_vk.cc",
+        "barrier_vk.cc",
+        "blit_pass_vk.cc",
+        "capabilities_vk.cc",
+        "command_buffer_vk.cc",
+        "command_pool_vk.cc",
+        "command_queue_vk.cc",
+        "compute_pass_vk.cc",
+        "compute_pipeline_vk.cc",
+        "context_vk.cc",
+        "debug_report_vk.cc",
+        "descriptor_pool_vk.cc",
+        "device_buffer_vk.cc",
+        "driver_info_vk.cc",
+        "fence_waiter_vk.cc",
+        "formats_vk.cc",
+        "gpu_tracer_vk.cc",
+        "pipeline_cache_data_vk.cc",
+        "pipeline_cache_vk.cc",
+        "pipeline_compile_queue_vulkan.cc",
+        "pipeline_library_vk.cc",
+        "pipeline_vk.cc",
+        "queue_vk.cc",
+        "render_pass_builder_vk.cc",
+        "render_pass_vk.cc",
+        "resource_manager_vk.cc",
+        "sampler_library_vk.cc",
+        "sampler_vk.cc",
+        "shader_function_vk.cc",
+        "shader_library_vk.cc",
+        "shared_object_vk.cc",
+        "surface_context_vk.cc",
+        "swapchain/khr/khr_swapchain_image_vk.cc",
+        "swapchain/khr/khr_swapchain_impl_vk.cc",
+        "swapchain/khr/khr_swapchain_vk.cc",
+        "swapchain/surface_vk.cc",
+        "swapchain/swapchain_transients_vk.cc",
+        "swapchain/swapchain_vk.cc",
+        "texture_source_vk.cc",
+        "texture_vk.cc",
+        "texture_wrapper_vk.cc",
+        "tracked_objects_vk.cc",
+        "vertex_descriptor_vk.cc",
+        "vma.cc",
+        "workarounds_vk.cc",
+        "yuv_conversion_library_vk.cc",
+        "yuv_conversion_vk.cc",
+    ] + select({
+        "@platforms//os:android": [
+            "android/ahb_texture_source_vk.cc",  # is_android
+            "swapchain/ahb/ahb_swapchain_impl_vk.cc",  # is_android
+            "swapchain/ahb/ahb_swapchain_vk.cc",  # is_android
+            "swapchain/ahb/ahb_texture_pool_vk.cc",  # is_android
+            "swapchain/ahb/external_semaphore_vk.cc",  # is_android
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "allocator_vk.h",
+        "barrier_vk.h",
+        "blit_pass_vk.h",
+        "capabilities_vk.h",
+        "command_buffer_vk.h",
+        "command_pool_vk.h",
+        "command_queue_vk.h",
+        "compute_pass_vk.h",
+        "compute_pipeline_vk.h",
+        "context_vk.h",
+        "debug_report_vk.h",
+        "descriptor_pool_vk.h",
+        "device_buffer_vk.h",
+        "device_holder_vk.h",
+        "driver_info_vk.h",
+        "fence_waiter_vk.h",
+        "formats_vk.h",
+        "gpu_tracer_vk.h",
+        "limits_vk.h",
+        "pipeline_cache_data_vk.h",
+        "pipeline_cache_vk.h",
+        "pipeline_compile_queue_vulkan.h",
+        "pipeline_library_vk.h",
+        "pipeline_vk.h",
+        "queue_vk.h",
+        "render_pass_builder_vk.h",
+        "render_pass_vk.h",
+        "resource_manager_vk.h",
+        "sampler_library_vk.h",
+        "sampler_vk.h",
+        "shader_function_vk.h",
+        "shader_library_vk.h",
+        "shared_object_vk.h",
+        "surface_context_vk.h",
+        "swapchain/khr/khr_swapchain_image_vk.h",
+        "swapchain/khr/khr_swapchain_impl_vk.h",
+        "swapchain/khr/khr_swapchain_vk.h",
+        "swapchain/surface_vk.h",
+        "swapchain/swapchain_transients_vk.h",
+        "swapchain/swapchain_vk.h",
+        "texture_source_vk.h",
+        "texture_vk.h",
+        "texture_wrapper_vk.h",
+        "tracked_objects_vk.h",
+        "vertex_descriptor_vk.h",
+        "vk.h",
+        "vma.h",
+        "workarounds_vk.h",
+        "yuv_conversion_library_vk.h",
+        "yuv_conversion_vk.h",
+    ] + select({
+        "@platforms//os:android": [
+            "android/ahb_texture_source_vk.h",  # is_android
+            "swapchain/ahb/ahb_formats.h",  # is_android
+            "swapchain/ahb/ahb_swapchain_impl_vk.h",  # is_android
+            "swapchain/ahb/ahb_swapchain_vk.h",  # is_android
+            "swapchain/ahb/ahb_texture_pool_vk.h",  # is_android
+            "swapchain/ahb/external_semaphore_vk.h",  # is_android
+        ],
+        "//conditions:default": [],
+    }),
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flutter_vma
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma
+        "-Wno-deprecated-copy",  # from //flutter/flutter_vma
+        "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma
+        "-Wno-nullability-completeness",  # from //flutter/flutter_vma
+        "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma
+        "-Wno-suggest-override",  # from //flutter/flutter_vma
+        "-Wno-unused-private-field",  # from //flutter/flutter_vma
+        "-Wno-unused-variable",  # from //flutter/flutter_vma
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/flutter_vma",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/renderer",
+        "//engine/src/flutter/impeller/shader_archive",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:linked_hash_map",
+        "@abseil_cpp_tree//:root_includes",
+        "@vulkan-headers//:vulkan_headers",
+        "@vulkan_deps_tree//:root_includes",
+        "@vulkan_memory_allocator",
+    ] + select({
+        "@platforms//os:android": [
+            "//engine/src/flutter/impeller/toolkit/android",  # is_android
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "public_android_config",
+    defines = ["__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__"],
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+flutter_test_fixtures(
+    name = "unittests_fixtures",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "unittests_lib",
+    testonly = True,
+    srcs = [
+        "android/ahb_swapchain_vk_unittests.cc",
+        "android/ahb_texture_source_vk_unittests.cc",
+        "android/android_test_utils.cc",
+    ],
+    hdrs = ["android/android_test_utils.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :vulkan
+        "-Wno-c++98-compat-extra-semi",  # from :vulkan
+        "-Wno-deprecated-copy",  # from :vulkan
+        "-Wno-implicit-fallthrough",  # from :vulkan
+        "-Wno-nullability-completeness",  # from :vulkan
+        "-Wno-suggest-destructor-override",  # from :vulkan
+        "-Wno-suggest-override",  # from :vulkan
+        "-Wno-unused-private-field",  # from :vulkan
+        "-Wno-unused-variable",  # from :vulkan
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["TESTING"],
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":mock_vulkan",
+        ":unittests_fixtures",
+        ":vulkan",
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+flutter_android_device_test(
+    name = "impeller_vulkan_android_unittests",
+    size = "large",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":unittests_lib",
+        "//engine/src/flutter/testing",
+    ],
+)
+
+alias(
+    name = "vulkan_android_unittests",
+    actual = ":impeller_vulkan_android_unittests",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+native_activity_apk(
+    name = "vulkan_android_apk_unittests",
+    testonly = True,
+    apk_name = "impeller_vulkan_android_unittests",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":unittests_lib",
+        "//engine/src/flutter/testing/android/native_activity:gtest_activity",
+    ],
+)

@@ -1,0 +1,521 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: config, export_dynamic_symbols, export_dynamic_test_symbols.
+# Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/dist:everything.bzl", "everything_assemble", "everything_contents", "everything_files", "everything_trees")
+load("//build_defs/dist:local_engine.bzl", "local_engine")
+load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "flutter",
+    testonly = True,
+    # Compile the engine.
+    srcs = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",  # !is_fuchsia && !is_qnx
+        "//engine/src/flutter/shell/platform/embedder:flutter_engine",  # !is_qnx
+        "//engine/src/flutter/sky",  # !is_qnx
+    ] + select({
+        "//engine/src/flutter/testing:unittests_enabled": [
+            ":unittests",  # !is_qnx && enable_unittests
+            "//engine/src/flutter/display_list:display_list_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/display_list:display_list_builder_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/display_list:display_list_region_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/display_list:display_list_transform_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/display_list:primitive_rendering_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/fml:fml_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/impeller/geometry:geometry_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/lib/ui:ui_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/shell/common:shell_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/txt:txt_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:engine_artifacts": [
+            # Built alongside gen_snapshot for 64 bit targets
+            "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot",  # !is_fuchsia && !is_qnx && build_engine_artifacts && host_os == "linux"
+            # This must be listed explicitly for desktop cross-builds since
+            # //flutter/lib/snapshot:generate_snapshot_bin will only build
+            # gen_snapshot for the host and not the target.
+            "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            "//engine/src/flutter/build/dart:dart_sdk",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            "//engine/src/flutter/flutter_frontend_server:frontend_server",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            # Impeller artifacts - compiler and libtessellator
+            "//engine/src/flutter/impeller/compiler:impellerc",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            "//engine/src/flutter/impeller/tessellator:tessellator_shared",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            "//engine/src/flutter/shell/testing",  # build_engine_artifacts
+            "//engine/src/flutter/tools/engine_tool:tests",  # build_engine_artifacts
+            "//engine/src/flutter/tools/font_subset",  # build_engine_artifacts
+            "//engine/src/flutter/tools/licenses_cpp",  # !is_fuchsia && !is_qnx && build_engine_artifacts && host_os == "linux" || (host_os == "mac")
+            "//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner",  # !is_fuchsia && !is_qnx && build_engine_artifacts && host_os == "linux" || (host_os == "mac")
+            # path_ops
+            "//engine/src/flutter/tools/path_ops",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "//engine/src/flutter/impeller/toolkit/interop:sdk",  # is_mac || is_linux || is_win || is_android || is_qnx
+        ],
+        "@platforms//os:linux": [
+            "//engine/src/flutter/impeller/toolkit/interop:sdk",  # is_mac || is_linux || is_win || is_android || is_qnx
+        ],
+        "@platforms//os:android": [
+            "//engine/src/flutter/impeller/toolkit/interop:sdk",  # is_mac || is_linux || is_win || is_android || is_qnx
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_flutter_runtime_mode_debug_or_flutter_runtime_mode_profile_and_is_ios": [
+            "//engine/src/flutter/testing/ios_scenario_app",  # flutter_runtime_mode == "debug" || (flutter_runtime_mode == "profile") && is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_android_and_flutter_runtime_mode_debug": [
+            "//engine/src/flutter/shell/platform/embedder:embedder-archive",  # is_android && (flutter_runtime_mode == "debug")
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+filegroup(
+    name = "unittests",
+    testonly = True,
+    srcs = select({
+        "@platforms//os:android": [
+            "//engine/src/flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests",  # is_android
+            "//engine/src/flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",  # is_android
+            "//engine/src/flutter/impeller/toolkit/android:apk_unittests",  # is_android
+            "//engine/src/flutter/impeller/toolkit/android:unittests",  # is_android
+            "//engine/src/flutter/shell/platform/android:flutter_shell_native_unittests",  # is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/testing:ios_unittests_enabled": [
+            "//engine/src/flutter/shell/platform/darwin/ios:ios_test_flutter",  # enable_ios_unittests
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/testing:unittests_enabled": [
+            "//engine/src/flutter/assets:assets_unittests",  # enable_unittests
+            "//engine/src/flutter/display_list:display_list_rendertests",  # enable_unittests
+            "//engine/src/flutter/display_list:display_list_unittests",  # enable_unittests
+            "//engine/src/flutter/flow:flow_unittests",  # enable_unittests
+            "//engine/src/flutter/fml:fml_unittests",  # enable_unittests
+            "//engine/src/flutter/lib/ui:ui_unittests",  # enable_unittests
+            "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",  # enable_unittests
+            "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",  # enable_unittests
+            "//engine/src/flutter/runtime:runtime_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/common:shell_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/geometry:geometry_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/gpu:gpu_surface_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/shell/platform/android/jni:jni_unittests",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",  # enable_unittests && enable_desktop_embeddings
+            # These tests require the embedder and thus cannot run on fuchsia.
+            # TODO(): Enable when embedder works on fuchsia.
+            "//engine/src/flutter/shell/platform/common:common_cpp_unittests",  # enable_unittests && enable_desktop_embeddings && !is_fuchsia
+            "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",  # enable_unittests && enable_desktop_embeddings
+            "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/platform/embedder:embedder_unittests",  # enable_unittests
+            # These tests require GLFW and thus cannot run on fuchsia.
+            "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",  # enable_unittests && enable_desktop_embeddings && !is_fuchsia
+            "//engine/src/flutter/testing:testing_unittests",  # enable_unittests
+            "//engine/src/flutter/testing/dart",  # enable_unittests
+            "//engine/src/flutter/testing/smoke_test_failure",  # enable_unittests
+            "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",  # enable_unittests
+            "//engine/src/flutter/txt:txt_unittests",  # enable_unittests
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_enable_unittests_and_is_mac": [
+            "//engine/src/flutter/impeller/golden_tests:impeller_golden_tests",  # enable_unittests && is_mac
+            "//engine/src/flutter/shell/platform/darwin/common:availability_version_check_unittests",  # enable_unittests && is_mac
+            "//engine/src/flutter/shell/platform/darwin/common:framework_common_swift_unittests",  # enable_unittests && is_mac
+            "//engine/src/flutter/shell/platform/darwin/common:framework_common_unittests",  # enable_unittests && is_mac
+            "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests",  # enable_unittests && enable_desktop_embeddings && is_mac
+            "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",  # enable_unittests && enable_desktop_embeddings && is_mac
+            "//engine/src/flutter/third_party/accessibility:accessibility_unittests",  # enable_unittests && is_mac || is_win
+            "//engine/src/flutter/third_party/spring_animation:spring_animation_unittests",  # enable_unittests && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_enable_unittests_and_is_mac_or_is_linux": [
+            "//engine/src/flutter/impeller:impeller_dart_unittests",  # enable_unittests && is_mac || is_linux || is_win
+            "//engine/src/flutter/impeller:impeller_unittests",  # enable_unittests && is_mac || is_linux || is_win
+            "//engine/src/flutter/impeller/toolkit/interop:example",  # enable_unittests && is_mac || is_linux || is_win
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_enable_unittests_and_is_linux": [
+            "//engine/src/flutter/shell/platform/linux:flutter_linux_unittests",  # enable_unittests && enable_desktop_embeddings && is_linux
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_enable_unittests_and_is_linux_and_is_host_toolchain": [
+            "//engine/src/flutter/shell/platform/glfw:flutter_glfw_unittests",  # enable_unittests && enable_desktop_embeddings && is_linux && build_glfw_shell
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+filegroup(
+    name = "archives",
+    testonly = True,
+    srcs = ["//engine/src/flutter/build/archives:artifacts"],
+    target_compatible_with = select({
+        "//engine/src/flutter/common:engine_artifacts": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+filegroup(
+    name = "dist",
+    testonly = True,
+    srcs = [
+        "//engine/src/flutter/lib/gpu/dist",
+        "//engine/src/flutter/sky/dist",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_or_flutter_runtime_mode_profile",
+    match_any = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `(flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile") && is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_or_flutter_runtime_mode_profile_and_is_ios",
+    match_all = [
+        ":when_flutter_runtime_mode_debug_or_flutter_runtime_mode_profile",
+        "@platforms//os:ios",
+    ],
+)
+
+# `is_android && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_android_and_flutter_runtime_mode_debug",
+    match_all = [
+        "@platforms//os:android",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `enable_unittests && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "@platforms//os:macos",
+    ],
+)
+
+# `is_mac || is_linux`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_linux",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:linux",
+    ],
+)
+
+# `enable_unittests && (is_mac || is_linux)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_is_mac_or_is_linux",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        ":when_is_mac_or_is_linux",
+    ],
+)
+
+# `enable_unittests && is_linux`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_is_linux",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "@platforms//os:linux",
+    ],
+)
+
+# `enable_unittests && is_linux && is_host_toolchain`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_is_linux_and_is_host_toolchain",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "@platforms//os:linux",
+        "//engine/src/flutter/build/bazel:host_toolchain",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# config("config"), config("export_dynamic_symbols") and
+# config("export_dynamic_test_symbols") of BUILD.gn, by hand: the first is the
+# two include roots engine code is written against (engine/src and this
+# directory), which the converter's `includes` cannot say for a directory
+# above the package; the other two carry linker inputs that the converter's
+# configs do not yet. Every engine library depends on :config.
+
+# config("config") in BUILD.gn: the two include roots engine code is written
+# against -- engine/src ("flutter/fml/...") and this directory
+# ("impeller/...", "fml/..."). Every engine library depends on it; the
+# accompanying -Wunreachable-code is in FLUTTER_COPTS (build_defs/cc/copts.bzl),
+# since compiler flags do not propagate through dependencies.
+cc_library(
+    name = "config",
+    includes = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//engine/src:include_root"],
+)
+
+# The engine's Dart package configuration, which `gclient sync` writes (the
+# pub_get_offline hook) and GN's Dart compiles read (--packages). What the
+# frontend server resolves `package:` imports through; the fixtures compiled
+# so far import none, so nothing it points at is declared.
+filegroup(
+    name = "package_config",
+    srcs = [".dart_tool/package_config.json"],
+    visibility = ["//visibility:public"],
+)
+
+# config("export_dynamic_symbols") in BUILD.gn: the symbols a test binary
+# keeps in its dynamic symbol table, for the Dart VM to resolve at runtime
+# (the snapshot symbols, dart:ffi's lookups). GNU --dynamic-list on ELF, the
+# macOS linker's exported symbols list on a Mac; the files are
+# //flutter/common's.
+cc_library(
+    name = "export_dynamic_symbols",
+    additional_linker_inputs = select({
+        "@platforms//os:macos": ["//engine/src/flutter/common:exported_symbols_mac.sym"],
+        "//conditions:default": ["//engine/src/flutter/common:exported_symbols.sym"],
+    }),
+    linkopts = select({
+        "@platforms//os:macos": [
+            "-Xlinker",
+            "-exported_symbols_list",
+            "-Xlinker",
+            "$(execpath //engine/src/flutter/common:exported_symbols_mac.sym)",
+        ],
+        "//conditions:default": [
+            "-Wl,--dynamic-list=$(execpath //engine/src/flutter/common:exported_symbols.sym)",
+        ],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+# config("export_dynamic_test_symbols") in BUILD.gn: the list above plus the
+# symbol flutter_tester exposes to its Dart tests.
+cc_library(
+    name = "export_dynamic_test_symbols",
+    additional_linker_inputs = select({
+        "@platforms//os:macos": ["//engine/src/flutter/common:exported_test_symbols_mac.sym"],
+        "//conditions:default": ["//engine/src/flutter/common:exported_test_symbols.sym"],
+    }),
+    linkopts = select({
+        "@platforms//os:macos": [
+            "-Xlinker",
+            "-exported_symbols_list",
+            "-Xlinker",
+            "$(execpath //engine/src/flutter/common:exported_test_symbols_mac.sym)",
+        ],
+        "//conditions:default": [
+            "-Wl,--dynamic-list=$(execpath //engine/src/flutter/common:exported_test_symbols.sym)",
+        ],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+# What the tests of the engine's Dart tools read from directories of this
+# package (testing/run_tests.py --type dart-host; the tests themselves are
+# dart_package_test targets in the packages' own directories, see the suite
+# below): .ci.yaml (engine_build_configs, engine_tool; the builder
+# configurations are //engine/src/flutter/ci's) and bin/et (engine_tool's
+# entry-point test). The web engine's sources are //engine/src/flutter/lib/web_ui's;
+# its tests' Skia Gold client reads the release version file.
+exports_files([
+    ".ci.yaml",
+    ".engine-release.version",
+])
+
+# The embedder examples' directory, which flutter_tools' create_test creates a
+# project in (the SDK facsimile its tests run from needs the directory to
+# exist; packages/flutter_tools/BUILD.bazel).
+exports_files(["examples/glfw/README.md"])
+
+filegroup(
+    name = "et_entry_points",
+    srcs = glob(["bin/et*"]),
+    visibility = ["//visibility:public"],
+)
+
+# The scripts of tools/ that actions of other packages run (the Android
+# embedding's: shell/platform/android/BUILD.gn's gen_android_build_config_java
+# and check_imports). A script of a package's own directory needs no export.
+exports_files([
+    "tools/android_illegal_imports.py",
+    "tools/androidx/files.json",
+    "tools/androidx/generate_pom_file.py",
+    "tools/gen_android_buildconfig.py",
+    "tools/javadoc/android_reference",
+    "tools/javadoc/gen_javadoc.py",
+])
+
+# ci/host_debug_unopt's "Tests of tools/gn" (linux_unopt.json): `python3
+# flutter/tools/gn_test.py`, the unit tests of tools/gn -- its argument
+# parsing and the GN arguments it writes -- run from tools/ as the step runs
+# them (the script loads `gn` from its own directory). In the checkout
+# itself: to_gn_args() asks git for the engine's, Skia's and Dart's
+# revisions and runs the content-aware hash, which no view has. tools/ has
+# no package of its own: the root package's files, a test of this file.
+checkout_script_test(
+    name = "gn_test",
+    srcs = [
+        "tools/gn",
+        "tools/gn_test.py",
+    ],
+    # tools/gn looks the Apple SDKs up under prebuilts/SDKs unless it runs
+    # on a LUCI bot, where the step runs; a Linux checkout has none.
+    env = {"LUCI_CONTEXT": "bazel"},
+    in_checkout = True,
+    script = "tools/gn_test.py",
+)
+
+# run_tests.py --type dart-host: `dart test` in each Dart package of
+# build_dart_host_test_list, as dart_package_test runs it
+# (build_defs/dart/package_test.bzl). Thirteen packages there, eleven here:
+# ci's tests format files they write into the checkout and add to the git
+# index (format_test.dart), and clang_tidy's read a GN build directory's
+# compile_commands.json; both run with `dart test` in the checkout, not from
+# a build (ci/BUILD.bazel and tools/clang_tidy/BUILD.bazel say so).
+test_suite(
+    name = "dart_host_tests",
+    tests = [
+        "//engine/src/flutter/flutter_frontend_server:tests",
+        "//engine/src/flutter/testing/skia_gold_client:tests",
+        "//engine/src/flutter/tools/api_check:tests",
+        "//engine/src/flutter/tools/bazel_tools:tests",
+        "//engine/src/flutter/tools/build_bucket_golden_scraper:tests",
+        "//engine/src/flutter/tools/engine_tool:tests",
+        "//engine/src/flutter/tools/githooks:tests",
+        "//engine/src/flutter/tools/header_guard_check:tests",
+        "//engine/src/flutter/tools/pkg/engine_build_configs:tests",
+        "//engine/src/flutter/tools/pkg/engine_repo_tools:tests",
+        "//engine/src/flutter/tools/pkg/git_repo_tools:tests",
+    ],
+)
+
+# run_tests.py --type benchmarks (run_engine_benchmarks; CI's host_release_test
+# alone asks for it): the six benchmark executables it runs, each with ICU's
+# data file (the converter's benchmarkRuns). They are tests tagged `manual`,
+# as is this suite, so a wildcard run leaves them out as every other builder
+# does; `bazel test //engine/src/flutter:benchmarks` is the type -- less its
+# Dart test (run_benchmark_tests: testing/benchmark/test/parse_and_send_test
+# .dart), which reads the checkout's git log and stays with `dart` there.
+test_suite(
+    name = "benchmarks",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter/display_list:display_list_builder_benchmarks",
+        "//engine/src/flutter/fml:fml_benchmarks",
+        "//engine/src/flutter/impeller/geometry:geometry_benchmarks",
+        "//engine/src/flutter/lib/ui:ui_benchmarks",
+        "//engine/src/flutter/shell/common:shell_benchmarks",
+        "//engine/src/flutter/txt:txt_benchmarks",
+    ],
+)
+
+# The benchmark executables host_release_test builds (its target list): the
+# six above and the four nobody runs. Through this filegroup a wildcard build
+# compiles them all, as GN's does, manual tags notwithstanding.
+filegroup(
+    name = "benchmark_binaries",
+    testonly = True,
+    srcs = [
+        "//engine/src/flutter/display_list:display_list_benchmarks",
+        "//engine/src/flutter/display_list:display_list_builder_benchmarks",
+        "//engine/src/flutter/display_list:display_list_region_benchmarks",
+        "//engine/src/flutter/display_list:display_list_transform_benchmarks",
+        "//engine/src/flutter/display_list:primitive_rendering_benchmarks",
+        "//engine/src/flutter/fml:fml_benchmarks",
+        "//engine/src/flutter/impeller/geometry:geometry_benchmarks",
+        "//engine/src/flutter/lib/ui:ui_benchmarks",
+        "//engine/src/flutter/shell/common:shell_benchmarks",
+        "//engine/src/flutter/txt:txt_benchmarks",
+    ],
+)
+
+# What the flutter tool reads from a developer's build, where Bazel built
+# it: `local_engine` writes local_engine.json beside the files
+# (build_defs/dist/local_engine.bzl; NEED_DECISION D15), a map from each
+# GN path the tool reads to Bazel's file, and `--local-engine` /
+# `--local-engine-host` take the directory holding it -- the Gradle plugin
+# and the desktop CMake re-entry included. For a Linux host build:
+# flutter_tester, gen_snapshot, icudtl.dat, impellerc and its libraries,
+# font-subset, the GTK library and headers, the Dart SDK, the patched SDK,
+# the core snapshot under gen/flutter/lib/snapshot/, the frontend server
+# under gen/, the sky_engine package under gen/dart-pkg/ (assembled as one
+# directory, as package:sky_engine's root, and so is impellerc's
+# shader_lib, which the tool passes whole as --include), the embedder
+# library with its header. For an Android build (the developer's android_*
+# configurations, whose GN build is ninja's default target -- the root group
+# `flutter`, which engine/src's //:default depends on): what that group
+# lays -- libflutter.so and its lib.stripped/ copy, the host gen_snapshot
+# under clang_x64/, the embedding's jars and poms (which the Gradle plugin
+# resolves through the manifest), the Android archives and the javadoc under
+# zip_archives/, ICU's data file for the target. The Maven tree and the
+# dist archives are the builders' targets, not the default's, as under GN.
+# A build's directory is named after its platform and runtime mode
+# (bazel-out/android_arm64_debug-opt/, linux_x64_debug-opt/; the root
+# .bazelrc's --experimental_platform_in_output_dir over the per-mode
+# platforms of build_defs/config/platforms.bzl), so that a cross build, the
+# host build it pairs with, and the other modes of either are all on disk:
+#
+#   bazel build //engine/src/flutter:local_engine
+#   flutter test --local-engine=$PWD/engine/src/out/bazel-bin/engine/src/flutter \
+#       --local-engine-host=$PWD/engine/src/out/bazel-bin/engine/src/flutter
+#   bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine
+#   bazel build --config=host_debug //engine/src/flutter:local_engine
+#   flutter build apk --local-engine=$PWD/engine/src/out/bazel-out/android_arm64_debug-opt/bin/engine/src/flutter \
+#       --local-engine-host=$PWD/engine/src/out/bazel-out/linux_x64_debug-opt/bin/engine/src/flutter
+#   bazel build --config=host_debug_unopt_arm64 //engine/src/flutter:local_engine      (on a Mac)
+#   bazel build --config=ios_debug_unopt_sim_arm64 //engine/src/flutter:local_engine
+#   flutter build ios --simulator --debug \
+#       --local-engine=$PWD/engine/src/out/bazel-out/ios_sim_arm64_debug-dbg/bin/engine/src/flutter \
+#       --local-engine-host=$PWD/engine/src/out/bazel-out/macos_arm64_debug-dbg/bin/engine/src/flutter
+#
+# Not here: GN's own bookkeeping -- args.gn (nothing in the tree reads it:
+# testing/run_tests.py defines an is_asan() over it that nothing calls; a
+# GN marker in a Bazel tree would only mislead gn and ninja),
+# compile_commands.json (tools/gn_to_bazel/tool/compile_commands.py writes
+# it on demand, `et lint --backend bazel` runs that) and ninja's .d files.
+# The web SDK is the wasm builds' (ci/builders:wasm_release and the rest),
+# not the host build directory's, as under GN. The builders' own targets --
+# what each CI build of ci/builders/{linux,mac}_*.json builds, into its
+# --target-dir, under its `--config` (an `install` into GN's layout, which
+# the recipes read) -- are generated into ci/builders/BUILD.bazel.
+# What the directory holds is GN's default target, everything, as
+# build_defs/dist/everything.bzl spells it by platform -- the same
+# contents, files and trees an install of a CI build that names no ninja
+# target lays out (ci/builders/BUILD.bazel) -- and the host build's
+# directories assembled for the tool to read as directories.
+local_engine(
+    name = "local_engine",
+    # The root group is testonly (GN's `testonly = true`).
+    testonly = True,
+    assemble = everything_assemble(),
+    contents = everything_contents(),
+    files = everything_files(),
+    trees = everything_trees(),
+)

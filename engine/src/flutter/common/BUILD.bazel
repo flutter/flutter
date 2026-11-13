@@ -1,0 +1,263 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/common/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_FEATURE_DEFINES", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "flutter_config",
+    defines = FLUTTER_FEATURE_DEFINES,
+)
+
+cc_library(
+    name = "common",
+    srcs = [
+        "settings.cc",
+        "task_runners.cc",
+    ],
+    hdrs = [
+        "constants.h",
+        "macros.h",
+        "settings.h",
+        "task_runners.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":flutter_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# GN's `flutter_runtime_mode` argument. Orthogonal to Bazel's compilation
+# mode, exactly as in GN: host_debug_unopt is `-c dbg`, host_debug is
+# `-c opt`, and host_release is `-c opt --//engine/src/flutter/common:runtime_mode=release`.
+string_flag(
+    name = "runtime_mode",
+    build_setting_default = "debug",
+    values = [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ],
+)
+
+[
+    config_setting(
+        name = "runtime_mode_" + mode,
+        flag_values = {":runtime_mode": mode},
+    )
+    for mode in [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ]
+]
+
+# The complements, for `flutter_runtime_mode != "<mode>"` inside a
+# conjunction (the Android archives' directory, zip_bundle.gni's
+# android_zip_archive_dir): any of the other three.
+[
+    selects.config_setting_group(
+        name = "not_runtime_mode_" + mode,
+        match_any = [
+            ":runtime_mode_" + other
+            for other in [
+                "debug",
+                "profile",
+                "release",
+                "jit_release",
+            ]
+            if other != mode
+        ],
+    )
+    for mode in [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ]
+]
+
+# GN's `slimpeller` argument: build without the Skia-backed rendering paths.
+bool_flag(
+    name = "slimpeller",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "slimpeller_enabled",
+    flag_values = {":slimpeller": "True"},
+)
+
+# GN's enable_backtrace, as tools/gn sets it (--backtrace, which every
+# builder leaves on): the host's own build or a desktop target -- Linux,
+# macOS, Windows -- and iOS in debug mode; off elsewhere, which is where
+# fml compiles backtrace_stub.cc.
+selects.config_setting_group(
+    name = "backtrace_enabled",
+    match_any = [
+        "@platforms//os:linux",
+        "@platforms//os:macos",
+        "@platforms//os:windows",
+        ":ios_debug",
+    ],
+)
+
+selects.config_setting_group(
+    name = "ios_debug",
+    match_all = [
+        "@platforms//os:ios",
+        ":runtime_mode_debug",
+    ],
+)
+
+# Its complement, for the denied term of a disjunction (fml's
+# `!enable_backtrace || is_wasm`, the stub's branch).
+selects.config_setting_group(
+    name = "backtrace_disabled",
+    match_any = [
+        "@platforms//os:android",
+        "@platforms//os:emscripten",
+        "@platforms//os:fuchsia",
+        "@platforms//os:qnx",
+        ":ios_not_debug",
+    ],
+)
+
+selects.config_setting_group(
+    name = "ios_not_debug",
+    match_all = [
+        "@platforms//os:ios",
+        ":runtime_mode_not_debug",
+    ],
+)
+
+selects.config_setting_group(
+    name = "runtime_mode_not_debug",
+    match_any = [
+        ":runtime_mode_jit_release",
+        ":runtime_mode_profile",
+        ":runtime_mode_release",
+    ],
+)
+
+# GN's build_engine_artifacts (config.gni's formula over
+# flutter_build_engine_artifacts, which tools/gn leaves true: the host's own
+# build or a Linux, macOS or Windows target, never Android): where the
+# host-side development artifacts -- the archives, font-subset -- are
+# built. The formula's 32-bit Linux arm exclusion has no CPU constraint
+# here yet.
+selects.config_setting_group(
+    name = "engine_artifacts",
+    match_any = [
+        "@platforms//os:linux",
+        "@platforms//os:macos",
+        "@platforms//os:windows",
+    ],
+)
+
+# GN's full_target_platform_name (config.gni: `<target_platform_name>-<target_cpu>`,
+# mac spelled darwin and win windows), the pairs tools/gn builds, each the
+# group of its OS and CPU constraints: the archives' and font-subset's
+# paths are spelled out per pair (one select() case each), so a string
+# such as "$full_target_platform_name/font-subset.zip" needs no string
+# arithmetic in Starlark.
+_TARGET_PLATFORMS = {
+    "android-arm": [
+        "@platforms//os:android",
+        "@platforms//cpu:armv7",
+    ],
+    "android-arm64": [
+        "@platforms//os:android",
+        "@platforms//cpu:aarch64",
+    ],
+    "android-riscv64": [
+        "@platforms//os:android",
+        "@platforms//cpu:riscv64",
+    ],
+    "android-x64": [
+        "@platforms//os:android",
+        "@platforms//cpu:x86_64",
+    ],
+    "android-x86": [
+        "@platforms//os:android",
+        "@platforms//cpu:x86_32",
+    ],
+    "darwin-arm64": [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+    "darwin-x64": [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+    "fuchsia-arm64": [
+        "@platforms//os:fuchsia",
+        "@platforms//cpu:aarch64",
+    ],
+    "fuchsia-x64": [
+        "@platforms//os:fuchsia",
+        "@platforms//cpu:x86_64",
+    ],
+    "ios-arm64": [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+    ],
+    "ios-x64": [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+    ],
+    "linux-arm64": [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+    ],
+    "linux-x64": [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    "wasm-wasm": [
+        "@platforms//os:emscripten",
+        "@platforms//cpu:wasm32",
+    ],
+    "windows-arm64": [
+        "@platforms//os:windows",
+        "@platforms//cpu:aarch64",
+    ],
+    "windows-x64": [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+}
+
+[
+    selects.config_setting_group(
+        name = "platform_" + name.replace("-", "_"),
+        match_all = constraints,
+    )
+    for name, constraints in _TARGET_PLATFORMS.items()
+]
+
+# config("export_dynamic_symbols") and config("export_dynamic_test_symbols")
+# in //flutter/BUILD.gn read these.
+exports_files([
+    "exported_symbols.sym",
+    "exported_symbols_mac.sym",
+    "exported_test_symbols.sym",
+    "exported_test_symbols_mac.sym",
+])

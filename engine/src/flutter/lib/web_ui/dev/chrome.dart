@@ -83,6 +83,7 @@ class Chrome extends Browser {
   }) {
     final remoteDebuggerCompleter = Completer<Uri>.sync();
     final exceptionCompleter = Completer<String>();
+    final devtoolsPortCompleter = Completer<int>();
     return Chrome._(
       BrowserProcess(() async {
         // A good source of various Chrome CLI options:
@@ -101,6 +102,23 @@ class Chrome extends Browser {
           '--user-data-dir=$dir',
           url.toString(),
           if (!debug) '--headless',
+          // A headless window counts as occluded when the console's screen is
+          // locked (macOS: CGSSessionScreenIsLocked), and Chromium then stops
+          // delivering requestAnimationFrame to it -- every test that waits
+          // for a frame (the golden tests pump 15) hangs to its timeout on a
+          // locked Mac. Headless runs are not meant to depend on the state of
+          // a screen nobody is looking at.
+          if (!debug) '--disable-backgrounding-occluded-windows',
+          if (!debug) '--disable-renderer-backgrounding',
+          if (!debug) '--disable-background-timer-throttling',
+          // Those three keep the renderer awake, but on a locked Mac
+          // WindowServer also stops the display's vsync (CVDisplayLink)
+          // ticks, Chromium's compositor issues no BeginFrame without them,
+          // and requestAnimationFrame fires once and never again. This
+          // Chromium feature drives vsync from a software timer instead; an
+          // unknown feature name is ignored, so a Chrome without it loses
+          // nothing but the locked-screen case.
+          if (!debug && Platform.isMacOS) '--enable-features=ForceMacVSyncTimerForDebugging',
           if (isChromeNoSandbox) '--no-sandbox',
           // When headless, this is the actual size of the viewport.
           if (!debug) '--window-size=$kMaxScreenshotWidth,$kMaxScreenshotHeight',
@@ -127,7 +145,10 @@ class Chrome extends Browser {
           '--disable-translate',
           '--password-store=basic',
           '--use-mock-keychain',
-          '--remote-debugging-port=$kDevtoolsPort',
+          // Chrome picks a free port and names it in its "DevTools listening"
+          // line, which _spawnChromiumProcess reads; so more than one suite
+          // can run on a machine at once.
+          '--remote-debugging-port=0',
 
           // SwiftShader support on ARM macs is disabled until they upgrade to a newer
           // version of LLVM, see https://issuetracker.google.com/issues/165000222. In
@@ -139,12 +160,16 @@ class Chrome extends Browser {
           ...flags,
         ];
 
-        final Process process = await _spawnChromiumProcess(installation.executable, args);
+        final (Process process, int devtoolsPort) = await _spawnChromiumProcess(
+          installation.executable,
+          args,
+        );
+        devtoolsPortCompleter.complete(devtoolsPort);
 
-        await setupChromiumTab(url, exceptionCompleter);
+        await setupChromiumTab(url, exceptionCompleter, devtoolsPort);
 
         remoteDebuggerCompleter.complete(
-          getRemoteDebuggerUrl(Uri.parse('http://localhost:$kDevtoolsPort')),
+          getRemoteDebuggerUrl(Uri.parse('http://localhost:$devtoolsPort')),
         );
 
         unawaited(process.exitCode.then((_) => Directory(dir).deleteSync(recursive: true)));
@@ -153,10 +178,11 @@ class Chrome extends Browser {
       }),
       remoteDebuggerCompleter.future,
       exceptionCompleter.future,
+      devtoolsPortCompleter.future,
     );
   }
 
-  Chrome._(this._process, this.remoteDebuggerUrl, this._onUncaughtException);
+  Chrome._(this._process, this.remoteDebuggerUrl, this._onUncaughtException, this._devtoolsPort);
 
   static Future<String> generateUserDirectory(
     BrowserInstallation installation,
@@ -224,6 +250,9 @@ class Chrome extends Browser {
 
   final Future<String> _onUncaughtException;
 
+  /// The port Chrome's DevTools listen on, which Chrome chose at launch.
+  final Future<int> _devtoolsPort;
+
   @override
   final Future<Uri> remoteDebuggerUrl;
 
@@ -253,7 +282,7 @@ class Chrome extends Browser {
   // TODO(yjbanov): extends tests to Window, https://github.com/flutter/flutter/issues/65673
   @override
   Future<Image> captureScreenshot(math.Rectangle<num>? region) async {
-    final chromeConnection = wip.ChromeConnection('localhost', kDevtoolsPort);
+    final chromeConnection = wip.ChromeConnection('localhost', await _devtoolsPort);
     final wip.ChromeTab? chromeTab = await chromeConnection.getTab(
       (wip.ChromeTab chromeTab) => chromeTab.url.contains('localhost'),
     );
@@ -328,7 +357,13 @@ bool _isDbusError(String line) {
       line.contains('org.freedesktop.DBus');
 }
 
-Future<Process> _spawnChromiumProcess(String executable, List<String> args) async {
+/// The line Chrome prints when its DevTools are listening, with the port it
+/// chose: `DevTools listening on ws://127.0.0.1:<port>/devtools/browser/<id>`.
+final RegExp _kDevtoolsListening = RegExp(r'^DevTools listening on ws://[^:]+:(\d+)/');
+
+/// Starts Chrome and waits for its DevTools to listen; returns the process
+/// and the DevTools port Chrome chose (`--remote-debugging-port=0`).
+Future<(Process, int)> _spawnChromiumProcess(String executable, List<String> args) async {
   // Keep attempting to launch the browser until one of:
   // - Chrome launched successfully, in which case we just return from the loop.
   // - The tool detected an unretriable Chrome error, in which case we throw ToolExit.
@@ -342,7 +377,7 @@ Future<Process> _spawnChromiumProcess(String executable, List<String> args) asyn
     // Wait until the DevTools are listening before trying to connect. This is
     // only required for flutter_test --platform=chrome and not flutter run.
     var hitGlibcBug = false;
-    await process.stderr
+    final String listening = await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .where((String line) => !_isDbusError(line))
@@ -374,7 +409,11 @@ Future<Process> _spawnChromiumProcess(String executable, List<String> args) asyn
         );
 
     if (!hitGlibcBug) {
-      return process;
+      final RegExpMatch? match = _kDevtoolsListening.firstMatch(listening);
+      if (match == null) {
+        throw Exception('Could not read the DevTools port from Chrome\'s "$listening"');
+      }
+      return (process, int.parse(match.group(1)!));
     }
 
     // A precaution that avoids accumulating browser processes, in case the
@@ -417,8 +456,12 @@ Future<Uri> getRemoteDebuggerUrl(Uri base) async {
   }
 }
 
-Future<void> setupChromiumTab(Uri url, Completer<String> exceptionCompleter) async {
-  final chromeConnection = wip.ChromeConnection('localhost', kDevtoolsPort);
+Future<void> setupChromiumTab(
+  Uri url,
+  Completer<String> exceptionCompleter,
+  int devtoolsPort,
+) async {
+  final chromeConnection = wip.ChromeConnection('localhost', devtoolsPort);
   final wip.ChromeTab? chromeTab = await chromeConnection.getTab(
     (wip.ChromeTab chromeTab) => chromeTab.url == url.toString(),
     retryFor: const Duration(seconds: 5),

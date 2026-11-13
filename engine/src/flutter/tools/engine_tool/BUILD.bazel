@@ -1,0 +1,45 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:engine_tool: `et`, the engine's command-line tool. A Dart package
+# whose GN build file only registers its test files with `et test`
+# (dart_test(), a `dart test <file>` call written out as JSON for the tool to
+# run; not a build step), so there is nothing to convert; its tests are
+# run_tests.py's (--type dart-host).
+
+load("//build_defs/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# The library and the in-tree packages it imports (gn_to_bazel for the
+# Bazel backend of `et build` and `et test`: the configuration a build has,
+# the Bazel spelling of labels).
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]) + [
+        "//engine/src/flutter/tools/gn_to_bazel:dart_sources",
+        "//engine/src/flutter/tools/pkg/engine_build_configs:dart_sources",
+        "//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources",
+    ],
+)
+
+# The tests load the real builder configurations and .ci.yaml, look for the
+# checkout's .gclient (`et fetch` runs gclient from its directory) and run
+# bin/et, the shell entry point. That script resolves its own location
+# through `realpath`, so from the runfiles tree it reaches the checkout's
+# copy of this package and the prebuilt SDK rather than the staged ones --
+# the one read outside the declared inputs here.
+dart_package_test(
+    name = "tests",
+    data = [
+        "//:.gclient",
+        "//engine/src/flutter:.ci.yaml",
+        "//engine/src/flutter:et_entry_points",
+        "//engine/src/flutter/ci:builder_configs",
+    ],
+    deps = [
+        ":dart_sources",
+        "//engine/src/flutter/tools/pkg/process_fakes:dart_sources",
+    ],
+)

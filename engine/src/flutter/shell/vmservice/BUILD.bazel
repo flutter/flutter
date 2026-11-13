@@ -1,0 +1,93 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Hand-written until shell/vmservice/BUILD.gn converts: that file is the VM
+# service isolate's snapshot through the flutter_snapshot template
+# (build/dart/internal/flutter_snapshot.gni), which the converter does not
+# read yet. Two things of it are here: the empty entry point that
+# //flutter/testing's own vmservice_kernel compiles, and the AOT snapshot
+# the Android embedding's jar packs in the profile mode (shell/platform/
+# android/BUILD.gn's android_jar: `--native_lib
+# $root_gen_dir/flutter/shell/vmservice/android/libs/$android_app_abi/
+# libvmservice_snapshot.so`), written as the template writes it.
+
+load("//build_defs/dart:kernel.bzl", "dart_kernel")
+load("//build_defs/dart:snapshot.bzl", "aot_snapshot")
+
+exports_files(["empty.dart"])
+
+# flutter_snapshot's AOT modes (is_aot): the kernel is compiled --aot --tfa,
+# with -Ddart.vm.profile=true in the profile mode (no `product` here, so
+# the release mode adds nothing). The JIT modes' app snapshot, which the
+# template also makes, has no consumer on Android.
+_AOT_MODES = [
+    "//engine/src/flutter/common:runtime_mode_profile",
+    "//engine/src/flutter/common:runtime_mode_release",
+]
+
+# flutter_frontend_server(kernel_target): $target_gen_dir/kernel_blob.bin.
+dart_kernel(
+    name = "vmservice_kernel",
+    out = "kernel_blob.bin",
+    args = select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "--aot",
+            "--tfa",
+            "-Ddart.vm.profile=true",
+        ],
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "--aot",
+            "--tfa",
+        ],
+        "//conditions:default": [],
+    }),
+    main = "empty.dart",
+    target_compatible_with = select({mode: [] for mode in _AOT_MODES} | {"//conditions:default": ["@platforms//:incompatible"]}),
+)
+
+# compiled_action(snapshot_target) under is_android: gen_snapshot
+# --deterministic --snapshot_kind=app-aot-elf
+# --elf=$target_gen_dir/android/libs/$android_app_abi/libvmservice_snapshot.so,
+# the ABI being config.gni's name for the CPU. One target per ABI, since
+# the output's path cannot be selected on; the alias picks the CPU's.
+[
+    aot_snapshot(
+        name = "vmservice_snapshot_" + abi,
+        elf = "android/libs/" + abi + "/libvmservice_snapshot.so",
+        kernel = ":vmservice_kernel",
+        target_compatible_with = select({
+            "@platforms//os:android": [],
+            "//conditions:default": ["@platforms//:incompatible"],
+        }) + select({mode: [] for mode in _AOT_MODES} | {"//conditions:default": ["@platforms//:incompatible"]}),
+    )
+    for abi in [
+        "armeabi-v7a",
+        "arm64-v8a",
+        "x86",
+        "x86_64",
+        "riscv64",
+    ]
+]
+
+# No snapshot for a CPU of no Android ABI (wasm32): an alias that resolves
+# to nothing buildable, so that a wildcard build under the web
+# configurations skips it rather than failing on a select with no match.
+filegroup(
+    name = "vmservice_snapshot_none",
+    srcs = [],
+    target_compatible_with = ["@platforms//:incompatible"],
+)
+
+alias(
+    name = "vmservice_snapshot",
+    actual = select({
+        "@platforms//cpu:armv7": ":vmservice_snapshot_armeabi-v7a",
+        "@platforms//cpu:aarch64": ":vmservice_snapshot_arm64-v8a",
+        "@platforms//cpu:x86_32": ":vmservice_snapshot_x86",
+        "@platforms//cpu:x86_64": ":vmservice_snapshot_x86_64",
+        "@platforms//cpu:riscv64": ":vmservice_snapshot_riscv64",
+        "//conditions:default": ":vmservice_snapshot_none",
+    }),
+    visibility = ["//visibility:public"],
+)

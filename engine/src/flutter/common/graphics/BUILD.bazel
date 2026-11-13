@@ -1,0 +1,61 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/common/graphics/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "graphics",
+    srcs = [
+        "gl_context_switch.cc",
+        "persistent_cache.cc",
+        "texture.cc",
+    ],
+    hdrs = [
+        "gl_context_switch.h",
+        "persistent_cache.h",
+        "texture.h",
+    ],
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    # Heed caution when adding targets to the dependencies. This is a minimal
+    # target containing graphics sources that embedders can depend on. Any
+    # additions here could result in added app sizes across embeddings.
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/common:base64",
+        "//engine/src/flutter/shell/version",
+        "//engine/src/flutter/third_party/boringssl",
+        "@rapidjson",
+        "@skia",
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "@vulkan-headers//:vulkan_headers",  # shell_enable_vulkan
+            "@vulkan_deps_tree//:root_includes",
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)

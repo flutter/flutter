@@ -33,6 +33,10 @@ import xvfb
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 sys_path.insert(0, os.path.join(THIS_DIR, '..', 'third_party', 'pyyaml', 'lib'))
 import yaml  # type: ignore # pylint: disable=import-error, wrong-import-position
+# The Bazel build's CI module (flutter/build/bazel/ci.md): a build directory
+# tools/gn --bazel wrote runs its tests under Bazel.
+sys_path.insert(0, os.path.join(THIS_DIR, '..', 'build', 'bazel'))
+import bazel_ci  # type: ignore # pylint: disable=import-error, wrong-import-position
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 BUILDROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
@@ -1137,6 +1141,7 @@ def build_dart_host_test_list() -> typing.List[str]:
       os.path.join('flutter', 'flutter_frontend_server'),
       os.path.join('flutter', 'testing', 'skia_gold_client'),
       os.path.join('flutter', 'tools', 'api_check'),
+      os.path.join('flutter', 'tools', 'bazel_tools'),
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
       os.path.join('flutter', 'tools', 'clang_tidy'),
       os.path.join('flutter', 'tools', 'engine_tool'),
@@ -1311,6 +1316,64 @@ for more information.
       run_cmd([dart_bin, str(bin_path), temp_dir])
 
 
+def run_bazel_tests(args, types: typing.List[str]) -> int:
+  """Runs the types' tests under Bazel for a build directory tools/gn --bazel wrote.
+
+  The directory's bazel.json names the build's Bazel configuration and the
+  suites of its run_tests.py types (ci/builders/BUILD.bazel's); each type is
+  `bazelisk test --config=<name> <suites>` (flutter/build/bazel/ci.md). The
+  tests run from Bazel's own tree, not from the build directory, and bring
+  their own environment (the sanitizer suppressions, Vulkan's ICD and
+  layers, xvfb), so the flags that shape run_tests.py's own runs do not
+  apply; a filter is an error rather than a silent full run.
+  """
+  directories = {args.variant: os.path.join(OUT_DIR, args.variant)}
+  if 'java' in types or 'android' in types:
+    directories[args.android_variant] = os.path.join(OUT_DIR, args.android_variant)
+  for name, directory in directories.items():
+    if bazel_ci.read_build_directory(directory) is None:
+      _logger.error(
+          '%s is a Bazel build directory (tools/gn --bazel) but %s is not; the types %s '
+          'cannot mix the two', args.variant, name, ','.join(types)
+      )
+      return 1
+  for flag, value in [
+      ('--engine-filter', args.engine_filter),
+      ('--dart-filter', args.dart_filter),
+      ('--dart-host-filter', args.dart_host_filter),
+      ('--java-filter', args.java_filter),
+      ('--objc-filter', args.objc_filter),
+  ]:
+    if value:
+      _logger.error('%s is not supported under Bazel; run the test target itself', flag)
+      return 1
+  if args.coverage:
+    _logger.error('--coverage is not supported under Bazel')
+    return 1
+  status = 0
+  for name, directory in directories.items():
+    description = bazel_ci.read_build_directory(directory)
+    if args.type == 'all':
+      # "all" is what the build runs: its run_tests.py types and the test
+      # executables its steps run from the build directory.
+      types = list(description['tests']['types'])
+      if description['tests']['binaries']:
+        types.append('binaries')
+    own_types = [
+        t for t in types
+        if (t in ('java', 'android')) == (name == args.android_variant) or len(directories) == 1
+    ]
+    if not own_types:
+      continue
+    try:
+      result = bazel_ci.run_tests(description, own_types, logs_dir=args.logs_dir)
+    except bazel_ci.BazelCiError as error:
+      _logger.error('%s', error)
+      return 1
+    status = status or result
+  return status
+
+
 def main() -> int:
   parser = argparse.ArgumentParser(
       description="""
@@ -1476,6 +1539,12 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
         f'Build directory {build_dir} does not exist!\n\n'
         'You can use --variant to specify a different build configuration if needed.'
     )
+
+  # A build directory tools/gn --bazel wrote: the tests run under Bazel.
+  if bazel_ci.read_build_directory(build_dir) is not None or (
+      args.type in ('java', 'android') and
+      bazel_ci.read_build_directory(os.path.join(OUT_DIR, args.android_variant)) is not None):
+    return run_bazel_tests(args, types)
 
   if args.sanitizer_suppressions:
     assert is_linux() or is_mac(

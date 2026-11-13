@@ -19,8 +19,15 @@ source_set("licenses") {
   ]
   public_deps = [
     "//flutter/third_party/re2",
+    "//third_party/abseil-cpp/absl/container:btree",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
+    "//third_party/abseil-cpp/absl/log",
     "//third_party/abseil-cpp/absl/log:initialize",
+    "//third_party/abseil-cpp/absl/log:vlog_is_on",
+    "//third_party/abseil-cpp/absl/status",
     "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
   ]
 }
 
@@ -30,7 +37,11 @@ executable("licenses_cpp") {
     ":licenses",
     "//third_party/abseil-cpp/absl/flags:flag",
     "//third_party/abseil-cpp/absl/flags:parse",
+    "//third_party/abseil-cpp/absl/flags:usage",
+    "//third_party/abseil-cpp/absl/log:globals",
+    "//third_party/abseil-cpp/absl/log:initialize",
     "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
   ]
 }
 
@@ -42,10 +53,15 @@ executable("license_file_compare") {
   ]
   deps = [
     "//flutter/third_party/re2",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
     "//third_party/abseil-cpp/absl/flags:flag",
     "//third_party/abseil-cpp/absl/flags:parse",
+    "//third_party/abseil-cpp/absl/log",
+    "//third_party/abseil-cpp/absl/log:check",
+    "//third_party/abseil-cpp/absl/log:globals",
     "//third_party/abseil-cpp/absl/log:initialize",
     "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
   ]
 }
 
@@ -62,5 +78,7 @@ executable("licenses_cpp_testrunner") {
     ":licenses",
     "//flutter/third_party/googletest:gtest",
     "//flutter/third_party/googletest:gtest_main",
+    "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
   ]
 }

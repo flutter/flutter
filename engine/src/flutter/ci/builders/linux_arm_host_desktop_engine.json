@@ -29,7 +29,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--runtime-mode",
@@ -37,13 +38,15 @@
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
+                "--no-rbe",
                 "--target-dir",
                 "ci/linux_debug_arm64_desktop",
                 "--target-os=linux",
-                "--linux-cpu=arm64"
+                "--linux-cpu=arm64",
+                "--bazel"
             ],
             "name": "ci/linux_debug_arm64_desktop",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target arm64 Linux from a Linux host with fontconfig enabled.",
             "ninja": {
                 "config": "ci/linux_debug_arm64_desktop",
@@ -70,7 +73,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--runtime-mode",
@@ -78,13 +82,15 @@
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
                 "--thin-lto",
-                "--rbe",
+                "--no-rbe",
                 "--target-dir",
                 "ci/linux_profile_arm64_desktop",
                 "--target-os=linux",
-                "--linux-cpu=arm64"
+                "--linux-cpu=arm64",
+                "--bazel"
             ],
             "name": "ci/linux_profile_arm64_desktop",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target arm64 Linux from a Linux host with fontconfig enabled.",
             "ninja": {
                 "config": "ci/linux_profile_arm64_desktop",
@@ -111,7 +117,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": true,
+                "download_bazelisk": true
             },
             "gn": [
                 "--runtime-mode",
@@ -119,13 +126,15 @@
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
                 "--thin-lto",
-                "--rbe",
+                "--no-rbe",
                 "--target-dir",
                 "ci/linux_release_arm64_desktop",
                 "--target-os=linux",
-                "--linux-cpu=arm64"
+                "--linux-cpu=arm64",
+                "--bazel"
             ],
             "name": "ci/linux_release_arm64_desktop",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target arm64 Linux from a Linux host with fontconfig enabled.",
             "ninja": {
                 "config": "ci/linux_release_arm64_desktop",

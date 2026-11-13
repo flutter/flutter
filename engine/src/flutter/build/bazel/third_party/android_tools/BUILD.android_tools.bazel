@@ -1,0 +1,142 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @android_tools: the Android SDK and NDK CIPD package
+# (DEPS: flutter/android/sdk/all/${platform}, under download_android_deps;
+# engine/src/flutter/third_party/android_tools), as the engine's Android
+# toolchains read it. GN compiles for Android with the engine's own clang
+# against the NDK's sysroot (build/config/android/config.gni:
+# android_ndk_version, android_toolchain_root; build/config/sysroot.gni), links
+# -nostdlib with the sysroot's crt objects and libraries of the ABI's API level
+# (build/toolchain/android/BUILD.gn's libs_section_prefix/postfix), and takes
+# the compiler runtime from the NDK's clang, since the engine's clang ships no
+# Android runtimes (-lclang_rt.builtins-<arch>-android). Of the SDK itself,
+# the Java side of the Android embedding's build (shell/platform/android/
+# BUILD.gn) reads the platform's android.jar (build/config/android/config.gni:
+# android_sdk_jar) and the build tools' lambda stubs, exported below; the rest
+# is unread.
+
+load("@host_platform//:host.bzl", "HOST_NDK_PREBUILT")
+
+package(default_visibility = ["//visibility:public"])
+
+# The SDK's platform and build tools (build/config/android/config.gni:
+# android_sdk_version, android_sdk_build_tools_version), as the Java side
+# names them: the converter's mapping spells out the versions
+# (tools/gn_to_bazel: android_sdk_jar, android_sdk_build_tools).
+exports_files(glob([
+    "sdk/platforms/*/android.jar",
+    "sdk/build-tools/*/core-lambda-stubs.jar",
+    # aapt2 links the embedding's Java tests' resource APK
+    # (//build_defs/java:robolectric.bzl); with zipalign and apksigner it
+    # packages the Android suites' APKs (//build_defs/android:native_activity_apk.bzl).
+    "sdk/build-tools/*/aapt2",
+    "sdk/build-tools/*/apksigner",
+    "sdk/build-tools/*/zipalign",
+]))
+
+# What the build tools load beside themselves: apksigner's jar (the script
+# runs `java -jar lib/apksigner.jar`) and, in a Linux package, the libc++
+# zipalign finds under lib64/ (a Mac's build tools link the system's).
+filegroup(
+    name = "build_tools_libraries",
+    srcs = glob(
+        [
+            "sdk/build-tools/*/lib/apksigner.jar",
+            "sdk/build-tools/*/lib64/libc++.so",
+        ],
+        allow_empty = True,
+    ),
+)
+
+# build/config/android/config.gni: android_ndk_version. The directory name
+# is the version.
+# The SDK whole, one directory: ANDROID_HOME for the tests that run
+# `flutter build apk` (//build_defs/android:build_tools.bzl). The glob with
+# exclude_directories = 0 is how a directory becomes a source artifact.
+filegroup(
+    name = "android_sdk",
+    # buildifier: disable=constant-glob
+    srcs = glob(
+        ["sdk"],
+        exclude_directories = 0,
+    ),
+)
+
+NDK_VERSION = "28.2.13676358"
+
+NDK = "sdk/ndk/" + NDK_VERSION
+
+# android_toolchain_root: the NDK's LLVM toolchain of the host
+# (build/config/android/config.gni: prebuilt/$android_host_os-$android_host_arch,
+# linux-x86_64 or darwin-x86_64 -- HOST_NDK_PREBUILT). Only its sysroot and
+# compiler runtime archives are read; the engine's own clang compiles.
+TOOLCHAIN = NDK + "/toolchains/llvm/prebuilt/" + HOST_NDK_PREBUILT
+
+# The sysroot (GN's `sysroot` for Android). The toolchain derives the
+# --sysroot path from the NOTICE file's directory.
+SYSROOT = TOOLCHAIN + "/sysroot"
+
+exports_files([SYSROOT + "/NOTICE"])
+
+# usr/include is one directory input, as the Linux sysroots' (see
+# sysroot/BUILD.sysroot_linux.bazel); the per-triple headers
+# (usr/include/aarch64-linux-android) are under it.
+filegroup(
+    name = "sysroot_headers",
+    srcs = [SYSROOT + "/usr/include"],
+)
+
+# GN's ABIs and API levels (build/config/android/config.gni: android_api_level
+# is 24, 35 for riscv64), by the CPU name GN's android_cpu uses -- and arm64
+# at API level 26 (build/toolchain/android's clang_arm64_apilevel26), the
+# toolchain of the Vulkan validation layer alone.
+ABIS = {
+    "arm": ("arm-linux-androideabi", "21"),
+    "arm64": ("aarch64-linux-android", "24"),
+    "arm64_api26": ("aarch64-linux-android", "26"),
+    "x64": ("x86_64-linux-android", "24"),
+    "x86": ("i686-linux-android", "21"),
+    "riscv64": ("riscv64-linux-android", "35"),
+}
+
+# What the linker resolves for one ABI: the API level's directory -- the crt
+# objects (crtbegin_so.o, crtend_so.o, crtbegin_dynamic.o, crtend_android.o),
+# libc, libm, libdl, liblog, libandroid, libEGL, libGLESv2, libjnigraphics,
+# libvulkan and the rest -- and the compiler runtime archive of the NDK's
+# clang (whatever its version directory: lib/clang/*/lib/linux).
+[
+    filegroup(
+        name = "libraries_" + cpu,
+        srcs = glob([
+            SYSROOT + "/usr/lib/" + triple + "/" + api + "/*",
+            TOOLCHAIN + "/lib/clang/*/lib/linux/libclang_rt.builtins-" + triple.split("-")[0] + "-android.a",
+        ]),
+    )
+    for cpu, (triple, api) in ABIS.items()
+]
+
+# The compiler runtime archive alone, for the toolchain to name its directory
+# (-L) and the library (-l), as GN's android toolchain does.
+[
+    filegroup(
+        name = "builtins_" + cpu,
+        srcs = glob([
+            TOOLCHAIN + "/lib/clang/*/lib/linux/libclang_rt.builtins-" + triple.split("-")[0] + "-android.a",
+        ]),
+    )
+    for cpu, (triple, api) in ABIS.items()
+]
+
+# What a GN build for Android reads of the NDK, for the rules that wrap a GN
+# build (build/bazel/dart_wrap): the sysroot's headers and every ABI's
+# libraries, and the compiler runtime archives -- at their paths under the
+# SDK, where build/config/android/config.gni's android_ndk_root finds them.
+filegroup(
+    name = "ndk_build_tree",
+    srcs = [":sysroot_headers"] + glob([
+        SYSROOT + "/usr/lib/*/*/*",
+        TOOLCHAIN + "/lib/clang/*/lib/linux/libclang_rt.builtins-*-android.a",
+    ]),
+)

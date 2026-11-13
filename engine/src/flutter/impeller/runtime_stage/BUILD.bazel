@@ -1,0 +1,98 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/runtime_stage/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/flatbuffers:flatbuffers.bzl", "flatbuffers")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "runtime_stage_config",
+    includes = ["."],
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/impeller:impeller_public_config",
+    ],
+)
+
+flatbuffers(
+    name = "runtime_stage_types_flatbuffers",
+    flatbuffers = ["runtime_stage_types.fbs"],
+    deps = [
+        ":runtime_stage_config",
+        "@flatbuffers",
+    ],
+)
+
+flatbuffers(
+    name = "runtime_stage_flatbuffers",
+    flatbuffers = ["runtime_stage.fbs"],
+    deps = [
+        ":runtime_stage_config",
+        ":runtime_stage_types_flatbuffers",
+        "@flatbuffers",
+    ],
+)
+
+cc_library(
+    name = "runtime_stage",
+    srcs = ["runtime_stage.cc"],
+    hdrs = ["runtime_stage.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":runtime_stage_flatbuffers",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/core",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "runtime_stage_unittests",
+    testonly = True,
+    srcs = [
+        "runtime_stage_playground.cc",
+        "runtime_stage_unittests.cc",
+    ],
+    hdrs = ["runtime_stage_playground.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":runtime_stage",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+    alwayslink = True,
+)

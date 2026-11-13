@@ -1,0 +1,343 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/flow/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "flow",
+    srcs = [
+        "compositor_context.cc",
+        "diff_context.cc",
+        "embedded_views.cc",
+        "frame_timings.cc",
+        "layers/backdrop_filter_layer.cc",
+        "layers/cacheable_layer.cc",
+        "layers/clip_path_layer.cc",
+        "layers/clip_rect_layer.cc",
+        "layers/clip_rrect_layer.cc",
+        "layers/clip_rsuperellipse_layer.cc",
+        "layers/color_filter_layer.cc",
+        "layers/container_layer.cc",
+        "layers/display_list_layer.cc",
+        "layers/display_list_raster_cache_item.cc",
+        "layers/image_filter_layer.cc",
+        "layers/layer.cc",
+        "layers/layer_raster_cache_item.cc",
+        "layers/layer_state_stack.cc",
+        "layers/layer_tree.cc",
+        "layers/offscreen_surface.cc",
+        "layers/opacity_layer.cc",
+        "layers/performance_overlay_layer.cc",
+        "layers/platform_view_layer.cc",
+        "layers/shader_mask_layer.cc",
+        "layers/texture_layer.cc",
+        "layers/transform_layer.cc",
+        "paint_region.cc",
+        "paint_utils.cc",
+        "raster_cache.cc",
+        "raster_cache_key.cc",
+        "raster_cache_util.cc",
+        "stopwatch.cc",
+        "stopwatch_dl.cc",
+        "surface.cc",
+        "surface_frame.cc",
+        "view_slicer.cc",
+    ],
+    hdrs = [
+        "compositor_context.h",
+        "diff_context.h",
+        "embedded_views.h",
+        "frame_timings.h",
+        "layers/backdrop_filter_layer.h",
+        "layers/cacheable_layer.h",
+        "layers/clip_path_layer.h",
+        "layers/clip_rect_layer.h",
+        "layers/clip_rrect_layer.h",
+        "layers/clip_rsuperellipse_layer.h",
+        "layers/clip_shape_layer.h",
+        "layers/color_filter_layer.h",
+        "layers/container_layer.h",
+        "layers/display_list_layer.h",
+        "layers/display_list_raster_cache_item.h",
+        "layers/image_filter_layer.h",
+        "layers/layer.h",
+        "layers/layer_raster_cache_item.h",
+        "layers/layer_state_stack.h",
+        "layers/layer_tree.h",
+        "layers/offscreen_surface.h",
+        "layers/opacity_layer.h",
+        "layers/performance_overlay_layer.h",
+        "layers/platform_view_layer.h",
+        "layers/shader_mask_layer.h",
+        "layers/texture_layer.h",
+        "layers/transform_layer.h",
+        "paint_region.h",
+        "paint_utils.h",
+        "raster_cache.h",
+        "raster_cache_item.h",
+        "raster_cache_key.h",
+        "raster_cache_util.h",
+        "skia_gpu_object.h",
+        "stopwatch.h",
+        "stopwatch_dl.h",
+        "surface.h",
+        "surface_frame.h",
+        "view_slicer.h",
+    ],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/common/graphics
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status",
+        "@abseil_cpp_tree//:root_includes",
+        "@skia",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "flow_fixtures",
+    fixtures = ["//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "flow_testing",
+    testonly = True,
+    srcs = [
+        "testing/diff_context_test.cc",
+        "testing/gl_context_switch_test.cc",
+        "testing/mock_embedder.cc",
+        "testing/mock_layer.cc",
+        "testing/mock_raster_cache.cc",
+        "testing/mock_texture.cc",
+    ],
+    hdrs = [
+        "testing/diff_context_test.h",
+        "testing/gl_context_switch_test.h",
+        "testing/layer_test.h",
+        "testing/mock_embedder.h",
+        "testing/mock_layer.h",
+        "testing/mock_raster_cache.h",
+        "testing/mock_texture.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:skia
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:skia
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:skia
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :flow
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flow",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/testing:skia",
+        "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+    ],
+    alwayslink = True,
+)
+
+flutter_cc_test(
+    name = "flow_unittests",
+    size = "medium",
+    srcs = [
+        "diff_context_unittests.cc",
+        "embedded_view_params_unittests.cc",
+        "flow_run_all_unittests.cc",
+        "flow_test_utils.cc",
+        "flow_test_utils.h",
+        "frame_timings_recorder_unittests.cc",
+        "gl_context_switch_unittests.cc",
+        "layers/backdrop_filter_layer_unittests.cc",
+        "layers/clip_path_layer_unittests.cc",
+        "layers/clip_rect_layer_unittests.cc",
+        "layers/clip_rrect_layer_unittests.cc",
+        "layers/clip_rsuperellipse_layer_unittests.cc",
+        "layers/color_filter_layer_unittests.cc",
+        "layers/container_layer_unittests.cc",
+        "layers/display_list_layer_unittests.cc",
+        "layers/image_filter_layer_unittests.cc",
+        "layers/layer_state_stack_unittests.cc",
+        "layers/layer_tree_unittests.cc",
+        "layers/offscreen_surface_unittests.cc",
+        "layers/opacity_layer_unittests.cc",
+        "layers/performance_overlay_layer_unittests.cc",
+        "layers/platform_view_layer_unittests.cc",
+        "layers/shader_mask_layer_unittests.cc",
+        "layers/texture_layer_unittests.cc",
+        "layers/transform_layer_unittests.cc",
+        "mutators_stack_unittests.cc",
+        "raster_cache_unittests.cc",
+        "skia_gpu_object_unittests.cc",
+        "stopwatch_dl_unittests.cc",
+        "stopwatch_unittests.cc",
+        "surface_frame_unittests.cc",
+        "testing/mock_layer_unittests.cc",
+        "testing/mock_texture_unittests.cc",
+        "texture_unittests.cc",
+        "view_slicer_unittests.cc",
+    ],
+    args = [
+        "--golden-dir=engine/src/flutter/testing/resources",
+        "--font-file=engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :flow_testing
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :flow
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list/testing:display_list_testing
+        ],
+        "//conditions:default": [],
+    }),
+    data = [
+        "//engine/src/flutter/testing:resources",
+        "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flow",
+        ":flow_fixtures",
+        ":flow_testing",
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",  # for tracing
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/common:base64",
+        "//engine/src/flutter/testing:skia",
+        "//engine/src/flutter/testing:testing_lib",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+        "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+        "@skia",
+    ],
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `is_mac || is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        ":when_is_mac_or_is_ios",
+    ],
+)

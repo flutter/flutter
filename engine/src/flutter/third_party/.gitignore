@@ -8,6 +8,9 @@
 !.clang-tidy
 !README.md
 
+# The Bazel package for this directory (the include path, see the file).
+!BUILD.bazel
+
 # Allow custom README.flutter files in each folder.
 **/README.flutter
 

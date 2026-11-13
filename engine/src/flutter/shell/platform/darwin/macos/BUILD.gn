@@ -80,7 +80,9 @@ source_set("flutter_framework_source") {
     "framework/Source/AccessibilityBridgeMac.h",
     "framework/Source/AccessibilityBridgeMac.mm",
     "framework/Source/FlutterAppDelegate.mm",
+    "framework/Source/FlutterAppDelegate_Internal.h",
     "framework/Source/FlutterAppLifecycleDelegate.mm",
+    "framework/Source/FlutterAppLifecycleDelegate_Internal.h",
     "framework/Source/FlutterChannelKeyResponder.h",
     "framework/Source/FlutterChannelKeyResponder.mm",
     "framework/Source/FlutterCompositor.h",
@@ -138,6 +140,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterWindowController.h",
     "framework/Source/FlutterWindowController.mm",
     "framework/Source/KeyCodeMap.g.mm",
+    "framework/Source/KeyCodeMap_Internal.h",
+    "framework/Source/NSView+ClipsToBounds.h",
   ]
 
   sources += _flutter_framework_headers
@@ -216,6 +220,14 @@ executable("flutter_desktop_darwin_unittests") {
   cflags_objcc = flutter_cflags_objcc
   ldflags = [ "-ObjC" ]
 
+  # In the debug runtime mode the VM finds its snapshot by symbol name
+  # (kDartSnapshotData and kDartSnapshotText, //flutter/lib/snapshot's); the
+  # exported symbols keep them through the link's dead stripping, and the
+  # dependency defines them in every runtime mode (the AOT modes' libdart
+  # does not reach them) -- as in the other tests that boot the VM from the
+  # embedded snapshot.
+  configs += [ "//flutter:export_dynamic_symbols" ]
+
   sources = [
     "framework/Source/AccessibilityBridgeMacTest.mm",
     "framework/Source/FlutterAppDelegateTest.mm",
@@ -250,7 +262,9 @@ executable("flutter_desktop_darwin_unittests") {
   deps = [
     ":flutter_desktop_darwin_fixtures",
     ":flutter_framework_source",
+    "//flutter/common",
     "//flutter/fml",
+    "//flutter/lib/snapshot",
     "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/common:common_cpp_core",
     "//flutter/shell/platform/common:common_cpp_enums",

@@ -1,0 +1,36 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/sky/BUILD.gn by gn_to_bazel; do not edit.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sky",
+    testonly = True,
+    srcs = [
+        "//engine/src/flutter/shell",
+        "//engine/src/flutter/sky/packages",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The scripts of other packages' actions: sky/dist's copy of the assembled
+# sky_engine package for release, the macOS shell's framework headers and
+# its xcframework (shell/platform/darwin/macos), lib/snapshot's universal
+# gen_snapshot (lipo), and the recipe's generators over several builds with
+# the module they import (build/archives' universal artifacts,
+# //build_defs/dist:universal.bzl).
+exports_files([
+    "tools/create_ios_framework.py",
+    "tools/create_macos_binary.py",
+    "tools/create_macos_framework.py",
+    "tools/create_macos_gen_snapshots.py",
+    "tools/create_xcframework.py",
+    "tools/dist_dart_pkg.py",
+    "tools/install_framework_headers.py",
+    "tools/sky_utils.py",
+])

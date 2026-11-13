@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# shaders.bzl: the engine's impeller_shaders() GN template as a Bazel macro.
+# tool.bzl: the impellerc those rules run.
+
+load(":tool.bzl", "impellerc_tool")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "shaders.bzl",
+    "tool.bzl",
+])
+
+# impellerc as a tool: the engine's, built without the desktop builds'
+# fontconfig (tool.bzl says why), for the shader rules here and for
+# //build_defs/engine:impellerc, the alias a test's shader assets use.
+impellerc_tool(
+    name = "impellerc",
+    binary = "//engine/src/flutter/impeller/compiler:impellerc",
+)

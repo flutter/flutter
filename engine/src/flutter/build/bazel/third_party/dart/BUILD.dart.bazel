@@ -1,0 +1,308 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @dart: the Dart SDK sources pinned in DEPS.
+#
+# The VM, gen_snapshot and the other Dart targets the engine depends on are
+# not built from these sources by Bazel rules; the engine's GN build of them
+# is wrapped as one action instead (see ../../dart_wrap). This file therefore
+# exposes the embedding API headers, which the engine compiles against
+# directly, `build_tree`, the inputs of that wrapped build, and what the
+# engine's own snapshot pipeline (//flutter/lib/snapshot) reads from the tree:
+# the core library sources and the bin_to_assembly script.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The C API an embedder compiles against: //third_party/dart/runtime:dart_api
+# (runtime/BUILD.gn), a source set of the headers and of dart_api_dl.c, the
+# dynamic-linking shim, which GN therefore puts on the link line of every
+# binary that reaches it (through //flutter/fml's public_deps: all of them)
+# and into a complete static library's archive (the Impeller SDK's
+# libimpeller.a); in a linked binary nothing refers to it and --gc-sections
+# drops it, as a cc_library's archive member goes unpulled here. The engine
+# includes the headers as "third_party/dart/runtime/include/<name>.h", which
+# GN resolves through the engine root include directory; include_prefix
+# reproduces that path here so no source has to change. (The headers are
+# exported, through the glob buildifier cannot see into.)
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "dart_api_headers",
+    srcs = ["runtime/include/dart_api_dl.c"],
+    hdrs = glob(["runtime/include/**/*.h"]),
+    include_prefix = "third_party/dart",
+    # dart_public_config's include_dirs (runtime/ and runtime/include/): a few
+    # sources include "dart_api.h" bare (lib/ui's scene_builder.cc).
+    includes = [
+        "runtime",
+        "runtime/include",
+    ],
+)
+
+# third_party/double-conversion's headers, as the engine includes them
+# ("third_party/dart/third_party/double-conversion/src/double-conversion.h",
+# from the accessibility tree's string_utils.cc): the wrap's libdouble_conversion
+# facade carries them (dart_wrap/BUILD.bazel).
+cc_library(
+    name = "double_conversion_headers",
+    hdrs = glob(["third_party/double-conversion/src/*.h"]),
+    include_prefix = "third_party/dart",
+)
+
+# runtime/BUILD.gn's config("dart_config"), which the engine's dart:io glue
+# (//flutter/lib/io) lists privately: the defines it resolves to under the
+# host configurations tools/gn writes (DEBUG under --dart-debug, the wrap's
+# dart_debug flag, NDEBUG otherwise; DART_DYNAMIC_MODULES under the wrap's
+# dart_dynamic_modules flag; SUPPORT_PERFETTO and EXPERIMENTAL_VM_SERVICE are
+# the Dart arguments' defaults). Its compiler flags cannot ride a dependency;
+# the converter inlines them from its mapping (ConfigDependency.copts), and
+# they are the same either way since dart_debug_optimization_level stays "2".
+cc_library(
+    name = "dart_config",
+    defines = [
+        "SUPPORT_PERFETTO",
+        "EXPERIMENTAL_VM_SERVICE",
+    ] + select({
+        "@flutter//engine/src/flutter/build/bazel/dart_wrap:dart_debug_enabled": ["DEBUG"],
+        "//conditions:default": ["NDEBUG"],
+    }) + select({
+        "@flutter//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled": ["DART_DYNAMIC_MODULES"],
+        "//conditions:default": [],
+    }),
+    deps = [":dart_api_headers"],
+)
+
+# The embedder-side headers of runtime/bin that the engine includes
+# (elf_loader.h, io_natives.h, platform.h), with the bin/ and platform/
+# headers they include among themselves relative to runtime/ (hence
+# `includes`). The code behind them is in the archives of
+# //engine/src/flutter/build/bazel/dart_wrap.
+cc_library(
+    name = "runtime_bin_headers",
+    hdrs = glob([
+        "runtime/bin/*.h",
+        "runtime/platform/*.h",
+    ]),
+    include_prefix = "third_party/dart",
+    includes = ["runtime"],
+    deps = [":dart_api_headers"],
+)
+
+# The core libraries (dart:core, dart:async, ..., with the VM's patches) and
+# their libraries.json: what compile_platform reads, through the engine's
+# lib/snapshot/libraries.json, to build the platform kernel. GN tracks these
+# through the compiler's depfile; a sandboxed action declares them.
+filegroup(
+    name = "sdk_lib",
+    srcs = glob(["sdk/lib/**"]),
+)
+
+# The same files by name, for the copies sky/packages/sky_engine makes of
+# each library's sources into the sky_engine package (the Dart tree's
+# <library>_sources.gni lists, which the converter reads).
+exports_files(glob(["sdk/lib/**"]))
+
+# What a Dart script of the engine's build runs under when GN gives it this
+# tree's package configuration (prebuilt_dart_action's `packages`): the
+# configuration and the packages such scripts import -- package:args and
+# package:path, for web_sdk/sdk_rewriter.dart.
+filegroup(
+    name = "script_packages",
+    srcs = [".dart_tool/package_config.json"] + glob([
+        "third_party/pkg/core/pkgs/args/lib/**",
+        "third_party/pkg/core/pkgs/path/lib/**",
+    ]),
+)
+
+# The script GN's bin_to_assembly template runs (//flutter/build/bin_to_obj.gni).
+exports_files(["runtime/tools/bin_to_assembly.py"])
+
+# The SDK's version numbers, which the wrapped build stamps into the VM
+# (tools/make_version.py); the Dart wrap's smoke test reads them back.
+exports_files(["tools/VERSION"])
+
+# ANGLE's gni imports this one file of the Dart tree (through
+# build_overrides/angle.gni's angle_has_build); for the wrapped GN build of
+# the GPU test backends.
+filegroup(
+    name = "gclient_args",
+    srcs = ["build/config/gclient_args.gni"],
+)
+
+# Everything the engine's GN build of the Dart SDK targets reads, as measured
+# on the build graph of those targets (GN's own inputs, the compiler's
+# dependency output and the Dart compilers' depfiles): about 12k of the
+# tree's 82k files. The patterns are deliberately a little wider than the
+# measurement so that a Dart roll which adds a source does not usually need a
+# change here; one that reads from a new area fails the (sandboxed) wrapped
+# build with a missing-file error, and the fix is a pattern below.
+filegroup(
+    name = "build_tree",
+    srcs = [
+        "BUILD.gn",
+        "tools/VERSION",
+        # Resolves the Dart packages compile_platform, gen_kernel and the
+        # frontend server are compiled from (globbed below).
+        ".dart_tool/package_config.json",
+        # The prebuilt SDK that bootstraps the build (`dart compile exe` of
+        # compile_platform and gen_kernel), from DEPS: the launcher, the
+        # runtimes, and the gen_snapshot it drives. Its snapshots and
+        # libraries are globbed below.
+        "tools/sdks/dart-sdk/bin/dart",
+        "tools/sdks/dart-sdk/bin/dartaotruntime",
+        "tools/sdks/dart-sdk/bin/dartvm",
+        "tools/sdks/dart-sdk/bin/utils/gen_snapshot",
+        "tools/sdks/dart-sdk/version",
+        "third_party/perfetto/BUILD.gn",
+        "third_party/perfetto/src/BUILD.gn",
+    ] + glob(
+        [
+            # Build definitions and the scripts they run.
+            "*.gni",
+            "build/**",
+            "utils/**",
+            "tools/*.py",
+            # The runtime (VM, embedder library, gen_snapshot) and the core
+            # library sources it is built with.
+            "runtime/**",
+            "sdk/**",
+            # The Dart packages the compilers are built from. Only a
+            # package's lib/, bin/ and tool/ are reachable from those entry
+            # points, except that front_end's compile_platform imports
+            # helpers from its test/ directory.
+            "pkg/*",
+            "pkg/*/*",
+            "pkg/*/bin/**",
+            "pkg/*/lib/**",
+            "pkg/*/test/*.dart",
+            "pkg/*/tool/**",
+            "third_party/pkg/**/lib/**",
+            "third_party/pkg/**/pubspec.yaml",
+            # Bundled C++ dependencies of the runtime (the engine provides
+            # boringssl, zlib and icu itself).
+            "third_party/double-conversion/**",
+            "third_party/perfetto/mock_protobuf/**",
+            "third_party/perfetto/protos/**",
+            "third_party/perfetto/src/gn/**",
+            "third_party/perfetto/src/include/**",
+            "third_party/perfetto/src/src/base/**",
+            "third_party/perfetto/src/src/protozero/**",
+            # What the bootstrap SDK loads.
+            "tools/sdks/dart-sdk/bin/snapshots/**",
+            "tools/sdks/dart-sdk/lib/**",
+        ],
+        exclude = [
+            "**/__pycache__/**",
+            "**/testcases/**",
+            "**/testdata/**",
+            "pkg/*/lib/**/test/**",
+            "runtime/docs/**",
+            "runtime/tests/**",
+            "runtime/tools/dartfuzz/**",
+            "runtime/tools/graphexplorer/**",
+            "runtime/tools/wiki/**",
+            "third_party/pkg/**/test/**",
+        ],
+    ),
+)
+
+# What the build of the SDK itself reads beyond build_tree -- create_sdk and
+# kernel-service's frontend_server_aot, which the wrapped build adds in the
+# host's own build without the prebuilt SDK (dart_wrap's
+# flutter_build_dart_sdk; tools/gn --no-prebuilt-dart-sdk) -- measured the
+# same way on that build: its declared inputs, the compilers' dependency
+# output, the Dart compilers' depfiles and dart2js's .deps (6,750 files of
+# the tree, 1,170 beyond build_tree's). The trees the SDK's layout copies
+# in (sdk/BUILD.gn's copy_tree targets: the prebuilt DevTools web app,
+# require.js for DDC; dartdoc's templates and resources are under
+# build_tree's third_party/pkg lib/ pattern), the files it copies,
+# wasm-opt's sources (third_party/binaryen, the one bundled C++ tool the
+# SDK builds), the GN files the Dart root's other targets reach (the
+# samples, the Debian package and its version scripts) and DEPS, which the
+# root's build files read. Its own filegroup, so that the builds with the
+# prebuilt SDK keep their inputs.
+filegroup(
+    name = "sdk_build_tree",
+    srcs = [
+        "DEPS",
+        "LICENSE",
+        "README.dart-sdk",
+        "sdk_packages.yaml",
+        "third_party/binaryen/src/CMakeLists.txt",
+        "third_party/binaryen/src/config.h.in",
+        "third_party/requirejs/require.js",
+        "tools/debian_package/BUILD.gn",
+    ] + glob([
+        # dev_compiler's stack-trace mapper, compiled with the built dart2js
+        # from an entry point under web/ (utils/ddc passes it as an argument,
+        # not an input).
+        "pkg/dev_compiler/web/**",
+        "samples/**/BUILD.gn",
+        "third_party/binaryen/*",
+        "third_party/binaryen/src/src/**",
+        "third_party/binaryen/src/third_party/**",
+        # package:devtools_shared, which dds, dtd and the analysis server
+        # import (the third_party/pkg pattern above does not reach it).
+        "third_party/devtools/devtools_shared/lib/**",
+        "third_party/devtools/web/**",
+        "tools/debian_package/*.py",
+    ]),
+)
+
+# The Dart packages the engine's Dart tests (//flutter/testing/dart, run by
+# flutter_tester) import: package:test and what it reaches (test_api,
+# test_core, matcher, and the core and tools packages below them), vm_service
+# with its protos and protobuf, ffi, meta -- as measured on the kernel
+# compiles' depfiles under GN (about 30 packages, 520 files); whole package
+# groups here, for the next roll. The engine's package configuration names
+# them by their paths under this tree, which dart_package_root reproduces.
+filegroup(
+    name = "test_package_sources",
+    srcs = glob([
+        "pkg/meta/lib/**/*.dart",
+        "pkg/vm_service/lib/**/*.dart",
+        "pkg/vm_service_protos/lib/**/*.dart",
+        "third_party/pkg/core/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/native/pkgs/ffi/lib/**/*.dart",
+        "third_party/pkg/protobuf/protobuf/lib/**/*.dart",
+        "third_party/pkg/test/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/tools/pkgs/*/lib/**/*.dart",
+    ]),
+)
+
+# The packages of this tree that the engine's own Dart tools and their tests
+# import when `dart test` runs in a package of the tree
+# (testing/run_tests.py --type dart-host; build_defs/dart/package_test.bzl):
+# package:test's runner and everything below it -- the analyzer it parses
+# test files with, coverage, shelf and the web-socket packages of its browser
+# platforms, vm_service, frontend_server_client -- and the core and tools
+# packages the tools use directly (args, path, yaml, logging, ...); 48
+# packages as resolved in the engine's package configuration. Whole package
+# groups again, for the next roll.
+filegroup(
+    name = "host_package_sources",
+    srcs = glob([
+        "pkg/_fe_analyzer_shared/lib/**/*.dart",
+        "pkg/analyzer/lib/**/*.dart",
+        "pkg/frontend_server_client/lib/**/*.dart",
+        "pkg/meta/lib/**/*.dart",
+        "pkg/vm_service/lib/**/*.dart",
+        "third_party/pkg/core/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/http/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/native/pkgs/ffi/lib/**/*.dart",
+        "third_party/pkg/shelf/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/test/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/tools/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/web/web/lib/**/*.dart",
+        "third_party/pkg/webkit_inspection_protocol/lib/**/*.dart",
+    ]) + [":test_runner"],
+)
+
+# package:test's entry point, which dart_package_test runs on the VM: what
+# `dart test` delegates to.
+filegroup(
+    name = "test_runner",
+    srcs = ["third_party/pkg/test/pkgs/test/bin/test.dart"],
+)

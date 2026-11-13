@@ -1,0 +1,642 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/fml/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+# The Objective-C(++) sources of fml, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); fml links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "fml_objc",
+    srcs = select({
+        "@platforms//os:ios": [
+            "platform/darwin/concurrent_message_loop_factory.mm",  # is_ios || is_mac
+            "platform/darwin/message_loop_darwin.mm",  # is_ios || is_mac
+            "platform/darwin/paths_darwin.mm",  # is_ios || is_mac
+            "platform/darwin/platform_version.mm",  # is_ios || is_mac
+            "platform/darwin/string_range_sanitization.mm",  # is_ios || is_mac
+        ],
+        "@platforms//os:macos": [
+            "platform/darwin/concurrent_message_loop_factory.mm",  # is_ios || is_mac
+            "platform/darwin/message_loop_darwin.mm",  # is_ios || is_mac
+            "platform/darwin/paths_darwin.mm",  # is_ios || is_mac
+            "platform/darwin/platform_version.mm",  # is_ios || is_mac
+            "platform/darwin/string_range_sanitization.mm",  # is_ios || is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "ascii_trie.h",
+        "backtrace.h",
+        "base32.h",
+        "build_config.h",
+        "closure.h",
+        "concurrent_message_loop.h",
+        "container.h",
+        "cpu_affinity.h",
+        "delayed_task.h",
+        "eintr_wrapper.h",
+        "endianness.h",
+        "file.h",
+        "hash_combine.h",
+        "hex_codec.h",
+        "log_level.h",
+        "log_settings.h",
+        "logging.h",
+        "make_copyable.h",
+        "mapping.h",
+        "math.h",
+        "memory/ref_counted.h",
+        "memory/ref_counted_internal.h",
+        "memory/ref_ptr.h",
+        "memory/ref_ptr_internal.h",
+        "memory/task_runner_checker.h",
+        "memory/thread_checker.h",
+        "memory/weak_ptr.h",
+        "memory/weak_ptr_internal.h",
+        "message_loop.h",
+        "message_loop_impl.h",
+        "message_loop_task_queues.h",
+        "native_library.h",
+        "paths.h",
+        "posix_wrappers.h",
+        "process.h",
+        "raster_thread_merger.h",
+        "safe_math.h",
+        "shared_thread_merger.h",
+        "synchronization/atomic_object.h",
+        "synchronization/count_down_latch.h",
+        "synchronization/semaphore.h",
+        "synchronization/sync_switch.h",
+        "synchronization/waitable_event.h",
+        "task_queue_id.h",
+        "task_runner.h",
+        "task_runner_util.h",
+        "task_source.h",
+        "task_source_grade.h",
+        "thread.h",
+        "time/time_delta.h",
+        "time/time_point.h",
+        "time/timestamp_provider.h",
+        "trace_event.h",
+        "unique_fd.h",
+        "unique_object.h",
+        "wakeable.h",
+    ] + select({
+        "@platforms//os:emscripten": [],
+        "//conditions:default": [
+            "icu_util.h",  # target_os != "wasm"
+        ],
+    }) + select({
+        "@platforms//os:ios": [
+            "platform/darwin/cf_utils.h",  # is_ios || is_mac
+            "platform/darwin/message_loop_darwin.h",  # is_ios || is_mac
+            "platform/darwin/platform_version.h",  # is_ios || is_mac
+            "platform/darwin/scoped_nsautorelease_pool.h",  # is_ios || is_mac
+            "platform/darwin/string_range_sanitization.h",  # is_ios || is_mac
+        ],
+        "@platforms//os:macos": [
+            "platform/darwin/cf_utils.h",  # is_ios || is_mac
+            "platform/darwin/message_loop_darwin.h",  # is_ios || is_mac
+            "platform/darwin/platform_version.h",  # is_ios || is_mac
+            "platform/darwin/scoped_nsautorelease_pool.h",  # is_ios || is_mac
+            "platform/darwin/string_range_sanitization.h",  # is_ios || is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:android": [
+            "platform/android/cpu_affinity.h",  # is_android
+            "platform/android/jni_util.h",  # is_android
+            "platform/android/jni_weak_ref.h",  # is_android
+            "platform/android/message_loop_android.h",  # is_android
+            "platform/android/paths_android.h",  # is_android
+            "platform/android/scoped_java_ref.h",  # is_android
+            "platform/linux/timerfd.h",  # is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": [
+            "platform/linux/message_loop_linux.h",  # is_linux
+            "platform/linux/timerfd.h",  # is_linux
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":build_config",
+        ":command_line",
+        ":macros",
+        ":string_conversion",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+        "@abseil-cpp//absl/numeric:int128",
+        "@abseil_cpp_tree//:root_includes",
+        "@dart//:dart_api_headers",
+    ] + select({
+        "@platforms//os:emscripten": [],
+        "//conditions:default": [
+            "@icu",  # target_os != "wasm"
+        ],
+    }) + select({
+        "//engine/src/flutter/common:backtrace_enabled": [
+            # This abseil dependency is only used by backtrace.cc.
+            "@abseil-cpp//absl/debugging:symbolize",  # enable_backtrace
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "fml",
+    srcs = [
+        "ascii_trie.cc",
+        "base32.cc",
+        "concurrent_message_loop.cc",
+        "cpu_affinity.cc",
+        "delayed_task.cc",
+        "endianness.cc",
+        "file.cc",
+        "hex_codec.cc",
+        "log_settings.cc",
+        "log_settings_state.cc",
+        "logging.cc",
+        "mapping.cc",
+        "memory/task_runner_checker.cc",
+        "memory/thread_checker.cc",
+        "memory/weak_ptr_internal.cc",
+        "message_loop.cc",
+        "message_loop_impl.cc",
+        "message_loop_task_queues.cc",
+        "paths.cc",
+        "platform/posix/command_line_posix.cc",  # !(is_win)
+        "platform/posix/file_posix.cc",  # !(is_win)
+        "platform/posix/mapping_posix.cc",  # !(is_win)
+        "platform/posix/native_library_posix.cc",  # !(is_win)
+        "platform/posix/paths_posix.cc",  # !(is_win)
+        "platform/posix/posix_wrappers_posix.cc",  # !(is_win)
+        "platform/posix/process_posix.cc",  # !(is_win)
+        "raster_thread_merger.cc",
+        "safe_math.cc",
+        "shared_thread_merger.cc",
+        "synchronization/count_down_latch.cc",
+        "synchronization/semaphore.cc",
+        "synchronization/sync_switch.cc",
+        "synchronization/waitable_event.cc",
+        "task_runner.cc",
+        "task_runner_util.cc",
+        "task_source.cc",
+        "thread.cc",
+        "time/time_point.cc",
+        "trace_event.cc",
+        "unique_fd.cc",
+    ] + select({
+        ":when_enable_backtrace_and_not_is_wasm": [
+            "backtrace.cc",  # enable_backtrace && !is_wasm
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:backtrace_disabled": [
+            "backtrace_stub.cc",  # !(enable_backtrace && !is_wasm)
+        ],
+        "@platforms//os:emscripten": [
+            "backtrace_stub.cc",  # !(enable_backtrace && !is_wasm)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:emscripten": [],
+        "//conditions:default": [
+            "icu_util.cc",  # target_os != "wasm"
+        ],
+    }) + select({
+        "@platforms//os:ios": [
+            "platform/darwin/cf_utils.cc",  # is_ios || is_mac
+            "platform/darwin/scoped_nsautorelease_pool.cc",  # is_ios || is_mac
+        ],
+        "@platforms//os:macos": [
+            "platform/darwin/cf_utils.cc",  # is_ios || is_mac
+            "platform/darwin/scoped_nsautorelease_pool.cc",  # is_ios || is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": [
+            "concurrent_message_loop_factory.cc",  # !(is_ios || is_mac)
+        ],
+    }) + select({
+        "@platforms//os:android": [
+            "platform/android/cpu_affinity.cc",  # is_android
+            "platform/android/jni_util.cc",  # is_android
+            "platform/android/jni_weak_ref.cc",  # is_android
+            "platform/android/message_loop_android.cc",  # is_android
+            "platform/android/paths_android.cc",  # is_android
+            "platform/android/scoped_java_ref.cc",  # is_android
+            "platform/linux/timerfd.cc",  # is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": [
+            "platform/linux/message_loop_linux.cc",  # is_linux
+            "platform/linux/paths_linux.cc",  # is_linux
+            "platform/linux/timerfd.cc",  # is_linux
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "ascii_trie.h",
+        "backtrace.h",
+        "base32.h",
+        "build_config.h",
+        "closure.h",
+        "concurrent_message_loop.h",
+        "container.h",
+        "cpu_affinity.h",
+        "delayed_task.h",
+        "eintr_wrapper.h",
+        "endianness.h",
+        "file.h",
+        "hash_combine.h",
+        "hex_codec.h",
+        "log_level.h",
+        "log_settings.h",
+        "logging.h",
+        "make_copyable.h",
+        "mapping.h",
+        "math.h",
+        "memory/ref_counted.h",
+        "memory/ref_counted_internal.h",
+        "memory/ref_ptr.h",
+        "memory/ref_ptr_internal.h",
+        "memory/task_runner_checker.h",
+        "memory/thread_checker.h",
+        "memory/weak_ptr.h",
+        "memory/weak_ptr_internal.h",
+        "message_loop.h",
+        "message_loop_impl.h",
+        "message_loop_task_queues.h",
+        "native_library.h",
+        "paths.h",
+        "posix_wrappers.h",
+        "process.h",
+        "raster_thread_merger.h",
+        "safe_math.h",
+        "shared_thread_merger.h",
+        "synchronization/atomic_object.h",
+        "synchronization/count_down_latch.h",
+        "synchronization/semaphore.h",
+        "synchronization/sync_switch.h",
+        "synchronization/waitable_event.h",
+        "task_queue_id.h",
+        "task_runner.h",
+        "task_runner_util.h",
+        "task_source.h",
+        "task_source_grade.h",
+        "thread.h",
+        "time/time_delta.h",
+        "time/time_point.h",
+        "time/timestamp_provider.h",
+        "trace_event.h",
+        "unique_fd.h",
+        "unique_object.h",
+        "wakeable.h",
+    ] + select({
+        "@platforms//os:emscripten": [],
+        "//conditions:default": [
+            "icu_util.h",  # target_os != "wasm"
+        ],
+    }) + select({
+        "@platforms//os:ios": [
+            "platform/darwin/cf_utils.h",  # is_ios || is_mac
+            "platform/darwin/message_loop_darwin.h",  # is_ios || is_mac
+            "platform/darwin/platform_version.h",  # is_ios || is_mac
+            "platform/darwin/scoped_nsautorelease_pool.h",  # is_ios || is_mac
+            "platform/darwin/string_range_sanitization.h",  # is_ios || is_mac
+        ],
+        "@platforms//os:macos": [
+            "platform/darwin/cf_utils.h",  # is_ios || is_mac
+            "platform/darwin/message_loop_darwin.h",  # is_ios || is_mac
+            "platform/darwin/platform_version.h",  # is_ios || is_mac
+            "platform/darwin/scoped_nsautorelease_pool.h",  # is_ios || is_mac
+            "platform/darwin/string_range_sanitization.h",  # is_ios || is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:android": [
+            "platform/android/cpu_affinity.h",  # is_android
+            "platform/android/jni_util.h",  # is_android
+            "platform/android/jni_weak_ref.h",  # is_android
+            "platform/android/message_loop_android.h",  # is_android
+            "platform/android/paths_android.h",  # is_android
+            "platform/android/scoped_java_ref.h",  # is_android
+            "platform/linux/timerfd.h",  # is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": [
+            "platform/linux/message_loop_linux.h",  # is_linux
+            "platform/linux/timerfd.h",  # is_linux
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS,
+    linkopts = select({
+        "@platforms//os:android": [
+            "-landroid",  # is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": [
+            "-framework",
+            "Foundation",  # is_ios || is_mac
+        ],
+        "@platforms//os:macos": [
+            "-framework",
+            "Foundation",  # is_ios || is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":build_config",
+        ":command_line",
+        ":macros",
+        ":string_conversion",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+        "@abseil-cpp//absl/numeric:int128",
+        "@abseil_cpp_tree//:root_includes",
+        "@dart//:dart_api_headers",
+    ] + select({
+        "@platforms//os:emscripten": [],
+        "//conditions:default": [
+            "@icu",  # target_os != "wasm"
+        ],
+    }) + select({
+        "//engine/src/flutter/common:backtrace_enabled": [
+            # This abseil dependency is only used by backtrace.cc.
+            "@abseil-cpp//absl/debugging:symbolize",  # enable_backtrace
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": [":fml_objc"],
+        "@platforms//os:macos": [":fml_objc"],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "build_config",
+    hdrs = ["build_config.h"],
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+        "@dart//:dart_api_headers",
+    ],
+)
+
+cc_library(
+    name = "command_line",
+    srcs = ["command_line.cc"],
+    hdrs = ["command_line.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":macros",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+        "@dart//:dart_api_headers",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "macros",
+    hdrs = ["macros.h"],
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+        "@dart//:dart_api_headers",
+    ],
+)
+
+cc_library(
+    name = "string_conversion_config",
+)
+
+cc_library(
+    name = "string_conversion",
+    srcs = ["string_conversion.cc"],
+    hdrs = ["string_conversion.h"],
+    copts = FLUTTER_COPTS,
+    # Current versions of libcxx have deprecated some of the UTF-16 string
+    # conversion APIs.
+    local_defines = FLUTTER_LOCAL_DEFINES + ["_LIBCPP_DISABLE_DEPRECATION_WARNINGS"],
+    deps = [
+        ":build_config",
+        ":string_conversion_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+        "@dart//:dart_api_headers",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "fml_fixtures",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_test(
+    name = "fml_benchmarks",
+    size = "medium",
+    srcs = ["message_loop_task_queues_benchmark.cc"],
+    args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
+    copts = FLUTTER_COPTS,
+    data = ["@icu//:icudata"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = [
+        "benchmark",
+        "manual",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":fml",
+        "//engine/src:include_root",
+        "//engine/src/flutter/benchmarking",
+        "@dart//:dart_api_headers",
+    ],
+)
+
+# `is_mac || is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `enable_unittests && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# The Objective-C(++) sources of fml_unittests, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); fml_unittests links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "fml_unittests_objc",
+    testonly = True,
+    srcs = select({
+        "@platforms//os:macos": [
+            "platform/darwin/cf_utils_unittests.mm",  # is_mac || is_ios
+            "platform/darwin/string_range_sanitization_unittests.mm",  # is_mac || is_ios
+        ],
+        "@platforms//os:ios": [
+            "platform/darwin/cf_utils_unittests.mm",  # is_mac || is_ios
+            "platform/darwin/string_range_sanitization_unittests.mm",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = ["time/chrono_timestamp_provider.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:run_all_unittests
+    ] + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_enable_unittests_and_is_mac_or_is_ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":fml",
+        ":fml_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing:run_all_unittests",
+        "//engine/src/flutter/testing:testing_core",
+        "@dart//:dart_api_headers",
+    ],
+    alwayslink = True,
+)
+
+flutter_cc_test(
+    name = "fml_unittests",
+    size = "small",
+    srcs = [
+        "ascii_trie_unittests.cc",
+        "backtrace_unittests.cc",
+        "base32_unittest.cc",
+        "closure_unittests.cc",
+        "command_line_unittest.cc",
+        "container_unittests.cc",
+        "cpu_affinity_unittests.cc",
+        "endianness_unittests.cc",
+        "file_unittest.cc",
+        "hash_combine_unittests.cc",
+        "hex_codec_unittest.cc",
+        "logging_unittests.cc",
+        "mapping_unittests.cc",
+        "math_unittests.cc",
+        "memory/ref_counted_unittest.cc",
+        "memory/task_runner_checker_unittest.cc",
+        "memory/weak_ptr_unittest.cc",
+        "message_loop_task_queues_merge_unmerge_unittests.cc",
+        "message_loop_task_queues_unittests.cc",
+        "message_loop_unittests.cc",
+        "paths_unittests.cc",
+        "raster_thread_merger_unittests.cc",
+        "safe_math_unittests.cc",
+        "string_conversion_unittests.cc",
+        "synchronization/count_down_latch_unittests.cc",
+        "synchronization/semaphore_unittest.cc",
+        "synchronization/sync_switch_unittest.cc",
+        "synchronization/waitable_event_unittest.cc",
+        "task_runner_util_unittests.cc",
+        "task_source_unittests.cc",
+        "thread_unittests.cc",
+        "time/chrono_timestamp_provider.cc",
+        "time/chrono_timestamp_provider.h",
+        "time/time_delta_unittest.cc",
+        "time/time_point_unittest.cc",
+        "time/time_unittest.cc",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:run_all_unittests
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":fml",
+        ":fml_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing:run_all_unittests",
+        "//engine/src/flutter/testing:testing_core",
+        "@dart//:dart_api_headers",
+    ] + select({
+        "@platforms//os:macos": [":fml_unittests_objc"],
+        "@platforms//os:ios": [":fml_unittests_objc"],
+        "//conditions:default": [],
+    }),
+)
+
+# `enable_backtrace && !is_wasm`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_backtrace_and_not_is_wasm",
+    match_all = [
+        "//engine/src/flutter/common:backtrace_enabled",
+        "//engine/src/flutter/build/bazel:not_wasm",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# A Windows header the accessibility tests include on every platform
+# (third_party/accessibility's accessibility_unittests lists it), which only
+# the Windows build's string_conversion declares.
+exports_files(["platform/win/wstring_conversion.h"])

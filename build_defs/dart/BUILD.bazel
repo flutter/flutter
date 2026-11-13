@@ -1,0 +1,49 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Dart rules: snapshot.bzl, the snapshot pipeline of //flutter/lib/snapshot
+# (compile_platform, gen_snapshot, bin_to_assembly); kernel.bzl, GN's
+# flutter_frontend_server (dart_kernel, dart_package_root); package_test.bzl,
+# run_tests.py's --type dart-host (dart_package_test); pub.bzl, the
+# repository's pub packages from pubspec.lock (the `pub` module extension,
+# pub_package_config); flutter_test.bzl and flutter_assets.bzl, a framework
+# test as `flutter test` runs it (flutter_test, flutter_test_assets);
+# dart_test.bzl, a pure-Dart package's test under package:test's runner,
+# precompiled (dart_test, dart_test_runner).
+
+load(":dart_test.bzl", "dart_test_runner")
+load(":pub.bzl", "pub_package_config")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "extract_archive.py",
+    "package_config.py",
+    # Generated from pubspec.lock; tools/bazel_tools' tests check it is current.
+    "pub.lock.bzl",
+    "snapshot.bzl",
+    "test_assets.py",
+])
+
+# package:test's runner as a kernel, for every dart_test (dart_test.bzl):
+# compiled against the closure of package:test alone.
+pub_package_config(
+    name = "test_runner_package_config",
+    out = "test_runner_package_config.json",
+    roots = ["test"],
+)
+
+pub_package_config(
+    name = "test_runner_runtime_package_config",
+    out = "test_runner_runtime_package_config.json",
+    layout = "runfiles",
+    roots = ["test"],
+)
+
+dart_test_runner(
+    name = "test_runner",
+    srcs = ["@pub//test:sources"],
+    package_config = ":test_runner_package_config",
+    runtime_package_config = ":test_runner_runtime_package_config",
+)

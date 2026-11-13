@@ -162,6 +162,10 @@ class FlutterTesterDevice extends Device {
       artifacts.getArtifactPath(Artifact.flutterTester),
       '--run-forever',
       '--non-interactive',
+      // A local engine's icudtl.dat may not sit beside flutter_tester (a
+      // Bazel build directory maps it); name the artifact.
+      if (artifacts.localEngineInfo != null)
+        '--icu-data-file-path=${artifacts.getArtifactPath(Artifact.icuData)}',
       if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
       '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       '--flutter-assets-dir=${assetDirectory.path}',

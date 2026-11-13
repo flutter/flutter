@@ -1,0 +1,77 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The prebuilt Dart SDK of DEPS (flutter/prebuilts/<host>/dart-sdk; GN's
+# host_prebuilt_dart_sdk), pinned to the same Dart revision as the tree. The
+# engine's GN build uses it to run the Dart tools it does not build itself;
+# what Bazel actions need of it so far: the AOT runtime and the frontend
+# server snapshot it runs (build_defs/dart/kernel.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dartaotruntime",
+    srcs = ["bin/dartaotruntime"],
+)
+
+filegroup(
+    name = "frontend_server",
+    srcs = ["bin/snapshots/frontend_server_aot.dart.snapshot"],
+)
+
+# The whole SDK, as dart-sdk-<platform>.zip ships it (build/archives'
+# dart_sdk_archive; directorySources in the converter's bazel_mapping.dart):
+# every file of the checkout's directory, not the repository's own markers.
+# The SDK's libraries (lib/libraries.json and the sources it names), which
+# the web SDK's compilers read as `dart-sdk/lib` beside flutter_web_sdk
+# (build_defs/web/web_sdk.bzl).
+filegroup(
+    name = "lib",
+    srcs = glob(["lib/**"]),
+)
+
+filegroup(
+    name = "all_files",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+        ],
+    ),
+)
+
+# DevTools as the SDK ships it under bin/resources; the flutter tool reads
+# its version from there (flutter_tools' cache_test, under a test's
+# FLUTTER_ROOT/bin/cache/dart-sdk).
+filegroup(
+    name = "devtools",
+    srcs = glob(["bin/resources/devtools/**"]),
+)
+
+# The VM's platform kernel, which the frontend server compiles a VM program
+# against (--target=vm; build_defs/dart/dart_test.bzl).
+filegroup(
+    name = "vm_platform",
+    srcs = ["lib/_internal/vm_platform_strong.dill"],
+)
+
+# The command-line SDK: `dart` (and `dartvm`, the VM it runs), the
+# libraries and snapshots it loads (DDC's module loader and stack-trace
+# mapper under lib/dev_compiler among them: the flutter tool's debug web
+# builds copy them), and the version file the analyzer reads
+# (FolderBasedDartSdk.languageVersion) when it analyzes against this SDK.
+filegroup(
+    name = "dart",
+    srcs = [
+        "bin/dart",
+        # The tool runs the frontend server's AOT snapshot on it.
+        "bin/dartaotruntime",
+        "bin/dartvm",
+        "version",
+    ] + glob([
+        "bin/snapshots/**",
+        "lib/**",
+    ]),
+)

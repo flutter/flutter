@@ -1,0 +1,39 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# packages_autoroller's sources and its tests under Bazel: each test compiled by the
+# frontend server for the VM and run by package:test's precompiled runner
+# from this directory, as `dart test` runs them
+# (build_defs/dart/dart_test.bzl; research/15).
+#
+#   bazel test //dev/packages_autoroller:tests
+
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob(
+        [
+            "bin/**",
+            "lib/**",
+        ],
+        allow_empty = True,
+    ) + ["pubspec.yaml"],
+)
+
+dart_package_tests(
+    name = "tests",
+    srcs = glob(
+        ["test/**/*.dart"],
+        allow_empty = True,
+        exclude = ["test/**/*_test.dart"],
+    ),
+    package = "packages_autoroller",
+    tests = glob(["test/**/*_test.dart"]),
+    # flutter_tools' test harness: the tests' common.dart imports its
+    # fake_process_manager.dart.
+    deps = ["//packages/flutter_tools:test_harness"],
+)

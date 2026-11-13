@@ -1,0 +1,1368 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/darwin/ios/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: copy_asan_runtime_dylib.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@engine_version//:version.bzl", "ENGINE_VERSION")
+load("@macos_sdk//:sdk.bzl", "IPHONEOS_PLATFORM_PATH", "IPHONESIMULATOR_PLATFORM_PATH")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
+load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
+load("//build_defs/dist:framework.bzl", "framework_module_check", "xcframework")
+load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy")
+load("//build_defs/testing:native_symbols.bzl", "check_forbidden_native_symbols")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "ios_gpu_configuration",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src/flutter/shell/gpu:gpu_surface_metal",  # invoker.enable_metal
+        "//engine/src/flutter/shell/gpu:gpu_surface_software",  # invoker.enable_software
+    ],
+)
+
+cc_library(
+    name = "ios_gpu_configuration_config",
+    defines = [
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_METAL",  # invoker.enable_metal
+    ],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+flutter_swift_library(
+    name = "InternalFlutterSwift",
+    srcs = [
+        "framework/Source/AccessibilityFeatures.swift",
+        "framework/Source/ConnectionCollection.swift",
+        "framework/Source/DisplayLinkManager.swift",
+        "framework/Source/KeyboardInsetManager.swift",
+        "framework/Source/LaunchEngine.swift",
+        "framework/Source/SplashScreenManager.swift",
+        "framework/Source/TranslateViewController.swift",
+        "framework/Source/UIPressProxy.swift",
+        "framework/Source/VSyncClient.swift",
+    ],
+    hdrs = [
+        "framework/Headers/Flutter.h",
+        "framework/Headers/FlutterAppDelegate.h",
+        "framework/Headers/FlutterCallbackCache.h",
+        "framework/Headers/FlutterEngine.h",
+        "framework/Headers/FlutterEngineGroup.h",
+        "framework/Headers/FlutterHeadlessDartRunner.h",
+        "framework/Headers/FlutterPlatformViews.h",
+        "framework/Headers/FlutterPlugin.h",
+        "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
+        "framework/Headers/FlutterSceneDelegate.h",
+        "framework/Headers/FlutterSceneLifeCycle.h",
+        "framework/Headers/FlutterViewController.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterBinaryMessenger.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterChannels.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterCodecs.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterDartProject.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterHourFormat.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterMacros.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterTexture.h",
+    ],
+    bridge_header = "InternalFlutterSwift-Bridging-Header.h",
+    includes = [
+        # do not sort
+        "framework/Headers",
+        "framework",  # For module.modulemap
+    ],
+    swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_engine_bindings",
+        "//engine/src:include_root",
+        "//engine/src/flutter/shell/platform/darwin/common:config",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_relative_headers",
+    ],
+)
+
+# The Objective-C(++) sources of flutter_framework_source, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); flutter_framework_source links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "flutter_framework_source_objc",
+    srcs = [
+        "framework/Source/FlutterAppDelegate.mm",
+        "framework/Source/FlutterCallbackCache.mm",
+        "framework/Source/FlutterChannelKeyResponder.mm",
+        "framework/Source/FlutterDartProject.mm",
+        "framework/Source/FlutterDartVMServicePublisher.mm",
+        "framework/Source/FlutterEmbedderKeyResponder.mm",
+        "framework/Source/FlutterEngine.mm",
+        "framework/Source/FlutterEngineGroup.mm",
+        "framework/Source/FlutterHeadlessDartRunner.mm",
+        "framework/Source/FlutterKeyboardManager.mm",
+        "framework/Source/FlutterMetalLayer.mm",
+        "framework/Source/FlutterOverlayView.mm",
+        "framework/Source/FlutterPlatformPlugin.mm",
+        "framework/Source/FlutterPlatformViews.mm",
+        "framework/Source/FlutterPlatformViewsController.mm",
+        "framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
+        "framework/Source/FlutterRestorationPlugin.mm",
+        "framework/Source/FlutterSceneDelegate.mm",
+        "framework/Source/FlutterSceneLifeCycle.mm",
+        "framework/Source/FlutterSemanticsScrollView.mm",
+        "framework/Source/FlutterSharedApplication.mm",
+        "framework/Source/FlutterShell.mm",
+        "framework/Source/FlutterSpellCheckPlugin.mm",
+        "framework/Source/FlutterTextInputPlugin.mm",
+        "framework/Source/FlutterTextureRegistryRelay.mm",
+        "framework/Source/FlutterUndoManagerPlugin.mm",
+        "framework/Source/FlutterView.mm",
+        "framework/Source/FlutterViewController.mm",
+        "framework/Source/KeyCodeMap.g.mm",
+        "framework/Source/SemanticsObject.mm",
+        "framework/Source/SemanticsObject+UIFocusSystem.mm",
+        "framework/Source/TextInputSemanticsObject.mm",
+        "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm",
+        "framework/Source/accessibility_bridge.mm",
+        "framework/Source/overlay_layer_pool.mm",
+        "framework/Source/platform_message_response_darwin.mm",
+        "framework/Source/profiler_metrics_ios.mm",
+        "framework/Source/vsync_waiter_ios.mm",
+        "ios_context.mm",
+        "ios_context_metal_impeller.mm",
+        "ios_external_texture_metal.mm",
+        "ios_external_view_embedder.mm",
+        "ios_surface.mm",
+        "ios_surface_metal_impeller.mm",
+        "platform_message_handler_ios.mm",
+        "platform_view_ios.mm",
+        "rendering_api_selection.mm",
+    ],
+    hdrs = [
+        "flutter_task_queue_dispatch.h",
+        "framework/Headers/Flutter.h",
+        "framework/Headers/FlutterAppDelegate.h",
+        "framework/Headers/FlutterCallbackCache.h",
+        "framework/Headers/FlutterEngine.h",
+        "framework/Headers/FlutterEngineGroup.h",
+        "framework/Headers/FlutterHeadlessDartRunner.h",
+        "framework/Headers/FlutterPlatformViews.h",
+        "framework/Headers/FlutterPlugin.h",
+        "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
+        "framework/Headers/FlutterSceneDelegate.h",
+        "framework/Headers/FlutterSceneLifeCycle.h",
+        "framework/Headers/FlutterViewController.h",
+        "framework/Source/FlutterAppDelegate+Test.h",
+        "framework/Source/FlutterAppDelegate_Internal.h",
+        "framework/Source/FlutterCallbackCache_Internal.h",
+        "framework/Source/FlutterChannelKeyResponder.h",
+        "framework/Source/FlutterDartProject_Internal.h",
+        "framework/Source/FlutterDartVMServicePublisher.h",
+        "framework/Source/FlutterEmbedderKeyResponder.h",
+        "framework/Source/FlutterEngine+TaskRunners.h",
+        "framework/Source/FlutterEngine_Internal.h",
+        "framework/Source/FlutterIndirectScribbleDelegate.h",
+        "framework/Source/FlutterKeyPrimaryResponder.h",
+        "framework/Source/FlutterKeySecondaryResponder.h",
+        "framework/Source/FlutterKeyboardManager.h",
+        "framework/Source/FlutterMetalLayer.h",
+        "framework/Source/FlutterOverlayView.h",
+        "framework/Source/FlutterPlatformPlugin.h",
+        "framework/Source/FlutterPlatformViewsController.h",
+        "framework/Source/FlutterPlatformViews_Internal.h",
+        "framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h",
+        "framework/Source/FlutterRestorationPlugin.h",
+        "framework/Source/FlutterSceneLifeCycle_Internal.h",
+        "framework/Source/FlutterSemanticsScrollView.h",
+        "framework/Source/FlutterSharedApplication.h",
+        "framework/Source/FlutterShell.h",
+        "framework/Source/FlutterShell_Internal.h",
+        "framework/Source/FlutterSpellCheckPlugin.h",
+        "framework/Source/FlutterTextInputDelegate.h",
+        "framework/Source/FlutterTextInputPlugin.h",
+        "framework/Source/FlutterTextureRegistryRelay.h",
+        "framework/Source/FlutterUndoManagerDelegate.h",
+        "framework/Source/FlutterUndoManagerPlugin.h",
+        "framework/Source/FlutterView.h",
+        "framework/Source/FlutterViewController_Internal.h",
+        "framework/Source/FlutterViewResponder.h",
+        "framework/Source/IOKit.h",
+        "framework/Source/KeyCodeMap_Internal.h",
+        "framework/Source/SemanticsObject.h",
+        "framework/Source/TextInputSemanticsObject.h",
+        "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h",
+        "framework/Source/accessibility_bridge.h",
+        "framework/Source/accessibility_bridge_ios.h",
+        "framework/Source/overlay_layer_pool.h",
+        "framework/Source/platform_message_response_darwin.h",
+        "framework/Source/profiler_metrics_ios.h",
+        "framework/Source/vsync_waiter_ios.h",
+        "ios_context.h",
+        "ios_context_metal_impeller.h",
+        "ios_external_texture_metal.h",
+        "ios_external_view_embedder.h",
+        "ios_surface.h",
+        "ios_surface_metal_impeller.h",
+        "platform_message_handler_ios.h",
+        "platform_view_ios.h",
+        "rendering_api_selection.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-fapplication-extension",  # from //build/config/ios:ios_application_extension
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-Wno-unguarded-availability",  # from :ios_gpu_configuration
+    ] + select({
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :ios_gpu_configuration
+            "-Wno-deprecated-copy",  # from :ios_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :ios_gpu_configuration
+            "-Wno-nullability-completeness",  # from :ios_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :ios_gpu_configuration
+            "-Wno-suggest-override",  # from :ios_gpu_configuration
+            "-Wno-unused-private-field",  # from :ios_gpu_configuration
+            "-Wno-unused-variable",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + FLUTTER_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK=1"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwift",
+        ":flutter_engine_bindings",
+        ":ios_gpu_configuration",
+        ":ios_gpu_configuration_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel:ios_application_extension",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/platform/common:common_cpp_input",
+        "//engine/src/flutter/shell/platform/darwin/common",
+        "//engine/src/flutter/shell/platform/darwin/common:config",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/graphics",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "//engine/src/flutter/shell/profiling",
+        "//engine/src/flutter/third_party/spring_animation",
+        "@icu",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "flutter_framework_source",
+    hdrs = [
+        "flutter_task_queue_dispatch.h",
+        "framework/Headers/Flutter.h",
+        "framework/Headers/FlutterAppDelegate.h",
+        "framework/Headers/FlutterCallbackCache.h",
+        "framework/Headers/FlutterEngine.h",
+        "framework/Headers/FlutterEngineGroup.h",
+        "framework/Headers/FlutterHeadlessDartRunner.h",
+        "framework/Headers/FlutterPlatformViews.h",
+        "framework/Headers/FlutterPlugin.h",
+        "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
+        "framework/Headers/FlutterSceneDelegate.h",
+        "framework/Headers/FlutterSceneLifeCycle.h",
+        "framework/Headers/FlutterViewController.h",
+        "framework/Source/FlutterAppDelegate+Test.h",
+        "framework/Source/FlutterAppDelegate_Internal.h",
+        "framework/Source/FlutterCallbackCache_Internal.h",
+        "framework/Source/FlutterChannelKeyResponder.h",
+        "framework/Source/FlutterDartProject_Internal.h",
+        "framework/Source/FlutterDartVMServicePublisher.h",
+        "framework/Source/FlutterEmbedderKeyResponder.h",
+        "framework/Source/FlutterEngine+TaskRunners.h",
+        "framework/Source/FlutterEngine_Internal.h",
+        "framework/Source/FlutterIndirectScribbleDelegate.h",
+        "framework/Source/FlutterKeyPrimaryResponder.h",
+        "framework/Source/FlutterKeySecondaryResponder.h",
+        "framework/Source/FlutterKeyboardManager.h",
+        "framework/Source/FlutterMetalLayer.h",
+        "framework/Source/FlutterOverlayView.h",
+        "framework/Source/FlutterPlatformPlugin.h",
+        "framework/Source/FlutterPlatformViewsController.h",
+        "framework/Source/FlutterPlatformViews_Internal.h",
+        "framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h",
+        "framework/Source/FlutterRestorationPlugin.h",
+        "framework/Source/FlutterSceneLifeCycle_Internal.h",
+        "framework/Source/FlutterSemanticsScrollView.h",
+        "framework/Source/FlutterSharedApplication.h",
+        "framework/Source/FlutterShell.h",
+        "framework/Source/FlutterShell_Internal.h",
+        "framework/Source/FlutterSpellCheckPlugin.h",
+        "framework/Source/FlutterTextInputDelegate.h",
+        "framework/Source/FlutterTextInputPlugin.h",
+        "framework/Source/FlutterTextureRegistryRelay.h",
+        "framework/Source/FlutterUndoManagerDelegate.h",
+        "framework/Source/FlutterUndoManagerPlugin.h",
+        "framework/Source/FlutterView.h",
+        "framework/Source/FlutterViewController_Internal.h",
+        "framework/Source/FlutterViewResponder.h",
+        "framework/Source/IOKit.h",
+        "framework/Source/KeyCodeMap_Internal.h",
+        "framework/Source/SemanticsObject.h",
+        "framework/Source/TextInputSemanticsObject.h",
+        "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h",
+        "framework/Source/accessibility_bridge.h",
+        "framework/Source/accessibility_bridge_ios.h",
+        "framework/Source/overlay_layer_pool.h",
+        "framework/Source/platform_message_response_darwin.h",
+        "framework/Source/profiler_metrics_ios.h",
+        "framework/Source/vsync_waiter_ios.h",
+        "ios_context.h",
+        "ios_context_metal_impeller.h",
+        "ios_external_texture_metal.h",
+        "ios_external_view_embedder.h",
+        "ios_surface.h",
+        "ios_surface_metal_impeller.h",
+        "platform_message_handler_ios.h",
+        "platform_view_ios.h",
+        "rendering_api_selection.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-fapplication-extension",  # from //build/config/ios:ios_application_extension
+        "-Wno-unguarded-availability",  # from :ios_gpu_configuration
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :ios_gpu_configuration
+            "-Wno-deprecated-copy",  # from :ios_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :ios_gpu_configuration
+            "-Wno-nullability-completeness",  # from :ios_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :ios_gpu_configuration
+            "-Wno-suggest-override",  # from :ios_gpu_configuration
+            "-Wno-unused-private-field",  # from :ios_gpu_configuration
+            "-Wno-unused-variable",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }),
+    implementation_deps = [
+        "//engine/src/flutter/build/bazel:ios_application_extension",
+        "//engine/src/flutter/shell/platform/darwin/common:config",
+    ],
+    linkopts = [
+        "-framework",
+        "AudioToolbox",
+        "-framework",
+        "CoreMedia",
+        "-framework",
+        "CoreVideo",
+        "-framework",
+        "IOSurface",
+        "-framework",
+        "QuartzCore",
+        "-framework",
+        "WebKit",
+        "-framework",
+        "UIKit",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            # This is required by the profiler_metrics_ios.mm to get GPU statistics.
+            # Usage in release builds will cause rejection from the App Store.
+            "-framework",
+            "IOKit",  # flutter_runtime_mode == "profile" || (flutter_runtime_mode == "debug")
+        ],
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            # This is required by the profiler_metrics_ios.mm to get GPU statistics.
+            # Usage in release builds will cause rejection from the App Store.
+            "-framework",
+            "IOKit",  # flutter_runtime_mode == "profile" || (flutter_runtime_mode == "debug")
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK=1"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwift",
+        ":flutter_engine_bindings",
+        ":flutter_framework_source_objc",
+        ":ios_gpu_configuration",
+        ":ios_gpu_configuration_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/platform/common:common_cpp_input",
+        "//engine/src/flutter/shell/platform/darwin/common",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/graphics",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "//engine/src/flutter/shell/profiling",
+        "//engine/src/flutter/third_party/spring_animation",
+        "@icu",
+    ],
+    alwayslink = True,
+)
+
+# `is_ios && enable_ios_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_enable_ios_unittests",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/testing:ios_unittests_enabled",
+    ],
+)
+
+# The Objective-C(++) sources of flutter_engine_bindings_test_helpers, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); flutter_engine_bindings_test_helpers links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "flutter_engine_bindings_test_helpers_objc",
+    testonly = True,
+    srcs = ["framework/Source/FlutterFMLTaskRunnerTestHelper.mm"],
+    hdrs = ["framework/Source/FlutterFMLTaskRunnerTestHelper.h"],
+    copts = FLUTTER_COPTS + ["-fvisibility=default"] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_ios_and_enable_ios_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_engine_bindings",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config",
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "flutter_engine_bindings_test_helpers",
+    testonly = True,
+    hdrs = ["framework/Source/FlutterFMLTaskRunnerTestHelper.h"],
+    # Add platform frameworks directory to search path for test frameworks.
+    # Add platform lib to search path for test libraries/Swift modules.
+    copts = FLUTTER_COPTS + ["-fvisibility=default"] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }),
+    implementation_deps = ["//engine/src/flutter/shell/platform/darwin/common:test_config"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_ios_and_enable_ios_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_engine_bindings",
+        ":flutter_engine_bindings_test_helpers_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+flutter_swift_library(
+    name = "ios_test_flutter_swift",
+    testonly = True,
+    srcs = [
+        "framework/Source/AccessibilityFeaturesTests.swift",
+        "framework/Source/ConnectionCollectionTests.swift",
+        "framework/Source/DisplayLinkManagerTests.swift",
+        "framework/Source/FakeUIPressProxy.swift",
+        "framework/Source/LaunchEngineTests.swift",
+        "framework/Source/SplashScreenManagerTests.swift",
+        "framework/Source/TaskRunnerTests.swift",
+        "framework/Source/VSyncClientTests.swift",
+    ],
+    bridge_header = "FlutterTests-Bridging-Header.h",
+    includes = [
+        # do not sort
+        "framework/Headers",
+        "framework",
+    ],
+    linkopts = [
+        "-framework",
+        "Testing",
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-L" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-L" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    swiftflags = [
+        "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        "-target",  # is_ios
+    ] + select({
+        ":when_is_ios_and_current_cpu_arm64_and_use_ios_simulator": [
+            "arm64-apple-ios15.0-simulator",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_arm64_and_not_use_ios_simulator": [
+            "arm64-apple-ios15.0",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_x64_and_use_ios_simulator": [
+            "x86_64-apple-ios15.0-simulator",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_x64_and_not_use_ios_simulator": [
+            "x86_64-apple-ios15.0",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    tags = ["no-remote-exec"],
+    target_compatible_with = select({
+        ":when_is_ios_and_enable_ios_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwift",
+        ":flutter_engine_bindings",
+        ":flutter_engine_bindings_test_helpers",
+        ":flutter_framework_source",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/platform/darwin/common:config",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_relative_headers",
+    ],
+)
+
+cc_library(
+    name = "ios_test_flutter_include_dirs",
+    includes = ["."],
+    target_compatible_with = select({
+        ":when_is_ios_and_enable_ios_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# The Objective-C(++) sources of ios_test_flutter, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); ios_test_flutter links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "ios_test_flutter_objc",
+    testonly = True,
+    srcs = [
+        "framework/Source/FlutterAppDelegateTest.mm",
+        "framework/Source/FlutterChannelKeyResponderTest.mm",
+        "framework/Source/FlutterDartProjectTest.mm",
+        "framework/Source/FlutterEmbedderKeyResponderTest.mm",
+        "framework/Source/FlutterEngineGroupTest.mm",
+        "framework/Source/FlutterEnginePlatformViewTest.mm",
+        "framework/Source/FlutterEngineTest.mm",
+        "framework/Source/FlutterFakeKeyEvents.mm",
+        "framework/Source/FlutterKeyboardManagerTest.mm",
+        "framework/Source/FlutterMetalLayerTest.mm",
+        "framework/Source/FlutterPlatformPluginTest.mm",
+        "framework/Source/FlutterPlatformViewsTest.mm",
+        "framework/Source/FlutterPlatformViewsTestHelper.mm",
+        "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
+        "framework/Source/FlutterRestorationPluginTest.mm",
+        "framework/Source/FlutterSceneDelegateTest.m",
+        "framework/Source/FlutterSceneLifeCycleTest.mm",
+        "framework/Source/FlutterSharedApplicationTest.mm",
+        "framework/Source/FlutterShellTest.mm",
+        "framework/Source/FlutterSpellCheckPluginTest.mm",
+        "framework/Source/FlutterTextInputPluginTest.mm",
+        "framework/Source/FlutterTextureRegistryRelayTest.mm",
+        "framework/Source/FlutterUndoManagerPluginTest.mm",
+        "framework/Source/FlutterViewControllerTest.mm",
+        "framework/Source/FlutterViewTest.mm",
+        "framework/Source/SemanticsObjectTest.mm",
+        "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
+        "framework/Source/VsyncWaiterIOSTest.mm",
+        "framework/Source/accessibility_bridge_test.mm",
+        "framework/Source/availability_version_check_test.mm",
+        "platform_message_handler_ios_test.mm",
+        "platform_view_ios_test.mm",
+    ],
+    hdrs = [
+        "framework/Source/FlutterEngine+Test.h",
+        "framework/Source/FlutterFMLTaskRunners+FML.h",
+        "framework/Source/FlutterFakeKeyEvents.h",
+        "framework/Source/FlutterPlatformViewsTestHelper.h",
+        "framework/Source/FlutterSceneDelegate+Test.h",
+        "framework/Source/FlutterSceneLifeCycle+Test.h",
+        "framework/Source/FlutterTouchInterceptingView+Test.h",
+        "framework/Source/SemanticsObjectTestMocks.h",
+        "//engine/src/flutter/testing/ios:IosUnitTests/App/AppDelegate.h",
+    ],
+    copts = ["-fvisibility=default"] + FLUTTER_COPTS + [
+        "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-fvisibility=default",
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-Wno-unguarded-availability",  # from :ios_gpu_configuration
+    ] + select({
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :ios_gpu_configuration
+            "-Wno-deprecated-copy",  # from :ios_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :ios_gpu_configuration
+            "-Wno-nullability-completeness",  # from :ios_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :ios_gpu_configuration
+            "-Wno-suggest-override",  # from :ios_gpu_configuration
+            "-Wno-unused-private-field",  # from :ios_gpu_configuration
+            "-Wno-unused-variable",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + FLUTTER_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_ios_and_enable_ios_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwift",
+        ":flutter_engine_bindings_test_helpers",
+        ":flutter_framework_source",
+        ":ios_gpu_configuration",
+        ":ios_gpu_configuration_config",
+        ":ios_test_flutter_include_dirs",
+        ":ios_test_flutter_swift",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/shell/platform/darwin/common:availability_version_check",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config",
+        "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "//engine/src/flutter/shell/platform/embedder:embedder_test_utils",
+        "//engine/src/flutter/third_party/spring_animation",
+        "//engine/src/flutter/third_party/tonic",
+        "//engine/src/flutter/txt",
+        "@ocmock//:ocmock_shared_import",
+        "@rapidjson",
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+# The tests here are run in a host application on an iOS simulator thus
+# considerably slower to start than the tests in
+# "//flutter/shell/platform/darwin/common:framework_common_swift_unittests".
+# If your tests do not have to be run on a simulator (no UIKit dependencies
+# for example), consider adding them to the
+# ":framework_common_swift_unittests" target.
+flutter_shared_library(
+    name = "ios_test_flutter",
+    testonly = True,
+    srcs = [
+        "framework/Source/FlutterEngine+Test.h",
+        "framework/Source/FlutterFMLTaskRunners+FML.h",
+        "framework/Source/FlutterFakeKeyEvents.h",
+        "framework/Source/FlutterPlatformViewsTestHelper.h",
+        "framework/Source/FlutterSceneDelegate+Test.h",
+        "framework/Source/FlutterSceneLifeCycle+Test.h",
+        "framework/Source/FlutterTouchInterceptingView+Test.h",
+        "framework/Source/SemanticsObjectTestMocks.h",
+        "//engine/src/flutter/testing/ios:IosUnitTests/App/AppDelegate.h",
+    ],
+    # Add platform frameworks directory to search path for test frameworks.
+    # Add platform lib to search path for test libraries/Swift modules.
+    copts = ["-fvisibility=default"] + FLUTTER_COPTS + [
+        "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-fvisibility=default",
+        "-Wno-unguarded-availability",  # from :ios_gpu_configuration
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :ios_gpu_configuration
+            "-Wno-deprecated-copy",  # from :ios_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :ios_gpu_configuration
+            "-Wno-nullability-completeness",  # from :ios_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :ios_gpu_configuration
+            "-Wno-suggest-override",  # from :ios_gpu_configuration
+            "-Wno-unused-private-field",  # from :ios_gpu_configuration
+            "-Wno-unused-variable",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }),
+    data = [":flutter_framework"],
+    interface_deps = [
+        ":ios_gpu_configuration_config",
+        "//engine/src/flutter:config",
+    ],
+    linkopts = [
+        "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib",
+        "-framework",
+        "XCTest",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    output_name = "ios_test_flutter",
+    target_compatible_with = select({
+        ":when_is_ios_and_enable_ios_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwift",
+        ":flutter_engine_bindings_test_helpers",
+        ":flutter_framework_source",
+        ":ios_gpu_configuration",
+        ":ios_gpu_configuration_config",
+        ":ios_test_flutter_include_dirs",
+        ":ios_test_flutter_objc",
+        ":ios_test_flutter_swift",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/shell/platform/darwin/common:availability_version_check",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config",
+        "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "//engine/src/flutter/shell/platform/embedder:embedder_test_utils",
+        "//engine/src/flutter/third_party/spring_animation",
+        "//engine/src/flutter/third_party/tonic",
+        "//engine/src/flutter/txt",
+        "@ocmock//:ocmock_shared_import",
+        "@rapidjson",
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# The Objective-C(++) sources of flutter_engine_bindings, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); flutter_engine_bindings links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "flutter_engine_bindings_objc",
+    srcs = [
+        "framework/Source/FlutterFMLTaskRunner.mm",
+        "framework/Source/FlutterFMLTaskRunners.mm",
+    ],
+    hdrs = [
+        "framework/Source/FlutterFMLTaskRunner.h",
+        "framework/Source/FlutterFMLTaskRunner+FML.h",
+        "framework/Source/FlutterFMLTaskRunners.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-unguarded-availability",  # from //flutter/shell/common
+    ] + FLUTTER_CFLAGS_OBJC,
+    includes = [
+        # do not sort
+        "framework/Headers",
+        "framework",  # For module.modulemap
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK=1"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/platform/darwin/common:config",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_relative_headers",
+        "//engine/src/flutter/third_party/spring_animation",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "flutter_engine_bindings",
+    hdrs = [
+        "framework/Source/FlutterFMLTaskRunner.h",
+        "framework/Source/FlutterFMLTaskRunner+FML.h",
+        "framework/Source/FlutterFMLTaskRunners.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-unguarded-availability",  # from //flutter/shell/common
+    ],
+    implementation_deps = ["//engine/src/flutter/shell/platform/darwin/common:config"],
+    includes = [
+        # do not sort
+        "framework/Headers",
+        "framework",  # For module.modulemap
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK=1"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_engine_bindings_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_relative_headers",
+        "//engine/src/flutter/third_party/spring_animation",
+    ],
+    alwayslink = True,
+)
+
+flutter_shared_library(
+    name = "create_flutter_framework_dylib",
+    srcs = [
+        "framework/Headers/Flutter.h",
+        "framework/Headers/FlutterAppDelegate.h",
+        "framework/Headers/FlutterCallbackCache.h",
+        "framework/Headers/FlutterEngine.h",
+        "framework/Headers/FlutterEngineGroup.h",
+        "framework/Headers/FlutterHeadlessDartRunner.h",
+        "framework/Headers/FlutterPlatformViews.h",
+        "framework/Headers/FlutterPlugin.h",
+        "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
+        "framework/Headers/FlutterSceneDelegate.h",
+        "framework/Headers/FlutterSceneLifeCycle.h",
+        "framework/Headers/FlutterViewController.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-fapplication-extension",  # from //build/config/ios:ios_application_extension
+    ],
+    interface_deps = ["//engine/src/flutter:config"],
+    linkopts = ["-Wl,-install_name,@rpath/Flutter.framework/Flutter"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    output_name = "Flutter",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_framework_source",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel:ios_application_extension",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+    ],
+)
+
+gn_copy(
+    name = "copy_dylib",
+    srcs = [":create_flutter_framework_dylib"],
+    outs = ["Flutter.framework/Flutter"],
+    outputs = ["$root_out_dir/Flutter.framework/Flutter"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":create_flutter_framework_dylib"],
+)
+
+check_forbidden_native_symbols(
+    name = "check_native_symbols",
+    library_target = ":copy_dylib",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":copy_dylib"],
+)
+
+gn_action(
+    name = "copy_framework_info_plist",
+    srcs = ["framework/Info.plist"],
+    args = [
+        "--source",
+        "$(execpath :framework/Info.plist)",
+        "--destination",
+        "$(built Flutter.framework/Info.plist)",
+        "--minversion",
+        "15.0",
+        "--buildmode",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["debug"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["profile"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["release"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["jit_release"],
+        "//conditions:default": [],
+    }),
+    build_outputs = ["Flutter.framework/Info.plist"],
+    env = {"FLUTTER_ENGINE_VERSION": ENGINE_VERSION},
+    script = "//engine/src/flutter/build:copy_info_plist.py",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_copy(
+    name = "copy_framework_module_map",
+    srcs = ["framework/module.modulemap"],
+    outputs = ["$root_out_dir/Flutter.framework/Modules/module.modulemap"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# Copy privacy manifest. This file is required by Apple for third-party SDKs,
+# and documents engine and third_party usage of timestamps and boot time APIs.
+# See https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
+gn_copy(
+    name = "copy_framework_privacy_manifest",
+    srcs = ["framework/PrivacyInfo.xcprivacy"],
+    outputs = ["$root_out_dir/Flutter.framework/PrivacyInfo.xcprivacy"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_action(
+    name = "copy_framework_headers",
+    srcs = [
+        "framework/Headers/Flutter.h",
+        "framework/Headers/FlutterAppDelegate.h",
+        "framework/Headers/FlutterCallbackCache.h",
+        "framework/Headers/FlutterEngine.h",
+        "framework/Headers/FlutterEngineGroup.h",
+        "framework/Headers/FlutterHeadlessDartRunner.h",
+        "framework/Headers/FlutterPlatformViews.h",
+        "framework/Headers/FlutterPlugin.h",
+        "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
+        "framework/Headers/FlutterSceneDelegate.h",
+        "framework/Headers/FlutterSceneLifeCycle.h",
+        "framework/Headers/FlutterViewController.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterBinaryMessenger.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterChannels.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterCodecs.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterDartProject.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterHourFormat.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterMacros.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterTexture.h",
+    ],
+    args = [
+        "--location",
+        "$(built Flutter.framework/Headers)",
+        "--headers",
+        "$(execpath :framework/Headers/Flutter.h)",
+        "$(execpath :framework/Headers/FlutterAppDelegate.h)",
+        "$(execpath :framework/Headers/FlutterCallbackCache.h)",
+        "$(execpath :framework/Headers/FlutterEngine.h)",
+        "$(execpath :framework/Headers/FlutterEngineGroup.h)",
+        "$(execpath :framework/Headers/FlutterHeadlessDartRunner.h)",
+        "$(execpath :framework/Headers/FlutterPlatformViews.h)",
+        "$(execpath :framework/Headers/FlutterPlugin.h)",
+        "$(execpath :framework/Headers/FlutterPluginAppLifeCycleDelegate.h)",
+        "$(execpath :framework/Headers/FlutterSceneDelegate.h)",
+        "$(execpath :framework/Headers/FlutterSceneLifeCycle.h)",
+        "$(execpath :framework/Headers/FlutterViewController.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterMacros.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterBinaryMessenger.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterChannels.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterCodecs.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterHourFormat.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterTexture.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterDartProject.h)",
+    ],
+    build_outputs = [
+        "Flutter.framework/Headers/Flutter.h",
+        "Flutter.framework/Headers/FlutterAppDelegate.h",
+        "Flutter.framework/Headers/FlutterCallbackCache.h",
+        "Flutter.framework/Headers/FlutterEngine.h",
+        "Flutter.framework/Headers/FlutterEngineGroup.h",
+        "Flutter.framework/Headers/FlutterHeadlessDartRunner.h",
+        "Flutter.framework/Headers/FlutterPlatformViews.h",
+        "Flutter.framework/Headers/FlutterPlugin.h",
+        "Flutter.framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
+        "Flutter.framework/Headers/FlutterSceneDelegate.h",
+        "Flutter.framework/Headers/FlutterSceneLifeCycle.h",
+        "Flutter.framework/Headers/FlutterViewController.h",
+        "Flutter.framework/Headers/FlutterMacros.h",
+        "Flutter.framework/Headers/FlutterBinaryMessenger.h",
+        "Flutter.framework/Headers/FlutterChannels.h",
+        "Flutter.framework/Headers/FlutterCodecs.h",
+        "Flutter.framework/Headers/FlutterHourFormat.h",
+        "Flutter.framework/Headers/FlutterTexture.h",
+        "Flutter.framework/Headers/FlutterDartProject.h",
+    ],
+    script = "//engine/src/flutter/sky:tools/install_framework_headers.py",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_copy(
+    name = "copy_framework_icu",
+    srcs = ["@icu//:flutter/icudtl.dat"],
+    outputs = ["$root_out_dir/Flutter.framework/{{source_file_part}}"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_copy(
+    name = "copy_license",
+    srcs = ["//engine/src:LICENSE"],
+    outputs = ["$root_out_dir/LICENSE"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+framework_module_check(
+    name = "copy_and_verify_framework_module",
+    srcs = ["framework/Source/FlutterUmbrellaImport.m"],
+    copts = [
+        "-fapplication-extension",  # from //build/config/ios:ios_application_extension
+    ],
+    linkopts = [
+        "-Xlinker",
+        "-fatal_warnings",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":copy_framework_headers",
+        ":copy_framework_info_plist",
+        ":copy_framework_module_map",
+        ":copy_framework_privacy_manifest",
+        "//engine/src/flutter/build/bazel:ios_application_extension",
+    ],
+)
+
+filegroup(
+    name = "universal_flutter_framework",
+    srcs = [
+        ":check_native_symbols",
+        ":copy_and_verify_framework_module",
+        ":copy_dylib",
+        ":copy_framework_icu",
+        ":copy_framework_info_plist",
+        ":copy_framework_module_map",
+        ":copy_framework_privacy_manifest",
+        ":copy_license",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+xcframework(
+    name = "flutter_framework",
+    args = [
+        "--frameworks",
+        "$(built Flutter.framework)",
+        "--name",
+        "Flutter",
+        "--location",
+        "$(built .)",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":universal_flutter_framework"],
+)
+
+# `is_mac && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_enable_unittests",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
+)
+
+# `is_mac || is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `impeller_enable_metal && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `is_ios && use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/build/bazel:ios_simulator_enabled",
+    ],
+)
+
+# `is_ios && !use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_not_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/build/bazel:ios_simulator_disabled",
+    ],
+)
+
+# `is_ios && current_cpu == "arm64" && use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_current_cpu_arm64_and_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/build/bazel:ios_simulator_enabled",
+    ],
+)
+
+# `is_ios && current_cpu == "arm64" && !use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_current_cpu_arm64_and_not_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/build/bazel:ios_simulator_disabled",
+    ],
+)
+
+# `is_ios && current_cpu == "x64" && use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_current_cpu_x64_and_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/build/bazel:ios_simulator_enabled",
+    ],
+)
+
+# `is_ios && current_cpu == "x64" && !use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_current_cpu_x64_and_not_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/build/bazel:ios_simulator_disabled",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The embedding's AccessibilityFeatures, which api_check's tests read (the
+# enum mirrors dart:ui's), and its task queue header, which darwin/common's
+# Objective-C suite includes (the manifest's extraSources).
+exports_files([
+    "flutter_task_queue_dispatch.h",
+    "framework/Source/AccessibilityFeatures.swift",
+])

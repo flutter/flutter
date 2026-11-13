@@ -600,7 +600,9 @@ action("android_jar") {
         "//third_party/vulkan_validation_layers($apilevel26_toolchain)"
     deps += [ validation_layer_target ]
     if (stripped_symbols) {
-      validation_library = "lib.stripped/libVkLayer_khronos_validation.so"
+      validation_library = rebase_path(
+              "$root_build_dir/lib.stripped/libVkLayer_khronos_validation.so",
+              root_build_dir)
     } else {
       validation_layer_out_dir =
           get_label_info(validation_layer_target, "root_out_dir")
@@ -758,6 +760,21 @@ action("gen_android_javadoc") {
   script = "//flutter/tools/javadoc/gen_javadoc.py"
   sources = android_java_sources + embedding_dependencies_jars
 
+  inputs = [
+    android_sdk_jar,
+    "//flutter/tools/javadoc/android_reference",
+  ]
+
+  if (host_os == "mac") {
+    _javadocbin = rebase_path(
+            "//flutter/third_party/java/openjdk/Contents/Home/bin/javadoc")
+  } else if (host_os == "win") {
+    _javadocbin =
+        rebase_path("//flutter/third_party/java/openjdk/bin/javadoc.exe")
+  } else {
+    _javadocbin = rebase_path("//flutter/third_party/java/openjdk/bin/javadoc")
+  }
+
   outputs = [ "$target_gen_dir/javadocs" ]
   args = [
     "--out-dir",
@@ -768,6 +785,13 @@ action("gen_android_javadoc") {
     rebase_path(target_gen_dir, root_build_dir),
     "--src-dir",
     rebase_path("//", root_build_dir),
+    "--javadoc-bin",
+    _javadocbin,
+    "--android-jar",
+    rebase_path(android_sdk_jar, root_build_dir),
+    "--embedding-dependencies-dir",
+    rebase_path("//flutter/third_party/android_embedding_dependencies/lib",
+                root_build_dir),
     "--quiet",
   ]
 
@@ -919,10 +943,10 @@ action("embedding_jars") {
       ]
       args += [
         "-i",
-        "${name}.jar",
+        rebase_path("$root_out_dir/${name}.jar", root_build_dir),
         rebase_path("${base_name}.jar", root_build_dir),
         "-i",
-        "${name}-sources.jar",
+        rebase_path("$root_out_dir/${name}-sources.jar", root_build_dir),
         rebase_path("${base_name}-sources.jar", root_build_dir),
       ]
     } else {
@@ -953,10 +977,10 @@ action("embedding_jars") {
       ]
       args += [
         "-i",
-        "${name}.jar",
+        rebase_path("$root_out_dir/${name}.jar", root_build_dir),
         rebase_path("${hash_base_name}.jar", root_build_dir),
         "-i",
-        "${name}-sources.jar",
+        rebase_path("$root_out_dir/${name}-sources.jar", root_build_dir),
         rebase_path("${hash_base_name}-sources.jar", root_build_dir),
       ]
     } else {

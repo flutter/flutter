@@ -1,0 +1,35 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's libc++ configuration headers (__config_site,
+# __assertion_handler, and the `<format>` and `<version>` that ban
+# std::format outside libc++'s own build). Every C++ compile action gets
+# this directory on its include path from the toolchain; see
+# //engine/src/flutter/build/bazel/toolchains.
+
+package(default_visibility = ["//visibility:public"])
+
+# The toolchain derives the include path from this file's location.
+exports_files(["config/__config_site"])
+
+filegroup(
+    name = "config_headers",
+    srcs = [
+        "config/__assertion_handler",
+        "config/__config_site",
+        "config/format",
+        "config/version",
+    ],
+)
+
+# What the GN build reads from this directory (the libc++ BUILD.gn and the
+# same headers), for rules that wrap a GN build. This package interrupts the
+# glob of //engine/src/flutter/build:gn_files, which lists it.
+filegroup(
+    name = "gn_files",
+    srcs = [
+        "BUILD.gn",
+        ":config_headers",
+    ],
+)

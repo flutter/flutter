@@ -6,16 +6,27 @@
 #define FLUTTER_TESTING_TESTING_H_
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/testing/assertions.h"
 #include "gtest/gtest.h"
-#include "third_party/skia/include/core/SkData.h"
 
 namespace flutter::testing {
 
+//------------------------------------------------------------------------------
+/// @brief      Returns the root of the source tree (the GN `//` directory).
+///
+///             The build system compiles a default location into the test
+///             executable. Setting the `FLUTTER_TEST_SOURCE_DIR` environment
+///             variable overrides it, which lets test runners relocate the
+///             sources (for example when running from a sandbox or runfiles
+///             tree).
+///
+/// @return     The source path.
+///
 const char* GetSourcePath();
 
 //------------------------------------------------------------------------------
@@ -25,6 +36,9 @@ const char* GetSourcePath();
 ///             this symbol, the unit-test target needs to depend on a
 ///             `test_fixtures` target.
 ///
+///             Setting the `FLUTTER_TEST_FIXTURES_DIR` environment variable
+///             overrides the compiled-in location.
+///
 /// @return     The fixtures path.
 ///
 const char* GetFixturesPath();
@@ -32,9 +46,46 @@ const char* GetFixturesPath();
 //------------------------------------------------------------------------------
 /// @brief      Returns the directory containing assets shared across all tests.
 ///
+///             Setting the `FLUTTER_TEST_TESTING_ASSETS_DIR` environment
+///             variable overrides the compiled-in location.
+///
 /// @return     The testing assets path.
 ///
 const char* GetTestingAssetsPath();
+
+//------------------------------------------------------------------------------
+/// @brief      Returns the URI the Dart compiler recorded for a source file of
+///             the tree, for `Dart_LookupLibrary` and the like: the build's
+///             source root URI prefix followed by `relative_path`, a path
+///             relative to the source root (`flutter/runtime/fixtures/...`).
+///             A GN build compiles sources as `file://` plus their absolute
+///             paths; other builds may compile under a virtual root scheme.
+///
+///             Setting the `FLUTTER_TEST_SOURCE_URI_PREFIX` environment
+///             variable overrides the compiled-in prefix.
+///
+/// @param[in]  relative_path  The path relative to the source root.
+///
+/// @return     The URI.
+///
+std::string GetSourceUri(std::string_view relative_path);
+
+//------------------------------------------------------------------------------
+/// @name       Compiled-in default locations.
+///
+///             These are not implemented in this library. The build system
+///             generates a translation unit defining them for every test
+///             executable (see the `fixtures_location` template in
+///             `//flutter/testing/testing.gni`). Tests must not call them
+///             directly; use the accessors above, which honor the environment
+///             overrides.
+///
+/// @{
+const char* GetCompiledInSourcePath();
+const char* GetCompiledInFixturesPath();
+const char* GetCompiledInTestingAssetsPath();
+const char* GetCompiledInSourceUriPrefix();
+/// @}
 
 //------------------------------------------------------------------------------
 /// @brief      Returns the default path to kernel_blob.bin. This file is within
@@ -72,17 +123,6 @@ fml::UniqueFD OpenFixture(const std::string& fixture_name);
 ///
 std::unique_ptr<fml::Mapping> OpenFixtureAsMapping(
     const std::string& fixture_name);
-
-//------------------------------------------------------------------------------
-/// @brief      Opens a fixture of the given file name and returns a Skia SkData
-///             holding its contents.
-///
-/// @param[in]  fixture_name  The fixture name
-///
-/// @return     An SkData, or null if the fixture does not exist or its contents
-///             cannot be mapped in.
-///
-sk_sp<SkData> OpenFixtureAsSkData(const std::string& fixture_name);
 
 //------------------------------------------------------------------------------
 /// @brief      Gets the name of the currently running test. This is useful in

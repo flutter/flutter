@@ -1,0 +1,16 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @reclient: the `infra/rbe/client` CIPD package pinned in
+# DEPS (buildtools/<host>/reclient; synced with gclient's use_rbe). A wrapped
+# GN build lays the whole tree under the GN root (gn_build.bzl's rbe), where
+# GN's rewrapper_command names rewrapper and gn_build.py runs bootstrap and
+# reproxy around ninja.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]),
+)

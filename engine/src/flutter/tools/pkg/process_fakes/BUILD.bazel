@@ -1,0 +1,14 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:process_fakes: a fake process manager for the tests of the engine's
+# Dart tools (a dev dependency of most of them). A Dart package with no GN
+# build file and no tests of its own.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)

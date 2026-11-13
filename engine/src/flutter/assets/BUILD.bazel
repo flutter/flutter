@@ -1,0 +1,68 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/assets/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "assets",
+    srcs = [
+        "asset_manager.cc",
+        "directory_asset_bundle.cc",
+        "native_assets.cc",
+    ],
+    hdrs = [
+        "asset_manager.h",
+        "asset_resolver.h",
+        "directory_asset_bundle.h",
+        "native_assets.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/fml",
+        "@rapidjson",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "assets_fixtures",
+)
+
+flutter_cc_test(
+    name = "assets_unittests",
+    size = "small",
+    srcs = ["native_assets_unittests.cc"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":assets",
+        ":assets_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing",
+    ],
+)

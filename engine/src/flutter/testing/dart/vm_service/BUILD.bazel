@@ -1,0 +1,26 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Dart tests that need the VM service, run by flutter_tester with it on
+# (testing/run_tests.py's enable_vm_service; microtask_profiling_test with
+# --profile-microtasks). Hand-written like ../BUILD.bazel; the list of tests
+# is BUILD.gn's.
+
+load("//build_defs/testing:testing.bzl", "flutter_dart_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_dart_tests(
+    name = "vm_service",
+    srcs = ["//engine/src/flutter/testing/dart:dart_sources"],
+    package_roots = ["//engine/src/flutter/testing/dart:test_packages"],
+    tests = [
+        "microtask_profiling_test.dart",
+        "shader_reload_test.dart",
+        "skp_test.dart",
+        "tracing_test.dart",
+        "vmservice_methods_test.dart",
+    ],
+    vm_service = True,
+)

@@ -1,0 +1,159 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/android/surface/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "surface",
+    srcs = [
+        "android_surface.cc",
+        "snapshot_surface_producer.cc",
+    ],
+    hdrs = [
+        "android_surface.h",
+        "snapshot_surface_producer.h",
+    ],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":native_window",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/platform/android/context",
+        "//engine/src/flutter/shell/platform/android/jni",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "native_window",
+    srcs = ["android_native_window.cc"],
+    hdrs = ["android_native_window.h"],
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "surface_mock",
+    testonly = True,
+    srcs = ["android_surface_mock.cc"],
+    hdrs = ["android_surface_mock.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/third_party/googletest:gmock
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-deprecated-copy",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-implicit-fallthrough",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-nullability-completeness",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-suggest-destructor-override",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-suggest-override",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-unused-private-field",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-unused-variable",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":surface",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/shell/gpu:gpu_surface_gl",
+        "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "//engine/src/flutter/vulkan",  # shell_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+# `is_mac || is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
