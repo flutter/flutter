@@ -203,8 +203,8 @@ void main() {
                 'details':
                     '_createDevFS: Unexpected exception:PathAccessException: '
                     r"Creation of temporary directory failed, path = 'C:\Users\user\AppData\Local\Temp' "
-                    '(OS Error: Access is denied.\r\n, errno = 5)\r\n'
-                    '#0      _checkForErrorResponse (dart:io/common.dart:58:9)\r\n'
+                    '(OS Error: Access is denied, errno = 5)\n'
+                    '#0      _checkForErrorResponse (dart:io/common.dart:58:9)\n'
                     '#1      _Directory.createTemp.<anonymous closure> (dart:io/directory_impl.dart:163:7)',
               },
             ),
@@ -225,7 +225,7 @@ void main() {
               .having(
                 (DevFSException e) => e.error,
                 'error',
-                r"PathAccessException: Creation of temporary directory failed, path = 'C:\Users\user\AppData\Local\Temp' (OS Error: Access is denied. , errno = 5)",
+                r"PathAccessException: Creation of temporary directory failed, path = 'C:\Users\user\AppData\Local\Temp' (OS Error: Access is denied, errno = 5)",
               ),
         ),
       );
