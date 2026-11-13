@@ -301,8 +301,9 @@ bool KeyboardManager::HandleMessage(UINT const action,
       }
 
       current_session_.clear();
-      current_session_.push_back(Win32Message{
-          .action = action, .wparam = wparam, .lparam = key_lparam});
+      // Preserve the original message for redispatch if it is not handled.
+      current_session_.push_back(
+          Win32Message{.action = action, .wparam = wparam, .lparam = lparam});
       const bool is_keydown_message =
           (action == WM_KEYDOWN || action == WM_SYSKEYDOWN);
       // Check if this key produces a character by peeking if this key down

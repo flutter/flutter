@@ -839,6 +839,92 @@ TEST_F(KeyboardTest, ShiftWithZeroScanCodeIsReleasedByRegularKeyUp) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
+// Non-standard Shift messages are normalized for the framework, but are
+// redispatched to the system unchanged when the framework does not handle them.
+//
+// Regression test for https://github.com/flutter/flutter/issues/181907.
+TEST_F(KeyboardTest, ShiftWithExtendedBitIsRedispatchedUnchanged) {
+  KeyboardTester tester{GetContext()};
+  tester.Responding(false);
+
+  const Win32Message key_down =
+      WmKeyDownInfo{VK_SHIFT, kScanCodeShiftRight, kExtended, kWasUp}.Build(
+          kWmResultZero);
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RSHIFT, true, false}, key_down});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalShiftRight, kLogicalShiftRight, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+
+  const auto& redispatched = tester.GetWindow().RedispatchedMessages();
+  ASSERT_EQ(redispatched.size(), 1u);
+  EXPECT_EQ(redispatched.front().message, key_down.message);
+  EXPECT_EQ(redispatched.front().wParam, key_down.wParam);
+  EXPECT_EQ(redispatched.front().lParam, key_down.lParam);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1u);
+
+  const Win32Message key_up =
+      WmKeyUpInfo{VK_SHIFT, kScanCodeShiftRight, kExtended}.Build(
+          kWmResultZero);
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RSHIFT, false, true}, key_up});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeUp,
+                       kPhysicalShiftRight, kLogicalShiftRight, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+
+  ASSERT_EQ(redispatched.size(), 1u);
+  EXPECT_EQ(redispatched.front().message, key_up.message);
+  EXPECT_EQ(redispatched.front().wParam, key_up.wParam);
+  EXPECT_EQ(redispatched.front().lParam, key_up.lParam);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1u);
+}
+
+TEST_F(KeyboardTest, ShiftWithZeroScanCodeIsRedispatchedUnchanged) {
+  KeyboardTester tester{GetContext()};
+  tester.Responding(false);
+
+  const Win32Message key_down =
+      WmKeyDownInfo{VK_SHIFT, 0, kNotExtended, kWasUp}.Build(kWmResultZero);
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, true, false}, key_down});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalShiftLeft, kLogicalShiftLeft, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+
+  const auto& redispatched = tester.GetWindow().RedispatchedMessages();
+  ASSERT_EQ(redispatched.size(), 1u);
+  EXPECT_EQ(redispatched.front().message, key_down.message);
+  EXPECT_EQ(redispatched.front().wParam, key_down.wParam);
+  EXPECT_EQ(redispatched.front().lParam, key_down.lParam);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1u);
+
+  const Win32Message key_up =
+      WmKeyUpInfo{VK_SHIFT, 0, kNotExtended}.Build(kWmResultZero);
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, false, true}, key_up});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeUp,
+                       kPhysicalShiftLeft, kLogicalShiftLeft, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+
+  ASSERT_EQ(redispatched.size(), 1u);
+  EXPECT_EQ(redispatched.front().message, key_up.message);
+  EXPECT_EQ(redispatched.front().wParam, key_up.wParam);
+  EXPECT_EQ(redispatched.front().lParam, key_up.lParam);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1u);
+}
+
 TEST_F(KeyboardTest, CtrlLeftUnhandled) {
   KeyboardTester tester{GetContext()};
   tester.Responding(false);
@@ -861,7 +947,7 @@ TEST_F(KeyboardTest, CtrlLeftUnhandled) {
   // Release CtrlLeft
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       KeyStateChange{VK_LCONTROL, false, true},
-      WmKeyUpInfo{VK_SHIFT, kScanCodeControl, kNotExtended}.Build(
+      WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kNotExtended}.Build(
           kWmResultZero)});
 
   EXPECT_EQ(tester.key_calls.size(), 1);
