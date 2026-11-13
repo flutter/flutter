@@ -778,12 +778,7 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    final List<FlutterView> views = await flutterDevices.first!.vmService!.getFlutterViews();
-    final Map<String, Object?>? current = await flutterDevices.first!.vmService!
-        .flutterAllViewsMetricsOverride(isolateId: views.first.uiIsolate!.id!);
-    final Brightness next = current?['platformBrightness'] == Brightness.dark.name
-        ? Brightness.light
-        : Brightness.dark;
+    Brightness? next;
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       // Views that share an isolate share the override too.
@@ -793,11 +788,16 @@ abstract class ResidentHandlers {
         if (allViews == null) {
           continue;
         }
+        next ??= allViews['platformBrightness'] == Brightness.dark.name
+            ? Brightness.light
+            : Brightness.dark;
         await device.vmService!.flutterAllViewsMetricsOverride(
           isolateId: isolateId,
           overrides: <String, Object?>{...allViews, 'platformBrightness': next.name},
         );
       }
+    }
+    if (next != null) {
       logger.printStatus('Changed brightness to $next.');
     }
     return true;

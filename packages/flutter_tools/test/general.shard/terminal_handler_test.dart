@@ -201,8 +201,6 @@ void main() {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         listViews,
         readAllViewsMetricsOverride(),
-        listViews,
-        readAllViewsMetricsOverride(),
         writeAllViewsMetricsOverride(const <String, Object>{'platformBrightness': 'dark'}),
       ]);
       await terminalHandler.processTerminalInput('b');
@@ -215,8 +213,6 @@ void main() {
       () async {
         const allViews = <String, Object>{'boldText': true, 'platformBrightness': 'dark'};
         final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-          listViews,
-          readAllViewsMetricsOverride(allViews),
           listViews,
           readAllViewsMetricsOverride(allViews),
           writeAllViewsMetricsOverride(const <String, Object>{
@@ -237,14 +233,29 @@ void main() {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         listViews,
         readAllViewsMetricsOverride(),
-        listViews,
-        readAllViewsMetricsOverride(),
         writeAllViewsMetricsOverride(const <String, Object>{'platformBrightness': 'dark'}),
       ], web: true);
       await terminalHandler.processTerminalInput('b');
 
       expect(terminalHandler.logger.statusText, contains('Changed brightness to Brightness.dark'));
     });
+
+    testWithoutContext(
+      'b - debugToggleBrightness does nothing when the app rejects a viewId of all',
+      () async {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+          listViews,
+          FakeVmServiceRequest(
+            method: 'ext.flutter.viewMetricsOverride',
+            args: const <String, Object>{'isolateId': '1', 'viewId': 'all'},
+            error: FakeRPCError(code: vm_service.RPCErrorKind.kServerError.code),
+          ),
+        ]);
+        await terminalHandler.processTerminalInput('b');
+
+        expect(terminalHandler.logger.statusText, isNot(contains('Changed brightness')));
+      },
+    );
 
     testWithoutContext('b - debugToggleBrightness without service protocol is skipped', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(

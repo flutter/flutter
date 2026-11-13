@@ -807,25 +807,36 @@ class FlutterVmService {
 
   /// Returns the view metrics override that applies to every view of the
   /// application running in the isolate [isolateId], in the format of
-  /// `DebugViewMetricsOverride.toJson`.
+  /// `DebugViewMetricsOverride.toJson`, or an empty map if there is no such
+  /// override.
   ///
   /// If a non-null value is provided for [overrides], it replaces that override
   /// first.
   ///
   /// Returns null if the application does not provide the
-  /// `ext.flutter.viewMetricsOverride` service extension.
+  /// `ext.flutter.viewMetricsOverride` service extension, or rejects a `viewId`
+  /// of `all`.
   Future<Map<String, Object?>?> flutterAllViewsMetricsOverride({
     Map<String, Object?>? overrides,
     required String isolateId,
   }) async {
-    final Map<String, Object?>? result = await invokeFlutterExtensionRpcRaw(
-      'ext.flutter.viewMetricsOverride',
-      isolateId: isolateId,
-      args: <String, String>{
-        'viewId': 'all',
-        if (overrides != null) 'overrides': json.encode(overrides),
-      },
-    );
+    final Map<String, Object?>? result;
+    try {
+      result = await invokeFlutterExtensionRpcRaw(
+        'ext.flutter.viewMetricsOverride',
+        isolateId: isolateId,
+        args: <String, String>{
+          'viewId': 'all',
+          if (overrides != null) 'overrides': json.encode(overrides),
+        },
+      );
+    } on vm_service.RPCError catch (error) {
+      // A framework from before the override for every view rejects its id.
+      if (error.code == vm_service.RPCErrorKind.kServerError.code) {
+        return null;
+      }
+      rethrow;
+    }
     if (result case {'overrides': final Map<String, Object?> registry}) {
       return switch (registry['all']) {
         final Map<String, Object?> allViews => allViews,
