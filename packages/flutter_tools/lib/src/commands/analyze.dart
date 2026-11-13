@@ -83,7 +83,32 @@ class AnalyzeCommand extends FlutterCommand {
       hide: !verboseHelp,
       help: 'Also output the analysis time.',
     );
-    argParser.addFlag('plugins', defaultsTo: true, help: 'Whether to enable analyzer plugins.');
+    argParser.addFlag(
+      'plugins',
+      defaultsTo: null,
+      help: 'Use analyzer plugins. Defaults to true when running on CI.',
+    );
+    argParser.addFlag(
+      'trust-plugins',
+      negatable: false,
+      help:
+          'Trust the analyzer plugins specified in analysis options, '
+          'with their current contents, to execute code.',
+    );
+    argParser.addFlag(
+      'always-trust-plugins',
+      negatable: false,
+      help:
+          'Always trust the analyzer plugins specified in analysis options '
+          'to execute code.',
+    );
+    argParser.addFlag(
+      'never-trust-plugins',
+      negatable: false,
+      help:
+          'Never trust the analyzer plugins specified in analysis options '
+          'to execute code.',
+    );
 
     CommonOptions.pub.addTo(argParser);
 
@@ -238,6 +263,18 @@ class AnalyzeCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
         toolContext;
+
+    final int trustFlagCount = <bool>[
+      boolArg('trust-plugins'),
+      boolArg('always-trust-plugins'),
+      boolArg('never-trust-plugins'),
+    ].where((bool flag) => flag).length;
+    if (trustFlagCount > 1) {
+      throwToolExit(
+        'Cannot specify more than one of "--trust-plugins", '
+        '"--always-trust-plugins", and "--never-trust-plugins".',
+      );
+    }
 
     if (boolArg('android')) {
       final AndroidAnalyzeOption option;
