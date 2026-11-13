@@ -6,6 +6,7 @@ package com.flutter.gradle
 
 import com.flutter.gradle.ManifestVersionCode.Result
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
@@ -43,7 +44,7 @@ class ManifestVersionCodeTest {
         val main = manifest("main.xml", "android:versionCode=\"8\"")
 
         val result = assertIs<Result.Unresolved>(ManifestVersionCode.from(listOf(release, main)))
-        assertEquals(true, result.reason.contains("\${vc}"))
+        assertContains(result.reason, "\${vc}")
     }
 
     @Test
@@ -51,7 +52,8 @@ class ManifestVersionCodeTest {
         val release = manifest("release.xml", "tools:remove=\"android:label, android:versionCode\"")
         val main = manifest("main.xml", "android:versionCode=\"8\"")
 
-        assertIs<Result.Unresolved>(ManifestVersionCode.from(listOf(release, main)))
+        val result = assertIs<Result.Unresolved>(ManifestVersionCode.from(listOf(release, main)))
+        assertContains(result.reason, "tools:remove")
     }
 
     @Test
@@ -59,7 +61,14 @@ class ManifestVersionCodeTest {
         val release = manifest("release.xml", "tools:node=\"replace\"")
         val main = manifest("main.xml", "android:versionCode=\"8\"")
 
-        assertIs<Result.Unresolved>(ManifestVersionCode.from(listOf(release, main)))
+        val result = assertIs<Result.Unresolved>(ManifestVersionCode.from(listOf(release, main)))
+        assertContains(result.reason, "tools:node=\"replace\"")
+    }
+
+    @Test
+    fun `a manifest that cannot be parsed is unresolved`() {
+        val result = assertIs<Result.Unresolved>(ManifestVersionCode.from(listOf("broken.xml" to "<manifest")))
+        assertContains(result.reason, "broken.xml could not be parsed")
     }
 
     @Test

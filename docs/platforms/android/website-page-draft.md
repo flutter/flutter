@@ -134,9 +134,11 @@ Note: For `--split-per-abi` builds, Flutter sets per-ABI version codes
 `arm64-v8a`, and 4 for `x86_64`) in its own `onVariants` callback. It takes
 `versionCode` from your `android {}` block (`defaultConfig` or a product
 flavor). If that block sets none, Flutter uses `android:versionCode` from
-`AndroidManifest.xml`. If neither sets an integer versionCode, the build fails,
-because Google Play rejects split APKs that share one; pass
-`-P force-version-code-ignoring-abi=true` to build them anyway.
+`AndroidManifest.xml`. If neither sets an integer versionCode (for example,
+the manifest uses a placeholder), the build fails, because Google Play rejects
+split APKs that share a versionCode. Pass
+`-P force-version-code-ignoring-abi=true` to `flutter build apk` to build them
+anyway.
 When the Flutter plugin is applied in the `plugins {}` block, as in Flutter's
 templates, that callback runs before an `androidComponents.onVariants` block
 in your app's build script, and a value your block sets replaces Flutter's.

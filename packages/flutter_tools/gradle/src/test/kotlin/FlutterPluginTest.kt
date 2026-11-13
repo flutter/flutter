@@ -443,7 +443,7 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants offsets the manifest versionCode lazily, failing if unresolved, when the DSL declares none`(
+    fun `onVariants offsets the manifest versionCode lazily when the DSL declares none`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
@@ -467,10 +467,14 @@ class FlutterPluginTest {
 
         verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
         assertEquals(2007, versionCodeProvider.captured.get())
-        manifest.writeText("""<manifest xmlns:android="http://schemas.android.com/apk/res/android"/>""")
+        manifest.writeText(
+            """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="${'$'}{vc}"/>"""
+        )
         val error = assertThrows<GradleException> { versionCodeProvider.captured.get() }
         assertContains(error.message!!, "variant 'debug'")
         assertContains(error.message!!, "versionCode = flutter.versionCode")
+        manifest.writeText("""<manifest xmlns:android="http://schemas.android.com/apk/res/android"/>""")
+        assertContains(assertThrows<GradleException> { versionCodeProvider.captured.get() }.message!!, "no manifest sets one")
     }
 
     @Test
