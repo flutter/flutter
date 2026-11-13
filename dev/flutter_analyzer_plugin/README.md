@@ -160,7 +160,7 @@ final double clamped = clampDouble(value, 0.0, 1.0);
 - **Scope**: Global (all Dart files where the plugin is enabled)
 - **Description**: Disallows direct instantiation of `Stopwatch()` or calling functions that return a `Stopwatch`.
 - **Rationale**: Direct usage of `Stopwatch` relies on the host system clock, which can fall out of sync with `FakeAsync` during unit and widget tests, causing non-deterministic test flakes. Code should instead use `clock.stopwatch()` from `package:clock` (which binds with `FakeAsync` during tests) or use `dart:developer` timeline events for profiling.
-- **Inline Exemption**: Standard analyzer ignore comments (`// ignore: no_stopwatches`) or legacy inline directive `// flutter_ignore: stopwatch (see analyze.dart)`.
+- **Inline Exemption**: Standard analyzer ignore comments (`// ignore: flutter_analyzer_plugin/no_stopwatches`) or legacy inline directive `// flutter_ignore: stopwatch (see analyze.dart)`.
 
 ```dart
 // BAD:
@@ -177,7 +177,7 @@ final Stopwatch stopwatch = clock.stopwatch()..start();
 - **Scope**: Global (all library declarations and public APIs)
 - **Description**: Enforces standard multi-line string formatting on `@Deprecated` annotations.
 - **Rationale**: Standardizing deprecation messages ensures all deprecated APIs provide actionable migration instructions, state the exact version of deprecation, and link to the Flutter deprecation policy.
-- **Inline Exemption**: Standard analyzer ignore comments (`// ignore: deprecation_syntax`) or legacy inline directive `// flutter_ignore: deprecation_syntax (see analyze.dart)`.
+- **Inline Exemption**: Standard analyzer ignore comments (`// ignore: flutter_analyzer_plugin/deprecation_syntax`) or legacy inline directive `// flutter_ignore: deprecation_syntax (see analyze.dart)`.
 
 ```dart
 // BAD:
@@ -343,7 +343,7 @@ late List<StackTrace> _creationStackTraces = <StackTrace>[];
 - **Description**: Requires debug-only members (whose names start with `debug`, `_debug`, `Debug`, or `_Debug`) to be accessed only inside `assert(...)` statements/initializers, or inside other debug-only members.
 - **Rationale**: Symbols prefixed with `debug` or `_debug` exist for development-time diagnostics and assertions. Restricting their usage to `assert(...)` blocks ensures the logic and the storage are tree-shaken from profile and release builds.
 - **Limitations**: To keep the rule's implementation simple, debug-only accesses guarded by control flows (such as `if (kDebugMode)` or `if (!kReleaseMode)`) will still be flagged.
-Suppress intentional exceptions using `// ignore: access_debug_members_only_in_asserts`.
+Suppress intentional exceptions using `// ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts`.
 
 ```dart
 // BAD:
