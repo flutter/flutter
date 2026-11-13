@@ -329,6 +329,9 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   //
   // /build/native_assets/ios/buz.framework/buz:
   // @rpath/libbuz.dylib
+  //
+  // Paths can themselves contain parentheses and architecture-like text;
+  // only a trailing ' (architecture <name>)' is an architecture suffix.
 
   const outputArchitectures = <String, Architecture>{
     'arm': Architecture.arm,
@@ -343,19 +346,12 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
 
   while (lines.moveNext()) {
     final String line = lines.current;
-    // A section header is a '<path>:' or '<path> (architecture <name>):'
-    // line. The path can itself contain parentheses, including text that
-    // looks like an architecture suffix, so the architecture name is only
-    // taken from a ' (architecture <name>)' that closes the line. Only the
-    // last occurrence of the marker can be that closing suffix, so checking
-    // just that candidate keeps the scan linear in the length of the line
-    // instead of backtracking over every '(' like a regular expression.
-    // '.' in the previous expression did not match the line terminators
-    // U+000D, U+2028 and U+2029 (lines are already split on U+000A), so a
-    // line containing one is still not a header.
+    // Use string matching rather than a regex to avoid backtracking when a
+    // path contains multiple architecture-like fragments.
     String? architectureString;
     bool isHeader = line.length > 1 && line.endsWith(':');
     if (isHeader) {
+      // A colon-terminated line with CR/U+2028/U+2029 is not a valid header.
       for (final int codeUnit in line.codeUnits) {
         if (codeUnit == 0x0d || codeUnit == 0x2028 || codeUnit == 0x2029) {
           isHeader = false;
