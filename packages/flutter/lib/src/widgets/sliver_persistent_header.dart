@@ -17,6 +17,38 @@ import 'scroll_position.dart';
 import 'scrollable.dart';
 
 /// Delegate for configuring a [SliverPersistentHeader].
+///
+/// A delegate describes how a persistent header is sized, and how it is built
+/// as it shrinks and grows. Subclasses must implement [build], [minExtent],
+/// [maxExtent] and [shouldRebuild].
+///
+/// [minExtent] and [maxExtent] bound the header's extent along the main axis,
+/// and [minExtent] must be less than or equal to [maxExtent]. Neither may
+/// change over the lifetime of a delegate instance; both should be derived
+/// entirely from the arguments passed to the delegate's constructor. To resize
+/// the header, supply a new delegate whose [shouldRebuild] returns true.
+///
+/// [build] is given a `shrinkOffset` that runs from zero, when the header is at
+/// [maxExtent], up to `maxExtent - minExtent`, when the header has collapsed to
+/// [minExtent]. Interpolating on that offset is what produces the effect of the
+/// header's contents collapsing as it scrolls away.
+///
+/// Whether a collapsed header remains visible is decided by the header rather
+/// than by the delegate, through [SliverPersistentHeader.pinned] and
+/// [SliverPersistentHeader.floating].
+///
+/// {@tool dartpad}
+/// This example implements a delegate for a pinned header whose title shrinks,
+/// and whose colors shift, as the list scrolls underneath it.
+///
+/// ** See code in examples/api/lib/widgets/sliver_persistent_header/sliver_persistent_header_delegate.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [SliverPersistentHeader], the sliver that this delegate configures.
+///  * [SliverAppBar], which is built on top of [SliverPersistentHeader] and
+///    covers many common app bar use cases without a custom delegate.
 abstract class SliverPersistentHeaderDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
