@@ -495,71 +495,51 @@ class DevFS {
 
   // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h.
   static const _kFileSystemAlreadyExistsCode = 1001;
-  static const _kServiceConnectionDisposedMessage = 'Service connection disposed';
-  static const _kCreateDevFSUnexpectedPrefix = '_createDevFS: Unexpected exception:';
-  static final _targetVmFileSystemErrorPrefix = RegExp(
-    r'^(?:FileSystemException|PathAccessException|PathExistsException|PathNotFoundException):',
+  // Legacy sdk/lib/vmservice omits a space after 'exception:'; pkg/dart_runtime_service adds one.
+  static final _targetFileSystemErrorPattern = RegExp(
+    r'^_createDevFS: Unexpected exception: ?'
+    r'((?:FileSystem|PathAccess|PathExists|PathNotFound)Exception:.*)',
+    dotAll: true,
   );
-  static final _newlinePattern = RegExp(r'\r?\n');
-  static final _stackTraceStartPattern = RegExp(r'\r?\n#0');
-
-  static String? _extractTargetFileSystemError(vm_service.RPCError rpcException) {
-    if (rpcException.code != vm_service.RPCErrorKind.kInternalError.code) {
-      return null;
-    }
-    final String? details = rpcException.details;
-    if (details == null) {
-      return null;
-    }
-    String errorText = details.split(_stackTraceStartPattern).first.trim();
-    if (errorText.startsWith(_kCreateDevFSUnexpectedPrefix)) {
-      errorText = errorText.substring(_kCreateDevFSUnexpectedPrefix.length).trim();
-    }
-    if (!_targetVmFileSystemErrorPrefix.hasMatch(errorText)) {
-      return null;
-    }
-    return errorText.replaceAll(_newlinePattern, ' ');
-  }
 
   Future<Uri> create() async {
     final Logger logger = _toolContext.logger;
     logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
-    final vm_service.Response response = await _createDevFSOnDevice(
-      logger: logger,
-      retryIfAlreadyExists: true,
-    );
-    _baseUri = Uri.parse(response.json!['uri'] as String);
+    for (var retry = true; ; retry = false) {
+      try {
+        final vm_service.Response response = await _vmService.createDevFS(fsName);
+        _baseUri = Uri.parse(response.json!['uri'] as String);
+        break;
+      } on vm_service.RPCError catch (rpcException) {
+        if (rpcException.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+            rpcException.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
+            rpcException.message.contains('Service connection disposed')) {
+          // This can happen if the device has been disconnected, so translate to
+          // a DevFSException, which the caller will handle.
+          throw DevFSException('Service disconnected', rpcException);
+        }
+        if (rpcException.details case final String details
+            when rpcException.code == vm_service.RPCErrorKind.kInternalError.code) {
+          final String header = details.split('\n#0').first.trim();
+          if (_targetFileSystemErrorPattern.firstMatch(header)?.group(1) case final String error) {
+            logger.printTrace('DevFS: Failed to create filesystem on device: $rpcException');
+            throw DevFSException(
+              'Failed to create DevFS on device',
+              error.replaceAll('\r\n', ' ').replaceAll('\n', ' '),
+            );
+          }
+        }
+        if (!retry || rpcException.code != _kFileSystemAlreadyExistsCode) {
+          // Other RPCErrors are unexpected. Rethrow so it will hit crash
+          // logging.
+          rethrow;
+        }
+        logger.printTrace('DevFS: Creating failed. Destroying and trying again');
+        await destroy();
+      }
+    }
     logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
     return _baseUri!;
-  }
-
-  Future<vm_service.Response> _createDevFSOnDevice({
-    required Logger logger,
-    required bool retryIfAlreadyExists,
-  }) async {
-    try {
-      return await _vmService.createDevFS(fsName);
-    } on vm_service.RPCError catch (rpcException) {
-      if (rpcException.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
-          rpcException.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
-          rpcException.message.contains(_kServiceConnectionDisposedMessage)) {
-        // This can happen if the device has been disconnected, so translate to
-        // a DevFSException, which the caller will handle.
-        throw DevFSException('Service disconnected', rpcException);
-      }
-      if (_extractTargetFileSystemError(rpcException) case final String fileSystemError) {
-        logger.printTrace('DevFS: Failed to create filesystem on device: $rpcException');
-        throw DevFSException('Failed to create DevFS on device', fileSystemError);
-      }
-      if (!retryIfAlreadyExists || rpcException.code != _kFileSystemAlreadyExistsCode) {
-        // Other RPCErrors are unexpected. Rethrow so it will hit crash
-        // logging.
-        rethrow;
-      }
-      logger.printTrace('DevFS: Creating failed. Destroying and trying again');
-      await destroy();
-      return _createDevFSOnDevice(logger: logger, retryIfAlreadyExists: false);
-    }
   }
 
   Future<void> destroy() async {
