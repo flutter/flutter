@@ -26,7 +26,6 @@ dependencies:
   completion: 1.0.2
   coverage: 1.15.1
   crypto: 3.0.8
-  ffi: 2.2.0
   file: 7.0.1
   flutter_tools_core:
     path: packages/flutter_tools_core
@@ -71,7 +70,7 @@ dependencies:
   graphs: 2.3.2
   hooks_runner: 1.6.4
   hooks: 2.2.0
-  code_assets: 2.1.0
+  code_assets: 2.2.0
   data_assets: 0.20.0
   record_use: 1.1.1
 
@@ -139,4 +138,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: rriph5
+# PUBSPEC CHECKSUM: s5pthg

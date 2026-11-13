@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/artifacts.dart' show Artifacts;
 import 'package:flutter_tools/src/base/logger.dart' show BufferLogger;
 import 'package:flutter_tools/src/build_info.dart' show BuildMode, TargetPlatform, kBuildMode;
 import 'package:flutter_tools/src/build_system/build_system.dart' show Environment;
-import 'package:flutter_tools/src/features.dart' show FeatureFlags;
+import 'package:flutter_tools/src/features.dart' show FeatureFlags, featureFlags;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart'
     show BuildCodeAssetsOptions, runFlutterSpecificHooks;
 
@@ -61,6 +61,7 @@ void main() {
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: featureFlags,
           logger: logger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -107,6 +108,7 @@ void main() {
             buildDataAssets: true,
             recordedUsesFile: null,
             fileSystem: fileSystem,
+            featureFlags: featureFlags,
             logger: logger,
             buildRunner: FakeFlutterNativeAssetsBuildRunner(
               packagesWithNativeAssetsResult: <String>['bar'],
