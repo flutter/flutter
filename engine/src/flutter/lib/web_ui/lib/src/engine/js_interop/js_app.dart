@@ -9,28 +9,18 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 /// The JS bindings for the configuration object passed to [FlutterApp.addView].
 ///
-/// This is the engine's view of the public [ui_web.FlutterViewOptions]. Both
-/// describe the same JS object; this one only refines [hostElement] into the
-/// engine-internal [DomElement] type, which can't appear in `dart:ui_web`.
-extension type JsFlutterViewOptions._(JSObject _) implements ui_web.FlutterViewOptions {
-  factory JsFlutterViewOptions({
-    required DomElement hostElement,
-    JsViewConstraints? viewConstraints,
-    Object? initialData,
-  }) =>
-      ui_web.FlutterViewOptions(
-            hostElement: hostElement,
-            viewConstraints: viewConstraints,
-            initialData: initialData,
-          )
-          as JsFlutterViewOptions;
+/// This is the public [ui_web.FlutterViewOptions]. The engine reads the host
+/// element through [JsFlutterViewOptionsExtension.hostDomElement].
+typedef JsFlutterViewOptions = ui_web.FlutterViewOptions;
 
+/// Engine-only accessors for [JsFlutterViewOptions].
+extension JsFlutterViewOptionsExtension on JsFlutterViewOptions {
   @JS('hostElement')
   external DomElement? get _hostElement;
 
-  // Redeclares `ui_web.FlutterViewOptions.hostElement` with the engine type.
-  // ignore: annotate_redeclares
-  DomElement get hostElement {
+  /// The host element, as the engine-internal [DomElement] type, which can't
+  /// appear in `dart:ui_web`.
+  DomElement get hostDomElement {
     assert(_hostElement != null, '`hostElement` passed to addView cannot be null.');
     return _hostElement!;
   }
