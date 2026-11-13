@@ -484,8 +484,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final HostPlatform hostPlatform = os.hostPlatform;
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(hostPlatform);
+      final onlyActiveArch = activeArch == os.hostPlatform.cpuArch;
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');

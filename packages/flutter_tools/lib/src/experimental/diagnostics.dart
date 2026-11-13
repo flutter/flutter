@@ -91,7 +91,7 @@ class ExtensionDoctorValidator extends DoctorValidator {
 }
 
 /// A host-side [DiagnosticsExtension] client adapter that delegates RPC queries to an [ExtensionConnection].
-class DiagnosticsExtensionClient extends DiagnosticsExtension {
+final class DiagnosticsExtensionClient extends DiagnosticsExtension {
   /// Creates a [DiagnosticsExtensionClient] wrapping the host [connection].
   DiagnosticsExtensionClient(
     this.connection, {
@@ -123,6 +123,8 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
       } else {
         _logger.printTrace('DiagnosticsExtensionClient received invalid title response: $response');
       }
+    } on ToolExtensionException catch (err) {
+      _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
       _logger.printTrace('DiagnosticsExtensionClient failed to fetch title: $err\n$stack');
     }
@@ -144,6 +146,12 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
         'DiagnosticsExtensionClient received ${results.length} result(s) via RPC.',
       );
       return results;
+    } on ToolExtensionException catch (err) {
+      return <ValidationResult>[
+        ValidationResult(ValidationType.missing, <ValidationMessage>[
+          ValidationMessage.error(err.message),
+        ]),
+      ];
     } on Object catch (err, stack) {
       _logger.printWarning(
         'Failed to run diagnostics for extension "${connection.extensionName}": $err',

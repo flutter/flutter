@@ -7,8 +7,8 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals show platform;
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
@@ -683,9 +683,10 @@ void main() {
     );
   });
 
-  testUsingContext('generates normalized input & output file paths', () {
+  testWithoutContext('generates normalized input & output file paths', () {
+    const Platform platform = LocalPlatform();
     final FileSystem fs = MemoryFileSystem.test(
-      style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
     setupLocalizations(
       <String, String>{'en': singleMessageArbFileString, 'es': singleEsMessageArbFileString},
@@ -697,11 +698,11 @@ void main() {
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
-    final jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
-    final oppositeSeparator = globals.platform.isWindows ? '/' : r'\';
-    final inputList = jsonResult['inputs'] as List<dynamic>;
+    final jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, Object?>;
+    final oppositeSeparator = platform.isWindows ? '/' : r'\';
+    final inputList = jsonResult['inputs']! as List<Object?>;
     expect(inputList, everyElement(isNot(contains(oppositeSeparator))));
-    final outputList = jsonResult['outputs'] as List<dynamic>;
+    final outputList = jsonResult['outputs']! as List<Object?>;
     expect(outputList, everyElement(isNot(contains(oppositeSeparator))));
   });
 
