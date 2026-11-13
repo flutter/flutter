@@ -323,6 +323,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         analytics: globals.analytics,
         cocoaPods: globals.cocoaPods!,
+        featureFlags: featureFlags,
         plistParser: globals.plistParser,
         templateRenderer: globals.templateRenderer,
         toolContext: const _GlobalToolContext(),
@@ -409,6 +410,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       XCDevice: () => XCDevice(
         analytics: globals.analytics,
         cocoaPods: globals.cocoaPods!,
+        featureFlags: featureFlags,
         iproxy: IProxy(
           artifacts: globals.artifacts!,
           logger: globals.logger,

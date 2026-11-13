@@ -10,7 +10,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
-import '../features.dart';
+import '../features.dart' show FeatureFlags;
 import '../flutter_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -24,6 +24,7 @@ Future<void> processPodsIfNeeded(
   String buildDirectory,
   BuildMode buildMode, {
   required CocoaPods? cocoaPods,
+  required FeatureFlags featureFlags,
   required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
   bool forceCocoaPodsOnly = false,

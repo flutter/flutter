@@ -601,6 +601,7 @@ class ToolDependencies {
         XCDevice(
           analytics: finalAnalytics,
           cocoaPods: finalCocoaPods,
+          featureFlags: finalFeatureFlags,
           iproxy: IProxy(
             artifacts: finalArtifacts,
             logger: finalLogger,
@@ -625,6 +626,7 @@ class ToolDependencies {
         IOSSimulatorUtils(
           analytics: finalAnalytics,
           cocoaPods: finalCocoaPods,
+          featureFlags: finalFeatureFlags,
           plistParser: finalPlistParser,
           templateRenderer: templateRenderer,
           toolContext: finalToolContext,

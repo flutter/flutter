@@ -22,6 +22,7 @@ import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
+import '../features.dart' show FeatureFlags;
 import '../flutter_plugins.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
@@ -38,6 +39,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required this.codesign,
+    required this.featureFlags,
     required this.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
@@ -108,6 +110,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   );
 
   final DarwinAddToAppCodesigning codesign;
+  final FeatureFlags featureFlags;
   final TemplateRenderer templateRenderer;
 
   final AppleContext _appleContext;
@@ -463,6 +466,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
+    required super.featureFlags,
     required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
@@ -612,6 +616,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
           cocoaPods: appleContext.cocoaPods,
+          featureFlags: featureFlags,
           templateRenderer: templateRenderer,
           toolContext: toolContext,
           forceCocoaPodsOnly: true,

@@ -115,6 +115,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: FakeAnalytics(),
     cocoaPods: FakeCocoaPods(),
+    featureFlags: TestFeatureFlags(),
     iMobileDevice: IMobileDevice.test(processManager: processManager),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
