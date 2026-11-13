@@ -7,6 +7,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class FlutterFMLTaskRunner;
+
 NS_ASSUME_NONNULL_BEGIN
 
 /// The shell-backed implementation of the engine backend.
@@ -17,6 +19,20 @@ NS_ASSUME_NONNULL_BEGIN
 /// The label used for this backend's threads and task runners, or nil before a thread host
 /// exists.
 @property(nonatomic, readonly, copy, nullable) NSString* threadLabel;
+
+/// The task runner for the platform thread (iOS main thread), or nil before task runners are
+/// adopted and after `resetTaskRunners`.
+@property(nonatomic, readonly, nullable) FlutterFMLTaskRunner* platformTaskRunner;
+
+/// The task runner for the UI thread, where framework code runs, or nil before task runners are
+/// adopted and after `resetTaskRunners`.
+///
+/// The platform and UI threads are always merged on iOS, so this is the platform task runner.
+@property(nonatomic, readonly, nullable) FlutterFMLTaskRunner* uiTaskRunner;
+
+/// The task runner for the raster thread, where GPU rasterisation commands are issued, or nil
+/// before task runners are adopted and after `resetTaskRunners`.
+@property(nonatomic, readonly, nullable) FlutterFMLTaskRunner* rasterTaskRunner;
 
 /// Creates the raster, IO, and (in debug and profile modes) profiler threads, and adopts the
 /// calling thread as the platform and UI thread.
@@ -36,6 +52,11 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// The shell using these threads must be destroyed before calling this method.
 - (void)destroyThreadHost;
+
+/// Releases the task runner wrappers.
+///
+/// @see `adoptTaskRunners:` in FlutterShell_Internal.h.
+- (void)resetTaskRunners;
 
 @end
 
