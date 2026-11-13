@@ -107,9 +107,6 @@ flutter::ThreadHost MakeThreadHost(NSString* thread_label) {
 @implementation FlutterShell {
   std::shared_ptr<flutter::ThreadHost> _threadHost;
   std::shared_ptr<flutter::SamplingProfiler> _profiler;
-
-  FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
-  FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
 }
 
 - (instancetype)init {
@@ -158,28 +155,21 @@ flutter::ThreadHost MakeThreadHost(NSString* thread_label) {
 }
 
 - (void)adoptTaskRunners:(const flutter::TaskRunners&)taskRunners {
-  _platformTaskRunnerWrapper =
+  FML_DCHECK(!_platformTaskRunner && !_rasterTaskRunner);
+  _platformTaskRunner =
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:taskRunners.GetPlatformTaskRunner()];
-  _rasterTaskRunnerWrapper =
+  _rasterTaskRunner =
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:taskRunners.GetRasterTaskRunner()];
 }
 
 - (void)resetTaskRunners {
-  _platformTaskRunnerWrapper = nil;
-  _rasterTaskRunnerWrapper = nil;
-}
-
-- (FlutterFMLTaskRunner*)platformTaskRunner {
-  return _platformTaskRunnerWrapper;
+  _platformTaskRunner = nil;
+  _rasterTaskRunner = nil;
 }
 
 - (FlutterFMLTaskRunner*)uiTaskRunner {
   // The platform and UI threads are always merged on iOS.
-  return _platformTaskRunnerWrapper;
-}
-
-- (FlutterFMLTaskRunner*)rasterTaskRunner {
-  return _rasterTaskRunnerWrapper;
+  return _platformTaskRunner;
 }
 
 @end

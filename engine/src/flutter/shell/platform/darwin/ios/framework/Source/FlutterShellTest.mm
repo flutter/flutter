@@ -151,6 +151,8 @@ flutter::TaskRunners MakeTaskRunners(FlutterShell* shell) {
 
   // The platform and UI threads are always merged on iOS.
   XCTAssertEqual(shell.uiTaskRunner, shell.platformTaskRunner);
+
+  // The platform and raster threads are not merged on iOS.
   XCTAssertNotEqual(shell.rasterTaskRunner, shell.platformTaskRunner);
 
   [shell resetTaskRunners];

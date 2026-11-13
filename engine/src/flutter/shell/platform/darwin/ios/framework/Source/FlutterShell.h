@@ -54,6 +54,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)destroyThreadHost;
 
 /// Releases the task runner wrappers.
+///
+/// @see `adoptTaskRunners:` in FlutterShell_Internal.h.
 - (void)resetTaskRunners;
 
 @end
