@@ -263,10 +263,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return 0.0f;
   }
   float scrollPosition = self.node.scrollPosition;
-  if (isnan(scrollPosition)) {
+  if (!isfinite(scrollPosition)) {
     scrollPosition = 0.0f;
   }
-  NSCAssert(isfinite(scrollPosition), @"The scrollPosition must not be infinity");
   return scrollPosition;
 }
 
