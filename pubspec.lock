@@ -150,10 +150,10 @@ packages:
     dependency: "direct main"
     description:
       name: cli_util
-      sha256: "89b8801ba49f8b593fbf2d3e59efd0f566c46cd4ba6837ae2610c72b52a0f899"
+      sha256: ff6785f7e9e3c38ac98b2fb035701789de90154024a75b6cb926445e83197d1c
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "0.4.2"
   clock:
     dependency: "direct main"
     description:
@@ -258,14 +258,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  dart_data_home:
-    dependency: "direct main"
-    description:
-      name: dart_data_home
-      sha256: "61b80017c4131cd3d52e8e89ecba4208c2f625cb80307c8d468d23680bc572be"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.1"
   dart_service_protocol_shared:
     dependency: transitive
     description:
@@ -358,10 +350,10 @@ packages:
     dependency: "direct dev"
     description:
       name: ffigen
-      sha256: "6f55d99ac1857fc063b58c3b31753df2bba417028ba98d30c6d625a385855064"
+      sha256: b7803707faeec4ce3c1b0c2274906504b796e3b70ad573577e72333bd1c9b3ba
       url: "https://pub.dev"
     source: hosted
-    version: "23.0.0"
+    version: "20.1.1"
   file:
     dependency: "direct main"
     description:

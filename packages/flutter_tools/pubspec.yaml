@@ -19,7 +19,6 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dap_adapters: 1.1.0
-  dart_data_home: 0.1.1
   dds: 5.4.0
   dwds: 27.2.1
   code_builder: 4.13.0
@@ -94,7 +93,6 @@ dependencies:
   built_collection: 5.1.2
   built_value: 8.13.0
   cli_config: 0.2.0
-  cli_util: 0.6.0
   clock: 1.1.3
   csslib: 1.0.2
   dap: 1.4.0
@@ -140,4 +138,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: c5nc6e
+# PUBSPEC CHECKSUM: s5pthg

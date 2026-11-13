@@ -2,82 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
-import 'package:dart_data_home/dart_data_home.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
-import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-import 'package:yaml/yaml.dart';
 
 import '../artifacts.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
+import '../base/time.dart';
 import '../build_system/depfile.dart';
 import '../convert.dart';
-import '../package_graph.dart';
 import 'project_extension_finder.dart';
 
-typedef _LockPackageInfo = ({String? resolvedRef, String source, String version});
+/// Result of compiling or reusing a workspace-local extension `.dill` Kernel.
+///
+/// Pass `buildToken` to [ExtensionKernelCompiler.writeCachedCapabilities] so
+/// capabilities are persisted only when the on-disk `.dill` still matches the
+/// snapshot spawned by the caller.
+typedef CompiledExtensionKernel = ({String buildToken, Uri dillUri});
 
-typedef _LocalStampData = ({
+typedef _StampData = ({
+  String buildToken,
   ToolExtensionCapabilities? capabilities,
-  String closureHash,
+  DateTime compiledAt,
+  String packageConfigHash,
   String sdkRevision,
-  String sdkVersion,
 });
 
-typedef _SharedCacheClosureEvaluation = ({
-  List<Package> closurePackages,
-  _LockPackageInfo extensionLockInfo,
-  Map<String, _LockPackageInfo> lockPackages,
-});
-
-typedef _CachedDillValidation = ({bool isValid, _LocalStampData? localStamp});
-
-typedef _CachedWorkspaceMetadata = ({
-  PackageConfig packageConfig,
-  String packageConfigRaw,
-  PackageGraph? packageGraph,
-  String? packageGraphRaw,
-  Map<String, _LockPackageInfo>? pubspecLock,
-  String? pubspecLockRaw,
-});
-
-sealed class _DillTarget {
-  const _DillTarget({required this.dillFile});
-
-  final File dillFile;
-}
-
-final class _SharedDillTarget extends _DillTarget {
-  const _SharedDillTarget({
-    required this.capabilitiesFile,
-    required super.dillFile,
-    required this.localFallback,
-  });
-
-  final File capabilitiesFile;
-  final _LocalDillTarget localFallback;
-}
-
-final class _LocalDillTarget extends _DillTarget {
-  const _LocalDillTarget({
-    required this.closureHash,
-    required super.dillFile,
-    required this.sdkRevision,
-    required this.sdkVersion,
-    required this.stampFile,
-  });
-
-  final String closureHash;
-  final String sdkRevision;
-  final String sdkVersion;
-  final File stampFile;
-}
+typedef _CachedDillValidation = ({bool isValid, _StampData? stamp});
 
 /// Exception thrown when compiling a tool extension entrypoint to a `.dill` Kernel fails.
 class ExtensionCompileException implements Exception {
@@ -90,60 +48,48 @@ class ExtensionCompileException implements Exception {
   String toString() => 'ExtensionCompileException: $message';
 }
 
-/// Compiles discovered tool extension entrypoints to `.dill` Kernel files and
-/// manages caching across shared immutable packages and local workspace packages.
+/// Compiles discovered tool extension entrypoints to workspace-local `.dill`
+/// Kernel files and manages incremental cache invalidation and capability
+/// persistence.
 class ExtensionKernelCompiler {
   ExtensionKernelCompiler({
     required this._artifacts,
     required this._fileSystem,
     required this._flutterRoot,
     required this._logger,
-    required this._platform,
     required this._processManager,
+    this._clock = const SystemClock(),
   }) : _depfileService = DepfileService(fileSystem: _fileSystem, logger: _logger);
 
-  static const String _kExtensionsDataDirectoryName = 'flutter_tool_extensions';
-  static const String _kCacheSubdirectoryName = 'cache';
-  static const String _kPackageGraphFileName = 'package_graph.json';
-  static const String _kPackageConfigFileName = 'package_config.json';
-  static const String _kPubspecLockFileName = 'pubspec.lock';
   static const String _kDotDartToolDirectoryName = '.dart_tool';
   static const String _kFlutterToolsDirectoryName = 'flutter_tools';
   static const String _kExtensionsDirectoryName = 'extensions';
   static const String _kLocalDillFileName = 'extension.dill';
-  static const String _kPackagesLockKey = 'packages';
-  static const String _kSourceLockKey = 'source';
-  static const String _kVersionLockKey = 'version';
-  static const String _kDescriptionLockKey = 'description';
-  static const String _kResolvedRefLockKey = 'resolved-ref';
-  static const String _kHostedSource = 'hosted';
-  static const String _kGitSource = 'git';
+  static const String _kBuildTokenStampKey = 'buildToken';
+  static const String _kCompiledAtStampKey = 'compiledAt';
+  static const String _kPackageConfigHashStampKey = 'packageConfigHash';
   static const String _kSdkRevisionStampKey = 'sdkRevision';
-  static const String _kSdkVersionStampKey = 'sdkVersion';
-  static const String _kClosureHashStampKey = 'closureHash';
   static const String _kCapabilitiesStampKey = 'capabilities';
-  static const String _kCapabilitiesFileSuffix = '.capabilities.json';
   static const String _kStampFileSuffix = '.stamp';
   static const String _kDepfileSuffix = '.d';
   static const String _kLockFileSuffix = '.lock';
   static const String _kTempFileSuffix = '.tmp';
-  static const _kImmutableLockSources = <String>{_kHostedSource, _kGitSource};
-  static final _kUnsupportedLabelChars = RegExp(r'[^a-zA-Z0-9._+-]');
+  static const int _kBuildTokenByteLength = 16;
 
   final Artifacts _artifacts;
+  final SystemClock _clock;
   final DepfileService _depfileService;
   final FileSystem _fileSystem;
   final Directory _flutterRoot;
   final Logger _logger;
-  final Platform _platform;
   final ProcessManager _processManager;
-  final _workspaceMetadataCache = <String, _CachedWorkspaceMetadata>{};
+  final Random _random = Random.secure();
 
-  /// Compiles [extension] to a `.dill` file (or returns the cached `.dill` URI
-  /// if up to date).
+  /// Compiles [extension] to a workspace-local `.dill` file (or returns the
+  /// cached `.dill` URI and `buildToken` if up to date).
   ///
   /// Throws an [ExtensionCompileException] if compilation fails.
-  Future<Uri> compile(DiscoveredProjectExtension extension) async {
+  Future<CompiledExtensionKernel> compile(DiscoveredProjectExtension extension) async {
     try {
       final File entrypointFile = _fileSystem.file(extension.entrypointUri);
       final bool entrypointExists = ErrorHandlingFileSystem.noExitOnFailure(
@@ -166,55 +112,122 @@ class ExtensionKernelCompiler {
         );
       }
 
-      final _DillTarget target = ErrorHandlingFileSystem.noExitOnFailure(
-        () => _resolveDillTarget(extension),
-      );
-      if (_isCachedDillValid(
-        entrypointFile: entrypointFile,
-        packageConfigFile: packageConfigFile,
-        target: target,
-      )) {
-        return target.dillFile.absolute.uri;
-      }
-      if (target case _SharedDillTarget(:final _LocalDillTarget localFallback)) {
-        if (_isCachedDillValid(
-          entrypointFile: entrypointFile,
-          packageConfigFile: packageConfigFile,
-          target: localFallback,
-        )) {
-          return localFallback.dillFile.absolute.uri;
-        }
-      }
+      final File dillFile = resolveDillFile(extension);
+      final File depFile = _fileSystem.file('${dillFile.path}$_kDepfileSuffix');
+      final File stampFile = _fileSystem.file('${dillFile.path}$_kStampFileSuffix');
 
-      switch (target) {
-        case _SharedDillTarget(:final _LocalDillTarget localFallback):
-          try {
-            return await _compileTarget(
-              extension,
-              entrypointFile: entrypointFile,
-              packageConfigFile: packageConfigFile,
-              target: target,
-            );
-          } on FileSystemException catch (error) {
-            _logger.printTrace(
-              'ExtensionKernelCompiler: shared cache unavailable ($error); '
-              'falling back to workspace-local cache.',
-            );
-            return await _compileTarget(
-              extension,
-              entrypointFile: entrypointFile,
-              packageConfigFile: packageConfigFile,
-              target: localFallback,
-            );
-          }
-        case _LocalDillTarget():
-          return await _compileTarget(
+      if (_tryReuseCachedDill(
             extension,
+            depFile: depFile,
+            dillFile: dillFile,
             entrypointFile: entrypointFile,
             packageConfigFile: packageConfigFile,
-            target: target,
-          );
+            stampFile: stampFile,
+          )
+          case final CompiledExtensionKernel cachedKernel) {
+        return cachedKernel;
       }
+
+      _ensureCacheDirectoryWritable(dillFile);
+
+      return await _fileSystem.runLocked<CompiledExtensionKernel>(
+        lockPath: '${dillFile.path}$_kLockFileSuffix',
+        logger: _logger,
+        scope: () async {
+          if (_tryReuseCachedDill(
+                extension,
+                depFile: depFile,
+                dillFile: dillFile,
+                entrypointFile: entrypointFile,
+                packageConfigFile: packageConfigFile,
+                stampFile: stampFile,
+              )
+              case final CompiledExtensionKernel cachedKernel) {
+            return cachedKernel;
+          }
+
+          // Capture compilation start time truncated down to whole seconds
+          // before hashing inputs or invoking `dart compile kernel`. Comparing
+          // `!input.lastModifiedSync().isBefore(compiledAt)` closes both the
+          // mid-compile edit window and coarse (millisecond / 1-second) OS
+          // filesystem timestamp truncation.
+          final DateTime compiledAt = _truncateToSeconds(_clock.now());
+          final String sdkRevision = _dartSdkRevision(extension);
+          final String packageConfigHash = _hashFile(packageConfigFile);
+
+          final File tempDillFile = _fileSystem.file('${dillFile.path}$_kTempFileSuffix');
+          final File tempDepFile = _fileSystem.file('${depFile.path}$_kTempFileSuffix');
+          final File tempStampFile = _fileSystem.file('${stampFile.path}$_kTempFileSuffix');
+          try {
+            final command = <String>[
+              // TODO(bkonyi): Resolve the Dart binary from _flutterRoot/bin/cache/dart-sdk
+              // instead of Artifact.engineDartBinary so --local-engine runs match the host
+              // VM used by Isolate.spawnUri and _resolveDartSdkRevisionFile().
+              _artifacts.getArtifactPath(Artifact.engineDartBinary),
+              'compile',
+              'kernel',
+              '--packages=${packageConfigFile.path}',
+              '--output=${tempDillFile.path}',
+              '--depfile=${tempDepFile.path}',
+              entrypointFile.path,
+            ];
+
+            _logger.printTrace(
+              'ExtensionKernelCompiler: compiling "${extension.name}" with: ${command.join(' ')}',
+            );
+            final ProcessResult result = await _processManager.run(command);
+            if (result.exitCode != 0) {
+              throw ExtensionCompileException(
+                'Failed to compile extension "${extension.name}" to kernel '
+                '(exit code ${result.exitCode}):\n${result.stderr}',
+              );
+            }
+
+            final CompiledExtensionKernel compiled = ErrorHandlingFileSystem.noExitOnFailure(() {
+              if (!tempDillFile.existsSync() || tempDillFile.lengthSync() == 0) {
+                throw ExtensionCompileException(
+                  'Failed to compile extension "${extension.name}" to kernel: '
+                  'compiler exited 0 but did not produce a non-empty "${tempDillFile.path}".',
+                );
+              }
+
+              final String buildToken = _generateBuildToken();
+
+              // Commit `.d` first, then `.dill`, and finally `.stamp` last so
+              // the stamp acts as the linearizable commit point: an unlocked
+              // reader never observes the new `buildToken` before `dillFile` is
+              // replaced, and any reader observing the new `.dill` alongside the
+              // previous stamp rejects it because the changed inputs fail the
+              // previous stamp's freshness check.
+              if (tempDepFile.existsSync()) {
+                tempDepFile.renameSync(depFile.path);
+              } else {
+                ErrorHandlingFileSystem.deleteIfExists(depFile);
+              }
+
+              tempDillFile.renameSync(dillFile.path);
+
+              tempStampFile
+                ..writeAsStringSync(
+                  jsonEncode(
+                    _encodeStamp(
+                      buildToken: buildToken,
+                      compiledAt: compiledAt,
+                      packageConfigHash: packageConfigHash,
+                      sdkRevision: sdkRevision,
+                    ),
+                  ),
+                )
+                ..renameSync(stampFile.path);
+
+              return (buildToken: buildToken, dillUri: dillFile.absolute.uri);
+            });
+            return compiled;
+          } finally {
+            _cleanupTempFiles(<File>[tempDillFile, tempDepFile, tempStampFile]);
+          }
+        },
+      );
     } on ProcessException catch (error) {
       throw ExtensionCompileException(
         'Failed to compile extension "${extension.name}" to kernel: $error',
@@ -224,119 +237,6 @@ class ExtensionKernelCompiler {
         'Failed to compile extension "${extension.name}" to kernel: $error',
       );
     }
-  }
-
-  Future<Uri> _compileTarget(
-    DiscoveredProjectExtension extension, {
-    required File entrypointFile,
-    required File packageConfigFile,
-    required _DillTarget target,
-  }) async {
-    final File dillFile = target.dillFile;
-    final File depFile = _fileSystem.file('${dillFile.path}$_kDepfileSuffix');
-    _ensureCacheDirectoryWritable(dillFile);
-
-    return _fileSystem.runLocked<Uri>(
-      lockPath: '${dillFile.path}$_kLockFileSuffix',
-      logger: _logger,
-      scope: () async {
-        if (_isCachedDillValid(
-          entrypointFile: entrypointFile,
-          packageConfigFile: packageConfigFile,
-          target: target,
-        )) {
-          return dillFile.absolute.uri;
-        }
-
-        final File tempDillFile = _fileSystem.file('${dillFile.path}$_kTempFileSuffix');
-        final File tempDepFile = _fileSystem.file('${depFile.path}$_kTempFileSuffix');
-        try {
-          final command = <String>[
-            // TODO(bkonyi): Resolve the Dart binary from _flutterRoot/bin/cache/dart-sdk
-            // instead of Artifact.engineDartBinary so --local-engine runs match the host
-            // VM used by Isolate.spawnUri and _resolveDartSdkRevisionFile().
-            _artifacts.getArtifactPath(Artifact.engineDartBinary),
-            'compile',
-            'kernel',
-            '--packages=${packageConfigFile.path}',
-            '--output=${tempDillFile.path}',
-            '--depfile=${tempDepFile.path}',
-            entrypointFile.path,
-          ];
-
-          _logger.printTrace(
-            'ExtensionKernelCompiler: compiling "${extension.name}" with: ${command.join(' ')}',
-          );
-          final ProcessResult result = await _processManager.run(command);
-          if (result.exitCode != 0) {
-            throw ExtensionCompileException(
-              'Failed to compile extension "${extension.name}" to kernel '
-              '(exit code ${result.exitCode}):\n${result.stderr}',
-            );
-          }
-
-          final Uri compiledUri = ErrorHandlingFileSystem.noExitOnFailure(() {
-            if (!tempDillFile.existsSync() || tempDillFile.lengthSync() == 0) {
-              throw ExtensionCompileException(
-                'Failed to compile extension "${extension.name}" to kernel: '
-                'compiler exited 0 but did not produce a non-empty "${tempDillFile.path}".',
-              );
-            }
-
-            // Clear or update cached capabilities BEFORE renaming tempDillFile
-            // onto dillFile.path so unlocked concurrent readers never observe
-            // a fresh .dill alongside stale capabilities from a prior build.
-            switch (target) {
-              case _SharedDillTarget(:final File capabilitiesFile):
-                ErrorHandlingFileSystem.deleteIfExists(capabilitiesFile);
-              case _LocalDillTarget(
-                :final String closureHash,
-                :final String sdkRevision,
-                :final String sdkVersion,
-                :final File stampFile,
-              ):
-                ErrorHandlingFileSystem.deleteIfExists(dillFile);
-                _fileSystem.file('${stampFile.path}$_kTempFileSuffix')
-                  ..writeAsStringSync(
-                    jsonEncode(
-                      _encodeStamp(
-                        closureHash: closureHash,
-                        sdkRevision: sdkRevision,
-                        sdkVersion: sdkVersion,
-                      ),
-                    ),
-                  )
-                  ..renameSync(stampFile.path);
-            }
-
-            if (tempDepFile.existsSync()) {
-              tempDepFile.renameSync(depFile.path);
-            } else {
-              ErrorHandlingFileSystem.deleteIfExists(depFile);
-            }
-
-            tempDillFile.renameSync(dillFile.path);
-            return dillFile.absolute.uri;
-          });
-          return compiledUri;
-        } finally {
-          _cleanupTempFiles(<File>[
-            tempDillFile,
-            tempDepFile,
-            if (target case _LocalDillTarget(:final File stampFile))
-              _fileSystem.file('${stampFile.path}$_kTempFileSuffix'),
-          ]);
-        }
-      },
-    );
-  }
-
-  void _ensureCacheDirectoryWritable(File dillFile) {
-    ErrorHandlingFileSystem.noExitOnFailure(() {
-      dillFile.parent.createSync(recursive: true);
-      final File probeLockFile = _fileSystem.file('${dillFile.path}$_kLockFileSuffix');
-      probeLockFile.openSync(mode: FileMode.append).closeSync();
-    });
   }
 
   /// Reads the cached [ToolExtensionCapabilities] for [extension] if its
@@ -355,28 +255,16 @@ class ExtensionKernelCompiler {
       if (!inputsExist) {
         return null;
       }
-      final _DillTarget target = ErrorHandlingFileSystem.noExitOnFailure(
-        () => _resolveDillTarget(extension),
-      );
+      final File dillFile = resolveDillFile(extension);
       final _CachedDillValidation validation = _validateCachedDill(
+        extension,
+        depFile: _fileSystem.file('${dillFile.path}$_kDepfileSuffix'),
+        dillFile: dillFile,
         entrypointFile: entrypointFile,
         packageConfigFile: packageConfigFile,
-        target: target,
+        stampFile: _fileSystem.file('${dillFile.path}$_kStampFileSuffix'),
       );
-      switch (target) {
-        case _SharedDillTarget(:final File capabilitiesFile, :final _LocalDillTarget localFallback):
-          if (validation.isValid) {
-            return _readCapabilitiesFile(capabilitiesFile);
-          }
-          final _CachedDillValidation fallbackValidation = _validateCachedDill(
-            entrypointFile: entrypointFile,
-            packageConfigFile: packageConfigFile,
-            target: localFallback,
-          );
-          return fallbackValidation.isValid ? fallbackValidation.localStamp?.capabilities : null;
-        case _LocalDillTarget():
-          return validation.isValid ? validation.localStamp?.capabilities : null;
-      }
+      return validation.isValid ? validation.stamp?.capabilities : null;
     } on ExtensionCompileException {
       return null;
     } on FileSystemException {
@@ -386,15 +274,20 @@ class ExtensionKernelCompiler {
     }
   }
 
-  /// Persists [capabilities] into the cache alongside [extension]'s compiled
-  /// `.dill` Kernel if the `.dill` is still present and up to date.
+  /// Persists [capabilities] into the cache stamp alongside [extension]'s
+  /// compiled `.dill` Kernel if the on-disk `.dill` still matches [buildToken]
+  /// and all dependency inputs are up to date.
   ///
   /// Cache write failures (such as read-only file systems) are logged at trace
   /// level and ignored so that active commands are not interrupted.
   Future<void> writeCachedCapabilities(
     DiscoveredProjectExtension extension,
-    ToolExtensionCapabilities capabilities,
-  ) async {
+    ToolExtensionCapabilities capabilities, {
+    required String buildToken,
+  }) async {
+    if (buildToken.isEmpty) {
+      return;
+    }
     try {
       final File entrypointFile = _fileSystem.file(extension.entrypointUri);
       final File packageConfigFile = _fileSystem.file(extension.packageConfigUri);
@@ -404,75 +297,57 @@ class ExtensionKernelCompiler {
       if (!inputsExist) {
         return;
       }
-      final _DillTarget resolvedTarget = ErrorHandlingFileSystem.noExitOnFailure(
-        () => _resolveDillTarget(extension),
-      );
-      final _DillTarget activeTarget;
-      if (_validateCachedDill(
+
+      final File dillFile = resolveDillFile(extension);
+      final File depFile = _fileSystem.file('${dillFile.path}$_kDepfileSuffix');
+      final File stampFile = _fileSystem.file('${dillFile.path}$_kStampFileSuffix');
+      final _CachedDillValidation preLockValidation = _validateCachedDill(
+        extension,
+        depFile: depFile,
+        dillFile: dillFile,
         entrypointFile: entrypointFile,
         packageConfigFile: packageConfigFile,
-        target: resolvedTarget,
-      ).isValid) {
-        activeTarget = resolvedTarget;
-      } else if (resolvedTarget case _SharedDillTarget(:final _LocalDillTarget localFallback)
-          when _validateCachedDill(
-            entrypointFile: entrypointFile,
-            packageConfigFile: packageConfigFile,
-            target: localFallback,
-          ).isValid) {
-        activeTarget = localFallback;
-      } else {
+        stampFile: stampFile,
+      );
+      if (!preLockValidation.isValid || preLockValidation.stamp?.buildToken != buildToken) {
         return;
       }
 
-      _ensureCacheDirectoryWritable(activeTarget.dillFile);
+      _ensureCacheDirectoryWritable(dillFile);
       await _fileSystem.runLocked<void>(
-        lockPath: '${activeTarget.dillFile.path}$_kLockFileSuffix',
+        lockPath: '${dillFile.path}$_kLockFileSuffix',
         logger: _logger,
         scope: () async {
           ErrorHandlingFileSystem.noExitOnFailure(() {
             final _CachedDillValidation validation = _validateCachedDill(
+              extension,
+              depFile: depFile,
+              dillFile: dillFile,
               entrypointFile: entrypointFile,
               packageConfigFile: packageConfigFile,
-              target: activeTarget,
+              stampFile: stampFile,
             );
-            if (!validation.isValid) {
+            final _StampData? stamp = validation.stamp;
+            if (!validation.isValid || stamp == null || stamp.buildToken != buildToken) {
               return;
             }
-            switch (activeTarget) {
-              case _SharedDillTarget(:final File capabilitiesFile):
-                final File tempCapabilitiesFile = _fileSystem.file(
-                  '${capabilitiesFile.path}$_kTempFileSuffix',
-                );
-                try {
-                  tempCapabilitiesFile
-                    ..writeAsStringSync(jsonEncode(capabilities.toMap()))
-                    ..renameSync(capabilitiesFile.path);
-                } finally {
-                  _cleanupTempFiles(<File>[tempCapabilitiesFile]);
-                }
-              case _LocalDillTarget(:final File stampFile):
-                final _LocalStampData? localStamp = validation.localStamp;
-                if (localStamp == null) {
-                  return;
-                }
-                final File tempStampFile = _fileSystem.file('${stampFile.path}$_kTempFileSuffix');
-                try {
-                  tempStampFile
-                    ..writeAsStringSync(
-                      jsonEncode(
-                        _encodeStamp(
-                          capabilities: capabilities,
-                          closureHash: localStamp.closureHash,
-                          sdkRevision: localStamp.sdkRevision,
-                          sdkVersion: localStamp.sdkVersion,
-                        ),
-                      ),
-                    )
-                    ..renameSync(stampFile.path);
-                } finally {
-                  _cleanupTempFiles(<File>[tempStampFile]);
-                }
+            final File tempStampFile = _fileSystem.file('${stampFile.path}$_kTempFileSuffix');
+            try {
+              tempStampFile
+                ..writeAsStringSync(
+                  jsonEncode(
+                    _encodeStamp(
+                      buildToken: stamp.buildToken,
+                      capabilities: capabilities,
+                      compiledAt: stamp.compiledAt,
+                      packageConfigHash: stamp.packageConfigHash,
+                      sdkRevision: stamp.sdkRevision,
+                    ),
+                  ),
+                )
+                ..renameSync(stampFile.path);
+            } finally {
+              _cleanupTempFiles(<File>[tempStampFile]);
             }
           });
         },
@@ -488,427 +363,128 @@ class ExtensionKernelCompiler {
     }
   }
 
-  static void _cleanupTempFiles(List<File> tempFiles) {
-    for (final file in tempFiles) {
-      try {
-        ErrorHandlingFileSystem.deleteIfExists(file);
-      } on FileSystemException {
-        // Best-effort cleanup of temporary artifacts on failure.
-      }
-    }
-  }
-
-  bool _isCachedDillValid({
-    required File entrypointFile,
-    required File packageConfigFile,
-    required _DillTarget target,
-  }) {
-    if (_validateCachedDill(
-      entrypointFile: entrypointFile,
-      packageConfigFile: packageConfigFile,
-      target: target,
-    ).isValid) {
-      _logger.printTrace(switch (target) {
-        _SharedDillTarget() =>
-          'ExtensionKernelCompiler: reusing cached shared kernel "${target.dillFile.path}".',
-        _LocalDillTarget() =>
-          'ExtensionKernelCompiler: reusing up-to-date local kernel "${target.dillFile.path}".',
-      });
-      return true;
-    }
-    return false;
-  }
-
-  /// Determines whether [extension] and its resolved dependency closure
-  /// consist exclusively of immutable (`hosted` or `git`) packages in
-  /// `pubspec.lock` outside the workspace root, making it eligible for the
-  /// shared Tier 1 `.dill` cache.
+  /// Resolves the workspace-local `.dill` cache [File] for [extension].
   @visibleForTesting
-  bool isSharedCacheExtension(DiscoveredProjectExtension extension) =>
-      ErrorHandlingFileSystem.noExitOnFailure(() => _resolveDillTarget(extension))
-          is _SharedDillTarget;
+  File resolveDillFile(DiscoveredProjectExtension extension) => _fileSystem
+      .directory(extension.workspaceRootUri)
+      .childDirectory(_kDotDartToolDirectoryName)
+      .childDirectory(_kFlutterToolsDirectoryName)
+      .childDirectory(_kExtensionsDirectoryName)
+      .childDirectory(extension.name)
+      .childFile(_kLocalDillFileName)
+      .absolute;
 
-  _SharedCacheClosureEvaluation? _evaluateSharedCacheClosure(
-    DiscoveredProjectExtension extension, {
-    required Set<String>? closureNames,
-    required Map<String, _LockPackageInfo>? lockPackages,
-    required PackageConfig? packageConfig,
-  }) {
-    if (packageConfig == null || closureNames == null || lockPackages == null) {
-      return null;
-    }
-    final String normalizedWorkspaceRoot = _fileSystem.path.normalize(
-      _fileSystem.directory(extension.workspaceRootUri).absolute.path,
-    );
-    final String extRootPath = _fileSystem.directory(extension.rootUri).absolute.path;
-    if (_isWithinDirectory(extRootPath, normalizedWorkspaceRoot)) {
-      return null;
-    }
-    final _LockPackageInfo? extLockInfo = lockPackages[extension.name];
-    if (extLockInfo == null ||
-        !_kImmutableLockSources.contains(extLockInfo.source) ||
-        extLockInfo.version.trim().isEmpty) {
-      return null;
-    }
-    final closurePackages = <Package>[];
-    for (final String name in closureNames) {
-      final Package? pkg = packageConfig[name];
-      final _LockPackageInfo? depLockInfo = lockPackages[name];
-      if (pkg == null ||
-          depLockInfo == null ||
-          !_kImmutableLockSources.contains(depLockInfo.source) ||
-          depLockInfo.version.trim().isEmpty) {
-        return null;
-      }
-      final String pkgRootPath = _fileSystem.directory(pkg.root).absolute.path;
-      if (_isWithinDirectory(pkgRootPath, normalizedWorkspaceRoot)) {
-        return null;
-      }
-      closurePackages.add(pkg);
-    }
-    return (
-      closurePackages: closurePackages,
-      extensionLockInfo: extLockInfo,
-      lockPackages: lockPackages,
-    );
-  }
-
-  bool _isWithinDirectory(String candidatePath, String normalizedParentPath) {
-    final String normalizedCandidate = _fileSystem.path.normalize(candidatePath);
-    return _fileSystem.path.isWithin(normalizedParentPath, normalizedCandidate) ||
-        _fileSystem.path.equals(normalizedParentPath, normalizedCandidate);
-  }
-
-  _CachedWorkspaceMetadata? _loadWorkspaceMetadata(
-    File packageConfigFile, {
-    required String extensionName,
-  }) {
-    return ErrorHandlingFileSystem.noExitOnFailure(() {
-      if (!packageConfigFile.existsSync()) {
-        return null;
-      }
-      final String cacheKey = _fileSystem.path.normalize(packageConfigFile.absolute.path);
-      final String packageConfigRaw;
-      try {
-        packageConfigRaw = packageConfigFile.readAsStringSync();
-      } on FileSystemException catch (error) {
-        throw ExtensionCompileException(
-          'Failed to read package_config.json for extension "$extensionName" at '
-          '"${packageConfigFile.path}": $error',
-        );
-      }
-
-      final File graphFile = packageConfigFile.parent.childFile(_kPackageGraphFileName);
-      final String? packageGraphRaw = _tryReadFileString(graphFile);
-      final File lockFile = packageConfigFile.parent.parent.childFile(_kPubspecLockFileName);
-      final String? pubspecLockRaw = _tryReadFileString(lockFile);
-
-      final _CachedWorkspaceMetadata? cached = _workspaceMetadataCache[cacheKey];
-      if (cached != null &&
-          cached.packageConfigRaw == packageConfigRaw &&
-          cached.packageGraphRaw == packageGraphRaw &&
-          cached.pubspecLockRaw == pubspecLockRaw) {
-        return cached;
-      }
-
-      final PackageConfig packageConfig;
-      if (cached != null && cached.packageConfigRaw == packageConfigRaw) {
-        packageConfig = cached.packageConfig;
-      } else {
-        try {
-          packageConfig = PackageConfig.parseString(
-            packageConfigRaw,
-            packageConfigFile.absolute.uri,
-          );
-        } on FormatException catch (error) {
-          throw ExtensionCompileException(
-            'Failed to parse package_config.json for extension "$extensionName" at '
-            '"${packageConfigFile.path}": $error',
-          );
-        }
-      }
-
-      final PackageGraph? packageGraph;
-      if (cached != null && cached.packageGraphRaw == packageGraphRaw) {
-        packageGraph = cached.packageGraph;
-      } else {
-        packageGraph = _parsePackageGraphRaw(graphFile, packageGraphRaw);
-      }
-
-      final Map<String, _LockPackageInfo>? pubspecLock;
-      if (cached != null && cached.pubspecLockRaw == pubspecLockRaw) {
-        pubspecLock = cached.pubspecLock;
-      } else {
-        pubspecLock = _parsePubspecLockRaw(pubspecLockRaw);
-      }
-
-      final _CachedWorkspaceMetadata updated = (
-        packageConfig: packageConfig,
-        packageConfigRaw: packageConfigRaw,
-        packageGraph: packageGraph,
-        packageGraphRaw: packageGraphRaw,
-        pubspecLock: pubspecLock,
-        pubspecLockRaw: pubspecLockRaw,
-      );
-      _workspaceMetadataCache[cacheKey] = updated;
-      return updated;
+  void _ensureCacheDirectoryWritable(File dillFile) {
+    ErrorHandlingFileSystem.noExitOnFailure(() {
+      dillFile.parent.createSync(recursive: true);
+      final File probeLockFile = _fileSystem.file('${dillFile.path}$_kLockFileSuffix');
+      probeLockFile.openSync(mode: FileMode.append).closeSync();
     });
   }
 
-  static String? _tryReadFileString(File file) {
+  static void _cleanupTempFiles(List<File> tempFiles) {
+    ErrorHandlingFileSystem.noExitOnFailure(() {
+      for (final file in tempFiles) {
+        try {
+          ErrorHandlingFileSystem.deleteIfExists(file);
+        } on FileSystemException {
+          // Best-effort cleanup of temporary artifacts on failure.
+        }
+      }
+    });
+  }
+
+  static DateTime _truncateToSeconds(DateTime time) {
+    final DateTime utc = time.toUtc();
+    return DateTime.fromMillisecondsSinceEpoch(
+      (utc.millisecondsSinceEpoch ~/ 1000) * 1000,
+      isUtc: true,
+    );
+  }
+
+  String _generateBuildToken() =>
+      hex.encode(List<int>.generate(_kBuildTokenByteLength, (_) => _random.nextInt(256)));
+
+  CompiledExtensionKernel? _tryReuseCachedDill(
+    DiscoveredProjectExtension extension, {
+    required File depFile,
+    required File dillFile,
+    required File entrypointFile,
+    required File packageConfigFile,
+    required File stampFile,
+  }) {
+    final String sdkRevision = _dartSdkRevision(extension);
+    final _CachedDillValidation validation = _validateCachedDill(
+      extension,
+      depFile: depFile,
+      dillFile: dillFile,
+      entrypointFile: entrypointFile,
+      packageConfigFile: packageConfigFile,
+      sdkRevision: sdkRevision,
+      stampFile: stampFile,
+    );
+    if (validation case (isValid: true, stamp: final _StampData stamp)) {
+      _logger.printTrace(
+        'ExtensionKernelCompiler: reusing up-to-date local kernel "${dillFile.path}".',
+      );
+      return (buildToken: stamp.buildToken, dillUri: dillFile.absolute.uri);
+    }
+    return null;
+  }
+
+  _CachedDillValidation _validateCachedDill(
+    DiscoveredProjectExtension extension, {
+    required File depFile,
+    required File dillFile,
+    required File entrypointFile,
+    required File packageConfigFile,
+    required File stampFile,
+    String? sdkRevision,
+  }) {
+    const _CachedDillValidation invalid = (isValid: false, stamp: null);
     try {
+      final String resolvedSdkRevision = sdkRevision ?? _dartSdkRevision(extension);
       return ErrorHandlingFileSystem.noExitOnFailure(() {
-        if (!file.existsSync()) {
-          return null;
+        if (!dillFile.existsSync() ||
+            !depFile.existsSync() ||
+            !entrypointFile.existsSync() ||
+            !packageConfigFile.existsSync() ||
+            dillFile.lengthSync() == 0) {
+          return invalid;
         }
-        return file.readAsStringSync();
-      });
-    } on FileSystemException {
-      return null;
-    }
-  }
-
-  static PackageGraph? _parsePackageGraphRaw(File graphFile, String? raw) {
-    if (raw == null) {
-      return null;
-    }
-    try {
-      return PackageGraph.fromJson(graphFile, jsonDecode(raw));
-    } on FormatException {
-      return null;
-    }
-  }
-
-  static Set<String>? _extensionClosureFromGraph(PackageGraph? graph, String extensionName) {
-    if (graph == null || !graph.dependencies.containsKey(extensionName)) {
-      return null;
-    }
-    final closure = <String>{};
-    final toVisit = <String>[extensionName];
-    while (toVisit.isNotEmpty) {
-      final String name = toVisit.removeLast();
-      if (closure.add(name)) {
-        toVisit.addAll(graph.dependencies[name] ?? const <String>[]);
-      }
-    }
-    return closure;
-  }
-
-  static Map<String, _LockPackageInfo>? _parsePubspecLockRaw(String? raw) {
-    if (raw == null) {
-      return null;
-    }
-    try {
-      final Object? parsed = loadYaml(raw);
-      if (parsed is! YamlMap) {
-        return null;
-      }
-      final Object? packagesNode = parsed[_kPackagesLockKey];
-      if (packagesNode is! YamlMap) {
-        return null;
-      }
-      final result = <String, _LockPackageInfo>{};
-      for (final MapEntry(:Object? key, :Object? value) in packagesNode.entries) {
-        if (key is! String || value is! YamlMap) {
-          continue;
+        final _StampData? stamp = _readStamp(stampFile);
+        if (stamp == null ||
+            stamp.sdkRevision != resolvedSdkRevision ||
+            _hashFile(packageConfigFile) != stamp.packageConfigHash) {
+          return invalid;
         }
-        final Object? source = value[_kSourceLockKey];
-        final Object? version = value[_kVersionLockKey];
-        if (source is! String || version is! String) {
-          continue;
+        final Depfile depfile = _depfileService.parse(depFile);
+        if (depfile.inputs.isEmpty) {
+          return invalid;
         }
-        String? resolvedRef;
-        if (value[_kDescriptionLockKey] case final YamlMap description) {
-          if (description[_kResolvedRefLockKey] case final String ref) {
-            resolvedRef = ref;
+        for (final File input in depfile.inputs) {
+          if (_isPackageConfigInput(input, packageConfigFile)) {
+            continue;
+          }
+          if (!input.existsSync() || !input.lastModifiedSync().isBefore(stamp.compiledAt)) {
+            return invalid;
           }
         }
-        result[key] = (resolvedRef: resolvedRef, source: source, version: version);
-      }
-      return result;
-    } on YamlException {
-      return null;
+        return (isValid: true, stamp: stamp);
+      });
+    } on FileSystemException {
+      return invalid;
+    } on FormatException {
+      return invalid;
     }
   }
 
-  /// Resolves the target `.dill` cache [File] for [extension].
-  @visibleForTesting
-  File resolveDillFile(DiscoveredProjectExtension extension) =>
-      ErrorHandlingFileSystem.noExitOnFailure(() => _resolveDillTarget(extension)).dillFile;
+  bool _isPackageConfigInput(File input, File packageConfigFile) =>
+      _fileSystem.path.equals(input.absolute.path, packageConfigFile.absolute.path);
 
-  _DillTarget _resolveDillTarget(DiscoveredProjectExtension extension) {
-    final String sdkRevision = _dartSdkRevision(extension);
-    final String sdkVersion = _readSdkVersion();
-    final File packageConfigFile = _fileSystem.file(extension.packageConfigUri);
-    final _CachedWorkspaceMetadata? metadata = _loadWorkspaceMetadata(
-      packageConfigFile,
-      extensionName: extension.name,
-    );
-    final PackageConfig? packageConfig = metadata?.packageConfig;
-    final Set<String>? closureNames = _extensionClosureFromGraph(
-      metadata?.packageGraph,
-      extension.name,
-    );
-    final Map<String, _LockPackageInfo>? lockPackages = metadata?.pubspecLock;
-
-    final File localDill = _fileSystem
-        .directory(extension.workspaceRootUri)
-        .childDirectory(_kDotDartToolDirectoryName)
-        .childDirectory(_kFlutterToolsDirectoryName)
-        .childDirectory(_kExtensionsDirectoryName)
-        .childDirectory(extension.name)
-        .childFile(_kLocalDillFileName)
-        .absolute;
-    final String closureHash = _computeLocalClosureHash(
-      extension,
-      closureNames: closureNames,
-      lockPackages: lockPackages,
-      packageConfig: packageConfig,
-    );
-    final localTarget = _LocalDillTarget(
-      closureHash: closureHash,
-      dillFile: localDill,
-      sdkRevision: sdkRevision,
-      sdkVersion: sdkVersion,
-      stampFile: _fileSystem.file('${localDill.path}$_kStampFileSuffix'),
-    );
-
-    if (_evaluateSharedCacheClosure(
-          extension,
-          closureNames: closureNames,
-          lockPackages: lockPackages,
-          packageConfig: packageConfig,
-        )
-        case final _SharedCacheClosureEvaluation evaluation) {
-      final Directory cacheDir = _resolveSharedCacheDirectory();
-      final String rawExtVersion = evaluation.extensionLockInfo.version.trim();
-      final String sanitizedExtVersion = rawExtVersion.replaceAll(_kUnsupportedLabelChars, '_');
-      final String sdkAndDepsHash = _computeSdkAndDepsHash(
-        extension,
-        closurePackages: evaluation.closurePackages,
-        lockPackages: evaluation.lockPackages,
-        sdkRevision: sdkRevision,
-        sdkVersion: sdkVersion,
-      );
-      final prefix = '${extension.name}-$sanitizedExtVersion-$sdkAndDepsHash';
-      final File dillFile = _fileSystem.file(
-        _fileSystem.path.normalize(cacheDir.childFile('$prefix.dill').absolute.path),
-      );
-      final File capabilitiesFile = _fileSystem.file(
-        _fileSystem.path.normalize(
-          cacheDir.childFile('$prefix$_kCapabilitiesFileSuffix').absolute.path,
-        ),
-      );
-      return _SharedDillTarget(
-        capabilitiesFile: capabilitiesFile,
-        dillFile: dillFile,
-        localFallback: localTarget,
-      );
-    }
-    return localTarget;
-  }
-
-  /// Resolves the shared cache directory for compiled `.dill` files via
-  /// [getDartDataHome] from `package:dart_data_home`, falling back to
-  /// `<flutterRoot>/bin/cache/flutter_tool_extensions/cache` if the required OS
-  /// environment variables are unset.
-  Directory _resolveSharedCacheDirectory() {
-    // Strip empty or whitespace-only entries because `getDartDataHome` checks
-    // `environment['DART_DATA_HOME'] != null` without checking `.isEmpty`, which
-    // would otherwise resolve `DART_DATA_HOME=""` relative to the current directory.
-    // Note: `getDartDataHome` branches on `dart:io` `Platform.operatingSystem`.
-    final environment = <String, String>{
-      for (final MapEntry(:String key, :String value) in _platform.environment.entries)
-        if (value.trim().isNotEmpty) key: value.trim(),
-    };
-    try {
-      final String dataHomePath = getDartDataHome(
-        _kExtensionsDataDirectoryName,
-        environment: environment,
-      );
-      return _fileSystem.directory(dataHomePath).childDirectory(_kCacheSubdirectoryName);
-    } on Exception {
-      return _flutterRoot
-          .childDirectory('bin')
-          .childDirectory('cache')
-          .childDirectory(_kExtensionsDataDirectoryName)
-          .childDirectory(_kCacheSubdirectoryName);
-    }
-  }
-
-  String _computeSdkAndDepsHash(
-    DiscoveredProjectExtension extension, {
-    required List<Package> closurePackages,
-    required Map<String, _LockPackageInfo> lockPackages,
-    required String sdkRevision,
-    required String sdkVersion,
-  }) {
-    final String entrypointPath = _fileSystem.path.normalize(
-      _fileSystem.file(extension.entrypointUri).absolute.path,
-    );
-    final packageDescriptors = <String>[
-      for (final Package pkg in closurePackages)
-        _formatPackageDescriptor(pkg, lockInfo: lockPackages[pkg.name]),
-    ]..sort();
-    final String payload = <String>[
-      'revision=$sdkRevision',
-      'sdkVersion=$sdkVersion',
-      'entrypoint=$entrypointPath',
-      ...packageDescriptors,
-    ].join('|');
-    return sha256.convert(utf8.encode(payload)).toString();
-  }
-
-  String _computeLocalClosureHash(
-    DiscoveredProjectExtension extension, {
-    required Set<String>? closureNames,
-    required Map<String, _LockPackageInfo>? lockPackages,
-    required PackageConfig? packageConfig,
-  }) {
-    final String entrypointPath = _fileSystem.path.normalize(
-      _fileSystem.file(extension.entrypointUri).absolute.path,
-    );
-    if (packageConfig == null) {
-      return sha256.convert(utf8.encode('none|entrypoint=$entrypointPath')).toString();
-    }
-    final List<String> descriptors;
-    final String modePrefix;
-    if (closureNames != null) {
-      modePrefix = 'closure';
-      descriptors = <String>[
-        for (final String name in closureNames)
-          if (packageConfig[name] case final Package pkg)
-            _formatPackageDescriptor(pkg, lockInfo: lockPackages?[name])
-          else
-            '$name:::::',
-      ]..sort();
-    } else {
-      modePrefix = 'all';
-      descriptors = <String>[
-        for (final Package pkg in packageConfig.packages)
-          _formatPackageDescriptor(pkg, lockInfo: lockPackages?[pkg.name]),
-      ]..sort();
-    }
-    final String payload = <String>[
-      modePrefix,
-      'entrypoint=$entrypointPath',
-      ...descriptors,
-    ].join('|');
-    return sha256.convert(utf8.encode(payload)).toString();
-  }
-
-  String _formatPackageDescriptor(Package pkg, {_LockPackageInfo? lockInfo}) {
-    final String normalizedRoot = _fileSystem.path.normalize(
-      _fileSystem.directory(pkg.root).absolute.path,
-    );
-    final String normalizedPackageUriRoot = _fileSystem.path.normalize(
-      _fileSystem.directory(pkg.packageUriRoot).absolute.path,
-    );
-    final String source = lockInfo?.source ?? '';
-    final String version = lockInfo?.version ?? '';
-    final String resolvedRef = lockInfo?.resolvedRef ?? '';
-    return '${pkg.name}:$source:$version:$resolvedRef:$normalizedRoot:$normalizedPackageUriRoot';
-  }
+  static String _hashFile(File file) => ErrorHandlingFileSystem.noExitOnFailure(
+    () => sha256.convert(file.readAsBytesSync()).toString(),
+  );
 
   String _dartSdkRevision(DiscoveredProjectExtension extension) {
     final File revisionFile = _resolveDartSdkRevisionFile();
@@ -922,9 +498,6 @@ class ExtensionKernelCompiler {
     return revision;
   }
 
-  String _readSdkVersion() =>
-      _readNonEmptyTrimmed(_resolveDartSdkVersionFile()) ?? _platform.version.trim();
-
   static String? _readNonEmptyTrimmed(File file) {
     return ErrorHandlingFileSystem.noExitOnFailure(() {
       if (!file.existsSync()) {
@@ -935,69 +508,7 @@ class ExtensionKernelCompiler {
     });
   }
 
-  _CachedDillValidation _validateCachedDill({
-    required File entrypointFile,
-    required File packageConfigFile,
-    required _DillTarget target,
-  }) {
-    const _CachedDillValidation invalid = (isValid: false, localStamp: null);
-    try {
-      return ErrorHandlingFileSystem.noExitOnFailure(() {
-        final File dillFile = target.dillFile;
-        final File depFile = _fileSystem.file('${dillFile.path}$_kDepfileSuffix');
-        if (!dillFile.existsSync() || !depFile.existsSync() || dillFile.lengthSync() == 0) {
-          return invalid;
-        }
-        _LocalStampData? localStamp;
-        switch (target) {
-          case _SharedDillTarget():
-            break;
-          case _LocalDillTarget(
-            :final String closureHash,
-            :final String sdkRevision,
-            :final String sdkVersion,
-            :final File stampFile,
-          ):
-            localStamp = _readLocalStamp(stampFile);
-            if (localStamp == null ||
-                localStamp.sdkRevision != sdkRevision ||
-                localStamp.sdkVersion != sdkVersion ||
-                localStamp.closureHash != closureHash) {
-              return invalid;
-            }
-        }
-        final Depfile depfile = _depfileService.parse(depFile);
-        if (depfile.inputs.isEmpty) {
-          return invalid;
-        }
-        final DateTime dillModified = dillFile.lastModifiedSync();
-        final trackedFiles = <File>[
-          if (target is _LocalDillTarget) packageConfigFile,
-          entrypointFile,
-        ];
-        for (final file in trackedFiles) {
-          if (file.existsSync() && file.lastModifiedSync().isAfter(dillModified)) {
-            return invalid;
-          }
-        }
-        for (final File input in depfile.inputs) {
-          if (target is _SharedDillTarget && _isPackageConfigFile(input)) {
-            continue;
-          }
-          if (!input.existsSync() || input.lastModifiedSync().isAfter(dillModified)) {
-            return invalid;
-          }
-        }
-        return (isValid: true, localStamp: localStamp);
-      });
-    } on FileSystemException {
-      return invalid;
-    } on FormatException {
-      return invalid;
-    }
-  }
-
-  _LocalStampData? _readLocalStamp(File stampFile) {
+  _StampData? _readStamp(File stampFile) {
     try {
       return ErrorHandlingFileSystem.noExitOnFailure(() {
         if (!stampFile.existsSync()) {
@@ -1007,15 +518,22 @@ class ExtensionKernelCompiler {
         if (decoded is! Map<String, Object?>) {
           return null;
         }
+        final Object? buildToken = decoded[_kBuildTokenStampKey];
+        final Object? compiledAtRaw = decoded[_kCompiledAtStampKey];
+        final Object? packageConfigHash = decoded[_kPackageConfigHashStampKey];
         final Object? sdkRevision = decoded[_kSdkRevisionStampKey];
-        final Object? sdkVersion = decoded[_kSdkVersionStampKey];
-        final Object? closureHash = decoded[_kClosureHashStampKey];
-        if (sdkRevision is! String ||
-            sdkRevision.isEmpty ||
-            sdkVersion is! String ||
-            sdkVersion.isEmpty ||
-            closureHash is! String ||
-            closureHash.isEmpty) {
+        if (buildToken is! String ||
+            buildToken.isEmpty ||
+            compiledAtRaw is! String ||
+            compiledAtRaw.isEmpty ||
+            packageConfigHash is! String ||
+            packageConfigHash.isEmpty ||
+            sdkRevision is! String ||
+            sdkRevision.isEmpty) {
+          return null;
+        }
+        final DateTime? parsedCompiledAt = DateTime.tryParse(compiledAtRaw);
+        if (parsedCompiledAt == null) {
           return null;
         }
         ToolExtensionCapabilities? capabilities;
@@ -1023,30 +541,12 @@ class ExtensionKernelCompiler {
           capabilities = _tryParseCapabilitiesMap(rawCapabilities);
         }
         return (
+          buildToken: buildToken,
           capabilities: capabilities,
-          closureHash: closureHash,
+          compiledAt: parsedCompiledAt.toUtc(),
+          packageConfigHash: packageConfigHash,
           sdkRevision: sdkRevision,
-          sdkVersion: sdkVersion,
         );
-      });
-    } on FileSystemException {
-      return null;
-    } on FormatException {
-      return null;
-    }
-  }
-
-  ToolExtensionCapabilities? _readCapabilitiesFile(File capabilitiesFile) {
-    try {
-      return ErrorHandlingFileSystem.noExitOnFailure(() {
-        if (!capabilitiesFile.existsSync()) {
-          return null;
-        }
-        final Object? decoded = jsonDecode(capabilitiesFile.readAsStringSync());
-        if (decoded is! Map<String, Object?>) {
-          return null;
-        }
-        return _tryParseCapabilitiesMap(decoded);
       });
     } on FileSystemException {
       return null;
@@ -1067,26 +567,18 @@ class ExtensionKernelCompiler {
   }
 
   static Map<String, Object?> _encodeStamp({
-    required String closureHash,
+    required String buildToken,
+    required DateTime compiledAt,
+    required String packageConfigHash,
     required String sdkRevision,
-    required String sdkVersion,
     ToolExtensionCapabilities? capabilities,
   }) => <String, Object?>{
+    _kBuildTokenStampKey: buildToken,
+    _kCompiledAtStampKey: compiledAt.toUtc().toIso8601String(),
+    _kPackageConfigHashStampKey: packageConfigHash,
     _kSdkRevisionStampKey: sdkRevision,
-    _kSdkVersionStampKey: sdkVersion,
-    _kClosureHashStampKey: closureHash,
     if (capabilities != null) _kCapabilitiesStampKey: capabilities.toMap(),
   };
-
-  bool _isPackageConfigFile(File file) =>
-      _fileSystem.path.basename(file.path) == _kPackageConfigFileName &&
-      _fileSystem.path.basename(file.parent.path) == _kDotDartToolDirectoryName;
-
-  File _resolveDartSdkVersionFile() => _flutterRoot
-      .childDirectory('bin')
-      .childDirectory('cache')
-      .childDirectory('dart-sdk')
-      .childFile('version');
 
   File _resolveDartSdkRevisionFile() => _flutterRoot
       .childDirectory('bin')
