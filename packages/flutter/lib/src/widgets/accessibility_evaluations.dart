@@ -449,7 +449,7 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
     final Iterable<Element> elements = _collectElementsByText(
       WidgetsBinding.instance.rootElement!,
       text,
-    ).where((Element element) => _isHitTestable(element, renderView.flutterView.viewId));
+    ).where(_isHitTestable);
     for (final element in elements) {
       violations.addAll(await _evaluateElement(node, element, image, byteData, renderView));
     }
@@ -793,14 +793,18 @@ bool _isRenderObjectAncestorOfTarget(RenderObject renderObject, HitTestTarget ta
   return false;
 }
 
-bool _isHitTestable(Element element, int viewId) {
+// Checks whether the center of [element] can be hit-tested in its enclosing
+// [RenderView], so obscured text (such as text behind a modal or backdrop) is
+// skipped.
+bool _isHitTestable(Element element) {
   final RenderObject? object = element.renderObject;
-  if (object is! RenderBox || !object.hasSize) {
+  final RenderObject? root = object?.owner?.rootNode;
+  if (root is! RenderView || object is! RenderBox || !object.hasSize) {
     return false;
   }
   final Offset absoluteOffset = object.localToGlobal(object.size.center(Offset.zero));
   final hitResult = HitTestResult();
-  WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
+  WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, root.flutterView.viewId);
   return hitResult.path.any(
     (HitTestEntry entry) => _isRenderObjectAncestorOfTarget(object, entry.target),
   );
