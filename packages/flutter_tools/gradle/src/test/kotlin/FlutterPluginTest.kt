@@ -46,6 +46,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.assertThrows
@@ -442,28 +443,38 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants warns and leaves versionCodes unchanged when the DSL declares no versionCode`(
+    fun `onVariants offsets the manifest versionCode lazily when the DSL declares none`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         every { env.project.findProperty("split-per-abi") } returns "true"
         val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val versionCodeProvider = slot<Provider<Int>>()
+        every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
+        val manifest = tempDir.resolve("AndroidManifest.xml").toFile()
+        val project = ProjectBuilder.builder().withProjectDir(tempDir.toFile()).build()
+        val manifests = project.provider { listOf(project.layout.projectDirectory.file(manifest.path)) }
+        val variant = mockApplicationVariant(outputs = listOf(arm64.output))
+        every { variant.sources.manifests.all } returns manifests
+        every { env.project.providers } returns project.providers
 
         val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
-        onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
+        onVariant(variant)
+        // Written after configuration, so the value must be read lazily.
+        manifest.writeText(
+            """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="7"/>"""
+        )
 
         verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
-        val logger = env.project.logger
-        verify {
-            logger.error(
-                match<String> {
-                    it.contains("variant 'debug'") &&
-                        it.contains("declares no versionCode") &&
-                        it.contains("versionCode = flutter.versionCode")
-                }
-            )
-        }
-        verify(exactly = 0) { logger.warn(any<String>()) }
+        assertEquals(2007, versionCodeProvider.captured.get())
+        manifest.writeText(
+            """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="${'$'}{vc}"/>"""
+        )
+        val error = assertThrows<GradleException> { versionCodeProvider.captured.get() }
+        assertContains(error.message!!, "variant 'debug'")
+        assertContains(error.message!!, "versionCode = flutter.versionCode")
+        manifest.writeText("""<manifest xmlns:android="http://schemas.android.com/apk/res/android"/>""")
+        assertContains(assertThrows<GradleException> { versionCodeProvider.captured.get() }.message!!, "no manifest sets one")
     }
 
     @Test
