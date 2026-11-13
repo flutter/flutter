@@ -110,7 +110,7 @@ enum PubOutputMode {
 /// A handle for interacting with the pub tool.
 abstract class Pub {
   /// Create a default [Pub] instance.
-  factory Pub({required ToolContext toolContext, Stdio? stdio}) {
+  factory Pub({required ToolContext toolContext}) {
     final ToolContext(
       :BotDetector botDetector,
       :Cache cache,
@@ -119,18 +119,6 @@ abstract class Pub {
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
-    if (stdio != null) {
-      return _DefaultPub.test(
-        botDetector: botDetector,
-        cache: cache,
-        fileSystem: fileSystem,
-        flutterRoot: cache.flutterRoot,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-    }
     return _DefaultPub(
       botDetector: botDetector,
       cache: cache,
@@ -223,9 +211,8 @@ abstract class Pub {
 
   /// Runs pub in 'interactive' mode.
   ///
-  /// This will run the pub process with [ProcessStartMode.inheritStdio] unless
-  /// `stdio` overrides the process stdin, stdout, or stderr streams (for
-  /// testing).
+  /// This will run the pub process with StdioInherited (unless `stdio` is set
+  /// for testing).
   ///
   /// The pub process will be run in current working directory, so `--directory`
   /// should be passed appropriately in [arguments]. This ensures output from
@@ -439,8 +426,8 @@ class _DefaultPub implements Pub {
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
   ///
-  /// Uses [ProcessStartMode.normal] and [_stdio] when [_stdio] overrides the
-  /// process stdin, stdout, or stderr streams (for example, in tests).
+  /// Uses [ProcessStartMode.normal] and [_stdio] if [Pub.test] constructor
+  /// was used.
   ///
   /// Prints the stdout and stderr of the whole run, unless silenced using
   /// [outputMode].
@@ -468,7 +455,7 @@ class _DefaultPub implements Pub {
     try {
       if (outputMode != PubOutputMode.failuresOnly) {
         final io.Stdio? stdio = _stdio;
-        if (stdio == null || !io.hasStdioStreamOverrides(stdio)) {
+        if (stdio == null) {
           // Let pub inherit stdio and output directly to the tool's stdout and
           // stderr handles.
           final io.Process process = await _processUtils.start(
