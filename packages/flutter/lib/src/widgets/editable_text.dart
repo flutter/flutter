@@ -1194,6 +1194,8 @@ class EditableText extends StatefulWidget {
   ///
   /// It's rarely necessary to set this property. By default its value
   /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  /// If the app did not choose its locale (see [Localizations.isDefaultLocale]),
+  /// no locale is used and the platform's default locale applies.
   ///
   /// See [RenderEditable.locale] for more information.
   final Locale? locale;
@@ -6290,6 +6292,16 @@ class _Editable extends MultiChildRenderObjectWidget {
   final Color? promptRectColor;
   final Clip clipBehavior;
 
+  // A default locale that the app didn't choose isn't passed to the engine, so
+  // the platform's default locale is used for font fallback.
+  // See https://github.com/flutter/flutter/issues/194931.
+  Locale? _effectiveLocale(BuildContext context) {
+    if (locale != null) {
+      return locale;
+    }
+    return Localizations.isDefaultLocaleOf(context) ? null : Localizations.maybeLocaleOf(context);
+  }
+
   @override
   RenderEditable createRenderObject(BuildContext context) {
     return RenderEditable(
@@ -6310,7 +6322,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       textScaler: textScaler,
       textAlign: textAlign,
       textDirection: textDirection,
-      locale: locale ?? Localizations.maybeLocaleOf(context),
+      locale: _effectiveLocale(context),
       selection: value.selection,
       offset: offset,
       ignorePointer: rendererIgnoresPointer,
@@ -6354,7 +6366,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..textScaler = textScaler
       ..textAlign = textAlign
       ..textDirection = textDirection
-      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..locale = _effectiveLocale(context)
       ..selection = value.selection
       ..offset = offset
       ..ignorePointer = rendererIgnoresPointer
