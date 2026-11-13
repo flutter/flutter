@@ -5,6 +5,8 @@
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart'
+    show DebugViewMetricsOverride, debugClearViewMetricsOverrides, debugSetViewMetricsOverride;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -355,6 +357,36 @@ void main() {
       expect(backingView.lastSemanticsUpdate, expectedUpdate);
     });
   });
+
+  group('TestFlutterView with a debug view metrics override', () {
+    tearDown(debugClearViewMetricsOverrides);
+
+    testWidgets('reports display features in the logical pixels of the ratio it reports', (
+      WidgetTester tester,
+    ) async {
+      final dispatcher = TestPlatformDispatcher(platformDispatcher: _HingePlatformDispatcher());
+      final TestFlutterView view = dispatcher.view(id: _HingeView.id)!;
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(20, 0, 30, 100));
+
+      // An overridden ratio moves the hinge into its logical pixels, so that it
+      // stays where it is physically.
+      debugSetViewMetricsOverride(
+        _HingeView.id,
+        const DebugViewMetricsOverride(devicePixelRatio: 4.0),
+      );
+      expect(view.devicePixelRatio, 4.0);
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(10, 0, 15, 50));
+
+      // A ratio the test sets hides the overridden one, so the hinge is in the
+      // logical pixels of the ratio the test set instead.
+      view.devicePixelRatio = 2.0;
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(20, 0, 30, 100));
+      view.devicePixelRatio = 1.0;
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(40, 0, 60, 200));
+      debugClearViewMetricsOverrides();
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(40, 0, 60, 200));
+    });
+  });
 }
 
 Matcher matchesSnapshot(FlutterViewSnapshot expected) => _FlutterViewSnapshotMatcher(expected);
@@ -514,3 +546,41 @@ class _FakeFlutterView extends Fake implements FlutterView {
 }
 
 class _FakeDisplay extends Fake implements TestDisplay {}
+
+/// A [PlatformDispatcher] that reports a single [_HingeView] and no displays.
+class _HingePlatformDispatcher extends Fake implements PlatformDispatcher {
+  final _HingeView _view = _HingeView();
+
+  @override
+  Iterable<FlutterView> get views => <FlutterView>[_view];
+
+  @override
+  Iterable<Display> get displays => const <Display>[];
+
+  @override
+  VoidCallback? onMetricsChanged;
+
+  @override
+  ViewFocusChangeCallback? onViewFocusChange;
+}
+
+/// A [FlutterView] at a device pixel ratio of 2 with a vertical hinge at the
+/// logical horizontal offsets 20 to 30.
+class _HingeView extends Fake implements FlutterView {
+  static const int id = 300;
+
+  @override
+  int get viewId => id;
+
+  @override
+  double get devicePixelRatio => 2.0;
+
+  @override
+  List<DisplayFeature> get displayFeatures => const <DisplayFeature>[
+    DisplayFeature(
+      bounds: Rect.fromLTRB(20, 0, 30, 100),
+      type: DisplayFeatureType.hinge,
+      state: DisplayFeatureState.postureFlat,
+    ),
+  ];
+}

@@ -11,6 +11,8 @@ import 'package:flutter/src/widgets/_accessibility_evaluations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'multi_view_testing.dart';
+
 /// The brightness the test environment does not report, so that overriding to
 /// it is a visible change on every platform these tests run on.
 final ui.Brightness _otherBrightness = switch (ui.PlatformDispatcher.instance.platformBrightness) {
@@ -186,6 +188,56 @@ Widget _capture(void Function(MediaQueryData data) onData, {Widget? child}) {
       onData(MediaQuery.of(context));
       return child ?? const SizedBox.expand();
     },
+  );
+}
+
+/// An override that sets metrics of every kind a view reports: its geometry,
+/// the platform-wide metrics, and the accessibility features.
+final DebugViewMetricsOverride _everyGroup = DebugViewMetricsOverride(
+  devicePixelRatio: 4.0,
+  physicalSize: const ui.Size(1200, 400),
+  textScaling: const <ui.Offset>[ui.Offset(1, 3)],
+  platformBrightness: _otherBrightness,
+  alwaysUse24HourFormat: true,
+  boldText: true,
+  highContrast: true,
+);
+
+/// What [_metricsReader] reports for a view that [_everyGroup] applies to.
+final Map<String, Object?> _everyGroupApplied = <String, Object?>{
+  'View.of physicalSize': const ui.Size(1200, 400),
+  'MediaQuery size': const Size(300, 100),
+  'MediaQuery devicePixelRatio': 4.0,
+  'MediaQuery textScaler.scale(10)': 30.0,
+  'MediaQuery platformBrightness': _otherBrightness,
+  'MediaQuery alwaysUse24HourFormat': true,
+  'MediaQuery boldText': true,
+  'MediaQuery highContrast': true,
+};
+
+/// Builds a [View] for `view` that reports, every time it builds, the metrics
+/// of [_everyGroup] as its descendants read them from [View.of] and from
+/// [MediaQuery].
+Widget _metricsReader(ui.FlutterView view, void Function(Map<String, Object?> readings) onRead) {
+  return View(
+    view: view,
+    child: Builder(
+      builder: (BuildContext context) {
+        final ui.FlutterView viewOf = View.of(context);
+        final MediaQueryData data = MediaQuery.of(context);
+        onRead(<String, Object?>{
+          'View.of physicalSize': viewOf.physicalSize,
+          'MediaQuery size': data.size,
+          'MediaQuery devicePixelRatio': data.devicePixelRatio,
+          'MediaQuery textScaler.scale(10)': data.textScaler.scale(10),
+          'MediaQuery platformBrightness': data.platformBrightness,
+          'MediaQuery alwaysUse24HourFormat': data.alwaysUse24HourFormat,
+          'MediaQuery boldText': data.boldText,
+          'MediaQuery highContrast': data.highContrast,
+        });
+        return const SizedBox.expand();
+      },
+    ),
   );
 }
 
@@ -832,6 +884,183 @@ void main() {
       expect(inherited.devicePixelRatio, 4.0);
       debugClearViewMetricsOverrides();
       await tester.pump();
+    });
+  });
+
+  group('views a test creates', () {
+    testWidgets('a test double that reports an id of its own resolves the entry of that id', (
+      WidgetTester tester,
+    ) async {
+      final fake = FakeView(tester.view);
+      late Map<String, Object?> readings;
+      await tester.pumpWidget(
+        wrapWithView: false,
+        _metricsReader(fake, (Map<String, Object?> value) => readings = value),
+      );
+      final before = readings;
+      final double implicitRatio = tester.view.devicePixelRatio;
+      final double implicitTextScale = tester.view.platformDispatcher.textScaleFactor;
+
+      debugSetViewMetricsOverride(fake.viewId, _everyGroup);
+      await tester.pump();
+      final applied = readings;
+      final double implicitRatioWithOverride = tester.view.devicePixelRatio;
+      final double implicitTextScaleWithOverride = tester.view.platformDispatcher.textScaleFactor;
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+
+      expect(applied, _everyGroupApplied);
+      expect(readings, before);
+      // The view the double wraps is not affected by the entry of the double.
+      expect(implicitRatioWithOverride, implicitRatio);
+      expect(implicitTextScaleWithOverride, implicitTextScale);
+    });
+
+    testWidgets('test values outrank the override of a view a test creates', (
+      WidgetTester tester,
+    ) async {
+      final TestFlutterView added = tester.platformDispatcher.addTestView(
+        _RenderableFakeView(tester.platformDispatcher),
+      );
+      addTearDown(() => tester.platformDispatcher.removeTestView(added));
+      final fake = FakeView(tester.view);
+      added.physicalSize = const ui.Size(900, 600);
+      fake.physicalSize = const ui.Size(800, 400);
+      tester.platformDispatcher.textScaleFactorTestValue = 5.0;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+      addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+      late Map<String, Object?> fromAdded;
+      late Map<String, Object?> fromFake;
+      await tester.pumpWidget(
+        wrapWithView: false,
+        ViewCollection(
+          views: <Widget>[
+            _metricsReader(added, (Map<String, Object?> value) => fromAdded = value),
+            _metricsReader(fake, (Map<String, Object?> value) => fromFake = value),
+          ],
+        ),
+      );
+
+      debugSetViewMetricsOverride(added.viewId, _everyGroup);
+      debugSetViewMetricsOverride(fake.viewId, _everyGroup);
+      await tester.pump();
+      final addedReadings = fromAdded;
+      final fakeReadings = fromFake;
+      debugClearViewMetricsOverrides();
+
+      // The size set on each view, and the text scale and accessibility
+      // features set on the dispatcher, win over the override. What no test
+      // value sets still comes from the override.
+      final expected = <String, Object?>{
+        ..._everyGroupApplied,
+        'MediaQuery textScaler.scale(10)': 50.0,
+        'MediaQuery boldText': false,
+        'MediaQuery highContrast': false,
+      };
+      expect(addedReadings, <String, Object?>{
+        ...expected,
+        'View.of physicalSize': const ui.Size(900, 600),
+        'MediaQuery size': const Size(225, 150),
+      });
+      expect(fakeReadings, <String, Object?>{
+        ...expected,
+        'View.of physicalSize': const ui.Size(800, 400),
+        'MediaQuery size': const Size(200, 100),
+      });
+    });
+
+    testWidgets('a test double reports what the view it wraps reports where its entry is silent', (
+      WidgetTester tester,
+    ) async {
+      // The double reads its metrics through the view it wraps, so below the
+      // entry of its own id it reports what that view reports, the entry of
+      // that view's id included.
+      final fake = FakeView(tester.view);
+      late Map<String, Object?> readings;
+      await tester.pumpWidget(
+        wrapWithView: false,
+        _metricsReader(fake, (Map<String, Object?> value) => readings = value),
+      );
+
+      debugSetViewMetricsOverride(tester.view.viewId, _everyGroup);
+      debugSetViewMetricsOverride(
+        fake.viewId,
+        const DebugViewMetricsOverride(textScaling: <ui.Offset>[ui.Offset(1, 2)], boldText: false),
+      );
+      await tester.pump();
+      final applied = readings;
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+
+      expect(applied, <String, Object?>{
+        ..._everyGroupApplied,
+        'MediaQuery textScaler.scale(10)': 20.0,
+        'MediaQuery boldText': false,
+      });
+    });
+
+    testWidgets('a test double that keeps the id of the test view it wraps reads it as is', (
+      WidgetTester tester,
+    ) async {
+      // The wrapped view already applies the entry of the id, below its own
+      // test values, so the double does not apply it again, over them.
+      final sameId = FakeView(tester.view, viewId: tester.view.viewId);
+      tester.view.physicalSize = const ui.Size(1000, 500);
+      addTearDown(tester.view.resetPhysicalSize);
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(physicalSize: ui.Size(300, 300), devicePixelRatio: 5.0),
+      );
+      final ui.Size size = sameId.physicalSize;
+      final double ratio = sameId.devicePixelRatio;
+      debugClearViewMetricsOverrides();
+
+      expect(size, const ui.Size(1000, 500));
+      expect(ratio, 5.0);
+      expect(sameId.platformDispatcher, same(tester.platformDispatcher));
+    });
+
+    testWidgets('a change of the override of a view a test creates is announced once', (
+      WidgetTester tester,
+    ) async {
+      // The dispatchers of the views a test creates register no callbacks of
+      // their own, so a change reaches the framework once, through the
+      // binding's dispatcher, however many such views are in use.
+      final TestFlutterView added = tester.platformDispatcher.addTestView(
+        _RenderableFakeView(tester.platformDispatcher),
+      );
+      addTearDown(() => tester.platformDispatcher.removeTestView(added));
+      final fake = FakeView(tester.view);
+      await tester.pumpWidget(
+        wrapWithView: false,
+        ViewCollection(
+          views: <Widget>[
+            _metricsReader(added, (Map<String, Object?> readings) {}),
+            _metricsReader(fake, (Map<String, Object?> readings) {}),
+          ],
+        ),
+      );
+      final recorder = _NotificationRecorder();
+      tester.binding.addObserver(recorder);
+      addTearDown(() => tester.binding.removeObserver(recorder));
+
+      debugSetViewMetricsOverride(
+        fake.viewId,
+        const DebugViewMetricsOverride(
+          devicePixelRatio: 4.0,
+          textScaling: <ui.Offset>[ui.Offset(1, 2)],
+          boldText: true,
+        ),
+      );
+      final announced = '$recorder';
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+
+      expect(
+        announced,
+        'metrics: 1, accessibilityFeatures: 1, textScaleFactor: 1, platformBrightness: 0',
+      );
     });
   });
 

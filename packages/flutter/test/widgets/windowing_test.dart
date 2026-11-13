@@ -4,6 +4,8 @@
 
 import 'dart:ui' show Display, FlutterView, PlatformDispatcher;
 
+import 'package:flutter/foundation.dart'
+    show DebugViewMetricsOverride, debugClearViewMetricsOverrides, debugSetViewMetricsOverride;
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
     show
@@ -2423,6 +2425,51 @@ void main() {
             expect(tester.platformDispatcher.views, isNot(contains(child2.rootView)));
           },
         );
+
+        testWidgets('A test window applies the debug view metrics override of its id', (
+          WidgetTester tester,
+        ) async {
+          final WindowController controller = WidgetsBinding.instance.windowingOwner
+              .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
+          _destroyOnTearDown(controller);
+          late MediaQueryData data;
+          await tester.pumpWidget(
+            wrapWithView: false,
+            View(
+              view: controller.rootView,
+              child: Builder(
+                builder: (BuildContext context) {
+                  data = MediaQuery.of(context);
+                  return const SizedBox.expand();
+                },
+              ),
+            ),
+          );
+          final before = data;
+
+          debugSetViewMetricsOverride(
+            controller.rootView.viewId,
+            const DebugViewMetricsOverride(
+              devicePixelRatio: 4.0,
+              physicalSize: Size(1200, 400),
+              textScaling: <Offset>[Offset(1, 3)],
+              boldText: true,
+            ),
+          );
+          await tester.pump();
+          final overridden = data;
+          // The text scaler reads the dispatcher whenever it scales, so it is
+          // read while the override is still installed.
+          final double overriddenScaled = data.textScaler.scale(10);
+          debugClearViewMetricsOverrides();
+          await tester.pump();
+
+          expect(overridden.devicePixelRatio, 4.0);
+          expect(overridden.size, const Size(300, 100));
+          expect(overriddenScaled, 30.0);
+          expect(overridden.boldText, isTrue);
+          expect(data, before);
+        });
       });
     });
   });

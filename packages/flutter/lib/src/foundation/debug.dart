@@ -1157,8 +1157,10 @@ ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispa
 /// that already applies its override and a view of a dispatcher that was never
 /// wrapped. A [TestFlutterView] is one such view, because it applies its own
 /// test values over the wrapper. It also includes a decorator or test double
-/// that only reports a wrapped dispatcher and an id. Outside of debug mode,
-/// every view is returned unchanged.
+/// that only reports a wrapped dispatcher and an id. Such a view can apply the
+/// entry of the id it reports with [debugApplyViewMetricsOverridesToView], as
+/// [TestFlutterView] does. Outside of debug mode, every view is returned
+/// unchanged.
 ///
 /// The decision reads the view's [ui.FlutterView.platformDispatcher] and
 /// [ui.FlutterView.viewId], so a test double handed to [RenderView], [View] or
@@ -1187,6 +1189,39 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
         result = _debugWrapView(registered);
       }
     }
+    return true;
+  }());
+  return result;
+}
+
+/// Returns a view that reports the metrics of [view] with the
+/// [debugViewMetricsOverrides] entry of [viewId] applied, and that reports
+/// [viewId] as its [ui.FlutterView.viewId].
+///
+/// This is for a view that reads its metrics from another view but stands for
+/// a view of its own, such as a test double that wraps [WidgetTester.view] and
+/// reports a different id. No dispatcher reports such a view, so the entry of
+/// its id would otherwise apply nowhere. [TestFlutterView] reads every metric
+/// it has no test value for through this function.
+///
+/// The [ui.FlutterView.platformDispatcher] of the returned view resolves the
+/// platform-wide metrics, such as [ui.PlatformDispatcher.textScaleFactor],
+/// from the same entry, and forwards the rest to the dispatcher of [view],
+/// wrapping the views it reports. A change of the entry is announced once,
+/// through the dispatchers that [debugApplyViewMetricsOverrides] wrapped.
+///
+/// A metric the entry does not set is read from [view], including an override
+/// that [view] applies itself. A view that this function or a dispatcher from
+/// [debugApplyViewMetricsOverrides] returned for [viewId] is returned itself.
+/// Any other view is wrapped, even one that applies the entry itself.
+///
+/// Returns the same view every time it is called with the same [view] and
+/// [viewId]. Returns [view] itself outside of debug mode (in profile or
+/// release mode).
+ui.FlutterView debugApplyViewMetricsOverridesToView(ui.FlutterView view, {required int viewId}) {
+  var result = view;
+  assert(() {
+    result = _debugWrapView(view, viewId);
     return true;
   }());
   return result;
@@ -1432,16 +1467,20 @@ _DebugViewMetricsPlatformDispatcher _debugWrapDispatcher(ui.PlatformDispatcher d
   return wrapper;
 }
 
-// Keyed by the engine view so that repeated reads return the same wrapper: the
-// framework compares views by identity.
-final Expando<_DebugViewMetricsFlutterView> _debugViewMetricsViews =
-    Expando<_DebugViewMetricsFlutterView>();
+// One wrapper per wrapped view and id, because the framework compares views by
+// identity.
+final Expando<Map<int, _DebugViewMetricsFlutterView>> _debugViewMetricsViews =
+    Expando<Map<int, _DebugViewMetricsFlutterView>>();
 
-_DebugViewMetricsFlutterView _debugWrapView(ui.FlutterView view) {
-  if (view is _DebugViewMetricsFlutterView) {
+// The wrapper that applies the entry of [viewId], or of the view's own id, to
+// [view]. A wrapper is returned itself for its own id.
+_DebugViewMetricsFlutterView _debugWrapView(ui.FlutterView view, [int? viewId]) {
+  if (view is _DebugViewMetricsFlutterView && (viewId == null || viewId == view.viewId)) {
     return view;
   }
-  return _debugViewMetricsViews[view] ??= _DebugViewMetricsFlutterView(view);
+  final int id = viewId ?? view.viewId;
+  return (_debugViewMetricsViews[view] ??= <int, _DebugViewMetricsFlutterView>{})[id] ??=
+      _DebugViewMetricsFlutterView(view, id);
 }
 
 // A [ui.PlatformDispatcher] that reports the platform-wide metrics of a
@@ -1756,19 +1795,26 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
       'DebugViewMetricsPlatformDispatcher(${_viewId == null ? 'implicit view' : 'view $_viewId'})';
 }
 
-// A [ui.FlutterView] that reports the metrics of its [debugViewMetricsOverrides]
-// entry in place of the ones the platform reports.
+// A [ui.FlutterView] that reports the metrics of a [debugViewMetricsOverrides]
+// entry in place of the ones the view it wraps reports.
+//
+// It applies the entry of [viewId] and reports that id, which is the id of the
+// view it wraps unless debugApplyViewMetricsOverridesToView built it for
+// another id.
 class _DebugViewMetricsFlutterView implements ui.FlutterView {
-  _DebugViewMetricsFlutterView(this._view);
+  _DebugViewMetricsFlutterView(this._view, this.viewId);
 
   final ui.FlutterView _view;
 
-  DebugViewMetricsOverride? get _override => _viewMetricsOverrides[_view.viewId];
+  @override
+  final int viewId;
+
+  DebugViewMetricsOverride? get _override => _viewMetricsOverrides[viewId];
 
   @override
   late final ui.PlatformDispatcher platformDispatcher = _DebugViewMetricsPlatformDispatcher(
     _view.platformDispatcher,
-    _view.viewId,
+    viewId,
   );
 
   @override
@@ -1833,9 +1879,6 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
   }
 
   // Everything below is forwarded unchanged.
-
-  @override
-  int get viewId => _view.viewId;
 
   @override
   ui.Display get display => _view.display;

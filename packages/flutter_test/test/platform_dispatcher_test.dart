@@ -20,6 +20,7 @@ import 'dart:ui'
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';
 
+import 'multi_view_testing.dart';
 import 'utils/fake_and_mock_utils.dart';
 
 void main() {
@@ -421,6 +422,77 @@ void main() {
     // before the notification went out rather than after it.
     expect(seenWhileNotifying, isNotNull);
     expect(seenWhileNotifying!.viewId, 200);
+  });
+
+  testWidgets(
+    'the dispatcher of a view other than the implicit view shares the state of its owner',
+    (WidgetTester tester) async {
+      // Such a view reports a dispatcher of its own, so that the debug view
+      // metrics override of its id can apply to the platform-wide metrics. It
+      // shares the test values, views, displays and focus of its owner.
+      final TestPlatformDispatcher owner = tester.platformDispatcher;
+      final fake = FakeView(tester.view);
+      final TestPlatformDispatcher dispatcher = fake.platformDispatcher;
+      expect(fake.platformDispatcher, same(dispatcher));
+      expect(dispatcher, isNot(same(owner)));
+      expect(tester.view.platformDispatcher, same(owner));
+      addTearDown(owner.clearAllTestValues);
+      addTearDown(owner.resetFocusedViewTestValues);
+
+      dispatcher.textScaleFactorTestValue = 2.5;
+      owner.localeTestValue = const Locale('fr');
+      dispatcher.applicationLocale = const Locale('de');
+      expect(owner.textScaleFactor, 2.5);
+      expect(dispatcher.textScaleFactor, 2.5);
+      expect(dispatcher.locale, const Locale('fr'));
+      expect(owner.applicationLocale, const Locale('de'));
+      expect(dispatcher.implicitView, same(tester.view));
+      expect(dispatcher.views, orderedEquals(owner.views));
+      expect(dispatcher.displays, orderedEquals(owner.displays));
+
+      final VoidCallback? previousMetricsChanged = owner.onMetricsChanged;
+      addTearDown(() => owner.onMetricsChanged = previousMetricsChanged);
+      var metricsChanged = 0;
+      dispatcher.onMetricsChanged = () => metricsChanged += 1;
+      expect(owner.onMetricsChanged, same(dispatcher.onMetricsChanged));
+      owner.notifyMetricsChanged();
+      expect(metricsChanged, 1);
+
+      owner.resetFocusedViewTestValues();
+      dispatcher.requestViewFocusChange(
+        viewId: fake.viewId,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.forward,
+      );
+      expect(owner.testFocusEvents.single.viewId, fake.viewId);
+      expect(dispatcher.testFocusEvents.single.viewId, fake.viewId);
+
+      dispatcher.clearAllTestValues();
+      expect(owner.textScaleFactor, PlatformDispatcher.instance.textScaleFactor);
+      expect(owner.locale, PlatformDispatcher.instance.locale);
+      expect(owner.applicationLocale, isNull);
+    },
+  );
+
+  testWidgets('a view of a fake that lacks what a view dispatcher needs keeps its dispatcher', (
+    WidgetTester tester,
+  ) async {
+    // The fake dispatcher does not implement implicitView.
+    final display = _FakeDisplay(id: 1);
+    final dispatcher = TestPlatformDispatcher(
+      platformDispatcher: _FakePlatformDispatcher(
+        displays: <Display>[display],
+        views: <FlutterView>[_FakeFlutterView(display: display, viewId: 100)],
+      ),
+    );
+    expect(dispatcher.views.single.platformDispatcher, same(dispatcher));
+
+    // The fake view does not implement platformDispatcher.
+    final TestFlutterView added = tester.platformDispatcher.addTestView(
+      _FakeFlutterView(display: tester.view.display, viewId: 100),
+    );
+    addTearDown(() => tester.platformDispatcher.removeTestView(added));
+    expect(added.platformDispatcher, same(tester.platformDispatcher));
   });
 
   testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
