@@ -229,6 +229,9 @@ base class ExtensionBuildManager {
         try {
           final Object? result = await connection.sendRequest(rpcMethod);
           return (connection, listFromJson(result));
+        } on ToolExtensionException catch (e) {
+          _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
+          return (connection, <T>[]);
         } on Object catch (e) {
           _logger.printWarning(
             'Failed to query $targetKind targets from extension "${connection.extensionName}": $e',
@@ -392,6 +395,8 @@ base class ExtensionBuildManager {
         success: false,
         errorMessage: 'Invalid $targetKind result from extension.',
       );
+    } on ToolExtensionException catch (e) {
+      return ExtensionBuildResult(success: false, errorMessage: e.message);
     } on Object catch (e) {
       _logger.printTrace('Failed to run $targetKind from extension: $e');
       return ExtensionBuildResult(success: false, errorMessage: e.toString());

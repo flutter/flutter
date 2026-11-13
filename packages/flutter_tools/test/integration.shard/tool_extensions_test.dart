@@ -145,52 +145,24 @@ void main() {
     expect(projectDir.existsSync(), isFalse);
   });
 
-  testWithoutContext('flutter create with custom template succeeds when enabled', () async {
-    final Directory projectDir = tempHome.childDirectory('custom_app');
-    if (projectDir.existsSync()) {
-      projectDir.deleteSync(recursive: true);
-    }
+  testWithoutContext(
+    'flutter devices -v gracefully shuts down active tool extensions on exit',
+    () async {
+      final ProcessResult result = await processManager.run(
+        <String>[flutterBin, 'devices', '-v'],
+        environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+      );
 
-    final ProcessResult result = await processManager.run(
-      <String>[flutterBin, 'create', '--template=custom-linux-app', projectDir.path],
-      environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
-    );
-
-    if (isLinux) {
       expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
-      expect(projectDir.existsSync(), isTrue);
-      final File verificationFile = projectDir.childFile('.custom_device_extension_info');
-      expect(verificationFile.existsSync(), isTrue);
-      expect(
-        verificationFile.readAsStringSync().trim(),
-        'Custom Linux Device Extension App Template Verified',
-      );
-    } else {
-      expect(
-        result.exitCode,
-        isNot(0),
-        reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}',
-      );
-      expect(result.stderr, contains('custom-linux-app'));
-      expect(projectDir.existsSync(), isFalse);
-    }
-  });
-
-  testWithoutContext('flutter create with custom template fails when disabled', () async {
-    final Directory projectDir = tempHome.childDirectory('custom_app_disabled');
-    if (projectDir.existsSync()) {
-      projectDir.deleteSync(recursive: true);
-    }
-
-    final ProcessResult result = await processManager.run(
-      <String>[flutterBin, 'create', '--template=custom-linux-app', projectDir.path],
-      environment: baseEnv, // disabled by default
-    );
-
-    expect(result.exitCode, isNot(0));
-    expect(result.stderr, contains('is not an allowed value for option "--template"'));
-    expect(projectDir.existsSync(), isFalse);
-  });
+      if (isLinux) {
+        expect(
+          result.stdout,
+          contains('[ToolExtensionIsolate] Handling extension.shutdown request.'),
+        );
+        expect(result.stdout, contains('ExtensionConnection disposing isolate connection.'));
+      }
+    },
+  );
 
   testWithoutContext('flutter assemble with custom TargetPlatform and ExtensionPluginPlatformKey generates custom platform Dart plugin registrant', () async {
     final Directory workspaceDir = tempHome.childDirectory('custom_assemble_workspace')

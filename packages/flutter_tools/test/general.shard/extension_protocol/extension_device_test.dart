@@ -670,5 +670,112 @@ void main() {
         );
       },
     );
+
+    testWithoutContext('ExtensionDeviceClient.launchApp and stopApp log error and return false on ToolExtensionException', () async {
+      void domainErrorEntryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _DomainErrorDeviceService(),
+          ], extensionName: 'custom_device_ext'),
+        );
+      }
+
+      final ExtensionConnection conn = await ExtensionConnection.spawn(
+        domainErrorEntryPoint,
+        logger: logger,
+      );
+      addTearDown(conn.dispose);
+
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final bool launched = await client.launchApp(
+        debuggingOptions: const ExtensionDebuggingOptions(
+          buildMode: .debug,
+          debuggingEnabled: true,
+        ),
+        deviceId: _primaryDeviceId,
+        executableUri: Uri.file('/project/build/app'),
+      );
+      expect(launched, isFalse);
+      expect(
+        logger.errorText,
+        contains('Extension "custom_device_ext": Launch failed: device disconnected.'),
+      );
+
+      logger.clear();
+      final bool stopped = await client.stopApp(deviceId: _primaryDeviceId);
+      expect(stopped, isFalse);
+      expect(
+        logger.errorText,
+        contains('Extension "custom_device_ext": Stop failed: app not running.'),
+      );
+    });
+
+    testWithoutContext('ExtensionDevices.pollingGetDevices reports ToolExtensionException via getDiagnostics without warning on every poll', () async {
+      void domainErrorEntryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _DomainErrorDeviceService(),
+          ], extensionName: 'custom_device_ext'),
+        );
+      }
+
+      final manager = ExtensionManager(
+        entryPoints: <ExtensionEntryPoint>[domainErrorEntryPoint],
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      addTearDown(manager.dispose);
+
+      final discovery = ExtensionDevices(
+        extensionBuildManager: _createBuildManager(extensionManager: manager, logger: logger),
+        extensionManager: manager,
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
+      );
+      addTearDown(discovery.dispose);
+
+      expect(await discovery.pollingGetDevices(), isEmpty);
+      expect(logger.warningText, isEmpty);
+      expect(await discovery.getDiagnostics(), const <String>[
+        'Extension "custom_device_ext": Device discovery failed: daemon not running.',
+      ]);
+    });
   });
+}
+
+final class _DomainErrorDeviceService extends DeviceService {
+  @override
+  Future<List<TargetDevice>> getDevices() async {
+    throw const ToolExtensionException('Device discovery failed: daemon not running.');
+  }
+
+  @override
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => true;
+
+  @override
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  }) async {
+    throw const ToolExtensionException('Launch failed: device disconnected.');
+  }
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+
+  @override
+  Future<bool> stopApp({required String deviceId}) async {
+    throw const ToolExtensionException('Stop failed: app not running.');
+  }
+
+  @override
+  Future<void> startLogStream({required String deviceId}) async {}
+
+  @override
+  Future<void> stopLogStream({required String deviceId}) async {}
 }
