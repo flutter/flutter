@@ -4,7 +4,6 @@
 
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -12,12 +11,13 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 
 final _FakeAnalytics fakeAnalytics = _FakeAnalytics();
 
@@ -2168,6 +2168,34 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
       expect(fileSystem.typeSync(file.path, followLinks: false), FileSystemEntityType.notFound);
     });
+  });
+
+  group('readAsStringSync', () {
+    const invalidUtf8Bytes = <int>[0xFF, 0xFE, 0x41];
+
+    for (final (String encodingName, Encoding encoding, String expected)
+        in <(String, Encoding, String)>[
+          ('AsciiCodec(allowInvalid: true)', const AsciiCodec(allowInvalid: true), '\uFFFD\uFFFDA'),
+          ('latin1', latin1, '\u00FF\u00FEA'),
+        ]) {
+      testWithoutContext('forwards $encodingName to LocalFileSystem delegate', () {
+        final localFileSystem = LocalFileSystem.test(signals: FakeSignals());
+        addTearDown(localFileSystem.dispose);
+        final Directory tempDir = localFileSystem.systemTempDirectory.createTempSync(
+          'flutter_tools_read_as_string_sync_test.',
+        );
+        addTearDown(() => tryToDelete(tempDir));
+
+        final fileSystem = ErrorHandlingFileSystem(
+          delegate: localFileSystem,
+          platform: linuxPlatform,
+        );
+        final File file = fileSystem.file(fileSystem.path.join(tempDir.path, 'binary.bin'))
+          ..writeAsBytesSync(invalidUtf8Bytes);
+
+        expect(file.readAsStringSync(encoding: encoding), expected);
+      });
+    }
   });
 }
 
