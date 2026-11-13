@@ -10,6 +10,7 @@
 #include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -17,35 +18,23 @@ namespace testing {
 
 namespace {
 
-// Stands in for an image such as DlDeferredImageGPUSkia: it is safe to hold
-// on the UI thread, but it is owned by the raster context and so its SkImage
-// may only be created and released on the raster thread.
-class RasterOwnedTestImage final : public DlImageSkia {
+using ::testing::NiceMock;
+using ::testing::Return;
+
+class MockDlImageSkia : public DlImageSkia {
  public:
-  RasterOwnedTestImage() : DlImageSkia(nullptr) {}
+  MockDlImageSkia() : DlImageSkia(nullptr) {}
 
-  // |DlImageSkia|
-  sk_sp<SkImage> skia_image() const override {
-    skia_image_call_count_++;
-    return nullptr;
-  }
-
-  // |DlImage|
-  bool isUIThreadSafe() const override { return true; }
-
-  // |DlImage|
-  DlISize GetSize() const override { return DlISize(10, 10); }
-
-  // |DlImage|
-  OwningContext owning_context() const override {
-    return OwningContext::kRaster;
-  }
-
-  int skia_image_call_count() const { return skia_image_call_count_; }
-
- private:
-  mutable int skia_image_call_count_ = 0;
+  MOCK_METHOD(sk_sp<SkImage>, skia_image, (), (const, override));
+  MOCK_METHOD(DlImage::OwningContext, owning_context, (), (const, override));
 };
+
+sk_sp<NiceMock<MockDlImageSkia>> MakeRasterOwnedImage() {
+  auto image = sk_make_sp<NiceMock<MockDlImageSkia>>();
+  ON_CALL(*image, owning_context())
+      .WillByDefault(Return(DlImage::OwningContext::kRaster));
+  return image;
+}
 
 }  // namespace
 
@@ -65,9 +54,11 @@ TEST(DisplayListImage, EqualsComparesTheSkiaImagesOfImagesNotOwnedByRaster) {
 
 // Regression test for https://github.com/flutter/flutter/issues/195888.
 TEST(DisplayListImage, EqualsDoesNotAccessTheSkiaImageOfRasterOwnedImages) {
-  auto image1 = sk_make_sp<RasterOwnedTestImage>();
-  auto image2 = sk_make_sp<RasterOwnedTestImage>();
+  auto image1 = MakeRasterOwnedImage();
+  auto image2 = MakeRasterOwnedImage();
   sk_sp<DlImage> plain_image = MakeTestImage(10, 10, DlColor::kGreen());
+  EXPECT_CALL(*image1, skia_image()).Times(0);
+  EXPECT_CALL(*image2, skia_image()).Times(0);
 
   // Raster owned images have pointer equality.
   EXPECT_TRUE(image1->Equals(image1));
@@ -77,9 +68,6 @@ TEST(DisplayListImage, EqualsDoesNotAccessTheSkiaImageOfRasterOwnedImages) {
   // The raster owned image may be on either side of the comparison.
   EXPECT_FALSE(image1->Equals(plain_image));
   EXPECT_FALSE(plain_image->Equals(image1));
-
-  EXPECT_EQ(image1->skia_image_call_count(), 0);
-  EXPECT_EQ(image2->skia_image_call_count(), 0);
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/195888.
@@ -89,8 +77,10 @@ TEST(DisplayListImage, EqualsDoesNotAccessTheSkiaImageOfRasterOwnedImages) {
 // This test ensures that the builder does not access the SkImage of a raster
 // owned image.
 TEST(DisplayListImage, BuilderDoesNotAccessTheSkiaImageOfRasterOwnedImages) {
-  auto image1 = sk_make_sp<RasterOwnedTestImage>();
-  auto image2 = sk_make_sp<RasterOwnedTestImage>();
+  auto image1 = MakeRasterOwnedImage();
+  auto image2 = MakeRasterOwnedImage();
+  EXPECT_CALL(*image1, skia_image()).Times(0);
+  EXPECT_CALL(*image2, skia_image()).Times(0);
   DlPaint paint1;
   paint1.setColorSource(DlColorSource::MakeImage(image1, DlTileMode::kRepeat,
                                                  DlTileMode::kRepeat));
@@ -106,8 +96,6 @@ TEST(DisplayListImage, BuilderDoesNotAccessTheSkiaImageOfRasterOwnedImages) {
   sk_sp<DisplayList> display_list = builder.Build();
 
   EXPECT_NE(display_list, nullptr);
-  EXPECT_EQ(image1->skia_image_call_count(), 0);
-  EXPECT_EQ(image2->skia_image_call_count(), 0);
 }
 
 }  // namespace testing
