@@ -4,6 +4,7 @@
 
 #include <initializer_list>
 #include <tuple>
+#include <vector>
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
@@ -236,6 +237,64 @@ TEST(BlitCommandGLESTest, BlitCopyTextureToBufferCommandGLESBindsFramebuffer) {
 
   std::shared_ptr<TextureGLES> source_texture =
       CreateTexture(reactor, PixelFormat::kR8G8B8A8UNormInt);
+  std::shared_ptr<DeviceBufferGLES> dest_buffer = CreateBuffer(reactor);
+
+  ASSERT_TRUE(reactor->React());
+
+  BlitCopyTextureToBufferCommandGLES command =
+      CreateCopyTextureToBufferCommand(source_texture, dest_buffer);
+
+  EXPECT_TRUE(command.Encode(*reactor));
+
+  source_texture.reset();
+  dest_buffer.reset();
+
+  ASSERT_TRUE(reactor->React());
+}
+
+// With EXT_multisampled_render_to_texture an offscreen render target is read
+// back through its multisampled texture. The readback keeps binding
+// GL_FRAMEBUFFER, which OpenGL ES 2 requires, but attaches the texture single
+// sampled: its texture level holds the resolved samples, and attaching it
+// multisampled only to read it crashes some drivers
+// (https://github.com/flutter/flutter/issues/195319).
+TEST(BlitCommandGLESTest,
+     BlitCopyTextureToBufferCommandGLESReadsMultisampledTextureSingleSampled) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+
+  EXPECT_CALL(mock_gles_impl_ref, GenFramebuffers(1, _))
+      .WillOnce(::testing::SetArgPointee<1>(3));
+  EXPECT_CALL(mock_gles_impl_ref, GenTextures(1, _))
+      .WillOnce(::testing::SetArgPointee<1>(1));
+  EXPECT_CALL(mock_gles_impl_ref,
+              FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                   GL_TEXTURE_2D, 1, 0))
+      .Times(1);
+  EXPECT_CALL(mock_gles_impl_ref,
+              FramebufferTexture2DMultisampleEXT(_, _, _, _, _, _))
+      .Times(0);
+  EXPECT_CALL(mock_gles_impl_ref, CheckFramebufferStatus(GL_FRAMEBUFFER))
+      .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
+  EXPECT_CALL(mock_gles_impl_ref, ReadPixels(_, _, _, _, _, _, _)).Times(1);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(
+      std::move(mock_gles_impl),
+      std::vector<const char*>{"GL_KHR_debug",
+                               "GL_EXT_multisampled_render_to_texture"});
+  auto reactor = std::make_shared<TestReactorGLES>();
+  auto worker = std::make_shared<MockWorker>();
+  reactor->AddWorker(worker);
+
+  TextureDescriptor tex_desc;
+  tex_desc.storage_mode = StorageMode::kDevicePrivate;
+  tex_desc.type = TextureType::kTexture2DMultisample;
+  tex_desc.sample_count = SampleCount::kCount4;
+  tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  tex_desc.size = {10, 10};
+  tex_desc.usage = TextureUsage::kRenderTarget;
+  auto source_texture = std::make_shared<TextureGLES>(reactor, tex_desc);
+  ASSERT_EQ(source_texture->GetType(), TextureGLES::Type::kTextureMultisampled);
   std::shared_ptr<DeviceBufferGLES> dest_buffer = CreateBuffer(reactor);
 
   ASSERT_TRUE(reactor->React());

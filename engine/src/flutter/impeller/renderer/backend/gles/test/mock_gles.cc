@@ -505,6 +505,20 @@ void mockFramebufferTexture2D(GLenum target,
 static_assert(CheckSameSignature<decltype(mockFramebufferTexture2D),  //
                                  decltype(glFramebufferTexture2D)>::value);
 
+void mockFramebufferTexture2DMultisampleEXT(GLenum target,
+                                            GLenum attachment,
+                                            GLenum textarget,
+                                            GLuint texture,
+                                            GLint level,
+                                            GLsizei samples) {
+  CallMockMethod(&IMockGLESImpl::FramebufferTexture2DMultisampleEXT, target,
+                 attachment, textarget, texture, level, samples);
+}
+
+static_assert(
+    CheckSameSignature<decltype(mockFramebufferTexture2DMultisampleEXT),  //
+                       decltype(glFramebufferTexture2DMultisampleEXT)>::value);
+
 void mockActiveTexture(GLenum texture) {
   CallMockMethod(&IMockGLESImpl::ActiveTexture, texture);
 }
@@ -790,6 +804,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGetShaderiv);
   } else if (strcmp(name, "glFramebufferTexture2D") == 0) {
     return reinterpret_cast<void*>(mockFramebufferTexture2D);
+  } else if (strcmp(name, "glFramebufferTexture2DMultisampleEXT") == 0) {
+    return reinterpret_cast<void*>(mockFramebufferTexture2DMultisampleEXT);
   } else if (strcmp(name, "glActiveTexture") == 0) {
     return reinterpret_cast<void*>(mockActiveTexture);
   } else if (strcmp(name, "glUniform1i") == 0) {
