@@ -201,11 +201,15 @@ class MouseTracker extends ChangeNotifier {
       _debugDuringDeviceUpdate = true;
       return true;
     }());
-    task();
-    assert(() {
-      _debugDuringDeviceUpdate = false;
-      return true;
-    }());
+    try {
+      task();
+    } finally {
+      // A failed hit test or hover callback must not disable future updates.
+      assert(() {
+        _debugDuringDeviceUpdate = false;
+        return true;
+      }());
+    }
   }
 
   // Whether an observed event might update a device.
