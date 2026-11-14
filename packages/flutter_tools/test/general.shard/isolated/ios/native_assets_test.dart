@@ -50,9 +50,21 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+  for (final (
+        BuildMode buildMode,
+        String? deploymentTarget,
+        AppleVersion expectedVersion,
+        String expectedMinimum,
+      )
+      in <(BuildMode, String?, AppleVersion, String)>[
+        for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) ...[
+          (buildMode, null, AppleVersion(15), '15.0'),
+          (buildMode, '16.4', AppleVersion(16, minor: 4), '16.4'),
+          (buildMode, '17.2.1', AppleVersion(17, minor: 2, patch: 1), '17.2.1'),
+        ],
+      ]) {
     testUsingContext(
-      'build with assets $buildMode',
+      'build with assets $buildMode deployment target $deploymentTarget',
       overrides: <Type, Generator>{
         FeatureFlags: () =>
             TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
@@ -240,21 +252,28 @@ void main() {
         ];
         final buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
-          onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            codeAssets: buildMode == BuildMode.debug
-                ? codeAssets(input.config.code.targetOS, input.config.code)
-                : <CodeAsset>[],
-          ),
-          onLink: (LinkInput input) => buildMode == BuildMode.debug
-              ? null
-              : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                  codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-                ),
+          onBuild: (BuildInput input) {
+            expect(input.config.code.iOS.deploymentVersion, expectedVersion);
+            return FakeFlutterNativeAssetsBuilderResult.fromAssets(
+              codeAssets: buildMode == BuildMode.debug
+                  ? codeAssets(input.config.code.targetOS, input.config.code)
+                  : <CodeAsset>[],
+            );
+          },
+          onLink: (LinkInput input) {
+            expect(input.config.code.iOS.deploymentVersion, expectedVersion);
+            return buildMode == BuildMode.debug
+                ? null
+                : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                    codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                  );
+          },
         );
         final environmentDefines = <String, String>{
           kBuildMode: buildMode.cliName,
           kSdkRoot: '.../iPhone Simulator',
           kIosArchs: 'arm64 x86_64',
+          kIosDeploymentTarget: ?deploymentTarget,
         };
         final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
@@ -293,6 +312,14 @@ void main() {
           ]),
         );
         expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
+        for (final name in <String>['bar', 'buz']) {
+          expect(
+            fileSystem
+                .file('/build/native_assets/ios/$name.framework/Info.plist')
+                .readAsStringSync(),
+            contains('<key>MinimumOSVersion</key>\n\t<string>$expectedMinimum</string>'),
+          );
+        }
         // Two archs.
         expect(buildRunner.buildInvocations, 2);
         expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
