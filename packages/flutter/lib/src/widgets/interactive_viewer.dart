@@ -472,7 +472,9 @@ class InteractiveViewer extends StatefulWidget {
       InteractiveViewer.getNearestPointOnLine(point, quad.point3, quad.point0),
     ];
     double minDistance = double.infinity;
-    late Vector3 closestOverall;
+    // If the point contains NaN, no distance compares as smaller, so fall back
+    // to the point itself.
+    var closestOverall = point;
     for (final closePoint in closestPoints) {
       final double distance = math.sqrt(
         math.pow(point.x - closePoint.x, 2) + math.pow(point.y - closePoint.y, 2),
