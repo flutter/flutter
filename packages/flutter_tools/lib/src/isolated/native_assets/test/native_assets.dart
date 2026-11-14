@@ -53,7 +53,7 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 ///
 /// Resolves the target package name for the current project and executes build
 /// and install hooks for the host test platform ([TargetPlatform.tester]),
-/// writing the generated manifest to `build/native_assets/<os>/native_assets.json`.
+/// writing the generated manifest to `build/native_assets/native_assets.json`.
 ///
 /// Returns the [TestCompilerNativeAssetsBuildResult] containing the [Uri] to the
 /// generated `native_assets.json` file and hook output, or `null` fields if
@@ -124,13 +124,14 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   }
 
   // Only `flutter test` uses the
-  // `build/native_assets/<os>/native_assets.json` file which uses absolute
+  // `build/native_assets/native_assets.json` file which uses absolute
   // paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
   final String buildDir = getBuildDirectory(config, fileSystem);
   final String osName = targetOS.name;
-  final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
-  final Uri nativeAssetsFileUri = buildUri.resolve(_nativeAssetsJsonFileName);
+  final Uri nativeAssetsDirUri = projectUri.resolve('$buildDir/native_assets/');
+  final Uri buildUri = nativeAssetsDirUri.resolve('$osName/');
+  final Uri nativeAssetsFileUri = nativeAssetsDirUri.resolve(_nativeAssetsJsonFileName);
 
   final environmentDefines = <String, String>{kBuildMode: mode.cliName};
 
