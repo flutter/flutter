@@ -69,6 +69,11 @@ struct _FlView {
   // TRUE if the view size should be controlled by Flutter.
   gboolean sized_to_content;
 
+  // Last known toplevel window origin, used to detect drags.
+  gboolean window_position_set;
+  gint window_x;
+  gint window_y;
+
   GCancellable* cancellable;
 };
 
@@ -387,7 +392,29 @@ static void grab_notify_cb(FlView* self, gboolean was_grabbed) {
     return;
   }
 
+  // The application stays focused while a platform menu is open, so the
+  // framework does not otherwise know to close a Flutter context menu.
+  fl_engine_dismiss_context_menu(self->engine);
   cancel_input(self, gtk_get_current_event_time());
+}
+
+// Signal handler for GtkWidget::configure-event on the toplevel window.
+static gboolean window_configure_event_cb(FlView* self,
+                                          GdkEventConfigure* event) {
+  if (!self->window_position_set) {
+    self->window_x = event->x;
+    self->window_y = event->y;
+    self->window_position_set = TRUE;
+    return FALSE;
+  }
+  if (event->x == self->window_x && event->y == self->window_y) {
+    return FALSE;
+  }
+  self->window_x = event->x;
+  self->window_y = event->y;
+  // Dragging the window does not deactivate the application.
+  fl_engine_dismiss_context_menu(self->engine);
+  return FALSE;
 }
 
 // Signal handler for GtkWidget::unmap
@@ -516,6 +543,10 @@ static void realize_cb(FlView* self) {
   self->window_state_monitor =
       fl_window_state_monitor_new(fl_engine_get_binary_messenger(self->engine),
                                   GTK_WINDOW(toplevel_window));
+
+  g_signal_connect_object(toplevel_window, "configure-event",
+                          G_CALLBACK(window_configure_event_cb), self,
+                          G_CONNECT_SWAPPED);
 
   // Handle requests by the user to close the application.
   g_signal_connect_object(toplevel_window, "delete-event",

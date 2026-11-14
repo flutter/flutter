@@ -1168,6 +1168,54 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
     }, variant: TargetPlatformVariant.desktop());
 
+    // Regression test for https://github.com/flutter/flutter/issues/111054.
+    testWidgets(
+      'context menu hides when app loses focus on desktop',
+      (WidgetTester tester) async {
+        final focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+        final toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: _selectableRegion(
+              focusNode: focusNode,
+              contextMenuBuilder: (BuildContext context, SelectableRegionState state) {
+                return SizedBox.shrink(key: toolbarKey);
+              },
+              child: const Center(child: Text('How are you')),
+            ),
+          ),
+        );
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text('How are you'), matching: find.byType(RichText)),
+        );
+        final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraph, 2),
+          kind: PointerDeviceKind.mouse,
+          buttons: kSecondaryMouseButton,
+        );
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        expect(paragraph.selections, isNotEmpty);
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        // Setting the app lifecycle state to AppLifecycleState.inactive to simulate
+        // a lose of window focus.
+        await setAppLifecycleState(AppLifecycleState.inactive);
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, isFalse);
+        expect(paragraph.selections, isNotEmpty);
+        expect(find.byKey(toolbarKey), findsNothing);
+      },
+      variant: TargetPlatformVariant.desktop(),
+      skip: kIsWeb, // [intended] Web uses its native context menu.
+    );
+
     testWidgets(
       'touch can select word-by-word on double tap drag on mobile platforms',
       (WidgetTester tester) async {
