@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/context/android_context.dart' show AndroidSdkProvider;
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
@@ -46,6 +45,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -59,11 +59,7 @@ void main() {
       'build with assets $buildMode',
       // [intended] Backslashes in commands, but we will never run these commands on Windows.
       skip: const LocalPlatform().isWindows,
-      overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.empty(),
-        FeatureFlags: () =>
-            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
-      },
+      overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
       () async {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
@@ -105,7 +101,10 @@ void main() {
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(
+            isNativeAssetsEnabled: true,
+            isDartDataAssetsEnabled: true,
+          ),
           logger: logger,
           buildRunner: buildRunner,
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
@@ -160,7 +159,7 @@ void main() {
         targetPlatform: TargetPlatform.android_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: logger,
         buildRunner: _BuildRunnerWithoutNdk(),
         buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
@@ -171,33 +170,29 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'throw if NDK not present and there are native assets',
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
-    () async {
-      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-      await packageConfig.parent.create();
-      await packageConfig.create();
-      expect(
-        await runFlutterSpecificHooks(
-          environmentDefines: <String, String>{
-            kBuildMode: BuildMode.debug.cliName,
-            kMinSdkVersion: minSdkVersion,
-          },
-          targetPlatform: TargetPlatform.android_arm64,
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          featureFlags: featureFlags,
-          logger: logger,
-          buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
-          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
-          buildDataAssets: true,
-          recordedUsesFile: null,
-        ),
-        isA<DartHooksResult>(),
-      );
-    },
-  );
+  testUsingContext('throw if NDK not present and there are native assets', () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      await runFlutterSpecificHooks(
+        environmentDefines: <String, String>{
+          kBuildMode: BuildMode.debug.cliName,
+          kMinSdkVersion: minSdkVersion,
+        },
+        targetPlatform: TargetPlatform.android_arm64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
+        logger: logger,
+        buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
+        buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+        buildDataAssets: true,
+        recordedUsesFile: null,
+      ),
+      isA<DartHooksResult>(),
+    );
+  });
 
   testWithoutContext('does not look up AndroidSdk when running data-only build hooks', () async {
     final androidSdkProvider = _CountingAndroidSdkProvider(androidSdk: _FakeAndroidSdk());

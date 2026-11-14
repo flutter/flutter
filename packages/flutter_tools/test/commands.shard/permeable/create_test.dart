@@ -4859,12 +4859,15 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     // 2. We want to pretend we're creating into a relative (not absolute) path
     // 3. It's non-trivial to use MemoryFileSystem.test(), we need real template files
     await io.IOOverrides.runZoned<Future<void>>(() async {
-      final CommandRunner<void> runner = createTestCommandRunner(
+      final ToolContext toolContext = _createToolContext();
+      final runner = TestFlutterCommandRunner(toolContext: toolContext);
+      runner.addCommand(
         CreateCommand(
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
+          featureFlags: runner.featureFlags,
           templateRenderer: const MustacheTemplateRenderer(),
-          toolContext: _createToolContext(),
+          toolContext: toolContext,
         ),
       );
       await runner.run(<String>['create', '--no-pub', '.']);
@@ -5016,6 +5019,7 @@ CreateCommand createCreateCommand({
   AndroidContext? androidContext,
   AppleContext? appleContext,
   ExtensionTemplateManager? extensionTemplateManager,
+  FeatureFlags? featureFlags,
   Java? java,
   Net? net,
   Pub? pub,
@@ -5047,6 +5051,7 @@ CreateCommand createCreateCommand({
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           ),
         ),
+    featureFlags: featureFlags ?? TestFlutterCommandRunner().featureFlags,
     templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
     toolContext: resolvedToolContext,
     extensionTemplateManager: extensionTemplateManager,

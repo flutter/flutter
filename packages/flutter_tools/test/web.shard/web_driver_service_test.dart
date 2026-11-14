@@ -23,6 +23,7 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         dartSdkPath: 'dart',
+        featureFlags: TestFeatureFlags(isWebEnabled: true),
         toolContext: FakeToolContext(),
       );
       const link = 'https://flutter.dev/to/integration-test-on-web';

@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../../asset.dart';
 import '../../base/logger.dart' show Logger;
 import '../../build_info.dart';
-import '../../features.dart' show featureFlags;
 import '../../hook_runner.dart' show FlutterHookRunner;
 import '../../isolated/native_assets/dart_hook_result.dart' show DartHooksResult;
 import '../../isolated/native_assets/native_assets.dart';
@@ -45,7 +44,7 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
       targetPlatform: targetPlatform,
       projectUri: environment.projectDir.uri,
       fileSystem: environment.fileSystem,
-      featureFlags: featureFlags,
+      featureFlags: environment.featureFlags,
       logger: environment.logger,
       buildCodeAssets: null,
       buildDataAssets: true,

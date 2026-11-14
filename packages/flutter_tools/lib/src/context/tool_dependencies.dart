@@ -436,11 +436,14 @@ class ToolDependencies {
       processManager: finalProcessManager,
     );
 
+    late final Artifacts finalArtifacts;
+
     final Cache finalCache =
         cache ??
         FlutterCache(
           flutterRoot: finalFlutterRoot,
           fileSystem: finalFS,
+          isLocalEngineBuilder: () => finalArtifacts.localEngineInfo != null,
           logger: finalLogger,
           platform: finalPlatform,
           osUtils: finalOS,
@@ -456,6 +459,7 @@ class ToolDependencies {
           flutterRoot: finalFlutterRoot,
           fs: finalFS,
           git: finalGit,
+          isOmitLegacyVersionFileEnabled: () => finalFeatureFlags.isOmitLegacyVersionFileEnabled,
           logger: finalLogger,
           platform: finalPlatform,
         );
@@ -538,7 +542,7 @@ class ToolDependencies {
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
     // Artifacts will be updated later if a local engine is used.
-    final Artifacts finalArtifacts = switch (artifacts) {
+    finalArtifacts = switch (artifacts) {
       final DeferredArtifacts deferredArtifacts => deferredArtifacts,
       final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
       null => DeferredArtifacts(
@@ -601,6 +605,7 @@ class ToolDependencies {
         XCDevice(
           analytics: finalAnalytics,
           cocoaPods: finalCocoaPods,
+          featureFlags: finalFeatureFlags,
           iproxy: IProxy(
             artifacts: finalArtifacts,
             logger: finalLogger,
@@ -625,6 +630,7 @@ class ToolDependencies {
         IOSSimulatorUtils(
           analytics: finalAnalytics,
           cocoaPods: finalCocoaPods,
+          featureFlags: finalFeatureFlags,
           plistParser: finalPlistParser,
           templateRenderer: templateRenderer,
           toolContext: finalToolContext,
@@ -767,12 +773,15 @@ class ToolDependencies {
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               doctorValidatorsProvider ??
               DoctorValidatorsProvider.create(
+                androidContext: finalAndroidContext,
+                androidWorkflow: finalAndroidWorkflow,
                 appleContext: appleContext,
                 deviceManager: finalDeviceManager,
                 extensionManager: extensionManager,
                 featureFlags: finalFeatureFlags,
                 httpClientFactory: httpClientFactory,
                 toolContext: finalToolContext,
+                windowsWorkflow: finalWindowsWorkflow,
               ),
         );
 

@@ -5,12 +5,10 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -275,31 +273,26 @@ migration:
     expect(logger.traceText, contains('The key `create_revision` was not found'));
   });
 
-  testUsingContext(
-    'enabledValues does not contain packageFfi if native-assets not enabled',
-    () {
-      expect(
-        ParsedFlutterTemplateType.enabledValues(featureFlags, extensionTemplateManager: null),
-        isNot(contains(FlutterTemplateType.packageFfi)),
-      );
-      expect(
-        ParsedFlutterTemplateType.enabledValues(featureFlags, extensionTemplateManager: null),
-        contains(FlutterTemplateType.plugin),
-      );
-    },
-    overrides: <Type, Generator>{
-      // ignore: avoid_redundant_argument_values
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: false),
-    },
-  );
-
-  testUsingContext('enabledValues contains packageFfi if natives-assets enabled', () {
+  testWithoutContext('enabledValues does not contain packageFfi if native-assets not enabled', () {
+    final flags = TestFeatureFlags();
     expect(
-      ParsedFlutterTemplateType.enabledValues(featureFlags, extensionTemplateManager: null),
+      ParsedFlutterTemplateType.enabledValues(flags, extensionTemplateManager: null),
+      isNot(contains(FlutterTemplateType.packageFfi)),
+    );
+    expect(
+      ParsedFlutterTemplateType.enabledValues(flags, extensionTemplateManager: null),
+      contains(FlutterTemplateType.plugin),
+    );
+  });
+
+  testWithoutContext('enabledValues contains packageFfi if natives-assets enabled', () {
+    final flags = TestFeatureFlags(isNativeAssetsEnabled: true);
+    expect(
+      ParsedFlutterTemplateType.enabledValues(flags, extensionTemplateManager: null),
       contains(FlutterTemplateType.packageFfi),
     );
     expect(
-      ParsedFlutterTemplateType.enabledValues(featureFlags, extensionTemplateManager: null),
+      ParsedFlutterTemplateType.enabledValues(flags, extensionTemplateManager: null),
       contains(FlutterTemplateType.plugin),
     );
   });

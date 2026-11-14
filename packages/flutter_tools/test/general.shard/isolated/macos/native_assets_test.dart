@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart'
     show cCompilerConfigMacOS;
@@ -44,6 +43,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -78,364 +78,360 @@ void main() {
       signPathBuz = '/build/native_assets/macos/buz.framework';
     }
     for (final buildMode in <BuildMode>[BuildMode.debug, if (!flutterTester) BuildMode.release]) {
-      testUsingContext(
-        'build with assets $buildMode$testName',
-        overrides: <Type, Generator>{
-          FeatureFlags: () =>
-              TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
-        },
-        () async {
-          if (const LocalPlatform().isWindows) {
-            return; // Backslashes in commands, but we will never run these commands on Windows.
-          }
-          if (flutterTester && !const LocalPlatform().isMacOS) {
-            // The [runFlutterSpecificDartBuild] will - when given
-            // `TargetPlatform.tester` - enable `flutter test` mode. That means if
-            // this test is run on linux, it's going to do a linux build.
-            // Though this test is mac-specific, so we skip that.
-            //
-            // Running the test in `!flutterTester` mode still works on linux as
-            // we explicitly tell it to do a mac build (instead of letting it
-            // choose the local build).
-            return;
-          }
-          processManager = FakeProcessManager.list(<FakeCommand>[
-            if (flutterTester) ...<FakeCommand>[
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'lipo',
-                  '-create',
-                  '-output',
-                  dylibPathBar,
-                  '${isArm64 ? 'arm64' : 'x64'}/libbar.dylib',
-                ],
-              ),
-              if (buildMode == BuildMode.release) ...<FakeCommand>[
-                FakeCommand(
-                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
-                  onRun: (_) {
-                    fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
-                  },
-                ),
-                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
+      testUsingContext('build with assets $buildMode$testName', () async {
+        if (const LocalPlatform().isWindows) {
+          return; // Backslashes in commands, but we will never run these commands on Windows.
+        }
+        if (flutterTester && !const LocalPlatform().isMacOS) {
+          // The [runFlutterSpecificDartBuild] will - when given
+          // `TargetPlatform.tester` - enable `flutter test` mode. That means if
+          // this test is run on linux, it's going to do a linux build.
+          // Though this test is mac-specific, so we skip that.
+          //
+          // Running the test in `!flutterTester` mode still works on linux as
+          // we explicitly tell it to do a mac build (instead of letting it
+          // choose the local build).
+          return;
+        }
+        processManager = FakeProcessManager.list(<FakeCommand>[
+          if (flutterTester) ...<FakeCommand>[
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'lipo',
+                '-create',
+                '-output',
+                dylibPathBar,
+                '${isArm64 ? 'arm64' : 'x64'}/libbar.dylib',
               ],
+            ),
+            if (buildMode == BuildMode.release) ...<FakeCommand>[
               FakeCommand(
-                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBar],
-                stdout: <String>[
-                  '$dylibPathBar (architecture x86_64):',
-                  '@rpath/libbar.dylib',
-                  '$dylibPathBar (architecture arm64):',
-                  '@rpath/libbar.dylib',
-                ].join('\n'),
+                command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                onRun: (_) {
+                  fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
+                },
               ),
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'lipo',
-                  '-create',
-                  '-output',
-                  dylibPathBuz,
-                  '${isArm64 ? 'arm64' : 'x64'}/libbuz.dylib',
-                ],
-              ),
-              if (buildMode == BuildMode.release) ...<FakeCommand>[
-                FakeCommand(
-                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
-                  onRun: (_) {
-                    fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
-                  },
-                ),
-                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
-              ],
-              FakeCommand(
-                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBuz],
-                stdout: <String>[
-                  '$dylibPathBuz (architecture ${isArm64 ? 'arm64' : 'x86_64'}):',
-                  '@rpath/libbuz.dylib',
-                ].join('\n'),
-              ),
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'install_name_tool',
-                  '-id',
-                  dylibPathBar,
-                  '-change',
-                  '@rpath/libbar.dylib',
-                  dylibPathBar,
-                  '-change',
-                  '@rpath/libbuz.dylib',
-                  dylibPathBuz,
-                  dylibPathBar,
-                ],
-              ),
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'codesign',
-                  '--force',
-                  '--sign',
-                  '-',
-                  if (buildMode == BuildMode.debug) '--timestamp=none',
-                  signPathBar,
-                ],
-              ),
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'install_name_tool',
-                  '-id',
-                  dylibPathBuz,
-                  '-change',
-                  '@rpath/libbar.dylib',
-                  dylibPathBar,
-                  '-change',
-                  '@rpath/libbuz.dylib',
-                  signPathBuz,
-                  signPathBuz,
-                ],
-              ),
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'codesign',
-                  '--force',
-                  '--sign',
-                  '-',
-                  if (buildMode == BuildMode.debug) '--timestamp=none',
-                  signPathBuz,
-                ],
-              ),
-            ] else ...<FakeCommand>[
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'lipo',
-                  '-create',
-                  '-output',
-                  dylibPathBar,
-                  'arm64/libbar.dylib',
-                  'x64/libbar.dylib',
-                ],
-              ),
-              if (buildMode == BuildMode.release) ...<FakeCommand>[
-                FakeCommand(
-                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
-                  onRun: (_) {
-                    fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
-                  },
-                ),
-                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
-              ],
-              FakeCommand(
-                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBar],
-                stdout: <String>[
-                  '$dylibPathBar (architecture x86_64):',
-                  '@rpath/libbar.dylib',
-                  '$dylibPathBar (architecture arm64):',
-                  '@rpath/libbar.dylib',
-                ].join('\n'),
-              ),
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'lipo',
-                  '-create',
-                  '-output',
-                  dylibPathBuz,
-                  'arm64/libbuz.dylib',
-                  'x64/libbuz.dylib',
-                ],
-              ),
-              if (buildMode == BuildMode.release) ...<FakeCommand>[
-                FakeCommand(
-                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
-                  onRun: (_) {
-                    fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
-                  },
-                ),
-                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
-              ],
-              FakeCommand(
-                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBuz],
-                stdout: <String>[
-                  '$dylibPathBuz (architecture x86_64):',
-                  '@rpath/libbuz.dylib',
-                  '$dylibPathBuz (architecture arm64):',
-                  '@rpath/libbuz.dylib',
-                ].join('\n'),
-              ),
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'install_name_tool',
-                  '-id',
-                  '@rpath/bar.framework/bar',
-                  '-change',
-                  '@rpath/libbar.dylib',
-                  '@rpath/bar.framework/bar',
-                  '-change',
-                  '@rpath/libbuz.dylib',
-                  '@rpath/buz.framework/buz',
-                  dylibPathBar,
-                ],
-              ),
-              FakeCommand(
-                command: <Pattern>[
-                  'xcrun',
-                  'install_name_tool',
-                  '-id',
-                  '@rpath/buz.framework/buz',
-                  '-change',
-                  '@rpath/libbar.dylib',
-                  '@rpath/bar.framework/bar',
-                  '-change',
-                  '@rpath/libbuz.dylib',
-                  '@rpath/buz.framework/buz',
-                  dylibPathBuz,
-                ],
-              ),
+              FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
             ],
-          ]);
-          final File packageConfig = environment.projectDir.childFile(
-            '.dart_tool/package_config.json',
-          );
-          final Uri nonFlutterTesterAssetUri = environment.buildDir
-              .childFile(InstallCodeAssets.nativeAssetsFilename)
-              .uri;
-          await packageConfig.parent.create();
-          await packageConfig.create();
-
-          List<CodeAsset> codeAssets(OS targetOS, CodeConfig codeConfig) => <CodeAsset>[
-            CodeAsset(
-              package: 'bar',
-              name: 'bar.dart',
-              linkMode: DynamicLoadingBundled(),
-              file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
+            FakeCommand(
+              command: <Pattern>['xcrun', 'otool', '-D', dylibPathBar],
+              stdout: <String>[
+                '$dylibPathBar (architecture x86_64):',
+                '@rpath/libbar.dylib',
+                '$dylibPathBar (architecture arm64):',
+                '@rpath/libbar.dylib',
+              ].join('\n'),
             ),
-            CodeAsset(
-              package: 'buz',
-              name: 'buz.dart',
-              linkMode: DynamicLoadingBundled(),
-              file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
-            ),
-          ];
-          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <String>['bar'],
-            onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-              codeAssets: buildMode == BuildMode.debug
-                  ? codeAssets(input.config.code.targetOS, input.config.code)
-                  : <CodeAsset>[],
-            ),
-            onLink: (LinkInput input) => buildMode == BuildMode.debug
-                ? null
-                : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                    codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-                  ),
-          );
-          final environmentDefines = <String, String>{
-            kBuildMode: buildMode.cliName,
-            kDarwinArchs: 'arm64 x86_64',
-          };
-          final TargetPlatform targetPlatform = flutterTester
-              ? TargetPlatform.tester
-              : TargetPlatform.darwin;
-          final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
-            environmentDefines: environmentDefines,
-            targetPlatform: targetPlatform,
-            projectUri: projectUri,
-            fileSystem: fileSystem,
-            featureFlags: featureFlags,
-            logger: logger,
-            buildRunner: buildRunner,
-            buildCodeAssets: BuildCodeAssetsOptions(
-              appBuildDirectory: fileSystem.directory(projectUri),
-            ),
-            buildDataAssets: true,
-            recordedUsesFile: null,
-          );
-          final Uri nativeAssetsFileUri = flutterTester
-              ? projectUri.resolve(
-                  'build/native_assets/macos/${InstallCodeAssets.nativeAssetsFilename}',
-                )
-              : nonFlutterTesterAssetUri;
-
-          await installCodeAssets(
-            dartHookResult: dartHookResult,
-            environmentDefines: environmentDefines,
-            targetPlatform: targetPlatform,
-            projectUri: projectUri,
-            fileSystem: fileSystem,
-            logger: logger,
-            processManager: processManager,
-            nativeAssetsFileUri: nativeAssetsFileUri,
-            targetUri: projectUri.resolve(
-              '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/macos/',
-            ),
-          );
-          final expectedArchsBeingBuilt = flutterTester
-              ? (isArm64 ? 'macos_arm64' : 'macos_x64')
-              : 'macos_arm64, macos_x64';
-          expect(
-            logger.traceText,
-            stringContainsInOrder(<String>[
-              'Running build hooks for $expectedArchsBeingBuilt.',
-              'Running build hooks for $expectedArchsBeingBuilt done.',
-              if (buildMode == BuildMode.release) ...<String>[
-                'Running link hooks for $expectedArchsBeingBuilt.',
-                'Running link hooks for $expectedArchsBeingBuilt done.',
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'lipo',
+                '-create',
+                '-output',
+                dylibPathBuz,
+                '${isArm64 ? 'arm64' : 'x64'}/libbuz.dylib',
               ],
-            ]),
-          );
-          final String nativeAssetsFileContent = await fileSystem
-              .file(nativeAssetsFileUri)
-              .readAsString();
-          expect(
-            nativeAssetsFileContent,
-            stringContainsInOrder(<String>[
-              'package:bar/bar.dart',
-              if (flutterTester)
-                // Tests run on host system, so the have the full path on the system.
-                projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()
-              else
-                // Apps are a bundle, and the dylibs are opened by the install
-                // name of the framework they are bundled in.
+            ),
+            if (buildMode == BuildMode.release) ...<FakeCommand>[
+              FakeCommand(
+                command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                onRun: (_) {
+                  fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
+                },
+              ),
+              FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
+            ],
+            FakeCommand(
+              command: <Pattern>['xcrun', 'otool', '-D', dylibPathBuz],
+              stdout: <String>[
+                '$dylibPathBuz (architecture ${isArm64 ? 'arm64' : 'x86_64'}):',
+                '@rpath/libbuz.dylib',
+              ].join('\n'),
+            ),
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'install_name_tool',
+                '-id',
+                dylibPathBar,
+                '-change',
+                '@rpath/libbar.dylib',
+                dylibPathBar,
+                '-change',
+                '@rpath/libbuz.dylib',
+                dylibPathBuz,
+                dylibPathBar,
+              ],
+            ),
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'codesign',
+                '--force',
+                '--sign',
+                '-',
+                if (buildMode == BuildMode.debug) '--timestamp=none',
+                signPathBar,
+              ],
+            ),
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'install_name_tool',
+                '-id',
+                dylibPathBuz,
+                '-change',
+                '@rpath/libbar.dylib',
+                dylibPathBar,
+                '-change',
+                '@rpath/libbuz.dylib',
+                signPathBuz,
+                signPathBuz,
+              ],
+            ),
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'codesign',
+                '--force',
+                '--sign',
+                '-',
+                if (buildMode == BuildMode.debug) '--timestamp=none',
+                signPathBuz,
+              ],
+            ),
+          ] else ...<FakeCommand>[
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'lipo',
+                '-create',
+                '-output',
+                dylibPathBar,
+                'arm64/libbar.dylib',
+                'x64/libbar.dylib',
+              ],
+            ),
+            if (buildMode == BuildMode.release) ...<FakeCommand>[
+              FakeCommand(
+                command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                onRun: (_) {
+                  fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
+                },
+              ),
+              FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
+            ],
+            FakeCommand(
+              command: <Pattern>['xcrun', 'otool', '-D', dylibPathBar],
+              stdout: <String>[
+                '$dylibPathBar (architecture x86_64):',
+                '@rpath/libbar.dylib',
+                '$dylibPathBar (architecture arm64):',
+                '@rpath/libbar.dylib',
+              ].join('\n'),
+            ),
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'lipo',
+                '-create',
+                '-output',
+                dylibPathBuz,
+                'arm64/libbuz.dylib',
+                'x64/libbuz.dylib',
+              ],
+            ),
+            if (buildMode == BuildMode.release) ...<FakeCommand>[
+              FakeCommand(
+                command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                onRun: (_) {
+                  fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
+                },
+              ),
+              FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
+            ],
+            FakeCommand(
+              command: <Pattern>['xcrun', 'otool', '-D', dylibPathBuz],
+              stdout: <String>[
+                '$dylibPathBuz (architecture x86_64):',
+                '@rpath/libbuz.dylib',
+                '$dylibPathBuz (architecture arm64):',
+                '@rpath/libbuz.dylib',
+              ].join('\n'),
+            ),
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'install_name_tool',
+                '-id',
                 '@rpath/bar.framework/bar',
-            ]),
-          );
-          expect(
-            nativeAssetsFileContent,
-            stringContainsInOrder(<String>[
-              'package:buz/buz.dart',
-              if (flutterTester)
-                // Tests run on host system, so the have the full path on the system.
-                projectUri.resolve('build/native_assets/macos/libbuz.dylib').toFilePath()
-              else
-                // Apps are a bundle, and the dylibs are opened by the install
-                // name of the framework they are bundled in.
+                '-change',
+                '@rpath/libbar.dylib',
+                '@rpath/bar.framework/bar',
+                '-change',
+                '@rpath/libbuz.dylib',
                 '@rpath/buz.framework/buz',
-            ]),
+                dylibPathBar,
+              ],
+            ),
+            FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'install_name_tool',
+                '-id',
+                '@rpath/buz.framework/buz',
+                '-change',
+                '@rpath/libbar.dylib',
+                '@rpath/bar.framework/bar',
+                '-change',
+                '@rpath/libbuz.dylib',
+                '@rpath/buz.framework/buz',
+                dylibPathBuz,
+              ],
+            ),
+          ],
+        ]);
+        final File packageConfig = environment.projectDir.childFile(
+          '.dart_tool/package_config.json',
+        );
+        final Uri nonFlutterTesterAssetUri = environment.buildDir
+            .childFile(InstallCodeAssets.nativeAssetsFilename)
+            .uri;
+        await packageConfig.parent.create();
+        await packageConfig.create();
+
+        List<CodeAsset> codeAssets(OS targetOS, CodeConfig codeConfig) => <CodeAsset>[
+          CodeAsset(
+            package: 'bar',
+            name: 'bar.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
+          ),
+          CodeAsset(
+            package: 'buz',
+            name: 'buz.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
+          ),
+        ];
+        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['bar'],
+          onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            codeAssets: buildMode == BuildMode.debug
+                ? codeAssets(input.config.code.targetOS, input.config.code)
+                : <CodeAsset>[],
+          ),
+          onLink: (LinkInput input) => buildMode == BuildMode.debug
+              ? null
+              : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                  codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                ),
+        );
+        final environmentDefines = <String, String>{
+          kBuildMode: buildMode.cliName,
+          kDarwinArchs: 'arm64 x86_64',
+        };
+        final TargetPlatform targetPlatform = flutterTester
+            ? TargetPlatform.tester
+            : TargetPlatform.darwin;
+        final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
+          environmentDefines: environmentDefines,
+          targetPlatform: targetPlatform,
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          featureFlags: TestFeatureFlags(
+            isNativeAssetsEnabled: true,
+            isDartDataAssetsEnabled: true,
+          ),
+          logger: logger,
+          buildRunner: buildRunner,
+          buildCodeAssets: BuildCodeAssetsOptions(
+            appBuildDirectory: fileSystem.directory(projectUri),
+          ),
+          buildDataAssets: true,
+          recordedUsesFile: null,
+        );
+        final Uri nativeAssetsFileUri = flutterTester
+            ? projectUri.resolve(
+                'build/native_assets/macos/${InstallCodeAssets.nativeAssetsFilename}',
+              )
+            : nonFlutterTesterAssetUri;
+
+        await installCodeAssets(
+          dartHookResult: dartHookResult,
+          environmentDefines: environmentDefines,
+          targetPlatform: targetPlatform,
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          logger: logger,
+          processManager: processManager,
+          nativeAssetsFileUri: nativeAssetsFileUri,
+          targetUri: projectUri.resolve(
+            '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/macos/',
+          ),
+        );
+        final expectedArchsBeingBuilt = flutterTester
+            ? (isArm64 ? 'macos_arm64' : 'macos_x64')
+            : 'macos_arm64, macos_x64';
+        expect(
+          logger.traceText,
+          stringContainsInOrder(<String>[
+            'Running build hooks for $expectedArchsBeingBuilt.',
+            'Running build hooks for $expectedArchsBeingBuilt done.',
+            if (buildMode == BuildMode.release) ...<String>[
+              'Running link hooks for $expectedArchsBeingBuilt.',
+              'Running link hooks for $expectedArchsBeingBuilt done.',
+            ],
+          ]),
+        );
+        final String nativeAssetsFileContent = await fileSystem
+            .file(nativeAssetsFileUri)
+            .readAsString();
+        expect(
+          nativeAssetsFileContent,
+          stringContainsInOrder(<String>[
+            'package:bar/bar.dart',
+            if (flutterTester)
+              // Tests run on host system, so the have the full path on the system.
+              projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()
+            else
+              // Apps are a bundle, and the dylibs are opened by the install
+              // name of the framework they are bundled in.
+              '@rpath/bar.framework/bar',
+          ]),
+        );
+        expect(
+          nativeAssetsFileContent,
+          stringContainsInOrder(<String>[
+            'package:buz/buz.dart',
+            if (flutterTester)
+              // Tests run on host system, so the have the full path on the system.
+              projectUri.resolve('build/native_assets/macos/libbuz.dylib').toFilePath()
+            else
+              // Apps are a bundle, and the dylibs are opened by the install
+              // name of the framework they are bundled in.
+              '@rpath/buz.framework/buz',
+          ]),
+        );
+        // Multi arch.
+        expect(buildRunner.buildInvocations, flutterTester ? 1 : 2);
+        expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
+
+        if (!flutterTester) {
+          // Not running on the host system, so the code asset has been turned into a framework.
+          final Directory frameworkRoot = fileSystem.directory(
+            '/build/native_assets/macos/bar.framework',
           );
-          // Multi arch.
-          expect(buildRunner.buildInvocations, flutterTester ? 1 : 2);
-          expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
 
-          if (!flutterTester) {
-            // Not running on the host system, so the code asset has been turned into a framework.
-            final Directory frameworkRoot = fileSystem.directory(
-              '/build/native_assets/macos/bar.framework',
-            );
+          // MacOS frameworks use symlinks for versioned content:
+          // https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
+          expect(frameworkRoot.childLink('bar').targetSync(), 'Versions/Current/bar');
+          expect(frameworkRoot.childLink('Resources').targetSync(), 'Versions/Current/Resources');
 
-            // MacOS frameworks use symlinks for versioned content:
-            // https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
-            expect(frameworkRoot.childLink('bar').targetSync(), 'Versions/Current/bar');
-            expect(frameworkRoot.childLink('Resources').targetSync(), 'Versions/Current/Resources');
-
-            expect(frameworkRoot.childLink('Versions/Current').targetSync(), 'A');
-          }
-        },
-      );
+          expect(frameworkRoot.childLink('Versions/Current').targetSync(), 'A');
+        }
+      });
     }
   }
 

@@ -28,6 +28,7 @@ import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
+import '../features.dart' show FeatureFlags;
 import '../flutter_plugins.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../project.dart';
@@ -53,6 +54,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
     required FlutterProject flutterProject,
     required bool stayResident,
     required ToolContext toolContext,
@@ -68,6 +70,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       buildSystem: buildSystem,
       buildTargets: buildTargets,
       debuggingOptions: debuggingOptions,
+      featureFlags: featureFlags,
       flutterProject: flutterProject,
       toolContext: toolContext,
       machine: machine,
@@ -94,6 +97,7 @@ class ResidentWebRunner extends ResidentRunner {
     required super.buildSystem,
     required super.buildTargets,
     required super.debuggingOptions,
+    required super.featureFlags,
     required this.flutterProject,
     required super.toolContext,
     super.machine = false,
@@ -326,6 +330,7 @@ class ResidentWebRunner extends ResidentRunner {
             analytics: analytics,
             buildSystem: buildSystem,
             buildTargets: buildTargets,
+            featureFlags: featureFlags,
             toolContext: toolContext,
           );
           await webBuilder.buildWeb(
@@ -485,6 +490,7 @@ class ResidentWebRunner extends ResidentRunner {
             analytics: analytics,
             buildSystem: buildSystem,
             buildTargets: buildTargets,
+            featureFlags: featureFlags,
             toolContext: toolContext,
           );
           await webBuilder.buildWeb(

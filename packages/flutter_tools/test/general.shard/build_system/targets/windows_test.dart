@@ -17,6 +17,7 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
 void main() {
@@ -28,6 +29,7 @@ void main() {
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -154,6 +156,7 @@ void main() {
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -181,6 +184,7 @@ void main() {
     final environment = Environment.test(
       flavorFileSystem.currentDirectory,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: flavorFileSystem,
       logger: BufferLogger.test(),
@@ -232,6 +236,7 @@ flutter:
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -264,6 +269,7 @@ flutter:
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -297,6 +303,7 @@ flutter:
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),

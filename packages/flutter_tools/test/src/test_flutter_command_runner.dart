@@ -61,13 +61,16 @@ Future<String> createProject(
 }) async {
   arguments ??= <String>['--no-pub'];
   final String projectPath = temp.fileSystem.path.join(temp.path, name);
+  final ToolContext resolvedToolContext = toolContext ?? DelegatingToolContext(fs: temp.fileSystem);
+  final runner = TestFlutterCommandRunner(toolContext: resolvedToolContext);
   final command = CreateCommand(
     androidContext: FakeAndroidContext(),
     appleContext: FakeAppleContext(),
+    featureFlags: runner.featureFlags,
     templateRenderer: const MustacheTemplateRenderer(),
-    toolContext: DelegatingToolContext(fs: temp.fileSystem),
+    toolContext: resolvedToolContext,
   );
-  final CommandRunner<void> runner = createTestCommandRunner(command);
+  runner.addCommand(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }

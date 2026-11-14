@@ -25,6 +25,7 @@ import 'cache.dart';
 import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart' show FeatureFlags;
 import 'project.dart';
 import 'version.dart';
 import 'windows/visual_studio.dart';
@@ -35,6 +36,7 @@ class BundleBuilder {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required this._toolContext,
     this._androidSdkBuilder,
   });
@@ -43,6 +45,7 @@ class BundleBuilder {
   final AndroidSdk? Function()? _androidSdkBuilder;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
   /// Builds the bundle for the given target platform.
@@ -99,6 +102,7 @@ class BundleBuilder {
       processManager: processManager,
       analytics: _analytics,
       androidSdkBuilder: _androidSdkBuilder,
+      featureFlags: _featureFlags,
       platform: hostPlatform,
       projectFactory: projectFactory,
       visualStudio: VisualStudio(toolContext: _toolContext),

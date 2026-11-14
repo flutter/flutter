@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_system/targets/deferred_components.dart'
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 
 // These tests perform a simple check to verify if the check/task was executed at all.
 // Detailed per-check tests are in android/deferred_components_setup_validator_test.dart.
@@ -33,6 +34,7 @@ void main() {
       projectDir: fileSystem.directory('project')..createSync(),
       defines: <String, String>{kDeferredComponents: 'true'},
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: logger,
@@ -67,6 +69,7 @@ void main() {
       projectDir: fileSystem.directory('project')..createSync(),
       defines: <String, String>{kDeferredComponents: 'true'},
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: logger,
@@ -100,6 +103,7 @@ void main() {
       projectDir: fileSystem.directory('project')..createSync(),
       defines: <String, String>{kDeferredComponents: 'true'},
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: logger,

@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -45,6 +47,7 @@ HotRunner createHotRunner(
   BuildTargets? buildTargets,
   FlutterHookRunner? dartBuilder,
   String? dillOutputPath,
+  FeatureFlags? featureFlags,
   bool hostIsIde = false,
   HotRunnerConfig? hotRunnerConfig,
   bool machine = false,
@@ -58,11 +61,10 @@ HotRunner createHotRunner(
   ToolContext toolContext = const DelegatingToolContext(),
   Xcode? xcode,
 }) {
-  buildSystem ??= FlutterBuildSystem(
-    fileSystem: toolContext.fs,
-    logger: toolContext.logger,
-    platform: toolContext.platform,
-  );
+  buildSystem ??= () {
+    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
+    return FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform);
+  }();
 
   return HotRunner(
     flutterDevices,
@@ -70,6 +72,7 @@ HotRunner createHotRunner(
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
+    featureFlags: featureFlags ?? TestFeatureFlags(),
     target: target,
     toolContext: toolContext,
     xcode: xcode,
@@ -100,6 +103,7 @@ ColdRunner createColdRunner(
   BuildSystem? buildSystem,
   BuildTargets? buildTargets,
   FlutterHookRunner? dartBuilder,
+  FeatureFlags? featureFlags,
   bool machine = false,
   bool stayResident = true,
   ToolContext toolContext = const DelegatingToolContext(),
@@ -111,13 +115,13 @@ ColdRunner createColdRunner(
     analytics: analytics ?? const NoOpAnalytics(),
     buildSystem:
         buildSystem ??
-        FlutterBuildSystem(
-          fileSystem: toolContext.fs,
-          logger: toolContext.logger,
-          platform: toolContext.platform,
-        ),
+        () {
+          final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
+          return FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform);
+        }(),
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
+    featureFlags: featureFlags ?? TestFeatureFlags(),
     target: target,
     toolContext: toolContext,
     xcode: xcode,

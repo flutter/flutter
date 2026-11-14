@@ -44,7 +44,11 @@ void main() {
       processManager: processManager,
       systemClock: SystemClock.fixed(DateTime.utc(2026)),
     );
-    final command = UpgradeCommand(toolContext: toolContext, verboseHelp: false);
+    final command = UpgradeCommand(
+      featureFlags: TestFeatureFlags(),
+      toolContext: toolContext,
+      verboseHelp: false,
+    );
     return createTestCommandRunner(command, null, toolContext);
   }
 

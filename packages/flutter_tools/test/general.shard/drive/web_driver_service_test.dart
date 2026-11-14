@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -455,6 +456,7 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         dartSdkPath: 'dart',
+        featureFlags: TestFeatureFlags(isWebEnabled: true),
         toolContext: FakeToolContext(),
       );
       await expectLater(
@@ -487,6 +489,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
     required FlutterProject flutterProject,
     required bool stayResident,
     required ToolContext toolContext,
@@ -558,6 +561,7 @@ WebDriverService setUpDriverService() {
     buildSystem: TestBuildSystem.all(BuildResult(success: true)),
     buildTargets: const BuildTargetsImpl(),
     dartSdkPath: 'dart',
+    featureFlags: TestFeatureFlags(isWebEnabled: true),
     toolContext: const DelegatingToolContext(),
   );
 }

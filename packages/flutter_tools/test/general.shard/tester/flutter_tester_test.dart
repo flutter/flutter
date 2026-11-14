@@ -99,6 +99,7 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
       device = FlutterTesterDevice(
         'flutter-tester',
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
           cache: Cache.test(processManager: fakeProcessManager),
@@ -241,6 +242,7 @@ Hello!
 FlutterTesterDevices setUpFlutterTesterDevices() {
   final processManager = FakeProcessManager.any();
   return FlutterTesterDevices(
+    featureFlags: TestFeatureFlags(),
     toolContext: FakeToolContext(
       artifacts: Artifacts.test(),
       cache: Cache.test(processManager: processManager),

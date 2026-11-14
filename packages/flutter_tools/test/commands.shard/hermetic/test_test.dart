@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -2263,11 +2264,16 @@ class _FakeNativeAssetsBuilderWithDataAssets extends Fake
   FlutterHookResult hookResult;
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo, {required ToolContext toolContext}) async => null;
+  Future<Uri?> build(
+    BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+  }) async => null;
 
   @override
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(
     BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
     required ToolContext toolContext,
   }) async => (nativeAssetsManifest: null, flutterHookResult: hookResult);
 }

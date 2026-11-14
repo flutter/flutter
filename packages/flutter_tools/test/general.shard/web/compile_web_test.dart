@@ -74,6 +74,7 @@ environement:
         analytics: fakeAnalytics,
         buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           artifacts: FakeArtifacts(fileSystem: fileSystem),
           cache: FakeCache(fileSystem: fileSystem),
@@ -150,6 +151,7 @@ environement:
         analytics: fakeAnalytics,
         buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           artifacts: FakeArtifacts(fileSystem: fileSystem),
           cache: FakeCache(fileSystem: fileSystem),
@@ -211,6 +213,7 @@ environement:
           analytics: fakeAnalytics,
           buildSystem: buildSystem,
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: TestFeatureFlags(),
           toolContext: FakeToolContext(
             artifacts: FakeArtifacts(fileSystem: fileSystem),
             cache: FakeCache(fileSystem: fileSystem),
@@ -318,6 +321,7 @@ environement:
         analytics: fakeAnalytics,
         buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           artifacts: Artifacts.testLocalEngine(
             localEngine: 'out/host_debug_unopt',

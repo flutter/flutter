@@ -24,6 +24,7 @@ Future<void> processPodsIfNeeded(
   String buildDirectory,
   BuildMode buildMode, {
   required CocoaPods? cocoaPods,
+  required FeatureFlags featureFlags,
   required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
   bool forceCocoaPodsOnly = false,

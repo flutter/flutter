@@ -805,6 +805,7 @@ exit code: 66
     // Intentionally not using pub.test to simulate a real environment, but
     // we are using non-inherited I/O to avoid printing to the console.
     final pub = Pub(
+      featureFlags: TestFeatureFlags(),
       toolContext: FakeToolContext(
         botDetector: const FakeBotDetector(false),
         cache: Cache.test(flutterRoot: '', processManager: processManager),

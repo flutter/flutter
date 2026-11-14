@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -29,6 +30,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
 import '../../../src/throwing_pub.dart';
@@ -113,6 +115,7 @@ name: foo
             kBuildMode: BuildMode.debug.cliName,
           },
           artifacts: Artifacts.test(fileSystem: fs),
+          featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
           processManager: processManager,
           logger: logger,
           fileSystem: fs,
@@ -2145,16 +2148,17 @@ _flutter.loader.load();
   );
 
   test(
-    'Dart2WasmTarget buildPatternStems keeps main.dart.wasm.map unhashed under webContentHash',
+    'Dart2WasmTarget buildPatternStemsFor keeps main.dart.wasm.map unhashed under webContentHash',
     () => testbed.run(() {
       final target = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
         engineRevision: _kEngineRevision,
       );
-      expect(target.buildPatternStems, contains('main.dart.wasm.map'));
-      expect(target.buildPatternStems, isNot(contains('main.dart.*.wasm.map')));
-      expect(target.buildPatternStems, contains('main.dart.*.mjs.map'));
+      final Iterable<String> stems = target.buildPatternStemsFor(isRecordUseEnabled: false);
+      expect(stems, contains('main.dart.wasm.map'));
+      expect(stems, isNot(contains('main.dart.*.wasm.map')));
+      expect(stems, contains('main.dart.*.mjs.map'));
     }),
   );
 
@@ -2561,9 +2565,9 @@ _flutter.loader.load();
       );
       expect(target.buildKey, jsonEncode(<String>[jsTarget.buildKey]));
       expect(target.dependencies, <Object>[jsTarget]);
-      // Three static inputs plus one {BUILD_DIR} pattern per build stem.
-      expect(target.inputs.length, 3 + jsTarget.buildPatternStems.length);
-      expect(jsTarget.buildPatternStems, contains('main.dart.*.js'));
+      // Three static inputs plus one Source.fromEnvironment entry for {BUILD_DIR} stems.
+      expect(target.inputs.length, 4);
+      expect(jsTarget.buildPatternStemsFor(isRecordUseEnabled: false), contains('main.dart.*.js'));
 
       final noHashTarget = WebTemplatedFiles(
         <Map<String, Object?>>[],
@@ -2575,6 +2579,94 @@ _flutter.loader.load();
       expect(noHashTarget.buildKey, isNot(target.buildKey));
     }),
   );
+
+  testWithoutContext('WebTemplatedFiles and WebReleaseBundle include recorded uses files only when recordUse is enabled', () {
+    final fileSystem = MemoryFileSystem.test();
+    Environment createEnv({required bool isRecordUseEnabled}) {
+      final env = Environment.test(
+        fileSystem.currentDirectory,
+        projectDir: fileSystem.currentDirectory.childDirectory('foo'),
+        outputDir: fileSystem.currentDirectory.childDirectory('bar'),
+        artifacts: Artifacts.test(fileSystem: fileSystem),
+        featureFlags: TestFeatureFlags(isRecordUseEnabled: isRecordUseEnabled),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.empty(),
+      );
+      env.buildDir.createSync(recursive: true);
+      env.outputDir.createSync(recursive: true);
+      return env;
+    }
+
+    final jsTarget = Dart2JSTarget(const JsCompilerConfig(), engineRevision: _kEngineRevision);
+    final wasmTarget = Dart2WasmTarget(
+      const WasmCompilerConfig(),
+      const NoOpAnalytics(),
+      engineRevision: _kEngineRevision,
+    );
+    final templatedFiles = WebTemplatedFiles(
+      <Map<String, Object?>>[],
+      compileTargets: <Dart2WebTarget>[jsTarget, wasmTarget],
+      engineRevision: _kEngineRevision,
+    );
+    final releaseBundle = WebReleaseBundle(
+      <WebCompilerConfig>[const JsCompilerConfig(), const WasmCompilerConfig()],
+      const NoOpAnalytics(),
+      engineRevision: _kEngineRevision,
+    );
+
+    final Environment enabledEnv = createEnv(isRecordUseEnabled: true);
+    final List<String> enabledTemplatedInputs = templatedFiles
+        .resolveInputs(enabledEnv)
+        .sources
+        .map((File f) => f.basename)
+        .toList();
+    final List<String> enabledBundleInputs = releaseBundle
+        .resolveInputs(enabledEnv)
+        .sources
+        .map((File f) => f.basename)
+        .toList();
+    final List<String> enabledBundleOutputs = releaseBundle
+        .resolveOutputs(enabledEnv)
+        .sources
+        .map((File f) => f.basename)
+        .toList();
+    expect(
+      enabledTemplatedInputs,
+      containsAll(<String>[LinkHooks.recordedUsesJsFileName, LinkHooks.recordedUsesWasmFileName]),
+    );
+    expect(
+      enabledBundleInputs,
+      containsAll(<String>[LinkHooks.recordedUsesJsFileName, LinkHooks.recordedUsesWasmFileName]),
+    );
+    expect(
+      enabledBundleOutputs,
+      containsAll(<String>[LinkHooks.recordedUsesJsFileName, LinkHooks.recordedUsesWasmFileName]),
+    );
+
+    final Environment disabledEnv = createEnv(isRecordUseEnabled: false);
+    final List<String> disabledTemplatedInputs = templatedFiles
+        .resolveInputs(disabledEnv)
+        .sources
+        .map((File f) => f.basename)
+        .toList();
+    final List<String> disabledBundleInputs = releaseBundle
+        .resolveInputs(disabledEnv)
+        .sources
+        .map((File f) => f.basename)
+        .toList();
+    final List<String> disabledBundleOutputs = releaseBundle
+        .resolveOutputs(disabledEnv)
+        .sources
+        .map((File f) => f.basename)
+        .toList();
+    expect(disabledTemplatedInputs, isNot(contains(LinkHooks.recordedUsesJsFileName)));
+    expect(disabledTemplatedInputs, isNot(contains(LinkHooks.recordedUsesWasmFileName)));
+    expect(disabledBundleInputs, isNot(contains(LinkHooks.recordedUsesJsFileName)));
+    expect(disabledBundleInputs, isNot(contains(LinkHooks.recordedUsesWasmFileName)));
+    expect(disabledBundleOutputs, isNot(contains(LinkHooks.recordedUsesJsFileName)));
+    expect(disabledBundleOutputs, isNot(contains(LinkHooks.recordedUsesWasmFileName)));
+  });
 
   test(
     'Dart2JSTarget and Dart2WasmTarget getBuildConfig safely handle multiple candidate files in buildDir',
@@ -3119,6 +3211,7 @@ flutter:
         projectDir: environment.fileSystem.directory('/work/canvaskit/app/foo'),
         outputDir: environment.fileSystem.directory('/work/canvaskit/app/bar'),
         artifacts: Artifacts.test(fileSystem: environment.fileSystem),
+        featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
         processManager: processManager,
         logger: environment.logger,
         fileSystem: environment.fileSystem,
@@ -3631,6 +3724,7 @@ _flutter.loader.load({
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
       processManager: FakeProcessManager.any(),
     );
     testEnvironment.buildDir.createSync(recursive: true);

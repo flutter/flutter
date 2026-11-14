@@ -108,6 +108,7 @@ class FlutterDeviceManager extends DeviceManager {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        featureFlags: _featureFlags,
         toolContext: _toolContext,
       ),
       MacOSDevices(
@@ -125,6 +126,7 @@ class FlutterDeviceManager extends DeviceManager {
       LinuxDevices(analytics: _analytics, featureFlags: _featureFlags, toolContext: _toolContext),
       WindowsDevices(
         analytics: _analytics,
+        featureFlags: _featureFlags,
         toolContext: _toolContext,
         windowsWorkflow: _windowsWorkflow,
       ),

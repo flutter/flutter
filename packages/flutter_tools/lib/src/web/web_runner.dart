@@ -10,6 +10,7 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../features.dart' show FeatureFlags;
 import '../project.dart';
 import '../resident_runner.dart';
 
@@ -26,6 +27,7 @@ abstract class WebRunnerFactory {
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
     required FlutterProject flutterProject,
     required bool stayResident,
     required ToolContext toolContext,

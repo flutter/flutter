@@ -16,7 +16,7 @@ import '../../../base/platform.dart';
 import '../../../build_info.dart';
 import '../../../cache.dart';
 import '../../../context/tool_context.dart';
-import '../../../features.dart' show featureFlags;
+import '../../../features.dart';
 import '../../../native_assets.dart';
 import '../../../project.dart';
 import '../../../windows/visual_studio.dart';
@@ -32,14 +32,26 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
   const TestCompilerNativeAssetsBuilderImpl();
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo, {required ToolContext toolContext}) async =>
-      (await buildWithHookResult(buildInfo, toolContext: toolContext)).nativeAssetsManifest;
+  Future<Uri?> build(
+    BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+  }) async => (await buildWithHookResult(
+    buildInfo,
+    featureFlags: featureFlags,
+    toolContext: toolContext,
+  )).nativeAssetsManifest;
 
   @override
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(
     BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
     required ToolContext toolContext,
-  }) => testCompilerBuildNativeAssets(buildInfo, toolContext: toolContext);
+  }) => testCompilerBuildNativeAssets(
+    buildInfo,
+    featureFlags: featureFlags,
+    toolContext: toolContext,
+  );
 
   @override
   String windowsBuildDirectory(FlutterProject project, {required ToolContext toolContext}) {
@@ -61,6 +73,7 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 /// be resolved.
 Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   BuildInfo buildInfo, {
+  required FeatureFlags featureFlags,
   required ToolContext toolContext,
 }) async {
   final BuildInfo(

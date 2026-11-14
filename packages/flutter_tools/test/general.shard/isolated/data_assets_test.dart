@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/artifacts.dart' show Artifacts;
 import 'package:flutter_tools/src/base/logger.dart' show BufferLogger;
 import 'package:flutter_tools/src/build_info.dart' show BuildMode, TargetPlatform, kBuildMode;
 import 'package:flutter_tools/src/build_system/build_system.dart' show Environment;
-import 'package:flutter_tools/src/features.dart' show FeatureFlags, featureFlags;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart'
     show BuildCodeAssetsOptions, runFlutterSpecificHooks;
 
@@ -37,6 +36,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -47,10 +47,7 @@ void main() {
 
   testUsingContext(
     'build but data assets are not enabled',
-    overrides: <Type, Generator>{
-      ProcessManager: FakeProcessManager.empty,
-      FeatureFlags: () => TestFeatureFlags(),
-    },
+    overrides: <Type, Generator>{ProcessManager: FakeProcessManager.empty},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
@@ -61,7 +58,7 @@ void main() {
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
           logger: logger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -79,10 +76,7 @@ void main() {
 
   testUsingContext(
     'Data assets: no duplicate assets with linking',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: FakeProcessManager.empty,
-    },
+    overrides: <Type, Generator>{ProcessManager: FakeProcessManager.empty},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
@@ -108,7 +102,7 @@ void main() {
             buildDataAssets: true,
             recordedUsesFile: null,
             fileSystem: fileSystem,
-            featureFlags: featureFlags,
+            featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
             logger: logger,
             buildRunner: FakeFlutterNativeAssetsBuildRunner(
               packagesWithNativeAssetsResult: <String>['bar'],

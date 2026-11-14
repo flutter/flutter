@@ -25,6 +25,7 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../package_graph.dart';
 import '../plugins.dart';
@@ -161,7 +162,7 @@ class PackagesTestCommand extends FlutterCommand {
     requiresPubspecYaml();
   }
 
-  late final Pub _pub = _createPub(toolContext);
+  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   @override
   String get name => 'test';
@@ -200,7 +201,7 @@ class PackagesForwardCommand extends FlutterCommand {
     }
   }
 
-  late final Pub _pub = _createPub(toolContext);
+  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   PubContext context = PubContext.pubForward;
 
@@ -243,7 +244,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
   @override
   ArgParser argParser = ArgParser.allowAnything();
 
-  late final Pub _pub = _createPub(toolContext);
+  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   @override
   String get name => 'pub';
@@ -302,7 +303,7 @@ class PackagesGetCommand extends FlutterCommand {
     return '${runner!.executableName} pub $_commandName [<arguments...>]';
   }
 
-  late final Pub _pub = _createPub(toolContext);
+  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   /// An [ArgParser] that accepts all options and flags that the
   ///
@@ -463,6 +464,7 @@ class PackagesGetCommand extends FlutterCommand {
             platform: platform,
             analytics: analytics,
             androidSdkBuilder: null,
+            featureFlags: runner!.featureFlags,
             projectFactory: projectFactory,
             visualStudio: null,
             xcode: null,
@@ -599,6 +601,6 @@ class PackagesGetCommand extends FlutterCommand {
   }
 }
 
-Pub _createPub(ToolContext toolContext) {
-  return Pub(stdio: toolContext.stdio, toolContext: toolContext);
+Pub _createPub(FeatureFlags featureFlags, ToolContext toolContext) {
+  return Pub(featureFlags: featureFlags, toolContext: toolContext, stdio: toolContext.stdio);
 }
