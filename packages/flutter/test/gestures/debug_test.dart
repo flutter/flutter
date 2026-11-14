@@ -2,11 +2,60 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('debugPrintHitTestResults wraps long output without losing hit test entries', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/178153.
+    const targetKey = ValueKey<String>('target');
+    Widget child = GestureDetector(
+      onTap: () {},
+      behavior: HitTestBehavior.opaque,
+      child: const SizedBox(key: targetKey, width: 100, height: 100),
+    );
+    for (var i = 0; i < 100; i++) {
+      child = Padding(padding: const EdgeInsets.all(0.01), child: child);
+    }
+    await tester.pumpWidget(Center(child: child));
+    final Offset position = tester.getCenter(find.byKey(targetKey));
+    final expectedResult = tester.hitTestOnBinding(position).toString();
+    expect(expectedResult.length, greaterThan(1024));
+
+    final DebugPrintCallback oldCallback = debugPrint;
+    final bool oldFlag = debugPrintHitTestResults;
+    addTearDown(() {
+      debugPrint = oldCallback;
+      debugPrintHitTestResults = oldFlag;
+    });
+    debugPrint = debugPrintSynchronously;
+    debugPrintHitTestResults = true;
+    final lines = <String>[];
+    await runZoned(
+      () async => tester.tapAt(position),
+      zoneSpecification: ZoneSpecification(
+        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+          lines.addAll(line.split('\n'));
+        },
+      ),
+    );
+
+    expect(lines, hasLength(greaterThan(1)));
+    expect(lines.first, startsWith('PointerDownEvent'));
+    expect(lines.map((String line) => line.length), everyElement(lessThanOrEqualTo(800)));
+    final String output = lines.join(' ');
+    expect(
+      output.substring(output.indexOf('HitTestResult(')),
+      equalsIgnoringHashCodes(expectedResult),
+    );
+  });
+
   testWidgets('debugPrintGestureArenaDiagnostics', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
