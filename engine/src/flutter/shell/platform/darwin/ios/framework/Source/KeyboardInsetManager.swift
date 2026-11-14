@@ -12,6 +12,13 @@ import UIKit
 
 typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> Void
 
+func keyboardAnimationElapsedTime(
+  targetTime: CFTimeInterval, animationStartTime: CFTimeInterval
+) -> CFTimeInterval? {
+  guard targetTime >= animationStartTime else { return nil }
+  return targetTime - animationStartTime
+}
+
 /// @brief Coordinates the animation of the bottom viewport inset in response to system keyboard
 /// visibility changes.
 ///
@@ -211,8 +218,7 @@ typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> V
     return delegate.engine()?.viewController !== (delegate as AnyObject)
   }
 
-  @objc func calculateKeyboardAttachMode(_ notification: Notification) -> FlutterKeyboardMode
-  {
+  @objc func calculateKeyboardAttachMode(_ notification: Notification) -> FlutterKeyboardMode {
     // There are multiple types of keyboard: docked, undocked, split, split docked,
     // floating, expanded shortcuts bar, minimized shortcuts bar.
     //
@@ -402,7 +408,10 @@ typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> V
 
     var currentInset: CGFloat = 0
     if let keyboardSpringAnimation = keyboardSpringAnimation {
-      let timeElapsed = targetTime - keyboardAnimationStartTime
+      guard
+        let timeElapsed = keyboardAnimationElapsedTime(
+          targetTime: targetTime, animationStartTime: keyboardAnimationStartTime)
+      else { return }
       currentInset = CGFloat(keyboardSpringAnimation.curveFunction(timeElapsed))
     } else if let presentationLayer = keyboardAnimationView.layer.presentation() {
       currentInset = presentationLayer.frame.origin.y
