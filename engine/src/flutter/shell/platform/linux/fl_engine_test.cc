@@ -20,6 +20,107 @@
 
 class FlEngineTest : public flutter::testing::LinuxTest {};
 
+// A runner override checks completion before doing its own window cleanup,
+// matching GtkApplication's RUN_LAST shutdown contract.
+struct ShutdownApplication {
+  GApplication parent_instance;
+};
+struct ShutdownApplicationClass {
+  GApplicationClass parent_class;
+};
+G_DEFINE_TYPE(ShutdownApplication, shutdown_application, G_TYPE_APPLICATION)
+static void shutdown_application_init(ShutdownApplication*) {}
+static void shutdown_application_class_init(ShutdownApplicationClass* klass) {
+  G_APPLICATION_CLASS(klass)->shutdown = [](GApplication* app) {
+    auto* completed =
+        static_cast<int*>(g_object_get_data(G_OBJECT(app), "completed"));
+    if (completed != nullptr) {
+      EXPECT_EQ(*completed, 1);
+    }
+    G_APPLICATION_CLASS(shutdown_application_parent_class)->shutdown(app);
+  };
+}
+
+class FlEngineShutdownTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    application =
+        G_APPLICATION(g_object_new(shutdown_application_get_type(), "flags",
+                                   G_APPLICATION_NON_UNIQUE, nullptr));
+    g_object_set_data(G_OBJECT(application), "completed", &completed);
+    g_application_set_default(application);
+    fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+        Initialize, ([](size_t, const FlutterRendererConfig*,
+                        const FlutterProjectArgs* args, void* user_data,
+                        FLUTTER_API_SYMBOL(FlutterEngine)* result) {
+          *result = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+          return kSuccess;
+        }));
+    fl_engine_get_embedder_api(engine)->RunInitialized =
+        MOCK_ENGINE_PROC(RunInitialized, ([](auto) { return kSuccess; }));
+    fl_engine_get_embedder_api(engine)->Shutdown =
+        MOCK_ENGINE_PROC(Shutdown, ([this](auto) {
+                           shutdown_calls++;
+                           completed++;
+                           return kSuccess;
+                         }));
+    StartEngine();
+  }
+  void TearDown() override {
+    LinuxTest::TearDown();
+    g_application_set_default(nullptr);
+    g_clear_object(&application);
+  }
+  GApplication* application = nullptr;
+  int shutdown_calls = 0;
+  int completed = 0;
+};
+
+TEST_F(FlEngineShutdownTest, ApplicationShutdownPrecedesRunnerCleanup) {
+  g_autoptr(FlEngine) retained = FL_ENGINE(g_object_ref(engine));
+  GSignalQuery query = {};
+  g_signal_query(g_signal_lookup("shutdown", G_TYPE_APPLICATION), &query);
+  EXPECT_NE(query.signal_flags & G_SIGNAL_RUN_LAST, 0);
+  g_signal_emit_by_name(application, "shutdown");
+  EXPECT_EQ(shutdown_calls, 1);
+  EXPECT_EQ(completed, 1);
+  g_signal_emit_by_name(application, "shutdown");
+  EXPECT_EQ(shutdown_calls, 1);
+}
+
+TEST_F(FlEngineShutdownTest, ApplicationRunReturnsAfterNativeShutdown) {
+  g_signal_connect(
+      application, "activate",
+      G_CALLBACK(+[](GApplication* app, gpointer) { g_application_quit(app); }),
+      nullptr);
+  EXPECT_EQ(g_application_run(application, 0, nullptr), 0);
+  EXPECT_EQ(completed, 1);
+  EXPECT_EQ(shutdown_calls, 1);
+}
+
+TEST_F(FlEngineShutdownTest, DisposalWithoutApplicationShutdown) {
+  g_clear_object(&engine);
+  EXPECT_EQ(shutdown_calls, 1);
+  EXPECT_EQ(completed, 1);
+}
+
+TEST_F(FlEngineShutdownTest, RemovingViewDoesNotStopEngine) {
+  fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
+      RemoveView, ([](auto, const FlutterRemoveViewInfo* info) {
+        FlutterRemoveViewResult result = {};
+        result.struct_size = sizeof(result);
+        result.removed = true;
+        result.user_data = info->user_data;
+        info->remove_view_callback(&result);
+        return kSuccess;
+      }));
+  fl_engine_remove_view(engine, 123, nullptr, nullptr, nullptr);
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+  EXPECT_EQ(shutdown_calls, 0);
+  EXPECT_EQ(completed, 0);
+}
+
 // Checks notifying display updates works.
 TEST_F(FlEngineTest, NotifyDisplayUpdate) {
   StartEngine();
