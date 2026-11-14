@@ -514,6 +514,21 @@ extension type DomNode._(JSObject _) implements DomEventTarget {
   external DomNode? get parentNode;
   external DomNode? get nextSibling;
   external DomNode insertBefore(DomNode newNode, DomNode? referenceNode);
+  external void moveBefore(DomNode movedNode, DomNode? referenceNode);
+
+  /// Inserts [node] before [referenceNode], or last when it is null.
+  ///
+  /// If [node] is already in the document, it is moved with `moveBefore` when
+  /// the browser supports it. Unlike a remove-and-insert, `moveBefore` keeps the
+  /// focus inside [node], so a focused descendant is not blurred.
+  void insertOrMoveBefore(DomNode node, DomNode? referenceNode) {
+    if (node.isConnected == true && isConnected == true && (this as JSObject).has('moveBefore')) {
+      moveBefore(node, referenceNode);
+    } else {
+      insertBefore(node, referenceNode);
+    }
+  }
+
   void remove() {
     if (parentNode != null) {
       final DomNode parent = parentNode!;

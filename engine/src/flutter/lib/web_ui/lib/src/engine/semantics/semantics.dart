@@ -2159,7 +2159,9 @@ class SemanticsObject {
     // Trivial case: previous list was empty => just populate the container.
     if (_currentChildrenInRenderOrder == null || _currentChildrenInRenderOrder!.isEmpty) {
       for (final child in childrenInRenderOrder) {
-        element.append(child.element);
+        // The child may already be attached to another parent, e.g. when a new
+        // node is inserted above it. See https://github.com/flutter/flutter/issues/195289.
+        element.insertOrMoveBefore(child.element, null);
         owner._attachObject(parent: this, child: child);
       }
       _currentChildrenInRenderOrder = childrenInRenderOrder;
@@ -2242,11 +2244,7 @@ class SemanticsObject {
     for (int i = childCount - 1; i >= 0; i -= 1) {
       final SemanticsObject child = childrenInRenderOrder[i];
       if (!stationaryIds.contains(child.id)) {
-        if (refNode == null) {
-          element.append(child.element);
-        } else {
-          element.insertBefore(child.element, refNode);
-        }
+        element.insertOrMoveBefore(child.element, refNode);
         owner._attachObject(parent: this, child: child);
       } else {
         assert(child._parent == this);

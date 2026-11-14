@@ -3323,6 +3323,74 @@ void _testTextField() {
 
     semantics().semanticsEnabled = false;
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/195289
+  test('does not blur a focused text field when a node is inserted above or removed from '
+      'its ancestors', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    // Sends 0 > (3 >) 1 > 2, where 2 is a focused text field. Parents are sent
+    // before their children, as the framework does.
+    void pumpSemantics({required bool withNode3}) {
+      final builder = ui.SemanticsUpdateBuilder();
+      void container(int id, int childId) {
+        updateNode(
+          builder,
+          id: id,
+          transform: Matrix4.identity().toFloat64(),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          childrenInHitTestOrder: Int32List.fromList(<int>[childId]),
+          childrenInTraversalOrder: Int32List.fromList(<int>[childId]),
+        );
+      }
+
+      container(0, withNode3 ? 3 : 1);
+      if (withNode3) {
+        container(3, 1);
+      }
+      container(1, 2);
+      updateNode(
+        builder,
+        id: 2,
+        flags: const ui.SemanticsFlags(
+          isTextField: true,
+          isFocused: ui.Tristate.isTrue,
+          isEnabled: ui.Tristate.isTrue,
+        ),
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      owner().updateSemantics(builder.build());
+    }
+
+    pumpSemantics(withNode3: false);
+
+    final DomElement input = owner().debugSemanticsTree![2]!.element.querySelector('input')!;
+    expect(domDocument.activeElement, input);
+
+    var blurCount = 0;
+    final DomEventListener onBlur = createDomEventListener((DomEvent _) {
+      blurCount += 1;
+    });
+    input.addEventListener('blur', onBlur);
+
+    // Insert node 3 between node 0 and node 1, as the framework does when a
+    // new sibling (e.g. an overlay or a tooltip) appears next to a route.
+    pumpSemantics(withNode3: true);
+
+    expect(blurCount, 0);
+    expect(domDocument.activeElement, input);
+
+    pumpSemantics(withNode3: false);
+
+    expect(blurCount, 0);
+    expect(domDocument.activeElement, input);
+
+    input.removeEventListener('blur', onBlur);
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testCheckables() {
