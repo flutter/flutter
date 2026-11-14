@@ -6,8 +6,10 @@
 
 #include <algorithm>
 #include <cctype>
+#include <charconv>
 #include <filesystem>
 #include <map>
+#include <string_view>
 
 #include "flutter/fml/file.h"
 #include "fml/command_line.h"
@@ -109,6 +111,11 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << optional_multiple_prefix << "--define=<define>" << std::endl;
   stream << optional_prefix << "--depfile=<depfile_path>" << std::endl;
   stream << optional_prefix << "--gles-language-version=<number>" << std::endl;
+  stream << optional_prefix
+         << "--gles-uniform-vector-limit=<number> (decimal 0-4294967295; "
+            "default: 0; emit eligible ESSL 300 fragment UBOs as plain "
+            "uniforms within this vector budget)"
+         << std::endl;
   stream << optional_prefix << "--json" << std::endl;
   stream << optional_prefix
          << "--use-half-textures (force openGL semantics when "
@@ -177,6 +184,17 @@ static std::filesystem::path GetOptionAsPath(
   return std::filesystem::path(std::u8string(value.begin(), value.end()));
 }
 
+static std::optional<uint32_t> ParseGLESUniformVectorLimit(
+    std::string_view value) {
+  uint32_t limit = 0;
+  const auto result =
+      std::from_chars(value.data(), value.data() + value.size(), limit);
+  if (result.ec != std::errc{} || result.ptr != value.data() + value.size()) {
+    return std::nullopt;
+  }
+  return limit;
+}
+
 Switches::Switches(const fml::CommandLine& command_line)
     : working_directory(std::make_shared<fml::UniqueFD>(fml::OpenDirectory(
           Utf8FromPath(std::filesystem::current_path()).c_str(),
@@ -198,6 +216,9 @@ Switches::Switches(const fml::CommandLine& command_line)
       gles_language_version(
           stoi(command_line.GetOptionValueWithDefault("gles-language-version",
                                                       "0"))),
+      gles_uniform_vector_limit(ParseGLESUniformVectorLimit(
+          command_line.GetOptionValueWithDefault("gles-uniform-vector-limit",
+                                                 "0"))),
       metal_version(
           command_line.GetOptionValueWithDefault("metal-version", "1.2")),
       entry_point(
@@ -267,6 +288,14 @@ bool Switches::AreValid(std::ostream& explain) const {
   const bool shader_bundle_mode = !shader_bundle.empty();
 
   bool valid = true;
+  if (!gles_uniform_vector_limit.has_value()) {
+    explain
+        << "Invalid --gles-uniform-vector-limit: expected a decimal integer "
+           "between 0 and 4294967295."
+        << std::endl;
+    valid = false;
+  }
+
   if (target_platform_ == TargetPlatform::kUnknown && runtime_stages_.empty() &&
       !shader_bundle_mode) {
     explain << "Either a target platform was not specified, or no runtime "
@@ -337,6 +366,7 @@ SourceOptions Switches::CreateSourceOptions() const {
           source_file_name, options.type, options.source_language, entry_point);
   options.json_format = json_format;
   options.gles_language_version = gles_language_version;
+  options.gles_uniform_vector_limit = gles_uniform_vector_limit.value_or(0);
   options.metal_version = metal_version;
   options.use_half_textures = use_half_textures;
   options.require_framebuffer_fetch = require_framebuffer_fetch;

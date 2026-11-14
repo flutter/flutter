@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include <initializer_list>
+#include <sstream>
+#include <utility>
 #include <vector>
 
 #include "flutter/fml/command_line.h"
@@ -124,6 +126,42 @@ TEST(SwitchesTest, MinifyFlagIsPropagatedToSourceOptions) {
   ASSERT_TRUE(minify_switches.AreValid(std::cout));
   EXPECT_TRUE(minify_switches.minify);
   EXPECT_TRUE(minify_switches.CreateSourceOptions().minify);
+}
+
+TEST(SwitchesTest, GLESUniformVectorLimitIsPropagatedToSourceOptions) {
+  Switches default_switches = MakeSwitchesDesktopGL();
+  ASSERT_TRUE(default_switches.AreValid(std::cout));
+  EXPECT_EQ(default_switches.CreateSourceOptions().gles_uniform_vector_limit,
+            0u);
+  for (const auto& [value, expected] :
+       std::vector<std::pair<const char*, uint32_t>>{
+           {"0", 0u},
+           {"4096", 4096u},
+           {"4294967295", 4294967295u},
+       }) {
+    SCOPED_TRACE(value);
+    std::string option = std::string("--gles-uniform-vector-limit=") + value;
+    Switches switches = MakeSwitchesDesktopGL({option.c_str()});
+    ASSERT_TRUE(switches.AreValid(std::cout));
+    EXPECT_EQ(switches.CreateSourceOptions().gles_uniform_vector_limit,
+              expected);
+  }
+}
+
+TEST(SwitchesTest, GLESUniformVectorLimitRejectsInvalidValues) {
+  for (const auto& option : {
+           "--gles-uniform-vector-limit=",
+           "--gles-uniform-vector-limit=-1",
+           "--gles-uniform-vector-limit=4294967296",
+           "--gles-uniform-vector-limit=4096tail",
+       }) {
+    SCOPED_TRACE(option);
+    Switches switches = MakeSwitchesDesktopGL({option});
+    std::ostringstream explain;
+    EXPECT_FALSE(switches.AreValid(explain));
+    EXPECT_NE(explain.str().find("Invalid --gles-uniform-vector-limit"),
+              std::string::npos);
+  }
 }
 
 }  // namespace testing

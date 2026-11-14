@@ -26,6 +26,9 @@ struct SourceOptions {
   std::filesystem::path file_name = "main.glsl";
   std::string entry_point_name = "main";
   uint32_t gles_language_version = 100;
+  // Emit eligible ESSL 300 fragment UBOs as plain uniforms within this
+  // conservative vector budget. Zero leaves uniform blocks unchanged.
+  uint32_t gles_uniform_vector_limit = 0;
   std::vector<std::string> defines;
   bool json_format = false;
   std::string metal_version;

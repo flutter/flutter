@@ -18,6 +18,10 @@ declare_args() {
   embedder_enable_metal = shell_enable_metal
 }
 
+embedder_enable_impeller_gles =
+    embedder_enable_gl && impeller_supports_rendering &&
+    impeller_enable_opengles
+
 shell_gpu_configuration("embedder_gpu_configuration") {
   enable_software = embedder_enable_software
   enable_vulkan = embedder_enable_vulkan
@@ -124,11 +128,20 @@ template("embedder_source_set") {
       ]
 
       if (impeller_supports_rendering) {
-        sources += [
-          "embedder_surface_gl_impeller.cc",
-          "embedder_surface_gl_impeller.h",
-        ]
         deps += [ "//flutter/impeller/renderer/backend/gles" ]
+      }
+    }
+
+    if (embedder_enable_impeller_gles) {
+      sources += [
+        "embedder_surface_gl_impeller.cc",
+        "embedder_surface_gl_impeller.h",
+      ]
+      if (is_linux) {
+        deps += [
+          "//flutter/impeller/entity:gles3_plain_entity_shaders",
+          "//flutter/impeller/entity:gles3_plain_framebuffer_blend_entity_shaders",
+        ]
       }
     }
 
@@ -333,8 +346,11 @@ if (enable_unittests) {
         "tests/embedder_test_context_gl.cc",
         "tests/embedder_test_context_gl.h",
         "tests/embedder_test_gl.cc",
-        "tests/embedder_test_surface_gl_impeller.cc",
       ]
+
+      if (embedder_enable_impeller_gles) {
+        sources += [ "tests/embedder_test_surface_gl_impeller.cc" ]
+      }
 
       public_deps += [
         "//flutter/impeller/renderer/backend/gles",

@@ -132,6 +132,10 @@ template("impellerc") {
       gles_language_version = invoker.gles_language_version
       args += [ "--gles-language-version=$gles_language_version" ]
     }
+    if (defined(invoker.gles_uniform_vector_limit)) {
+      args +=
+          [ "--gles-uniform-vector-limit=${invoker.gles_uniform_vector_limit}" ]
+    }
 
     if (defined(invoker.metal_version)) {
       assert(is_mac || is_ios)

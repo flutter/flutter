@@ -6,6 +6,7 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_shaders("entity_shaders") {
   name = "entity"
+  gles_fragment_uniform_workaround = true
 
   if (impeller_enable_vulkan) {
     vulkan_language_version = 130
@@ -97,6 +98,7 @@ impeller_shaders("modern_entity_shaders") {
 
 impeller_shaders("framebuffer_blend_entity_shaders") {
   name = "framebuffer_blend"
+  gles_fragment_uniform_workaround = true
   require_framebuffer_fetch = true
 
   if (impeller_enable_vulkan) {

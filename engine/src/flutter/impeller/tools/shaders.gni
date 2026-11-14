@@ -51,6 +51,10 @@ import("//flutter/impeller/tools/shaders_vk.gni")
 #
 #    Whether to require the framebuffer fetch extension for GLES fragment shaders.
 template("impeller_shaders") {
+  gles_fragment_uniform_workaround =
+      defined(invoker.gles_fragment_uniform_workaround) &&
+      invoker.gles_fragment_uniform_workaround
+  not_needed([ "gles_fragment_uniform_workaround" ])
   if (defined(invoker.metal_version)) {
     metal_version = invoker.metal_version
   }
@@ -138,6 +142,22 @@ template("impeller_shaders") {
         shaders = invoker.shaders
       }
       analyze = analyze
+    }
+
+    # Only the Linux embedder selects these driver-workaround archives. The
+    # original vertex and modern/SSBO shaders remain in the regular archives.
+    if (is_linux && gles_fragment_uniform_workaround) {
+      impeller_shaders_gles("gles3_plain_$target_name") {
+        name = "${invoker.name}_plain"
+        require_framebuffer_fetch = require_framebuffer_fetch
+        shaders = filter_include(invoker.shaders, [ "*.frag" ])
+        gles_language_version = 300
+        is_300 = true
+        analyze = false
+
+        # Must match the minimum checked by ShouldUsePlainFragmentUniforms.
+        gles_uniform_vector_limit = 4096
+      }
     }
   }
 

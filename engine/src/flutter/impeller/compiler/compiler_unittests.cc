@@ -223,6 +223,125 @@ TEST(CompilerTest, YFlipInjectionHandlesEarlyReturnsInGLESVertexShader) {
       << gl_vert;
 }
 
+namespace {
+
+std::string CompileGLSLUniformTest(const std::string& source,
+                                   SourceOptions options) {
+  options.source_language = SourceLanguage::kGLSL;
+  Reflector::Options reflection;
+  reflection.target_platform = options.target_platform;
+  reflection.header_file_name = "plain_uniforms.h";
+  reflection.shader_name = "shader";
+  Compiler compiler(std::make_shared<fml::DataMapping>(source), options,
+                    reflection);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  auto mapping = compiler.GetSLShaderSource();
+  return mapping
+             ? std::string(reinterpret_cast<const char*>(mapping->GetMapping()),
+                           mapping->GetSize())
+             : std::string{};
+}
+
+}  // namespace
+
+TEST(CompilerTest, PlainFragmentUniformsPreserveESSL300AndArraySizes) {
+  const std::string source = R"(
+uniform FragInfo {
+  vec4 colors[256];
+  float weights[128];
+} frag_info;
+out vec4 frag_color;
+void main() {
+  frag_color = frag_info.colors[int(gl_FragCoord.x) % 256] *
+               frag_info.weights[int(gl_FragCoord.y) % 128];
+}
+)";
+  SourceOptions options("plain_uniforms.frag", SourceType::kFragmentShader);
+  auto compile = [&] { return CompileGLSLUniformTest(source, options); };
+  options.target_platform = TargetPlatform::kOpenGLES;
+  options.gles_language_version = 300;
+  const auto original = compile();
+  EXPECT_NE(original.find("layout(std140) uniform FragInfo"),
+            std::string::npos);
+
+  options.gles_uniform_vector_limit = 4096;
+  for (bool minify : {false, true}) {
+    options.minify = minify;
+    const auto plain = compile();
+    EXPECT_EQ(plain.find("#version 300 es\n"), 0u);
+    EXPECT_EQ(plain.find("layout(std140)"), std::string::npos);
+    EXPECT_NE(plain.find("struct FragInfo"), std::string::npos);
+    EXPECT_NE(plain.find("uniform FragInfo frag_info;"), std::string::npos);
+    EXPECT_NE(plain.find("colors[256]"), std::string::npos);
+    EXPECT_NE(plain.find("weights[128]"), std::string::npos);
+  }
+  // A device with too few uniform vectors keeps the original blocks.
+  options.minify = false;
+  options.gles_uniform_vector_limit = 256;
+  EXPECT_EQ(compile(), original);
+
+  // The option leaves other language versions and desktop GL untouched.
+  options.gles_language_version = 310;
+  const auto es310 = compile();
+  options.gles_uniform_vector_limit = 0;
+  EXPECT_EQ(compile(), es310);
+  options.target_platform = TargetPlatform::kOpenGLDesktop;
+  options.gles_language_version = 330;
+  const auto desktop = compile();
+  options.gles_uniform_vector_limit = 4096;
+  EXPECT_EQ(compile(), desktop);
+}
+
+TEST(CompilerTest, PlainUniformOptionKeepsUnsupportedMembersInUniformBlocks) {
+  struct Case {
+    const char* member;
+    const char* expression;
+  };
+  for (const auto& test :
+       {Case{"int value;", "vec4(float(frag_info.value))"},
+        Case{"mat2 value;", "vec4(frag_info.value[0], 0.0, 1.0)"},
+        Case{"mat3 value;", "vec4(frag_info.value[0], 1.0)"},
+        Case{"mat2x3 value;", "vec4(frag_info.value[0], 1.0)"},
+        Case{"Inner value;", "frag_info.value.color"}}) {
+    const std::string source =
+        "struct Inner { vec4 color; }; uniform FragInfo { " +
+        std::string(test.member) +
+        " } frag_info; out vec4 frag_color; void main() { "
+        "frag_color = " +
+        test.expression + "; }";
+    SourceOptions options("plain_uniforms.frag", SourceType::kFragmentShader);
+    options.target_platform = TargetPlatform::kOpenGLES;
+    options.gles_language_version = 300;
+    options.gles_uniform_vector_limit = 4096;
+    const auto result = CompileGLSLUniformTest(source, options);
+    EXPECT_NE(result.find("layout(std140) uniform FragInfo"), std::string::npos)
+        << test.member << "\n"
+        << result;
+  }
+}
+
+TEST(CompilerTest, PlainUniformOptionDoesNotChangeVertexOrRuntimeShaders) {
+  SourceOptions vertex("plain_uniforms.vert", SourceType::kVertexShader);
+  vertex.target_platform = TargetPlatform::kOpenGLES;
+  vertex.gles_language_version = 300;
+  const std::string vertex_source =
+      "uniform FrameInfo { mat4 mvp; } frame_info; "
+      "void main() { gl_Position = frame_info.mvp * vec4(1.0); }";
+  const auto original_vertex = CompileGLSLUniformTest(vertex_source, vertex);
+  vertex.gles_uniform_vector_limit = 4096;
+  EXPECT_EQ(CompileGLSLUniformTest(vertex_source, vertex), original_vertex);
+
+  SourceOptions runtime("plain_uniforms.frag", SourceType::kFragmentShader);
+  runtime.target_platform = TargetPlatform::kRuntimeStageGLES3;
+  runtime.gles_language_version = 300;
+  const std::string runtime_source =
+      "uniform float value; out vec4 frag_color; "
+      "void main() { frag_color = vec4(value); }";
+  const auto original_runtime = CompileGLSLUniformTest(runtime_source, runtime);
+  runtime.gles_uniform_vector_limit = 4096;
+  EXPECT_EQ(CompileGLSLUniformTest(runtime_source, runtime), original_runtime);
+}
+
 TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
   ASSERT_EQ(SourceTypeFromFileName("hello.vert"), SourceType::kVertexShader);
   ASSERT_EQ(SourceTypeFromFileName("hello.frag"), SourceType::kFragmentShader);
