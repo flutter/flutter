@@ -234,14 +234,25 @@ Future<(String, Directory)> _createNativeApp({
   return (xcodeProjectName, xcodeProjectDir);
 }
 
+// The module pubspec.yaml each Xcode project was last pod installed against.
+final Map<String, String> _installedPubspecs = <String, String>{};
+
 Future<void> _installPlugins({
   required Directory appDir,
   required Directory xcodeProjectDir,
 }) async {
+  final pubspec = File(path.join(appDir.path, 'pubspec.yaml'));
+  final String pubspecContent = pubspec.readAsStringSync();
+  // Scenarios only change the pod set by swapping pubspec.yaml, so a reinstall
+  // is only needed when it differs from the last install.
+  if (_installedPubspecs[xcodeProjectDir.path] == pubspecContent) {
+    print('Skipping pod install, pubspec.yaml is unchanged.');
+    return;
+  }
+
   // Poke the pubspec to reset the fingerprinter to ensure the module is re-generated.
   // See [_regenerateModuleFromTemplateIfNeeded] in packages/flutter_tools/lib/src/xcode_project.dart.
-  final pubspec = File(path.join(appDir.path, 'pubspec.yaml'));
-  pubspec.writeAsStringSync(pubspec.readAsStringSync());
+  pubspec.writeAsStringSync(pubspecContent);
 
   await flutter(
     'build',
@@ -261,6 +272,7 @@ Future<void> _installPlugins({
     },
     workingDirectory: xcodeProjectDir.path,
   );
+  _installedPubspecs[xcodeProjectDir.path] = pubspecContent;
 }
 
 class FileReplacements {
@@ -381,25 +393,6 @@ enum XcodeProjectType { UIKitSwift, SwiftUI }
 class Scenarios {
   Scenarios();
 
-  late Map<String, Map<String, String>> deepLinkScenarios = <String, Map<String, String>>{
-    'AppMigrated-FlutterSceneDelegate-PluginMigrated-DeepLink': <String, String>{
-      ...sharedLifecycleFiles,
-      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
-      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
-          r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-DeepLinks-SceneEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
-    },
-    'AppMigrated-FlutterSceneDelegate-PluginNotMigrated-DeepLink': <String, String>{
-      ...sharedLifecycleFiles,
-      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
-      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
-          r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-DeepLinks-ApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
-    },
-  };
-
   Map<String, Map<String, String>> scenarios(XcodeProjectType projectType) {
     switch (projectType) {
       case XcodeProjectType.UIKitSwift:
@@ -415,11 +408,12 @@ class Scenarios {
   /// in a native iOS app. The file replacements are used to set up the
   /// specific configuration for each scenario.
   late Map<String, Map<String, String>> uiKitSwiftScenarios = <String, Map<String, String>>{
-    ...basicLifecycleScenarios,
+    // Opening the app by URL breaks scene restoration until the simulator
+    // reboots, so these run before the deep link tests.
     ...stateRestorationScenarios,
+    ...basicLifecycleScenarios,
     ...implicitEngineDelegateScenarios,
     ...multiSceneScenarios,
-    ...deepLinkScenarios,
   };
 
   late Map<String, Map<String, String>> swiftUIScenarios = <String, Map<String, String>>{
@@ -461,7 +455,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-DeepLinks-SceneEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When the app has migrated but the plugin hasn't, we expect application events to be used as
@@ -472,7 +466,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppMigrated.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-DeepLinks-ApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When both the app and the plugin have migrated to scenes, we expect scene events.
