@@ -41,6 +41,9 @@ void SurfaceTextureExternalTextureGLSkia::ProcessFrame(PaintContext& context,
 
   // Updates the texture contents and transformation matrix.
   Update();
+  if (context.gr_context) {
+    context.gr_context->resetContext(kTextureBinding_GrGLBackendState);
+  }
 
   GrGLTextureInfo textureInfo = {GL_TEXTURE_EXTERNAL_OES, texture_name_,
                                  GL_RGBA8_OES};
