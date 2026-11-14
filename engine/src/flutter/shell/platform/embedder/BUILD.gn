@@ -306,6 +306,7 @@ if (enable_unittests) {
       "tests/embedder_test_context_software.cc",
       "tests/embedder_test_context_software.h",
       "tests/embedder_unittests_util.cc",
+      "vsync_waiter_embedder_unittests.cc",
     ]
 
     public_deps = [

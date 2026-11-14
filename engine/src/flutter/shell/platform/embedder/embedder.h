@@ -2710,8 +2710,11 @@ typedef struct {
   /// A callback that gets invoked by the engine when it attempts to wait for a
   /// platform vsync event. The engine will give the platform a baton that needs
   /// to be returned back to the engine via `FlutterEngineOnVsync`. All batons
-  /// must be retured to the engine before initializing a
-  /// `FlutterEngineShutdown`. Not doing the same will result in a memory leak.
+  /// must be returned exactly once while the engine is running. Before calling
+  /// `FlutterEngineShutdown`, stop admitting platform vsync work. Outstanding
+  /// batons are reclaimed when the engine destroys its vsync waiter; do not
+  /// return them during or after shutdown. Batons are opaque tokens, not
+  /// pointers, and must not be interpreted by the embedder.
   /// While the call to `FlutterEngineOnVsync` must occur on the thread that
   /// made the call to `FlutterEngineRun`, the engine will make this callback on
   /// an internal engine-managed thread. If the components accessed on the
@@ -3374,7 +3377,9 @@ FlutterEngineResult FlutterEngineSendSemanticsAction(
 
 //------------------------------------------------------------------------------
 /// @brief      Notify the engine that a vsync event occurred. A baton passed to
-///             the platform via the vsync callback must be returned. This call
+///             the platform via the vsync callback must be returned exactly
+///             once, unless engine shutdown cancels the outstanding request.
+///             Do not call during or after engine shutdown. This call
 ///             must be made on the thread on which the call to
 ///             `FlutterEngineRun` was made.
 ///
