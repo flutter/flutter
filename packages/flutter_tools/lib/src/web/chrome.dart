@@ -69,6 +69,18 @@ const _kDevToolsServerFailure = 'Cannot start http server for devtools';
 @visibleForTesting
 const kDevToolsListeningTimeout = Duration(seconds: 30);
 
+/// How long to wait for each step of the graceful shutdown of Chromium before
+/// giving up on a clean shutdown and escalating to SIGTERM/SIGKILL.
+///
+/// The `Browser.close` reply is raced against the process exit, so a Chrome
+/// that already exited returns immediately; this timeout covers a Chrome that
+/// is alive but never answers. Chrome can block at any step of the shutdown,
+/// so without a bound [Chromium.close] would hang forever.
+///
+/// See: https://github.com/flutter/flutter/issues/196191
+@visibleForTesting
+const kBrowserCloseTimeout = Duration(seconds: 5);
+
 /// Filters out non-fatal D-Bus connection error messages emitted by Chromium.
 ///
 /// Headless Linux Chrome attempts to query Linux D-Bus desktop services (such as
@@ -728,13 +740,23 @@ class Chromium {
           chromeConnection,
           (_) => true,
           retryFor: const Duration(seconds: 1),
-        );
+        ).timeout(kBrowserCloseTimeout);
         if (tab != null) {
-          final WipConnection wipConnection = await tab.connect();
-          await wipConnection.sendCommand('Browser.close');
+          final WipConnection wipConnection = await tab.connect().timeout(kBrowserCloseTimeout);
+          // Chrome may exit before its reply arrives, so race the reply
+          // against process exit to avoid waiting out the timeout.
+          await Future.any<void>(<Future<void>>[
+            wipConnection.sendCommand('Browser.close'),
+            _process.exitCode,
+          ]).timeout(kBrowserCloseTimeout);
           await wipConnection.close();
           sigtermDelay = const Duration(seconds: 1);
         }
+      } on TimeoutException {
+        _logger.printTrace(
+          'Chrome did not complete a graceful shutdown within '
+          '${kBrowserCloseTimeout.inSeconds}s. Falling back to SIGTERM.',
+        );
       } on IOException catch (_) {
         // Chrome is not responding to the debug protocol and probably has
         // already been closed.
