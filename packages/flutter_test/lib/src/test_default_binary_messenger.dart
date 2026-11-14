@@ -128,6 +128,14 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   /// The number of incomplete/pending calls sent to the platform channels.
   int get pendingMessageCount => _pendingMessages.length;
 
+  /// Clears any pending messages that were sent to platform channels.
+  ///
+  /// This is called between tests to ensure unanswered platform messages
+  /// from one test do not leak into subsequent tests or keep objects alive.
+  void clearPendingMessages() {
+    _pendingMessages.clear();
+  }
+
   // Handlers that intercept and respond to outgoing messages,
   // pretending to be the platform.
   final Map<String, MessageHandler> _outboundHandlers = <String, MessageHandler>{};
