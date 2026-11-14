@@ -1374,10 +1374,6 @@ class _TextFieldState extends State<TextField>
 
   EditableTextState? get _editableText => editableTextKey.currentState;
 
-  void _requestKeyboard() {
-    _editableText?.requestKeyboard();
-  }
-
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection toolbar, we shouldn't show the handles either.
@@ -1807,47 +1803,8 @@ class _TextFieldState extends State<TextField>
                 enabled: _isEnabled,
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
-                onTap: widget.readOnly
-                    ? null
-                    : () {
-                        if (!_effectiveController.selection.isValid) {
-                          _effectiveController.selection = TextSelection.collapsed(
-                            offset: _effectiveController.text.length,
-                          );
-                        }
-                        _requestKeyboard();
-                      },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
                 onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
-                onFocus: _isEnabled
-                    ? () {
-                        assert(
-                          _effectiveFocusNode.canRequestFocus,
-                          'Received SemanticsAction.focus from the engine. However, the FocusNode '
-                          'of this text field cannot gain focus. This likely indicates a bug. '
-                          'If this text field cannot be focused (e.g. because it is not '
-                          'enabled), then its corresponding semantics node must be configured '
-                          'such that the assistive technology cannot request focus on it.',
-                        );
-
-                        if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
-                          _effectiveFocusNode.requestFocus();
-                        } else if (!widget.readOnly) {
-                          // If the platform requested focus, that means that previously the
-                          // platform believed that the text field did not have focus (even
-                          // though Flutter's widget system believed otherwise). This likely
-                          // means that the on-screen keyboard is hidden, or more generally,
-                          // there is no current editing session in this field. To correct
-                          // that, keyboard must be requested.
-                          //
-                          // A concrete scenario where this can happen is when the user
-                          // dismisses the keyboard on the web. The editing session is
-                          // closed by the engine, but the text field widget stays focused
-                          // in the framework.
-                          _requestKeyboard();
-                        }
-                      }
-                    : null,
                 child: child,
               );
             },

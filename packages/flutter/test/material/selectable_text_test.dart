@@ -1619,7 +1619,7 @@ void main() {
               textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.longPress],
+                  actions: <SemanticsAction>[SemanticsAction.longPress, SemanticsAction.focus],
                   inputType: ui.SemanticsInputType.text,
                   children: <TestSemantics>[
                     TestSemantics(
@@ -2171,7 +2171,7 @@ void main() {
                 TestSemantics.rootChild(
                   textDirection: TextDirection.ltr,
                   value: 'Guten Tag',
-                  actions: <SemanticsAction>[SemanticsAction.longPress],
+                  actions: <SemanticsAction>[SemanticsAction.longPress, SemanticsAction.focus],
                   inputType: ui.SemanticsInputType.text,
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isTextField,
@@ -2210,6 +2210,7 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   actions: <SemanticsAction>[
                     SemanticsAction.longPress,
+                    SemanticsAction.focus,
                     SemanticsAction.moveCursorBackwardByCharacter,
                     SemanticsAction.moveCursorBackwardByWord,
                     SemanticsAction.setSelection,
@@ -2249,6 +2250,7 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   actions: <SemanticsAction>[
                     SemanticsAction.longPress,
+                    SemanticsAction.focus,
                     SemanticsAction.moveCursorBackwardByCharacter,
                     SemanticsAction.moveCursorForwardByCharacter,
                     SemanticsAction.moveCursorBackwardByWord,
@@ -2290,6 +2292,7 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   actions: <SemanticsAction>[
                     SemanticsAction.longPress,
+                    SemanticsAction.focus,
                     SemanticsAction.moveCursorForwardByCharacter,
                     SemanticsAction.moveCursorForwardByWord,
                     SemanticsAction.setSelection,
@@ -2379,6 +2382,7 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   actions: <SemanticsAction>[
                     SemanticsAction.longPress,
+                    SemanticsAction.focus,
                     // Absent the following because enableInteractiveSelection: false
                     // SemanticsAction.moveCursorBackwardByCharacter,
                     // SemanticsAction.moveCursorBackwardByWord,
@@ -2428,7 +2432,7 @@ void main() {
                   value: 'Hello',
                   textDirection: TextDirection.ltr,
                   inputType: ui.SemanticsInputType.text,
-                  actions: <SemanticsAction>[SemanticsAction.longPress],
+                  actions: <SemanticsAction>[SemanticsAction.longPress, SemanticsAction.focus],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isReadOnly,
                     SemanticsFlag.isTextField,
@@ -2467,6 +2471,7 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   actions: <SemanticsAction>[
                     SemanticsAction.longPress,
+                    SemanticsAction.focus,
                     SemanticsAction.moveCursorBackwardByCharacter,
                     SemanticsAction.moveCursorBackwardByWord,
                     SemanticsAction.setSelection,
@@ -2506,6 +2511,7 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   actions: <SemanticsAction>[
                     SemanticsAction.longPress,
+                    SemanticsAction.focus,
                     SemanticsAction.moveCursorBackwardByCharacter,
                     SemanticsAction.moveCursorForwardByCharacter,
                     SemanticsAction.moveCursorBackwardByWord,
@@ -2583,7 +2589,10 @@ void main() {
                       ],
                       children: <TestSemantics>[
                         TestSemantics(
-                          actions: <SemanticsAction>[SemanticsAction.longPress],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.longPress,
+                            SemanticsAction.focus,
+                          ],
                           inputType: ui.SemanticsInputType.text,
                           children: <TestSemantics>[
                             TestSemantics(
@@ -2664,6 +2673,7 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   actions: <SemanticsAction>[
                     SemanticsAction.longPress,
+                    SemanticsAction.focus,
                     SemanticsAction.moveCursorBackwardByCharacter,
                     SemanticsAction.moveCursorBackwardByWord,
                     SemanticsAction.setSelection,
@@ -2724,6 +2734,7 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   actions: <SemanticsAction>[
                     SemanticsAction.longPress,
+                    SemanticsAction.focus,
                     SemanticsAction.moveCursorBackwardByCharacter,
                     SemanticsAction.moveCursorBackwardByWord,
                     SemanticsAction.setSelection,
@@ -2781,7 +2792,7 @@ void main() {
                     SemanticsFlag.isFocusable,
                     SemanticsFlag.isMultiline,
                   ],
-                  actions: <SemanticsAction>[SemanticsAction.longPress],
+                  actions: <SemanticsAction>[SemanticsAction.longPress, SemanticsAction.focus],
                   value: testValue,
                   textDirection: TextDirection.ltr,
                 ),
@@ -2817,6 +2828,7 @@ void main() {
                   ],
                   actions: <SemanticsAction>[
                     SemanticsAction.longPress,
+                    SemanticsAction.focus,
                     SemanticsAction.moveCursorBackwardByCharacter,
                     SemanticsAction.moveCursorBackwardByWord,
                     SemanticsAction.setSelection,
