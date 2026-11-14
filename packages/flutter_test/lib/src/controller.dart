@@ -2480,7 +2480,8 @@ abstract class WidgetController {
 
   /// Enable semantics in a test by creating a [SemanticsHandle].
   ///
-  /// The handle must be disposed at the end of the test.
+  /// The handle must be disposed at the end of the test, for example by
+  /// passing its [SemanticsHandle.dispose] method to `addTearDown`.
   SemanticsHandle ensureSemantics() {
     return binding.ensureSemantics();
   }
