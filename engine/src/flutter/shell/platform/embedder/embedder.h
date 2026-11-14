@@ -116,6 +116,8 @@ typedef enum {
   /// Request to show deterministic (non-blinking) cursor in editable text
   /// fields.
   kFlutterAccessibilityFeatureDeterministicCursor = 1 << 10,
+  /// Request that scrollbars remain visible rather than fading out.
+  kFlutterAccessibilityFeaturePersistentScrollbars = 1 << 11,
 } FlutterAccessibilityFeature;
 
 /// The set of possible actions that can be conveyed to a semantics node.

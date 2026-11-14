@@ -76,6 +76,7 @@ struct AccessibilityFeaturesTests {
         #expect(AccessibilityFeatureFlag.noAutoPlayAnimatedImages.rawValue == 1 << 8)
         #expect(AccessibilityFeatureFlag.noAutoPlayVideos.rawValue == 1 << 9)
         #expect(AccessibilityFeatureFlag.deterministicCursor.rawValue == 1 << 10)
+        #expect(AccessibilityFeatureFlag.persistentScrollbars.rawValue == 1 << 11)
     }
 
     @MainActor
