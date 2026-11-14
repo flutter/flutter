@@ -19,6 +19,7 @@ class ProtocolDiscovery {
     this.serviceName, {
     this.portForwarder,
     required this.throttleDuration,
+    required this.failureReasonTimeout,
     this.hostPort,
     this.devicePort,
     required this._ipv6,
@@ -31,6 +32,7 @@ class ProtocolDiscovery {
     DeviceLogReader logReader, {
     DevicePortForwarder? portForwarder,
     Duration? throttleDuration,
+    Duration? failureReasonTimeout,
     int? hostPort,
     int? devicePort,
     required bool ipv6,
@@ -42,6 +44,7 @@ class ProtocolDiscovery {
       kVmServiceService,
       portForwarder: portForwarder,
       throttleDuration: throttleDuration ?? const Duration(milliseconds: 200),
+      failureReasonTimeout: failureReasonTimeout ?? const Duration(seconds: 5),
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
@@ -59,6 +62,10 @@ class ProtocolDiscovery {
 
   /// The time to wait before forwarding a new VM Service URIs from [logReader].
   final Duration throttleDuration;
+
+  /// How long to wait for the reason after the app reports that the VM
+  /// service failed to start, before failing without it.
+  final Duration failureReasonTimeout;
 
   StreamSubscription<String>? _deviceLogSubscription;
   final _uriStreamController = _BufferedStreamController<Uri>();
@@ -94,6 +101,7 @@ class ProtocolDiscovery {
   Future<void> cancel() => _stopScrapingLogs();
 
   Future<void> _stopScrapingLogs() async {
+    _failureReasonTimer?.cancel();
     await _uriStreamController.close();
     await _deviceLogSubscription?.cancel();
     _deviceLogSubscription = null;
@@ -111,7 +119,38 @@ class ProtocolDiscovery {
     return null;
   }
 
+  /// The engine's log line when the VM service HTTP server fails to start.
+  ///
+  /// The engine prints the error (e.g. a `SocketException`) on the next line,
+  /// followed by a stack trace.
+  static const _kVmServiceStartFailure = 'Could not start Dart VM service HTTP server:';
+
+  /// The text that came before [_kVmServiceStartFailure] on its line (such
+  /// as a logcat tag), or null if that line has not been seen.
+  ///
+  /// When this is non-null, the next line that starts with it holds the reason
+  /// for the failure. Lines without it (e.g. from other processes interleaved
+  /// in logcat) are skipped.
+  String? _vmServiceStartFailurePrefix;
+
+  /// Fails discovery without a reason if the reason does not arrive within
+  /// [failureReasonTimeout].
+  Timer? _failureReasonTimer;
+
   void _handleLine(String line) {
+    if (_vmServiceStartFailurePrefix case final String prefix) {
+      if (line.startsWith(prefix)) {
+        _reportVmServiceStartFailure(line.substring(prefix.length).trim());
+      }
+      return;
+    }
+    final int failureIndex = line.indexOf(_kVmServiceStartFailure);
+    if (failureIndex != -1) {
+      _vmServiceStartFailurePrefix = line.substring(0, failureIndex);
+      _failureReasonTimer = Timer(failureReasonTimeout, () => _reportVmServiceStartFailure(null));
+      return;
+    }
+
     Uri? uri;
     try {
       uri = _getVmServiceUri(line);
@@ -126,6 +165,13 @@ class ProtocolDiscovery {
       return;
     }
     _uriStreamController.add(uri);
+  }
+
+  void _reportVmServiceStartFailure(String? reason) {
+    _failureReasonTimer?.cancel();
+    _failureReasonTimer = null;
+    _vmServiceStartFailurePrefix = null;
+    _uriStreamController.addError(VmServiceStartException(reason));
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
@@ -147,6 +193,24 @@ class ProtocolDiscovery {
     }
     return hostUri;
   }
+}
+
+/// Thrown by [ProtocolDiscovery.uris] when the app reports
+/// that the Dart VM service HTTP server failed to start.
+class VmServiceStartException implements Exception {
+  VmServiceStartException(this.reason);
+
+  /// The error the app reported, e.g. `SocketException: Failed to create
+  /// server socket (OS Error: Operation not permitted, errno = 1), ...`.
+  ///
+  /// Null if the app did not report the error in time.
+  final String? reason;
+
+  @override
+  String toString() => switch (reason) {
+    final String reason => 'The Dart VM service failed to start: $reason',
+    null => 'The Dart VM service failed to start.',
+  };
 }
 
 /// Provides a broadcast stream controller that buffers the events
