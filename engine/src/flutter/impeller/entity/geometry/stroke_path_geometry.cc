@@ -14,6 +14,7 @@
 #include "impeller/geometry/separated_vector.h"
 #include "impeller/geometry/wangs_formula.h"
 #include "impeller/tessellator/path_tessellator.h"
+#include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
 
@@ -767,8 +768,28 @@ GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
   adjusted_stroke.width = std::max(stroke_.width, min_size);
 
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
-  auto scale = entity.GetTransform().GetMaxBasisLengthXY();
+  const Scalar scale = max_basis;
   auto& tessellator = renderer.GetTessellator();
+
+  const std::shared_ptr<const void> cache_identity = GetCacheIdentity();
+  if (cache_identity != nullptr) {
+    const std::vector<Point>* cached = tessellator.FindCachedStrokeTessellation(
+        cache_identity.get(), adjusted_stroke, scale);
+    if (cached != nullptr) {
+      BufferView buffer_view = data_host_buffer.Emplace(
+          cached->data(), cached->size() * sizeof(Point), alignof(Point));
+
+      return GeometryResult{.type = PrimitiveType::kTriangleStrip,
+                            .vertex_buffer =
+                                {
+                                    .vertex_buffer = buffer_view,
+                                    .vertex_count = cached->size(),
+                                    .index_type = IndexType::kNone,
+                                },
+                            .transform = entity.GetShaderTransform(pass),
+                            .mode = GeometryResult::Mode::kPreventOverdraw};
+    }
+  }
 
   PositionWriter position_writer(tessellator.GetStrokePointCache());
   StrokePathSegmentReceiver receiver(tessellator, position_writer,
@@ -776,6 +797,32 @@ GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
   Dispatch(receiver, tessellator, scale);
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
+  const size_t point_count = arena_length + oversized_length;
+
+  if (cache_identity != nullptr) {
+    if (tessellator.HasSeenStrokeTessellation(cache_identity.get(),
+                                              adjusted_stroke, scale)) {
+      if (point_count > 0u && point_count <= kMaxCachedStrokePointsPerEntry) {
+        std::vector<Point> combined;
+        combined.reserve(point_count);
+        const std::vector<Point>& arena = tessellator.GetStrokePointCache();
+        combined.insert(combined.end(), arena.begin(),
+                        arena.begin() + arena_length);
+        if (oversized_length > 0u) {
+          const std::vector<Point>& oversized_data =
+              position_writer.GetOversizedBuffer();
+          combined.insert(combined.end(), oversized_data.begin(),
+                          oversized_data.end());
+        }
+        tessellator.StoreCachedStrokeTessellation(
+            cache_identity, adjusted_stroke, scale, std::move(combined));
+      }
+    } else {
+      tessellator.RecordSeenStrokeTessellation(cache_identity.get(),
+                                               adjusted_stroke, scale);
+    }
+  }
+
   if (!position_writer.HasOversizedBuffer()) {
     BufferView buffer_view =
         data_host_buffer.Emplace(tessellator.GetStrokePointCache().data(),
@@ -862,6 +909,10 @@ void StrokePathSourceGeometry::Dispatch(PathAndArcSegmentReceiver& receiver,
                                         Tessellator& tessellator,
                                         Scalar scale) const {
   PathTessellator::PathToStrokedSegments(GetSource(), receiver);
+}
+
+std::shared_ptr<const void> StrokePathSourceGeometry::GetCacheIdentity() const {
+  return GetSource().GetCacheIdentity();
 }
 
 StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
