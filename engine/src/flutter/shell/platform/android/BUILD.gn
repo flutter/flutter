@@ -55,7 +55,10 @@ executable("flutter_shell_native_unittests") {
     "platform_view_android_unittests.cc",
   ]
   if (!slimpeller) {
-    sources += [ "android_context_gl_unittests.cc" ]
+    sources += [
+      "android_context_gl_unittests.cc",
+      "image_external_texture_gl_unittests.cc",
+    ]
   }
   public_configs = [ "//flutter:config" ]
   defines = [ "TESTING" ]
