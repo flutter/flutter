@@ -339,6 +339,74 @@ void main() {
     expect(await chromeDevice.sdkNameAndVersion, 'unknown');
   });
 
+  testWithoutContext(
+    'Chrome and Edge read version from Application directory on Windows without invoking reg',
+    () async {
+      final fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      const programFiles = r'C:\Program Files';
+      fileSystem
+          .file(r'C:\Program Files\Google\Chrome\Application\chrome.exe')
+          .createSync(recursive: true);
+      fileSystem
+          .directory(r'C:\Program Files\Google\Chrome\Application\130.0.6723.117')
+          .createSync(recursive: true);
+      fileSystem
+          .directory(r'C:\Program Files\Google\Chrome\Application\131.0.6778.69')
+          .createSync(recursive: true);
+      fileSystem
+          .directory(r'C:\Program Files\Google\Chrome\Application\131.0.6778.86')
+          .createSync(recursive: true);
+      fileSystem
+          .file(r'C:\Program Files\Microsoft\Edge\Application\msedge.exe')
+          .createSync(recursive: true);
+      fileSystem
+          .directory(r'C:\Program Files\Microsoft\Edge\Application\131.0.2903.70')
+          .createSync(recursive: true);
+
+      final processManager = FakeProcessManager.empty();
+      final webDevices = WebDevices(
+        featureFlags: TestFeatureFlags(isWebEnabled: true),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'windows',
+          environment: <String, String>{'PROGRAMFILES': programFiles},
+        ),
+        processManager: processManager,
+      );
+
+      final List<Device> devices = await webDevices.pollingGetDevices();
+      final GoogleChromeDevice chromeDevice = devices.whereType<GoogleChromeDevice>().single;
+      final MicrosoftEdgeDevice edgeDevice = devices.whereType<MicrosoftEdgeDevice>().single;
+
+      expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 131.0.6778.86');
+      expect(await edgeDevice.sdkNameAndVersion, 'Microsoft Edge 131.0.2903.70');
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext(
+    'Edge is not listed and does not invoke reg when Edge executable cannot be run',
+    () async {
+      final fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final processManager = FakeProcessManager.empty();
+      processManager.excludedExecutables = <String>{
+        r'.\Google\Chrome\Application\chrome.exe',
+        r'.\Microsoft\Edge\Application\msedge.exe',
+      };
+      final webDevices = WebDevices(
+        featureFlags: TestFeatureFlags(isWebEnabled: true),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'windows', environment: <String, String>{}),
+        processManager: processManager,
+      );
+
+      expect(await webDevices.pollingGetDevices(), isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
   testWithoutContext('Edge is not supported on versions less than 73', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
