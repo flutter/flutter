@@ -10,7 +10,7 @@
 #include <utility>
 
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/raster_thread_merger.h"
+#include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "gtest/gtest.h"
 
@@ -216,21 +216,13 @@ TEST(TaskRunnerAffineWeakPtrTest, ShouldNotCrashIfRunningOnTheSameTaskRunner) {
   latch2.Wait();
   fml::TaskQueueId qid1 = loop1->GetTaskRunner()->GetTaskQueueId();
   fml::TaskQueueId qid2 = loop2->GetTaskRunner()->GetTaskQueueId();
-  const auto raster_thread_merger =
-      fml::MakeRefCounted<fml::RasterThreadMerger>(qid1, qid2);
-  const size_t kNumFramesMerged = 5;
-
-  raster_thread_merger->MergeWithLease(kNumFramesMerged);
+  auto* task_queues = fml::MessageLoopTaskQueues::GetInstance();
+  ASSERT_TRUE(task_queues->Merge(qid1, qid2));
 
   loop2_task_start_latch.Signal();
   loop2_task_finish_latch.Wait();
 
-  for (size_t i = 0; i < kNumFramesMerged; i++) {
-    ASSERT_TRUE(raster_thread_merger->IsMerged());
-    raster_thread_merger->DecrementLease();
-  }
-
-  ASSERT_FALSE(raster_thread_merger->IsMerged());
+  ASSERT_TRUE(task_queues->Unmerge(qid1, qid2));
   loop2->Terminate();
 
   term1.Signal();

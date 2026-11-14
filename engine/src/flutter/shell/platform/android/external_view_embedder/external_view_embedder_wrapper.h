@@ -54,17 +54,10 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
       std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
-  PostPrerollResult PostPrerollAction(
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
-      override;
-
-  // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(GrDirectContext* context,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override;
+  void BeginFrame(GrDirectContext* context) override;
 
   // |ExternalViewEmbedder|
   void PrepareFlutterView(DlISize frame_size,
@@ -74,12 +67,7 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   void CancelFrame() override;
 
   // |ExternalViewEmbedder|
-  void EndFrame(bool should_resubmit_frame,
-                const fml::RefPtr<fml::RasterThreadMerger>&
-                    raster_thread_merger) override;
-
-  // |ExternalViewEmbedder|
-  bool SupportsDynamicThreadMerging() override;
+  void EndFrame() override;
 
   // |ExternalViewEmbedder|
   void Teardown() override;

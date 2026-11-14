@@ -5,6 +5,10 @@
 #ifndef FLUTTER_FLOW_TESTING_MOCK_EMBEDDER_H_
 #define FLUTTER_FLOW_TESTING_MOCK_EMBEDDER_H_
 
+#include <deque>
+#include <memory>
+#include <vector>
+
 #include "flutter/flow/embedded_views.h"
 
 namespace flutter {
@@ -25,9 +29,7 @@ class MockViewEmbedder : public ExternalViewEmbedder {
   void CancelFrame() override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(GrDirectContext* context,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override;
+  void BeginFrame(GrDirectContext* context) override;
 
   // |ExternalViewEmbedder|
   void PrepareFlutterView(DlISize frame_size,

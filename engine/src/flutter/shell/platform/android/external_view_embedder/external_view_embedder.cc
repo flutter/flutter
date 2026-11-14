@@ -313,12 +313,6 @@ AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
   return frame;
 }
 
-// |ExternalViewEmbedder|
-PostPrerollResult AndroidExternalViewEmbedder::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  return PostPrerollResult::kSuccess;
-}
-
 bool AndroidExternalViewEmbedder::FrameHasPlatformLayers() {
   return !composition_order_.empty();
 }
@@ -335,9 +329,7 @@ void AndroidExternalViewEmbedder::Reset() {
 }
 
 // |ExternalViewEmbedder|
-void AndroidExternalViewEmbedder::BeginFrame(
-    GrDirectContext* context,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+void AndroidExternalViewEmbedder::BeginFrame(GrDirectContext* context) {}
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::PrepareFlutterView(
@@ -373,16 +365,9 @@ void AndroidExternalViewEmbedder::CancelFrame() {
 }
 
 // |ExternalViewEmbedder|
-void AndroidExternalViewEmbedder::EndFrame(
-    bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+void AndroidExternalViewEmbedder::EndFrame() {
   surface_pool_->RecycleLayers();
   FlushRetiredOverlayIds();
-}
-
-// |ExternalViewEmbedder|
-bool AndroidExternalViewEmbedder::SupportsDynamicThreadMerging() {
-  return false;
 }
 
 // |ExternalViewEmbedder|

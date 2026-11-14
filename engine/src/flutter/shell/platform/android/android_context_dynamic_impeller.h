@@ -50,9 +50,6 @@ class AndroidContextDynamicImpeller : public AndroidContext {
   /// @attention  Must never be called from the thread that executes
   ///             [SetupImpellerContext] before that setup has completed, as
   ///             the signal being waited on could then never be delivered.
-  ///             In practice that is the raster thread, but note it is not
-  ///             always a distinct thread: while a |fml::RasterThreadMerger|
-  ///             lease is active, raster tasks run on the platform thread.
   ///
   // |AndroidContext|
   AndroidRenderingAPI RenderingApi() const override;

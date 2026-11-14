@@ -61,9 +61,7 @@ void EmbedderExternalViewEmbedder::CancelFrame() {
 }
 
 // |ExternalViewEmbedder|
-void EmbedderExternalViewEmbedder::BeginFrame(
-    GrDirectContext* context,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+void EmbedderExternalViewEmbedder::BeginFrame(GrDirectContext* context) {}
 
 // |ExternalViewEmbedder|
 void EmbedderExternalViewEmbedder::PrepareFlutterView(
