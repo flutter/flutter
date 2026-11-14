@@ -24,9 +24,9 @@ class BuildApkCommand extends BuildSubCommand {
     required this._androidBuilder,
     required this._androidContext,
     required this._buildSystem,
-    required ToolContext toolContext,
+    required super.toolContext,
     super.verboseHelp = false,
-  }) : super(logger: toolContext.logger, toolContext: toolContext) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -88,9 +88,6 @@ class BuildApkCommand extends BuildSubCommand {
           }
         : targetPlatform;
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   FlutterProject get project =>

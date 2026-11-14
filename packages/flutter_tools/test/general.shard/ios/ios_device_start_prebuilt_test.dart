@@ -2073,6 +2073,7 @@ IOSDevice setUpIOSDevice({
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     iosDeploy: iosDeploy ?? IOSDeploy(toolContext: toolContext),
     analytics: analytics ?? FakeAnalytics(),
+    cocoaPods: FakeCocoaPods(),
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),
@@ -2081,7 +2082,9 @@ IOSDevice setUpIOSDevice({
     ),
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
+    plistParser: FakePlistParser(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
+    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     cpuArch: .arm64,
     connectionInterface: interfaceType,
     isConnected: true,

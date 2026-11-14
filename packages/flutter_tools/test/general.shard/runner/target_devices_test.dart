@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -2983,7 +2984,8 @@ class TestTargetDeviceSelection extends TargetDeviceSelection {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required this.logger, required this.platform}) : super(logger: logger);
+  TestDeviceManager({required this.logger, required this.platform})
+    : super(fileSystem: MemoryFileSystem.test(), logger: logger);
 
   final Logger logger;
   final Platform platform;

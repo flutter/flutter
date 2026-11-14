@@ -6,10 +6,12 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
@@ -20,6 +22,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
@@ -243,6 +246,374 @@ void main() {
     expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
 
+  group('TCC privacy crash detection', () {
+    const logShowCommand = <String>[
+      '/usr/bin/log',
+      'show',
+      '--last',
+      '30s',
+      '--style',
+      'ndjson',
+      '--predicate',
+      'processID == 10000 AND eventMessage CONTAINS "${MacOSDevice.kMacOSPrivacyCrashPattern}"',
+    ];
+
+    testWithoutContext(
+      'detects privacy crash via log show on SIGABRT (-6) exit and awaits check on dispose',
+      () async {
+        final logger = BufferLogger.test();
+        final processCompleter = Completer<void>();
+        final logShowCompleter = Completer<void>();
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['release/executable'],
+            exitCode: MacOSDevice.kSigabrtExitCode,
+            completer: processCompleter,
+          ),
+          FakeCommand(
+            command: logShowCommand,
+            completer: logShowCompleter,
+            stdout: <String>[
+              jsonEncode(<String, Object?>{
+                'processID': 10000,
+                'eventMessage':
+                    '${MacOSDevice.kMacOSPrivacyCrashPattern}. '
+                    "The app's Info.plist must supply an NSSpeechRecognitionUsageDescription key "
+                    'with a string value explaining to the user how the app uses this data.',
+              }),
+              jsonEncode(<String, Object?>{'count': 1, 'finished': 1}),
+            ].join('\n'),
+          ),
+        ]);
+        final device = MacOSDevice(
+          analytics: const NoOpAnalytics(),
+          appleContext: FakeAppleContext(),
+          featureFlags: TestFeatureFlags(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(logger: logger, processManager: processManager),
+        );
+        final package = FakeMacOSApp();
+
+        final LaunchResult result = await device.startApp(
+          package,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          prebuiltApplication: true,
+        );
+        expect(result.started, true);
+
+        var disposeFinished = false;
+        final Future<void> disposeFuture = device.dispose().then((_) {
+          disposeFinished = true;
+        });
+        Timer.run(processCompleter.complete);
+        await pumpEventQueue();
+        expect(disposeFinished, false);
+        expect(logger.errorText, isEmpty);
+
+        logShowCompleter.complete();
+        await disposeFuture;
+        expect(disposeFinished, true);
+
+        expect(logger.errorText, contains('macOS Privacy Permission Crash Detected'));
+        expect(
+          logger.errorText,
+          contains(
+            'access to protected resources (requiring NSSpeechRecognitionUsageDescription).',
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains('protected resource requests are made to the parent IDE or\nterminal process'),
+        );
+        expect(
+          logger.errorText,
+          contains('Even if NSSpeechRecognitionUsageDescription is already present'),
+        );
+        expect(
+          logger.errorText,
+          contains(
+            '1. Ensure NSSpeechRecognitionUsageDescription is present in macos/Runner/Info.plist.',
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains(
+            "2. Run the project directly from Xcode, or 'flutter run' using the default macOS Terminal app.",
+          ),
+        );
+        expect(logger.errorText, contains('https://github.com/flutter/flutter/issues/70374'));
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext('detects privacy crash with alternative phrasing', () async {
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['release/executable'],
+          exitCode: MacOSDevice.kSigabrtExitCode,
+        ),
+        FakeCommand(
+          command: logShowCommand,
+          stdout: jsonEncode(<String, Object?>{
+            'processID': 10000,
+            'eventMessage':
+                '${MacOSDevice.kMacOSPrivacyCrashPattern}. '
+                "The app's Info.plist must contain an NSPhotoLibraryUsageDescription key "
+                'with a string value explaining to the user how the app uses this data.',
+          }),
+        ),
+      ]);
+      final device = MacOSDevice(
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: logger, processManager: processManager),
+      );
+      final package = FakeMacOSApp();
+
+      final LaunchResult result = await device.startApp(
+        package,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        prebuiltApplication: true,
+      );
+      expect(result.started, true);
+
+      await pumpEventQueue();
+      await device.dispose();
+
+      expect(logger.errorText, contains('macOS Privacy Permission Crash Detected'));
+      expect(
+        logger.errorText,
+        contains('access to protected resources (requiring NSPhotoLibraryUsageDescription).'),
+      );
+      expect(
+        logger.errorText,
+        contains(
+          "2. Run the project directly from Xcode, or 'flutter run' using the default macOS Terminal app.",
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext(
+      'detects privacy crash without key name and prints fallback diagnostic',
+      () async {
+        final logger = BufferLogger.test();
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['release/executable'],
+            exitCode: MacOSDevice.kSigabrtExitCode,
+          ),
+          FakeCommand(
+            command: logShowCommand,
+            stdout: jsonEncode(<String, Object?>{
+              'processID': 10000,
+              'eventMessage': '${MacOSDevice.kMacOSPrivacyCrashPattern}.',
+            }),
+          ),
+        ]);
+        final device = MacOSDevice(
+          analytics: const NoOpAnalytics(),
+          appleContext: FakeAppleContext(),
+          featureFlags: TestFeatureFlags(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(logger: logger, processManager: processManager),
+        );
+        final package = FakeMacOSApp();
+
+        await device.startApp(
+          package,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          prebuiltApplication: true,
+        );
+        await pumpEventQueue();
+        await device.dispose();
+
+        expect(logger.errorText, contains('macOS Privacy Permission Crash Detected'));
+        expect(logger.errorText, contains('access to protected resources.'));
+        expect(logger.errorText, isNot(contains('requiring')));
+        expect(
+          logger.errorText,
+          contains(
+            'Even if the usage description key is already present in macos/Runner/Info.plist',
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains(
+            '1. Ensure the required usage description key is present in macos/Runner/Info.plist.',
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains(
+            "2. Run the project directly from Xcode, or 'flutter run' using the default macOS Terminal app.",
+          ),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'does not print diagnostic on SIGABRT (-6) when log show finds no matching TCC entry',
+      () async {
+        final logger = BufferLogger.test();
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['release/executable'],
+            exitCode: MacOSDevice.kSigabrtExitCode,
+          ),
+          FakeCommand(
+            command: logShowCommand,
+            stdout: <String>[
+              'non-JSON line echoing ${MacOSDevice.kMacOSPrivacyCrashPattern}',
+              jsonEncode(<String, Object?>{
+                'processID': 99999,
+                'eventMessage': '${MacOSDevice.kMacOSPrivacyCrashPattern}.',
+              }),
+              jsonEncode(<String, Object?>{'count': 0, 'finished': 1}),
+            ].join('\n'),
+          ),
+        ]);
+        final device = MacOSDevice(
+          analytics: const NoOpAnalytics(),
+          appleContext: FakeAppleContext(),
+          featureFlags: TestFeatureFlags(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(logger: logger, processManager: processManager),
+        );
+        final package = FakeMacOSApp();
+
+        await device.startApp(
+          package,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          prebuiltApplication: true,
+        );
+        await pumpEventQueue();
+        await device.dispose();
+
+        expect(logger.errorText, isEmpty);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext('does not run log show on normal exit (0)', () async {
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['release/executable']),
+      ]);
+      final device = MacOSDevice(
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: logger, processManager: processManager),
+      );
+      final package = FakeMacOSApp();
+
+      await device.startApp(
+        package,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        prebuiltApplication: true,
+      );
+      await pumpEventQueue();
+      await device.dispose();
+
+      expect(logger.errorText, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('does not run log show on non-SIGABRT signal (-9)', () async {
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['release/executable'], exitCode: -9),
+      ]);
+      final device = MacOSDevice(
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: logger, processManager: processManager),
+      );
+      final package = FakeMacOSApp();
+
+      await device.startApp(
+        package,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        prebuiltApplication: true,
+      );
+      await pumpEventQueue();
+      await device.dispose();
+
+      expect(logger.errorText, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('skips log show when /usr/bin/log cannot be executed', () async {
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['release/executable'],
+          exitCode: MacOSDevice.kSigabrtExitCode,
+        ),
+      ])..excludedExecutables = <String>{'/usr/bin/log'};
+      final device = MacOSDevice(
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: logger, processManager: processManager),
+      );
+      final package = FakeMacOSApp();
+
+      await device.startApp(
+        package,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        prebuiltApplication: true,
+      );
+      await pumpEventQueue();
+      await device.dispose();
+
+      expect(logger.errorText, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('handles log show ProcessException gracefully', () async {
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['release/executable'],
+          exitCode: MacOSDevice.kSigabrtExitCode,
+        ),
+        const FakeCommand(
+          command: logShowCommand,
+          exception: ProcessException('/usr/bin/log', <String>['show']),
+        ),
+      ]);
+      final device = MacOSDevice(
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: logger, processManager: processManager),
+      );
+      final package = FakeMacOSApp();
+
+      await device.startApp(
+        package,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        prebuiltApplication: true,
+      );
+      await pumpEventQueue();
+      await device.dispose();
+
+      expect(logger.errorText, isNot(contains('macOS Privacy Permission Crash Detected')));
+      expect(processManager, hasNoRemainingExpectations);
+    });
+  });
+
   group('buildForDevice', () {
     late MemoryFileSystem fileSystem;
 
@@ -304,6 +675,7 @@ FlutterProject setUpFlutterProject(Directory directory) {
   final flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
+    config: FakeConfig(),
   );
   return flutterProjectFactory.fromDirectory(directory);
 }

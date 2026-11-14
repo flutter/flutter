@@ -6,7 +6,6 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/package_graph.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config.dart';
@@ -30,7 +29,6 @@ void main() {
   late FileSystem fileSystem;
 
   setUp(() {
-    Cache.flutterRoot = '';
     fileSystem = MemoryFileSystem.test();
   });
 
@@ -154,6 +152,25 @@ ${package.devDependencies.map((String d) => '  $d: {path: ../$d}').join('\n')}
         (name: 'package_c', dependencies: <String>[], devDependencies: <String>[]),
       ],
       <String>['package_c'],
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/194444.
+  test('throws ToolExit when dependency is missing from package_config', () async {
+    writePubspecs(<Package>[
+      (name: 'my_app', dependencies: <String>[], devDependencies: <String>[]),
+    ]);
+    writePackageGraph(<Package>[
+      (name: 'my_app', dependencies: <String>['package_a'], devDependencies: <String>[]),
+      (name: 'package_a', dependencies: <String>[], devDependencies: <String>[]),
+    ]);
+
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('my_app'));
+    final PackageConfig packageConfig = await loadPackageConfig(project.packageConfig);
+
+    expect(
+      () => computeTransitiveDependencies(project, packageConfig),
+      throwsToolExit(message: 'package `package_a` is missing from package_config.json'),
     );
   });
 }
