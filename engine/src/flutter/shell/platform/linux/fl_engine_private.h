@@ -20,6 +20,10 @@
 
 G_BEGIN_DECLS
 
+// Internal GTK-thread shutdown boundary, independent of GObject references.
+// Stops the whole engine, not an individual view; cannot be restarted.
+void fl_engine_shutdown(FlEngine* engine);
+
 /**
  * FlEngineError:
  * Errors for #FlEngine objects to set on failures.
