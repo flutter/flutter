@@ -1876,6 +1876,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   OCMVerifyAll(settingsChannel);
 
+  (void)vc;
+
   [mockHourFormat stopMocking];
   [settingsChannel stopMocking];
 }
