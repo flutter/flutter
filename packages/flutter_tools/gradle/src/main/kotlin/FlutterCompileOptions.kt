@@ -55,15 +55,10 @@ internal data class FlutterCompileOptions(
         /**
          * Separator used to split [FILE_SYSTEM_ROOTS_PROPERTY] into individual roots.
          *
-         * The Flutter tool joins the roots with a single `|`, see `gradle.dart`. Kotlin's
-         * [String.split] takes a literal delimiter rather than a regular expression, so this
-         * two-character delimiter never matches and the property arrives as a single element.
-         * The behavior predates the variant API migration and is preserved here unchanged.
-         *
-         * TODO(reidbaker): Split on "|" so that multiple `--filesystem-root` values reach
-         *  `flutter assemble`. https://github.com/flutter/flutter/issues/192824
+         * The Flutter tool joins roots using `|` in `gradle.dart`, so Kotlin's [String.split]
+         * must use the same literal delimiter.
          */
-        private const val FILE_SYSTEM_ROOTS_SEPARATOR = "\\|"
+        private const val FILE_SYSTEM_ROOTS_SEPARATOR = "|"
 
         /** Reads every Gradle property that configures a Flutter compile task from [project]. */
         fun from(project: Project): FlutterCompileOptions =
