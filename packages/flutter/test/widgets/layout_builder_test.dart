@@ -963,41 +963,22 @@ void main() {
         return const Placeholder();
       },
     );
-    final overlayEntry1 = OverlayEntry(
-      maintainState: true,
-      canSizeOverlay: true,
-      builder: (BuildContext context) => layoutBuilder,
-    );
-    // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
-    final overlayEntry2 = OverlayEntry(
-      opaque: true,
-      canSizeOverlay: true,
-      builder: (BuildContext context) => const Placeholder(),
-    );
-    addTearDown(
-      () => overlayEntry1
-        ..remove()
-        ..dispose(),
-    );
-    addTearDown(
-      () => overlayEntry2
-        ..remove()
-        ..dispose(),
-    );
-    await tester.pumpWidget(
-      Directionality(
+    Widget buildTree({required bool skipLayout}) {
+      return Directionality(
         textDirection: TextDirection.ltr,
-        // The UnconstrainedBox makes sure the OverlayEntries are not relayout boundaries.
-        child: UnconstrainedBox(child: Overlay(initialEntries: <OverlayEntry>[overlayEntry1])),
-      ),
-    );
-    tester.state<OverlayState>(find.byType(Overlay)).insert(overlayEntry2);
-    await tester.pump();
+        // The UnconstrainedBox makes sure the LayoutBuilder is not a relayout
+        // boundary, so laying it out has to go through the _LayoutSkipper.
+        child: UnconstrainedBox(
+          child: _LayoutSkipper(skipLayout: skipLayout, child: layoutBuilder),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTree(skipLayout: false));
+    await tester.pumpWidget(buildTree(skipLayout: true));
 
     rebuilt = false;
-    final Element layoutBuilderElement = tester.element(
-      find.byWidget(layoutBuilder, skipOffstage: false),
-    );
+    final Element layoutBuilderElement = tester.element(find.byWidget(layoutBuilder));
     layoutBuilderElement.markNeedsBuild();
     expect(rebuilt, isFalse);
     await tester.pump();
@@ -1173,5 +1154,44 @@ class _RenderLayoutSpy extends RenderBox {
   @override
   void performLayout() {
     performLayoutCount += 1;
+  }
+}
+
+// Stops laying out its child once skipLayout is true, keeping its last size.
+class _LayoutSkipper extends SingleChildRenderObjectWidget {
+  const _LayoutSkipper({required this.skipLayout, super.child});
+
+  final bool skipLayout;
+
+  @override
+  _RenderLayoutSkipper createRenderObject(BuildContext context) {
+    return _RenderLayoutSkipper(skipLayout);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderLayoutSkipper renderObject) {
+    renderObject.skipLayout = skipLayout;
+  }
+}
+
+class _RenderLayoutSkipper extends RenderProxyBox {
+  _RenderLayoutSkipper(this._skipLayout);
+
+  bool get skipLayout => _skipLayout;
+  bool _skipLayout;
+  set skipLayout(bool value) {
+    if (value == _skipLayout) {
+      return;
+    }
+    _skipLayout = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    if (skipLayout && hasSize) {
+      return;
+    }
+    super.performLayout();
   }
 }

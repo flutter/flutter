@@ -992,7 +992,10 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
 /// Special version of a [Stack], that doesn't layout and render the first
 /// [skipCount] children.
 ///
-/// The first [skipCount] children are considered "offstage".
+/// The first [skipCount] children are considered "offstage". They are not
+/// painted and are not laid out with the theater's constraints. An offstage
+/// child that was previously laid out is kept as a relayout boundary, so it can
+/// still be laid out when it changes.
 class _Theater extends MultiChildRenderObjectWidget {
   const _Theater({
     this.skipCount = 0,
@@ -1501,6 +1504,32 @@ class _RenderTheater extends RenderBox
       if (child != sizeDeterminingChild) {
         layoutChild(child, _nonPositionedChildConstraints);
       }
+    }
+
+    // Offstage children are not laid out with the onstage children, and their
+    // sizes can't affect the theater. An offstage child that was last laid out
+    // with non-tight constraints (such as a positioned child, or the
+    // size-determining child of an unconstrained theater) is not a relayout
+    // boundary, so once it is marked as needing layout it would stay dirty
+    // under a clean theater.
+    //
+    // Laying it out again with its previous constraints, without
+    // parentUsesSize, makes it a relayout boundary: later layout requests stop
+    // at the child and the PipelineOwner lays it out directly. Layout returns
+    // early for a clean child, so this only does real work for a dirty one.
+    // Children laid out with tight constraints, such as offstage routes, are
+    // already relayout boundaries and are skipped.
+    //
+    // The size-determining child can be offstage when no onstage child can
+    // size the theater (see _findSizeDeterminingChild). It was laid out with
+    // parentUsesSize above, and is skipped too.
+    RenderBox? child = firstChild;
+    for (int toSkip = skipCount; toSkip > 0; toSkip--) {
+      final childParentData = child!.parentData! as _TheaterParentData;
+      if (child != sizeDeterminingChild && child.hasSize && !child.constraints.isTight) {
+        child.layout(child.constraints);
+      }
+      child = childParentData.nextSibling;
     }
   }
 
