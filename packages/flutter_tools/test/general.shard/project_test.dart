@@ -500,6 +500,63 @@ dependencies:
         );
         expectExists(project.macos.generatedXcodePropertiesFile);
       });
+      testWithoutContext(
+        'creates xcfilelists for macOS so Xcode can build before flutter build',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final macOSFeatureFlags = TestFeatureFlags(isMacOSEnabled: true);
+          final toolContext = FakeToolContext(
+            fs: fs,
+            logger: logger,
+            projectFactory: FlutterProjectFactory(
+              config: FakeConfig(),
+              featureFlags: macOSFeatureFlags,
+              fileSystem: fs,
+              logger: logger,
+            ),
+          );
+          final FlutterProject project = await someProject(toolContext: toolContext);
+          project.macos.managedDirectory.createSync(recursive: true);
+          await regeneratePlatformSpecificTooling(
+            project,
+            featureFlagsOverride: macOSFeatureFlags,
+            releaseMode: false,
+            toolContext: toolContext,
+          );
+          expectExists(project.macos.inputFileList);
+          expectExists(project.macos.outputFileList);
+        },
+      );
+      testWithoutContext('does not overwrite existing xcfilelists for macOS', () async {
+        final fs = MemoryFileSystem.test();
+        final macOSFeatureFlags = TestFeatureFlags(isMacOSEnabled: true);
+        final toolContext = FakeToolContext(
+          fs: fs,
+          logger: logger,
+          projectFactory: FlutterProjectFactory(
+            config: FakeConfig(),
+            featureFlags: macOSFeatureFlags,
+            fileSystem: fs,
+            logger: logger,
+          ),
+        );
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.macos.managedDirectory.createSync(recursive: true);
+        project.macos.inputFileList
+          ..createSync(recursive: true)
+          ..writeAsStringSync('input');
+        project.macos.outputFileList
+          ..createSync(recursive: true)
+          ..writeAsStringSync('output');
+        await regeneratePlatformSpecificTooling(
+          project,
+          featureFlagsOverride: macOSFeatureFlags,
+          releaseMode: false,
+          toolContext: toolContext,
+        );
+        expect(project.macos.inputFileList.readAsStringSync(), 'input');
+        expect(project.macos.outputFileList.readAsStringSync(), 'output');
+      });
       testWithoutContext('injects plugins for Linux', () async {
         final fs = MemoryFileSystem.test();
         final linuxFeatureFlags = TestFeatureFlags(isLinuxEnabled: true);
