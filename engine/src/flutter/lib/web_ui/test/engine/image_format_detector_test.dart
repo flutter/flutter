@@ -168,6 +168,182 @@ Future<void> testMain() async {
       });
     }
   });
+
+  group('handles truncated and malformed image buffers gracefully', () {
+    // 21 bytes: the 12-byte RIFF/WEBP header, the 8-byte VP8X chunk header and
+    // the VP8X flags byte with the animation bit set.
+    final Uint8List animatedWebpHeader = _createWebpVp8xHeader(flags: 0x02);
+
+    for (final (int length, ImageType? expected) in <(int, ImageType?)>[
+      (0, null),
+      (11, null),
+      (12, ImageType.webp),
+      (20, ImageType.webp),
+      (21, ImageType.animatedWebp),
+    ]) {
+      test('WebP header truncated to $length bytes is detected as $expected', () {
+        final view = Uint8List.sublistView(animatedWebpHeader, 0, length);
+        expect(detectImageType(view), expected);
+      });
+    }
+
+    test('WebpHeaderReader.isAnimated() returns false for truncated buffers', () {
+      expect(WebpHeaderReader(ByteData(0)).isAnimated(), isFalse);
+      expect(
+        WebpHeaderReader(ByteData.sublistView(animatedWebpHeader, 0, 20)).isAnimated(),
+        isFalse,
+      );
+    });
+
+    // Byte layout of the 114-byte `_createTestGif(numFrames: 1)`:
+    //   0-5     'GIF89a' header
+    //   6-12    logical screen descriptor (no global color table)
+    //   13-33   comment extension
+    //   34-41   graphic control extension
+    //   42-62   comment extension
+    //   63-72   image descriptor
+    //   73      LZW minimum code size
+    //   74-91   image data sub-block (16 bytes) and block terminator
+    //   92-112  comment extension
+    //   113     trailer (0x3b)
+    final Uint8List staticGif = _createTestGif(numFrames: 1);
+    Uint8List gifPrefix(int length) => Uint8List.sublistView(staticGif, 0, length);
+    final Uint8List firstFrame = gifPrefix(92);
+    // The image descriptor, LZW minimum code size and image data of the first
+    // frame, used to append another frame.
+    final imageFrame = Uint8List.sublistView(staticGif, 63, 92);
+
+    final gifCases = <(String, List<int>, ImageType?)>[
+      ('a partial GIF signature', gifPrefix(5), null),
+      ('a GIF89a header only', gifPrefix(6), ImageType.gif),
+      ('a truncated logical screen descriptor', gifPrefix(12), ImageType.gif),
+      (
+        // Packed fields 0xf7 declare a 768-byte global color table, but only
+        // 7 bytes of it are present.
+        'a truncated global color table',
+        <int>[...gifPrefix(10), 0xf7, 0, 0, ...List<int>.filled(7, 0)],
+        ImageType.gif,
+      ),
+      ('a truncated graphic control extension', gifPrefix(38), ImageType.gif),
+      ('a truncated LZW data sub-block', gifPrefix(80), ImageType.gif),
+      ('1 frame and no trailer', firstFrame, ImageType.gif),
+      (
+        'an unknown extension label',
+        <int>[...gifPrefix(13), 0x21, 0x42, 0x03, 0x01, 0x02, 0x03, 0x00, ...staticGif.sublist(13)],
+        ImageType.gif,
+      ),
+      (
+        'an image separator that is not 0x2c',
+        Uint8List.fromList(staticGif)..[63] = 0x2d,
+        ImageType.gif,
+      ),
+      (
+        'a data sub-block declaring 255 bytes when 5 remain',
+        <int>[...gifPrefix(74), 0xff, ...List<int>.filled(5, 0x41)],
+        ImageType.gif,
+      ),
+      (
+        '1 frame followed by comment and application extensions',
+        <int>[
+          ...firstFrame,
+          ...Uint8List.sublistView(staticGif, 92, 113),
+          ...<int>[0x21, 0xff, 0x0b, ...'NETSCAPE2.0'.codeUnits, 0x03, 0x01, 0x00, 0x00, 0x00],
+          0x3b,
+        ],
+        ImageType.gif,
+      ),
+      ('1 frame followed by a garbage byte', <int>[...firstFrame, 0x00], ImageType.gif),
+      for (final int label in <int>[0xfa, 0xfd, 0x80, 0x42])
+        (
+          // Extension introducer, the label, one 3-byte data sub-block and the
+          // block terminator.
+          'a 0x${label.toRadixString(16)} extension between 2 frames',
+          <int>[...firstFrame, 0x21, label, 0x03, 0x01, 0x02, 0x03, 0x00, ...imageFrame, 0x3b],
+          ImageType.animatedGif,
+        ),
+      (
+        'a truncated unknown extension after 1 frame',
+        <int>[...firstFrame, 0x21, 0x80, 0x03, 0x01],
+        ImageType.gif,
+      ),
+      (
+        // Packed fields 0xf7 declare a 768-byte global color table, which
+        // ends exactly where the first frame starts.
+        'a full-size global color table and 2 frames',
+        <int>[
+          ...gifPrefix(10),
+          0xf7,
+          0,
+          0,
+          ...List<int>.filled(768, 0),
+          ...imageFrame,
+          ...imageFrame,
+          0x3b,
+        ],
+        ImageType.animatedGif,
+      ),
+      (
+        // Extension introducer, Plain Text label, block size, 12 bytes of text
+        // grid fields, one 1-byte data sub-block and the block terminator.
+        'a plain text extension as the first frame',
+        <int>[
+          ...gifPrefix(13),
+          ...<int>[0x21, 0x01, 0x0c, ...List<int>.filled(12, 0), 0x01, 0x41, 0x00],
+          ...imageFrame,
+          0x3b,
+        ],
+        ImageType.animatedGif,
+      ),
+      (
+        // Extension introducer, Graphic Control label, a 5-byte data sub-block
+        // instead of the usual 4 bytes, and the block terminator.
+        'a 5-byte graphic control extension in the first frame',
+        <int>[
+          ...gifPrefix(13),
+          ...<int>[0x21, 0xf9, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+          ...imageFrame,
+          ...imageFrame,
+          0x3b,
+        ],
+        ImageType.animatedGif,
+      ),
+    ];
+    for (final (String name, List<int> bytes, ImageType? expected) in gifCases) {
+      test('GIF with $name is detected as $expected', () {
+        expect(detectImageType(Uint8List.fromList(bytes)), expected);
+      });
+    }
+
+    test('GifHeaderReader.isAnimated() returns false for truncated buffers', () {
+      expect(GifHeaderReader(ByteData(0)).isAnimated(), isFalse);
+      expect(GifHeaderReader(ByteData.sublistView(gifPrefix(6))).isAnimated(), isFalse);
+      expect(GifHeaderReader(ByteData.sublistView(firstFrame)).isAnimated(), isFalse);
+    });
+
+    test('truncated payloads in a padded subview are detected as static', () {
+      final Uint8List webp = _createPaddedSubview(
+        Uint8List.sublistView(animatedWebpHeader, 0, 20),
+        leadingPadding: 3,
+        trailingPadding: 1,
+      );
+      expect(detectImageType(webp), ImageType.webp);
+      final Uint8List gif = _createPaddedSubview(firstFrame, leadingPadding: 3, trailingPadding: 1);
+      expect(detectImageType(gif), ImageType.gif);
+    });
+  });
+}
+
+/// Generates a 21-byte WebP header: the RIFF/WEBP file header, a 'VP8X' chunk
+/// header and the VP8X [flags] byte.
+Uint8List _createWebpVp8xHeader({required int flags}) {
+  return Uint8List.fromList(<int>[
+    ...'RIFF'.codeUnits,
+    ...<int>[0x20, 0x00, 0x00, 0x00],
+    ...'WEBP'.codeUnits,
+    ...'VP8X'.codeUnits,
+    ...<int>[0x0a, 0x00, 0x00, 0x00],
+    flags,
+  ]);
 }
 
 /// Copies [source] into a larger buffer, surrounded by [leadingPadding] and
