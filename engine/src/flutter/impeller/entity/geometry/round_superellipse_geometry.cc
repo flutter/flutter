@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
 #include <cmath>
 #include <variant>
+#include <vector>
 
 #include "flutter/impeller/entity/geometry/round_superellipse_geometry.h"
 #include "flutter/impeller/geometry/round_superellipse_param.h"
@@ -213,15 +215,25 @@ size_t DrawSuperellipsoidArc(Point* output,
                              bool reverse,
                              const Matrix& transform) {
   Point* next = output;
+  const Scalar exp = 2.0f / n;
   Scalar angle = reverse ? max_theta : 0.0f;
   Scalar step =
-      (reverse ? -1 : 1) *
-      CalculateStep(a - a * pow(abs(cosf(max_theta)), 2 / n), max_theta);
+      (reverse ? -1.0f : 1.0f) *
+      CalculateStep(a - a * std::pow(std::abs(std::cos(max_theta)), exp),
+                    max_theta);
   Scalar end = reverse ? 0.0f : max_theta;
+  Scalar sin_angle = std::sin(angle);
+  Scalar cos_angle = std::cos(angle);
+  const Scalar sin_step = std::sin(step);
+  const Scalar cos_step = std::cos(step);
   while ((angle < end) != reverse) {
-    Scalar x = a * pow(abs(sinf(angle)), 2 / n);
-    Scalar y = a * pow(abs(cosf(angle)), 2 / n);
+    Scalar x = a * std::pow(std::abs(sin_angle), exp);
+    Scalar y = a * std::pow(std::abs(cos_angle), exp);
     *(next++) = transform * Point(x, y);
+    Scalar next_sin = sin_angle * cos_step + cos_angle * sin_step;
+    Scalar next_cos = cos_angle * cos_step - sin_angle * sin_step;
+    sin_angle = next_sin;
+    cos_angle = next_cos;
     angle += step;
   }
   return next - output;
@@ -259,12 +271,17 @@ size_t DrawCircularArc(Point* output,
 
   Point* next = output;
   Scalar angle = reverse ? max_angle : 0.0f;
-  Scalar step =
-      (reverse ? -1 : 1) * CalculateStep(std::abs(start.y - end.y), max_angle);
+  Scalar step = (reverse ? -1.0f : 1.0f) *
+                CalculateStep(std::abs(start.y - end.y), max_angle);
   Scalar end_angle = reverse ? 0.0f : max_angle;
+  Point current = reverse ? end : start;
+  const Scalar cos_step = std::cos(-step);
+  const Scalar sin_step = std::sin(-step);
 
   while ((angle < end_angle) != reverse) {
-    *(next++) = transform * start.Rotate(Radians(-angle));
+    *(next++) = transform * current;
+    current = Point(current.x * cos_step - current.y * sin_step,
+                    current.x * sin_step + current.y * cos_step);
     angle += step;
   }
   return next - output;
@@ -361,6 +378,25 @@ static size_t DrawQuadrant(Point* output,
   return next - output;
 }
 
+constexpr size_t kSuperellipseStripCacheSize = 64u;
+
+struct CachedSuperellipseStrip {
+  Size size;
+  RoundingRadii radii;
+  std::vector<Point> strip;
+  bool valid = false;
+};
+
+struct SuperellipseStripCache {
+  std::array<CachedSuperellipseStrip, kSuperellipseStripCacheSize> entries;
+  size_t next_slot = 0u;
+};
+
+SuperellipseStripCache& GetSuperellipseStripCache() {
+  thread_local SuperellipseStripCache cache;
+  return cache;
+}
+
 }  // namespace
 
 RoundSuperellipseGeometry::RoundSuperellipseGeometry(const Rect& bounds,
@@ -378,49 +414,80 @@ GeometryResult RoundSuperellipseGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  Point* cache = renderer.GetTessellator().GetStrokePointCache().data();
+  const Size size = bounds_.GetSize();
+  const Point origin = bounds_.GetOrigin();
 
-  // The memory size (in units of Points) allocated to store each quadrants.
-  constexpr size_t kMaxQuadSize = kPointArenaSize / 4;
-  // Since the curve is traversed in steps bounded by kMaxQuadrantSteps, the
-  // curving part will have fewer points than kMaxQuadrantSteps. Multiply it by
-  // 2 for storing other sporatic points (an extremely conservative estimate).
-  static_assert(kMaxQuadSize > 2 * kMaxQuadrantSteps);
-
-  ConvexRearranger* rearranger;
-  std::variant<std::monostate, MirroredQuadrantRearranger,
-               UnevenQuadrantsRearranger>
-      rearranger_holder;
-
-  auto param = RoundSuperellipseParam::MakeBoundsRadii(bounds_, radii_);
-
-  if (param.all_corners_same) {
-    rearranger_holder.emplace<MirroredQuadrantRearranger>(bounds_.GetCenter(),
-                                                          cache);
-    auto& t = std::get<MirroredQuadrantRearranger>(rearranger_holder);
-    rearranger = &t;
-
-    // The quadrant must be drawn at the origin so that it can be rotated later.
-    param.top_right.offset = Point();
-    t.QuadSize() = DrawQuadrant(cache, param.top_right);
-  } else {
-    rearranger_holder.emplace<UnevenQuadrantsRearranger>(cache, kMaxQuadSize);
-    auto& t = std::get<UnevenQuadrantsRearranger>(rearranger_holder);
-    rearranger = &t;
-
-    t.QuadSize(0) = DrawQuadrant(t.QuadCache(0), param.top_right);
-    t.QuadSize(1) = DrawQuadrant(t.QuadCache(1), param.bottom_right);
-    t.QuadSize(2) = DrawQuadrant(t.QuadCache(2), param.bottom_left);
-    t.QuadSize(3) = DrawQuadrant(t.QuadCache(3), param.top_left);
+  auto& strip_cache = GetSuperellipseStripCache();
+  const std::vector<Point>* cached_strip = nullptr;
+  for (const auto& entry : strip_cache.entries) {
+    if (entry.valid && entry.size == size && entry.radii == radii_) {
+      cached_strip = &entry.strip;
+      break;
+    }
   }
 
-  size_t contour_length = rearranger->ContourLength();
+  if (cached_strip == nullptr) {
+    Point* cache = renderer.GetTessellator().GetStrokePointCache().data();
+
+    // The memory size (in units of Points) allocated to store each quadrants.
+    constexpr size_t kMaxQuadSize = kPointArenaSize / 4;
+    // Since the curve is traversed in steps bounded by kMaxQuadrantSteps, the
+    // curving part will have fewer points than kMaxQuadrantSteps. Multiply it
+    // by 2 for storing other sporatic points (an extremely conservative
+    // estimate).
+    static_assert(kMaxQuadSize > 2 * kMaxQuadrantSteps);
+
+    ConvexRearranger* rearranger;
+    std::variant<std::monostate, MirroredQuadrantRearranger,
+                 UnevenQuadrantsRearranger>
+        rearranger_holder;
+
+    const Rect origin_bounds = Rect::MakeSize(size);
+    auto param = RoundSuperellipseParam::MakeBoundsRadii(origin_bounds, radii_);
+
+    if (param.all_corners_same) {
+      rearranger_holder.emplace<MirroredQuadrantRearranger>(
+          origin_bounds.GetCenter(), cache);
+      auto& t = std::get<MirroredQuadrantRearranger>(rearranger_holder);
+      rearranger = &t;
+
+      // The quadrant must be drawn at the origin so that it can be rotated
+      // later.
+      param.top_right.offset = Point();
+      t.QuadSize() = DrawQuadrant(cache, param.top_right);
+    } else {
+      rearranger_holder.emplace<UnevenQuadrantsRearranger>(cache, kMaxQuadSize);
+      auto& t = std::get<UnevenQuadrantsRearranger>(rearranger_holder);
+      rearranger = &t;
+
+      t.QuadSize(0) = DrawQuadrant(t.QuadCache(0), param.top_right);
+      t.QuadSize(1) = DrawQuadrant(t.QuadCache(1), param.bottom_right);
+      t.QuadSize(2) = DrawQuadrant(t.QuadCache(2), param.bottom_left);
+      t.QuadSize(3) = DrawQuadrant(t.QuadCache(3), param.top_left);
+    }
+
+    size_t contour_length = rearranger->ContourLength();
+    auto& slot = strip_cache.entries[strip_cache.next_slot];
+    strip_cache.next_slot =
+        (strip_cache.next_slot + 1u) % kSuperellipseStripCacheSize;
+    slot.size = size;
+    slot.radii = radii_;
+    slot.strip.resize(contour_length);
+    rearranger->RearrangeIntoTriangleStrip(slot.strip.data());
+    slot.valid = true;
+    cached_strip = &slot.strip;
+  }
+
+  const size_t contour_length = cached_strip->size();
   BufferView vertex_buffer = renderer.GetTransientsDataBuffer().Emplace(
       nullptr, sizeof(Point) * contour_length, alignof(Point));
   Point* vertex_data =
       reinterpret_cast<Point*>(vertex_buffer.GetBuffer()->OnGetContents() +
                                vertex_buffer.GetRange().offset);
-  rearranger->RearrangeIntoTriangleStrip(vertex_data);
+  const Point* src = cached_strip->data();
+  for (size_t i = 0; i < contour_length; ++i) {
+    vertex_data[i] = src[i] + origin;
+  }
   vertex_buffer.GetBuffer()->Flush(vertex_buffer.GetRange());
 
   return GeometryResult{
