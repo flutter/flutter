@@ -26,6 +26,7 @@ Future<void> main(List<String> arguments) async {
   final String? localEngineHost = Platform.environment['LOCAL_ENGINE_HOST'];
   final String? projectDirectory = Platform.environment['PROJECT_DIR'];
   final String? splitDebugInfo = Platform.environment['SPLIT_DEBUG_INFO'];
+  final String? windowsAotFormat = Platform.environment['WINDOWS_AOT_FORMAT'];
   final String? buildName = Platform.environment['BUILD_NAME'];
   final String? buildNumber = Platform.environment['BUILD_NUMBER'];
   final trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] == 'true';
@@ -100,6 +101,7 @@ or
     if (codeSizeDirectory != null) '-dCodeSizeDirectory=$codeSizeDirectory',
     if (flavor != null && flavor.isNotEmpty) '-dFlavor=$flavor',
     if (splitDebugInfo != null) '-dSplitDebugInfo=$splitDebugInfo',
+    if (windowsAotFormat != null) '-dWindowsAotFormat=$windowsAotFormat',
     if (buildName != null) '-dBuildName=$buildName',
     if (buildNumber != null) '-dBuildNumber=$buildNumber',
     if (dartDefines != null) '--DartDefines=$dartDefines',
