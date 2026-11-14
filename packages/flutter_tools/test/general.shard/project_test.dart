@@ -1484,6 +1484,35 @@ android {
           expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
         });
 
+        testWithMocks(
+          'from build settings and plist, by substitution of braced variables',
+          () async {
+            final FlutterProject project = await someProject();
+            project.ios.xcodeProject.createSync();
+            project.ios.defaultHostInfoPlist.createSync(recursive: true);
+            const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+            xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+              IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+              'SUFFIX': 'suffix',
+            };
+            xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
+              <String>[],
+              <String>[],
+              <String>['Runner'],
+              logger,
+            );
+            testPlistUtils.setProperty(
+              'CFBundleIdentifier',
+              r'${PRODUCT_BUNDLE_IDENTIFIER}.${SUFFIX}',
+            );
+
+            expect(
+              await project.ios.productBundleIdentifier(null),
+              'io.flutter.someProject.suffix',
+            );
+          },
+        );
+
         testWithMocks('Always pass parsing org on ios project with flavors', () async {
           final FlutterProject project = await someProject(toolContext: toolContext);
           addIosProjectFile(
