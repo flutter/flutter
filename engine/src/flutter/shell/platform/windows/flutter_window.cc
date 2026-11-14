@@ -504,13 +504,34 @@ void FlutterWindow::InitializeChild(const char* title,
   }
   SetUserObjectInformationA(GetCurrentProcess(),
                             UOI_TIMERPROC_EXCEPTION_SUPPRESSION, FALSE, 1);
-  // SetTimer is not precise, if a 16 ms interval is requested, it will instead
-  // often fire in an interval of 32 ms. Providing a value of 14 will ensure it
-  // runs every 16 ms, which will allow for 60 Hz trackpad gesture events, which
-  // is the maximal frequency supported by SetTimer.
-  SetTimer(result, kDirectManipulationTimer, 14, nullptr);
   direct_manipulation_owner_ = std::make_unique<DirectManipulationOwner>(this);
-  direct_manipulation_owner_->Init(width, height);
+  if (direct_manipulation_owner_->Init(width, height) != 0) {
+    direct_manipulation_owner_->Destroy();
+    direct_manipulation_owner_.reset();
+  }
+}
+
+void FlutterWindow::SetDirectManipulationNeedsUpdate(bool needs_update) {
+  if (!window_handle_ || needs_update == direct_manipulation_timer_running_) {
+    return;
+  }
+  if (needs_update) {
+    // SetTimer is not precise, if a 16 ms interval is requested, it will instead
+    // often fire in an interval of 32 ms. Providing a value of 14 will ensure it
+    // runs every 16 ms, which will allow for 60 Hz trackpad gesture events, which
+    // is the maximal frequency supported by SetTimer.
+    // See relevant investigation:
+    // https://github.com/flutter-team-archive/engine/pull/37154#issuecomment-1301672538
+    direct_manipulation_timer_running_ =
+        windows_proc_table_->SetTimer(window_handle_, kDirectManipulationTimer,
+                                      14, nullptr) != 0;
+    if (!direct_manipulation_timer_running_) {
+      FML_LOG(ERROR) << "Failed to start DirectManipulation timer";
+    }
+  } else {
+    direct_manipulation_timer_running_ = false;
+    windows_proc_table_->KillTimer(window_handle_, kDirectManipulationTimer);
+  }
 }
 
 HWND FlutterWindow::GetWindowHandle() {
@@ -816,7 +837,9 @@ FlutterWindow::HandleMessage(UINT const message,
     }
     case WM_TIMER:
       if (wparam == kDirectManipulationTimer) {
-        direct_manipulation_owner_->Update();
+        if (direct_manipulation_timer_running_ && direct_manipulation_owner_) {
+          direct_manipulation_owner_->Update();
+        }
         return 0;
       }
       break;
@@ -1052,6 +1075,12 @@ LRESULT FlutterWindow::Win32DefWindowProc(HWND hWnd,
 }
 
 void FlutterWindow::Destroy() {
+  // Stop callbacks and polling while the HWND is still valid.
+  SetDirectManipulationNeedsUpdate(false);
+  if (direct_manipulation_owner_) {
+    direct_manipulation_owner_->Destroy();
+    direct_manipulation_owner_.reset();
+  }
   if (window_handle_) {
     text_input_manager_->SetWindowHandle(nullptr);
     DestroyWindow(window_handle_);

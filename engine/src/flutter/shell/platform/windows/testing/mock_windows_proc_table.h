@@ -51,6 +51,16 @@ class MockWindowsProcTable : public WindowsProcTable {
 
   MOCK_METHOD(HCURSOR, SetCursor, (HCURSOR cursor), (const, override));
 
+  MOCK_METHOD(UINT_PTR,
+              SetTimer,
+              (HWND hwnd, UINT_PTR timer_id, UINT interval, TIMERPROC callback),
+              (const, override));
+
+  MOCK_METHOD(BOOL,
+              KillTimer,
+              (HWND hwnd, UINT_PTR timer_id),
+              (const, override));
+
   MOCK_METHOD(BOOL,
               EnumDisplaySettings,
               (LPCWSTR lpszDeviceName, DWORD iModeNum, DEVMODEW* lpDevMode),

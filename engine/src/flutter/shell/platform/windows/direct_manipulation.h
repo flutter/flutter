@@ -38,12 +38,16 @@ class DirectManipulationOwner {
   virtual void SetContact(UINT contactId);
   // Called to get updates from DirectManipulation. Should be called frequently
   // to provide smooth updates.
-  void Update();
+  virtual void Update();
+  // Starts or stops polling in response to DirectManipulation's interaction
+  // notifications. These arrive on the window's thread even with manual
+  // updates.
+  void SetNeedsUpdate(bool needs_update);
   // Release child event handler and OS resources.
   void Destroy();
   // The target that should be updated when DirectManipulation provides a new
   // pan/zoom transformation.
-  WindowBindingHandlerDelegate* binding_handler_delegate;
+  WindowBindingHandlerDelegate* binding_handler_delegate = nullptr;
 
  private:
   // The window gesture input is occuring on.
