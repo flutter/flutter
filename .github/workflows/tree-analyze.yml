@@ -37,6 +37,35 @@ jobs:
 
       - uses: ./.github/actions/composite-flutter-setup
 
+      - name: Check Engine Changes (fork repositories)
+        id: fork_engine_changes
+        if: github.repository != 'flutter/flutter'
+        uses: ./.github/actions/has-engine-changes
+
+      # Syncs local dart:ui and dart:ui_web Dart sources on fork repositories where
+      # LUCI does not build flutter_archives_v2 (does not cover DEPS Dart SDK rolls).
+      - name: Sync local sky_engine Dart sources (fork repositories)
+        if: steps.fork_engine_changes.outputs.changed == 'true' && github.repository != 'flutter/flutter'
+        shell: bash
+        run: |
+          echo "Syncing local dart:ui and dart:ui_web sources into bin/cache/pkg/sky_engine for fork analysis..."
+          mkdir -p bin/cache/pkg/sky_engine/lib/ui bin/cache/pkg/sky_engine/lib/fix_data bin/cache/pkg/sky_engine/lib/ui_web
+          rm -rf bin/cache/pkg/sky_engine/lib/ui/*.dart bin/cache/pkg/sky_engine/lib/ui_web/*
+          cp engine/src/flutter/lib/ui/*.dart bin/cache/pkg/sky_engine/lib/ui/
+          cp engine/src/flutter/lib/ui/fix_dart_ui.yaml bin/cache/pkg/sky_engine/lib/fix_data/fix_dart_ui.yaml
+          TMP_REWRITE="$(mktemp -d)"
+          ./bin/cache/dart-sdk/bin/dart --packages=.dart_tool/package_config.json \
+            engine/src/flutter/web_sdk/sdk_rewriter.dart \
+            --output-dir=bin/cache/pkg/sky_engine/lib/ui_web/ \
+            --input-dir=engine/src/flutter/lib/web_ui/lib/ui_web/src/ui_web/ \
+            --public \
+            --library-name=ui_web \
+            --api-file=engine/src/flutter/lib/web_ui/lib/ui_web/src/ui_web.dart \
+            --stamp="$TMP_REWRITE/ui_web.stamp" \
+            --depfile="$TMP_REWRITE/ui_web.d" \
+            --build-dir="."
+          rm -rf "$TMP_REWRITE"
+
       - name: Run Analyze
         run: |
           SHARD=analyze LUCI_CI=true dart --enable-asserts dev/bots/test.dart
