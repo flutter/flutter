@@ -308,6 +308,68 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqualObjects(parent.children, @[ child2 ]);
 }
 
+- (void)testReplaceChildPreservesDifferentHitTestOrder {
+  auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* sibling = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+  SemanticsObject* replacement = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  parent.children = @[ child, sibling ];
+  parent.childrenInHitTestOrder = @[ sibling, child ];
+
+  [parent replaceChildAtIndex:0 withChild:replacement];
+
+  XCTAssertEqualObjects(parent.children, (@[ replacement, sibling ]));
+  XCTAssertEqualObjects(parent.childrenInHitTestOrder, (@[ sibling, replacement ]));
+  XCTAssertNil(child.parent);
+  XCTAssertEqual(replacement.parent, parent);
+  XCTAssertEqual(sibling.parent, parent);
+}
+
+- (void)testReplaceTraversalChildAbsentFromHitTestOrder {
+  auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* sibling = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+  SemanticsObject* replacement = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  parent.children = @[ child, sibling ];
+  parent.childrenInHitTestOrder = @[ sibling ];
+
+  [parent replaceChildAtIndex:0 withChild:replacement];
+
+  XCTAssertEqualObjects(parent.children, (@[ replacement, sibling ]));
+  XCTAssertEqualObjects(parent.childrenInHitTestOrder, (@[ sibling ]));
+  XCTAssertNil(child.parent);
+  XCTAssertEqual(replacement.parent, parent);
+  XCTAssertEqual(sibling.parent, parent);
+}
+
+- (void)testReplaceChildLeavesNilHitTestOrderUntouched {
+  auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* replacement = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  parent.children = @[ child ];
+  parent.childrenInHitTestOrder = nil;
+  id partialParent = OCMPartialMock(parent);
+  OCMReject([partialParent setChildrenInHitTestOrder:[OCMArg any]]);
+
+  [parent replaceChildAtIndex:0 withChild:replacement];
+
+  XCTAssertEqualObjects(parent.children, @[ replacement ]);
+  XCTAssertNil(parent.childrenInHitTestOrder);
+  XCTAssertNil(child.parent);
+  XCTAssertEqual(replacement.parent, parent);
+  OCMVerifyAll(partialParent);
+  [partialParent stopMocking];
+}
+
 - (void)testPlainSemanticsObjectWithLabelHasStaticTextTrait {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());
