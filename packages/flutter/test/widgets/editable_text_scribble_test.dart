@@ -325,6 +325,138 @@ void main() {
   );
 
   testWidgets(
+    'Does not measure a field on a route that was never laid out',
+    (WidgetTester tester) async {
+      final coveredController = TextEditingController(text: 'covered');
+      addTearDown(coveredController.dispose);
+      final coveredFocusNode = FocusNode();
+      addTearDown(coveredFocusNode.dispose);
+      controller.text = 'Lorem ipsum dolor sit amet';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Navigator(
+            // The first route is covered by the second from the start, so the
+            // overlay never lays it out.
+            onGenerateInitialRoutes: (_, _) => <Route<void>>[
+              PageRouteBuilder<void>(
+                pageBuilder: (_, _, _) => EditableText(
+                  controller: coveredController,
+                  backgroundCursorColor: _grey,
+                  focusNode: coveredFocusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                ),
+              ),
+              PageRouteBuilder<void>(
+                pageBuilder: (_, _, _) => EditableText(
+                  controller: controller,
+                  backgroundCursorColor: _grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  selectionControls: testTextSelectionHandleControls,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(TextInput.scribbleClients, hasLength(2));
+
+      final List<List<dynamic>> elements = await tester.testTextInput.scribbleRequestElementsInRect(
+        const Rect.fromLTWH(0, 0, 1, 1),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(elements, hasLength(1));
+
+      // On web, we should rely on the browser's implementation of Scribble, so the engine will
+      // never request the scribble elements.
+    },
+    skip: kIsWeb, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+  );
+
+  testWidgets(
+    'Does not measure a laid out field below an ancestor that was never laid out',
+    (WidgetTester tester) async {
+      controller.text = 'Lorem ipsum dolor sit amet';
+      final GlobalKey fieldKey = GlobalKey();
+      var covered = false;
+
+      late final OverlayEntry fieldEntry;
+      fieldEntry = OverlayEntry(
+        maintainState: true,
+        builder: (BuildContext context) {
+          final Widget field = EditableText(
+            key: fieldKey,
+            controller: controller,
+            backgroundCursorColor: _grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          );
+          // The transform is inserted in the same frame the entry is covered,
+          // so its render object is never laid out, while the field below it
+          // keeps the size from its last layout.
+          return covered ? Transform.scale(scale: 2.0, child: field) : field;
+        },
+      );
+      addTearDown(() {
+        fieldEntry.remove();
+        fieldEntry.dispose();
+      });
+      final coveringEntry = OverlayEntry(
+        opaque: true,
+        builder: (BuildContext context) => const SizedBox.expand(),
+      );
+      addTearDown(() {
+        coveringEntry.remove();
+        coveringEntry.dispose();
+      });
+      final overlayKey = GlobalKey<OverlayState>();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Overlay(key: overlayKey, initialEntries: <OverlayEntry>[fieldEntry]),
+        ),
+      );
+
+      List<List<dynamic>> elements = await tester.testTextInput.scribbleRequestElementsInRect(
+        const Rect.fromLTWH(0, 0, 1, 1),
+      );
+      expect(elements, hasLength(1));
+
+      covered = true;
+      fieldEntry.markNeedsBuild();
+      overlayKey.currentState!.insert(coveringEntry);
+      await tester.pump();
+
+      final RenderBox fieldBox = tester.renderObject<RenderBox>(
+        find.byKey(fieldKey, skipOffstage: false),
+      );
+      expect(fieldBox.hasSize, isTrue);
+      final RenderBox transformBox = tester.renderObject<RenderBox>(
+        find.byType(Transform, skipOffstage: false),
+      );
+      expect(transformBox.hasSize, isFalse);
+
+      elements = await tester.testTextInput.scribbleRequestElementsInRect(
+        const Rect.fromLTWH(0, 0, 1, 1),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(elements, isEmpty);
+
+      // On web, we should rely on the browser's implementation of Scribble, so the engine will
+      // never request the scribble elements.
+    },
+    skip: kIsWeb, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+  );
+
+  testWidgets(
     'single line Scribble fields can show a horizontal placeholder',
     (WidgetTester tester) async {
       controller.text = 'Lorem ipsum dolor sit amet';

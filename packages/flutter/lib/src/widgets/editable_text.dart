@@ -6485,6 +6485,15 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
     if (box == null || !mounted || !box.attached) {
       return Rect.zero;
     }
+    // A field on a route that is covered by an opaque route is mounted but
+    // not laid out. Measuring it reads the size of the field and of the
+    // ancestors that apply a paint transform, so none of them can be measured
+    // until they all have a size.
+    for (RenderObject? node = box; node != null; node = node.parent) {
+      if (node is RenderBox && !node.hasSize) {
+        return Rect.zero;
+      }
+    }
     final Matrix4 transform = box.getTransformTo(null);
     return MatrixUtils.transformRect(
       transform,
