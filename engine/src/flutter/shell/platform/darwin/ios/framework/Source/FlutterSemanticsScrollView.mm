@@ -17,6 +17,16 @@ FLUTTER_ASSERT_ARC
     _semanticsObject = semanticsObject;
     _isDoingSystemScrolling = NO;
     self.delegate = self;
+    // FlutterSemanticsScrollView is an invisible accessibility proxy UIScrollView that mirrors the
+    // Dart scrollable's contentOffset for assistive technologies and draws nothing itself. On iOS
+    // 26+, UIScrollView automatically applies a scroll edge effect (blur/tint) when its
+    // contentOffset is non-zero, which would otherwise render over the Flutter canvas.
+    if (@available(iOS 26.0, *)) {
+      self.topEdgeEffect.hidden = YES;
+      self.bottomEdgeEffect.hidden = YES;
+      self.leftEdgeEffect.hidden = YES;
+      self.rightEdgeEffect.hidden = YES;
+    }
   }
   return self;
 }
