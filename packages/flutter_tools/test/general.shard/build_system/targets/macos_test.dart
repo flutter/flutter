@@ -483,6 +483,15 @@ void main() {
             ),
           )
           .createSync(recursive: true);
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.vmserviceKernelDill,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
       final inputKernel = '${environment.buildDir.path}/app.dill';
@@ -509,6 +518,12 @@ void main() {
       );
       expect(
         fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+        exists,
+      );
+      expect(
+        fileSystem.file(
+          'App.framework/Versions/A/Resources/flutter_assets/vmservice_snapshot.dill',
+        ),
         exists,
       );
     },
@@ -539,6 +554,15 @@ void main() {
           .file(
             artifacts.getArtifactPath(
               Artifact.isolateSnapshotData,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.vmserviceKernelDill,
               platform: TargetPlatform.darwin,
               mode: BuildMode.debug,
             ),
@@ -628,12 +652,25 @@ void main() {
         fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
         isNot(exists),
       );
+      expect(
+        fileSystem.file(
+          'App.framework/Versions/A/Resources/flutter_assets/vmservice_snapshot.dill',
+        ),
+        isNot(exists),
+      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     },
   );
+
+  testWithoutContext('ProfileMacOSBundleFlutterAssets depends on UnpackMacOSVmService', () {
+    expect(
+      const ProfileMacOSBundleFlutterAssets().dependencies,
+      contains(const UnpackMacOSVmService()),
+    );
+  });
 
   testUsingContext(
     'release macOS application creates App.framework.dSYM',
@@ -978,6 +1015,182 @@ void main() {
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
       },
     );
+  });
+
+  group('UnpackMacOSVmService', () {
+    const target = UnpackMacOSVmService();
+    const vmServiceArtifact = 'Artifact.vmserviceFramework.TargetPlatform.darwin.profile';
+
+    testWithoutContext('declares expected inputs, outputs, and skips SwiftPM', () async {
+      expect(target.inputs, const <Source>[
+        Source.artifact(Artifact.vmserviceFramework, platform: .darwin, mode: .profile),
+      ]);
+      expect(
+        target.resolveOutputs(environment).sources.map((File file) => file.path),
+        containsAll(<String>[
+          environment.outputDir.childFile('VMService.framework/Versions/A/VMService').path,
+          environment.outputDir
+              .childFile('VMService.framework/Versions/A/Resources/Info.plist')
+              .path,
+        ]),
+      );
+
+      expect(await target.canSkip(environment), isFalse);
+
+      final swiftPmEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildSwiftPackage: 'true'},
+        artifacts: artifacts,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+      expect(await target.canSkip(swiftPmEnvironment), isTrue);
+    });
+
+    testWithoutContext('copies, updates permissions, and thins fat framework', () async {
+      final Directory outputDir = fileSystem.directory('output');
+      final File vmServiceBinary = fileSystem.file(
+        fileSystem.path.join(outputDir.path, 'VMService.framework', 'Versions', 'A', 'VMService'),
+      );
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kDarwinArchs: 'arm64'},
+        artifacts: artifacts,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store/',
+            '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+            vmServiceArtifact,
+            outputDir.path,
+          ],
+          onRun: (_) => vmServiceBinary.createSync(recursive: true),
+        ),
+        FakeCommand(
+          command: <String>['chmod', '-R', 'u+w', outputDir.childDirectory(vmServiceArtifact).path],
+        ),
+        FakeCommand(
+          command: <String>['lipo', '-info', vmServiceBinary.path],
+          stdout: 'Architectures in the fat file: x86_64 arm64',
+        ),
+        FakeCommand(command: <String>['lipo', vmServiceBinary.path, '-verify_arch', 'arm64']),
+        FakeCommand(
+          command: <String>[
+            'lipo',
+            '-output',
+            vmServiceBinary.path,
+            '-extract',
+            'arm64',
+            vmServiceBinary.path,
+          ],
+        ),
+      ]);
+
+      await target.build(testEnvironment);
+
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('skips lipo extract when non-fat binary matches arch', () async {
+      final Directory outputDir = fileSystem.directory('output');
+      final File vmServiceBinary = fileSystem.file(
+        fileSystem.path.join(outputDir.path, 'VMService.framework', 'Versions', 'A', 'VMService'),
+      )..createSync(recursive: true);
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kDarwinArchs: 'arm64'},
+        artifacts: artifacts,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store/',
+            '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+            vmServiceArtifact,
+            outputDir.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>['chmod', '-R', 'u+w', outputDir.childDirectory(vmServiceArtifact).path],
+        ),
+        FakeCommand(
+          command: <String>['lipo', '-info', vmServiceBinary.path],
+          stdout: 'Non-fat file:',
+        ),
+        FakeCommand(command: <String>['lipo', vmServiceBinary.path, '-verify_arch', 'arm64']),
+      ]);
+
+      await target.build(testEnvironment);
+
+      expect(
+        logger.traceText,
+        contains('Skipping lipo for non-fat file output/VMService.framework/Versions/A/VMService'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('throws when binary does not exist', () async {
+      final Directory outputDir = fileSystem.directory('output');
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kDarwinArchs: 'arm64'},
+        artifacts: artifacts,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store/',
+            '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+            vmServiceArtifact,
+            outputDir.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>['chmod', '-R', 'u+w', outputDir.childDirectory(vmServiceArtifact).path],
+        ),
+      ]);
+
+      await expectLater(
+        target.build(testEnvironment),
+        throwsA(
+          isException.having(
+            (Exception exception) => exception.toString(),
+            'description',
+            contains('output/VMService.framework/Versions/A/VMService does not exist, cannot thin'),
+          ),
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 }
 
