@@ -43,7 +43,7 @@ class OffscreenCanvasRasterizer extends Rasterizer {
   @override
   void dispose() {
     _surfaceProvider.dispose();
-    for (final OffscreenCanvasViewRasterizer viewRasterizer in _viewRasterizers.values) {
+    for (final OffscreenCanvasViewRasterizer viewRasterizer in _viewRasterizers.values.toList()) {
       viewRasterizer.dispose();
     }
   }
@@ -58,6 +58,15 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
   OffscreenCanvasViewRasterizer(super.view, this.rasterizer);
 
   final OffscreenCanvasRasterizer rasterizer;
+
+  @override
+  void dispose() {
+    if (isDisposed) {
+      return;
+    }
+    super.dispose();
+    rasterizer._viewRasterizers.remove(view);
+  }
 
   @override
   final DisplayCanvasFactory<RenderCanvas> displayFactory = DisplayCanvasFactory<RenderCanvas>(
