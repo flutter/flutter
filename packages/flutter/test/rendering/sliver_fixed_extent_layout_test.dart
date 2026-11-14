@@ -1008,6 +1008,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     );
     return _renderObject! as ExtentOfTrackingSliverFixedExtentBoxAdaptor;
   }
+
   int? _currentlyUpdatingChildIndex;
 
   @override
