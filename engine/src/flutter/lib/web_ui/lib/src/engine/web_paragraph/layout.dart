@@ -89,7 +89,11 @@ class TextLayout {
 
   void calculateStrutMetrics() {
     if (paragraph.paragraphStyle.strutStyle != null) {
-      paragraph.paragraphStyle.strutStyle?.calculateMetrics();
+      // Pass the paragraph's default leadingDistribution as a fallback when
+      // StrutStyle.leadingDistribution is not explicitly set.
+      paragraph.paragraphStyle.strutStyle?.calculateMetrics(
+        paragraph.paragraphStyle.textStyle.leadingDistribution,
+      );
     }
   }
 
@@ -294,6 +298,7 @@ class TextLayout {
       whitespaceTextRange,
       hardlineTextRange,
       allTextRange,
+      paragraph.paragraphStyle.strutStyle,
       isSyntheticEmptyLine: isSyntheticEmptyLine,
       includesTrailingNewline: includesTrailingNewline,
     );
@@ -1504,7 +1509,8 @@ class TextLine {
     this.textRange,
     this.whitespacesRange,
     this.hardLineBreakRange,
-    this.allLineTextRange, {
+    this.allLineTextRange,
+    this.strutStyle, {
     required this.isSyntheticEmptyLine,
     required this.includesTrailingNewline,
   });
@@ -1542,6 +1548,7 @@ class TextLine {
   final ui.TextRange hardLineBreakRange;
   final ui.TextRange allLineTextRange;
   final int lineNumber;
+  final WebStrutStyle? strutStyle;
 
   /// True if this line is an artificial empty line added after a trailing
   /// newline at the end of the text (e.g. Line 1 in `'Hello\n'`).
@@ -1566,16 +1573,18 @@ class TextLine {
   bool lastLine = false;
 
   ui.Rect advance = ui.Rect.zero;
-  double fontBoundingBoxAscent = 0.0;
-  double fontBoundingBoxDescent = 0.0;
+  // Every line is at least as tall as the strut (including half of the strut
+  // leading on each side), both in scaled and in raw metrics.
+  late double fontBoundingBoxAscent = strutStyle?.lineAscent ?? 0.0;
+  late double fontBoundingBoxDescent = strutStyle?.lineDescent ?? 0.0;
 
   /// Unscaled font ascent (without height multipliers) so [ui.TextHeightBehavior]
   /// can revert the first line's ascent.
-  double rawFontBoundingBoxAscent = 0.0;
+  late double rawFontBoundingBoxAscent = strutStyle?.lineAscent ?? 0.0;
 
   /// Unscaled font descent (without height multipliers) so [ui.TextHeightBehavior]
   /// can revert the last line's descent.
-  double rawFontBoundingBoxDescent = 0.0;
+  late double rawFontBoundingBoxDescent = strutStyle?.lineDescent ?? 0.0;
 
   /// True when [ui.TextHeightBehavior.applyHeightToFirstAscent] is false on the
   /// first line, causing the line and its backgrounds to use unscaled ascent.
@@ -1584,7 +1593,7 @@ class TextLine {
   /// True when [ui.TextHeightBehavior.applyHeightToLastDescent] is false on the
   /// last line, causing the line and its backgrounds to use unscaled descent.
   bool usesRawDescent = false;
-  bool _hasLineMetrics = false;
+  late bool _hasLineMetrics = strutStyle != null;
 
   double paintBoundsAscent = 0.0;
   double paintBoundsDescent = 0.0;
@@ -1638,10 +1647,19 @@ class TextLine {
   void updateBoundingBox(LineBlock block) {
     // Only text blocks have painted glyphs; placeholders are not painted by the paragraph.
     if (block is TextBlock) {
+      // Paint bounds always reflect the actual painted glyph bounds regardless of forceStrutHeight.
       paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
       paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
       paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
       paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
+    }
+
+    // When forceStrutHeight is enabled, the line metrics (scaled and raw alike) stay locked to the
+    // strut and ignore both text and placeholder blocks, matching SkParagraph's
+    // InternalLineMetrics::add. Raw metrics must stay locked too so TextHeightBehavior cannot
+    // revert the first or last line to metrics taller than the strut.
+    if (strutStyle?.forceStrutHeight ?? false) {
+      return;
     }
 
     final (double ascent, double descent, double rawAscent, double rawDescent) = switch (block) {
