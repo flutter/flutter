@@ -73,6 +73,8 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
               ImageProducerTextureEntryAcquireLatestImage,
               (JavaLocalRef image_texture_entry),
               (override));
+  MOCK_METHOD(std::optional<SkISize>, ImageGetSize, (JavaLocalRef), (override));
+
   MOCK_METHOD(JavaLocalRef,
               ImageGetHardwareBuffer,
               (JavaLocalRef image),

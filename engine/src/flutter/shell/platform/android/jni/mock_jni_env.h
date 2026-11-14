@@ -55,6 +55,7 @@ class MockableJNIEnv : public JNIEnv {
     jni_.CallObjectMethodV = WrapCallObjectMethodV;
     jni_.CallVoidMethod = WrapCallVoidMethod;
     jni_.CallVoidMethodV = WrapCallVoidMethodV;
+    jni_.CallIntMethodV = WrapCallIntMethodV;
     jni_.DeleteGlobalRef = WrapDeleteGlobalRef;
     jni_.DeleteLocalRef = WrapDeleteLocalRef;
     jni_.DeleteWeakGlobalRef = WrapDeleteWeakGlobalRef;
@@ -76,6 +77,7 @@ class MockableJNIEnv : public JNIEnv {
     jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
   }
 
+  virtual jint CallIntMethodV(jobject, jmethodID, va_list) = 0;
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
   virtual void CallVoidMethodV(jobject, jmethodID, va_list) = 0;
   virtual void DeleteGlobalRef(jobject) = 0;
@@ -108,6 +110,12 @@ class MockableJNIEnv : public JNIEnv {
     jobject result = WrapCallObjectMethodV(env, obj, methodID, args);
     va_end(args);
     return result;
+  }
+  static jint WrapCallIntMethodV(JNIEnv* env,
+                                 jobject obj,
+                                 jmethodID method,
+                                 va_list args) {
+    return static_cast<MockableJNIEnv*>(env)->CallIntMethodV(obj, method, args);
   }
   static jobject WrapCallObjectMethodV(JNIEnv* env,
                                        jobject obj,
@@ -217,6 +225,7 @@ class MockableJNIEnv : public JNIEnv {
 
 class MockJNIEnv : public MockableJNIEnv {
  public:
+  MOCK_METHOD(jint, CallIntMethodV, (jobject, jmethodID, va_list), (override));
   MOCK_METHOD(jobject,
               CallObjectMethodV,
               (jobject, jmethodID, va_list),

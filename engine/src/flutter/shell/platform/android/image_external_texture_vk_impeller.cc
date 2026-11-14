@@ -56,6 +56,7 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
   auto existing_image = image_lru_.FindImage(key);
   if (existing_image != nullptr || !hb_desc.has_value()) {
     dl_image_ = existing_image;
+    UpdateImageBounds(image, latest_hardware_buffer);
 
     CloseHardwareBuffer(hardware_buffer);
     return;
@@ -97,6 +98,7 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
   }
 
   dl_image_ = impeller::DlImageImpeller::Make(texture);
+  UpdateImageBounds(image, latest_hardware_buffer);
   if (key.has_value()) {
     image_lru_.AddImage(dl_image_, key.value());
   }
