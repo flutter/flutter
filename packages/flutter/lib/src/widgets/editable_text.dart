@@ -5809,8 +5809,16 @@ class EditableTextState extends State<EditableText>
         ignoreNonCollapsedSelection: true,
       ),
     ),
-    ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_verticalSelectionUpdateAction),
-    ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
+    ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(
+      _VerticalCaretMovementAction<ExtendSelectionVerticallyToAdjacentLineIntent>(
+        _verticalSelectionUpdateAction,
+      ),
+    ),
+    ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(
+      _VerticalCaretMovementAction<ExtendSelectionVerticallyToAdjacentPageIntent>(
+        _verticalSelectionUpdateAction,
+      ),
+    ),
     ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent: _makeOverridable(
       _UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent>(
         this,
@@ -6852,6 +6860,28 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
 
     return state._value.selection.isValid;
   }
+}
+
+/// Forwards intents of type [T] to the vertical caret movement action that
+/// [ExtendSelectionVerticallyToAdjacentLineIntent] and
+/// [ExtendSelectionVerticallyToAdjacentPageIntent] share.
+///
+/// Both intents must use the same [_UpdateTextSelectionVerticallyAction]
+/// because it keeps track of the current [VerticalCaretMovementRun]. That
+/// action handles any [DirectionalCaretMovementIntent], so wrapping it in an
+/// action of the specific intent type allows an override of that intent, such
+/// as the one in [SelectableRegion], to access its [Action.callingAction].
+class _VerticalCaretMovementAction<T extends DirectionalCaretMovementIntent>
+    extends ContextAction<T> {
+  _VerticalCaretMovementAction(this._action);
+
+  final _UpdateTextSelectionVerticallyAction<DirectionalCaretMovementIntent> _action;
+
+  @override
+  void invoke(T intent, [BuildContext? context]) => _action.invoke(intent, context);
+
+  @override
+  bool get isActionEnabled => _action.isActionEnabled;
 }
 
 class _WebComposingDisablingCallbackAction<T extends Intent> extends CallbackAction<T> {

@@ -1691,13 +1691,15 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
       return true;
     }());
     overrideAction._updateCallingAction(_defaultAction);
-    final Object? returnValue = overrideAction._invoke(intent, context);
-    overrideAction._updateCallingAction(null);
-    assert(() {
-      _debugAssertMutuallyRecursive = false;
-      return true;
-    }());
-    return returnValue;
+    try {
+      return overrideAction._invoke(intent, context);
+    } finally {
+      overrideAction._updateCallingAction(null);
+      assert(() {
+        _debugAssertMutuallyRecursive = false;
+        return true;
+      }());
+    }
   }
 
   @override
@@ -1833,14 +1835,15 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T>
       action: _defaultAction,
     );
     overrideAction._updateCallingAction(wrappedDefault);
-    final Object? returnValue = overrideAction._invoke(intent, context);
-    overrideAction._updateCallingAction(null);
-
-    assert(() {
-      _debugAssertMutuallyRecursive = false;
-      return true;
-    }());
-    return returnValue;
+    try {
+      return overrideAction._invoke(intent, context);
+    } finally {
+      overrideAction._updateCallingAction(null);
+      assert(() {
+        _debugAssertMutuallyRecursive = false;
+        return true;
+      }());
+    }
   }
 
   @override
