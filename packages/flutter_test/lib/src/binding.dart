@@ -2658,6 +2658,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
               for (final RenderView renderView in renderViews) {
                 renderView.compositeFrame(); // this sends the bits to the GPU
               }
+              if (shouldFlushHitTestRegions) {
+                rootPipelineOwner.flushHitTestRegions();
+              }
               if (_phase != EnginePhase.composite) {
                 rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
                 assert(

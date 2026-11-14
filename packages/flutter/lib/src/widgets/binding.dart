@@ -1560,20 +1560,25 @@ mixin WidgetsBinding
   /// 7. The compositing phase: The layer tree is turned into a [Scene] and
   /// sent to the GPU.
   ///
-  /// 8. The semantics phase: All the dirty [RenderObject]s in the system have
+  /// 8. The hit-test region phase: When [automaticPointerInterceptorsEnabled]
+  /// is enabled on a supported platform, the hit-test regions of Flutter
+  /// content overlapping platform views are computed and reported (see
+  /// [PipelineOwner.flushHitTestRegions]).
+  ///
+  /// 9. The semantics phase: All the dirty [RenderObject]s in the system have
   /// their semantics updated (see [RenderObject.assembleSemanticsNode]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
   ///
-  /// For more details on steps 4-8, see [PipelineOwner].
+  /// For more details on steps 4-9, see [PipelineOwner].
   ///
-  /// 9. The finalization phase in the widgets layer: The widgets tree is
+  /// 10. The finalization phase in the widgets layer: The widgets tree is
   /// finalized. This causes [State.dispose] to be invoked on any objects that
   /// were removed from the widgets tree this frame. See
   /// [BuildOwner.finalizeTree] for more details.
   ///
-  /// 10. The finalization phase in the scheduler layer: After [drawFrame]
+  /// 11. The finalization phase in the scheduler layer: After [drawFrame]
   /// returns, [handleDrawFrame] then invokes post-frame callbacks (registered
   /// with [addPostFrameCallback]).
   //
