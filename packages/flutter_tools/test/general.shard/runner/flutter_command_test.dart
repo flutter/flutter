@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart' show OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -201,43 +200,67 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'does not print Intel Mac warning on macOS ARM64',
-      () async {
-        final flutterCommand = DummyFlutterCommand();
-        await flutterCommand.run();
+    testWithoutContext('does not print Intel Mac warning on macOS ARM64', () async {
+      final flutterCommand = DummyFlutterCommand(
+        noUsagePath: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          os: FakeOperatingSystemUtils(hostPlatform: .darwin_arm64),
+          processManager: processManager,
+        ),
+      );
+      await flutterCommand.run();
 
-        expect(testLogger.warningText, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: .darwin_arm64),
-      },
-    );
+      expect(logger.warningText, isEmpty);
+    });
 
-    testUsingContext(
-      'prints Intel Mac warning on macOS X64 once',
-      () async {
-        final flutterCommand = DummyFlutterCommand();
+    testWithoutContext('prints Intel Mac warning on macOS X64 on every command', () async {
+      final flutterCommand = DummyFlutterCommand(
+        noUsagePath: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          os: FakeOperatingSystemUtils(hostPlatform: .darwin_x64),
+          processManager: processManager,
+        ),
+      );
 
-        await flutterCommand.run();
+      await flutterCommand.run();
 
-        final String warningText = testLogger.warningText;
-        expect(warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+      expect(logger.warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
 
-        // Run the command again, the message shouldn't be printed again.
-        await flutterCommand.run();
+      // Run the command again, the warning is printed every time.
+      await flutterCommand.run();
 
-        // BufferLogger.clear() does not clear warnings.
-        expect(testLogger.warningText, equals(warningText));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: .darwin_x64),
-      },
-    );
+      // BufferLogger.clear() does not clear warnings, so the second run appends
+      // another copy of the warning.
+      expect(
+        'Flutter is deprecating support for Intel-based Macs.'
+            .allMatches(logger.warningText)
+            .length,
+        2,
+      );
+    });
+
+    testWithoutContext('Intel Mac warning on macOS X64 is not fatal', () async {
+      final flutterCommand = DummyFlutterCommand(
+        noUsagePath: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          os: FakeOperatingSystemUtils(hostPlatform: .darwin_x64),
+          processManager: processManager,
+        ),
+      );
+      logger.fatalWarnings = true;
+
+      await flutterCommand.run();
+
+      expect(logger.warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+      expect(logger.hadWarningOutput, isFalse);
+      expect(logger.checkForFatalLogs, returnsNormally);
+    });
 
     testUsingContext(
       'prints warning when enable-impeller flag is used with release build',
