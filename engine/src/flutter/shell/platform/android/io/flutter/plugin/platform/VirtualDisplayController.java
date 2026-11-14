@@ -41,7 +41,8 @@ class VirtualDisplayController {
       int height,
       int viewId,
       Object createParams,
-      OnFocusChangeListener focusChangeListener) {
+      OnFocusChangeListener focusChangeListener,
+      @NonNull ViewTreeOwners.Source viewTreeOwnersSource) {
     if (width == 0 || height == 0) {
       return null;
     }
@@ -85,7 +86,8 @@ class VirtualDisplayController {
             renderTarget,
             focusChangeListener,
             viewId,
-            createParams);
+            createParams,
+            viewTreeOwnersSource);
     return controller;
   }
 
@@ -97,6 +99,7 @@ class VirtualDisplayController {
   private final int viewId;
   private final PlatformViewRenderTarget renderTarget;
   private final OnFocusChangeListener focusChangeListener;
+  @NonNull private final ViewTreeOwners.Source viewTreeOwnersSource;
 
   private VirtualDisplay virtualDisplay;
 
@@ -108,13 +111,15 @@ class VirtualDisplayController {
       PlatformViewRenderTarget renderTarget,
       OnFocusChangeListener focusChangeListener,
       int viewId,
-      Object createParams) {
+      Object createParams,
+      @NonNull ViewTreeOwners.Source viewTreeOwnersSource) {
     this.context = context;
     this.accessibilityEventsDelegate = accessibilityEventsDelegate;
     this.renderTarget = renderTarget;
     this.focusChangeListener = focusChangeListener;
     this.viewId = viewId;
     this.virtualDisplay = virtualDisplay;
+    this.viewTreeOwnersSource = viewTreeOwnersSource;
     this.densityDpi = context.getResources().getDisplayMetrics().densityDpi;
     presentation =
         new SingleViewPresentation(
@@ -124,7 +129,23 @@ class VirtualDisplayController {
             accessibilityEventsDelegate,
             viewId,
             focusChangeListener);
+    updateViewTreeOwners(presentation);
     presentation.show();
+  }
+
+  /**
+   * Gives {@code newPresentation} the owners of the FlutterView that is attached now.
+   *
+   * <p>Called for every presentation before {@code show()}. A cached engine keeps its platform
+   * views when it moves to another host, and the owners of the previous host would tie the embedded
+   * view to a lifecycle that has ended. If no FlutterView with owners is attached, the presentation
+   * keeps the owners in its state.
+   */
+  private void updateViewTreeOwners(@NonNull SingleViewPresentation newPresentation) {
+    final ViewTreeOwners current = viewTreeOwnersSource.get();
+    if (current != null) {
+      newPresentation.setViewTreeOwners(current);
+    }
   }
 
   public int getRenderTargetWidth() {
@@ -218,6 +239,7 @@ class VirtualDisplayController {
             presentationState,
             focusChangeListener,
             isFocused);
+    updateViewTreeOwners(newPresentation);
     newPresentation.show();
     presentation.cancel();
     presentation = newPresentation;
@@ -322,6 +344,7 @@ class VirtualDisplayController {
             presentationState,
             focusChangeListener,
             isFocused);
+    updateViewTreeOwners(newPresentation);
     newPresentation.show();
     presentation.cancel();
     presentation = newPresentation;
