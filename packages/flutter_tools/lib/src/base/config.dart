@@ -100,7 +100,11 @@ class Config {
     }
     try {
       ErrorHandlingFileSystem.noExitOnFailure(() {
-        _values = castStringKeyedMap(json.decode(_file.readAsStringSync())) ?? <String, Object>{};
+        final Object? decoded = json.decode(_file.readAsStringSync());
+        if (decoded != null && decoded is! Map<String, Object?>) {
+          throw const FormatException('Preferences must be a JSON object.');
+        }
+        _values = castStringKeyedMap(decoded) ?? <String, Object>{};
       });
     } on FormatException {
       _logger
