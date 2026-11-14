@@ -2530,12 +2530,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
 
   bool _hasNonNullEntry() => value.values.any((T? o) => o != null);
 
-  // An iterable of each entry's description in [value].
-  //
-  // For a non-null value, its description is its key.
-  //
-  // For a null value, it is omitted unless `includeEmpty` is true and
-  // [ifEntryNull] contains a corresponding description.
+  // Returns the keys of entries in [value] whose values are non-null.
   Iterable<String> _formattedValues() {
     return value.entries
         .where((MapEntry<String, T?> entry) => entry.value != null)
