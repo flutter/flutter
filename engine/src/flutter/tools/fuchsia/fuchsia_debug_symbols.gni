@@ -43,7 +43,7 @@ template("_copy_debug_symbols") {
       args += [ "--unstripped" ]
     }
 
-    outputs = [ "${_dest_base}/.${target_name}_success" ]
+    outputs = [ "${_dest_base}/.${target_name}_dbg_success" ]
   }
 }
 

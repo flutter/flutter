@@ -5,9 +5,10 @@
 import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/rbe.gni")
+import("//build/toolchain/siso.gni")
 import("//build/toolchain/toolchain.gni")
 
-if (use_rbe) {
+if (use_rbe && !use_siso) {
   if (target_cpu == "x64") {
     target_triple = "x86_64-unknown-fuchsia"
   } else if (target_cpu == "arm64") {

@@ -23,7 +23,7 @@ if (impeller_malioc_path != "") {
                 "--malioc",
                 rebase_path(impeller_malioc_path, root_build_dir),
                 "--output",
-                rebase_path(_core_list_file),
+                rebase_path(_core_list_file, root_build_dir),
               ])
   _impeller_malioc_cores = read_file(_core_list_file, "json")
 }
@@ -105,7 +105,7 @@ template("malioc_analyze_shaders") {
 
                 args = [
                   rebase_path(impeller_malioc_path, root_build_dir),
-                  rebase_path(output_file),
+                  rebase_path(output_file, root_build_dir),
                   "--format",
                   "json",
                   shader_kind_flag,
