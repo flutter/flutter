@@ -511,15 +511,15 @@ class ColorProperty extends DiagnosticsProperty<Color> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object?> json = super.toJsonMap(delegate);
-    if (value != null) {
-      json['valueProperties'] = <String, Object>{
-        'red': value!.red,
-        'green': value!.green,
-        'blue': value!.blue,
-        'alpha': value!.alpha,
-      };
-    }
-    return json;
+    return {
+      ...super.toJsonMap(delegate),
+      if (value != null)
+        'valueProperties': <String, Object>{
+          'red': value!.red,
+          'green': value!.green,
+          'blue': value!.blue,
+          'alpha': value!.alpha,
+        },
+    };
   }
 }
