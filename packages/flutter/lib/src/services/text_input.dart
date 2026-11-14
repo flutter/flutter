@@ -1464,6 +1464,23 @@ mixin TextInputClient {
   /// `NSStandardKeyBindingResponding` protocol or user-specified selector
   /// from `DefaultKeyBinding.Dict`.
   void performSelector(String selectorName) {}
+
+  /// Reports that the platform's text input system performed a backward
+  /// deletion, after it has been performed.
+  ///
+  /// [deletedText] is the text that was removed, and is empty when the
+  /// deletion removed nothing — for example a backspace on an empty field, or
+  /// one with the selection collapsed at offset zero. Those are the cases that
+  /// produce no editing state update at all, and so cannot be observed through
+  /// [updateEditingValue].
+  ///
+  /// This is a notification only: the deletion has already been applied by the
+  /// platform, and implementers must not apply it again.
+  ///
+  /// Only sent by the iOS embedder, where deletion is performed by the engine.
+  /// On platforms where the framework performs the deletion itself, the same
+  /// information is available where that deletion happens.
+  void didDeleteBackward(String deletedText) {}
 }
 
 /// An interface into iOS's stylus handwriting text input.
@@ -2331,6 +2348,8 @@ class TextInput {
         );
       case 'TextInputClient.removeTextPlaceholder':
         _currentConnection!._client.removeTextPlaceholder();
+      case 'TextInputClient.didDeleteBackward':
+        _currentConnection!._client.didDeleteBackward(args[1] as String);
       default:
         throw MissingPluginException();
     }

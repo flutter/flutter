@@ -285,6 +285,7 @@ class TextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
+    this.onDeleteBackward,
     this.inputFormatters,
     this.enabled,
     this.ignorePointers,
@@ -605,6 +606,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.onAppPrivateCommand}
   final AppPrivateCommandCallback? onAppPrivateCommand;
+
+  /// {@macro flutter.widgets.editableText.onDeleteBackward}
+  final DeleteBackwardCallback? onDeleteBackward;
 
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter>? inputFormatters;
@@ -1717,6 +1721,7 @@ class _TextFieldState extends State<TextField>
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
+          onDeleteBackward: widget.onDeleteBackward,
           groupId: widget.groupId,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
           onTapOutside: widget.onTapOutside,
