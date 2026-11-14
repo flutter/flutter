@@ -1253,6 +1253,12 @@ public class FlutterView extends FrameLayout
             Settings.System.getUriFor(Settings.System.TEXT_SHOW_PASSWORD),
             false,
             systemSettingsObserver);
+    getContext()
+        .getContentResolver()
+        .registerContentObserver(
+            Settings.System.getUriFor(Settings.System.TIME_12_24),
+            false,
+            systemSettingsObserver);
 
     sendViewportMetricsToFlutter();
 
