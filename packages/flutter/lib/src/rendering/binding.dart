@@ -5,12 +5,10 @@
 /// @docImport 'dart:ui';
 ///
 /// @docImport 'package:flutter/widgets.dart';
-///
-/// @docImport 'layer.dart';
 library;
 
 import 'dart:async';
-import 'dart:ui' as ui show PictureRecorder, Rect, SceneBuilder, SemanticsUpdate;
+import 'dart:ui' as ui show Image, PictureRecorder, Rect, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -19,6 +17,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
+import 'layer.dart';
 import 'mouse_tracker.dart';
 import 'object.dart';
 import 'service_extensions.dart';
@@ -65,6 +64,7 @@ mixin RendererBinding
       addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
     }
     rootPipelineOwner.attach(_manifold);
+    SystemChannels.screenshot.setMethodCallHandler(_handleScreenshotMethodCall);
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -743,6 +743,55 @@ mixin RendererBinding
       renderView.visitChildren(visitor);
     }
     return endOfFrame;
+  }
+
+  Future<Map<String, Object>?> _handleScreenshotMethodCall(MethodCall call) async {
+    if (call.method != 'Screenshot.captureView') {
+      throw MissingPluginException('No implementation found for method ${call.method}');
+    }
+    final int? targetViewId = (call.arguments as num?)?.toInt();
+
+    // If a frame is currently scheduled or in progress, wait for it to finish
+    // so the root OffsetLayer is populated and up to date.
+    if (schedulerPhase != SchedulerPhase.idle || hasScheduledFrame) {
+      await endOfFrame;
+    }
+
+    RenderView? targetView;
+    for (final RenderView view in renderViews) {
+      if (targetViewId == null || view.flutterView.viewId == targetViewId) {
+        targetView = view;
+        break;
+      }
+    }
+    if (targetView == null || !targetView.attached) {
+      return null;
+    }
+
+    // ignore: invalid_use_of_protected_member
+    final Layer? rootLayer = targetView.layer;
+    if (rootLayer is! OffsetLayer) {
+      return null;
+    }
+    final ui.Rect bounds = targetView.paintBounds;
+    if (bounds.isEmpty) {
+      return null;
+    }
+
+    final ui.Image image = await rootLayer.toImage(bounds);
+    try {
+      final ByteData? byteData = await image.toByteData();
+      if (byteData == null) {
+        return null;
+      }
+      return <String, Object>{
+        'width': image.width,
+        'height': image.height,
+        'bytes': byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+      };
+    } finally {
+      image.dispose();
+    }
   }
 }
 

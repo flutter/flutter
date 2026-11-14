@@ -325,6 +325,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/systemchannels/PlatformViewsChannel2.java",
   "io/flutter/embedding/engine/systemchannels/ProcessTextChannel.java",
   "io/flutter/embedding/engine/systemchannels/RestorationChannel.java",
+  "io/flutter/embedding/engine/systemchannels/ScreenshotChannel.java",
   "io/flutter/embedding/engine/systemchannels/ScribeChannel.java",
   "io/flutter/embedding/engine/systemchannels/SensitiveContentChannel.java",
   "io/flutter/embedding/engine/systemchannels/SettingsChannel.java",

@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -36,9 +37,16 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.systemchannels.ScreenshotChannel;
+import io.flutter.plugin.common.MethodChannel;
 import io.flutter.view.TextureRegistry;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -1169,5 +1177,138 @@ public class FlutterRendererTest {
     when(image.getFence()).thenReturn(fence);
     producer.waitOnFence(image);
     verify(fence, times(1)).close();
+  }
+
+  @Test
+  public void getBitmapAsync_decodesValidRgbaPayloadIntoBitmap() {
+    MethodChannel mockChannel = mock(MethodChannel.class);
+    ScreenshotChannel screenshotChannel = new ScreenshotChannel(mockChannel);
+    when(fakeFlutterJNI.isAttached()).thenReturn(true);
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI, screenshotChannel);
+
+    AtomicReference<Bitmap> capturedBitmap = new AtomicReference<>();
+    flutterRenderer.getBitmapAsync(capturedBitmap::set);
+
+    ArgumentCaptor<MethodChannel.Result> resultCaptor =
+        ArgumentCaptor.forClass(MethodChannel.Result.class);
+    verify(mockChannel).invokeMethod(eq("Screenshot.captureView"), eq(0L), resultCaptor.capture());
+
+    // 2x1 RGBA_8888 buffer: pixel (0,0) = Red, pixel (1,0) = Green.
+    byte[] rgbaBytes =
+        new byte[] {(byte) 0xFF, 0x00, 0x00, (byte) 0xFF, 0x00, (byte) 0xFF, 0x00, (byte) 0xFF};
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("width", 2);
+    payload.put("height", 1);
+    payload.put("bytes", rgbaBytes);
+
+    resultCaptor.getValue().success(payload);
+
+    Bitmap bitmap = capturedBitmap.get();
+    assertNotNull(bitmap);
+    assertEquals(2, bitmap.getWidth());
+    assertEquals(1, bitmap.getHeight());
+    assertEquals(Bitmap.Config.ARGB_8888, bitmap.getConfig());
+
+    byte[] outBytes = new byte[rgbaBytes.length];
+    bitmap.copyPixelsToBuffer(ByteBuffer.wrap(outBytes));
+    assertArrayEquals(rgbaBytes, outBytes);
+  }
+
+  @Test
+  public void getBitmapAsync_returnsNullWhenChannelNotAttachedOrPayloadInvalid() {
+    // 1. ScreenshotChannel is null (1-arg constructor).
+    when(fakeFlutterJNI.isAttached()).thenReturn(true);
+    FlutterRenderer rendererWithoutChannel = new FlutterRenderer(fakeFlutterJNI);
+    AtomicBoolean called = new AtomicBoolean(false);
+    AtomicReference<Bitmap> capturedBitmap = new AtomicReference<>();
+    rendererWithoutChannel.getBitmapAsync(
+        bitmap -> {
+          called.set(true);
+          capturedBitmap.set(bitmap);
+        });
+    shadowMainLooper().idle();
+    assertTrue(called.get());
+    assertNull(capturedBitmap.get());
+
+    // 2. FlutterJNI is not attached.
+    MethodChannel mockChannel = mock(MethodChannel.class);
+    ScreenshotChannel screenshotChannel = new ScreenshotChannel(mockChannel);
+    when(fakeFlutterJNI.isAttached()).thenReturn(false);
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI, screenshotChannel);
+    called.set(false);
+    flutterRenderer.getBitmapAsync(
+        bitmap -> {
+          called.set(true);
+          capturedBitmap.set(bitmap);
+        });
+    shadowMainLooper().idle();
+    assertTrue(called.get());
+    assertNull(capturedBitmap.get());
+    verify(mockChannel, never()).invokeMethod(any(), any(), any());
+
+    // 3. Invalid payload from channel.
+    when(fakeFlutterJNI.isAttached()).thenReturn(true);
+    called.set(false);
+    flutterRenderer.getBitmapAsync(
+        bitmap -> {
+          called.set(true);
+          capturedBitmap.set(bitmap);
+        });
+    ArgumentCaptor<MethodChannel.Result> resultCaptor =
+        ArgumentCaptor.forClass(MethodChannel.Result.class);
+    verify(mockChannel).invokeMethod(eq("Screenshot.captureView"), eq(0L), resultCaptor.capture());
+    resultCaptor.getValue().success("invalid_payload");
+    assertTrue(called.get());
+    assertNull(capturedBitmap.get());
+  }
+
+  @Test
+  public void getBitmapAsync_returnsNullOnChannelErrorOrNotImplemented() {
+    MethodChannel mockChannel = mock(MethodChannel.class);
+    ScreenshotChannel screenshotChannel = new ScreenshotChannel(mockChannel);
+    when(fakeFlutterJNI.isAttached()).thenReturn(true);
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI, screenshotChannel);
+
+    AtomicBoolean called = new AtomicBoolean(false);
+    AtomicReference<Bitmap> capturedBitmap = new AtomicReference<>();
+    flutterRenderer.getBitmapAsync(
+        bitmap -> {
+          called.set(true);
+          capturedBitmap.set(bitmap);
+        });
+
+    ArgumentCaptor<MethodChannel.Result> resultCaptor =
+        ArgumentCaptor.forClass(MethodChannel.Result.class);
+    verify(mockChannel).invokeMethod(eq("Screenshot.captureView"), eq(0L), resultCaptor.capture());
+
+    resultCaptor.getValue().error("ERROR", "Failed", null);
+    assertTrue(called.get());
+    assertNull(capturedBitmap.get());
+
+    called.set(false);
+    resultCaptor.getValue().notImplemented();
+    assertTrue(called.get());
+    assertNull(capturedBitmap.get());
+  }
+
+  @Test
+  public void getBitmapAsync_throwsWhenCalledOffMainThread() throws InterruptedException {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    AtomicReference<Throwable> thrown = new AtomicReference<>();
+    CountDownLatch latch = new CountDownLatch(1);
+    Thread backgroundThread =
+        new Thread(
+            () -> {
+              try {
+                flutterRenderer.getBitmapAsync(bitmap -> {});
+              } catch (Throwable t) {
+                thrown.set(t);
+              } finally {
+                latch.countDown();
+              }
+            });
+    backgroundThread.start();
+    latch.await();
+    assertTrue(thrown.get() instanceof IllegalStateException);
   }
 }
