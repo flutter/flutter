@@ -293,9 +293,21 @@ class BuildDirectoryTest(unittest.TestCase):
         description['startup_options'],
         ['--output_user_root=/b/s/w/ir/tmp/t/bazel_ci/output', '--max_idle_secs=300']
     )
-    # A developer's build has no RBE unless asked (--bazel-rbe).
-    self.assertNotIn('--config=rbe', bazel_ci.build_options(self.engine_src))
-    self.assertEqual(bazel_ci.build_options(self.engine_src, rbe=True)[:len(rbe)], rbe)
+    # A developer's build has no RBE unless asked (--bazel-rbe), and then a
+    # Linux host's is build:rbe_dev: build:rbe with the links on the machine.
+    with unittest.mock.patch.dict(os.environ):
+      os.environ.pop('LUCI_CONTEXT', None)
+      developer_rbe = bazel_ci.rbe_config()
+      if sys.platform.startswith('linux'):
+        self.assertEqual(developer_rbe, ['--config=rbe_dev', bazel_ci.WRAP_RBE_FLAG])
+      else:
+        self.assertEqual(developer_rbe, rbe)
+      options = bazel_ci.build_options(self.engine_src)
+      self.assertNotIn('--config=rbe', options)
+      self.assertNotIn('--config=rbe_dev', options)
+      self.assertEqual(
+          bazel_ci.build_options(self.engine_src, rbe=True)[:len(developer_rbe)], developer_rbe
+      )
     self.assertEqual(
         description['environment'], {'BAZELISK_HOME': '/b/s/w/ir/tmp/t/bazel_ci/bazelisk'}
     )

@@ -1321,7 +1321,8 @@ def parse_args(args):
       default=None,
       action='store_true',
       help="With --bazel: run the build's actions on Flutter's RBE instance (the root "
-      ".bazelrc's build:rbe; Linux hosts only), which is a Linux bot's default.",
+      ".bazelrc's build:rbe; Linux hosts only), which is a Linux bot's default. Off a bot "
+      "it is build:rbe_dev: the links stay on the machine.",
   )
   parser.add_argument(
       '--no-bazel-rbe',

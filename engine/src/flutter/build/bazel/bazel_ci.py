@@ -349,9 +349,15 @@ def rbe_config():
   compiles with reclient's proxy (WRAP_RBE_FLAG: the host's reclient and
   rewrapper configuration, build_defs/gn/gn_build.bzl). Any other host has
   no workers to speak of.
+
+  Off a bot a Linux host's is `--config=rbe_dev`, build:rbe with the links
+  on the machine: a link an edit waits a minute for on a worker takes a few
+  seconds there (the root .bazelrc has the measurements). tools/gn draws
+  the same line for a GN build, whose reclient races on a workstation and
+  is remote_local_fallback on LUCI.
   """
   if sys.platform.startswith('linux'):
-    return ['--config=rbe', WRAP_RBE_FLAG]
+    return ['--config=rbe' if on_bot() else '--config=rbe_dev', WRAP_RBE_FLAG]
   if sys.platform == 'darwin':
     return ['--config=rbe_mac', WRAP_RBE_FLAG]
   return []

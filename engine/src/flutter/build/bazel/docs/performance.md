@@ -88,18 +88,27 @@ Without remote execution:
 | Disk after a full build | 26.8 GB | 47.8 GB, plus a 19.5 GB disk cache |
 
 With remote execution (`--config=rbe` and the wrapped builds through reclient;
-GN through reclient as `et` runs it):
+GN through reclient as `et` runs it). `--config=rbe_dev` is `--config=rbe`
+with the links on the workstation; its column was measured three days later on
+the same machine, an evening on which `--config=rbe` took 15 s and 61 s for the
+two edits:
 
-| Step | GN + reclient | Bazel |
-|---|---|---|
-| Cold full build | 5 min 13 s | 7 min 47 s, with 39% of its actions already in the remote cache |
-| Rebuild from nothing, remote cache warm | 4 min 23 s | 4 min 25 s |
-| Code edit in `fml`, rebuild `fml_unittests` | 8.8 s | 13.8 s |
-| Code edit of `shell/common/shell.cc`, rebuild `flutter_tester` | 20.0 s | 82 to 95 s |
-| Peak process memory, cold full build | 5.3 GB | 19.7 GB |
+| Step | GN + reclient | Bazel, `--config=rbe` | Bazel, `--config=rbe_dev` |
+|---|---|---|---|
+| Cold full build | 5 min 13 s | 7 min 47 s, with 39% of its actions already in the remote cache | not measured |
+| Rebuild from nothing, remote cache warm | 4 min 23 s | 4 min 25 s | not measured |
+| Code edit in `fml`, rebuild `fml_unittests` | 8.8 s | 13.8 s | 7 to 9 s |
+| Code edit of `shell/common/shell.cc`, rebuild `flutter_tester` | 20.0 s | 82 to 95 s | 21 to 30 s |
+| Peak process memory, cold full build | 5.3 GB | 19.7 GB | not measured |
 
 Bazel's cold local build spends its critical path, about 17 minutes, in the two
 wrapped GN builds. An edit that leaves the object file unchanged (a comment)
 does not relink under Bazel. With remote execution the link of `flutter_tester`
 runs on a 2-vCPU worker and takes over a minute, where it takes about five
-seconds locally.
+seconds locally; `--config=rbe_dev` keeps the links on the workstation for that
+reason, and is what a developer's edit loop on RBE should use. Its compiles
+still run on the workers. Racing them against the workstation
+(`--strategy=CppCompile=dynamic`, what reclient's racing does for a GN build)
+measured 3 s and 16 to 19 s for the two edits, but against this RBE instance
+it makes wider builds fail at random with Bazel 8.8.1; the root `.bazelrc`
+says why, beside `build:rbe_dev`.

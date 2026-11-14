@@ -97,6 +97,7 @@ including which `flutter precache` options the tool's shards need.
 | Run some of a suite's cases | `bazelisk test --config=<cfg> --test_filter='Base32*' //engine/src/flutter/fml:fml_unittests` |
 | Run a suite's binary directly, for example under a debugger | `bazelisk build --config=<cfg> <label>_binary`, then from the repository root `engine/src/out/bazel-bin/engine/src/flutter/fml/fml_unittests_binary --gtest_filter='Base32*'`. Debug information names sources relative to the repository root, so start the debugger there |
 | Write `compile_commands.json` | `python3 engine/src/flutter/tools/gn_to_bazel/tool/compile_commands.py --out=engine/src/out/<dir> --config=<cfg>` |
+| Build on Flutter's RBE instance from a Linux workstation | `gcloud auth application-default login` once, then add `--config=rbe_dev`: compiles on the workers, links on the workstation |
 | Free the build's outputs | `bazelisk clean` |
 | Stop the Bazel server | `bazelisk shutdown` |
 
