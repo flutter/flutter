@@ -16,6 +16,7 @@ source_set("context") {
   deps = [
     "//flutter/common",
     "//flutter/fml",
+    "//flutter/impeller/entity",
     "//flutter/impeller/renderer",
     "//flutter/skia",
   ]
