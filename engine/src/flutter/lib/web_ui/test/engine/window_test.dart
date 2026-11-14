@@ -1143,6 +1143,12 @@ class _RecordingSemanticsEnabler implements SemanticsEnabler {
   bool tryEnableSemantics(DomEvent event) => true;
 
   @override
+  bool shouldForwardTab(DomKeyboardEvent event) => true;
+
+  @override
+  bool interceptViewFocus(DomElement? activeElement) => false;
+
+  @override
   void updatePlaceholderLabel(String message) {}
 
   @override

@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../dom.dart';
+import '../platform_dispatcher.dart';
 import 'semantics.dart';
 
 /// The maximum [semanticsActivationAttempts] before we give up waiting for
@@ -52,6 +53,14 @@ class SemanticsHelper {
     return _semanticsEnabler.shouldEnableSemantics(event);
   }
 
+  /// Gives the enabler a chance to handle a request to focus a Flutter view
+  /// while [activeElement] has focus.
+  ///
+  /// See [SemanticsEnabler.interceptViewFocus].
+  bool interceptViewFocus(DomElement? activeElement) {
+    return _semanticsEnabler.interceptViewFocus(activeElement);
+  }
+
   /// Notifies that a Flutter view rooted at [viewRoot] was created, so that a
   /// placeholder can be put where this form factor needs it.
   void addPlaceholderForView(DomElement viewRoot) {
@@ -92,7 +101,7 @@ abstract class SemanticsEnabler {
     if (event.isA<DomKeyboardEvent>()) {
       event as DomKeyboardEvent;
       if (event.key == 'Tab') {
-        return true;
+        return shouldForwardTab(event);
       }
     }
 
@@ -103,6 +112,19 @@ abstract class SemanticsEnabler {
       return tryEnableSemantics(event);
     }
   }
+
+  /// Whether a Tab key event should be forwarded to the framework.
+  ///
+  /// Tab never enables semantics. When it is not forwarded, the browser moves
+  /// focus to the next element in its own tab order.
+  bool shouldForwardTab(DomKeyboardEvent event) => true;
+
+  /// Gives the enabler a chance to handle a request to focus a Flutter view
+  /// while [activeElement] has focus.
+  ///
+  /// Returns true if the enabler handled the request, in which case the view
+  /// is not focused.
+  bool interceptViewFocus(DomElement? activeElement) => false;
 
   /// Attempts to activate semantics.
   ///
@@ -259,6 +281,53 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
   @override
   DomElement? placeholderHostFor(DomElement viewRoot) => domDocument.body;
 
+  /// Whether focus is outside every Flutter view while the placeholder is
+  /// still waiting, so that moving forward through the page reaches the
+  /// placeholder before any view.
+  bool _isFocusAheadOfViews(DomElement? element) {
+    return isWaitingToEnableSemantics &&
+        !EngineSemantics.instance.semanticsEnabled &&
+        EnginePlatformDispatcher.instance.viewManager.findViewForElement(element) == null;
+  }
+
+  /// Focuses the placeholder instead of the view while the placeholder is
+  /// waiting and nothing on the page has focus.
+  ///
+  /// The framework asks for its view to be focused as soon as a widget gains
+  /// focus, which happens at startup. Moving browser focus into the view then
+  /// would put it past the placeholder, where neither Tab nor a screen reader
+  /// reading forward comes back to it. Leaving focus on the body is not
+  /// enough either, because VoiceOver then starts on the page itself and does
+  /// not step into it. Focusing the placeholder lets both start on it.
+  ///
+  /// Focus on other page content outside the views is left where it is.
+  /// Focus that is already in a view still moves between views, and keyboard
+  /// input reaches the framework either way because [KeyboardBinding] listens
+  /// on the window.
+  ///
+  /// See https://github.com/flutter/flutter/issues/195585
+  @override
+  bool interceptViewFocus(DomElement? activeElement) {
+    if (!_isFocusAheadOfViews(activeElement)) {
+      return false;
+    }
+    if (activeElement == null || activeElement == domDocument.body) {
+      placeholders.first.focusWithoutScroll();
+    }
+    return true;
+  }
+
+  /// Lets the browser handle Tab outside the views while the placeholder is
+  /// waiting.
+  ///
+  /// Otherwise the framework would move its own focus and consume the key, and
+  /// browser focus would never step onto the placeholder or from it into the
+  /// view. Inside a view, Tab goes to the framework as usual.
+  @override
+  bool shouldForwardTab(DomKeyboardEvent event) {
+    return !_isFocusAheadOfViews(event.target as DomElement?);
+  }
+
   @override
   bool tryEnableSemantics(DomEvent event) {
     // Semantics may be enabled programmatically. If there's a race between that
@@ -273,11 +342,14 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       return true;
     }
 
-    // In touch screen laptops, the touch is received as a mouse click
+    // In touch screen laptops, the touch is received as a mouse click.
+    //
+    // Key events are left out on purpose. The placeholder can hold focus at
+    // startup, see [interceptViewFocus], while a widget the app autofocused
+    // expects Enter or Space, so keys go to the framework. Screen readers
+    // press the placeholder with a click.
     const kInterestingEventTypes = <String>{
       'click',
-      'keyup',
-      'keydown',
       'mouseup',
       'mousedown',
       'pointerdown',
@@ -316,11 +388,11 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       true.toJS,
     );
 
-    // Adding roles to semantics placeholder. 'aria-live' will make sure that
-    // the content is announced to the assistive technology user as soon as the
-    // page receives focus. 'tabindex' makes sure the button is the first
-    // target of tab. 'aria-label' is used to define the placeholder message
-    // to the assistive technology user.
+    // Adding roles to semantics placeholder. 'tabindex' puts the button in the
+    // tab order, ahead of the views, see [interceptViewFocus]. 'aria-label'
+    // is used to define the placeholder message to the assistive technology
+    // user. 'aria-live' does not announce it, since the element has no content
+    // that changes.
     placeholder
       ..setAttribute('role', 'button')
       ..setAttribute('aria-live', 'polite')
