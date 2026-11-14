@@ -54,6 +54,7 @@ SKWASM_EXPORT bool paragraph_getDidExceedMaxLines(
 
 SKWASM_EXPORT void paragraph_layout(Skwasm::Paragraph* paragraph,
                                     SkScalar width) {
+  paragraph->dl_text_cache.clear();
   paragraph->skia_paragraph->layout(width);
 }
 

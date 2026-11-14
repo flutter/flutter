@@ -19,9 +19,12 @@
 namespace {
 class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
  public:
-  SkwasmParagraphPainter(flutter::DisplayListBuilder& builder,
-                         const std::vector<flutter::DlPaint>& paints)
-      : builder_(builder), paints_(paints) {}
+  SkwasmParagraphPainter(
+      flutter::DisplayListBuilder& builder,
+      const std::vector<flutter::DlPaint>& paints,
+      std::unordered_map<uint32_t, std::shared_ptr<flutter::DlText>>&
+          dl_text_cache)
+      : builder_(builder), paints_(paints), dl_text_cache_(dl_text_cache) {}
 
   virtual void drawTextBlob(const sk_sp<SkTextBlob>& blob,
                             SkScalar x,
@@ -33,7 +36,7 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
 
     const int* paint_id = std::get_if<PaintID>(&paint);
     auto dl_paint = paint_id ? paints_[*paint_id] : flutter::DlPaint();
-    builder_.DrawText(flutter::TextFromBlob(blob), x, y, dl_paint);
+    builder_.DrawText(MakeOrGetDlText(blob), x, y, dl_paint);
   }
 
   virtual void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -52,7 +55,7 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
                                        blur_sigma, false);
       paint.setMaskFilter(&filter);
     }
-    builder_.DrawText(flutter::TextFromBlob(blob), x, y, paint);
+    builder_.DrawText(MakeOrGetDlText(blob), x, y, paint);
   }
 
   virtual void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
@@ -106,6 +109,17 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
  private:
   const std::vector<flutter::DlPaint>& paints_;
   flutter::DisplayListBuilder& builder_;
+  std::unordered_map<uint32_t, std::shared_ptr<flutter::DlText>>&
+      dl_text_cache_;
+
+  std::shared_ptr<flutter::DlText> MakeOrGetDlText(
+      const sk_sp<SkTextBlob>& blob) {
+    auto [it, inserted] = dl_text_cache_.try_emplace(blob->uniqueID(), nullptr);
+    if (inserted) {
+      it->second = flutter::TextFromBlob(blob);
+    }
+    return it->second;
+  }
 
   flutter::DlPaint ToDlPaint(
       const DecorationStyle& decor_style,
@@ -294,7 +308,8 @@ SKWASM_EXPORT void canvas_drawParagraph(flutter::DisplayListBuilder* canvas,
                                         Skwasm::Paragraph* paragraph,
                                         flutter::DlScalar x,
                                         flutter::DlScalar y) {
-  auto painter = SkwasmParagraphPainter(*canvas, paragraph->paints);
+  auto painter = SkwasmParagraphPainter(*canvas, paragraph->paints,
+                                        paragraph->dl_text_cache);
   paragraph->skia_paragraph->paint(&painter, x, y);
 }
 
