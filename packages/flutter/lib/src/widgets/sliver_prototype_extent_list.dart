@@ -181,10 +181,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   }
 
   @override
-  void updateRenderObject(
-    BuildContext context,
-    RenderSliverMultiBoxAdaptor renderObject,
-  ) {
+  void updateRenderObject(BuildContext context, RenderSliverMultiBoxAdaptor renderObject) {
     (renderObject as RenderSliverFixedExtentBoxAdaptor).spacing = spacing;
   }
 

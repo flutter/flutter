@@ -198,6 +198,12 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     double? leadingScrollOffset,
     double? trailingScrollOffset,
   }) {
+    if (itemExtentBuilder == null) {
+      final int? childCount = childManager.estimatedChildCount;
+      if (childCount != null) {
+        return childCount == 0 ? 0.0 : childCount * itemExtent! + (childCount - 1) * spacing;
+      }
+    }
     return childManager.estimateMaxScrollOffset(
       constraints,
       firstIndex: firstIndex,

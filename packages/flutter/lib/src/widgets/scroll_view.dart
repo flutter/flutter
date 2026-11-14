@@ -1398,6 +1398,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
+    this.spacing = 0.0,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1414,7 +1415,8 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
     super.hitTestBehavior,
-  }) : assert(
+  }) : assert(spacing >= 0.0),
+       assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
              (prototypeItem == null && itemExtentBuilder == null),
@@ -1478,6 +1480,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
+    this.spacing = 0.0,
     required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
@@ -1496,7 +1499,8 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
     super.hitTestBehavior,
-  }) : assert(itemCount == null || itemCount >= 0),
+  }) : assert(spacing >= 0.0),
+       assert(itemCount == null || itemCount >= 0),
        assert(semanticChildCount == null || semanticChildCount <= itemCount!),
        assert(
          (itemExtent == null && prototypeItem == null) ||
@@ -1630,6 +1634,7 @@ class ListView extends BoxScrollView {
        ),
        itemExtent = null,
        prototypeItem = null,
+       spacing = 0.0,
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
@@ -1677,6 +1682,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.prototypeItem,
     this.itemExtentBuilder,
+    this.spacing = 0.0,
     required this.childrenDelegate,
     @Deprecated(
       'Use scrollCacheExtent instead. '
@@ -1690,7 +1696,8 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
     super.hitTestBehavior,
-  }) : assert(
+  }) : assert(spacing >= 0.0),
+       assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
              (prototypeItem == null && itemExtentBuilder == null),
@@ -1788,25 +1795,42 @@ class ListView extends BoxScrollView {
   /// respectively.
   final SliverChildDelegate childrenDelegate;
 
+  /// {@template flutter.widgets.list_view.spacing}
+  /// How much space to place between children in the main axis.
+  ///
+  /// Defaults to 0.0. Must not be negative.
+  /// {@endtemplate}
+  final double spacing;
+
   @override
   Widget buildChildLayout(BuildContext context) {
     if (itemExtent != null) {
-      return SliverFixedExtentList(delegate: childrenDelegate, itemExtent: itemExtent!);
+      return SliverFixedExtentList(
+        delegate: childrenDelegate,
+        itemExtent: itemExtent!,
+        spacing: spacing,
+      );
     } else if (itemExtentBuilder != null) {
       return SliverVariedExtentList(
         delegate: childrenDelegate,
         itemExtentBuilder: itemExtentBuilder!,
+        spacing: spacing,
       );
     } else if (prototypeItem != null) {
-      return SliverPrototypeExtentList(delegate: childrenDelegate, prototypeItem: prototypeItem!);
+      return SliverPrototypeExtentList(
+        delegate: childrenDelegate,
+        prototypeItem: prototypeItem!,
+        spacing: spacing,
+      );
     }
-    return SliverList(delegate: childrenDelegate);
+    return SliverList(delegate: childrenDelegate, spacing: spacing);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
   }
 
   // Helper method to compute the actual child count for the separated constructor.
