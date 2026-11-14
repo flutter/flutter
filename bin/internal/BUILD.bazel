@@ -48,12 +48,14 @@ filegroup(
 # exists (Cache.engineRevision), not what it says -- takes fixed words, as
 # the SDK version's defines are in the tests' compiles (flutter_test.bzl),
 # so that a commit elsewhere re-runs nothing there. A facsimile with the
-# engine's directories takes the revision the build stamps into them
-# (@engine_version: the frameworks' Info.plist carry it as FlutterEngine,
-# and the content validation tests compare the two with the cache's) --
-# those directories change with the revision anyway (their archives'
-# readmes name it). The framework version is one every constraint allows:
-# the checkout is newer than any package that constrains it.
+# engine's directories takes the revision the build puts into them
+# (@engine_version: the checkout's HEAD in a stamped build, --config=stamp,
+# and forty zeros otherwise; the frameworks' Info.plist carry it as
+# FlutterEngine, and the content validation tests compare the two with the
+# cache's) -- in a stamped build those directories change with the revision
+# anyway (their archives' readmes name it). The framework version is one
+# every constraint allows: the checkout is newer than any package that
+# constrains it.
 [
     [
         write_file(

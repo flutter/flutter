@@ -463,8 +463,9 @@ gn_action = rule(
         ),
         "env": attr.string_dict(
             doc = "Environment variables for the script. Also what puts in the action's key a value the script " +
-                  "reads outside its inputs (copy_info_plist.py's `git rev-parse HEAD`, as FLUTTER_ENGINE_VERSION): " +
-                  "the action reruns when the value changes, where its cached result would be stale.",
+                  "would read outside its inputs (copy_info_plist.py takes the engine's revision from " +
+                  "FLUTTER_ENGINE_VERSION where a GN build asks git): the action reruns when the value changes, " +
+                  "where its cached result would be stale.",
         ),
     } | PYTHON_ATTRS,
 )

@@ -99,8 +99,10 @@ Objective-C flag lists already are. A string around such a variable
 (`"FLUTTER_ENGINE_VERSION=\"$engine_version\""` in `shell/version`)
 renders as a concatenation with the constant -- here one of
 `@engine_version//:version.bzl`, which a repository rule writes at fetch
-time from git and DEPS, as `tools/gn` computes version.gni's arguments at
-gen time. The oracle below reads the GN values from the out directory's
+time: Skia's and Dart's revisions from DEPS, and the checkout's revision and
+content hash from git in a stamped build (`--config=stamp`), as `tools/gn`
+computes version.gni's arguments at gen time, or as fixed words in an
+unstamped one. The oracle below reads the GN values from the out directory's
 arguments (`gn args --list`).
 Beneath any `--assume` sit the build's invariants (`buildInvariants`):
 `is_clang = true`, which every configuration `tools/gn` writes has and the

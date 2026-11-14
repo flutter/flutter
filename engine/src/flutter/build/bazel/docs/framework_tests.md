@@ -336,7 +336,9 @@ directories), so that its stamps describe the engine the tool downloaded
 commit that built it, not the checkout's HEAD -- and the content
 validation tests compare a framework's embedded revision with the stamp
 of the same download (they differ if the facsimile
-stamps HEAD). The tree's facsimile stamps HEAD, which is what it built.
+stamps HEAD). The tree's facsimile stamps the revision its build carries
+(`@engine_version`: HEAD in a stamped build, `--config=stamp`, and forty
+zeros otherwise), which is what it built.
 The prebuilt Mac host
 engine's `FlutterMacOS.xcframework` is assembled with its links made
 again (the repository's globs follow the bundle's directory links,

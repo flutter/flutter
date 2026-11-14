@@ -54,8 +54,10 @@ INFRA_FLAGS = frozenset([
 _INFRA_VALUE_FLAGS = ('--rbe-server-address',)
 
 # `--gn-args=engine_version="<rev>"` is what the recipe adds to a monorepo
-# build (the engine's version string); a Bazel build stamps the version from
-# the checkout (@engine_version), so the flag is matched away too.
+# build (the engine's version string); a Bazel build of these builders
+# stamps the version from the checkout (@engine_version, which --config=ci
+# asks to: the root .bazelrc's common:stamp), so the flag is matched away
+# too.
 _IGNORED_GN_ARGS = ('engine_version=',)
 
 # What the recipe appends under its `no_lto` property (cocoon sets it on

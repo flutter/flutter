@@ -86,15 +86,32 @@ build --experimental_disk_cache_gc_max_size=20G
 # no run that has the files.
 common --repository_cache=~/.cache/flutter_engine_bazel/repository_cache
 
+# The checkout's revision in the build (common:stamp). Unstamped, the
+# default, a build depends on the files it reads and not on git's HEAD: the
+# engine's revision and content hash are fixed words (@engine_version;
+# build_defs/repositories/repositories.bzl says where they go), so a commit,
+# a rebase or a switch of branches re-runs nothing for the version's sake
+# and a link is a cache hit across commits. Stamped, a build says what a GN
+# build says -- tools/gn asks git every time it generates one -- and the
+# values are read again whenever HEAD moves. A build whose artifacts leave
+# the machine is stamped: --config=ci includes this config, which covers a
+# bot's builds and every build directory tools/gn --bazel writes. Not
+# Bazel's own --stamp, which this does not set: the revision names output
+# files (the Maven artifacts' `1.0.0-<revision>`), and --stamp's values are
+# known only when an action runs.
+common:stamp --repo_env=FLUTTER_BAZEL_STAMP=1
+
 # CI's invocations (tools/gn --bazel and testing/run_tests.py on a bot,
 # through engine/src/flutter/build/bazel/bazel_ci.py; see ci.md there): plain
 # output for a log, a progress line every 30 s rather than five a second,
-# failures spelled out, every failing test's log in the output. A bot's
+# failures spelled out, every failing test's log in the output, and the
+# checkout's revision in the artifacts (common:stamp). A bot's
 # state lives under the checkout's .bazel_ci, where bazel_ci.py puts the
 # output root and, on the command line, the disk cache (bazel_ci.py's
 # build_options: the builders' builds alternate flags the exec configuration
 # shares, and the cache serves the repeats).
 common:ci --color=no --curses=no --show_timestamps --show_progress_rate_limit=30 --announce_rc
+common:ci --config=stamp
 build:ci --verbose_failures
 test:ci --test_output=errors --keep_going --test_summary=short
 

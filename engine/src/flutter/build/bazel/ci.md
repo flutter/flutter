@@ -109,7 +109,11 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   not spell them -- without the cache each switch rebuilds the host tools
   (10 minutes between `ci/host_debug` and a second `ci/host_debug_unopt`
   on 10-31). `BAZEL_CI_HOME` overrides the location. `--config=ci` (the
-  root `.bazelrc`) keeps the output readable in a log. A bot's Bazel
+  root `.bazelrc`) keeps the output readable in a log and stamps the build
+  (`--config=stamp`: the checkout's revision and content hash in
+  shell/version, the frameworks' Info.plist and the Maven artifacts' names,
+  read from git as `tools/gn` reads them; a build without it, a
+  developer's, says forty zeros and does not depend on HEAD). A bot's Bazel
   server exits five minutes after its last command (`--max_idle_secs`):
   the recipe's process cleanup does not know the detached JVM, which would
   otherwise idle for hours into the bot's next task. A bot's sandboxes go

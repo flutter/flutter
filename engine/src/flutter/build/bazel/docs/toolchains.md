@@ -181,10 +181,12 @@ a transition to `android_arm64_api26` for the Vulkan validation layer
 `@vulkan-utility-libraries`), which GN's debug arm64 jar carries by default
 (`impeller_enable_vulkan_validation_layers`) under
 `clang_arm64_apilevel26/`; and `env`, which carries into the action's key
-what a script reads outside its inputs (`copy_info_plist.py` runs `git
-rev-parse HEAD` for the Apple frameworks' Info.plist: the converter sets
-`FLUTTER_ENGINE_VERSION` from `@engine_version` on that script's actions,
-so they rerun when HEAD moves instead of serving a cached revision).
+what a script would read outside its inputs (`copy_info_plist.py` asks git
+for the revision it writes into the Apple frameworks' Info.plist; the
+converter sets `FLUTTER_ENGINE_VERSION` from `@engine_version` on that
+script's actions and the script takes it from there, so the plist names the
+checkout's HEAD in a stamped build, `--config=stamp`, and a fixed word
+otherwise, and the action reruns when the value changes).
 `shell/vmservice/BUILD.bazel` is hand-written
 (the VM-service kernel and its AOT snapshot per ABI). Against CI's artifacts
 of the base commit: the embedding jar byte-identical (456 classes), the
