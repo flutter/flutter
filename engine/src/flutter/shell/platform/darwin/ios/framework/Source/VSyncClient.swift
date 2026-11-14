@@ -15,8 +15,21 @@ class VSyncClient: NSObject {
   private let callback: (CFTimeInterval, CFTimeInterval) -> Void
 
   /// The display link used to coordinate vsync callbacks.
+  ///
+  /// The display link is created on the task runner's thread, in the same call that adds it to that
+  /// thread's run loop (see `init`). It is `nil` before then and after `invalidate()` is called.
   @objc
   private(set) var displayLink: CADisplayLink?
+
+  /// Whether `invalidate()` has been called. A display link is never created after invalidation.
+  private var isInvalidated = false
+
+  /// Whether vsync callbacks are paused.
+  ///
+  /// Reflects the most recent call to `await()` or `pause()`, including calls made before the
+  /// display link is created, and is applied to the display link when it is created.
+  @objc
+  private(set) var isPaused = true
 
   private var _refreshRate: Double = defaultRefreshRate
 
@@ -60,23 +73,36 @@ class VSyncClient: NSObject {
 
     super.init()
 
-    let relay = VSyncClientRelay(target: self)
-    let link = CADisplayLink(target: relay, selector: #selector(VSyncClientRelay.onDisplayLink(_:)))
-    link.isPaused = true
-    self.displayLink = link
-
-    setMaxRefreshRate(maxRefreshRate)
-
-    // Capture a weak reference to self to ensure we don't add the display link to the run loop if
-    // the client has already been deallocated.
-    taskRunner.postTask { [weak self] in
-      guard let self else { return }
-      self.displayLink?.add(to: .current, forMode: .common)
+    // Create the display link in the same call that adds it to the run loop, rather than creating it
+    // here and adding it to the run loop later.
+    //
+    // When the app's scene moves to another display (e.g. to the inner display of an iPhone Duo
+    // while the app launches), iOS retargets the app's display links to that display, but only the
+    // ones that are already scheduled on a run loop. A link created earlier but scheduled after the
+    // retarget stays bound to the previous display. If that display no longer refreshes, vsync never
+    // fires and nothing renders. Creating and scheduling the link in one call means it is either
+    // created after the retarget, and so bound to the new display, or scheduled before it, and so
+    // retargeted. See https://github.com/flutter/flutter/issues/195401.
+    taskRunner.runNowOrPostTask { [weak self] in
+      self?.createDisplayLink(maxRefreshRate: maxRefreshRate)
     }
   }
 
   deinit {
     invalidate()
+  }
+
+  private func createDisplayLink(maxRefreshRate: Double) {
+    guard !isInvalidated else { return }
+
+    let relay = VSyncClientRelay(target: self)
+    let link = CADisplayLink(target: relay, selector: #selector(VSyncClientRelay.onDisplayLink(_:)))
+    link.isPaused = isPaused
+    displayLink = link
+
+    setMaxRefreshRate(maxRefreshRate)
+
+    link.add(to: .current, forMode: .common)
   }
 
   /// Configures the maximum and preferred refresh rate range for the display link.
@@ -107,9 +133,11 @@ class VSyncClient: NSObject {
   /// Resumes the display link to begin receiving vsync callback ticks.
   ///
   /// Calling this method unpauses the underlying `CADisplayLink`, allowing it to trigger
-  /// `onDisplayLink(_:)` on the next vsync event.
+  /// `onDisplayLink(_:)` on the next vsync event. If the display link has not been created yet, it
+  /// is created unpaused.
   @objc
   func await() {
+    isPaused = false
     displayLink?.isPaused = false
   }
 
@@ -119,6 +147,7 @@ class VSyncClient: NSObject {
   /// any subsequent vsync events until `await()` is called.
   @objc
   func pause() {
+    isPaused = true
     displayLink?.isPaused = true
   }
 
@@ -128,6 +157,7 @@ class VSyncClient: NSObject {
   /// caused by the `CADisplayLink` retaining its target.
   @objc
   func invalidate() {
+    isInvalidated = true
     guard let link = displayLink else { return }
     displayLink = nil
 
@@ -196,6 +226,7 @@ class VSyncClient: NSObject {
     }
 
     if allowPauseAfterVsync {
+      isPaused = true
       link.isPaused = true
     }
     callback(timestamp, targetTimestamp)
