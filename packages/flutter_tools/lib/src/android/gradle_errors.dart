@@ -888,8 +888,9 @@ const String kMigrateToBuiltInKotlinDocsUrl =
 const String kOptOutOfNewDslDocsUrl =
     'https://developer.android.com/build/releases/agp-9-0-0-release-notes';
 
-/// Handler when applying the kotlin-android plugin results in a build failure. This failure occurs when
-/// using AGP 9+ because built-in Kotlin has become the default behavior.
+/// Handler when applying the kotlin-android plugin results in a build failure.
+/// This occurs when `android.builtInKotlin=true` is set (AGP 9+) but the app or
+/// a Flutter plugin still applies `org.jetbrains.kotlin.android`.
 @visibleForTesting
 final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
   test: (String line) {
@@ -907,11 +908,25 @@ final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
         Java? java,
       }) async {
         final Logger logger = toolContext.logger;
-        logger.printBox('''
-${logger.terminal.warningMark} Starting AGP 9+, the default has become built-in Kotlin.
-This results in a build failure when applying the kotlin-android plugin.
-To resolve this, migrate to built-in Kotlin.
-\nFor instructions on how to migrate, see: $kMigrateToBuiltInKotlinDocsUrl''', title: _boxTitle);
+        const gradlePropertiesPath = 'android/gradle.properties';
+        logger.printBox(
+          "${logger.terminal.warningMark} The 'org.jetbrains.kotlin.android' (kotlin-android) "
+          'Gradle plugin is not compatible with android.builtInKotlin=true, since built-in '
+          'Kotlin replaces it starting with AGP 9.0. Your app or one of its Flutter plugins '
+          'still applies it.\n\n'
+          'To see which projects still apply kotlin-android, the app must build. Set '
+          'android.builtInKotlin=false in $gradlePropertiesPath, and android.newDsl=false if it '
+          'is true, since android.newDsl=true requires built-in Kotlin. Flutter then logs a '
+          'warning naming each project that still applies the kotlin-android plugin. Android '
+          'Gradle Plugin 10.0 removes these opt-outs.\n\n'
+          'If a plugin has not migrated to built-in Kotlin, upgrade it or file an issue with the '
+          'plugin asking for built-in Kotlin support.\n'
+          'If your app applies kotlin-android, migrate it to built-in Kotlin.\n'
+          'Once your app and all of its Flutter plugins are migrated to built-in Kotlin, set '
+          'android.builtInKotlin=true in $gradlePropertiesPath.\n'
+          'For migration instructions, see: $kMigrateToBuiltInKotlinDocsUrl',
+          title: _boxTitle,
+        );
 
         return GradleBuildStatus.exit;
       },
