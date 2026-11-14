@@ -1433,8 +1433,15 @@ flutter:
         logger.warningText,
         'The following plugins do not support Swift Package Manager for ios:\n'
         '  - plugin\n'
-        'This will become an error in a future version of Flutter. Please contact the plugin '
-        'maintainers to request Swift Package Manager adoption.\n',
+        'This will become an error in a future version of Flutter.\n'
+        "It's possible support was added in a newer version. "
+        'You can upgrade the plugin versions by running:\n'
+        '  flutter pub upgrade plugin\n'
+        'You can try upgrading to new major versions, which may include breaking changes, '
+        'by running:\n'
+        '  flutter pub upgrade --major-versions plugin\n'
+        'If the warning persists after upgrading, contact the plugin maintainers to request '
+        'Swift Package Manager adoption.\n',
       );
       expect(
         fakeAnalytics.sentEvents,
@@ -1482,8 +1489,15 @@ flutter:
         'The following plugins do not support Swift Package Manager for ios:\n'
         '  - plugin_a\n'
         '  - plugin_b\n'
-        'This will become an error in a future version of Flutter. Please contact the plugin '
-        'maintainers to request Swift Package Manager adoption.\n',
+        'This will become an error in a future version of Flutter.\n'
+        "It's possible support was added in a newer version. "
+        'You can upgrade the plugin versions by running:\n'
+        '  flutter pub upgrade plugin_a plugin_b\n'
+        'You can try upgrading to new major versions, which may include breaking changes, '
+        'by running:\n'
+        '  flutter pub upgrade --major-versions plugin_a plugin_b\n'
+        'If the warning persists after upgrading, contact the plugin maintainers to request '
+        'Swift Package Manager adoption.\n',
       );
       expect(fakeAnalytics.sentEvents, <Event>[
         Event.appleUsageEvent(workflow: 'cocoapod-only-plugin-warning', parameter: 'plugin_a'),
