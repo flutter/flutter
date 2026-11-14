@@ -7,7 +7,6 @@ import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
 import 'src/android/gradle.dart';
-import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -51,22 +50,20 @@ import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
+import 'src/context_runner.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
 import 'src/features.dart';
 // Files in `isolated` are intentionally excluded from google3 tooling.
-import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
-import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
-import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
 ///
@@ -128,48 +125,54 @@ Future<void> main(List<String> args) async {
         widgetPreviews: widgetPreviews,
       );
 
-  await runner.run(
-    args,
-    (ToolDependencies toolDependencies) {
-      final ToolDependencies(
-        :ExtensionManager? extensionManager,
-        :FeatureFlags featureFlags,
-        toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
-      ) = toolDependencies;
-      final ExtensionManager manager = extensionManager!;
-      final templateManager = ExtensionTemplateManager(
-        extensionManager: manager,
-        featureFlags: featureFlags,
-        fileSystem: fs,
-        flutterRoot: cache.flutterRoot,
-        logger: logger,
-      );
-      return generateCommands(
-        toolDependencies: toolDependencies,
-        verboseHelp: verboseHelp,
-        verbose: verbose,
-        extensionTemplateManager: templateManager,
-      );
-    },
+  final ToolDependencies toolDependencies = await ToolDependencies.bootstrap(
     buildTargets: const BuildTargetsImpl(),
+    enablePreRunValidator: true,
     extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-    muteCommandLogging: muteCommandLogging,
+    logger: logger,
     nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => terminal,
-      FlutterHookRunner: () => FlutterHookRunnerNative(),
-      Logger: () => logger,
-      OutputPreferences: () => outputPreferences,
-      Stdio: () => stdio,
+    outputPreferences: outputPreferences,
+    platform: platform,
+    shutdownHooks: shutdownHooks,
+    stdio: stdio,
+    templateRenderer: const MustacheTemplateRenderer(),
+    terminal: terminal,
+  );
+
+  // `runInContext` still supplies the services that `runner.run` doesn't
+  // register (such as `Pub` and `AndroidBuilder`) until it's deleted.
+  await runInContext<int>(
+    () => runner.run(
+      args,
+      (ToolDependencies toolDependencies) {
+        final ToolDependencies(
+          :ExtensionManager extensionManager,
+          :FeatureFlags featureFlags,
+          toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
+        ) = toolDependencies;
+        final templateManager = ExtensionTemplateManager(
+          extensionManager: extensionManager,
+          featureFlags: featureFlags,
+          fileSystem: fs,
+          flutterRoot: cache.flutterRoot,
+          logger: logger,
+        );
+        return generateCommands(
+          toolDependencies: toolDependencies,
+          verboseHelp: verboseHelp,
+          verbose: verbose,
+          extensionTemplateManager: templateManager,
+        );
+      },
+      flutterHookRunner: FlutterHookRunnerNative(),
+      muteCommandLogging: muteCommandLogging,
+      toolDependencies: toolDependencies,
+      verbose: verbose,
+      verboseHelp: verboseHelp,
       // The web runner is not supported in google3 because it depends
       // on dwds.
-      WebRunnerFactory: () => DwdsWebRunnerFactory(),
-    },
-    preRunValidatorBuilder: PreRunValidator.new,
-    shutdownHooks: shutdownHooks,
-    templateRenderer: const MustacheTemplateRenderer(),
-    verbose: verbose,
-    verboseHelp: verboseHelp,
+      webRunnerFactory: DwdsWebRunnerFactory(),
+    ),
   );
 }
 
