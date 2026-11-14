@@ -413,6 +413,11 @@ typedef struct MouseState {
                object:nil];
 
   [center addObserver:self
+             selector:@selector(onUserSettingsChanged:)
+                 name:NSCurrentLocaleDidChangeNotification
+               object:nil];
+
+  [center addObserver:self
              selector:@selector(onHideHomeIndicatorNotification:)
                  name:FlutterViewControllerHideHomeIndicator
                object:nil];

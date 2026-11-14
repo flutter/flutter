@@ -1859,6 +1859,27 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [settingsChannel stopMocking];
 }
 
+- (void)testItReportsAlwaysUse24HourFormatOnLocaleDidChangeNotification {
+  id settingsChannel = OCMStrictClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:self.mockEngine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+  id mockHourFormat = OCMClassMock([FlutterHourFormat class]);
+  OCMStub([mockHourFormat isAlwaysUse24HourFormat]).andReturn(YES);
+  OCMExpect([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
+                               return [message[@"alwaysUse24HourFormat"] isEqual:@(YES)];
+                             }]]);
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:NSCurrentLocaleDidChangeNotification
+                                                      object:nil];
+
+  OCMVerifyAll(settingsChannel);
+
+  [mockHourFormat stopMocking];
+  [settingsChannel stopMocking];
+}
+
 - (void)testOnAccessibilityStatusChangedCallsEnableSemanticsWithFlags {
   FlutterViewController* viewController =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
