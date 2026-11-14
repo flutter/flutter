@@ -66,6 +66,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--thin-lto",
+                "--use-glfw-swiftshader",
                 "--rbe"
             ],
             "name": "ci/host_profile_test",
@@ -80,6 +81,17 @@
                 ]
             },
              "tests": [
+                {
+                    "language": "python3",
+                    "name": "Impeller tests for host_profile",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_profile_test",
+                        "--type",
+                        "impeller"
+                    ]
+                },
                 {
                     "language": "python3",
                     "name": "Host Tests for host_profile",
@@ -117,6 +129,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--thin-lto",
+                "--use-glfw-swiftshader",
                 "--rbe"
             ],
             "name": "ci/host_release_test",
@@ -141,6 +154,17 @@
                 ]
             },
             "tests": [
+                {
+                    "language": "python3",
+                    "name": "Impeller tests for host_release",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_release_test",
+                        "--type",
+                        "impeller"
+                    ]
+                },
                 {
                     "language": "python3",
                     "name": "Host Tests for host_release",

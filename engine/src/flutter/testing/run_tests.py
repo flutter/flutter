@@ -603,11 +603,10 @@ def run_cc_tests(
     extra_env = metal_validation_env()
     extra_env.update(vulkan_validation_env(build_dir))
     mac_impeller_unittests_flags = repeat_flags + [
-        '--gtest_filter=-*OpenGLES:*OpenGLESSDF',  # These are covered in the golden tests.
-        '--',
-        '--enable_vulkan_validation',
+        # OpenGLES is covered by the golden tests. Vulkan is SwiftShader here
+        # and already runs on Linux.
+        '--gtest_filter=-*OpenGLES:*OpenGLESSDF:*Vulkan*',
     ]
-    # Impeller tests are only supported on macOS for now.
     run_engine_executable(
         build_dir,
         'impeller_unittests',
