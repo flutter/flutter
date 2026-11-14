@@ -162,21 +162,28 @@ class ExtensionConnection {
   /// Used by unit tests to exercise extension protocol behavior in-process
   /// without compiling a `.dill` kernel file, and during transitional bootstrap
   /// before dynamic project discovery is wired via [spawnUri].
+  ///
+  /// When [expectedConfig] is provided, validates that the runtime
+  /// [ToolExtensionCapabilities] reported by `extension.getCapabilities` match
+  /// the static declarations in `extension/flutter_tools/config.yaml`,
+  /// killing the extension isolate and throwing a [StateError] if they drift.
   @visibleForTesting
   static Future<ExtensionConnection> spawn(
     ExtensionEntryPoint entryPoint, {
     required Logger logger,
+    ExtensionPackageConfig? expectedConfig,
     String? extensionName,
     Duration timeout = const Duration(seconds: 5),
   }) {
     logger.printTrace('ExtensionConnection spawning extension isolate...');
     return _spawnAndHandshake(
-      logger: logger,
-      extensionName: extensionName,
-      timeout: timeout,
+      expectedConfig: expectedConfig,
+      extensionName: extensionName ?? expectedConfig?.name,
       isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
         return Isolate.spawn(entryPoint, sendPort, onError: onError, onExit: onExit);
       },
+      logger: logger,
+      timeout: timeout,
     );
   }
 
@@ -187,7 +194,7 @@ class ExtensionConnection {
   /// When [expectedConfig] is provided, validates that the runtime
   /// [ToolExtensionCapabilities] reported by `extension.getCapabilities` match
   /// the static declarations in `extension/flutter_tools/config.yaml`,
-  /// disposing the connection and throwing a [StateError] if they drift.
+  /// killing the extension isolate and throwing a [StateError] if they drift.
   static Future<ExtensionConnection> spawnUri(
     Uri entrypointUri, {
     required Logger logger,
@@ -196,14 +203,13 @@ class ExtensionConnection {
     ExtensionPackageConfig? expectedConfig,
     String? extensionName,
     Duration timeout = const Duration(seconds: 5),
-  }) async {
+  }) {
     logger.printTrace(
       'ExtensionConnection spawning extension isolate from URI "$entrypointUri"...',
     );
-    final ExtensionConnection connection = await _spawnAndHandshake(
-      logger: logger,
+    return _spawnAndHandshake(
+      expectedConfig: expectedConfig,
       extensionName: extensionName ?? expectedConfig?.name,
-      timeout: timeout,
       isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
         return Isolate.spawnUri(
           entrypointUri,
@@ -214,19 +220,16 @@ class ExtensionConnection {
           onExit: onExit,
         );
       },
+      logger: logger,
+      timeout: timeout,
     );
-    if (expectedConfig != null) {
-      try {
-        connection._validateCapabilitiesMatchConfig(expectedConfig);
-      } on Object {
-        await connection.dispose();
-        rethrow;
-      }
-    }
-    return connection;
   }
 
-  void _validateCapabilitiesMatchConfig(ExtensionPackageConfig expectedConfig) {
+  static void _validateCapabilitiesMatchConfig(
+    ToolExtensionCapabilities capabilities,
+    ExtensionPackageConfig expectedConfig, {
+    required String extensionName,
+  }) {
     final Set<String> actualServices = capabilities.services.toSet();
     if (actualServices.length != expectedConfig.services.length ||
         !actualServices.containsAll(expectedConfig.services)) {
@@ -256,6 +259,7 @@ class ExtensionConnection {
     required Future<Isolate> Function(SendPort sendPort, SendPort onError, SendPort onExit)
     isolateLauncher,
     required Logger logger,
+    ExtensionPackageConfig? expectedConfig,
     String? extensionName,
     Duration timeout = const Duration(seconds: 5),
   }) async {
@@ -318,11 +322,20 @@ class ExtensionConnection {
         'ExtensionConnection handshake complete. Capabilities: ${capabilities.services}',
       );
 
+      final String resolvedExtensionName =
+          extensionName ?? capabilities.extensionName ?? defaultExtensionName;
+      if (expectedConfig != null) {
+        _validateCapabilitiesMatchConfig(
+          capabilities,
+          expectedConfig,
+          extensionName: resolvedExtensionName,
+        );
+      }
       return connection = ExtensionConnection._(
         capabilities: capabilities,
         errorPort: errorPort,
         exitPort: exitPort,
-        extensionName: extensionName ?? capabilities.extensionName ?? defaultExtensionName,
+        extensionName: resolvedExtensionName,
         isolate: isolate,
         logger: logger,
         peer: peer,
