@@ -54,6 +54,14 @@ A `--config` names a build as `et` and the builder files name it:
 engine/src/flutter/ci/builders/configs.bazelrc` lists them all. A build
 without a `--config` is a configuration no builder builds.
 
+A build does not carry the checkout's revision unless you add
+`--config=stamp`. Without it the engine reports forty zeros as its revision
+and content hash, and a commit, a rebase or a branch switch rebuilds nothing
+on that account. With it the build says what a GN build says. CI's builds
+are stamped: `--config=ci` includes it. A test whose tool downloads an engine
+artifact the build does not supply (a Mac's integration shard, for `flutter
+build ios`) needs a stamped build, of a commit CI has built engines for.
+
 A GN label `//flutter/fml:fml_unittests` is the Bazel label
 `//engine/src/flutter/fml:fml_unittests`.
 
@@ -97,6 +105,7 @@ including which `flutter precache` options the tool's shards need.
 | Run some of a suite's cases | `bazelisk test --config=<cfg> --test_filter='Base32*' //engine/src/flutter/fml:fml_unittests` |
 | Run a suite's binary directly, for example under a debugger | `bazelisk build --config=<cfg> <label>_binary`, then from the repository root `engine/src/out/bazel-bin/engine/src/flutter/fml/fml_unittests_binary --gtest_filter='Base32*'`. Debug information names sources relative to the repository root, so start the debugger there |
 | Write `compile_commands.json` | `python3 engine/src/flutter/tools/gn_to_bazel/tool/compile_commands.py --out=engine/src/out/<dir> --config=<cfg>` |
+| Put the checkout's revision in the build | Add `--config=stamp` |
 | Build on Flutter's RBE instance from a Linux workstation | `gcloud auth application-default login` once, then add `--config=rbe_dev`: compiles on the workers, links on the workstation |
 | Free the build's outputs | `bazelisk clean` |
 | Stop the Bazel server | `bazelisk shutdown` |

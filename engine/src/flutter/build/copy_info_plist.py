@@ -53,7 +53,12 @@ def main():
 
   text = open(args.source).read()
   engine_path = os.path.join(_src_root_dir, 'flutter')
-  revision = git_revision.get_repository_version(engine_path)
+  # A Bazel build names the revision in the action's environment (the
+  # checkout's HEAD when the build is stamped, a fixed word otherwise), so
+  # that the plist says what the action's key says. A GN build asks git.
+  revision = os.environ.get('FLUTTER_ENGINE_VERSION')
+  if not revision:
+    revision = git_revision.get_repository_version(engine_path)
   clang_version = get_clang_version()
   text = text.format(
       revision=revision,

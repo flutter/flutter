@@ -672,16 +672,18 @@ const Map<String, List<String>> scriptInputs = <String, List<String>>{
   '//build/android/gyp/create_flutter_jar.py': <String>['//engine/src/build:android_gyp_scripts'],
 };
 
-/// What an action's script reads outside its inputs, by the script's GN
-/// path: each value as the GN reference whose Bazel-side constant
+/// What an action's script would read outside its inputs, by the script's
+/// GN path: each value as the GN reference whose Bazel-side constant
 /// ([referenceConstants]) holds it, under the name of the environment
 /// variable that carries it to the action (gn_action's `env`). The script's
 /// result depends on the value, so the value belongs in the action's key:
 /// the action reruns when it changes, where its cached result would be
-/// stale. copy_info_plist.py writes the checkout's `git rev-parse HEAD`
-/// into the framework's Info.plist (the FlutterEngine key, which the tool's
-/// content validation tests compare with engine_stamp.json's); that is
-/// version.gni's engine_version.
+/// stale. copy_info_plist.py writes the engine's revision into the
+/// framework's Info.plist (the FlutterEngine key, which the tool's content
+/// validation tests compare with engine_stamp.json's). In a GN build it
+/// asks git; in a Bazel build it takes the variable, which is version.gni's
+/// engine_version: the checkout's HEAD when the build is stamped, a fixed
+/// word otherwise (@engine_version).
 const Map<String, Map<String, String>> scriptEnvironment = <String, Map<String, String>>{
   '//flutter/build/copy_info_plist.py': <String, String>{
     'FLUTTER_ENGINE_VERSION': 'engine_version',

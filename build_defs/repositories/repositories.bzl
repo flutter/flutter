@@ -26,7 +26,9 @@ without touching the targets that use it.
 
 A third, `engine_version_repository`, holds no sources: it writes the version
 strings `tools/gn` would compute at gen time (shell/version) as a `.bzl` of
-constants, read from git and DEPS at fetch time.
+constants. Skia's and Dart's revisions come from DEPS. The checkout's own
+revision and content hash are fixed words unless the build is stamped
+(`--config=stamp`), which reads them from git at fetch time as `tools/gn` does.
 """
 
 _BUILD_FILE_NAMES = ("BUILD", "BUILD.bazel")
@@ -474,8 +476,28 @@ package(default_visibility = ["//visibility:public"])
 exports_files(["version.bzl"])
 """
 
+# Whether the build carries the checkout's revision: `--config=stamp` (the
+# root .bazelrc's `--repo_env=FLUTTER_BAZEL_STAMP=1`, which a bot's
+# `--config=ci` includes). Unstamped, the default, the two strings that
+# change with every commit -- the revision and the content hash -- are fixed
+# words: nothing of git is read and nothing of it watched, so a commit, a
+# rebase or a switch of branches re-runs no action for the version's sake
+# (shell/version's compile and every link behind it, the frameworks'
+# Info.plist, the archives' readmes, the Maven artifacts named by the
+# revision), and a link is a cache hit across commits. Stamped, a build
+# says what a GN build says: tools/gn asks git every time it generates one.
+# A setting of this rule rather than Bazel's own --stamp because the
+# revision names output files (the Maven artifacts' `1.0.0-<revision>`),
+# which a value known only when an action runs cannot do.
+_STAMP_ENV = "FLUTTER_BAZEL_STAMP"
+
+# An unstamped build's revision and content hash: a revision's shape -- forty
+# hexadecimal digits -- for whatever reads one (the tool's engine.stamp, a
+# Maven version).
+_UNSTAMPED = "0" * 40
+
 # Override the values read from the checkout (a build without git, or one
-# that must reproduce another's version strings).
+# that must reproduce another's version strings), stamped or not.
 _ENGINE_VERSION_ENV = "FLUTTER_BAZEL_ENGINE_VERSION"
 _CONTENT_HASH_ENV = "FLUTTER_BAZEL_CONTENT_HASH"
 
@@ -521,7 +543,7 @@ def _prebuilt_engine_version(rctx, root):
     bot was given, a developer's content hash's build). A facsimile under
     --config=prebuilt_engine stamps the artifacts it still takes from the
     tree (the Android shard's gen_snapshots) with this rather than the
-    checkout's HEAD, so that every stamp of the facsimile's cache agrees
+    build's own revision, so that every stamp of the facsimile's cache agrees
     with the engine.stamp it lays from bin/cache.
     """
     stamp = root.get_child("bin", "cache", "engine.stamp")
@@ -550,16 +572,25 @@ def _engine_realm(rctx, root):
         return ""
     return rctx.read(realm_file).strip()
 
+def _stamped(rctx):
+    """Whether the build is stamped: FLUTTER_BAZEL_STAMP set, to anything but an empty word, 0, false or no."""
+    value = rctx.getenv(_STAMP_ENV)
+    return value != None and value.lower() not in ("", "0", "false", "no")
+
 def _engine_version_repository_impl(rctx):
     root = checkout_root(rctx)
     engine_version = rctx.getenv(_ENGINE_VERSION_ENV)
     content_hash = rctx.getenv(_CONTENT_HASH_ENV)
-    if engine_version == None or content_hash == None:
+    if _stamped(rctx) and (engine_version == None or content_hash == None):
         _watch_head(rctx, root)
         if engine_version == None:
             engine_version = _git(rctx, root, ["rev-parse", "HEAD"])
         if content_hash == None:
             content_hash = _content_hash(rctx, root)
+    if engine_version == None:
+        engine_version = _UNSTAMPED
+    if content_hash == None:
+        content_hash = _UNSTAMPED
     rctx.file("BUILD.bazel", _VERSION_BUILD)
     rctx.file("version.bzl", _VERSION_BZL.format(
         engine_version = repr(engine_version),
@@ -573,16 +604,19 @@ def _engine_version_repository_impl(rctx):
 
 engine_version_repository = repository_rule(
     implementation = _engine_version_repository_impl,
-    doc = """The engine's version strings as a `version.bzl` of four constants.
+    doc = """The engine's version strings as a `version.bzl` of constants.
 
 `tools/gn` sets shell/version/version.gni's arguments when it generates a GN
 build: `engine_version` is the checkout's `git rev-parse HEAD`,
 `content_hash` the output of bin/internal/content_aware_hash, and
 `skia_version` and `dart_version` the HEADs of the synced Skia and Dart
-trees, which are their DEPS pins. This rule does the same at fetch time:
-the first two from git (re-read when HEAD moves; `FLUTTER_BAZEL_ENGINE_VERSION`
-and `FLUTTER_BAZEL_CONTENT_HASH` in the environment override them), the
-last two from deps.lock.bzl through the attributes; ENGINE_REALM, the
+trees, which are their DEPS pins. This rule does the same at fetch time for a
+stamped build (`--config=stamp`, FLUTTER_BAZEL_STAMP in the repository
+environment): the first two from git, re-read when HEAD moves. An unstamped
+build, the default, has forty zeros for both and reads nothing of git.
+`FLUTTER_BAZEL_ENGINE_VERSION` and `FLUTTER_BAZEL_CONTENT_HASH` in the
+environment override either. The last two come from deps.lock.bzl through
+the attributes. Besides: ENGINE_REALM, the
 artifacts' storage realm (FLUTTER_REALM, else the checkout's
 bin/cache/engine.realm, else empty), for the tool's SDK facsimile; and
 PREBUILT_ENGINE_VERSION, bin/cache/engine.stamp's revision (empty without

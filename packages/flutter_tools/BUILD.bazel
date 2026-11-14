@@ -303,11 +303,11 @@ _TREE_ENGINE_CACHE_FILES = {
 # engine's stamp and its JSON, the version file, the storage realm), so that
 # the facsimile's stamps say what its artifacts are -- the engine the tool
 # downloaded, which on a developer's machine is the content hash's build,
-# not the checkout's HEAD (the tree's facsimile stamps HEAD, which is what
-# it built) -- and a framework's embedded revision agrees with
-# engine_stamp.json (the content validation tests). An artifact set the
-# tool has not fetched has no stamp here either, and the tool fetches it
-# as the checkout's would.
+# not the checkout's HEAD (the tree's facsimile stamps the revision its
+# build carries, @engine_version's, which is what it built) -- and a
+# framework's embedded revision agrees with engine_stamp.json (the content
+# validation tests). An artifact set the tool has not fetched has no stamp
+# here either, and the tool fetches it as the checkout's would.
 _PREBUILT_ENGINE_CACHE = {
     "@flutter_bin_cache//:common_engine": "",
     "@flutter_bin_cache//:web_sdk": "",
