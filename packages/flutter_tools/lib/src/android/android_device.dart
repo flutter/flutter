@@ -60,15 +60,17 @@ const kKnownHardware = <String, HardwareType>{
 class AndroidDevice extends Device {
   AndroidDevice(
     super.id, {
-    this.productID,
-    required this.modelID,
-    this.deviceCodeName,
-    required super.logger,
-    required ProcessManager processManager,
-    required this._platform,
     required this._androidSdk,
     required this._fileSystem,
+    required super.logger,
+    required this.modelID,
+    required this._platform,
+    required ProcessManager processManager,
+    this._androidBuilder,
     this._androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
+    this._applicationPackageFactory,
+    this.deviceCodeName,
+    this.productID,
   }) : _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
@@ -80,7 +82,9 @@ class AndroidDevice extends Device {
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
+  final AndroidBuilder? _androidBuilder;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
+  final ApplicationPackageFactory? _applicationPackageFactory;
 
   final String? productID;
   final String modelID;
@@ -555,7 +559,7 @@ class AndroidDevice extends Device {
         ],
       ];
 
-      await androidBuilder!.buildApk(
+      await _androidBuilder!.buildApk(
         project: project,
         target: mainPath ?? 'lib/main.dart',
         androidBuildInfo: AndroidBuildInfo(
@@ -568,7 +572,7 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+      builtPackage = await _applicationPackageFactory!.getPackageForPlatform(
         devicePlatform,
         buildInfo: debuggingOptions.buildInfo,
       ) as AndroidApk?;

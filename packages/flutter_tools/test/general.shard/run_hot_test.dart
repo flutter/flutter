@@ -3,15 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -52,7 +57,19 @@ void main() {
       () async {
         final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: getFlutterRoot(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -77,7 +94,19 @@ void main() {
       () async {
         final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: getFlutterRoot(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -102,7 +131,19 @@ void main() {
       () async {
         final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: getFlutterRoot(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -139,7 +180,19 @@ void main() {
       () async {
         final runner = HotRunner(
           flutterDevices,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: getFlutterRoot(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),

@@ -17,8 +17,10 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -86,10 +88,12 @@ void main() {
         ),
       );
 
-      await ApplicationPackageFactory.instance!.getPackageForPlatform(
-        TargetPlatform.android_arm,
-        applicationBinary: apkFile,
-      );
+      await FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => sdk,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: const DelegatingToolContext(),
+      ).getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile);
       final logger = BufferLogger.test();
       final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
@@ -159,10 +163,12 @@ void main() {
         ),
       );
 
-      await ApplicationPackageFactory.instance!.getPackageForPlatform(
-        TargetPlatform.android_arm,
-        applicationBinary: apkFile,
-      );
+      await FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => sdk,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: const DelegatingToolContext(),
+      ).getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile);
       final logger = BufferLogger.test();
       final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
@@ -330,8 +336,12 @@ void main() {
           ),
         );
 
-        final ApplicationPackage applicationPackage = (await ApplicationPackageFactory.instance!
-            .getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile))!;
+        final ApplicationPackage applicationPackage = (await FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => sdk,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: const DelegatingToolContext(),
+        ).getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile))!;
         expect(applicationPackage.name, 'app-debug.apk');
         expect(applicationPackage, isA<PrebuiltApplicationPackage>());
         expect(
@@ -358,7 +368,12 @@ void main() {
       gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
       gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
-      await ApplicationPackageFactory.instance!.getPackageForPlatform(
+      await FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => sdk,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: const DelegatingToolContext(),
+      ).getPackageForPlatform(
         TargetPlatform.android_arm,
         applicationBinary: fs.file('app-debug.apk'),
       );
@@ -371,7 +386,12 @@ void main() {
         final AndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
         sdk.latestVersion = sdkVersion;
 
-        await ApplicationPackageFactory.instance!.getPackageForPlatform(TargetPlatform.android_arm);
+        await FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => sdk,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: const DelegatingToolContext(),
+        ).getPackageForPlatform(TargetPlatform.android_arm);
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
       overrides: overrides,
@@ -826,6 +846,7 @@ void main() {
       final iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
         null,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         toolContext: toolContext,
       ) as BuildableIOSApp?;
 
@@ -838,6 +859,7 @@ void main() {
       final iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
         null,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         toolContext: toolContext,
       ) as BuildableIOSApp?;
 
@@ -851,6 +873,7 @@ void main() {
       final iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
         null,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         toolContext: toolContext,
       ) as BuildableIOSApp?;
 
@@ -869,6 +892,7 @@ void main() {
       final iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
         null,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         toolContext: toolContext,
       ) as BuildableIOSApp?;
 
@@ -881,6 +905,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Name.With.Dots',
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         toolContext: toolContext,
       );
       expect(iosApp.name, 'Name.With.Dots');
@@ -898,6 +923,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         toolContext: toolContext,
       );
       final String iconDirSuffix = fileSystem.path.join(
@@ -915,6 +941,7 @@ void main() {
         ),
         'com.foo.bar',
         'Runner',
+        templatePathProvider: TemplatePathProvider(flutterRoot: getFlutterRoot()),
         toolContext: toolContext,
       );
       final String iconDirSuffix = fileSystem.path.join(
@@ -964,6 +991,7 @@ void main() {
         ),
         'com.foo.bar',
         'Runner',
+        templatePathProvider: TemplatePathProvider(flutterRoot: getFlutterRoot()),
         toolContext: toolContext,
       );
       final String iconDirSuffix = fileSystem.path.join(
@@ -988,6 +1016,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         toolContext: toolContext,
       );
       final String launchImageDirSuffix = fileSystem.path.join(
@@ -1005,6 +1034,7 @@ void main() {
         ),
         'com.foo.bar',
         'Runner',
+        templatePathProvider: TemplatePathProvider(flutterRoot: getFlutterRoot()),
         toolContext: toolContext,
       );
       final String launchImageDirSuffix = fileSystem.path.join(
@@ -1054,6 +1084,7 @@ void main() {
         ),
         'com.foo.bar',
         'Runner',
+        templatePathProvider: TemplatePathProvider(flutterRoot: getFlutterRoot()),
         toolContext: toolContext,
       );
       final String launchImageDirSuffix = fileSystem.path.join(

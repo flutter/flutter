@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/template.dart';
 
 import '../../src/android_common.dart';
 
@@ -197,10 +198,12 @@ class FakeBuildCommand extends BuildCommand {
     required super.toolContext,
     AndroidBuilder? androidBuilder,
     FeatureFlags? featureFlags,
+    TemplatePathProvider? templatePathProvider,
     bool verboseHelp = false,
   }) : super(
          androidBuilder: androidBuilder ?? FakeAndroidBuilder(),
          featureFlags: featureFlags ?? TestFeatureFlags(),
+         templatePathProvider: templatePathProvider ?? const TemplatePathProvider(flutterRoot: ''),
          verboseHelp: verboseHelp,
        ) {
     addSubcommand(

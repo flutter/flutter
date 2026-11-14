@@ -13,7 +13,9 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -29,6 +31,11 @@ void main() {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(operatingSystem: 'macos'),
+        ),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
@@ -44,6 +51,11 @@ void main() {
     testWithoutContext('discovery not allowed', () async {
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(operatingSystem: 'macos'),
+        ),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
@@ -62,6 +74,11 @@ void main() {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(operatingSystem: 'macos'),
+        ),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
@@ -80,6 +97,11 @@ void main() {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: false),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(operatingSystem: 'macos'),
+        ),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
@@ -98,6 +120,11 @@ void main() {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(operatingSystem: 'macos'),
+        ),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
@@ -123,6 +150,11 @@ void main() {
 
   testWithoutContext('MacOSDesignedForIPadDevice properties', () async {
     final device = MacOSDesignedForIPadDevice(
+      mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+        analytics: const NoOpAnalytics(),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'macos'),
+      ),
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
         logger: BufferLogger.test(),

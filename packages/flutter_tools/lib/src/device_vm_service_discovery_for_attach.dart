@@ -74,6 +74,7 @@ class LogScanningVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach
 class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   MdnsVMServiceDiscoveryForAttach({
     required this.device,
+    required this.mdnsVmServiceDiscovery,
     required this.useDeviceIPAsHost,
     required this.usesIpv6,
     this.appId,
@@ -83,6 +84,7 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   });
 
   final Device device;
+  final MDnsVmServiceDiscovery mdnsVmServiceDiscovery;
   final String? appId;
   final bool usesIpv6;
   final bool useDeviceIPAsHost;
@@ -92,16 +94,15 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
 
   @override
   Stream<Uri> get uris {
-    final Future<Uri?> mDNSDiscoveryFuture = MDnsVmServiceDiscovery.instance!
-        .getVMServiceUriForAttach(
-          appId,
-          device,
-          deviceVmservicePort: deviceVmservicePort,
-          hostVmservicePort: hostVmservicePort,
-          throwOnError: throwOnError,
-          useDeviceIPAsHost: useDeviceIPAsHost,
-          usesIpv6: usesIpv6,
-        );
+    final Future<Uri?> mDNSDiscoveryFuture = mdnsVmServiceDiscovery.getVMServiceUriForAttach(
+      appId,
+      device,
+      deviceVmservicePort: deviceVmservicePort,
+      hostVmservicePort: hostVmservicePort,
+      throwOnError: throwOnError,
+      useDeviceIPAsHost: useDeviceIPAsHost,
+      usesIpv6: usesIpv6,
+    );
 
     return Stream<Uri?>.fromFuture(mDNSDiscoveryFuture)
         .where((Uri? uri) => uri != null)

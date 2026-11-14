@@ -29,6 +29,7 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -2639,6 +2640,7 @@ Future<void> regeneratePlatformSpecificTooling(
     ),
     plistParser: FakePlistParser(),
     releaseMode: releaseMode,
+    templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
     templateRenderer: const MustacheTemplateRenderer(),
   );
 }

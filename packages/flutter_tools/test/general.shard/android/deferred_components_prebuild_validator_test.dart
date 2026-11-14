@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/template.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart';
@@ -32,6 +33,7 @@ void main() {
   testWithoutContext('No checks passes', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
+      templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
@@ -45,6 +47,7 @@ void main() {
   testWithoutContext('clearTempDir passes', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
+      templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
@@ -84,6 +87,7 @@ void main() {
 
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
+      templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
@@ -156,6 +160,7 @@ void main() {
 
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
+      templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
@@ -213,6 +218,7 @@ void main() {
 
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
+      templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
@@ -249,6 +255,7 @@ void main() {
   testWithoutContext('androidStringMapping creates new file', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
+      templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
@@ -342,6 +349,7 @@ void main() {
   testWithoutContext('androidStringMapping modifies strings file', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
+      templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,

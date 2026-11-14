@@ -18,7 +18,6 @@ import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fakes.dart';
 import 'utils/preview_project.dart';
 
@@ -42,38 +41,45 @@ void main() {
       root.deleteSync(recursive: true);
     });
 
-    testUsingContext(
-      'creates dependency_overrides for previewed project dependencies',
-      () async {
-        const kPackageProjectName = 'abcd';
-        const kExampleProjectName = 'example';
-        final workspace = WidgetPreviewWorkspace(workspaceRoot: root);
-        final WidgetPreviewProject packageProject = await workspace.createWorkspaceProject(
-          name: kPackageProjectName,
-        );
-        final WidgetPreviewProject exampleProject = await workspace.createWorkspaceProject(
-          name: kExampleProjectName,
-        );
+    testWithoutContext('creates dependency_overrides for previewed project dependencies', () async {
+      const kPackageProjectName = 'abcd';
+      const kExampleProjectName = 'example';
+      final workspace = WidgetPreviewWorkspace(workspaceRoot: root);
+      final WidgetPreviewProject packageProject = await workspace.createWorkspaceProject(
+        name: kPackageProjectName,
+      );
+      final WidgetPreviewProject exampleProject = await workspace.createWorkspaceProject(
+        name: kExampleProjectName,
+      );
 
-        // Add a dependency on the package project from the example project.
-        exampleProject.writePubspec('''
+      // Add a dependency on the package project from the example project.
+      exampleProject.writePubspec('''
 ${exampleProject.initialPubspecContents}
   ${packageProject.packageName}: # This resolves to the other package in the workspace
 ''');
 
-        final FlutterProject rootProject = FlutterProject.fromDirectory(root, logger: logger);
-        final pubspecBuilder = PreviewPubspecBuilder(
+      final FlutterProject rootProject = FlutterProject.fromDirectory(root, logger: logger);
+      final pubspecBuilder = PreviewPubspecBuilder(
+        logger: logger,
+        verbose: true,
+        offline: false,
+        pub: Pub.test(
+          flutterRoot: getFlutterRoot(),
+          fileSystem: fs,
           logger: logger,
-          verbose: true,
-          offline: false,
-          rootProject: rootProject,
-          previewManifest: FakePreviewManifest(),
-        );
+          processManager: processManager,
+          botDetector: const FakeBotDetector(true),
+          platform: const LocalPlatform(),
+          stdio: Stdio.test(stdout: stdout, stderr: stderr),
+        ),
+        rootProject: rootProject,
+        previewManifest: FakePreviewManifest(),
+      );
 
-        // Bare minimum initialization of the widget_preview_scaffold project.
-        rootProject.widgetPreviewScaffold.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+      // Bare minimum initialization of the widget_preview_scaffold project.
+      rootProject.widgetPreviewScaffold.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
 name: widget_preview_scaffold
 environment:
   sdk: ^3.7.0
@@ -85,52 +91,40 @@ dependencies:
     sdk: flutter
 ''');
 
-        // Populate .dart_tool/widget_preview_scaffold/pubspec.yaml with the dependencies on the
-        // local projects.
-        await pubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
-        final yaml = loadYaml(
-          rootProject.widgetPreviewScaffoldProject.pubspecFile.readAsStringSync(),
-        ) as YamlMap;
-        final expectedDependencies = <String, Object?>{
-          'abcd': {'path': packageProject.projectRoot.path.replaceAll(r'\', '/')},
-          'example': {'path': exampleProject.projectRoot.path.replaceAll(r'\', '/')},
-        };
+      // Populate .dart_tool/widget_preview_scaffold/pubspec.yaml with the dependencies on the
+      // local projects.
+      await pubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
+      final yaml = loadYaml(
+        rootProject.widgetPreviewScaffoldProject.pubspecFile.readAsStringSync(),
+      ) as YamlMap;
+      final expectedDependencies = <String, Object?>{
+        'abcd': {'path': packageProject.projectRoot.path.replaceAll(r'\', '/')},
+        'example': {'path': exampleProject.projectRoot.path.replaceAll(r'\', '/')},
+      };
 
-        // The generated pubspec.yaml should have path dependencies on both the package and example
-        // projects, but should also have dependency_overrides set to handle cases where one
-        // project in a workspace depends on another without explicitly specifying a path
-        // dependency (e.g., a dependency of the form "some_workspace_package: " with no version
-        // constraint or path).
-        if (yaml case {
-          'dependencies': final YamlMap dependencies,
-          'dependency_overrides': final YamlMap dependencyOverrides,
-        }) {
-          for (final MapEntry(key: package, value: constraint) in expectedDependencies.entries) {
-            expect(dependencies[package], constraint);
-            expect(dependencyOverrides[package], constraint);
-          }
-        } else {
-          fail('''
+      // The generated pubspec.yaml should have path dependencies on both the package and example
+      // projects, but should also have dependency_overrides set to handle cases where one
+      // project in a workspace depends on another without explicitly specifying a path
+      // dependency (e.g., a dependency of the form "some_workspace_package: " with no version
+      // constraint or path).
+      if (yaml case {
+        'dependencies': final YamlMap dependencies,
+        'dependency_overrides': final YamlMap dependencyOverrides,
+      }) {
+        for (final MapEntry(key: package, value: constraint) in expectedDependencies.entries) {
+          expect(dependencies[package], constraint);
+          expect(dependencyOverrides[package], constraint);
+        }
+      } else {
+        fail('''
 Did not find the following dependencies for "dependencies" or "dependency_overrides":
 $expectedDependencies
 
 Actual pubspec:
 $yaml
 ''');
-        }
-      },
-      overrides: {
-        Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
-          fileSystem: fs,
-          logger: logger,
-          processManager: processManager,
-          botDetector: const FakeBotDetector(true),
-          platform: const LocalPlatform(),
-          stdio: Stdio.test(stdout: stdout, stderr: stderr),
-        ),
-      },
-    );
+      }
+    });
   });
 }
 

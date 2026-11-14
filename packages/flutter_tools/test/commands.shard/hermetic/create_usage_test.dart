@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -25,6 +26,7 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
+import '../../src/throwing_pub.dart';
 
 class FakePub extends Fake implements Pub {
   int calledGetOffline = 0;
@@ -181,6 +183,8 @@ void main() {
       return CreateCommand(
         androidContext: FakeAndroidContext(),
         appleContext: FakeAppleContext(),
+        pub: pub ?? const ThrowingPub(),
+        templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fs,
@@ -192,7 +196,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger, config: config),
         ),
-        pub: pub,
       );
     }
 

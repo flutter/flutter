@@ -10,12 +10,15 @@ import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'src/android/android_builder.dart';
 import 'src/android/android_sdk.dart';
 import 'src/android/android_studio.dart';
 import 'src/android/android_workflow.dart';
 import 'src/android/gradle_utils.dart';
 import 'src/android/java.dart';
+import 'src/application_package.dart';
 import 'src/artifacts.dart';
+import 'src/asset.dart';
 import 'src/base/async_guard.dart';
 import 'src/base/bot_detector.dart';
 import 'src/base/common.dart';
@@ -44,6 +47,7 @@ import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
 import 'src/custom_devices/custom_devices_config.dart';
+import 'src/dart/pub.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
@@ -51,6 +55,7 @@ import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
 import 'src/git.dart';
+import 'src/hook_runner.dart';
 import 'src/ios/ios_workflow.dart';
 import 'src/ios/plist_parser.dart';
 import 'src/ios/simulators.dart';
@@ -60,16 +65,20 @@ import 'src/macos/cocoapods_validator.dart';
 import 'src/macos/macos_workflow.dart';
 import 'src/macos/xcdevice.dart';
 import 'src/macos/xcode.dart';
+import 'src/mdns_discovery.dart';
 import 'src/native_assets.dart';
 import 'src/persistent_tool_state.dart';
 import 'src/pre_run_validator.dart';
 import 'src/project.dart';
 import 'src/reporting/crash_reporting.dart';
 import 'src/reporting/unified_analytics.dart';
+import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/runner/local_engine.dart';
+import 'src/template.dart';
 import 'src/version.dart';
+import 'src/web/web_runner.dart';
 import 'src/windows/windows_workflow.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
@@ -79,6 +88,7 @@ Future<int> run(
   required ShutdownHooks shutdownHooks,
   BuildTargets? buildTargets,
   List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
+  FlutterHookRunner? flutterHookRunner,
   String? flutterVersion,
   bool muteCommandLogging = false,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
@@ -89,6 +99,7 @@ Future<int> run(
   TemplateRenderer? templateRenderer,
   bool verbose = false,
   bool verboseHelp = false,
+  WebRunnerFactory? webRunnerFactory,
 }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
@@ -149,6 +160,7 @@ Future<int> run(
             .resolveOverride<HttpClientFactory>();
         final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
           analytics: bootstrapContext.resolveOverride<Analytics>(),
+          androidBuilder: bootstrapContext.resolveOverride<AndroidBuilder>(),
           androidSdkBuilder: bootstrapContext.hasOverride(AndroidSdk)
               ? () => bootstrapContext.resolveOverride<AndroidSdk>()
               : null,
@@ -156,7 +168,9 @@ Future<int> run(
               ? () => bootstrapContext.resolveOverride<AndroidStudio>()
               : null,
           androidWorkflow: bootstrapContext.resolveOverride<AndroidWorkflow>(),
+          applicationPackageFactory: bootstrapContext.resolveOverride<ApplicationPackageFactory>(),
           artifacts: bootstrapContext.resolveOverride<Artifacts>(),
+          assetBundleFactory: bootstrapContext.resolveOverride<AssetBundleFactory>(),
           botDetector: bootstrapContext.resolveOverride<BotDetector>(),
           buildSystem: bootstrapContext.resolveOverride<BuildSystem>(),
           buildTargets: buildTargets ?? bootstrapContext.resolveOverride<BuildTargets>(),
@@ -171,11 +185,14 @@ Future<int> run(
           crashReporter: bootstrapContext.resolveOverride<CrashReporter>(),
           customDevicesConfig: bootstrapContext.resolveOverride<CustomDevicesConfig>(),
           deviceManager: bootstrapContext.resolveOverride<DeviceManager>(),
+          devtoolsLauncher: bootstrapContext.resolveOverride<DevtoolsLauncher>(),
           doctor: bootstrapContext.resolveOverride<Doctor>(),
           doctorValidatorsProvider: overriddenDoctorValidatorsProvider,
           emulatorManager: bootstrapContext.resolveOverride<EmulatorManager>(),
           extensionEntryPoints: extensionEntryPoints,
           featureFlags: bootstrapContext.resolveOverride<FeatureFlags>(),
+          flutterHookRunner:
+              flutterHookRunner ?? bootstrapContext.resolveOverride<FlutterHookRunner>(),
           flutterVersion: bootstrapContext.resolveOverride<FlutterVersion>(),
           fs: bootstrapContext.resolveOverride<FileSystem>(),
           git: bootstrapContext.resolveOverride<Git>(),
@@ -195,6 +212,7 @@ Future<int> run(
           localEngineLocator: bootstrapContext.resolveOverride<LocalEngineLocator>(),
           logger: bootstrapContext.resolveOverride<Logger>(),
           macOSWorkflow: bootstrapContext.resolveOverride<MacOSWorkflow>(),
+          mdnsVmServiceDiscovery: bootstrapContext.resolveOverride<MDnsVmServiceDiscovery>(),
           nativeAssetsBuilder:
               nativeAssetsBuilder ??
               bootstrapContext.resolveOverride<TestCompilerNativeAssetsBuilder>(),
@@ -211,13 +229,17 @@ Future<int> run(
           processInfo: bootstrapContext.resolveOverride<ProcessInfo>(),
           processManager: bootstrapContext.resolveOverride<ProcessManager>(),
           projectFactory: bootstrapContext.resolveOverride<FlutterProjectFactory>(),
+          pub: bootstrapContext.resolveOverride<Pub>(),
           shutdownHooks: shutdownHooks,
           signals: bootstrapContext.resolveOverride<Signals>(),
           stdio: initialStdio,
           systemClock: initialSystemClock,
+          templatePathProvider: bootstrapContext.resolveOverride<TemplatePathProvider>(),
           templateRenderer: overriddenTemplateRenderer,
           terminal: initialTerminal,
           userMessages: bootstrapContext.resolveOverride<UserMessages>(),
+          webRunnerFactory:
+              webRunnerFactory ?? bootstrapContext.resolveOverride<WebRunnerFactory>(),
           windowsWorkflow: bootstrapContext.resolveOverride<WindowsWorkflow>(),
           xcdeviceBuilder: bootstrapContext.hasOverride(XCDevice)
               ? () => bootstrapContext.resolveOverride<XCDevice>()
@@ -231,20 +253,29 @@ Future<int> run(
         );
         final ToolDependencies(
           :Analytics analytics,
+          :AndroidBuilder androidBuilder,
           :AndroidContext androidContext,
           :AndroidWorkflow androidWorkflow,
           :AppleContext appleContext,
+          :ApplicationPackageFactory applicationPackageFactory,
+          :AssetBundleFactory assetBundleFactory,
           :BuildSystem buildSystem,
           buildTargets: BuildTargets resolvedBuildTargets,
           :CrashReporter crashReporter,
           :DeviceManager deviceManager,
+          :DevtoolsLauncher devtoolsLauncher,
           :Doctor doctor,
           :EmulatorManager emulatorManager,
           :ExtensionManager? extensionManager,
           :FeatureFlags featureFlags,
+          flutterHookRunner: FlutterHookRunner? resolvedFlutterHookRunner,
           :MacOSWorkflow macOSWorkflow,
+          :MDnsVmServiceDiscovery mdnsVmServiceDiscovery,
+          :Pub pub,
+          :TemplatePathProvider templatePathProvider,
           templateRenderer: TemplateRenderer resolvedTemplateRenderer,
           :ToolContext toolContext,
+          webRunnerFactory: WebRunnerFactory? resolvedWebRunnerFactory,
           :WindowsWorkflow windowsWorkflow,
         ) = toolDeps;
         final ToolContext(
@@ -290,11 +321,14 @@ Future<int> run(
         return context.run<int>(
           overrides: <Type, Generator>{
             Analytics: () => analytics,
+            AndroidBuilder: () => androidBuilder,
             AndroidSdk: () => androidContext.androidSdk,
             AndroidStudio: () => androidContext.androidStudio,
             AndroidWorkflow: () => androidWorkflow,
             AnsiTerminal: () => terminal,
+            ApplicationPackageFactory: () => applicationPackageFactory,
             Artifacts: () => artifacts,
+            AssetBundleFactory: () => assetBundleFactory,
             BotDetector: () => botDetector,
             BuildSystem: () => buildSystem,
             BuildTargets: () => resolvedBuildTargets,
@@ -305,11 +339,14 @@ Future<int> run(
             CrashReporter: () => crashReporter,
             CustomDevicesConfig: () => customDevicesConfig,
             DeviceManager: () => deviceManager,
+            DevtoolsLauncher: () => devtoolsLauncher,
             Doctor: () => doctor,
             DoctorValidatorsProvider: createDoctorValidatorsProvider,
             EmulatorManager: () => emulatorManager,
             FeatureFlags: () => featureFlags,
             FileSystem: () => fs,
+            if (resolvedFlutterHookRunner != null)
+              FlutterHookRunner: () => resolvedFlutterHookRunner,
             FlutterProjectFactory: () => projectFactory,
             FlutterVersion: () => resolvedFlutterVersion,
             Git: () => git,
@@ -320,6 +357,7 @@ Future<int> run(
             LocalEngineLocator: () => localEngineLocator,
             Logger: () => logger,
             MacOSWorkflow: () => macOSWorkflow,
+            MDnsVmServiceDiscovery: () => mdnsVmServiceDiscovery,
             OperatingSystemUtils: () => os,
             OutputPreferences: () => outputPreferences,
             PersistentToolState: () => persistentToolState,
@@ -329,12 +367,15 @@ Future<int> run(
             ProcessInfo: () => processInfo,
             ProcessManager: () => processManager,
             ProcessUtils: () => processUtils,
+            Pub: () => pub,
             ShutdownHooks: () => shutdownHooks,
             Signals: () => signals,
             Stdio: () => stdio,
             SystemClock: () => systemClock,
+            TemplatePathProvider: () => templatePathProvider,
             TemplateRenderer: () => resolvedTemplateRenderer,
             UserMessages: () => userMessages,
+            if (resolvedWebRunnerFactory != null) WebRunnerFactory: () => resolvedWebRunnerFactory,
             WindowsWorkflow: () => windowsWorkflow,
             XCDevice: () => appleContext.xcdevice,
             Xcode: () => appleContext.xcode,
@@ -344,12 +385,16 @@ Future<int> run(
             final runner = FlutterCommandRunner(
               analytics: analytics,
               androidContext: androidContext,
+              applicationPackageFactory: applicationPackageFactory,
               cocoaPods: appleContext.cocoaPods,
               deviceManager: deviceManager,
+              devtoolsLauncher: devtoolsLauncher,
               doctor: doctor,
               extensionManager: extensionManager!,
               featureFlags: featureFlags,
               plistParser: appleContext.plistParser,
+              pub: pub,
+              templatePathProvider: templatePathProvider,
               templateRenderer: resolvedTemplateRenderer,
               toolContext: toolContext,
               verboseHelp: verboseHelp,

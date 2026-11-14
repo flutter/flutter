@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -120,6 +121,7 @@ void main() {
         ]);
 
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -203,6 +205,7 @@ void main() {
         ]);
 
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -257,6 +260,7 @@ void main() {
         ]);
 
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -328,6 +332,7 @@ void main() {
         ]);
 
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -397,6 +402,7 @@ void main() {
         ]);
 
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -466,6 +472,7 @@ void main() {
         ]);
 
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -535,6 +542,7 @@ void main() {
         ]);
 
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -561,6 +569,7 @@ void main() {
           flutterRoot: flutterRoot,
         );
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -580,6 +589,7 @@ void main() {
           flutterRoot: flutterRoot,
         );
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -599,6 +609,7 @@ void main() {
           flutterRoot: flutterRoot,
         );
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -618,6 +629,7 @@ void main() {
           flutterRoot: flutterRoot,
         );
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -659,6 +671,7 @@ void main() {
           hostAppProjectName: 'Runner',
         );
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -719,6 +732,7 @@ void main() {
         );
 
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -784,6 +798,7 @@ void main() {
             isTemporaryProject: true,
           );
           final xcodeDebug = XcodeDebug(
+            templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
             logger: logger,
             processManager: fakeProcessManager,
             xcode: xcode,
@@ -848,6 +863,7 @@ void main() {
           hostAppProjectName: 'Runner',
         );
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -888,6 +904,7 @@ void main() {
             isTemporaryProject: true,
           );
           final xcodeDebug = XcodeDebug(
+            templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
             logger: logger,
             processManager: FakeProcessManager.any(),
             xcode: xcode,
@@ -943,6 +960,7 @@ void main() {
 
       testWithoutContext('succeeds with all optional flags', () async {
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -985,6 +1003,7 @@ void main() {
 
       testWithoutContext('fails if osascript output returns false status', () async {
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -1039,6 +1058,7 @@ void main() {
 
       testWithoutContext('succeeds', () async {
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -1057,6 +1077,7 @@ void main() {
 
       testWithoutContext('prints error if scheme file not found', () async {
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -1073,6 +1094,7 @@ void main() {
 
       testWithoutContext('throws error if launch action is missing debugger info', () async {
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -1093,6 +1115,7 @@ void main() {
 
       testWithoutContext('prints error if unable to find launch action', () async {
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -1111,6 +1134,7 @@ void main() {
 
       testWithoutContext('prints error if invalid xml', () async {
         final xcodeDebug = XcodeDebug(
+          templatePathProvider: const TemplatePathProvider(flutterRoot: flutterRoot),
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -1152,6 +1176,7 @@ void main() {
       final localFileSystem = LocalFileSystem.test(signals: FakeSignals());
       addTearDown(localFileSystem.dispose);
       final xcodeDebug = XcodeDebug(
+        templatePathProvider: TemplatePathProvider(flutterRoot: getFlutterRoot()),
         logger: logger,
         processManager: fakeProcessManager,
         xcode: xcode,

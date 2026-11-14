@@ -5,15 +5,19 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/fakes.dart' show FakeToolContext, TestFeatureFlags;
+import '../../src/fakes.dart'
+    show FakeDevtoolsLauncher, FakePlistParser, FakeToolContext, TestFeatureFlags;
 import '../../src/test_build_system.dart';
 
 void main() {
@@ -27,8 +31,16 @@ void main() {
 
     final server = DaemonServer(
       analytics: const NoOpAnalytics(),
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(),
+      ),
+      assetBundleFactory: _FakeAssetBundleFactory(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
+      devtoolsLauncher: FakeDevtoolsLauncher(),
       toolContext: FakeToolContext(),
       xcode: null,
       port: 123,
@@ -57,8 +69,16 @@ void main() {
 
     final server = DaemonServer(
       analytics: const NoOpAnalytics(),
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(),
+      ),
+      assetBundleFactory: _FakeAssetBundleFactory(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
+      devtoolsLauncher: FakeDevtoolsLauncher(),
       toolContext: FakeToolContext(),
       xcode: null,
       port: 123,
@@ -86,8 +106,16 @@ void main() {
 
     final server = DaemonServer(
       analytics: const NoOpAnalytics(),
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(),
+      ),
+      assetBundleFactory: _FakeAssetBundleFactory(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
+      devtoolsLauncher: FakeDevtoolsLauncher(),
       toolContext: FakeToolContext(),
       xcode: null,
       port: 123,
@@ -108,6 +136,8 @@ void main() {
     expect(completed, isTrue);
   });
 }
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}
 
 class FakeServerSocket extends Fake implements ServerSocket {
   FakeServerSocket({this.closeImmediately = true});
