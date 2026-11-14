@@ -362,6 +362,7 @@ class RunCommand extends RunCommandBase {
       DebuggingOptionDescriptors.pidFile,
       DebuggingOptionDescriptors.reportReady,
       _benchmark,
+      _noUninstall,
     ], verboseHelp: verboseHelp);
   }
 
@@ -387,6 +388,12 @@ class RunCommand extends RunCommandBase {
     defaultsTo: true,
     verboseOnly: true,
     help: 'Stay resident after launching the application. Not available with "--trace-startup".',
+  );
+
+  static const _noUninstall = FlagOptionDescriptor(
+    name: 'no-uninstall',
+    negatable: false,
+    help: 'Do not uninstall an existing Android app if installing the new APK fails.',
   );
 
   static const _benchmark = FlagOptionDescriptor(
@@ -738,6 +745,14 @@ class RunCommand extends RunCommandBase {
       :Terminal terminal,
     ) = toolContext;
     final ProcessInfo processInfo = this.processInfo;
+
+    if (getValue(_noUninstall)) {
+      for (final Device device in devices!) {
+        if (device is AndroidDevice) {
+          device.uninstallOnInstallFailure = false;
+        }
+      }
+    }
 
     final BuildInfo buildInfo = await getBuildInfo();
     // Enable hot mode by default if `--no-hot` was not passed and we are in
