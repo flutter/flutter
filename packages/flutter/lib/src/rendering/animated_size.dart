@@ -4,6 +4,7 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'box.dart';
 import 'layer.dart';
@@ -87,7 +88,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     _controller =
         AnimationController(vsync: vsync, duration: duration, reverseDuration: reverseDuration)
           ..addListener(() {
-            if (_controller.value != _lastValue) {
+            // performLayout starts the controller. With a zero duration,
+            // forward() completes and notifies synchronously, before it
+            // returns. The layout in progress reads the new value itself, so
+            // it must not be re-dirtied here.
+            if (_controller.value != _lastValue && !_isForwardingDuringLayout) {
               markNeedsLayout();
             }
           });
@@ -134,6 +139,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   final SizeTween _sizeTween = SizeTween();
   late bool _hasVisualOverflow;
   double? _lastValue;
+  bool _isForwardingDuringLayout = false;
+  bool _hasPendingOnEnd = false;
 
   /// The state this size animation is in.
   ///
@@ -217,8 +224,12 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     super.attach(owner);
     switch (state) {
       case RenderAnimatedSizeState.start:
-      case RenderAnimatedSizeState.stable:
         break;
+      case RenderAnimatedSizeState.stable:
+        // Resume an animation that a detach interrupted.
+        if (_sizeTween.begin != _sizeTween.end && _controller.value != _controller.upperBound) {
+          markNeedsLayout();
+        }
       case RenderAnimatedSizeState.changed:
       case RenderAnimatedSizeState.unstable:
         // Call markNeedsLayout in case the RenderObject isn't marked dirty
@@ -230,6 +241,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   @override
   void detach() {
+    _hasPendingOnEnd = false;
     _controller.stop();
     _controller.removeStatusListener(_animationStatusListener);
     super.detach();
@@ -247,6 +259,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     _hasVisualOverflow = false;
     final BoxConstraints constraints = this.constraints;
     if (child == null || constraints.isTight) {
+      _hasPendingOnEnd = false;
       _controller.stop();
       size = _currentSize = _sizeTween.begin = _sizeTween.end = constraints.smallest;
       _state = RenderAnimatedSizeState.start;
@@ -265,6 +278,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         _layoutChanged();
       case RenderAnimatedSizeState.unstable:
         _layoutUnstable();
+    }
+    // With a zero duration, forward() completes before it returns, so there
+    // is no animation left to track the child size against.
+    if (_controller.isCompleted) {
+      _state = RenderAnimatedSizeState.stable;
     }
 
     size = _currentSize = constraints.constrain(_animatedSize!);
@@ -286,17 +304,27 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     // size without modifying global state. See performLayout for comments
     // explaining the rational behind the implementation.
     final Size childSize = child!.getDryLayout(constraints);
+    // performLayout resumes a stopped animation (for example after a detach),
+    // and with a zero duration it completes at once.
+    final bool resumesToEnd = !_controller.isAnimating && _controller.duration == Duration.zero;
     switch (_state) {
       case RenderAnimatedSizeState.start:
         return constraints.constrain(childSize);
       case RenderAnimatedSizeState.stable:
         if (_sizeTween.end != childSize) {
-          return constraints.constrain(_currentSize);
-        } else if (_controller.value == _controller.upperBound) {
+          // performLayout restarts the animation, which completes at once
+          // with a zero duration.
+          return constraints.constrain(
+            _controller.duration == Duration.zero ? childSize : _currentSize,
+          );
+        } else if (_controller.value == _controller.upperBound || resumesToEnd) {
+          return constraints.constrain(childSize);
+        }
+      case RenderAnimatedSizeState.changed:
+        if (_sizeTween.end != childSize || resumesToEnd) {
           return constraints.constrain(childSize);
         }
       case RenderAnimatedSizeState.unstable:
-      case RenderAnimatedSizeState.changed:
         if (_sizeTween.end != childSize) {
           return constraints.constrain(childSize);
         }
@@ -307,7 +335,16 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   void _restartAnimation() {
     _lastValue = 0.0;
-    _controller.forward(from: 0.0);
+    _forwardDuringLayout(from: 0.0);
+  }
+
+  void _forwardDuringLayout({double? from}) {
+    _isForwardingDuringLayout = true;
+    try {
+      _controller.forward(from: from);
+    } finally {
+      _isForwardingDuringLayout = false;
+    }
   }
 
   /// Laying out the child for the first time.
@@ -334,7 +371,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       // Animation finished. Reset target sizes.
       _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
     } else if (!_controller.isAnimating) {
-      _controller.forward(); // resume the animation after being detached
+      _forwardDuringLayout(); // resume the animation after being detached
     }
   }
 
@@ -355,7 +392,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       _state = RenderAnimatedSizeState.stable;
       if (!_controller.isAnimating) {
         // Resume the animation after being detached.
-        _controller.forward();
+        _forwardDuringLayout();
       }
     }
   }
@@ -370,13 +407,34 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       _restartAnimation();
     } else {
       // Child size stabilized.
+      _hasPendingOnEnd = false;
       _controller.stop();
       _state = RenderAnimatedSizeState.stable;
     }
   }
 
   void _animationStatusListener(AnimationStatus status) {
-    if (status.isCompleted) {
+    if (!status.isCompleted || _onEnd == null) {
+      return;
+    }
+    // onEnd can call setState() or read the size, which is not allowed
+    // during layout.
+    if (_isForwardingDuringLayout) {
+      if (_hasPendingOnEnd) {
+        return;
+      }
+      _hasPendingOnEnd = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!_hasPendingOnEnd) {
+          return;
+        }
+        _hasPendingOnEnd = false;
+        if (attached && _controller.isCompleted) {
+          _onEnd?.call();
+        }
+      }, debugLabel: 'RenderAnimatedSize.onEnd');
+    } else {
+      _hasPendingOnEnd = false;
       _onEnd?.call();
     }
   }
