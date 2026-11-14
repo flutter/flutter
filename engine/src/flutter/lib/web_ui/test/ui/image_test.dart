@@ -197,6 +197,30 @@ Future<void> testMain() async {
     codec.dispose();
   });
 
+  test(
+    'instantiateImageCodecWithSize does not create a full-size image to read the size',
+    () async {
+      final ui.ImmutableBuffer imageBuffer = await _createImageBuffer();
+      final createdImages = <ui.Image>[];
+      addTearDown(() => ui.Image.onCreate = null);
+      ui.Image.onCreate = createdImages.add;
+
+      final ui.Codec codec = await ui.instantiateImageCodecWithSize(
+        imageBuffer,
+        getTargetSize: (int w, int h) => ui.TargetImageSize(width: w ~/ 2, height: h ~/ 2),
+      );
+      addTearDown(codec.dispose);
+      expect(createdImages, isEmpty);
+
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      addTearDown(frameInfo.image.dispose);
+      expect(createdImages, hasLength(1));
+      expect(frameInfo.image.width, 5);
+      expect(frameInfo.image.height, 5);
+    },
+    skip: !browserSupportsImageDecoder,
+  );
+
   test('ImageDescriptor.instantiateCodec honors upscaling when requested', () async {
     final ui.ImmutableBuffer imageBuffer = await _createImageBuffer();
     final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(imageBuffer);

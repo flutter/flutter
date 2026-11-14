@@ -63,6 +63,8 @@ class BrowserImageDecoder {
       }
     } finally {
       _onDisposeCallbacks.clear();
+      _pendingFrame?.close();
+      _pendingFrame = null;
       _cachedWebDecoder?.close();
       _cachedWebDecoder = null;
 
@@ -92,6 +94,32 @@ class BrowserImageDecoder {
   /// This is only meant to be used in tests.
   @visibleForTesting
   ImageDecoder? get debugCachedWebDecoder => _cachedWebDecoder;
+
+  /// The first frame, decoded by [decodeFirstFrameSize] and not yet returned
+  /// by [getNextFrame].
+  VideoFrame? _pendingFrame;
+
+  /// The frame kept by [decodeFirstFrameSize] until the next call to
+  /// [getNextFrame].
+  ///
+  /// This is only meant to be used in tests.
+  @visibleForTesting
+  VideoFrame? get debugPendingFrame => _pendingFrame;
+
+  /// Decodes the first frame and returns its size.
+  ///
+  /// The decoded frame is kept and returned by the next call to
+  /// [getNextFrame]. This lets callers choose a target size from the intrinsic
+  /// size of the image without decoding the first frame twice.
+  ///
+  /// Must be called after [initialize] and before the first call to
+  /// [getNextFrame].
+  Future<BitmapSize> decodeFirstFrameSize() async {
+    assert(_nextFrameIndex == 0 && _pendingFrame == null);
+    final VideoFrame frame = await getNextFrame();
+    _pendingFrame = frame;
+    return BitmapSize(frame.displayWidth.toInt(), frame.displayHeight.toInt());
+  }
 
   Future<void> initialize() async {
     final ImageDecoder webDecoder = await _createWebDecoder();
@@ -166,6 +194,11 @@ class BrowserImageDecoder {
         'Cannot decode image. The image decoder has been disposed.\n'
         'Image source: $debugSource',
       );
+    }
+    final VideoFrame? pendingFrame = _pendingFrame;
+    if (pendingFrame != null) {
+      _pendingFrame = null;
+      return pendingFrame;
     }
     final ImageDecoder? webDecoder = _cachedWebDecoder;
     if (webDecoder == null) {
@@ -403,6 +436,58 @@ Future<ui.Codec> engineInstantiateImageCodec(
         'without builtin image codecs.',
       );
     }
+  }
+}
+
+/// Instantiates a codec for [list] that decodes frames at the size returned
+/// by [getTargetSize].
+///
+/// [getTargetSize] is called once with the intrinsic size of the image.
+///
+/// When the browser supports `ImageDecoder`, only one decoder is created. Its
+/// first frame is decoded to read the intrinsic size, and the same frame is
+/// returned as the first frame of the codec, scaled to the target size.
+/// Otherwise, the image is decoded once to read its intrinsic size and again
+/// at the target size.
+Future<ui.Codec> engineInstantiateImageCodecWithSize(
+  Uint8List list, {
+  required ui.TargetImageSizeCallback getTargetSize,
+}) async {
+  if (browserSupportsImageDecoder) {
+    final ImageType imageType = tryDetectImageType(list, 'encoded image bytes');
+    final decoder = BrowserImageDecoder(
+      contentType: imageType.mimeType,
+      dataSource: list.toJS,
+      debugSource: 'encoded image bytes',
+    );
+    try {
+      await decoder.initialize();
+      final BitmapSize size = await decoder.decodeFirstFrameSize();
+      final ui.TargetImageSize targetSize = getTargetSize(size.width, size.height);
+      return EngineCodec.browser(
+        decoder,
+        targetWidth: targetSize.width,
+        targetHeight: targetSize.height,
+      );
+    } catch (e) {
+      decoder.dispose();
+      rethrow;
+    }
+  }
+
+  final ui.Codec codec = await engineInstantiateImageCodec(list);
+  ui.FrameInfo? info;
+  try {
+    info = await codec.getNextFrame();
+    final ui.TargetImageSize targetSize = getTargetSize(info.image.width, info.image.height);
+    return await engineInstantiateImageCodec(
+      list,
+      targetWidth: targetSize.width,
+      targetHeight: targetSize.height,
+    );
+  } finally {
+    info?.image.dispose();
+    codec.dispose();
   }
 }
 
