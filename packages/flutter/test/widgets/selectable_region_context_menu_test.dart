@@ -81,6 +81,7 @@ void main() {
     expect(element.style.width, '100%');
     expect(element.style.height, '100%');
     expect(element.classList.length, 1);
+    expect(element.getAttribute('aria-hidden'), 'true');
 
     final int numberOfStyleElements = getNumberOfStyleElements();
     expect(numberOfStyleElements, 1);
@@ -155,6 +156,198 @@ void main() {
     expect(selectWordEvent, isNotNull);
     expect((selectWordEvent!.globalPosition.dx - 200).abs() < precisionErrorTolerance, isTrue);
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('selection changes synchronize the active SelectableRegion without a mouse event', (
+    WidgetTester tester,
+  ) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final focusNodeA = FocusNode();
+    final focusNodeB = FocusNode();
+    addTearDown(focusNodeA.dispose);
+    addTearDown(focusNodeB.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Column(
+          children: <Widget>[
+            SelectableRegion(
+              focusNode: focusNodeA,
+              selectionControls: emptyTextSelectionControls,
+              child: const Text('first selection'),
+            ),
+            SelectableRegion(
+              focusNode: focusNodeB,
+              selectionControls: emptyTextSelectionControls,
+              child: const Text('second selection'),
+            ),
+          ],
+        ),
+      ),
+    );
+    addTearDown(() => tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink())));
+
+    // Mount the fake platform-view elements for both regions.
+    final elementA = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    final elementB = fakePlatformViewRegistry.getViewById(currentViewId + 2) as web.HTMLElement;
+    web.document.body!.append(elementA);
+    web.document.body!.append(elementB);
+    addTearDown(() {
+      elementA.remove();
+      elementB.remove();
+    });
+
+    Future<void> selectRegion(FocusNode focusNode) async {
+      focusNode.requestFocus();
+      await tester.pump();
+      final SelectableRegionState regionState = tester.state<SelectableRegionState>(
+        find.byWidgetPredicate(
+          (Widget widget) => widget is SelectableRegion && widget.focusNode == focusNode,
+        ),
+      );
+      regionState.selectAll();
+      await tester.pump();
+    }
+
+    // Select all text in the first region without a mouse event.
+    await selectRegion(focusNodeA);
+
+    // Check the element updated, and it's the selection.
+    expect(elementA.innerText, 'first selection');
+    expect(elementB.innerText, ''); // Hasn't updated yet
+    expect(web.window.getSelection()?.toString().trim(), 'first selection');
+
+    // Select all text in the second region without a mouse event.
+    await selectRegion(focusNodeB);
+
+    // Check the element updated, and it's the selection.
+    expect(elementA.innerText, 'first selection'); // Did not change
+    expect(elementB.innerText, 'second selection');
+    expect(web.window.getSelection()?.toString().trim(), 'second selection');
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('focusing a nested text field does not overwrite its DOM selection', (
+    WidgetTester tester,
+  ) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final regionFocusNode = FocusNode();
+    final fieldFocusNode = FocusNode();
+    final controller = TextEditingController(text: 'field text');
+    addTearDown(regionFocusNode.dispose);
+    addTearDown(fieldFocusNode.dispose);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: regionFocusNode,
+          selectionControls: emptyTextSelectionControls,
+          child: Column(
+            children: <Widget>[
+              const Text('region text'),
+              EditableText(
+                controller: controller,
+                focusNode: fieldFocusNode,
+                style: const TextStyle(fontSize: 14),
+                cursorColor: const Color(0xFF000000),
+                backgroundCursorColor: const Color(0xFFFFFFFF),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    addTearDown(() => tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink())));
+
+    // Mount the fake platform-view element.
+    final hiddenElement =
+        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    web.document.body!.append(hiddenElement);
+    addTearDown(() => hiddenElement.remove());
+
+    // First select text in the SelectableRegion so its hidden element is populated.
+    regionFocusNode.requestFocus();
+    await tester.pump();
+    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).selectAll();
+    await tester.pump();
+    expect(hiddenElement.innerText, 'region text');
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+
+    // Focusing the nested field gives the region focus (but not primary focus),
+    // which must detach the region.
+    fieldFocusNode.requestFocus();
+    await tester.pump();
+    expect(regionFocusNode.hasFocus, isTrue);
+    expect(regionFocusNode.hasPrimaryFocus, isFalse);
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+
+    // Add a stand-in for the engine's text-editing element, focus it and
+    // set the selection.
+    final input = web.document.createElement('input') as web.HTMLInputElement;
+    input.value = 'field text';
+    web.document.body!.append(input);
+    addTearDown(() => input.remove());
+    input.focus();
+    input.setSelectionRange(0, 10);
+
+    // Changing the region's selection while the nested field is focused must not
+    // overwrite the input's selection.
+    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).clearSelection();
+    await tester.pump();
+    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).selectAll();
+    await tester.pump();
+
+    expect(input.selectionStart, 0);
+    expect(input.selectionEnd, 10);
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('DOM selection reflects the region selection immediately', (
+    WidgetTester tester,
+  ) async {
+    // WebKit only enables Edit > Copy when a range selection already exists when
+    // the menu opens, so the hidden element and the DOM selection must mirror
+    // the Flutter selection before any copy event fires.
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: emptyTextSelectionControls,
+          child: const Text('eager text'),
+        ),
+      ),
+    );
+    addTearDown(() => tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink())));
+
+    // Mount the fake platform-view element.
+    final hiddenElement =
+        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    web.document.body!.append(hiddenElement);
+    addTearDown(() => hiddenElement.remove());
+
+    focusNode.requestFocus();
+    await tester.pump();
+    final SelectableRegionState state = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
+    state.selectAll();
+    await tester.pump();
+
+    // No copy event or right click has occurred, but the selection should've
+    // been updated.
+    expect(hiddenElement.innerText, 'eager text');
+    expect(web.window.getSelection()?.toString().trim(), 'eager text');
+
+    // Clearing the selection should also clear the hidden element and remove
+    // the DOM selection range so Edit > Copy does not stay enabled.
+    state.clearSelection();
+    await tester.pump();
+    expect(hiddenElement.innerText, isEmpty);
+    expect(web.window.getSelection()?.toString(), isEmpty);
+    expect(web.window.getSelection()?.rangeCount, 0);
   }, variant: _browserContextMenuEnabledVariants);
 
   // Regression test for https://github.com/flutter/flutter/issues/189575.
@@ -450,6 +643,10 @@ void main() {
     await BrowserContextMenu.enableContextMenu();
     addTearDown(BrowserContextMenu.enableContextMenu);
 
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     late StateSetter rebuild;
     await tester.pumpWidget(
       TestWidgetsApp(
@@ -457,6 +654,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             rebuild = setState;
             return SelectableRegion(
+              focusNode: focusNode,
               selectionControls: testTextSelectionHandleControls,
               child: const Text('How are you?'),
             );
@@ -464,6 +662,12 @@ void main() {
         ),
       ),
     );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).selectAll();
+    await tester.pump();
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
 
     await BrowserContextMenu.disableContextMenu();
     rebuild(() {});
@@ -474,6 +678,10 @@ void main() {
     rebuild(() {});
     await tester.pump();
     expect(tester.takeException(), isNull);
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+    final remountedElement =
+        fakePlatformViewRegistry.getViewById(currentViewId + 2) as web.HTMLElement;
+    expect(remountedElement.innerText, 'How are you?');
 
     await BrowserContextMenu.disableContextMenu();
     rebuild(() {});
