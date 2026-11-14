@@ -2541,6 +2541,68 @@ TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
 }
 
+TEST(FlutterTextInputPluginTest, TextFieldDoesNotTakeOverFieldEditorWhileComposing) {
+  FlutterEngine* engine = CreateTestEngine();
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [viewController loadView];
+  // Create a NSWindow so that the native text field can become first responder.
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSWindowStyleMaskBorderless
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+
+  engine.semanticsEnabled = YES;
+
+  auto bridge = viewController.accessibilityBridge.lock();
+  FlutterPlatformNodeDelegateMac delegate(bridge, viewController);
+  ui::AXTree tree;
+  ui::AXNode ax_node(&tree, nullptr, 0, 0);
+  ui::AXNodeData node_data;
+  node_data.SetValue("");
+  ax_node.SetData(node_data);
+  delegate.Init(viewController.accessibilityBridge, &ax_node);
+  {
+    FlutterTextPlatformNode text_platform_node(&delegate, viewController);
+    FlutterTextField* textField = text_platform_node.GetNativeViewAccessible();
+    FlutterTextInputPlugin* plugin = engine.textInputPlugin;
+
+    FlutterResult result = ^(id result) {
+    };
+    NSDictionary* setClientConfig = @{
+      @"viewId" : @(flutter::kFlutterImplicitViewId),
+      @"inputAction" : @"action",
+      @"inputType" : @{@"name" : @"inputName"},
+    };
+    [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                               arguments:@[ @(1), setClientConfig ]]
+                      result:result];
+    [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show"
+                                                               arguments:@[]]
+                      result:result];
+
+    [plugin setMarkedText:@"´"
+            selectedRange:NSMakeRange(1, 0)
+         replacementRange:NSMakeRange(NSNotFound, 0)];
+    [textField startEditing];
+    EXPECT_NE(textField.currentEditor, plugin);
+    EXPECT_EQ(window.firstResponder, plugin);
+    EXPECT_TRUE(plugin.hasMarkedText);
+
+    [plugin insertText:@"é" replacementRange:NSMakeRange(NSNotFound, 0)];
+    [textField startEditing];
+    EXPECT_EQ(textField.currentEditor, plugin);
+
+    // This blocks the FlutterTextField, which is held onto by the main event
+    // loop, from crashing.
+    [textField setPlatformNode:nil];
+  }
+
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+}
+
 TEST(FlutterTextInputPluginTest, CanNotBecomeResponderIfNoViewController) {
   FlutterEngine* engine = CreateTestEngine();
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
