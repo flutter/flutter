@@ -8,6 +8,7 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/shell/common/display.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
@@ -323,6 +324,209 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
                        reinterpret_cast<jlong>(holder.get()), 1.0f, 100, 100, 0,
                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, bounds, type, state,
                        0, 0, 0, 0, 0, 0, 0, 0);
+}
+
+namespace {
+
+void RestorePlaceholderRegistration() {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+
+  const jclass kPlaceholderClass = reinterpret_cast<jclass>(100);
+  const jfieldID kPlaceholderFieldID = reinterpret_cast<jfieldID>(200);
+  const jmethodID kPlaceholderMethodID = reinterpret_cast<jmethodID>(300);
+
+  EXPECT_CALL(mock_env, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, FindClass(_)).WillRepeatedly(Return(kPlaceholderClass));
+  EXPECT_CALL(mock_env, GetFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderMethodID));
+  EXPECT_CALL(mock_env, GetStaticFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetStaticMethodID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderMethodID));
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+  EXPECT_CALL(mock_env, RegisterNatives(_, _, _)).WillRepeatedly(Return(0));
+
+  EXPECT_TRUE(PlatformViewAndroid::Register(&mock_env));
+}
+
+}  // namespace
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       GetDisplayMetricsUseCachedFieldIdsWithoutRuntimeLookup) {
+  struct RestoreGuard {
+    ~RestoreGuard() { RestorePlaceholderRegistration(); }
+  } restore_guard;
+
+  const jclass kPlaceholderClass = reinterpret_cast<jclass>(0x5000);
+  const jclass kFlutterJniClass = reinterpret_cast<jclass>(0x5100);
+  const jfieldID kPlaceholderFieldID = reinterpret_cast<jfieldID>(0x5200);
+  const jfieldID kRefreshRateField = reinterpret_cast<jfieldID>(0x5201);
+  const jfieldID kWidthField = reinterpret_cast<jfieldID>(0x5202);
+  const jfieldID kHeightField = reinterpret_cast<jfieldID>(0x5203);
+  const jfieldID kDensityField = reinterpret_cast<jfieldID>(0x5204);
+  const jmethodID kPlaceholderMethodID = reinterpret_cast<jmethodID>(0x5300);
+
+  {
+    MockJNIEnvProvider register_env_provider;
+    MockJNIEnv& register_env = register_env_provider.env();
+
+    EXPECT_CALL(register_env, GetObjectRefType(_))
+        .WillRepeatedly(Return(JNILocalRefType));
+    EXPECT_CALL(register_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(register_env, DeleteLocalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(register_env, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(register_env, DeleteGlobalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(register_env, FindClass(_))
+        .WillRepeatedly([&](const char* name) {
+          if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+            return kFlutterJniClass;
+          }
+          return kPlaceholderClass;
+        });
+    EXPECT_CALL(register_env, GetFieldID(_, _, _))
+        .WillRepeatedly(Return(kPlaceholderFieldID));
+    EXPECT_CALL(register_env, GetMethodID(_, _, _))
+        .WillRepeatedly(Return(kPlaceholderMethodID));
+    EXPECT_CALL(register_env, GetStaticMethodID(_, _, _))
+        .WillRepeatedly(Return(kPlaceholderMethodID));
+    EXPECT_CALL(register_env, GetStaticFieldID(_, _, _))
+        .WillRepeatedly(
+            [&](jclass clazz, const char* name, const char* sig) -> jfieldID {
+              if (clazz == kFlutterJniClass && strcmp(sig, "F") == 0) {
+                if (strcmp(name, "refreshRateFPS") == 0) {
+                  return kRefreshRateField;
+                }
+                if (strcmp(name, "displayWidth") == 0) {
+                  return kWidthField;
+                }
+                if (strcmp(name, "displayHeight") == 0) {
+                  return kHeightField;
+                }
+                if (strcmp(name, "displayDensity") == 0) {
+                  return kDensityField;
+                }
+              }
+              return kPlaceholderFieldID;
+            });
+    EXPECT_CALL(register_env, ExceptionCheck())
+        .WillRepeatedly(Return(JNI_FALSE));
+    EXPECT_CALL(register_env, RegisterNatives(_, _, _))
+        .WillRepeatedly(Return(0));
+
+    ASSERT_TRUE(PlatformViewAndroid::Register(&register_env));
+  }
+
+  {
+    MockJNIEnvProvider runtime_env_provider;
+    MockJNIEnv& runtime_env = runtime_env_provider.env();
+
+    const jobject kFlutterJniObj = reinterpret_cast<jobject>(0x5400);
+
+    EXPECT_CALL(runtime_env, GetObjectRefType(_))
+        .WillRepeatedly(Return(JNILocalRefType));
+    EXPECT_CALL(runtime_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(runtime_env, DeleteLocalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(runtime_env, NewWeakGlobalRef(_))
+        .WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(runtime_env, DeleteWeakGlobalRef(_)).WillRepeatedly(Return());
+
+    // Runtime display queries must use the cached jclass and jfieldIDs directly
+    // without calling GetObjectClass or GetStaticFieldID.
+    EXPECT_CALL(runtime_env, GetObjectClass(_)).Times(0);
+    EXPECT_CALL(runtime_env, GetStaticFieldID(_, _, _)).Times(0);
+
+    EXPECT_CALL(runtime_env,
+                GetStaticFloatField(kFlutterJniClass, kRefreshRateField))
+        .WillOnce(Return(120.0f));
+    EXPECT_CALL(runtime_env, GetStaticFloatField(kFlutterJniClass, kWidthField))
+        .WillOnce(Return(1080.0f));
+    EXPECT_CALL(runtime_env,
+                GetStaticFloatField(kFlutterJniClass, kHeightField))
+        .WillOnce(Return(2400.0f));
+    EXPECT_CALL(runtime_env,
+                GetStaticFloatField(kFlutterJniClass, kDensityField))
+        .WillOnce(Return(2.75f));
+    EXPECT_CALL(runtime_env, ExceptionCheck())
+        .Times(4)
+        .WillRepeatedly(Return(JNI_FALSE));
+
+    fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&runtime_env,
+                                                      kFlutterJniObj);
+    PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+    EXPECT_DOUBLE_EQ(android_jni.GetDisplayRefreshRate(), 120.0);
+    EXPECT_DOUBLE_EQ(android_jni.GetDisplayWidth(), 1080.0);
+    EXPECT_DOUBLE_EQ(android_jni.GetDisplayHeight(), 2400.0);
+    EXPECT_DOUBLE_EQ(android_jni.GetDisplayDensity(), 2.75);
+
+    // When FlutterJNI has been detached/collected, fallback sentinels are
+    // returned without touching JNI static fields.
+    fml::jni::JavaObjectWeakGlobalRef empty_jni_ref;
+    PlatformViewAndroidJNIImpl detached_jni(empty_jni_ref);
+    EXPECT_DOUBLE_EQ(detached_jni.GetDisplayRefreshRate(),
+                     kUnknownDisplayRefreshRate);
+    EXPECT_DOUBLE_EQ(detached_jni.GetDisplayWidth(), -1.0);
+    EXPECT_DOUBLE_EQ(detached_jni.GetDisplayHeight(), -1.0);
+    EXPECT_DOUBLE_EQ(detached_jni.GetDisplayDensity(), -1.0);
+  }
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       RegisterFailsCleanlyWhenDisplayMetricFieldMissing) {
+  struct RestoreGuard {
+    ~RestoreGuard() { RestorePlaceholderRegistration(); }
+  } restore_guard;
+
+  const char* const kDisplayFieldNames[] = {
+      "refreshRateFPS",
+      "displayWidth",
+      "displayHeight",
+      "displayDensity",
+  };
+
+  for (const char* missing_field : kDisplayFieldNames) {
+    MockJNIEnvProvider env_provider;
+    MockJNIEnv& mock_env = env_provider.env();
+
+    const jclass kPlaceholderClass = reinterpret_cast<jclass>(100);
+    const jfieldID kPlaceholderFieldID = reinterpret_cast<jfieldID>(200);
+    const jmethodID kPlaceholderMethodID = reinterpret_cast<jmethodID>(300);
+
+    EXPECT_CALL(mock_env, GetObjectRefType(_))
+        .WillRepeatedly(Return(JNILocalRefType));
+    EXPECT_CALL(mock_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mock_env, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(mock_env, DeleteGlobalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mock_env, FindClass(_))
+        .WillRepeatedly(Return(kPlaceholderClass));
+    EXPECT_CALL(mock_env, GetFieldID(_, _, _))
+        .WillRepeatedly(Return(kPlaceholderFieldID));
+    EXPECT_CALL(mock_env, GetMethodID(_, _, _))
+        .WillRepeatedly(Return(kPlaceholderMethodID));
+    EXPECT_CALL(mock_env, GetStaticMethodID(_, _, _))
+        .WillRepeatedly(Return(kPlaceholderMethodID));
+    EXPECT_CALL(mock_env, GetStaticFieldID(_, _, _))
+        .WillRepeatedly([&](jclass, const char* name, const char*) -> jfieldID {
+          if (strcmp(name, missing_field) == 0) {
+            return nullptr;
+          }
+          return kPlaceholderFieldID;
+        });
+    EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+    EXPECT_CALL(mock_env, RegisterNatives(_, _, _)).WillRepeatedly(Return(0));
+
+    EXPECT_FALSE(PlatformViewAndroid::Register(&mock_env))
+        << "Expected Register() to fail when " << missing_field << " is null";
+  }
 }
 
 // The load order is exercised with an injected loader rather than real
