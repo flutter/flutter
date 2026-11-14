@@ -6,6 +6,7 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+#include <atomic>
 #include <thread>
 #include <vector>
 
@@ -24,6 +25,267 @@
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 class FlEngineTest : public flutter::testing::LinuxTest {};
+
+// A runner override checks completion before doing its own window cleanup,
+// matching GtkApplication's RUN_LAST shutdown contract.
+struct ShutdownApplication {
+  GApplication parent_instance;
+};
+struct ShutdownApplicationClass {
+  GApplicationClass parent_class;
+};
+G_DEFINE_TYPE(ShutdownApplication, shutdown_application, G_TYPE_APPLICATION)
+static void shutdown_application_init(ShutdownApplication*) {}
+static void shutdown_application_class_init(ShutdownApplicationClass* klass) {
+  G_APPLICATION_CLASS(klass)->shutdown = [](GApplication* app) {
+    auto* completed =
+        static_cast<int*>(g_object_get_data(G_OBJECT(app), "completed"));
+    if (completed != nullptr) {
+      EXPECT_EQ(*completed, 1);
+    }
+    G_APPLICATION_CLASS(shutdown_application_parent_class)->shutdown(app);
+  };
+}
+
+class FlEngineShutdownTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    application =
+        G_APPLICATION(g_object_new(shutdown_application_get_type(), "flags",
+                                   G_APPLICATION_NON_UNIQUE, nullptr));
+    g_object_set_data(G_OBJECT(application), "completed", &completed);
+    g_application_set_default(application);
+    fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+        Initialize, ([this](size_t, const FlutterRendererConfig*,
+                            const FlutterProjectArgs* args, void* user_data,
+                            FLUTTER_API_SYMBOL(FlutterEngine)* result) {
+          callback = args->vsync_callback;
+          callback_data = user_data;
+          *result = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+          return kSuccess;
+        }));
+    fl_engine_get_embedder_api(engine)->RunInitialized =
+        MOCK_ENGINE_PROC(RunInitialized, ([](auto) { return kSuccess; }));
+    fl_engine_get_embedder_api(engine)->OnVsync =
+        MOCK_ENGINE_PROC(OnVsync, ([this](auto, intptr_t, uint64_t, uint64_t) {
+                           EXPECT_EQ(shutdown_calls, 0);
+                           delivered++;
+                           // Reentrant shutdown during stop must not
+                           // recursively stop/join.
+                           fl_engine_shutdown(engine);
+                           return kSuccess;
+                         }));
+    fl_engine_get_embedder_api(engine)->Shutdown = MOCK_ENGINE_PROC(
+        Shutdown, ([this](auto) {
+          shutdown_calls++;
+          // Models a worker already entering the embedder's vsync callback
+          // while synchronous shutdown is waiting for engine threads.
+          std::thread late([this] { callback(callback_data, 99); });
+          late.join();
+          fl_engine_shutdown(engine);
+          return kSuccess;
+        }));
+    g_signal_connect(engine, "shutdown-complete",
+                     G_CALLBACK(+[](FlEngine*, gpointer data) {
+                       (*static_cast<int*>(data))++;
+                     }),
+                     &completed);
+    StartEngine();
+    ASSERT_NE(callback, nullptr);
+  }
+  void TearDown() override {
+    fl_engine_shutdown(engine);
+    LinuxTest::TearDown();
+    g_application_set_default(nullptr);
+    g_clear_object(&application);
+  }
+  GApplication* application = nullptr;
+  VsyncCallback callback = nullptr;
+  void* callback_data = nullptr;
+  int shutdown_calls = 0;
+  int completed = 0;
+  int delivered = 0;
+};
+
+TEST_F(FlEngineShutdownTest, PendingWorkerDispatchStopsWithoutMainLoop) {
+  std::thread worker([this] { callback(callback_data, 1); });
+  worker.join();
+  EXPECT_EQ(delivered, 0);
+  fl_engine_shutdown(engine);
+  EXPECT_EQ(delivered, 1);
+  EXPECT_EQ(shutdown_calls, 1);
+  EXPECT_EQ(completed, 1);
+  fl_engine_shutdown(engine);
+  callback(callback_data, 2);
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+  EXPECT_EQ(delivered, 1);
+  EXPECT_EQ(shutdown_calls, 1);
+  EXPECT_EQ(completed, 1);
+  EXPECT_FALSE(fl_engine_mark_texture_frame_available(engine, 1));
+  EXPECT_FALSE(fl_engine_register_external_texture(engine, 1));
+  EXPECT_FALSE(fl_engine_unregister_external_texture(engine, 1));
+  FlutterTask task = {};
+  fl_engine_get_embedder_api(engine)->RunTask =
+      MOCK_ENGINE_PROC(RunTask, ([](auto, auto) {
+                         ADD_FAILURE() << "Task after shutdown";
+                         return kSuccess;
+                       }));
+  fl_engine_execute_task(engine, &task);
+  g_autoptr(GError) error = nullptr;
+  EXPECT_FALSE(fl_engine_start(engine, &error));
+  EXPECT_NE(error, nullptr);
+}
+
+TEST_F(FlEngineShutdownTest,
+       ApplicationShutdownStopsPendingTimerBeforeClassCleanup) {
+  ASSERT_TRUE(g_main_context_acquire(nullptr));
+  callback(callback_data, 1);
+  g_main_context_release(nullptr);
+  EXPECT_EQ(delivered, 0);
+  GSignalQuery query = {};
+  g_signal_query(g_signal_lookup("shutdown", G_TYPE_APPLICATION), &query);
+  EXPECT_NE(query.signal_flags & G_SIGNAL_RUN_LAST, 0);
+  g_signal_connect_after(application, "shutdown",
+                         G_CALLBACK(+[](GApplication*, gpointer data) {
+                           EXPECT_EQ(*static_cast<int*>(data), 1);
+                         }),
+                         &completed);
+  g_signal_emit_by_name(application, "shutdown");
+  EXPECT_EQ(delivered, 1);
+  EXPECT_EQ(completed, 1);
+  EXPECT_EQ(shutdown_calls, 1);
+}
+
+TEST_F(FlEngineShutdownTest, ApplicationRunReturnsAfterNativeShutdown) {
+  struct Activation {
+    VsyncCallback callback;
+    void* data;
+  } activation = {callback, callback_data};
+  g_signal_connect(application, "activate",
+                   G_CALLBACK(+[](GApplication* app, gpointer data) {
+                     auto* activation = static_cast<Activation*>(data);
+                     activation->callback(activation->data, 1);
+                     g_application_quit(app);
+                   }),
+                   &activation);
+  EXPECT_EQ(g_application_run(application, 0, nullptr), 0);
+  EXPECT_EQ(completed, 1);
+  EXPECT_EQ(shutdown_calls, 1);
+  EXPECT_EQ(delivered, 1);
+}
+
+TEST_F(FlEngineShutdownTest, QueuedPlatformTaskDoesNotRunAfterShutdown) {
+  fl_engine_get_embedder_api(engine)->RunTask =
+      MOCK_ENGINE_PROC(RunTask, ([](auto, auto) {
+                         ADD_FAILURE() << "Queued task entered stopped engine";
+                         return kSuccess;
+                       }));
+  FlutterTask task = {};
+  fl_task_runner_post_flutter_task(fl_engine_get_task_runner(engine), task, 0);
+  fl_engine_shutdown(engine);
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+  EXPECT_EQ(completed, 1);
+}
+
+TEST_F(FlEngineShutdownTest, TextureNotificationsRaceShutdown) {
+  std::atomic<int> native_calls = 0;
+  fl_engine_get_embedder_api(engine)->MarkExternalTextureFrameAvailable =
+      MOCK_ENGINE_PROC(MarkExternalTextureFrameAvailable,
+                       ([&](auto handle, int64_t) {
+                         EXPECT_NE(handle, nullptr);
+                         EXPECT_EQ(shutdown_calls, 0);
+                         native_calls++;
+                         return kSuccess;
+                       }));
+  std::atomic<bool> ready = false;
+  std::thread worker([&] {
+    ready = true;
+    for (int i = 0; i < 100; ++i) {
+      fl_engine_mark_texture_frame_available(engine, 1);
+    }
+  });
+  while (!ready) {
+    std::this_thread::yield();
+  }
+  fl_engine_shutdown(engine);
+  worker.join();
+  const int count = native_calls;
+  EXPECT_FALSE(fl_engine_mark_texture_frame_available(engine, 1));
+  EXPECT_EQ(native_calls, count);
+  EXPECT_EQ(completed, 1);
+}
+
+TEST_F(FlEngineShutdownTest, PlatformMessageResponsesRaceShutdown) {
+  std::atomic<int> native_calls = 0;
+  fl_engine_get_embedder_api(engine)->SendPlatformMessageResponse =
+      MOCK_ENGINE_PROC(SendPlatformMessageResponse,
+                       ([&](auto handle, auto, auto, auto) {
+                         EXPECT_NE(handle, nullptr);
+                         EXPECT_EQ(shutdown_calls, 0);
+                         native_calls++;
+                         return kSuccess;
+                       }));
+  auto respond = [&] {
+    g_autoptr(GError) error = nullptr;
+    const gboolean sent = fl_engine_send_platform_message_response(
+        engine,
+        reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(1),
+        nullptr, &error);
+    EXPECT_EQ(error == nullptr, sent != FALSE);
+    return sent;
+  };
+  // A worker reply during the native join must be rejected without waiting
+  // for Shutdown to return. Holding lifecycle_mutex across Shutdown deadlocks.
+  fl_engine_get_embedder_api(engine)->Shutdown =
+      MOCK_ENGINE_PROC(Shutdown, ([&](auto) {
+                         shutdown_calls++;
+                         std::thread late([&] { EXPECT_FALSE(respond()); });
+                         late.join();
+                         return kSuccess;
+                       }));
+  std::atomic<bool> ready = false;
+  std::thread worker([&] {
+    EXPECT_TRUE(respond());
+    ready = true;
+    for (int i = 0; i < 100; ++i) {
+      respond();
+    }
+  });
+  while (!ready) {
+    std::this_thread::yield();
+  }
+  fl_engine_shutdown(engine);
+  worker.join();
+  const int count = native_calls;
+  EXPECT_GE(count, 1);
+  EXPECT_FALSE(respond());
+  EXPECT_EQ(native_calls, count);
+  EXPECT_EQ(shutdown_calls, 1);
+  EXPECT_EQ(completed, 1);
+}
+
+TEST_F(FlEngineShutdownTest, WorkerAdmissionRacesShutdown) {
+  std::atomic<bool> ready = false;
+  std::thread worker([&] {
+    ready = true;
+    for (int i = 1; i <= 100; ++i) {
+      callback(callback_data, i);
+    }
+  });
+  while (!ready) {
+    std::this_thread::yield();
+  }
+  fl_engine_shutdown(engine);
+  worker.join();
+  EXPECT_EQ(shutdown_calls, 1);
+  EXPECT_EQ(completed, 1);
+  const int count = delivered;
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+  EXPECT_EQ(delivered, count);
+}
 
 #if FLUTTER_LINUX_GTK4
 TEST_F(FlEngineTest, SelectVulkanWithoutInitializingDriver) {
@@ -212,6 +474,48 @@ G_DEFINE_TYPE_WITH_CODE(FlVsyncTestWidget,
 static void fl_vsync_test_widget_class_init(FlVsyncTestWidgetClass*) {}
 static void fl_vsync_test_widget_init(FlVsyncTestWidget*) {}
 
+TEST_F(FlEngineShutdownTest,
+       ApplicationQuitStopsMappedTickBeforeWindowTeardown) {
+  g_autoptr(GtkWindow) window = GTK_WINDOW(gtk_window_new());
+  g_object_ref_sink(window);
+  GtkWidget* widget =
+      GTK_WIDGET(g_object_new(fl_vsync_test_widget_get_type(), nullptr));
+  gtk_window_set_child(window, widget);
+  gtk_window_present(window);
+  ASSERT_TRUE(gtk_widget_get_mapped(widget));
+  g_autoptr(GdkFrameClock) clock =
+      GDK_FRAME_CLOCK(g_object_ref(gtk_widget_get_frame_clock(widget)));
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(widget));
+  ASSERT_TRUE(g_main_context_acquire(nullptr));
+  callback(callback_data, 1);
+  g_main_context_release(nullptr);
+  EXPECT_EQ(delivered, 0);
+  g_signal_emit_by_name(application, "shutdown");
+  EXPECT_EQ(delivered, 1);
+  EXPECT_EQ(completed, 1);
+  gtk_window_destroy(window);
+  g_signal_emit_by_name(clock, "update");
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+  EXPECT_EQ(delivered, 1);
+  EXPECT_EQ(shutdown_calls, 1);
+}
+
+TEST_F(FlEngineShutdownTest, DestroyingViewDoesNotStopRetainedEngine) {
+  g_autoptr(GtkWindow) window = GTK_WINDOW(gtk_window_new());
+  g_object_ref_sink(window);
+  GtkWidget* widget =
+      GTK_WIDGET(g_object_new(fl_vsync_test_widget_get_type(), nullptr));
+  gtk_window_set_child(window, widget);
+  gtk_window_present(window);
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(widget));
+  gtk_window_destroy(window);
+  EXPECT_EQ(shutdown_calls, 0);
+  EXPECT_EQ(completed, 0);
+  fl_engine_shutdown(engine);
+  EXPECT_EQ(completed, 1);
+}
+
 class FlEngineVsyncTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
@@ -275,6 +579,25 @@ class FlEngineVsyncTest : public flutter::testing::LinuxTest {
   GdkFrameClock* clock = nullptr;
   std::vector<intptr_t> batons;
 };
+
+TEST_F(FlEngineVsyncTest, ExplicitShutdownStopsPendingTickWithRetainedView) {
+  int shutdown_calls = 0;
+  fl_engine_get_embedder_api(engine)->Shutdown =
+      MOCK_ENGINE_PROC(Shutdown, ([&](auto) {
+                         shutdown_calls++;
+                         return kSuccess;
+                       }));
+  Request(1);
+  fl_engine_shutdown(engine);
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(shutdown_calls, 1);
+  EXPECT_EQ(TickHandler(), 0u);
+  Tick();
+  callback(callback_data, 2);
+  fl_engine_shutdown(engine);
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(shutdown_calls, 1);
+}
 
 TEST_F(FlEngineVsyncTest, KeepsClockUpdatingBetweenAnimationRequests) {
   Request(1);

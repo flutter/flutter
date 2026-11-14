@@ -138,3 +138,48 @@ and do not compare engine-pacer runs using this collector (they have no GTK pace
 ticks). Keep CPU/GPU/memory measurements alongside feedback and measure tracing
 cost before treating a performance difference as meaningful. Pacing behavior is
 unchanged; these observations support a measured feedback loop for later changes.
+
+## Application engine shutdown
+
+Application shutdown synchronously stops the whole native engine on the GTK
+thread, independent of GObject reference counts. This is an internal lifecycle
+operation, not a new public Linux API. It is idempotent, cannot be
+undone by starting the engine again, and emits `shutdown-complete` after
+successful embedder shutdown. Destroying or removing one view does not invoke
+this operation on an engine shared with other views.
+
+At engine start, the default GApplication (if any) gets a normal `shutdown`
+signal handler. GApplication emits that signal after its main loop has stopped;
+the engine handler runs before the RUN_LAST class handler, including a runner's
+shutdown override. It does not require further GTK main-loop dispatch.
+Hosts without a default GApplication retain the existing disposal-driven
+lifecycle; no new custom-host shutdown API is introduced here. Other normal
+signal handlers that tear resources down must coordinate their ordering
+explicitly.
+
+Shutdown closes admission under the same lock used by worker vsync registration,
+external texture notifications, and asynchronous platform message responses.
+The lock is released before native Shutdown joins worker threads. It returns
+accepted pending batons before embedder shutdown, cancels dispatch/tick/timer sources, and clears the native
+handle before calling synchronous embedder Shutdown. Returning those batons may
+schedule rendering; the embedder's shell/raster and thread-host teardown is the
+completion barrier, not the end of the pacer stop operation. Newly arriving
+requests are ignored after admission closes. Their opaque tokens are reclaimed
+by the shared embedder waiter during destruction. Its token registry also
+rejects duplicate/stale delivery and owns queued UI callbacks by value, so
+cancelling a request or discarding a task does not leak a raw baton allocation.
+This shared-embedder ownership change affects other embedders too and is tested
+separately from Linux lifecycle integration.
+
+Retained stopped engines reject texture operations, message responses, and new views, ignore queued
+engine tasks/display updates, and allow view removal without calling a dead
+native handle. Existing input/message methods already handle a null native
+engine. Plugin-owned graphics resources still need their own orderly cleanup.
+
+For shutdown reproduction, set `FLUTTER_LINUX_SHUTDOWN_DIAGNOSTICS=1` and keep
+GTK pacing selected. The begin/complete messages include monotonic timestamps.
+Completion must precede runner teardown/process exit; weak engine destruction
+can happen later because messenger idles or plugins still own references.
+This change does not destroy detached GTK4 toplevels or drain arbitrary plugin
+idles. Validate removal of runner workarounds separately using the candidate
+engine and matching Dart AOT artifacts.

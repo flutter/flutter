@@ -24,6 +24,11 @@
 
 G_BEGIN_DECLS
 
+// Internal GTK-thread shutdown boundary used by application shutdown and tests.
+// Stops the whole native engine independently of remaining GObject references.
+// Idempotent; the engine cannot be restarted. Not part of the public Linux API.
+void fl_engine_shutdown(FlEngine* engine);
+
 /**
  * FlEngineError:
  * Errors for #FlEngine objects to set on failures.
