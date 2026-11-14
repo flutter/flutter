@@ -8,6 +8,8 @@
 /// @docImport 'text.dart';
 library;
 
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'basic.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
@@ -15,12 +17,17 @@ import 'inherited_theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// The selection style to apply to descendant [EditableText] widgets which
-/// don't have an explicit style.
+/// The selection style to apply to descendant [EditableText], [Text], and
+/// [RichText] widgets which don't have an explicit style.
 ///
 /// {@macro flutter.cupertino.CupertinoApp.defaultSelectionStyle}
 ///
 /// {@macro flutter.material.MaterialApp.defaultSelectionStyle}
+///
+/// The [selectionHeightStyle] and [selectionWidthStyle] properties only affect
+/// the selection highlights painted by [Text] and [RichText] inside a
+/// [SelectableRegion] or [SelectionArea]. [EditableText] and [SelectableText]
+/// use their own selection style properties.
 ///
 /// See also:
 ///  * [TextSelectionTheme]: which also creates a [DefaultSelectionStyle] for
@@ -33,6 +40,8 @@ class DefaultSelectionStyle extends InheritedTheme {
     this.cursorColor,
     this.selectionColor,
     this.mouseCursor,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     required super.child,
   });
 
@@ -48,6 +57,8 @@ class DefaultSelectionStyle extends InheritedTheme {
     : cursorColor = null,
       selectionColor = null,
       mouseCursor = null,
+      selectionHeightStyle = null,
+      selectionWidthStyle = null,
       super(child: const _NullWidget());
 
   /// Creates a default selection style that overrides the selection styles in
@@ -60,6 +71,8 @@ class DefaultSelectionStyle extends InheritedTheme {
     Color? cursorColor,
     Color? selectionColor,
     MouseCursor? mouseCursor,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     required Widget child,
   }) {
     return Builder(
@@ -70,6 +83,8 @@ class DefaultSelectionStyle extends InheritedTheme {
           cursorColor: cursorColor ?? parent.cursorColor,
           selectionColor: selectionColor ?? parent.selectionColor,
           mouseCursor: mouseCursor ?? parent.mouseCursor,
+          selectionHeightStyle: selectionHeightStyle ?? parent.selectionHeightStyle,
+          selectionWidthStyle: selectionWidthStyle ?? parent.selectionWidthStyle,
           child: child,
         );
       },
@@ -96,6 +111,36 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// If this property is null, [SystemMouseCursors.text] will be used.
   final MouseCursor? mouseCursor;
 
+  /// {@template flutter.widgets.DefaultSelectionStyle.selectionHeightStyle}
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// Defaults to [ui.BoxHeightStyle.tight] when null.
+  ///
+  /// This only affects the selection highlights painted by [Text] and [RichText]
+  /// inside a [SelectableRegion] or [SelectionArea]. [EditableText] and
+  /// [SelectableText] use their own `selectionHeightStyle` properties and ignore
+  /// this value.
+  ///
+  /// See also:
+  /// * [ui.BoxHeightStyle].
+  /// {@endtemplate}
+  final ui.BoxHeightStyle? selectionHeightStyle;
+
+  /// {@template flutter.widgets.DefaultSelectionStyle.selectionWidthStyle}
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// Defaults to [ui.BoxWidthStyle.tight] when null.
+  ///
+  /// This only affects the selection highlights painted by [Text] and [RichText]
+  /// inside a [SelectableRegion] or [SelectionArea]. [EditableText] and
+  /// [SelectableText] use their own `selectionWidthStyle` properties and ignore
+  /// this value.
+  ///
+  /// See also:
+  /// * [ui.BoxWidthStyle].
+  /// {@endtemplate}
+  final ui.BoxWidthStyle? selectionWidthStyle;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// If no such instance exists, returns an instance created by
@@ -117,6 +162,8 @@ class DefaultSelectionStyle extends InheritedTheme {
       cursorColor: cursorColor,
       selectionColor: selectionColor,
       mouseCursor: mouseCursor,
+      selectionHeightStyle: selectionHeightStyle,
+      selectionWidthStyle: selectionWidthStyle,
       child: child,
     );
   }
@@ -125,7 +172,9 @@ class DefaultSelectionStyle extends InheritedTheme {
   bool updateShouldNotify(DefaultSelectionStyle oldWidget) {
     return cursorColor != oldWidget.cursorColor ||
         selectionColor != oldWidget.selectionColor ||
-        mouseCursor != oldWidget.mouseCursor;
+        mouseCursor != oldWidget.mouseCursor ||
+        selectionHeightStyle != oldWidget.selectionHeightStyle ||
+        selectionWidthStyle != oldWidget.selectionWidthStyle;
   }
 }
 
