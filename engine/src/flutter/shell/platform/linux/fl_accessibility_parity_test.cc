@@ -140,6 +140,7 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
   size_t slider_calls = 0;
   size_t scroll_calls = 0;
   size_t finish_calls = 0;
+  size_t text_transition_calls = 0;
   size_t protected_selection_calls = 0;
   fl_engine_get_embedder_api(view_engine)->SendSemanticsAction =
       MOCK_ENGINE_PROC(
@@ -209,6 +210,19 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
                 protected_selection_calls++;
                 break;
               }
+              case 10:
+                EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+                text_transition_calls++;
+                flags[3].is_multiline = text_transition_calls == 1;
+                flags[3].is_read_only = text_transition_calls == 1;
+                semantics[3].value =
+                    text_transition_calls == 1 ? "Two\nlines" : "Edited value";
+                semantics[3].hint =
+                    text_transition_calls == 1 ? "Read these lines" : "";
+                semantics[3].tooltip =
+                    text_transition_calls == 1 ? "Editor help" : "";
+                changed = &semantics[3];
+                break;
               case 8:
                 EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
                 finish_calls++;
@@ -246,6 +260,7 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
   EXPECT_EQ(slider_calls, 1u);
   EXPECT_EQ(scroll_calls, 1u);
   EXPECT_EQ(finish_calls, 1u);
+  EXPECT_EQ(text_transition_calls, 2u);
 #if FLUTTER_LINUX_GTK4
   EXPECT_EQ(protected_selection_calls,
             gtk_check_version(4, 22, 0) == nullptr ? 1u : 0u);

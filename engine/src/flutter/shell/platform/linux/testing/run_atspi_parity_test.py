@@ -150,6 +150,7 @@ def snapshot(Atspi, nodes):
         'role': node.get_role_name(),
         'interfaces': sorted(node.get_interfaces()),
         'states': sorted(state.value_nick for state in states.get_states()),
+        'description': node.get_description(),
         'children': [node.get_child_at_index(i).get_name() for i in range(node.get_child_count())],
         'actions': [],
     }
@@ -308,11 +309,39 @@ def run_backend(Atspi, binary, output, require_password_privacy=False):
       return text is not None and Atspi.Text.get_text(text, 0, -1) == 'Hello world'
 
     wait_until(editor_restored, 'editor readable again')
+    text_transitions = {}
+    for phase, expected_text in [('multiline_read_only', 'Two\nlines'),
+                                 ('singleline_editable', 'Edited value')]:
+      invoke(nodes['Toggle'], 'tap')
+
+      def text_updated():
+        nodes['Editor'].clear_cache()
+        text = nodes['Editor'].get_text_iface()
+        return text is not None and Atspi.Text.get_text(text, 0, -1) == expected_text
+
+      wait_until(text_updated, phase)
+      record = snapshot(Atspi, {'Editor': nodes['Editor']})['Editor']
+      text_transitions[phase] = record
+      if require_password_privacy:
+        multiline = phase == 'multiline_read_only'
+        if ('multi-line' in record['states']) != multiline:
+          raise RuntimeError(f'GTK4 multiline state did not follow update: {record}')
+        if ('editable' in record['states']) == multiline:
+          raise RuntimeError(f'GTK4 editable state did not follow update: {record}')
+        if ('read-only' in record['states']) != multiline:
+          raise RuntimeError('GTK4 read-only state did not follow update')
+        editing_actions = {'cut', 'paste'} & set(record['actions'])
+        if editing_actions != (set() if multiline else {'cut', 'paste'}):
+          raise RuntimeError('GTK4 editing actions did not follow read-only state')
+        expected_description = 'Read these lines\nEditor help' if multiline else ''
+        if record['description'] != expected_description:
+          raise RuntimeError('GTK4 description did not follow hint/tooltip update')
     after = snapshot(Atspi, nodes)
     invoke(nodes['Finish comparison'], 'tap')
     if fixture.wait(timeout=10) != 0:
       raise RuntimeError('Fixture did not receive exactly the expected actions')
     return {
+        'text_transitions': text_transitions,
         'before': before,
         'after': after,
         'password_checks': {

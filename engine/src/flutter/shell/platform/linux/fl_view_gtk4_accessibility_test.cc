@@ -410,6 +410,142 @@ TEST_F(FlViewGtk4AccessibilityTest, OptionalStatesPreserveUndefined) {
   }
 }
 
+TEST_F(FlViewGtk4AccessibilityTest, TextFieldPropertiesFollowPartialUpdates) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  int32_t children[] = {1};
+  FlutterSemanticsNode2 root = {};
+  root.child_count = 1;
+  root.children_in_traversal_order = children;
+  FlutterSemanticsFlags flags = {};
+  flags.is_text_field = true;
+  FlutterSemanticsNode2 field = {};
+  field.id = 1;
+  field.flags2 = &flags;
+  field.label = "Editor";
+  field.value = "First value";
+  FlutterSemanticsNode2* nodes[] = {&root, &field};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 2;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) native_root =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  g_autoptr(GtkAccessible) original =
+      fl_gtk_runtime_accessible_get_first_accessible_child(native_root);
+  ASSERT_NE(original, nullptr);
+  gtk_test_accessible_assert_property(
+      original, GTK_ACCESSIBLE_PROPERTY_MULTI_LINE, FALSE);
+  gtk_test_accessible_assert_property(original,
+                                      GTK_ACCESSIBLE_PROPERTY_READ_ONLY, FALSE);
+
+  // Only the field is sent again: its parent link and identity must survive.
+  update.node_count = 1;
+  update.nodes = &nodes[1];
+  for (bool multiline : {true, false, true, false}) {
+    flags.is_multiline = multiline;
+    flags.is_read_only = multiline;
+    field.value = multiline ? "Two\nlines" : "Edited value";
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_gtk_runtime_accessible_get_first_accessible_child(native_root);
+    ASSERT_EQ(native, original);
+    gtk_test_accessible_assert_property(
+        native, GTK_ACCESSIBLE_PROPERTY_MULTI_LINE, multiline);
+    gtk_test_accessible_assert_property(
+        native, GTK_ACCESSIBLE_PROPERTY_READ_ONLY, multiline);
+    gtk_test_accessible_assert_property(
+        native, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT, field.value);
+  }
+
+  // Leaving text-field semantics must remove field-only properties even if the
+  // producer leaves the associated flags set. Recreating it restores defaults.
+  flags.is_text_field = false;
+  flags.is_multiline = true;
+  flags.is_read_only = true;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) label =
+      fl_gtk_runtime_accessible_get_first_accessible_child(native_root);
+  ASSERT_NE(label, nullptr);
+  EXPECT_FALSE(gtk_test_accessible_has_property(
+      label, GTK_ACCESSIBLE_PROPERTY_MULTI_LINE));
+  EXPECT_FALSE(gtk_test_accessible_has_property(
+      label, GTK_ACCESSIBLE_PROPERTY_READ_ONLY));
+  flags = {};
+  flags.is_text_field = true;
+  field.value = "Recreated";
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) recreated =
+      fl_gtk_runtime_accessible_get_first_accessible_child(native_root);
+  ASSERT_NE(recreated, nullptr);
+  gtk_test_accessible_assert_property(
+      recreated, GTK_ACCESSIBLE_PROPERTY_MULTI_LINE, FALSE);
+  gtk_test_accessible_assert_property(recreated,
+                                      GTK_ACCESSIBLE_PROPERTY_READ_ONLY, FALSE);
+  gtk_test_accessible_assert_property(
+      recreated, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT, "Recreated");
+}
+
+TEST_F(FlViewGtk4AccessibilityTest,
+       DescriptionsClearWhenHintsAndTooltipsChange) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  flags.is_button = kFlutterTristateTrue;
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.label = "Save";
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  const struct {
+    const char* hint;
+    const char* tooltip;
+    const char* expected;
+  } cases[] = {
+      {nullptr, nullptr, nullptr},
+      {"Save changes", nullptr, "Save changes"},
+      {"Save changes", "Ctrl+S", "Save changes\nCtrl+S"},
+      {"", "Ctrl+S", "Ctrl+S"},
+      {nullptr, "", nullptr},
+      {"New hint", "", "New hint"},
+      {"", "", nullptr},
+  };
+  for (const auto& test : cases) {
+    root.hint = test.hint;
+    root.tooltip = test.tooltip;
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_view_gtk4_accessibility_ref_native_root_for_testing(
+            view->accessibility_backend);
+    ASSERT_NE(native, nullptr);
+    gtk_test_accessible_assert_property(native, GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                        "Save");
+    if (test.expected == nullptr) {
+      EXPECT_FALSE(gtk_test_accessible_has_property(
+          native, GTK_ACCESSIBLE_PROPERTY_DESCRIPTION));
+    } else {
+      gtk_test_accessible_assert_property(
+          native, GTK_ACCESSIBLE_PROPERTY_DESCRIPTION, test.expected);
+    }
+  }
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, NativeActionsRespectCurrentSemantics) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";

@@ -479,3 +479,17 @@ sharpness, physical touchscreen/touchpad behavior, AT-SPI event ordering,
 external-texture behavior, or every older GTK runtime. The optional direct
 subsurface path falls back to GTK texture presentation at fractional scales;
 its native Wayland buffer scale remains integer-only.
+
+### Text-property transitions in the shared AT-SPI comparison
+
+The shared parity fixture also updates its existing Editor through multiline,
+read-only, and editable single-line semantics using child-only updates. The
+report includes `text_transitions` snapshots for both backends, including
+accessible descriptions. GTK4 assertions check changed text, multiline/read-only
+and editable states, removal/restoration of cut and paste actions, and clearing
+hint/tooltip descriptions. Single-line state is recorded but not required: the
+stock GTK 4.24.1 probe does not export it for this custom text node.
+
+These are native adapter tests using mocked embedder semantics. They do not
+validate Dart widget semantics generation or Orca announcements. Backend
+snapshot differences are observations, not an automatic defect count.
