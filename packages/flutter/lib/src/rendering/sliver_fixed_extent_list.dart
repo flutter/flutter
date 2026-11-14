@@ -504,7 +504,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     final int lastIndex = indexOf(lastChild!);
     final double leadingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
-    final double endOfLastChild = childScrollOffset(lastChild!)! + paintExtentOf(lastChild!);
+    final double endOfLastChild = childScrollOffset(lastChild!)! + itemExtentOf(lastIndex)!;
     final bool isLastChild;
     if (estimatedMaxScrollOffset.isFinite) {
       isLastChild = true;
@@ -512,8 +512,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       final int? childCount = childManager.estimatedChildCount;
       if (childCount != null && lastIndex >= childCount - 1) {
         isLastChild = true;
-      } else if (itemExtentBuilder != null &&
-          itemExtentBuilder!(lastIndex + 1, layoutDimensions) == null) {
+      } else if (spacing > 0.0 && itemExtentBuilder != null && itemExtentOf(lastIndex + 1) == null) {
         isLastChild = true;
       } else {
         isLastChild = false;
