@@ -1131,7 +1131,9 @@ class RawScrollbar extends StatefulWidget {
   ///     behavior does not apply to those with [Axis.horizontal]. To explicitly
   ///     use the PrimaryScrollController, set [ScrollView.primary] to true.
   ///
-  /// Defaults to false when null.
+  /// When null, the platform preference reported by
+  /// [MediaQueryData.persistentScrollbars] is used instead, which is false
+  /// unless the platform asks for persistently visible scrollbars.
   ///
   /// <callout-box>
   ///
@@ -1188,6 +1190,8 @@ class RawScrollbar extends StatefulWidget {
   ///
   ///   * [RawScrollbarState.showScrollbar], an overridable getter which uses
   ///     this value to override the default behavior.
+  ///   * [MediaQueryData.persistentScrollbars], the platform preference used
+  ///     when this value is null.
   ///   * [ScrollView.primary], which indicates whether the ScrollView is the primary
   ///     scroll view associated with the parent [PrimaryScrollController].
   ///   * [PrimaryScrollController], which associates a [ScrollController] with
@@ -1441,15 +1445,23 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   late final ScrollbarPainter scrollbarPainter;
 
+  // The last value of [MediaQueryData.persistentScrollbars] observed in
+  // [didChangeDependencies].
+  bool _platformPersistentScrollbars = false;
+  bool _isFirstDependenciesCheck = true;
+
   /// Overridable getter to indicate that the scrollbar should be visible, even
   /// when a scroll is not underway.
   ///
   /// Subclasses can override this getter to make its value depend on an inherited
-  /// theme.
+  /// theme. When they do, they should keep this implementation as the last
+  /// fallback so that the platform preference is still honoured.
   ///
-  /// Defaults to false when [RawScrollbar.thumbVisibility] is null.
+  /// Defaults to [MediaQueryData.persistentScrollbars] when
+  /// [RawScrollbar.thumbVisibility] is null, which is false unless the platform
+  /// asks for persistently visible scrollbars.
   @protected
-  bool get showScrollbar => widget.thumbVisibility ?? false;
+  bool get showScrollbar => widget.thumbVisibility ?? _platformPersistentScrollbars;
 
   bool get _showTrack => showScrollbar && (widget.trackVisibility ?? false);
 
@@ -1499,7 +1511,31 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final bool platformPersistentScrollbars = MediaQuery.persistentScrollbarsOf(context);
+    if (platformPersistentScrollbars != _platformPersistentScrollbars) {
+      _platformPersistentScrollbars = platformPersistentScrollbars;
+      if (_isFirstDependenciesCheck && showScrollbar) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && showScrollbar) {
+            _fadeoutAnimationController.value = 1.0;
+          }
+        });
+      } else {
+        _updateFadeoutForVisibility(showScrollbar);
+      }
+    }
+    _isFirstDependenciesCheck = false;
     assert(_debugScheduleCheckHasValidScrollPosition());
+  }
+
+  void _updateFadeoutForVisibility(bool visible) {
+    if (visible) {
+      assert(_debugScheduleCheckHasValidScrollPosition());
+      _fadeoutTimer?.cancel();
+      _fadeoutAnimationController.animateTo(1.0);
+    } else {
+      _fadeoutAnimationController.reverse();
+    }
   }
 
   bool _debugScheduleCheckHasValidScrollPosition() {
@@ -1522,10 +1558,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       // for interaction, ensure we are set up properly.
       // Don't assert immediately if we're in the middle of updating the widget
       // as the controller may not be attached yet in that frame.
-      if (_fadeoutAnimationController.status == AnimationStatus.forward &&
-          (widget.thumbVisibility ?? false)) {
-        // When thumbVisibility is true and we're animating forward,
-        // the check is already scheduled by _debugScheduleCheckHasValidScrollPosition.
+      if (_fadeoutAnimationController.status == AnimationStatus.forward && showScrollbar) {
+        // When the scrollbar is meant to stay visible and we're animating
+        // forward, the check is already scheduled by
+        // _debugScheduleCheckHasValidScrollPosition.
         return;
       }
       assert(_debugCheckHasValidScrollPosition());
@@ -1658,13 +1694,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.thumbVisibility != oldWidget.thumbVisibility) {
-      if (widget.thumbVisibility ?? false) {
-        assert(_debugScheduleCheckHasValidScrollPosition());
-        _fadeoutTimer?.cancel();
-        _fadeoutAnimationController.animateTo(1.0);
-      } else {
-        _fadeoutAnimationController.reverse();
-      }
+      _updateFadeoutForVisibility(widget.thumbVisibility ?? _platformPersistentScrollbars);
     }
     if (widget.mouseCursor != oldWidget.mouseCursor) {
       updateMouseCursor();
