@@ -138,6 +138,35 @@ build:rbe --remote_timeout=600
 # links each, minutes of a bot's network disk.
 build:rbe --nobuild_runfile_links
 
+# A workstation's RBE build (build:rbe_dev): build:rbe with the links on the
+# machine, in the sandbox like its other local actions. On a worker a link
+# is the slow step of an edit: flutter_tester's takes 21-39 s on two vCPUs
+# where a workstation takes 2, and its inputs and its 536 MB output cross
+# the network besides. Measured on a 24-core workstation (11-10 to 11-13):
+# an edit of shell.cc 61-95 s with build:rbe and 21-30 s with the link here
+# (GN with reclient, which links locally too: 20 s); an edit in fml 13-15 s
+# and 7-9 s (GN: 9 s). The first such build downloads the objects its links
+# read. The compiles stay on the workers. Racing them against the machine
+# (--strategy=CppCompile=dynamic: what reclient's racing is to a GN build)
+# took the two edits to 16-19 s and 3 s, but against this instance Bazel
+# then fails wider builds at random: "unable to open output file" for every
+# compile a worker finishes first, in 4 of 12 raced builds (11-13). A
+# failing build's Commands name their outputs in the newer `output_paths`
+# where a passing build's use `output_files`, and the instance, which
+# speaks version 2.0 of the remote execution API, creates no directory for
+# an output named there. Bazel picks the field once per build, with its
+# first remote action (RemoteExecutionService.initUseOutputPaths), and
+# picks `output_paths` when it could not read the server's version; by its
+# source that is what an interrupted thread gets, and dynamic execution
+# interrupts an action's remote side the moment its local side wins. Bazel
+# 8.8.1 and its master alike: no racing until one of the two changes. A bot
+# keeps build:rbe, as tools/gn keeps a GN build off racing on LUCI
+# (remote_local_fallback), and what a bot links on a worker the next bot
+# finds in the cache; bazel_ci.py gives build:rbe_dev to a developer who
+# asks for RBE (--bazel-rbe).
+build:rbe_dev --config=rbe
+build:rbe_dev --strategy=CppLink=sandboxed
+
 # A Mac's compiles on the same workers (build:rbe_mac): what GN's reclient
 # build does for the Mac builders -- the C/C++/Objective-C compiles go to
 # the Linux x64 workers, which run the Linux clang of the same revision over

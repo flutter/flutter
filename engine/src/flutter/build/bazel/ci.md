@@ -290,7 +290,9 @@ the test for real, and so does the command from `engine/src`.
   can be compared on the bots: `--no-bazel-rbe` among a build's `gn` flags
   in its builder file (an infrastructure flag like `--bazel`, matched away;
   `--bazel-rbe` asks for RBE anywhere, a developer's Linux checkout
-  included, given `gcloud auth application-default login`),
+  included, given `gcloud auth application-default login`; off a bot that
+  is `build:rbe_dev`, the same with the links on the machine, where an
+  edit's link takes a few seconds instead of a minute),
   `FLUTTER_BAZEL_RBE=0` in the environment of a run, and `RBE_ON_BOTS` in
   bazel_ci.py, the default a Linux bot gets without either; test.dart's
   shards have the same three (`--bazel-rbe` / `--no-bazel-rbe`, the
