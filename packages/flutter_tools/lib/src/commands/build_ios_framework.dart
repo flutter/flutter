@@ -249,10 +249,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         framework.path,
         ...framework.parent
             .listSync()
-            .where(
-              (FileSystemEntity entity) =>
-                  entity.basename.endsWith('dSYM') && !entity.basename.startsWith('Flutter'),
-            )
+            .where((FileSystemEntity entity) => entity.basename == '${framework.basename}.dSYM')
             .map((FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
             .expand<String>((List<String> parameter) => parameter),
       ],
@@ -320,10 +317,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       final String frameworkName = fs.path.basename(frameworkPath);
 
       // Skip Flutter's own frameworks.
-      if (frameworkName == 'Flutter.framework' ||
-          frameworkName == 'Flutter.xcframework' ||
-          frameworkName == 'App.framework' ||
-          frameworkName == 'App.xcframework') {
+      if (_kFlutterOwnedFrameworks.contains(frameworkName)) {
         continue;
       }
 
@@ -364,6 +358,17 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     }
   }
 }
+
+const _kFlutterOwnedFrameworks = <String>{
+  'Flutter.framework',
+  'Flutter.xcframework',
+  'FlutterMacOS.framework',
+  'FlutterMacOS.xcframework',
+  'App.framework',
+  'App.xcframework',
+  'VMService.framework',
+  'VMService.xcframework',
+};
 
 /// Parses vendored framework paths from a Pods.xcodeproj/project.pbxproj file.
 ///
@@ -833,8 +838,10 @@ end
     final AppleContext(:Xcode xcode) = appleContext;
 
     const appFrameworkName = 'App.framework';
+    const vmServiceFrameworkName = 'VMService.framework';
     final Status status = logger.startProgress(' ├─Building App.xcframework...');
     final frameworks = <Directory>[];
+    final vmServiceFrameworks = <Directory>[];
 
     try {
       for (final EnvironmentType sdkType in EnvironmentType.values) {
@@ -843,6 +850,9 @@ end
           EnvironmentType.simulator => simulatorBuildOutput,
         };
         frameworks.add(outputBuildDirectory.childDirectory(appFrameworkName));
+        if (buildInfo.isProfile) {
+          vmServiceFrameworks.add(outputBuildDirectory.childDirectory(vmServiceFrameworkName));
+        }
         final environment = Environment(
           projectDir: fs.currentDirectory,
           packageConfigPath: packageConfigPath(),
@@ -902,6 +912,17 @@ end
       codesignIdentity,
       buildInfo.mode,
     );
+
+    if (buildInfo.isProfile) {
+      await BuildFrameworkCommand.produceXCFramework(
+        vmServiceFrameworks,
+        'VMService',
+        outputDirectory,
+        processManager,
+        codesignIdentity,
+        buildInfo.mode,
+      );
+    }
   }
 
   Future<void> _producePlugins(

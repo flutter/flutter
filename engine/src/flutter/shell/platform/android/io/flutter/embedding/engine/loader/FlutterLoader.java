@@ -50,6 +50,7 @@ public class FlutterLoader {
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
   private static final String VMSERVICE_SNAPSHOT_LIBRARY = "libvmservice_snapshot.so";
+  private static final String VMSERVICE_SNAPSHOT_KERNEL = "vmservice_snapshot.dill";
 
   // The manifest metadata key for engine flags specified via the command line
   // that are injected into the application merged manifest to be loaded here in the
@@ -775,7 +776,8 @@ public class FlutterLoader {
       resourceExtractor
           .addResource(fullAssetPathFrom(flutterApplicationInfo.vmSnapshotData))
           .addResource(fullAssetPathFrom(flutterApplicationInfo.isolateSnapshotData))
-          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB));
+          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB))
+          .addResource(fullAssetPathFrom(VMSERVICE_SNAPSHOT_KERNEL));
 
       resourceExtractor.start();
     }

@@ -1352,6 +1352,424 @@ void main() {
 
       expect(testContext.processManager.hasRemainingExpectations, isFalse);
     });
+
+    test('embed_and_thin for macos embeds and codesigns VMService.framework when present in BUILT_PRODUCTS_DIR', () {
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterMacOSFramework = buildDir.childDirectory('FlutterMacOS.framework')
+        ..createSync();
+      final Directory vmServiceFramework = buildDir.childDirectory('VMService.framework')
+        ..createSync(recursive: true);
+
+      final Directory targetBuildDir = fileSystem.directory('/path/to/target')
+        ..createSync(recursive: true);
+      const frameworksFolderPath = 'Contents/Frameworks';
+      const infoPlistPath = 'Runner.app/Info.plist';
+      fileSystem.file('${buildDir.path}/$infoPlistPath').createSync(recursive: true);
+      const appPath = '/path/to/my_flutter_app';
+      const platformDirPath = '$appPath/macos';
+      const buildMode = 'Profile';
+      const codesignIdentity = '12312313';
+      final testContext = TestContext(
+        <String>['embed_and_thin', 'macos'],
+        <String, String>{
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CONFIGURATION': buildMode,
+          'INFOPLIST_PATH': infoPlistPath,
+          'SOURCE_ROOT': platformDirPath,
+          'FLUTTER_APPLICATION_PATH': appPath,
+          'FLUTTER_BUILD_DIR': 'build',
+          'FLUTTER_ROOT': '/path/to/flutter',
+          'FLUTTER_BUILD_NAME': '1.0.0',
+          'FLUTTER_BUILD_NUMBER': '1',
+          'TARGET_BUILD_DIR': targetBuildDir.path,
+          'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+          'EXPANDED_CODE_SIGN_IDENTITY': codesignIdentity,
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'mkdir',
+              '-p',
+              '--',
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              buildDir.childDirectory('App.framework').path,
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('App.framework/App')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              vmServiceFramework.path,
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('VMService.framework/VMService')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              '--filter',
+              '- Headers',
+              '--filter',
+              '- Modules',
+              flutterMacOSFramework.path,
+              '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('FlutterMacOS.framework/FlutterMacOS')
+                  .path,
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+
+      expect(testContext.processManager.hasRemainingExpectations, isFalse);
+    });
+
+    test('embed_and_thin does not embed VMService.framework in Release mode even when present in BUILT_PRODUCTS_DIR', () {
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterFramework = buildDir.childDirectory('Flutter.framework')..createSync();
+      buildDir.childDirectory('VMService.framework').createSync(recursive: true);
+
+      final Directory targetBuildDir = fileSystem.directory('/path/to/target')
+        ..createSync(recursive: true);
+      const frameworksFolderPath = 'Runner.app/Frameworks';
+      final Directory staleEmbeddedVmService = targetBuildDir
+          .childDirectory(frameworksFolderPath)
+          .childDirectory('VMService.framework');
+      staleEmbeddedVmService.childFile('VMService').createSync(recursive: true);
+
+      const infoPlistPath = 'Runner.app/Info.plist';
+      fileSystem.file('${buildDir.path}/$infoPlistPath').createSync(recursive: true);
+      const appPath = '/path/to/my_flutter_app';
+      const platformDirPath = '$appPath/ios';
+      const buildMode = 'Release';
+      final testContext = TestContext(
+        <String>['embed_and_thin', 'ios'],
+        <String, String>{
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CONFIGURATION': buildMode,
+          'INFOPLIST_PATH': infoPlistPath,
+          'SOURCE_ROOT': platformDirPath,
+          'FLUTTER_APPLICATION_PATH': appPath,
+          'FLUTTER_BUILD_DIR': 'build',
+          'FLUTTER_ROOT': '/path/to/flutter',
+          'FLUTTER_BUILD_NAME': '1.0.0',
+          'FLUTTER_BUILD_NUMBER': '1',
+          'TARGET_BUILD_DIR': targetBuildDir.path,
+          'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+          'DISABLE_PORT_PUBLICATION': 'YES',
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'mkdir',
+              '-p',
+              '--',
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              buildDir.childDirectory('App.framework').path,
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              flutterFramework.path,
+              '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+
+      expect(staleEmbeddedVmService.existsSync(), isFalse);
+      expect(testContext.processManager.hasRemainingExpectations, isFalse);
+    });
+
+    for (final buildMode in <String>['Debug', 'Release']) {
+      test('embed for macos deletes stale embedded VMService.framework in $buildMode mode', () {
+        final Directory buildDir = fileSystem.directory('/path/to/builds')
+          ..createSync(recursive: true);
+        final Directory flutterMacOSFramework = buildDir.childDirectory('FlutterMacOS.framework')
+          ..createSync();
+        buildDir.childDirectory('VMService.framework').createSync(recursive: true);
+
+        final Directory targetBuildDir = fileSystem.directory('/path/to/target')
+          ..createSync(recursive: true);
+        const frameworksFolderPath = 'Contents/Frameworks';
+        final Directory staleEmbeddedVmService = targetBuildDir
+            .childDirectory(frameworksFolderPath)
+            .childDirectory('VMService.framework');
+        staleEmbeddedVmService.childFile('Versions/A/VMService').createSync(recursive: true);
+
+        const appPath = '/path/to/my_flutter_app';
+        const platformDirPath = '$appPath/macos';
+        final testContext = TestContext(
+          <String>['embed', 'macos'],
+          <String, String>{
+            'BUILT_PRODUCTS_DIR': buildDir.path,
+            'CONFIGURATION': buildMode,
+            'SOURCE_ROOT': platformDirPath,
+            'FLUTTER_APPLICATION_PATH': appPath,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_ROOT': '/path/to/flutter',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
+            'TARGET_BUILD_DIR': targetBuildDir.path,
+            'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+          },
+          commands: <FakeCommand>[
+            FakeCommand(
+              command: <String>[
+                'mkdir',
+                '-p',
+                '--',
+                targetBuildDir.childDirectory(frameworksFolderPath).path,
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                'rsync',
+                '-8',
+                '-av',
+                '--delete',
+                '--filter',
+                '- .DS_Store',
+                buildDir.childDirectory('App.framework').path,
+                targetBuildDir.childDirectory(frameworksFolderPath).path,
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                'rsync',
+                '-8',
+                '-av',
+                '--delete',
+                '--filter',
+                '- .DS_Store',
+                '--filter',
+                '- Headers',
+                '--filter',
+                '- Modules',
+                flutterMacOSFramework.path,
+                '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
+              ],
+            ),
+          ],
+          fileSystem: fileSystem,
+        )..run();
+
+        expect(staleEmbeddedVmService.existsSync(), isFalse);
+        expect(testContext.processManager.hasRemainingExpectations, isFalse);
+      });
+    }
+
+    test('embed_and_thin for ios embeds VMService.framework in Profile mode and deletes stale copy in Debug mode', () {
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterFramework = buildDir.childDirectory('Flutter.framework')..createSync();
+      final Directory vmServiceFramework = buildDir.childDirectory('VMService.framework')
+        ..createSync(recursive: true);
+
+      final Directory targetBuildDir = fileSystem.directory('/path/to/target')
+        ..createSync(recursive: true);
+      const frameworksFolderPath = 'Runner.app/Frameworks';
+      final Directory embeddedFrameworksDir = targetBuildDir.childDirectory(frameworksFolderPath);
+      const infoPlistPath = 'Runner.app/Info.plist';
+      fileSystem.file('${buildDir.path}/$infoPlistPath').createSync(recursive: true);
+      const appPath = '/path/to/my_flutter_app';
+      const platformDirPath = '$appPath/ios';
+
+      final profileContext = TestContext(
+        <String>['embed_and_thin', 'ios'],
+        <String, String>{
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CONFIGURATION': 'Profile',
+          'INFOPLIST_PATH': infoPlistPath,
+          'SOURCE_ROOT': platformDirPath,
+          'FLUTTER_APPLICATION_PATH': appPath,
+          'FLUTTER_BUILD_DIR': 'build',
+          'FLUTTER_ROOT': '/path/to/flutter',
+          'FLUTTER_BUILD_NAME': '1.0.0',
+          'FLUTTER_BUILD_NUMBER': '1',
+          'TARGET_BUILD_DIR': targetBuildDir.path,
+          'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+          'DISABLE_PORT_PUBLICATION': 'YES',
+        },
+        commands: <FakeCommand>[
+          FakeCommand(command: <String>['mkdir', '-p', '--', embeddedFrameworksDir.path]),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              buildDir.childDirectory('App.framework').path,
+              embeddedFrameworksDir.path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              vmServiceFramework.path,
+              embeddedFrameworksDir.path,
+            ],
+            onRun: (_) {
+              embeddedFrameworksDir
+                  .childDirectory('VMService.framework')
+                  .childFile('VMService')
+                  .createSync(recursive: true);
+            },
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              flutterFramework.path,
+              '${embeddedFrameworksDir.path}/',
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+
+      expect(profileContext.processManager.hasRemainingExpectations, isFalse);
+      expect(embeddedFrameworksDir.childDirectory('VMService.framework').existsSync(), isTrue);
+
+      final debugContext = TestContext(
+        <String>['embed_and_thin', 'ios'],
+        <String, String>{
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CONFIGURATION': 'Debug',
+          'INFOPLIST_PATH': infoPlistPath,
+          'SOURCE_ROOT': platformDirPath,
+          'FLUTTER_APPLICATION_PATH': appPath,
+          'FLUTTER_BUILD_DIR': 'build',
+          'FLUTTER_ROOT': '/path/to/flutter',
+          'FLUTTER_BUILD_NAME': '1.0.0',
+          'FLUTTER_BUILD_NUMBER': '1',
+          'TARGET_BUILD_DIR': targetBuildDir.path,
+          'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+          'DISABLE_PORT_PUBLICATION': 'YES',
+        },
+        commands: <FakeCommand>[
+          FakeCommand(command: <String>['mkdir', '-p', '--', embeddedFrameworksDir.path]),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              buildDir.childDirectory('App.framework').path,
+              embeddedFrameworksDir.path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              flutterFramework.path,
+              '${embeddedFrameworksDir.path}/',
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+
+      expect(debugContext.processManager.hasRemainingExpectations, isFalse);
+      expect(embeddedFrameworksDir.childDirectory('VMService.framework').existsSync(), isFalse);
+    });
   });
 
   group('validates generated build settings', () {

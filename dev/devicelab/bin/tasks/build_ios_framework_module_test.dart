@@ -215,6 +215,31 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
     );
   }
 
+  for (final slice in const <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
+    checkFileExists(
+      path.join(
+        outputPath,
+        'Profile',
+        'VMService.xcframework',
+        slice,
+        'VMService.framework',
+        'VMService',
+      ),
+    );
+    checkFileExists(
+      path.join(
+        outputPath,
+        'Profile',
+        'VMService.xcframework',
+        slice,
+        'VMService.framework',
+        'Info.plist',
+      ),
+    );
+  }
+  checkDirectoryNotExists(path.join(outputPath, 'Debug', 'VMService.xcframework'));
+  checkDirectoryNotExists(path.join(outputPath, 'Release', 'VMService.xcframework'));
+
   section("Check all modes' engine dylib");
 
   for (final mode in <String>['Debug', 'Profile', 'Release']) {
@@ -381,6 +406,9 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
     final String modePath = path.join(outputPath, mode);
     await _checkCodeSignature(path.join(modePath, 'Flutter.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
+    if (mode == 'Profile') {
+      await _checkCodeSignature(path.join(modePath, 'VMService.xcframework'));
+    }
     await _checkCodeSignature(path.join(modePath, 'connectivity.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
     if (isModule) {
@@ -427,8 +455,9 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
       await _checkDsym(path.join(appFrameworkDsymPath, 'Contents', 'Resources', 'DWARF', 'App'));
     }
 
-    if (Directory(path.join(cocoapodsOutputPath, mode, 'FlutterPluginRegistrant.xcframework'))
-            .existsSync() !=
+    if (Directory(
+          path.join(cocoapodsOutputPath, mode, 'FlutterPluginRegistrant.xcframework'),
+        ).existsSync() !=
         isModule) {
       throw TaskResult.failure('Unexpected FlutterPluginRegistrant.xcframework.');
     }
@@ -611,6 +640,30 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     await _checkDsym(path.join(appFrameworkDsymPath, 'Contents', 'Resources', 'DWARF', 'App'));
   }
 
+  checkSymlinkExists(
+    path.join(
+      outputPath,
+      'Profile',
+      'VMService.xcframework',
+      'macos-arm64_x86_64',
+      'VMService.framework',
+      'VMService',
+    ),
+  );
+  checkFileExists(
+    path.join(
+      outputPath,
+      'Profile',
+      'VMService.xcframework',
+      'macos-arm64_x86_64',
+      'VMService.framework',
+      'Resources',
+      'Info.plist',
+    ),
+  );
+  checkDirectoryNotExists(path.join(outputPath, 'Debug', 'VMService.xcframework'));
+  checkDirectoryNotExists(path.join(outputPath, 'Release', 'VMService.xcframework'));
+
   section("Check all modes' engine dylib");
 
   for (final mode in <String>['Debug', 'Profile', 'Release']) {
@@ -722,6 +775,9 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     final String modePath = path.join(outputPath, mode);
     await _checkCodeSignature(path.join(modePath, 'FlutterMacOS.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
+    if (mode == 'Profile') {
+      await _checkCodeSignature(path.join(modePath, 'VMService.xcframework'));
+    }
     await _checkCodeSignature(path.join(modePath, 'connectivity_macos.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
   }

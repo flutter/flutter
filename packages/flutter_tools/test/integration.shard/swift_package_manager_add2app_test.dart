@@ -298,6 +298,34 @@ void main() {
           ], workingDirectory: buildDir.childDirectory('FlutterNativeIntegration').path);
           expect(pluginResult.exitCode, 0, reason: pluginResult.stderr.toString());
           expect(pluginRegistrantLink.targetSync(), './Profile');
+
+          // Verify native build in Profile mode embeds VMService.framework.
+          await _buildNativeProject(
+            nativeProjectPath: nativeProject.path,
+            nativeProjectName: nativeProjectName,
+            buildDir: nativeBuildDir.path,
+            buildMode: 'Release',
+            flutterBuildMode: 'Profile',
+            sdk: sdk,
+            platform: targetPlatform,
+            buildSettings: [r'ENABLE_USER_SCRIPT_SANDBOXING=NO'],
+            codesign: codesign,
+            expectedOutput: ['Verification complete.'],
+          );
+          if (targetPlatform == .ios) {
+            await _buildNativeProject(
+              nativeProjectPath: nativeProject.path,
+              nativeProjectName: nativeProjectName,
+              buildDir: nativeBuildDir.path,
+              buildMode: 'Release',
+              flutterBuildMode: 'Profile',
+              sdk: XcodeSdk.IPhoneSimulator,
+              platform: targetPlatform,
+              buildSettings: [r'ENABLE_USER_SCRIPT_SANDBOXING=NO'],
+              codesign: false,
+              expectedOutput: ['Verification complete.'],
+            );
+          }
         } finally {
           ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         }
@@ -453,6 +481,7 @@ Future<String> _buildNativeProject({
   required String nativeProjectName,
   required String buildDir,
   required String buildMode,
+  String? flutterBuildMode,
   required XcodeSdk sdk,
   required FlutterDarwinPlatform platform,
   required List<String> buildSettings,
@@ -498,6 +527,7 @@ Future<String> _buildNativeProject({
     ...codesignArguments,
     'FLUTTER_SWIFT_PACKAGE_OUTPUT=\$SRCROOT/../$appName/build/${platform.name}/SwiftPackages',
     r'VERBOSE_SCRIPT_LOGGING=YES',
+    if (flutterBuildMode != null) 'FLUTTER_BUILD_MODE=$flutterBuildMode',
     ...buildSettings,
   ], workingDirectory: nativeProjectPath);
 
@@ -510,21 +540,47 @@ Future<String> _buildNativeProject({
     expect(output, isNot(contains(unexpectedLog)), reason: output);
   }
   if (!expectFailure) {
+    final String targetFlutterBuildMode = flutterBuildMode ?? buildMode;
     final modeDirName = platform == FlutterDarwinPlatform.macos
         ? buildMode
         : '$buildMode-${sdk.platformName}';
+    final Directory appBundle = fileSystem
+        .directory(buildDir)
+        .childDirectory(modeDirName)
+        .childDirectory('$nativeProjectName.app');
     final plistPath = platform == FlutterDarwinPlatform.macos
         ? 'Contents/Frameworks/${platform.binaryName}.framework/Resources/Info.plist'
         : 'Frameworks/${platform.binaryName}.framework/Info.plist';
+    final String expectedBuildMode = sdk == XcodeSdk.IPhoneSimulator
+        ? 'debug'
+        : targetFlutterBuildMode.toLowerCase();
     expect(
-      fileSystem
-          .directory(buildDir)
-          .childDirectory(modeDirName)
-          .childDirectory('$nativeProjectName.app')
-          .childFile(plistPath)
-          .readAsStringSync(),
-      contains('<string>${buildMode.toLowerCase()}</string>'),
+      appBundle.childFile(plistPath).readAsStringSync(),
+      contains('<string>$expectedBuildMode</string>'),
     );
+    final vmServiceFrameworkPath = platform == .macos
+        ? 'Contents/Frameworks/VMService.framework'
+        : 'Frameworks/VMService.framework';
+    final Directory embeddedVmService = appBundle.childDirectory(vmServiceFrameworkPath);
+    expect(embeddedVmService.existsSync(), targetFlutterBuildMode == 'Profile');
+    if (targetFlutterBuildMode == 'Profile') {
+      if (platform == .macos) {
+        expect(embeddedVmService.childDirectory('Versions').childLink('Current').targetSync(), 'A');
+        expect(embeddedVmService.childLink('VMService').targetSync(), 'Versions/Current/VMService');
+        expect(embeddedVmService.childLink('Resources').targetSync(), 'Versions/Current/Resources');
+        expect(
+          embeddedVmService
+              .childDirectory('Versions')
+              .childDirectory('A')
+              .childDirectory('Resources')
+              .childFile('Info.plist'),
+          exists,
+        );
+      } else {
+        expect(embeddedVmService.childFile('VMService'), exists);
+        expect(embeddedVmService.childFile('Info.plist'), exists);
+      }
+    }
   }
   return output;
 }
@@ -688,6 +744,34 @@ void _verifyFilesForBuildMode({
     buildDir.childDirectory('FlutterNativeIntegration/$buildMode/Frameworks/App.xcframework'),
     exists,
   );
+  final Directory vmServiceXcframework = buildDir.childDirectory(
+    'FlutterNativeIntegration/$buildMode/Frameworks/VMService.xcframework',
+  );
+  expect(vmServiceXcframework, buildMode == 'Profile' ? exists : isNot(exists));
+  if (buildMode == 'Profile') {
+    if (platform == .macos) {
+      final Directory macosVmService = vmServiceXcframework
+          .childDirectory('macos-arm64_x86_64')
+          .childDirectory('VMService.framework');
+      expect(macosVmService.childLink('VMService').targetSync(), 'Versions/Current/VMService');
+      expect(
+        macosVmService
+            .childDirectory('Versions')
+            .childDirectory('A')
+            .childDirectory('Resources')
+            .childFile('Info.plist'),
+        exists,
+      );
+    } else {
+      for (final slice in const <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
+        final Directory iosVmService = vmServiceXcframework
+            .childDirectory(slice)
+            .childDirectory('VMService.framework');
+        expect(iosVmService.childFile('VMService'), exists);
+        expect(iosVmService.childFile('Info.plist'), exists);
+      }
+    }
+  }
   expect(
     buildDir.childDirectory(
       'FlutterNativeIntegration/$buildMode/Frameworks/CocoaPods/$cocoaPodsPluginName.xcframework',
@@ -733,6 +817,8 @@ Future<void> _verifyCodeSigning({
 }) async {
   final frameworks = <String>[
     'FlutterNativeIntegration/$buildMode/Frameworks/App.xcframework',
+    if (buildMode == 'Profile')
+      'FlutterNativeIntegration/$buildMode/Frameworks/VMService.xcframework',
     'FlutterNativeIntegration/$buildMode/Frameworks/CocoaPods/$cocoaPodsPluginName.xcframework',
     'FlutterNativeIntegration/$buildMode/Frameworks/${platform.binaryName}.xcframework',
     'FlutterNativeIntegration/$buildMode/Frameworks/NativeAssets/$nativeAssetName.xcframework',

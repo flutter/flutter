@@ -232,7 +232,14 @@ class DebugUniversalFramework extends Target {
     final Set<String>? iosArchNames = environment.defines[kIosArchs]?.split(' ').toSet();
     final File output = environment.buildDir.childDirectory('App.framework').childFile('App');
     environment.buildDir.createSync(recursive: true);
-    await _createStubAppFramework(output, environment, iosArchNames, sdkRoot);
+    await _createStubFramework(
+      output,
+      environment,
+      iosArchNames,
+      sdkRoot,
+      installName: '@rpath/App.framework/App',
+      buildMode: BuildMode.debug,
+    );
   }
 }
 
@@ -263,6 +270,13 @@ abstract class UnpackIOS extends UnpackDarwin {
 
   @override
   FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
+
+  @override
+  Future<bool> canSkip(Environment environment) async {
+    // The `build swift-package` command copies the Flutter.xcframework separately and therefore
+    // does not need it to be done by the build system.
+    return environment.defines[kBuildSwiftPackage] == 'true';
+  }
 
   @override
   Future<void> build(Environment environment) async {
@@ -368,6 +382,129 @@ class DebugUnpackIOS extends UnpackIOS {
   @override
   BuildMode get buildMode => BuildMode.debug;
 }
+
+const _kVmServiceFrameworkName = 'VMService.framework';
+const _kVmServiceExecutableName = 'VMService';
+
+/// Unpack the profile prebuilt VM service framework.
+class UnpackIosVmService extends UnpackDarwin {
+  const UnpackIosVmService();
+
+  @override
+  String get name => 'unpack_ios_vm_service';
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => .ios;
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/$_kVmServiceExecutableName'),
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Info.plist'),
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  Future<bool> canSkip(Environment environment) async {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    return BuildMode.fromCliName(buildModeEnvironment) != .profile;
+  }
+
+  @override
+  Future<void> build(Environment environment) async {
+    final String? archs = environment.defines[kIosArchs];
+    if (archs == null) {
+      throw MissingDefineException(kIosArchs, name);
+    }
+
+    final String? sdkRoot = environment.defines[kSdkRoot];
+    // Simulator builds use DebugIosApplicationBundle with kBuildMode == 'profile' during
+    // profile Add-to-App builds; compile a simulator stub VMService.framework for XCFramework creation.
+    if (sdkRoot != null &&
+        environmentTypeFromSdkroot(sdkRoot, environment.fileSystem) == .simulator) {
+      final Directory vmServiceFrameworkDir = environment.outputDir.childDirectory(
+        _kVmServiceFrameworkName,
+      );
+      if (vmServiceFrameworkDir.existsSync()) {
+        vmServiceFrameworkDir.deleteSync(recursive: true);
+      }
+      vmServiceFrameworkDir.createSync(recursive: true);
+      vmServiceFrameworkDir
+          .childFile('Info.plist')
+          .writeAsStringSync(_simulatorVmServiceInfoPlist());
+      await _createStubFramework(
+        vmServiceFrameworkDir.childFile(_kVmServiceExecutableName),
+        environment,
+        archs.split(' ').toSet(),
+        sdkRoot,
+        installName: '@rpath/$_kVmServiceFrameworkName/$_kVmServiceExecutableName',
+        buildMode: .profile,
+      );
+      return;
+    }
+
+    await copyFramework(
+      environment,
+      buildMode: .profile,
+      framework: .vmserviceFramework,
+      targetPlatform: .ios,
+    );
+
+    final File frameworkBinary = environment.outputDir
+        .childDirectory(_kVmServiceFrameworkName)
+        .childFile(_kVmServiceExecutableName);
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary ${frameworkBinary.path} does not exist, cannot thin');
+    }
+    await thinFramework(environment, frameworkBinary.path, archs);
+    await _signFramework(environment, frameworkBinary, .profile);
+  }
+}
+
+String _simulatorVmServiceInfoPlist() =>
+    '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleExecutable</key>
+  <string>$_kVmServiceExecutableName</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.flutter.flutter.vmservice</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>$_kVmServiceExecutableName</string>
+  <key>CFBundlePackageType</key>
+  <string>FMWK</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <key>CFBundleSupportedPlatforms</key>
+  <array>
+    <string>iPhoneSimulator</string>
+  </array>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+  <key>MinimumOSVersion</key>
+  <string>${FlutterDarwinPlatform.ios.deploymentTarget()}</string>
+  <key>BuildMode</key>
+  <string>profile</string>
+</dict>
+</plist>
+''';
 
 // TODO(gaaclarke): Remove this after a reasonable amount of time where the
 // UISceneDelegate migration being on stable. This incurs a minor build time
@@ -687,6 +824,14 @@ abstract class IosAssetBundle extends Target {
       environment.fileSystem
           .file(isolateSnapshotData)
           .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+
+      final String vmserviceDill = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceKernelDill,
+        mode: BuildMode.debug,
+      );
+      environment.fileSystem
+          .file(vmserviceDill)
+          .copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
     } else {
       environment.buildDir
           .childDirectory('App.framework')
@@ -764,6 +909,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   List<Source> get inputs => <Source>[
     const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmserviceKernelDill, mode: BuildMode.debug),
     const Source.pattern('{BUILD_DIR}/app.dill'),
     ...super.inputs,
   ];
@@ -773,6 +919,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vm_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vmservice_snapshot.dill'),
     ...super.outputs,
   ];
 
@@ -780,6 +927,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   List<Target> get dependencies => <Target>[
     const DebugUniversalFramework(),
     const DebugIosLLDBInit(),
+    const UnpackIosVmService(),
     ...super.dependencies,
   ];
 }
@@ -809,7 +957,11 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'profile_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    AotAssemblyProfile(),
+    InstallCodeAssets(),
+    UnpackIosVmService(),
+  ];
 }
 
 /// Build a release iOS application bundle.
@@ -868,21 +1020,24 @@ Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) as
   }
 }
 
-/// Create an App.framework for debug iOS targets.
+/// Create a stub framework for iOS targets (such as `App.framework` in debug/simulator
+/// builds or `VMService.framework` in profile simulator builds).
 ///
-/// This framework needs to exist for the Xcode project to link/bundle,
+/// This framework needs to exist for the Xcode project or XCFramework to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<void> _createStubAppFramework(
+Future<void> _createStubFramework(
   File outputFile,
   Environment environment,
   Set<String>? iosArchNames,
-  String sdkRoot,
-) async {
+  String sdkRoot, {
+  required String installName,
+  required BuildMode buildMode,
+}) async {
   try {
     outputFile.createSync(recursive: true);
   } on Exception catch (e) {
-    throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
+    throwToolExit('Failed to create ${outputFile.parent.basename} stub at ${outputFile.path}: $e');
   }
 
   final FileSystem fileSystem = environment.fileSystem;
@@ -911,7 +1066,7 @@ Future<void> _createStubAppFramework(
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',
-      '-install_name', '@rpath/App.framework/App',
+      '-install_name', installName,
       '-isysroot', sdkRoot,
       '-o', outputFile.path,
     ]);
@@ -921,11 +1076,13 @@ Future<void> _createStubAppFramework(
     } on FileSystemException {
       // Best effort. Sometimes we can't delete things from system temp.
     } on Exception catch (e) {
-      throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
+      throwToolExit(
+        'Failed to create ${outputFile.parent.basename} stub at ${outputFile.path}: $e',
+      );
     }
   }
 
-  await _signFramework(environment, outputFile, BuildMode.debug);
+  await _signFramework(environment, outputFile, buildMode);
 }
 
 Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {

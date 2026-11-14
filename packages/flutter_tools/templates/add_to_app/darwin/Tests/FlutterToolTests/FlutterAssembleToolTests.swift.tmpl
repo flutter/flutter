@@ -226,6 +226,709 @@ func runWithAssemble(
   )
 }
 
+@Test(
+  "runVerifyBuildModeAndUpdateIfNeededCopiesVMServiceInProfileMode",
+  arguments: [
+    (
+      FlutterPlatform.ios,
+      "iphoneos26.2",
+      "Flutter",
+      "Flutter.framework/Info.plist",
+      "ios-arm64",
+      ["--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r"]
+    ),
+    (
+      FlutterPlatform.ios,
+      "iphonesimulator26.2",
+      "Flutter",
+      "Flutter.framework/Info.plist",
+      "ios-arm64_x86_64-simulator",
+      ["--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r"]
+    ),
+    (
+      FlutterPlatform.macos,
+      "macosx26.2",
+      "FlutterMacOS",
+      "FlutterMacOS.framework/Resources/Info.plist",
+      "macos-arm64_x86_64",
+      [
+        "--filter", "- Headers", "--filter", "- Modules",
+        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+      ]
+    ),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededCopiesVMServiceInProfileMode(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String,
+  flutterFrameworkBinaryName: String,
+  infoPlistRelativePath: String,
+  expectedSlice: String,
+  flutterRsyncExtraArgs: [String]
+) async throws {
+  let fileManager = StatefulMockFileManager()
+  let processManager = StatefulMockProcessManager(fileManager: fileManager)
+  let targetBuildMode = "Profile"
+  let currentBuildMode = "Release"
+  let expectedBuildMode = sdkRoot.contains("simulator") ? "debug" : targetBuildMode
+  let buildDir = "/Build/Products/\(targetBuildMode)"
+  let frameworksDir =
+    targetPlatform == .macos ? "MyApp.app/Contents/Frameworks" : "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let flutterXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/\(flutterFrameworkBinaryName).xcframework"
+  let appXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/App.xcframework"
+  let vmServiceXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/VMService.xcframework"
+  let embeddedVmServiceFrameworkPath =
+    "\(buildDir)/\(frameworksDir)/VMService.framework"
+
+  fileManager.filesExist["\(flutterPackagePath)/./\(targetBuildMode)"] = true
+  fileManager.filesExist[flutterXCFrameworkPath] = true
+  fileManager.filesInDirectory[flutterXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/ios-arm64"),
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/ios-arm64_x86_64-simulator"),
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/macos-arm64_x86_64"),
+  ]
+  fileManager.filesExist[appXCFrameworkPath] = true
+  fileManager.filesInDirectory[appXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/ios-arm64"),
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/ios-arm64_x86_64-simulator"),
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/macos-arm64_x86_64"),
+  ]
+  fileManager.filesExist[vmServiceXCFrameworkPath] = true
+  fileManager.filesInDirectory[vmServiceXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(vmServiceXCFrameworkPath)/ios-arm64"),
+    URL(fileURLWithPath: "\(vmServiceXCFrameworkPath)/ios-arm64_x86_64-simulator"),
+    URL(fileURLWithPath: "\(vmServiceXCFrameworkPath)/macos-arm64_x86_64"),
+  ]
+
+  fileManager.fileContents["\(buildDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: currentBuildMode).utf8),
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8),
+  ]
+  fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8)
+  ]
+  processManager.expectedProcesses.append(
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+        ] + flutterRsyncExtraArgs + [
+          "\(flutterXCFrameworkPath)/\(expectedSlice)/\(flutterFrameworkBinaryName).framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(appXCFrameworkPath)/\(expectedSlice)/App.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(vmServiceXCFrameworkPath)/\(expectedSlice)/VMService.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+    ]
+  )
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": sdkRoot,
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+  #expect(processManager.expectedProcesses.isEmpty)
+  #expect(fileManager.filesExist[embeddedVmServiceFrameworkPath] == true)
+  #expect(fileManager.filesRemoved.isEmpty)
+}
+
+@Test func runInSandboxSucceedsInProfileModeWhenBuildModeMatches() async throws {
+  let fileManager = MockFileManager()
+  let targetBuildMode = "Profile"
+  let targetPlatform = FlutterPlatform.ios
+  let buildDir = "/Build/Products/\(targetBuildMode)-iphoneos"
+  let frameworksDir = "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let embeddedVmServiceFrameworkPath =
+    "\(buildDir)/\(frameworksDir)/VMService.framework"
+
+  let plistContent = plistContentFor(buildMode: targetBuildMode)
+  fileManager.fileContents["\(buildDir)/Flutter.framework/Info.plist"] = [
+    Data(plistContent.utf8)
+  ]
+  fileManager.fileContents[
+    "\(buildDir)/\(frameworksDir)/Flutter.framework/Info.plist"
+  ] = [
+    Data(plistContent.utf8)
+  ]
+  fileManager.filesExist[embeddedVmServiceFrameworkPath] = true
+  try FlutterAssembleToolHelper.runInSandbox(
+    appPath: nil,
+    packagePath: flutterPackagePath,
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": "iphoneos26.2",
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+    ],
+    fileManager: fileManager
+  )
+  #expect(fileManager.filesExist[embeddedVmServiceFrameworkPath] == true)
+  #expect(fileManager.filesRemoved.isEmpty)
+  #expect(fileManager.symlinksCreated.isEmpty)
+}
+
+@Test(
+  arguments: [
+    (
+      FlutterPlatform.ios,
+      "iphoneos26.2",
+      "Flutter",
+      "Flutter.framework/Info.plist"
+    ),
+    (
+      FlutterPlatform.ios,
+      "iphonesimulator26.2",
+      "Flutter",
+      "Flutter.framework/Info.plist"
+    ),
+    (
+      FlutterPlatform.macos,
+      "macosx26.2",
+      "FlutterMacOS",
+      "FlutterMacOS.framework/Resources/Info.plist"
+    ),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededNoOpInProfileModeWhenVMServiceAlreadyEmbedded(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String,
+  flutterFrameworkBinaryName: String,
+  infoPlistRelativePath: String
+) async throws {
+  let fileManager = StatefulMockFileManager()
+  let processManager = StatefulMockProcessManager(fileManager: fileManager)
+  let targetBuildMode = "Profile"
+  let expectedBuildMode = sdkRoot.contains("simulator") ? "debug" : targetBuildMode
+  let buildDir = "/Build/Products/\(targetBuildMode)"
+  let frameworksDir =
+    targetPlatform == .macos ? "MyApp.app/Contents/Frameworks" : "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let embeddedVmServiceFrameworkPath =
+    "\(buildDir)/\(frameworksDir)/VMService.framework"
+
+  fileManager.filesExist[embeddedVmServiceFrameworkPath] = true
+  fileManager.fileContents["\(buildDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8)
+  ]
+  fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8)
+  ]
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": sdkRoot,
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+  #expect(processManager.expectedProcesses.isEmpty)
+  #expect(fileManager.filesExist[embeddedVmServiceFrameworkPath] == true)
+  #expect(fileManager.filesRemoved.isEmpty)
+  #expect(fileManager.symlinksCreated.isEmpty)
+}
+
+@Test(
+  arguments: [
+    (
+      FlutterPlatform.ios,
+      "iphoneos26.2",
+      "Flutter",
+      "Flutter.framework/Info.plist",
+      "ios-arm64",
+      ["--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r"]
+    ),
+    (
+      FlutterPlatform.ios,
+      "iphonesimulator26.2",
+      "Flutter",
+      "Flutter.framework/Info.plist",
+      "ios-arm64_x86_64-simulator",
+      ["--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r"]
+    ),
+    (
+      FlutterPlatform.macos,
+      "macosx26.2",
+      "FlutterMacOS",
+      "FlutterMacOS.framework/Resources/Info.plist",
+      "macos-arm64_x86_64",
+      [
+        "--filter", "- Headers", "--filter", "- Modules",
+        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+      ]
+    ),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededEmbedsMissingVMServiceWhenFlutterBuildModeAlreadyMatches(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String,
+  flutterFrameworkBinaryName: String,
+  infoPlistRelativePath: String,
+  expectedSlice: String,
+  flutterRsyncExtraArgs: [String]
+) async throws {
+  let fileManager = StatefulMockFileManager()
+  let processManager = StatefulMockProcessManager(fileManager: fileManager)
+  let targetBuildMode = "Profile"
+  let expectedBuildMode = sdkRoot.contains("simulator") ? "debug" : targetBuildMode
+  let buildDir = "/Build/Products/\(targetBuildMode)"
+  let frameworksDir =
+    targetPlatform == .macos ? "MyApp.app/Contents/Frameworks" : "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let flutterXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/\(flutterFrameworkBinaryName).xcframework"
+  let appXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/App.xcframework"
+  let vmServiceXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/VMService.xcframework"
+  let embeddedVmServiceFrameworkPath =
+    "\(buildDir)/\(frameworksDir)/VMService.framework"
+
+  fileManager.filesExist["\(flutterPackagePath)/./\(targetBuildMode)"] = true
+  fileManager.filesExist[flutterXCFrameworkPath] = true
+  fileManager.filesInDirectory[flutterXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/\(expectedSlice)"),
+  ]
+  fileManager.filesExist[appXCFrameworkPath] = true
+  fileManager.filesInDirectory[appXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/\(expectedSlice)"),
+  ]
+  fileManager.filesExist[vmServiceXCFrameworkPath] = true
+  fileManager.filesInDirectory[vmServiceXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(vmServiceXCFrameworkPath)/\(expectedSlice)"),
+  ]
+
+  fileManager.fileContents["\(buildDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8)
+  ]
+  fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8),
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8),
+  ]
+  processManager.expectedProcesses.append(
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+        ] + flutterRsyncExtraArgs + [
+          "\(flutterXCFrameworkPath)/\(expectedSlice)/\(flutterFrameworkBinaryName).framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(appXCFrameworkPath)/\(expectedSlice)/App.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(vmServiceXCFrameworkPath)/\(expectedSlice)/VMService.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+    ]
+  )
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": sdkRoot,
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+  #expect(processManager.expectedProcesses.isEmpty)
+  #expect(fileManager.filesExist[embeddedVmServiceFrameworkPath] == true)
+  #expect(fileManager.filesRemoved.isEmpty)
+}
+
+@Test(
+  arguments: [
+    (
+      FlutterPlatform.ios,
+      "iphoneos26.2",
+      "Flutter",
+      "Flutter.framework/Info.plist",
+      "ios-arm64",
+      ["--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r"]
+    ),
+    (
+      FlutterPlatform.macos,
+      "macosx26.2",
+      "FlutterMacOS",
+      "FlutterMacOS.framework/Resources/Info.plist",
+      "macos-arm64_x86_64",
+      [
+        "--filter", "- Headers", "--filter", "- Modules",
+        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+      ]
+    ),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededRemovesStaleVMServiceFramework(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String,
+  flutterFrameworkBinaryName: String,
+  infoPlistRelativePath: String,
+  expectedSlice: String,
+  flutterRsyncExtraArgs: [String]
+) async throws {
+  let fileManager = StatefulMockFileManager()
+  let processManager = StatefulMockProcessManager(fileManager: fileManager)
+  let targetBuildMode = "Release"
+  let currentBuildMode = "Profile"
+  let buildDir = "/Build/Products/\(targetBuildMode)"
+  let frameworksDir =
+    targetPlatform == .macos ? "MyApp.app/Contents/Frameworks" : "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let flutterXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/\(flutterFrameworkBinaryName).xcframework"
+  let appXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/App.xcframework"
+  let embeddedVmServiceFrameworkPath =
+    "\(buildDir)/\(frameworksDir)/VMService.framework"
+
+  fileManager.filesExist["\(flutterPackagePath)/./\(targetBuildMode)"] = true
+  fileManager.filesExist[flutterXCFrameworkPath] = true
+  fileManager.filesInDirectory[flutterXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/ios-arm64"),
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/ios-arm64_x86_64-simulator"),
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/macos-arm64_x86_64"),
+  ]
+  fileManager.filesExist[appXCFrameworkPath] = true
+  fileManager.filesInDirectory[appXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/ios-arm64"),
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/ios-arm64_x86_64-simulator"),
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/macos-arm64_x86_64"),
+  ]
+  fileManager.filesExist[embeddedVmServiceFrameworkPath] = true
+
+  fileManager.fileContents["\(buildDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: currentBuildMode).utf8),
+    Data(plistContentFor(buildMode: targetBuildMode).utf8),
+  ]
+  fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: targetBuildMode).utf8)
+  ]
+  processManager.expectedProcesses.append(
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+        ] + flutterRsyncExtraArgs + [
+          "\(flutterXCFrameworkPath)/\(expectedSlice)/\(flutterFrameworkBinaryName).framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(appXCFrameworkPath)/\(expectedSlice)/App.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+    ]
+  )
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": sdkRoot,
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+  #expect(processManager.expectedProcesses.isEmpty)
+  #expect(fileManager.filesRemoved == [embeddedVmServiceFrameworkPath])
+  #expect(fileManager.filesExist[embeddedVmServiceFrameworkPath] == false)
+}
+
+@Test(
+  arguments: [
+    (
+      FlutterPlatform.ios,
+      "iphoneos26.2",
+      "Debug",
+      "Flutter",
+      "Flutter.framework/Info.plist",
+      "ios-arm64",
+      ["--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r"]
+    ),
+    (
+      FlutterPlatform.ios,
+      "iphonesimulator26.2",
+      "Debug",
+      "Flutter",
+      "Flutter.framework/Info.plist",
+      "ios-arm64_x86_64-simulator",
+      ["--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r"]
+    ),
+    (
+      FlutterPlatform.ios,
+      "iphoneos26.2",
+      "Release",
+      "Flutter",
+      "Flutter.framework/Info.plist",
+      "ios-arm64",
+      ["--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r"]
+    ),
+    (
+      FlutterPlatform.macos,
+      "macosx26.2",
+      "Release",
+      "FlutterMacOS",
+      "FlutterMacOS.framework/Resources/Info.plist",
+      "macos-arm64_x86_64",
+      [
+        "--filter", "- Headers", "--filter", "- Modules",
+        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+      ]
+    ),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededRemovesStaleVMServiceWhenFlutterBuildModeAlreadyMatches(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String,
+  targetBuildMode: String,
+  flutterFrameworkBinaryName: String,
+  infoPlistRelativePath: String,
+  expectedSlice: String,
+  flutterRsyncExtraArgs: [String]
+) async throws {
+  let fileManager = StatefulMockFileManager()
+  let processManager = StatefulMockProcessManager(fileManager: fileManager)
+  let expectedBuildMode = sdkRoot.contains("simulator") ? "debug" : targetBuildMode
+  let buildDir = "/Build/Products/\(targetBuildMode)"
+  let frameworksDir =
+    targetPlatform == .macos ? "MyApp.app/Contents/Frameworks" : "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let flutterXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/\(flutterFrameworkBinaryName).xcframework"
+  let appXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/App.xcframework"
+  let embeddedVmServiceFrameworkPath =
+    "\(buildDir)/\(frameworksDir)/VMService.framework"
+
+  fileManager.filesExist["\(flutterPackagePath)/./\(targetBuildMode)"] = true
+  fileManager.filesExist[flutterXCFrameworkPath] = true
+  fileManager.filesInDirectory[flutterXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/\(expectedSlice)"),
+  ]
+  fileManager.filesExist[appXCFrameworkPath] = true
+  fileManager.filesInDirectory[appXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/\(expectedSlice)"),
+  ]
+  fileManager.filesExist[embeddedVmServiceFrameworkPath] = true
+
+  fileManager.fileContents["\(buildDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8)
+  ]
+  fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8),
+    Data(plistContentFor(buildMode: expectedBuildMode).utf8),
+  ]
+  processManager.expectedProcesses.append(
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+        ] + flutterRsyncExtraArgs + [
+          "\(flutterXCFrameworkPath)/\(expectedSlice)/\(flutterFrameworkBinaryName).framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(appXCFrameworkPath)/\(expectedSlice)/App.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+    ]
+  )
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": sdkRoot,
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+  #expect(processManager.expectedProcesses.isEmpty)
+  #expect(fileManager.filesRemoved == [embeddedVmServiceFrameworkPath])
+  #expect(fileManager.filesExist[embeddedVmServiceFrameworkPath] == false)
+}
+
+@Test(
+  arguments: [
+    (
+      FlutterPlatform.ios,
+      "iphoneos26.2",
+      "Flutter",
+      "Flutter.framework/Info.plist",
+      "ios-arm64",
+      ["--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r"]
+    ),
+    (
+      FlutterPlatform.macos,
+      "macosx26.2",
+      "FlutterMacOS",
+      "FlutterMacOS.framework/Resources/Info.plist",
+      "macos-arm64_x86_64",
+      [
+        "--filter", "- Headers", "--filter", "- Modules",
+        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+      ]
+    ),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededFailsWhenVMServiceXCFrameworkMissingInProfileMode(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String,
+  flutterFrameworkBinaryName: String,
+  infoPlistRelativePath: String,
+  expectedSlice: String,
+  flutterRsyncExtraArgs: [String]
+) async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  let targetBuildMode = "Profile"
+  let currentBuildMode = "Release"
+  let buildDir = "/Build/Products/\(targetBuildMode)"
+  let frameworksDir =
+    targetPlatform == .macos ? "MyApp.app/Contents/Frameworks" : "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let flutterXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/\(flutterFrameworkBinaryName).xcframework"
+  let appXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/App.xcframework"
+  let embeddedVmServiceFrameworkPath =
+    "\(buildDir)/\(frameworksDir)/VMService.framework"
+
+  fileManager.filesExist["\(flutterPackagePath)/./\(targetBuildMode)"] = true
+  fileManager.filesExist[flutterXCFrameworkPath] = true
+  fileManager.filesInDirectory[flutterXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/\(expectedSlice)"),
+  ]
+  fileManager.filesExist[appXCFrameworkPath] = true
+  fileManager.filesInDirectory[appXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/\(expectedSlice)"),
+  ]
+  fileManager.filesExist[embeddedVmServiceFrameworkPath] = true
+
+  fileManager.fileContents["\(buildDir)/\(infoPlistRelativePath)"] = [
+    Data(plistContentFor(buildMode: currentBuildMode).utf8),
+  ]
+  processManager.expectedProcesses.append(
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+        ] + flutterRsyncExtraArgs + [
+          "\(flutterXCFrameworkPath)/\(expectedSlice)/\(flutterFrameworkBinaryName).framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(appXCFrameworkPath)/\(expectedSlice)/App.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+    ]
+  )
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterAssembleToolHelper.run(
+      targetBuildMode: targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: [
+        "SDKROOT": sdkRoot,
+        "BUILT_PRODUCTS_DIR": buildDir,
+        "TARGET_BUILD_DIR": buildDir,
+        "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+        "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+        "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+      ],
+      fileManager: fileManager,
+      processManager: processManager
+    )
+  }
+  #expect(fileManager.filesRemoved.isEmpty)
+}
+
 @Test
 func runInSandboxFailsWhenBuildModeWrong() async throws {
   let fileManager = MockFileManager()
@@ -644,4 +1347,42 @@ func plistContentFor(buildMode: String) -> String {
     </dict>
     </plist>
     """
+}
+
+final class StatefulMockFileManager: MockFileManager {
+  override func removeItem(at url: URL) throws {
+    try super.removeItem(at: url)
+    filesExist[url.path] = false
+  }
+
+  override func removeItem(atPath path: String) throws {
+    try super.removeItem(atPath: path)
+    filesExist[path] = false
+  }
+}
+
+final class StatefulMockProcessManager: FlutterProcessRunner {
+  var expectedProcesses: [MockProcess] = []
+  private let fileManager: MockFileManager
+
+  init(fileManager: MockFileManager) {
+    self.fileManager = fileManager
+  }
+
+  func run(
+    executableURL: URL,
+    arguments: [String],
+    env: [String: String]?,
+    failOnError: Bool
+  ) throws {
+    let expectedProcess = expectedProcesses.remove(at: 0)
+    #expect(executableURL.path == expectedProcess.expectedURL)
+    #expect(arguments == expectedProcess.expectedArguments)
+    if executableURL.path == "/usr/bin/rsync", arguments.count >= 2 {
+      let sourcePath = arguments[arguments.count - 2]
+      let destinationDir = arguments[arguments.count - 1]
+      let copiedItemName = URL(fileURLWithPath: sourcePath).lastPathComponent
+      fileManager.filesExist["\(destinationDir)/\(copiedItemName)"] = true
+    }
+  }
 }
