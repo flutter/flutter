@@ -71,6 +71,8 @@ Future<Depfile> copyAssets(
     // for this pubspec file.
     pubspecFile,
     ...additionalInputs,
+    for (final File file in assetBundle.inputFiles)
+      if (file.existsSync()) file,
   ];
   final outputs = <File>[];
 
@@ -268,7 +270,12 @@ Future<Depfile> copyAssets(
       }),
     );
   }
-  final depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
+  final seenInputPaths = <String>{};
+  final depfileInputs = <File>[
+    for (final File file in <File>[...inputs, ...assetBundle.additionalDependencies])
+      if (seenInputPaths.add(environment.fileSystem.path.normalize(file.absolute.path))) file,
+  ];
+  final depfile = Depfile(depfileInputs, outputs);
   return depfile;
 }
 
