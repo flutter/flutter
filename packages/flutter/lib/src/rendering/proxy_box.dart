@@ -3998,7 +3998,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
     this._onLongPress,
     this._onHorizontalDragUpdate,
     this._onVerticalDragUpdate,
-    this.scrollFactor = 0.8,
+    this.scrollFactor = 1.0,
     super.behavior,
   });
 
