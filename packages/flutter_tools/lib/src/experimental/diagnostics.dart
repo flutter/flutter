@@ -15,12 +15,38 @@ class ExtensionDoctorValidator extends DoctorValidator {
   ExtensionDoctorValidator({required this.extension, required this._logger})
     : super(extension.title);
 
+  /// Creates a [ValidationResult] attributing a diagnostic crash to the
+  /// tool extension identified by [extensionIdentifier].
+  static ValidationResult createExtensionCrashResult(
+    String extensionIdentifier,
+    Object error, [
+    StackTrace? stackTrace,
+  ]) {
+    return ValidationResult(ValidationType.crash, <ValidationMessage>[
+      ValidationMessage.error(
+        'Due to an error in tool extension "$extensionIdentifier", the doctor check did not complete. '
+        'Please report this issue to the extension author.',
+      ),
+      ValidationMessage.error('$error'),
+      if (stackTrace != null) ValidationMessage('$stackTrace'),
+    ], statusInfo: 'the doctor check crashed');
+  }
+
   /// The active extension service executing diagnostic checks.
   final DiagnosticsExtension extension;
   final Logger _logger;
 
   @override
   String get title => extension.title;
+
+  @override
+  ValidationResult createCrashResult(Object error, [StackTrace? stackTrace]) {
+    final String extensionIdentifier = switch (extension) {
+      DiagnosticsExtensionClient(:final ExtensionConnection connection) => connection.extensionName,
+      _ => extension.title,
+    };
+    return createExtensionCrashResult(extensionIdentifier, error, stackTrace);
+  }
 
   @override
   Future<ValidationResult> validateImpl() async {
@@ -111,24 +137,15 @@ final class DiagnosticsExtensionClient extends DiagnosticsExtension {
       'DiagnosticsExtensionClient running diagnostics via RPC ("${DiagnosticsExtension.runDiagnosticsMethod}")...',
     );
     try {
-      final Object? response = await connection.sendRequest(
+      final Object? result = await connection.sendRequest(
         DiagnosticsExtension.runDiagnosticsMethod,
+        timeout: null,
       );
-      if (response is List<Object?>) {
-        final results = <ValidationResult>[];
-        for (final Object? element in response) {
-          if (element is Map) {
-            results.add(ValidationResult.fromJson(element.cast<String, Object?>()));
-          }
-        }
-        _logger.printTrace(
-          'DiagnosticsExtensionClient received ${results.length} result(s) via RPC.',
-        );
-        return results;
-      }
+      final List<ValidationResult> results = ValidationResult.listFromJson(result);
       _logger.printTrace(
-        'DiagnosticsExtensionClient received invalid diagnostics response: $response',
+        'DiagnosticsExtensionClient received ${results.length} result(s) via RPC.',
       );
+      return results;
     } on ToolExtensionException catch (err) {
       return <ValidationResult>[
         ValidationResult(ValidationType.missing, <ValidationMessage>[
@@ -136,8 +153,13 @@ final class DiagnosticsExtensionClient extends DiagnosticsExtension {
         ]),
       ];
     } on Object catch (err, stack) {
-      _logger.printTrace('DiagnosticsExtensionClient failed to run diagnostics: $err\n$stack');
+      _logger.printWarning(
+        'Failed to run diagnostics for extension "${connection.extensionName}": $err',
+      );
+      _logger.printTrace('$stack');
+      return <ValidationResult>[
+        ExtensionDoctorValidator.createExtensionCrashResult(connection.extensionName, err, stack),
+      ];
     }
-    return const <ValidationResult>[];
   }
 }
