@@ -889,4 +889,90 @@ flutter:
 
     expect(() async => const CopyAssets().build(environment), throwsException);
   });
+
+  testWithoutContext(
+    'rebuilds asset bundle when a dependency pubspec adds an asset between builds',
+    () async {
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: example
+dependencies:
+  my_package:
+    path: my_package
+dev_dependencies:
+  dev_package:
+    path: dev_package
+''');
+      fileSystem.file('my_package/pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('name: my_package\n');
+      fileSystem.file('dev_package/pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('name: dev_package\n');
+      writePackageConfigFiles(
+        directory: fileSystem.currentDirectory,
+        mainLibName: 'example',
+        packages: <String, String>{'my_package': 'my_package', 'dev_package': 'dev_package'},
+        dependencies: <String>['my_package'],
+        devDependencies: <String>['dev_package'],
+      );
+
+      final buildSystem = FlutterBuildSystem(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+      );
+
+      final BuildResult firstBuild = await buildSystem.build(
+        const StandaloneCopyAssets(),
+        environment,
+      );
+      expect(firstBuild.success, isTrue);
+      expect(firstBuild.performance['copy_assets']!.skipped, isFalse);
+
+      final Depfile firstDepfile = environment.depFileService.parse(
+        environment.buildDir.childFile('flutter_assets.d'),
+      );
+      final Set<String> firstInputPaths = firstDepfile.inputs.map((File file) => file.path).toSet();
+      expect(firstInputPaths, contains('/my_package/pubspec.yaml'));
+      expect(firstInputPaths, isNot(contains('/dev_package/pubspec.yaml')));
+
+      final BuildResult unchangedBuild = await buildSystem.build(
+        const StandaloneCopyAssets(),
+        environment,
+      );
+      expect(unchangedBuild.success, isTrue);
+      expect(unchangedBuild.performance['copy_assets']!.skipped, isTrue);
+
+      fileSystem.file('my_package/lib/my_script.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('console.log("hello");');
+      fileSystem.file('my_package/pubspec.yaml').writeAsStringSync('''
+name: my_package
+flutter:
+  assets:
+    - lib/my_script.js
+''');
+
+      final BuildResult updatedBuild = await buildSystem.build(
+        const StandaloneCopyAssets(),
+        environment,
+      );
+      expect(updatedBuild.success, isTrue);
+      expect(updatedBuild.performance['copy_assets']!.skipped, isFalse);
+      expect(
+        environment.buildDir.childFile('flutter_assets/packages/my_package/lib/my_script.js'),
+        exists,
+      );
+    },
+  );
+}
+
+class StandaloneCopyAssets extends CopyAssets {
+  const StandaloneCopyAssets();
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  List<Source> get inputs => const <Source>[];
 }
