@@ -6,6 +6,8 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/testing/mock_signal_handler.h"
@@ -159,4 +161,31 @@ TEST_F(FlViewAccessibleTest, AddRemoveChildren) {
   }
 
   EXPECT_EQ(atk_object_get_n_accessible_children(root_object), 0);
+}
+
+// An assistive technology that reads the tree without registering for events
+// enables semantics. Embedding the view does not.
+TEST_F(FlViewAccessibleTest, ReadingEnablesSemantics) {
+  StartEngine();
+
+  int calls = 0;
+  fl_engine_get_embedder_api(engine)->UpdateSemanticsEnabled = MOCK_ENGINE_PROC(
+      UpdateSemanticsEnabled, ([&calls](auto engine, bool enabled) {
+        EXPECT_TRUE(enabled);
+        calls++;
+        return kSuccess;
+      }));
+
+  g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine, 456);
+
+  // The ATK bridge counts the children when it embeds the view.
+  atk_object_get_n_accessible_children(ATK_OBJECT(accessible));
+  EXPECT_EQ(calls, 0);
+
+  atk_object_get_role(ATK_OBJECT(accessible));
+  EXPECT_EQ(calls, 1);
+
+  g_autoptr(AtkStateSet) state =
+      atk_object_ref_state_set(ATK_OBJECT(accessible));
+  EXPECT_EQ(calls, 1);
 }

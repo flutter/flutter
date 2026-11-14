@@ -206,6 +206,39 @@ TEST_F(FlEngineTest, PointerPanZoom) {
   EXPECT_TRUE(called);
 }
 
+// Checks semantics are enabled once, however often they are asked for.
+TEST_F(FlEngineTest, EnableSemanticsOnce) {
+  StartEngine();
+
+  int calls = 0;
+  fl_engine_get_embedder_api(engine)->UpdateSemanticsEnabled = MOCK_ENGINE_PROC(
+      UpdateSemanticsEnabled, ([&calls](auto engine, bool enabled) {
+        EXPECT_TRUE(enabled);
+        calls++;
+        return kSuccess;
+      }));
+
+  fl_engine_enable_semantics(engine);
+  fl_engine_enable_semantics(engine);
+
+  EXPECT_EQ(calls, 1);
+}
+
+// Checks the engine does not build semantics until an assistive technology
+// connects.
+TEST_F(FlEngineTest, StartDoesNotEnableSemantics) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->UpdateSemanticsEnabled = MOCK_ENGINE_PROC(
+      UpdateSemanticsEnabled, ([&called](auto engine, bool enabled) {
+        called = true;
+        return kSuccess;
+      }));
+
+  StartEngine();
+
+  EXPECT_FALSE(called);
+}
+
 // Checks dispatching a semantics action works.
 TEST_F(FlEngineTest, DispatchSemanticsAction) {
   bool called = false;

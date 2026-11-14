@@ -616,6 +616,15 @@ gboolean fl_engine_unregister_external_texture(FlEngine* engine,
 void fl_engine_update_accessibility_features(FlEngine* engine, int32_t flags);
 
 /**
+ * fl_engine_enable_semantics:
+ * @engine: an #FlEngine.
+ *
+ * Tells the Flutter engine to build semantics, as an assistive technology uses
+ * them. Semantics stay enabled after this.
+ */
+void fl_engine_enable_semantics(FlEngine* engine);
+
+/**
  * fl_engine_request_app_exit:
  * @engine: an #FlEngine.
  *
