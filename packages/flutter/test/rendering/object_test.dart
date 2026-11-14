@@ -125,6 +125,37 @@ void main() {
     expect(renderObject.describeSemanticsConfigurationCallCount, 0);
   });
 
+  test('attached RenderObject does not do semantics while semantics is off', () {
+    final owner = PipelineOwner();
+    final renderObject = TestRenderObject();
+    owner.rootNode = renderObject;
+    expect(renderObject.attached, isTrue);
+    expect(renderObject.describeSemanticsConfigurationCallCount, 0);
+
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    owner.flushLayout();
+    expect(renderObject.describeSemanticsConfigurationCallCount, 0);
+    owner.rootNode = null;
+    owner.dispose();
+  });
+
+  test('RenderObject attached before semantics is enabled reports semantics', () {
+    final owner = PipelineOwner(onSemanticsUpdate: (ui.SemanticsUpdate update) {});
+    final renderObject = TestRenderObject();
+    owner.rootNode = renderObject;
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    expect(renderObject.describeSemanticsConfigurationCallCount, 0);
+
+    final SemanticsHandle handle = owner.ensureSemantics();
+    renderObject.scheduleInitialSemantics();
+    owner.flushSemantics();
+    expect(renderObject.describeSemanticsConfigurationCallCount, greaterThan(0));
+    expect(owner.semanticsOwner!.rootSemanticsNode, isNotNull);
+    handle.dispose();
+    owner.rootNode = null;
+    owner.dispose();
+  });
+
   test('ensure errors processing render objects are well formatted', () {
     late FlutterErrorDetails errorDetails;
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
