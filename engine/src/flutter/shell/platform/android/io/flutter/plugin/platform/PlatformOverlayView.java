@@ -5,6 +5,7 @@
 package io.flutter.plugin.platform;
 
 import android.content.Context;
+import android.media.ImageReader;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import androidx.annotation.NonNull;
@@ -21,6 +22,14 @@ public class PlatformOverlayView extends FlutterImageView {
       int height,
       @NonNull AccessibilityEventsDelegate accessibilityDelegate) {
     super(context, width, height, FlutterImageView.SurfaceKind.overlay);
+    this.accessibilityDelegate = accessibilityDelegate;
+  }
+
+  public PlatformOverlayView(
+      @NonNull Context context,
+      @NonNull ImageReader imageReader,
+      @Nullable AccessibilityEventsDelegate accessibilityDelegate) {
+    super(context, imageReader, FlutterImageView.SurfaceKind.overlay);
     this.accessibilityDelegate = accessibilityDelegate;
   }
 

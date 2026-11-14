@@ -31,6 +31,9 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
       const TaskRunners& task_runners);
 
   // |ExternalViewEmbedder|
+  bool ReadyForNextFrame(const fml::closure& resume) override;
+
+  // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
       int64_t view_id,
       std::unique_ptr<flutter::EmbeddedViewParams> params) override;

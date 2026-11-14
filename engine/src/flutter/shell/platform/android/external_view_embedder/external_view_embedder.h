@@ -5,7 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
 
+#include <atomic>
+#include <cstdint>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -35,6 +38,11 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
       const TaskRunners& task_runners);
+
+  ~AndroidExternalViewEmbedder() override;
+
+  // |ExternalViewEmbedder|
+  bool ReadyForNextFrame(const fml::closure& resume) override;
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -87,12 +95,31 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   DlRect GetViewRect(int64_t view_id) const;
 
  private:
-  // The number of frames the rasterizer task runner will continue
-  // to run on the platform thread after no platform view is rendered.
-  //
-  // Note: this is an arbitrary number that attempts to account for cases
-  // where the platform view might be momentarily off the screen.
-  static const int kDefaultMergedLeaseDuration = 10;
+  struct PlatformOp {
+    enum class Type {
+      kDisplayPlatformView,
+      kDisplayOverlaySurface,
+    };
+    Type type = Type::kDisplayPlatformView;
+    int64_t view_id = 0;
+    int32_t surface_id = 0;
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    int32_t view_width = 0;
+    int32_t view_height = 0;
+    MutatorsStack mutators_stack;
+  };
+
+  struct State {
+    std::atomic<bool> destroyed{false};
+    std::atomic<uint64_t> generation{0};
+    std::atomic<uint64_t> next_trace_flow_id{1};
+    std::mutex mutex;
+    bool in_flight = false;
+    std::vector<fml::closure> pending_resumes;
+  };
 
   // Provides metadata to the Android surfaces.
   const AndroidContext& android_context_;
@@ -108,6 +135,10 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // The task runners.
   const TaskRunners task_runners_;
+
+  // Synchronization and lifetime state shared with asynchronous platform/raster
+  // callbacks.
+  const std::shared_ptr<State> state_;
 
   // The size of the root canvas.
   DlISize frame_size_;
@@ -129,35 +160,52 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // mutation stack.
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
 
-  // The number of platform views in the previous frame.
-  int64_t previous_frame_view_count_ = 0;
+  // Whether Java has been placed in Hybrid Composition platform-view mode for
+  // the preceding frame (meaning overlay views and ImageView backing may be
+  // active until transitioned back out). Raster thread only.
+  bool presented_platform_views_ = false;
 
-  // Destroys the surfaces created from the surface factory.
-  // This method schedules a task on the platform thread, and waits for
-  // the task until it completes. Only call it where the platform thread can't
-  // be waiting for the caller, such as from |Teardown|, which the shell calls
-  // on the platform thread. Never call it from the raster thread.
-  void DestroySurfaces();
+  // Whether Java overlay surfaces may have been created or scheduled for
+  // async destruction since the last |Teardown|. Raster thread only.
+  bool overlays_may_exist_ = false;
 
-  // Takes the overlay layers out of the pool and releases them without waiting
-  // for the platform thread. The rendering surfaces are released on the
-  // calling thread, and the overlay views are destroyed on the platform
-  // thread.
+  // Overlay layer IDs retired on the raster thread (e.g. during resize) whose
+  // Java counterparts still need to be destroyed on the platform thread.
+  // Raster thread only.
+  std::vector<int32_t> pending_retired_overlay_ids_;
+
+  // Takes the overlay layers out of the pool on the raster thread and queues
+  // their Java layer IDs into |pending_retired_overlay_ids_| for destruction
+  // on the platform thread.
   void ReleaseOverlayLayers();
 
-  // Resets the state.
+  // Posts queued retired overlay IDs (without presenting a frame) if any are
+  // pending when a frame ends without reaching |SubmitFlutterView|.
+  void FlushRetiredOverlayIds();
+
+  // Posts platform-thread view/overlay presentation ops and retired overlay ID
+  // destruction. When |present| is true, marks presentation as in-flight so
+  // |ReadyForNextFrame| applies backpressure until the platform thread finishes
+  // and signals the raster thread.
+  void PostPlatformWork(bool present,
+                        std::vector<PlatformOp> ops,
+                        std::vector<int32_t> retired_ids);
+
+  // Resets the frame state.
   void Reset();
 
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
 
-  // Creates a Surface when needed or recycles an existing one, and draws the
-  // picture on the frame's canvas. Returns nullptr if acquiring a frame from
-  // the overlay surface fails.
+  // Creates a Surface when needed or recycles an existing one, draws the
+  // picture on the overlay frame's canvas, and sets |out_surface_id| to the
+  // overlay's layer ID. Returns nullptr if layer allocation or acquiring a
+  // frame from the overlay surface fails.
   std::unique_ptr<SurfaceFrame> CreateSurfaceIfNeeded(GrDirectContext* context,
                                                       int64_t view_id,
                                                       EmbedderViewSlice* slice,
-                                                      const DlRect& rect);
+                                                      const DlRect& rect,
+                                                      int32_t* out_surface_id);
 };
 
 }  // namespace flutter

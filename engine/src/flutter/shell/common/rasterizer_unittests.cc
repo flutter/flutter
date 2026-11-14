@@ -70,6 +70,7 @@ class MockDelegate : public Rasterizer::Delegate {
               ShouldDiscardLayerTree,
               (int64_t, const flutter::LayerTree&),
               (override));
+  MOCK_METHOD(void, OnDrawFinished, (DrawStatus status), (override));
 };
 
 class MockSurface : public Surface {
@@ -95,6 +96,14 @@ class MockSurface : public Surface {
 
 class MockExternalViewEmbedder : public ExternalViewEmbedder {
  public:
+  MockExternalViewEmbedder() {
+    ON_CALL(*this, ReadyForNextFrame).WillByDefault(Return(true));
+  }
+
+  MOCK_METHOD(bool,
+              ReadyForNextFrame,
+              (const fml::closure& resume),
+              (override));
   MOCK_METHOD(DlCanvas*, GetRootCanvas, (), (override));
   MOCK_METHOD(void, CancelFrame, (), (override));
   MOCK_METHOD(
@@ -131,6 +140,7 @@ class MockExternalViewEmbedder : public ExternalViewEmbedder {
        const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger),
       (override));
   MOCK_METHOD(bool, SupportsDynamicThreadMerging, (), (override));
+  MOCK_METHOD(void, Teardown, (), (override));
 };
 
 #if IMPELLER_SUPPORTS_RENDERING
@@ -1518,6 +1528,183 @@ TEST(RasterizerTest, presentationTimeNotSetWhenVsyncTargetInPast) {
   });
   latch.Wait();
 #endif  // false
+}
+
+TEST(RasterizerTest, DrawDefersWhenEmbedderNotReadyAndCallsOnDrawFinished) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform |
+                             ThreadHost::Type::kRaster | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi);
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  TaskRunners task_runners("test",
+                           fml::MessageLoop::GetCurrent().GetTaskRunner(),
+                           fml::MessageLoop::GetCurrent().GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  EXPECT_CALL(delegate, GetTaskRunners())
+      .WillRepeatedly(ReturnRef(task_runners));
+  ON_CALL(delegate, ShouldDiscardLayerTree).WillByDefault(Return(false));
+
+  auto rasterizer = std::make_unique<Rasterizer>(delegate);
+  auto surface = std::make_unique<NiceMock<MockSurface>>();
+  auto external_view_embedder =
+      std::make_shared<NiceMock<MockExternalViewEmbedder>>();
+  rasterizer->SetExternalViewEmbedder(external_view_embedder);
+
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  auto surface_frame = std::make_unique<SurfaceFrame>(
+      nullptr, framebuffer_info,
+      [](const SurfaceFrame&, DlCanvas*) { return true; },
+      [](const SurfaceFrame&) { return true; }, DlISize(800, 600));
+  EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*surface, AcquireFrame(DlISize()))
+      .WillOnce(Return(ByMove(std::move(surface_frame))));
+  EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillRepeatedly([&]() {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  EXPECT_CALL(*external_view_embedder, SupportsDynamicThreadMerging())
+      .WillRepeatedly(Return(false));
+
+  rasterizer->Setup(std::move(surface));
+
+  auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
+  auto layer_tree =
+      std::make_unique<LayerTree>(nullptr, /*frame_size=*/DlISize());
+  auto item = std::make_unique<FrameItem>(
+      SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
+                          kDevicePixelRatio),
+      CreateFinishedBuildRecorder());
+  ASSERT_TRUE(pipeline->Produce().Complete(std::move(item)).success);
+
+  fml::closure captured_resume;
+  EXPECT_CALL(*external_view_embedder, ReadyForNextFrame(_))
+      .WillOnce([&](const fml::closure& resume) {
+        captured_resume = resume;
+        return false;
+      })
+      .WillOnce(Return(true));
+  {
+    ::testing::InSequence seq;
+    EXPECT_CALL(delegate, OnDrawFinished(DrawStatus::kDeferred)).Times(1);
+    EXPECT_CALL(*external_view_embedder, SubmitFlutterView(_, _, _, _))
+        .Times(1);
+    EXPECT_CALL(delegate, OnDrawFinished(DrawStatus::kDone)).Times(1);
+  }
+
+  rasterizer->Draw(pipeline);
+  ASSERT_TRUE(captured_resume);
+  captured_resume();
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+}
+
+TEST(RasterizerTest, DrawLastLayerTreesDefersAndTeardownDropsDeferredRecorder) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform |
+                             ThreadHost::Type::kRaster | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi);
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  TaskRunners task_runners("test",
+                           fml::MessageLoop::GetCurrent().GetTaskRunner(),
+                           fml::MessageLoop::GetCurrent().GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  EXPECT_CALL(delegate, GetTaskRunners())
+      .WillRepeatedly(ReturnRef(task_runners));
+  ON_CALL(delegate, ShouldDiscardLayerTree).WillByDefault(Return(false));
+
+  auto rasterizer = std::make_unique<Rasterizer>(delegate);
+  auto surface = std::make_unique<NiceMock<MockSurface>>();
+  auto external_view_embedder =
+      std::make_shared<NiceMock<MockExternalViewEmbedder>>();
+  rasterizer->SetExternalViewEmbedder(external_view_embedder);
+
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  auto make_frame = [&]() {
+    return std::make_unique<SurfaceFrame>(
+        nullptr, framebuffer_info,
+        [](const SurfaceFrame&, DlCanvas*) { return true; },
+        [](const SurfaceFrame&) { return true; }, DlISize(800, 600));
+  };
+  EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillRepeatedly([&]() {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  EXPECT_CALL(*surface, AcquireFrame(DlISize()))
+      .WillOnce(Return(ByMove(make_frame())))
+      .WillOnce(Return(ByMove(make_frame())));
+  EXPECT_CALL(*external_view_embedder, SupportsDynamicThreadMerging())
+      .WillRepeatedly(Return(false));
+
+  rasterizer->Setup(std::move(surface));
+
+  // Initial Draw populates last_layer_trees_.
+  auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
+  auto layer_tree =
+      std::make_unique<LayerTree>(nullptr, /*frame_size=*/DlISize());
+  auto item = std::make_unique<FrameItem>(
+      SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
+                          kDevicePixelRatio),
+      CreateFinishedBuildRecorder());
+  ASSERT_TRUE(pipeline->Produce().Complete(std::move(item)).success);
+  EXPECT_CALL(delegate, OnDrawFinished(DrawStatus::kDone)).Times(1);
+  rasterizer->Draw(pipeline);
+  ::testing::Mock::VerifyAndClearExpectations(external_view_embedder.get());
+  ON_CALL(*external_view_embedder, ReadyForNextFrame)
+      .WillByDefault(Return(true));
+  ON_CALL(*external_view_embedder, SupportsDynamicThreadMerging())
+      .WillByDefault(Return(false));
+
+  // DrawLastLayerTrees defers when embedder isn't ready and completes on
+  // resume.
+  fml::closure resume_redraw;
+  EXPECT_CALL(*external_view_embedder, ReadyForNextFrame(_))
+      .WillOnce([&](const fml::closure& resume) {
+        resume_redraw = resume;
+        return false;
+      })
+      .WillOnce(Return(true));
+  EXPECT_CALL(*external_view_embedder, SubmitFlutterView(_, _, _, _)).Times(1);
+  rasterizer->DrawLastLayerTrees(CreateFinishedBuildRecorder());
+  ASSERT_TRUE(resume_redraw);
+  resume_redraw();
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  ::testing::Mock::VerifyAndClearExpectations(external_view_embedder.get());
+  ON_CALL(*external_view_embedder, ReadyForNextFrame)
+      .WillByDefault(Return(true));
+  ON_CALL(*external_view_embedder, SupportsDynamicThreadMerging())
+      .WillByDefault(Return(false));
+
+  // If Teardown runs while a DrawLastLayerTrees is deferred (X12), invoking
+  // the stale resume closure afterward must safely no-op without drawing.
+  fml::closure stale_resume;
+  EXPECT_CALL(*external_view_embedder, ReadyForNextFrame(_))
+      .WillOnce([&](const fml::closure& resume) {
+        stale_resume = resume;
+        return false;
+      });
+  rasterizer->DrawLastLayerTrees(CreateFinishedBuildRecorder());
+  ASSERT_TRUE(stale_resume);
+
+  EXPECT_CALL(*external_view_embedder, Teardown()).Times(1);
+  rasterizer->Teardown();
+  rasterizer->TeardownExternalViewEmbedder();
+  EXPECT_CALL(*external_view_embedder, SubmitFlutterView(_, _, _, _)).Times(0);
+  stale_resume();
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
 }
 
 }  // namespace flutter

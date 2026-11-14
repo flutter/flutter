@@ -10,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.MutableContextWrapper;
+import android.media.ImageReader;
 import android.os.Build;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -26,6 +27,7 @@ import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
+import io.flutter.embedding.android.FlutterImageView;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -40,6 +42,7 @@ import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.util.ViewUtils;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,7 +135,21 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private final SparseArray<PlatformViewWrapper> viewWrappers;
 
   // Next available unique ID for use in overlayLayerViews.
+  // Guards cross-thread access between raster-thread createOverlaySurface(width, height) and
+  // platform-thread view/overlay lifecycle operations.
+  private final Object overlayLock = new Object();
+
+  private boolean overlayActive = false;
+
   private int nextOverlayLayerId = 0;
+
+  // ImageReaders created on the raster thread awaiting promotion to PlatformOverlayViews on the
+  // next platform-thread present.
+  private final SparseArray<ImageReader> pendingOverlayReaders;
+
+  // Retired PlatformOverlayViews retained across resize/frame transitions so swapImageReader()
+  // can reuse them without inflating a new View or mutating flutterView's children.
+  private final ArrayDeque<PlatformOverlayView> reusableOverlayViews;
 
   // Tracks whether the flutterView has been converted to use a FlutterImageView.
   private boolean flutterViewConvertedToImageView = false;
@@ -807,6 +824,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     contextToEmbeddedView = new HashMap<>();
     overlayLayerViews = new SparseArray<>();
+    pendingOverlayReaders = new SparseArray<>();
+    reusableOverlayViews = new ArrayDeque<>();
     currentFrameUsedOverlayLayerIds = new HashSet<>();
     destroyedOverlayLayerIds = new HashSet<>();
     currentFrameUsedPlatformViewIds = new HashSet<>();
@@ -866,6 +885,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    */
   @UiThread
   public void detach() {
+    synchronized (overlayLock) {
+      overlayActive = false;
+      closePendingOverlayReadersLocked();
+    }
     if (platformViewsChannel != null) {
       platformViewsChannel.setPlatformViewsHandler(null);
     }
@@ -883,6 +906,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    */
   public void attachToView(@NonNull FlutterView newFlutterView) {
     flutterView = newFlutterView;
+    synchronized (overlayLock) {
+      overlayActive = true;
+    }
     // Add wrapper for platform views that use GL texture.
     for (int index = 0; index < viewWrappers.size(); index++) {
       final PlatformViewWrapper view = viewWrappers.valueAt(index);
@@ -908,15 +934,23 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * fragment needs to be displayed, a new Flutter view is created, so attachToView is called again.
    */
   public void detachFromView() {
+    synchronized (overlayLock) {
+      overlayActive = false;
+      closePendingOverlayReadersLocked();
+    }
     // Remove wrapper for platform views that use GL texture.
     for (int index = 0; index < viewWrappers.size(); index++) {
       final PlatformViewWrapper view = viewWrappers.valueAt(index);
-      flutterView.removeView(view);
+      if (flutterView != null) {
+        flutterView.removeView(view);
+      }
     }
     // Remove wrapper for platform views that are composed at the view hierarchy level.
     for (int index = 0; index < platformViewParent.size(); index++) {
       final FlutterMutatorView view = platformViewParent.valueAt(index);
-      flutterView.removeView(view);
+      if (flutterView != null) {
+        flutterView.removeView(view);
+      }
     }
 
     destroyOverlaySurfaces();
@@ -1260,6 +1294,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       int viewWidth,
       int viewHeight,
       @NonNull FlutterMutatorsStack mutatorsStack) {
+    if (flutterView == null) {
+      return;
+    }
     initializeRootImageViewIfNeeded();
     if (!initializePlatformViewIfNeeded(viewId)) {
       return;
@@ -1291,12 +1328,43 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    *     only visible for testing.
    */
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
-    if (overlayLayerViews.get(id) == null) {
-      throw new IllegalStateException("The overlay surface (id:" + id + ") doesn't exist");
+    if (flutterView == null) {
+      return;
     }
-    initializeRootImageViewIfNeeded();
+    PlatformOverlayView overlayView = overlayLayerViews.get(id);
+    if (overlayView == null) {
+      final ImageReader pendingReader;
+      final PlatformOverlayView pooledView;
+      synchronized (overlayLock) {
+        pendingReader = pendingOverlayReaders.get(id);
+        if (pendingReader != null) {
+          pendingOverlayReaders.remove(id);
+          pooledView = reusableOverlayViews.pollFirst();
+        } else {
+          pooledView = null;
+        }
+      }
+      if (pendingReader == null) {
+        Log.w(TAG, "Ignoring display request for missing or retired overlay surface id: " + id);
+        return;
+      }
+      initializeRootImageViewIfNeeded();
+      if (pooledView != null) {
+        if (pooledView.getParent() != null && pooledView.getParent() != flutterView) {
+          ((ViewGroup) pooledView.getParent()).removeView(pooledView);
+        }
+        pooledView.swapImageReader(pendingReader);
+        overlayView = pooledView;
+      } else {
+        overlayView =
+            new PlatformOverlayView(
+                flutterView.getContext(), pendingReader, accessibilityEventsDelegate);
+      }
+      overlayLayerViews.put(id, overlayView);
+    } else {
+      initializeRootImageViewIfNeeded();
+    }
 
-    final PlatformOverlayView overlayView = overlayLayerViews.get(id);
     if (overlayView.getParent() == null) {
       flutterView.addView(overlayView);
     }
@@ -1321,6 +1389,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * <p>This member is not intended for public use, and is only visible for testing.
    */
   public void onEndFrame() {
+    if (flutterView == null) {
+      flutterViewConvertedToImageView = false;
+      finishFrame(false);
+      return;
+    }
     // If there are no platform views in the current frame,
     // then revert the image view surface and use the previous surface.
     //
@@ -1354,7 +1427,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       final PlatformOverlayView overlayView = overlayLayerViews.valueAt(i);
 
       if (currentFrameUsedOverlayLayerIds.contains(overlayId)) {
-        flutterView.attachOverlaySurfaceToRender(overlayView);
+        if (flutterView != null) {
+          flutterView.attachOverlaySurfaceToRender(overlayView);
+        }
         final boolean didAcquireOverlaySurfaceImage = overlayView.acquireLatestImage();
         isFrameRenderedUsingImageReaders &= didAcquireOverlaySurfaceImage;
       } else {
@@ -1375,6 +1450,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
       }
     }
+
+    drainReusableOverlayViews();
 
     for (int i = 0; i < platformViewParent.size(); i++) {
       final int viewId = platformViewParent.keyAt(i);
@@ -1408,9 +1485,35 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   @VisibleForTesting
   @NonNull
   public FlutterOverlaySurface createOverlaySurface(@NonNull PlatformOverlayView imageView) {
-    final int id = nextOverlayLayerId++;
+    final int id;
+    synchronized (overlayLock) {
+      id = nextOverlayLayerId++;
+    }
     overlayLayerViews.put(id, imageView);
     return new FlutterOverlaySurface(id, imageView.getSurface());
+  }
+
+  /**
+   * Allocates an {@link ImageReader} overlay surface directly on the calling thread (including the
+   * raster thread) without accessing UI views or blocking on the platform thread.
+   */
+  @Nullable
+  public FlutterOverlaySurface createOverlaySurface(int width, int height) {
+    synchronized (overlayLock) {
+      if (!overlayActive) {
+        return null;
+      }
+    }
+    final ImageReader reader = FlutterImageView.createImageReader(width, height);
+    synchronized (overlayLock) {
+      if (!overlayActive) {
+        reader.close();
+        return null;
+      }
+      final int id = nextOverlayLayerId++;
+      pendingOverlayReaders.put(id, reader);
+      return new FlutterOverlaySurface(id, reader.getSurface());
+    }
   }
 
   /**
@@ -1437,11 +1540,46 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   /**
+   * Retires only the specified overlay surface IDs (e.g., stale IDs from a previous viewport size)
+   * without touching newly allocated IDs from the current frame.
+   */
+  @UiThread
+  public void destroyOverlaySurfacesByIds(@NonNull int[] ids) {
+    for (int id : ids) {
+      final ImageReader pendingReader;
+      synchronized (overlayLock) {
+        pendingReader = pendingOverlayReaders.get(id);
+        if (pendingReader != null) {
+          pendingOverlayReaders.remove(id);
+        }
+      }
+      if (pendingReader != null) {
+        pendingReader.close();
+      }
+      final PlatformOverlayView overlayView = overlayLayerViews.get(id);
+      if (overlayView != null) {
+        overlayLayerViews.remove(id);
+        currentFrameUsedOverlayLayerIds.remove(id);
+        destroyedOverlayLayerIds.remove(id);
+        overlayView.detachFromRenderer();
+        overlayView.closeImageReader();
+        overlayView.setVisibility(View.GONE);
+        synchronized (overlayLock) {
+          reusableOverlayViews.addLast(overlayView);
+        }
+      }
+    }
+  }
+
+  /**
    * Destroys the overlay surfaces and removes them from the view hierarchy.
    *
    * <p>This method is used only internally by {@code FlutterJNI}.
    */
   public void destroyOverlaySurfaces() {
+    synchronized (overlayLock) {
+      closePendingOverlayReadersLocked();
+    }
     for (int viewIndex = 0; viewIndex < overlayLayerViews.size(); viewIndex++) {
       final int overlayId = overlayLayerViews.keyAt(viewIndex);
       if (!destroyedOverlayLayerIds.add(overlayId)) {
@@ -1457,7 +1595,31 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
   }
 
+  private void closePendingOverlayReadersLocked() {
+    for (int i = 0; i < pendingOverlayReaders.size(); i++) {
+      pendingOverlayReaders.valueAt(i).close();
+    }
+    pendingOverlayReaders.clear();
+  }
+
+  private void drainReusableOverlayViews() {
+    while (true) {
+      final PlatformOverlayView unusedView;
+      synchronized (overlayLock) {
+        unusedView = reusableOverlayViews.pollFirst();
+      }
+      if (unusedView == null) {
+        break;
+      }
+      unusedView.setVisibility(View.GONE);
+      if (flutterView != null) {
+        flutterView.removeView(unusedView);
+      }
+    }
+  }
+
   private void removeOverlaySurfaces() {
+    drainReusableOverlayViews();
     if (flutterView == null) {
       Log.e(TAG, "removeOverlaySurfaces called while flutter view is null");
       return;

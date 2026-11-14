@@ -789,6 +789,13 @@ class Shell final : public PlatformView::Delegate,
   bool ShouldDiscardLayerTree(int64_t view_id,
                               const flutter::LayerTree& tree) override;
 
+  // |Rasterizer::Delegate|
+  void OnDrawFinished(DrawStatus status) override;
+
+  // Flushes any waiting first-frame callbacks once a draw finishes or cannot
+  // run.
+  void FlushFirstFrameCallbacks();
+
   // |ServiceProtocol::Handler|
   fml::RefPtr<fml::TaskRunner> GetServiceProtocolHandlerTaskRunner(
       std::string_view method) const override;

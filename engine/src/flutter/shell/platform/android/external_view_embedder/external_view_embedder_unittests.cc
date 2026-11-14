@@ -143,7 +143,7 @@ TEST(AndroidExternalViewEmbedder, CancelFrame) {
   ASSERT_EQ(embedder->CompositeEmbeddedView(0), nullptr);
 }
 
-TEST(AndroidExternalViewEmbedder, RasterizerRunsOnPlatformThread) {
+TEST(AndroidExternalViewEmbedder, DoesNotMergeRasterizerIntoPlatformThread) {
   auto jni_mock = std::make_shared<JNIMock>();
   auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
@@ -154,7 +154,10 @@ TEST(AndroidExternalViewEmbedder, RasterizerRunsOnPlatformThread) {
       GetThreadMergerFromPlatformThread(&rasterizer_thread);
   ASSERT_FALSE(raster_thread_merger->IsMerged());
 
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(0);
+  EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(0);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(10, 20)).Times(1);
+
   embedder->BeginFrame(nullptr, raster_thread_merger);
   embedder->PrepareFlutterView(DlISize(10, 20), 1.0);
 
@@ -163,19 +166,12 @@ TEST(AndroidExternalViewEmbedder, RasterizerRunsOnPlatformThread) {
       0, std::make_unique<EmbeddedViewParams>());
 
   auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
-  ASSERT_EQ(PostPrerollResult::kSkipAndRetryFrame, postpreroll_result);
+  ASSERT_EQ(PostPrerollResult::kSuccess, postpreroll_result);
 
-  EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-  embedder->EndFrame(/*should_resubmit_frame=*/true, raster_thread_merger);
+  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+  ASSERT_FALSE(raster_thread_merger->IsMerged());
 
-  ASSERT_TRUE(raster_thread_merger->IsMerged());
-
-  int pending_frames = 0;
-  while (raster_thread_merger->IsMerged()) {
-    raster_thread_merger->DecrementLease();
-    pending_frames++;
-  }
-  ASSERT_EQ(10, pending_frames);  // kDefaultMergedLeaseDuration
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
 }
 
 TEST(AndroidExternalViewEmbedder, RasterizerRunsOnRasterizerThread) {
@@ -192,8 +188,8 @@ TEST(AndroidExternalViewEmbedder, RasterizerRunsOnRasterizerThread) {
   PostPrerollResult result = embedder->PostPrerollAction(raster_thread_merger);
   ASSERT_EQ(PostPrerollResult::kSuccess, result);
 
-  EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-  embedder->EndFrame(/*should_resubmit_frame=*/true, raster_thread_merger);
+  EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(0);
+  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
 
   ASSERT_FALSE(raster_thread_merger->IsMerged());
 }
@@ -208,7 +204,8 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRect) {
   auto raster_thread_merger =
       GetThreadMergerFromPlatformThread(&rasterizer_thread);
 
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(0);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(100, 100)).Times(1);
   embedder->BeginFrame(nullptr, raster_thread_merger);
   embedder->PrepareFlutterView(DlISize(100, 100), 1.5);
 
@@ -223,6 +220,7 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRect) {
   auto view_id = 0;
   embedder->PrerollCompositeEmbeddedView(view_id, std::move(view_params));
   ASSERT_EQ(DlRect::MakeXYWH(15, 30, 45, 60), embedder->GetViewRect(view_id));
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
 }
 
 TEST(AndroidExternalViewEmbedder, PlatformViewRectChangedParams) {
@@ -235,7 +233,8 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRectChangedParams) {
   auto raster_thread_merger =
       GetThreadMergerFromPlatformThread(&rasterizer_thread);
 
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(0);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(100, 100)).Times(1);
   embedder->BeginFrame(nullptr, raster_thread_merger);
   embedder->PrepareFlutterView(DlISize(100, 100), 1.5);
 
@@ -262,6 +261,7 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRectChangedParams) {
   embedder->PrerollCompositeEmbeddedView(view_id, std::move(view_params_2));
 
   ASSERT_EQ(DlRect::MakeXYWH(75, 90, 105, 120), embedder->GetViewRect(view_id));
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/189834.
@@ -284,7 +284,7 @@ TEST(AndroidExternalViewEmbedder, PlatformViewSizeIsRoundedNotTruncated) {
   constexpr double kDevicePixelRatio = 2.625;
   const auto frame_size = DlISize(1080, 2400);
 
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(1080, 2400)).Times(1);
   embedder->BeginFrame(nullptr, raster_thread_merger);
   embedder->PrepareFlutterView(frame_size, kDevicePixelRatio);
 
@@ -301,10 +301,15 @@ TEST(AndroidExternalViewEmbedder, PlatformViewSizeIsRoundedNotTruncated) {
   embedder->PrerollCompositeEmbeddedView(
       0, std::make_unique<EmbeddedViewParams>(scale, size_points, stack));
 
-  // Both the bounding rect and the size of the view itself cover the whole
-  // screen; neither is 1079x2399.
-  EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 1080, 2400,
-                                                          1080, 2400, stack));
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+    // Both the bounding rect and the size of the view itself cover the whole
+    // screen; neither is 1079x2399.
+    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 1080, 2400,
+                                                            1080, 2400, stack));
+    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+  }
 
   SurfaceFrame::FramebufferInfo framebuffer_info;
   auto surface_frame = std::make_unique<SurfaceFrame>(
@@ -314,9 +319,10 @@ TEST(AndroidExternalViewEmbedder, PlatformViewSizeIsRoundedNotTruncated) {
       /*frame_size=*/frame_size);
   embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                               std::move(surface_frame));
-
-  EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
   embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
 }
 
 TEST(AndroidExternalViewEmbedder, SubmitFlutterView) {
@@ -366,7 +372,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFlutterView) {
 
   auto raster_thread_merger = GetThreadMergerFromPlatformThread();
 
-  // ------------------ First frame ------------------ //
+  // ------------------ First frame (no platform views) ------------------ //
   {
     auto did_submit_frame = false;
     auto surface_frame = std::make_unique<SurfaceFrame>(
@@ -385,57 +391,112 @@ TEST(AndroidExternalViewEmbedder, SubmitFlutterView) {
                                 std::move(surface_frame));
     // Submits frame if no Android view in the current frame.
     EXPECT_TRUE(did_submit_frame);
-    // Doesn't resubmit frame.
     auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
     ASSERT_EQ(PostPrerollResult::kSuccess, postpreroll_result);
-
-    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
     embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
   }
 
-  // ------------------ Second frame ------------------ //
+  // ------------------ Second frame (Frame 0 with PV: root composite)
+  // ------------------ //
   {
-    EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+    EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(1000, 1000)).Times(1);
     embedder->BeginFrame(nullptr, raster_thread_merger);
     embedder->PrepareFlutterView(frame_size, 1.5);
 
-    // Add an Android view.
     MutatorsStack stack1;
     DlMatrix scale = DlMatrix::MakeScale({1.5, 1.5, 1});
     DlMatrix trans = DlMatrix::MakeTranslation({100, 100});
     DlMatrix matrix1 = scale * trans;
     stack1.PushTransform(scale);
     stack1.PushTransform(trans);
-    // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
-    // the offsetPixels, but not the sizePoints.
     auto view_params_1 =
         std::make_unique<EmbeddedViewParams>(matrix1, DlSize(200, 200), stack1);
 
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
-    // This is the recording canvas flow writes to.
     auto canvas_1 = embedder->CompositeEmbeddedView(0);
 
     DlPaint rect_paint;
     rect_paint.setColor(DlColor::kCyan());
     rect_paint.setDrawStyle(DlDrawStyle::kFill);
-
-    // This simulates Flutter UI that doesn't intersect with the Android view.
     canvas_1->DrawRect(DlRect::MakeXYWH(0, 0, 50, 50), rect_paint);
-    // This simulates Flutter UI that intersects with the Android view.
     canvas_1->DrawRect(DlRect::MakeXYWH(50, 50, 200, 200), rect_paint);
     canvas_1->DrawRect(DlRect::MakeXYWH(150, 150, 100, 100), rect_paint);
 
-    // Create a new overlay surface.
-    EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
+    // Frame 0 composites onto root surface without creating overlays.
+    EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(_, _)).Times(0);
+    EXPECT_CALL(*jni_mock, FlutterViewDisplayOverlaySurface(_, _, _, _, _))
+        .Times(0);
+    {
+      ::testing::InSequence sequence;
+      EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+      EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(
+                                 0, 150, 150, 300, 300, 300, 300, stack1));
+      EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+    }
+
+    auto did_submit_frame = false;
+    auto surface_frame = std::make_unique<SurfaceFrame>(
+        SkSurfaces::Null(1000, 1000), framebuffer_info,
+        [&did_submit_frame](const SurfaceFrame& surface_frame,
+                            DlCanvas* canvas) mutable {
+          if (canvas != nullptr) {
+            did_submit_frame = true;
+          }
+          return true;
+        },
+        [](const SurfaceFrame& surface_frame) { return true; },
+        /*frame_size=*/DlISize(800, 600));
+
+    embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
+                                std::move(surface_frame));
+    EXPECT_TRUE(did_submit_frame);
+    ASSERT_EQ(PostPrerollResult::kSuccess,
+              embedder->PostPrerollAction(raster_thread_merger));
+    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
+  }
+
+  // ------------------ Third frame (Frame 1: creates overlay)
+  // ------------------ //
+  {
+    embedder->BeginFrame(nullptr, raster_thread_merger);
+    embedder->PrepareFlutterView(frame_size, 1.5);
+
+    MutatorsStack stack1;
+    DlMatrix scale = DlMatrix::MakeScale({1.5, 1.5, 1});
+    DlMatrix trans = DlMatrix::MakeTranslation({100, 100});
+    DlMatrix matrix1 = scale * trans;
+    stack1.PushTransform(scale);
+    stack1.PushTransform(trans);
+    auto view_params_1 =
+        std::make_unique<EmbeddedViewParams>(matrix1, DlSize(200, 200), stack1);
+
+    embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
+    auto canvas_1 = embedder->CompositeEmbeddedView(0);
+
+    DlPaint rect_paint;
+    rect_paint.setColor(DlColor::kCyan());
+    rect_paint.setDrawStyle(DlDrawStyle::kFill);
+    canvas_1->DrawRect(DlRect::MakeXYWH(0, 0, 50, 50), rect_paint);
+    canvas_1->DrawRect(DlRect::MakeXYWH(50, 50, 200, 200), rect_paint);
+    canvas_1->DrawRect(DlRect::MakeXYWH(150, 150, 100, 100), rect_paint);
+
+    EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(1000, 1000))
         .WillOnce(Return(
             ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
                 0, window))));
-    // The JNI call to display the Android view.
-    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(
-                               0, 150, 150, 300, 300, 300, 300, stack1));
-    // The JNI call to display the overlay surface.
-    EXPECT_CALL(*jni_mock,
-                FlutterViewDisplayOverlaySurface(0, 150, 150, 100, 100));
+    {
+      ::testing::InSequence sequence;
+      EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+      EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(
+                                 0, 150, 150, 300, 300, 300, 300, stack1));
+      EXPECT_CALL(*jni_mock,
+                  FlutterViewDisplayOverlaySurface(0, 150, 150, 100, 100));
+      EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+    }
 
     auto did_submit_frame = false;
     auto surface_frame = std::make_unique<SurfaceFrame>(
@@ -452,57 +513,50 @@ TEST(AndroidExternalViewEmbedder, SubmitFlutterView) {
 
     embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
                                 std::move(surface_frame));
-    // Doesn't submit frame if there aren't Android views in the previous frame.
-    EXPECT_FALSE(did_submit_frame);
-    // Resubmits frame.
-    auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
-    ASSERT_EQ(PostPrerollResult::kResubmitFrame, postpreroll_result);
-
-    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+    EXPECT_TRUE(did_submit_frame);
+    ASSERT_EQ(PostPrerollResult::kSuccess,
+              embedder->PostPrerollAction(raster_thread_merger));
     embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
   }
 
-  // ------------------ Third frame ------------------ //
+  // ------------------ Fourth frame (recycles overlay) ------------------ //
   {
-    EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
     embedder->BeginFrame(nullptr, raster_thread_merger);
     embedder->PrepareFlutterView(frame_size, 1.5);
 
-    // Add an Android view.
     MutatorsStack stack1;
     DlMatrix scale = DlMatrix::MakeScale({1.5, 1.5, 1});
     DlMatrix trans = DlMatrix::MakeTranslation({100, 100});
     DlMatrix matrix1 = scale * trans;
     stack1.PushTransform(scale);
     stack1.PushTransform(trans);
-    // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
-    // the offsetPixels, but not the sizePoints.
     auto view_params_1 =
         std::make_unique<EmbeddedViewParams>(matrix1, DlSize(200, 200), stack1);
 
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
-    // This is the recording canvas flow writes to.
     auto canvas_1 = embedder->CompositeEmbeddedView(0);
 
     DlPaint rect_paint;
     rect_paint.setColor(DlColor::kCyan());
     rect_paint.setDrawStyle(DlDrawStyle::kFill);
-
-    // This simulates Flutter UI that doesn't intersect with the Android view.
     canvas_1->DrawRect(DlRect::MakeXYWH(0, 0, 50, 50), rect_paint);
-    // This simulates Flutter UI that intersects with the Android view.
     canvas_1->DrawRect(DlRect::MakeXYWH(50, 50, 200, 200), rect_paint);
     canvas_1->DrawRect(DlRect::MakeXYWH(150, 150, 100, 100), rect_paint);
 
-    // Don't create a new overlay surface since it's recycled from the first
-    // frame.
-    EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface()).Times(0);
-    // The JNI call to display the Android view.
-    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(
-                               0, 150, 150, 300, 300, 300, 300, stack1));
-    // The JNI call to display the overlay surface.
-    EXPECT_CALL(*jni_mock,
-                FlutterViewDisplayOverlaySurface(0, 150, 150, 100, 100));
+    EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(_, _)).Times(0);
+    {
+      ::testing::InSequence sequence;
+      EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+      EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(
+                                 0, 150, 150, 300, 300, 300, 300, stack1));
+      EXPECT_CALL(*jni_mock,
+                  FlutterViewDisplayOverlaySurface(0, 150, 150, 100, 100));
+      EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+    }
 
     auto did_submit_frame = false;
     auto surface_frame = std::make_unique<SurfaceFrame>(
@@ -518,14 +572,43 @@ TEST(AndroidExternalViewEmbedder, SubmitFlutterView) {
         /*frame_size=*/DlISize(800, 600));
     embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
                                 std::move(surface_frame));
-    // Submits frame if there are Android views in the previous frame.
     EXPECT_TRUE(did_submit_frame);
-    // Doesn't resubmit frame.
-    auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
-    ASSERT_EQ(PostPrerollResult::kSuccess, postpreroll_result);
-
-    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+    ASSERT_EQ(PostPrerollResult::kSuccess,
+              embedder->PostPrerollAction(raster_thread_merger));
     embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
+  }
+
+  // ------------------ Fifth frame (transition out of PVs) ------------------
+  // //
+  {
+    embedder->BeginFrame(nullptr, raster_thread_merger);
+    embedder->PrepareFlutterView(frame_size, 1.5);
+
+    EXPECT_CALL(*jni_mock,
+                FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
+        .Times(0);
+    EXPECT_CALL(*jni_mock, FlutterViewDisplayOverlaySurface(_, _, _, _, _))
+        .Times(0);
+    {
+      ::testing::InSequence sequence;
+      EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+      EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+    }
+
+    auto surface_frame = std::make_unique<SurfaceFrame>(
+        SkSurfaces::Null(1000, 1000), framebuffer_info,
+        [](const SurfaceFrame&, DlCanvas*) { return true; },
+        [](const SurfaceFrame&) { return true; }, DlISize(800, 600));
+    embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
+                                std::move(surface_frame));
+    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   }
 }
 
@@ -569,69 +652,66 @@ TEST(AndroidExternalViewEmbedder, OverlayCoverTwoPlatformViews) {
       *android_context, jni_mock, surface_factory, GetTaskRunnersForFixture());
 
   auto raster_thread_merger = GetThreadMergerFromPlatformThread();
-
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
-  embedder->BeginFrame(nullptr, raster_thread_merger);
-  embedder->PrepareFlutterView(frame_size, 1.5);
-
-  {
-    // Add first Android view.
-    DlMatrix matrix = DlMatrix::MakeTranslation({100, 100});
-    MutatorsStack stack;
-    embedder->PrerollCompositeEmbeddedView(
-        0,
-        std::make_unique<EmbeddedViewParams>(matrix, DlSize(100, 100), stack));
-    // The JNI call to display the Android view.
-    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(
-                               0, 100, 100, 100, 100, 150, 150, stack));
-  }
-
-  {
-    // Add second Android view.
-    DlMatrix matrix = DlMatrix::MakeTranslation({300, 100});
-    MutatorsStack stack;
-    embedder->PrerollCompositeEmbeddedView(
-        1,
-        std::make_unique<EmbeddedViewParams>(matrix, DlSize(100, 100), stack));
-    // The JNI call to display the Android view.
-    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(
-                               1, 300, 100, 100, 100, 150, 150, stack));
-  }
   auto rect_paint = DlPaint();
   rect_paint.setColor(DlColor::kCyan());
   rect_paint.setDrawStyle(DlDrawStyle::kFill);
 
-  // This simulates Flutter UI that intersects with the two Android views.
-  // Since we will compute the intersection for each android view in turn, and
-  // finally merge The final size of the overlay will be smaller than the
-  // width and height of the rect.
-  embedder->CompositeEmbeddedView(1)->DrawRect(
-      DlRect::MakeXYWH(150, 50, 200, 200), rect_paint);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(1000, 1000)).Times(1);
 
-  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
-      .WillRepeatedly([&]() {
-        return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
-            1, window);
-      });
+  auto submit_two_pv_scene = [&](bool expect_overlay) {
+    embedder->BeginFrame(nullptr, raster_thread_merger);
+    embedder->PrepareFlutterView(frame_size, 1.5);
+    {
+      DlMatrix matrix = DlMatrix::MakeTranslation({100, 100});
+      MutatorsStack stack;
+      embedder->PrerollCompositeEmbeddedView(
+          0, std::make_unique<EmbeddedViewParams>(matrix, DlSize(100, 100),
+                                                  stack));
+    }
+    {
+      DlMatrix matrix = DlMatrix::MakeTranslation({300, 100});
+      MutatorsStack stack;
+      embedder->PrerollCompositeEmbeddedView(
+          1, std::make_unique<EmbeddedViewParams>(matrix, DlSize(100, 100),
+                                                  stack));
+    }
+    embedder->CompositeEmbeddedView(1)->DrawRect(
+        DlRect::MakeXYWH(150, 50, 200, 200), rect_paint);
 
-  // The JNI call to display the overlay surface.
-  EXPECT_CALL(*jni_mock,
-              FlutterViewDisplayOverlaySurface(1, 150, 100, 200, 100))
-      .Times(1);
+    EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+    EXPECT_CALL(*jni_mock,
+                FlutterViewOnDisplayPlatformView(0, 100, 100, 100, 100, 150,
+                                                 150, MutatorsStack()));
+    EXPECT_CALL(*jni_mock,
+                FlutterViewOnDisplayPlatformView(1, 300, 100, 100, 100, 150,
+                                                 150, MutatorsStack()));
+    if (expect_overlay) {
+      EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(1000, 1000))
+          .WillRepeatedly([&]() {
+            return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+                1, window);
+          });
+      EXPECT_CALL(*jni_mock,
+                  FlutterViewDisplayOverlaySurface(1, 150, 100, 200, 100))
+          .Times(1);
+    }
+    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
 
-  auto surface_frame = std::make_unique<SurfaceFrame>(
-      SkSurfaces::Null(1000, 1000), framebuffer_info,
-      [](const SurfaceFrame& surface_frame, DlCanvas* canvas) mutable {
-        return true;
-      },
-      [](const SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/DlISize(800, 600));
+    auto surface_frame = std::make_unique<SurfaceFrame>(
+        SkSurfaces::Null(1000, 1000), framebuffer_info,
+        [](const SurfaceFrame&, DlCanvas*) { return true; },
+        [](const SurfaceFrame&) { return true; }, DlISize(800, 600));
+    embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
+                                std::move(surface_frame));
+    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
+  };
 
-  embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
-                              std::move(surface_frame));
-
-  EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+  // Frame 0 transitions into Hybrid Composition; Frame 1 creates overlay.
+  submit_two_pv_scene(/*expect_overlay=*/false);
+  submit_two_pv_scene(/*expect_overlay=*/true);
 }
 
 TEST(AndroidExternalViewEmbedder, SubmitFrameOverlayComposition) {
@@ -671,74 +751,64 @@ TEST(AndroidExternalViewEmbedder, SubmitFrameOverlayComposition) {
       *android_context, jni_mock, surface_factory, GetTaskRunnersForFixture());
 
   auto raster_thread_merger = GetThreadMergerFromPlatformThread();
-
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
-  embedder->BeginFrame(nullptr, raster_thread_merger);
-  embedder->PrepareFlutterView(frame_size, 1.5);
-
-  {
-    // Add first Android view.
-    DlMatrix matrix;
-    MutatorsStack stack;
-    stack.PushTransform(DlMatrix::MakeTranslation({0, 0}));
-
-    embedder->PrerollCompositeEmbeddedView(
-        0,
-        std::make_unique<EmbeddedViewParams>(matrix, DlSize(200, 200), stack));
-    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 200, 200,
-                                                            300, 300, stack));
-  }
-
   auto rect_paint = DlPaint();
   rect_paint.setColor(DlColor::kCyan());
   rect_paint.setDrawStyle(DlDrawStyle::kFill);
 
-  // This simulates Flutter UI that intersects with the first Android view.
-  embedder->CompositeEmbeddedView(0)->DrawRect(
-      DlRect::MakeXYWH(25, 25, 80, 150), rect_paint);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(1000, 1000)).Times(1);
 
-  {
-    // Add second Android view.
-    DlMatrix matrix;
-    MutatorsStack stack;
-    stack.PushTransform(DlMatrix::MakeTranslation({0, 100}));
-
+  auto submit_scene = [&](bool expect_overlay) {
+    embedder->BeginFrame(nullptr, raster_thread_merger);
+    embedder->PrepareFlutterView(frame_size, 1.5);
+    MutatorsStack stack0;
+    stack0.PushTransform(DlMatrix::MakeTranslation({0, 0}));
     embedder->PrerollCompositeEmbeddedView(
-        1,
-        std::make_unique<EmbeddedViewParams>(matrix, DlSize(100, 100), stack));
+        0, std::make_unique<EmbeddedViewParams>(DlMatrix(), DlSize(200, 200),
+                                                stack0));
+    embedder->CompositeEmbeddedView(0)->DrawRect(
+        DlRect::MakeXYWH(25, 25, 80, 150), rect_paint);
+
+    MutatorsStack stack1;
+    stack1.PushTransform(DlMatrix::MakeTranslation({0, 100}));
+    embedder->PrerollCompositeEmbeddedView(
+        1, std::make_unique<EmbeddedViewParams>(DlMatrix(), DlSize(100, 100),
+                                                stack1));
+    embedder->CompositeEmbeddedView(1)->DrawRect(
+        DlRect::MakeXYWH(25, 25, 80, 50), rect_paint);
+    embedder->CompositeEmbeddedView(1)->DrawRect(
+        DlRect::MakeXYWH(75, 75, 30, 100), rect_paint);
+
+    EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 200, 200,
+                                                            300, 300, stack0));
     EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(1, 0, 0, 100, 100,
-                                                            150, 150, stack));
-  }
-  // This simulates Flutter UI that intersects with the first and second Android
-  // views.
-  embedder->CompositeEmbeddedView(1)->DrawRect(DlRect::MakeXYWH(25, 25, 80, 50),
-                                               rect_paint);
+                                                            150, 150, stack1));
+    if (expect_overlay) {
+      EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(1000, 1000))
+          .WillRepeatedly([&]() {
+            return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+                1, window);
+          });
+      EXPECT_CALL(*jni_mock,
+                  FlutterViewDisplayOverlaySurface(1, 25, 25, 80, 150))
+          .Times(2);
+    }
+    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
 
-  embedder->CompositeEmbeddedView(1)->DrawRect(
-      DlRect::MakeXYWH(75, 75, 30, 100), rect_paint);
+    auto surface_frame = std::make_unique<SurfaceFrame>(
+        SkSurfaces::Null(1000, 1000), framebuffer_info,
+        [](const SurfaceFrame&, DlCanvas*) { return true; },
+        [](const SurfaceFrame&) { return true; }, DlISize(800, 600));
+    embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
+                                std::move(surface_frame));
+    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
+  };
 
-  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
-      .WillRepeatedly([&]() {
-        return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
-            1, window);
-      });
-
-  EXPECT_CALL(*jni_mock, FlutterViewDisplayOverlaySurface(1, 25, 25, 80, 150))
-      .Times(2);
-
-  auto surface_frame = std::make_unique<SurfaceFrame>(
-      SkSurfaces::Null(1000, 1000), framebuffer_info,
-      [](const SurfaceFrame& surface_frame, DlCanvas* canvas) mutable {
-        return true;
-      },
-      [](const SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/DlISize(800, 600));
-
-  embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
-                              std::move(surface_frame));
-
-  EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+  submit_scene(/*expect_overlay=*/false);
+  submit_scene(/*expect_overlay=*/true);
 }
 
 TEST(AndroidExternalViewEmbedder, SubmitFramePlatformViewWithoutAnyOverlay) {
@@ -751,66 +821,46 @@ TEST(AndroidExternalViewEmbedder, SubmitFramePlatformViewWithoutAnyOverlay) {
   auto frame_size = DlISize(1000, 1000);
   SurfaceFrame::FramebufferInfo framebuffer_info;
   auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>(
-      [gr_context, window, frame_size, framebuffer_info]() {
-        auto surface_frame_1 = std::make_unique<SurfaceFrame>(
-            SkSurfaces::Null(1000, 1000), framebuffer_info,
-            [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
-              return true;
-            },
-            [](const SurfaceFrame& surface_frame) { return true; },
-            /*frame_size=*/DlISize(800, 600));
-
-        auto surface_mock = std::make_unique<SurfaceMock>();
-        EXPECT_CALL(*surface_mock, AcquireFrame(frame_size))
-            .Times(1 /* frames */)
-            .WillOnce(Return(ByMove(std::move(surface_frame_1))));
-
-        auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
-        EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
-
-        EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
-            .WillOnce(Return(ByMove(std::move(surface_mock))));
-
-        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _));
-        return android_surface_mock;
-      });
+      []() { return std::make_unique<AndroidSurfaceMock>(); });
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
       *android_context, jni_mock, surface_factory, GetTaskRunnersForFixture());
 
   auto raster_thread_merger = GetThreadMergerFromPlatformThread();
 
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
-  embedder->BeginFrame(nullptr, raster_thread_merger);
-  embedder->PrepareFlutterView(frame_size, 1.5);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(1000, 1000)).Times(1);
+  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(_, _)).Times(0);
 
-  {
-    // Add Android view.
+  for (int i = 0; i < 2; ++i) {
+    embedder->BeginFrame(nullptr, raster_thread_merger);
+    embedder->PrepareFlutterView(frame_size, 1.5);
+
     DlMatrix matrix;
     MutatorsStack stack;
     stack.PushTransform(DlMatrix::MakeTranslation({0, 0}));
-
     embedder->PrerollCompositeEmbeddedView(
         0,
         std::make_unique<EmbeddedViewParams>(matrix, DlSize(200, 200), stack));
-    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 200, 200,
-                                                            300, 300, stack));
+
+    {
+      ::testing::InSequence sequence;
+      EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+      EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 200, 200,
+                                                              300, 300, stack));
+      EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+    }
+
+    auto surface_frame = std::make_unique<SurfaceFrame>(
+        SkSurfaces::Null(1000, 1000), framebuffer_info,
+        [](const SurfaceFrame&, DlCanvas*) { return true; },
+        [](const SurfaceFrame&) { return true; }, DlISize(800, 600));
+
+    embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
+                                std::move(surface_frame));
+    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
   }
-
-  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface()).Times(0);
-
-  auto surface_frame = std::make_unique<SurfaceFrame>(
-      SkSurfaces::Null(1000, 1000), framebuffer_info,
-      [](const SurfaceFrame& surface_frame, DlCanvas* canvas) mutable {
-        return true;
-      },
-      [](const SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/DlISize(800, 600));
-
-  embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
-                              std::move(surface_frame));
-
-  EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
 }
 
 TEST(AndroidExternalViewEmbedder, DoesNotCallJNIPlatformThreadOnlyMethods) {
@@ -833,7 +883,7 @@ TEST(AndroidExternalViewEmbedder, DoesNotCallJNIPlatformThreadOnlyMethods) {
   embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
 }
 
-TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
+TEST(AndroidExternalViewEmbedder, RetireOverlayLayersByIdOnSizeChange) {
   auto jni_mock = std::make_shared<JNIMock>();
 
   auto android_context =
@@ -869,158 +919,59 @@ TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
 
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
       *android_context, jni_mock, surface_factory, GetTaskRunnersForFixture());
-  fml::Thread rasterizer_thread("rasterizer");
-  auto raster_thread_merger =
-      GetThreadMergerFromPlatformThread(&rasterizer_thread);
+  auto raster_thread_merger = GetThreadMergerFromPlatformThread();
 
-  // ------------------ First frame ------------------ //
-  {
-    EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+  auto submit_frame = [&](bool expect_overlay) {
     embedder->BeginFrame(nullptr, raster_thread_merger);
     embedder->PrepareFlutterView(frame_size, 1.5);
-
-    // Add an Android view.
     MutatorsStack stack1;
-    // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
-    // the offsetPixels, but not the sizePoints.
-    auto view_params_1 = std::make_unique<EmbeddedViewParams>(
-        DlMatrix(), DlSize(200, 200), stack1);
-
-    embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
-
-    // This simulates Flutter UI that intersects with the Android view.
+    embedder->PrerollCompositeEmbeddedView(
+        0, std::make_unique<EmbeddedViewParams>(DlMatrix(), DlSize(200, 200),
+                                                stack1));
     embedder->CompositeEmbeddedView(0)->DrawRect(
         DlRect::MakeXYWH(50, 50, 200, 200), DlPaint());
-
-    // Create a new overlay surface.
-    EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
-        .WillOnce(Return(
-            ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
-                0, window))));
-    // The JNI call to display the Android view.
+    if (expect_overlay) {
+      EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(1000, 1000))
+          .WillOnce(Return(
+              ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+                  0, window))));
+      EXPECT_CALL(*jni_mock,
+                  FlutterViewDisplayOverlaySurface(0, 50, 50, 150, 150));
+    }
+    EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
     EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 200, 200,
                                                             300, 300, stack1));
-    EXPECT_CALL(*jni_mock,
-                FlutterViewDisplayOverlaySurface(0, 50, 50, 150, 150));
-
-    SurfaceFrame::FramebufferInfo framebuffer_info;
+    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
     auto surface_frame = std::make_unique<SurfaceFrame>(
         SkSurfaces::Null(1000, 1000), framebuffer_info,
-        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
-          return true;
-        },
-        [](const SurfaceFrame& surface_frame) { return true; },
-        /*frame_size=*/DlISize(800, 600));
+        [](const SurfaceFrame&, DlCanvas*) { return true; },
+        [](const SurfaceFrame&) { return true; }, DlISize(800, 600));
     embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
                                 std::move(surface_frame));
-
-    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
     embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
-  }
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
+  };
 
-  EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces());
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
-  // Change the frame size.
-  embedder->BeginFrame(nullptr, raster_thread_merger);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(1000, 1000)).Times(1);
+  submit_frame(/*expect_overlay=*/false);
+  submit_frame(/*expect_overlay=*/true);
+
+  // Changing the frame size must not destroy overlay surfaces inline inside
+  // PrepareFlutterView; instead EndFrame flushes retired overlay ID {0} via
+  // FlutterViewDestroyOverlaySurfacesByIds on the platform task runner (X6/X9).
+  EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(0);
+  EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfacesByIds(_)).Times(0);
   embedder->PrepareFlutterView(DlISize(30, 40), 1.0);
-  // `PrepareFlutterView` posts `MaybeResizeSurfaceView` to the platform runner,
-  // keeping `jni_mock` alive past the end of the test, so verify here.
   ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
-}
 
-TEST(AndroidExternalViewEmbedder, DoesNotDestroyOverlayLayersOnSizeChange) {
-  auto jni_mock = std::make_shared<JNIMock>();
-  auto android_context =
-      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
-
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
-  auto gr_context = GrDirectContext::MakeMock(nullptr);
-  auto frame_size = DlISize(1000, 1000);
-  SurfaceFrame::FramebufferInfo framebuffer_info;
-  auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>(
-      [gr_context, window, frame_size, framebuffer_info]() {
-        auto surface_frame_1 = std::make_unique<SurfaceFrame>(
-            SkSurfaces::Null(1000, 1000), framebuffer_info,
-            [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
-              return true;
-            },
-            [](const SurfaceFrame& surface_frame) { return true; },
-            /*frame_size=*/DlISize(800, 600));
-
-        auto surface_mock = std::make_unique<SurfaceMock>();
-        EXPECT_CALL(*surface_mock, AcquireFrame(frame_size))
-            .WillOnce(Return(ByMove(std::move(surface_frame_1))));
-
-        auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
-        EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
-
-        EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
-            .WillOnce(Return(ByMove(std::move(surface_mock))));
-
-        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _));
-
-        return android_surface_mock;
-      });
-
-  auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
-      *android_context, jni_mock, surface_factory, GetTaskRunnersForFixture());
-
-  // ------------------ First frame ------------------ //
-  {
-    fml::Thread rasterizer_thread("rasterizer");
-    auto raster_thread_merger =
-        GetThreadMergerFromPlatformThread(&rasterizer_thread);
-    EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
-    embedder->BeginFrame(nullptr, raster_thread_merger);
-    embedder->PrepareFlutterView(frame_size, 1.5);
-
-    // Add an Android view.
-    MutatorsStack stack1;
-    // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
-    // the offsetPixels, but not the sizePoints.
-    auto view_params_1 = std::make_unique<EmbeddedViewParams>(
-        DlMatrix(), DlSize(200, 200), stack1);
-
-    embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
-
-    // This simulates Flutter UI that intersects with the Android view.
-    embedder->CompositeEmbeddedView(0)->DrawRect(
-        DlRect::MakeXYWH(50, 50, 200, 200), DlPaint());
-
-    // Create a new overlay surface.
-    EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
-        .WillOnce(Return(
-            ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
-                0, window))));
-    // The JNI call to display the Android view.
-    EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 200, 200,
-                                                            300, 300, stack1));
-    EXPECT_CALL(*jni_mock,
-                FlutterViewDisplayOverlaySurface(0, 50, 50, 150, 150));
-
-    auto surface_frame = std::make_unique<SurfaceFrame>(
-        SkSurfaces::Null(1000, 1000), framebuffer_info,
-        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
-          return true;
-        },
-        [](const SurfaceFrame& surface_frame) { return true; },
-        /*frame_size=*/DlISize(800, 600));
-    embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
-                                std::move(surface_frame));
-
-    EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
-    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
-  }
-
-  EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(0);
-
-  fml::Thread platform_thread("platform");
-  embedder->BeginFrame(nullptr,
-                       GetThreadMergerFromRasterThread(&platform_thread));
-  embedder->PrepareFlutterView(DlISize(30, 40), 1.0);
-  // `PrepareFlutterView` posts `MaybeResizeSurfaceView` to the platform runner,
-  // keeping `jni_mock` alive past the end of the test, so verify here.
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(30, 40)).Times(1);
+  EXPECT_CALL(*jni_mock,
+              FlutterViewDestroyOverlaySurfacesByIds(std::vector<int32_t>{0}))
+      .Times(1);
+  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
 }
 
@@ -1029,7 +980,7 @@ TEST(AndroidExternalViewEmbedder, SupportsDynamicThreadMerging) {
   auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
       android_context, jni_mock, nullptr, GetTaskRunnersForFixture());
-  ASSERT_TRUE(embedder->SupportsDynamicThreadMerging());
+  ASSERT_FALSE(embedder->SupportsDynamicThreadMerging());
 }
 
 TEST(AndroidExternalViewEmbedder, DisableThreadMerger) {
@@ -1042,24 +993,24 @@ TEST(AndroidExternalViewEmbedder, DisableThreadMerger) {
   auto raster_thread_merger = GetThreadMergerFromRasterThread(&platform_thread);
   ASSERT_FALSE(raster_thread_merger->IsMerged());
 
-  // The shell may disable the thread merger during `OnPlatformViewDestroyed`.
   raster_thread_merger->Disable();
 
   EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(0);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(10, 20)).Times(1);
 
   embedder->BeginFrame(nullptr, raster_thread_merger);
   embedder->PrepareFlutterView(DlISize(10, 20), 1.0);
-  // Push a platform view.
   embedder->PrerollCompositeEmbeddedView(
       0, std::make_unique<EmbeddedViewParams>());
 
   auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
-  ASSERT_EQ(PostPrerollResult::kSkipAndRetryFrame, postpreroll_result);
+  ASSERT_EQ(PostPrerollResult::kSuccess, postpreroll_result);
 
   EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(0);
-  embedder->EndFrame(/*should_resubmit_frame=*/true, raster_thread_merger);
+  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
 
   ASSERT_FALSE(raster_thread_merger->IsMerged());
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
 }
 
 TEST(AndroidExternalViewEmbedder, Teardown) {
@@ -1098,36 +1049,47 @@ TEST(AndroidExternalViewEmbedder, Teardown) {
   auto raster_thread_merger =
       GetThreadMergerFromPlatformThread(&rasterizer_thread);
 
-  embedder->BeginFrame(nullptr, raster_thread_merger);
-  embedder->PrepareFlutterView(frame_size, 1.5);
-
-  // Add an Android view.
-  MutatorsStack stack;
-  auto view_params =
-      std::make_unique<EmbeddedViewParams>(DlMatrix(), DlSize(200, 200), stack);
-
-  embedder->PrerollCompositeEmbeddedView(0, std::move(view_params));
-
-  // This simulates Flutter UI that intersects with the Android view.
-  embedder->CompositeEmbeddedView(0)->DrawRect(
-      DlRect::MakeXYWH(50, 50, 200, 200), DlPaint());
-
-  // Create a new overlay surface.
-  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(1000, 1000)).Times(1);
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(2);
+  EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(2);
+  EXPECT_CALL(*jni_mock,
+              FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
+      .Times(2);
+  EXPECT_CALL(*jni_mock, FlutterViewDisplayOverlaySurface(_, _, _, _, _))
+      .Times(1);
+  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(1000, 1000))
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               0, window))));
 
-  SurfaceFrame::FramebufferInfo framebuffer_info;
-  auto surface_frame = std::make_unique<SurfaceFrame>(
-      SkSurfaces::Null(1000, 1000), framebuffer_info,
-      [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
-      [](const SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/DlISize(800, 600));
-  embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
-                              std::move(surface_frame));
+  for (int i = 0; i < 2; ++i) {
+    embedder->BeginFrame(nullptr, raster_thread_merger);
+    embedder->PrepareFlutterView(frame_size, 1.5);
 
-  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+    MutatorsStack stack;
+    auto view_params = std::make_unique<EmbeddedViewParams>(
+        DlMatrix(), DlSize(200, 200), stack);
+
+    embedder->PrerollCompositeEmbeddedView(0, std::move(view_params));
+
+    embedder->CompositeEmbeddedView(0)->DrawRect(
+        DlRect::MakeXYWH(50, 50, 200, 200), DlPaint());
+
+    SurfaceFrame::FramebufferInfo framebuffer_info;
+    auto surface_frame = std::make_unique<SurfaceFrame>(
+        SkSurfaces::Null(1000, 1000), framebuffer_info,
+        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
+          return true;
+        },
+        [](const SurfaceFrame& surface_frame) { return true; },
+        /*frame_size=*/DlISize(800, 600));
+    embedder->SubmitFlutterView(kImplicitViewId, gr_context.get(), nullptr,
+                                std::move(surface_frame));
+
+    embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+    fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  }
 
   EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces());
   // Teardown.
@@ -1155,7 +1117,7 @@ TEST(AndroidExternalViewEmbedder, MaybeResizeSurfaceView) {
       GetThreadMergerFromPlatformThread(&rasterizer_thread);
   ASSERT_FALSE(raster_thread_merger->IsMerged());
 
-  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(0);
   embedder->BeginFrame(nullptr, raster_thread_merger);
 
   EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(100, 200));
@@ -1243,8 +1205,8 @@ struct HcResizeTestFixture {
         *android_context, jni_mock, surface_factory, task_runners);
   }
 
-  void DrawMergedOverlayFrame(const DlISize& size) {
-    PostTaskSync(task_runners.GetPlatformTaskRunner(), [&]() {
+  void DrawOverlayFrame(const DlISize& size, bool expect_overlay = true) {
+    PostTaskSync(task_runners.GetRasterTaskRunner(), [&]() {
       embedder->PrepareFlutterView(size, kDevicePixelRatio);
       embedder->PrerollCompositeEmbeddedView(
           kTestPlatformViewId,
@@ -1263,8 +1225,11 @@ struct HcResizeTestFixture {
               SkSurfaces::Null(size.width, size.height), framebuffer_info,
               [](const SurfaceFrame&, DlCanvas*) { return true; },
               [](const SurfaceFrame&) { return true; }, size));
+      embedder->EndFrame(false, nullptr);
     });
+    (void)expect_overlay;
     PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+    PostTaskSync(task_runners.GetRasterTaskRunner(), []() {});
   }
 };
 
@@ -1273,27 +1238,26 @@ struct HcResizeTestFixture {
 // Regression test for a raster/platform thread deadlock with Hybrid
 // Composition (HC).
 //
-// HC only merges the raster thread into the platform thread while platform
-// views are in the scene. After the last platform view leaves and the merge
-// lease expires, frames are rasterized on the raster thread again, but the
-// surface pool still holds the overlay layers. When the frame size then changes
-// (for example, on rotation), `PrepareFlutterView` runs on the raster thread
-// and must release those layers without blocking on the platform thread, which
-// may itself be waiting on the raster thread (e.g. `NotifyChanged`).
+// In unmerged HC, frame resizes on the raster thread retire old overlay layers
+// without waiting for the platform thread (which may be blocked waiting for the
+// raster thread during NotifyChanged / teardown).
 TEST(AndroidExternalViewEmbedder, ResizeDoesNotBlockRasterOnPlatformThread) {
   HcResizeTestFixture h;
 
-  // The first frame allocates overlay 0.
   EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
       .Times(::testing::AnyNumber());
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(2);
   EXPECT_CALL(*h.jni_mock,
               FlutterViewOnDisplayPlatformView(
                   HcResizeTestFixture::kTestPlatformViewId, 0, 0,
                   HcResizeTestFixture::kPlatformViewLogicalSize,
                   HcResizeTestFixture::kPlatformViewLogicalSize,
                   HcResizeTestFixture::kPhysicalViewSizePx,
-                  HcResizeTestFixture::kPhysicalViewSizePx, h.stack));
-  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface())
+                  HcResizeTestFixture::kPhysicalViewSizePx, h.stack))
+      .Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface(
+                               h.frame_size1.width, h.frame_size1.height))
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               HcResizeTestFixture::kFirstOverlayId, h.window))));
@@ -1302,12 +1266,15 @@ TEST(AndroidExternalViewEmbedder, ResizeDoesNotBlockRasterOnPlatformThread) {
                                HcResizeTestFixture::kOverlayOriginLogical,
                                HcResizeTestFixture::kOverlayOriginLogical,
                                HcResizeTestFixture::kClippedOverlaySizePx,
-                               HcResizeTestFixture::kClippedOverlaySizePx));
-  h.DrawMergedOverlayFrame(h.frame_size1);
+                               HcResizeTestFixture::kClippedOverlaySizePx))
+      .Times(1);
+  // Frame 0 transitions to HC; Frame 1 creates overlay 0.
+  h.DrawOverlayFrame(h.frame_size1);
+  h.DrawOverlayFrame(h.frame_size1);
   ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
 
-  // Occupy the platform thread, standing in for a platform thread that is
-  // waiting for the raster thread.
+  // Occupy the platform thread, standing in for a platform thread waiting for
+  // the raster thread.
   fml::AutoResetWaitableEvent platform_occupied;
   fml::AutoResetWaitableEvent release_platform;
   h.task_runners.GetPlatformTaskRunner()->PostTask([&]() {
@@ -1316,13 +1283,14 @@ TEST(AndroidExternalViewEmbedder, ResizeDoesNotBlockRasterOnPlatformThread) {
   });
   platform_occupied.Wait();
 
-  // Without platform views, the next frame is rasterized on the raster thread.
-  // Its frame-size change must not wait for the platform thread.
+  // Resizing on the raster thread must not wait on the platform thread.
   EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(0);
+  EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfacesByIds(_)).Times(0);
   fml::AutoResetWaitableEvent resize_done;
   h.task_runners.GetRasterTaskRunner()->PostTask([&]() {
     h.embedder->PrepareFlutterView(h.frame_size2,
                                    HcResizeTestFixture::kDevicePixelRatio);
+    h.embedder->EndFrame(false, nullptr);
     resize_done.Signal();
   });
   const bool timed_out =
@@ -1337,22 +1305,26 @@ TEST(AndroidExternalViewEmbedder, ResizeDoesNotBlockRasterOnPlatformThread) {
   } else {
     ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
 
-    // The overlay views of the old size are destroyed on the platform thread
-    // once it is free.
     EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
         .Times(::testing::AnyNumber());
-    EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
+    EXPECT_CALL(*h.jni_mock,
+                FlutterViewDestroyOverlaySurfacesByIds(
+                    std::vector<int32_t>{HcResizeTestFixture::kFirstOverlayId}))
+        .Times(1);
 
     release_platform.Signal();
     PostTaskSync(h.task_runners.GetPlatformTaskRunner(), []() {});
   }
   ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
 
-  // The next frame with an overlay allocates a new overlay for the new size
-  // without destroying again.
+  // The next frame with an overlay allocates a new overlay on the raster
+  // thread without destroying again.
   EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
       .Times(::testing::AnyNumber());
   EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(0);
+  EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfacesByIds(_)).Times(0);
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(1);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(1);
   EXPECT_CALL(*h.jni_mock,
               FlutterViewOnDisplayPlatformView(
                   HcResizeTestFixture::kTestPlatformViewId, 0, 0,
@@ -1360,7 +1332,8 @@ TEST(AndroidExternalViewEmbedder, ResizeDoesNotBlockRasterOnPlatformThread) {
                   HcResizeTestFixture::kPlatformViewLogicalSize,
                   HcResizeTestFixture::kPhysicalViewSizePx,
                   HcResizeTestFixture::kPhysicalViewSizePx, h.stack));
-  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface())
+  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface(
+                               h.frame_size2.width, h.frame_size2.height))
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               HcResizeTestFixture::kSecondOverlayId, h.window))));
@@ -1370,10 +1343,10 @@ TEST(AndroidExternalViewEmbedder, ResizeDoesNotBlockRasterOnPlatformThread) {
                                HcResizeTestFixture::kOverlayOriginLogical,
                                HcResizeTestFixture::kClippedOverlaySizePx,
                                HcResizeTestFixture::kClippedOverlaySizePx));
-  h.DrawMergedOverlayFrame(h.frame_size2);
+  h.DrawOverlayFrame(h.frame_size2);
   ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
 
-  // Teardown on the platform thread destroys the new overlay.
+  // Teardown on the platform thread destroys overlays inline (X8).
   EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
   PostTaskSync(h.task_runners.GetPlatformTaskRunner(),
                [&]() { h.embedder->Teardown(); });
@@ -1381,24 +1354,69 @@ TEST(AndroidExternalViewEmbedder, ResizeDoesNotBlockRasterOnPlatformThread) {
 }
 
 TEST(AndroidExternalViewEmbedder,
-     MergedTaskAheadOfPostedResizeDestroyDestroysOldBeforeCreatingNew) {
+     ResizeCreatesNewOverlayOnRasterAndDestroysOldByIdBeforePresent) {
   HcResizeTestFixture h;
-  auto raster_thread_merger = fml::MakeRefCounted<fml::RasterThreadMerger>(
-      h.task_runners.GetPlatformTaskRunner()->GetTaskQueueId(),
-      h.task_runners.GetRasterTaskRunner()->GetTaskQueueId());
 
   EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
       .Times(::testing::AnyNumber());
-  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame())
-      .Times(::testing::AnyNumber());
-  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(::testing::AnyNumber());
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(2);
   EXPECT_CALL(*h.jni_mock,
               FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
-      .Times(::testing::AnyNumber());
+      .Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface(
+                               h.frame_size1.width, h.frame_size1.height))
+      .WillOnce(Return(
+          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+              HcResizeTestFixture::kFirstOverlayId, h.window))));
+  EXPECT_CALL(*h.jni_mock,
+              FlutterViewDisplayOverlaySurface(
+                  HcResizeTestFixture::kFirstOverlayId, _, _, _, _))
+      .Times(1);
+  h.DrawOverlayFrame(h.frame_size1);
+  h.DrawOverlayFrame(h.frame_size1);
+  ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
 
-  auto run_hc_frame = [&](const DlISize& size) -> PostPrerollResult {
-    h.embedder->BeginFrame(nullptr, raster_thread_merger);
-    h.embedder->PrepareFlutterView(size,
+  // Hold the platform thread while raster prepares frame_size2 and submits a
+  // resized frame without going through EndFrame in between (simulating X9).
+  fml::AutoResetWaitableEvent platform_held;
+  fml::AutoResetWaitableEvent release_platform;
+  h.task_runners.GetPlatformTaskRunner()->PostTask([&]() {
+    platform_held.Signal();
+    release_platform.Wait();
+  });
+  platform_held.Wait();
+
+  EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
+      .Times(::testing::AnyNumber());
+  {
+    InSequence sequence;
+    // Raster thread allocates new overlay first (X1/V6), while platform is
+    // held.
+    EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface(
+                                 h.frame_size2.width, h.frame_size2.height))
+        .WillOnce(Return(
+            ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+                HcResizeTestFixture::kSecondOverlayId, h.window))));
+    // Once platform runs Present, retired overlay 0 is destroyed by ID before
+    // BeginFrame/ops/EndFrame present overlay 1.
+    EXPECT_CALL(*h.jni_mock,
+                FlutterViewDestroyOverlaySurfacesByIds(
+                    std::vector<int32_t>{HcResizeTestFixture::kFirstOverlayId}))
+        .Times(1);
+    EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(1);
+    EXPECT_CALL(*h.jni_mock,
+                FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
+        .Times(1);
+    EXPECT_CALL(*h.jni_mock,
+                FlutterViewDisplayOverlaySurface(
+                    HcResizeTestFixture::kSecondOverlayId, _, _, _, _))
+        .Times(1);
+    EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(1);
+  }
+
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    h.embedder->PrepareFlutterView(h.frame_size2,
                                    HcResizeTestFixture::kDevicePixelRatio);
     h.embedder->PrerollCompositeEmbeddedView(
         HcResizeTestFixture::kTestPlatformViewId,
@@ -1413,129 +1431,24 @@ TEST(AndroidExternalViewEmbedder,
                                     HcResizeTestFixture::kOverlaySizeLogical,
                                     HcResizeTestFixture::kOverlaySizeLogical),
                    DlPaint());
-    PostPrerollResult preroll =
-        h.embedder->PostPrerollAction(raster_thread_merger);
-    if (preroll != PostPrerollResult::kSkipAndRetryFrame) {
-      h.embedder->SubmitFlutterView(
-          kImplicitViewId, nullptr, nullptr,
-          std::make_unique<SurfaceFrame>(
-              SkSurfaces::Null(size.width, size.height), h.framebuffer_info,
-              [](const SurfaceFrame&, DlCanvas*) { return true; },
-              [](const SurfaceFrame&) { return true; }, size));
-    }
-    h.embedder->EndFrame(preroll != PostPrerollResult::kSuccess,
-                         raster_thread_merger);
-    return preroll;
-  };
-
-  // Allocate overlay 0 at frame_size1, then expire the merge lease so threads
-  // unmerge while overlay 0 remains cached in SurfacePool.
-  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface())
-      .WillOnce(Return(
-          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
-              HcResizeTestFixture::kFirstOverlayId, h.window))));
-  EXPECT_CALL(*h.jni_mock,
-              FlutterViewDisplayOverlaySurface(
-                  HcResizeTestFixture::kFirstOverlayId, _, _, _, _))
-      .Times(::testing::AtLeast(1));
-  PostTaskSync(h.task_runners.GetPlatformTaskRunner(), [&]() {
-    raster_thread_merger->MergeWithLease(
-        HcResizeTestFixture::kInitialMergeLease);
-    run_hc_frame(h.frame_size1);
-    run_hc_frame(h.frame_size1);
-    h.embedder->BeginFrame(nullptr, raster_thread_merger);
-    h.embedder->PrepareFlutterView(h.frame_size1,
-                                   HcResizeTestFixture::kDevicePixelRatio);
-    h.embedder->EndFrame(false, raster_thread_merger);
-    while (raster_thread_merger->IsMerged()) {
-      raster_thread_merger->DecrementLease();
-    }
+    h.embedder->SubmitFlutterView(
+        kImplicitViewId, nullptr, nullptr,
+        std::make_unique<SurfaceFrame>(
+            SkSurfaces::Null(h.frame_size2.width, h.frame_size2.height),
+            h.framebuffer_info,
+            [](const SurfaceFrame&, DlCanvas*) { return true; },
+            [](const SurfaceFrame&) { return true; }, h.frame_size2));
+    h.embedder->EndFrame(false, nullptr);
   });
-  // Drain the MaybeResizeSurfaceView task queued by PrepareFlutterView before
-  // clearing and updating JNIMock expectations on the test thread.
-  PostTaskSync(h.task_runners.GetPlatformTaskRunner(), []() {});
-  ASSERT_FALSE(raster_thread_merger->IsMerged());
-  ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
-
-  EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
-      .Times(::testing::AnyNumber());
-  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame())
-      .Times(::testing::AnyNumber());
-  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(::testing::AnyNumber());
-  EXPECT_CALL(*h.jni_mock,
-              FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
-      .Times(::testing::AnyNumber());
-  {
-    // Even though Draw 2 runs on the merged platform queue ahead of the
-    // platform task posted by Draw 1's ReleaseOverlayLayers(), SurfacePool
-    // flushes the pending destroy before creating overlay 1 and turns the
-    // delayed platform task into a no-op.
-    InSequence sequence;
-    EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
-    EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface())
-        .WillOnce(Return(
-            ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
-                HcResizeTestFixture::kSecondOverlayId, h.window))));
-    EXPECT_CALL(*h.jni_mock,
-                FlutterViewDisplayOverlaySurface(
-                    HcResizeTestFixture::kSecondOverlayId, _, _, _, _))
-        .Times(::testing::AtLeast(1));
-  }
-
-  fml::AutoResetWaitableEvent platform_held;
-  fml::AutoResetWaitableEvent release_platform;
-  h.task_runners.GetPlatformTaskRunner()->PostTask([&]() {
-    platform_held.Signal();
-    release_platform.Wait();
-  });
-  platform_held.Wait();
-
-  fml::AutoResetWaitableEvent draw1_entered;
-  fml::AutoResetWaitableEvent draw2_queued;
-  fml::AutoResetWaitableEvent draw1_finished;
-  h.task_runners.GetRasterTaskRunner()->PostTask([&]() {
-    draw1_entered.Signal();
-    draw2_queued.Wait();
-    EXPECT_EQ(PostPrerollResult::kSkipAndRetryFrame,
-              run_hc_frame(h.frame_size2));
-    h.task_runners.GetRasterTaskRunner()->PostTask([&]() {
-      if (raster_thread_merger->IsOnRasterizingThread()) {
-        run_hc_frame(h.frame_size2);
-      }
-    });
-    draw1_finished.Signal();
-  });
-
-  draw1_entered.Wait();
-  // Queued before Draw 1 posts ReleaseOverlayLayers() to platform_queue, giving
-  // this raster task an earlier MessageLoopTaskQueues order_ stamp.
-  h.task_runners.GetRasterTaskRunner()->PostTask([&]() {
-    if (!raster_thread_merger->IsOnRasterizingThread()) {
-      return;
-    }
-    if (run_hc_frame(h.frame_size2) == PostPrerollResult::kResubmitFrame) {
-      h.task_runners.GetRasterTaskRunner()->PostTask([&]() {
-        if (raster_thread_merger->IsOnRasterizingThread()) {
-          run_hc_frame(h.frame_size2);
-        }
-      });
-    }
-  });
-  draw2_queued.Signal();
-  draw1_finished.Wait();
 
   release_platform.Signal();
   PostTaskSync(h.task_runners.GetPlatformTaskRunner(), []() {});
-  PostTaskSync(h.task_runners.GetPlatformTaskRunner(), []() {});
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), []() {});
   ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
 
   EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
-  PostTaskSync(h.task_runners.GetPlatformTaskRunner(), [&]() {
-    h.embedder->Teardown();
-    while (raster_thread_merger->IsMerged()) {
-      raster_thread_merger->DecrementLease();
-    }
-  });
+  PostTaskSync(h.task_runners.GetPlatformTaskRunner(),
+               [&]() { h.embedder->Teardown(); });
   h.embedder.reset();
 }
 
@@ -1544,20 +1457,25 @@ TEST(AndroidExternalViewEmbedder, TeardownDrainsPendingAsyncOverlayDestroy) {
 
   EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
       .Times(::testing::AnyNumber());
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(2);
   EXPECT_CALL(*h.jni_mock,
               FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
-      .Times(1);
-  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface())
+      .Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface(
+                               h.frame_size1.width, h.frame_size1.height))
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               HcResizeTestFixture::kFirstOverlayId, h.window))));
   EXPECT_CALL(*h.jni_mock, FlutterViewDisplayOverlaySurface(_, _, _, _, _))
       .Times(1);
-  h.DrawMergedOverlayFrame(h.frame_size1);
+  h.DrawOverlayFrame(h.frame_size1);
+  h.DrawOverlayFrame(h.frame_size1);
   ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
 
   EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
       .Times(::testing::AnyNumber());
+  EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfacesByIds(_)).Times(0);
   std::atomic<int> destroy_calls{0};
   ON_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces())
       .WillByDefault([&]() { destroy_calls.fetch_add(1); });
@@ -1565,25 +1483,25 @@ TEST(AndroidExternalViewEmbedder, TeardownDrainsPendingAsyncOverlayDestroy) {
 
   int destroy_calls_upon_teardown_return = -1;
   PostTaskSync(h.task_runners.GetPlatformTaskRunner(), [&]() {
-    // While the platform thread is in this Looper turn, 1.raster finishes
-    // PrepareFlutterView(frame_size2) and queues its async destroy behind us.
+    // While the platform thread is in this Looper turn, 1.raster resizes and
+    // queues its async retired-ID cleanup behind Teardown.
     PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
       h.embedder->PrepareFlutterView(h.frame_size2,
                                      HcResizeTestFixture::kDevicePixelRatio);
+      h.embedder->EndFrame(false, nullptr);
     });
     h.embedder->Teardown();
     destroy_calls_upon_teardown_return = destroy_calls.load();
   });
 
-  // Drain the queued platform task and verify no JNI call runs after Teardown.
+  // Drain the queued platform task and verify stale task became a no-op.
   PostTaskSync(h.task_runners.GetPlatformTaskRunner(), []() {});
   EXPECT_EQ(1, destroy_calls_upon_teardown_return);
   EXPECT_EQ(1, destroy_calls.load());
   h.embedder.reset();
 }
 
-TEST(AndroidExternalViewEmbedder,
-     NullOverlaySurfaceFrameSkipsDisplayAndSubmit) {
+TEST(AndroidExternalViewEmbedder, NullOverlaySurfaceFrameAbortsPartialPresent) {
   auto jni_mock = std::make_shared<JNIMock>();
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
@@ -1600,9 +1518,8 @@ TEST(AndroidExternalViewEmbedder,
   MutatorsStack stack;
 
   auto surface_mock = std::make_unique<SurfaceMock>();
-  // Frame 1 succeeds so Frame 2 enters SubmitFlutterView with
-  // previous_frame_view_count_ > 0 (should_submit_current_frame == true);
-  // Frame 2 returns nullptr from AcquireFrame.
+  // Frame 1 acquires and submits overlay 0 cleanly; Frame 2 returns nullptr
+  // from AcquireFrame so partial Present must be aborted (X3).
   EXPECT_CALL(*surface_mock, AcquireFrame(frame_size))
       .WillOnce([framebuffer_info, frame_size](const DlISize&) {
         return std::make_unique<SurfaceFrame>(
@@ -1626,91 +1543,73 @@ TEST(AndroidExternalViewEmbedder,
 
   fml::RefPtr<AndroidNativeWindow> window =
       fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
-  auto raster_thread_merger = fml::MakeRefCounted<fml::RasterThreadMerger>(
-      task_runners.GetPlatformTaskRunner()->GetTaskQueueId(),
-      task_runners.GetRasterTaskRunner()->GetTaskQueueId());
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
       *android_context, jni_mock, surface_factory, task_runners);
 
   EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(_, _))
       .Times(::testing::AnyNumber());
-  EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(1);
-  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(2);
+  EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(2);
+  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(frame_size.width,
+                                                         frame_size.height))
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               HcResizeTestFixture::kFirstOverlayId, window))));
   EXPECT_CALL(*jni_mock,
               FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
-      .Times(1);
+      .Times(2);
   EXPECT_CALL(*jni_mock, FlutterViewDisplayOverlaySurface(_, _, _, _, _))
       .Times(1);
 
-  PostTaskSync(task_runners.GetPlatformTaskRunner(), [&]() {
-    embedder->PrepareFlutterView(frame_size,
-                                 HcResizeTestFixture::kDevicePixelRatio);
-    embedder->PrerollCompositeEmbeddedView(
-        HcResizeTestFixture::kTestPlatformViewId,
-        std::make_unique<EmbeddedViewParams>(
-            DlMatrix(),
-            DlSize(HcResizeTestFixture::kPlatformViewLogicalSize,
-                   HcResizeTestFixture::kPlatformViewLogicalSize),
-            stack));
-    embedder->CompositeEmbeddedView(HcResizeTestFixture::kTestPlatformViewId)
-        ->DrawRect(DlRect::MakeXYWH(HcResizeTestFixture::kOverlayOriginLogical,
-                                    HcResizeTestFixture::kOverlayOriginLogical,
-                                    HcResizeTestFixture::kOverlaySizeLogical,
-                                    HcResizeTestFixture::kOverlaySizeLogical),
-                   DlPaint());
-    embedder->SubmitFlutterView(
-        kImplicitViewId, nullptr, nullptr,
-        std::make_unique<SurfaceFrame>(
-            SkSurfaces::Null(frame_size.width, frame_size.height),
-            framebuffer_info,
-            [](const SurfaceFrame&, DlCanvas*) { return true; },
-            [](const SurfaceFrame&) { return true; }, frame_size));
-    embedder->EndFrame(false, raster_thread_merger);
-  });
-  PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+  auto submit_frame = [&](const std::function<bool(const SurfaceFrame&,
+                                                   DlCanvas*)>& on_submit) {
+    PostTaskSync(task_runners.GetRasterTaskRunner(), [&]() {
+      embedder->PrepareFlutterView(frame_size,
+                                   HcResizeTestFixture::kDevicePixelRatio);
+      embedder->PrerollCompositeEmbeddedView(
+          HcResizeTestFixture::kTestPlatformViewId,
+          std::make_unique<EmbeddedViewParams>(
+              DlMatrix(),
+              DlSize(HcResizeTestFixture::kPlatformViewLogicalSize,
+                     HcResizeTestFixture::kPlatformViewLogicalSize),
+              stack));
+      embedder->CompositeEmbeddedView(HcResizeTestFixture::kTestPlatformViewId)
+          ->DrawRect(
+              DlRect::MakeXYWH(HcResizeTestFixture::kOverlayOriginLogical,
+                               HcResizeTestFixture::kOverlayOriginLogical,
+                               HcResizeTestFixture::kOverlaySizeLogical,
+                               HcResizeTestFixture::kOverlaySizeLogical),
+              DlPaint());
+      embedder->SubmitFlutterView(
+          kImplicitViewId, nullptr, nullptr,
+          std::make_unique<SurfaceFrame>(
+              SkSurfaces::Null(frame_size.width, frame_size.height),
+              framebuffer_info, on_submit,
+              [](const SurfaceFrame&) { return true; }, frame_size));
+      embedder->EndFrame(false, nullptr);
+    });
+    PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+    PostTaskSync(task_runners.GetRasterTaskRunner(), []() {});
+  };
+
+  submit_frame([](const SurfaceFrame&, DlCanvas*) { return true; });
+  submit_frame([](const SurfaceFrame&, DlCanvas*) { return true; });
   ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
 
-  // Frame 2 has previous_frame_view_count_ == 1, so root_submitted becomes
-  // true while the null overlay SurfaceFrame skips both
-  // FlutterViewDisplayOverlaySurface and overlay Submit().
+  // Frame 2 fails AcquireFrame -> root submits, partial Present is aborted
+  // (no BeginFrame / DisplayPlatformView / DisplayOverlaySurface / EndFrame).
   bool root_submitted = false;
-  EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(1);
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(0);
+  EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(0);
   EXPECT_CALL(*jni_mock,
               FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
-      .Times(1);
+      .Times(0);
   EXPECT_CALL(*jni_mock, FlutterViewDisplayOverlaySurface(_, _, _, _, _))
       .Times(0);
 
-  PostTaskSync(task_runners.GetPlatformTaskRunner(), [&]() {
-    embedder->PrepareFlutterView(frame_size,
-                                 HcResizeTestFixture::kDevicePixelRatio);
-    embedder->PrerollCompositeEmbeddedView(
-        HcResizeTestFixture::kTestPlatformViewId,
-        std::make_unique<EmbeddedViewParams>(
-            DlMatrix(),
-            DlSize(HcResizeTestFixture::kPlatformViewLogicalSize,
-                   HcResizeTestFixture::kPlatformViewLogicalSize),
-            stack));
-    embedder->CompositeEmbeddedView(HcResizeTestFixture::kTestPlatformViewId)
-        ->DrawRect(DlRect::MakeXYWH(HcResizeTestFixture::kOverlayOriginLogical,
-                                    HcResizeTestFixture::kOverlayOriginLogical,
-                                    HcResizeTestFixture::kOverlaySizeLogical,
-                                    HcResizeTestFixture::kOverlaySizeLogical),
-                   DlPaint());
-    embedder->SubmitFlutterView(
-        kImplicitViewId, nullptr, nullptr,
-        std::make_unique<SurfaceFrame>(
-            SkSurfaces::Null(frame_size.width, frame_size.height),
-            framebuffer_info,
-            [&](const SurfaceFrame&, DlCanvas*) {
-              root_submitted = true;
-              return true;
-            },
-            [](const SurfaceFrame&) { return true; }, frame_size));
-    embedder->EndFrame(false, raster_thread_merger);
+  submit_frame([&](const SurfaceFrame&, DlCanvas*) {
+    root_submitted = true;
+    return true;
   });
   EXPECT_TRUE(root_submitted);
   ::testing::Mock::VerifyAndClearExpectations(jni_mock.get());
@@ -1719,6 +1618,169 @@ TEST(AndroidExternalViewEmbedder,
   PostTaskSync(task_runners.GetPlatformTaskRunner(),
                [&]() { embedder->Teardown(); });
   embedder.reset();
+}
+
+TEST(AndroidExternalViewEmbedder, ReadyForNextFrameBackpressureAndResume) {
+  HcResizeTestFixture h;
+
+  EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
+      .Times(::testing::AnyNumber());
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(1);
+  EXPECT_CALL(*h.jni_mock,
+              FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
+      .Times(1);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(1);
+
+  fml::AutoResetWaitableEvent platform_held;
+  fml::AutoResetWaitableEvent release_platform;
+  h.task_runners.GetPlatformTaskRunner()->PostTask([&]() {
+    platform_held.Signal();
+    release_platform.Wait();
+  });
+  platform_held.Wait();
+
+  fml::AutoResetWaitableEvent resumed;
+  bool deferred_while_in_flight = false;
+  bool ready_before_present = false;
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    ready_before_present = h.embedder->ReadyForNextFrame([]() {});
+    h.embedder->PrepareFlutterView(h.frame_size1,
+                                   HcResizeTestFixture::kDevicePixelRatio);
+    h.embedder->PrerollCompositeEmbeddedView(
+        HcResizeTestFixture::kTestPlatformViewId,
+        std::make_unique<EmbeddedViewParams>(
+            DlMatrix(),
+            DlSize(HcResizeTestFixture::kPlatformViewLogicalSize,
+                   HcResizeTestFixture::kPlatformViewLogicalSize),
+            h.stack));
+    h.embedder->SubmitFlutterView(
+        kImplicitViewId, nullptr, nullptr,
+        std::make_unique<SurfaceFrame>(
+            SkSurfaces::Null(h.frame_size1.width, h.frame_size1.height),
+            h.framebuffer_info,
+            [](const SurfaceFrame&, DlCanvas*) { return true; },
+            [](const SurfaceFrame&) { return true; }, h.frame_size1));
+    h.embedder->EndFrame(false, nullptr);
+    deferred_while_in_flight =
+        !h.embedder->ReadyForNextFrame([&]() { resumed.Signal(); });
+  });
+
+  EXPECT_TRUE(ready_before_present);
+  EXPECT_TRUE(deferred_while_in_flight);
+
+  release_platform.Signal();
+  resumed.Wait();
+
+  bool ready_after_present_done = false;
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    ready_after_present_done = h.embedder->ReadyForNextFrame([]() {});
+  });
+  EXPECT_TRUE(ready_after_present_done);
+
+  PostTaskSync(h.task_runners.GetPlatformTaskRunner(),
+               [&]() { h.embedder->Teardown(); });
+  h.embedder.reset();
+}
+
+TEST(AndroidExternalViewEmbedder,
+     CancelFrameAfterResizeFlushesRetiredOverlayIds) {
+  HcResizeTestFixture h;
+
+  EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
+      .Times(::testing::AnyNumber());
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(2);
+  EXPECT_CALL(*h.jni_mock,
+              FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
+      .Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface(
+                               h.frame_size1.width, h.frame_size1.height))
+      .WillOnce(Return(
+          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+              HcResizeTestFixture::kFirstOverlayId, h.window))));
+  EXPECT_CALL(*h.jni_mock, FlutterViewDisplayOverlaySurface(_, _, _, _, _))
+      .Times(1);
+
+  h.DrawOverlayFrame(h.frame_size1);
+  h.DrawOverlayFrame(h.frame_size1);
+  ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
+
+  EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
+      .Times(::testing::AnyNumber());
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(0);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(0);
+  EXPECT_CALL(*h.jni_mock,
+              FlutterViewDestroyOverlaySurfacesByIds(
+                  std::vector<int32_t>{HcResizeTestFixture::kFirstOverlayId}))
+      .Times(1);
+
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    h.embedder->PrepareFlutterView(h.frame_size2,
+                                   HcResizeTestFixture::kDevicePixelRatio);
+    h.embedder->CancelFrame();
+  });
+  PostTaskSync(h.task_runners.GetPlatformTaskRunner(), []() {});
+  ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
+
+  EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
+  PostTaskSync(h.task_runners.GetPlatformTaskRunner(),
+               [&]() { h.embedder->Teardown(); });
+  h.embedder.reset();
+}
+
+TEST(AndroidExternalViewEmbedder, ReuseAfterTeardownOnForegroundResume) {
+  HcResizeTestFixture h;
+
+  EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
+      .Times(::testing::AnyNumber());
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(2);
+  EXPECT_CALL(*h.jni_mock,
+              FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
+      .Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface(
+                               h.frame_size1.width, h.frame_size1.height))
+      .WillOnce(Return(
+          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+              HcResizeTestFixture::kFirstOverlayId, h.window))));
+  EXPECT_CALL(*h.jni_mock, FlutterViewDisplayOverlaySurface(_, _, _, _, _))
+      .Times(1);
+  h.DrawOverlayFrame(h.frame_size1);
+  h.DrawOverlayFrame(h.frame_size1);
+  ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
+
+  // Simulate surfaceDestroyed -> Teardown().
+  EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
+  PostTaskSync(h.task_runners.GetPlatformTaskRunner(),
+               [&]() { h.embedder->Teardown(); });
+  ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
+
+  // Simulate surfaceCreated -> foreground resume reusing the same embedder:
+  // Frame 0 re-enters HC and Frame 1 allocates a fresh overlay normally.
+  EXPECT_CALL(*h.jni_mock, MaybeResizeSurfaceView(_, _))
+      .Times(::testing::AnyNumber());
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginFrame()).Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndFrame()).Times(2);
+  EXPECT_CALL(*h.jni_mock,
+              FlutterViewOnDisplayPlatformView(_, _, _, _, _, _, _, _))
+      .Times(2);
+  EXPECT_CALL(*h.jni_mock, FlutterViewCreateOverlaySurface(
+                               h.frame_size1.width, h.frame_size1.height))
+      .WillOnce(Return(
+          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+              HcResizeTestFixture::kSecondOverlayId, h.window))));
+  EXPECT_CALL(*h.jni_mock,
+              FlutterViewDisplayOverlaySurface(
+                  HcResizeTestFixture::kSecondOverlayId, _, _, _, _))
+      .Times(1);
+  h.DrawOverlayFrame(h.frame_size1);
+  h.DrawOverlayFrame(h.frame_size1);
+  ::testing::Mock::VerifyAndClearExpectations(h.jni_mock.get());
+
+  EXPECT_CALL(*h.jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
+  PostTaskSync(h.task_runners.GetPlatformTaskRunner(),
+               [&]() { h.embedder->Teardown(); });
+  h.embedder.reset();
 }
 
 TEST(AndroidExternalViewEmbedder2,

@@ -387,6 +387,32 @@ public class FlutterJNITest {
     }
   }
 
+  @Test
+  public void createOverlaySurfaceWithDimensions_delegatesToPlatformViewsController() {
+    FlutterJNI flutterJNI = new FlutterJNI();
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    FlutterOverlaySurface expectedSurface = mock(FlutterOverlaySurface.class);
+    when(platformViewsController.createOverlaySurface(320, 240)).thenReturn(expectedSurface);
+    flutterJNI.setPlatformViewsController(platformViewsController);
+
+    FlutterOverlaySurface actual = flutterJNI.createOverlaySurface(320, 240);
+
+    assertEquals(expectedSurface, actual);
+    verify(platformViewsController, times(1)).createOverlaySurface(320, 240);
+  }
+
+  @Test
+  public void destroyOverlaySurfacesByIds_delegatesToPlatformViewsController() {
+    FlutterJNI flutterJNI = new FlutterJNI();
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    flutterJNI.setPlatformViewsController(platformViewsController);
+    int[] ids = new int[] {3, 7};
+
+    flutterJNI.destroyOverlaySurfacesByIds(ids);
+
+    verify(platformViewsController, times(1)).destroyOverlaySurfacesByIds(ids);
+  }
+
   static class FlutterJNITester extends FlutterJNI {
     FlutterJNITester(boolean attached) {
       this.isAttached = attached;

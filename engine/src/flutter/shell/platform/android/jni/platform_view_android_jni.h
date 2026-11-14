@@ -214,13 +214,23 @@ class PlatformViewAndroidJNI {
   };
 
   //----------------------------------------------------------------------------
-  /// @brief      Instantiates an overlay surface in hybrid composition and
-  ///             provides the necessary metadata to operate the surface in C.
+  /// @brief      Instantiates an overlay surface in hybrid composition with the
+  ///             given physical pixel dimensions and returns metadata for C++.
+  ///
+  /// @note       May be called from the raster thread without blocking on the
+  ///             platform thread. Returns null or metadata with a null window
+  ///             if the FlutterView is detached.
+  ///
+  virtual std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
+  FlutterViewCreateOverlaySurface(int32_t width, int32_t height) = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Destroys only the specified overlay surfaces by ID.
   ///
   /// @note       Must be called from the platform thread.
   ///
-  virtual std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
-  FlutterViewCreateOverlaySurface() = 0;
+  virtual void FlutterViewDestroyOverlaySurfacesByIds(
+      const std::vector<int32_t>& ids) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the overlay surfaces.

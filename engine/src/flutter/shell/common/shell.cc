@@ -1522,34 +1522,14 @@ void Shell::OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) {
   FML_DCHECK(is_set_up_);
 
   task_runners_.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
-      [&waiting_for_first_frame = waiting_for_first_frame_,
-       &waiting_for_first_frame_mutex = waiting_for_first_frame_mutex_,
-       &waiting_for_first_frame_callbacks = waiting_for_first_frame_callbacks_,
-       rasterizer = rasterizer_->GetWeakPtr(),
+      [this, rasterizer = rasterizer_->GetWeakPtr(),
        weak_pipeline = std::weak_ptr<FramePipeline>(pipeline)]() mutable {
         if (rasterizer) {
           std::shared_ptr<FramePipeline> pipeline = weak_pipeline.lock();
           if (pipeline) {
             rasterizer->Draw(pipeline);
-          }
-
-          // waiting_for_first_frame is set to true during shell startup, and
-          // after the first frame is drawn it is set fo false and will remain
-          // false.
-          // AddFirstFrameCallback reads waiting_for_first_frame while holding
-          // the waiting_for_first_frame_mutex, and it adds entries to
-          // waiting_for_first_frame_callbacks only if waiting_for_first_frame
-          // is true.
-          if (waiting_for_first_frame.load()) {
-            std::vector<std::function<void()>> callbacks;
-            {
-              std::scoped_lock lock(waiting_for_first_frame_mutex);
-              waiting_for_first_frame.store(false);
-              std::swap(waiting_for_first_frame_callbacks, callbacks);
-            }
-            for (const auto& callback : callbacks) {
-              callback();
-            }
+          } else {
+            FlushFirstFrameCallbacks();
           }
         }
       }));
@@ -1971,6 +1951,31 @@ bool Shell::ShouldDiscardLayerTree(int64_t view_id,
   auto expected_frame_constraints = ExpectedFrameConstraints(view_id);
   return !expected_frame_constraints.IsSatisfiedBy(
       Size(tree.frame_size().width, tree.frame_size().height));
+}
+
+// |Rasterizer::Delegate|
+void Shell::OnDrawFinished(DrawStatus status) {
+  if (status != DrawStatus::kDeferred && status != DrawStatus::kYielded) {
+    FlushFirstFrameCallbacks();
+  }
+}
+
+void Shell::FlushFirstFrameCallbacks() {
+  // waiting_for_first_frame_ is set to true during shell startup, and after
+  // the first frame is drawn it is set to false and will remain false.
+  // AddFirstFrameCallback reads waiting_for_first_frame_ while holding
+  // waiting_for_first_frame_mutex_ and adds entries only if it is true.
+  if (waiting_for_first_frame_.load()) {
+    std::vector<std::function<void()>> callbacks;
+    {
+      std::scoped_lock lock(waiting_for_first_frame_mutex_);
+      waiting_for_first_frame_.store(false);
+      std::swap(waiting_for_first_frame_callbacks_, callbacks);
+    }
+    for (const auto& callback : callbacks) {
+      callback();
+    }
+  }
 }
 
 // |ServiceProtocol::Handler|

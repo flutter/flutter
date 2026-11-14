@@ -110,7 +110,10 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   void FlutterViewEndFrame() override;
 
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
-  FlutterViewCreateOverlaySurface() override;
+  FlutterViewCreateOverlaySurface(int32_t width, int32_t height) override;
+
+  void FlutterViewDestroyOverlaySurfacesByIds(
+      const std::vector<int32_t>& ids) override;
 
   void FlutterViewDestroyOverlaySurfaces() override;
 

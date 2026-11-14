@@ -15,6 +15,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/flow/surface_frame.h"
+#include "flutter/fml/closure.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/raster_thread_merger.h"
 
@@ -476,6 +477,14 @@ class ExternalViewEmbedder {
       const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
     return PostPrerollResult::kSuccess;
   }
+
+  // Called on the raster thread before the rasterizer draws the next frame.
+  //
+  // Returns false to defer the frame without blocking the raster thread, for
+  // example while the platform thread is still presenting the previous frame.
+  // The frame stays queued. Once the embedder can accept another frame, it
+  // invokes every `resume` callback it was given.
+  virtual bool ReadyForNextFrame(const fml::closure& resume) { return true; }
 
   // Must be called on the UI thread.
   virtual DlCanvas* CompositeEmbeddedView(int64_t platform_view_id) = 0;

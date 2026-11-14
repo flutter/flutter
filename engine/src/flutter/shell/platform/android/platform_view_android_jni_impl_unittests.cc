@@ -602,7 +602,7 @@ TEST_F(PlatformViewAndroidJNIImplTest,
         });
 
     auto metadata = (variant == 0)
-                        ? android_jni.FlutterViewCreateOverlaySurface()
+                        ? android_jni.FlutterViewCreateOverlaySurface(800, 600)
                         : android_jni.createOverlaySurface2();
     ASSERT_NE(metadata, nullptr);
     EXPECT_EQ(metadata->id, 42 + variant);
@@ -694,6 +694,42 @@ TEST_F(PlatformViewAndroidJNIImplTest,
       android_jni.FlutterViewComputePlatformResolvedLocale({"en", "US", ""});
   ASSERT_NE(empty_resolved, nullptr);
   EXPECT_TRUE(empty_resolved->empty());
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, DestroyOverlaySurfacesByIds) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+
+  const jobject kFlutterJniObj = reinterpret_cast<jobject>(0x1001);
+
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  EXPECT_CALL(mock_env, NewIntArray(_)).Times(0);
+  EXPECT_CALL(mock_env, CallVoidMethodV(_, _, _)).Times(0);
+  android_jni.FlutterViewDestroyOverlaySurfacesByIds({});
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+  jintArray created_array = nullptr;
+  std::vector<jint> captured_ids;
+  EXPECT_CALL(mock_env, NewIntArray(2)).WillOnce([&](jsize) -> jintArray {
+    created_array = tracker.AllocateNew<jintArray>();
+    return created_array;
+  });
+  EXPECT_CALL(mock_env, SetIntArrayRegion(_, 0, 2, _))
+      .WillOnce([&](jintArray arr, jsize, jsize len, const jint* buf) {
+        EXPECT_EQ(arr, created_array);
+        captured_ids.assign(buf, buf + len);
+      });
+  EXPECT_CALL(mock_env, CallVoidMethodV(kFlutterJniObj, _, _)).Times(1);
+
+  android_jni.FlutterViewDestroyOverlaySurfacesByIds({11, 22});
+  EXPECT_THAT(captured_ids, ElementsAre(11, 22));
   EXPECT_EQ(tracker.ActiveCount(), 0u);
 }
 

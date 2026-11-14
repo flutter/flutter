@@ -43,6 +43,17 @@ void AndroidExternalViewEmbedderWrapper::EnsureInitialized() {
 }
 
 // |ExternalViewEmbedder|
+bool AndroidExternalViewEmbedderWrapper::ReadyForNextFrame(
+    const fml::closure& resume) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    return hcpp_view_embedder_->ReadyForNextFrame(resume);
+  } else {
+    return non_hcpp_view_embedder_->ReadyForNextFrame(resume);
+  }
+}
+
+// |ExternalViewEmbedder|
 void AndroidExternalViewEmbedderWrapper::PrerollCompositeEmbeddedView(
     int64_t view_id,
     std::unique_ptr<EmbeddedViewParams> params) {

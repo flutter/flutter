@@ -94,7 +94,7 @@ public class FlutterImageView extends View implements RenderSurface {
   }
 
   @VisibleForTesting
-  /*package*/ FlutterImageView(
+  public FlutterImageView(
       @NonNull Context context, @NonNull ImageReader imageReader, SurfaceKind kind) {
     super(context, null);
     this.imageReader = imageReader;
@@ -122,7 +122,7 @@ public class FlutterImageView extends View implements RenderSurface {
 
   @SuppressLint("WrongConstant") // RGBA_8888 is a valid constant.
   @NonNull
-  private static ImageReader createImageReader(int width, int height) {
+  public static ImageReader createImageReader(int width, int height) {
     if (width <= 0) {
       logW("ImageReader width must be greater than 0, but given width=%d, set width=1", width);
       width = 1;
@@ -252,6 +252,25 @@ public class FlutterImageView extends View implements RenderSurface {
     if (droppedImage != null) {
       droppedImage.close();
     }
+  }
+
+  /**
+   * Replaces the underlying {@link ImageReader} when reusing a pooled overlay view, closing the
+   * previous reader if it has not already been closed.
+   */
+  public void swapImageReader(@NonNull ImageReader newImageReader) {
+    if (imageReader == newImageReader) {
+      return;
+    }
+    detachFromRenderer();
+    closeCurrentImage();
+    currentBitmap = null;
+    if (!isImageReaderClosed) {
+      imageReader.close();
+    }
+    imageReader = newImageReader;
+    isImageReaderClosed = false;
+    setAlpha(0.0f);
   }
 
   /** Creates a new image reader with the provided size. */

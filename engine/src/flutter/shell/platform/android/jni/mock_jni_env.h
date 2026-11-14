@@ -72,6 +72,7 @@ class MockableJNIEnv : public JNIEnv {
     jni_.GetStaticMethodID = WrapGetStaticMethodID;
     jni_.GetStaticObjectField = WrapGetStaticObjectField;
     jni_.NewFloatArray = WrapNewFloatArray;
+    jni_.NewIntArray = WrapNewIntArray;
     jni_.NewGlobalRef = WrapNewGlobalRef;
     jni_.NewLocalRef = WrapNewLocalRef;
     jni_.NewObject = WrapNewObject;
@@ -87,6 +88,7 @@ class MockableJNIEnv : public JNIEnv {
     jni_.GetObjectArrayElement = WrapGetObjectArrayElement;
     jni_.SetObjectArrayElement = WrapSetObjectArrayElement;
     jni_.SetFloatArrayRegion = WrapSetFloatArrayRegion;
+    jni_.SetIntArrayRegion = WrapSetIntArrayRegion;
     jni_.GetStringChars = WrapGetStringChars;
     jni_.GetStringLength = WrapGetStringLength;
     jni_.ReleaseStringChars = WrapReleaseStringChars;
@@ -110,6 +112,7 @@ class MockableJNIEnv : public JNIEnv {
   virtual jmethodID GetStaticMethodID(jclass, const char*, const char*) = 0;
   virtual jobject GetStaticObjectField(jclass, jfieldID) = 0;
   virtual jfloatArray NewFloatArray(jsize) = 0;
+  virtual jintArray NewIntArray(jsize) = 0;
   virtual jobject NewGlobalRef(jobject) = 0;
   virtual jobject NewLocalRef(jobject) = 0;
   virtual jobjectArray NewObjectArray(jsize, jclass, jobject) = 0;
@@ -127,6 +130,7 @@ class MockableJNIEnv : public JNIEnv {
                                    jsize,
                                    jsize,
                                    const jfloat*) = 0;
+  virtual void SetIntArrayRegion(jintArray, jsize, jsize, const jint*) = 0;
   virtual const jchar* GetStringChars(jstring, jboolean*) = 0;
   virtual jsize GetStringLength(jstring) = 0;
   virtual void ReleaseStringChars(jstring, const jchar*) = 0;
@@ -242,6 +246,17 @@ class MockableJNIEnv : public JNIEnv {
   }
   static jfloatArray WrapNewFloatArray(JNIEnv* env, jsize len) {
     return static_cast<MockableJNIEnv*>(env)->NewFloatArray(len);
+  }
+  static jintArray WrapNewIntArray(JNIEnv* env, jsize len) {
+    return static_cast<MockableJNIEnv*>(env)->NewIntArray(len);
+  }
+  static void WrapSetIntArrayRegion(JNIEnv* env,
+                                    jintArray array,
+                                    jsize start,
+                                    jsize len,
+                                    const jint* buf) {
+    static_cast<MockableJNIEnv*>(env)->SetIntArrayRegion(array, start, len,
+                                                         buf);
   }
   static jobject WrapNewGlobalRef(JNIEnv* env, jobject ref) {
     return static_cast<MockableJNIEnv*>(env)->NewGlobalRef(ref);
@@ -373,6 +388,7 @@ class MockJNIEnv : public MockableJNIEnv {
               (override));
   MOCK_METHOD(jobject, GetStaticObjectField, (jclass, jfieldID), (override));
   MOCK_METHOD(jfloatArray, NewFloatArray, (jsize), (override));
+  MOCK_METHOD(jintArray, NewIntArray, (jsize), (override));
   MOCK_METHOD(jobject, NewGlobalRef, (jobject), (override));
   MOCK_METHOD(jobject, NewLocalRef, (jobject), (override));
   MOCK_METHOD(jobjectArray,
@@ -404,6 +420,10 @@ class MockJNIEnv : public MockableJNIEnv {
   MOCK_METHOD(void,
               SetFloatArrayRegion,
               (jfloatArray, jsize, jsize, const jfloat*),
+              (override));
+  MOCK_METHOD(void,
+              SetIntArrayRegion,
+              (jintArray, jsize, jsize, const jint*),
               (override));
   MOCK_METHOD(const jchar*, GetStringChars, (jstring, jboolean*), (override));
   MOCK_METHOD(jsize, GetStringLength, (jstring), (override));
