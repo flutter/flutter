@@ -9,7 +9,6 @@ import 'package:multicast_dns/multicast_dns.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -69,8 +68,6 @@ class MDnsVmServiceDiscovery {
 
   @visibleForTesting
   static const dartVmServiceName = '_dartVmService._tcp.local';
-
-  static MDnsVmServiceDiscovery? get instance => context.get<MDnsVmServiceDiscovery>();
 
   /// Executes an mDNS query for Dart VM Services.
   /// Checks for services that have already been launched.

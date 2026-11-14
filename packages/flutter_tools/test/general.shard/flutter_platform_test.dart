@@ -121,6 +121,7 @@ void main() {
         final testDevice = _UnstartableDevice();
         final logger = BufferLogger.test();
         final flutterPlatform = FlutterPlatform(
+          applicationPackageFactory: _FakeApplicationPackageFactory(),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
           enableVmService: false,
@@ -157,7 +158,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
       },
     );
 
@@ -169,6 +169,7 @@ void main() {
 
         final shutdownHooks = ShutdownHooks();
         final flutterPlatform = FlutterPlatform(
+          applicationPackageFactory: _FakeApplicationPackageFactory(),
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
           enableVmService: false,
@@ -200,7 +201,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
       },
     );
 
@@ -512,6 +512,7 @@ void main() {
         addFlutterTesterDeviceExpectation();
 
         final flutterPlatform = FlutterPlatform(
+          applicationPackageFactory: _FakeApplicationPackageFactory(),
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           flutterTesterBinPath: 'flutter_tester',
           enableVmService: false,
@@ -585,7 +586,6 @@ void main() {
               Device? device,
               Logger? logger,
             }) async => flutterVmService,
-        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
         Artifacts: () => artifacts,
       },
     );
@@ -614,6 +614,7 @@ void main() {
       Platform? platform,
     }) {
       return FlutterPlatform(
+        applicationPackageFactory: _FakeApplicationPackageFactory(),
         debuggingOptions: DebuggingOptions.disabled(.debug),
         flutterTesterBinPath: 'flutter_tester',
         enableVmService: false,
@@ -653,7 +654,6 @@ void main() {
               Device? device,
               Logger? logger,
             }) async => _FakeFlutterVmService(),
-        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
         Artifacts: () => Artifacts.test(fileSystem: windows ? windowsFs : fileSystem),
       };
     }

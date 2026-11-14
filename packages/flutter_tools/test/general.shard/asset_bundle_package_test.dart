@@ -20,6 +20,13 @@ import '../src/package_config.dart';
 void main() {
   late FileSystem testFileSystem;
 
+  AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
+    fileSystem: testFileSystem,
+    flutterRoot: getFlutterRoot(),
+    logger: testLogger,
+    platform: FakePlatform(),
+  ).createBundle();
+
   String fixPath(String path) {
     // The in-memory file system is strict about slashes on Windows being the
     // correct way so until https://github.com/google/file.dart/issues/112 is
@@ -83,7 +90,7 @@ $assetsSection
     Map<Object, Object> expectedAssetManifest, {
     String? flavor,
   }) async {
-    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    final AssetBundle bundle = createBundle();
     await bundle.build(
       packageConfigPath: '.dart_tool/package_config.json',
       flavor: flavor,
@@ -145,7 +152,7 @@ $assetsSection
           assets: <String>['../../../escaped_secret'],
         );
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         expect(
           () => bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
@@ -182,7 +189,7 @@ flutter:
     - ../../../escaped_secret
 ''');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         expect(
           () => bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
@@ -208,7 +215,7 @@ flutter:
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -239,7 +246,7 @@ flutter:
         final assets = <String>['a/foo'];
         writeAssets('p/p/', assets);
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -741,7 +748,7 @@ flutter:
 
         writeAssets('p/p/', assetsOnDisk);
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -833,7 +840,7 @@ flutter:
 
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: assetOnManifest);
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -884,7 +891,7 @@ flutter:
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
         writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'test');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,

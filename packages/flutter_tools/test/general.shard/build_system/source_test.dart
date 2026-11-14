@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/project.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/throwing_pub.dart';
 
 final Platform windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
@@ -44,6 +45,7 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
       ),
+      pub: () => const ThrowingPub(),
     );
     final artifacts = CachedArtifacts(
       fileSystem: fileSystem,

@@ -13,7 +13,9 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/test/integration_test_device.dart';
 import 'package:flutter_tools/src/test/test_device.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -63,6 +65,7 @@ void main() {
 
   setUp(() {
     testDevice = IntegrationTestTestDevice(
+      applicationPackageFactory: FakeApplicationPackageFactory(),
       id: 1,
       device: FakeDevice(
         'ephemeral',
@@ -121,8 +124,28 @@ void main() {
   });
 
   testUsingContext('will not start when package missing', () async {
+    final toolContext = FakeToolContext(artifacts: Artifacts.test());
+    final missingPackageDevice = IntegrationTestTestDevice(
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: toolContext,
+      ),
+      id: 1,
+      device: FakeDevice(
+        'ephemeral',
+        'ephemeral',
+        type: PlatformType.android,
+        launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
+      ),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      userIdentifier: '',
+      compileExpression: null,
+      toolContext: toolContext,
+    );
     await expectLater(
-      testDevice.start('entrypointPath'),
+      missingPackageDevice.start('entrypointPath'),
       throwsA(
         isA<TestDeviceException>().having(
           (Exception e) => e.toString(),
@@ -142,7 +165,6 @@ void main() {
       expect(testDevice.finished, doesNotComplete);
     },
     overrides: <Type, Generator>{
-      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
       VMServiceConnector: () =>
           (
             Uri httpUri, {
@@ -168,7 +190,6 @@ void main() {
       expect(testDevice.finished, completes);
     },
     overrides: <Type, Generator>{
-      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
       VMServiceConnector: () =>
           (
             Uri httpUri, {
@@ -189,6 +210,7 @@ void main() {
     'kill() completes and logs warning when DDS shutdown times out',
     () async {
       final TestDevice localTestDevice = IntegrationTestTestDevice(
+        applicationPackageFactory: FakeApplicationPackageFactory(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -227,7 +249,6 @@ void main() {
       expect(localTestDevice.finished, completes);
     },
     overrides: <Type, Generator>{
-      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
       VMServiceConnector: () =>
           (
             Uri httpUri, {
@@ -248,6 +269,7 @@ void main() {
     'when the device starts without providing an vmService URI',
     () async {
       final TestDevice testDevice = IntegrationTestTestDevice(
+        applicationPackageFactory: FakeApplicationPackageFactory(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -283,6 +305,7 @@ void main() {
     'when the device fails to start',
     () async {
       final TestDevice testDevice = IntegrationTestTestDevice(
+        applicationPackageFactory: FakeApplicationPackageFactory(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -319,6 +342,7 @@ void main() {
     () async {
       final trackingDevice = FakeDeviceTrackingUninstall();
       final testDeviceWithUninstall = IntegrationTestTestDevice(
+        applicationPackageFactory: FakeApplicationPackageFactory(),
         id: 1,
         device: trackingDevice,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -334,7 +358,6 @@ void main() {
       expect(testDeviceWithUninstall.finished, completes);
     },
     overrides: <Type, Generator>{
-      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
       VMServiceConnector: () =>
           (
             Uri httpUri, {
@@ -356,6 +379,7 @@ void main() {
     () async {
       final trackingDevice = FakeDeviceTrackingUninstall();
       final testDeviceWithoutUninstall = IntegrationTestTestDevice(
+        applicationPackageFactory: FakeApplicationPackageFactory(),
         id: 1,
         device: trackingDevice,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, uninstallApp: false),
@@ -371,7 +395,6 @@ void main() {
       expect(testDeviceWithoutUninstall.finished, completes);
     },
     overrides: <Type, Generator>{
-      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
       VMServiceConnector: () =>
           (
             Uri httpUri, {
@@ -396,7 +419,6 @@ void main() {
       expect(await channel.stream.isEmpty, true);
     },
     overrides: <Type, Generator>{
-      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
       VMServiceConnector: () =>
           (
             Uri httpUri, {
@@ -461,6 +483,7 @@ void main() {
         ],
       );
       final TestDevice startPausedDevice = IntegrationTestTestDevice(
+        applicationPackageFactory: FakeApplicationPackageFactory(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -480,7 +503,6 @@ void main() {
       expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
     },
     overrides: <Type, Generator>{
-      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
       VMServiceConnector: () =>
           (
             Uri httpUri, {

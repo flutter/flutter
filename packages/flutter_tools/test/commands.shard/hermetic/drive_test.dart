@@ -11,6 +11,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_engine_cli_flags.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -80,7 +81,9 @@ void main() {
       final capturingDriverService = CapturingDriverService();
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
         flutterDriverFactory: CapturingFlutterDriverFactory(capturingDriverService),
       );
@@ -113,7 +116,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -123,7 +125,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
       fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -151,7 +155,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
       fileSystem.file('lib/app.dart').createSync(recursive: true);
@@ -177,7 +183,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
       fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -208,7 +216,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
       fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -237,7 +247,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -247,7 +256,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
         flutterDriverFactory: FailingFakeFlutterDriverFactory(),
         signalsToHandle: const <ProcessSignal>{ProcessSignal.sigusr1},
@@ -278,7 +289,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -288,7 +298,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
       fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -317,7 +329,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -327,7 +338,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
         flutterDriverFactory: FailingFakeFlutterDriverFactory(),
       );
@@ -368,7 +381,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -378,7 +390,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
 
@@ -411,7 +425,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -421,7 +434,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(signalsOverride: Signals.test()),
         flutterDriverFactory: FakeFlutterDriverFactory(),
       );
@@ -473,7 +488,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -485,7 +499,9 @@ void main() {
       final signalUnderTest = ProcessSignal(signal);
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(signalsOverride: Signals.test()),
         flutterDriverFactory: FakeFlutterDriverFactory(
           onStartTest: () {
@@ -532,7 +548,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -542,7 +557,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
 
@@ -559,7 +576,13 @@ void main() {
       expect(command.shouldRunPub, false);
 
       try {
-        await createTestCommandRunner(command).run(const <String>['drive']);
+        await createTestCommandRunner(
+          command,
+          null,
+          null,
+          null,
+          FakePub(),
+        ).run(const <String>['drive']);
       } on Exception {
         // Expected to throw
       }
@@ -569,7 +592,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
     },
   );
 
@@ -578,7 +600,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
 
@@ -587,7 +611,7 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
 
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>[
+        () => createTestCommandRunner(command, null, null, null, FakePub()).run(<String>[
           'drive',
           '--start-paused',
           '--disable-service-auth-codes',
@@ -633,7 +657,6 @@ void main() {
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
     },
   );
 
@@ -642,7 +665,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
 
@@ -655,7 +680,7 @@ void main() {
       fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>['drive']),
+        () => createTestCommandRunner(command, null, null, null, FakePub()).run(<String>['drive']),
         throwsToolExit(),
       );
 
@@ -667,7 +692,6 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
-      Pub: () => FakePub(),
     },
   );
 
@@ -676,7 +700,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
 
@@ -685,7 +711,7 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
 
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>['drive']),
+        () => createTestCommandRunner(command, null, null, null, FakePub()).run(<String>['drive']),
         throwsToolExit(),
       );
 
@@ -701,7 +727,6 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
-      Pub: () => FakePub(),
     },
   );
 
@@ -710,7 +735,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
 
@@ -723,7 +750,13 @@ void main() {
       fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>['drive', '--no-publish-port']),
+        () => createTestCommandRunner(
+          command,
+          null,
+          null,
+          null,
+          FakePub(),
+        ).run(<String>['drive', '--no-publish-port']),
         throwsToolExit(),
       );
 
@@ -735,7 +768,6 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
-      Pub: () => FakePub(),
     },
   );
 
@@ -748,7 +780,9 @@ void main() {
       final signalUnderTest = ProcessSignal(signal);
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
         flutterDriverFactory: FakeFlutterDriverFactory(
           onStartTest: () async {
@@ -789,7 +823,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -803,7 +836,9 @@ void main() {
       final signalUnderTest = ProcessSignal(signal);
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
         flutterDriverFactory: FakeFlutterDriverFactory(
           onStartTest: () async {
@@ -845,15 +880,16 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
 
   testUsingContext('flutter drive --help explains how to use the command', () async {
     final command = DriveCommand(
+      assetBundleFactory: _FakeAssetBundleFactory(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
+      devtoolsLauncher: FakeDevtoolsLauncher(),
       toolContext: createToolContext(),
     );
 
@@ -870,7 +906,9 @@ void main() {
     () async {
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
 
@@ -911,7 +949,6 @@ void main() {}
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
     },
   );
@@ -998,7 +1035,9 @@ void main() {}
     expectAcceptsDeprecatedJsInteropFlag(
       DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       ),
     );
@@ -1012,7 +1051,9 @@ void main() {}
       fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: createToolContext(),
       );
       createTestCommandRunner(command);
@@ -1036,7 +1077,9 @@ void main() {}
         fakeDeviceManager.attachedDevices = <Device>[ScreenshotDevice()];
         final command = DriveCommand(
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: createToolContext(),
         );
         final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1376,11 +1419,23 @@ class TestDriveCommandThatOnlyValidates extends DriveCommand {
   TestDriveCommandThatOnlyValidates({required super.toolContext})
     : super(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
       );
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
   }
+}
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {
+  @override
+  AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
+    fileSystem: MemoryFileSystem.test(),
+    flutterRoot: '',
+    logger: BufferLogger.test(),
+    platform: FakePlatform(),
+  ).createBundle();
 }

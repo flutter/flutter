@@ -18,6 +18,13 @@ import '../src/package_config.dart';
 void main() {
   late FileSystem testFileSystem;
 
+  AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
+    fileSystem: testFileSystem,
+    flutterRoot: getFlutterRoot(),
+    logger: testLogger,
+    platform: FakePlatform(),
+  ).createBundle();
+
   String fixPath(String path) {
     // The in-memory file system is strict about slashes on Windows being the
     // correct way so until https://github.com/google/file.dart/issues/112 is
@@ -62,7 +69,7 @@ $fontsSection
     List<String> packages,
     String expectedAssetManifest,
   ) async {
-    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    final AssetBundle bundle = createBundle();
     await bundle.build(
       packageConfigPath: '.dart_tool/package_config.json',
       targetPlatform: TargetPlatform.tester,
@@ -115,7 +122,7 @@ $fontsSection
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,

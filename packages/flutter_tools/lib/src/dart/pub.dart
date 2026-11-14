@@ -12,7 +12,6 @@ import 'package:process/process.dart';
 
 import '../base/bot_detector.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
@@ -26,9 +25,6 @@ import '../git.dart';
 import '../project.dart';
 import '../version.dart';
 import 'package_map.dart';
-
-/// The [Pub] instance.
-Pub get pub => context.get<Pub>()!;
 
 /// The console environment key used by the pub tool.
 const _kPubEnvironmentKey = 'PUB_ENVIRONMENT';

@@ -48,6 +48,9 @@ const _kDefaultPlatformArgumentHelp =
 /// Common behavior for `flutter create` and `flutter widget-preview start` commands.
 mixin CreateBase on FlutterCommand {
   @protected
+  TemplatePathProvider get templatePathProvider;
+
+  @protected
   TemplateRenderer get templateRenderer => const MustacheTemplateRenderer();
 
   /// Pattern for a Windows file system drive (e.g. "D:").
@@ -456,6 +459,7 @@ mixin CreateBase on FlutterCommand {
       templateName,
       fileSystem: fs,
       logger: logger,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
       templateManifest: _templateManifest,
     );
@@ -486,6 +490,7 @@ mixin CreateBase on FlutterCommand {
       directory,
       fileSystem: fs,
       logger: logger,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
       templateManifest: _templateManifest,
     );

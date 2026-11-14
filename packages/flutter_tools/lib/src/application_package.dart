@@ -5,13 +5,10 @@
 /// @docImport 'flutter_application_package.dart';
 library;
 
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 
 abstract class ApplicationPackageFactory {
-  static ApplicationPackageFactory? get instance => context.get<ApplicationPackageFactory>();
-
   /// Create an [ApplicationPackage] for the given platform.
   Future<ApplicationPackage?> getPackageForPlatform(
     TargetPlatform platform, {

@@ -27,11 +27,13 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compiler_config.dart';
@@ -168,6 +170,12 @@ name: my_app
     );
     return ResidentWebRunner(
       flutterDevice,
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: test_fakes.FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: toolContext,
+      ),
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
       analytics: fakeAnalytics,
@@ -178,6 +186,12 @@ name: my_app
             platform: FakePlatform(),
             logger: BufferLogger.test(),
           ),
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: fileSystem,
+        flutterRoot: '',
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+      ),
       buildTargets: const BuildTargetsImpl(),
       toolContext: toolContext,
     );
@@ -191,9 +205,21 @@ name: my_app
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
@@ -220,9 +246,21 @@ name: my_app
       flutterDevice.device = WebServerDevice(logger: BufferLogger.test());
       final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
@@ -241,9 +279,21 @@ name: my_app
     () {
       final ResidentRunner residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
@@ -252,9 +302,21 @@ name: my_app
       flutterDevice.device = chromeDevice;
       final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
@@ -495,10 +557,22 @@ name: my_app
       fileSystem.directory('web').deleteSync(recursive: true);
       final residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         stayResident: false,
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
@@ -521,10 +595,22 @@ name: my_app
       setupMocks();
       final ResidentRunner residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         stayResident: false,
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
@@ -548,9 +634,21 @@ name: my_app
       fileSystem.directory('web').deleteSync(recursive: true);
       final residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
@@ -583,9 +681,21 @@ name: my_app
       fileSystem.directory('web').deleteSync(recursive: true);
       final residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
@@ -834,9 +944,21 @@ name: my_app
     () async {
       final ResidentRunner residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
@@ -1466,10 +1588,22 @@ name: my_app
       setupMocks();
       final ResidentRunner runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         platformArgs: <String, Object?>{'no-launch-chrome': true},
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
@@ -1500,10 +1634,22 @@ name: my_app
       flutterDevice.device = chromeDevice;
       final runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         platformArgs: <String, Object?>{'no-launch-chrome': true},
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
@@ -1537,9 +1683,21 @@ name: my_app
       flutterDevice.device = chromeDevice;
       final runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
@@ -1839,9 +1997,21 @@ name: my_app
 
       final runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
@@ -1881,9 +2051,21 @@ name: my_app
 
       final runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
@@ -1919,6 +2101,12 @@ name: my_app
       setupMocks();
       final ResidentRunner residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         stayResident: false,
@@ -1926,6 +2114,12 @@ name: my_app
           fileSystem: fileSystem,
           platform: FakePlatform(),
           logger: BufferLogger.test(),
+        ),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
@@ -2225,6 +2419,12 @@ flutter:
         setupMocks();
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
           stayResident: false,
@@ -2234,6 +2434,12 @@ flutter:
           ) {
             expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
@@ -2256,6 +2462,12 @@ flutter:
         setupMocks();
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -2264,6 +2476,12 @@ flutter:
           ) {
             expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
@@ -2291,6 +2509,12 @@ flutter:
         setupMocks();
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
@@ -2303,6 +2527,12 @@ flutter:
           ) {
             expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
@@ -2331,6 +2561,12 @@ flutter:
 
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.release,
@@ -2345,6 +2581,12 @@ flutter:
               capturedConfig = target.compileConfigs.first;
             }
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
@@ -2382,6 +2624,12 @@ flutter:
 
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
@@ -2396,6 +2644,12 @@ flutter:
               capturedConfig = target.compileConfigs.first;
             }
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
@@ -2439,6 +2693,12 @@ flutter:
 
           final residentWebRunner = ResidentWebRunner(
             flutterDevice,
+            applicationPackageFactory: FlutterApplicationPackageFactory(
+              androidSdkBuilder: () => null,
+              plistParserBuilder: test_fakes.FakePlistParser.new,
+              templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+              toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+            ),
             flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
             debuggingOptions: DebuggingOptions.enabled(
               BuildInfo(
@@ -2458,6 +2718,12 @@ flutter:
                 capturedConfig = target.compileConfigs.first;
               }
             }),
+            assetBundleFactory: AssetBundleFactory.defaultInstance(
+              fileSystem: fileSystem,
+              flutterRoot: '',
+              logger: BufferLogger.test(),
+              platform: FakePlatform(),
+            ),
             buildTargets: const BuildTargetsImpl(),
             toolContext: test_fakes.FakeToolContext(
               fs: fileSystem,
@@ -2613,6 +2879,12 @@ flutter:
 
         final ResidentRunner residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: project,
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo(
@@ -2627,6 +2899,7 @@ flutter:
           ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
@@ -2647,7 +2920,6 @@ flutter:
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
-        AssetBundleFactory: FakeAssetBundleFactory.new,
       },
     );
   });
