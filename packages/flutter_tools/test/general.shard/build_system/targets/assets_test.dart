@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -890,10 +891,31 @@ flutter:
     expect(() async => const CopyAssets().build(environment), throwsException);
   });
 
-  testWithoutContext(
-    'rebuilds asset bundle when a dependency pubspec adds an asset between builds',
-    () async {
-      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+  for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
+    final styleName = style == FileSystemStyle.windows ? 'windows' : 'posix';
+    testWithoutContext(
+      'rebuilds asset bundle when a dependency pubspec adds an asset between builds ($styleName)',
+      () async {
+        final testFileSystem = MemoryFileSystem.test(style: style);
+        final testPlatform = FakePlatform(
+          operatingSystem: style == FileSystemStyle.windows ? 'windows' : 'linux',
+        );
+        final testEnvironment = Environment.test(
+          testFileSystem.currentDirectory,
+          processManager: FakeProcessManager.any(),
+          artifacts: Artifacts.test(),
+          fileSystem: testFileSystem,
+          logger: logger,
+          platform: testPlatform,
+          defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+        );
+        testFileSystem
+            .file(testEnvironment.buildDir.childFile('native_assets.json'))
+            .createSync(recursive: true);
+
+        testFileSystem.file('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: example
 dependencies:
   my_package:
@@ -902,66 +924,139 @@ dev_dependencies:
   dev_package:
     path: dev_package
 ''');
-      fileSystem.file('my_package/pubspec.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('name: my_package\n');
-      fileSystem.file('dev_package/pubspec.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('name: dev_package\n');
-      writePackageConfigFiles(
-        directory: fileSystem.currentDirectory,
-        mainLibName: 'example',
-        packages: <String, String>{'my_package': 'my_package', 'dev_package': 'dev_package'},
-        dependencies: <String>['my_package'],
-        devDependencies: <String>['dev_package'],
-      );
+        testFileSystem.file(testFileSystem.path.join('my_package', 'pubspec.yaml'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('name: my_package\n');
+        testFileSystem.file(testFileSystem.path.join('dev_package', 'pubspec.yaml'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('name: dev_package\n');
+        writePackageConfigFiles(
+          directory: testFileSystem.currentDirectory,
+          mainLibName: 'example',
+          packages: <String, String>{'my_package': 'my_package', 'dev_package': 'dev_package'},
+          dependencies: <String>['my_package'],
+          devDependencies: <String>['dev_package'],
+        );
 
-      final buildSystem = FlutterBuildSystem(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(),
-      );
+        final buildSystem = FlutterBuildSystem(
+          fileSystem: testFileSystem,
+          logger: logger,
+          platform: testPlatform,
+        );
 
-      final BuildResult firstBuild = await buildSystem.build(
-        const StandaloneCopyAssets(),
-        environment,
-      );
-      expect(firstBuild.success, isTrue);
-      expect(firstBuild.performance['copy_assets']!.skipped, isFalse);
+        final BuildResult firstBuild = await buildSystem.build(
+          const StandaloneCopyAssets(),
+          testEnvironment,
+        );
+        expect(firstBuild.success, isTrue);
+        expect(firstBuild.performance['copy_assets']!.skipped, isFalse);
 
-      final Depfile firstDepfile = environment.depFileService.parse(
-        environment.buildDir.childFile('flutter_assets.d'),
-      );
-      final Set<String> firstInputPaths = firstDepfile.inputs.map((File file) => file.path).toSet();
-      expect(firstInputPaths, contains('/my_package/pubspec.yaml'));
-      expect(firstInputPaths, isNot(contains('/dev_package/pubspec.yaml')));
+        final Depfile firstDepfile = testEnvironment.depFileService.parse(
+          testEnvironment.buildDir.childFile('flutter_assets.d'),
+        );
+        final Set<String> firstInputPaths = firstDepfile.inputs
+            .map((File file) => testEnvironment.fileSystem.path.canonicalize(file.path))
+            .toSet();
+        expect(firstInputPaths, hasLength(firstDepfile.inputs.length));
+        expect(
+          firstInputPaths,
+          contains(
+            testEnvironment.fileSystem.path.canonicalize(
+              testFileSystem.path.join('my_package', 'pubspec.yaml'),
+            ),
+          ),
+        );
+        expect(
+          firstInputPaths,
+          isNot(
+            contains(
+              testEnvironment.fileSystem.path.canonicalize(
+                testFileSystem.path.join('dev_package', 'pubspec.yaml'),
+              ),
+            ),
+          ),
+        );
 
-      final BuildResult unchangedBuild = await buildSystem.build(
-        const StandaloneCopyAssets(),
-        environment,
-      );
-      expect(unchangedBuild.success, isTrue);
-      expect(unchangedBuild.performance['copy_assets']!.skipped, isTrue);
+        final BuildResult unchangedBuild = await buildSystem.build(
+          const StandaloneCopyAssets(),
+          testEnvironment,
+        );
+        expect(unchangedBuild.success, isTrue);
+        expect(unchangedBuild.performance['copy_assets']!.skipped, isTrue);
 
-      fileSystem.file('my_package/lib/my_script.js')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('console.log("hello");');
-      fileSystem.file('my_package/pubspec.yaml').writeAsStringSync('''
+        testFileSystem.file(testFileSystem.path.join('my_package', 'lib', 'my_script.js'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('console.log("hello");');
+        testFileSystem
+            .file(testFileSystem.path.join('my_package', 'pubspec.yaml'))
+            .writeAsStringSync('''
 name: my_package
 flutter:
   assets:
     - lib/my_script.js
 ''');
 
-      final BuildResult updatedBuild = await buildSystem.build(
-        const StandaloneCopyAssets(),
-        environment,
+        final BuildResult updatedBuild = await buildSystem.build(
+          const StandaloneCopyAssets(),
+          testEnvironment,
+        );
+        expect(updatedBuild.success, isTrue);
+        expect(updatedBuild.performance['copy_assets']!.skipped, isFalse);
+        expect(
+          testEnvironment.buildDir
+              .childDirectory('flutter_assets')
+              .childFile('packages/my_package/lib/my_script.js'),
+          exists,
+        );
+      },
+    );
+  }
+
+  testWithoutContext(
+    'deduplicates mixed-case Windows input paths while preserving wildcard sentinels',
+    () async {
+      final winFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final winEnv = Environment.test(
+        winFs.currentDirectory,
+        processManager: FakeProcessManager.any(),
+        artifacts: Artifacts.test(),
+        fileSystem: winFs,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'windows'),
+        defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
-      expect(updatedBuild.success, isTrue);
-      expect(updatedBuild.performance['copy_assets']!.skipped, isFalse);
+      winFs.file(r'assets\wildcard\item.png').createSync(recursive: true);
+      winFs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+name: example
+flutter:
+  assets:
+    - assets/wildcard/
+''');
+      writePackageConfigFiles(directory: winFs.currentDirectory, mainLibName: 'example');
+
+      final Directory outputDir = winEnv.buildDir.childDirectory('flutter_assets')
+        ..createSync(recursive: true);
+      final Depfile depfile = await copyAssets(
+        winEnv,
+        outputDir,
+        dartHookResult: DartHooksResult.empty(),
+        targetPlatform: TargetPlatform.windows_x64,
+        buildMode: BuildMode.debug,
+        additionalInputs: <File>[winFs.file(r'C:\PUBSPEC.YAML')],
+      );
+
+      final List<String> canonicalInputs = depfile.inputs
+          .map((File file) => winFs.path.canonicalize(file.path))
+          .toList();
       expect(
-        environment.buildDir.childFile('flutter_assets/packages/my_package/lib/my_script.js'),
-        exists,
+        canonicalInputs.where((String p) => p == winFs.path.canonicalize('pubspec.yaml')),
+        hasLength(1),
+      );
+      expect(
+        depfile.inputs.any((File file) => file.path.contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD')),
+        isTrue,
       );
     },
   );

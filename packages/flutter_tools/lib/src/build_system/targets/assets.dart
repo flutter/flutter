@@ -273,7 +273,7 @@ Future<Depfile> copyAssets(
   final seenInputPaths = <String>{};
   final depfileInputs = <File>[
     for (final File file in <File>[...inputs, ...assetBundle.additionalDependencies])
-      if (seenInputPaths.add(environment.fileSystem.path.normalize(file.absolute.path))) file,
+      if (seenInputPaths.add(environment.fileSystem.path.canonicalize(file.path))) file,
   ];
   final depfile = Depfile(depfileInputs, outputs);
   return depfile;
