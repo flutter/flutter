@@ -50,6 +50,11 @@ void FontCollection::SetupDefaultFontManager(
   collection_->SetupDefaultFontManager(font_initialization_data);
 }
 
+void FontCollection::DeferDefaultFontManager(
+    uint32_t font_initialization_data) {
+  collection_->DeferDefaultFontManager(font_initialization_data);
+}
+
 // Font manifest yaml format:
 //
 // flutter:

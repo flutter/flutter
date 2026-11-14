@@ -505,6 +505,12 @@ class Engine final : public RuntimeDelegate {
   void SetupDefaultFontManager();
 
   //----------------------------------------------------------------------------
+  /// @brief      Defer resolving the default font manager until first font
+  ///             usage.
+  ///
+  void DeferDefaultFontManager();
+
+  //----------------------------------------------------------------------------
   /// @brief      Updates the asset manager referenced by the root isolate of a
   ///             Flutter application. This happens implicitly in the call to
   ///             `Engine::Run` and `Engine::Restart` as the asset manager is
