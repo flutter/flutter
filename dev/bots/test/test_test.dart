@@ -177,8 +177,6 @@ void main() {
       'tool_integration_tests',
       'tool_tests_commands',
       'web_tool_tests',
-      'web_canvaskit_tests',
-      'web_skwasm_tests',
     ]) {
       test('$shard subshards by weight', () async {
         final ProcessResult result = await runScript(
