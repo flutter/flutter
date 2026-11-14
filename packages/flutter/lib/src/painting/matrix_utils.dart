@@ -8,6 +8,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'alignment.dart';
 import 'basic_types.dart';
 
 /// Utility functions for working with matrices.
@@ -605,6 +606,41 @@ abstract final class MatrixUtils {
     storage[12] = offset.dx; // Row 0, Column 3: x' = offset.dx
     storage[13] = offset.dy; // Row 1, Column 3: y' = offset.dy
     storage[15] = 1; // Row 3, Column 3: w' = w
+    return result;
+  }
+
+  /// Computes the effective transformation matrix by applying the [origin]
+  /// and [alignment] around [size] to [transform].
+  ///
+  /// This is used by [RenderTransform] and [RenderSliverTransform] to compute
+  /// their effective transform matrix.
+  static Matrix4 computeEffectiveTransform({
+    required Matrix4 transform,
+    required Size size,
+    Offset? origin,
+    AlignmentGeometry? alignment,
+    TextDirection? textDirection,
+  }) {
+    final Alignment? resolvedAlignment = alignment?.resolve(textDirection);
+    if (origin == null && resolvedAlignment == null) {
+      return transform;
+    }
+    final result = Matrix4.identity();
+    if (origin != null) {
+      result.translateByDouble(origin.dx, origin.dy, 0, 1);
+    }
+    Offset? translation;
+    if (resolvedAlignment != null) {
+      translation = resolvedAlignment.alongSize(size);
+      result.translateByDouble(translation.dx, translation.dy, 0, 1);
+    }
+    result.multiply(transform);
+    if (resolvedAlignment != null) {
+      result.translateByDouble(-translation!.dx, -translation.dy, 0, 1);
+    }
+    if (origin != null) {
+      result.translateByDouble(-origin.dx, -origin.dy, 0, 1);
+    }
     return result;
   }
 }
