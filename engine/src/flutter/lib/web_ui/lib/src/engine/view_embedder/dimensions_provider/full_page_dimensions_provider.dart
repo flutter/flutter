@@ -21,15 +21,16 @@ import 'dimensions_provider.dart';
 /// and should be cached as needed. Every call to every method on this class
 /// WILL perform actual DOM measurements.
 class FullPageDimensionsProvider extends DimensionsProvider {
-  /// Constructs a global [FullPageDimensionsProvider].
+  /// Constructs a [FullPageDimensionsProvider] for the given [viewDomWindow].
   ///
-  /// Doesn't need any parameters, because all the measurements come from the
-  /// globally available [DomVisualViewport].
-  FullPageDimensionsProvider() {
+  /// When no window is provided, the global [domWindow] is used.
+  FullPageDimensionsProvider({DomWindow? viewDomWindow, DomDocument? viewDomDocument})
+    : _domWindow = viewDomWindow ?? domWindow,
+      _domDocument = viewDomDocument ?? domDocument {
     // Determine what 'resize' event we'll be listening to.
     // This is needed for older browsers (Firefox < 91, Safari < 13)
     // TODO(dit): Clean this up, https://github.com/flutter/flutter/issues/117105
-    final DomEventTarget resizeEventTarget = domWindow.visualViewport ?? domWindow;
+    final DomEventTarget resizeEventTarget = _domWindow.visualViewport ?? _domWindow;
 
     // Subscribe to the 'resize' event, and convert it to a ui.Size stream.
     _domResizeSubscription = DomSubscription(
@@ -44,6 +45,9 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     // disposed, including on hot restart.
     domDocument.body!.append(safeAreaProbe);
   }
+
+  final DomWindow _domWindow;
+  final DomDocument _domDocument;
 
   late DomSubscription _domResizeSubscription;
   final StreamController<ui.Size?> _onResizeStreamController =
@@ -82,7 +86,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
   ui.Size computePhysicalSize() {
     late double windowInnerWidth;
     late double windowInnerHeight;
-    final DomVisualViewport? viewport = domWindow.visualViewport;
+    final DomVisualViewport? viewport = _domWindow.visualViewport;
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
 
     if (viewport != null) {
@@ -91,15 +95,15 @@ class FullPageDimensionsProvider extends DimensionsProvider {
         // starts in portrait orientation and the phone is rotated to
         // landscape, so the size is read from documentElement instead. See
         // `_iOSHeight` for when the height comes from the visual viewport.
-        windowInnerWidth = domDocument.documentElement!.clientWidth * devicePixelRatio;
+        windowInnerWidth = _domDocument.documentElement!.clientWidth * devicePixelRatio;
         windowInnerHeight = _iOSHeight(viewport) * devicePixelRatio;
       } else {
         windowInnerWidth = viewport.width! * devicePixelRatio;
         windowInnerHeight = viewport.height! * devicePixelRatio;
       }
     } else {
-      windowInnerWidth = domWindow.innerWidth! * devicePixelRatio;
-      windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
+      windowInnerWidth = _domWindow.innerWidth! * devicePixelRatio;
+      windowInnerHeight = _domWindow.innerHeight! * devicePixelRatio;
     }
     return ui.Size(windowInnerWidth, windowInnerHeight);
   }
@@ -118,7 +122,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
   /// on-screen keyboard shrinks, keeps the `clientHeight` view, and the
   /// keyboard is reported as an inset.
   double _iOSHeight(DomVisualViewport viewport) {
-    final DomElement documentElement = domDocument.documentElement!;
+    final DomElement documentElement = _domDocument.documentElement!;
     final double docWidth = documentElement.clientWidth;
     final double docHeight = documentElement.clientHeight;
     final double viewportHeight = viewport.height!;
@@ -129,7 +133,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
   @override
   ViewPadding computeKeyboardInsets(double physicalHeight, bool isEditingOnMobile) {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
-    final DomVisualViewport? viewport = domWindow.visualViewport;
+    final DomVisualViewport? viewport = _domWindow.visualViewport;
     late double windowInnerHeight;
 
     if (viewport != null) {
@@ -141,7 +145,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
         windowInnerHeight = viewport.height! * devicePixelRatio;
       }
     } else {
-      windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
+      windowInnerHeight = _domWindow.innerHeight! * devicePixelRatio;
     }
     final double bottomPadding = physicalHeight - windowInnerHeight;
 

@@ -30,14 +30,18 @@ abstract class DimensionsProvider {
   DimensionsProvider();
 
   /// Creates the appropriate DimensionsProvider depending on the incoming [hostElement].
-  factory DimensionsProvider.create({DomElement? hostElement}) {
+  factory DimensionsProvider.create({
+    DomElement? hostElement,
+    DomWindow? domWindow,
+    DomDocument? domDocument,
+  }) {
     if (hostElement != null) {
       return CustomElementDimensionsProvider(
         hostElement,
         onDprChange: DisplayDprStream.instance.dprChanged,
       );
     } else {
-      return FullPageDimensionsProvider();
+      return FullPageDimensionsProvider(viewDomWindow: domWindow, viewDomDocument: domDocument);
     }
   }
 

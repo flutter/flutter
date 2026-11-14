@@ -50,5 +50,32 @@ void testMain() {
       viewManager.dispose();
       state.removeListener(listener);
     });
+
+    test('stays resumed when a view is moved to a new host element', () {
+      final viewManager = FlutterViewManager(EnginePlatformDispatcher.instance);
+      final AppLifecycleState state = AppLifecycleState.create(viewManager);
+
+      final states = <ui.AppLifecycleState>[];
+      state.addListener(states.add);
+
+      final DomElement originalHost = createDomHTMLDivElement();
+      final view = EngineFlutterView(EnginePlatformDispatcher.instance, originalHost);
+      viewManager.registerView(view);
+      expect(states, contains(ui.AppLifecycleState.resumed));
+      states.clear();
+
+      final DomElement newHost = createDomHTMLDivElement();
+      viewManager.moveView(view.viewId, newHost);
+
+      // The lifecycle state should remain resumed because the view is still
+      // visible. No transient `detached` must be emitted, since apps may start
+      // cleanups when they observe it.
+      expect(states, isEmpty);
+      expect(state.appLifecycleState, ui.AppLifecycleState.resumed);
+
+      view.dispose();
+      viewManager.dispose();
+      state.removeListener(states.add);
+    });
   });
 }

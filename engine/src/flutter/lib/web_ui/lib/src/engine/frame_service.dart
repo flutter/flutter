@@ -61,6 +61,50 @@ class FrameService {
   bool get isFrameScheduled => _isFrameScheduled;
   bool _isFrameScheduled = false;
 
+  /// The set of windows that host Flutter views.
+  ///
+  /// [scheduleFrame] will prefer to call [requestAnimationFrame] on a visible
+  /// window in this set, so that rendering continues when the original browser
+  /// tab is hidden but a view is visible in a Document Picture-in-Picture
+  /// window.
+  final Set<DomWindow> _registeredWindows = <DomWindow>{};
+
+  /// Registers [window] as a window that hosts Flutter views.
+  void registerWindow(DomWindow window) {
+    _registeredWindows.add(window);
+  }
+
+  /// Unregisters [window].
+  void unregisterWindow(DomWindow window) {
+    _registeredWindows.remove(window);
+
+    // If the pending frame was requested on [window], its animation frame
+    // callback may never fire (e.g. a Document Picture-in-Picture window that
+    // is being closed). In that case [_isFrameScheduled] would be stuck in the
+    // `true` state and the app would freeze. Invalidate the pending request and
+    // reschedule it on one of the remaining windows.
+    if (_isFrameScheduled && _scheduledFrameWindow == window) {
+      _isFrameScheduled = false;
+      _scheduledFrameWindow = null;
+      _frameRequestId++;
+      scheduleFrame();
+    }
+  }
+
+  /// The window on which the currently pending animation frame was requested.
+  DomWindow? _scheduledFrameWindow;
+
+  /// Incremented every time a pending animation frame request is invalidated,
+  /// so that a stale callback (from a window that was unregistered but not
+  /// closed) does not render an extra frame.
+  int _frameRequestId = 0;
+
+  /// The windows currently registered for frame scheduling.
+  ///
+  /// This is intended for testing only.
+  @visibleForTesting
+  Set<DomWindow> get debugRegisteredWindows => _registeredWindows;
+
   /// Whether the engine and framework are in the middle of rendering a frame.
   ///
   /// Some DOM events can be triggered synchronously with DOM mutations, such as
@@ -94,7 +138,15 @@ class FrameService {
 
     _isFrameScheduled = true;
 
-    domWindow.requestAnimationFrame((JSNumber highResTime) {
+    final DomWindow window = _pickWindowForFrame();
+    final int requestId = _frameRequestId;
+    _scheduledFrameWindow = window;
+    window.requestAnimationFrame((JSNumber highResTime) {
+      if (requestId != _frameRequestId) {
+        // This request was invalidated (and rescheduled on another window) in
+        // [unregisterWindow].
+        return;
+      }
       // Reset immediately for two reasons:
       //
       // * While drawing a frame the framework may attempt to schedule a new
@@ -104,6 +156,7 @@ class FrameService {
       //   safest to reset this value before running any significant amount of
       //   functionality that may throw exceptions, or produce wasm traps.
       _isFrameScheduled = false;
+      _scheduledFrameWindow = null;
 
       if (_isDisposed) {
         // Skip this animation frame because the instance has been disposed, meaning there was a
@@ -172,6 +225,22 @@ class FrameService {
         onFinishedRenderingFrame?.call();
       }
     });
+  }
+
+  /// Picks a [DomWindow] on which to schedule the next animation frame.
+  ///
+  /// Prefers a visible registered window so that rendering continues when the
+  /// original tab is hidden but a Flutter view is visible in another window
+  /// (e.g. Document Picture-in-Picture). Falls back to the global [domWindow]
+  /// when no registered window is visible.
+  DomWindow _pickWindowForFrame() {
+    for (final DomWindow window in _registeredWindows) {
+      final document = window.document as DomHTMLDocument?;
+      if (document != null && document.visibilityState == 'visible') {
+        return window;
+      }
+    }
+    return domWindow;
   }
 
   void _renderFrame(double highResTime) {
