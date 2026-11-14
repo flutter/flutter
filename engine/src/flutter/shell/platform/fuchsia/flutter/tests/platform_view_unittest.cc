@@ -84,6 +84,9 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     surface_ = std::move(surface);
   }
   // |flutter::PlatformView::Delegate|
+  void OnPlatformViewCreatedDeferred(
+      flutter::PlatformView::SurfaceFactory surface_factory) override {}
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewDestroyed() {}
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewScheduleFrame() {}

@@ -43,5 +43,14 @@ TEST(SurfaceContextVK, TearsDownSwapchain) {
   EXPECT_EQ(surface_context.AcquireNextSurface(), nullptr);
 }
 
+TEST(SurfaceContextVK, ForwardsSubmissionTracker) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  SurfaceContextVK surface_context(context);
+
+  EXPECT_NE(surface_context.GetSubmissionTracker(), nullptr);
+  EXPECT_EQ(surface_context.GetSubmissionTracker(),
+            context->GetSubmissionTracker());
+}
+
 }  // namespace testing
 }  // namespace impeller
