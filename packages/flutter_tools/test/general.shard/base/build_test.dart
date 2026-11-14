@@ -104,6 +104,41 @@ void main() {
       }
       expect(logger.errorText, contains('XYZ'));
     });
+
+    testWithoutContext(
+      'filters the second line of a two-line warning only after its first line',
+      () async {
+        const elfWarning =
+            'Warning: The generated ELF library contains unobfuscated DWARF debugging information.';
+        final MapEntry<String, String> peCoffWarning =
+            GenSnapshot.kIgnoredTwoLineWarnings.entries.single;
+        processManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              artifacts.getArtifactPath(
+                Artifact.genSnapshot,
+                platform: TargetPlatform.windows_x64,
+                mode: BuildMode.release,
+              ),
+            ],
+            stderr:
+                'ABC\n'
+                '${peCoffWarning.key}\n'
+                '${peCoffWarning.value}\n'
+                '$elfWarning\n'
+                '${peCoffWarning.value}\n'
+                'XYZ\n',
+          ),
+        );
+
+        final int result = await genSnapshot.run(
+          snapshotType: SnapshotType(TargetPlatform.windows_x64, BuildMode.release),
+        );
+
+        expect(result, 0);
+        expect(logger.errorText, 'ABC\n$elfWarning\n${peCoffWarning.value}\nXYZ\n');
+      },
+    );
   });
 
   group('AOTSnapshotter', () {
@@ -520,6 +555,9 @@ void main() {
 
     testWithoutContext('builds PE library and PDB for windows-x64', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
+      final String pdbPath = fileSystem.path.join(outputPath, 'app.pdb');
+      fileSystem.file(pdbPath).createSync(recursive: true);
+
       processManager
         ..addCommand(
           FakeCommand(
@@ -538,8 +576,8 @@ void main() {
           ),
         )
         ..addCommand(
-          const FakeCommand(
-            command: <String>[
+          FakeCommand(
+            command: const <String>[
               r'C:\VS\link.exe',
               '/NOLOGO',
               '/DLL',
@@ -547,12 +585,19 @@ void main() {
               '/MACHINE:X64',
               '/DEBUG',
               '/INCREMENTAL:NO',
+              '/Brepro',
               '/OUT:build/foo/app.so',
               '/PDB:build/foo/app.pdb',
+              '/PDBALTPATH:%_PDB%',
               '/EXPORT:_kDartSnapshotData,DATA',
               '/EXPORT:_kDartSnapshotText,DATA',
               'build/foo/app.o',
             ],
+            onRun: (_) {
+              // The linker would update the previous PDB instead of
+              // replacing it.
+              expect(fileSystem.file(pdbPath).existsSync(), false);
+            },
           ),
         );
 
@@ -573,6 +618,8 @@ void main() {
       final String splitDebugInfoPath = fileSystem.path.join('build', 'symbols');
       final String stalePdbPath = fileSystem.path.join(outputPath, 'app.pdb');
       fileSystem.file(stalePdbPath).createSync(recursive: true);
+      final String pdbPath = fileSystem.path.join(splitDebugInfoPath, 'app.windows-x64.pdb');
+      fileSystem.file(pdbPath).createSync(recursive: true);
 
       processManager
         ..addCommand(
@@ -586,15 +633,16 @@ void main() {
               '--deterministic',
               '--snapshot_kind=app-aot-pecoff-obj',
               '--coff=build/foo/app.o',
-              '--strip',
+              '--dwarf-stack-traces',
+              '--resolve-dwarf-paths',
               '--obfuscate',
               'main.dill',
             ],
           ),
         )
         ..addCommand(
-          const FakeCommand(
-            command: <String>[
+          FakeCommand(
+            command: const <String>[
               r'C:\VS\link.exe',
               '/NOLOGO',
               '/DLL',
@@ -602,12 +650,17 @@ void main() {
               '/MACHINE:X64',
               '/DEBUG',
               '/INCREMENTAL:NO',
+              '/Brepro',
               '/OUT:build/foo/app.so',
               '/PDB:build/symbols/app.windows-x64.pdb',
+              '/PDBALTPATH:%_PDB%',
               '/EXPORT:_kDartSnapshotData,DATA',
               '/EXPORT:_kDartSnapshotText,DATA',
               'build/foo/app.o',
             ],
+            onRun: (_) {
+              expect(fileSystem.file(pdbPath).existsSync(), false);
+            },
           ),
         );
 
