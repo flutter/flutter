@@ -1207,4 +1207,26 @@ TEST_F(FlEngineTest, ChildObjects) {
   EXPECT_NE(fl_engine_get_mouse_cursor_handler(engine), nullptr);
 }
 
+TEST_F(FlEngineTest, RendererDefault) {
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kOpenGL);
+  EXPECT_TRUE(fl_engine_get_use_subsurface(engine));
+}
+
+TEST_F(FlEngineTest, RendererOpenGLGtk) {
+  g_autofree gchar* initial_renderer =
+      g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
+  g_setenv("FLUTTER_LINUX_RENDERER", "opengl-gtk", TRUE);
+
+  g_autoptr(FlDartProject) gtk_project = fl_dart_project_new();
+  g_autoptr(FlEngine) gtk_engine = fl_engine_new(gtk_project);
+  EXPECT_EQ(fl_engine_get_renderer_type(gtk_engine), kOpenGL);
+  EXPECT_FALSE(fl_engine_get_use_subsurface(gtk_engine));
+
+  if (initial_renderer != nullptr) {
+    g_setenv("FLUTTER_LINUX_RENDERER", initial_renderer, TRUE);
+  } else {
+    g_unsetenv("FLUTTER_LINUX_RENDERER");
+  }
+}
+
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
