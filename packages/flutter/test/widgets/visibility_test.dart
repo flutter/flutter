@@ -622,6 +622,90 @@ void main() {
     expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
   });
 
+  testWidgets('Visibility.of reports the displayed nested child or replacement', (
+    WidgetTester tester,
+  ) async {
+    for (final ancestorVisible in <bool>[true, false]) {
+      for (final outerVisible in <bool>[true, false]) {
+        for (final childVisible in <bool>[true, false]) {
+          for (final replacementVisible in <bool>[true, false]) {
+            final visibility = <String, bool>{};
+            Widget leaf(String name) {
+              return Builder(
+                builder: (BuildContext context) {
+                  visibility[name] = Visibility.of(context);
+                  return SizedBox(key: ValueKey<String>(name));
+                },
+              );
+            }
+
+            await tester.pumpWidget(
+              Visibility.maintain(
+                visible: ancestorVisible,
+                child: Visibility(
+                  visible: outerVisible,
+                  replacement: Visibility(
+                    visible: replacementVisible,
+                    replacement: leaf('D'),
+                    child: leaf('C'),
+                  ),
+                  child: Visibility(
+                    visible: childVisible,
+                    replacement: leaf('B'),
+                    child: leaf('A'),
+                  ),
+                ),
+              ),
+            );
+
+            final displayedLeaf = outerVisible
+                ? (childVisible ? 'A' : 'B')
+                : (replacementVisible ? 'C' : 'D');
+            expect(visibility, <String, bool>{displayedLeaf: ancestorVisible});
+            expect(find.byKey(ValueKey<String>(displayedLeaf)), findsOneWidget);
+          }
+        }
+      }
+    }
+  });
+
+  testWidgets('Visibility replacement depends on IndexedStack visibility', (
+    WidgetTester tester,
+  ) async {
+    var dependencyChanges = 0;
+    final Widget child = Visibility(
+      visible: false,
+      replacement: _ShowVisibility(
+        onDidChangeDependencies: () {
+          dependencyChanges += 1;
+        },
+      ),
+      child: const SizedBox.shrink(),
+    );
+
+    Widget buildStack(int? index) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(index: index, children: <Widget>[child]),
+      );
+    }
+
+    await tester.pumpWidget(buildStack(0));
+    expect(find.text('is visible ? true'), findsOneWidget);
+    expect(dependencyChanges, 1);
+
+    await tester.pumpWidget(buildStack(null));
+    expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(dependencyChanges, 2);
+
+    await tester.pumpWidget(buildStack(0));
+    expect(find.text('is visible ? true'), findsOneWidget);
+    expect(dependencyChanges, 3);
+
+    await tester.pumpWidget(buildStack(0));
+    expect(dependencyChanges, 3);
+  });
+
   testWidgets('Visibility does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);
