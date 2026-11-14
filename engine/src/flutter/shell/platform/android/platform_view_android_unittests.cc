@@ -195,6 +195,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               OnPlatformViewCreated,
               (std::unique_ptr<Surface>),
               (override));
+  MOCK_METHOD(void,
+              OnPlatformViewCreatedDeferred,
+              (PlatformView::SurfaceFactory surface_factory),
+              (override));
   MOCK_METHOD(void, OnPlatformViewDestroyed, (), (override));
   MOCK_METHOD(void, OnPlatformViewScheduleFrame, (), (override));
   MOCK_METHOD(void,
