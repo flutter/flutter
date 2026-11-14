@@ -102,11 +102,16 @@ class HardcodedUnicodeProperties {
 
 class AllCodeUnitFlags {
   AllCodeUnitFlags(this._text) : _allFlags = Uint16List(_text.length + 1) {
-    _extract();
+    // Only whitespace and line breaks are read during layout; word and grapheme flags stay lazy.
+    _extractLineBreaksAndWhitespace();
   }
 
   final String _text;
   final Uint16List _allFlags;
+  // Tracks whether wordBreak flags have been populated on demand.
+  bool _hasWordBreaks = false;
+  // Tracks whether grapheme flags have been populated on demand.
+  bool _hasGraphemes = false;
 
   int get length => _allFlags.length;
 
@@ -114,42 +119,56 @@ class AllCodeUnitFlags {
     assert(index >= 0);
     assert(index < _allFlags.length);
 
+    // Word and grapheme boundaries are not read during layout, so segment them on first query.
+    if (flag == CodeUnitFlag.wordBreak && !_hasWordBreaks) {
+      _extractWordBreaks();
+    } else if (flag == CodeUnitFlag.grapheme && !_hasGraphemes) {
+      _extractGraphemes();
+    }
+
     return (_allFlags[index] & flag._bitmask) != 0;
   }
 
-  void _extract() {
-    // Add whitespaces
-    _allFlags.fillRange(0, _allFlags.length, 0);
+  void _extractLineBreaksAndWhitespace() {
+    // Populate whitespace flags and V8 line-break flags needed by line wrapping.
     for (var i = 0; i < _allFlags.length - 1; i++) {
       if (HardcodedUnicodeProperties.isWhitespace(_text.codeUnitAt(i))) {
         _allFlags[i] = CodeUnitFlag.whitespace._bitmask;
       }
-      // We can add more flags here, e.g. control characters, ideographic characters, etc.
     }
 
-    // TODO(mdebbar): OPTIMIZATION:
-    // We can make `segmentText` update `codeUnitFlags` in-place?
-    // Get text segmentation results using browser APIs.
-    final SegmentationResult result = segmentText(_text);
-
-    // Fill out grapheme flags
-    for (final int index in result.graphemes) {
-      _allFlags[index] |= CodeUnitFlag.grapheme._bitmask;
-    }
-    // Fill out word flags
-    for (final int index in result.words) {
-      _allFlags[index] |= CodeUnitFlag.wordBreak._bitmask;
-    }
-    // Fill out line break flags
-    for (var i = 0; i < result.breaks.length; i += 2) {
-      final int index = result.breaks[i];
-      final int type = result.breaks[i + 1];
+    // Extract only V8 line breaks eagerly so layout does not pay for word or grapheme segmenters.
+    final Uint32List breaks = fragmentUsingV8LineBreaker(_text);
+    for (var i = 0; i < breaks.length; i += 2) {
+      final int index = breaks[i];
+      final int type = breaks[i + 1];
 
       if (type == kSoftLineBreak) {
         _allFlags[index] |= CodeUnitFlag.softLineBreak._bitmask;
       } else {
         _allFlags[index] |= CodeUnitFlag.hardLineBreak._bitmask;
       }
+    }
+  }
+
+  void _extractWordBreaks() {
+    // Populate word boundaries on demand for getWordBoundary queries.
+    _hasWordBreaks = true;
+    final Uint32List words = fragmentUsingIntlSegmenter(_text, IntlSegmenterGranularity.word);
+    for (final index in words) {
+      _allFlags[index] |= CodeUnitFlag.wordBreak._bitmask;
+    }
+  }
+
+  void _extractGraphemes() {
+    // Populate grapheme boundaries on demand when CodeUnitFlag.grapheme is queried directly.
+    _hasGraphemes = true;
+    final Uint32List graphemes = fragmentUsingIntlSegmenter(
+      _text,
+      IntlSegmenterGranularity.grapheme,
+    );
+    for (final index in graphemes) {
+      _allFlags[index] |= CodeUnitFlag.grapheme._bitmask;
     }
   }
 }
