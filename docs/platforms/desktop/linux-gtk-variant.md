@@ -15,6 +15,10 @@ The unified runner template defines `FLUTTER_LINUX_GTK3` or
 `FLUTTER_LINUX_GTK4`. Engine source selection uses the GTK4 define for GTK4
 paths; do not assume every GTK3 engine target defines the GTK3 macro.
 
+Check the [distribution compatibility matrix](linux-gtk4-distribution-compatibility.md)
+when choosing a deployment runtime. GTK4 capabilities depend on the loaded
+library, including a bundle or Flatpak runtime, rather than the host release alone.
+
 ## Tool Selection
 
 The Flutter tool resolves the variant in this order:

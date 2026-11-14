@@ -14,6 +14,10 @@ This covers presentation of Flutter's composed frame, not video decoding or
 the plugin-to-Flutter external-texture boundary. Enabling DMA-BUF here does not
 make a media plugin export DMA-BUFs or select Flutter's Vulkan backend.
 
+The [distribution compatibility matrix](linux-gtk4-distribution-compatibility.md)
+shows which GTK releases provide DMA-BUF, graphics offload, and newer frame
+outcome APIs. Availability still requires runtime driver and compositor checks.
+
 ## Frame pacing selection
 
 Set `FLUTTER_LINUX_FRAME_PACER=gtk` (the current default) or `engine` before

@@ -6,6 +6,11 @@ that internal compatibility layer and the requirements for extending it.
 It does not describe runtime selection between GTK3 and GTK4: each engine
 library links one GTK major.
 
+For package versions and the capabilities available on Ubuntu, RHEL, Fedora,
+and Debian releases, see the
+[distribution compatibility matrix](linux-gtk4-distribution-compatibility.md).
+Its entries describe API prerequisites, not a distribution support commitment.
+
 ## Compatibility Boundary
 
 Build-time headers determine which declarations the compiler can use.
@@ -67,6 +72,8 @@ and the complete symbol set used by that capability:
 
 | Capability | Runtime threshold | Behavior when unavailable |
 | --- | --- | --- |
+| Fractional surface scale | GTK 4.12 | Integer surface scale fallback |
+| Fractional monitor scale | GTK 4.14 | Integer monitor scale fallback |
 | Native accessible tree | GTK 4.10 | View exports the widget-backed render surface instead of the native semantics tree |
 | Accessible text queries and notifications | GTK 4.14 | No native text interface; the native hierarchy alone does not provide text access |
 | Accessible text extents/offsets | GTK 4.16 interface slots | Not implemented by this backend, even when the slots exist; layout data is still required |
@@ -75,6 +82,15 @@ and the complete symbol set used by that capability:
 | Caret and selection commands | GTK 4.22 interface tail | Native text remains queryable without the newer command callbacks |
 | DMA-BUF texture APIs | GTK 4.14 | Compositor cannot select the DMA-BUF texture route |
 | Graphics offload wrapper | GTK 4.14 and `gtk_graphics_offload_get_type` | Original render widget is parented directly; no wrapper is created |
+| Frame-cycle outcome telemetry | GTK 4.24 and `gdk_frame_timings_get_result` | Debug/profile collector reports unknown outcome (`-1`), retaining available timing fields |
+
+Frame outcome collection is enabled with `FLUTTER_LINUX_FRAME_TIMINGS=1` and
+GTK pacing in debug/profile builds. Release and JIT-release builds contain no
+collector, environment check, optional timing symbol lookup, or history storage.
+This symbol is resolved separately in `fl_vsync_timing.cc`, so the standalone
+pacer tests do not depend on the renderer/accessibility binding table. See
+[frame timing collection and interpretation](../../../engine/src/flutter/shell/platform/linux/testing/FRAME_PACING.md#presentation-feedback-for-benchmarks)
+for tracing, confirmed outcomes, unknown/pending frames, and coverage limits.
 
 Accessibility bounds apply Flutter’s affine and projective transform to the
 rectangle corners. Singular projective points are clamped to a finite fallback;
