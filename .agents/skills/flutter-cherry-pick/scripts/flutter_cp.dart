@@ -5,6 +5,71 @@
 import 'dart:convert';
 import 'dart:io';
 
+const _flutterOwner = 'flutter';
+const _flutterRepo = 'flutter';
+const _originRemote = 'origin';
+const _upstreamRemote = 'upstream';
+const _forkRemote = 'fork';
+
+/// Matches `<owner>/<repo>` in GitHub HTTPS and SSH remote URLs (optionally with a port).
+final _gitHubRepoPattern = RegExp(
+  r'github\.com(?::\d+)?[:/]([^/]+)/([^/]+?)(?:\.git)?/?$',
+  caseSensitive: false,
+);
+final _whitespacePattern = RegExp(r'\s+');
+
+/// The remotes used to cherry-pick: `upstream` points at `flutter/flutter` and
+/// `fork` at `<forkOwner>/flutter`. `forkOwner` is empty when there is no fork
+/// remote, in which case `fork` is `upstream`.
+typedef GitRemotes = ({String upstream, String fork, String forkOwner});
+
+/// Resolves [GitRemotes] from `git remote -v` output for the GitHub user [login].
+///
+/// For `upstream`, prefers a `flutter/flutter` remote named `upstream`, then
+/// `origin`, then the first matching `flutter/flutter` remote (or `origin` if
+/// none match).
+///
+/// For `fork`, only considers `<login>/flutter` remotes (preferring `fork`,
+/// then `origin`, then the first matching remote). If no `<login>/flutter`
+/// remote exists, falls back to `upstream` with an empty `forkOwner` so
+/// collaborator remotes are never selected.
+GitRemotes parseRemotes(String remoteOutput, {required String login}) {
+  // Remote name -> owner, for GitHub `*/flutter` remotes only.
+  final owners = <String, String>{};
+  for (final String line in LineSplitter.split(remoteOutput)) {
+    final List<String> parts = line.trim().split(_whitespacePattern);
+    if (parts.length < 2) {
+      continue;
+    }
+    final RegExpMatch? match = _gitHubRepoPattern.firstMatch(parts[1]);
+    if (match != null && match.group(2)!.toLowerCase() == _flutterRepo) {
+      owners.putIfAbsent(parts[0], () => match.group(1)!);
+    }
+  }
+
+  final upstreams = <String>[
+    for (final MapEntry(key: String name, value: String owner) in owners.entries)
+      if (owner.toLowerCase() == _flutterOwner) name,
+  ];
+  final String upstream =
+      const <String>[_upstreamRemote, _originRemote].where(upstreams.contains).firstOrNull ??
+      upstreams.firstOrNull ??
+      _originRemote;
+
+  final String normalizedLogin = login.trim().toLowerCase();
+  final forks = <String>[
+    for (final MapEntry(key: String name, value: String owner) in owners.entries)
+      if (normalizedLogin.isNotEmpty && owner.toLowerCase() == normalizedLogin) name,
+  ];
+  final String? fork =
+      const <String>[_forkRemote, _originRemote].where(forks.contains).firstOrNull ??
+      forks.firstOrNull;
+  if (fork == null) {
+    return (upstream: upstream, fork: upstream, forkOwner: '');
+  }
+  return (upstream: upstream, fork: fork, forkOwner: owners[fork]!);
+}
+
 /// A helper class to orchestrate the Flutter cherry-pick (CP) process.
 class CherryPickHelper {
   /// Creates a new [CherryPickHelper] instance.
@@ -138,50 +203,15 @@ class CherryPickHelper {
     }
   }
 
-  /// Dynamically retrieves the release candidate branch name for the target channel.
-  ///
-  /// Reads the version file `bin/internal/release-candidate-branch.version` from
-  /// the remote branch (or falls back to local branch).
-  /// Parses the owner from a GitHub git/https URL.
-  String? parseOwner(String url) {
-    final regExp = RegExp(r'(?:github\.com[:/])([^/]+)/');
-    final Match? match = regExp.firstMatch(url);
-    return match?.group(1);
-  }
+  Future<GitRemotes>? _remotesFuture;
 
   /// Detects the upstream and fork remotes, and the fork owner.
-  Future<Map<String, String>> detectRemotes() async {
-    final ProcessResult result = await runCmd(['git', 'remote', '-v']);
-    final output = result.stdout as String;
+  Future<GitRemotes> detectRemotes() => _remotesFuture ??= _detectRemotes();
 
-    String? upstream;
-    String? fork;
-    String? forkOwner;
-
-    for (final String line in output.split('\n')) {
-      if (line.trim().isEmpty) {
-        continue;
-      }
-      final List<String> parts = line.split('\t');
-      if (parts.length < 2) {
-        continue;
-      }
-      final String name = parts[0];
-      final String urlAndType = parts[1];
-      final String url = urlAndType.split(' ')[0];
-
-      if (url.contains('flutter/flutter')) {
-        upstream = name;
-      } else {
-        fork = name;
-        forkOwner = parseOwner(url);
-      }
-    }
-
-    upstream ??= 'origin';
-    fork ??= 'origin';
-
-    return {'upstream': upstream, 'fork': fork, 'forkOwner': forkOwner ?? ''};
+  Future<GitRemotes> _detectRemotes() async {
+    final ProcessResult remoteResult = await runCmd(['git', 'remote', '-v']);
+    final ProcessResult userResult = await runCmd(['gh', 'api', 'user', '--jq', '.login']);
+    return parseRemotes(remoteResult.stdout as String, login: (userResult.stdout as String).trim());
   }
 
   /// Dynamically retrieves the release candidate branch name for the target channel.
@@ -189,8 +219,8 @@ class CherryPickHelper {
   /// Reads the version file `bin/internal/release-candidate-branch.version` from
   /// the remote branch (or falls back to local branch).
   Future<String> getCandidateBranch() async {
-    final Map<String, String> remotes = await detectRemotes();
-    final String upstream = remotes['upstream']!;
+    final GitRemotes remotes = await detectRemotes();
+    final String upstream = remotes.upstream;
     _info('Locating candidate branch for $channel using remote $upstream...');
     ProcessResult result = await runCmd([
       'git',
@@ -262,8 +292,8 @@ class CherryPickHelper {
   /// attempts to cherry-pick the original merge commit. If conflicts occur,
   /// it prints the conflicted files and exits with code 2.
   Future<int> startManualCp(String candidateBranch) async {
-    final Map<String, String> remotes = await detectRemotes();
-    final String upstream = remotes['upstream']!;
+    final GitRemotes remotes = await detectRemotes();
+    final String upstream = remotes.upstream;
     _info('Starting manual cherry-pick fallback...');
     await runCmd(['git', 'fetch', upstream, candidateBranch]);
 
@@ -341,10 +371,7 @@ class CherryPickHelper {
 
   /// Pushes the local cherry-pick branch and creates a pull request targeting [candidateBranch].
   Future<int> pushAndCreatePr(String candidateBranch) async {
-    final Map<String, String> remotes = await detectRemotes();
-    final String fork = remotes['fork']!;
-    final String forkOwner = remotes['forkOwner']!;
-    final String upstream = remotes['upstream']!;
+    final (:String fork, :String forkOwner, :String upstream) = await detectRemotes();
 
     final branchName = 'cherry-pick-$pr-to-$channel';
     _info('Pushing branch $branchName to $fork...');
