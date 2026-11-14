@@ -72,6 +72,8 @@ class AX_EXPORT AXNodePosition : public AXPosition<AXNodePosition, AXNode> {
                            AXTreeID child_tree_id,
                            AXTreeID* parent_tree_id,
                            AXNode::AXID* parent_id);
+
+  int ComputeMaxTextOffset() const;
 };
 
 }  // namespace ui
