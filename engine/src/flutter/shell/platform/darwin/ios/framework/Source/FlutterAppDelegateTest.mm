@@ -103,13 +103,13 @@ FLUTTER_ASSERT_ARC
 - (void)testLaunchUrlWithDeepLinkingDisabled {
   OCMStub([self.mockMainBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"])
       .andReturn(@NO);
+  OCMReject([self.mockNavigationChannel invokeMethod:OCMOCK_ANY arguments:OCMOCK_ANY]);
 
   BOOL result =
       [self.appDelegate application:[UIApplication sharedApplication]
                             openURL:[NSURL URLWithString:@"http://myApp/custom/route?query=test"]
                             options:@{}];
   XCTAssertFalse(result);
-  OCMReject([self.mockNavigationChannel invokeMethod:OCMOCK_ANY arguments:OCMOCK_ANY]);
 }
 
 - (void)testLaunchUrlWithQueryParameterAndFragment {
@@ -205,6 +205,11 @@ FLUTTER_ASSERT_ARC
       });
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  // openURL should NOT be called. OCMReject is an expectation and must be recorded before the
+  // code under test runs.
+  OCMReject([mockApplication openURL:[OCMArg any]
+                             options:[OCMArg any]
+                   completionHandler:[OCMArg any]]);
 
   BOOL result = [self.appDelegate
                application:[UIApplication sharedApplication]
@@ -212,10 +217,7 @@ FLUTTER_ASSERT_ARC
         restorationHandler:^(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects){
         }];
   XCTAssertTrue(result);
-  // openURL should NOT have been called.
-  OCMReject([mockApplication openURL:[OCMArg any]
-                             options:[OCMArg any]
-                   completionHandler:[OCMArg any]]);
+  [mockApplication stopMocking];
 }
 
 - (void)testSetGetPluginRegistrant {
