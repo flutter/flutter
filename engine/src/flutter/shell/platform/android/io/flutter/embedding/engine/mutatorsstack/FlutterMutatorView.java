@@ -15,6 +15,7 @@ import android.graphics.Path;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
@@ -98,17 +99,46 @@ public class FlutterMutatorView extends FrameLayout {
 
   /**
    * Pass the necessary parameters to the view so it can apply correct mutations to its children.
+   *
+   * <p>When the view's size has not changed, this translates the view directly instead of calling
+   * {@link #setLayoutParams} so scrolling does not force a measure and layout pass on the embedded
+   * view subtree every frame. The layout params are kept in sync so that any later layout pass
+   * preserves the position.
    */
   public void readyToDisplay(
       @NonNull FlutterMutatorsStack mutatorsStack, int left, int top, int width, int height) {
     this.mutatorsStack = mutatorsStack;
     this.left = left;
     this.top = top;
-    FrameLayout.LayoutParams layoutParams =
-        new FrameLayout.LayoutParams(width, height, Gravity.LEFT | Gravity.TOP);
-    layoutParams.leftMargin = left;
-    layoutParams.topMargin = top;
-    setLayoutParams(layoutParams);
+    final ViewGroup.LayoutParams params = getLayoutParams();
+    if (!(params instanceof FrameLayout.LayoutParams)
+        || params.width != width
+        || params.height != height) {
+      FrameLayout.LayoutParams layoutParams =
+          new FrameLayout.LayoutParams(width, height, Gravity.LEFT | Gravity.TOP);
+      layoutParams.leftMargin = left;
+      layoutParams.topMargin = top;
+      setLayoutParams(layoutParams);
+    } else {
+      final FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams) params;
+      frameParams.leftMargin = left;
+      frameParams.topMargin = top;
+      frameParams.gravity = Gravity.LEFT | Gravity.TOP;
+      // If the view hasn't been laid out yet, the initial layout pass will position the view using
+      // the layout params.
+      if (isLaidOut()) {
+        final int dx = left - getLeft();
+        final int dy = top - getTop();
+        if (dx != 0 || dy != 0) {
+          offsetLeftAndRight(dx);
+          offsetTopAndBottom(dy);
+          // Notify ViewTreeObserver.OnScrollChangedListeners (e.g., PopupWindow, AdMob viewability)
+          // that this view moved without a layout pass, matching RecyclerView.dispatchOnScrolled.
+          onScrollChanged(getScrollX(), getScrollY(), getScrollX(), getScrollY());
+        }
+      }
+      invalidate();
+    }
     setWillNotDraw(false);
   }
 
