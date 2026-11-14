@@ -40,5 +40,25 @@ void main() {
       final parsed = ConfigOption.fromJson(map);
       expect(parsed, equals(config));
     });
+
+    test(
+      'FeatureFlag.fromJson and ConfigOption.fromJson throw FormatException on invalid types',
+      () {
+        expect(
+          () => FeatureFlag.fromJson(const <String, Object?>{FeatureFlag.nameKey: 123}),
+          throwsFormatException,
+        );
+        expect(
+          () => FeatureFlag.fromJson(const <String, Object?>{
+            FeatureFlag.enabledByDefaultKey: 'true',
+          }),
+          throwsFormatException,
+        );
+        expect(
+          () => ConfigOption.fromJson(const <String, Object?>{ConfigOption.valueKey: 42}),
+          throwsFormatException,
+        );
+      },
+    );
   });
 }

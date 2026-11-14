@@ -328,12 +328,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
           final int physicalTop = toPhysicalPixels(top);
           final int physicalLeft = toPhysicalPixels(left);
-          final FrameLayout.LayoutParams layoutParams =
-              (FrameLayout.LayoutParams) viewWrapper.getLayoutParams();
-          layoutParams.topMargin = physicalTop;
-          layoutParams.leftMargin = physicalLeft;
-          layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-          viewWrapper.setLayoutParams(layoutParams);
+          viewWrapper.setOffset(physicalLeft, physicalTop);
         }
 
         @Override
@@ -656,11 +651,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       textureId = -1;
     } else {
       final PlatformViewRenderTarget renderTarget = makePlatformViewRenderTarget(textureRegistry);
+      renderTarget.resize(physicalWidth, physicalHeight);
       viewWrapper = new PlatformViewWrapper(context, renderTarget);
       textureId = renderTarget.getId();
     }
     viewWrapper.setTouchProcessor(androidTouchProcessor);
-    viewWrapper.resizeRenderTarget(physicalWidth, physicalHeight);
 
     final FrameLayout.LayoutParams viewWrapperLayoutParams =
         new FrameLayout.LayoutParams(physicalWidth, physicalHeight, Gravity.LEFT | Gravity.TOP);
@@ -1055,7 +1050,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
               ? TextureRegistry.SurfaceLifecycle.resetInBackground
               : TextureRegistry.SurfaceLifecycle.manual;
       final TextureRegistry.SurfaceProducer textureEntry =
-          textureRegistry.createSurfaceProducer(lifecycle);
+          textureRegistry instanceof FlutterRenderer
+              ? ((FlutterRenderer) textureRegistry).createPlatformViewSurfaceProducer(lifecycle)
+              : textureRegistry.createSurfaceProducer(lifecycle);
       Log.i(TAG, "PlatformView is using SurfaceProducer backend");
       return new SurfaceProducerPlatformViewRenderTarget(textureEntry);
     }

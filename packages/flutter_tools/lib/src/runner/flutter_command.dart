@@ -30,8 +30,10 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
+import '../doctor.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../flutter_plugins.dart';
+import '../package_graph.dart';
 import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
@@ -179,34 +181,42 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
-  FlutterCommand({this.verboseHelp = false, ToolContext? toolContext, this._outputPreferences})
-    : _explicitToolContext = toolContext;
+  FlutterCommand({
+    required this.toolContext,
+    this.verboseHelp = false,
+    this._outputPreferences,
+    DeviceManager? deviceManager,
+    Doctor? doctor,
+  }) : _explicitDeviceManager = deviceManager,
+       _explicitDoctor = doctor;
 
   /// Whether this command was invoked with verbose help enabled.
   final bool verboseHelp;
 
-  final ToolContext? _explicitToolContext;
-  final OutputPreferences? _outputPreferences;
-
   /// The [ToolContext] providing explicit dependency injection for this command.
-  ToolContext? get toolContext => _explicitToolContext ?? runner?.toolContext;
+  final ToolContext toolContext;
 
-  SystemClock get _clock => toolContext?.systemClock ?? globals.systemClock;
-  Logger get _logger => toolContext?.logger ?? globals.logger;
-  Signals get _signals => toolContext?.signals ?? globals.signals;
-  UserMessages get _userMessages => toolContext?.userMessages ?? globals.userMessages;
-  PreRunValidator get _preRunValidator => toolContext?.preRunValidator ?? globals.preRunValidator;
-  OperatingSystemUtils get _os => toolContext?.os ?? globals.os;
-  PersistentToolState? get _persistentToolState =>
-      toolContext?.persistentToolState ?? globals.persistentToolState;
-  Platform get _platform => toolContext?.platform ?? globals.platform;
-  FileSystem get _fs => toolContext?.fs ?? globals.fs;
-  FlutterProjectFactory get _projectFactory =>
-      toolContext?.projectFactory ?? globals.projectFactory;
-  Analytics get _analytics => runner?.analytics ?? globals.analytics;
-  Cache get _cache => toolContext?.cache ?? globals.cache;
-  FlutterVersion get _flutterVersion => toolContext?.flutterVersion ?? globals.flutterVersion;
-  FileSystemUtils get _fsUtils => toolContext?.fileSystemUtils ?? globals.fsUtils;
+  final OutputPreferences? _outputPreferences;
+  final DeviceManager? _explicitDeviceManager;
+  final Doctor? _explicitDoctor;
+
+  DeviceManager? get _deviceManager => _explicitDeviceManager ?? runner?.deviceManager;
+  Doctor? get _doctor => _explicitDoctor ?? runner?.doctor;
+
+  SystemClock get _clock => toolContext.systemClock;
+  Logger get _logger => toolContext.logger;
+  Signals get _signals => toolContext.signals;
+  UserMessages get _userMessages => toolContext.userMessages;
+  PreRunValidator get _preRunValidator => toolContext.preRunValidator;
+  OperatingSystemUtils get _os => toolContext.os;
+  PersistentToolState? get _persistentToolState => toolContext.persistentToolState;
+  Platform get _platform => toolContext.platform;
+  FileSystem get _fs => toolContext.fs;
+  FlutterProjectFactory get _projectFactory => toolContext.projectFactory;
+  Analytics get _analytics => runner?.analytics ?? const NoOpAnalytics();
+  Cache get _cache => toolContext.cache;
+  FlutterVersion get _flutterVersion => toolContext.flutterVersion;
+  FileSystemUtils get _fsUtils => toolContext.fileSystemUtils;
 
   /// The currently executing command (or sub-command).
 
@@ -271,11 +281,8 @@ abstract class FlutterCommand extends Command<void> {
   ArgParser? get baseArgParser => _argParser;
 
   int? get _usageLineLength {
-    final OutputPreferences? prefs = _outputPreferences ?? toolContext?.outputPreferences;
-    if (prefs != null) {
-      return prefs.wrapText ? prefs.wrapColumn : null;
-    }
-    return null;
+    final OutputPreferences prefs = _outputPreferences ?? toolContext.outputPreferences;
+    return prefs.wrapText ? prefs.wrapColumn : null;
   }
 
   @override
@@ -293,7 +300,7 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get deprecated => false;
 
-  ProcessInfo get processInfo => toolContext?.processInfo ?? globals.processInfo;
+  ProcessInfo get processInfo => toolContext.processInfo;
 
   /// When the command runs and this is true, trigger an async process to
   /// discover devices from discoverers that support wireless devices for an
@@ -333,9 +340,10 @@ abstract class FlutterCommand extends Command<void> {
   void addDdsOptions({required bool verboseHelp}) {
     DebuggingOptionDescriptors.dds.addTo(argParser);
     DebuggingOptionDescriptors.ddsPort.addTo(argParser, verboseHelp: verboseHelp);
-    DebuggingOptionDescriptors.devToolsServerAddressOption.addTo(
+    DebuggingOptionDescriptors.devToolsServerAddress.addTo(
       argParser,
       verboseHelp: verboseHelp,
+      help: DebuggingOptionDescriptors.devToolsServerAddressBaseHelp,
     );
   }
 
@@ -351,11 +359,11 @@ abstract class FlutterCommand extends Command<void> {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    return toolContext?.fs.path.join('lib', 'main.dart') ?? bundle.defaultMainPath;
+    return bundle.defaultMainPath(_fs);
   }
 
   /// Indicates if the current command running has a terminal attached.
-  bool get hasTerminal => toolContext?.stdio.hasTerminal ?? globals.stdio.hasTerminal;
+  bool get hasTerminal => toolContext.stdio.hasTerminal;
 
   /// Path to the Dart's package config file.
   ///
@@ -413,10 +421,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Uri? get devToolsServerAddress {
-    if (wasParsed(DebuggingOptionDescriptors.devToolsServerAddressOption)) {
-      final Uri? uri = Uri.tryParse(
-        getValue(DebuggingOptionDescriptors.devToolsServerAddressOption)!,
-      );
+    if (wasParsed(DebuggingOptionDescriptors.devToolsServerAddress)) {
+      final Uri? uri = Uri.tryParse(getValue(DebuggingOptionDescriptors.devToolsServerAddress)!);
       if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
         return uri;
       }
@@ -503,9 +509,9 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   late final _targetDevices = TargetDevices(
-    deviceManager: globals.deviceManager!,
-    doctor: globals.doctor!,
-    toolContext: toolContext!,
+    deviceManager: _deviceManager!,
+    doctor: _doctor!,
+    toolContext: toolContext,
     deviceConnectionInterface: deviceConnectionInterface,
   );
 
@@ -581,7 +587,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags?.isHcppEnabled ?? false;
+  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags.isHcppEnabled ?? false;
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -645,7 +651,10 @@ abstract class FlutterCommand extends Command<void> {
       final String? customDir = getValue(BuildInfoOptions.codeSizeDirectory);
       final Directory directory = (customDir != null)
           ? _fs.directory(customDir)
-          : _fsUtils.getUniqueDirectory(_fs.directory(getBuildDirectory()), 'flutter_size');
+          : _fsUtils.getUniqueDirectory(
+              _fs.directory(getBuildDirectory(toolContext.config, _fs)),
+              'flutter_size',
+            );
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
@@ -1261,7 +1270,35 @@ abstract class FlutterCommand extends Command<void> {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
+    await regeneratePlatformSpecificTooling(project, releaseMode: releaseMode);
+  }
+
+  /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] using
+  /// this command's dependencies.
+  @protected
+  Future<void> regeneratePlatformSpecificTooling(
+    FlutterProject project, {
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    required bool releaseMode,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
+  }) {
+    final FlutterCommandRunner commandRunner = runner!;
+    return project.regeneratePlatformSpecificTooling(
+      toolContext: toolContext,
+      analytics: commandRunner.analytics,
+      cocoaPods: commandRunner.cocoaPods,
+      deprecationBehavior: deprecationBehavior,
+      featureFlags: commandRunner.featureFlags,
+      gradleUtils: commandRunner.gradleUtils,
+      plistParser: commandRunner.plistParser,
+      releaseMode: releaseMode,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
+      templateRenderer: commandRunner.templateRenderer,
+    );
   }
 
   /// The set of development artifacts required for this command.
@@ -1311,7 +1348,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     if (deviceList.length > 1) {
       _logger.printStatus(_userMessages.flutterSpecifyDevice);
-      final List<Device> allDevices = await globals.deviceManager!.getAllDevices();
+      final List<Device> allDevices = await _deviceManager!.getAllDevices();
       _logger.printStatus('');
       await Device.printDevices(allDevices, _logger);
       return null;
@@ -1404,7 +1441,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     // Otherwise, only add development artifacts corresponding to
     // potentially connected devices. We might not be able to determine if a
     // device is connected yet, so include it in case it becomes connected.
-    final List<Device> devices = await globals.deviceManager!.getDevices(
+    final List<Device> devices = await _deviceManager!.getDevices(
       filter: DeviceDiscoveryFilter(excludeDisconnected: false),
     );
     if (devices.isEmpty) {
@@ -1415,7 +1452,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(
         targetPlatform,
-        featureFlags,
+        runner?.featureFlags ?? featureFlags,
       );
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);

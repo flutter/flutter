@@ -158,6 +158,7 @@
 /dev/devicelab/bin/tasks/integration_test_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_driver.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_frame_number.dart @jtmcdole @flutter/engine
+/dev/devicelab/bin/tasks/integration_ui_keyboard_inset_jump.dart @mboetger @flutter/android
 /dev/devicelab/bin/tasks/integration_ui_keyboard_resize.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_textfield.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks.dart @jtmcdole @flutter/engine
@@ -188,13 +189,7 @@
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_bad_ios__timeline_summary.dart @LongCatIsLooong @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @LongCatIsLooong @flutter/engine
 /dev/devicelab/bin/tasks/cubic_bezier_perf_ios_sksl_warmup__timeline_summary.dart @jtmcdole @flutter/engine
-/dev/devicelab/bin/tasks/draw_arcs_all_fill_styles_perf_ios__timeline_summary.dart @b-luk @flutter/engine
-/dev/devicelab/bin/tasks/draw_arcs_all_stroke_styles_perf_ios__timeline_summary.dart @b-luk @flutter/engine
-/dev/devicelab/bin/tasks/draw_atlas_perf_ios__timeline_summary.dart @cbracken @flutter/engine
-/dev/devicelab/bin/tasks/draw_points_perf_ios__timeline_summary.dart @cbracken @flutter/engine
-/dev/devicelab/bin/tasks/draw_vertices_perf_ios__timeline_summary.dart @cbracken @flutter/engine
-/dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/dynamic_path_tessellation_perf_ios__timeline_summary.dart @cbracken @flutter/engine
+/dev/devicelab/bin/tasks/impeller_primitives_perf_suite_ios__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/external_textures_integration_test_ios.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test_ios.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios.dart @jtmcdole @flutter/engine
@@ -213,7 +208,6 @@
 /dev/devicelab/bin/tasks/integration_ui_ios_frame_number.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_keyboard_resize.dart @LongCatIsLooong @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @LongCatIsLooong @flutter/tool
-/dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/ios_defines_test.dart @okorohelijah @flutter/tool
 /dev/devicelab/bin/tasks/ios_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/keyboard_hot_restart_ios.dart @loic-sharma @flutter/ios
@@ -222,7 +216,6 @@
 /dev/devicelab/bin/tasks/native_assets_ios.dart @dcharkes @flutter/ios
 /dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @jtmcdole @flutter/engine
-/dev/devicelab/bin/tasks/new_gallery_skia_ios__transition_perf.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_ios.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_swift.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks_ios.dart @gaaclarke @flutter/engine
@@ -234,10 +227,7 @@
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/post_backdrop_filter_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/route_test_ios.dart @okorohelijah @flutter/tool
-/dev/devicelab/bin/tasks/rrect_blur_perf_ios__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/simple_animation_perf_ios.dart @LongCatIsLooong @flutter/engine
-/dev/devicelab/bin/tasks/static_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/static_path_tessellation_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @LongCatIsLooong @flutter/engine
 /dev/devicelab/bin/tasks/very_long_picture_scrolling_perf_ios__e2e_summary.dart @flar @flutter/engine
 
@@ -383,6 +373,8 @@
 # ci_yaml flutter roller @keyonghan @flutter/infra
 # coverage @christopherfujino @flutter/infra
 # customer_testing @justinmc @flutter/framework
+# customer_testing_devtools @justinmc @flutter/framework
+# customer_testing_flame @justinmc @flutter/framework
 # docs @justinmc @flutter/framework
 # snippets @justinmc @flutter/framework
 # flutter_packaging @christopherfujino @flutter/infra

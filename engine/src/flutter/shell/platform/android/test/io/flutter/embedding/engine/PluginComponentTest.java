@@ -106,6 +106,56 @@ public class PluginComponentTest {
     assertEquals(accessedPlugin, plugin.getAccessedPlugin());
   }
 
+  @Test
+  public void pluginsCanAccessEngineId() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterJNI flutterJNI = mock(FlutterJNI.class);
+    jniAttached = false;
+    when(flutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
+    doAnswer(invocation -> jniAttached = true).when(flutterJNI).attachToNative();
+
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+
+    FlutterEngine flutterEngine1 =
+        new FlutterEngine(ApplicationProvider.getApplicationContext(), flutterLoader, flutterJNI);
+    FlutterEngine flutterEngine2 =
+        new FlutterEngine(ApplicationProvider.getApplicationContext(), flutterLoader, flutterJNI);
+
+    PluginThatRecordsEngineId plugin1 = new PluginThatRecordsEngineId();
+    PluginThatRecordsEngineId plugin2 = new PluginThatRecordsEngineId();
+    flutterEngine1.getPlugins().add(plugin1);
+    flutterEngine2.getPlugins().add(plugin2);
+
+    assertEquals(flutterEngine1.getEngineId(), plugin1.getAttachedEngineId());
+    assertEquals(flutterEngine2.getEngineId(), plugin2.getAttachedEngineId());
+
+    flutterEngine1.getPlugins().remove(PluginThatRecordsEngineId.class);
+    assertEquals(flutterEngine1.getEngineId(), plugin1.getDetachedEngineId());
+  }
+
+  private static class PluginThatRecordsEngineId implements FlutterPlugin {
+    private long attachedEngineId;
+    private long detachedEngineId;
+
+    public long getAttachedEngineId() {
+      return attachedEngineId;
+    }
+
+    public long getDetachedEngineId() {
+      return detachedEngineId;
+    }
+
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+      attachedEngineId = binding.getEngineId();
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+      detachedEngineId = binding.getEngineId();
+    }
+  }
+
   private static class PluginThatAccessesAssets implements FlutterPlugin {
     private String assetPathBasedOnName;
     private String assetPathBasedOnNameAndPackage;
