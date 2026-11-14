@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -3347,6 +3348,96 @@ Future<void> main() async {
     expect(find.text('Middle Screen'), findsOneWidget);
     expect(find.text('Last Screen'), findsNothing);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/194447.
+  testWidgets(
+    'Predictive back gesture lays out the destination before starting SnackBar hero flight',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          // Builds the stack ['/', '/details'] at once, so the '/' route is
+          // never shown and therefore never laid out.
+          initialRoute: '/details',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => const Scaffold(body: Center(child: Text('Home'))),
+            '/details': (BuildContext context) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('Hello')));
+                  },
+                  child: const Text('Show SnackBar'),
+                ),
+              ),
+            ),
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Show SnackBar'));
+      await tester.pumpAndSettle();
+
+      // The SnackBar is built into every Scaffold, including the one in the
+      // '/' route, which is offstage and has never been laid out.
+      expect(find.byType(SnackBar, skipOffstage: false), findsNWidgets(2));
+
+      Future<void> sendBackGesture(String method, [Map<String, Object?>? arguments]) async {
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/backgesture',
+          const StandardMethodCodec().encodeMethodCall(MethodCall(method, arguments)),
+          (_) {},
+        );
+      }
+
+      Future<void> startAndUpdateBackGesture() async {
+        await sendBackGesture('startBackGesture', <String, Object?>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0, // left
+        });
+        await tester.pump();
+        await tester.pump();
+        await sendBackGesture('updateBackGestureProgress', <String, Object?>{
+          'touchOffset': <double>[150.0, 300.0],
+          'progress': 0.5,
+          'swipeEdge': 0,
+        });
+        await tester.pump();
+      }
+
+      // Canceling a gesture must restore the current route without leaving
+      // duplicate SnackBars or an invalid in-flight Hero.
+      await startAndUpdateBackGesture();
+      expect(find.text('Hello'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await sendBackGesture('cancelBackGesture');
+      await tester.pumpAndSettle();
+      expect(find.text('Show SnackBar'), findsOneWidget);
+      expect(find.text('Hello'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // A second gesture exercises the successful pop path as well.
+      await startAndUpdateBackGesture();
+      expect(find.text('Hello'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await sendBackGesture('updateBackGestureProgress', <String, Object?>{
+        'touchOffset': <double>[300.0, 300.0],
+        'progress': 1.0,
+        'swipeEdge': 0,
+      });
+      await tester.pump();
+      await sendBackGesture('commitBackGesture');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('Show SnackBar'), findsNothing);
+      expect(find.text('Hello'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/40239.
   testWidgets(
