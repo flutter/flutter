@@ -2088,6 +2088,54 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/40936.
+  test(
+    'Adjacent TextSpans with identical backgroundColor paint without seam',
+    () async {
+      for (final direction in TextDirection.values) {
+        final isRtl = direction == TextDirection.rtl;
+        final painter = TextPainter(
+          textDirection: direction,
+          text: TextSpan(
+            style: const TextStyle(
+              fontFamily: 'FlutterTest',
+              fontSize: 14.5,
+              color: Color(0x00000000),
+            ),
+            children: <TextSpan>[
+              TextSpan(
+                text: isRtl ? '\u05D0' : 'A',
+                style: const TextStyle(backgroundColor: Color(0xFFFF0000)),
+              ),
+              TextSpan(
+                text: isRtl ? '\u05D1' : 'B',
+                style: const TextStyle(backgroundColor: Color(0xFFFF0000)),
+              ),
+            ],
+          ),
+        )..layout();
+        addTearDown(painter.dispose);
+
+        final recorder = ui.PictureRecorder();
+        final canvas = Canvas(recorder)
+          ..drawRect(const Rect.fromLTWH(0, 0, 40, 20), Paint()..color = const Color(0xFFFFFFFF));
+        painter.paint(canvas, Offset.zero);
+        final ui.Picture picture = recorder.endRecording();
+        addTearDown(picture.dispose);
+
+        final ui.Image image = picture.toImageSync(40, 20);
+        addTearDown(image.dispose);
+        final ByteData bytes = (await image.toByteData())!;
+
+        // With fontSize 14.5, the two 1em glyphs meet at x = 14.5; coalescing
+        // their identical background paints avoids an anti-aliased seam at x = 14.
+        expect(bytes.getUint32((14 + 7 * image.width) * 4), 0xFF0000FF);
+      }
+    },
+    // Skwasm allocates monotonic PaintIDs: https://github.com/flutter/flutter/issues/40936.
+    skip: kIsWeb,
+  );
 }
 
 class MockCanvas extends Fake implements Canvas {}

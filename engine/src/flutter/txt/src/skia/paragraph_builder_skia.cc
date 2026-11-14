@@ -86,8 +86,15 @@ std::unique_ptr<Paragraph> ParagraphBuilderSkia::Build() {
 
 skt::ParagraphPainter::PaintID ParagraphBuilderSkia::CreatePaintID(
     const flutter::DlPaint& dl_paint) {
+  // Reuse existing IDs so SkParagraph can coalesce matching foreground and
+  // background styles across adjacent spans
+  for (size_t i = dl_paints_.size(); i > 0; --i) {
+    if (dl_paints_[i - 1] == dl_paint) {
+      return static_cast<skt::ParagraphPainter::PaintID>(i - 1);
+    }
+  }
   dl_paints_.push_back(dl_paint);
-  return dl_paints_.size() - 1;
+  return static_cast<skt::ParagraphPainter::PaintID>(dl_paints_.size() - 1);
 }
 
 skt::ParagraphStyle ParagraphBuilderSkia::TxtToSkia(const ParagraphStyle& txt) {

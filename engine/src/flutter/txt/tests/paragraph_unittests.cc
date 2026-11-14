@@ -175,12 +175,16 @@ class PainterTestBase : public CanvasTestBase<T> {
     return f_collection;
   }
 
-  txt::ParagraphBuilderSkia makeParagraphBuilder() const {
+ protected:
+  txt::ParagraphBuilderSkia makeParagraphBuilder(
+      txt::TextDirection direction = txt::TextDirection::ltr) const {
     auto p_style = txt::ParagraphStyle();
+    p_style.text_direction = direction;
     auto f_collection = makeFontCollection();
     return txt::ParagraphBuilderSkia(p_style, f_collection, impeller_);
   }
 
+ private:
   bool impeller_ = false;
 };
 
@@ -331,6 +335,64 @@ TEST_F(PainterTest, DrawTextBlobNoImpeller) {
   EXPECT_EQ(recorder.blobCount(), 1);
 }
 #endif  // IMPELLER_SUPPORTS_RENDERING
+
+TEST_F(PainterTest, CoalescesAdjacentSameBackgroundSpans) {
+  PretendImpellerIsEnabled(false);
+
+  for (auto direction : {txt::TextDirection::ltr, txt::TextDirection::rtl}) {
+    const bool is_rtl = direction == txt::TextDirection::rtl;
+    auto pb_skia = makeParagraphBuilder(direction);
+
+    auto style_a = makeStyle();
+    style_a.color = SK_ColorRED;
+    style_a.background = DlPaint(DlColor::kYellow());
+    pb_skia.PushStyle(style_a);
+    pb_skia.AddText(is_rtl ? u"\u05D0\u05D1" : u"Hello ");
+    pb_skia.Pop();
+
+    auto style_b = makeStyle();
+    style_b.color = SK_ColorBLUE;
+    style_b.background = DlPaint(DlColor::kYellow());
+    pb_skia.PushStyle(style_b);
+    pb_skia.AddText(is_rtl ? u"\u05D2\u05D3" : u"world");
+    pb_skia.Pop();
+
+    auto builder = DisplayListBuilder();
+    auto paragraph = pb_skia.Build();
+    paragraph->Layout(10000);
+    paragraph->Paint(&builder, 0, 0);
+
+    auto recorder = DlOpRecorder();
+    builder.Build()->Dispatch(recorder);
+
+    EXPECT_EQ(recorder.rectCount(), 1);
+    EXPECT_EQ(recorder.blobCount(), 2);
+  }
+
+  auto pb_distinct = makeParagraphBuilder();
+  auto yellow_style = makeStyle();
+  yellow_style.background = DlPaint(DlColor::kYellow());
+  pb_distinct.PushStyle(yellow_style);
+  pb_distinct.AddText(u"Hello ");
+  pb_distinct.Pop();
+
+  auto cyan_style = makeStyle();
+  cyan_style.background = DlPaint(DlColor::kCyan());
+  pb_distinct.PushStyle(cyan_style);
+  pb_distinct.AddText(u"world");
+  pb_distinct.Pop();
+
+  auto distinct_builder = DisplayListBuilder();
+  auto distinct_paragraph = pb_distinct.Build();
+  distinct_paragraph->Layout(10000);
+  distinct_paragraph->Paint(&distinct_builder, 0, 0);
+
+  auto distinct_recorder = DlOpRecorder();
+  distinct_builder.Build()->Dispatch(distinct_recorder);
+
+  EXPECT_EQ(distinct_recorder.rectCount(), 2);
+  EXPECT_EQ(distinct_recorder.blobCount(), 1);
+}
 
 }  // namespace testing
 }  // namespace flutter
