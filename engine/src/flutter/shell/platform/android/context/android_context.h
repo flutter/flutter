@@ -5,11 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_CONTEXT_ANDROID_CONTEXT_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_CONTEXT_ANDROID_CONTEXT_H_
 
-#include <atomic>
-
 #include "flutter/common/macros.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/task_runner.h"
 #include "flutter/impeller/base/flags.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
@@ -82,20 +79,6 @@ class AndroidContext {
   ///
   virtual void SetupImpellerContext() {}
 
-  //----------------------------------------------------------------------------
-  /// @brief      Starts compiling the Impeller context's default pipelines,
-  ///             if it is OpenGL ES, the first time it is called. Later calls
-  ///             do nothing, including those from other platform views that
-  ///             share this context, such as those of spawned engines.
-  ///             Thread-safe.
-  ///
-  /// @param[in]  raster_task_runner  The task runner that the pipelines are
-  ///                                 requested on, where the surfaces'
-  ///                                 ContentContexts later look them up.
-  ///
-  void StartWarmingDefaultPipelines(
-      const fml::RefPtr<fml::TaskRunner>& raster_task_runner);
-
  protected:
   void SetImpellerContext(
       const std::shared_ptr<impeller::Context>& impeller_context);
@@ -106,7 +89,6 @@ class AndroidContext {
   // This is the Skia context used for on-screen rendering.
   NOT_SLIMPELLER(sk_sp<GrDirectContext> main_context_);
   std::shared_ptr<impeller::Context> impeller_context_;
-  std::atomic<bool> started_warming_default_pipelines_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContext);
 };
