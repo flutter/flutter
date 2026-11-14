@@ -78,6 +78,7 @@ static NSString* const kAutofillProperties = @"autofill";
 static NSString* const kAutofillId = @"uniqueIdentifier";
 static NSString* const kAutofillEditingValue = @"editingValue";
 static NSString* const kAutofillHints = @"hints";
+static NSString* const kAutofillPasswordRules = @"passwordRules";
 
 static NSString* const kAutocorrectionType = @"autocorrect";
 static NSString* const kEnableInlinePrediction = @"enableInlinePrediction";
@@ -215,6 +216,111 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 
   // Present default key if bad input type is given.
   return UIReturnKeyDefault;
+}
+
+// Converts a custom character set to a password rules custom character class,
+// for example "[-_]". The password rules syntax requires "-" to be the first
+// character of the class and "]" to be the last one. Characters that are not
+// ASCII printable are not supported and are ignored. Returns nil if no
+// supported character is left.
+static NSString* ToPasswordRulesCustomCharacterClass(NSString* characters) {
+  NSMutableCharacterSet* others =
+      [NSMutableCharacterSet characterSetWithRange:NSMakeRange(0x20, 0x7F - 0x20)];
+  [others removeCharactersInString:@"-]"];
+  NSString* otherCharacters = [[characters componentsSeparatedByCharactersInSet:others.invertedSet]
+      componentsJoinedByString:@""];
+  BOOL hasDash = [characters containsString:@"-"];
+  BOOL hasClosingBracket = [characters containsString:@"]"];
+  if (!hasDash && !hasClosingBracket && otherCharacters.length == 0) {
+    return nil;
+  }
+  return [NSString stringWithFormat:@"[%@%@%@]", hasDash ? @"-" : @"", otherCharacters,
+                                    hasClosingBracket ? @"]" : @""];
+}
+
+// Converts a character class sent by the framework to its password rules
+// identifier. Returns nil if the character class is not recognized.
+static NSString* ToPasswordRulesCharacterClass(id characterClass) {
+  if ([characterClass isKindOfClass:[NSString class]]) {
+    if ([characterClass isEqualToString:@"asciiPrintable"]) {
+      return @"ascii-printable";
+    }
+    NSArray<NSString*>* identifiers = @[ @"upper", @"lower", @"digit", @"special", @"unicode" ];
+    return [identifiers containsObject:characterClass] ? characterClass : nil;
+  }
+  if ([characterClass isKindOfClass:[NSDictionary class]]) {
+    id characters = characterClass[@"custom"];
+    if ([characters isKindOfClass:[NSString class]] && [characters length] > 0) {
+      return ToPasswordRulesCustomCharacterClass(characters);
+    }
+  }
+  return nil;
+}
+
+// Converts a list of character classes sent by the framework to a comma
+// separated list of password rules identifiers. Returns nil if the list has no
+// recognized character class.
+static NSString* ToPasswordRulesCharacterClasses(id characterClasses) {
+  if (![characterClasses isKindOfClass:[NSArray class]]) {
+    return nil;
+  }
+  NSMutableArray<NSString*>* identifiers = [NSMutableArray array];
+  for (id characterClass in characterClasses) {
+    NSString* identifier = ToPasswordRulesCharacterClass(characterClass);
+    if (identifier) {
+      [identifiers addObject:identifier];
+    }
+  }
+  return identifiers.count > 0 ? [identifiers componentsJoinedByString:@", "] : nil;
+}
+
+// Converts the password rules sent by the framework to a password rules
+// descriptor, for example "required: upper; required: digit; minlength: 12;".
+// Returns nil if the rules are missing or have no recognized rule.
+static NSString* ToPasswordRulesDescriptor(id rules) {
+  if (![rules isKindOfClass:[NSDictionary class]]) {
+    return nil;
+  }
+  NSMutableString* descriptor = [NSMutableString string];
+  id required = rules[@"required"];
+  if ([required isKindOfClass:[NSArray class]]) {
+    for (id characterClasses in required) {
+      NSString* identifiers = ToPasswordRulesCharacterClasses(characterClasses);
+      if (identifiers) {
+        [descriptor appendFormat:@"required: %@; ", identifiers];
+      }
+    }
+  }
+  NSString* allowed = ToPasswordRulesCharacterClasses(rules[@"allowed"]);
+  if (allowed) {
+    [descriptor appendFormat:@"allowed: %@; ", allowed];
+  }
+  // Pairs of framework keys and password rules properties, in descriptor order.
+  NSArray<NSArray<NSString*>*>* lengthProperties = @[
+    @[ @"minLength", @"minlength" ],
+    @[ @"maxLength", @"maxlength" ],
+    @[ @"maxConsecutive", @"max-consecutive" ],
+  ];
+  for (NSArray<NSString*>* property in lengthProperties) {
+    id value = rules[property[0]];
+    if ([value isKindOfClass:[NSNumber class]] && [value integerValue] > 0) {
+      [descriptor appendFormat:@"%@: %ld; ", property[1], (long)[value integerValue]];
+    }
+  }
+  if (descriptor.length == 0) {
+    return nil;
+  }
+  // Remove the trailing space.
+  [descriptor deleteCharactersInRange:NSMakeRange(descriptor.length - 1, 1)];
+  return descriptor;
+}
+
+// Converts the password rules sent by the framework to a
+// UITextInputPasswordRules. Returns nil if the rules are missing or have no
+// recognized rule, which keeps the platform's default password rules.
+static UITextInputPasswordRules* ToUITextInputPasswordRules(id rules) {
+  NSString* descriptor = ToPasswordRulesDescriptor(rules);
+  return descriptor ? [UITextInputPasswordRules passwordRulesWithDescriptor:descriptor] : nil;
 }
 
 static UITextContentType ToUITextContentType(NSArray<NSString*>* hints) {
@@ -1116,8 +1222,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   self.autofillId = AutofillIdFromDictionary(configuration);
   if (autofill == nil) {
     self.textContentType = @"";
+    self.passwordRules = nil;
   } else {
     self.textContentType = ToUITextContentType(autofill[kAutofillHints]);
+    self.passwordRules = ToUITextInputPasswordRules(autofill[kAutofillPasswordRules]);
     [self setTextInputState:autofill[kAutofillEditingValue]];
     NSAssert(_autofillId, @"The autofill configuration must contain an autofill id");
   }
@@ -3271,6 +3379,20 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
         [inputView reloadInputViews];
       }
     }
+  }
+
+  // The password rules of the focused field can change while it is focused,
+  // for example when the app fetches them from a server.
+  id autofill = dictionary[kAutofillProperties];
+  UITextInputPasswordRules* passwordRules =
+      [autofill isKindOfClass:[NSDictionary class]]
+          ? ToUITextInputPasswordRules(autofill[kAutofillPasswordRules])
+          : nil;
+  NSString* oldDescriptor = _activeView.passwordRules.passwordRulesDescriptor;
+  NSString* newDescriptor = passwordRules.passwordRulesDescriptor;
+  if (oldDescriptor != newDescriptor && ![oldDescriptor isEqualToString:newDescriptor]) {
+    _activeView.passwordRules = passwordRules;
+    [_activeView reloadInputViews];
   }
 }
 
