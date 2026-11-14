@@ -1312,7 +1312,25 @@ void main() {
         ),
         phase: EnginePhase.build,
       );
-      expect(tester.takeException(), isAssertionError);
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(
+        (exception! as FlutterError).toStringDeep(),
+        'FlutterError\n'
+        '   DraggableScrollableController is already attached to a sheet.\n'
+        '   A DraggableScrollableController can only be attached to one\n'
+        '   DraggableScrollableSheet at a time, but it was given to a new\n'
+        '   sheet while it was still attached to another one.\n'
+        '   This can also happen when a single DraggableScrollableSheet is\n'
+        '   recreated instead of updated because its key, or the key of one\n'
+        '   of its ancestors in a Row, Column, Stack or similar, changed. The\n'
+        '   new sheet attaches to the controller before the old sheet is\n'
+        '   removed from the tree.\n'
+        '   Use a separate DraggableScrollableController for each sheet. If a\n'
+        '   single sheet is being recreated, keep its key and the keys of its\n'
+        '   ancestors stable, or, as a last resort, give the sheet a\n'
+        '   GlobalKey so that its State is reused when it moves.\n',
+      );
     },
   );
 
@@ -1515,6 +1533,73 @@ void main() {
       () => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear),
       throwsAssertionError,
     );
+  });
+
+  group('DraggableScrollableSheet recreated with the same controller', () {
+    Widget sheet(DraggableScrollableController controller) {
+      return DraggableScrollableSheet(
+        controller: controller,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return SingleChildScrollView(
+            controller: scrollController,
+            child: const SizedBox(height: 1000),
+          );
+        },
+      );
+    }
+
+    Widget column({
+      required bool insertSibling,
+      required DraggableScrollableController controller,
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            if (insertSibling) const Expanded(child: SizedBox.expand()),
+            Expanded(child: sheet(controller)),
+          ],
+        ),
+      );
+    }
+
+    testWidgets('stays attached when an un-keyed sibling is inserted before the sheet', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(column(insertSibling: false, controller: controller));
+      expect(controller.isAttached, isTrue);
+
+      // The sibling makes the sheet's State be recreated: the new State
+      // attaches before the old one is disposed.
+      await tester.pumpWidget(column(insertSibling: true, controller: controller));
+      expect(tester.takeException(), isNull);
+      // Disposing the old State must not detach the new one.
+      expect(controller.isAttached, isTrue);
+
+      var notifications = 0;
+      controller.addListener(() => notifications++);
+      controller.jumpTo(0.3);
+      await tester.pump();
+      expect(controller.size, moreOrLessEquals(0.3));
+      expect(notifications, greaterThan(0));
+    });
+
+    testWidgets('can be reattached after the recreated sheet is removed', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(column(insertSibling: false, controller: controller));
+      await tester.pumpWidget(column(insertSibling: true, controller: controller));
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(controller.isAttached, isFalse);
+
+      await tester.pumpWidget(column(insertSibling: false, controller: controller));
+      expect(tester.takeException(), isNull);
+      expect(controller.isAttached, isTrue);
+    });
   });
 
   testWidgets('DraggableScrollableController must be attached before using any of its parameters', (
