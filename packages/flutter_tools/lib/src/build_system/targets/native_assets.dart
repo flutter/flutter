@@ -145,7 +145,7 @@ Directory _buildCodeAssetsDirectory(
         .fromDirectory(environment.projectDir)
         .buildDirectory
         .childDirectory(linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux')
-        .childDirectory(targetPlatform.simpleName)
+        .childDirectory(targetPlatform.cpuArch.name)
         .childDirectory(buildModeEnvironment);
   }
   return environment.outputDir;
