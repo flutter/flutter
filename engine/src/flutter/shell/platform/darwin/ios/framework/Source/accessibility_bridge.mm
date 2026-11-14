@@ -62,6 +62,7 @@ AccessibilityBridge::AccessibilityBridge(
     if (weak_self) {
       weak_self->HandleEvent((NSDictionary*)message);
     }
+    reply(nil);
   }];
 }
 

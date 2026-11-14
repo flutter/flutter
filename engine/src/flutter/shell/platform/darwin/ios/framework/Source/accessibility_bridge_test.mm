@@ -2705,15 +2705,25 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
       /*platform_views_controller=*/nil);
 
   XCTAssertNotNil(capturedHandler);
+  if (!capturedHandler) {
+    return;
+  }
 
-  // Destroy the AccessibilityBridge then invoke the message handler block to ensure no-op.
-  bridge.reset();
   NSDictionary* event = @{@"type" : @"announce", @"data" : @{@"message" : @"test"}};
   NSData* messageData = [[FlutterStandardMessageCodec sharedInstance] encode:event];
-  if (capturedHandler) {
-    capturedHandler(messageData, ^(NSData* reply){
-                    });
-  }
+  __block int replyCount = 0;
+  FlutterBinaryReply reply = ^(NSData* response) {
+    XCTAssertNil(response);
+    ++replyCount;
+  };
+
+  capturedHandler(messageData, reply);
+  XCTAssertEqual(replyCount, 1);
+
+  // A message already in flight still needs a reply after bridge destruction.
+  bridge.reset();
+  capturedHandler(messageData, reply);
+  XCTAssertEqual(replyCount, 2);
 }
 
 @end

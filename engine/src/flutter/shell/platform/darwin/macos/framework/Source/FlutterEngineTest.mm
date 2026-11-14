@@ -1164,6 +1164,18 @@ TEST_F(FlutterEngineTest, IgnoresTerminationRequestIfNotFlutterAppDelegate) {
 
 TEST_F(FlutterEngineTest, HandleAccessibilityEvent) {
   __block BOOL announced = NO;
+  __block FlutterMessageHandler handler = nil;
+  id channelMock = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([channelMock messageChannelWithName:@"flutter/accessibility"
+                              binaryMessenger:[OCMArg any]
+                                        codec:[OCMArg any]])
+      .andReturn(channelMock);
+  OCMStub([channelMock setMessageHandler:[OCMArg any]]).andDo(^(NSInvocation* invocation) {
+    __unsafe_unretained FlutterMessageHandler registeredHandler = nil;
+    [invocation getArgument:&registeredHandler atIndex:2];
+    handler = [registeredHandler copy];
+  });
+
   id engineMock = CreateMockFlutterEngine(nil);
 
   OCMStub([engineMock announceAccessibilityMessage:[OCMArg any]
@@ -1180,9 +1192,15 @@ TEST_F(FlutterEngineTest, HandleAccessibilityEvent) {
       @{@"type" : @"announce",
         @"data" : @{@"message" : @"error message"}};
 
-  [engineMock handleAccessibilityEvent:annotatedEvent];
+  ASSERT_NE(handler, nil);
+  __block int replyCount = 0;
+  handler(annotatedEvent, ^(id reply) {
+    EXPECT_EQ(reply, nil);
+    ++replyCount;
+  });
 
   EXPECT_TRUE(announced);
+  EXPECT_EQ(replyCount, 1);
 }
 
 TEST_F(FlutterEngineTest, HandleLifecycleStates) API_AVAILABLE(macos(10.9)) {

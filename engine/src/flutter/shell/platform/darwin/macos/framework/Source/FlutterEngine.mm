@@ -1416,6 +1416,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   __weak FlutterEngine* weakSelf = self;
   [_accessibilityChannel setMessageHandler:^(id message, FlutterReply reply) {
     [weakSelf handleAccessibilityEvent:message];
+    reply(nil);
   }];
 }
 - (void)setUpNotificationCenterListeners {
