@@ -518,6 +518,8 @@ def to_gn_args(args):
   if not sys.platform.startswith('win'):
     # The GN arg is not available in the windows toolchain.
     gn_args['enable_lto'] = enable_lto
+    if enable_lto:
+      gn_args['use_thin_lto'] = args.thin_lto
 
   # Set OS, CPU arch for host or target build.
   if is_host_build(args):
@@ -1053,8 +1055,6 @@ def parse_args(args):
       '--rbe-dir', default=None, type=str, help='The location of the reclient binaries.'
   )
 
-  parser.add_argument('--goma', default=None, action='store_true')
-  parser.add_argument('--no-goma', dest='goma', action='store_false')
   parser.add_argument(
       '--xcode-symlinks',
       action='store_true',
@@ -1078,6 +1078,13 @@ def parse_args(args):
 
   parser.add_argument('--lto', default=True, action='store_true')
   parser.add_argument('--no-lto', dest='lto', action='store_false')
+  parser.add_argument(
+      '--thin-lto',
+      default=False,
+      action='store_true',
+      help='When LTO is enabled, use ThinLTO instead of full LTO.'
+  )
+  parser.add_argument('--no-thin-lto', dest='thin_lto', action='store_false')
 
   parser.add_argument('--clang', action='store_const', const=True)
   parser.add_argument('--no-clang', dest='clang', action='store_const', const=False)

@@ -96,7 +96,7 @@ void main() {
         customHostResponse,
       );
       expect(customHostDeps, hasLength(1));
-      expect(customHostDeps.single.hostPlatform, HostPlatform('freebsd-x64', 'x64'));
+      expect(customHostDeps.single.hostPlatform, HostPlatform('freebsd', .x64));
     });
 
     test('throws RpcException on missing or invalid engineVersion or hostPlatform', () async {

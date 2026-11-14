@@ -65,6 +65,10 @@ class ExtensionCleanManager {
               // https://github.com/flutter/flutter/issues/193955.
               timeout: null,
             );
+          } on ToolExtensionException catch (e) {
+            _logger.printError(
+              'Failed to clean extension artifacts for "${connection.extensionName}": ${e.message}',
+            );
           } on Object catch (e) {
             _logger.printError(
               'Failed to clean extension artifacts for "${connection.extensionName}": $e',

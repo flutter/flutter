@@ -414,6 +414,17 @@ abstract mixin class WidgetsBindingObserver {
   /// This method exposes notifications from
   /// [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   void didChangeAccessibilityFeatures() {}
+
+  /// Called when the [PlatformDispatcher.alwaysUse24HourFormat] setting changes.
+  ///
+  /// This method exposes notifications from
+  /// [dart:ui.PlatformDispatcher.onAlwaysUse24HourFormatChanged].
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.alwaysUse24HourFormatOf], which provides a similar service with
+  ///    less boilerplate.
+  void didChangeAlwaysUse24HourFormat() {}
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -991,6 +1002,27 @@ mixin WidgetsBinding
             library: 'widgets library',
             context: ErrorDescription(
               'while dispatching notifications for WidgetsBindingObserver.didChangePlatformBrightness',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void handleAlwaysUse24HourFormatChanged() {
+    super.handleAlwaysUse24HourFormatChanged();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangeAlwaysUse24HourFormat();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeAlwaysUse24HourFormat',
             ),
           ),
         );
