@@ -136,6 +136,14 @@ static void fl_view_renderer_opengl_realize(GtkWidget* widget) {
   self->frame = fl_opengl_frame_new();
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
+  // Creating the compositor makes an EGL context current on this thread. GDK
+  // leaves its OpenGL context current after drawing (see
+  // fl_view_renderer_opengl_draw()). On X11 this is a GLX context, and under
+  // libglvnd eglMakeCurrent fails with EGL_BAD_ACCESS while a context from
+  // another window API is current. EGL doesn't release it, so it must be
+  // released through GDK, which also keeps GDK's view of the current context in
+  // sync with the X server.
+  gdk_gl_context_clear_current();
   self->compositor =
       fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine));
 
@@ -236,6 +244,12 @@ static void fl_view_renderer_opengl_finalize(GObject* object) {
   // reference is dropped. This keeps it alive for the raster thread, which
   // holds a strong reference on the view (and thus this renderer) while
   // presenting.
+  //
+  // Releasing the compositor makes an EGL context current, so release GDK's
+  // context first (see fl_view_renderer_opengl_realize()).
+  if (self->compositor != nullptr) {
+    gdk_gl_context_clear_current();
+  }
   g_clear_object(&self->compositor);
   g_clear_object(&self->frame);
 
