@@ -607,7 +607,6 @@ targets:
   # Flame only runs its full test suites on Linux, where they take as long as
   # the rest of the registry.
   - name: Linux customer_testing_flame
-    bringup: true
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
