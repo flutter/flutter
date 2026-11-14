@@ -44,7 +44,15 @@ interface class Git {
 
   /// Environment variables that can interfere with git commands when targeting
   /// the Flutter SDK.
-  static const Set<String> _kGitEnvironmentVariables = <String>{
+  ///
+  /// Keep in sync with:
+  /// - `bin/internal/shared.sh`
+  /// - `bin/internal/shared.bat`
+  /// - `bin/internal/update_engine_version.sh`
+  /// - `bin/internal/update_engine_version.ps1`
+  /// - `bin/internal/content_aware_hash.sh`
+  /// - `bin/internal/content_aware_hash.ps1`
+  static const _kGitEnvironmentVariables = <String>{
     'GIT_DIR',
     'GIT_INDEX_FILE',
     'GIT_WORK_TREE',
