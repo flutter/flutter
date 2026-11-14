@@ -1358,8 +1358,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
-      context.GetTransientsDataBuffer().Reset();
-      context.GetTransientsIndexesBuffer().Reset();
+      context.ResetTransientsBuffers();
     }
     context.GetTextShadowCache().MarkFrameEnd();
     context.GetLazyGlyphAtlas()->ResetTextFrames();
