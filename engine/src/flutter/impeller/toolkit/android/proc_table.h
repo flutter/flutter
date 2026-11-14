@@ -11,6 +11,7 @@
 #include <android/api-level.h>
 #include <android/hardware_buffer.h>
 #include <android/hardware_buffer_jni.h>
+#include <android/native_window_jni.h>
 #include <android/surface_control.h>
 #include <android/trace.h>
 
@@ -56,6 +57,7 @@ ASurfaceTransaction* ASurfaceTransaction_fromJava(JNIEnv* env,
   INVOKE(AHardwareBuffer_release, 26)                              \
   INVOKE(AHardwareBuffer_unlock, 26)                               \
   INVOKE(ANativeWindow_acquire, 0)                                 \
+  INVOKE(ANativeWindow_fromSurface, 0)                             \
   INVOKE(ANativeWindow_getHeight, 0)                               \
   INVOKE(ANativeWindow_getWidth, 0)                                \
   INVOKE(ANativeWindow_release, 0)                                 \
