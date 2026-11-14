@@ -6,6 +6,9 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+#include <atomic>
+#include <thread>
+
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
@@ -61,12 +64,18 @@ class FlEngineShutdownTest : public flutter::testing::LinuxTest {
     fl_engine_get_embedder_api(engine)->Shutdown =
         MOCK_ENGINE_PROC(Shutdown, ([this](auto) {
                            shutdown_calls++;
+                           if (engine != nullptr) {
+                             fl_engine_shutdown(engine);
+                           }
                            completed++;
                            return kSuccess;
                          }));
     StartEngine();
   }
   void TearDown() override {
+    if (engine != nullptr) {
+      fl_engine_shutdown(engine);
+    }
     LinuxTest::TearDown();
     g_application_set_default(nullptr);
     g_clear_object(&application);
@@ -86,6 +95,9 @@ TEST_F(FlEngineShutdownTest, ApplicationShutdownPrecedesRunnerCleanup) {
   EXPECT_EQ(completed, 1);
   g_signal_emit_by_name(application, "shutdown");
   EXPECT_EQ(shutdown_calls, 1);
+  g_autoptr(GError) error = nullptr;
+  EXPECT_FALSE(fl_engine_start(engine, &error));
+  EXPECT_NE(error, nullptr);
 }
 
 TEST_F(FlEngineShutdownTest, ApplicationRunReturnsAfterNativeShutdown) {
@@ -119,6 +131,129 @@ TEST_F(FlEngineShutdownTest, RemovingViewDoesNotStopEngine) {
   }
   EXPECT_EQ(shutdown_calls, 0);
   EXPECT_EQ(completed, 0);
+}
+
+TEST_F(FlEngineShutdownTest, RetainedEngineRejectsLateNativeCalls) {
+  fl_engine_shutdown(engine);
+  EXPECT_FALSE(fl_engine_mark_texture_frame_available(engine, 1));
+  EXPECT_FALSE(fl_engine_register_external_texture(engine, 1));
+  EXPECT_FALSE(fl_engine_unregister_external_texture(engine, 1));
+  fl_engine_get_embedder_api(engine)->NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate, ([](auto, auto, auto, auto) {
+                         ADD_FAILURE() << "Display update after shutdown";
+                         return kSuccess;
+                       }));
+  fl_engine_notify_display_update(engine, nullptr, 0);
+  fl_engine_get_embedder_api(engine)->AddView =
+      MOCK_ENGINE_PROC(AddView, ([](auto, auto) {
+                         ADD_FAILURE() << "View added after shutdown";
+                         return kSuccess;
+                       }));
+  fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
+      RemoveView, ([](auto, auto) {
+        ADD_FAILURE() << "View removed through dead native handle";
+        return kSuccess;
+      }));
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  EXPECT_EQ(fl_engine_add_view(engine, FL_RENDERABLE(renderable), 10, 10, 10,
+                               10, 1.0, nullptr, nullptr, nullptr),
+            -1);
+  fl_engine_remove_view(engine, 1, nullptr, nullptr, nullptr);
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+}
+
+TEST_F(FlEngineShutdownTest, QueuedPlatformTaskDoesNotRunAfterShutdown) {
+  fl_engine_get_embedder_api(engine)->RunTask =
+      MOCK_ENGINE_PROC(RunTask, ([](auto, auto) {
+                         ADD_FAILURE() << "Queued task entered stopped engine";
+                         return kSuccess;
+                       }));
+  FlutterTask task = {};
+  fl_task_runner_post_flutter_task(fl_engine_get_task_runner(engine), task, 0);
+  fl_engine_shutdown(engine);
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+  EXPECT_EQ(completed, 1);
+}
+
+TEST_F(FlEngineShutdownTest, TextureNotificationsRaceShutdown) {
+  std::atomic<int> native_calls = 0;
+  fl_engine_get_embedder_api(engine)->MarkExternalTextureFrameAvailable =
+      MOCK_ENGINE_PROC(MarkExternalTextureFrameAvailable,
+                       ([&](auto handle, int64_t) {
+                         EXPECT_NE(handle, nullptr);
+                         EXPECT_EQ(shutdown_calls, 0);
+                         native_calls++;
+                         return kSuccess;
+                       }));
+  std::atomic<bool> ready = false;
+  std::thread worker([&] {
+    EXPECT_TRUE(fl_engine_mark_texture_frame_available(engine, 1));
+    ready = true;
+    for (int i = 0; i < 100; ++i) {
+      fl_engine_mark_texture_frame_available(engine, 1);
+    }
+  });
+  while (!ready) {
+    std::this_thread::yield();
+  }
+  fl_engine_shutdown(engine);
+  worker.join();
+  const int count = native_calls;
+  EXPECT_FALSE(fl_engine_mark_texture_frame_available(engine, 1));
+  EXPECT_EQ(native_calls, count);
+  EXPECT_EQ(completed, 1);
+}
+
+TEST_F(FlEngineShutdownTest, PlatformMessageResponsesRaceShutdown) {
+  std::atomic<int> native_calls = 0;
+  fl_engine_get_embedder_api(engine)->SendPlatformMessageResponse =
+      MOCK_ENGINE_PROC(SendPlatformMessageResponse,
+                       ([&](auto handle, auto, auto, auto) {
+                         EXPECT_NE(handle, nullptr);
+                         EXPECT_EQ(shutdown_calls, 0);
+                         native_calls++;
+                         return kSuccess;
+                       }));
+  auto respond = [&] {
+    g_autoptr(GError) error = nullptr;
+    const gboolean sent = fl_engine_send_platform_message_response(
+        engine,
+        reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(1),
+        nullptr, &error);
+    EXPECT_EQ(error == nullptr, sent != FALSE);
+    return sent;
+  };
+  // A worker reply during the native join must be rejected without waiting
+  // for Shutdown to return. Holding lifecycle_mutex across Shutdown deadlocks.
+  fl_engine_get_embedder_api(engine)->Shutdown =
+      MOCK_ENGINE_PROC(Shutdown, ([&](auto) {
+                         shutdown_calls++;
+                         std::thread late([&] { EXPECT_FALSE(respond()); });
+                         late.join();
+                         completed++;
+                         return kSuccess;
+                       }));
+  std::atomic<bool> ready = false;
+  std::thread worker([&] {
+    EXPECT_TRUE(respond());
+    ready = true;
+    for (int i = 0; i < 100; ++i) {
+      respond();
+    }
+  });
+  while (!ready) {
+    std::this_thread::yield();
+  }
+  fl_engine_shutdown(engine);
+  worker.join();
+  const int count = native_calls;
+  EXPECT_GE(count, 1);
+  EXPECT_FALSE(respond());
+  EXPECT_EQ(native_calls, count);
+  EXPECT_EQ(shutdown_calls, 1);
+  EXPECT_EQ(completed, 1);
 }
 
 // Checks notifying display updates works.
