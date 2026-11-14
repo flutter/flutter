@@ -2093,6 +2093,17 @@ typedef struct {
   /// sync for all layers prior to calling the compositor present callback, and
   /// so the written layer images can be freely bound by the embedder without
   /// any additional synchronization.
+  ///
+  /// When Impeller is enabled:
+  /// - The engine submits GPU commands without a host-side fence wait prior to
+  ///   calling the compositor present callback; the embedder must synchronize
+  ///   GPU access (for example, by consuming the image on the same Vulkan
+  ///   queue).
+  /// - The incoming image layout is ignored (`VK_IMAGE_LAYOUT_UNDEFINED`) and
+  ///   prior contents are discarded.
+  /// - The image must include `VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT`.
+  /// - The engine currently hands the image back in `VK_IMAGE_LAYOUT_GENERAL`
+  ///   (whereas Skia leaves it in `VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL`).
   const FlutterVulkanImage* image;
   /// A baton that is not interpreted by the engine in any way. It will be given
   /// back to the embedder in the destruction callback below. Embedder resources

@@ -235,7 +235,8 @@ TEST(GPUSurfaceVulkanImpeller,
       .WillRepeatedly([&]() -> std::unique_ptr<impeller::Surface> {
         std::shared_ptr<impeller::TextureSourceVK> wrapped =
             impeller::WrapTextureSourceVK(
-                context, desc, impeller::vk::Image(test_surface->GetImage()));
+                impeller::ContextVK::Cast(*context), desc,
+                impeller::vk::Image(test_surface->GetImage()));
         return impeller::SurfaceVK::WrapSwapchainImage(transients, wrapped,
                                                        []() { return true; });
       });

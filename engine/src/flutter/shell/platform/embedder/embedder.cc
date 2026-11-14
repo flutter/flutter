@@ -5,11 +5,9 @@
 #define FML_USED_ON_EMBEDDER
 #define RAPIDJSON_HAS_STDSTRING 1
 
-#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <memory>
-#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
@@ -109,6 +107,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
 #include "impeller/core/texture.h"                                  // nogncheck
+#include "impeller/renderer/backend/vulkan/context_vk.h"            // nogncheck
 #include "impeller/renderer/backend/vulkan/formats_vk.h"            // nogncheck
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"  // nogncheck
 #include "impeller/renderer/backend/vulkan/swapchain/swapchain_transients_vk.h"  // nogncheck
@@ -1157,64 +1156,6 @@ static std::optional<impeller::PixelFormat> FlutterFormatToImpellerPixelFormat(
 
 #endif  // defined(SHELL_ENABLE_GL) && defined(IMPELLER_SUPPORTS_RENDERING)
 
-/// Declared for every configuration so the render-target plumbing below
-/// compiles without Vulkan; defined only where there is a Vulkan Impeller
-/// backend to cache for.
-class ImpellerVulkanTransientsCache;
-
-#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
-/// The MSAA colour and depth-stencil buffers an Impeller Vulkan render target
-/// draws through, reused across frames and across the views of one frame.
-///
-/// Owned by the engine's render-target callback so that it is destroyed with
-/// the engine, while its Impeller context -- which owns the device the textures
-/// were allocated from -- is still alive.
-class ImpellerVulkanTransientsCache {
- public:
-  std::shared_ptr<impeller::SwapchainTransientsVK> Get(
-      const std::shared_ptr<impeller::Context>& context,
-      const impeller::TextureDescriptor& desc) {
-    if (!context) {
-      return nullptr;
-    }
-    const std::scoped_lock lock(mutex_);
-    // An engine that rebuilds its context leaves entries behind holding
-    // textures from the old one. Drop them on the way past rather than waiting
-    // for the size bound to evict them. Also keeps the comparison below honest:
-    // a lapsed weak_ptr locks to null and would match a null context.
-    std::erase_if(entries_,
-                  [](const Entry& entry) { return entry.context.expired(); });
-    for (const auto& entry : entries_) {
-      if (entry.context.lock() == context && entry.size == desc.size &&
-          entry.format == desc.format) {
-        return entry.transients;
-      }
-    }
-    auto transients = std::make_shared<impeller::SwapchainTransientsVK>(
-        context, desc, /*enable_msaa=*/true);
-    // One entry per view size; the bound only stops an embedder that cycles
-    // sizes from growing this without limit.
-    constexpr size_t kMaxEntries = 8u;
-    if (entries_.size() >= kMaxEntries) {
-      entries_.erase(entries_.begin());
-    }
-    entries_.push_back({context, desc.size, desc.format, transients});
-    return transients;
-  }
-
- private:
-  struct Entry {
-    std::weak_ptr<impeller::Context> context;
-    impeller::ISize size;
-    impeller::PixelFormat format;
-    std::shared_ptr<impeller::SwapchainTransientsVK> transients;
-  };
-
-  std::mutex mutex_;
-  std::vector<Entry> entries_;
-};
-#endif  // SHELL_ENABLE_VULKAN && IMPELLER_SUPPORTS_RENDERING
-
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 MakeRenderTargetFromBackingStoreImpeller(
     FlutterBackingStore backing_store,
@@ -1315,8 +1256,7 @@ MakeRenderTargetFromBackingStoreImpeller(
     const fml::closure& on_release,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
-    const FlutterVulkanBackingStore* vulkan,
-    ImpellerVulkanTransientsCache* transients_cache) {
+    const FlutterVulkanBackingStore* vulkan) {
 #if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
   if (!aiks_context || !aiks_context->GetContext()) {
     FML_LOG(ERROR) << "No Impeller context to build a render target with.";
@@ -1349,39 +1289,26 @@ MakeRenderTargetFromBackingStoreImpeller(
   desc.compression_type = impeller::CompressionType::kLossless;
   desc.usage = impeller::TextureUsage::kRenderTarget;
 
+  auto& vk_context = impeller::ContextVK::Cast(*aiks_context->GetContext());
+  vk_context.SetOffscreenFormat(format.value());
+
   auto texture_source = impeller::WrapTextureSourceVK(
-      aiks_context->GetContext(), desc,
+      vk_context, desc,
       impeller::vk::Image(reinterpret_cast<VkImage>(vulkan->image->image)));
   if (!texture_source) {
     FML_LOG(ERROR) << "Could not wrap embedder supplied Vulkan image.";
     return nullptr;
   }
 
-  // MSAA and the resolve step come from the swapchain transients, the same way
-  // the root surface builds its target -- rather than allocating an MSAA
-  // texture here as the Metal path does -- so both Vulkan paths resolve
-  // identically.
-  //
-  // Cached across frames exactly as GPUSurfaceVulkanImpeller caches its own,
-  // and for the same reason: the transients are an MSAA colour attachment plus
-  // a depth-stencil buffer at frame size, so building a set per render target
-  // means allocating them per frame. An embedder that asks for a fresh backing
-  // store each frame (a scanout ring does) then allocates tens of MB per frame,
-  // which costs frame rate immediately and eventually fails outright.
-  //
-  // The cache belongs to the engine's render-target callback, not to the
-  // process: these textures are allocated from the Impeller context's device,
-  // so outliving that context means freeing them against a dead device. Keyed
-  // by size and format because a multi-view embedder presents several sizes per
-  // frame and a single entry would rebuild them on each one.
-  std::shared_ptr<impeller::SwapchainTransientsVK> transients;
-  if (transients_cache != nullptr) {
-    transients = transients_cache->Get(aiks_context->GetContext(), desc);
-  } else {
-    transients = std::make_shared<impeller::SwapchainTransientsVK>(
-        aiks_context->GetContext(), desc, /*enable_msaa=*/true);
-  }
+  // TODO(https://github.com/flutter/flutter/issues/194239): Cache swapchain
+  // transients in Impeller core (ContextVK) instead of allocating per backing
+  // store (which becomes per frame when avoid_backing_store_cache is true).
+  auto transients = std::make_shared<impeller::SwapchainTransientsVK>(
+      aiks_context->GetContext(), desc, /*enable_msaa=*/true);
 
+  // TODO(https://github.com/flutter/flutter/issues/194238): Extract a helper
+  // for wrapping offscreen render targets and support configurable presentation
+  // layouts instead of using WrapSwapchainImage.
   auto surface = impeller::SurfaceVK::WrapSwapchainImage(
       transients, texture_source, []() -> bool { return true; });
   if (!surface) {
@@ -1554,8 +1481,7 @@ CreateEmbedderRenderTarget(
     const FlutterBackingStoreConfig& config,
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
-    bool enable_impeller,
-    ImpellerVulkanTransientsCache* transients_cache) {
+    bool enable_impeller) {
   FlutterBackingStore backing_store = {};
   backing_store.struct_size = sizeof(backing_store);
 
@@ -1688,7 +1614,7 @@ CreateEmbedderRenderTarget(
       if (enable_impeller) {
         render_target = MakeRenderTargetFromBackingStoreImpeller(
             backing_store, collect_callback.Release(), aiks_context, config,
-            &backing_store.vulkan, transients_cache);
+            &backing_store.vulkan);
         break;
       } else {
         auto skia_surface = MakeSkSurfaceFromBackingStore(
@@ -1743,24 +1669,15 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
 
   FlutterCompositor captured_compositor = *compositor;
 
-  // Lives as long as this engine's render-target callback, so the textures it
-  // holds are freed while the Impeller context that allocated them is alive.
-  // Null where there is no Vulkan Impeller backend; the render target path that
-  // reads it is compiled out in that case too.
-  std::shared_ptr<ImpellerVulkanTransientsCache> transients_cache;
-#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
-  transients_cache = std::make_shared<ImpellerVulkanTransientsCache>();
-#endif  // SHELL_ENABLE_VULKAN && IMPELLER_SUPPORTS_RENDERING
-
   flutter::EmbedderExternalViewEmbedder::CreateRenderTargetCallback
       create_render_target_callback =
-          [captured_compositor, enable_impeller, transients_cache](
+          [captured_compositor, enable_impeller](
               GrDirectContext* context,
               const std::shared_ptr<impeller::AiksContext>& aiks_context,
               const auto& config) {
-            return CreateEmbedderRenderTarget(
-                &captured_compositor, config, context, aiks_context,
-                enable_impeller, transients_cache.get());
+            return CreateEmbedderRenderTarget(&captured_compositor, config,
+                                              context, aiks_context,
+                                              enable_impeller);
           };
 
   flutter::EmbedderExternalViewEmbedder::PresentCallback present_callback;

@@ -49,10 +49,10 @@ class WrappedTextureSourceVK final : public TextureSourceVK {
 }  // namespace
 
 std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
-    const std::shared_ptr<Context>& context,
+    const ContextVK& context,
     const TextureDescriptor& desc,
     vk::Image image) {
-  if (!context || !image) {
+  if (!image) {
     return nullptr;
   }
 
@@ -67,7 +67,7 @@ std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
   view_info.image = image;
 
   auto [result, image_view] =
-      ContextVK::Cast(*context).GetDevice().createImageViewUnique(view_info);
+      context.GetDevice().createImageViewUnique(view_info);
   if (result != vk::Result::eSuccess) {
     FML_LOG(ERROR) << "Failed to create image view for wrapped image: "
                    << vk::to_string(result);

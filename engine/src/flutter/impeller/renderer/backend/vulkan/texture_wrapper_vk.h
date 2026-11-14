@@ -9,9 +9,9 @@
 
 #include "impeller/core/texture.h"
 #include "impeller/core/texture_descriptor.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
-#include "impeller/renderer/context.h"
 
 namespace impeller {
 
@@ -26,7 +26,7 @@ namespace impeller {
 ///
 /// @see        `WrapTextureMTL`, the Metal equivalent.
 std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
-    const std::shared_ptr<Context>& context,
+    const ContextVK& context,
     const TextureDescriptor& desc,
     vk::Image image);
 
