@@ -25,7 +25,7 @@ final path.Context urlContext = path.url;
 /// Convert `foo_bar` to `fooBar`.
 String camelCase(String str) {
   int index = str.indexOf('_');
-  while (index != -1 && index < str.length - 2) {
+  while (index != -1 && index < str.length - 1) {
     str =
         str.substring(0, index) +
         str.substring(index + 1, index + 2).toUpperCase() +
