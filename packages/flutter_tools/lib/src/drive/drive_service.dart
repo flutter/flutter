@@ -22,6 +22,7 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../features.dart' show FeatureFlags;
 import '../resident_runner.dart';
 import '../version.dart';
 import '../vmservice.dart';
@@ -35,6 +36,7 @@ class FlutterDriverFactory {
     required this._buildTargets,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
+    required this._featureFlags,
     required this._toolContext,
   });
 
@@ -44,6 +46,7 @@ class FlutterDriverFactory {
   final BuildTargets _buildTargets;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
+  final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
   /// Create a driver service for running `flutter drive`.
@@ -54,6 +57,7 @@ class FlutterDriverFactory {
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
         dartSdkPath: _dartSdkPath,
+        featureFlags: _featureFlags,
         toolContext: _toolContext,
       );
     }

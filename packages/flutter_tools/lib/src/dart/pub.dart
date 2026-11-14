@@ -22,6 +22,7 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../git.dart';
 import '../project.dart';
 import '../version.dart';
@@ -110,7 +111,11 @@ enum PubOutputMode {
 /// A handle for interacting with the pub tool.
 abstract class Pub {
   /// Create a default [Pub] instance.
-  factory Pub({required ToolContext toolContext, Stdio? stdio}) {
+  factory Pub({
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+    Stdio? stdio,
+  }) {
     final ToolContext(
       :BotDetector botDetector,
       :Cache cache,
@@ -125,6 +130,7 @@ abstract class Pub {
         cache: cache,
         fileSystem: fileSystem,
         flutterRoot: cache.flutterRoot,
+        isOmitLegacyVersionFileEnabled: () => featureFlags.isOmitLegacyVersionFileEnabled,
         logger: logger,
         platform: platform,
         processManager: processManager,
@@ -136,6 +142,7 @@ abstract class Pub {
       cache: cache,
       fileSystem: fileSystem,
       flutterRoot: cache.flutterRoot,
+      isOmitLegacyVersionFileEnabled: () => featureFlags.isOmitLegacyVersionFileEnabled,
       logger: logger,
       platform: platform,
       processManager: processManager,
@@ -153,6 +160,7 @@ abstract class Pub {
     required ProcessManager processManager,
     required Stdio stdio,
     Cache? cache,
+    bool Function()? isOmitLegacyVersionFileEnabled,
   }) {
     return _DefaultPub.test(
       botDetector: botDetector,
@@ -166,6 +174,8 @@ abstract class Pub {
           ),
       fileSystem: fileSystem,
       flutterRoot: flutterRoot,
+      isOmitLegacyVersionFileEnabled:
+          isOmitLegacyVersionFileEnabled ?? () => omitLegacyVersionFile.master.enabledByDefault,
       logger: logger,
       platform: platform,
       processManager: processManager,
@@ -248,6 +258,7 @@ class _DefaultPub implements Pub {
     required this._cache,
     required this._fileSystem,
     required this._flutterRoot,
+    required this._isOmitLegacyVersionFileEnabled,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
@@ -265,6 +276,7 @@ class _DefaultPub implements Pub {
     required this._cache,
     required this._fileSystem,
     required this._flutterRoot,
+    required this._isOmitLegacyVersionFileEnabled,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
@@ -282,6 +294,7 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Cache _cache;
+  final bool Function() _isOmitLegacyVersionFileEnabled;
   final ProcessManager _processManager;
   final Stdio? _stdio;
   final String _flutterRoot;
@@ -353,6 +366,7 @@ class _DefaultPub implements Pub {
         flutterRoot: _flutterRoot,
         fs: _fileSystem,
         git: _git,
+        isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled,
         logger: _logger,
         platform: _platform,
       );
@@ -779,6 +793,7 @@ class _DefaultPub implements Pub {
       flutterRoot: _flutterRoot,
       fs: _fileSystem,
       git: _git,
+      isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled,
       logger: _logger,
       platform: _platform,
     );

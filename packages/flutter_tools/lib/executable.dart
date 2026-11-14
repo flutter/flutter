@@ -195,7 +195,7 @@ List<FlutterCommand> generateCommands({
           logger: logger,
           processManager: processManager,
         ),
-        VariableDumpMachineProjectValidator(toolContext: toolContext),
+        VariableDumpMachineProjectValidator(featureFlags: featureFlags, toolContext: toolContext),
       ],
       androidBuilder: AndroidGradleBuilder.fromContexts(
         analytics: toolDependencies.analytics,
@@ -256,6 +256,7 @@ List<FlutterCommand> generateCommands({
     CreateCommand(
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
+      featureFlags: featureFlags,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       extensionTemplateManager: extensionTemplateManager,
@@ -279,6 +280,7 @@ List<FlutterCommand> generateCommands({
       verboseHelp: verboseHelp,
     ),
     DoctorCommand(
+      androidContext: toolDependencies.androidContext,
       doctor: toolDependencies.doctor,
       extensionManager: toolDependencies.extensionManager,
       toolContext: toolContext,
@@ -336,10 +338,11 @@ List<FlutterCommand> generateCommands({
     WidgetPreviewCommand(
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
+      deviceManager: toolDependencies.deviceManager,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
     ),
-    UpgradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    UpgradeCommand(featureFlags: featureFlags, toolContext: toolContext, verboseHelp: verboseHelp),
     SymbolizeCommand(toolContext: toolContext),
     // Development-only commands. These are always hidden,
     IdeConfigCommand(toolContext: toolContext),

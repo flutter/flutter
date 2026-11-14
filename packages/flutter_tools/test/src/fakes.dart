@@ -1645,7 +1645,6 @@ class DelegatingToolContext with Fake implements ToolContext {
   @override
   PersistentToolState get persistentToolState =>
       _persistentToolState ??
-      globals.persistentToolState ??
       PersistentToolState.test(
         directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
         logger: logger,

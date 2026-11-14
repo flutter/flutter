@@ -291,12 +291,14 @@ void main() {
   }
 
   WidgetPreviewCommand createWidgetPreviewCommand({
+    DeviceManager? deviceManager,
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     ResidentRunnerFactory? residentRunnerFactoryOverride,
   }) {
     return WidgetPreviewCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
+      deviceManager: deviceManager ?? fakeDeviceManager,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         cache: Cache.test(
@@ -330,8 +332,10 @@ void main() {
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     ResidentRunnerFactory? residentRunnerFactoryOverride,
   }) async {
-    final CommandRunner<void> runner = createTestCommandRunner(
+    final runner = TestFlutterCommandRunner();
+    runner.addCommand(
       createWidgetPreviewCommand(
+        deviceManager: runner.deviceManager,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         residentRunnerFactoryOverride: residentRunnerFactoryOverride,
       ),

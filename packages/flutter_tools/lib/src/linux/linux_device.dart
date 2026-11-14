@@ -18,10 +18,11 @@ import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
-  LinuxDevice({required this._analytics, required super.toolContext})
+  LinuxDevice({required this._analytics, required this._featureFlags, required super.toolContext})
     : super('linux', platformType: PlatformType.linux, ephemeral: false);
 
   final Analytics _analytics;
+  final FeatureFlags _featureFlags;
 
   @override
   Future<bool> isSupported() async => true;
@@ -62,6 +63,7 @@ class LinuxDevice extends DesktopDevice {
       projectFactory.fromDirectory(fs.currentDirectory).linux,
       buildInfo,
       analytics: _analytics,
+      featureFlags: _featureFlags,
       target: mainPath,
       targetPlatform: await targetPlatform,
       toolContext: toolContext,
@@ -77,12 +79,13 @@ class LinuxDevice extends DesktopDevice {
 class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     required this._analytics,
-    required FeatureFlags featureFlags,
+    required this._featureFlags,
     required ToolContext super.toolContext,
-  }) : _linuxWorkflow = LinuxWorkflow(platform: toolContext.platform, featureFlags: featureFlags),
+  }) : _linuxWorkflow = LinuxWorkflow(platform: toolContext.platform, featureFlags: _featureFlags),
        super('linux devices');
 
   final Analytics _analytics;
+  final FeatureFlags _featureFlags;
   final LinuxWorkflow _linuxWorkflow;
 
   @override
@@ -99,7 +102,9 @@ class LinuxDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[LinuxDevice(analytics: _analytics, toolContext: toolContext)];
+    return <Device>[
+      LinuxDevice(analytics: _analytics, featureFlags: _featureFlags, toolContext: toolContext),
+    ];
   }
 
   @override

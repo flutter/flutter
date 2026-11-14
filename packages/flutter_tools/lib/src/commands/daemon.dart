@@ -114,7 +114,7 @@ class DaemonCommand extends FlutterCommand {
         analytics: analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        featureFlags: featureFlags,
+        featureFlags: runner!.featureFlags,
         logger: StdoutLogger(
           terminal: terminal,
           stdio: stdio,
@@ -139,7 +139,7 @@ class DaemonCommand extends FlutterCommand {
       analytics: analytics,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
-      featureFlags: featureFlags,
+      featureFlags: runner!.featureFlags,
       toolContext: toolContext,
       xcode: _xcode,
       androidSdk: _androidSdk,
@@ -291,6 +291,7 @@ class Daemon {
         analytics: analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        featureFlags: featureFlags,
         xcode: xcode,
       ),
     );
@@ -803,6 +804,7 @@ class AppDomain extends Domain {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required this._xcode,
   }) : super(daemon, 'app') {
     registerHandler('restart', restart);
@@ -814,6 +816,7 @@ class AppDomain extends Domain {
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
   final Xcode? _xcode;
 
   static const _uuidGenerator = Uuid();
@@ -878,6 +881,7 @@ class AppDomain extends Domain {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        featureFlags: _featureFlags,
         toolContext: toolContext,
         webDefines: webDefines,
       );
@@ -894,6 +898,7 @@ class AppDomain extends Domain {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        featureFlags: _featureFlags,
         toolContext: toolContext,
         xcode: _xcode,
       );
@@ -907,6 +912,7 @@ class AppDomain extends Domain {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        featureFlags: _featureFlags,
         toolContext: toolContext,
         xcode: _xcode,
       );

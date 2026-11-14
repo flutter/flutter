@@ -362,6 +362,7 @@ class DriveCommand extends RunCommandBase {
       buildTargets: buildTargets,
       dartSdkPath: toolContext.artifacts.getArtifactPath(.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
+      featureFlags: runner!.featureFlags,
       toolContext: toolContext,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);

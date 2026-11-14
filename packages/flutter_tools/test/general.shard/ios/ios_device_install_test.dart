@@ -372,6 +372,7 @@ IOSDevice setUpIOSDevice({
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
+    featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
     toolContext: toolContext,
     xcode: FakeXcode(),
     sdkVersion: '13.3',

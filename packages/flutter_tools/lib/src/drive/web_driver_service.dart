@@ -22,6 +22,7 @@ import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../features.dart' show FeatureFlags;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
@@ -35,6 +36,7 @@ class WebDriverService extends DriverService {
     required this.buildSystem,
     required this.buildTargets,
     required this._dartSdkPath,
+    required this._featureFlags,
     required super.toolContext,
   });
 
@@ -42,6 +44,7 @@ class WebDriverService extends DriverService {
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
   final String _dartSdkPath;
+  final FeatureFlags _featureFlags;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -98,6 +101,7 @@ class WebDriverService extends DriverService {
       analytics: _analytics,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
+      featureFlags: _featureFlags,
       toolContext: toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();

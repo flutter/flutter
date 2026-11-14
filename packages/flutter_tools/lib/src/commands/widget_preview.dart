@@ -56,6 +56,7 @@ class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
+    required DeviceManager deviceManager,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
@@ -66,6 +67,7 @@ class WidgetPreviewCommand extends FlutterCommand {
       WidgetPreviewStartCommand(
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        deviceManager: deviceManager,
         toolContext: toolContext,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         dtdServicesOverride: dtdServicesOverride,
@@ -143,6 +145,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   WidgetPreviewStartCommand({
     required this._buildSystem,
     required this._buildTargets,
+    required this._deviceManager,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
@@ -230,6 +233,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final DeviceManager _deviceManager;
 
   @override
   WidgetPreviewMachineAwareLogger get logger =>
@@ -572,6 +576,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       // triggered while the preview scaffold is launching and establishing its
       // debug connection are gated until the previewer is ready.
       await _reloadMutex.runGuarded(() async {
+        final FeatureFlags featureFlags = runner!.featureFlags;
         // In the rare case that Flutter Web is disabled, the device manager will not return any web
         // devices which will cause us to crash.
         if (!featureFlags.isWebEnabled) {
@@ -586,7 +591,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           try {
             // The web-server device is hidden by default, make it visible before trying to look it up.
             WebServerDevice.showWebServerDevice = true;
-            devices = await deviceManager!.getDevicesById(WebServerDevice.kWebServerDeviceId);
+            devices = await _deviceManager.getDevicesById(WebServerDevice.kWebServerDeviceId);
           } finally {
             // Reset the flag to false to avoid affecting other commands.
             WebServerDevice.showWebServerDevice = false;
@@ -596,7 +601,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         } else {
           // Since the only target supported by the widget preview scaffold is the web
           // device, only a single web device should be returned.
-          final List<Device> devices = await deviceManager!.getDevices(
+          final List<Device> devices = await _deviceManager.getDevices(
             filter: DeviceDiscoveryFilter(
               supportFilter:
                   DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
@@ -674,6 +679,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
                   flutterDevice,
                   buildSystem: _buildSystem,
                   buildTargets: _buildTargets,
+                  featureFlags: featureFlags,
                   toolContext: toolContext,
                   target: target,
                   debuggingOptions: debuggingOptions,

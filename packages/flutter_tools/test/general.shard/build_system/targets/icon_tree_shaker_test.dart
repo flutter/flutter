@@ -87,6 +87,7 @@ void main() {
       fileSystem.directory('/icon_test')..createSync(recursive: true),
       defines: defines,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),

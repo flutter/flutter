@@ -703,6 +703,7 @@ void main() {
         );
         fileSystem = MemoryFileSystem.test();
         xcdevice = XCDevice(
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
             cache: Cache.test(processManager: FakeProcessManager.any()),
@@ -742,6 +743,7 @@ void main() {
       final shutdownHooks = ShutdownHooks();
 
       final xcdevice = XCDevice(
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
           cache: Cache.test(processManager: FakeProcessManager.any()),
@@ -796,6 +798,7 @@ void main() {
           fakeFlutterVersion: FakeFlutterVersion(),
         );
         xcdevice = XCDevice(
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
             cache: Cache.test(processManager: FakeProcessManager.any()),
@@ -1635,6 +1638,7 @@ void main() {
               ),
             );
             xcdevice = XCDevice(
+              featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
               toolContext: FakeToolContext(
                 artifacts: Artifacts.test(),
                 cache: Cache.test(processManager: FakeProcessManager.any()),

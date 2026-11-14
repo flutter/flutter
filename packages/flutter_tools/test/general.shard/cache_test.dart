@@ -9,7 +9,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -298,7 +297,7 @@ void main() {
       expect(artifact2.didUpdate, true);
     });
 
-    testUsingContext('should skip EngineCachedArtifacts when local engine is provided', () async {
+    testWithoutContext('should skip EngineCachedArtifacts when local engine is provided', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final fileSystem = MemoryFileSystem.test();
       final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
@@ -307,15 +306,16 @@ void main() {
       final cacheWithArtifacts = Cache.test(
         fileSystem: fileSystem,
         artifacts: <CachedArtifact>[artifact1, artifact2],
+        isLocalEngineBuilder: () => true,
         processManager: FakeProcessManager.any(),
       );
 
       await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
       expect(artifact1.didUpdate, true);
       expect(artifact2.didUpdate, false);
-    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
+    });
 
-    testUsingContext('should skip engine_stamp artifact when local engine is provided', () async {
+    testWithoutContext('should skip engine_stamp artifact when local engine is provided', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final fileSystem = MemoryFileSystem.test();
       final artifact2 = FakeEngineStampArtifact()..upToDate = false;
@@ -323,13 +323,14 @@ void main() {
       final cacheWithArtifacts = Cache.test(
         fileSystem: fileSystem,
         artifacts: <CachedArtifact>[artifact1, artifact2],
+        isLocalEngineBuilder: () => true,
         processManager: FakeProcessManager.any(),
       );
 
       await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
       expect(artifact1.didUpdate, true);
       expect(artifact2.didUpdate, false);
-    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
+    });
 
     testWithoutContext(
       "getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter",
@@ -1380,6 +1381,7 @@ void main() {
     artifactSet.stampName = 'STAMP';
     final cache = Cache(
       artifacts: <ArtifactSet>[artifactSet],
+      isLocalEngineBuilder: () => false,
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(),
@@ -1406,6 +1408,7 @@ void main() {
     artifactSet.stampName = 'STAMP';
     final cache = Cache(
       artifacts: <ArtifactSet>[artifactSet],
+      isLocalEngineBuilder: () => false,
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(),
@@ -1431,6 +1434,7 @@ void main() {
     artifactSet.stampName = 'STAMP';
     final cache = Cache(
       artifacts: <ArtifactSet>[artifactSet],
+      isLocalEngineBuilder: () => false,
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(),
@@ -1862,6 +1866,7 @@ void main() {
     final explicitCache = Cache(
       fileSystem: fileSystem,
       flutterRoot: '/explicit/flutter',
+      isLocalEngineBuilder: () => false,
       logger: logger,
       osUtils: osUtils,
       platform: platform,
@@ -1871,6 +1876,7 @@ void main() {
 
     final overrideCache = Cache(
       fileSystem: fileSystem,
+      isLocalEngineBuilder: () => false,
       logger: logger,
       osUtils: osUtils,
       platform: platform,
@@ -1881,6 +1887,7 @@ void main() {
     final mutableEnv = <String, String>{'FLUTTER_ROOT': '/env/flutter'};
     final defaultCache = Cache(
       fileSystem: fileSystem,
+      isLocalEngineBuilder: () => false,
       logger: logger,
       osUtils: osUtils,
       platform: FakePlatform(environment: mutableEnv),
@@ -1970,18 +1977,6 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
 
   @override
   String stampName = 'ios-usb';
-}
-
-class FakeLocalEngineArtifacts extends Fake implements Artifacts {
-  @override
-  final LocalEngineInfo localEngineInfo = LocalEngineInfo(
-    fileSystem: MemoryFileSystem.test(),
-    targetOutPath: 'out/android_debug_unopt',
-    hostOutPath: 'out/host_debug_unopt',
-  );
-
-  @override
-  bool get usesLocalArtifacts => true;
 }
 
 class FakeEngineCachedArtifact extends EngineCachedArtifact {
@@ -2120,7 +2115,7 @@ class FakeCache extends Cache {
     required super.fileSystem,
     required super.platform,
     required super.osUtils,
-  }) : super(artifacts: <ArtifactSet>[]);
+  }) : super(artifacts: <ArtifactSet>[], isLocalEngineBuilder: () => false);
 
   late File stampFile;
 

@@ -179,6 +179,7 @@ name: my_app
             logger: BufferLogger.test(),
           ),
       buildTargets: const BuildTargetsImpl(),
+      featureFlags: test_fakes.TestFeatureFlags(),
       toolContext: toolContext,
     );
   }
@@ -195,6 +196,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -224,6 +226,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -245,6 +248,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -256,6 +260,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -500,6 +505,7 @@ name: my_app
         stayResident: false,
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -526,6 +532,7 @@ name: my_app
         stayResident: false,
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -552,6 +559,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -587,6 +595,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -838,6 +847,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -1471,6 +1481,7 @@ name: my_app
         platformArgs: <String, Object?>{'no-launch-chrome': true},
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -1505,6 +1516,7 @@ name: my_app
         platformArgs: <String, Object?>{'no-launch-chrome': true},
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -1541,6 +1553,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -1843,6 +1856,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -1885,6 +1899,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -1928,6 +1943,7 @@ name: my_app
           logger: BufferLogger.test(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -2235,6 +2251,7 @@ flutter:
             expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
           }),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
@@ -2265,6 +2282,7 @@ flutter:
             expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
           }),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
@@ -2304,6 +2322,7 @@ flutter:
             expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
           }),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
@@ -2346,6 +2365,7 @@ flutter:
             }
           }),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),
@@ -2397,6 +2417,7 @@ flutter:
             }
           }),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),
@@ -2459,6 +2480,7 @@ flutter:
               }
             }),
             buildTargets: const BuildTargetsImpl(),
+            featureFlags: test_fakes.TestFeatureFlags(),
             toolContext: test_fakes.FakeToolContext(
               fs: fileSystem,
               systemClock: SystemClock.fixed(DateTime(2001)),
@@ -2628,6 +2650,7 @@ flutter:
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),

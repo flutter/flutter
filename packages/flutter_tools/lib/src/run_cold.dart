@@ -20,6 +20,7 @@ class ColdRunner extends ResidentRunner {
     required super.buildSystem,
     required super.buildTargets,
     required super.debuggingOptions,
+    required super.featureFlags,
     required super.target,
     required super.toolContext,
     required super.xcode,

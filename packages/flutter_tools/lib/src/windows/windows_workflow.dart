@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/context.dart';
 import '../base/platform.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
-
-/// The [WindowsWorkflow] instance.
-WindowsWorkflow? get windowsWorkflow => context.get<WindowsWorkflow>();
 
 /// The Windows-specific implementation of a [Workflow].
 ///

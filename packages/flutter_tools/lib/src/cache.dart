@@ -16,9 +16,7 @@ import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import 'artifacts.dart';
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart'
@@ -154,6 +152,7 @@ class Cache {
   /// [artifactUpdater] is configurable for testing.
   Cache({
     required FileSystem fileSystem,
+    required this._isLocalEngineBuilder,
     required Logger logger,
     required this._osUtils,
     required Platform platform,
@@ -180,6 +179,7 @@ class Cache {
     List<ArtifactSet>? artifacts,
     ArtifactUpdater? artifactUpdater,
     String? flutterRoot,
+    bool Function()? isLocalEngineBuilder,
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
@@ -204,6 +204,7 @@ class Cache {
       artifacts: artifacts ?? <ArtifactSet>[],
       artifactUpdater: artifactUpdater,
       flutterRoot: flutterRoot,
+      isLocalEngineBuilder: isLocalEngineBuilder ?? _defaultIsLocalEngine,
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
@@ -218,6 +219,8 @@ class Cache {
     );
   }
 
+  static bool _defaultIsLocalEngine() => false;
+
   final Logger _logger;
   final Platform _platform;
   final FileSystem _fileSystem;
@@ -225,6 +228,7 @@ class Cache {
   OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
+  final bool Function() _isLocalEngineBuilder;
   final Stdio? _stdio;
   final Net _net;
   final FileSystemUtils _fsUtils;
@@ -785,7 +789,7 @@ class Cache {
     Set<DevelopmentArtifact> requiredArtifacts,
   ) async {
     final artifactsToUpdate = <ArtifactSet>[];
-    final isLocalEngine = context.get<Artifacts>()?.localEngineInfo != null;
+    final bool isLocalEngine = _isLocalEngineBuilder();
 
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {

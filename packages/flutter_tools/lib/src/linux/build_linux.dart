@@ -43,6 +43,7 @@ Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
   required Analytics analytics,
+  required FeatureFlags featureFlags,
   required TargetPlatform targetPlatform,
   required ToolContext toolContext,
   String? target,

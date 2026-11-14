@@ -25,12 +25,13 @@ import 'project.dart';
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
   FlutterCache({
-    super.flutterRoot,
-    required Logger logger,
     required super.fileSystem,
-    required Platform platform,
+    required super.isLocalEngineBuilder,
+    required Logger logger,
     required super.osUtils,
+    required Platform platform,
     required FlutterProjectFactory projectFactory,
+    super.flutterRoot,
     super.stdio,
   }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
     registerArtifact(MaterialFonts(this));

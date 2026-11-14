@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/reporting/unified_analytics.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -31,12 +30,12 @@ void main() {
   });
 
   group('Unit testing util:', () {
-    testUsingContext('getEnabledFeatures is null', () {
+    testWithoutContext('getEnabledFeatures is null', () {
       final String? enabledFeatures = getEnabledFeatures(config);
       expect(enabledFeatures, isNull);
     });
 
-    testUsingContext('getEnabledFeatures not null', () {
+    testWithoutContext('getEnabledFeatures not null', () {
       config.setValue('cli-animations', true);
 
       final String? enabledFeatures = getEnabledFeatures(config);
