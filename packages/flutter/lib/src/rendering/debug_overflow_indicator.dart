@@ -212,8 +212,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return regions;
   }
 
-  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) {
-    overflowHints ??= <DiagnosticsNode>[];
+  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHintsParam) {
+    final List<DiagnosticsNode> overflowHints = overflowHintsParam ?? <DiagnosticsNode>[];
     if (overflowHints.isEmpty) {
       overflowHints.add(
         ErrorDescription(
@@ -265,7 +265,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
           // debugCreator should only be set in DebugMode, but we want the
           // treeshaker to know that.
           if (kDebugMode && debugCreator != null) DiagnosticsDebugCreator(debugCreator!),
-          ...overflowHints!,
+          ...overflowHints,
           describeForError('The specific $runtimeType in question is'),
           // TODO(jacobr): this line is ascii art that it would be nice to
           // handle a little more generically in GUI debugging clients in the

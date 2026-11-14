@@ -145,13 +145,13 @@ class BoxShadow extends ui.Shadow {
     if (identical(a, b)) {
       return a;
     }
-    a ??= <BoxShadow>[];
-    b ??= <BoxShadow>[];
-    final int commonLength = math.min(a.length, b.length);
+    final List<BoxShadow> effectiveA = a ?? <BoxShadow>[];
+    final List<BoxShadow> effectiveB = b ?? <BoxShadow>[];
+    final int commonLength = math.min(effectiveA.length, effectiveB.length);
     return <BoxShadow>[
-      for (int i = 0; i < commonLength; i += 1) BoxShadow.lerp(a[i], b[i], t)!,
-      for (int i = commonLength; i < a.length; i += 1) a[i].scale(1.0 - t),
-      for (int i = commonLength; i < b.length; i += 1) b[i].scale(t),
+      for (int i = 0; i < commonLength; i += 1) BoxShadow.lerp(effectiveA[i], effectiveB[i], t)!,
+      for (int i = commonLength; i < effectiveA.length; i += 1) effectiveA[i].scale(1.0 - t),
+      for (int i = commonLength; i < effectiveB.length; i += 1) effectiveB[i].scale(t),
     ];
   }
 
