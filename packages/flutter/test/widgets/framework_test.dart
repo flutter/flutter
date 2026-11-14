@@ -2151,6 +2151,43 @@ The findRenderObject() method was called for the following element:
   );
 
   testWidgets(
+    'children mounted before a sibling throws in initState are deactivated',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      late BuildContext mountedChild;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    mountedChild = context;
+                    MediaQuery.of(context);
+                    return const SizedBox();
+                  },
+                ),
+                StatefulWidgetSpy(onInitState: (_) => throw StateError('kaboom')),
+              ],
+            ),
+          ),
+        ),
+      );
+      FlutterError.onError = onError;
+      expect((mountedChild as Element).debugIsActive, false);
+
+      // Removing the MediaQuery the child depended on must not fail.
+      await tester.pumpWidget(const SizedBox());
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'widget is unmounted if throw in dispose',
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // leaking by design because of exception
