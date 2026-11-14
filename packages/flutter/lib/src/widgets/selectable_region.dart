@@ -2587,9 +2587,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @protected
   Comparator<Selectable> get compareOrder => _compareScreenOrder;
 
-  static int _compareScreenOrder(Selectable a, Selectable b) {
-    final Rect rectA = MatrixUtils.transformRect(a.getTransformTo(null), _getBoundingBox(a));
-    final Rect rectB = MatrixUtils.transformRect(b.getTransformTo(null), _getBoundingBox(b));
+  int _compareScreenOrder(Selectable a, Selectable b) {
+    if (isAttached && !hasSize) {
+      return 0;
+    }
+    final Matrix4 transformA = isAttached ? getTransformFrom(a) : a.getTransformTo(null);
+    final Matrix4 transformB = isAttached ? getTransformFrom(b) : b.getTransformTo(null);
+    final Rect rectA = MatrixUtils.transformRect(transformA, _getBoundingBox(a));
+    final Rect rectB = MatrixUtils.transformRect(transformB, _getBoundingBox(b));
     final int result = _compareVertically(rectA, rectB);
     if (result != 0) {
       return result;
