@@ -15,8 +15,8 @@ import android.view.ScrollCaptureSession;
 import android.view.Surface;
 import android.view.View;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.annotation.VisibleForTesting;
 import io.flutter.Build.API_LEVELS;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.ScrollCaptureChannel;
@@ -30,41 +30,45 @@ import java.util.function.Consumer;
  * its whole UI into a single surface, so this callback asks the framework over the {@link
  * ScrollCaptureChannel} where the scrollable content is, scrolls it on request, and copies the
  * rendered pixels into the capture session.
+ *
+ * <p>Content that Flutter paints over the scrollable content (for example, a floating action
+ * button) is part of every captured image, as it would be for a native view drawn over a scrolling
+ * view. Apps can opt out of scrolling screenshots with {@link View#setScrollCaptureHint(int)}{@code
+ * (View.SCROLL_CAPTURE_HINT_EXCLUDE)} on the {@link FlutterView}.
  */
 @RequiresApi(API_LEVELS.API_31)
 class FlutterScrollCaptureCallback implements ScrollCaptureCallback {
   private static final String TAG = "FlutterScrollCapture";
 
-  /**
-   * The time to wait after the framework has produced a frame before copying its pixels, to give
-   * the raster thread time to present it.
-   *
-   * <p>This matches the default delay Android uses when capturing native scrolling views.
-   */
-  @VisibleForTesting static final long POST_SCROLL_DELAY_MILLIS = 60L;
-
-  /** Copies the pixels currently rendered by Flutter. */
-  interface PixelCopier {
+  /** Captures the frame most recently rendered by Flutter. */
+  interface FrameCapturer {
     /**
-     * Copies the pixels in {@code source}, in the coordinates of the {@link FlutterView}, into
-     * {@code destination}, which has the same size as {@code source}, and then calls {@code onDone}
-     * on the main thread with whether the copy succeeded.
+     * Returns the last frame that Flutter rendered, which has the size of the {@link FlutterView},
+     * or {@code null} if it is not available. The caller recycles the returned bitmap.
      */
-    void copyPixels(
-        @NonNull Rect source, @NonNull Bitmap destination, @NonNull Consumer<Boolean> onDone);
+    @Nullable
+    Bitmap captureFrame();
+  }
+
+  /** The state of a capture session, which is no longer current once the session has ended. */
+  private static final class Session {
+    /** Whether the framework is capturing the same content that was found by the search. */
+    boolean isUsable = false;
   }
 
   @NonNull private final View view;
   @NonNull private final ScrollCaptureChannel channel;
-  @NonNull private final PixelCopier pixelCopier;
+  @NonNull private final FrameCapturer frameCapturer;
 
-  private boolean sessionStarted = false;
+  @Nullable private Session currentSession;
 
   FlutterScrollCaptureCallback(
-      @NonNull View view, @NonNull ScrollCaptureChannel channel, @NonNull PixelCopier pixelCopier) {
+      @NonNull View view,
+      @NonNull ScrollCaptureChannel channel,
+      @NonNull FrameCapturer frameCapturer) {
     this.view = view;
     this.channel = channel;
-    this.pixelCopier = pixelCopier;
+    this.frameCapturer = frameCapturer;
   }
 
   @Override
@@ -88,14 +92,16 @@ class FlutterScrollCaptureCallback implements ScrollCaptureCallback {
       @NonNull ScrollCaptureSession session,
       @NonNull CancellationSignal signal,
       @NonNull Runnable onReady) {
-    sessionStarted = true;
-    // If the framework cannot find the scrollable content anymore, the first image request will
-    // fail, which ends the session.
+    final Session captureSession = new Session();
+    currentSession = captureSession;
     channel.start(
         bounds -> {
-          if (signal.isCanceled()) {
+          if (signal.isCanceled() || captureSession != currentSession) {
             return;
           }
+          // If the content has moved or changed since the search, the images would not match the
+          // scroll bounds, so the first image request fails, which ends the session.
+          captureSession.isUsable = session.getScrollBounds().equals(clipToView(bounds));
           onReady.run();
         });
   }
@@ -106,11 +112,16 @@ class FlutterScrollCaptureCallback implements ScrollCaptureCallback {
       @NonNull CancellationSignal signal,
       @NonNull Rect captureArea,
       @NonNull Consumer<Rect> onComplete) {
+    final Session captureSession = currentSession;
+    if (captureSession == null || !captureSession.isUsable) {
+      onComplete.accept(new Rect());
+      return;
+    }
     channel.scrollTo(
         captureArea.top,
         captureArea.bottom,
         scrollDelta -> {
-          if (signal.isCanceled()) {
+          if (signal.isCanceled() || captureSession != currentSession) {
             return;
           }
           if (scrollDelta == null) {
@@ -131,41 +142,10 @@ class FlutterScrollCaptureCallback implements ScrollCaptureCallback {
           // The same area in the coordinates of the view.
           final Rect source = new Rect(availableArea);
           source.offset(scrollBounds.left, scrollBounds.top - scrollDelta);
-          view.postDelayed(
-              () -> capture(session, signal, source, availableArea, onComplete),
-              POST_SCROLL_DELAY_MILLIS);
-        });
-  }
-
-  @Override
-  public void onScrollCaptureEnd(@NonNull Runnable onReady) {
-    if (!sessionStarted) {
-      onReady.run();
-      return;
-    }
-    sessionStarted = false;
-    channel.end(onReady);
-  }
-
-  private void capture(
-      @NonNull ScrollCaptureSession session,
-      @NonNull CancellationSignal signal,
-      @NonNull Rect source,
-      @NonNull Rect availableArea,
-      @NonNull Consumer<Rect> onComplete) {
-    if (signal.isCanceled()) {
-      return;
-    }
-    final Bitmap bitmap =
-        Bitmap.createBitmap(source.width(), source.height(), Bitmap.Config.ARGB_8888);
-    pixelCopier.copyPixels(
-        source,
-        bitmap,
-        success -> {
-          if (signal.isCanceled()) {
-            return;
-          }
-          if (success && drawToSurface(session.getSurface(), bitmap)) {
+          // The framework replies once the frame showing the requested area has been submitted
+          // for rasterization, and the engine rasterizes frames in order before taking the
+          // screenshot, so the captured frame shows the requested area.
+          if (drawToSurface(session.getSurface(), source)) {
             onComplete.accept(availableArea);
           } else {
             onComplete.accept(new Rect());
@@ -173,25 +153,60 @@ class FlutterScrollCaptureCallback implements ScrollCaptureCallback {
         });
   }
 
-  private static boolean drawToSurface(@NonNull Surface surface, @NonNull Bitmap bitmap) {
+  @Override
+  public void onScrollCaptureEnd(@NonNull Runnable onReady) {
+    if (currentSession == null) {
+      onReady.run();
+      return;
+    }
+    currentSession = null;
+    channel.end(onReady);
+  }
+
+  /**
+   * Ends the current capture session, if any, for example because the {@link FlutterView} is
+   * detached from its engine. Pending requests of the session are ignored.
+   */
+  void dispose() {
+    if (currentSession != null) {
+      currentSession = null;
+      channel.end(() -> {});
+    }
+  }
+
+  /**
+   * Draws the part of the last rendered frame within {@code source}, in the coordinates of the
+   * view, at the origin of {@code surface}.
+   */
+  private boolean drawToSurface(@NonNull Surface surface, @NonNull Rect source) {
+    final Bitmap frame = frameCapturer.captureFrame();
+    if (frame == null) {
+      return false;
+    }
     try {
+      if (frame.getWidth() != view.getWidth() || frame.getHeight() != view.getHeight()) {
+        // The frame does not correspond to the current size of the view.
+        return false;
+      }
       final Canvas canvas = surface.lockHardwareCanvas();
       try {
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-        canvas.drawBitmap(bitmap, 0, 0, null);
+        canvas.drawBitmap(frame, source, new Rect(0, 0, source.width(), source.height()), null);
       } finally {
         surface.unlockCanvasAndPost(canvas);
       }
       return true;
     } catch (IllegalStateException | IllegalArgumentException e) {
-      // The session's surface has been released.
+      // The session's surface has been released, or could not be drawn to.
       Log.w(TAG, "Unable to draw scroll capture image: " + e);
       return false;
+    } finally {
+      frame.recycle();
     }
   }
 
   @NonNull
-  private Rect clipToView(Rect bounds) {
+  private Rect clipToView(@Nullable Rect bounds) {
     if (bounds == null || !bounds.intersect(0, 0, view.getWidth(), view.getHeight())) {
       return new Rect();
     }

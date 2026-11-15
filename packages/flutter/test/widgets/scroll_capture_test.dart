@@ -274,4 +274,152 @@ void main() {
     );
     expect(await _sendScrollCapture(tester, 'ScrollCapture.end'), isNull);
   });
+
+  testWidgets('scrollTo uses the rounded bounds at fractional device pixel ratios', (
+    WidgetTester tester,
+  ) async {
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      _buildList(controller: controller, appBar: AppBar(toolbarHeight: 55.3)),
+    );
+
+    final bounds =
+        (await _sendScrollCapture(tester, 'ScrollCapture.start'))! as Map<String, Object?>;
+    final int height = (bounds['bottom']! as int) - (bounds['top']! as int);
+    // The area just below the visible area must become exactly visible.
+    expect(
+      await _sendScrollCapture(tester, 'ScrollCapture.scrollTo', <String, Object?>{
+        'top': height,
+        'bottom': 2 * height,
+      }),
+      <String, Object?>{'scrollDelta': height},
+    );
+    await _sendScrollCapture(tester, 'ScrollCapture.end');
+    expect(controller.offset, 0);
+  });
+
+  testWidgets('search excludes pinned content at the leading edge', (WidgetTester tester) async {
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const SliverAppBar(pinned: true, title: Text('Pinned')),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) =>
+                    SizedBox(height: 50, child: Text('Item $index')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Rect scrollable = tester.getRect(find.byType(Scrollable));
+    final double pinnedHeight = tester.getSize(find.byType(AppBar)).height;
+    expect(await _sendScrollCapture(tester, 'ScrollCapture.search'), <String, Object?>{
+      'left': scrollable.left.round(),
+      'top': (scrollable.top + pinnedHeight).round(),
+      'right': scrollable.right.round(),
+      'bottom': scrollable.bottom.round(),
+    });
+  });
+
+  testWidgets('search ignores page views and list wheels', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PageView.builder(
+          scrollDirection: Axis.vertical,
+          itemCount: 10,
+          itemBuilder: (BuildContext context, int index) => Text('Page $index'),
+        ),
+      ),
+    );
+    expect(await _sendScrollCapture(tester, 'ScrollCapture.search'), isNull);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListWheelScrollView(
+          itemExtent: 50,
+          children: List<Widget>.generate(100, (int index) => Text('Item $index')),
+        ),
+      ),
+    );
+    expect(await _sendScrollCapture(tester, 'ScrollCapture.search'), isNull);
+  });
+
+  testWidgets('search ignores the scrollables of a NestedScrollView', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+            const SliverAppBar(expandedHeight: 200, title: Text('Header')),
+          ],
+          body: ListView.builder(
+            itemExtent: 50,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+          ),
+        ),
+      ),
+    );
+    expect(await _sendScrollCapture(tester, 'ScrollCapture.search'), isNull);
+  });
+
+  testWidgets('search ignores transformed scrollables', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(home: Transform.scale(scale: 0.5, child: _buildList())));
+    expect(await _sendScrollCapture(tester, 'ScrollCapture.search'), isNull);
+  });
+
+  testWidgets('start restores the scroll offset of a session that was not ended', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController(initialScrollOffset: 500);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(_buildList(controller: controller));
+
+    expect(await _sendScrollCapture(tester, 'ScrollCapture.start'), isNotNull);
+    await _sendScrollCapture(tester, 'ScrollCapture.scrollTo', <String, Object?>{
+      'top': 2000,
+      'bottom': 2500,
+    });
+    expect(controller.offset, isNot(500));
+
+    expect(await _sendScrollCapture(tester, 'ScrollCapture.start'), isNotNull);
+    expect(controller.offset, 500);
+    await _sendScrollCapture(tester, 'ScrollCapture.end');
+    expect(controller.offset, 500);
+  });
+
+  testWidgets('scrollTo returns null and end restores when frames are disabled', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController(initialScrollOffset: 500);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(_buildList(controller: controller));
+    expect(await _sendScrollCapture(tester, 'ScrollCapture.start'), isNotNull);
+    await _sendScrollCapture(tester, 'ScrollCapture.scrollTo', <String, Object?>{
+      'top': 2000,
+      'bottom': 2500,
+    });
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    addTearDown(() => tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed));
+    expect(tester.binding.framesEnabled, isFalse);
+    expect(
+      await _sendScrollCapture(tester, 'ScrollCapture.scrollTo', <String, Object?>{
+        'top': 0,
+        'bottom': 100,
+      }),
+      isNull,
+    );
+    await _sendScrollCapture(tester, 'ScrollCapture.end');
+    expect(controller.offset, 500);
+  });
 }

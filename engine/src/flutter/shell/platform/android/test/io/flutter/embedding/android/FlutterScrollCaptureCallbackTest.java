@@ -10,9 +10,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,7 +32,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.systemchannels.ScrollCaptureChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +46,8 @@ public class FlutterScrollCaptureCallbackTest {
 
   private View mockView;
   private ScrollCaptureChannel mockChannel;
-  private FlutterScrollCaptureCallback.PixelCopier mockPixelCopier;
+  private FlutterScrollCaptureCallback.FrameCapturer mockFrameCapturer;
+  private Bitmap frame;
   private Surface mockSurface;
   private Canvas mockCanvas;
   private ScrollCaptureSession session;
@@ -58,33 +59,31 @@ public class FlutterScrollCaptureCallbackTest {
     when(mockView.isShown()).thenReturn(true);
     when(mockView.getWidth()).thenReturn(1000);
     when(mockView.getHeight()).thenReturn(2000);
-    // Run delayed work immediately.
-    doAnswer(
-            invocation -> {
-              ((Runnable) invocation.getArgument(0)).run();
-              return true;
-            })
-        .when(mockView)
-        .postDelayed(any(Runnable.class), anyLong());
 
     mockChannel = mock(ScrollCaptureChannel.class);
-    mockPixelCopier = mock(FlutterScrollCaptureCallback.PixelCopier.class);
+    frame = Bitmap.createBitmap(1000, 2000, Bitmap.Config.ARGB_8888);
+    mockFrameCapturer = mock(FlutterScrollCaptureCallback.FrameCapturer.class);
+    when(mockFrameCapturer.captureFrame()).thenReturn(frame);
     mockSurface = mock(Surface.class);
     mockCanvas = mock(Canvas.class);
     when(mockSurface.lockHardwareCanvas()).thenReturn(mockCanvas);
     session = new ScrollCaptureSession(mockSurface, SCROLL_BOUNDS, new Point(0, 0));
-    callback = new FlutterScrollCaptureCallback(mockView, mockChannel, mockPixelCopier);
+    callback = new FlutterScrollCaptureCallback(mockView, mockChannel, mockFrameCapturer);
   }
 
   @SuppressWarnings("unchecked")
-  private ScrollCaptureChannel.Callback<Rect> captureRectCallback(boolean isStart) {
+  private ScrollCaptureChannel.Callback<Rect> captureSearchCallback() {
     ArgumentCaptor<ScrollCaptureChannel.Callback<Rect>> captor =
         ArgumentCaptor.forClass(ScrollCaptureChannel.Callback.class);
-    if (isStart) {
-      verify(mockChannel).start(captor.capture());
-    } else {
-      verify(mockChannel).search(captor.capture());
-    }
+    verify(mockChannel).search(captor.capture());
+    return captor.getValue();
+  }
+
+  @SuppressWarnings("unchecked")
+  private ScrollCaptureChannel.Callback<Rect> captureLastStartCallback() {
+    ArgumentCaptor<ScrollCaptureChannel.Callback<Rect>> captor =
+        ArgumentCaptor.forClass(ScrollCaptureChannel.Callback.class);
+    verify(mockChannel, atLeastOnce()).start(captor.capture());
     return captor.getValue();
   }
 
@@ -94,6 +93,12 @@ public class FlutterScrollCaptureCallbackTest {
         ArgumentCaptor.forClass(ScrollCaptureChannel.Callback.class);
     verify(mockChannel).scrollTo(eq(top), eq(bottom), captor.capture());
     return captor.getValue();
+  }
+
+  /** Starts a session in which the framework reports {@code bounds}. */
+  private void startSession(Rect bounds) {
+    callback.onScrollCaptureStart(session, new CancellationSignal(), () -> {});
+    captureLastStartCallback().onResult(bounds);
   }
 
   @Test
@@ -111,7 +116,7 @@ public class FlutterScrollCaptureCallbackTest {
     AtomicReference<Rect> result = new AtomicReference<>();
     callback.onScrollCaptureSearch(new CancellationSignal(), result::set);
 
-    captureRectCallback(false).onResult(new Rect(-10, 100, 1000, 2500));
+    captureSearchCallback().onResult(new Rect(-10, 100, 1000, 2500));
     assertEquals(new Rect(0, 100, 1000, 2000), result.get());
   }
 
@@ -120,7 +125,7 @@ public class FlutterScrollCaptureCallbackTest {
     AtomicReference<Rect> result = new AtomicReference<>();
     callback.onScrollCaptureSearch(new CancellationSignal(), result::set);
 
-    captureRectCallback(false).onResult(null);
+    captureSearchCallback().onResult(null);
     assertTrue(result.get().isEmpty());
   }
 
@@ -131,7 +136,7 @@ public class FlutterScrollCaptureCallbackTest {
     callback.onScrollCaptureSearch(signal, result::set);
 
     signal.cancel();
-    captureRectCallback(false).onResult(new Rect(0, 0, 10, 10));
+    captureSearchCallback().onResult(new Rect(0, 0, 10, 10));
     assertNull(result.get());
   }
 
@@ -141,21 +146,13 @@ public class FlutterScrollCaptureCallbackTest {
     callback.onScrollCaptureStart(session, new CancellationSignal(), () -> ready.set(true));
 
     assertFalse(ready.get());
-    captureRectCallback(true).onResult(SCROLL_BOUNDS);
+    captureLastStartCallback().onResult(new Rect(SCROLL_BOUNDS));
     assertTrue(ready.get());
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void imageRequestCopiesTheVisiblePartOfTheRequestedArea() {
-    doAnswer(
-            invocation -> {
-              ((Consumer<Boolean>) invocation.getArgument(2)).accept(true);
-              return null;
-            })
-        .when(mockPixelCopier)
-        .copyPixels(any(Rect.class), any(Bitmap.class), any());
-
+    startSession(new Rect(SCROLL_BOUNDS));
     AtomicReference<Rect> result = new AtomicReference<>();
     // Request the area just below the initially visible area.
     callback.onScrollCaptureImageRequest(
@@ -165,21 +162,18 @@ public class FlutterScrollCaptureCallbackTest {
     captureScrollToCallback(1000, 1500).onResult(300);
 
     // The visible part of the requested area is 1000-1300, which is at 700-1000 in the scroll
-    // bounds, which start at 100 in the view.
-    ArgumentCaptor<Rect> sourceCaptor = ArgumentCaptor.forClass(Rect.class);
-    ArgumentCaptor<Bitmap> bitmapCaptor = ArgumentCaptor.forClass(Bitmap.class);
-    verify(mockPixelCopier).copyPixels(sourceCaptor.capture(), bitmapCaptor.capture(), any());
-    assertEquals(new Rect(0, 800, 1000, 1100), sourceCaptor.getValue());
-    assertEquals(1000, bitmapCaptor.getValue().getWidth());
-    assertEquals(300, bitmapCaptor.getValue().getHeight());
-
-    verify(mockCanvas).drawBitmap(eq(bitmapCaptor.getValue()), eq(0f), eq(0f), any());
+    // bounds, which start at 100 in the view. It is drawn at the origin of the surface.
+    verify(mockCanvas)
+        .drawBitmap(
+            eq(frame), eq(new Rect(0, 800, 1000, 1100)), eq(new Rect(0, 0, 1000, 300)), isNull());
     verify(mockSurface).unlockCanvasAndPost(mockCanvas);
+    assertTrue(frame.isRecycled());
     assertEquals(new Rect(0, 1000, 1000, 1300), result.get());
   }
 
   @Test
   public void imageRequestBeyondTheContentReportsEmptyArea() {
+    startSession(new Rect(SCROLL_BOUNDS));
     AtomicReference<Rect> result = new AtomicReference<>();
     callback.onScrollCaptureImageRequest(
         session, new CancellationSignal(), new Rect(0, 3000, 1000, 3500), result::set);
@@ -187,33 +181,27 @@ public class FlutterScrollCaptureCallbackTest {
     // Already at the end of the content.
     captureScrollToCallback(3000, 3500).onResult(1000);
 
-    verify(mockPixelCopier, never()).copyPixels(any(), any(), any());
+    verify(mockFrameCapturer, never()).captureFrame();
     assertTrue(result.get().isEmpty());
   }
 
   @Test
   public void imageRequestReportsEmptyAreaWhenTheFrameworkFails() {
+    startSession(new Rect(SCROLL_BOUNDS));
     AtomicReference<Rect> result = new AtomicReference<>();
     callback.onScrollCaptureImageRequest(
         session, new CancellationSignal(), new Rect(0, 0, 1000, 500), result::set);
 
     captureScrollToCallback(0, 500).onResult(null);
 
-    verify(mockPixelCopier, never()).copyPixels(any(), any(), any());
+    verify(mockFrameCapturer, never()).captureFrame();
     assertTrue(result.get().isEmpty());
   }
 
   @Test
-  @SuppressWarnings("unchecked")
-  public void imageRequestReportsEmptyAreaWhenTheCopyFails() {
-    doAnswer(
-            invocation -> {
-              ((Consumer<Boolean>) invocation.getArgument(2)).accept(false);
-              return null;
-            })
-        .when(mockPixelCopier)
-        .copyPixels(any(Rect.class), any(Bitmap.class), any());
-
+  public void imageRequestReportsEmptyAreaWhenTheFrameIsUnavailable() {
+    when(mockFrameCapturer.captureFrame()).thenReturn(null);
+    startSession(new Rect(SCROLL_BOUNDS));
     AtomicReference<Rect> result = new AtomicReference<>();
     callback.onScrollCaptureImageRequest(
         session, new CancellationSignal(), new Rect(0, 0, 1000, 500), result::set);
@@ -224,7 +212,23 @@ public class FlutterScrollCaptureCallbackTest {
   }
 
   @Test
+  public void imageRequestReportsEmptyAreaWhenTheFrameDoesNotMatchTheView() {
+    Bitmap smallFrame = Bitmap.createBitmap(500, 1000, Bitmap.Config.ARGB_8888);
+    when(mockFrameCapturer.captureFrame()).thenReturn(smallFrame);
+    startSession(new Rect(SCROLL_BOUNDS));
+    AtomicReference<Rect> result = new AtomicReference<>();
+    callback.onScrollCaptureImageRequest(
+        session, new CancellationSignal(), new Rect(0, 0, 1000, 500), result::set);
+    captureScrollToCallback(0, 500).onResult(0);
+
+    verify(mockSurface, never()).lockHardwareCanvas();
+    assertTrue(smallFrame.isRecycled());
+    assertTrue(result.get().isEmpty());
+  }
+
+  @Test
   public void imageRequestDoesNotReportWhenCancelled() {
+    startSession(new Rect(SCROLL_BOUNDS));
     CancellationSignal signal = new CancellationSignal();
     AtomicReference<Rect> result = new AtomicReference<>();
     callback.onScrollCaptureImageRequest(session, signal, new Rect(0, 0, 1000, 500), result::set);
@@ -232,7 +236,32 @@ public class FlutterScrollCaptureCallbackTest {
     signal.cancel();
     captureScrollToCallback(0, 500).onResult(0);
 
-    verify(mockView, never()).postDelayed(any(Runnable.class), anyLong());
+    verify(mockFrameCapturer, never()).captureFrame();
+    assertNull(result.get());
+  }
+
+  @Test
+  public void imageRequestFailsWhenTheBoundsChangedSinceTheSearch() {
+    startSession(new Rect(0, 200, 1000, 1100));
+    AtomicReference<Rect> result = new AtomicReference<>();
+    callback.onScrollCaptureImageRequest(
+        session, new CancellationSignal(), new Rect(0, 0, 1000, 500), result::set);
+
+    verify(mockChannel, never()).scrollTo(anyInt(), anyInt(), any());
+    assertTrue(result.get().isEmpty());
+  }
+
+  @Test
+  public void imageRequestIgnoresRepliesAfterTheSessionEnded() {
+    startSession(new Rect(SCROLL_BOUNDS));
+    AtomicReference<Rect> result = new AtomicReference<>();
+    callback.onScrollCaptureImageRequest(
+        session, new CancellationSignal(), new Rect(0, 0, 1000, 500), result::set);
+    callback.onScrollCaptureEnd(() -> {});
+
+    captureScrollToCallback(0, 500).onResult(0);
+
+    verify(mockFrameCapturer, never()).captureFrame();
     assertNull(result.get());
   }
 
@@ -247,5 +276,24 @@ public class FlutterScrollCaptureCallbackTest {
     Runnable onReady = () -> {};
     callback.onScrollCaptureEnd(onReady);
     verify(mockChannel).end(onReady);
+  }
+
+  @Test
+  public void disposeEndsTheSessionAndIgnoresPendingReplies() {
+    startSession(new Rect(SCROLL_BOUNDS));
+    AtomicReference<Rect> result = new AtomicReference<>();
+    callback.onScrollCaptureImageRequest(
+        session, new CancellationSignal(), new Rect(0, 0, 1000, 500), result::set);
+
+    callback.dispose();
+    verify(mockChannel).end(any());
+
+    captureScrollToCallback(0, 500).onResult(0);
+    verify(mockFrameCapturer, never()).captureFrame();
+    assertNull(result.get());
+
+    // The system ending the session afterwards does not end it again.
+    callback.onScrollCaptureEnd(() -> {});
+    verify(mockChannel).end(any());
   }
 }

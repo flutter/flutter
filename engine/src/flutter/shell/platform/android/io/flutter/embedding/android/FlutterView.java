@@ -11,8 +11,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -134,6 +132,9 @@ public class FlutterView extends FrameLayout
 
   // Connections to a Flutter execution context.
   @Nullable private FlutterEngine flutterEngine;
+
+  // A FlutterScrollCaptureCallback, which requires API 31, while attached to an engine.
+  @Nullable private Object scrollCaptureCallback;
 
   @NonNull
   private final Set<FlutterEngineAttachmentListener> flutterEngineAttachmentListeners =
@@ -1262,10 +1263,15 @@ public class FlutterView extends FrameLayout
     flutterEngine.getPlatformViewsController2().attachToView(this);
 
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
-      // Lets Android's scrolling screenshots capture scrollable Flutter content.
-      setScrollCaptureCallback(
+      // Lets Android's scrolling screenshots capture scrollable Flutter content. The images come
+      // from the engine's screenshot of the last rendered frame rather than from
+      // android.view.PixelCopy, which cannot read the frames presented through some rendering
+      // backends (for example, Impeller's Vulkan backend on some devices).
+      final FlutterRenderer renderer = flutterEngine.getRenderer();
+      scrollCaptureCallback =
           new FlutterScrollCaptureCallback(
-              this, flutterEngine.getScrollCaptureChannel(), this::copyFlutterPixels));
+              this, flutterEngine.getScrollCaptureChannel(), renderer::getBitmap);
+      setScrollCaptureCallback((FlutterScrollCaptureCallback) scrollCaptureCallback);
     }
 
     // Notify engine attachment listeners of the attachment.
@@ -1279,36 +1285,6 @@ public class FlutterView extends FrameLayout
     if (isFlutterUiDisplayed) {
       flutterUiDisplayListener.onFlutterUiDisplayed();
     }
-  }
-
-  /**
-   * Copies the pixels that Flutter has rendered within {@code source}, in this view's coordinates,
-   * into {@code destination}, and then reports whether the copy succeeded on the main thread.
-   *
-   * <p>Used to provide images for Android's scrolling screenshots. This asks the engine for a
-   * screenshot of the last frame it rasterized instead of reading back the render surface with
-   * {@link android.view.PixelCopy}, because that cannot read frames presented through some
-   * rendering backends (for example, Impeller's Vulkan backend on some devices).
-   */
-  private void copyFlutterPixels(
-      @NonNull Rect source,
-      @NonNull Bitmap destination,
-      @NonNull java.util.function.Consumer<Boolean> onDone) {
-    final Handler handler = new Handler(Looper.getMainLooper());
-    final Bitmap frame =
-        isAttachedToFlutterEngine() ? flutterEngine.getRenderer().getBitmap() : null;
-    if (frame == null || !new Rect(0, 0, frame.getWidth(), frame.getHeight()).contains(source)) {
-      if (frame != null) {
-        frame.recycle();
-      }
-      handler.post(() -> onDone.accept(false));
-      return;
-    }
-    new Canvas(destination)
-        .drawBitmap(
-            frame, source, new Rect(0, 0, destination.getWidth(), destination.getHeight()), null);
-    frame.recycle();
-    handler.post(() -> onDone.accept(true));
   }
 
   /**
@@ -1336,7 +1312,9 @@ public class FlutterView extends FrameLayout
 
     getContext().getContentResolver().unregisterContentObserver(systemSettingsObserver);
 
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31 && scrollCaptureCallback != null) {
+      ((FlutterScrollCaptureCallback) scrollCaptureCallback).dispose();
+      scrollCaptureCallback = null;
       setScrollCaptureCallback(null);
     }
 

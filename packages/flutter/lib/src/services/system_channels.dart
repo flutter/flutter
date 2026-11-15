@@ -619,14 +619,15 @@ abstract final class SystemChannels {
   /// scrolling screenshots ("capture more").
   ///
   /// The following incoming methods are defined for this channel (registered
-  /// using [MethodChannel.setMethodCallHandler]). All coordinates are in
-  /// physical pixels. The optional `viewId` argument identifies the view, and
-  /// defaults to the implicit view.
+  /// using [MethodChannel.setMethodCallHandler]). They apply to the implicit
+  /// view, and all coordinates are in physical pixels. Currently, only Android
+  /// sends these requests.
   ///
-  ///  * `ScrollCapture.search`: Returns the bounds of the primary vertical
-  ///    scrollable in the view as a map with `left`, `top`, `right` and
-  ///    `bottom` keys, relative to the view, or null if there is no
-  ///    scrollable content to capture.
+  ///  * `ScrollCapture.search`: Returns the bounds of the scrolling content of
+  ///    the primary vertical scrollable in the view as a map with `left`,
+  ///    `top`, `right` and `bottom` keys, relative to the view, or null if
+  ///    there is no scrollable content to capture. Content pinned at the
+  ///    leading edge of the scrollable, such as a pinned app bar, is excluded.
   ///
   ///  * `ScrollCapture.start`: Starts a capture session for the primary
   ///    scrollable, remembering its scroll offset. Returns its bounds like
@@ -638,10 +639,10 @@ abstract final class SystemChannels {
   ///    top of the scroll bounds at the start of the session. Returns a map
   ///    whose `scrollDelta` entry is the distance the content has moved up
   ///    since the start of the session, or null if the session is no longer
-  ///    valid.
+  ///    valid or frames are not being produced.
   ///
   ///  * `ScrollCapture.end`: Ends the session and restores the original
-  ///    scroll offset.
+  ///    scroll offset. Starting a new session also ends the previous one.
   static const MethodChannel scrollCapture = OptionalMethodChannel(
     'flutter/scrollcapture',
     JSONMethodCodec(),

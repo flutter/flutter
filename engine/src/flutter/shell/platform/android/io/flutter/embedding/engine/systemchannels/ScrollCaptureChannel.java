@@ -36,7 +36,7 @@ public class ScrollCaptureChannel {
     void onResult(@Nullable T result);
   }
 
-  @NonNull public final MethodChannel channel;
+  @NonNull private final MethodChannel channel;
 
   public ScrollCaptureChannel(@NonNull DartExecutor dartExecutor) {
     this(new MethodChannel(dartExecutor, "flutter/scrollcapture", JSONMethodCodec.INSTANCE));
