@@ -26,7 +26,7 @@ void main() {
 void testMain() {
   for (final throwError in <bool>[false, true]) {
     test(
-      'context creation failure completes initialization with an error ($throwError)',
+      'context creation failure reports initialization errors and skips bitmap frames ($throwError)',
       () async {
         final int pending = SkwasmCallbackHandler.instance.debugPendingCallbackCount;
         final JSFunction original = _getOffscreenContext;
@@ -43,13 +43,22 @@ void testMain() {
         _getOffscreenContext = createContext.toJSCaptureThis;
         final provider = OffscreenCanvasProvider();
         final surface = SkwasmOffscreenSurface(provider);
+        final ui.Picture picture = _solidPicture(const ui.Color(0xFF00FF00));
         try {
           await expectLater(
             surface.initialized.timeout(const Duration(seconds: 5)),
             throwsStateError,
           );
+          for (var frame = 0; frame < 2; frame++) {
+            expect(
+              await surface.rasterizeToImageBitmaps(const BitmapSize(2, 2), <ui.Picture>[picture]),
+              isEmpty,
+            );
+          }
+          await expectLater(surface.initialized, throwsStateError);
         } finally {
           _getOffscreenContext = original;
+          picture.dispose();
           surface.dispose();
           provider.dispose();
         }
@@ -72,7 +81,9 @@ void testMain() {
         await surface.triggerContextLoss();
         await surface.handledContextLossEvent;
         await expectLater(surface.initialized, throwsStateError);
-        await expectLater(surface.rasterizeToCanvas(picture), throwsStateError);
+        for (var frame = 0; frame < 2; frame++) {
+          await expectLater(surface.rasterizeToCanvas(picture), throwsStateError);
+        }
       } finally {
         picture.dispose();
         surface.dispose();

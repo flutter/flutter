@@ -197,7 +197,6 @@ abstract class SkwasmSurface<C extends DomEventTarget, P extends CanvasProvider<
     List<ui.Picture> pictures, {
     required bool captureImageBitmaps,
   }) async {
-    await initialized;
     // Resize and render in a single worker message, so another operation on a
     // shared offscreen surface cannot change the size before capture.
     _currentSize = size;
@@ -314,6 +313,13 @@ class SkwasmOffscreenSurface extends SkwasmSurface<DomOffscreenCanvas, Offscreen
     BitmapSize size,
     List<ui.Picture> pictures,
   ) async {
+    try {
+      await initialized;
+    } catch (_) {
+      // Initialization reports the error. Subsequent bitmap frames fail quietly,
+      // while onscreen rendering must still throw to trigger hybrid fallback.
+      return <DomImageBitmap>[];
+    }
     final RasterResult result = await _renderPictures(size, pictures, captureImageBitmaps: true);
     return result.imageBitmaps.toDart.cast<DomImageBitmap>();
   }
@@ -366,6 +372,7 @@ class SkwasmOnscreenSurface extends SkwasmSurface<DomHTMLCanvasElement, Onscreen
 
   @override
   Future<void> rasterizeToCanvas(ui.Picture picture) async {
+    await initialized;
     await _renderPictures(_currentSize, <ui.Picture>[picture], captureImageBitmaps: false);
   }
 
