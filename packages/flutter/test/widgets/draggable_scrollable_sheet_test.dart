@@ -152,6 +152,28 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
   });
 
+  testWidgets('Expands before scrolling an already scrolled list', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/94942.
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(boilerplateWidget(null, controller: controller, itemExtent: 50.0));
+
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    // Revealing a focused text field can scroll the list while the sheet is partially expanded.
+    scrollController.jumpTo(100.0);
+    await tester.pump();
+    expect(controller.size, .5);
+    expect(scrollController.offset, 100.0);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -60));
+    await tester.pumpAndSettle(const Duration(milliseconds: 16));
+
+    expect(controller.size, greaterThan(.5));
+    expect(scrollController.offset, 100.0);
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets(
     'Invalid snap targets throw assertion errors.',
     experimentalLeakTesting: LeakTesting.settings
