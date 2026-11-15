@@ -37,6 +37,11 @@ class ExtensionConnection {
   /// Fallback extension name used when an extension does not report one in its capabilities.
   static const defaultExtensionName = 'unknown_extension';
 
+  // Bounded grace period for `extension.shutdown` RPCs so extensions can
+  // terminate child processes and tunnels before the isolate is killed
+  // without allowing a wedged extension to stall CLI exit.
+  static const _kShutdownTimeout = Duration(seconds: 2);
+
   Isolate? _isolate;
 
   /// Port receiving uncaught async errors (`[String error, String? stackTrace]`)
@@ -58,10 +63,11 @@ class ExtensionConnection {
   /// The resolved package or extension name of the connected extension.
   final String extensionName;
 
-  bool _isDisposed = false;
+  Future<void>? _disposeFuture;
+  bool _isolateExited = false;
 
   /// Whether this connection has been disposed.
-  bool get isDisposed => _isDisposed;
+  bool get isDisposed => _disposeFuture != null;
 
   /// Handles uncaught async errors from the extension isolate after handshake.
   ///
@@ -90,14 +96,16 @@ class ExtensionConnection {
   /// long-running `timeout: null` build requests) with a [StateError] and
   /// closing active notification streams instead of hanging indefinitely.
   void _handleIsolateExit() {
+    _isolateExited = true;
     _logger.printTrace('Extension isolate "$extensionName" exited unexpectedly.');
+    _receivePort.close();
     unawaited(dispose());
   }
 
   /// Returns a broadcast stream of JSON-RPC 2.0 notifications sent by the
   /// extension isolate for [method].
   Stream<Map<String, Object?>> onNotification(String method) {
-    if (_isDisposed) {
+    if (isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
     final StreamController<Map<String, Object?>>
@@ -127,7 +135,7 @@ class ExtensionConnection {
     Object? params,
     Duration? timeout = const Duration(seconds: 5),
   }) async {
-    if (_isDisposed) {
+    if (isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
     _logger.printTrace('ExtensionConnection sending RPC request "$method"...');
@@ -136,7 +144,13 @@ class ExtensionConnection {
       final Object? result = await (timeout != null ? request.timeout(timeout) : request);
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
-    } catch (error) {
+    } on json_rpc.RpcException catch (error) {
+      if (error.code == ToolExtensionException.domainErrorCode) {
+        throw ToolExtensionException(error.message);
+      }
+      _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
+      rethrow;
+    } on Object catch (error) {
       _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
       rethrow;
     }
@@ -332,12 +346,19 @@ class ExtensionConnection {
   }
 
   /// Disposes the extension isolate connection.
-  Future<void> dispose() async {
-    if (_isDisposed) {
-      return;
-    }
-    _isDisposed = true;
+  Future<void> dispose() => _disposeFuture ??= _doDispose();
+
+  Future<void> _doDispose() async {
     _logger.printTrace('ExtensionConnection disposing isolate connection.');
+    if (!_isolateExited && !_peer.isClosed) {
+      try {
+        await _peer.sendRequest(ToolExtensionEntryPoint.shutdownMethod).timeout(_kShutdownTimeout);
+      } on Object catch (error) {
+        _logger.printTrace(
+          'Extension "$extensionName" shutdown RPC did not complete cleanly: $error',
+        );
+      }
+    }
     _errorPort.close();
     _exitPort.close();
     _receivePort.close();
@@ -383,9 +404,7 @@ class ExtensionDiscovery {
   /// Disposes all registered extension isolate connections.
   Future<void> dispose() async {
     _logger.printTrace('ExtensionDiscovery disposing all registered connections.');
-    for (final ExtensionConnection connection in _connections) {
-      await connection.dispose();
-    }
+    await Future.wait(_connections.map((ExtensionConnection c) => c.dispose()));
     _connections.clear();
   }
 }

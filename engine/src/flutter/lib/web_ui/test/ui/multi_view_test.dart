@@ -37,7 +37,8 @@ void testMain() {
     });
 
     test('can render into arbitrary views', () async {
-      await renderer.renderScene(scene, implicitView as EngineFlutterView);
+      final implicitEngineView = implicitView as EngineFlutterView;
+      await renderer.renderScene(scene, implicitEngineView, size: implicitEngineView.physicalSize);
 
       final anotherView = EngineFlutterView(
         EnginePlatformDispatcher.instance,
@@ -45,7 +46,7 @@ void testMain() {
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(anotherView);
 
-      await renderer.renderScene(scene, anotherView);
+      await renderer.renderScene(scene, anotherView, size: anotherView.physicalSize);
     });
 
     test('will error if trying to render into an unregistered view', () async {
@@ -53,7 +54,10 @@ void testMain() {
         EnginePlatformDispatcher.instance,
         createDomElement('unregistered-view'),
       );
-      expect(() => renderer.renderScene(scene, unregisteredView), throwsAssertionError);
+      expect(
+        () => renderer.renderScene(scene, unregisteredView, size: unregisteredView.physicalSize),
+        throwsAssertionError,
+      );
     });
 
     test('will dispose the Rasterizer for a disposed view', () async {

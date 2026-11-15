@@ -28,5 +28,14 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<!--
+	When developing features that access protected resources (e.g. camera,
+	microphone, photos) on macOS, launching via "flutter run" from an IDE or
+	custom terminal attributes permission requests to the parent process
+	instead of this app bundle. To use these features during development, run
+	the project directly from Xcode, or "flutter run" using the default macOS
+	Terminal app.
+	See https://github.com/flutter/flutter/issues/70374 for more details.
+	-->
 </dict>
 </plist>

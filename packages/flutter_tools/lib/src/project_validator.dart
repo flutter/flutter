@@ -52,8 +52,16 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final ToolContext(:Cache cache, :FileSystem fs, :Git git, :Platform platform) = _toolContext;
-    final version = FlutterVersion(flutterRoot: cache.flutterRoot, fs: fs, git: git);
+    final ToolContext(:Cache cache, :FileSystem fs, :Git git, :Logger logger, :Platform platform) =
+        _toolContext;
+    final version = FlutterVersion(
+      cache: cache,
+      flutterRoot: cache.flutterRoot,
+      fs: fs,
+      git: git,
+      logger: logger,
+      platform: platform,
+    );
     final result = <String, Object?>{
       'FlutterProject.directory': project.directory.absolute.path,
       'FlutterProject.metadataFile': project.metadataFile.absolute.path,

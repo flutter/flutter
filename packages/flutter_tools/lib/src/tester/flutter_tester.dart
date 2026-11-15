@@ -233,8 +233,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    _logReader.dispose();
-    await _portForwarder.dispose();
+    await Future.wait(<Future<void>>[_logReader.dispose(), _portForwarder.dispose()]);
   }
 }
 
