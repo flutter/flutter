@@ -1243,10 +1243,7 @@ class LocalizationsGenerator {
         .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
         .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
         .replaceAll('@(delegateClass)', delegateClass)
-        .replaceAll(
-          '@(requiresFoundationImport)',
-          useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';",
-        )
+        .replaceAll('@(packageImports)', _generatePackageImports().join('\n'))
         .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
         .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
         // Removes all trailing whitespace from the generated file.
@@ -1255,6 +1252,48 @@ class LocalizationsGenerator {
         .join('\n')
         // Cleans out unnecessary newlines.
         .replaceAll('\n\n\n', '\n\n');
+  }
+
+  /// The direct dependencies declared in the project's pubspec.yaml.
+  late final Set<String> _projectDependencies =
+      FlutterManifest.createFromPath(
+        projectDirectory.childFile('pubspec.yaml').path,
+        fileSystem: _fs,
+        logger: logger,
+      )?.dependencies ??
+      const <String>{};
+
+  /// The package imports of the generated localizations file, sorted.
+  ///
+  /// `GlobalMaterialLocalizations` and `GlobalCupertinoLocalizations` in
+  /// `package:flutter_localizations` are deprecated in favor of the ones in
+  /// `package:material_ui` and `package:cupertino_ui`. If the project depends
+  /// on those packages, the delegates are imported from there instead, so that
+  /// the generated code does not use the deprecated delegates.
+  List<String> _generatePackageImports() {
+    final hiddenNames = <String>[];
+    final imports = <String>[
+      if (!useDeferredLoading) "import 'package:flutter/foundation.dart';",
+      "import 'package:flutter/widgets.dart';",
+      "import 'package:intl/intl.dart' as intl;",
+    ];
+    if (_projectDependencies.contains('cupertino_ui')) {
+      hiddenNames.add('GlobalCupertinoLocalizations');
+      imports.add(
+        "import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;",
+      );
+    }
+    if (_projectDependencies.contains('material_ui')) {
+      hiddenNames.add('GlobalMaterialLocalizations');
+      imports.add(
+        "import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;",
+      );
+    }
+    final hideCombinator = hiddenNames.isEmpty ? '' : ' hide ${hiddenNames.join(', ')}';
+    imports.add(
+      "import 'package:flutter_localizations/flutter_localizations.dart'$hideCombinator;",
+    );
+    return imports..sort();
   }
 
   String _generateMethod(Message message, LocaleInfo locale) {

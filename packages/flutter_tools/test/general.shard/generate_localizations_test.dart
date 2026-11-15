@@ -3095,6 +3095,138 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       },
     );
 
+    group('global localizations delegates imports', () {
+      void writePubspec(List<String> dependencies) {
+        fs.file('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+${dependencies.map((String dependency) => '  $dependency: any').join('\n')}
+flutter:
+  generate: true
+''');
+      }
+
+      void generate() {
+        setupLocalizations(<String, String>{
+          'en': singleMessageArbFileString,
+          'es': singleEsMessageArbFileString,
+        });
+      }
+
+      testWithoutContext('are imported from flutter_localizations by default', () {
+        writePubspec(<String>[]);
+        generate();
+        expect(
+          getGeneratedFileContent(),
+          contains('''
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'output-localization-file_en.dart';
+'''),
+        );
+      });
+
+      testWithoutContext('are imported from flutter_localizations without a pubspec.yaml', () {
+        generate();
+        final String content = getGeneratedFileContent();
+        expect(
+          content,
+          contains("import 'package:flutter_localizations/flutter_localizations.dart';"),
+        );
+        expect(content, isNot(contains('package:material_ui')));
+        expect(content, isNot(contains('package:cupertino_ui')));
+      });
+
+      testWithoutContext('are imported from material_ui and cupertino_ui when depended on', () {
+        writePubspec(<String>['cupertino_ui', 'material_ui']);
+        generate();
+        expect(
+          getGeneratedFileContent(),
+          contains('''
+import 'dart:async';
+
+import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart' hide GlobalCupertinoLocalizations, GlobalMaterialLocalizations;
+import 'package:intl/intl.dart' as intl;
+import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;
+
+import 'output-localization-file_en.dart';
+'''),
+        );
+      });
+
+      testWithoutContext('only replaces the delegates of the packages depended on', () {
+        writePubspec(<String>['material_ui']);
+        generate();
+        final String content = getGeneratedFileContent();
+        expect(
+          content,
+          contains(
+            "import 'package:flutter_localizations/flutter_localizations.dart' hide GlobalMaterialLocalizations;",
+          ),
+        );
+        expect(
+          content,
+          contains(
+            "import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;",
+          ),
+        );
+        expect(content, isNot(contains('package:cupertino_ui')));
+      });
+
+      testWithoutContext('ignores dev_dependencies', () {
+        fs.file('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+dev_dependencies:
+  cupertino_ui: any
+  material_ui: any
+flutter:
+  generate: true
+''');
+        generate();
+        final String content = getGeneratedFileContent();
+        expect(
+          content,
+          contains("import 'package:flutter_localizations/flutter_localizations.dart';"),
+        );
+        expect(content, isNot(contains('package:material_ui')));
+        expect(content, isNot(contains('package:cupertino_ui')));
+      });
+
+      testWithoutContext('omits the foundation import with deferred loading', () {
+        writePubspec(<String>['cupertino_ui', 'material_ui']);
+        setupLocalizations(<String, String>{
+          'en': singleMessageArbFileString,
+          'es': singleEsMessageArbFileString,
+        }, useDeferredLoading: true);
+        expect(
+          getGeneratedFileContent(),
+          contains('''
+import 'dart:async';
+
+import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
+import 'package:flutter/widgets.dart';
+'''),
+        );
+      });
+    });
+
     testWithoutContext('check for string interpolation rules', () {
       const enArbCheckList = '''
 {
