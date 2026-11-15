@@ -171,3 +171,5 @@ app.*.symbols
 .agents/rules/personal-*
 .agents/skills/personal-*
 /.agent-shell/
+# Widget Preview related
+.widget_preview/
