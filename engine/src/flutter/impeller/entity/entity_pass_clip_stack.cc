@@ -81,10 +81,12 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordRestore(
   result.clip_did_change = true;
 
   if (subpass_state.clip_coverage.back().coverage.has_value()) {
-    // Only pop replay entities that belonged to deeper child scopes
-    // (clip_height > restore_height). This preserves active parent clips across
-    // sibling restorations while correctly popping multi-level nested
-    // hierarchies back down to restore_height.
+    FML_DCHECK(next_replay_index_ <=
+               subpass_state.rendered_clip_entities.size());
+    // `RecordClip` omits replay entities for axis-aligned intersect rects that
+    // contain the current clip coverage, and a single `RecordRestore` can
+    // unwind multiple `RecordClip` calls at once. Popping all entries with
+    // `clip_height > restore_height` evicts only the restored scopes' clips.
     while (!subpass_state.rendered_clip_entities.empty() &&
            subpass_state.rendered_clip_entities.back().clip_height >
                restore_height) {
@@ -189,6 +191,9 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordClip(
   FML_DCHECK(next_replay_index_ == subpass_state.rendered_clip_entities.size())
       << "Not all clips have been replayed before appending new clip.";
 
+  // Tag with the same `clip_height` as its `ClipCoverageLayer` above so
+  // `RecordRestore` pops this replay entity if and only if its coverage layer
+  // is popped.
   subpass_state.rendered_clip_entities.push_back(ReplayResult{
       .clip_contents = clip_contents,           //
       .transform = transform,                   //

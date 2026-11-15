@@ -18,8 +18,8 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -58,6 +58,7 @@ FlutterPlatform installHook({
   required BuildInfo buildInfo,
   required DebuggingOptions debuggingOptions,
   required String flutterTesterBinPath,
+  required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
   bool enableVmService = false,
   FlutterProject? flutterProject,
@@ -92,6 +93,7 @@ FlutterPlatform installHook({
     buildInfo: buildInfo,
     debuggingOptions: debuggingOptions,
     flutterTesterBinPath: flutterTesterBinPath,
+    templateRenderer: templateRenderer,
     toolContext: toolContext,
     enableVmService: enableVmService,
     flutterProject: flutterProject,
@@ -302,6 +304,7 @@ class FlutterPlatform extends PlatformPlugin {
     required this.buildInfo,
     required this.debuggingOptions,
     required this.flutterTesterBinPath,
+    required this._templateRenderer,
     required this._toolContext,
     this.enableVmService,
     this.flutterProject,
@@ -325,6 +328,7 @@ class FlutterPlatform extends PlatformPlugin {
           TestCompiler(
             buildInfo,
             flutterProject,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             testTimeRecorder: testTimeRecorder,
           ),
@@ -333,6 +337,7 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   final String flutterTesterBinPath;
@@ -627,6 +632,7 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
@@ -655,6 +661,7 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             testTimeRecorder: testTimeRecorder,
           );
@@ -840,7 +847,7 @@ class FlutterPlatform extends PlatformPlugin {
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
       packageConfig[flutterProject!.manifest.appName],
-      Cache.flutterRoot!,
+      _toolContext.cache.flutterRoot,
     );
     return generateTestBootstrap(
       testUrl: testUrl,

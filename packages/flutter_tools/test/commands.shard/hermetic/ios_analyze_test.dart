@@ -54,13 +54,6 @@ void main() {
         ),
       );
       runner = createTestCommandRunner(command);
-
-      // Setup repo roots
-      const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
-      for (final dir in <String>['dev', 'examples', 'packages']) {
-        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
-      }
     });
 
     testWithoutContext('can output json file', () async {

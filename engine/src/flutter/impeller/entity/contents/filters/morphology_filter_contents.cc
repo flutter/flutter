@@ -204,12 +204,8 @@ DirectionalMorphologyFilterContents::GetFilterSourceCoverage(
     const Rect& output_limit) const {
   auto transformed_vector =
       effect_transform.TransformDirection(direction_ * radius_.radius).Abs();
-  switch (morph_type_) {
-    case FilterContents::MorphType::kDilate:
-      return output_limit.Expand(-transformed_vector);
-    case FilterContents::MorphType::kErode:
-      return output_limit.Expand(transformed_vector);
-  }
+  // Dilation and erosion both sample neighboring source pixels.
+  return output_limit.Expand(transformed_vector);
 }
 
 }  // namespace impeller
