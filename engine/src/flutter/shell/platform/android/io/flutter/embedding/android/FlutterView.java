@@ -27,12 +27,9 @@ import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.PixelCopy;
 import android.view.PointerIcon;
 import android.view.RoundedCorner;
 import android.view.Surface;
-import android.view.SurfaceView;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -1288,48 +1285,30 @@ public class FlutterView extends FrameLayout
    * Copies the pixels that Flutter has rendered within {@code source}, in this view's coordinates,
    * into {@code destination}, and then reports whether the copy succeeded on the main thread.
    *
-   * <p>Used to provide images for Android's scrolling screenshots.
+   * <p>Used to provide images for Android's scrolling screenshots. This asks the engine for a
+   * screenshot of the last frame it rasterized instead of reading back the render surface with
+   * {@link android.view.PixelCopy}, because that cannot read frames presented through some
+   * rendering backends (for example, Impeller's Vulkan backend on some devices).
    */
-  @RequiresApi(API_LEVELS.API_31)
   private void copyFlutterPixels(
       @NonNull Rect source,
       @NonNull Bitmap destination,
       @NonNull java.util.function.Consumer<Boolean> onDone) {
     final Handler handler = new Handler(Looper.getMainLooper());
-    final PixelCopy.OnPixelCopyFinishedListener listener =
-        result -> onDone.accept(result == PixelCopy.SUCCESS);
-    if (renderSurface instanceof SurfaceView) {
-      // The content of a SurfaceView is not part of the window's surface, so copy it directly.
-      PixelCopy.request((SurfaceView) renderSurface, source, destination, listener, handler);
-      return;
-    }
-    if (renderSurface instanceof TextureView) {
-      final Bitmap bitmap = ((TextureView) renderSurface).getBitmap();
-      if (bitmap == null) {
-        handler.post(() -> onDone.accept(false));
-        return;
+    final Bitmap frame =
+        isAttachedToFlutterEngine() ? flutterEngine.getRenderer().getBitmap() : null;
+    if (frame == null || !new Rect(0, 0, frame.getWidth(), frame.getHeight()).contains(source)) {
+      if (frame != null) {
+        frame.recycle();
       }
-      new Canvas(destination)
-          .drawBitmap(
-              bitmap,
-              source,
-              new Rect(0, 0, destination.getWidth(), destination.getHeight()),
-              null);
-      bitmap.recycle();
-      handler.post(() -> onDone.accept(true));
-      return;
-    }
-    // Otherwise, Flutter's content is drawn into the window's surface.
-    final Activity activity = ViewUtils.getActivity(getContext());
-    if (activity == null || activity.getWindow() == null) {
       handler.post(() -> onDone.accept(false));
       return;
     }
-    final int[] location = new int[2];
-    getLocationInWindow(location);
-    final Rect windowSource = new Rect(source);
-    windowSource.offset(location[0], location[1]);
-    PixelCopy.request(activity.getWindow(), windowSource, destination, listener, handler);
+    new Canvas(destination)
+        .drawBitmap(
+            frame, source, new Rect(0, 0, destination.getWidth(), destination.getHeight()), null);
+    frame.recycle();
+    handler.post(() -> onDone.accept(true));
   }
 
   /**
