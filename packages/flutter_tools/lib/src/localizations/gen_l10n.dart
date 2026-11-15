@@ -75,6 +75,7 @@ Future<LocalizationsGenerator> generateLocalizations({
             useRelaxedSyntax: options.relaxSyntax,
             useNamedParameters: options.useNamedParameters,
             useExplicitPluralValues: options.useExplicitPluralValues,
+            projectDependencies: flutterManifest.dependencies,
           )
           ..loadResources()
           ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
@@ -530,6 +531,7 @@ class LocalizationsGenerator {
     bool useRelaxedSyntax = false,
     bool useNamedParameters = false,
     bool useExplicitPluralValues = false,
+    Set<String> projectDependencies = const <String>{},
   }) {
     final Directory projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(
@@ -570,6 +572,7 @@ class LocalizationsGenerator {
       useRelaxedSyntax: useRelaxedSyntax,
       useNamedParameters: useNamedParameters,
       useExplicitPluralValues: useExplicitPluralValues,
+      projectDependencies: projectDependencies,
     );
   }
 
@@ -597,6 +600,7 @@ class LocalizationsGenerator {
     this.useRelaxedSyntax = false,
     this.useNamedParameters = false,
     this.useExplicitPluralValues = false,
+    this.projectDependencies = const <String>{},
   });
 
   final FileSystem _fs;
@@ -752,6 +756,13 @@ class LocalizationsGenerator {
   /// `other`) is resolved, and any non-negative integer is allowed for `N`.
   /// Otherwise `=0`, `=1` and `=2` are treated as `zero`, `one` and `two`.
   final bool useExplicitPluralValues;
+
+  /// The direct dependencies declared in the project's pubspec.yaml.
+  ///
+  /// Used to decide whether the global localizations delegates are imported
+  /// from `package:material_ui` and `package:cupertino_ui`, or from
+  /// `package:flutter_localizations`.
+  final Set<String> projectDependencies;
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
@@ -1254,15 +1265,6 @@ class LocalizationsGenerator {
         .replaceAll('\n\n\n', '\n\n');
   }
 
-  /// The direct dependencies declared in the project's pubspec.yaml.
-  late final Set<String> _projectDependencies =
-      FlutterManifest.createFromPath(
-        projectDirectory.childFile('pubspec.yaml').path,
-        fileSystem: _fs,
-        logger: logger,
-      )?.dependencies ??
-      const <String>{};
-
   /// The package imports of the generated localizations file, sorted.
   ///
   /// `GlobalMaterialLocalizations` and `GlobalCupertinoLocalizations` in
@@ -1277,13 +1279,13 @@ class LocalizationsGenerator {
       "import 'package:flutter/widgets.dart';",
       "import 'package:intl/intl.dart' as intl;",
     ];
-    if (_projectDependencies.contains('cupertino_ui')) {
+    if (projectDependencies.contains('cupertino_ui')) {
       hiddenNames.add('GlobalCupertinoLocalizations');
       imports.add(
         "import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;",
       );
     }
-    if (_projectDependencies.contains('material_ui')) {
+    if (projectDependencies.contains('material_ui')) {
       hiddenNames.add('GlobalMaterialLocalizations');
       imports.add(
         "import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;",

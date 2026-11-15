@@ -91,6 +91,7 @@ void main() {
     bool relaxSyntax = false,
     bool useNamedParameters = false,
     bool useExplicitPluralValues = false,
+    Set<String> projectDependencies = const <String>{},
     void Function(Directory)? setup,
     FileSystem? fileSystem,
   }) {
@@ -123,6 +124,7 @@ void main() {
         useRelaxedSyntax: relaxSyntax,
         useNamedParameters: useNamedParameters,
         useExplicitPluralValues: useExplicitPluralValues,
+        projectDependencies: projectDependencies,
         projectPathString: (fileSystem ?? fs).currentDirectory.path,
       )
       ..loadResources()
@@ -783,6 +785,76 @@ flutter:
         processManager: FakeProcessManager.any(),
       );
     });
+
+    Future<String> generateWithPubspec(String pubspec) async {
+      _standardFlutterDirectoryL10nSetup(fs);
+      fs.file('pubspec.yaml').writeAsStringSync(pubspec);
+      await generateLocalizations(
+        fileSystem: fs,
+        options: LocalizationOptions(
+          arbDir: Uri.directory(defaultL10nPath).path,
+          outputDir: Uri.directory(defaultL10nPath, windows: false).path,
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+        ),
+        logger: logger,
+        projectDir: fs.currentDirectory,
+        dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+      );
+      return fs.file(fs.path.join(defaultL10nPath, 'app_localizations.dart')).readAsStringSync();
+    }
+
+    testWithoutContext(
+      'imports the global delegates from the material_ui and cupertino_ui dependencies',
+      () async {
+        final String content = await generateWithPubspec('''
+name: test
+dependencies:
+  cupertino_ui: any
+  flutter:
+    sdk: flutter
+  material_ui: any
+flutter:
+  generate: true
+''');
+        expect(
+          content,
+          contains(
+            "import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;",
+          ),
+        );
+        expect(
+          content,
+          contains(
+            "import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;",
+          ),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'does not import the global delegates from material_ui and cupertino_ui dev_dependencies',
+      () async {
+        final String content = await generateWithPubspec('''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+dev_dependencies:
+  cupertino_ui: any
+  material_ui: any
+flutter:
+  generate: true
+''');
+        expect(
+          content,
+          contains("import 'package:flutter_localizations/flutter_localizations.dart';"),
+        );
+        expect(content, isNot(contains('package:material_ui')));
+        expect(content, isNot(contains('package:cupertino_ui')));
+      },
+    );
 
     testWithoutContext('other logs from flutter_tools does not affect gen-l10n', () async {
       _standardFlutterDirectoryL10nSetup(fs);
@@ -3096,29 +3168,14 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     );
 
     group('global localizations delegates imports', () {
-      void writePubspec(List<String> dependencies) {
-        fs.file('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-${dependencies.map((String dependency) => '  $dependency: any').join('\n')}
-flutter:
-  generate: true
-''');
-      }
-
-      void generate() {
+      void generate({Set<String> projectDependencies = const <String>{}}) {
         setupLocalizations(<String, String>{
           'en': singleMessageArbFileString,
           'es': singleEsMessageArbFileString,
-        });
+        }, projectDependencies: projectDependencies);
       }
 
       testWithoutContext('are imported from flutter_localizations by default', () {
-        writePubspec(<String>[]);
         generate();
         expect(
           getGeneratedFileContent(),
@@ -3135,20 +3192,8 @@ import 'output-localization-file_en.dart';
         );
       });
 
-      testWithoutContext('are imported from flutter_localizations without a pubspec.yaml', () {
-        generate();
-        final String content = getGeneratedFileContent();
-        expect(
-          content,
-          contains("import 'package:flutter_localizations/flutter_localizations.dart';"),
-        );
-        expect(content, isNot(contains('package:material_ui')));
-        expect(content, isNot(contains('package:cupertino_ui')));
-      });
-
       testWithoutContext('are imported from material_ui and cupertino_ui when depended on', () {
-        writePubspec(<String>['cupertino_ui', 'material_ui']);
-        generate();
+        generate(projectDependencies: <String>{'cupertino_ui', 'material_ui'});
         expect(
           getGeneratedFileContent(),
           contains('''
@@ -3167,8 +3212,7 @@ import 'output-localization-file_en.dart';
       });
 
       testWithoutContext('only replaces the delegates of the packages depended on', () {
-        writePubspec(<String>['material_ui']);
-        generate();
+        generate(projectDependencies: <String>{'material_ui'});
         final String content = getGeneratedFileContent();
         expect(
           content,
@@ -3185,36 +3229,12 @@ import 'output-localization-file_en.dart';
         expect(content, isNot(contains('package:cupertino_ui')));
       });
 
-      testWithoutContext('ignores dev_dependencies', () {
-        fs.file('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-dev_dependencies:
-  cupertino_ui: any
-  material_ui: any
-flutter:
-  generate: true
-''');
-        generate();
-        final String content = getGeneratedFileContent();
-        expect(
-          content,
-          contains("import 'package:flutter_localizations/flutter_localizations.dart';"),
-        );
-        expect(content, isNot(contains('package:material_ui')));
-        expect(content, isNot(contains('package:cupertino_ui')));
-      });
-
       testWithoutContext('omits the foundation import with deferred loading', () {
-        writePubspec(<String>['cupertino_ui', 'material_ui']);
-        setupLocalizations(<String, String>{
-          'en': singleMessageArbFileString,
-          'es': singleEsMessageArbFileString,
-        }, useDeferredLoading: true);
+        setupLocalizations(
+          <String, String>{'en': singleMessageArbFileString, 'es': singleEsMessageArbFileString},
+          useDeferredLoading: true,
+          projectDependencies: <String>{'cupertino_ui', 'material_ui'},
+        );
         expect(
           getGeneratedFileContent(),
           contains('''
