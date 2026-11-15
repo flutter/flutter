@@ -94,7 +94,7 @@ static size_t ComputeQuadrantDivisions(impeller::Scalar pixel_radius) {
   // Range-check as a float *before* converting to an integer: converting a
   // float above INT_MAX to int is undefined behaviour (it comes out as
   // INT_MIN on x86-64, which then crashes as it reads outside the table).
-  impeller::Scalar pixel_radius_ceil = ceil(pixel_radius);
+  impeller::Scalar pixel_radius_ceil = std::ceil(pixel_radius);
   if (pixel_radius_ceil < kPrecomputedDivisionCount) {
     int radius_index = pixel_radius_ceil;
     return kPrecomputedDivisions[radius_index];
@@ -144,7 +144,7 @@ static size_t ComputeQuadrantDivisions(impeller::Scalar pixel_radius) {
   // Since we have precomputed the divisions for radii up to 1024, we can
   // afford to be more accurate using the acos formula here for larger radii.
   double k = impeller::Tessellator::kCircleTolerance / pixel_radius;
-  double divisions = ceil(impeller::kPiOver4 / std::acos(1 - k));
+  double divisions = std::ceil(impeller::kPiOver4 / std::acos(1 - k));
   // acos(1 - k) can round to 0 for extremely small k, making this inf;
   // clamp before converting to size_t (out-of-range conversion is UB).
   if (!(divisions < impeller::Tessellator::kMaxQuadrantDivisions)) {
