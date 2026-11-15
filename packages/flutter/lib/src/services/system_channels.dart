@@ -614,4 +614,36 @@ abstract final class SystemChannels {
   ///  * `isSupported`: Returns whether or not setting content sensitivity levels is supported on the
   ///     device.
   static const MethodChannel sensitiveContent = OptionalMethodChannel('flutter/sensitivecontent');
+
+  /// A [MethodChannel] for capturing scrolling content, such as Android's
+  /// scrolling screenshots ("capture more").
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]). All coordinates are in
+  /// physical pixels. The optional `viewId` argument identifies the view, and
+  /// defaults to the implicit view.
+  ///
+  ///  * `ScrollCapture.search`: Returns the bounds of the primary vertical
+  ///    scrollable in the view as a map with `left`, `top`, `right` and
+  ///    `bottom` keys, relative to the view, or null if there is no
+  ///    scrollable content to capture.
+  ///
+  ///  * `ScrollCapture.start`: Starts a capture session for the primary
+  ///    scrollable, remembering its scroll offset. Returns its bounds like
+  ///    `ScrollCapture.search`, or null if there is nothing to capture.
+  ///
+  ///  * `ScrollCapture.scrollTo`: Scrolls so that as much as possible of the
+  ///    vertical range given by the `top` and `bottom` arguments is visible,
+  ///    then waits for the frame to be produced. The range is relative to the
+  ///    top of the scroll bounds at the start of the session. Returns a map
+  ///    whose `scrollDelta` entry is the distance the content has moved up
+  ///    since the start of the session, or null if the session is no longer
+  ///    valid.
+  ///
+  ///  * `ScrollCapture.end`: Ends the session and restores the original
+  ///    scroll offset.
+  static const MethodChannel scrollCapture = OptionalMethodChannel(
+    'flutter/scrollcapture',
+    JSONMethodCodec(),
+  );
 }

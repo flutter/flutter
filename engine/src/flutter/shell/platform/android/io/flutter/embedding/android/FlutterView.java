@@ -11,6 +11,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -25,9 +27,12 @@ import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.PixelCopy;
 import android.view.PointerIcon;
 import android.view.RoundedCorner;
 import android.view.Surface;
+import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -1259,6 +1264,13 @@ public class FlutterView extends FrameLayout
     flutterEngine.getPlatformViewsController().attachToView(this);
     flutterEngine.getPlatformViewsController2().attachToView(this);
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
+      // Lets Android's scrolling screenshots capture scrollable Flutter content.
+      setScrollCaptureCallback(
+          new FlutterScrollCaptureCallback(
+              this, flutterEngine.getScrollCaptureChannel(), this::copyFlutterPixels));
+    }
+
     // Notify engine attachment listeners of the attachment.
     for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
       listener.onFlutterEngineAttachedToFlutterView(flutterEngine);
@@ -1270,6 +1282,54 @@ public class FlutterView extends FrameLayout
     if (isFlutterUiDisplayed) {
       flutterUiDisplayListener.onFlutterUiDisplayed();
     }
+  }
+
+  /**
+   * Copies the pixels that Flutter has rendered within {@code source}, in this view's coordinates,
+   * into {@code destination}, and then reports whether the copy succeeded on the main thread.
+   *
+   * <p>Used to provide images for Android's scrolling screenshots.
+   */
+  @RequiresApi(API_LEVELS.API_31)
+  private void copyFlutterPixels(
+      @NonNull Rect source,
+      @NonNull Bitmap destination,
+      @NonNull java.util.function.Consumer<Boolean> onDone) {
+    final Handler handler = new Handler(Looper.getMainLooper());
+    final PixelCopy.OnPixelCopyFinishedListener listener =
+        result -> onDone.accept(result == PixelCopy.SUCCESS);
+    if (renderSurface instanceof SurfaceView) {
+      // The content of a SurfaceView is not part of the window's surface, so copy it directly.
+      PixelCopy.request((SurfaceView) renderSurface, source, destination, listener, handler);
+      return;
+    }
+    if (renderSurface instanceof TextureView) {
+      final Bitmap bitmap = ((TextureView) renderSurface).getBitmap();
+      if (bitmap == null) {
+        handler.post(() -> onDone.accept(false));
+        return;
+      }
+      new Canvas(destination)
+          .drawBitmap(
+              bitmap,
+              source,
+              new Rect(0, 0, destination.getWidth(), destination.getHeight()),
+              null);
+      bitmap.recycle();
+      handler.post(() -> onDone.accept(true));
+      return;
+    }
+    // Otherwise, Flutter's content is drawn into the window's surface.
+    final Activity activity = ViewUtils.getActivity(getContext());
+    if (activity == null || activity.getWindow() == null) {
+      handler.post(() -> onDone.accept(false));
+      return;
+    }
+    final int[] location = new int[2];
+    getLocationInWindow(location);
+    final Rect windowSource = new Rect(source);
+    windowSource.offset(location[0], location[1]);
+    PixelCopy.request(activity.getWindow(), windowSource, destination, listener, handler);
   }
 
   /**
@@ -1296,6 +1356,10 @@ public class FlutterView extends FrameLayout
     }
 
     getContext().getContentResolver().unregisterContentObserver(systemSettingsObserver);
+
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
+      setScrollCaptureCallback(null);
+    }
 
     flutterEngine.getPlatformViewsController().detachFromView();
     flutterEngine.getPlatformViewsController2().detachFromView();
