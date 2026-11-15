@@ -1398,17 +1398,17 @@ void main() async {
     expect(width, greaterThanOrEqualTo(2048));
     expect(height, greaterThanOrEqualTo(2048));
 
-    // A render target of the maximum width renders.
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.devicePrivate,
-      width,
-      1,
-    );
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
-    commandBuffer.createRenderPass(
-      gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: texture)),
-    );
-    commandBuffer.submit();
+    // Render targets of the maximum width and of the maximum height render.
+    // Each is a single row or column, rather than width x height, which
+    // could exhaust a CI runner's memory.
+    for (final (int w, int h) in <(int, int)>[(width, 1), (1, height)]) {
+      final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, w, h);
+      final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+      commandBuffer.createRenderPass(
+        gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: texture)),
+      );
+      commandBuffer.submit();
+    }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('RenderPass.bindTexture throws for invalid SamplerOptions.maxAnisotropy', () async {
