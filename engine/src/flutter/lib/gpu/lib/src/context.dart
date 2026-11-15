@@ -104,6 +104,26 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getMaxSamplerAnisotropy();
   }
 
+  /// The widest texture, in pixels, that a render pass can attach (see
+  /// [ColorAttachment.texture] and [DepthStencilAttachment.texture]).
+  ///
+  /// It's the device's own limit: `maxFramebufferWidth` on Vulkan,
+  /// `GL_MAX_TEXTURE_SIZE` on OpenGL ES, and the device's maximum texture size
+  /// on Metal. OpenGL ES only guarantees 2048, and many devices allow more, so
+  /// check this before creating a large render target rather than assuming a
+  /// size. It can be smaller than the largest texture that can be created
+  /// only for sampling.
+  int get maxRenderTargetWidth {
+    return _getMaximumRenderTargetSize(0);
+  }
+
+  /// The tallest texture, in pixels, that a render pass can attach.
+  ///
+  /// See [maxRenderTargetWidth].
+  int get maxRenderTargetHeight {
+    return _getMaximumRenderTargetSize(1);
+  }
+
   /// Whether this device supports the given family of block-compressed
   /// texture formats. Hardware support is granted on a per-family basis.
   ///
@@ -506,6 +526,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetMaxSamplerAnisotropy',
   )
   external int _getMaxSamplerAnisotropy();
+
+  @Native<Uint32 Function(Pointer<Void>, Int)>(
+    symbol: 'InternalFlutterGpu_Context_GetMaximumRenderTargetSize',
+  )
+  external int _getMaximumRenderTargetSize(int dimension);
 
   @Native<Bool Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_Context_SupportsTextureCompression',

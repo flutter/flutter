@@ -1390,6 +1390,27 @@ void main() async {
     expect(gpu.gpuContext.maxSamplerAnisotropy, greaterThanOrEqualTo(1));
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('GpuContext.maxRenderTargetWidth and Height report a usable size', () async {
+    // Every backend guarantees at least 2048: OpenGL ES's GL_MAX_TEXTURE_SIZE
+    // minimum, which Vulkan's and Metal's exceed.
+    final int width = gpu.gpuContext.maxRenderTargetWidth;
+    final int height = gpu.gpuContext.maxRenderTargetHeight;
+    expect(width, greaterThanOrEqualTo(2048));
+    expect(height, greaterThanOrEqualTo(2048));
+
+    // A render target of the maximum width renders.
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      width,
+      1,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    commandBuffer.createRenderPass(
+      gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: texture)),
+    );
+    commandBuffer.submit();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('RenderPass.bindTexture throws for invalid SamplerOptions.maxAnisotropy', () async {
     final RenderPassState state = createSimpleRenderPass();
 

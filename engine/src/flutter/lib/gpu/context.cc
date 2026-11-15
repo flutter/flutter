@@ -158,6 +158,22 @@ extern bool InternalFlutterGpu_Context_GetSupportsCompute(
   return flutter::gpu::SupportsCompute(wrapper->GetContext());
 }
 
+extern uint32_t InternalFlutterGpu_Context_GetMaximumRenderTargetSize(
+    flutter::gpu::Context* wrapper,
+    int dimension) {
+  const impeller::ISize size = wrapper->GetContext()
+                                   .GetCapabilities()
+                                   ->GetMaximumRenderPassAttachmentSize();
+  switch (dimension) {
+    case 0:
+      return static_cast<uint32_t>(size.width);
+    case 1:
+      return static_cast<uint32_t>(size.height);
+    default:
+      return 0u;
+  }
+}
+
 // The compute limits are zero wherever Flutter GPU does not support compute,
 // whatever the backend reports.
 
