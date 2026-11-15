@@ -279,6 +279,12 @@ class Tessellator {
   ///          true circle by more than this tolerance.
   static constexpr Scalar kCircleTolerance = 0.1f;
 
+  /// @brief   The maximum number of divisions per quarter circle. Beyond
+  ///          this, the chord error R(1 - cos(pi/4N)) is smaller than
+  ///          float32 rounding error (R * 2^-24), so more divisions cannot
+  ///          improve accuracy. N = (pi/4) / acos(1 - 2^-24) ~= 2274.76.
+  static constexpr size_t kMaxQuadrantDivisions = 2275;
+
   /// @brief   Create a |VertexGenerator| that can produce vertices for
   ///          a filled circle of the given radius around the given center
   ///          with enough polygon sub-divisions to provide reasonable
