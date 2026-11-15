@@ -18,12 +18,9 @@ const targetMacOSVersion = 13;
 /// Extract the [Architecture] from a [CpuArch].
 Architecture getNativeMacOSArchitecture(CpuArch cpuArch) {
   return switch (cpuArch) {
-    CpuArch.arm64 => Architecture.arm64,
-    CpuArch.x64 => Architecture.x64,
-    CpuArch.armv7 ||
-    CpuArch.x86 ||
-    CpuArch.riscv64 ||
-    CpuArch.unknown => throw Exception('Unknown macOS CPU arch: $cpuArch.'),
+    .arm64 => Architecture.arm64,
+    .x64 => Architecture.x64,
+    _ => throw Exception('Unknown macOS CPU arch: $cpuArch.'),
   };
 }
 
