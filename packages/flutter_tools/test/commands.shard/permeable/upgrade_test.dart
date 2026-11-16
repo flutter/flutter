@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -23,10 +22,17 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+final localFs = LocalFileSystem.test(signals: FakeSignals());
+
 void main() {
   setUpAll(() {
     Cache.disableLocking();
   });
+
+  tearDownAll(() async {
+    await localFs.dispose();
+  });
+
   group('UpgradeCommandRunner', () {
     final jan12026 = DateTime.utc(2026);
 
@@ -214,7 +220,7 @@ void main() {
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
-              globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
+              localFs.path.join(getFlutterRoot(), 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',
@@ -271,7 +277,7 @@ void main() {
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
+              localFs.path.join('bin', 'flutter'),
               '--no-color',
               '--no-version-check',
               'precache',
@@ -500,7 +506,7 @@ void main() {
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              globals.fs.path.join(
+              localFs.path.join(
                 realCommandRunner.workingDirectory ?? getFlutterRoot(),
                 'bin',
                 'flutter',
@@ -729,7 +735,7 @@ void main() {
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
+              localFs.path.join('bin', 'flutter'),
               '--no-color',
               '--no-version-check',
               'precache',
@@ -754,7 +760,7 @@ void main() {
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
+              localFs.path.join(getFlutterRoot(), 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',

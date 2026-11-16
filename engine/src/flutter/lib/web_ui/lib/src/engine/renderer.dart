@@ -96,7 +96,10 @@ abstract class Renderer {
     rasterizer.dispose();
   }
 
-  ui.Paint createPaint();
+  /// Creates a native paint for a single draw call from [paint].
+  ///
+  /// The caller owns the result and must dispose it after the draw call.
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode});
 
   BackendVertices createVertices(
     ui.VertexMode mode,
@@ -156,6 +159,7 @@ abstract class Renderer {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   });
   BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY});
   BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY});

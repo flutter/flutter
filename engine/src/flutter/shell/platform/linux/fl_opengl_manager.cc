@@ -37,7 +37,6 @@ static void fl_opengl_manager_dispose(GObject* object) {
   eglDestroyContext(self->display, self->render_context);
   eglDestroyContext(self->display, self->resource_context);
   eglDestroyContext(self->display, self->platform_context);
-  eglTerminate(self->display);
 
   G_OBJECT_CLASS(fl_opengl_manager_parent_class)->dispose(object);
 }

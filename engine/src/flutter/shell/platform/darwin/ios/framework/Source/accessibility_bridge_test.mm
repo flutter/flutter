@@ -80,6 +80,7 @@ namespace {
 class MockDelegate : public PlatformView::Delegate {
  public:
   void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}
+  void OnPlatformViewCreatedDeferred(PlatformView::SurfaceFactory surface_factory) override {}
   void OnPlatformViewDestroyed() override {}
   void OnPlatformViewScheduleFrame() override {}
   void OnPlatformViewAddView(int64_t view_id,
