@@ -107,11 +107,12 @@ android {
     expect(exampleApk, exists);
 
     if (template == 'plugin_ffi') {
-      // Does not support AGP 3.3.0.
+      // The checks below need plugin classes and a build.gradle.kts file, and
+      // the FFI template has neither. It also does not support AGP 3.3.0.
       return;
     }
 
-    // Generate the plugin's BuildConfig, to check which build types it treats as
+    // Turn on the plugin's BuildConfig, to check which build types it treats as
     // debuggable.
     final File pluginGradleFile = tempDir
         .childDirectory(testName)
@@ -129,7 +130,7 @@ android {
 ''');
 
     // The staging build type minifies the app. Check that R8 keeps the plugin
-    // classes.
+    // classes. Also generate the plugin's BuildConfig for the checks below.
     final Directory exampleAndroidDir = exampleAppDir.childDirectory('android');
     result = processManager.runSync(<String>[
       exampleAndroidDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').path,
@@ -139,9 +140,7 @@ android {
       '-Ptarget-platform=android-arm',
     ], workingDirectory: exampleAndroidDir.path);
     if (result.exitCode != 0) {
-      throw Exception(
-        'gradlew :app:assembleStaging failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
-      );
+      throw Exception('gradlew failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
     }
 
     // LibraryBuildType has no isDebuggable, so the Flutter Gradle plugin can
@@ -161,7 +160,11 @@ android {
         .childFile('BuildConfig.java')
         .readAsStringSync();
     final debugField = RegExp(r'boolean DEBUG = .*\btrue\b');
-    expect(pluginBuildConfig('qa'), matches(debugField));
+    expect(
+      pluginBuildConfig('qa'),
+      matches(debugField),
+      reason: 'PluginHandler.copyLibraryBuildTypeProperties did not copy isDebuggable',
+    );
     expect(pluginBuildConfig('staging'), isNot(matches(debugField)));
 
     // Clean
