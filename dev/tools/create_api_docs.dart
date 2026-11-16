@@ -614,6 +614,7 @@ class DartdocGenerator {
       'dartdoc',
       '--output',
       publishRoot.childDirectory('flutter').path,
+      '--rel-canonical-prefix=https://api.flutter.dev/flutter',
       '--allow-tools',
       if (useJson) '--json',
       if (validateLinks) '--validate-links' else '--no-validate-links',
@@ -832,6 +833,12 @@ class DartdocGenerator {
     }
   }
 
+  static final RegExp _canonicalTagPattern = RegExp(r'[ \t]*<link rel="canonical"[^>]*>\r?\n?');
+  static final RegExp _dartLibraryRedirectCanonicalPattern = RegExp(
+    r'<link rel="canonical" href="\.\./(dart-[^"&/]+)(?:&#47;|/)"\s*/?>',
+  );
+  static const Set<String> _flutterOwnedDartLibraries = <String>{'dart-ui', 'dart-ui_web'};
+
   /// Creates a custom index.html because we try to maintain old
   /// paths. Cleanup unused index.html files no longer needed.
   void _createIndexAndCleanup() {
@@ -840,6 +847,7 @@ class DartdocGenerator {
     _addHtmlBaseToIndex();
     _changePackageToSdkInTitlebar();
     _putRedirectInOldIndexLocation();
+    _rewriteDartSdkCanonicals();
     _writeSnippetsIndexFile();
     print('\nDocs ready to go!');
   }
@@ -869,6 +877,10 @@ class DartdocGenerator {
       '</title>\n',
       '</title>\n  <base href="./flutter/">\n',
     );
+    indexContents = indexContents.replaceAll(
+      '<link rel="canonical" href="https://api.flutter.dev/flutter/"',
+      '<link rel="canonical" href="https://api.flutter.dev/"',
+    );
 
     for (final String platform in kPlatformDocs.keys) {
       final String sectionName = kPlatformDocs[platform]!.sectionName;
@@ -885,6 +897,52 @@ class DartdocGenerator {
   void _putRedirectInOldIndexLocation() {
     const metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
     publishRoot.childDirectory('flutter').childFile('index.html').writeAsStringSync(metaTag);
+  }
+
+  void _rewriteDartSdkCanonicals() {
+    final Directory flutterDir = publishRoot.childDirectory('flutter');
+    for (final fileName in const <String>['search.html', '__404error.html']) {
+      final File utilityFile = flutterDir.childFile(fileName);
+      if (!utilityFile.existsSync()) {
+        continue;
+      }
+      final String contents = utilityFile.readAsStringSync();
+      final String stripped = contents.replaceAll(_canonicalTagPattern, '');
+      if (stripped != contents) {
+        utilityFile.writeAsStringSync(stripped);
+      }
+    }
+
+    final Iterable<File> dartSdkHtmlFiles = flutterDir
+        .listSync()
+        .whereType<Directory>()
+        .where(
+          (Directory dir) =>
+              dir.basename.startsWith('dart-') &&
+              !_flutterOwnedDartLibraries.contains(dir.basename),
+        )
+        .expand((Directory dir) => dir.listSync(recursive: true))
+        .whereType<File>()
+        .where((File file) => file.path.endsWith('.html'));
+
+    for (final htmlFile in dartSdkHtmlFiles) {
+      final String original = htmlFile.readAsStringSync();
+      // Match `<link rel="canonical"` specifically so prose `<a href="...">`
+      // links (such as `dart:math` references to `dart-ui/Offset-class.html`)
+      // continue pointing to `api.flutter.dev`.
+      final String updated = original
+          .replaceAll(
+            '<link rel="canonical" href="https://api.flutter.dev/flutter/',
+            '<link rel="canonical" href="https://api.dart.dev/',
+          )
+          .replaceAllMapped(
+            _dartLibraryRedirectCanonicalPattern,
+            (Match m) => '<link rel="canonical" href="https://api.dart.dev/${m[1]}/">',
+          );
+      if (updated != original) {
+        htmlFile.writeAsStringSync(updated);
+      }
+    }
   }
 
   void _writeSnippetsIndexFile() {
