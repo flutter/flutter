@@ -20,7 +20,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../dart/package_map.dart';
-import '../../features.dart';
+import '../../features.dart' show featureFlags;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
@@ -57,14 +57,17 @@ class BuildHooks extends Target {
       :SerializedBuildResults results,
       :DartHooksResult buildResult,
     ) = await runFlutterSpecificBuildHooks(
+      androidSdkProvider: environment,
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      featureFlags: featureFlags,
       logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
+      visualStudio: environment.visualStudio,
     );
 
     final File dartBuildOutputJsonFile = environment.buildDir.childFile(resultFilename);
@@ -218,16 +221,19 @@ class LinkHooks extends Target {
     final DartHooksResult linkResult;
     if (linkingEnabled) {
       linkResult = await runFlutterSpecificLinkHooks(
+        androidSdkProvider: environment,
         environmentDefines: environment.defines,
         buildRunner: buildRunner,
         targetPlatform: targetPlatform,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: environment.logger,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
         buildDataAssets: true,
         buildResults: buildResults,
         recordedUsesFile: recordedUsesFileToPass,
+        visualStudio: environment.visualStudio,
       );
     } else {
       linkResult = DartHooksResult.empty();
@@ -237,6 +243,7 @@ class LinkHooks extends Target {
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       fileSystem: fileSystem,
+      featureFlags: featureFlags,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
       buildResults: buildResults,

@@ -9,9 +9,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
 
@@ -1149,21 +1149,23 @@ void main() {
         flutterRoot: flutterRoot,
       );
 
+      final localFileSystem = LocalFileSystem.test(signals: FakeSignals());
+      addTearDown(localFileSystem.dispose);
       final xcodeDebug = XcodeDebug(
         logger: logger,
         processManager: fakeProcessManager,
         xcode: xcode,
-        fileSystem: globals.fs,
+        fileSystem: localFileSystem,
       );
 
-      final Directory projectDirectory = globals.fs.systemTempDirectory.createTempSync(
+      final Directory projectDirectory = localFileSystem.systemTempDirectory.createTempSync(
         'flutter_empty_xcode.',
       );
 
       try {
         final XcodeDebugProject project = await xcodeDebug.createXcodeProjectWithCustomBundle(
           '/path/to/bundle',
-          templateRenderer: globals.templateRenderer,
+          templateRenderer: const MustacheTemplateRenderer(),
           projectDestination: projectDirectory,
         );
 

@@ -21,8 +21,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/host_debug_test",
             "description": "Builds host-side unit tests for Linux.",
@@ -66,9 +65,8 @@
                 "profile",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--thin-lto",
+                "--rbe"
             ],
             "name": "ci/host_profile_test",
             "description": "Builds host-side unit tests for Linux.",
@@ -118,9 +116,8 @@
                 "release",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--thin-lto",
+                "--rbe"
             ],
             "name": "ci/host_release_test",
             "description": "Builds host-side unit tests and benchmarks for Linux.",

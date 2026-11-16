@@ -82,9 +82,6 @@ class DaemonCommand extends FlutterCommand {
   Java? get _java => _androidContext.java;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   final name = 'daemon';
 
   @override

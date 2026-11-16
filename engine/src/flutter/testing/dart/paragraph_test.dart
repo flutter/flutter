@@ -78,6 +78,27 @@ void main() {
     expect(longestLine(null), longestLine(Hyphens.manual));
   });
 
+  test('ParagraphStyle.hyphenCharacter is passed to the text layout', () {
+    double longestLine(String? hyphenCharacter) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(fontFamily: 'FlutterTest', fontSize: 10.0, hyphenCharacter: hyphenCharacter),
+      );
+      // Breaks at the soft hyphen into 'abcd' and 'efg'. Every FlutterTest
+      // glyph is 1 em wide, so the first line is the longest.
+      builder.addText('abcd\u00ADefg');
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 65.0));
+      return paragraph.longestLine;
+    }
+
+    // 'abcd' plus the default hyphen is 5 glyphs.
+    expect(longestLine(null), 50.0);
+    // 'abcd' plus '--' is 6 glyphs.
+    expect(longestLine('--'), 60.0);
+    // 'abcd' alone is 4 glyphs, since the empty string draws nothing at the break.
+    expect(longestLine(''), 40.0);
+  });
+
   test('predictably lays out a multi-line paragraph', () {
     for (final fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
       final builder = ParagraphBuilder(
