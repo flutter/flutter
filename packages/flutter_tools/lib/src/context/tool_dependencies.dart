@@ -689,13 +689,6 @@ class ToolDependencies {
           featureFlags: finalFeatureFlags,
         );
 
-    final MacOSWorkflow finalMacOSWorkflow =
-        macOSWorkflow ?? MacOSWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
-
-    final WindowsWorkflow finalWindowsWorkflow =
-        windowsWorkflow ??
-        WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
-
     final extensionManager = ExtensionManager(
       entryPoints: extensionEntryPoints,
       featureFlags: finalFeatureFlags,
@@ -703,17 +696,6 @@ class ToolDependencies {
       logger: finalLogger,
     );
     finalShutdownHooks.addShutdownHook(extensionManager.dispose);
-
-    final appleContext = AppleContext(
-      cocoaPodsBuilder: () => finalCocoaPods,
-      cocoapodsValidatorBuilder: () => finalCocoapodsValidator,
-      iosSimulatorUtilsBuilder: () => finalIOSSimulatorUtils,
-      iosWorkflowBuilder: () => finalIOSWorkflow,
-      plistParserBuilder: () => finalPlistParser,
-      xcdeviceBuilder: () => finalXCDevice,
-      xcodeBuilder: () => finalXcode,
-      xcodeProjectInterpreterBuilder: () => finalXcodeProjectInterpreter,
-    );
 
     final EmulatorManager finalEmulatorManager =
         emulatorManager ??
@@ -726,6 +708,24 @@ class ToolDependencies {
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
           extensionManager: extensionManager,
         );
+
+    final MacOSWorkflow finalMacOSWorkflow =
+        macOSWorkflow ?? MacOSWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
+
+    final WindowsWorkflow finalWindowsWorkflow =
+        windowsWorkflow ??
+        WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
+
+    final appleContext = AppleContext(
+      cocoaPodsBuilder: () => finalCocoaPods,
+      cocoapodsValidatorBuilder: () => finalCocoapodsValidator,
+      iosSimulatorUtilsBuilder: () => finalIOSSimulatorUtils,
+      iosWorkflowBuilder: () => finalIOSWorkflow,
+      plistParserBuilder: () => finalPlistParser,
+      xcdeviceBuilder: () => finalXCDevice,
+      xcodeBuilder: () => finalXcode,
+      xcodeProjectInterpreterBuilder: () => finalXcodeProjectInterpreter,
+    );
 
     final extensionBuildManager = ExtensionBuildManager(
       extensionManager: extensionManager,

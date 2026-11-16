@@ -28,51 +28,58 @@ EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 /// A class to get all available emulators.
 class EmulatorManager {
   EmulatorManager({
-    required this._androidWorkflow,
-    required this._iosWorkflow,
+    required AndroidWorkflow androidWorkflow,
+    required IOSWorkflow? iosWorkflow,
     required this._javaBuilder,
     required this._toolContext,
-    required this._xcode,
+    required Xcode? xcode,
     this._androidSdkBuilder,
-    this._extensionManager,
-  });
-
-  /// Platform identifier for built-in Android AVD creation (`--platform android`).
-  static const androidPlatform = 'android';
-
-  final AndroidSdk? Function()? _androidSdkBuilder;
-  late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
-  final AndroidWorkflow _androidWorkflow;
-  final ExtensionManager? _extensionManager;
-  final IOSWorkflow? _iosWorkflow;
-  final Java? Function() _javaBuilder;
-  late final Java? _java = _javaBuilder();
-  final ToolContext _toolContext;
-  final Xcode? _xcode;
-
-  late final AndroidEmulators _androidEmulators = () {
+    ExtensionManager? extensionManager,
+  }) {
     final ToolContext(:FileSystem fs, :Logger logger, :ProcessManager processManager) =
         _toolContext;
-    return AndroidEmulators(
+    _androidEmulators = AndroidEmulators(
       androidSdkBuilder: _androidSdkBuilder,
-      androidWorkflow: _androidWorkflow,
+      androidWorkflow: androidWorkflow,
       fileSystem: fs,
       logger: logger,
       processManager: processManager,
     );
-  }();
+    _emulatorDiscoverers.add(
+      IOSEmulators(iosWorkflow: iosWorkflow, toolContext: _toolContext, xcode: xcode),
+    );
+    _emulatorDiscoverers.add(_androidEmulators);
+    final ExtensionEmulators? extensionEmulators = extensionManager != null
+        ? ExtensionEmulators(extensionManager: extensionManager, logger: logger)
+        : null;
+    _extensionEmulators = extensionEmulators;
+    if (extensionEmulators != null) {
+      _emulatorDiscoverers.add(extensionEmulators);
+    }
+  }
 
-  late final ExtensionEmulators? _extensionEmulators = _extensionManager != null
-      ? ExtensionEmulators(extensionManager: _extensionManager, logger: _toolContext.logger)
-      : null;
+  /// Platform identifier for built-in Android AVD creation (`--platform android`).
+  static const androidPlatform = 'android';
 
-  // Constructing EmulatorManager is cheap; discoverers are only instantiated
-  // when emulator methods are called.
-  late final _emulatorDiscoverers = <EmulatorDiscovery>[
-    IOSEmulators(iosWorkflow: _iosWorkflow, toolContext: _toolContext, xcode: _xcode),
-    _androidEmulators,
-    ?_extensionEmulators,
-  ];
+  /// Formats an error message for an unrecognized emulator creation [platform].
+  static String unknownPlatformMessage(String platform, List<String> availablePlatforms) {
+    final suffix = availablePlatforms.isEmpty
+        ? 'No emulator creation platforms are available.'
+        : 'Available platforms: ${availablePlatforms.join(', ')}.';
+    return 'Unknown emulator creation platform "$platform". $suffix';
+  }
+
+  final AndroidSdk? Function()? _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
+  final Java? Function() _javaBuilder;
+  late final Java? _java = _javaBuilder();
+  late final AndroidEmulators _androidEmulators;
+  late final ExtensionEmulators? _extensionEmulators;
+  final ToolContext _toolContext;
+
+  // Constructing EmulatorManager is cheap; they only do expensive work if some
+  // of their methods are called.
+  final _emulatorDiscoverers = <EmulatorDiscovery>[];
 
   Future<List<Emulator>> getEmulatorsMatching(String searchText) async {
     final List<Emulator> emulators = await getAllAvailableEmulators();
@@ -163,11 +170,7 @@ class EmulatorManager {
     return CreateEmulatorResult(
       name ?? '',
       success: false,
-      error: availablePlatforms.isEmpty
-          ? 'Unknown emulator creation platform "$platform". '
-                'No emulator creation platforms are available.'
-          : 'Unknown emulator creation platform "$platform". '
-                'Available platforms: ${availablePlatforms.join(', ')}.',
+      error: unknownPlatformMessage(platform, availablePlatforms),
     );
   }
 

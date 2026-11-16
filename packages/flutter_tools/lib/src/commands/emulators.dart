@@ -15,10 +15,6 @@ import '../doctor_validator.dart';
 import '../emulator.dart';
 import '../runner/flutter_command.dart';
 
-const _launchOption = 'launch';
-const _coldFlag = 'cold';
-const _createFlag = 'create';
-const _nameOption = 'name';
 const _platformOption = 'platform';
 
 /// The `flutter emulators` command, which lists, launches, and creates emulators.
@@ -29,21 +25,21 @@ class EmulatorsCommand extends FlutterCommand {
     required super.toolContext,
     super.verboseHelp,
   }) {
-    argParser.addOption(_launchOption, help: 'The full or partial ID of the emulator to launch.');
+    argParser.addOption('launch', help: 'The full or partial ID of the emulator to launch.');
     argParser.addFlag(
-      _coldFlag,
+      'cold',
       help:
           'Used with the "--launch" flag to cold boot the emulator instance '
           '(Android and supported tool extensions).',
       negatable: false,
     );
     argParser.addFlag(
-      _createFlag,
+      'create',
       help: 'Creates a new emulator (for example, an Android AVD or a tool extension emulator).',
       negatable: false,
     );
     argParser.addOption(
-      _nameOption,
+      'name',
       help: 'Used with the "--create" flag. Specifies a name for the emulator being created.',
     );
     argParser.addOption(
@@ -74,8 +70,8 @@ class EmulatorsCommand extends FlutterCommand {
     final Platform platform = toolContext.platform;
     final ArgResults argumentResults = argResults!;
 
-    if (argumentResults.wasParsed(_platformOption) && !argumentResults.wasParsed(_createFlag)) {
-      throwToolExit('The "--$_platformOption" option can only be used with "--$_createFlag".');
+    if (argumentResults.wasParsed(_platformOption) && !argumentResults.wasParsed('create')) {
+      throwToolExit('The "--$_platformOption" option can only be used with "--create".');
     }
 
     if (_doctor.workflows.every((Workflow w) => !w.canListEmulators) &&
@@ -86,11 +82,11 @@ class EmulatorsCommand extends FlutterCommand {
         exitCode: 1,
       );
     }
-    if (argumentResults.wasParsed(_launchOption)) {
-      final bool coldBoot = argumentResults.wasParsed(_coldFlag);
-      await _launchEmulator(stringArg(_launchOption)!, coldBoot: coldBoot);
-    } else if (argumentResults.wasParsed(_createFlag)) {
-      await _createEmulator(name: stringArg(_nameOption), platform: stringArg(_platformOption));
+    if (argumentResults.wasParsed('launch')) {
+      final bool coldBoot = argumentResults.wasParsed('cold');
+      await _launchEmulator(stringArg('launch')!, coldBoot: coldBoot);
+    } else if (argumentResults.wasParsed('create')) {
+      await _createEmulator(name: stringArg('name'), platform: stringArg(_platformOption));
     } else {
       final String? searchText = argumentResults.rest.firstOrNull;
       await _listEmulators(searchText);
@@ -123,13 +119,7 @@ class EmulatorsCommand extends FlutterCommand {
         final List<String> availablePlatforms = await _emulatorManager
             .getAvailableCreatePlatforms();
         if (!availablePlatforms.contains(platform)) {
-          throwToolExit(
-            availablePlatforms.isEmpty
-                ? 'Unknown emulator creation platform "$platform". '
-                      'No emulator creation platforms are available.'
-                : 'Unknown emulator creation platform "$platform". '
-                      'Available platforms: ${availablePlatforms.join(', ')}.',
-          );
+          throwToolExit(EmulatorManager.unknownPlatformMessage(platform, availablePlatforms));
         }
       }
       resolvedPlatform = platform;

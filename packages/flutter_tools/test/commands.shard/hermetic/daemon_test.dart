@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -1505,6 +1506,90 @@ void main() {
         expect(listenerFired, isFalse);
       },
     );
+
+    testWithoutContext(
+      'EmulatorDomain uses injected EmulatorManager and keeps create Android-only',
+      () async {
+        addTearDown(daemonStreams.dispose);
+        var launchedColdBoot = false;
+        final emulatorManager = FakeEmulatorManager(
+          availableCreatePlatforms: const <String>['android', 'custom_os'],
+          createResult: CreateEmulatorResult('created_avd', success: true),
+          emulators: <Emulator>[
+            _FakeCustomEmulator(
+              'ext_sim_1',
+              onLaunch: (bool coldBoot) => launchedColdBoot = coldBoot,
+            ),
+            _FakeCustomEmulator(
+              'failing_sim',
+              onLaunch: (bool _) => throwToolExit('Failed to launch emulator "failing_sim".'),
+            ),
+          ],
+        );
+
+        daemon = Daemon(
+          daemonConnection,
+          analytics: const NoOpAnalytics(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          emulatorManager: emulatorManager,
+          featureFlags: TestFeatureFlags(),
+          notifyingLogger: notifyingLogger,
+          toolContext: FakeToolContext(logger: BufferLogger.test()),
+          xcode: null,
+        );
+
+        final Stream<DaemonMessage> responses = daemonStreams.outputs.stream
+            .asBroadcastStream()
+            .where(_notEvent);
+        Future<DaemonMessage> send(int id, String method, [Map<String, Object?>? params]) {
+          daemonStreams.inputs.add(
+            DaemonMessage(<String, Object?>{'id': id, 'method': method, 'params': ?params}),
+          );
+          return responses.firstWhere((DaemonMessage m) => m.data['id'] == id);
+        }
+
+        final DaemonMessage listResp = await send(1, 'emulator.getEmulators');
+        expect(listResp.data['result'], <Object?>[
+          <String, Object?>{
+            'id': 'ext_sim_1',
+            'name': 'Custom Extension Simulator',
+            'category': 'mobile',
+            'platformType': 'custom',
+          },
+          <String, Object?>{
+            'id': 'failing_sim',
+            'name': 'Custom Extension Simulator',
+            'category': 'mobile',
+            'platformType': 'custom',
+          },
+        ]);
+
+        final DaemonMessage launchResp = await send(2, 'emulator.launch', <String, Object?>{
+          'emulatorId': 'ext_sim_1',
+          'coldBoot': true,
+        });
+        expect(launchResp.data['error'], isNull);
+        expect(launchedColdBoot, isTrue);
+
+        final DaemonMessage launchErrResp = await send(3, 'emulator.launch', <String, Object?>{
+          'emulatorId': 'failing_sim',
+        });
+        expect(launchErrResp.data['error'], contains('Failed to launch emulator "failing_sim".'));
+
+        final DaemonMessage createResp = await send(4, 'emulator.create', <String, Object?>{
+          'name': 'created_avd',
+          'platform': 'custom_os',
+        });
+        expect(emulatorManager.lastCreatedName, 'created_avd');
+        expect(emulatorManager.lastCreatedPlatform, EmulatorManager.androidPlatform);
+        expect(createResp.data['result'], <String, Object?>{
+          'success': true,
+          'emulatorName': 'created_avd',
+          'error': null,
+        });
+      },
+    );
   });
 
   group('notifyingLogger', () {
@@ -1669,85 +1754,6 @@ void main() {
         hidden: true,
       );
       expect(hiddenCommand.hidden, true);
-    });
-
-    testWithoutContext('Daemon EmulatorDomain uses injected EmulatorManager for custom emulators and creates Android emulators', () async {
-      final logger = BufferLogger.test();
-      final daemonStreams = FakeDaemonStreams();
-      addTearDown(daemonStreams.dispose);
-      final connection = DaemonConnection(daemonStreams: daemonStreams, logger: logger);
-      addTearDown(connection.dispose);
-      final localNotifyingLogger = NotifyingLogger(verbose: false, parent: logger);
-      addTearDown(localNotifyingLogger.dispose);
-
-      var launchedColdBoot = false;
-      final customEmulator = _FakeCustomEmulator(
-        'ext_sim_1',
-        onLaunch: (bool coldBoot) => launchedColdBoot = coldBoot,
-      );
-      final emulatorManager = FakeEmulatorManager(
-        availableCreatePlatforms: const <String>['android', 'custom_os'],
-        createResult: CreateEmulatorResult('created_avd', success: true),
-        emulators: <Emulator>[customEmulator],
-      );
-
-      final localDaemon = Daemon(
-        connection,
-        analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        emulatorManager: emulatorManager,
-        featureFlags: TestFeatureFlags(),
-        notifyingLogger: localNotifyingLogger,
-        toolContext: FakeToolContext(logger: logger),
-        xcode: null,
-      );
-      addTearDown(localDaemon.shutdown);
-
-      final Stream<DaemonMessage> outputStream = daemonStreams.outputs.stream.asBroadcastStream();
-
-      daemonStreams.inputs.add(
-        DaemonMessage(<String, Object?>{'id': 1, 'method': 'emulator.getEmulators'}),
-      );
-      final DaemonMessage listResponse = await outputStream.firstWhere(_notEvent);
-      expect(listResponse.data['id'], 1);
-      expect(listResponse.data['result'], <Object?>[
-        <String, Object?>{
-          'id': 'ext_sim_1',
-          'name': 'Custom Extension Simulator',
-          'category': 'mobile',
-          'platformType': 'custom',
-        },
-      ]);
-
-      daemonStreams.inputs.add(
-        DaemonMessage(<String, Object?>{
-          'id': 2,
-          'method': 'emulator.launch',
-          'params': <String, Object?>{'emulatorId': 'ext_sim_1', 'coldBoot': true},
-        }),
-      );
-      final DaemonMessage launchResponse = await outputStream.firstWhere(_notEvent);
-      expect(launchResponse.data['id'], 2);
-      expect(launchResponse.data['error'], isNull);
-      expect(launchedColdBoot, isTrue);
-
-      daemonStreams.inputs.add(
-        DaemonMessage(<String, Object?>{
-          'id': 3,
-          'method': 'emulator.create',
-          'params': <String, Object?>{'name': 'created_avd', 'platform': 'custom_os'},
-        }),
-      );
-      final DaemonMessage createResponse = await outputStream.firstWhere(_notEvent);
-      expect(createResponse.data['id'], 3);
-      expect(emulatorManager.lastCreatedName, 'created_avd');
-      expect(emulatorManager.lastCreatedPlatform, EmulatorManager.androidPlatform);
-      expect(createResponse.data['result'], <String, Object?>{
-        'success': true,
-        'emulatorName': 'created_avd',
-        'error': null,
-      });
     });
   });
 }
