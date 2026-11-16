@@ -3046,6 +3046,88 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
   });
+
+  group('Visual overflow and clipping', () {
+    testWidgets('does not clip when every child fits', (WidgetTester tester) async {
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
+      await tester.pumpWidget(
+        simpleBuilderTest(
+          delegate: delegate = TwoDimensionalChildBuilderDelegate(
+            maxXIndex: 0,
+            maxYIndex: 0,
+            builder: (BuildContext context, ChildVicinity vicinity) {
+              return const SizedBox(width: 100, height: 100);
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.renderObject(find.byType(SimpleBuilderTableViewport)),
+        isNot(paints..clipRect()),
+        reason: 'The viewport should not clip when every child fits.',
+      );
+    });
+
+    testWidgets('clips when children overflow the viewport', (WidgetTester tester) async {
+      await tester.pumpWidget(simpleBuilderTest());
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.renderObject(find.byType(SimpleBuilderTableViewport)),
+        paints..clipRect(),
+        reason: 'The viewport should clip when children overflow.',
+      );
+    });
+
+    testWidgets('resets visual overflow when children fit after previously overflowing', (
+      WidgetTester tester,
+    ) async {
+      late TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
+
+      await tester.pumpWidget(
+        simpleBuilderTest(
+          delegate: delegate = TwoDimensionalChildBuilderDelegate(
+            maxXIndex: 5,
+            maxYIndex: 5,
+            builder: (BuildContext context, ChildVicinity vicinity) {
+              return const SizedBox(width: 200, height: 200);
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.renderObject(find.byType(SimpleBuilderTableViewport)),
+        paints..clipRect(),
+        reason: 'The viewport should clip when children overflow.',
+      );
+
+      // Now update the delegate so all children fit.
+      await tester.pumpWidget(
+        simpleBuilderTest(
+          delegate: delegate = TwoDimensionalChildBuilderDelegate(
+            maxXIndex: 0,
+            maxYIndex: 0,
+            builder: (BuildContext context, ChildVicinity vicinity) {
+              return const SizedBox(width: 100, height: 100);
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.renderObject(find.byType(SimpleBuilderTableViewport)),
+        isNot(paints..clipRect()),
+        reason: 'The viewport should not clip when every child fits after layout change.',
+      );
+    });
+  });
 }
 
 class _TestToggleable extends StatefulWidget {

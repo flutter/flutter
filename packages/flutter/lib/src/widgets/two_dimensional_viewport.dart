@@ -1323,6 +1323,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   @override
   void performLayout() {
+    _hasVisualOverflow = false;
     _firstChild = null;
     _lastChild = null;
     _activeChildrenForLayoutPass.clear();
@@ -1533,7 +1534,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // visual overflow.
     _hasVisualOverflow =
         _hasVisualOverflow ||
-        childParentData.layoutOffset != childParentData._paintExtent ||
+        child.size != childParentData._paintExtent ||
         !childParentData.isVisible;
   }
 
