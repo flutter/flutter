@@ -345,6 +345,50 @@ void main() {
     );
   });
 
+  testWidgets('SliverPadding preserves the viewport cache range when scrolled', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          controller: controller,
+          cacheExtent: 250.0,
+          slivers: <Widget>[
+            SliverPadding(
+              padding: const EdgeInsets.only(top: 100.0),
+              sliver: SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) =>
+                    SizedBox(height: 100.0, child: Text('$index')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    List<int> laidOutItems() =>
+        tester
+            .widgetList<Text>(find.byType(Text, skipOffstage: false))
+            .map((Text widget) => int.parse(widget.data!))
+            .toList()
+          ..sort();
+
+    // The cache initially starts in the padding, then reaches back across it.
+    expect(laidOutItems(), List<int>.generate(8, (int index) => index));
+    controller.jumpTo(175.0);
+    await tester.pump();
+    expect(laidOutItems(), List<int>.generate(10, (int index) => index));
+
+    // Now the padding is entirely before the cache, so neither edge shifts.
+    controller.jumpTo(1100.0);
+    await tester.pump();
+    expect(laidOutItems(), List<int>.generate(12, (int index) => index + 7));
+  });
+
   testWidgets('Viewport+SliverPadding changing padding', (WidgetTester tester) async {
     final offset1 = ViewportOffset.fixed(0.0);
     addTearDown(offset1.dispose);
