@@ -1007,8 +1007,8 @@ class _PrefixedStringBuilder {
   }
 
   void _writeLine(String line, {required bool includeLineBreak, required bool firstLine}) {
-    line = '${_getCurrentPrefix(firstLine)}$line';
-    _buffer.write(line.trimRight());
+    final prefixedLine = '${_getCurrentPrefix(firstLine)}$line';
+    _buffer.write(prefixedLine.trimRight());
     if (includeLineBreak) {
       _buffer.write('\n');
     }
@@ -1148,15 +1148,16 @@ class TextTreeRenderer {
   }) {
     final bool isSingleLine =
         _isSingleLine(node.style) && parentConfiguration?.lineBreakProperties != true;
-    prefixOtherLines ??= prefixLineOne;
+    var effectivePrefixLineOne = prefixLineOne;
+    String effectivePrefixOtherLines = prefixOtherLines ?? prefixLineOne;
     if (node.linePrefix != null) {
-      prefixLineOne += node.linePrefix!;
-      prefixOtherLines += node.linePrefix!;
+      effectivePrefixLineOne += node.linePrefix!;
+      effectivePrefixOtherLines += node.linePrefix!;
     }
 
     final TextTreeConfiguration config = node.textTreeConfiguration!;
-    if (prefixOtherLines.isEmpty) {
-      prefixOtherLines += config.prefixOtherLinesRootNode;
+    if (effectivePrefixOtherLines.isEmpty) {
+      effectivePrefixOtherLines += config.prefixOtherLinesRootNode;
     }
 
     if (node.style == DiagnosticsTreeStyle.truncateChildren) {
@@ -1171,14 +1172,14 @@ class TextTreeRenderer {
         for (final DiagnosticsNode child in node.getChildren()) {
           if (lines < maxLines) {
             depth += 1;
-            descendants.add('$prefixOtherLines${"  " * depth}$child');
+            descendants.add('$effectivePrefixOtherLines${"  " * depth}$child');
             if (depth < maxDepth) {
               visitor(child);
             }
             depth -= 1;
           } else if (lines == maxLines) {
             descendants.add(
-              '$prefixOtherLines  ...(descendants list truncated after $lines lines)',
+              '$effectivePrefixOtherLines  ...(descendants list truncated after $lines lines)',
             );
           }
           lines += 1;
@@ -1186,7 +1187,7 @@ class TextTreeRenderer {
       }
 
       visitor(node);
-      final information = StringBuffer(prefixLineOne);
+      final information = StringBuffer(effectivePrefixLineOne);
       if (lines > 1) {
         information.writeln(
           'This ${node.name} had the following descendants (showing up to depth $maxDepth):',
@@ -1200,9 +1201,9 @@ class TextTreeRenderer {
       return information.toString();
     }
     final builder = _PrefixedStringBuilder(
-      prefixLineOne: prefixLineOne,
-      prefixOtherLines: prefixOtherLines,
-      wrapWidth: math.max(_wrapWidth, prefixOtherLines.length + _wrapWidthProperties),
+      prefixLineOne: effectivePrefixLineOne,
+      prefixOtherLines: effectivePrefixOtherLines,
+      wrapWidth: math.max(_wrapWidth, effectivePrefixOtherLines.length + _wrapWidthProperties),
     );
 
     List<DiagnosticsNode> children = node.getChildren();
@@ -1304,7 +1305,7 @@ class TextTreeRenderer {
     if (node.emptyBodyDescription != null &&
         properties.isEmpty &&
         children.isEmpty &&
-        prefixLineOne.isNotEmpty) {
+        effectivePrefixLineOne.isNotEmpty) {
       builder.write(node.emptyBodyDescription!);
       if (config.lineBreakProperties) {
         builder.write(config.lineBreak);
@@ -1359,7 +1360,7 @@ class TextTreeRenderer {
     }
 
     final String prefixChildren = config.bodyIndent;
-    final prefixChildrenRaw = '$prefixOtherLines$prefixChildren';
+    final prefixChildrenRaw = '$effectivePrefixOtherLines$prefixChildren';
     if (children.isEmpty &&
         config.addBlankLineIfNoChildren &&
         builder.requiresMultipleLines &&
@@ -1374,7 +1375,7 @@ class TextTreeRenderer {
         builder.write(config.lineBreak);
       }
 
-      builder.prefixOtherLines = prefixOtherLines;
+      builder.prefixOtherLines = effectivePrefixOtherLines;
 
       for (var i = 0; i < children.length; i++) {
         final DiagnosticsNode child = children[i];
@@ -1704,12 +1705,15 @@ abstract class DiagnosticsNode {
       return const <Map<String, Object?>>[];
     }
     final int originalNodeCount = nodes.length;
-    nodes = delegate.truncateNodesList(nodes, parent);
-    if (nodes.length != originalNodeCount) {
-      nodes.add(DiagnosticsNode.message('...'));
+    List<DiagnosticsNode> effectiveNodes = delegate.truncateNodesList(nodes, parent);
+    if (effectiveNodes.length != originalNodeCount) {
+      effectiveNodes = List<DiagnosticsNode>.of(effectiveNodes);
+      effectiveNodes.add(DiagnosticsNode.message('...'));
       truncated = true;
     }
-    final List<_JsonDiagnosticsNode> json = nodes.map<_JsonDiagnosticsNode>((DiagnosticsNode node) {
+    final List<_JsonDiagnosticsNode> json = effectiveNodes.map<_JsonDiagnosticsNode>((
+      DiagnosticsNode node,
+    ) {
       return node.toJsonMap(delegate.delegateForNode(node));
     }).toList();
     if (truncated) {
@@ -2637,19 +2641,20 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final T? v = value;
     List<Map<String, Object?>>? properties;
+    var effectiveDelegate = delegate;
     if (delegate.expandPropertyValues &&
         delegate.includeProperties &&
         v is Diagnosticable &&
         getProperties().isEmpty) {
       // Exclude children for expanded nodes to avoid cycles.
-      delegate = delegate.copyWith(subtreeDepth: 0, includeProperties: false);
+      effectiveDelegate = delegate.copyWith(subtreeDepth: 0, includeProperties: false);
       properties = DiagnosticsNode.toJsonList(
-        delegate.filterProperties(v.toDiagnosticsNode().getProperties(), this),
+        effectiveDelegate.filterProperties(v.toDiagnosticsNode().getProperties(), this),
         this,
-        delegate,
+        effectiveDelegate,
       );
     }
-    final Map<String, Object?> json = super.toJsonMap(delegate);
+    final Map<String, Object?> json = super.toJsonMap(effectiveDelegate);
     if (properties != null) {
       json['properties'] = properties;
     }

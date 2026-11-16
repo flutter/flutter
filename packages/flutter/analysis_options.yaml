@@ -10,3 +10,7 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+
+linter:
+  rules:
+    parameter_assignments: true
