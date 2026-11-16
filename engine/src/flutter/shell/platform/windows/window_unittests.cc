@@ -485,14 +485,35 @@ TEST(MockWindow, OnImeCompositionClearChange) {
   std::unique_ptr<TextInputManager> text_input_manager_ptr(text_input_manager);
   MockWindow window(std::move(windows_proc_table),
                     std::move(text_input_manager_ptr));
+  EXPECT_CALL(window, OnComposeBegin()).Times(1);
   EXPECT_CALL(window, OnComposeChange(std::u16string(u""), 0)).Times(1);
   EXPECT_CALL(window, OnComposeCommit()).Times(1);
   ON_CALL(window, OnImeComposition)
       .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
-  // send an IME_COMPOSITION event that contains both the result string and the
-  // composition string.
+  // Start composing, then send an IME_COMPOSITION event with no GCS_ values
+  // set, which cancels the composition.
+  window.InjectWindowMessage(WM_IME_STARTCOMPOSITION, 0, 0);
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0, 0);
+}
+
+// Outside of a composition there is nothing to cancel. Clearing the composing
+// text would delete the current selection instead.
+TEST(MockWindow, OnImeCompositionClearWithoutCompositionIsIgnored) {
+  auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
+  auto* text_input_manager = new MockTextInputManager();
+  std::unique_ptr<TextInputManager> text_input_manager_ptr(text_input_manager);
+  MockWindow window(std::move(windows_proc_table),
+                    std::move(text_input_manager_ptr));
+  EXPECT_CALL(window, OnComposeBegin()).Times(0);
+  EXPECT_CALL(window, OnComposeChange(_, _)).Times(0);
+  EXPECT_CALL(window, OnComposeCommit()).Times(0);
+  EXPECT_CALL(window, OnText(_)).Times(0);
+  ON_CALL(window, OnImeComposition)
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
+  EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
+
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, 0);
 }
 
