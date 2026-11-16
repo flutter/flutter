@@ -553,6 +553,12 @@ class SemanticTextField extends SemanticRole {
     final input = editableElement as DomHTMLInputElement;
     if (semanticsObject.flags.isObscured) {
       input.type = 'password';
+      if (!_isAutofillOwned) {
+        // Autofill hints reach the engine only when the field is focused.
+        // Declare the most common purpose until then, so the field is not
+        // exposed as `off` to assistive technologies and checkers.
+        input.autocomplete = 'current-password';
+      }
     } else {
       // For email inputs, prefer type="text" with inputmode="email" so that
       // browsers keep selection APIs enabled while still providing email

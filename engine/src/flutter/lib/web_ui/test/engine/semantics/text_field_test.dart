@@ -146,6 +146,48 @@ void testMain() {
       expect(inputElement.autocomplete, 'email');
     });
 
+    // An obscured field is a password, so it declares that purpose before it
+    // is focused. Autofill hints only reach the engine on focus, and checkers
+    // read the attribute without focusing the field (WCAG 1.3.5).
+    test('obscured field declares current-password before focus', () {
+      final SemanticsObject node = createTextFieldSemantics(value: '', isObscured: true);
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.type, 'password');
+      expect(inputElement.autocomplete, 'current-password');
+    });
+
+    test('disabled obscured field declares current-password', () {
+      final SemanticsObject node = createTextFieldSemantics(
+        value: '',
+        isObscured: true,
+        isEnabled: false,
+      );
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.disabled, isTrue);
+      expect(inputElement.autocomplete, 'current-password');
+    });
+
+    test('obscured field owned by an autofill group keeps the group hint', () {
+      final SemanticsObject node = createTextFieldSemantics(value: '', isObscured: true);
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      inputElement
+        ..name = 'new-password'
+        ..autocomplete = 'new-password';
+
+      createTextFieldSemantics(value: '', isObscured: true);
+      expect(inputElement.autocomplete, 'new-password');
+    });
+
+    test('plain text field keeps autocomplete off', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.autocomplete, 'off');
+    });
+
     test('renders a disabled text field', () {
       createTextFieldSemantics(isEnabled: false, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input /></sem>''');
