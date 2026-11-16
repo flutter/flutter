@@ -169,7 +169,7 @@ class PluginHandler(
         }
 
         /**
-         * Copies the properties of [appBuildType] that a library accepts onto
+         * Copies the properties of [appBuildType] that a library needs onto
          * [libraryBuildType], a build type of a library plugin.
          *
          * This deliberately doesn't use `initWith`, which copies every property. AGP rejects
@@ -178,12 +178,15 @@ class PluginHandler(
          * features. See https://github.com/flutter/flutter/issues/169215,
          * https://github.com/flutter/flutter/issues/196412 and
          * https://github.com/flutter/flutter/issues/196696.
+         *
+         * isMinifyEnabled is deliberately not copied either. A minified library runs R8 with
+         * only its own keep rules, which removes the plugin classes that the app's
+         * GeneratedPluginRegistrant uses. The app's R8 run already shrinks the plugin code.
          */
         private fun copyLibraryBuildTypeProperties(
             appBuildType: DslBuildType,
             libraryBuildType: DslBuildType
         ) {
-            libraryBuildType.isMinifyEnabled = appBuildType.isMinifyEnabled
             libraryBuildType.matchingFallbacks.addAll(appBuildType.matchingFallbacks)
             // The public library DSL has no isDebuggable, but library variants still use it,
             // for example for BuildConfig.DEBUG. AGP implements every build type with one class

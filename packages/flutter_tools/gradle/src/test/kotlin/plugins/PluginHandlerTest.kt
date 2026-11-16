@@ -147,7 +147,6 @@ class PluginHandlerTest {
             mockk<ApplicationBuildType> {
                 every { name } returns "debug"
                 every { isDebuggable } returns true
-                every { isMinifyEnabled } returns false
                 every { matchingFallbacks } returns mutableListOf()
             }
         val mockLogger = mockk<Logger>()
@@ -204,7 +203,6 @@ class PluginHandlerTest {
             mockk<ApplicationBuildType> {
                 every { name } returns "debug"
                 every { isDebuggable } returns true
-                every { isMinifyEnabled } returns false
                 every { matchingFallbacks } returns mutableListOf()
             }
         every { project.logger } returns mockk(relaxed = true)
@@ -276,7 +274,8 @@ class PluginHandlerTest {
         // initWith would also copy app-only properties, such as applicationIdSuffix and
         // isShrinkResources, that AGP rejects in a library.
         verify(exactly = 0) { createdBuildType.initWith(any()) }
-        verify { createdBuildType.isMinifyEnabled = true }
+        // A minified library would strip the plugin classes that the app uses.
+        verify(exactly = 0) { createdBuildType.isMinifyEnabled = any() }
         verify { (createdBuildType as ApplicationBuildType).isDebuggable = true }
         assertEquals(listOf("debug"), createdMatchingFallbacks)
         // The custom debuggable build type maps to the debug engine artifacts.
@@ -383,7 +382,6 @@ class PluginHandlerTest {
             mockk<ApplicationBuildType> {
                 every { name } returns "debug"
                 every { isDebuggable } returns true
-                every { isMinifyEnabled } returns false
                 every { matchingFallbacks } returns mutableListOf()
             }
         val mockLogger = mockk<Logger>(relaxed = true)
