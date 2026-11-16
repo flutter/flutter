@@ -34,9 +34,9 @@ import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
+import '../src/test_flutter_command_runner.dart';
 import '../src/testbed.dart';
 import 'runner/utils.dart';
 
@@ -60,7 +60,7 @@ void main() {
         appleContext: fakeAppleContext,
         toolContext: fakeToolContext,
       );
-      final runner = FlutterCommandRunner(
+      final runner = TestFlutterCommandRunner(
         analytics: fakeToolDependencies.analytics,
         toolContext: fakeToolContext,
         verboseHelp: true,
@@ -93,7 +93,7 @@ void main() {
       },
     );
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -122,7 +122,7 @@ void main() {
 
     command.addSubcommand(subcommand);
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -146,7 +146,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -176,7 +176,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -202,7 +202,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -233,7 +233,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,

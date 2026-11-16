@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
@@ -87,7 +85,7 @@ Future<void> main(List<String> args) async {
     args[slashQuestionHelpIndex] = '-h';
   }
 
-  final String? commandName = findCommandName(args);
+  final String? commandName = FlutterCommandRunner.findCommandName(args);
   final doctor = commandName == 'doctor';
   final bool help =
       args.contains('-h') ||
@@ -173,34 +171,6 @@ Future<void> main(List<String> args) async {
     verbose: verbose,
     verboseHelp: verboseHelp,
   );
-}
-
-/// The name of the command in `args`, or null if there isn't one.
-///
-/// Global options can come before the command, so it can't be found by
-/// position. A throwaway parser walks past them instead: trailing options are
-/// disabled, so parsing stops at the command and leaves it at the head of
-/// [ArgResults.rest]. `help` is the exception, since the command runner
-/// registers it on the parser itself and so reports it as a parsed command.
-@visibleForTesting
-String? findCommandName(List<String> args, {ToolContext? toolContext}) {
-  final ArgResults results;
-  try {
-    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
-        .parse(args);
-  } on ArgParserException {
-    // The real parser will complain about these later.
-    return null;
-  }
-  return results.command?.name ?? results.rest.firstOrNull;
-}
-
-class _FallbackToolContext implements ToolContext {
-  @override
-  final OutputPreferences outputPreferences = OutputPreferences();
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 List<FlutterCommand> generateCommands({

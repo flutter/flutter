@@ -283,9 +283,11 @@ class MediaQueryData {
   ///  * [WidgetsBindingObserver.didChangeTextScaleFactor] or
   ///    [dart:ui.PlatformDispatcher.onTextScaleFactorChanged],
   ///  * [WidgetsBindingObserver.didChangePlatformBrightness] or
-  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
+  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged],
+  ///  * [WidgetsBindingObserver.didChangeAlwaysUse24HourFormat] or
+  ///    [dart:ui.PlatformDispatcher.onAlwaysUse24HourFormatChanged].
   ///
-  /// The last three notifications are only relevant if no `platformData` is
+  /// The last four notifications are only relevant if no `platformData` is
   /// provided. If `platformData` is provided, callers should ensure to call
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
@@ -2493,6 +2495,17 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     // have a parent, we get our platform brightness from the PlatformDispatcher
     // and need to update our data in response to the PlatformDispatcher
     // changing its platform brightness setting.
+    if (_parentData == null) {
+      _updateData();
+    }
+  }
+
+  @override
+  void didChangeAlwaysUse24HourFormat() {
+    // If we have a parent, it dictates our 24-hour format preference. If we don't
+    // have a parent, we get our 24-hour format preference from the PlatformDispatcher
+    // and need to update our data in response to the PlatformDispatcher changing
+    // its 24-hour format preference.
     if (_parentData == null) {
       _updateData();
     }
