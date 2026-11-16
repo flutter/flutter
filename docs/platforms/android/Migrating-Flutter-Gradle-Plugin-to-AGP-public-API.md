@@ -121,7 +121,7 @@ projects. That opt-out dies with AGP 10.
 | `BaseExtension.ndkVersion` | `FlutterPluginUtils.getConfiguredNdkVersion` | wrapper `ndkVersion` | P1 |
 | `buildModeFor(BuildType)` (legacy model type) | `FlutterPluginUtils.kt` | `buildModeFor(name, debuggable)` overload | P2 |
 | `getLegacyAndroidExtension(project).buildTypes` loops | `PluginHandler.kt` | wrapper new-DSL `buildTypes` container | P2 |
-| `internal.dsl.BuildType` live aliasing into plugin projects | `PluginHandler.kt` | `initWith`-based copy on new-DSL `BuildType` for app plugins; library plugins get only `isMinifyEnabled`, `matchingFallbacks` and `isDebuggable` | P3 |
+| `internal.dsl.BuildType` live aliasing into plugin projects | `PluginHandler.kt` | `initWith`-based copy on new-DSL `BuildType`; app-specific props only when both sides are `ApplicationBuildType` | P3 |
 | `BaseExtension` / `getLegacyAndroidExtension` (remaining call sites) | `FlutterPluginUtils.kt` | wrapper accessors incl. `externalNativeBuild` | P4 |
 | eager `applicationVariants.configureEach` task creation; mergeAssets/processResources hooks | `FlutterPlugin.kt`, `FlutterPluginUtils.kt` | consolidated `onVariants` block; `CopyFlutterAssetsTask` + `variant.sources.assets.addGeneratedSourceDirectory` | P5 |
 | `variant.outputs` + `packageApplicationProvider` + `doLast` APK copy; `versionCodeOverride` | `FlutterPluginUtils.kt` | `CopyFlutterApksTask` (`SingleArtifact.APK` + `BuiltArtifactsLoader`); `VariantOutput.versionCode` set from a `finalizeDsl` snapshot (`DslVersionCodes`) | P6 |
@@ -231,12 +231,11 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
    registered after it (for example in the app's build script) is not seen: Flutter offsets
    the value from before that change.
 4. **Custom build types → plugins**: live-aliased instances become `initWith`
-   copies for app plugins. Library plugins get only `isMinifyEnabled`,
-   `matchingFallbacks` and `isDebuggable`, because `initWith` also copies app-only
-   properties (`applicationIdSuffix`, `isShrinkResources`) that AGP rejects in a library
-   ([#196412](https://github.com/flutter/flutter/issues/196412)). `LibraryBuildType` has
-   no public `isDebuggable` setter, but AGP uses one build type class for every module
-   type, so Flutter sets it through the `ApplicationBuildType` interface.
+   copies; library plugins cannot receive `isDebuggable` (no public setter on
+   `LibraryBuildType`). **Warning:** If an app uses a custom build type (like `staging`),
+   the plugin's `BuildConfig.DEBUG` and native (C++/JNI) code may silently compile
+   in release mode instead of debug mode. Matching is preserved via `matchingFallbacks`,
+   but C++ debugging will be broken for those custom build types.
 5. **Asset merge**: flutter assets become a merged source dir instead of a
    post-merge overwrite; collisions resolve by AGP source-set priority.
 6. **Add-to-app**: the module registers its Flutter tasks in its own `onVariants` and
