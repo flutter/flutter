@@ -23,51 +23,56 @@ void main() {
     () async {
       testDispatcher.resetPerformanceModeTestValues();
 
-      final PerformanceModeRequestHandle? requestHandle1 = binding.requestPerformanceMode(
-        DartPerformanceMode.latency,
-      );
-      expect(requestHandle1, isNotNull);
-      expect(binding.debugGetRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
-      expect(
-        testDispatcher.testPerformanceModeRequests,
-        equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
-      );
+      PerformanceModeRequestHandle? requestHandle1;
+      PerformanceModeRequestHandle? requestHandle3;
+      try {
+        requestHandle1 = binding.requestPerformanceMode(DartPerformanceMode.latency);
+        expect(requestHandle1, isNotNull);
+        expect(binding.debugGetRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
+        expect(
+          testDispatcher.testPerformanceModeRequests,
+          equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+        );
 
-      // Conflicting request is rejected and not forwarded.
-      final PerformanceModeRequestHandle? requestHandle2 = binding.requestPerformanceMode(
-        DartPerformanceMode.throughput,
-      );
-      expect(requestHandle2, isNull);
-      expect(
-        testDispatcher.testPerformanceModeRequests,
-        equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
-      );
+        // Conflicting request is rejected and not forwarded.
+        final PerformanceModeRequestHandle? requestHandle2 = binding.requestPerformanceMode(
+          DartPerformanceMode.throughput,
+        );
+        expect(requestHandle2, isNull);
+        expect(
+          testDispatcher.testPerformanceModeRequests,
+          equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+        );
 
-      // Additional matching request does not forward duplicate call to platform dispatcher.
-      final PerformanceModeRequestHandle? requestHandle3 = binding.requestPerformanceMode(
-        DartPerformanceMode.latency,
-      );
-      expect(requestHandle3, isNotNull);
-      expect(
-        testDispatcher.testPerformanceModeRequests,
-        equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
-      );
+        // Additional matching request does not forward duplicate call to platform dispatcher.
+        requestHandle3 = binding.requestPerformanceMode(DartPerformanceMode.latency);
+        expect(requestHandle3, isNotNull);
+        expect(
+          testDispatcher.testPerformanceModeRequests,
+          equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+        );
 
-      // Disposing first handle does not revert engine mode.
-      requestHandle1?.dispose();
-      expect(binding.debugGetRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
-      expect(
-        testDispatcher.testPerformanceModeRequests,
-        equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
-      );
+        // Disposing first handle does not revert engine mode.
+        requestHandle1!.dispose();
+        requestHandle1 = null;
+        expect(binding.debugGetRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
+        expect(
+          testDispatcher.testPerformanceModeRequests,
+          equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+        );
 
-      // Disposing last handle reverts engine mode to balanced.
-      requestHandle3?.dispose();
-      expect(binding.debugGetRequestedPerformanceMode(), isNull);
-      expect(
-        testDispatcher.testPerformanceModeRequests,
-        equals(<DartPerformanceMode>[DartPerformanceMode.latency, DartPerformanceMode.balanced]),
-      );
+        // Disposing last handle reverts engine mode to balanced.
+        requestHandle3!.dispose();
+        requestHandle3 = null;
+        expect(binding.debugGetRequestedPerformanceMode(), isNull);
+        expect(
+          testDispatcher.testPerformanceModeRequests,
+          equals(<DartPerformanceMode>[DartPerformanceMode.latency, DartPerformanceMode.balanced]),
+        );
+      } finally {
+        requestHandle1?.dispose();
+        requestHandle3?.dispose();
+      }
     },
   );
 
