@@ -719,6 +719,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           analytics: const NoOpAnalytics(),
           cocoaPods: FakeCocoaPods(),
+          featureFlags: TestFeatureFlags(),
           plistParser: FakePlistParser(),
           templateRenderer: FakeTemplateRenderer(),
         );
@@ -760,6 +761,7 @@ void main() {
         xcodeDebug: FakeXcodeDebug(),
         analytics: const NoOpAnalytics(),
         cocoaPods: FakeCocoaPods(),
+        featureFlags: TestFeatureFlags(),
         plistParser: FakePlistParser(),
         templateRenderer: FakeTemplateRenderer(),
       );
@@ -812,6 +814,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           analytics: fakeAnalytics,
           cocoaPods: FakeCocoaPods(),
+          featureFlags: TestFeatureFlags(),
           plistParser: FakePlistParser(),
           templateRenderer: FakeTemplateRenderer(),
         );
@@ -1651,6 +1654,7 @@ void main() {
               xcodeDebug: FakeXcodeDebug(),
               analytics: fakeAnalytics,
               cocoaPods: FakeCocoaPods(),
+              featureFlags: TestFeatureFlags(),
               plistParser: FakePlistParser(),
               templateRenderer: FakeTemplateRenderer(),
             );

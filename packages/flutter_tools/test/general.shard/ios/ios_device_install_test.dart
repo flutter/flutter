@@ -385,6 +385,7 @@ IOSDevice setUpIOSDevice({
     iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: FakeAnalytics(),
     cocoaPods: FakeCocoaPods(),
+    featureFlags: TestFeatureFlags(),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
     plistParser: FakePlistParser(),

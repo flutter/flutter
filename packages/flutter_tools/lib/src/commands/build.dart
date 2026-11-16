@@ -97,6 +97,7 @@ class BuildCommand extends FlutterCommand {
       BuildIOSCommand(
         appleContext: appleContext,
         buildSystem: buildSystem,
+        featureFlags: featureFlags,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
@@ -107,6 +108,7 @@ class BuildCommand extends FlutterCommand {
         appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
+        featureFlags: featureFlags,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
@@ -117,6 +119,7 @@ class BuildCommand extends FlutterCommand {
         appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
+        featureFlags: featureFlags,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
@@ -124,7 +127,6 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildSwiftPackage(
-        analytics: analytics,
         buildSystem: buildSystem,
         cocoaPods: appleContext.cocoaPods,
         codesign: codesign,
@@ -140,6 +142,7 @@ class BuildCommand extends FlutterCommand {
       BuildIOSArchiveCommand(
         appleContext: appleContext,
         buildSystem: buildSystem,
+        featureFlags: featureFlags,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,

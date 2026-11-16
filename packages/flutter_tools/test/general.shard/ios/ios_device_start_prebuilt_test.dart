@@ -2074,6 +2074,7 @@ IOSDevice setUpIOSDevice({
     iosDeploy: iosDeploy ?? IOSDeploy(toolContext: toolContext),
     analytics: analytics ?? FakeAnalytics(),
     cocoaPods: FakeCocoaPods(),
+    featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),
