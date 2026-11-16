@@ -277,18 +277,24 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
 }
 
 extension FileSystemLocking on FileSystem {
-  static const int _kLinuxEagain = 11;
-  static const int _kPosixEacces = 13;
-  static const int _kMacOSEagain = 35;
-  static const int _kWindowsSharingViolation = 32;
-  static const int _kWindowsLockViolation = 33;
+  static const _posixEinval = 22;
+  static const _linuxEnolck = 37;
+  static const _linuxEnosys = 38;
+  static const _linuxEnotsup = 95;
+  static const _macOSEnotsup = 45;
+  static const _macOSEnolck = 77;
+  static const _macOSEnosys = 78;
+  static const _windowsErrorNotSupported = 50;
 
-  static const _kContentionErrorCodes = <int>{
-    _kLinuxEagain,
-    _kPosixEacces,
-    _kMacOSEagain,
-    _kWindowsSharingViolation,
-    _kWindowsLockViolation,
+  static const _unsupportedLockErrorCodes = <int>{
+    _posixEinval,
+    _linuxEnolck,
+    _linuxEnosys,
+    _linuxEnotsup,
+    _macOSEnotsup,
+    _macOSEnolck,
+    _macOSEnosys,
+    _windowsErrorNotSupported,
   };
 
   /// Runs [scope] while holding an exclusive file lock on the file at [lockPath].
@@ -329,7 +335,7 @@ extension FileSystemLocking on FileSystem {
           openedFile = null;
         }
         final int? errorCode = e.osError?.errorCode;
-        if (lockFailed && errorCode != null && !_kContentionErrorCodes.contains(errorCode)) {
+        if (lockFailed && errorCode != null && _unsupportedLockErrorCodes.contains(errorCode)) {
           logger?.printTrace('Locking not supported: $e');
           break;
         }
