@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show File;
+import 'dart:typed_data';
+
+import 'package:archive/archive.dart';
+import 'package:standard_message_codec/standard_message_codec.dart';
+
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/talkback.dart' hide adbPath;
@@ -49,6 +55,54 @@ TaskFunction createIntegrationTestFlavorsTest({
     environment: environment,
     deviceIdOverride: deviceIdOverride,
   ).call;
+}
+
+/// Verifies that `assets/flutter_assets/AssetManifest.bin` inside [apkFile]
+/// contains [includedAsset] (for [flavor]) and omits [excludedAsset] (for
+/// [excludedFlavor]).
+TaskResult checkFlavorAssetManifestInApk(
+  File apkFile, {
+  required String flavor,
+  required String includedAsset,
+  required String excludedAsset,
+  required String excludedFlavor,
+}) {
+  if (!apkFile.existsSync()) {
+    return TaskResult.failure('Expected built APK at "${apkFile.path}", but it does not exist.');
+  }
+
+  const manifestEntryPath = 'assets/flutter_assets/AssetManifest.bin';
+  final Archive apk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
+  final ArchiveFile? assetManifestEntry = apk.findFile(manifestEntryPath);
+  final Object? rawContent = assetManifestEntry?.content;
+  if (rawContent is! List<int>) {
+    return TaskResult.failure('Expected "${apkFile.path}" to contain "$manifestEntryPath".');
+  }
+
+  final Uint8List assetManifestFileData = rawContent is Uint8List
+      ? rawContent
+      : Uint8List.fromList(rawContent);
+  final assetManifest = const StandardMessageCodec().decodeMessage(
+    ByteData.sublistView(assetManifestFileData),
+  ) as Map<Object?, Object?>;
+
+  if (assetManifest.containsKey(excludedAsset)) {
+    return TaskResult.failure(
+      'Expected the asset "$excludedAsset", which '
+      ' was declared with a flavor of "$excludedFlavor" to not be included in the asset bundle '
+      ' because the --flavor was set to "$flavor".',
+    );
+  }
+
+  if (!assetManifest.containsKey(includedAsset)) {
+    return TaskResult.failure(
+      'Expected the asset "$includedAsset", which '
+      ' was declared with a flavor of "$flavor" to be included in the asset bundle '
+      ' because the --flavor was set to "$flavor".',
+    );
+  }
+
+  return TaskResult.success(null);
 }
 
 TaskFunction createExternalTexturesFrameRateIntegrationTest({
