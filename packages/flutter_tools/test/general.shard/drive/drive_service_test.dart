@@ -7,16 +7,18 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
@@ -80,21 +82,52 @@ void main() {
     );
   });
 
-  testWithoutContext('Exits if application package is null for target platform', () {
+  testWithoutContext('Exits if application package is null for target platform', () async {
     final DriverService driverService = setUpDriverService(
       applicationPackageFactory: FakeApplicationPackageFactory(),
     );
     final Device device = FakeDevice(LaunchResult.succeeded());
 
-    expect(
+    await expectLater(
       () => driverService.start(
         BuildInfo.profile,
         device,
         DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
       ),
-      throwsToolExit(message: 'No application found for TargetPlatform.android_arm.'),
+      throwsToolExit(
+        message:
+            'No application found for TargetPlatform.android_arm.\n'
+            'Is your project missing an android/AndroidManifest.xml?\n'
+            'Consider running "flutter create ." to create one.',
+      ),
     );
   });
+
+  testWithoutContext(
+    'Exits without missing project hint if prebuilt application package is null',
+    () async {
+      final DriverService driverService = setUpDriverService(
+        applicationPackageFactory: FakeApplicationPackageFactory(),
+      );
+      final Device device = FakeDevice(LaunchResult.succeeded());
+
+      await expectLater(
+        () => driverService.start(
+          BuildInfo.profile,
+          device,
+          DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+          applicationBinary: MemoryFileSystem.test().file('app.apk'),
+        ),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit error) => error.message,
+            'message',
+            'No application found for TargetPlatform.android_arm.',
+          ),
+        ),
+      );
+    },
+  );
 
   testWithoutContext('Retries application launch if it fails the first time', () async {
     final fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[getVM]);
@@ -440,12 +473,8 @@ void main() {
         applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
         dartSdkPath: 'dart',
         devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: FakeToolContext(artifacts: Artifacts.test(), processManager: processManager),
         logFlushDelay: Duration.zero,
-        toolContext: FakeToolContext(
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
-        ),
         vmServiceConnector:
             (
               Uri httpUri, {
@@ -453,6 +482,7 @@ void main() {
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
               Device? device,
@@ -517,22 +547,16 @@ FlutterDriverService setUpDriverService({
   ProcessManager? processManager,
   FlutterVmService? vmService,
 }) {
-  logger ??= BufferLogger.test();
-  final fs = MemoryFileSystem.test();
   return FlutterDriverService(
     applicationPackageFactory:
         applicationPackageFactory ?? FakeApplicationPackageFactory(FakeApplicationPackage()),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
     toolContext: FakeToolContext(
-      fs: fs,
+      artifacts: Artifacts.test(),
       logger: logger,
-      platform: platform ?? FakePlatform(),
-      processUtils: ProcessUtils(
-        logger: logger,
-        processManager: processManager ?? FakeProcessManager.any(),
-      ),
-      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      platform: platform,
+      processManager: processManager,
     ),
     vmServiceConnector:
         (
@@ -541,6 +565,7 @@ FlutterDriverService setUpDriverService({
           Restart? restart,
           CompileExpression? compileExpression,
           FlutterProject? flutterProject,
+          FlutterVersion? flutterVersion,
           PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
           io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
           Device? device,
@@ -657,6 +682,7 @@ class FakeDartDevelopmentService extends Fake
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    Artifacts? artifacts,
     String? appName = 'Fake App',
     FlutterDevice? device,
     int? ddsPort,
@@ -690,8 +716,8 @@ class FakeDeviceLogReader implements DeviceLogReader {
   }
 
   @override
-  void dispose() {
-    _logLinesController.close();
+  Future<void> dispose() async {
+    await _logLinesController.close();
   }
 
   @override

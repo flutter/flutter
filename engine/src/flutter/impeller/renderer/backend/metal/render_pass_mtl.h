@@ -89,7 +89,7 @@ class RenderPassMTL final : public RenderPass {
   bool SetIndexBuffer(BufferView index_buffer, IndexType index_type) override;
 
   // |RenderPass|
-  fml::Status Draw() override;
+  absl::Status Draw() override;
 
   // |RenderPass|
   bool BindResource(ShaderStage stage,

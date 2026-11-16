@@ -5,8 +5,8 @@
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 
 #include <cmath>
-#include <format>
 #include <memory>
+#include <string>
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
@@ -21,6 +21,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/size.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -94,9 +95,9 @@ absl::StatusOr<ImageDecoderImpeller::ImageInfo> ToImageInfo(
   const std::optional<impeller::PixelFormat> pixel_format =
       ImageDecoderImpeller::ToPixelFormat(sk_image_format.colorType());
   if (!pixel_format.has_value()) {
-    std::string decode_error(
-        std::format("Codec pixel format is not supported (SkColorType={})",
-                    static_cast<int>(sk_image_format.colorType())));
+    std::string decode_error =
+        absl::StrCat("Codec pixel format is not supported (SkColorType=",
+                     static_cast<int>(sk_image_format.colorType()), ")");
     return absl::InvalidArgumentError(decode_error);
   }
   return {{
@@ -345,6 +346,25 @@ ImageDecoderImpeller::ImageDecoderImpeller(
 
 ImageDecoderImpeller::~ImageDecoderImpeller() = default;
 
+// static
+SkISize ImageDecoderImpeller::ClampToMaxTextureSize(
+    SkISize target_size,
+    impeller::ISize max_texture_size) {
+  if (target_size.width() <= max_texture_size.width &&
+      target_size.height() <= max_texture_size.height) {
+    return target_size;
+  }
+  // Shrink both sides by the same factor so the aspect ratio is kept, but
+  // never below one pixel.
+  const double scale = std::min(static_cast<double>(max_texture_size.width) /
+                                    std::max(target_size.width(), 1),
+                                static_cast<double>(max_texture_size.height) /
+                                    std::max(target_size.height(), 1));
+  return SkISize::Make(
+      std::max(1, static_cast<int>(std::lround(target_size.width() * scale))),
+      std::max(1, static_cast<int>(std::lround(target_size.height() * scale))));
+}
+
 absl::StatusOr<ImageDecoderImpeller::DecompressResult>
 ImageDecoderImpeller::DecompressTexture(
     ImageDescriptor* descriptor,
@@ -362,22 +382,9 @@ ImageDecoderImpeller::DecompressTexture(
 
   const SkISize source_size = SkISize::Make(descriptor->image_info().width,
                                             descriptor->image_info().height);
-  SkISize target_size =
-      SkISize::Make(options.target_width, options.target_height);
-  // Shrink both sides by the same factor so the aspect ratio is kept, but
-  // never below one pixel.
-  if (options.target_width > max_texture_size.width ||
-      options.target_height > max_texture_size.height) {
-    const double scale = std::min(static_cast<double>(max_texture_size.width) /
-                                      std::max(options.target_width, 1u),
-                                  static_cast<double>(max_texture_size.height) /
-                                      std::max(options.target_height, 1u));
-    target_size = SkISize::Make(
-        std::max(1,
-                 static_cast<int>(std::lround(options.target_width * scale))),
-        std::max(1,
-                 static_cast<int>(std::lround(options.target_height * scale))));
-  }
+  const SkISize target_size = ClampToMaxTextureSize(
+      SkISize::Make(options.target_width, options.target_height),
+      max_texture_size);
 
   // Fast path for when the input requires no decompressing or conversion.
   if (!descriptor->is_compressed() && source_size == target_size &&
@@ -424,8 +431,8 @@ ImageDecoderImpeller::DecompressTexture(
 
   if (!ToPixelFormat(image_info.value().colorType()).has_value()) {
     std::string decode_error =
-        std::format("Codec pixel format is not supported (SkColorType={})",
-                    static_cast<int>(image_info.value().colorType()));
+        absl::StrCat("Codec pixel format is not supported (SkColorType=",
+                     static_cast<int>(image_info.value().colorType()), ")");
     FML_DLOG(ERROR) << decode_error;
     return absl::InvalidArgumentError(decode_error);
   }
@@ -504,8 +511,7 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
   }
 
   dest_texture->SetLabel(
-      std::format("ui.Image({})", static_cast<const void*>(dest_texture.get()))
-          .c_str());
+      absl::StrCat("ui.Image(0x", absl::Hex(dest_texture.get()), ")"));
 
   auto command_buffer = context->CreateCommandBuffer();
   if (!command_buffer) {
@@ -659,9 +665,9 @@ ImageDecoderImpeller::UploadTextureToStorage(
   const auto image_info = bitmap->info();
   const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
-    std::string decode_error(
-        std::format("Unsupported pixel format (SkColorType={})",
-                    static_cast<int>(image_info.colorType())));
+    std::string decode_error =
+        absl::StrCat("Unsupported pixel format (SkColorType=",
+                     static_cast<int>(image_info.colorType()), ")");
     FML_DLOG(ERROR) << decode_error;
     return std::make_pair(nullptr, decode_error);
   }
@@ -692,9 +698,7 @@ ImageDecoderImpeller::UploadTextureToStorage(
     return std::make_pair(nullptr, decode_error);
   }
 
-  texture->SetLabel(
-      std::format("ui.Image({})", static_cast<const void*>(texture.get()))
-          .c_str());
+  texture->SetLabel(absl::StrCat("ui.Image(0x", absl::Hex(texture.get()), ")"));
 
   context->DisposeThreadLocalCachedResources();
 

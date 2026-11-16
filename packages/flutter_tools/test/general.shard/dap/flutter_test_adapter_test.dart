@@ -7,16 +7,14 @@ import 'dart:async';
 import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
-import 'package:flutter_tools/src/globals.dart' as globals show platform;
 import 'package:test/test.dart';
 
 import 'mocks.dart';
 
 void main() {
   // Use the real platform as a base so that Windows bots test paths.
-  final platform = FakePlatform.fromPlatform(globals.platform);
+  final platform = FakePlatform.fromPlatform(const LocalPlatform());
   final FileSystemStyle fsStyle = platform.isWindows
       ? FileSystemStyle.windows
       : FileSystemStyle.posix;
@@ -25,10 +23,6 @@ void main() {
     final expectedFlutterExecutable = platform.isWindows
         ? r'C:\fake\flutter\bin\flutter.bat'
         : '/fake/flutter/bin/flutter';
-
-    setUpAll(() {
-      Cache.flutterRoot = platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter';
-    });
 
     test('includes toolArgs', () async {
       final adapter = FakeFlutterTestDebugAdapter(

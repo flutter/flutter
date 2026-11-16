@@ -833,4 +833,179 @@ Future<void> testMain() async {
       },
     );
   });
+
+  group('Paragraph characters without a cluster', () {
+    // The browser gives some invisible characters no cluster of their own.
+    for (final (String name, String text) in <(String, String)>[
+      ('soft hyphen', 'ab cd\u00AD'),
+      ('zero width space', 'ab cd\u200B'),
+    ]) {
+      test('Layout handles a trailing $name', () {
+        final builder = ui.ParagraphBuilder(ahemStyle);
+        builder.addText(text);
+        final ui.Paragraph paragraph = builder.build();
+
+        expect(() => paragraph.layout(const ui.ParagraphConstraints(width: 40)), returnsNormally);
+        expect(paragraph.numberOfLines, 2);
+      });
+    }
+
+    for (final (String name, String character) in <(String, String)>[
+      ('soft hyphen', '\u00AD'),
+      ('zero width space', '\u200B'),
+    ]) {
+      test('A span that starts with a $name covers only its own text', () {
+        final builder = ui.ParagraphBuilder(ahemStyle);
+        builder.addText('abcd');
+        builder.pushStyle(ui.TextStyle(color: const ui.Color(0xFF0000FF)));
+        builder.addText('${character}ef');
+        builder.pop();
+        final ui.Paragraph paragraph = builder.build();
+        paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+
+        final ui.TextBox abcd = paragraph.getBoxesForRange(0, 4).single;
+        final List<ui.TextBox> ef = paragraph.getBoxesForRange(5, 7);
+        expect(ef, hasLength(1));
+        expect(ef.single.left, closeTo(abcd.right, 0.01));
+      });
+
+      test('getLineNumberAt maps a leading $name to its line', () {
+        // When a line starts with a character that has no cluster of its own (at offset 0 or
+        // right after a hard newline), the first visible cluster starts after that character,
+        // but the line's text range must still start at the beginning of the line so binary
+        // search in getLineNumberAt finds it.
+        final builder = ui.ParagraphBuilder(ahemStyle)..addText('${character}abcd\n${character}ef');
+        final ui.Paragraph paragraph = builder.build()
+          ..layout(const ui.ParagraphConstraints(width: 1000));
+
+        expect(paragraph.getLineNumberAt(0), 0);
+        expect(paragraph.getLineNumberAt(6), 1);
+      });
+
+      test('A styled span containing only a $name adds no visual block', () {
+        // A span whose text has no clusters of its own maps to an empty cluster range and must
+        // not emit a zero-width TextBlock in visualBlocks or split selection boxes.
+        final builder = ui.ParagraphBuilder(ahemStyle);
+        builder.addText('ab');
+        builder.pushStyle(ui.TextStyle(color: const ui.Color(0xFF0000FF)));
+        builder.addText(character);
+        builder.pop();
+        builder.addText('cd');
+        final ui.Paragraph paragraph = builder.build()
+          ..layout(const ui.ParagraphConstraints(width: 1000));
+
+        expect(paragraph.getBoxesForRange(0, 5), hasLength(2));
+      });
+    }
+
+    test('Directional marks without a cluster do not create empty or duplicate bidi runs', () {
+      // U+200F (RLM) has no cluster of its own. At the start of an LTR paragraph it must map to
+      // an empty cluster range [0, 0), and before a newline its empty BidiRun must be skipped
+      // during line layout.
+      ui.Paragraph layoutText(String text) {
+        final builder = ui.ParagraphBuilder(ahemStyle)..addText(text);
+        return builder.build()..layout(const ui.ParagraphConstraints(width: 1000));
+      }
+
+      final ui.Paragraph abc = layoutText('abc');
+      final ui.Paragraph leadingRlm = layoutText('\u200Fabc');
+      expect(
+        leadingRlm.computeLineMetrics().single.width,
+        closeTo(abc.computeLineMetrics().single.width, 0.01),
+      );
+      expect(leadingRlm.getBoxesForRange(1, 4), hasLength(1));
+
+      final ui.Paragraph interiorRlm = layoutText('a\u200F\nb');
+      expect(interiorRlm.numberOfLines, 2);
+    });
+
+    for (final (String name, String character) in <(String, String)>[
+      ('soft hyphen', '\u00AD'),
+      ('zero width space', '\u200B'),
+      ('right-to-left mark', '\u200F'),
+    ]) {
+      test('Layout handles a paragraph containing only a $name', () {
+        // A paragraph whose text consists solely of characters without clusters produces only the
+        // trailing EmptyCluster and must lay out with empty-paragraph metrics instead of throwing
+        // on lines.first.
+        final emptyBuilder = ui.ParagraphBuilder(ahemStyle);
+        final ui.Paragraph emptyParagraph = emptyBuilder.build()
+          ..layout(const ui.ParagraphConstraints(width: 100));
+
+        final builder = ui.ParagraphBuilder(ahemStyle)..addText(character);
+        final ui.Paragraph paragraph = builder.build();
+
+        expect(() => paragraph.layout(const ui.ParagraphConstraints(width: 100)), returnsNormally);
+        expect(paragraph.numberOfLines, 0);
+        expect(paragraph.height, emptyParagraph.height);
+        expect(paragraph.alphabeticBaseline, emptyParagraph.alphabeticBaseline);
+        expect(paragraph.ideographicBaseline, emptyParagraph.ideographicBaseline);
+        expect(paragraph.maxIntrinsicWidth, 0);
+        expect(paragraph.minIntrinsicWidth, 0);
+        expect(paragraph.getPositionForOffset(ui.Offset.zero), const ui.TextPosition(offset: 0));
+        expect(paragraph.getLineNumberAt(0), isNull);
+        expect(paragraph.getGlyphInfoAt(0), isNull);
+      });
+    }
+
+    for (final (String name, String character) in <(String, String)>[
+      ('left-to-right mark', '\u200E'),
+      ('right-to-left mark', '\u200F'),
+    ]) {
+      test('Soft line break before a $name after a zero width space wraps the line', () {
+        // Depending on the browser's line breaker, the soft break after U+200B (LB8) can land on
+        // the following directional mark, which has no cluster of its own. Line wrapping must
+        // still detect the soft break before the next visible cluster.
+        final builder = ui.ParagraphBuilder(ahemStyle)..addText('ab\u200B${character}cd');
+        final ui.Paragraph paragraph = builder.build()
+          ..layout(const ui.ParagraphConstraints(width: 30));
+
+        expect(paragraph.numberOfLines, 2);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 4),
+        );
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 4)),
+          const ui.TextRange(start: 4, end: 6),
+        );
+      });
+    }
+
+    test('Soft line break and getLineBoundary handle clusterless characters after spaces', () {
+      // When trailing spaces are followed by characters that have no cluster of their own, soft
+      // wrapping must still detect the break after the spaces and the line's text range must cover
+      // the unmapped code units.
+      final wrappedBuilder = ui.ParagraphBuilder(ahemStyle)..addText('ab \u200F\u200Fcd');
+      final ui.Paragraph wrapped = wrappedBuilder.build()
+        ..layout(const ui.ParagraphConstraints(width: 30));
+
+      expect(wrapped.numberOfLines, 2);
+      expect(wrapped.getLineNumberAt(3), 0);
+      expect(wrapped.getLineNumberAt(4), 0);
+      expect(
+        wrapped.getLineBoundary(const ui.TextPosition(offset: 3)),
+        const ui.TextRange(start: 0, end: 5),
+      );
+      expect(
+        wrapped.getLineBoundary(const ui.TextPosition(offset: 4)),
+        const ui.TextRange(start: 0, end: 5),
+      );
+      expect(
+        wrapped.getLineBoundary(const ui.TextPosition(offset: 5)),
+        const ui.TextRange(start: 5, end: 7),
+      );
+
+      final trailingBuilder = ui.ParagraphBuilder(ahemStyle)..addText('ab \u200B');
+      final ui.Paragraph trailing = trailingBuilder.build()
+        ..layout(const ui.ParagraphConstraints(width: 100));
+
+      expect(trailing.numberOfLines, 1);
+      expect(trailing.getLineNumberAt(3), 0);
+      expect(
+        trailing.getLineBoundary(const ui.TextPosition(offset: 3)),
+        const ui.TextRange(start: 0, end: 4),
+      );
+    });
+  });
 }

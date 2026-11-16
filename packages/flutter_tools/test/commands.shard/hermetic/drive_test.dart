@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
@@ -33,12 +32,12 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_devices.dart' as fake_devices;
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -117,6 +116,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -241,6 +241,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -282,6 +283,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -321,6 +323,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -372,6 +375,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -415,6 +419,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -477,6 +482,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -536,6 +542,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -793,6 +800,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -849,6 +857,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -915,6 +924,7 @@ void main() {}
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
+      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -926,14 +936,19 @@ void main() {}
         cache: Cache.test(processManager: FakeProcessManager.any()),
         fs: fileSystem,
         logger: logger,
-        outputPreferences: outputPreferences,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
-        projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
         signals: signals,
       );
-      final command = _ProjectFilteringDriveCommand(
-        devices: <Device>[FakeUnsupportedDevice()],
+      final deviceManager = _TestDeviceManager(logger: logger, fileSystem: fileSystem)
+        ..addDevice(
+          fake_devices.FakeDevice(
+            'Unsupported Device',
+            'unsupported_device',
+            isSupportedForProject: false,
+          ),
+        );
+      final command = DriveCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
         toolContext: toolContext,
         flutterDriverFactory: CapturingFlutterDriverFactory(capturingDriverService),
       );
@@ -942,36 +957,39 @@ void main() {}
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
 
-      await expectLater(
-        () => createTestCommandRunner(
-          command,
-          null,
-          toolContext,
-          TestFeatureFlags(),
-        ).run(<String>['drive', '--no-pub']),
-        throwsToolExit(),
-      );
+      final runner = TestFlutterCommandRunner(
+        deviceManager: deviceManager,
+        featureFlags: TestFeatureFlags(),
+        toolContext: toolContext,
+      )..addCommand(command);
+
+      await expectLater(() => runner.run(<String>['drive', '--no-pub']), throwsToolExit());
+      expect(logger.statusText, contains('No supported devices connected.'));
       expect(capturingDriverService.device, isNull);
     },
   );
 
-  testWithoutContext(
+  // Uses testUsingContext because RunCommandBase.createDebuggingOptions reads ambient featureFlags.
+  testUsingContext(
     'includes devices unsupported by the project when using prebuilt application binary',
     () async {
       final capturingDriverService = CapturingDriverService();
-      final unsupportedDevice = FakeUnsupportedDevice();
+      final unsupportedDevice = fake_devices.FakeDevice(
+        'Unsupported Device',
+        'unsupported_device',
+        isSupportedForProject: false,
+      );
       final toolContext = FakeToolContext(
         cache: Cache.test(processManager: FakeProcessManager.any()),
         fs: fileSystem,
         logger: logger,
-        outputPreferences: outputPreferences,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
-        projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
         signals: signals,
       );
-      final command = _ProjectFilteringDriveCommand(
-        devices: <Device>[unsupportedDevice],
+      final deviceManager = _TestDeviceManager(logger: logger, fileSystem: fileSystem)
+        ..addDevice(unsupportedDevice);
+      final command = DriveCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
         toolContext: toolContext,
         flutterDriverFactory: CapturingFlutterDriverFactory(capturingDriverService),
       );
@@ -981,12 +999,13 @@ void main() {}
       fileSystem.file('pubspec.yaml').createSync();
       final File appBinary = fileSystem.file('app.apk')..createSync();
 
-      await createTestCommandRunner(
-        command,
-        null,
-        toolContext,
-        TestFeatureFlags(),
-      ).run(<String>['drive', '--no-pub', '--use-application-binary', appBinary.path]);
+      final runner = TestFlutterCommandRunner(
+        deviceManager: deviceManager,
+        featureFlags: TestFeatureFlags(),
+        toolContext: toolContext,
+      )..addCommand(command);
+
+      await runner.run(<String>['drive', '--no-pub', '--use-application-binary', appBinary.path]);
 
       expect(capturingDriverService.device, unsupportedDevice);
       expect(capturingDriverService.applicationBinary?.path, appBinary.path);
@@ -1080,6 +1099,28 @@ void main() {}
       ),
     );
   });
+
+  testUsingContext(
+    'disablePortPublication defaults to true when argResults is null',
+    () async {
+      final Device wirelessDevice = FakeIosDevice()
+        ..connectionInterface = DeviceConnectionInterface.wireless;
+      fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
+      final command = DriveCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: createToolContext(),
+      );
+      createTestCommandRunner(command);
+
+      expect(await command.disablePortPublication, isTrue);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
 
   for (final String flag in AndroidEngineCliFlags.allFlags) {
     testUsingContext(
@@ -1176,13 +1217,7 @@ class ScreenshotDevice extends Fake implements Device {
   final id = 'fake_device';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
-
-  @override
-  Future<bool> isSupported() async => true;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android;
 
   @override
   bool supportsScreenshot = true;
@@ -1423,86 +1458,27 @@ class FakeSignals extends Fake implements Signals {
   Future<bool> removeHandler(ProcessSignal signal, Object token) async => true;
 }
 
-class _ProjectFilteringDriveCommand extends DriveCommand {
-  _ProjectFilteringDriveCommand({
-    required this._devices,
-    required super.toolContext,
-    super.flutterDriverFactory,
-  }) : super(
-         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-         buildTargets: const BuildTargetsImpl(),
-       );
+class _TestDeviceManager extends DeviceManager {
+  _TestDeviceManager({required super.logger, required super.fileSystem});
 
-  final List<Device> _devices;
+  final _discoverer = fake_devices.FakePollingDeviceDiscovery();
 
   @override
-  bool get refreshWirelessDevices => false;
+  late final deviceDiscoverers = <DeviceDiscovery>[_discoverer];
 
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
-
-  @override
-  Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async =>
-      DebuggingOptions.enabled(BuildInfo.debug);
-
-  @override
-  Future<List<Device>?> findAllTargetDevices({
-    bool? canPrompt,
-    bool includeDevicesUnsupportedByProject = false,
-  }) async {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
-    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
-    final matchingDevices = <Device>[];
-    for (final Device device in _devices) {
-      if (includeDevicesUnsupportedByProject ||
-          await device.isSupportedForProject(flutterProject)) {
-        matchingDevices.add(device);
-      }
-    }
-    return matchingDevices.isEmpty ? null : matchingDevices;
-  }
+  void addDevice(Device device) => _discoverer.addDevice(device);
 }
 
-class FakeUnsupportedDevice extends Fake implements Device {
+class _FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
   @override
-  final String id = 'unsupported_device';
-
-  @override
-  final String name = 'Unsupported Device';
-
-  @override
-  String get displayName => name;
-
-  @override
-  bool get isConnected => true;
-
-  @override
-  Category get category => Category.mobile;
-
-  @override
-  PlatformType get platformType => PlatformType.android;
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
-
-  @override
-  Future<bool> isSupported() async => true;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => false;
-
-  @override
-  Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-    String? mainPath,
-    String? route,
-    DebuggingOptions? debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
-  }) async => LaunchResult.succeeded();
+  Future<ApplicationPackage?> getPackageForPlatform(
+    TargetPlatform platform, {
+    BuildInfo? buildInfo,
+    File? applicationBinary,
+  }) async => _FakeApplicationPackage();
 }
+
+class _FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
 class FakeWindowsDevice extends Fake implements Device {
   @override

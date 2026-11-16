@@ -443,7 +443,7 @@ TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
 
   // There's enough area to add this rectangle, but no space big enough for
   // the 50 units of width.
-  IPoint16 output;
+  IPoint16 output{};
   ASSERT_FALSE(packer->AddRect(50, 50, &output));
   // Should be unchanged.
   ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 0.65));
@@ -457,7 +457,7 @@ TEST(TypographerTest, RectanglePackerFillsRows) {
   auto skyline = RectanglePacker::Factory(257, 256);
 
   // Fill up the first row.
-  IPoint16 loc;
+  IPoint16 loc{};
   for (auto i = 0u; i < 16; i++) {
     skyline->AddRect(16, 16, &loc);
   }

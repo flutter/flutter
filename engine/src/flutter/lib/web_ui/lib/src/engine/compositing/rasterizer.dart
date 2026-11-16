@@ -57,12 +57,20 @@ abstract class ViewRasterizer {
   /// The last layer tree that was rendered. Only non-null if in debug mode.
   LayerTree? _lastRenderedLayerTree;
 
-  /// Draws the [layerTree] to the screen for the view associated with this
-  /// rasterizer.
-  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
-    final ui.Size frameSize = view.physicalSize;
-    if (frameSize.isEmpty) {
-      // Available drawing area is empty. Skip drawing.
+  /// Draws the [layerTree] at [frameSize] (in physical pixels) to the screen
+  /// for the view associated with this rasterizer.
+  Future<void> draw(LayerTree layerTree, ui.Size frameSize, FrameTimingRecorder? recorder) async {
+    // The [frameSize] may be slightly imprecise if the `devicePixelRatio` isn't
+    // an integer. For example, if you zoom to 110% in Chrome on a Macbook, the
+    // `devicePixelRatio` is `2.200000047683716`, so when the physical size is
+    // computed by multiplying the logical size by the device pixel ratio, the
+    // result is slightly imprecise as well. Nevertheless, the number should
+    // be close to an integer, so round the frame size to be more precise.
+    final BitmapSize bitmapSize = frameSize.isEmpty
+        ? BitmapSize.zero
+        : BitmapSize.fromSize(frameSize);
+    if (bitmapSize.isEmpty) {
+      // Available drawing area is empty (or rounds to 0 physical pixels). Skip drawing.
       // Record all the draw steps as happening instantly so we don't crash
       // when submitting frame timings.
       recorder?.recordBuildFinish();
@@ -71,14 +79,6 @@ abstract class ViewRasterizer {
       return;
     }
 
-    // The [frameSize] may be slightly imprecise if the `devicePixelRatio` isn't
-    // an integer. For example, is you zoom to 110% in Chrome on a Macbook, the
-    // `devicePixelRatio` is `2.200000047683716`, so when the physical size is
-    // computed by multiplying the logical size by the device pixel ratio, the
-    // result is slightly imprecise as well. Nevertheless, the number should
-    // be close to an integer, so round the frame size to be more precise.
-    final bitmapSize = BitmapSize.fromSize(frameSize);
-
     currentFrameSize = bitmapSize;
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
@@ -86,14 +86,22 @@ abstract class ViewRasterizer {
     compositorFrame.raster(layerTree, currentFrameSize, recorder);
     _lastRenderedLayerTree = layerTree;
 
+    final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
     await prepareToDraw();
     await viewEmbedder.submitFrame(recorder);
+    if (presentationTimer != null) {
+      presentationTimer.stop();
+      Profiler.instance.benchmark(
+        kProfilePresentationDuration,
+        presentationTimer.elapsedMicroseconds.toDouble(),
+      );
+    }
   }
 
   /// Do some initialization to prepare to draw a frame.
   ///
-  /// For example, in the [OffscreenCanvasRasterizer], this ensures the backing
-  /// [OffscreenCanvas] is the correct size to draw the frame.
+  /// For example, in the [MultiSurfaceRasterizer], this ensures the base
+  /// canvas is the correct size to draw the frame.
   Future<void> prepareToDraw();
 
   /// Rasterizes the given [pictures] into the [displayCanvases].
@@ -171,10 +179,12 @@ abstract class DisplayCanvas {
   void dispose();
 }
 
-/// Encapsulates a request to render a [ui.Scene]. Contains the scene to render
-/// and a [Completer] which completes when the scene has been rendered.
+/// Encapsulates a request to render a [ui.Scene] at a given physical [size].
+/// Contains the scene to render and a [Completer] which completes when the
+/// scene has been rendered.
 typedef RenderRequest = ({
   ui.Scene scene,
+  ui.Size size,
   Completer<void> completer,
   FrameTimingRecorder? recorder,
 });

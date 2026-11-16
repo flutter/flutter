@@ -1383,6 +1383,17 @@ public class FlutterJNI {
     platformViewsController2.publishTransaction(tx);
   }
 
+  // Called from the raster thread after the frame's surface submissions have published their
+  // transactions and before the corresponding platform-thread task is posted.
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  public void sealFrameTransactions() {
+    if (platformViewsController2 == null) {
+      throw new RuntimeException("");
+    }
+    platformViewsController2.sealFrameTransactions();
+  }
+
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
   @UiThread

@@ -23,7 +23,7 @@ import 'build.dart';
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
     required this.buildSystem,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     required this._featureFlags,
     required this._visualStudio,
@@ -36,9 +36,6 @@ class BuildWindowsCommand extends BuildSubCommand {
 
   @visibleForTesting
   FeatureFlags get featureFlags => _featureFlags;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'windows';
@@ -60,10 +57,12 @@ class BuildWindowsCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = this.logger;
-    final OperatingSystemUtils os = toolContext.os;
-    final Platform platform = toolContext.platform;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+    ) = toolContext;
 
     final BuildInfo buildInfo = await getBuildInfo();
     if (!_featureFlags.isWindowsEnabled) {
@@ -84,7 +83,9 @@ class BuildWindowsCommand extends BuildSubCommand {
       project.windows,
       buildInfo,
       targetPlatform,
+      analytics: analytics,
       target: targetFile,
+      toolContext: toolContext,
       visualStudioOverride: _visualStudio,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: fs,

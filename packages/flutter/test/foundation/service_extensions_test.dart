@@ -1435,6 +1435,15 @@ void main() {
 
   test('Service extensions - viewMetricsOverride', () async {
     final int viewId = binding.platformDispatcher.views.single.viewId;
+    // Every test in this file starts with no frame scheduled, and changing an
+    // override schedules one. Tear-downs run last-registered-first, so this
+    // runs after the registry is cleared, which can schedule another, and runs
+    // even when an expectation below fails.
+    addTearDown(() async {
+      if (binding.frameScheduled) {
+        await binding.doFrame();
+      }
+    });
     addTearDown(debugClearViewMetricsOverrides);
     // Every client listening for extension state changes has to learn about an
     // override, not just the one that asked for it.
@@ -1629,9 +1638,25 @@ void main() {
     // Clearing again removes nothing, and says nothing.
     await call(<String, String>{'clearAll': 'true'});
     expect(extensionChangedEvents.length, 8);
-    if (binding.frameScheduled) {
-      await binding.doFrame();
-    }
+
+    // The extension is the way tooling installs overrides, so the whole path
+    // — handler, registry, replay, binding — is exercised once end to end. This
+    // is part of this test, not a test of its own, because the tests in this
+    // file share the binding and run in a random order: the event counts above
+    // assume that no other test has used this extension.
+    final observer = _MetricsObserver();
+    binding.addObserver(observer);
+    addTearDown(() => binding.removeObserver(observer));
+    final double realRatio = binding.platformDispatcher.implicitView!.devicePixelRatio;
+
+    await call(<String, String>{'viewId': '$viewId', 'overrides': '{"devicePixelRatio": 3.5}'});
+    expect(observer.metricsChanged, 1);
+    expect(binding.platformDispatcher.implicitView!.devicePixelRatio, 3.5);
+
+    await call(<String, String>{'clearAll': 'true'});
+    expect(observer.metricsChanged, 2);
+    expect(binding.platformDispatcher.implicitView!.devicePixelRatio, realRatio);
+    expect(extensionChangedEvents.length, 10);
 
     testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
   });
@@ -1683,4 +1708,11 @@ void main() {
 
     testedExtensions.add(FoundationServiceExtensions.connectedVmServiceUri.name);
   });
+}
+
+class _MetricsObserver with WidgetsBindingObserver {
+  int metricsChanged = 0;
+
+  @override
+  void didChangeMetrics() => metricsChanged += 1;
 }

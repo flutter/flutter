@@ -148,7 +148,7 @@ class Chrome {
       if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
     ];
 
-    final io.Process chromeProcess = await _spawnChromiumProcess(
+    final (:io.Process process, :int? remoteDebuggingPort) = await _spawnChromiumProcess(
       _findSystemChromeExecutable(),
       args,
       silent: options.silent,
@@ -157,10 +157,15 @@ class Chrome {
 
     WipConnection? debugConnection;
     if (withDebugging) {
-      debugConnection = await _connectToChromeDebugPort(options.debugPort!, options.url);
+      final int? port = options.debugPort == 0 ? remoteDebuggingPort : options.debugPort;
+      if (port == null || port == 0) {
+        process.kill();
+        throw StateError('Failed to determine Chrome remote debugging port.');
+      }
+      debugConnection = await _connectToChromeDebugPort(port, options.url);
     }
 
-    return Chrome._(chromeProcess, onError, debugConnection);
+    return Chrome._(process, onError, debugConnection);
   }
 
   /// Connects to an existing Chrome process with the given [options].
@@ -701,7 +706,7 @@ bool _isDbusError(String line) {
       line.contains('org.freedesktop.DBus');
 }
 
-Future<io.Process> _spawnChromiumProcess(
+Future<({io.Process process, int? remoteDebuggingPort})> _spawnChromiumProcess(
   String executable,
   List<String> args, {
   required bool silent,
@@ -726,7 +731,7 @@ Future<io.Process> _spawnChromiumProcess(
     // Wait until the DevTools are listening before trying to connect. This is
     // only required for flutter_test --platform=chrome and not flutter run.
     var hitGlibcBug = false;
-    await process.stderr
+    final String devToolsLine = await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .where((String line) => !_isDbusError(line))
@@ -758,8 +763,16 @@ Future<io.Process> _spawnChromiumProcess(
           },
         );
 
+    int? remoteDebuggingPort;
+    final RegExpMatch? devToolsMatch = RegExp(r'DevTools listening on (ws://[^\s]+)')
+        .firstMatch(devToolsLine);
+    if (devToolsMatch != null) {
+      final Uri uri = Uri.parse(devToolsMatch.group(1)!);
+      remoteDebuggingPort = uri.port;
+    }
+
     if (!hitGlibcBug) {
-      return process;
+      return (process: process, remoteDebuggingPort: remoteDebuggingPort);
     }
 
     // A precaution that avoids accumulating browser processes, in case the
