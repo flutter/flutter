@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -209,6 +208,48 @@ void main() {
           expect(version.didCheckFlutterVersionFreshness, false);
         },
       );
+
+      testWithoutContext(
+        'does not check that Flutter installation is up-to-date for daemon command by default',
+        () async {
+          final version = FakeFlutterVersion();
+          final toolContext = FakeToolContext(
+            botDetector: const FakeBotDetector(false),
+            flutterVersion: version,
+            fs: fileSystem,
+            platform: platform,
+          );
+          final FlutterCommand command = DummyFlutterCommand(
+            name: 'daemon',
+            toolContext: toolContext,
+          );
+          final runner =
+              createTestCommandRunner(command, null, toolContext) as FlutterCommandRunner;
+
+          await runner.run(<String>['daemon']);
+
+          expect(version.didCheckFlutterVersionFreshness, false);
+        },
+      );
+
+      testWithoutContext('checks that Flutter installation is up-to-date for daemon command when explicit --version-check', () async {
+        final version = FakeFlutterVersion();
+        final toolContext = FakeToolContext(
+          botDetector: const FakeBotDetector(false),
+          flutterVersion: version,
+          fs: fileSystem,
+          platform: platform,
+        );
+        final FlutterCommand command = DummyFlutterCommand(
+          name: 'daemon',
+          toolContext: toolContext,
+        );
+        final runner = createTestCommandRunner(command, null, toolContext) as FlutterCommandRunner;
+
+        await runner.run(<String>['daemon', '--version-check']);
+
+        expect(version.didCheckFlutterVersionFreshness, true);
+      });
 
       testWithoutContext('Fetches tags when --version is used', () async {
         final os = FakeOperatingSystemUtils();
@@ -959,88 +1000,9 @@ void main() {
             Platform: () => platform,
           },
         );
-
-        testWithoutContext('does not update artifacts, write version file, or check version freshness for daemon command by default', () async {
-          final cache = _RecordingCache(fileSystem);
-          final version = FakeFlutterVersion();
-          final toolContext = FakeToolContext(
-            botDetector: const FakeBotDetector(false),
-            cache: cache,
-            flutterVersion: version,
-            fs: fileSystem,
-            platform: platform,
-          );
-          final command = DummyFlutterCommand(
-            name: 'daemon',
-            noUsagePath: true,
-            commandFunction: () async => FlutterCommandResult.success(),
-            toolContext: toolContext,
-          );
-          final runner = FlutterCommandRunner(toolContext: toolContext)..addCommand(command);
-
-          await runner.run(<String>['daemon']);
-
-          expect(cache.didLock, isTrue);
-          expect(cache.didUpdateAll, isFalse);
-          expect(version.didEnsureVersionFile, isFalse);
-          expect(version.didCheckFlutterVersionFreshness, isFalse);
-        });
-
-        testWithoutContext(
-          'checks version freshness for daemon command when --version-check is explicitly passed',
-          () async {
-            final cache = _RecordingCache(fileSystem);
-            final version = FakeFlutterVersion();
-            final toolContext = FakeToolContext(
-              botDetector: const FakeBotDetector(false),
-              cache: cache,
-              flutterVersion: version,
-              fs: fileSystem,
-              platform: platform,
-            );
-            final command = DummyFlutterCommand(
-              name: 'daemon',
-              noUsagePath: true,
-              commandFunction: () async => FlutterCommandResult.success(),
-              toolContext: toolContext,
-            );
-            final runner = FlutterCommandRunner(toolContext: toolContext)..addCommand(command);
-
-            await runner.run(<String>['daemon', '--version-check']);
-
-            expect(cache.didLock, isTrue);
-            expect(cache.didUpdateAll, isFalse);
-            expect(version.didEnsureVersionFile, isFalse);
-            expect(version.didCheckFlutterVersionFreshness, isTrue);
-          },
-        );
       });
     });
   });
-}
-
-class _RecordingCache extends Fake implements Cache {
-  _RecordingCache(this._fileSystem);
-
-  final FileSystem _fileSystem;
-  bool didLock = false;
-  bool didUpdateAll = false;
-
-  @override
-  Directory getRoot() => _fileSystem.directory('/cache');
-
-  @override
-  Future<void> lock() async {
-    didLock = true;
-  }
-
-  @override
-  void releaseLock() {}
-
-  @override
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
-    didUpdateAll = true;
-  }
 }
 
 class FakeFlutterCommand extends FlutterCommand {

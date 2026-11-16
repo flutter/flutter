@@ -107,9 +107,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   final bool _verboseHelp;
 
-  static const _kDaemonCommandName = 'daemon';
-  static const _kUpgradeCommandName = 'upgrade';
-
   @override
   ArgParser get argParser => _argParser;
   ArgParser _argParser;
@@ -523,8 +520,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // Running the "upgrade" command is already checking, don't check twice.
     // The "daemon" command is a non-interactive JSON-RPC server and should not
     // run git version checks unless explicitly requested.
-    final String? commandName = topLevelResults.command?.name;
-    if (commandName == _kUpgradeCommandName || commandName == _kDaemonCommandName) {
+    if (topLevelResults.command?.name case 'upgrade' || 'daemon') {
       return false;
     }
 
@@ -660,12 +656,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
           _extensionManager.disable();
         }
 
-        if (topLevelResults.command?.name != _kDaemonCommandName) {
-          // Required to support `flutter --version` before artifacts are cached.
-          await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
-          flutterVersion.ensureVersionFile();
-        }
+        // Required to support `flutter --version` before artifacts are cached.
+        await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
 
+        flutterVersion.ensureVersionFile();
         if (await _shouldCheckForUpdates(topLevelResults)) {
           await flutterVersion.checkFlutterVersionFreshness();
         }

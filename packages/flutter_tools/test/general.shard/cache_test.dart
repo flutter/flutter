@@ -1975,7 +1975,6 @@ void main() {
     // Subsequent accesses should return the memoized value.
     mutableEnv['FLUTTER_ROOT'] = '/mutated/flutter';
     expect(defaultCache.flutterRoot, '/env/flutter');
->>>>>>> upstream/master
   });
 }
 

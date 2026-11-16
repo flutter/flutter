@@ -982,7 +982,7 @@ abstract class CachedArtifact extends ArtifactSet {
   }) async {
     if (!location.existsSync()) {
       try {
-        // Creates bin/cache/artifacts with 755 permissions; getCacheArtifacts() no longer does.
+        // Ensure bin/cache/artifacts exists with 755 permissions before creating location.
         cache.getCacheDir('artifacts');
         location.createSync(recursive: true);
       } on FileSystemException catch (err) {
