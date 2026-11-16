@@ -1389,6 +1389,12 @@ class RenderFlex extends RenderBox
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return !_hasOverflow || !size.isEmpty;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (!_hasOverflow) {
       defaultPaint(context, offset);

@@ -48,6 +48,33 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('Viewport does not report slivers in the cache extent as painted', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 200)),
+                SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+    expect(viewport.paintsChild(viewport.firstChild!), isTrue);
+    expect(viewport.paintsChild(viewport.lastChild!), isFalse);
+  });
+
   testWidgets('Scrollable widget scrollDirection update test', (WidgetTester tester) async {
     final controller = ScrollController();
     addTearDown(controller.dispose);

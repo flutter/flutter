@@ -1253,6 +1253,25 @@ void main() {
     expect(exceptions.first.message, isNot(contains('Null check operator')));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  test('RenderFlex does not report children as painted when it overflows and is empty', () {
+    void checkPaintsChild(BoxConstraints constraints, bool expected) {
+      final child = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 200.0),
+      );
+      final flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[child]);
+      layout(flex, constraints: constraints);
+      expect(flex.paintsChild(child), expected);
+    }
+
+    // Empty, but not overflowing.
+    checkPaintsChild(const BoxConstraints.tightFor(width: 0.0, height: 300.0), true);
+    // Overflowing, but not empty.
+    checkPaintsChild(const BoxConstraints(maxWidth: 100.0, maxHeight: 100.0), true);
+    // Overflowing and empty, so paint skips the children.
+    checkPaintsChild(const BoxConstraints.tightFor(width: 100.0, height: 0.0), false);
+  });
+
   test('Negative RenderFlex.spacing throws an exception', () {
     final exceptions = <dynamic>[];
     final box = RenderDecoratedBox(decoration: const BoxDecoration());

@@ -808,6 +808,12 @@ class _RenderVisibility extends RenderProxyBox {
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return visible;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (!visible) {
       return;
@@ -870,6 +876,12 @@ class _RenderSliverVisibility extends RenderProxySliver {
     if (maintainSemantics || visible) {
       super.visitChildrenForSemantics(visitor);
     }
+  }
+
+  @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    return visible;
   }
 
   @override

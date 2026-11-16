@@ -1548,6 +1548,12 @@ class _RenderTheater extends RenderBox
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return _childrenInPaintOrder().contains(child);
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(

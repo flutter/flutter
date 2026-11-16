@@ -16,6 +16,42 @@ const double VIEWPORT_WIDTH = 300;
 void main() {
   const kYellowColor = Color(0xFFFFFF00);
 
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('SliverCrossAxisGroup does not report slivers in the cache extent as painted', (
+    WidgetTester tester,
+  ) async {
+    Widget buildGroup({required double leadingExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: leadingExtent)),
+                const SliverCrossAxisGroup(
+                  slivers: <Widget>[SliverToBoxAdapter(child: SizedBox(height: 100))],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildGroup(leadingExtent: 200));
+    RenderSliverCrossAxisGroup group = tester.renderObject(
+      find.byType(SliverCrossAxisGroup, skipOffstage: false),
+    );
+    expect(group.paintsChild(group.firstChild!), isFalse);
+
+    await tester.pumpWidget(buildGroup(leadingExtent: 50));
+    group = tester.renderObject(find.byType(SliverCrossAxisGroup));
+    expect(group.paintsChild(group.firstChild!), isTrue);
+  });
+
   testWidgets('SliverCrossAxisGroup is laid out properly', (WidgetTester tester) async {
     final items = List<int>.generate(20, (int i) => i);
     final controller = ScrollController();

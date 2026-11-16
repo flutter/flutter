@@ -604,6 +604,49 @@ void main() {
         reason: 'Leading clip should follow the content once insideClipExtent is consumed',
       );
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/196649.
+    testWidgets('does not report the child as painted when the clip is empty', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(_buildOverlapScenario(controller: controller));
+      final RenderSliverClipRect renderSliver = tester.renderObject(find.byType(SliverClipRect));
+      expect(renderSliver.paintsChild(renderSliver.child!), isTrue);
+
+      // The pinned header covers the whole visible part of the child, so the
+      // clip is empty even though the child is visible.
+      controller.jumpTo(150.0);
+      await tester.pump();
+      expect(renderSliver.child!.geometry!.visible, isTrue);
+      expect(renderSliver.paintsChild(renderSliver.child!), isFalse);
+
+      // Without clipping, paint paints the child.
+      await tester.pumpWidget(_buildOverlapScenario(controller: controller, clipBehavior: .none));
+      expect(renderSliver.paintsChild(renderSliver.child!), isTrue);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/196649.
+    testWidgets('does not report the child in the cache extent as painted', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 600.0)),
+              SliverClipRect(sliver: SliverToBoxAdapter(child: SizedBox(height: 100.0))),
+            ],
+          ),
+        ),
+      );
+      final RenderSliverClipRect renderSliver = tester.renderObject(
+        find.byType(SliverClipRect, skipOffstage: false),
+      );
+      expect(renderSliver.paintsChild(renderSliver.child!), isFalse);
+    });
   });
 }
 

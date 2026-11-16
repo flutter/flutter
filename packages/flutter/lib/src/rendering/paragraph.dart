@@ -1043,6 +1043,12 @@ class RenderParagraph extends RenderBox
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return (child.parentData! as TextParentData).offset != null;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     // Text alignment only triggers repaint so it's possible the text layout has
     // been invalidated but performLayout wasn't called at this point. Make sure

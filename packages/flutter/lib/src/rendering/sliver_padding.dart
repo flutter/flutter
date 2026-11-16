@@ -264,6 +264,12 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver
   }
 
   @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    return child.geometry?.visible ?? false;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && child!.geometry!.visible) {
       final childParentData = child!.parentData! as SliverPhysicalParentData;

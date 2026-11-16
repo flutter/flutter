@@ -352,6 +352,32 @@ void main() {
     );
     expect(tester.getSize(find.byType(SnapshotWidget)), Size.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('SnapshotWidget does not report the child as painted at zero area', (
+    WidgetTester tester,
+  ) async {
+    final controller = SnapshotController();
+    addTearDown(controller.dispose);
+    Widget buildSnapshot(double size) {
+      return TestWidgetsApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: size,
+            child: SnapshotWidget(controller: controller, child: const Placeholder()),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSnapshot(100));
+    RenderProxyBox snapshot = tester.renderObject(find.byType(SnapshotWidget));
+    expect(snapshot.paintsChild(snapshot.child!), isTrue);
+
+    await tester.pumpWidget(buildSnapshot(0));
+    snapshot = tester.renderObject(find.byType(SnapshotWidget));
+    expect(snapshot.paintsChild(snapshot.child!), isFalse);
+  });
 }
 
 class TestPlatformView extends SingleChildRenderObjectWidget {

@@ -33,6 +33,40 @@ void main() {
     expect(rect, equals(ideal));
   }
 
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('SliverPersistentHeader does not report the child as painted when not visible', (
+    WidgetTester tester,
+  ) async {
+    Widget buildHeader({required double leadingExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: leadingExtent)),
+                SliverPersistentHeader(delegate: TestDelegate()),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildHeader(leadingExtent: 200));
+    RenderSliverPersistentHeader header = tester.renderObject(
+      find.byType(SliverPersistentHeader, skipOffstage: false),
+    );
+    expect(header.paintsChild(header.child!), isFalse);
+
+    await tester.pumpWidget(buildHeader(leadingExtent: 50));
+    header = tester.renderObject(find.byType(SliverPersistentHeader));
+    expect(header.paintsChild(header.child!), isTrue);
+  });
+
   testWidgets('_SliverScrollingPersistentHeader should update stretchConfiguration', (
     WidgetTester tester,
   ) async {

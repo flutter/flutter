@@ -990,6 +990,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     super.dispose();
   }
 
+  @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    return child.geometry?.visible ?? false;
+  }
+
   void _paintContents(PaintingContext context, Offset offset) {
     for (final RenderSliver child in childrenInPaintOrder) {
       if (child.geometry!.visible) {

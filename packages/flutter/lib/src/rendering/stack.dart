@@ -861,6 +861,12 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return child == _childAtIndex();
+  }
+
+  @override
   void paintStack(PaintingContext context, Offset offset) {
     final RenderBox? displayedChild = _childAtIndex();
     if (displayedChild == null) {

@@ -9,6 +9,21 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('IndexedStack only reports the child at index as painted', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(index: 1, children: <Widget>[SizedBox(), SizedBox()]),
+      ),
+    );
+    final RenderIndexedStack stack = tester.renderObject(find.byType(IndexedStack));
+    expect(stack.paintsChild(stack.firstChild!), isFalse);
+    expect(stack.paintsChild(stack.lastChild!), isTrue);
+  });
+
   testWidgets('Can construct an empty IndexedStack', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(textDirection: TextDirection.ltr, child: IndexedStack()),

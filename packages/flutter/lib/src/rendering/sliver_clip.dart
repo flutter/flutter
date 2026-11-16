@@ -111,6 +111,16 @@ base class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
   bool clipContains(Offset offset, Rect clip) => clip.contains(offset);
 
   @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    if (!(child.geometry?.visible ?? false)) {
+      return false;
+    }
+    final Rect? clipRect = _getClip();
+    return clipRect == null || !clipRect.isEmpty;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child == null || !child!.geometry!.visible) {
       layer = null;
@@ -243,6 +253,16 @@ base class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
 
   @override
   bool clipContains(Offset offset, RRect clip) => clip.contains(offset);
+
+  @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    if (!(child.geometry?.visible ?? false)) {
+      return false;
+    }
+    final RRect? clip = _getClip();
+    return clip == null || !clip.isEmpty;
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {

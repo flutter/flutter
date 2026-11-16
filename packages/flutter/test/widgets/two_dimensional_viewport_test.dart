@@ -1622,6 +1622,94 @@ void main() {
   });
 
   group('RenderTwoDimensionalViewport', () {
+    // Returns what the RenderTwoDimensionalViewport reports from paintsChild
+    // for its child that contains the widget with `key`.
+    bool paintsChild(WidgetTester tester, Key key) {
+      RenderObject child = tester.renderObject(find.byKey(key, skipOffstage: false));
+      while (child.parent is! RenderTwoDimensionalViewport) {
+        child = child.parent!;
+      }
+      return child.parent!.paintsChild(child);
+    }
+
+    // Regression test for https://github.com/flutter/flutter/issues/196649.
+    testWidgets('paintsChild is false for children laid out outside the viewport', (
+      WidgetTester tester,
+    ) async {
+      const visibleKey = Key('visible');
+      const outsideKey = Key('outside');
+      final delegate = TwoDimensionalChildListDelegate(
+        children: <List<Widget>>[
+          for (int row = 0; row < 5; row++)
+            <Widget>[
+              for (int column = 0; column < 5; column++)
+                SizedBox.square(
+                  dimension: 200,
+                  key: row == 0 && column == 0
+                      ? visibleKey
+                      : row == 0 && column == 4
+                      ? outsideKey
+                      : null,
+                ),
+            ],
+        ],
+      );
+      addTearDown(delegate.dispose);
+      await tester.pumpWidget(simpleListTest(delegate: delegate));
+
+      expect(paintsChild(tester, visibleKey), isTrue);
+      // The column at index 4 starts at the trailing edge of the 800 pixel wide
+      // viewport, so it is laid out but not painted.
+      expect(paintsChild(tester, outsideKey), isFalse);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/196649.
+    testWidgets('paintsChild is false for children that are kept alive', (
+      WidgetTester tester,
+    ) async {
+      final checkBoxKey = UniqueKey();
+      const Widget otherCell = SizedBox.square(dimension: 200);
+      final verticalController = ScrollController();
+      addTearDown(verticalController.dispose);
+      final delegate = TwoDimensionalChildListDelegate(
+        children: <List<Widget>>[
+          <Widget>[
+            SizedBox.square(
+              dimension: 200,
+              child: Center(child: KeepAliveCheckBox(key: checkBoxKey)),
+            ),
+            otherCell,
+            otherCell,
+            otherCell,
+            otherCell,
+          ],
+          for (int row = 1; row < 5; row++)
+            <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+        ],
+      );
+      addTearDown(delegate.dispose);
+      await tester.pumpWidget(
+        simpleListTest(
+          delegate: delegate,
+          verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+        ),
+      );
+      await tester.tap(find.byKey(checkBoxKey));
+      await tester.pumpAndSettle();
+      expect(paintsChild(tester, checkBoxKey), isTrue);
+
+      // Scroll away, keeping the checkbox alive.
+      verticalController.jumpTo(verticalController.position.maxScrollExtent);
+      await tester.pump();
+      expect(find.byKey(checkBoxKey, skipOffstage: false), findsOneWidget);
+      expect(paintsChild(tester, checkBoxKey), isFalse);
+
+      // Bring the checkbox back into view.
+      verticalController.jumpTo(0.0);
+      await tester.pump();
+      expect(paintsChild(tester, checkBoxKey), isTrue);
+    });
+
     testWidgets('asserts against axes mismatch', (WidgetTester tester) async {
       // Horizontal mismatch
       expect(

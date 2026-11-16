@@ -1081,7 +1081,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   @override
   bool paintsChild(RenderObject child) {
     assert(child.parent == this);
-    return opacity.value > 0;
+    return _alpha != 0;
   }
 
   @override
@@ -2725,6 +2725,20 @@ class RenderTransform extends RenderProxyBox {
         return super.hitTestChildren(result, position: position);
       },
     );
+  }
+
+  @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    if (filterQuality != null) {
+      return true;
+    }
+    final Matrix4 transform = _effectiveTransform!;
+    if (MatrixUtils.getAsTranslation(transform) != null) {
+      return true;
+    }
+    final double det = transform.determinant();
+    return det != 0 && det.isFinite;
   }
 
   @override

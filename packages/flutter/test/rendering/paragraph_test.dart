@@ -784,6 +784,32 @@ void main() {
     });
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  test('Does not report truncated rendering children as painted', () {
+    const double screenWidth = 100;
+    final renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: 'a'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+    ];
+    final paragraph = RenderParagraph(
+      const TextSpan(
+        children: <InlineSpan>[
+          WidgetSpan(child: Text('a')),
+          TextSpan(text: 'a long line to be truncated.'),
+          WidgetSpan(child: Text('b')),
+        ],
+      ),
+      overflow: TextOverflow.ellipsis,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+    _applyParentData(renderBoxes, paragraph.text);
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+
+    expect(paragraph.paintsChild(renderBoxes[0]), isTrue);
+    expect(paragraph.paintsChild(renderBoxes[1]), isFalse);
+  });
+
   test('Supports gesture recognizer semantics', () {
     final paragraph = RenderParagraph(
       TextSpan(

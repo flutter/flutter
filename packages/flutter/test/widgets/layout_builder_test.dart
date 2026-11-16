@@ -584,6 +584,43 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('SliverLayoutBuilder does not report a child in the cache extent as painted', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          controller: scrollController,
+          slivers: <Widget>[
+            const SliverToBoxAdapter(child: SizedBox(height: 600)),
+            SliverLayoutBuilder(
+              builder: (BuildContext context, SliverConstraints constraint) =>
+                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final RenderSliver layoutBuilder = tester.renderObject(
+      find.byType(SliverLayoutBuilder, skipOffstage: false),
+    );
+    final RenderSliver child = tester.renderObject(
+      find.byType(SliverToBoxAdapter, skipOffstage: false).last,
+    );
+    // The child is laid out in the cache extent below the viewport.
+    expect(layoutBuilder.paintsChild(child), isFalse);
+
+    scrollController.jumpTo(100);
+    await tester.pump();
+    expect(layoutBuilder.paintsChild(child), isTrue);
+  });
+
   testWidgets('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
     final scrollController = ScrollController();
     addTearDown(scrollController.dispose);

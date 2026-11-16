@@ -914,6 +914,49 @@ void main() {
     expect(opacity.paintsChild(sliver), false);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  test('AnimatedOpacity does not report the child as painted when the alpha rounds to 0', () {
+    final RenderBox box = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 20),
+    );
+    final opacityAnimation = AnimationController(value: 1, vsync: const TestVSync());
+    addTearDown(opacityAnimation.dispose);
+    final opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    // Paint skips the child because the alpha is 0, although the opacity is not.
+    opacityAnimation.value = 0.001;
+
+    expect(opacity.paintsChild(box), false);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  test('RenderTransform does not report the child as painted when det is 0 or not finite', () {
+    final RenderBox box = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 20, height: 20),
+    );
+    final transform = RenderTransform(transform: Matrix4.diagonal3Values(2, 2, 1), child: box);
+    layout(transform);
+    expect(transform.paintsChild(box), true);
+
+    // Paint applies a translation without checking the matrix.
+    transform.transform = Matrix4.translationValues(double.infinity, 0, 0);
+    expect(transform.paintsChild(box), true);
+
+    // Paint skips the child when the determinant is 0 or not finite.
+    transform.transform = Matrix4.diagonal3Values(0, 0, 1);
+    expect(transform.paintsChild(box), false);
+    transform.transform = Matrix4.diagonal3Values(double.infinity, 1, 1);
+    expect(transform.paintsChild(box), false);
+
+    // With a filter quality, paint applies the matrix with an image filter
+    // instead.
+    transform.filterQuality = FilterQuality.low;
+    expect(transform.paintsChild(box), true);
+  });
+
   test('RenderCustomClip extenders respect clipBehavior when asked to describeApproximateClip', () {
     final RenderBox child = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
