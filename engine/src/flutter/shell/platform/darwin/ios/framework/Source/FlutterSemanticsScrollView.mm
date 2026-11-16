@@ -46,8 +46,10 @@ FLUTTER_ASSERT_ARC
     return NO;
   }
 
-  if ([semanticsObject hasChildren]) {
-    return NO;
+  if (@available(iOS 27.0, *)) {
+    if ([semanticsObject hasChildren]) {
+      return NO;
+    }
   }
 
   if (bridge->isVoiceOverRunning()) {
@@ -123,12 +125,18 @@ FLUTTER_ASSERT_ARC
   if (!semanticsObject.bridge) {
     return nil;
   }
-  return ([semanticsObject uid] == kRootNodeId) ? semanticsObject.bridgeView
-                                                : semanticsObject.parent.accessibilityContainer;
+  if (@available(iOS 27.0, *)) {
+    return ([semanticsObject uid] == kRootNodeId) ? semanticsObject.bridgeView
+                                                  : semanticsObject.parent.accessibilityContainer;
+  }
+  return semanticsObject.accessibilityContainer;
 }
 
 - (NSInteger)accessibilityElementCount {
-  return self.semanticsObject.children.count;
+  if (@available(iOS 27.0, *)) {
+    return self.semanticsObject.children.count;
+  }
+  return 0;
 }
 
 - (nullable id)accessibilityElementAtIndex:(NSInteger)index {

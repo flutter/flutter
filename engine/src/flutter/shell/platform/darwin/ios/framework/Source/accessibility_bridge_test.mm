@@ -680,11 +680,20 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   XCTAssertTrue([rootContainer accessibilityElementCount] ==
                 2);  // one for root, one for scrollable.
   id scrollableContainer = [rootContainer accessibilityElementAtIndex:1];
-  XCTAssertTrue([scrollableContainer isKindOfClass:[FlutterSemanticsScrollView class]]);
-  XCTAssertTrue([scrollableContainer accessibilityElementCount] == 1);
-  id child = [scrollableContainer accessibilityElementAtIndex:0];
-  /// Replacing node 1 should not accidentally clean up its child's container.
-  XCTAssertEqual([child accessibilityContainer], scrollableContainer);
+  if (@available(iOS 27.0, *)) {
+    XCTAssertTrue([scrollableContainer isKindOfClass:[FlutterSemanticsScrollView class]]);
+    XCTAssertTrue([scrollableContainer accessibilityElementCount] == 1);
+    id child = [scrollableContainer accessibilityElementAtIndex:0];
+    /// Replacing node 1 should not accidentally clean up its child's container.
+    XCTAssertEqual([child accessibilityContainer], scrollableContainer);
+  } else {
+    XCTAssertTrue([scrollableContainer isKindOfClass:[SemanticsObjectContainer class]]);
+    XCTAssertTrue([scrollableContainer accessibilityElementCount] ==
+                  2);  // one for scrollable, one for scrollable child.
+    id child = [scrollableContainer accessibilityElementAtIndex:1];
+    /// Replacing node 1 should not accidentally clean up its child's container.
+    XCTAssertNotNil([child accessibilityContainer]);
+  }
 }
 
 - (void)testRootScrollableSemanticsWithChildren {
@@ -743,12 +752,23 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
 
   XCTAssertEqual(flutterView.accessibilityElements.count, 1u);
   id rootContainer = flutterView.accessibilityElements[0];
-  XCTAssertTrue([rootContainer isKindOfClass:[FlutterSemanticsScrollView class]]);
-  XCTAssertEqual([rootContainer accessibilityContainer], flutterView);
-  XCTAssertEqual([rootContainer accessibilityElementCount], 1);
-  id child = [rootContainer accessibilityElementAtIndex:0];
-  XCTAssertEqual([child accessibilityContainer], rootContainer);
-  XCTAssertEqual([rootContainer _accessibilityHitTest:CGPointMake(10, 10) withEvent:nil], child);
+  if (@available(iOS 27.0, *)) {
+    XCTAssertTrue([rootContainer isKindOfClass:[FlutterSemanticsScrollView class]]);
+    XCTAssertEqual([rootContainer accessibilityContainer], flutterView);
+    XCTAssertEqual([rootContainer accessibilityElementCount], 1);
+    id child = [rootContainer accessibilityElementAtIndex:0];
+    XCTAssertEqual([child accessibilityContainer], rootContainer);
+    XCTAssertEqual([rootContainer _accessibilityHitTest:CGPointMake(10, 10) withEvent:nil], child);
+  } else {
+    XCTAssertTrue([rootContainer isKindOfClass:[SemanticsObjectContainer class]]);
+    XCTAssertEqual([rootContainer accessibilityContainer], flutterView);
+    XCTAssertEqual([rootContainer accessibilityElementCount], 2);
+    id scrollView = [rootContainer accessibilityElementAtIndex:0];
+    XCTAssertTrue([scrollView isKindOfClass:[FlutterSemanticsScrollView class]]);
+    id child = [rootContainer accessibilityElementAtIndex:1];
+    XCTAssertEqual([child accessibilityContainer], rootContainer);
+    XCTAssertEqual([rootContainer _accessibilityHitTest:CGPointMake(10, 10) withEvent:nil], child);
+  }
 
   bridge->SetViewController(nil, flutterView);
   XCTAssertNil(flutterView.accessibilityElements);
