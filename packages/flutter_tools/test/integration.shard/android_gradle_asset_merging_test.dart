@@ -223,7 +223,7 @@ void main() {
   // *incremental* (e.g. by scraping task stdout for UP-TO-DATE). A full rebuild
   // that produced a correct APK would also satisfy this test, and that is the
   // intended contract: the assertion is about stale output never surviving into
-  // the artifact, which is the regression clearing `CopyFlutterAssetsTask`'s output prevents.
+  // the artifact, which is the regression `FileSystemOperations.sync` prevents.
   testWithoutContext('assets removed from pubspec are pruned from the APK on rebuild', () async {
     final Directory projectDir = await createApp(tempDir);
 
