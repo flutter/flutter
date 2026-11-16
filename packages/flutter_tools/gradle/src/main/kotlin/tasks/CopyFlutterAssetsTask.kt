@@ -66,8 +66,8 @@ abstract class CopyFlutterAssetsTask : DefaultTask() {
             from(intermediateDir.dir(FLUTTER_ASSETS_DIRECTORY_NAME)) {
                 into(FLUTTER_ASSETS_DIRECTORY_NAME)
             }
-            // Flutter's assets are copied last, so on a path collision they replace the merged
-            // native asset, as they did before 3.50.
+            // Gradle copies the child spec after the root spec's sources, so on a collision
+            // Flutter's assets replace the merged native asset, as they did before 3.50.
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
             // Assets from the pub cache can be read-only, and a packaging step downstream has to be
             // able to replace the copy.
