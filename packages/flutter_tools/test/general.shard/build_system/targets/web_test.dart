@@ -3679,6 +3679,7 @@ _flutter.loader.load({
       fs
           .file('packages/flutter_tools/lib/src/build_system/targets/native_assets.dart')
           .createSync(recursive: true);
+      // Minimal Wasm binary header ('\0asm' magic bytes + version 1).
       fs
           .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterWebSdk))
           .childDirectory('canvaskit')
@@ -4172,6 +4173,150 @@ _flutter.loader.load();
           environment.outputDir.childFile('index.html').readAsStringSync(),
           contains('<title>Edited</title>'),
         );
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: buildOverrides()),
+    );
+
+    test(
+      'deleting custom flutter_bootstrap.js or index.html invalidates web_templated_files and cleans up stale index.html',
+      () => testbed.run(() async {
+        setUpWebProject();
+        const configs = <WebCompilerConfig>[
+          JsCompilerConfig(webContentHash: true, sourceMaps: false),
+        ];
+
+        final File customBootstrap = environment.projectDir.childFile('web/flutter_bootstrap.js')
+          ..writeAsStringSync('''
+{{flutter_js}}
+{{flutter_build_config}}
+// custom-marker
+_flutter.loader.load();
+''');
+        queueDart2JsCompile(sourceMaps: false);
+        final BuildResult initialBuild = await runWebBuild(configs);
+        expect(initialBuild.success, isTrue);
+        expect(
+          environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
+          allOf(contains('// custom-marker'), contains('"assetManifest":')),
+        );
+        expect(environment.outputDir.childFile('index.html'), exists);
+
+        // Deleting custom web/flutter_bootstrap.js restores default bootstrap and hashed manifest config.
+        customBootstrap.deleteSync();
+        final BuildResult afterDeleteBootstrap = await runWebBuild(configs);
+        expect(afterDeleteBootstrap.success, isTrue);
+        expect(afterDeleteBootstrap.performance['web_templated_files']!.skipped, isFalse);
+        expect(afterDeleteBootstrap.performance['web_release_bundle']!.skipped, isFalse);
+        expect(
+          environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
+          allOf(
+            isNot(contains('// custom-marker')),
+            contains('_flutter.loader.load()'),
+            contains('"assetManifest":'),
+          ),
+        );
+
+        final BuildResult noOpAfterDeleteBootstrap = await runWebBuild(configs);
+        expect(noOpAfterDeleteBootstrap.performance['web_templated_files']!.skipped, isTrue);
+        expect(noOpAfterDeleteBootstrap.performance['web_release_bundle']!.skipped, isTrue);
+        expect(noOpAfterDeleteBootstrap.performance['web_service_worker']!.skipped, isTrue);
+
+        // Deleting web/index.html re-runs web_templated_files and removes stale outputDir/index.html.
+        environment.projectDir.childFile('web/index.html').deleteSync();
+        final BuildResult afterDeleteIndexHtml = await runWebBuild(configs);
+        expect(afterDeleteIndexHtml.success, isTrue);
+        expect(afterDeleteIndexHtml.performance['web_templated_files']!.skipped, isFalse);
+        expect(environment.outputDir.childFile('index.html'), isNot(exists));
+
+        final BuildResult noOpAfterDeleteIndexHtml = await runWebBuild(configs);
+        expect(noOpAfterDeleteIndexHtml.performance['web_templated_files']!.skipped, isTrue);
+        expect(noOpAfterDeleteIndexHtml.performance['web_release_bundle']!.skipped, isTrue);
+        expect(noOpAfterDeleteIndexHtml.performance['web_service_worker']!.skipped, isTrue);
+        expect(environment.outputDir.childFile('index.html'), isNot(exists));
+
+        // Recreating web/index.html invalidates web_templated_files and restores outputDir/index.html.
+        environment.projectDir.childFile('web/index.html').writeAsStringSync('''
+<!DOCTYPE html>
+<html>
+<head><base href="$kBaseHrefPlaceholder"><title>Restored</title></head>
+<body><script>{{flutter_bootstrap_js}}</script></body>
+</html>
+''');
+        final BuildResult afterRecreateIndexHtml = await runWebBuild(configs);
+        expect(afterRecreateIndexHtml.success, isTrue);
+        expect(afterRecreateIndexHtml.performance['web_templated_files']!.skipped, isFalse);
+        expect(afterRecreateIndexHtml.performance['web_release_bundle']!.skipped, isFalse);
+        expect(
+          environment.outputDir.childFile('index.html').readAsStringSync(),
+          allOf(contains('<title>Restored</title>'), contains('"assetManifest":')),
+        );
+
+        final BuildResult noOpAfterRecreateIndexHtml = await runWebBuild(configs);
+        expect(noOpAfterRecreateIndexHtml.performance['web_templated_files']!.skipped, isTrue);
+        expect(noOpAfterRecreateIndexHtml.performance['web_release_bundle']!.skipped, isTrue);
+        expect(noOpAfterRecreateIndexHtml.performance['web_service_worker']!.skipped, isTrue);
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: buildOverrides()),
+    );
+
+    test(
+      'adding custom web/flutter_service_worker.js with symlinked projectDir and outputDir preserves custom service worker',
+      () => testbed.run(() async {
+        fs.directory('/private/tmp/real_proj').createSync(recursive: true);
+        fs.directory('/private/tmp/real_out').createSync(recursive: true);
+        fs.link('/tmp_proj').createSync('/private/tmp/real_proj');
+        fs.link('/tmp_out').createSync('/private/tmp/real_out');
+        writePackageConfigFiles(
+          directory: fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'foo': 'tmp_proj/'},
+          languageVersions: <String, String>{'foo': '2.7'},
+        );
+
+        setUpWebProject(projectDir: fs.directory('/tmp_proj'), outputDir: fs.directory('/tmp_out'));
+
+        queueDart2JsCompile(sourceMaps: false);
+        final BuildResult initialHashed = await runWebBuild(const <WebCompilerConfig>[
+          JsCompilerConfig(webContentHash: true, sourceMaps: false),
+        ]);
+        expect(initialHashed.success, isTrue);
+        expect(
+          fs.file('/tmp_out/flutter_service_worker.js').readAsStringSync(),
+          equals(serviceWorkerStub),
+        );
+
+        // Add custom web/flutter_service_worker.js and transition to a plain build.
+        final File customSw = environment.projectDir.childFile('web/flutter_service_worker.js')
+          ..writeAsStringSync('// custom-service-worker-v1');
+        queueDart2JsCompile(sourceMaps: false);
+        final BuildResult plainWithCustomSw = await runWebBuild(const <WebCompilerConfig>[
+          JsCompilerConfig(sourceMaps: false),
+        ]);
+        expect(plainWithCustomSw.success, isTrue);
+        expect(fs.file('/tmp_out/flutter_service_worker.js'), exists);
+        expect(
+          fs.file('/tmp_out/flutter_service_worker.js').readAsStringSync(),
+          equals('// custom-service-worker-v1'),
+        );
+
+        // Editing custom web/flutter_service_worker.js updates outputDir and skips on the next no-op build.
+        customSw.writeAsStringSync('// custom-service-worker-v2');
+        final BuildResult afterEditCustomSw = await runWebBuild(const <WebCompilerConfig>[
+          JsCompilerConfig(sourceMaps: false),
+        ]);
+        expect(afterEditCustomSw.success, isTrue);
+        expect(afterEditCustomSw.performance['web_release_bundle']!.skipped, isFalse);
+        expect(
+          fs.file('/tmp_out/flutter_service_worker.js').readAsStringSync(),
+          equals('// custom-service-worker-v2'),
+        );
+
+        final BuildResult noOpAfterCustomSw = await runWebBuild(const <WebCompilerConfig>[
+          JsCompilerConfig(sourceMaps: false),
+        ]);
+        expect(noOpAfterCustomSw.performance['web_templated_files']!.skipped, isTrue);
+        expect(noOpAfterCustomSw.performance['web_release_bundle']!.skipped, isTrue);
+        expect(noOpAfterCustomSw.performance['web_service_worker']!.skipped, isTrue);
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: buildOverrides()),
     );

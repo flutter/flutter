@@ -1270,14 +1270,12 @@ class WebReleaseBundle extends Target {
       depfileService.writeToFile(
         Depfile(bundledDepfile.inputs, updatedOutputs),
         environment.buildDir.childFile('flutter_assets.d'),
-        writeEmpty: true,
       );
       injectManifestBuildConfig(outputDir, hashResult);
     } else {
       depfileService.writeToFile(
         bundledDepfile,
         environment.buildDir.childFile('flutter_assets.d'),
-        writeEmpty: true,
       );
     }
 
@@ -1496,10 +1494,13 @@ $supportsDart2WasmLine''';
 
   @override
   Future<void> build(Environment environment) async {
-    final Directory webResources = environment.projectDir.childDirectory('web');
+    final Directory projectDir = _resolveDirectory(environment.projectDir);
+    final Directory webResources = _resolveDirectory(projectDir.childDirectory('web'));
     final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
+    final templatedInputs = <File>[];
     final String inputBootstrapContent;
     if (inputFlutterBootstrapJs.existsSync()) {
+      templatedInputs.add(inputFlutterBootstrapJs);
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
     } else {
       inputBootstrapContent = generateDefaultFlutterBootstrapScript();
@@ -1538,35 +1539,46 @@ $supportsDart2WasmLine''';
     final Directory outputDir = _resolveDirectory(environment.outputDir);
     final File outputFlutterBootstrapJs = outputDir.childFile('flutter_bootstrap.js');
     await outputFlutterBootstrapJs.writeAsString(bootstrapContent);
+    final templatedOutputs = <File>[outputFlutterBootstrapJs];
 
-    final Directory resolvedWebResources = _resolveDirectory(webResources);
-    if (resolvedWebResources.existsSync()) {
-      final File inputIndexHtml = resolvedWebResources.childFile('index.html');
-      if (inputIndexHtml.existsSync()) {
-        final indexHtmlTemplate = WebTemplate(inputIndexHtml.readAsStringSync());
+    final File inputIndexHtml = webResources.childFile('index.html');
+    final File outputIndexHtml = outputDir.childFile('index.html');
+    if (inputIndexHtml.existsSync()) {
+      templatedInputs.add(inputIndexHtml);
+      final indexHtmlTemplate = WebTemplate(inputIndexHtml.readAsStringSync());
 
-        for (final WebTemplateWarning warning in indexHtmlTemplate.getWarnings()) {
-          _emitWebTemplateWarning(environment, 'index.html', warning);
-        }
-
-        final String indexHtmlContent = indexHtmlTemplate.withSubstitutions(
-          baseHref: environment.defines[kBaseHref] ?? '/',
-          staticAssetsUrl: environment.defines[kStaticAssetsUrl] ?? '/',
-          flutterJsFile: flutterJsFile,
-          buildConfig: buildConfig,
-          flutterBootstrapJs: bootstrapContent,
-          logger: environment.logger,
-          webDefines: webDefines,
-        );
-        final File outputIndexHtml = outputDir.childFile('index.html');
-        await outputIndexHtml.writeAsString(indexHtmlContent);
+      for (final WebTemplateWarning warning in indexHtmlTemplate.getWarnings()) {
+        _emitWebTemplateWarning(environment, 'index.html', warning);
       }
+
+      final String indexHtmlContent = indexHtmlTemplate.withSubstitutions(
+        baseHref: environment.defines[kBaseHref] ?? '/',
+        staticAssetsUrl: environment.defines[kStaticAssetsUrl] ?? '/',
+        flutterJsFile: flutterJsFile,
+        buildConfig: buildConfig,
+        flutterBootstrapJs: bootstrapContent,
+        logger: environment.logger,
+        webDefines: webDefines,
+      );
+      await outputIndexHtml.writeAsString(indexHtmlContent);
+      templatedOutputs.add(outputIndexHtml);
+    } else if (outputIndexHtml.existsSync()) {
+      outputIndexHtml.deleteSync();
     }
+
+    await environment.buildDir.create(recursive: true);
+    environment.depFileService.writeToFile(
+      Depfile(templatedInputs, templatedOutputs),
+      environment.buildDir.childFile('web_templated_files.d'),
+    );
   }
 
   @override
   List<Target> get dependencies =>
       compileTargets != null ? <Target>[...compileTargets!] : <Target>[];
+
+  @override
+  List<String> get depfiles => const <String>['web_templated_files.d'];
 
   @override
   List<Source> get inputs => <Source>[
@@ -1701,6 +1713,7 @@ class WebServiceWorker extends Target {
   @override
   Future<void> build(Environment environment) async {
     final Directory outputDir = _resolveDirectory(environment.outputDir);
+    final Directory projectDir = _resolveDirectory(environment.projectDir);
     final List<File> contents = outputDir.existsSync()
         ? outputDir
               .listSync(recursive: true)
@@ -1722,12 +1735,11 @@ class WebServiceWorker extends Target {
       enabled: webContentHash,
       useLocalCanvasKit: environment.defines[kUseLocalCanvasKitFlag] == 'true',
     );
-    final File userServiceWorker = environment.projectDir
-        .childDirectory('web')
+    final File userServiceWorker = _resolveDirectory(projectDir.childDirectory('web'))
         .childFile('flutter_service_worker.js');
     File? serviceWorkerFile;
     if (!userServiceWorker.existsSync()) {
-      serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
+      serviceWorkerFile = outputDir.childFile('flutter_service_worker.js');
       final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
         Artifact.flutterToolsFileGenerators,
       );
