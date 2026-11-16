@@ -104,15 +104,16 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getMaxSamplerAnisotropy();
   }
 
-  /// The widest texture, in pixels, that a render pass can attach (see
-  /// [ColorAttachment.texture] and [DepthStencilAttachment.texture]).
+  /// The widest texture, in pixels, that can be created and attached to a
+  /// render pass (see [ColorAttachment.texture] and
+  /// [DepthStencilAttachment.texture]).
   ///
-  /// It's the device's own limit: `maxFramebufferWidth` on Vulkan,
-  /// `GL_MAX_TEXTURE_SIZE` on OpenGL ES, and the device's maximum texture size
-  /// on Metal. OpenGL ES only guarantees 2048, and many devices allow more, so
-  /// check this before creating a large render target rather than assuming a
-  /// size. It can be smaller than the largest texture that can be created
-  /// only for sampling.
+  /// It's the device's own limit: on Vulkan, the smaller of
+  /// `maxFramebufferWidth` and `maxImageDimension2D`, on OpenGL ES,
+  /// `GL_MAX_TEXTURE_SIZE`, and on Metal, the device's maximum texture size.
+  /// OpenGL ES 3.0 guarantees 2048 (OpenGL ES 2.0 only 64), and many devices
+  /// allow more, so check this before creating a large render target rather
+  /// than assuming a size.
   int get maxRenderTargetWidth {
     return _getMaximumRenderTargetSize(0);
   }
