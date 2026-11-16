@@ -27,8 +27,7 @@ bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
     content_context.GetRenderTargetCache()->Start();
     bool result = entity.Render(content_context, pass);
     content_context.GetRenderTargetCache()->End();
-    content_context.GetTransientsDataBuffer().Reset();
-    content_context.GetTransientsIndexesBuffer().Reset();
+    content_context.ResetTransientsBuffers();
     return result;
   };
   return Playground::OpenPlaygroundHere(callback);
@@ -47,8 +46,7 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
     content_context.GetRenderTargetCache()->Start();
     bool result = callback(content_context, pass);
     content_context.GetRenderTargetCache()->End();
-    content_context.GetTransientsDataBuffer().Reset();
-    content_context.GetTransientsIndexesBuffer().Reset();
+    content_context.ResetTransientsBuffers();
     return result;
   };
   return Playground::OpenPlaygroundHere(pass_callback);

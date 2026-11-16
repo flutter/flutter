@@ -49,6 +49,8 @@ final class ExtensionDeviceClient extends DeviceService {
   Future<List<TargetDevice>> getDevices() async {
     try {
       return await _fetchDevices();
+    } on ToolExtensionException catch (err) {
+      _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
       _logger.printTrace('ExtensionDeviceClient failed to get devices: $err\n$stack');
     }
@@ -75,6 +77,8 @@ final class ExtensionDeviceClient extends DeviceService {
       if (rawResult case final bool supported) {
         return supported;
       }
+    } on ToolExtensionException catch (err) {
+      _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
       _logger.printTrace(
         'ExtensionDeviceClient failed to check project support for "$deviceId": $err\n$stack',
@@ -112,6 +116,8 @@ final class ExtensionDeviceClient extends DeviceService {
         'ExtensionDeviceClient received invalid response for "${DeviceService.launchAppMethod}": '
         'expected bool, got ${rawResult.runtimeType}.',
       );
+    } on ToolExtensionException catch (err) {
+      _logger.printError('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
       _logger.printError('ExtensionDeviceClient failed to launch app on "$deviceId": $err');
       _logger.printTrace('$stack');
@@ -150,6 +156,8 @@ final class ExtensionDeviceClient extends DeviceService {
         'ExtensionDeviceClient received invalid response for "${DeviceService.getVmServiceUriMethod}": '
         'expected Map with String or null "${DeviceService.vmServiceUriKey}", got ${rawResult.runtimeType}.',
       );
+    } on ToolExtensionException catch (err) {
+      _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
       _logger.printError(
         'ExtensionDeviceClient failed to get VM Service URI for "$deviceId": $err',
@@ -177,6 +185,8 @@ final class ExtensionDeviceClient extends DeviceService {
         'ExtensionDeviceClient received invalid response for "${DeviceService.stopAppMethod}": '
         'expected bool, got ${rawResult.runtimeType}.',
       );
+    } on ToolExtensionException catch (err) {
+      _logger.printError('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
       _logger.printError('ExtensionDeviceClient failed to stop app on "$deviceId": $err');
       _logger.printTrace('$stack');
@@ -311,15 +321,22 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
             },
           );
       await _deviceService.startLogStream(deviceId: _deviceId);
+    } on ToolExtensionException catch (error) {
+      _logger.printWarning('Extension "${_connection.extensionName}": ${error.message}');
+      await _cleanupOnStartFailure();
     } on Object catch (error) {
       _logger.printWarning('Failed to start log stream for extension device "$_deviceId": $error');
-      if (!_isDisposed) {
-        _isDisposed = true;
-        await _notificationSubscription?.cancel();
-        _notificationSubscription = null;
-        if (!_logLinesController.isClosed) {
-          await _logLinesController.close();
-        }
+      await _cleanupOnStartFailure();
+    }
+  }
+
+  Future<void> _cleanupOnStartFailure() async {
+    if (!_isDisposed) {
+      _isDisposed = true;
+      await _notificationSubscription?.cancel();
+      _notificationSubscription = null;
+      if (!_logLinesController.isClosed) {
+        await _logLinesController.close();
       }
     }
   }
@@ -354,16 +371,19 @@ class ExtensionDevices extends PollingDeviceDiscovery {
     required this._fileSystem,
     required this._logger,
     this._artifacts,
+    this._cache,
     this._config,
   }) : super('tool_extension');
 
   final Artifacts? _artifacts;
+  final Cache? _cache;
   final Config? _config;
   final ExtensionBuildManager _extensionBuildManager;
   final ExtensionManager _extensionManager;
   final FileSystem _fileSystem;
   final Logger _logger;
   final _devicesByKey = <(ExtensionConnection, String), ExtensionBackedDevice>{};
+  final _diagnosticsByConnection = <ExtensionConnection, String>{};
 
   @override
   bool get supportsPlatform => true;
@@ -388,26 +408,42 @@ class ExtensionDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
 
-    final List<(ExtensionDeviceClient, List<TargetDevice>?)> devicesPerService = await Future.wait(
-      deviceServices.whereType<ExtensionDeviceClient>().map((ExtensionDeviceClient service) async {
-        try {
-          final List<TargetDevice> devices = await service._fetchDevices();
-          return (service, devices);
-        } on Object catch (e, st) {
-          _logger.printTrace('Error querying device extension service: $e\n$st');
-          return (service, null);
-        }
-      }),
-    );
+    final List<(ExtensionDeviceClient, List<TargetDevice>?, String?)> devicesPerService =
+        await Future.wait(
+          deviceServices.whereType<ExtensionDeviceClient>().map((
+            ExtensionDeviceClient service,
+          ) async {
+            try {
+              final List<TargetDevice> devices = await service._fetchDevices();
+              return (service, devices, null);
+            } on ToolExtensionException catch (e) {
+              final diagnostic = 'Extension "${service.connection.extensionName}": ${e.message}';
+              _logger.printTrace(diagnostic);
+              return (service, null, diagnostic);
+            } on Object catch (e, st) {
+              _logger.printTrace('Error querying device extension service: $e\n$st');
+              return (service, null, null);
+            }
+          }),
+        );
 
+    final activeConnections = <ExtensionConnection>{};
     final failedConnections = <ExtensionConnection>{};
     final seenKeys = <(ExtensionConnection, String)>{};
     final targetDevices = <Device>[];
-    for (final (ExtensionDeviceClient service, List<TargetDevice>? devices) in devicesPerService) {
+    for (final (ExtensionDeviceClient service, List<TargetDevice>? devices, String? diagnostic)
+        in devicesPerService) {
+      activeConnections.add(service.connection);
       if (devices == null) {
         failedConnections.add(service.connection);
+        if (diagnostic != null) {
+          _diagnosticsByConnection[service.connection] = diagnostic;
+        } else {
+          _diagnosticsByConnection.remove(service.connection);
+        }
         continue;
       }
+      _diagnosticsByConnection.remove(service.connection);
       for (final TargetDevice targetDevice in devices) {
         final (ExtensionConnection, String) key = (service.connection, targetDevice.id);
         if (!seenKeys.add(key)) {
@@ -422,6 +458,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
           device = ExtensionBackedDevice(
             artifacts: _artifacts,
             buildManager: _extensionBuildManager,
+            cache: _cache,
             config: _config,
             connection: service.connection,
             deviceService: service,
@@ -435,6 +472,9 @@ class ExtensionDevices extends PollingDeviceDiscovery {
       }
     }
 
+    _diagnosticsByConnection.removeWhere(
+      (ExtensionConnection connection, _) => !activeConnections.contains(connection),
+    );
     final removedKeys = <(ExtensionConnection, String)>[
       for (final (ExtensionConnection connection, String deviceId) in _devicesByKey.keys)
         if (!seenKeys.contains((connection, deviceId)) && !failedConnections.contains(connection))
@@ -456,6 +496,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
       unawaited(device.dispose());
     }
     _devicesByKey.clear();
+    _diagnosticsByConnection.clear();
   }
 
   @override
@@ -465,7 +506,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
   }
 
   @override
-  Future<List<String>> getDiagnostics() async => <String>[];
+  Future<List<String>> getDiagnostics() async => _diagnosticsByConnection.values.toList();
 }
 
 /// A host-side [Device] wrapper representing a target device backed by a tool extension.
@@ -479,6 +520,7 @@ class ExtensionBackedDevice extends Device {
     required super.logger,
     required this._targetDevice,
     this._artifacts,
+    this._cache,
     this._config,
   }) : super(
          _targetDevice.id,
@@ -489,6 +531,7 @@ class ExtensionBackedDevice extends Device {
 
   final Artifacts? _artifacts;
   final ExtensionBuildManager _buildManager;
+  final Cache? _cache;
   final Config? _config;
   final ExtensionConnection connection;
   final DeviceService _deviceService;
@@ -640,7 +683,7 @@ class ExtensionBackedDevice extends Device {
           )
         : const <String, String>{};
 
-    final String flutterRootPath = Cache.flutterRoot ?? projectDir.path;
+    final String flutterRootPath = _cache?.flutterRoot ?? projectDir.path;
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildMode,

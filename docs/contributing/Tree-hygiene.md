@@ -59,6 +59,11 @@ The general process for submitting code to a Flutter repository is as follows:
    `clang-format` before submission (use `buildtools/<OS>/clang/bin/clang-format
    --style=file -i`).
 
+   Put unrelated changes in separate PRs. If a PR is reverted (see step 10),
+   everything in it is reverted, so a refactor bundled with a bug fix is lost
+   when the bug fix turns out to be wrong, and vice versa. Smaller PRs are also
+   faster to review.
+
 6. Submit this branch as a PR to the relevant Flutter repository.
    _(See also: [Signing commits](./Signing-commits.md))_
 
@@ -69,6 +74,9 @@ The general process for submitting code to a Flutter repository is as follows:
    All submissions to Google Open Source projects need to follow
    [Google's Contributor License Agreement (CLA)](https://cla.developers.google.com/),
    in which contributors agree that their contribution is an original work of authorship.
+   Pull requests with a failing CLA check are automatically moved to a draft state and
+   will not be routed for review until the CLA is signed, the `cla/google` check passes,
+   and the PR is marked **Ready for review**.
    If you use coding assistance tools, see our
    [AI contribution guidelines](../../CONTRIBUTING.ai.md).
 
@@ -205,13 +213,11 @@ You can do this online, and it only takes a minute.
 ## Getting a code review
 
 Every PR must be code-reviewed before check-in, including things like
-rolling a dependency. Getting a review means that a regular Flutter
-contributor (someone with commit access; see [contributor access](Contributor-access.md) for details) has "approved" the PR in the
+rolling a dependency. Getting a review means that an active member of the [Flutter Contributor Ladder](https://github.com/flutter/contributors) (`flutter-hackers`; see [contributor access](Contributor-access.md) and the [code review workflow](https://github.com/flutter/contributors/blob/main/docs/CODE_REVIEW_WORKFLOW.md) for details) has "approved" the PR in the
 GitHub UI. We call this "getting an LGTM" ("looks good to me").
 
-If you are not yourself someone with commit access, then a second person
-with commit access must also review and approve your PR. This ensures that
-two people with commit access (trusted contributors) agree on every commit.
+* If you are a **Contributor**, **Reviewer**, or **Dasher Emeritus**, your PR requires **2 approvals** from ladder members (`flutter-hackers`): at least one binding approval from a **Committer** or **Maintainer** (someone with commit/write access), and the second approval from a **Reviewer** (or higher).
+* If you are a **Committer** or **Maintainer** (someone with commit/write access), your PR requires **1 approval** from a **Reviewer** (or higher).
 
 ### Why
 
@@ -264,9 +270,8 @@ The `#hackers-new` channel is a good place to ask for help if you're a new contr
 ### How
 
 Code review status is managed via GitHub's approval system. PRs should
-not be merged unless one or more contributors with commit access (at
-least one of which should be very familiar with the code in question)
-have approved the PR in the GitHub UI.
+not be merged unless the required [Contributor Ladder](https://github.com/flutter/contributors/blob/main/docs/CODE_REVIEW_WORKFLOW.md) approvals (including at least one binding approval from a Committer or Maintainer familiar with the code in question)
+have been granted on the PR in the GitHub UI.
 
 Reviewers should carefully read the code and make sure they understand
 it. A reviewer should check the code for both high level concerns,
@@ -305,7 +310,7 @@ In general, reviewers should favor approving a PR once it is in a state where it
 
 Reviewers should always feel free to leave comments expressing that something could be better, but if it's not very important, prefix it with something like "Shouldn't block this PR but: " to let the author know that it's just a point of polish that they could choose to ignore in the current PR (these should be documented in TODO comments with a tracking issue).
 
-If you are not a regular Flutter contributor (someone with commit access),
+If you are not on the [Flutter Contributor Ladder](Contributor-access.md) (`flutter-hackers`),
 we very much welcome your reviews on code contributions in the form of comments
 on the code, but please refrain from approving or LGTM'ing changes, as it
 confuses PR authors, who may think your approval is authoritative and merge

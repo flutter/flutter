@@ -95,6 +95,9 @@ const int kPSLocaleIndex = 12;
 // encode slot (7), since slots 7-12 are reused only as mask-bit positions.
 const int kPSRenderSoftHyphensIndex = 13;
 const int kPSRenderSoftHyphensEncodeIndex = 7;
+// Like ellipsis, soft_hyphen_string is passed separately and only claims a
+// mask bit.
+const int kPSSoftHyphenStringIndex = 14;
 
 const int kPSTextAlignMask = 1 << kPSTextAlignIndex;
 const int kPSTextDirectionMask = 1 << kPSTextDirectionIndex;
@@ -109,6 +112,7 @@ const int kPSStrutStyleMask = 1 << kPSStrutStyleIndex;
 const int kPSEllipsisMask = 1 << kPSEllipsisIndex;
 const int kPSLocaleMask = 1 << kPSLocaleIndex;
 const int kPSRenderSoftHyphensMask = 1 << kPSRenderSoftHyphensIndex;
+const int kPSSoftHyphenStringMask = 1 << kPSSoftHyphenStringIndex;
 
 // TextShadows decoding
 
@@ -159,11 +163,12 @@ void ParagraphBuilder::Create(Dart_Handle wrapper,
                               double fontSize,
                               double height,
                               const std::u16string& ellipsis,
-                              const std::string& locale) {
+                              const std::string& locale,
+                              const std::u16string& softHyphenString) {
   UIDartState::ThrowIfUIOperationsProhibited();
   auto res = fml::MakeRefCounted<ParagraphBuilder>(
       encoded_handle, strutData, fontFamily, strutFontFamilies, fontSize,
-      height, ellipsis, locale);
+      height, ellipsis, locale, softHyphenString);
   res->AssociateWithDartWrapper(wrapper);
 }
 
@@ -232,7 +237,8 @@ ParagraphBuilder::ParagraphBuilder(
     double fontSize,
     double height,
     const std::u16string& ellipsis,
-    const std::string& locale) {
+    const std::string& locale,
+    const std::u16string& softHyphenString) {
   int32_t mask = 0;
   txt::ParagraphStyle style;
   {
@@ -297,6 +303,10 @@ ParagraphBuilder::ParagraphBuilder(
 
   if (mask & kPSLocaleMask) {
     style.locale = locale;
+  }
+
+  if (mask & kPSSoftHyphenStringMask) {
+    style.soft_hyphen_string = softHyphenString;
   }
 
   FontCollection& font_collection = UIDartState::Current()

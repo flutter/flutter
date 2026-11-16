@@ -29,21 +29,25 @@ public class PlatformChannel {
 
   @NonNull public final MethodChannel channel;
   @Nullable private PlatformMessageHandler platformMessageHandler;
+  // This state belongs to the FlutterEngine, so retain it while Activities attach and detach.
+  @Nullable private Boolean frameworkHandlesBack;
 
   @NonNull @VisibleForTesting
   final MethodChannel.MethodCallHandler parsingMethodCallHandler =
       new MethodChannel.MethodCallHandler() {
         @Override
         public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          if (platformMessageHandler == null) {
+          String method = call.method;
+          Object arguments = call.arguments;
+          Log.v(TAG, "Received '" + method + "' message.");
+
+          if (platformMessageHandler == null
+              && !method.equals("SystemNavigator.setFrameworkHandlesBack")) {
             // If no explicit PlatformMessageHandler has been registered then we don't
             // need to forward this call to an API. Return.
             return;
           }
 
-          String method = call.method;
-          Object arguments = call.arguments;
-          Log.v(TAG, "Received '" + method + "' message.");
           try {
             switch (method) {
               case "SystemSound.play":
@@ -137,12 +141,12 @@ public class PlatformChannel {
                 }
                 break;
               case "SystemNavigator.setFrameworkHandlesBack":
-                {
-                  boolean frameworkHandlesBack = (boolean) arguments;
+                frameworkHandlesBack = (boolean) arguments;
+                if (platformMessageHandler != null) {
                   platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBack);
-                  result.success(null);
-                  break;
                 }
+                result.success(null);
+                break;
               case "SystemNavigator.pop":
                 platformMessageHandler.popSystemNavigator();
                 result.success(null);
@@ -221,6 +225,9 @@ public class PlatformChannel {
    */
   public void setPlatformMessageHandler(@Nullable PlatformMessageHandler platformMessageHandler) {
     this.platformMessageHandler = platformMessageHandler;
+    if (platformMessageHandler != null && frameworkHandlesBack != null) {
+      platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBack);
+    }
   }
 
   /** Informs Flutter of a change in the SystemUI overlays. */

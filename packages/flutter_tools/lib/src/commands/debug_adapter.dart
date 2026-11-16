@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../context/tool_context.dart';
 import '../debug_adapters/server.dart';
 import '../runner/flutter_command.dart';
 
@@ -37,9 +36,6 @@ class DebugAdapterCommand extends FlutterCommand {
   }
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   final name = 'debug-adapter';
 
   @override
@@ -64,6 +60,7 @@ class DebugAdapterCommand extends FlutterCommand {
       stdio.stdout.nonBlocking,
       fileSystem: toolContext.fs,
       platform: toolContext.platform,
+      cache: toolContext.cache,
       ipv6: ipv6 ?? false,
       enableDds: enableDds,
       test: boolArg('test'),
