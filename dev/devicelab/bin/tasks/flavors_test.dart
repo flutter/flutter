@@ -5,6 +5,7 @@
 import 'dart:io' show File, Platform;
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -44,22 +45,22 @@ Future<void> main() async {
 Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
   await evalFlutter('install', options: <String>['--debug', '--flavor', 'paid']);
 
-  final Uint8List assetManifestFileData = File(
-    path.join(
-      projectDir,
-      'build',
-      'app',
-      'intermediates',
-      'assets',
-      'paidDebug',
-      'mergePaidDebugAssets',
-      'flutter_assets',
-      'AssetManifest.bin',
-    ),
-  ).readAsBytesSync();
+  // Read the asset manifest from the APK that was installed, rather than from
+  // an intermediate directory of the Android Gradle Plugin, whose location
+  // depends on how the Flutter Gradle Plugin adds its assets.
+  final apkFile = File(
+    path.join(projectDir, 'build', 'app', 'outputs', 'flutter-apk', 'app-paid-debug.apk'),
+  );
+  final Archive apk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
+  final ArchiveFile? assetManifestFile = apk.findFile('assets/flutter_assets/AssetManifest.bin');
+  if (assetManifestFile == null) {
+    return TaskResult.failure(
+      'Expected ${apkFile.path} to contain assets/flutter_assets/AssetManifest.bin.',
+    );
+  }
 
   final assetManifest = const StandardMessageCodec().decodeMessage(
-    ByteData.sublistView(assetManifestFileData),
+    ByteData.sublistView(assetManifestFile.content as Uint8List),
   ) as Map<Object?, Object?>;
 
   if (assetManifest.containsKey('assets/free/free.txt')) {
