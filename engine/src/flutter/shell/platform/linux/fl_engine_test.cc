@@ -1284,6 +1284,6 @@ TEST_F(FlEngineTest, RepeatedForcedDisposeHasNoCritical) {
   g_object_run_dispose(G_OBJECT(retained_engine));
   g_object_run_dispose(G_OBJECT(retained_engine));
   g_object_unref(retained_engine);
-  EXPECT_FALSE(flutter::testing::fl_has_received_gtk_log_level(
-      G_LOG_LEVEL_CRITICAL));
+  EXPECT_FALSE(
+      flutter::testing::fl_has_received_gtk_log_level(G_LOG_LEVEL_CRITICAL));
 }

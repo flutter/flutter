@@ -286,7 +286,7 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
   // An unrealized renderer (or one whose GL realization failed) drops the frame
   // without queuing a renderer-owning idle. Only the engine callback owns view.
   void TestNoRedraw(bool fail_realize, bool zero_layers, bool shutdown);
-  void TestComposite(bool unrealize_before_present);
+  void TestComposite(bool unrealize_before_present, bool shutdown = false);
 
   FlutterCompositor compositor = {};
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
@@ -367,7 +367,8 @@ TEST_F(FlViewRendererLifetimeTest, SoftwareDisposeDuringComposite) {
   ExpectNoCritical();
 }
 
-void FlViewRendererLifetimeTest::TestComposite(bool unrealize_before_present) {
+void FlViewRendererLifetimeTest::TestComposite(bool unrealize_before_present,
+                                               bool shutdown) {
   FlView* view = CreateView();
   GtkWidget* window = Realize(GTK_WIDGET(view));
   GtkWidget* renderer = FindRenderer(GTK_WIDGET(view));
@@ -413,12 +414,48 @@ void FlViewRendererLifetimeTest::TestComposite(bool unrealize_before_present) {
   g_object_unref(view);
   EXPECT_EQ(view_finalization.count, 0);
   EXPECT_EQ(renderer_finalization.count, 0);
-  barrier.ReleaseAndJoin();
-  EXPECT_TRUE(completed);
-  EXPECT_EQ(view_finalization.count, 0);
-  EXPECT_EQ(renderer_finalization.count, 0);
-  EXPECT_EQ(view_style_finalization.count, 0);
-  EXPECT_EQ(renderer_style_finalization.count, 0);
+  auto expect_pending_release = [&] {
+    EXPECT_TRUE(completed);
+    EXPECT_EQ(view_finalization.count, 0);
+    EXPECT_EQ(renderer_finalization.count, 0);
+    EXPECT_EQ(view_style_finalization.count, 0);
+    EXPECT_EQ(renderer_style_finalization.count, 0);
+  };
+  if (shutdown) {
+    GSource* release_source = nullptr;
+    bool shutdown_called = false;
+    FlutterEngineProcTable* api = fl_engine_get_embedder_api(engine);
+    api->Shutdown = MOCK_ENGINE_PROC(
+        Shutdown, ([&, original_shutdown = api->Shutdown](auto handle) {
+          shutdown_called = true;
+          barrier.ReleaseAndJoin();
+          expect_pending_release();
+          release_source =
+              g_main_context_find_source_by_user_data(nullptr, engine);
+          EXPECT_NE(release_source, nullptr);
+          if (release_source != nullptr) {
+            g_source_ref(release_source);
+          }
+          return original_shutdown(handle);
+        }));
+    g_object_run_dispose(G_OBJECT(engine));
+    EXPECT_TRUE(shutdown_called);
+    if (release_source != nullptr) {
+      EXPECT_TRUE(g_source_is_destroyed(release_source));
+      g_source_unref(release_source);
+    }
+    // Shutdown drains the callback's view reference without a loop iteration.
+    // Successful composition also queues an existing renderer redraw idle;
+    // that separate owner is released when GTK dispatches its pending work.
+    EXPECT_EQ(view_finalization.count, 1);
+    EXPECT_EQ(view_finalization.thread, std::this_thread::get_id());
+    EXPECT_EQ(renderer_finalization.count, 0);
+    EXPECT_NE(g_main_context_find_source_by_user_data(nullptr, renderer),
+              nullptr);
+  } else {
+    barrier.ReleaseAndJoin();
+    expect_pending_release();
+  }
   DrainIdles();
   EXPECT_EQ(view_finalization.count, 1);
   EXPECT_EQ(renderer_finalization.count, 1);
@@ -442,6 +479,10 @@ TEST_F(FlViewRendererLifetimeTest, ViewOwnsRendererDuringComposite) {
 
 TEST_F(FlViewRendererLifetimeTest, ViewAfterUnrealizeFinalizationOnMain) {
   TestComposite(/*unrealize_before_present=*/true);
+}
+
+TEST_F(FlViewRendererLifetimeTest, SuccessfulCallbackDuringShutdown) {
+  TestComposite(/*unrealize_before_present=*/false, /*shutdown=*/true);
 }
 
 void FlViewRendererLifetimeTest::TestNoRedraw(bool fail_realize,
