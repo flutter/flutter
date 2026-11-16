@@ -7,11 +7,13 @@ import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:dds/dds_launcher.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -49,6 +51,7 @@ import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -68,6 +71,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -1247,12 +1251,20 @@ class FakeExtensionManager extends Fake implements ExtensionManager {
   void disable() {}
 }
 
+class _FakeAndroidBuilder extends Fake implements AndroidBuilder {}
+
+class _FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {}
+
+class _FakeTemplateRenderer extends Fake implements TemplateRenderer {}
+
 class FakeToolDependencies extends Fake implements ToolDependencies {
   FakeToolDependencies({
     this._analytics,
+    this._androidBuilder,
     this._androidContext,
     this._androidWorkflow,
     this._appleContext,
+    this._applicationPackageFactory,
     this._assetBundleFactory,
     this._buildSystem,
     this._buildTargets,
@@ -1265,18 +1277,23 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this.extensionCleanManager,
     this.extensionManager,
     this._featureFlags,
+    this.flutterHookRunner,
     this._macOSWorkflow,
     this._mdnsVmServiceDiscovery,
     this._pub,
     this._templatePathProvider,
+    this._templateRenderer,
     this._toolContext,
+    this.webRunnerFactory,
     this._windowsWorkflow,
   });
 
   final Analytics? _analytics;
+  final AndroidBuilder? _androidBuilder;
   final AndroidContext? _androidContext;
   final AndroidWorkflow? _androidWorkflow;
   final AppleContext? _appleContext;
+  final ApplicationPackageFactory? _applicationPackageFactory;
   final AssetBundleFactory? _assetBundleFactory;
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
@@ -1290,11 +1307,15 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final MDnsVmServiceDiscovery? _mdnsVmServiceDiscovery;
   final Pub? _pub;
   final TemplatePathProvider? _templatePathProvider;
+  final TemplateRenderer? _templateRenderer;
   final ToolContext? _toolContext;
   final WindowsWorkflow? _windowsWorkflow;
 
   @override
   Analytics get analytics => _analytics ?? const NoOpAnalytics();
+
+  @override
+  AndroidBuilder get androidBuilder => _androidBuilder ?? _FakeAndroidBuilder();
 
   @override
   AndroidContext get androidContext => _androidContext ?? FakeAndroidContext();
@@ -1309,6 +1330,10 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   AppleContext get appleContext => _appleContext ?? FakeAppleContext();
+
+  @override
+  ApplicationPackageFactory get applicationPackageFactory =>
+      _applicationPackageFactory ?? _FakeApplicationPackageFactory();
 
   @override
   late final AssetBundleFactory assetBundleFactory =
@@ -1359,6 +1384,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
 
   @override
+  final FlutterHookRunner? flutterHookRunner;
+
+  @override
   late final MacOSWorkflow macOSWorkflow =
       _macOSWorkflow ?? MacOSWorkflow(featureFlags: featureFlags, platform: _platform);
 
@@ -1375,7 +1403,13 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
       _templatePathProvider ?? TemplatePathProvider(flutterRoot: _cache.flutterRoot);
 
   @override
+  TemplateRenderer get templateRenderer => _templateRenderer ?? _FakeTemplateRenderer();
+
+  @override
   late final ToolContext toolContext = _toolContext ?? FakeToolContext();
+
+  @override
+  final WebRunnerFactory? webRunnerFactory;
 
   @override
   late final WindowsWorkflow windowsWorkflow =

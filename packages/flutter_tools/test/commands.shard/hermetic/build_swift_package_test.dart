@@ -83,7 +83,7 @@ void main() {
       cocoaPods: cocoaPods ?? FakeCocoaPods(),
       codesign: FakeDarwinAddToAppCodesigning(),
       featureFlags: FakeFeatureFlags(),
-      templatePathProvider: const TemplatePathProvider(flutterRoot: _flutterRoot),
+      templatePathProvider: TemplatePathProvider(flutterRoot: getFlutterRoot()),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: FakeToolContext(
         artifacts: FakeArtifacts(_engineArtifactPath),
@@ -3414,7 +3414,7 @@ BuildSwiftPackageUtils _createTestUtils({
     flutterRoot: _flutterRoot,
     project:
         project ?? FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: isModule),
-    templatePathProvider: const TemplatePathProvider(flutterRoot: _flutterRoot),
+    templatePathProvider: TemplatePathProvider(flutterRoot: getFlutterRoot()),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: FakeArtifacts(_engineArtifactPath),

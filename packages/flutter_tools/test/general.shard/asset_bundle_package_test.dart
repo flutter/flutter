@@ -24,7 +24,7 @@ void main() {
     fileSystem: testFileSystem,
     flutterRoot: getFlutterRoot(),
     logger: testLogger,
-    platform: FakePlatform(),
+    platform: const LocalPlatform(),
   ).createBundle();
 
   String fixPath(String path) {
