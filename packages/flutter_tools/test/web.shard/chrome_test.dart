@@ -1202,6 +1202,142 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     },
   );
 
+  testWithoutContext('Chromium close does not hang when Browser.close never replies', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      // Process outlives the Browser.close timeout (6s > 5s), so the
+      // timeout must fire and escalate to SIGTERM. Without the timeout,
+      // close() would wait here forever.
+      final process = FakeProcess(duration: const Duration(seconds: 6));
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+
+      // 5s timeout + wait up to 5s more for the 6s process to exit.
+      fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
+      expect(closeCompleted, isTrue);
+      expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
+    });
+
+    expect(logger.warningText, isEmpty);
+  });
+
+  testWithoutContext('Chromium close does not hang when Chrome never responds', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangGetTab: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      final process = FakeProcess(duration: const Duration(seconds: 6));
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+
+      fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
+      expect(closeCompleted, isTrue);
+      expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
+    });
+
+    expect(logger.warningText, isEmpty);
+    expect(logger.traceText, contains('Chrome did not complete a graceful shutdown within 5s.'));
+  });
+
+  testWithoutContext('Chromium close returns promptly when Chrome already exited', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      // The process has already exited, so the reply never arrives. The exit
+      // should win the race and skip the timeout.
+      final process = FakeProcess();
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      // The process exit timer is already due.
+      fakeAsync.elapse(Duration.zero);
+      expect(closeCompleted, isTrue);
+      expect(process.signals, isEmpty);
+    });
+
+    expect(logger.warningText, isEmpty);
+  });
+
   testWithoutContext(
     'Chromium close handles a WebSocketException when closing the WipConnection',
     () async {
@@ -1300,17 +1436,24 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
     OnSendCommand? onSendCommand,
     this.onGetTab,
     bool throwWebSocketException = false,
-  }) : _tab = FakeChromeTab(onSendCommand, throwWebSocketException);
+    bool hangBrowserClose = false,
+    this.hangGetTab = false,
+  }) : _tab = FakeChromeTab(onSendCommand, throwWebSocketException, hangBrowserClose);
 
   final FakeChromeTab _tab;
   void Function()? onGetTab;
   bool throwSocketExceptions = false;
+  final bool hangGetTab;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
     onGetTab?.call();
     if (throwSocketExceptions) {
       throw const io.SocketException('test');
+    }
+    if (hangGetTab) {
+      // Simulate a Chrome that is alive but never answers.
+      return Completer<ChromeTab?>().future;
     }
     return _tab;
   }
@@ -1328,27 +1471,36 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.onSendCommand, this.throwWebSocketException);
+  FakeChromeTab(this.onSendCommand, this.throwWebSocketException, this.hangBrowserClose);
 
   final OnSendCommand? onSendCommand;
   final bool throwWebSocketException;
+  final bool hangBrowserClose;
 
   @override
   Future<WipConnection> connect({Function? onError}) async {
-    return FakeWipConnection(onSendCommand, throwWebSocketException);
+    return FakeWipConnection(onSendCommand, throwWebSocketException, hangBrowserClose);
   }
 }
 
 class FakeWipConnection extends Fake implements WipConnection {
-  FakeWipConnection(this.onSendCommand, this.throwWebSocketException);
+  FakeWipConnection(this.onSendCommand, this.throwWebSocketException, this.hangBrowserClose);
 
   final OnSendCommand? onSendCommand;
   final bool throwWebSocketException;
+  final bool hangBrowserClose;
 
   @override
-  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) async {
+  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) {
     onSendCommand?.call(method);
-    return WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}});
+    if (hangBrowserClose && method == 'Browser.close') {
+      // Simulate Chrome exiting before its Browser.close reply arrives,
+      // so the pending future in webkit_inspection_protocol never completes.
+      return Completer<WipResponse>().future;
+    }
+    return Future<WipResponse>.value(
+      WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}}),
+    );
   }
 
   @override
