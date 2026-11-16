@@ -12,10 +12,9 @@ import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../ios/plist_parser.dart';
@@ -24,44 +23,32 @@ import '../macos/swift_package_manager.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/crash_reporting.dart';
-import '../version.dart';
 
 /// Swift Package Manager integration requires changes to the Xcode project's
 /// project.pbxproj and xcscheme. This class handles making those changes.
 class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   SwiftPackageManagerIntegrationMigration(
     XcodeBasedProject project,
-    FlutterDarwinPlatform platform,
-    BuildInfo buildInfo, {
-    required this._xcodeProjectInterpreter,
-    required Logger logger,
-    required this._fileSystem,
-    required this._plistParser,
-    required this._config,
+    this._platform,
+    this._buildInfo, {
     required this._analytics,
-    required this._hostPlatform,
-    required this._operatingSystemUtils,
-    required this._flutterVersion,
-    required this._reportCrashes,
+    required this._plistParser,
+    required this._toolContext,
+    required this._xcodeProjectInterpreter,
+    this._crashReportSenderFactory,
   }) : _xcodeProject = project,
-       _platform = platform,
-       _buildInfo = buildInfo,
        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-       super(logger);
+       super(_toolContext.logger);
 
   final XcodeBasedProject _xcodeProject;
   final FlutterDarwinPlatform _platform;
   final BuildInfo _buildInfo;
-  final XcodeProjectInterpreter _xcodeProjectInterpreter;
-  final FileSystem _fileSystem;
-  final File _xcodeProjectInfoFile;
-  final PlistParser _plistParser;
-  final Config _config;
   final Analytics _analytics;
-  final Platform _hostPlatform;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final FlutterVersion _flutterVersion;
-  final bool _reportCrashes;
+  final CrashReportSender Function()? _crashReportSenderFactory;
+  final PlistParser _plistParser;
+  final ToolContext _toolContext;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
+  final File _xcodeProjectInfoFile;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -106,7 +93,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   static const _macosProjectIdentifier = '33CC10E52044A3C60003C045';
 
   File get backupProjectSettings =>
-      _fileSystem.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
+      _toolContext.fs.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
 
   String get _runnerFrameworksBuildPhaseIdentifier {
     return _platform == FlutterDarwinPlatform.ios
@@ -147,7 +134,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// If the app is not an example app or the plugin cannot be found, this will return null.
   late final ({String name, String path})? _examplePlugin;
 
-  String _flutterVersionString() => _flutterVersion.getVersionString(redactUnknownBranches: true);
+  String _flutterVersionString() =>
+      _toolContext.flutterVersion.getVersionString(redactUnknownBranches: true);
 
   void restoreFromBackup(SchemeInfo? schemeInfo) {
     if (backupProjectSettings.existsSync()) {
@@ -181,6 +169,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       return;
     }
 
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
     var optionalOnly = false;
@@ -191,7 +181,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
       _examplePlugin = await _loadPluginFromExampleProject(
         xcodeProject: _xcodeProject,
-        fileSystem: _fileSystem,
+        fileSystem: fs,
         logger: logger,
         platform: _platform,
       );
@@ -246,22 +236,14 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       try {
         await _xcodeProjectInterpreter.getInfo(
           _xcodeProject,
-          buildDirectory: _fileSystem.directory(
-            _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
-          ),
+          buildDirectory: fs.directory(_platform.buildDirectory(config: config, fileSystem: fs)),
         );
       } on Exception catch (e, stackTrace) {
         // Send error to crash reporter.
-        if (_reportCrashes) {
+        if (_crashReportSenderFactory case final crashReportSenderFactory?) {
           try {
             await asyncGuard(() async {
-              final crashReportSender = CrashReportSender(
-                platform: _hostPlatform,
-                logger: logger,
-                operatingSystemUtils: _operatingSystemUtils,
-                analytics: _analytics,
-              );
-              await crashReportSender.sendReport(
+              await crashReportSenderFactory().sendReport(
                 error: e,
                 stackTrace: stackTrace,
                 getFlutterVersion: _flutterVersionString,
@@ -269,7 +251,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
                 typeId: 'XcodeBuildError',
               );
             });
-          } on Exception catch (_) {
+          } on Exception {
             // Fail silently if it fails to send crash report
           }
         }
@@ -1345,6 +1327,7 @@ $newContent
           flutterProject.directory.parent.childFile('pubspec.yaml').existsSync()) {
         final FlutterProject parentProject = FlutterProject.fromDirectory(
           flutterProject.directory.parent,
+          logger: logger,
         );
         if (parentProject.isPlugin && parentProject.hasExampleApp) {
           final String pluginName = parentProject.manifest.appName;

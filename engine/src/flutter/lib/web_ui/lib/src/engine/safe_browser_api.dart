@@ -126,7 +126,7 @@ extension type ImageDecoderOptions._(JSObject _) implements JSObject {
     double? desiredWidth,
     double? desiredHeight,
     required String colorSpaceConversion,
-    required bool preferAnimation,
+    bool? preferAnimation,
   });
 }
 

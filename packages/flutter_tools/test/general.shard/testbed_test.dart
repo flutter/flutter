@@ -8,26 +8,52 @@ import 'dart:io';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 
 import '../src/common.dart';
+import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
 import '../src/testbed.dart';
 
 void main() {
   group('Testbed', () {
+    test('Does not evaluate overrides before setup runs', () async {
+      late FileSystem fs;
+      late ProcessManager processManager;
+      final testbed = TestBed(
+        setup: () {
+          fs = MemoryFileSystem.test();
+          processManager = FakeProcessManager.empty();
+        },
+        overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager},
+      );
+
+      String? flutterRoot;
+      ProcessManager? resolvedProcessManager;
+      PlistParser? resolvedPlistParser;
+      await testbed.run(() {
+        flutterRoot = context.get<Cache>()?.flutterRoot;
+        resolvedProcessManager = context.get<ProcessManager>();
+        resolvedPlistParser = context.get<PlistParser>();
+      });
+
+      expect(flutterRoot, isEmpty);
+      expect(resolvedProcessManager, same(processManager));
+      expect(resolvedPlistParser, isA<FakePlistParser>());
+    });
+
     test('Can provide default interfaces', () async {
       final testbed = TestBed();
 
-      late FileSystem localFileSystem;
+      FileSystem? localFileSystem;
       await testbed.run(() {
-        localFileSystem = globals.fs;
+        localFileSystem = context.resolveOverride<FileSystem>();
       });
 
-      expect(localFileSystem, isA<ErrorHandlingFileSystem>());
-      expect((localFileSystem as ErrorHandlingFileSystem).fileSystem, isA<MemoryFileSystem>());
+      expect(localFileSystem, isA<MemoryFileSystem>());
     });
 
     test('Can provide setup interfaces', () async {

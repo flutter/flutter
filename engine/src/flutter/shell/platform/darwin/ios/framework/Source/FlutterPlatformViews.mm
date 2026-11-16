@@ -499,6 +499,21 @@ static BOOL _preparedOnce = NO;
 
 @end
 
+@implementation FlutterPlatformViewInfo
+
+- (instancetype)initWithView:(NSObject<FlutterPlatformView>*)view
+            touchInterceptor:(FlutterTouchInterceptingView*)touchInterceptor
+                    rootView:(UIView*)rootView {
+  if (self = [super init]) {
+    _view = view;
+    _touchInterceptor = touchInterceptor;
+    _rootView = rootView;
+  }
+  return self;
+}
+
+@end
+
 @implementation UIView (FirstResponder)
 - (BOOL)flt_hasFirstResponderInViewHierarchySubtree {
   if (self.isFirstResponder) {
