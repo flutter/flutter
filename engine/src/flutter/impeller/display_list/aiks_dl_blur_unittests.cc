@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
+
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -837,6 +839,38 @@ MASK_BLUR_VARIANT_TEST(OuterTranslucent)
 MASK_BLUR_VARIANT_TEST(OuterOpaqueWithBlurImageFilter)
 
 #undef MASK_BLUR_VARIANT_TEST
+
+// A filled round superellipse with uniform corner radii, a solid color, and a
+// mask blur is drawn by Canvas::AttemptDrawBlurredRSuperellipse with the
+// dedicated RSuperellipseBlur SDF shader rather than a Gaussian blur.
+TEST_P(AiksTest, SolidColorRoundSuperellipseMaskBlur) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  constexpr std::array<Scalar, 4> kSigmas = {2, 8, 16, 32};
+  for (size_t i = 0; i < kSigmas.size(); i++) {
+    DlPaint paint;
+    paint.setColor(DlColor::kCornflowerBlue());
+    paint.setMaskFilter(
+        DlBlurMaskFilter::Make(DlBlurStyle::kNormal, kSigmas[i]));
+    builder.DrawRoundSuperellipse(
+        DlRoundSuperellipse::MakeRectRadius(
+            DlRect::MakeXYWH(60 + i * 230, 80, 170, 220), /*radius=*/48),
+        paint);
+  }
+
+  // kSolid takes the two-draw path (blurred shape, then the crisp shape).
+  DlPaint solid;
+  solid.setColor(DlColor::kOrangeRed());
+  solid.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kSolid, 12));
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(DlRect::MakeXYWH(60, 420, 400, 180),
+                                          /*radius=*/60),
+      solid);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
 
 TEST_P(AiksTest, GaussianBlurStyleInner) {
   DisplayListBuilder builder;

@@ -673,6 +673,7 @@ void main() {
         BuildInfoOptions.performanceMeasurementFile,
         BuildInfoOptions.analyzeSize,
         BuildInfoOptions.codeSizeDirectory,
+        BuildInfoOptions.trackWidgetCreation,
       ];
 
       for (final descriptor in allOptions) {
@@ -848,7 +849,7 @@ void main() {
           DebuggingOptionDescriptors.dds,
           DebuggingOptionDescriptors.disableDds,
           DebuggingOptionDescriptors.enableDevTools,
-          DebuggingOptionDescriptors.devToolsServerAddressOption,
+          DebuggingOptionDescriptors.devToolsServerAddress,
           BuildInfoOptions.initializeFromDill,
           BuildInfoOptions.assumeInitializeFromDillUpToDate,
           BuildInfoOptions.nativeAssetsYamlFile,
@@ -870,11 +871,15 @@ void main() {
       },
     );
 
-    testWithoutContext('OptionBundle.register supports verboseHelp and hideOverride overrides for FlutterCommand helpers', () async {
+    testWithoutContext('OptionBundle.register supports verboseHelp and hide overrides', () async {
       final command = _FakeCommand(name: 'helper-test', description: 'Helper delegation test');
-      command.usesFilesystemOptions(hide: false);
-      command.usesPortOptions(verboseHelp: true);
-      command.addBuildModeFlags(verboseHelp: true, defaultToRelease: false, excludeRelease: true);
+      const FilesystemOptionsBundle().register(command, command.argParser, hide: false);
+      const VmServicePortOptionsBundle(includeIpv6: false)
+          .register(command, command.argParser, verboseHelp: true);
+      const BuildModeOptionsBundle(
+        defaultToRelease: false,
+        excludeRelease: true,
+      ).register(command, command.argParser, verboseHelp: true);
 
       expect(command.argParser.options['output-dill']!.hide, isFalse);
       expect(command.argParser.options['vm-service-port']!.hide, isFalse);
@@ -888,10 +893,72 @@ void main() {
         hiddenCommand,
         hiddenCommand.argParser,
         verboseHelp: true,
-        hideOverride: true,
+        hide: true,
       );
       expect(hiddenCommand.argParser.options['output-dill']!.hide, isTrue);
     });
+
+    testWithoutContext(
+      'SafeArgResults.hasOption checks descriptor identity on argParser',
+      () async {
+        final commandWithCustomFatalWarnings = _FakeCommand(
+          name: 'custom-fatal-warnings',
+          description: 'Registers a custom --fatal-warnings flag',
+        );
+        commandWithCustomFatalWarnings.argParser.addFlag(
+          'fatal-warnings',
+          defaultsTo: true,
+          help: 'Treat warning level issues as fatal.',
+        );
+        expect(commandWithCustomFatalWarnings.hasOption(CommonOptions.fatalWarnings), isFalse);
+
+        final commandWithCommonFatalWarnings = _FakeCommand(
+          name: 'common-fatal-warnings',
+          description: 'Registers CommonOptions.fatalWarnings',
+        );
+        CommonOptions.fatalWarnings.addTo(commandWithCommonFatalWarnings.argParser);
+        expect(commandWithCommonFatalWarnings.hasOption(CommonOptions.fatalWarnings), isTrue);
+      },
+    );
+
+    testWithoutContext(
+      'addTo and addDescriptor help overrides customize usage while preserving descriptor identity',
+      () async {
+        const descriptor = StringOptionDescriptor(
+          name: 'custom-help-opt',
+          help: 'Default help text.',
+        );
+        final parser = ArgParser();
+        parser.addDescriptor(descriptor, help: 'Command-specific help text.');
+
+        expect(parser.options['custom-help-opt']!.help, 'Command-specific help text.');
+        expect(descriptor.isRegisteredOnParser(parser), isTrue);
+
+        expect(
+          const DdsAndDevToolsOptionsBundle().descriptors,
+          contains(DebuggingOptionDescriptors.devToolsServerAddress),
+        );
+        expect(
+          const DdsAndDevToolsOptionsBundle(includeDevTools: false).descriptors,
+          isNot(contains(DebuggingOptionDescriptors.devToolsServerAddress)),
+        );
+
+        final command = _FakeCommand(
+          name: 'dds-only',
+          description: 'Registers addDdsOptions without --devtools',
+          verboseHelp: true,
+        )..addDdsOptions(verboseHelp: true);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        await runner.run(<String>['dds-only', '--devtools-server-address=http://127.0.0.1:9100']);
+
+        expect(
+          command.argParser.options[FlutterCommand.kDevToolsServerAddress]!.help,
+          DebuggingOptionDescriptors.devToolsServerAddressBaseHelp,
+        );
+        expect(command.hasOption(DebuggingOptionDescriptors.devToolsServerAddress), isTrue);
+        expect(command.devToolsServerAddress, Uri.parse('http://127.0.0.1:9100'));
+      },
+    );
   });
 }
 

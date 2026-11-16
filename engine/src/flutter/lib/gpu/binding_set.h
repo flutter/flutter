@@ -25,30 +25,34 @@
 namespace flutter {
 namespace gpu {
 
-/// A group of uniform and texture bindings, resolved against shader
-/// reflection once at creation and replayed by every draw that binds it.
+/// A group of uniform, texture and storage buffer bindings, resolved against
+/// shader reflection once at creation and replayed by every draw that binds
+/// it.
 ///
 /// Binding the set on a render pass costs one slot assignment no matter how
 /// many resources it holds, so a renderer that draws many nodes with the same
 /// material stops paying per-resource bind work per draw.
+///
+/// A set can hold bindings for any stage. A render pass replays its vertex
+/// and fragment bindings, and a compute pass its compute bindings.
 class BindingSet : public RefCountedDartWrappable<BindingSet> {
   DEFINE_WRAPPERTYPEINFO();
   FML_FRIEND_MAKE_REF_COUNTED(BindingSet);
 
  public:
   struct BufferBinding {
-    impeller::ShaderStage stage;
-    impeller::ShaderUniformSlot slot;
+    impeller::ShaderStage stage = impeller::ShaderStage::kUnknown;
+    impeller::ShaderUniformSlot slot{};
     /// Borrowed from the shader that declared the binding, which this set
     /// keeps alive.
-    const impeller::ShaderMetadata* metadata;
+    const impeller::ShaderMetadata* metadata = nullptr;
     impeller::BufferView view;
   };
 
   struct TextureBinding {
-    impeller::ShaderStage stage;
-    impeller::SampledImageSlot slot;
-    const impeller::ShaderMetadata* metadata;
+    impeller::ShaderStage stage = impeller::ShaderStage::kUnknown;
+    impeller::SampledImageSlot slot{};
+    const impeller::ShaderMetadata* metadata = nullptr;
     std::shared_ptr<const impeller::Texture> texture;
     /// Owned by the context's sampler library, which caches it for the
     /// context's lifetime. The Dart wrapper holds the context that resolved
@@ -71,6 +75,15 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
                   size_t offset_in_bytes,
                   size_t length_in_bytes);
 
+  /// The storage buffer counterpart to `AddUniform`. Only compute shaders
+  /// take storage buffers, so this returns false for any other stage.
+  bool AddStorageBuffer(
+      Shader& shader,
+      int storage_buffer_index,
+      const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
+      size_t offset_in_bytes,
+      size_t length_in_bytes);
+
   /// The texture counterpart to `AddUniform`.
   bool AddTexture(Shader& shader,
                   int uniform_texture_index,
@@ -85,6 +98,8 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
 
   const std::vector<TextureBinding>& GetTextureBindings() const;
 
+  const std::vector<BufferBinding>& GetStorageBufferBindings() const;
+
  private:
   /// Keeps `shader` alive for this set's lifetime, since the bindings point
   /// into reflection data the shader owns.
@@ -92,6 +107,7 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
 
   std::vector<BufferBinding> buffer_bindings_;
   std::vector<TextureBinding> texture_bindings_;
+  std::vector<BufferBinding> storage_buffer_bindings_;
   std::vector<fml::RefPtr<Shader>> shaders_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(BindingSet);
@@ -114,6 +130,15 @@ extern bool InternalFlutterGpu_BindingSet_AddUniform(
     flutter::gpu::BindingSet* wrapper,
     flutter::gpu::Shader* shader,
     int uniform_struct_index,
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int length_in_bytes);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_BindingSet_AddStorageBuffer(
+    flutter::gpu::BindingSet* wrapper,
+    flutter::gpu::Shader* shader,
+    int storage_buffer_index,
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes);

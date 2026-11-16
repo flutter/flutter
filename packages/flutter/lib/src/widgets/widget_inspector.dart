@@ -789,6 +789,7 @@ mixin WidgetInspectorService {
   /// normal interactions. Otherwise the previously selected widget is
   /// highlighted but the application can be interacted with normally.
   @visibleForTesting
+  // ignore: avoid_setters_without_getters
   set isSelectMode(bool enabled) {
     _changeWidgetSelectionMode(enabled);
   }

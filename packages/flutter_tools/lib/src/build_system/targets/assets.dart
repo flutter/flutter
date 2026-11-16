@@ -47,6 +47,7 @@ Future<Depfile> copyAssets(
   final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
     logger: environment.logger,
     fileSystem: environment.fileSystem,
+    flutterRoot: environment.flutterRootDir.path,
     platform: environment.platform,
     splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
@@ -205,12 +206,15 @@ Future<Depfile> copyAssets(
   // The assets are included in assetBundle.entries as a normal asset when
   // building as debug.
   if (environment.defines[kDeferredComponents] == 'true') {
+    final FlutterProject project = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     await Future.wait<void>(
       assetBundle.deferredComponentsEntries.entries.map<Future<void>>((
         MapEntry<String, Map<String, AssetBundleEntry>> componentEntries,
       ) async {
-        final Directory componentOutputDir = FlutterProject.fromDirectory(environment.projectDir)
-            .buildDirectory
+        final Directory componentOutputDir = project.buildDirectory
             .childDirectory(componentEntries.key)
             .childDirectory('intermediates')
             .childDirectory('flutter');
