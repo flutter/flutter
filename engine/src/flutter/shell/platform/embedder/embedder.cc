@@ -1253,10 +1253,18 @@ MakeRenderTargetFromBackingStoreImpeller(
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 MakeRenderTargetFromBackingStoreImpeller(
     FlutterBackingStore backing_store,
-    const fml::closure& on_release,
+    fml::ScopedCleanupClosure& on_release,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
     const FlutterVulkanBackingStore* vulkan) {
+  auto on_destruct = [callback = vulkan->destruction_callback,
+                      user_data = vulkan->user_data]() {
+    if (callback) {
+      callback(user_data);
+    }
+  };
+  fml::ScopedCleanupClosure vulkan_destruct(on_destruct);
+
 #if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
   if (!aiks_context || !aiks_context->GetContext()) {
     FML_LOG(ERROR) << "No Impeller context to build a render target with.";
@@ -1268,14 +1276,16 @@ MakeRenderTargetFromBackingStoreImpeller(
     return nullptr;
   }
 
-  // Read directly, as the Skia path does. `FlutterVulkanImage.struct_size` has
-  // never been checked for backing stores, so embedders that leave it unset
-  // work under Skia; gating on it here would fail them only under Impeller.
-  const auto format = impeller::VkFormatToImpellerFormat(
-      static_cast<impeller::vk::Format>(vulkan->image->format));
+  // Read directly without struct_size validation to maintain backwards
+  // compatibility with embedders which leave FlutterVulkanImage::struct_size
+  // unpopulated.
+  const auto vk_format =
+      static_cast<impeller::vk::Format>(vulkan->image->format);
+  const auto format = impeller::VkFormatToImpellerFormat(vk_format);
   if (!format.has_value()) {
     FML_LOG(ERROR) << "Embedder supplied Vulkan image with an unsupported "
-                      "pixel format.";
+                      "pixel format: "
+                   << impeller::vk::to_string(vk_format);
     return nullptr;
   }
 
@@ -1294,11 +1304,14 @@ MakeRenderTargetFromBackingStoreImpeller(
 
   auto texture_source = impeller::WrapTextureSourceVK(
       vk_context, desc,
-      impeller::vk::Image(reinterpret_cast<VkImage>(vulkan->image->image)));
+      impeller::vk::Image(reinterpret_cast<VkImage>(vulkan->image->image)),
+      on_destruct);
   if (!texture_source) {
     FML_LOG(ERROR) << "Could not wrap embedder supplied Vulkan image.";
     return nullptr;
   }
+  // Ownership of the destruction callback now belongs to `texture_source`.
+  vulkan_destruct.Release();
 
   // TODO(https://github.com/flutter/flutter/issues/194239): Cache swapchain
   // transients in Impeller core (ContextVK) instead of allocating per backing
@@ -1321,8 +1334,8 @@ MakeRenderTargetFromBackingStoreImpeller(
       std::make_unique<impeller::RenderTarget>(surface->GetRenderTarget());
 
   return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
-      backing_store, aiks_context, std::move(render_target), on_release,
-      fml::closure());
+      backing_store, aiks_context, std::move(render_target),
+      on_release.Release(), fml::closure());
 #else
   return nullptr;
 #endif
@@ -1613,7 +1626,7 @@ CreateEmbedderRenderTarget(
     case kFlutterBackingStoreTypeVulkan: {
       if (enable_impeller) {
         render_target = MakeRenderTargetFromBackingStoreImpeller(
-            backing_store, collect_callback.Release(), aiks_context, config,
+            backing_store, collect_callback, aiks_context, config,
             &backing_store.vulkan);
         break;
       } else {

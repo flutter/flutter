@@ -20,12 +20,23 @@ class WrappedTextureSourceVK final : public TextureSourceVK {
  public:
   WrappedTextureSourceVK(vk::Image image,
                          vk::UniqueImageView image_view,
-                         TextureDescriptor desc)
+                         TextureDescriptor desc,
+                         std::function<void()> cleanup)
       : TextureSourceVK(desc),
         image_(image),
-        image_view_(std::move(image_view)) {}
+        image_view_(std::move(image_view)),
+        cleanup_(std::move(cleanup)) {}
 
-  ~WrappedTextureSourceVK() override = default;
+  ~WrappedTextureSourceVK() override {
+    // Order matters: the cleanup callback may destroy the embedder-owned
+    // VkImage, and Vulkan requires framebuffers and image views referencing
+    // it to be destroyed first (VUID-vkDestroyImage-image-01000).
+    ResetFrameData();
+    image_view_.reset();
+    if (cleanup_) {
+      cleanup_();
+    }
+  }
 
  private:
   vk::Image GetImage() const override { return image_; }
@@ -41,6 +52,7 @@ class WrappedTextureSourceVK final : public TextureSourceVK {
 
   vk::Image image_;
   vk::UniqueImageView image_view_;
+  std::function<void()> cleanup_;
 
   WrappedTextureSourceVK(const WrappedTextureSourceVK&) = delete;
   WrappedTextureSourceVK& operator=(const WrappedTextureSourceVK&) = delete;
@@ -51,7 +63,8 @@ class WrappedTextureSourceVK final : public TextureSourceVK {
 std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
     const ContextVK& context,
     const TextureDescriptor& desc,
-    vk::Image image) {
+    vk::Image image,
+    std::function<void()> cleanup) {
   if (!image) {
     return nullptr;
   }
@@ -75,7 +88,7 @@ std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
   }
 
   return std::make_shared<WrappedTextureSourceVK>(image, std::move(image_view),
-                                                  desc);
+                                                  desc, std::move(cleanup));
 }
 
 }  // namespace impeller

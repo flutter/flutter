@@ -2089,19 +2089,27 @@ typedef struct {
   size_t struct_size;
   /// The image that the layer will be rendered to. This image must already be
   /// available for the engine to bind for writing when it's given to the engine
-  /// via the backing store creation callback. The engine will perform a host
-  /// sync for all layers prior to calling the compositor present callback, and
-  /// so the written layer images can be freely bound by the embedder without
-  /// any additional synchronization.
+  /// via the backing store creation callback.
+  ///
+  /// When Impeller is disabled (Skia), the engine will perform a host sync for
+  /// all layers prior to calling the compositor present callback, and so the
+  /// written layer images can be freely bound by the embedder without any
+  /// additional synchronization.
   ///
   /// When Impeller is enabled:
   /// - The engine submits GPU commands without a host-side fence wait prior to
   ///   calling the compositor present callback; the embedder must synchronize
-  ///   GPU access (for example, by consuming the image on the same Vulkan
-  ///   queue).
+  ///   GPU access (for example, via a `VkSemaphore` or an explicit
+  ///   `VkImageMemoryBarrier` from
+  ///   `VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT` /
+  ///   `VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT`, acquiring the Vulkan queue mutex
+  ///   if submitting on the engine's queue).
   /// - The incoming image layout is ignored (`VK_IMAGE_LAYOUT_UNDEFINED`) and
   ///   prior contents are discarded.
-  /// - The image must include `VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT`.
+  /// - The image must be single-sample (`VK_SAMPLE_COUNT_1_BIT`), single-mip
+  ///   (`mipLevels = 1`), match `FlutterBackingStoreConfig.size`, include
+  ///   `VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT`, and use a supported format
+  ///   (`VK_FORMAT_R8G8B8A8_UNORM` or `VK_FORMAT_B8G8R8A8_UNORM`).
   /// - The engine currently hands the image back in `VK_IMAGE_LAYOUT_GENERAL`
   ///   (whereas Skia leaves it in `VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL`).
   const FlutterVulkanImage* image;
@@ -2110,7 +2118,11 @@ typedef struct {
   /// may be associated with this baton.
   void* user_data;
   /// The callback invoked by the engine when it no longer needs this backing
-  /// store.
+  /// store. When Impeller is enabled, this is invoked after GPU work on the
+  /// image completes and may be called on an internal engine thread. GPU
+  /// resources (`VkImage` / memory) must only be freed or reused here rather
+  /// than in `FlutterCompositor.collect_backing_store_callback`, and relative
+  /// callback ordering between the two is unspecified.
   VoidCallback destruction_callback;
 } FlutterVulkanBackingStore;
 
@@ -2333,6 +2345,12 @@ typedef struct {
   FlutterBackingStoreCreateCallback create_backing_store_callback;
   /// A callback invoked by the engine to release the backing store. The
   /// embedder may collect any resources associated with the backing store.
+  ///
+  /// For `kFlutterBackingStoreTypeVulkan` with Impeller enabled, this callback
+  /// only indicates that the engine has finished submitting to the backing
+  /// store wrapper; GPU work may still be in flight, so the underlying
+  /// `VkImage` and memory must only be destroyed or reused in
+  /// `FlutterVulkanBackingStore.destruction_callback`.
   ///
   /// The callback should return true if the operation was successful.
   FlutterBackingStoreCollectCallback collect_backing_store_callback;
