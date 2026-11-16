@@ -129,6 +129,32 @@ void main() {
     );
   });
 
+  test('does not derive a side of 0 for a very thin image', () async {
+    Future<List<int>> decode(int width, int height, {int? targetWidth, int? targetHeight}) async {
+      final recorder = ui.PictureRecorder();
+      ui.Canvas(recorder).drawRect(
+        ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+        ui.Paint()..color = const ui.Color(0xFF0000FF),
+      );
+      final ui.Image image = await recorder.endRecording().toImage(width, height);
+      final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        data!.buffer.asUint8List(),
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+      );
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      final size = <int>[frameInfo.image.width, frameInfo.image.height];
+      frameInfo.image.dispose();
+      codec.dispose();
+      return size;
+    }
+
+    expect(await decode(4000, 1, targetWidth: 100), <int>[100, 1]);
+    expect(await decode(1, 4000, targetHeight: 100), <int>[1, 100]);
+  });
+
   test('disposed decoded image', () async {
     final Uint8List data = await _getSkiaResource('flutter_logo.jpg').readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(data);
@@ -170,6 +196,44 @@ void main() {
         .readAsBytesSync();
 
     expect(imageData.buffer.asUint8List(), goldenData);
+  });
+
+  test('Animated webp decodes a frame with alpha after an opaque first frame', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/85831
+    final Uint8List data = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'opaque_first_frame_then_alpha.webp'),
+    ).readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+
+    // The test image contains two solid frames. The first is opaque red, and
+    // the second is blue with alpha=128.
+    ui.Image image = (await codec.getNextFrame()).image;
+    ByteData imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(0), 0xFF0000FF);
+    image = (await codec.getNextFrame()).image;
+    imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(0), 0x00008080);
+    codec.dispose();
+  });
+
+  test('Animated gif decodes a frame with alpha after an opaque first frame', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/85831
+    final Uint8List data = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'opaque_first_frame_then_alpha.gif'),
+    ).readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+
+    // The test image contains two frames that restore to the background. The
+    // first is opaque red, and the second is transparent except for one blue
+    // pixel in the top left corner.
+    ui.Image image = (await codec.getNextFrame()).image;
+    ByteData imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(0), 0xFF0000FF);
+    image = (await codec.getNextFrame()).image;
+    imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(0), 0x0000FFFF);
+    expect(imageData.getUint32(4), 0x00000000);
+    codec.dispose();
   });
 
   test('Animated webp can reuse across multiple frames', () async {
@@ -309,6 +373,63 @@ void main() {
       }
     },
   );
+
+  test('Animated gif frames are resized to targetWidth and targetHeight', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/90804
+    final Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      data,
+      targetWidth: 160,
+      targetHeight: 120,
+    );
+    expect(codec.frameCount, 4);
+
+    // Decode two loops so that frames composited on top of a cached backdrop
+    // after the animation wraps around are covered as well.
+    for (var i = 0; i < codec.frameCount * 2; i++) {
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      expect(frameInfo.image.width, 160);
+      expect(frameInfo.image.height, 120);
+      frameInfo.image.dispose();
+    }
+    codec.dispose();
+  });
+
+  test('Animated webp frames are resized when only targetWidth is given', () async {
+    final Uint8List data = File(path.join('flutter', 'lib', 'ui', 'fixtures', 'heart.webp'))
+        .readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data, targetWidth: 100);
+    expect(codec.frameCount, 69);
+
+    for (var i = 0; i < codec.frameCount; i++) {
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      expect(frameInfo.image.width, 100);
+      expect(frameInfo.image.height, 100);
+      frameInfo.image.dispose();
+    }
+    codec.dispose();
+  });
+
+  test('instantiateImageCodecWithSize resizes animated images', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/137668
+    final Uint8List data = File(path.join('flutter', 'lib', 'ui', 'fixtures', 'heart.webp'))
+        .readAsBytesSync();
+    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(data);
+    final ui.Codec codec = await ui.instantiateImageCodecWithSize(
+      buffer,
+      getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+        expect(intrinsicWidth, 500);
+        expect(intrinsicHeight, 500);
+        return const ui.TargetImageSize(width: 50, height: 50);
+      },
+    );
+
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+    expect(frameInfo.image.width, 50);
+    expect(frameInfo.image.height, 50);
+    frameInfo.image.dispose();
+    codec.dispose();
+  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.

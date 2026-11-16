@@ -1,0 +1,48 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Backs the shader bundle compute reflection tests: a 3D workgroup size, one
+// storage buffer per access qualifier, blocks with and without a trailing
+// runtime-sized array, and a storage buffer whose only read is overwritten so
+// the compiler drops it.
+
+layout(local_size_x = 8, local_size_y = 4, local_size_z = 2) in;
+
+layout(std430, binding = 0) readonly buffer InputData {
+  uint count;
+  vec4 values[];
+}
+input_data;
+
+layout(std430, binding = 1) writeonly buffer OutputData {
+  vec4 values[];
+}
+output_data;
+
+layout(std430, binding = 2) buffer Accumulator {
+  uint total;
+  uint padding[3];
+}
+accumulator;
+
+layout(std430, binding = 3) readonly buffer Unused {
+  vec4 never_read;
+}
+unused;
+
+uniform Params {
+  float scale;
+}
+params;
+
+void main() {
+  uint index = gl_GlobalInvocationID.x;
+  if (index >= input_data.count) {
+    return;
+  }
+  vec4 value = unused.never_read;
+  value = input_data.values[index] * params.scale;
+  output_data.values[index] = value;
+  atomicAdd(accumulator.total, 1u);
+}

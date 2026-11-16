@@ -1,0 +1,27 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Writes the three vertices of a triangle that covers the whole viewport when
+// `scale` is 1, and a smaller one that leaves the corners uncovered when it is
+// less than 1. Dispatched as one workgroup.
+
+layout(local_size_x = 3) in;
+
+layout(std430) buffer;
+
+layout(binding = 0) uniform TriangleInfo {
+  float scale;
+}
+triangle_info;
+
+layout(binding = 1) writeonly buffer Vertices {
+  vec2 positions[];
+}
+vertices;
+
+void main() {
+  uint index = gl_GlobalInvocationID.x;
+  vec2 corner = vec2(index == 1u ? 3.0 : -1.0, index == 2u ? 3.0 : -1.0);
+  vertices.positions[index] = corner * triangle_info.scale;
+}

@@ -24,9 +24,9 @@ class BuildApkCommand extends BuildSubCommand {
     required this._androidBuilder,
     required this._androidContext,
     required this._buildSystem,
-    required ToolContext toolContext,
+    required super.toolContext,
     super.verboseHelp = false,
-  }) : super(logger: toolContext.logger, toolContext: toolContext) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -35,8 +35,8 @@ class BuildApkCommand extends BuildSubCommand {
     ]);
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       _splitPerAbi,
-      _configOnly,
-      _targetPlatform,
+      BuildInfoOptions.configOnly,
+      AndroidBuildOptionsBundle.targetPlatform,
     ]);
   }
 
@@ -46,19 +46,6 @@ class BuildApkCommand extends BuildSubCommand {
     help:
         'Whether to split the APKs per ABIs. '
         'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
-  );
-
-  static const _configOnly = FlagOptionDescriptor(
-    name: 'config-only',
-    help:
-        'Generate build files used by flutter but '
-        'do not build any artifacts.',
-  );
-
-  static const _targetPlatform = MultiOptionDescriptor(
-    name: 'target-platform',
-    allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
-    help: 'The target platform for which the app is compiled.',
   );
 
   final AndroidBuilder _androidBuilder;
@@ -93,7 +80,7 @@ class BuildApkCommand extends BuildSubCommand {
   static const _kDefaultJitArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
   static const _kDefaultAotArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
   List<String> get _targetArchs {
-    final List<String> targetPlatform = getValue(_targetPlatform);
+    final List<String> targetPlatform = getValue(AndroidBuildOptionsBundle.targetPlatform);
     return targetPlatform.isEmpty
         ? switch (_buildMode) {
             BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
@@ -101,9 +88,6 @@ class BuildApkCommand extends BuildSubCommand {
           }
         : targetPlatform;
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   FlutterProject get project =>
@@ -129,7 +113,7 @@ class BuildApkCommand extends BuildSubCommand {
       ? DeprecationBehavior.ignore
       : DeprecationBehavior.exit;
 
-  bool get configOnly => getValue(_configOnly);
+  bool get configOnly => getValue(BuildInfoOptions.configOnly);
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{

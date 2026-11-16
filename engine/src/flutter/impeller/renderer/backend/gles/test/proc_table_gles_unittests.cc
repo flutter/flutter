@@ -59,6 +59,28 @@ TEST(ProcTableGLES, GLES3VertexAttribDivisor) {
   EXPECT_TRUE(mock_gles->GetProcTable().VertexAttribDivisor.IsAvailable());
 }
 
+TEST(ProcTableGLES, GLES2WithoutExtensionsHasNoInstancingProcs) {
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 2.0");
+  EXPECT_UNAVAILABLE(VertexAttribDivisor);
+  EXPECT_UNAVAILABLE(DrawArraysInstanced);
+  EXPECT_UNAVAILABLE(DrawElementsInstanced);
+  EXPECT_UNAVAILABLE(VertexAttribDivisorEXT);
+  EXPECT_UNAVAILABLE(DrawArraysInstancedEXT);
+  EXPECT_UNAVAILABLE(DrawElementsInstancedEXT);
+}
+
+TEST(ProcTableGLES, GLES2WithExtensionsHasOnlyExtInstancingProcs) {
+  const auto extensions = std::vector<const char*>{"GL_EXT_instanced_arrays",
+                                                   "GL_EXT_draw_instanced"};
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  EXPECT_UNAVAILABLE(VertexAttribDivisor);
+  EXPECT_UNAVAILABLE(DrawArraysInstanced);
+  EXPECT_UNAVAILABLE(DrawElementsInstanced);
+  EXPECT_AVAILABLE(VertexAttribDivisorEXT);
+  EXPECT_AVAILABLE(DrawArraysInstancedEXT);
+  EXPECT_AVAILABLE(DrawElementsInstancedEXT);
+}
+
 TEST(GLErrorToString, ReturnsCorrectStringForKnownErrors) {
   EXPECT_EQ(GLErrorToString(GL_NO_ERROR), "GL_NO_ERROR");
   EXPECT_EQ(GLErrorToString(GL_INVALID_ENUM), "GL_INVALID_ENUM");

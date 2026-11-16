@@ -50,7 +50,7 @@ typedef InputCounterWidgetBuilder = Widget? Function(
   required int? maxLength,
 
   /// Whether or not the TextField is currently focused. Mainly provided for
-  /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
+  /// the `liveRegion` parameter in the [Semantics] widget for accessibility.
   required bool isFocused,
 });
 

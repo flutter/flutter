@@ -109,6 +109,7 @@ final List<Replacer> stripMetaPatterns = <Replacer>[
 const Set<String> rootLibraryNames = <String>{'ui_web', 'engine', 'skwasm_stub', 'skwasm_impl'};
 
 final Map<Pattern, String> extraImportsMap = <Pattern, String>{
+  // TODO(srujzs): Migrate to dart.tool.dart2wasm, https://github.com/dart-lang/sdk/issues/61464.
   RegExp('skwasm_(stub|impl)'):
       "import 'dart:_skwasm_impl' if (dart.library.html) 'dart:_skwasm_stub';",
   'ui_web': "import 'dart:ui_web' as ui_web;",

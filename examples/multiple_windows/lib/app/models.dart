@@ -20,6 +20,9 @@ class WindowSettings {
     this.dialogSize = const Size(400, 400),
     this.dialogShrinkWrap = false,
     this.dialogResizable = true,
+    this.satelliteSize = const Size(400, 400),
+    this.satelliteShrinkWrap = false,
+    this.satelliteResizable = true,
     this.positioner = const WindowPositioner(
       parentAnchor: WindowPositionerAnchor.right,
       childAnchor: WindowPositionerAnchor.left,
@@ -46,7 +49,17 @@ class WindowSettings {
   /// If true, dialog windows may be manually resized by the user.
   bool dialogResizable;
 
-  /// The positioner used to determine where new tooltips and popups are placed.
+  /// The initial size of the satellite window.
+  /// Ignored when [satelliteShrinkWrap] is true.
+  Size satelliteSize;
+
+  /// If true, new satellite windows will be sized to fit their content.
+  bool satelliteShrinkWrap;
+
+  /// If true, content-sized satellite windows may be manually resized by the user.
+  bool satelliteResizable;
+
+  /// The positioner used to place tooltips, popups, and new satellite windows.
   WindowPositioner positioner;
 }
 
@@ -79,6 +92,26 @@ class CallbackDialogWindowControllerDelegate with DialogWindowControllerDelegate
   }
 
   final VoidCallback onDestroyed;
+}
+
+class CallbackSatelliteWindowControllerDelegate with SatelliteWindowControllerDelegate {
+  CallbackSatelliteWindowControllerDelegate({required this.onDestroyed});
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+
+  final VoidCallback onDestroyed;
+}
+
+String? validateWindowDimension(String? value) {
+  final double? dimension = double.tryParse(value ?? '');
+  if (dimension == null || !dimension.isFinite || dimension <= 0) {
+    return 'Enter a positive, finite number';
+  }
+  return null;
 }
 
 String anchorToString(WindowPositionerAnchor anchor) {

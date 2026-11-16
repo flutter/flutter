@@ -294,6 +294,86 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
+  testWidgets('default text selection width style', (WidgetTester tester) async {
+    const blue = Color(0xFF2196F3);
+    const grey = Color(0xFF9E9E9E);
+    const black = Color(0xFF000000);
+    const selectionColor = Color(0xFFFFFF00);
+    controller.text = 'a b c\na b c d e f g';
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: null,
+            style: const TextStyle(
+              fontFamily: 'FlutterTest',
+              fontSize: 14.0,
+              color: black,
+              height: 2.0,
+            ),
+            cursorColor: blue,
+            backgroundCursorColor: grey,
+            selectionColor: selectionColor,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    );
+
+    controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(TestWidgetsApp),
+      matchesGoldenFile('editable_text_golden.TextSelectionWidthStyle.1.png'),
+    );
+  }, variant: TargetPlatformVariant.all());
+
+  // Regression test for https://github.com/flutter/flutter/issues/174689.
+  testWidgets('Tight selectionWidthStyle does not expand to a longer next line', (
+    WidgetTester tester,
+  ) async {
+    const backgroundCursorColor = Color(0xFF9E9E9E);
+    const selectionColor = Color(0xFF000000);
+    const fontSize = 10.0;
+    const characterWidth = fontSize; // FlutterTest is a square monospace font.
+    controller.text = 'abc\nabcdefghij';
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: null,
+            selectionWidthStyle: BoxWidthStyle.tight,
+            style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize, height: 1.0),
+            cursorColor: cursorColor,
+            backgroundCursorColor: backgroundCursorColor,
+            selectionColor: selectionColor,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    expect(renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+
+    // Select the first line, including the line feed character. The second line
+    // is longer, but BoxWidthStyle.tight should not expand the highlight to the
+    // second line's width.
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    const expectedSelectionRect = Rect.fromLTRB(0.0, 0.0, 3 * characterWidth, fontSize);
+
+    expect(renderEditable, paints..rect(color: selectionColor, rect: expectedSelectionRect));
+  });
+
   group('Check the passed groupId value', () {
     testWidgets('The value of the passed-in groupId should match the groupId of the EditableText', (
       WidgetTester tester,
@@ -572,7 +652,7 @@ void main() {
     expect(caretXPosition, lessThan(previousCaretXPosition));
 
     expect(state.currentTextEditingValue.text, equals('گیگ '));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/78550.
+  });
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -4141,6 +4221,95 @@ void main() {
       assert(!onEditingCompleteCalled);
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/132047.
+  testWidgets('Dragging selection base handle upwards scrolls the viewport', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'Line 1\n' * 100);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),
+    );
+
+    await tester.tap(find.byType(TestTextField));
+    await tester.pumpAndSettle();
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+
+    // Populate the viewport and scroll to the bottom to prepare for an upward drag.
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, equals(scrollable.position.maxScrollExtent));
+
+    // Establish an initial selection at the end of the text.
+    controller.selection = const TextSelection(baseOffset: 500, extentOffset: 600);
+    await tester.pumpAndSettle();
+
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    // Simulate a drag that moves the base (start) handle toward the beginning
+    // of the text while keeping the extent (end) handle stationary.
+    state.userUpdateTextEditingValue(
+      TextEditingValue(
+        text: 'Line 1\n' * 100,
+        selection: const TextSelection(baseOffset: 0, extentOffset: 600),
+      ),
+      SelectionChangedCause.drag,
+    );
+
+    await tester.pumpAndSettle();
+
+    // The scroll offset updates to follow the dragged handle upwards
+    // instead of locking up or snapping to the opposite end.
+    expect(
+      scrollable.position.pixels,
+      0.0,
+      reason:
+          'The viewport should follow the base handle upwards instead of snapping to the extent.',
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('Mouse drag selection from bottom to top does not snap to extent', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'Line 1\n' * 100);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),
+    );
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+
+    // Scroll to the bottom of the long text.
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, equals(scrollable.position.maxScrollExtent));
+
+    final Finder textField = find.byType(TestTextField);
+
+    // Simulate clicking and holding the mouse at the bottom left of the text field.
+    final TestGesture gesture = await tester.startGesture(
+      tester.getBottomLeft(textField) + const Offset(10, -10),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+
+    // Drag the mouse upwards to the top left of the text field to select text.
+    await gesture.moveTo(tester.getTopLeft(textField) + const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    // The viewport should follow the mouse upwards (offset decreases).
+    // It should not snap back to the bottom (maxScrollExtent).
+    expect(scrollable.position.pixels, lessThan(scrollable.position.maxScrollExtent));
+
+    // Release the mouse click.
+    await gesture.up();
+  });
 
   testWidgets(
     'finalizeEditing should reset the input connection when shouldUnfocus is true but the unfocus is cancelled',

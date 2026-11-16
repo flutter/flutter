@@ -8,7 +8,6 @@
 #include "flutter/fml/build_config.h"
 #include "impeller/entity/advanced_blend.frag.h"
 #include "impeller/entity/advanced_blend.vert.h"
-#include "impeller/entity/border_mask_blur.frag.h"
 #include "impeller/entity/circle.frag.h"
 #include "impeller/entity/circle.vert.h"
 #include "impeller/entity/clip.frag.h"
@@ -63,6 +62,8 @@
 #include "impeller/entity/texture_uv_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/uber_sdf.frag.h"
+#include "impeller/entity/uber_sdf.vert.h"
+#include "impeller/entity/uber_sdf_ssbo.frag.h"
 #include "impeller/entity/vertices_uber_1.frag.h"
 #include "impeller/entity/vertices_uber_2.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
@@ -104,7 +105,6 @@ using BlendOverlayPipeline = AdvancedBlendPipelineHandle;
 using BlendSaturationPipeline = AdvancedBlendPipelineHandle;
 using BlendScreenPipeline = AdvancedBlendPipelineHandle;
 using BlendSoftLightPipeline = AdvancedBlendPipelineHandle;
-using BorderMaskBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, BorderMaskBlurFragmentShader>;
 using CirclePipeline = RenderPipelineHandle<CircleVertexShader, CircleFragmentShader>;
 using ClipPipeline = RenderPipelineHandle<ClipVertexShader, ClipFragmentShader>;
 using ColorMatrixColorFilterPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, ColorMatrixColorFilterFragmentShader>;
@@ -159,7 +159,8 @@ using TextureStrictSrcPipeline = RenderPipelineHandle<TextureFillVertexShader, T
 using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, TiledTextureFillFragmentShader>;
 using VerticesUber1Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber1FragmentShader>;
 using VerticesUber2Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber2FragmentShader>;
-using UberSDFPipeline = RenderPipelineHandle<CircleVertexShader, UberSdfFragmentShader>;
+using UberSDFPipeline = RenderPipelineHandle<UberSdfVertexShader, UberSdfFragmentShader>;
+using UberSDFSSBOPipeline = RenderPipelineHandle<UberSdfVertexShader, UberSdfSsboFragmentShader>;
 using ComplexRSEPipeline = RenderPipelineHandle<CircleVertexShader, ComplexRseFragmentShader>;
 using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, YuvToRgbFilterFragmentShader>;
 // clang-format on

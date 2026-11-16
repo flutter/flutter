@@ -12,7 +12,6 @@ import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
-import com.android.builder.model.BuildType
 import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS
 import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_APPS
 import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
@@ -31,12 +30,12 @@ import io.mockk.verify
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
+import org.gradle.api.plugins.UnknownPluginException
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -382,24 +381,61 @@ class FlutterPluginUtilsTest {
     @Test
     fun `shouldConfigureFlutterTask returns true for assemble task`() {
         val project = mockk<Project>()
-        val assembleTask = mockk<Task>()
 
         every { project.gradle.startParameter.taskNames } returns listOf("assemble")
 
-        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assemble")
         assertEquals(true, result)
     }
 
     @Test
     fun `shouldConfigureFlutterTask returns true when taskname and assembleTask end with Release`() {
         val project = mockk<Project>()
-        val assembleTask = mockk<Task>()
 
         every { project.gradle.startParameter.taskNames } returns listOf("assembleRelease")
-        every { assembleTask.name } returns "assembleSomethingElseRelease"
 
-        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleSomethingElseRelease")
         assertEquals(true, result)
+    }
+
+    @Test
+    fun `shouldConfigureFlutterTask with assembleTaskName string parameter`() {
+        val project = mockk<Project>()
+
+        every { project.gradle.startParameter.taskNames } returns listOf("assembleDebug")
+
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleDebug")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `shouldConfigureFlutterTask returns true when taskname and assembleTask end with Profile`() {
+        val project = mockk<Project>()
+
+        every { project.gradle.startParameter.taskNames } returns listOf("assembleProfile")
+
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleSomethingElseProfile")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `shouldConfigureFlutterTask with assembleTaskName string parameter for Profile`() {
+        val project = mockk<Project>()
+
+        every { project.gradle.startParameter.taskNames } returns listOf("assembleProfile")
+
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleProfile")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `shouldConfigureFlutterTask returns false when taskname is Debug and assembleTask is Profile`() {
+        val project = mockk<Project>()
+
+        every { project.gradle.startParameter.taskNames } returns listOf("assembleDebug")
+
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleSomethingElseProfile")
+        assertEquals(false, result)
     }
 
     // getFlutterSourceDirectory
@@ -498,36 +534,6 @@ class FlutterPluginUtilsTest {
     }
 
     // buildModeFor
-    @Test
-    fun `buildModeFor returns profile if the BuildType has name profile`() {
-        val buildType = mockk<BuildType>()
-        every { buildType.name } returns "profile"
-        every { buildType.isDebuggable } returns false
-
-        val result = FlutterPluginUtils.buildModeFor(buildType)
-        assertEquals("profile", result)
-    }
-
-    @Test
-    fun `buildModeFor returns debug if the BuildType is debuggable`() {
-        val buildType = mockk<BuildType>()
-        every { buildType.name } returns "something random"
-        every { buildType.isDebuggable } returns true
-
-        val result = FlutterPluginUtils.buildModeFor(buildType)
-        assertEquals("debug", result)
-    }
-
-    @Test
-    fun `buildModeFor returns release if the BuildType is not debuggable and not named profile`() {
-        val buildType = mockk<BuildType>()
-        every { buildType.isDebuggable } returns false
-        every { buildType.name } returns "something random"
-
-        val result = FlutterPluginUtils.buildModeFor(buildType)
-        assertEquals("release", result)
-    }
-
     @Test
     fun `buildModeFor with a name and debuggable flag prefers the profile name over debuggability`() {
         assertEquals("profile", FlutterPluginUtils.buildModeFor("profile", isDebuggable = true))
@@ -1117,14 +1123,14 @@ class FlutterPluginUtilsTest {
                 @TempDir tempDir: Path
             ) {
                 val subproject = mockk<Project>()
-                val mockBuildFile = mockk<File>()
+                // A directory exists but cannot be read as text, so readText() throws an
+                // IOException (FileNotFoundException) on every platform. This avoids mocking
+                // java.io.File, whose internal call order differs across JDK versions.
+                val unreadableBuildFile = tempDir.resolve("build.gradle").toFile()
+                assertTrue(unreadableBuildFile.mkdir())
                 val mockLogger = mockk<Logger>(relaxed = true)
 
-                every { subproject.buildFile } returns mockBuildFile
-                every { mockBuildFile.exists() } returns true
-                every { mockBuildFile.absolutePath } returns "/some/path/build.gradle"
-                every { mockBuildFile.extension } returns "gradle"
-                every { mockBuildFile.path } throws IOException("Simulated I/O error")
+                every { subproject.buildFile } returns unreadableBuildFile
                 every { subproject.projectDir } returns tempDir.toFile()
                 every { subproject.logger } returns mockLogger
 
@@ -1133,7 +1139,7 @@ class FlutterPluginUtilsTest {
                 assertNull(result)
                 verify(exactly = 1) {
                     mockLogger.error(
-                        "Failed to read build file: /some/path/build.gradle",
+                        "Failed to read build file: ${unreadableBuildFile.absolutePath}",
                         any<IOException>()
                     )
                 }
@@ -1280,9 +1286,10 @@ class FlutterPluginUtilsTest {
 
             // This AGP version will should match the Flutter create template values.
             // In //packages/flutter_tools/lib/src/android/gradle_utils.dart
-            private val templateAgpVersion = AndroidPluginVersion(9, 1, 0)
+            private val templateAgpVersion = AndroidPluginVersion(9, 3, 1)
 
-            private val errorAgpVersion = DependencyVersionChecker.errorAGPVersion
+            // Any AGP version below 9, which does not support built-in Kotlin.
+            private val agp8Version = AndroidPluginVersion(8, 13, 0)
 
             private fun mockBuiltInKotlinProperty(value: String?) {
                 val mockProvider = mockk<Provider<String>>()
@@ -1316,7 +1323,7 @@ class FlutterPluginUtilsTest {
                 fun `returns false when AGP is less than 9 and builtInKotlin is set to true`() {
                     val subproject = setupProjectWithProperty("true")
 
-                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, errorAgpVersion)
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, agp8Version)
 
                     assertFalse(result)
                 }
@@ -1325,7 +1332,7 @@ class FlutterPluginUtilsTest {
                 fun `returns false when AGP is less than 9 and builtInKotlin is set to TRUE`() {
                     val subproject = setupProjectWithProperty("TRUE")
 
-                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, errorAgpVersion)
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, agp8Version)
 
                     assertFalse(result)
                 }
@@ -1334,7 +1341,7 @@ class FlutterPluginUtilsTest {
                 fun `returns false when AGP is less than 9 and builtInKotlin is set to false`() {
                     val subproject = setupProjectWithProperty("false")
 
-                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, errorAgpVersion)
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, agp8Version)
 
                     assertFalse(result)
                 }
@@ -1343,7 +1350,7 @@ class FlutterPluginUtilsTest {
                 fun `returns false when AGP is less than 9 and builtInKotlin is set to FALSE`() {
                     val subproject = setupProjectWithProperty("FALSE")
 
-                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, errorAgpVersion)
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, agp8Version)
 
                     assertFalse(result)
                 }
@@ -1812,8 +1819,8 @@ class FlutterPluginUtilsTest {
                         val appPluginManager = testProject.appPluginManager
                         val plugin1Manager = testProject.plugin1Manager
 
-                        every { appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-                        every { plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+                        every { appPluginManager.apply("kotlin-android") } throws UnknownPluginException("KGP not on classpath")
+                        every { plugin1Manager.apply("kotlin-android") } throws UnknownPluginException("KGP not on classpath")
 
                         executeDetectApplyingKotlinGradlePlugin(testProject)
 
@@ -1831,6 +1838,36 @@ class FlutterPluginUtilsTest {
                             )
                         }
                     }
+
+                    @Test
+                    fun `propagates a KGP failure that is not a missing plugin`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        declarativelyAppliedPlugins = listOf("com.android.application")
+                                    ),
+                                pluginConfigs = emptyList()
+                            )
+                        val kgpFailure = GradleException("KGP rejected android.newDsl=true")
+                        every { testProject.appPluginManager.apply("kotlin-android") } throws kgpFailure
+
+                        val thrown =
+                            assertThrows<GradleException> {
+                                detectApplyingKotlinGradlePlugin(testProject.appProject)
+                            }
+
+                        assertEquals(kgpFailure, thrown)
+                        verify(exactly = 0) {
+                            mockLogger.quiet(match { it.contains("KGP was not found on the classpath") })
+                        }
+                    }
                 }
 
                 @Nested
@@ -1842,7 +1879,7 @@ class FlutterPluginUtilsTest {
                         val testProject =
                             setupTest(
                                 tempDir = tempDir,
-                                agpVersion = errorAgpVersion,
+                                agpVersion = agp8Version,
                                 builtInKotlin = "false",
                                 appConfig = SubprojectConfig("app", declarativelyAppliedPlugins = listOf("com.android.application")),
                                 pluginConfigs =
@@ -1871,7 +1908,7 @@ class FlutterPluginUtilsTest {
                         val testProject =
                             setupTest(
                                 tempDir = tempDir,
-                                agpVersion = errorAgpVersion,
+                                agpVersion = agp8Version,
                                 builtInKotlin = "false",
                                 appConfig =
                                     SubprojectConfig(
@@ -1905,7 +1942,7 @@ class FlutterPluginUtilsTest {
                         val testProject =
                             setupTest(
                                 tempDir = tempDir,
-                                agpVersion = errorAgpVersion,
+                                agpVersion = agp8Version,
                                 builtInKotlin = "false",
                                 appConfig =
                                     SubprojectConfig(
@@ -1924,8 +1961,8 @@ class FlutterPluginUtilsTest {
                         val appPluginManager = testProject.appPluginManager
                         val plugin1Manager = testProject.plugin1Manager
 
-                        every { appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-                        every { plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+                        every { appPluginManager.apply("kotlin-android") } throws UnknownPluginException("KGP not on classpath")
+                        every { plugin1Manager.apply("kotlin-android") } throws UnknownPluginException("KGP not on classpath")
 
                         executeDetectApplyingKotlinGradlePlugin(testProject)
 

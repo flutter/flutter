@@ -4,6 +4,7 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
@@ -182,6 +183,23 @@ Future<void> testMain() async {
       "fontFeatures: [FontFeature('case', 1)], "
       "fontVariations: [FontVariation('ital', 0.1)]"
       ')',
+    );
+  });
+
+  test('effectiveFontFamilies deduplicates fontFamilyFallback against fontFamily', () {
+    expect(
+      EngineTextStyle(
+        fontFamily: 'Roboto',
+        fontFamilyFallback: const <String>['Roboto', 'Noto Sans'],
+      ).effectiveFontFamilies,
+      const <String>['Roboto', 'Noto Sans'],
+    );
+    expect(
+      const EngineStrutStyle(
+        fontFamily: 'Roboto',
+        fontFamilyFallback: <String>['Roboto'],
+      ).effectiveFontFamilies,
+      const <String>['Roboto'],
     );
   });
 }

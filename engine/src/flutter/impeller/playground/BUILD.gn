@@ -17,6 +17,8 @@ impeller_component("playground") {
     "switches.h",
     "widgets.cc",
     "widgets.h",
+    "yuv_test_textures.cc",
+    "yuv_test_textures.h",
   ]
 
   deps = [
@@ -59,6 +61,7 @@ impeller_component("playground") {
     "//flutter/testing:testing_lib",
     "//flutter/third_party/glfw",
     "//flutter/third_party/imgui:imgui_glfw",
+    "//third_party/abseil-cpp/absl/status:statusor",
   ]
 
   if (impeller_supports_rendering) {
@@ -92,6 +95,34 @@ impeller_component("playground_test") {
   public_deps = [
     ":playground",
     "//flutter/impeller/testing:golden_digest_manager",
+    "//flutter/testing:testing_lib",
+  ]
+}
+
+impeller_component("pipeline_variant_recorder") {
+  testonly = true
+
+  sources = [
+    "pipeline_variant_recorder.cc",
+    "pipeline_variant_recorder.h",
+  ]
+
+  public_deps = [
+    "../entity",
+    "../renderer",
+  ]
+
+  deps = [ "//flutter/fml" ]
+}
+
+impeller_component("pipeline_variant_recorder_unittests") {
+  testonly = true
+
+  sources = [ "pipeline_variant_recorder_unittests.cc" ]
+
+  deps = [
+    ":pipeline_variant_recorder",
+    "../renderer/testing:mocks",
     "//flutter/testing:testing_lib",
   ]
 }

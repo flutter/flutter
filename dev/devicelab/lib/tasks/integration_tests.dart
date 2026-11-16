@@ -102,6 +102,14 @@ TaskFunction createEndToEndKeyboardTest({String? deviceIdOverride}) {
   ).call;
 }
 
+TaskFunction createEndToEndKeyboardInsetJumpTest({String? deviceIdOverride}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/keyboard_inset_jump.dart',
+    deviceIdOverride: deviceIdOverride,
+  ).call;
+}
+
 TaskFunction createEndToEndFrameNumberTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
@@ -239,11 +247,14 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
-TaskFunction createEngineIntegrationGoldenTest() {
+TaskFunction createEngineIntegrationGoldenTest({String? maxD3DFeatureLevel}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/engine_integration_golden_test',
     'integration_test/engine_integration_golden_test.dart',
     createPlatforms: <String>['windows'],
+    environment: <String, String>{
+      if (maxD3DFeatureLevel != null) 'FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL': maxD3DFeatureLevel,
+    },
   ).call;
 }
 
