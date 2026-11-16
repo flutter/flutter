@@ -62,7 +62,6 @@ executable("flutter_shell_native_unittests") {
   deps = [
     ":flutter_shell_native_src",
     "//flutter/fml",
-    "//flutter/impeller/renderer/testing:mocks",
     "//flutter/shell/platform/android/jni:jni_mock",
     "//flutter/shell/platform/android/jni:mock_jni_env",
     "//flutter/third_party/googletest:gmock",

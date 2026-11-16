@@ -1251,12 +1251,28 @@ class ErrorHandlingProcessManager extends ProcessManager {
       environmentResult[suppressKey] = (!analytics.okToSend).toString();
     }
 
-    // Propagate the parent tool identifier down to the spawned process.
-    final String? parentTool = _platform.environment[DashEnvVar.tool.name];
+    // Propagate the root tool identifier down to the spawned process.
+    //
+    // This matches how `package:unified_analytics` resolves the root tool for
+    // this process (`DASH__TOOL` if it names a tool that can be a root tool,
+    // otherwise this tool), so the sub-tool reports the same root tool as this
+    // process. An invalid label or a shared component (for example
+    // `analysis-server`) is never passed on, and a caller-supplied value is
+    // ignored.
     environmentResult[DashEnvVar.tool.name] =
-        parentTool ?? environmentResult[DashEnvVar.tool.name] ?? DashTool.flutterTool.label;
+        _asRootToolLabel(_platform.environment[DashEnvVar.tool.name]) ?? DashTool.flutterTool.label;
 
     return environmentResult;
+  }
+
+  /// Returns [label] if it names a [DashTool] that can be a root tool, or
+  /// `null` otherwise.
+  static String? _asRootToolLabel(String? label) {
+    if (label == null) {
+      return null;
+    }
+    final DashTool? tool = DashTool.values.where((DashTool t) => t.label == label).firstOrNull;
+    return (tool?.canBeRootTool ?? false) ? label : null;
   }
 
   @override
