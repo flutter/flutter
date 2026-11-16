@@ -63,17 +63,26 @@ else
   ENGINE_VERSION=$("$FLUTTER_ROOT/bin/internal/content_aware_hash.sh")
 fi
 
+# Writes $2 to $1 via a PID-scoped temporary file and atomic mv when $1 does not
+# exist or its contents have changed, preventing race conditions and redundant
+# writes during parallel flutter executions.
+write_cache_file_if_changed() {
+  local target="$1"
+  local value="${2%$'\r'}"
+  if [ -f "$target" ]; then
+    local existing
+    if existing="$(cat "$target" 2>/dev/null)" && [ "${existing%$'\r'}" = "$value" ]; then
+      return 0
+    fi
+  fi
+  local tmp="$target.tmp.$$"
+  trap "rm -f '$tmp'" EXIT
+  echo "$value" >"$tmp" && mv "$tmp" "$target"
+  trap - EXIT
+}
+
 # Write the engine version out so downstream tools know what to look for.
-# Use a temporary file and atomic mv to prevent race conditions during parallel flutter executions.
-pid=$$
-es_tmp="$FLUTTER_ROOT/bin/cache/engine.stamp.tmp.$pid"
-trap 'rm -f "$es_tmp"' EXIT
-echo "$ENGINE_VERSION" >"$es_tmp" && mv "$es_tmp" "$FLUTTER_ROOT/bin/cache/engine.stamp"
-trap - EXIT
+write_cache_file_if_changed "$FLUTTER_ROOT/bin/cache/engine.stamp" "$ENGINE_VERSION"
 
 # The realm on CI is passed in.
-if [ -n "${FLUTTER_REALM}" ]; then
-  echo "$FLUTTER_REALM" >"$FLUTTER_ROOT/bin/cache/engine.realm"
-else
-  echo "" >"$FLUTTER_ROOT/bin/cache/engine.realm"
-fi
+write_cache_file_if_changed "$FLUTTER_ROOT/bin/cache/engine.realm" "${FLUTTER_REALM:-}"

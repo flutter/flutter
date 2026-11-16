@@ -62,34 +62,46 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
   $engineVersion = Invoke-Expression "& '$flutterRoot/bin/internal/content_aware_hash.ps1'"
 }
 
-# Write the engine version out so downstream tools know what to look for.
-# Use a temporary file and a retry logic to minimize chances of a race condition during
-# parallel flutter executions.
-$esTmp = "$flutterRoot/bin/cache/engine.stamp.tmp.$PID"
-try {
-    Set-Content -Path $esTmp -Value $engineVersion -Encoding Ascii
-    $retryCount = 0
-    while ($true) {
+# Writes $Value to $Path via a PID-scoped temporary file and atomic Move-Item
+# retry loop when $Path does not exist or its contents have changed, minimizing
+# file-lock contention during parallel flutter executions.
+function Write-CacheFileIfChanged([string]$Path, [string]$Value) {
+    if (Test-Path -Path $Path) {
         try {
-            Move-Item -Path $esTmp -Destination "$flutterRoot/bin/cache/engine.stamp" -Force
-            break
-        } catch {
-            if ($retryCount -ge 2) {
-                throw
+            $existing = [string](Get-Content -Path $Path -Raw)
+            if ($existing.TrimEnd() -ceq $Value.TrimEnd()) {
+                return
             }
-            $retryCount++
-            Start-Sleep -Milliseconds 50
+        } catch {
+            # Fall through and rewrite atomically if reading collided with a concurrent move.
         }
     }
-} finally {
-    if (Test-Path -Path $esTmp) {
-        Remove-Item -Path $esTmp -Force -ErrorAction SilentlyContinue
+    $tmpPath = "$Path.tmp.$PID"
+    try {
+        Set-Content -Path $tmpPath -Value $Value -Encoding Ascii
+        $retryCount = 0
+        while ($true) {
+            try {
+                Move-Item -Path $tmpPath -Destination $Path -Force
+                break
+            } catch {
+                if ($retryCount -ge 2) {
+                    throw
+                }
+                $retryCount++
+                Start-Sleep -Milliseconds 50
+            }
+        }
+    } finally {
+        if (Test-Path -Path $tmpPath) {
+            Remove-Item -Path $tmpPath -Force -ErrorAction SilentlyContinue
+        }
     }
 }
 
+# Write the engine version out so downstream tools know what to look for.
+Write-CacheFileIfChanged "$flutterRoot/bin/cache/engine.stamp" $engineVersion
+
 # The realm on CI is passed in.
-if ($env:FLUTTER_REALM) {
-    Set-Content -Path $flutterRoot/bin/cache/engine.realm -Value $env:FLUTTER_REALM -Encoding Ascii
-} else {
-    Set-Content -Path $flutterRoot/bin/cache/engine.realm -Value "" -Encoding Ascii
-}
+$engineRealm = if ($env:FLUTTER_REALM) { $env:FLUTTER_REALM } else { "" }
+Write-CacheFileIfChanged "$flutterRoot/bin/cache/engine.realm" $engineRealm
