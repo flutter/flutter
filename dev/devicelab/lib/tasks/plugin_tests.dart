@@ -38,6 +38,7 @@ class PluginTest {
     this.dartOnlyPlugin = false,
     this.template = 'plugin',
     this.cocoapodsTransitiveFlutterDependency = false,
+    this.testPlugin = true,
   });
 
   final String buildTarget;
@@ -47,6 +48,9 @@ class PluginTest {
   final bool dartOnlyPlugin;
   final String template;
   final bool cocoapodsTransitiveFlutterDependency;
+
+  /// Whether to test the plugin itself before building the app that uses it.
+  final bool testPlugin;
 
   Future<TaskResult> call() async {
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
@@ -67,18 +71,20 @@ class PluginTest {
       if (dartOnlyPlugin) {
         await plugin.convertDefaultPluginToDartPlugin();
       }
-      section('Test plugin');
-      if (runFlutterTest) {
-        await plugin.runFlutterTest();
-        if (!dartOnlyPlugin) {
-          await plugin.example.runNativeTests(buildTarget);
-          if (buildTarget == 'ios') {
-            var runResult = false;
-            await testWithNewIOSSimulator('TestPluginExample', (String deviceId) async {
-              runResult = await plugin.example.runApp(options: <String>['-d', deviceId]);
-            });
-            if (!runResult) {
-              return TaskResult.failure('flutter run either failed or had an engine error.');
+      if (testPlugin) {
+        section('Test plugin');
+        if (runFlutterTest) {
+          await plugin.runFlutterTest();
+          if (!dartOnlyPlugin) {
+            await plugin.example.runNativeTests(buildTarget);
+            if (buildTarget == 'ios') {
+              var runResult = false;
+              await testWithNewIOSSimulator('TestPluginExample', (String deviceId) async {
+                runResult = await plugin.example.runApp(options: <String>['-d', deviceId]);
+              });
+              if (!runResult) {
+                return TaskResult.failure('flutter run either failed or had an engine error.');
+              }
             }
           }
         }
@@ -236,8 +242,16 @@ class $dartPluginClass {
 
   Future<void> runNativeTests(String buildTarget) async {
     // Native unit tests rely on building the app first to generate necessary
-    // build files.
-    await build(buildTarget, validateNativeBuildProject: false, buildMode: 'debug');
+    // build files. xcodebuild and Gradle compile the app themselves, so only
+    // generate the project configuration. Linux and Windows run a test binary
+    // from the build directory and need the full build.
+    final bool needsFullBuild = buildTarget == 'linux' || buildTarget == 'windows';
+    await build(
+      buildTarget,
+      validateNativeBuildProject: false,
+      configOnly: !needsFullBuild,
+      buildMode: 'debug',
+    );
 
     switch (buildTarget) {
       case 'apk':

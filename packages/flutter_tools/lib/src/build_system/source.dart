@@ -45,7 +45,10 @@ class SourceVisitor implements ResolvedFiles {
   final bool inputs;
 
   /// The current project.
-  late final FlutterProject _project = FlutterProject.fromDirectory(environment.projectDir);
+  late final FlutterProject _project = FlutterProject.fromDirectory(
+    environment.projectDir,
+    logger: environment.logger,
+  );
 
   @override
   final sources = <File>[];

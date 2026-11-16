@@ -232,6 +232,10 @@ class TextureGLES final : public Texture,
 
   void InitializeContentsIfNecessary();
 
+  // Makes the current context wait for the fence set by `SetFence`, if any,
+  // then clears it.
+  void WaitForFence();
+
   // Allocates storage for `(slice, mip_level)` if it has not been allocated
   // yet, so the subresource can be attached to a framebuffer. Returns false on
   // failure.

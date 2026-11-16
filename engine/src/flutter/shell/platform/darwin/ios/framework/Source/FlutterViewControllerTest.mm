@@ -1415,6 +1415,33 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerifyAll(mockVC);
 }
 
+- (void)testViewDidLayoutSubviewsUpdatesEngineDisplays {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+
+  // Layout is when the view may have moved to a different screen (e.g. between the inner and outer
+  // displays of a device with multiple built-in displays).
+  OCMExpect([mockEngine updateDisplays]);
+  [viewController viewDidLayoutSubviews];
+  OCMVerifyAll((id)mockEngine);
+}
+
+- (void)testViewDidLayoutSubviewsDoesNotUpdateEngineDisplaysWhenNotEngineViewController {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  mockEngine.viewController = nil;
+
+  OCMReject([mockEngine updateDisplays]);
+  [viewController viewDidLayoutSubviews];
+  OCMVerifyAll((id)mockEngine);
+}
+
 - (void)testUpdateViewportMetricsIfNeeded_DoesNotInvokeEngineWhenShouldBeIgnoredDuringRotation {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];

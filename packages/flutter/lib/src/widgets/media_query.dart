@@ -283,9 +283,11 @@ class MediaQueryData {
   ///  * [WidgetsBindingObserver.didChangeTextScaleFactor] or
   ///    [dart:ui.PlatformDispatcher.onTextScaleFactorChanged],
   ///  * [WidgetsBindingObserver.didChangePlatformBrightness] or
-  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
+  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged],
+  ///  * [WidgetsBindingObserver.didChangeAlwaysUse24HourFormat] or
+  ///    [dart:ui.PlatformDispatcher.onAlwaysUse24HourFormatChanged].
   ///
-  /// The last three notifications are only relevant if no `platformData` is
+  /// The last four notifications are only relevant if no `platformData` is
   /// provided. If `platformData` is provided, callers should ensure to call
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
@@ -295,12 +297,30 @@ class MediaQueryData {
   /// constructor is primarily for use in the implementation of the framework
   /// itself.
   ///
+  /// A [debugViewMetricsOverrides] entry for `view` is applied by the view and
+  /// its [PlatformDispatcher], so it reaches this constructor only through
+  /// what they report: its geometry always, and its platform-wide values only
+  /// when `platformData` does not supply them. An ancestor [MediaQuery] that
+  /// does supply them is not overridden, just as it is not overridden by the
+  /// real platform settings.
+  ///
   /// See also:
   ///
   ///  * [MediaQuery.fromView], which constructs [MediaQueryData] from a provided
   ///    [FlutterView], makes it available to descendant widgets, and sets up
   ///    the appropriate notification listeners to keep the data updated.
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
+    : this._fromView(
+        kDebugMode ? debugViewWithMetricsOverrides(view) : view,
+        platformData: platformData,
+      );
+
+  // A hop, so that everything below reads the view that applies the
+  // [debugViewMetricsOverrides] entry registered for `view`: in debug mode, a
+  // view read straight from a PlatformDispatcher the framework wrapped applies
+  // none of its own, and the one [debugViewWithMetricsOverrides] returns for it
+  // does.
+  MediaQueryData._fromView(ui.FlutterView view, {required MediaQueryData? platformData})
     : size = view.physicalSize / view.devicePixelRatio,
       devicePixelRatio = view.devicePixelRatio,
       _textScaleFactor = 1.0, // _textScaler is the source of truth.
@@ -2475,6 +2495,17 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     // have a parent, we get our platform brightness from the PlatformDispatcher
     // and need to update our data in response to the PlatformDispatcher
     // changing its platform brightness setting.
+    if (_parentData == null) {
+      _updateData();
+    }
+  }
+
+  @override
+  void didChangeAlwaysUse24HourFormat() {
+    // If we have a parent, it dictates our 24-hour format preference. If we don't
+    // have a parent, we get our 24-hour format preference from the PlatformDispatcher
+    // and need to update our data in response to the PlatformDispatcher changing
+    // its 24-hour format preference.
     if (_parentData == null) {
       _updateData();
     }

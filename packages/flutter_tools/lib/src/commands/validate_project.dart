@@ -26,14 +26,11 @@ class ValidateProject {
   final bool verbose;
 
   Future<FlutterCommandResult> run() async {
-    final ToolContext(
-      fs: FileSystem fileSystem,
-      :Logger logger,
-      :FlutterProjectFactory projectFactory,
-    ) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        _toolContext;
     final Directory workingDirectory = userPath.isEmpty
-        ? fileSystem.currentDirectory
-        : fileSystem.directory(userPath);
+        ? fs.currentDirectory
+        : fs.directory(userPath);
 
     final FlutterProject project = projectFactory.fromDirectory(workingDirectory);
     final results = <ProjectValidator, Future<List<ProjectValidatorResult>>>{};

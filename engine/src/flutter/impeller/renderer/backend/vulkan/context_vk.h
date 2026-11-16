@@ -5,9 +5,9 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 
-#include <format>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
@@ -30,6 +30,7 @@
 #include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/context.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -90,6 +91,10 @@ class ContextVK final : public Context,
     std::vector<std::shared_ptr<fml::Mapping>> shader_libraries_data;
     fml::UniqueFD cache_directory;
     bool enable_validation = false;
+    /// If validations are enabled, also enable the synchronization validation
+    /// feature of the validation layers. This detects missing or incorrect
+    /// barriers but adds significant CPU overhead.
+    bool enable_sync_validation = false;
     bool enable_gpu_tracing = false;
     bool enable_surface_control = false;
     /// If validations are requested but cannot be enabled, log a fatal error.
@@ -194,7 +199,7 @@ class ContextVK final : public Context,
       // No-op if validation layers are not enabled.
       return true;
     }
-    std::string combined = std::format("{} {}", label, trailing);
+    std::string combined = absl::StrCat(label, " ", trailing);
     return SetDebugName(GetDevice(), handle, combined);
   }
 

@@ -11,12 +11,14 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
+import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets.dart'
+    show copyNativeCodeAssetsMacOS, copyNativeCodeAssetsMacOSFlutterTester;
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart'
     show cCompilerConfigMacOS;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -24,6 +26,7 @@ import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -83,7 +86,23 @@ void main() {
         overrides: <Type, Generator>{
           FeatureFlags: () =>
               TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
-          ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        },
+        () async {
+          if (const LocalPlatform().isWindows) {
+            return; // Backslashes in commands, but we will never run these commands on Windows.
+          }
+          if (flutterTester && !const LocalPlatform().isMacOS) {
+            // The [runFlutterSpecificDartBuild] will - when given
+            // `TargetPlatform.tester` - enable `flutter test` mode. That means if
+            // this test is run on linux, it's going to do a linux build.
+            // Though this test is mac-specific, so we skip that.
+            //
+            // Running the test in `!flutterTester` mode still works on linux as
+            // we explicitly tell it to do a mac build (instead of letting it
+            // choose the local build).
+            return;
+          }
+          processManager = FakeProcessManager.list(<FakeCommand>[
             if (flutterTester) ...<FakeCommand>[
               FakeCommand(
                 command: <Pattern>[
@@ -281,23 +300,7 @@ void main() {
                 ],
               ),
             ],
-          ]),
-        },
-        () async {
-          if (const LocalPlatform().isWindows) {
-            return; // Backslashes in commands, but we will never run these commands on Windows.
-          }
-          if (flutterTester && !const LocalPlatform().isMacOS) {
-            // The [runFlutterSpecificDartBuild] will - when given
-            // `TargetPlatform.tester` - enable `flutter test` mode. That means if
-            // this test is run on linux, it's going to do a linux build.
-            // Though this test is mac-specific, so we skip that.
-            //
-            // Running the test in `!flutterTester` mode still works on linux as
-            // we explicitly tell it to do a mac build (instead of letting it
-            // choose the local build).
-            return;
-          }
+          ]);
           final File packageConfig = environment.projectDir.childFile(
             '.dart_tool/package_config.json',
           );
@@ -346,6 +349,8 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            featureFlags: featureFlags,
+            logger: logger,
             buildRunner: buildRunner,
             buildCodeAssets: BuildCodeAssetsOptions(
               appBuildDirectory: fileSystem.directory(projectUri),
@@ -365,6 +370,8 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            logger: logger,
+            processManager: processManager,
             nativeAssetsFileUri: nativeAssetsFileUri,
             targetUri: projectUri.resolve(
               '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/macos/',
@@ -374,7 +381,7 @@ void main() {
               ? (isArm64 ? 'macos_arm64' : 'macos_x64')
               : 'macos_arm64, macos_x64';
           expect(
-            (globals.logger as BufferLogger).traceText,
+            logger.traceText,
             stringContainsInOrder(<String>[
               'Running build hooks for $expectedArchsBeingBuilt.',
               'Running build hooks for $expectedArchsBeingBuilt done.',
@@ -416,6 +423,8 @@ void main() {
           // Multi arch.
           expect(buildRunner.buildInvocations, flutterTester ? 1 : 2);
           expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
+          // Every install name fit, so there is nothing to warn about.
+          expect(logger.warningText, isEmpty);
 
           if (!flutterTester) {
             // Not running on the host system, so the code asset has been turned into a framework.
@@ -435,13 +444,247 @@ void main() {
     }
   }
 
+  group('install name that does not fit', () {
+    const doesNotFit =
+        "error: install_name_tool: changing install names or rpaths can't be redone for: "
+        '/build/native_assets/macos/libbar.dylib (for architecture arm64) because larger '
+        'updated load commands do not fit (the program must be relinked, and you may need '
+        'to use -headerpad or -headerpad_max_install_names)';
+
+    FlutterCodeAsset codeAsset(String name) => FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: name,
+        name: '$name.dart',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('arm64/lib$name.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.arm64,
+    );
+
+    testWithoutContext(
+      'flutter tester keeps the install name of a dylib without header room for its path',
+      () async {
+        if (const LocalPlatform().isWindows) {
+          return; // Backslashes in commands, but we will never run these commands on Windows.
+        }
+        const barPath = '/build/native_assets/macos/libbar.dylib';
+        const buzPath = '/build/native_assets/macos/libbuz.dylib';
+        const changeDependencies = <String>[
+          '-change',
+          '@rpath/libbuz.dylib',
+          buzPath,
+          '-change',
+          '@rpath/libbar.dylib',
+          barPath,
+        ];
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['xcrun', 'lipo', '-create', '-output', buzPath, 'arm64/libbuz.dylib'],
+          ),
+          const FakeCommand(
+            command: <String>['xcrun', 'otool', '-D', buzPath],
+            stdout: '$buzPath (architecture arm64):\n@rpath/libbuz.dylib',
+          ),
+          const FakeCommand(
+            command: <String>['xcrun', 'lipo', '-create', '-output', barPath, 'arm64/libbar.dylib'],
+          ),
+          const FakeCommand(
+            command: <String>['xcrun', 'otool', '-D', barPath],
+            stdout: '$barPath (architecture arm64):\n@rpath/libbar.dylib',
+          ),
+          // libbuz has room, and references libbar by its path.
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'install_name_tool',
+              '-id',
+              buzPath,
+              ...changeDependencies,
+              buzPath,
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              '--timestamp=none',
+              buzPath,
+            ],
+          ),
+          // libbar has no room for its path, so it keeps its install name and
+          // only its dependencies are changed.
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'install_name_tool',
+              '-id',
+              barPath,
+              ...changeDependencies,
+              barPath,
+            ],
+            exitCode: 1,
+            stderr: doesNotFit,
+          ),
+          const FakeCommand(
+            command: <String>['xcrun', 'install_name_tool', ...changeDependencies, barPath],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              '--timestamp=none',
+              barPath,
+            ],
+          ),
+        ]);
+
+        final List<File> installedFiles = await copyNativeCodeAssetsMacOSFlutterTester(
+          Uri.directory('/build/native_assets/macos/'),
+          <Uri, List<FlutterCodeAsset>>{
+            Uri.file('libbuz.dylib'): <FlutterCodeAsset>[codeAsset('buz')],
+            Uri.file('libbar.dylib'): <FlutterCodeAsset>[codeAsset('bar')],
+          },
+          null,
+          BuildMode.debug,
+          fileSystem,
+          logger: logger,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+        );
+
+        expect(installedFiles.map((File file) => file.path), <String>[buzPath, barPath]);
+        expect(processManager, hasNoRemainingExpectations);
+        expect(
+          logger.warningText,
+          allOf(
+            contains(
+              'Code asset "package:bar/bar.dart" keeps its install name "@rpath/libbar.dylib"',
+            ),
+            contains('-headerpad_max_install_names'),
+            isNot(contains('package:buz/buz.dart')),
+          ),
+        );
+        expect('package:bar/bar.dart'.allMatches(logger.warningText), hasLength(1));
+        // The asset loads, so `--fatal-warnings` must not fail the run.
+        expect(logger.hadWarningOutput, isFalse);
+      },
+    );
+
+    testWithoutContext('flutter tester does not keep the install name through a symlink', () async {
+      if (const LocalPlatform().isWindows) {
+        return; // Backslashes in commands, but we will never run these commands on Windows.
+      }
+      // The build directory is a symlink: a dylib replaced under a running tester would
+      // load as a second copy if it kept its install name.
+      fileSystem.directory('/real_build/native_assets/macos').createSync(recursive: true);
+      fileSystem.link('/linked_build').createSync('/real_build');
+      const barPath = '/linked_build/native_assets/macos/libbar.dylib';
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['xcrun', 'lipo', '-create', '-output', barPath, 'arm64/libbar.dylib'],
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'otool', '-D', barPath],
+          stdout: '$barPath (architecture arm64):\n@rpath/libbar.dylib',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'install_name_tool',
+            '-id',
+            barPath,
+            '-change',
+            '@rpath/libbar.dylib',
+            barPath,
+            barPath,
+          ],
+          exitCode: 1,
+          stderr: doesNotFit,
+        ),
+      ]);
+
+      await expectLater(
+        copyNativeCodeAssetsMacOSFlutterTester(
+          Uri.directory('/linked_build/native_assets/macos/'),
+          <Uri, List<FlutterCodeAsset>>{
+            Uri.file('libbar.dylib'): <FlutterCodeAsset>[codeAsset('bar')],
+          },
+          null,
+          BuildMode.debug,
+          fileSystem,
+          logger: logger,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+        ),
+        throwsToolExit(message: 'larger updated load commands do not fit'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+      expect(logger.warningText, isEmpty);
+    });
+
+    testWithoutContext('app builds still fail when the install name does not fit', () async {
+      if (const LocalPlatform().isWindows) {
+        return; // Backslashes in commands, but we will never run these commands on Windows.
+      }
+      const barPath = '/build/native_assets/macos/bar.framework/Versions/A/bar';
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['xcrun', 'lipo', '-create', '-output', barPath, 'arm64/libbar.dylib'],
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'otool', '-D', barPath],
+          stdout: '$barPath (architecture arm64):\n@rpath/libbar.dylib',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'install_name_tool',
+            '-id',
+            '@rpath/bar.framework/bar',
+            '-change',
+            '@rpath/libbar.dylib',
+            '@rpath/bar.framework/bar',
+            barPath,
+          ],
+          exitCode: 1,
+          stderr: doesNotFit,
+        ),
+      ]);
+
+      await expectLater(
+        copyNativeCodeAssetsMacOS(
+          Uri.directory('/build/native_assets/macos/'),
+          <Uri, List<FlutterCodeAsset>>{
+            Uri.file('bar.framework/bar'): <FlutterCodeAsset>[codeAsset('bar')],
+          },
+          null,
+          BuildMode.debug,
+          fileSystem,
+          logger: logger,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+        ),
+        throwsToolExit(message: 'larger updated load commands do not fit'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+      expect(logger.warningText, isEmpty);
+    });
+  });
+
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig normal installation',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig normal installation', () async {
+    if (!const LocalPlatform().isMacOS) {
+      return;
+    }
+
+    final processUtils = ProcessUtils(
+      processManager: FakeProcessManager.list(<FakeCommand>[
         for (final binary in <String>['clang', 'ar', 'ld'])
           FakeCommand(
             command: <Pattern>['xcrun', '--find', binary],
@@ -451,61 +694,63 @@ void main() {
 ''', // NOTE: explicitly test needing to trim new line
           ),
       ]),
-    },
-    () async {
-      if (!const LocalPlatform().isMacOS) {
-        return;
-      }
+      logger: logger,
+    );
+    final CCompilerConfig result = (await cCompilerConfigMacOS(
+      processUtils: processUtils,
+      throwIfNotFound: true,
+    ))!;
+    expect(
+      result.compiler,
+      Uri.file(
+        '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang',
+      ),
+    );
+    expect(
+      result.archiver,
+      Uri.file(
+        '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar',
+      ),
+    );
+    expect(
+      result.linker,
+      Uri.file(
+        '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld',
+      ),
+    );
+  });
 
-      final CCompilerConfig result = (await cCompilerConfigMacOS(throwIfNotFound: true))!;
-      expect(
-        result.compiler,
-        Uri.file(
-          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang',
-        ),
-      );
-      expect(
-        result.archiver,
-        Uri.file(
-          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar',
-        ),
-      );
-      expect(
-        result.linker,
-        Uri.file(
-          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld',
-        ),
-      );
-    },
-  );
+  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig Nix installation', () async {
+    if (!const LocalPlatform().isMacOS) {
+      return;
+    }
 
-  testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig Nix installation',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+    final processUtils = ProcessUtils(
+      processManager: FakeProcessManager.list(<FakeCommand>[
         for (final binary in <String>['clang', 'ar', 'ld'])
           FakeCommand(
             command: <Pattern>['xcrun', '--find', binary],
             stdout: '/nix/store/random-path-to-clang-wrapper/bin/$binary',
           ),
       ]),
-    },
-    () async {
-      if (!const LocalPlatform().isMacOS) {
-        return;
-      }
+      logger: logger,
+    );
+    final CCompilerConfig result = (await cCompilerConfigMacOS(
+      processUtils: processUtils,
+      throwIfNotFound: true,
+    ))!;
+    expect(result.compiler, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/clang'));
+    expect(result.archiver, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ar'));
+    expect(result.linker, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ld'));
+  });
 
-      final CCompilerConfig result = (await cCompilerConfigMacOS(throwIfNotFound: true))!;
-      expect(result.compiler, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/clang'));
-      expect(result.archiver, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ar'));
-      expect(result.linker, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ld'));
-    },
-  );
+  testWithoutContext('missing xcode when required', () async {
+    if (!const LocalPlatform().isMacOS) {
+      return;
+    }
 
-  testUsingContext(
-    'missing xcode when required',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+    final processUtils = ProcessUtils(
+      processManager: FakeProcessManager.list(<FakeCommand>[
         for (final binary in <String>['clang', 'ar', 'ld'])
           FakeCommand(
             command: <Pattern>['xcrun', '--find', binary],
@@ -513,20 +758,21 @@ void main() {
             stderr: 'not found',
           ),
       ]),
-    },
-    () async {
-      if (!const LocalPlatform().isMacOS) {
-        return;
-      }
+      logger: logger,
+    );
+    await expectLater(
+      cCompilerConfigMacOS(processUtils: processUtils, throwIfNotFound: true),
+      throwsA(isA<ToolExit>()),
+    );
+  });
 
-      await expectLater(cCompilerConfigMacOS(throwIfNotFound: true), throwsA(isA<ToolExit>()));
-    },
-  );
+  testWithoutContext('missing xcode when not required', () async {
+    if (!const LocalPlatform().isMacOS) {
+      return;
+    }
 
-  testUsingContext(
-    'missing xcode when not required',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+    final processUtils = ProcessUtils(
+      processManager: FakeProcessManager.list(<FakeCommand>[
         for (final binary in <String>['clang', 'ar', 'ld'])
           FakeCommand(
             command: <Pattern>['xcrun', '--find', binary],
@@ -534,13 +780,8 @@ void main() {
             stderr: 'not found',
           ),
       ]),
-    },
-    () async {
-      if (!const LocalPlatform().isMacOS) {
-        return;
-      }
-
-      expect(await cCompilerConfigMacOS(throwIfNotFound: false), isNull);
-    },
-  );
+      logger: logger,
+    );
+    expect(await cCompilerConfigMacOS(processUtils: processUtils, throwIfNotFound: false), isNull);
+  });
 }
