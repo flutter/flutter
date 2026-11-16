@@ -125,6 +125,7 @@ android {
     result = processManager.runSync(<String>[
       exampleAndroidDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').path,
       ':app:assembleStaging',
+      '-Ptarget-platform=android-arm',
     ], workingDirectory: exampleAndroidDir.path);
     if (result.exitCode != 0) {
       throw Exception(
