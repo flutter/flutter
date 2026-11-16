@@ -103,6 +103,11 @@ struct _FlEngine {
   // engine threads and GTK.
   GMutex renderables_mutex;
 
+  // Presentation references awaiting release on the GTK thread. Protected by
+  // renderables_mutex, including the source that drains them.
+  GList* renderables_to_release;
+  GSource* renderables_release_source;
+
   // Function to call when a platform message is received.
   FlEnginePlatformMessageHandler platform_message_handler;
   gpointer platform_message_handler_data;
@@ -392,6 +397,53 @@ static bool compositor_collect_backing_store_callback(
   }
 }
 
+// Release presentation references only on the GTK thread. Shutdown also calls
+// this after joining the raster thread, since the main loop may have stopped.
+static void release_renderables(FlEngine* self) {
+  g_assert(self->thread == g_thread_self());
+
+  GList* renderables;
+  {
+    g_autoptr(GMutexLocker) locker =
+        g_mutex_locker_new(&self->renderables_mutex);
+    if (self->renderables_release_source != nullptr) {
+      g_source_destroy(self->renderables_release_source);
+      g_clear_pointer(&self->renderables_release_source, g_source_unref);
+    }
+    renderables = g_steal_pointer(&self->renderables_to_release);
+  }
+
+  // Dropping a view can dispose the engine, so do not hold the mutex here.
+  g_list_free_full(renderables, g_object_unref);
+}
+
+static gboolean release_renderables_cb(gpointer user_data) {
+  // A view may own the last engine reference. Keep the engine alive while
+  // releasing the batch, without making the queued source own the engine.
+  g_autoptr(FlEngine) self = FL_ENGINE(g_object_ref(user_data));
+  release_renderables(self);
+  return G_SOURCE_REMOVE;
+}
+
+// Takes ownership of the callback's reference. Even a disposed GtkWidget still
+// has GTK/CSS state that must be finalized on the GTK thread.
+static void queue_renderable_release(FlEngine* self, FlRenderable* renderable) {
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->renderables_mutex);
+  self->renderables_to_release =
+      g_list_prepend(self->renderables_to_release, renderable);
+  if (self->renderables_release_source == nullptr) {
+    // Explicitly attach a source: g_main_context_invoke() can run inline on
+    // the raster thread when the main context is unowned. A destroy notifier
+    // likewise provides no thread-affinity guarantee.
+    self->renderables_release_source = g_idle_source_new();
+    g_source_set_name(self->renderables_release_source,
+                      "FlEngine::release_renderables");
+    g_source_set_callback(self->renderables_release_source,
+                          release_renderables_cb, self, nullptr);
+    g_source_attach(self->renderables_release_source, nullptr);
+  }
+}
+
 // Called when embedder should composite contents of each layer onto the screen.
 static bool compositor_present_view_callback(
     const FlutterPresentViewInfo* info) {
@@ -403,6 +455,7 @@ static bool compositor_present_view_callback(
   }
 
   fl_renderable_present_layers(renderable, info->layers, info->layers_count);
+  queue_renderable_release(self, g_steal_pointer(&renderable));
   return true;
 }
 
@@ -599,6 +652,11 @@ static void fl_engine_dispose(GObject* object) {
     self->engine = nullptr;
   }
 
+  // Shutdown has finished all compositor callbacks. Cancel the idle and drain
+  // its references here on GTK main, without requiring another loop iteration
+  // or relying on source destruction to release thread-affine objects.
+  release_renderables(self);
+
   if (self->aot_data != nullptr) {
     if (self->embedder_api.CollectAOTData(self->aot_data) != kSuccess) {
       g_warning("Failed to send collect AOT data");
@@ -631,8 +689,6 @@ static void fl_engine_dispose(GObject* object) {
         g_mutex_locker_new(&self->renderables_mutex);
     g_clear_pointer(&self->renderables_by_view_id, g_hash_table_unref);
   }
-  g_mutex_clear(&self->renderables_mutex);
-
   if (self->platform_message_handler_destroy_notify) {
     self->platform_message_handler_destroy_notify(
         self->platform_message_handler_data);
@@ -643,8 +699,15 @@ static void fl_engine_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_engine_parent_class)->dispose(object);
 }
 
+static void fl_engine_finalize(GObject* object) {
+  FlEngine* self = FL_ENGINE(object);
+  g_mutex_clear(&self->renderables_mutex);
+  G_OBJECT_CLASS(fl_engine_parent_class)->finalize(object);
+}
+
 static void fl_engine_class_init(FlEngineClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_engine_dispose;
+  G_OBJECT_CLASS(klass)->finalize = fl_engine_finalize;
   G_OBJECT_CLASS(klass)->set_property = fl_engine_set_property;
 
   g_object_class_install_property(

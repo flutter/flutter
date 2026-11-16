@@ -15,6 +15,8 @@
 #include <thread>
 #include <utility>
 
+#include "flutter/common/constants.h"
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_renderable.h"
@@ -78,6 +80,61 @@ class CompositionBarrier {
 // Only the explicitly selected raster thread intercepts Cairo. The actual
 // compositor and actual Cairo operation still run, rather than a fake present.
 thread_local CompositionBarrier* cairo_barrier = nullptr;
+
+bool Present(const FlutterCompositor& compositor,
+             const FlutterLayer** layers,
+             size_t layers_count) {
+  FlutterPresentViewInfo info = {};
+  info.struct_size = sizeof(FlutterPresentViewInfo);
+  info.view_id = flutter::kFlutterImplicitViewId;
+  info.layers = layers;
+  info.layers_count = layers_count;
+  info.user_data = compositor.user_data;
+  return compositor.present_view_callback(&info);
+}
+
+class PresentationBarrier;
+thread_local PresentationBarrier* presentation_barrier = nullptr;
+
+// Pause after the production compositor callback has acquired its view, then
+// run the actual FlView implementation after GTK has destroyed that view.
+class PresentationBarrier {
+ public:
+  explicit PresentationBarrier(FlView* view) {
+    iface_ = FL_RENDERABLE_GET_IFACE(view);
+    present_layers_ = iface_->present_layers;
+    iface_->present_layers = [](FlRenderable* renderable,
+                                const FlutterLayer** layers,
+                                size_t layers_count) {
+      PresentationBarrier* self = presentation_barrier;
+      self->barrier_.Enter();
+      self->present_layers_(renderable, layers, layers_count);
+    };
+  }
+
+  ~PresentationBarrier() {
+    ReleaseAndJoin();
+    iface_->present_layers = present_layers_;
+  }
+
+  void Start(const FlutterCompositor& compositor,
+             const FlutterLayer** layers,
+             size_t layers_count) {
+    barrier_.Start([this, compositor, layers, layers_count] {
+      presentation_barrier = this;
+      EXPECT_TRUE(Present(compositor, layers, layers_count));
+      presentation_barrier = nullptr;
+    });
+  }
+
+  bool WaitForEntry() { return barrier_.WaitForEntry(); }
+  void ReleaseAndJoin() { barrier_.ReleaseAndJoin(); }
+
+ private:
+  FlRenderableInterface* iface_;
+  decltype(FlRenderableInterface::present_layers) present_layers_;
+  CompositionBarrier barrier_;
+};
 
 struct Finalization {
   std::atomic<int> count{0};
@@ -189,6 +246,49 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
         flutter::testing::fl_has_received_gtk_log_level(G_LOG_LEVEL_CRITICAL));
   }
 
+  FlView* CreateView() {
+    FlView* view = fl_view_new(project);
+    g_object_ref_sink(view);
+    g_clear_object(&engine);
+    engine = FL_ENGINE(g_object_ref(fl_view_get_engine(view)));
+    FlutterEngineProcTable* api = fl_engine_get_embedder_api(engine);
+    // Capture the real production callback without replacing its ownership
+    // logic, and keep the mock embedder's valid engine handle for Shutdown.
+    api->Initialize = MOCK_ENGINE_PROC(
+        Initialize, ([this, initialize = api->Initialize](
+                         size_t version, const FlutterRendererConfig* config,
+                         const FlutterProjectArgs* args, void* user_data,
+                         FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+          compositor = *args->compositor;
+          return initialize(version, config, args, user_data, engine_out);
+        }));
+    // The legacy mock never completes RemoveView, leaking its GTask and engine.
+    api->RemoveView = MOCK_ENGINE_PROC(
+        RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
+          FlutterRemoveViewResult result = {};
+          result.struct_size = sizeof(FlutterRemoveViewResult);
+          result.removed = true;
+          result.user_data = info->user_data;
+          info->remove_view_callback(&result);
+          return kSuccess;
+        }));
+    return view;
+  }
+
+  void InitializeStyle(GtkWidget* widget, Finalization& finalization) {
+    GtkStyleContext* context = gtk_widget_get_style_context(widget);
+    GdkRGBA color;
+    gtk_style_context_add_class(context, "flutter-lifetime-test");
+    gtk_style_context_get_color(context, GTK_STATE_FLAG_NORMAL, &color);
+    finalization.Watch(context);
+  }
+
+  // An unrealized renderer (or one whose GL realization failed) drops the frame
+  // without queuing a renderer-owning idle. Only the engine callback owns view.
+  void TestNoRedraw(bool fail_realize, bool zero_layers, bool shutdown);
+  void TestComposite(bool unrealize_before_present);
+
+  FlutterCompositor compositor = {};
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   ::testing::NiceMock<flutter::testing::MockGtk> gtk;
 };
@@ -267,11 +367,8 @@ TEST_F(FlViewRendererLifetimeTest, SoftwareDisposeDuringComposite) {
   ExpectNoCritical();
 }
 
-TEST_F(FlViewRendererLifetimeTest, ViewOwnsRendererDuringComposite) {
-  FlView* view = fl_view_new(project);
-  g_object_ref_sink(view);
-  g_autoptr(FlEngine) retained_engine =
-      FL_ENGINE(g_object_ref(fl_view_get_engine(view)));
+void FlViewRendererLifetimeTest::TestComposite(bool unrealize_before_present) {
+  FlView* view = CreateView();
   GtkWidget* window = Realize(GTK_WIDGET(view));
   GtkWidget* renderer = FindRenderer(GTK_WIDGET(view));
   ASSERT_NE(renderer, nullptr);
@@ -279,8 +376,15 @@ TEST_F(FlViewRendererLifetimeTest, ViewOwnsRendererDuringComposite) {
   ASSERT_TRUE(gtk_widget_get_realized(renderer));
   Finalization view_finalization;
   Finalization renderer_finalization;
+  Finalization view_style_finalization;
+  Finalization renderer_style_finalization;
+  Finalization engine_finalization;
   view_finalization.Watch(view);
   renderer_finalization.Watch(renderer);
+  engine_finalization.Watch(engine);
+  InitializeStyle(GTK_WIDGET(view), view_style_finalization);
+  InitializeStyle(renderer, renderer_style_finalization);
+  ASSERT_NE(compositor.present_view_callback, nullptr);
   int first_frames = 0;
   g_signal_connect(view, "first-frame",
                    G_CALLBACK(+[](FlView*, int* count) { ++*count; }),
@@ -289,60 +393,190 @@ TEST_F(FlViewRendererLifetimeTest, ViewOwnsRendererDuringComposite) {
   const FlutterLayer* layers[] = {&frame.layer};
   CompositionBarrier barrier;
   ExpectReadback(barrier);
+  if (unrealize_before_present) {
+    gtk_widget_unrealize(GTK_WIDGET(view));
+    EXPECT_FALSE(gtk_widget_get_realized(renderer));
+  }
   std::atomic<bool> completed{false};
-  // Match the engine callback: the raster thread owns only a view reference.
-  // It must not independently retain renderer and conceal broken ownership.
-  FlView* raster_view = FL_VIEW(g_object_ref(view));
+  // The production callback must acquire and hand off the view reference.
+  // No test-owned reference may conceal broken engine ownership.
   flutter::testing::fl_reset_received_gtk_log_levels();
-  barrier.Start([&, raster_view] {
-    fl_renderable_present_layers(FL_RENDERABLE(raster_view), layers, 1);
+  barrier.Start([&] {
+    EXPECT_TRUE(Present(compositor, layers, 1));
     completed = true;
-    g_object_unref(raster_view);
   });
   EXPECT_TRUE(barrier.WaitForEntry());
   fl_gtk_widget_destroy(GTK_WIDGET(view));
+  EXPECT_EQ(g_signal_handler_find(renderer, G_SIGNAL_MATCH_DATA, 0, 0, nullptr,
+                                  nullptr, view),
+            0u);
   g_object_unref(view);
   EXPECT_EQ(view_finalization.count, 0);
   EXPECT_EQ(renderer_finalization.count, 0);
   barrier.ReleaseAndJoin();
   EXPECT_TRUE(completed);
-  EXPECT_EQ(view_finalization.count, 1);
+  EXPECT_EQ(view_finalization.count, 0);
+  EXPECT_EQ(renderer_finalization.count, 0);
+  EXPECT_EQ(view_style_finalization.count, 0);
+  EXPECT_EQ(renderer_style_finalization.count, 0);
   DrainIdles();
+  EXPECT_EQ(view_finalization.count, 1);
   EXPECT_EQ(renderer_finalization.count, 1);
+  EXPECT_EQ(view_style_finalization.count, 1);
+  EXPECT_EQ(renderer_style_finalization.count, 1);
   EXPECT_EQ(first_frames, 0);
+  EXPECT_EQ(view_finalization.thread, std::this_thread::get_id());
   EXPECT_EQ(renderer_finalization.thread, std::this_thread::get_id());
+  EXPECT_EQ(view_style_finalization.thread, std::this_thread::get_id());
+  EXPECT_EQ(renderer_style_finalization.thread, std::this_thread::get_id());
   fl_gtk_widget_destroy(window);
+  g_clear_object(&engine);
+  EXPECT_EQ(engine_finalization.count, 1);
+  EXPECT_EQ(engine_finalization.thread, std::this_thread::get_id());
   ExpectNoCritical();
 }
 
-// No idle is scheduled for the early-drop path. Record which thread releases
-// the last view/renderer reference rather than assuming GTK always does so.
-TEST_F(FlViewRendererLifetimeTest, ViewEarlyDropFinalizationThread) {
-  FlView* view = fl_view_new(project);
-  g_object_ref_sink(view);
+TEST_F(FlViewRendererLifetimeTest, ViewOwnsRendererDuringComposite) {
+  TestComposite(/*unrealize_before_present=*/false);
+}
+
+TEST_F(FlViewRendererLifetimeTest, ViewAfterUnrealizeFinalizationOnMain) {
+  TestComposite(/*unrealize_before_present=*/true);
+}
+
+void FlViewRendererLifetimeTest::TestNoRedraw(bool fail_realize,
+                                              bool zero_layers,
+                                              bool shutdown) {
+  FlView* view = CreateView();
   GtkWidget* renderer = FindRenderer(GTK_WIDGET(view));
   ASSERT_NE(renderer, nullptr);
+  ASSERT_TRUE(FL_IS_VIEW_RENDERER_OPENGL(renderer));
+  GtkWidget* window = nullptr;
+  if (fail_realize) {
+    ON_CALL(gtk, gdk_gl_context_realize)
+        .WillByDefault([](GdkGLContext*, GError** error) {
+          g_set_error_literal(error, GDK_GL_ERROR, GDK_GL_ERROR_NOT_AVAILABLE,
+                              "Test context realization failure");
+          return FALSE;
+        });
+    window = Realize(GTK_WIDGET(view));
+    EXPECT_TRUE(gtk_widget_get_realized(renderer));
+  } else {
+    StartEngine();
+    EXPECT_FALSE(gtk_widget_get_realized(renderer));
+  }
+  ASSERT_NE(compositor.present_view_callback, nullptr);
   Finalization view_finalization;
   Finalization renderer_finalization;
+  Finalization view_style_finalization;
+  Finalization renderer_style_finalization;
+  Finalization engine_finalization;
   view_finalization.Watch(view);
   renderer_finalization.Watch(renderer);
-  FlView* raster_view = FL_VIEW(g_object_ref(view));
+  engine_finalization.Watch(engine);
+  InitializeStyle(GTK_WIDGET(view), view_style_finalization);
+  InitializeStyle(renderer, renderer_style_finalization);
+  int first_frames = 0;
+  g_signal_connect(view, "first-frame",
+                   G_CALLBACK(+[](FlView*, int* count) { ++*count; }),
+                   &first_frames);
+  OpenGLLayer frame;
+  const FlutterLayer* layers[] = {&frame.layer};
+  PresentationBarrier barrier(view);
+  flutter::testing::fl_reset_received_gtk_log_levels();
+  // Leave the default context unowned while raster runs. An invoke[_full]
+  // implementation would inline the unref and fail the pre-drain assertions.
+  EXPECT_FALSE(g_main_context_is_owner(g_main_context_default()));
+  barrier.Start(compositor, zero_layers ? nullptr : layers,
+                zero_layers ? 0 : 1);
+  EXPECT_TRUE(barrier.WaitForEntry());
   fl_gtk_widget_destroy(GTK_WIDGET(view));
+  EXPECT_EQ(g_signal_handler_find(renderer, G_SIGNAL_MATCH_DATA, 0, 0, nullptr,
+                                  nullptr, view),
+            0u);
   g_object_unref(view);
-  // Retaining only the view must retain the renderer even without a queued
-  // redraw or a GTK container reference.
+  EXPECT_EQ(view_finalization.count, 0);
   EXPECT_EQ(renderer_finalization.count, 0);
-  std::thread::id raster_id;
-  std::thread raster([&] {
-    raster_id = std::this_thread::get_id();
-    fl_renderable_present_layers(FL_RENDERABLE(raster_view), nullptr, 0);
-    g_object_unref(raster_view);
-  });
-  raster.join();
+  auto expect_pending_release = [&] {
+    EXPECT_EQ(view_finalization.count, 0);
+    EXPECT_EQ(renderer_finalization.count, 0);
+    EXPECT_EQ(view_style_finalization.count, 0);
+    EXPECT_EQ(renderer_style_finalization.count, 0);
+    // This path must not be rescued by a successful renderer redraw idle.
+    EXPECT_EQ(g_main_context_find_source_by_user_data(nullptr, renderer),
+              nullptr);
+  };
+  if (shutdown) {
+    // Model Shutdown joining an in-flight raster callback. It queues its final
+    // reference while GTK main is synchronously shutting down, with no further
+    // main-loop iterations available to release it.
+    GSource* release_source = nullptr;
+    bool shutdown_called = false;
+    FlutterEngineProcTable* api = fl_engine_get_embedder_api(engine);
+    api->Shutdown = MOCK_ENGINE_PROC(
+        Shutdown, ([&, original_shutdown = api->Shutdown](auto handle) {
+          shutdown_called = true;
+          barrier.ReleaseAndJoin();
+          expect_pending_release();
+          release_source =
+              g_main_context_find_source_by_user_data(nullptr, engine);
+          EXPECT_NE(release_source, nullptr);
+          if (release_source != nullptr) {
+            g_source_ref(release_source);
+          }
+          return original_shutdown(handle);
+        }));
+    g_object_run_dispose(G_OBJECT(engine));
+    EXPECT_TRUE(shutdown_called);
+    if (release_source != nullptr) {
+      EXPECT_TRUE(g_source_is_destroyed(release_source));
+      g_source_unref(release_source);
+    }
+  } else {
+    barrier.ReleaseAndJoin();
+    expect_pending_release();
+    DrainIdles();
+  }
   EXPECT_EQ(view_finalization.count, 1);
   EXPECT_EQ(renderer_finalization.count, 1);
-  EXPECT_EQ(view_finalization.thread, raster_id);
-  EXPECT_EQ(renderer_finalization.thread, raster_id);
+  EXPECT_EQ(view_style_finalization.count, 1);
+  EXPECT_EQ(renderer_style_finalization.count, 1);
+  EXPECT_EQ(view_finalization.thread, std::this_thread::get_id());
+  EXPECT_EQ(renderer_finalization.thread, std::this_thread::get_id());
+  EXPECT_EQ(view_style_finalization.thread, std::this_thread::get_id());
+  EXPECT_EQ(renderer_style_finalization.thread, std::this_thread::get_id());
+  DrainIdles();
+  EXPECT_EQ(view_finalization.count, 1);
+  EXPECT_EQ(renderer_finalization.count, 1);
+  EXPECT_EQ(first_frames, 0);
+  if (window != nullptr) {
+    fl_gtk_widget_destroy(window);
+  }
+  g_clear_object(&engine);
+  EXPECT_EQ(engine_finalization.count, 1);
+  EXPECT_EQ(engine_finalization.thread, std::this_thread::get_id());
+  ExpectNoCritical();
+}
+
+// The previous early-drop test explicitly expected raster finalization. The
+// actual engine callback must now defer both widgets and their CSS state.
+TEST_F(FlViewRendererLifetimeTest, ViewEarlyDropFinalizationOnMain) {
+  TestNoRedraw(/*fail_realize=*/false, /*zero_layers=*/true,
+               /*shutdown=*/false);
+}
+
+TEST_F(FlViewRendererLifetimeTest, ViewEarlyDropWithLayersFinalizationOnMain) {
+  TestNoRedraw(/*fail_realize=*/false, /*zero_layers=*/false,
+               /*shutdown=*/false);
+}
+
+TEST_F(FlViewRendererLifetimeTest, ViewFailedRealizeFinalizationOnMain) {
+  TestNoRedraw(/*fail_realize=*/true, /*zero_layers=*/false,
+               /*shutdown=*/false);
+}
+
+TEST_F(FlViewRendererLifetimeTest, ViewEarlyDropDrainedDuringShutdown) {
+  TestNoRedraw(/*fail_realize=*/false, /*zero_layers=*/true, /*shutdown=*/true);
 }
 
 TEST_F(FlViewRendererLifetimeTest, SubsurfaceManagerBeforeRealizeIsReleased) {

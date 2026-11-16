@@ -6,6 +6,8 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+#include <thread>
+
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
@@ -20,6 +22,72 @@
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 class FlEngineTest : public flutter::testing::LinuxTest {};
+
+// Cancelling a source on raster must not release its GTK-affine references.
+// Engine shutdown must still drain them without running the main loop again.
+TEST_F(FlEngineTest, CancelledPresentationReleaseDrainedDuringShutdown) {
+  FlutterCompositor compositor = {};
+  FlutterEngineProcTable* api = fl_engine_get_embedder_api(engine);
+  api->Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&compositor, initialize = api->Initialize](
+                       size_t version, const FlutterRendererConfig* config,
+                       const FlutterProjectArgs* args, void* user_data,
+                       FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        compositor = *args->compositor;
+        return initialize(version, config, args, user_data, engine_out);
+      }));
+  StartEngine();
+  ASSERT_NE(compositor.present_view_callback, nullptr);
+
+  FlMockRenderable* renderable = fl_mock_renderable_new();
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
+  struct Finalization {
+    int count = 0;
+    std::thread::id thread;
+  } finalization;
+  GQuark key = g_quark_from_static_string("flutter-presentation-finalization");
+  // Weak notifications can fire at dispose; qdata observes final release.
+  g_object_set_qdata_full(
+      G_OBJECT(renderable), key, &finalization, [](gpointer data) {
+        auto* observation = static_cast<Finalization*>(data);
+        observation->thread = std::this_thread::get_id();
+        observation->count++;
+      });
+
+  GSource* release_source = nullptr;
+  std::thread raster([&] {
+    FlutterPresentViewInfo info = {};
+    info.struct_size = sizeof(FlutterPresentViewInfo);
+    info.view_id = 0;
+    info.user_data = compositor.user_data;
+    // Multiple callback references share one pending drain.
+    EXPECT_TRUE(compositor.present_view_callback(&info));
+    EXPECT_TRUE(compositor.present_view_callback(&info));
+    release_source = g_main_context_find_source_by_user_data(nullptr, engine);
+    EXPECT_NE(release_source, nullptr);
+    if (release_source != nullptr) {
+      g_source_ref(release_source);
+      g_source_destroy(release_source);
+    }
+  });
+  raster.join();
+  g_object_unref(renderable);
+  EXPECT_EQ(finalization.count, 0);
+
+  g_object_run_dispose(G_OBJECT(engine));
+  EXPECT_EQ(finalization.count, 1);
+  EXPECT_EQ(finalization.thread, std::this_thread::get_id());
+  // Repeated dispose must neither double-unref nor clear a live mutex twice.
+  g_object_run_dispose(G_OBJECT(engine));
+  EXPECT_EQ(finalization.count, 1);
+  if (release_source != nullptr) {
+    EXPECT_TRUE(g_source_is_destroyed(release_source));
+    g_source_unref(release_source);
+  }
+  if (finalization.count == 0) {
+    g_object_steal_qdata(G_OBJECT(renderable), key);
+  }
+}
 
 // Checks notifying display updates works.
 TEST_F(FlEngineTest, NotifyDisplayUpdate) {
