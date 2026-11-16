@@ -4,6 +4,7 @@
 
 assert(is_linux)
 
+import("//build/toolchain/clang.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
@@ -341,6 +342,46 @@ executable("flutter_linux_unittests") {
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
   ]
+}
+
+# These tests use ELF --wrap on calls between the embedding's source files.
+# LTO can inline those calls and bypass the barriers. Keep the real embedding
+# and its callers in separate translation units by building without LTO.
+if (!enable_lto) {
+  executable("flutter_linux_wayland_unittests") {
+    testonly = true
+
+    sources = [ "fl_view_renderer_wayland_lifetime_test.cc" ]
+
+    public_configs = [ "//flutter:config" ]
+    configs += [
+      "//flutter/shell/platform/linux/config:gtk",
+      "//flutter/shell/platform/linux/config:epoxy",
+      "//flutter/shell/platform/linux/config:wayland_client",
+      "//flutter/shell/platform/linux/config:wayland_egl",
+    ]
+    defines = [
+      "FLUTTER_ENGINE_NO_PROTOTYPES",
+      "FLUTTER_LINUX_COMPILATION",
+    ]
+    ldflags = [
+      "-Wl,--wrap=fl_compositor_opengl_composite_layers",
+      "-Wl,--wrap=fl_compositor_opengl_can_fence",
+      "-Wl,--wrap=fl_gl_fence_new",
+      "-Wl,--wrap=fl_opengl_manager_make_current",
+      "-Wl,--wrap=fl_subsurface_egl_new",
+      "-Wl,--wrap=fl_subsurface_egl_present",
+      "-Wl,--wrap=fl_task_runner_stop_wait",
+      "-Wl,--wrap=fl_wayland_display_create_subsurface",
+    ]
+
+    # In particular, do not link linux_test.cc or testing/mock_*.cc. This
+    # executable must connect to the compositor through real GTK and Wayland.
+    deps = [
+      ":flutter_linux",
+      "//flutter/testing",
+    ]
+  }
 }
 
 shared_library("flutter_linux_gtk") {

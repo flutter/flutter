@@ -287,6 +287,11 @@ group("unittests") {
       if (is_linux) {
         public_deps +=
             [ "//flutter/shell/platform/linux:flutter_linux_unittests" ]
+        if (!enable_lto) {
+          public_deps += [
+            "//flutter/shell/platform/linux:flutter_linux_wayland_unittests",
+          ]
+        }
         if (build_glfw_shell) {
           public_deps +=
               [ "//flutter/shell/platform/glfw:flutter_glfw_unittests" ]
