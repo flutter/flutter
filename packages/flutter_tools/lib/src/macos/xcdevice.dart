@@ -12,21 +12,24 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../ios/core_devices.dart';
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
 import '../ios/iproxy.dart';
 import '../ios/mac.dart';
+import '../ios/plist_parser.dart';
 import '../ios/xcode_debug.dart';
+import '../ios/xcodeproj.dart';
+import 'cocoapods.dart';
 import 'xcode.dart';
 
 class XCDeviceEventNotification {
@@ -51,60 +54,47 @@ enum XCDeviceEventInterface {
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
   XCDevice({
-    required Artifacts artifacts,
-    required Cache cache,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Xcode xcode,
-    required Platform platform,
-    required IProxy iproxy,
-    required FileSystem fileSystem,
     required this._analytics,
-    required ShutdownHooks shutdownHooks,
+    required this._cocoaPods,
+    required IProxy iproxy,
+    required this._plistParser,
+    required this._templateRenderer,
+    required this._toolContext,
+    required this._xcode,
+    required this._xcodeProjectInterpreter,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
-  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _logger = logger,
-       _iMobileDevice = IMobileDevice(
-         artifacts: artifacts,
-         cache: cache,
-         logger: logger,
-         processManager: processManager,
-       ),
-       _iosDeploy = IOSDeploy(
-         artifacts: artifacts,
-         cache: cache,
-         logger: logger,
-         platform: platform,
-         processManager: processManager,
-       ),
-       _coreDeviceControl =
-           coreDeviceControl ??
-           IOSCoreDeviceControl(
-             logger: logger,
-             processManager: processManager,
-             xcode: xcode,
-             fileSystem: fileSystem,
-           ),
-       _xcodeDebug =
-           xcodeDebug ??
-           XcodeDebug(
-             logger: logger,
-             processManager: processManager,
-             xcode: xcode,
-             fileSystem: fileSystem,
-           ),
-       _iProxy = iproxy,
-       _xcode = xcode {
+  }) : _iProxy = iproxy {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+    ) = _toolContext;
+    _iMobileDevice = IMobileDevice(
+      artifacts: artifacts,
+      cache: cache,
+      logger: logger,
+      processManager: processManager,
+    );
+    _iosDeploy = IOSDeploy(toolContext: _toolContext);
+    _coreDeviceControl =
+        coreDeviceControl ?? IOSCoreDeviceControl(toolContext: _toolContext, xcode: _xcode);
+    _xcodeDebug =
+        xcodeDebug ??
+        XcodeDebug(logger: logger, processManager: processManager, xcode: _xcode, fileSystem: fs);
     shutdownHooks.addShutdownHook(dispose);
-
-    _setupDeviceIdentifierByEventStream();
   }
 
   Completer<void>? _cancelWirelessDiscoveryCompleter;
+  final _activeObserveDisposers = <void Function()>{};
 
   void dispose() {
-    _stopObservingTetheredIOSDevices();
+    for (final void Function() stop in _activeObserveDisposers.toList()) {
+      stop();
+    }
     _usbDeviceWaitProcess?.kill();
     _wifiDeviceWaitProcess?.kill();
   }
@@ -116,21 +106,20 @@ class XCDevice {
     }
   }
 
-  final ProcessUtils _processUtils;
-  final Logger _logger;
-  final IMobileDevice _iMobileDevice;
-  final IOSDeploy _iosDeploy;
+  late final IMobileDevice _iMobileDevice;
+  late final IOSDeploy _iosDeploy;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final IProxy _iProxy;
-  final IOSCoreDeviceControl _coreDeviceControl;
-  final XcodeDebug _xcodeDebug;
+  late final IOSCoreDeviceControl _coreDeviceControl;
+  late final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
+  final PlistParser _plistParser;
+  final TemplateRenderer _templateRenderer;
+  final ToolContext _toolContext;
 
   List<Object>? _cachedListResults;
-
-  Process? _usbDeviceObserveProcess;
-  Process? _wifiDeviceObserveProcess;
-  StreamController<XCDeviceEventNotification>? _observeStreamController;
 
   @visibleForTesting
   StreamController<XCDeviceEventNotification>? waitStreamController;
@@ -138,20 +127,12 @@ class XCDevice {
   Process? _usbDeviceWaitProcess;
   Process? _wifiDeviceWaitProcess;
 
-  void _setupDeviceIdentifierByEventStream() {
-    // _observeStreamController Should always be available for listeners
-    // in case polling needs to be stopped and restarted.
-    _observeStreamController = StreamController<XCDeviceEventNotification>.broadcast(
-      onListen: _startObservingTetheredIOSDevices,
-      onCancel: _stopObservingTetheredIOSDevices,
-    );
-  }
-
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck;
 
   Future<List<Object>?> _getAllDevices({bool useCache = false, required Duration timeout}) async {
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!isInstalled) {
-      _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
+      logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
     }
     if (useCache && _cachedListResults != null) {
@@ -159,7 +140,7 @@ class XCDevice {
     }
     try {
       // USB-tethered devices should be found quickly. 1 second timeout is faster than the default.
-      final RunResult result = await _processUtils.run(<String>[
+      final RunResult result = await processUtils.run(<String>[
         ..._xcode.xcrunCommand(),
         'xcdevice',
         'list',
@@ -169,24 +150,22 @@ class XCDevice {
       if (result.exitCode == 0) {
         final String listOutput = result.stdout;
         try {
-          if (json.decode(result.stdout) case final List<Object?> decoded) {
-            final List<Object> listResults = decoded.whereType<Object>().toList();
-            _cachedListResults = listResults;
-            return listResults;
-          }
-          _logger.printTrace('xcdevice returned unexpected JSON response: $listOutput');
-          return null;
+          final List<Object> listResults = (json.decode(result.stdout) as List<Object?>)
+              .whereType<Object>()
+              .toList();
+          _cachedListResults = listResults;
+          return listResults;
         } on FormatException {
           // xcdevice logs errors and crashes to stdout.
-          _logger.printError('xcdevice returned non-JSON response: $listOutput');
+          logger.printError('xcdevice returned non-JSON response: $listOutput');
           return null;
         }
       }
-      _logger.printTrace('xcdevice returned an error:\n${result.stderr}');
+      logger.printTrace('xcdevice returned an error:\n${result.stderr}');
     } on ProcessException catch (exception) {
-      _logger.printTrace('Process exception running xcdevice list:\n$exception');
+      logger.printTrace('Process exception running xcdevice list:\n$exception');
     } on ArgumentError catch (exception) {
-      _logger.printTrace('Argument exception running xcdevice list:\n$exception');
+      logger.printTrace('Argument exception running xcdevice list:\n$exception');
     }
 
     return null;
@@ -197,11 +176,96 @@ class XCDevice {
   /// Each attach and detach event contains information on the event type,
   /// the event interface, and the device identifier.
   Stream<XCDeviceEventNotification>? observedDeviceEvents() {
+    final Logger logger = _toolContext.logger;
     if (!isInstalled) {
-      _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
+      logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
     }
-    return _observeStreamController?.stream;
+
+    var canceled = false;
+    Process? usbProcess;
+    Process? wifiProcess;
+    late final StreamController<XCDeviceEventNotification> controller;
+
+    void stop() {
+      if (canceled) {
+        return;
+      }
+      canceled = true;
+      _activeObserveDisposers.remove(stop);
+      // xcdevice observe is running in an interactive shell.
+      // Signal script child jobs to exit and exit the shell.
+      // See https://linux.die.net/Bash-Beginners-Guide/sect_12_01.html#sect_12_01_01_02.
+      if (usbProcess case final Process process) {
+        ProcessSignal.sighup.kill(process);
+      }
+      if (wifiProcess case final Process process) {
+        ProcessSignal.sighup.kill(process);
+      }
+    }
+
+    controller = StreamController<XCDeviceEventNotification>(
+      onListen: () async {
+        _activeObserveDisposers.add(stop);
+        try {
+          void handleEvent(XCDeviceEventNotification event) {
+            if (!canceled && !controller.isClosed) {
+              controller.add(event);
+            }
+          }
+
+          final Process startedUsbProcess = await _startObserveProcess(
+            XCDeviceEventInterface.usb,
+            onEvent: handleEvent,
+          );
+          if (canceled) {
+            ProcessSignal.sighup.kill(startedUsbProcess);
+            return;
+          }
+          usbProcess = startedUsbProcess;
+
+          final Process startedWifiProcess = await _startObserveProcess(
+            XCDeviceEventInterface.wifi,
+            onEvent: handleEvent,
+          );
+          if (canceled) {
+            ProcessSignal.sighup.kill(startedUsbProcess);
+            ProcessSignal.sighup.kill(startedWifiProcess);
+            return;
+          }
+          wifiProcess = startedWifiProcess;
+
+          final Future<void> usbProcessExited = startedUsbProcess.exitCode.then((int status) {
+            logger.printTrace('xcdevice observe --usb exited with code $exitCode');
+            // Kill other process in case only one was killed.
+            ProcessSignal.sighup.kill(startedWifiProcess);
+          });
+          final Future<void> wifiProcessExited = startedWifiProcess.exitCode.then((int status) {
+            logger.printTrace('xcdevice observe --wifi exited with code $exitCode');
+            // Kill other process in case only one was killed.
+            ProcessSignal.sighup.kill(startedUsbProcess);
+          });
+
+          await Future.wait<void>(<Future<void>>[usbProcessExited, wifiProcessExited]);
+          if (!canceled && !controller.isClosed) {
+            // Tell listener the process died.
+            await controller.close();
+          }
+        } on ProcessException catch (exception, stackTrace) {
+          if (!canceled && !controller.isClosed) {
+            controller.addError(exception, stackTrace);
+          }
+        } on ArgumentError catch (exception, stackTrace) {
+          if (!canceled && !controller.isClosed) {
+            controller.addError(exception, stackTrace);
+          }
+        } finally {
+          stop();
+        }
+      },
+      onCancel: stop,
+    );
+    return controller.stream;
   }
 
   // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
@@ -209,71 +273,10 @@ class XCDevice {
   // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
   final _observationIdentifierPattern = RegExp(r'^(\w*): ([\w-]*)$');
 
-  var _observeAttemptId = 0;
-
-  Future<void> _startObservingTetheredIOSDevices() async {
-    final int attemptId = ++_observeAttemptId;
-    try {
-      final Process usbProcess = await _startObserveProcess(XCDeviceEventInterface.usb);
-      if (_observeAttemptId != attemptId) {
-        ProcessSignal.sighup.kill(usbProcess);
-        return;
-      }
-      _usbDeviceObserveProcess = usbProcess;
-
-      final Process wifiProcess = await _startObserveProcess(XCDeviceEventInterface.wifi);
-      if (_observeAttemptId != attemptId) {
-        ProcessSignal.sighup.kill(usbProcess);
-        ProcessSignal.sighup.kill(wifiProcess);
-        return;
-      }
-      _wifiDeviceObserveProcess = wifiProcess;
-
-      final Future<void> usbProcessExited = usbProcess.exitCode.then((int status) {
-        _logger.printTrace('xcdevice observe --usb exited with code $exitCode');
-        // Kill other process in case only one was killed.
-        ProcessSignal.sighup.kill(wifiProcess);
-      });
-
-      final Future<void> wifiProcessExited = wifiProcess.exitCode.then((int status) {
-        _logger.printTrace('xcdevice observe --wifi exited with code $exitCode');
-        // Kill other process in case only one was killed.
-        ProcessSignal.sighup.kill(usbProcess);
-      });
-
-      unawaited(
-        Future.wait(<Future<void>>[usbProcessExited, wifiProcessExited]).whenComplete(() async {
-          if (_observeAttemptId != attemptId) {
-            return;
-          }
-          _usbDeviceObserveProcess = null;
-          _wifiDeviceObserveProcess = null;
-
-          final StreamController<XCDeviceEventNotification>? controller = _observeStreamController;
-          // Reopen it so new listeners can resume polling.
-          _setupDeviceIdentifierByEventStream();
-
-          if (controller != null && controller.hasListener) {
-            // Tell listeners the process died.
-            controller.onCancel = null;
-            await controller.close();
-          }
-        }),
-      );
-    } on ProcessException catch (exception, stackTrace) {
-      if (_observeAttemptId == attemptId) {
-        _stopObservingTetheredIOSDevices();
-        _observeStreamController?.addError(exception, stackTrace);
-      }
-    } on ArgumentError catch (exception, stackTrace) {
-      if (_observeAttemptId == attemptId) {
-        _stopObservingTetheredIOSDevices();
-        _observeStreamController?.addError(exception, stackTrace);
-      }
-    }
-  }
-
-  Future<Process> _startObserveProcess(XCDeviceEventInterface eventInterface) {
+  Future<Process> _startObserveProcess(
+    XCDeviceEventInterface eventInterface, {
+    required void Function(XCDeviceEventNotification) onEvent,
+  }) {
     // Run in interactive mode (via script) to convince
     // xcdevice it has a terminal attached in order to redirect stdout.
     return _streamXCDeviceEventCommand(
@@ -291,7 +294,7 @@ class XCDevice {
       mapFunction: (String line) {
         final XCDeviceEventNotification? event = _processXCDeviceStdOut(line, eventInterface);
         if (event != null) {
-          _observeStreamController?.add(event);
+          onEvent(event);
         }
         return line;
       },
@@ -308,7 +311,8 @@ class XCDevice {
     String prefix = '',
     StringConverter? mapFunction,
   }) async {
-    final Process process = await _processUtils.start(cmd);
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    final Process process = await processUtils.start(cmd);
 
     final StreamSubscription<String> stdoutSubscription = process.stdout
         .transform(utf8LineDecoder)
@@ -319,7 +323,7 @@ class XCDevice {
           }
           if (mappedLine != null) {
             final message = '$prefix$mappedLine';
-            _logger.printTrace(message);
+            logger.printTrace(message);
           }
         });
     final StreamSubscription<String> stderrSubscription = process.stderr
@@ -330,7 +334,7 @@ class XCDevice {
             mappedLine = mapFunction(line);
           }
           if (mappedLine != null) {
-            _logger.printError('$prefix$mappedLine', wrap: false);
+            logger.printError('$prefix$mappedLine', wrap: false);
           }
         });
 
@@ -342,21 +346,6 @@ class XCDevice {
     );
 
     return process;
-  }
-
-  void _stopObservingTetheredIOSDevices() {
-    _observeAttemptId++;
-    // xcdevice observe is running in an interactive shell.
-    // Signal script child jobs to exit and exit the shell.
-    // See https://linux.die.net/Bash-Beginners-Guide/sect_12_01.html#sect_12_01_01_02.
-    if (_usbDeviceObserveProcess != null) {
-      ProcessSignal.sighup.kill(_usbDeviceObserveProcess!);
-      _usbDeviceObserveProcess = null;
-    }
-    if (_wifiDeviceObserveProcess != null) {
-      ProcessSignal.sighup.kill(_wifiDeviceObserveProcess!);
-      _wifiDeviceObserveProcess = null;
-    }
   }
 
   XCDeviceEventNotification? _processXCDeviceStdOut(
@@ -387,58 +376,49 @@ class XCDevice {
   ///
   /// To cancel this process, call [cancelWaitForDeviceToConnect].
   Future<XCDeviceEventNotification?> waitForDeviceToConnect(String deviceId) async {
+    final Logger logger = _toolContext.logger;
     try {
       if (_usbDeviceWaitProcess != null || _wifiDeviceWaitProcess != null) {
         throw Exception('xcdevice wait restart failed');
       }
 
-      final controller = StreamController<XCDeviceEventNotification>();
-      waitStreamController = controller;
+      waitStreamController = StreamController<XCDeviceEventNotification>();
 
-      final Process usbProcess = await _startWaitProcess(deviceId, XCDeviceEventInterface.usb);
-      _usbDeviceWaitProcess = usbProcess;
+      _usbDeviceWaitProcess = await _startWaitProcess(deviceId, XCDeviceEventInterface.usb);
 
-      final Process wifiProcess = await _startWaitProcess(deviceId, XCDeviceEventInterface.wifi);
-      _wifiDeviceWaitProcess = wifiProcess;
+      _wifiDeviceWaitProcess = await _startWaitProcess(deviceId, XCDeviceEventInterface.wifi);
 
-      final Future<void> usbProcessExited = usbProcess.exitCode.then((int status) {
-        _logger.printTrace('xcdevice wait --usb exited with code $exitCode');
+      final Future<void> usbProcessExited = _usbDeviceWaitProcess!.exitCode.then((int status) {
+        logger.printTrace('xcdevice wait --usb exited with code $exitCode');
         // Kill other process in case only one was killed.
-        wifiProcess.kill();
+        _wifiDeviceWaitProcess?.kill();
       });
 
-      final Future<void> wifiProcessExited = wifiProcess.exitCode.then((int status) {
-        _logger.printTrace('xcdevice wait --wifi exited with code $exitCode');
+      final Future<void> wifiProcessExited = _wifiDeviceWaitProcess!.exitCode.then((int status) {
+        logger.printTrace('xcdevice wait --wifi exited with code $exitCode');
         // Kill other process in case only one was killed.
-        usbProcess.kill();
+        _usbDeviceWaitProcess?.kill();
       });
 
       final Future<void> allProcessesExited =
           Future.wait(<Future<void>>[usbProcessExited, wifiProcessExited]).whenComplete(() async {
-            if (_usbDeviceWaitProcess == usbProcess) {
-              _usbDeviceWaitProcess = null;
-            }
-            if (_wifiDeviceWaitProcess == wifiProcess) {
-              _wifiDeviceWaitProcess = null;
-            }
-            await controller.close();
+            _usbDeviceWaitProcess = null;
+            _wifiDeviceWaitProcess = null;
+            await waitStreamController?.close();
           });
 
       return await Future.any(<Future<XCDeviceEventNotification?>>[
         allProcessesExited.then((_) => null),
-        controller.stream.first.whenComplete(() async {
+        waitStreamController!.stream.first.whenComplete(() async {
           cancelWaitForDeviceToConnect();
         }),
       ]);
     } on ProcessException catch (exception, stackTrace) {
-      cancelWaitForDeviceToConnect();
-      _logger.printTrace('Process exception running xcdevice wait:\n$exception\n$stackTrace');
+      logger.printTrace('Process exception running xcdevice wait:\n$exception\n$stackTrace');
     } on ArgumentError catch (exception, stackTrace) {
-      cancelWaitForDeviceToConnect();
-      _logger.printTrace('Process exception running xcdevice wait:\n$exception\n$stackTrace');
+      logger.printTrace('Process exception running xcdevice wait:\n$exception\n$stackTrace');
     } on StateError {
-      cancelWaitForDeviceToConnect();
-      _logger.printTrace('Stream broke before first was found');
+      logger.printTrace('Stream broke before first was found');
       return null;
     }
     return null;
@@ -473,8 +453,6 @@ class XCDevice {
   void cancelWaitForDeviceToConnect() {
     _usbDeviceWaitProcess?.kill();
     _wifiDeviceWaitProcess?.kill();
-    _usbDeviceWaitProcess = null;
-    _wifiDeviceWaitProcess = null;
   }
 
   /// A list of [IOSDevice]s. This list includes connected devices and
@@ -600,7 +578,7 @@ class XCDevice {
                 Event.appleUsageEvent(workflow: 'device', parameter: 'ios-trust-failure'),
               );
             }
-            _logger.printTrace(errorMessage);
+            _toolContext.logger.printTrace(errorMessage);
           }
 
           final int? code = _errorCode(errorProperties);
@@ -681,29 +659,27 @@ class XCDevice {
           modelCode: modelCode,
           operatingSystemVersion: operatingSystemVersion,
           iProxy: _iProxy,
-          fileSystem: globals.fs,
-          fileSystemUtils: globals.fsUtils,
-          logger: _logger,
-          analytics: globals.analytics,
+          toolContext: _toolContext,
+          analytics: _analytics,
+          cocoaPods: _cocoaPods,
+          plistParser: _plistParser,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           coreDeviceControl: _coreDeviceControl,
           coreDeviceLauncher: IOSCoreDeviceLauncher(
             coreDeviceControl: _coreDeviceControl,
-            logger: _logger,
             xcodeDebug: _xcodeDebug,
-            fileSystem: globals.fs,
-            processUtils: _processUtils,
-            xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+            toolContext: _toolContext,
+            xcode: _xcode,
             deviceVersion: Version.parse(sdkVersionString),
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,
-          platform: globals.platform,
+          xcodeProjectInterpreter: _xcodeProjectInterpreter,
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
           isCoreDevice: coreDevice != null,
-          processUtils: _processUtils,
+          templateRenderer: _templateRenderer,
         );
       }
     }
@@ -788,7 +764,7 @@ class XCDevice {
         } else {
           cpuArchitecture = CpuArch.arm64;
         }
-        _logger.printWarning(
+        _toolContext.logger.printWarning(
           'Unknown architecture $architecture, defaulting to '
           '${cpuArchitecture.name}',
         );

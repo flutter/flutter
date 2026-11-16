@@ -17,9 +17,11 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
@@ -55,6 +57,7 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, hostVmServicePort: 1234),
           enableVmService: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -88,6 +91,7 @@ void main() {
           precompiledDillPath: 'example.dill',
           enableVmService: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -125,6 +129,7 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -172,6 +177,7 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -204,6 +210,7 @@ void main() {
           flutterTesterBinPath: 'abc',
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -226,6 +233,7 @@ void main() {
             hostVmServicePort: 123,
           ),
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -261,6 +269,7 @@ void main() {
           capturedPlatform = platform;
         },
         buildInfo: BuildInfo.debug,
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -441,6 +450,7 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -510,6 +520,7 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -568,6 +579,7 @@ void main() {
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               io.CompressionOptions? compression,
               Device? device,
@@ -610,6 +622,7 @@ void main() {
         host: InternetAddress.anyIPv4,
         updateGoldens: false,
         buildInfo: .debug,
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fs,
           logger: logger,
@@ -634,6 +647,7 @@ void main() {
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               io.CompressionOptions? compression,
               Device? device,

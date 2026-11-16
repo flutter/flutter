@@ -22,6 +22,23 @@ import 'framework.dart';
 import 'lookup_boundary.dart';
 import 'media_query.dart';
 
+// Whether [renderView], if there is one, renders into the view that [View] and
+// [RawView] keep for [view], which is the one [debugViewWithMetricsOverrides]
+// returns. That is the same object every time it is asked about the same view,
+// so asking again here is the same as reading the field, which an initializer
+// list assert cannot do. Only ever called from an assert.
+bool _debugRenderViewRendersInto(RenderView? renderView, FlutterView view) {
+  assert(
+    renderView == null || identical(renderView.flutterView, debugViewWithMetricsOverrides(view)),
+    'A RenderView passed to View or RawView must render into the FlutterView '
+    'passed alongside it. Both are normalized by debugViewWithMetricsOverrides '
+    'and then compared by identity, so a view that merely compares == to the '
+    "RenderView's — a test double with an operator == of its own, say — is not "
+    'the same view for this purpose.',
+  );
+  return true;
+}
+
 /// Bootstraps a render tree that is rendered into the provided [FlutterView].
 ///
 /// The content rendered into that view is determined by the provided [child].
@@ -80,7 +97,7 @@ class View extends StatefulWidget {
   /// widget.
   View({
     super.key,
-    required this.view,
+    required FlutterView view,
     @Deprecated(
       'Do not use. '
       'This parameter only exists to implement the deprecated RendererBinding.pipelineOwner property until it is removed. '
@@ -94,18 +111,22 @@ class View extends StatefulWidget {
     )
     RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
     required this.child,
-  }) : _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
+  }) : view = kDebugMode ? debugViewWithMetricsOverrides(view) : view,
+       _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
        assert(
          (deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner == null) ==
              (deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null),
        ),
        assert(
-         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null ||
-             deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView == view,
+         _debugRenderViewRendersInto(deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView, view),
        );
 
   /// The [FlutterView] into which [child] is drawn.
+  ///
+  /// This is the view passed to the constructor, normalized in debug mode with
+  /// [debugViewWithMetricsOverrides] so that it applies the
+  /// [debugViewMetricsOverrides] entry registered for its id.
   final FlutterView view;
 
   /// The widget below this widget in the tree, which will be drawn into the
@@ -129,6 +150,16 @@ class View extends StatefulWidget {
   /// is best practice to use [MediaQuery.maybeOf] instead, which will ensure
   /// that the `context` is informed when the view properties change.
   ///
+  /// {@template flutter.widgets.View.debugViewMetricsOverrides}
+  /// In debug mode, a view that [PlatformDispatcher.instance] reports is used
+  /// through a wrapper that applies [debugViewMetricsOverrides], and this method
+  /// returns the wrapper. It is not identical to the view that
+  /// [PlatformDispatcher.instance] reports, and its
+  /// [FlutterView.platformDispatcher] is not identical to
+  /// [PlatformDispatcher.instance]. Compare views by [FlutterView.viewId]
+  /// instead.
+  /// {@endtemplate}
+  ///
   /// See also:
   ///
   ///  * [View.of], which throws instead of returning null if no [FlutterView]
@@ -149,6 +180,8 @@ class View extends StatefulWidget {
   /// prefer using the access methods on [MediaQuery], such as
   /// [MediaQuery.sizeOf], which will ensure that the `context` is informed when
   /// the view properties change.
+  ///
+  /// {@macro flutter.widgets.View.debugViewMetricsOverrides}
   ///
   /// See also:
   ///
@@ -337,7 +370,7 @@ class RawView extends StatelessWidget {
   /// Creates a [RawView] widget.
   RawView({
     super.key,
-    required this.view,
+    required FlutterView view,
     @Deprecated(
       'Do not use. '
       'This parameter only exists to implement the deprecated RendererBinding.pipelineOwner property until it is removed. '
@@ -351,18 +384,22 @@ class RawView extends StatelessWidget {
     )
     RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
     required this.child,
-  }) : _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
+  }) : view = kDebugMode ? debugViewWithMetricsOverrides(view) : view,
+       _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
        assert(
          (deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner == null) ==
              (deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null),
        ),
        assert(
-         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null ||
-             deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView == view,
+         _debugRenderViewRendersInto(deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView, view),
        );
 
   /// The [FlutterView] into which [child] is drawn.
+  ///
+  /// This is the view passed to the constructor, normalized in debug mode with
+  /// [debugViewWithMetricsOverrides] so that it applies the
+  /// [debugViewMetricsOverrides] entry registered for its id.
   final FlutterView view;
 
   /// The widget below this widget in the tree, which will be drawn into the

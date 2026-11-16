@@ -25,18 +25,9 @@ class CleanEnvironment {
   /// valid trailing-slash-terminated absolute `file:` directory URIs.
   factory CleanEnvironment.fromJson(Map<String, Object?> json) {
     return CleanEnvironment(
-      buildDir: _parseDirectoryUri(json, buildDirKey),
-      projectRoot: _parseDirectoryUri(json, projectRootKey),
+      buildDir: json.directoryUri(buildDirKey),
+      projectRoot: json.directoryUri(projectRootKey),
     );
-  }
-
-  static Uri _parseDirectoryUri(Map<String, Object?> json, String key) {
-    final String rawUri = json.requiredField<String>(key);
-    final Uri? uri = Uri.tryParse(rawUri);
-    if (uri != null && uri.isScheme('file') && uri.hasAbsolutePath && uri.path.endsWith('/')) {
-      return uri;
-    }
-    throw FormatException('Invalid "$key": expected trailing-slash-terminated absolute file: URI.');
   }
 
   /// Map key for [buildDir].

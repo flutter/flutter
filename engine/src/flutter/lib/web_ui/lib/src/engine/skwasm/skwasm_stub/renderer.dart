@@ -16,6 +16,10 @@ class SkwasmRenderer extends Renderer {
   bool get supportsResizingAnimatedImages =>
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
+  @override
+  bool get supportsAnimatedImages =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
+
   bool get isWimp => false;
 
   @override
@@ -32,6 +36,7 @@ class SkwasmRenderer extends Renderer {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   }) => throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
@@ -134,7 +139,7 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Paint createPaint() {
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
@@ -195,7 +200,7 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  Future<void> renderScene(ui.Scene scene, ui.FlutterView view) {
+  Future<void> renderScene(ui.Scene scene, EngineFlutterView view, {required ui.Size size}) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
