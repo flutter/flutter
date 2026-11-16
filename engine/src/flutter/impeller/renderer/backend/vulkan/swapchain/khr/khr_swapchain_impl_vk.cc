@@ -325,6 +325,8 @@ bool KHRSwapchainImplVK::IsValid() const {
 
 void KHRSwapchainImplVK::WaitIdle() const {
   if (auto context = context_.lock()) {
+    Lock device_lock(
+        *ContextVK::Cast(*context).GetDeviceHolder()->GetQueueHostMutex());
     [[maybe_unused]] auto result =
         ContextVK::Cast(*context).GetDevice().waitIdle();
   }

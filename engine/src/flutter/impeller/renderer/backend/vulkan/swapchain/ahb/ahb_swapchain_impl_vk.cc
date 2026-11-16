@@ -127,6 +127,8 @@ const android::HardwareBufferDescriptor& AHBSwapchainImplVK::GetDescriptor()
 void AHBSwapchainImplVK::WaitIdle() const {
   if (transients_) {
     if (auto context = transients_->GetContext().lock()) {
+      Lock device_lock(
+          *ContextVK::Cast(*context).GetDeviceHolder()->GetQueueHostMutex());
       auto result = ContextVK::Cast(*context).GetDevice().waitIdle();
       if (result != vk::Result::eSuccess) {
         FML_LOG(INFO) << "Device waitIdle failed: " << vk::to_string(result);

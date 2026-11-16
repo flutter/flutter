@@ -56,6 +56,7 @@ class IdleWaiterVK : public IdleWaiter {
     std::shared_ptr<DeviceHolderVK> strong_device_holder_ =
         device_holder_.lock();
     if (strong_device_holder_ && strong_device_holder_->GetDevice()) {
+      Lock device_lock(*strong_device_holder_->GetQueueHostMutex());
       [[maybe_unused]] auto result =
           strong_device_holder_->GetDevice().waitIdle();
     }
