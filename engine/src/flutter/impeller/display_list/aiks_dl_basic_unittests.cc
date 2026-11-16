@@ -2861,5 +2861,64 @@ TEST_P(AiksTest, DrawImageFromYUVTextures) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/195859.
+// Renders two green circles, one above the other. Both are drawn at x=-100
+// inside a SaveLayer whose image filter translates them +300 on-screen. The
+// top one is drawn directly; the bottom one is drawn through DrawDisplayList
+// (a nested DisplayList with an RTree, like a dart:ui Picture). If only the
+// top circle is visible, the nested DisplayList was culled against the root
+// render target instead of the subpass.
+TEST_P(AiksTest, DrawDisplayListInTranslatedSaveLayerIsNotCulled) {
+  DlPaint green;
+  green.setColor(DlColor::kGreen());
+
+  DisplayListBuilder inner_builder(/*prepare_rtree=*/true);
+  inner_builder.DrawCircle(DlPoint(-100, 300), 80, green);
+  auto inner_dl = inner_builder.Build();
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({300, 0}), DlImageSampling::kLinear));
+  builder.SaveLayer(std::nullopt, &paint);
+  // Control: drawn directly, not subject to DisplayList culling.
+  builder.DrawCircle(DlPoint(-100, 100), 80, green);
+  // Drawn through DrawDisplayList; was culled before the fix.
+  builder.DrawDisplayList(inner_dl, 1.0f);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/195859.
+// Same as DrawDisplayListInTranslatedSaveLayerIsNotCulled, but the bottom
+// circle is drawn inside a nested SaveLayer. If only the top circle is
+// visible, the child SaveLayer's subpass was clamped to the root render target
+// and its off-screen content was dropped before the parent filter moved it.
+TEST_P(AiksTest, NestedSaveLayerInTranslatedSaveLayerIsNotCulled) {
+  DlPaint green;
+  green.setColor(DlColor::kGreen());
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({300, 0}), DlImageSampling::kLinear));
+  builder.SaveLayer(std::nullopt, &paint);
+  // Control: drawn directly into the parent layer.
+  builder.DrawCircle(DlPoint(-100, 100), 80, green);
+  DlPaint child_paint;
+  builder.SaveLayer(std::nullopt, &child_paint);
+  // Drawn inside the child SaveLayer; not visible when SaveLayer clamps.
+  builder.DrawCircle(DlPoint(-100, 300), 80, green);
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
