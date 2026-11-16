@@ -193,7 +193,7 @@ void main() {
       },
     );
 
-    testWithoutContext('reports extension-attributed ValidationType.crash and logs extension name when runDiagnostics RPC throws', () async {
+    testWithoutContext('reports extension-attributed ValidationType.crash and traces failure when runDiagnostics RPC throws', () async {
       void crashingEntryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
           sendPort,
@@ -225,7 +225,11 @@ void main() {
         clientResults.single.messages.map((ValidationMessage m) => m.message),
         everyElement(isNot(contains('flutter/flutter/issues'))),
       );
-      expect(logger.warningText, contains('my_test_extension'));
+      expect(logger.warningText, isEmpty);
+      expect(
+        logger.traceText,
+        contains('Failed to run diagnostics for extension "my_test_extension"'),
+      );
 
       final validator = ExtensionDoctorValidator(extension: extension, logger: logger);
       final ValidationResult result = await validator.validate();
@@ -247,9 +251,10 @@ void main() {
         result.messages.map((ValidationMessage m) => m.message),
         everyElement(isNot(contains('flutter/flutter/issues'))),
       );
+      expect(logger.warningText, isEmpty);
     });
 
-    testWithoutContext('reports extension-attributed ValidationType.crash and logs extension name when runDiagnostics returns malformed payload', () async {
+    testWithoutContext('reports extension-attributed ValidationType.crash and traces failure when runDiagnostics returns malformed payload', () async {
       void nonListPayloadEntryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
           sendPort,
@@ -311,7 +316,11 @@ void main() {
         firstResult.messages.map((ValidationMessage m) => m.message),
         everyElement(isNot(contains('flutter/flutter/issues'))),
       );
-      expect(logger.warningText, contains('non_list_diagnostics_ext'));
+      expect(logger.warningText, isEmpty);
+      expect(
+        logger.traceText,
+        contains('Failed to run diagnostics for extension "non_list_diagnostics_ext"'),
+      );
 
       final secondValidator = ExtensionDoctorValidator(
         extension: manager.diagnosticsExtensions[1],
@@ -333,7 +342,11 @@ void main() {
         secondResult.messages.map((ValidationMessage m) => m.message),
         everyElement(isNot(contains('flutter/flutter/issues'))),
       );
-      expect(logger.warningText, contains('invalid_element_diagnostics_ext'));
+      expect(logger.warningText, isEmpty);
+      expect(
+        logger.traceText,
+        contains('Failed to run diagnostics for extension "invalid_element_diagnostics_ext"'),
+      );
     });
 
     testWithoutContext('DiagnosticsExtensionClient.runDiagnostics allows slow checks past 5 seconds without timing out', () {

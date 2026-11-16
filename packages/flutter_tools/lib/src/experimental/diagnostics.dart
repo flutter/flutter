@@ -153,10 +153,9 @@ final class DiagnosticsExtensionClient extends DiagnosticsExtension {
         ]),
       ];
     } on Object catch (err, stack) {
-      _logger.printWarning(
-        'Failed to run diagnostics for extension "${connection.extensionName}": $err',
+      _logger.printTrace(
+        'Failed to run diagnostics for extension "${connection.extensionName}": $err\n$stack',
       );
-      _logger.printTrace('$stack');
       return <ValidationResult>[
         ExtensionDoctorValidator.createExtensionCrashResult(connection.extensionName, err, stack),
       ];

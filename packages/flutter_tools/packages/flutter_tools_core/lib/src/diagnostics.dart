@@ -173,15 +173,6 @@ final class ValidationResult {
     this.statusInfo,
   }) : messages = List<ValidationMessage>.unmodifiable(messages);
 
-  /// Creates a [ValidationResult] representing a crash during execution.
-  factory ValidationResult.crash(Object error, [StackTrace? stackTrace]) {
-    return ValidationResult(ValidationType.crash, <ValidationMessage>[
-      const ValidationMessage.error('Due to an error, the doctor check did not complete.'),
-      ValidationMessage.error('$error'),
-      if (stackTrace != null) ValidationMessage('$stackTrace'),
-    ], statusInfo: 'the doctor check crashed');
-  }
-
   /// Deserializes a [ValidationResult] from a JSON-serializable map.
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
