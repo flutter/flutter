@@ -138,6 +138,9 @@ class PointerDataPacketConverter {
   //----------------------------------------------------------------------------
   /// @brief      Handles non-finite values in `pointer_data`.
   ///
+  ///             Non-finite values are not expected, so unoptimized builds
+  ///             assert on them.
+  ///
   /// @param[in,out] pointer_data  The pointer data to check and sanitize.
   ///
   /// @return     `false` if `pointer_data` should be dropped: pan/zoom update

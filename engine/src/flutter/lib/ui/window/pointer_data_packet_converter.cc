@@ -59,6 +59,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         // The cancel is also dropped if the down was dropped because its
         // position was not finite.
         auto iter = states_.find(pointer_data.device);
+        FML_DCHECK(iter == states_.end() || iter->second.is_down);
         if (iter != states_.end() && iter->second.is_down) {
           PointerState state = iter->second;
           UpdatePointerIdentifier(pointer_data, state, false);
@@ -127,6 +128,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         // Drops the remove if the pointer was not added, which happens when
         // its add or down was dropped because its position was not finite.
         auto iter = states_.find(pointer_data.device);
+        FML_DCHECK(iter != states_.end());
         if (iter == states_.end()) {
           break;
         }
@@ -224,6 +226,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         // Drops the move if the pointer is not down, which happens when its
         // down was dropped because its position was not finite.
         auto iter = states_.find(pointer_data.device);
+        FML_DCHECK(iter != states_.end() && iter->second.is_down);
         if (iter == states_.end() || !iter->second.is_down) {
           break;
         }
@@ -239,6 +242,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         // Drops the up if the pointer is not down, which happens when its
         // down was dropped because its position was not finite.
         auto iter = states_.find(pointer_data.device);
+        FML_DCHECK(iter != states_.end() && iter->second.is_down);
         if (iter == states_.end() || !iter->second.is_down) {
           break;
         }
@@ -306,6 +310,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         // when its pan/zoom start was dropped because its position was not
         // finite.
         auto iter = states_.find(pointer_data.device);
+        FML_DCHECK(iter != states_.end() && iter->second.is_pan_zoom_active);
         if (iter == states_.end() || !iter->second.is_pan_zoom_active) {
           break;
         }
@@ -323,6 +328,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         // when its pan/zoom start was dropped because its position was not
         // finite.
         auto iter = states_.find(pointer_data.device);
+        FML_DCHECK(iter != states_.end() && iter->second.is_pan_zoom_active);
         if (iter == states_.end() || !iter->second.is_pan_zoom_active) {
           break;
         }
@@ -446,6 +452,15 @@ void PointerDataPacketConverter::UpdateDeltaAndState(PointerData& pointer_data,
 
 bool PointerDataPacketConverter::SanitizeNonFinitePosition(
     PointerData& pointer_data) {
+  // Unoptimized builds fail on the first non-finite event, instead of on a
+  // later event of the same pointer. Other builds drop or sanitize the event.
+  FML_DCHECK(std::isfinite(pointer_data.physical_x) &&
+             std::isfinite(pointer_data.physical_y));
+  FML_DCHECK(pointer_data.change != PointerData::Change::kPanZoomUpdate ||
+             (std::isfinite(pointer_data.pan_x) &&
+              std::isfinite(pointer_data.pan_y) &&
+              std::isfinite(pointer_data.scale) &&
+              std::isfinite(pointer_data.rotation)));
   if (pointer_data.change == PointerData::Change::kPanZoomUpdate &&
       (!std::isfinite(pointer_data.pan_x) ||
        !std::isfinite(pointer_data.pan_y) ||
