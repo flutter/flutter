@@ -354,6 +354,22 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual(object.isAccessibilityElement, NO);
 }
 
+- (void)testFocusBlockedNodeWithLabelIsNotAnAccessibilityElement {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  flutter::SemanticsNode node;
+  node.label = "Temp";
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  XCTAssertTrue(object.isAccessibilityElement);
+
+  node.flags.isAccessibilityFocusBlocked = true;
+  [object setSemanticsNode:&node];
+  XCTAssertFalse(object.isAccessibilityElement);
+  XCTAssertEqualObjects(object.accessibilityLabel, @"Temp");
+}
+
 - (void)testIntresetingSemanticsObjectWithLabelHasStaticTextTrait {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());

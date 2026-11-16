@@ -532,6 +532,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return false;
   }
 
+  if (self.node.flags.isAccessibilityFocusBlocked) {
+    return false;
+  }
+
   // If the node is scrollable AND hidden OR
   // The node has a label, value, or hint OR
   // The node has non-scrolling related actions.
