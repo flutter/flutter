@@ -166,8 +166,10 @@ To verify the result, inspect the built APK:
 ### Custom build types and plugins
 
 Flutter copies your app's custom build types onto Flutter plugin projects so
-they resolve. With the new DSL these are `initWith` copies rather than live
-aliases:
+they resolve. With the new DSL these are no longer live aliases. A plugin that is
+built as a library gets only `isMinifyEnabled`, `matchingFallbacks` and
+`isDebuggable` from your build type. Library modules can't use app-only settings
+such as `applicationIdSuffix` or `isShrinkResources`:
 
 - Set `matchingFallbacks` on custom build types so dependent Android libraries
   resolve. If a third-party plugin does not define your app's custom `staging`
@@ -184,13 +186,6 @@ aliases:
       }
   }
   ```
-
-- **Warning for Plugin Authors / JNI Developers:** Library (plugin) projects cannot
-  be explicitly marked debuggable through the public AGP API. If an app uses a
-  custom build type (like `staging`), the plugin's `BuildConfig.DEBUG` and native (C++/JNI)
-  code may silently compile in release mode instead of debug mode. Variant matching
-  still works via `matchingFallbacks`, but C++ debugging will be broken for those
-  custom build types.
 
 ### Add-to-app (Flutter module in a host app)
 

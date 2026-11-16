@@ -147,6 +147,8 @@ class PluginHandlerTest {
             mockk<ApplicationBuildType> {
                 every { name } returns "debug"
                 every { isDebuggable } returns true
+                every { isMinifyEnabled } returns false
+                every { matchingFallbacks } returns mutableListOf()
             }
         val mockLogger = mockk<Logger>()
         every { project.logger } returns mockLogger
@@ -202,6 +204,8 @@ class PluginHandlerTest {
             mockk<ApplicationBuildType> {
                 every { name } returns "debug"
                 every { isDebuggable } returns true
+                every { isMinifyEnabled } returns false
+                every { matchingFallbacks } returns mutableListOf()
             }
         every { project.logger } returns mockk(relaxed = true)
 
@@ -223,7 +227,7 @@ class PluginHandlerTest {
     }
 
     @Test
-    fun `configurePlugins copies missing app build types onto library plugin projects using initWith`(
+    fun `configurePlugins copies only library properties onto library plugin build types`(
         @TempDir tempDir: Path
     ) {
         val project = mockk<Project>()
@@ -232,6 +236,8 @@ class PluginHandlerTest {
             mockk<ApplicationBuildType> {
                 every { name } returns "staging"
                 every { isDebuggable } returns true
+                every { isMinifyEnabled } returns true
+                every { matchingFallbacks } returns mutableListOf("debug")
             }
         every { project.logger } returns mockk(relaxed = true)
 
@@ -246,7 +252,12 @@ class PluginHandlerTest {
         setupMockPluginLoader(project, listOf(cameraDependency))
 
         every { pluginProjectBuildTypes.findByName("staging") } returns null
-        val createdBuildType = mockk<LibraryBuildType>(relaxed = true)
+        // AGP uses one build type class for every module type, so a library build type is
+        // also an ApplicationBuildType.
+        val createdBuildType =
+            mockk<LibraryBuildType>(relaxed = true, moreInterfaces = arrayOf(ApplicationBuildType::class))
+        val createdMatchingFallbacks = mutableListOf<String>()
+        every { createdBuildType.matchingFallbacks } returns createdMatchingFallbacks
         val createActionSlot = slot<Action<LibraryBuildType>>()
         every {
             pluginProjectBuildTypes.create("staging", capture(createActionSlot))
@@ -262,7 +273,12 @@ class PluginHandlerTest {
         capturePluginActionSlot.forEach { it.execute(pluginProject) }
 
         createActionSlot.captured.execute(createdBuildType)
-        verify { createdBuildType.initWith(appBuildType) }
+        // initWith would also copy app-only properties, such as applicationIdSuffix and
+        // isShrinkResources, that AGP rejects in a library.
+        verify(exactly = 0) { createdBuildType.initWith(any()) }
+        verify { createdBuildType.isMinifyEnabled = true }
+        verify { (createdBuildType as ApplicationBuildType).isDebuggable = true }
+        assertEquals(listOf("debug"), createdMatchingFallbacks)
         // The custom debuggable build type maps to the debug engine artifacts.
         verify {
             pluginProject.dependencies.add(
@@ -270,54 +286,6 @@ class PluginHandlerTest {
                 "io.flutter:flutter_embedding_debug:$EXAMPLE_ENGINE_VERSION"
             )
         }
-    }
-
-    @Test
-    fun `configurePlugins clears applicationIdSuffix on build types copied to library plugins`(
-        @TempDir tempDir: Path
-    ) {
-        val project = mockk<Project>()
-        val pluginProject = mockk<Project>()
-        val appBuildType =
-            mockk<ApplicationBuildType> {
-                every { name } returns "profile"
-                every { isDebuggable } returns false
-            }
-        every { project.logger } returns mockk(relaxed = true)
-
-        setupMockProjectDir(project, tempDir)
-        setupMockPluginProject(project, pluginProject, isAppPlugin = false)
-
-        val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<LibraryBuildType>>(relaxed = true)
-        val mockLibraryExtension = setUpMockLibraryAndroidExtension(pluginProject)
-        every { mockLibraryExtension.buildTypes } returns pluginProjectBuildTypes
-
-        setUpMockAndroidExtension(project, compileSdk = 35, buildTypes = listOf(appBuildType))
-        setupMockPluginLoader(project, listOf(cameraDependency))
-
-        every { pluginProjectBuildTypes.findByName("profile") } returns null
-        // AGP uses one build type class for every module type, so a library build type is
-        // also an ApplicationBuildType and `initWith` copies applicationIdSuffix onto it.
-        val createdBuildType =
-            mockk<LibraryBuildType>(relaxed = true, moreInterfaces = arrayOf(ApplicationBuildType::class))
-        val createActionSlot = slot<Action<LibraryBuildType>>()
-        every {
-            pluginProjectBuildTypes.create("profile", capture(createActionSlot))
-        } returns createdBuildType
-
-        val pluginHandler = PluginHandler(project)
-        pluginHandler.configurePlugins(
-            engineVersionValue = EXAMPLE_ENGINE_VERSION
-        )
-
-        val capturePluginActionSlot = mutableListOf<Action<Project>>()
-        verify { pluginProject.afterEvaluate(capture(capturePluginActionSlot)) }
-        capturePluginActionSlot.forEach { it.execute(pluginProject) }
-
-        createActionSlot.captured.execute(createdBuildType)
-        verify { createdBuildType.initWith(appBuildType) }
-        verify { (createdBuildType as ApplicationBuildType).applicationIdSuffix = null }
-        verify(exactly = 0) { (createdBuildType as ApplicationBuildType).isDebuggable = any() }
     }
 
     @Test
@@ -415,6 +383,8 @@ class PluginHandlerTest {
             mockk<ApplicationBuildType> {
                 every { name } returns "debug"
                 every { isDebuggable } returns true
+                every { isMinifyEnabled } returns false
+                every { matchingFallbacks } returns mutableListOf()
             }
         val mockLogger = mockk<Logger>(relaxed = true)
         every { project.logger } returns mockLogger
