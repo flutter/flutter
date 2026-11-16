@@ -35,7 +35,7 @@ typedef _ProjectDeps = ({FlutterProject project, ResolvedDependencies deps});
 /// A command to update internal dependencies across Flutter packages.
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     @visibleForTesting this._httpClientFactory,
     @visibleForTesting Pub? pub,
@@ -83,9 +83,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   final HttpClientFactory? _httpClientFactory;
   final Pub? _injectedPub;
 
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
   final _keyForceUpgrade = 'force-upgrade';
   final _keyUpdateHashes = 'update-hashes';
   final _keyCherryPick = 'cherry-pick';
@@ -112,24 +109,22 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final hidden = true;
 
-  late final Pub _pub =
-      _injectedPub ??
-      Pub(
-        botDetector: toolContext.botDetector,
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        platform: toolContext.platform,
-        processManager: toolContext.processManager,
-      );
+  // Lazy-initialize the net utilities with values from the context.
+  late final Pub _pub = _injectedPub ?? _createPub();
 
-  late final _net = Net(
-    httpClientFactory: _httpClientFactory,
-    logger: toolContext.logger,
-    platform: toolContext.platform,
-  );
+  Pub _createPub() {
+    return Pub(toolContext: toolContext);
+  }
+
+  late final Net _net = _createNet();
+
+  Net _createNet() {
+    final ToolContext(:Logger logger, :Platform platform) = toolContext;
+    return Net(httpClientFactory: _httpClientFactory, logger: logger, platform: platform);
+  }
 
   Future<void> _downloadCoverageData() async {
-    final ToolContext(:FileSystem fs, :Platform platform) = toolContext;
+    final ToolContext(:Cache cache, :FileSystem fs, :Platform platform) = toolContext;
     final String urlBase =
         platform.environment[kFlutterStorageBaseUrl] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
@@ -137,7 +132,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     if (data == null) {
       throwToolExit('Failed to fetch coverage data from $coverageUri');
     }
-    final String coverageDir = fs.path.join(Cache.flutterRoot!, 'packages/flutter/coverage');
+    final String coverageDir = fs.path.join(cache.flutterRoot, 'packages/flutter/coverage');
     fs.file(fs.path.join(coverageDir, 'lcov.base.info'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(data, flush: true);
@@ -148,11 +143,15 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        toolContext;
+    final ToolContext(
+      :Cache cache,
+      :FileSystem fs,
+      :Logger logger,
+      :FlutterProjectFactory projectFactory,
+    ) = toolContext;
     // Add the root directory to the list of packages, to capture the workspace
     // `pubspec.yaml`.
-    final Directory rootDirectory = fs.directory(fs.path.absolute(Cache.flutterRoot!));
+    final Directory rootDirectory = fs.directory(fs.path.absolute(cache.flutterRoot));
 
     final bool forceUpgrade = boolArg(_keyForceUpgrade);
     final bool updateHashes = boolArg(_keyUpdateHashes);
@@ -289,8 +288,12 @@ class UpdatePackagesCommand extends FlutterCommand {
     required List<FlutterProject> projects,
     List<PackageVersion>? pinned,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        toolContext;
+    final ToolContext(
+      :Cache cache,
+      :FileSystem fs,
+      :Logger logger,
+      :FlutterProjectFactory projectFactory,
+    ) = toolContext;
     final Map<String, String> pinnedDeps;
     if (forceUpgrade) {
       logger.printStatus('Upgrading packages versions...');
@@ -312,7 +315,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final deps = <_ProjectDeps>[];
     for (final project in projects) {
       final Directory projectTempDir = tempDir.childDirectory(
-        fs.path.relative(project.directory.path, from: Cache.flutterRoot),
+        fs.path.relative(project.directory.path, from: cache.flutterRoot),
       );
       final File tempPubspec = projectTempDir.childFile(project.pubspecFile.basename)
         ..createSync(recursive: true);

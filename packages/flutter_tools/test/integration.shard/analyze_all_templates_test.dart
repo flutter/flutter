@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -17,7 +16,7 @@ void main() {
     late Directory tempDir;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync(
+      tempDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_tools_analyze_all_template.',
       );
     });
@@ -32,7 +31,7 @@ void main() {
           tempDir,
           arguments: <String>['--no-pub', '--template', template],
         );
-        final ProcessResult result = await globals.processManager.run(<String>[
+        final ProcessResult result = await processManager.run(<String>[
           'flutter',
           'analyze',
         ], workingDirectory: projectPath);

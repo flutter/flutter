@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show HttpServer;
+import 'dart:convert';
+import 'dart:io' show HttpClient, HttpClientResponse, HttpServer;
 
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/proxy_middleware.dart';
@@ -445,5 +446,50 @@ void main() {
         }
       },
     );
+
+    test('should stream the backend response instead of buffering it', () async {
+      final body = StreamController<List<int>>();
+      final client = HttpClient();
+      HttpServer? backendServer;
+      HttpServer? proxyServer;
+      try {
+        backendServer = await shelf_io.serve(
+          (Request request) =>
+              Response.ok(body.stream, context: <String, Object>{'shelf.io.buffer_output': false}),
+          'localhost',
+          0,
+        );
+        final rules = <ProxyRule>[
+          PrefixProxyRule(prefix: '/api/', target: 'http://localhost:${backendServer.port}/'),
+        ];
+        proxyServer = await shelf_io.serve(
+          proxyMiddleware(rules, logger)((Request request) => Response.notFound(null)),
+          'localhost',
+          0,
+        );
+
+        body.add(utf8.encode('first\n'));
+        final HttpClientResponse response = await (await client.getUrl(
+          Uri.parse('http://localhost:${proxyServer.port}/api/events'),
+        )).close();
+        final Stream<String> lines = utf8.decoder.bind(response).transform(const LineSplitter());
+        final received = <String>[];
+        await for (final line in lines) {
+          received.add(line);
+          // The backend only ends the response once the first line has made it
+          // through the proxy, so a buffering proxy never delivers it.
+          if (received.length == 1) {
+            body.add(utf8.encode('second\n'));
+            unawaited(body.close());
+          }
+        }
+
+        expect(received, <String>['first', 'second']);
+      } finally {
+        client.close(force: true);
+        await proxyServer?.close(force: true);
+        await backendServer?.close(force: true);
+      }
+    });
   });
 }

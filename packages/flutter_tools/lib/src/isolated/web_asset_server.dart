@@ -213,14 +213,19 @@ class WebAssetServer implements AssetReader {
     required WebRendererMode webRenderer,
     required bool isWasm,
     required bool useLocalCanvasKit,
+    required ToolContext toolContext,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
     bool useDwdsWebSocketConnection = false,
-    required ToolContext toolContext,
     Map<String, String> webDefines = const <String, String>{},
   }) async {
-    final ToolContext(:Config config, :FileSystem fs, :Logger logger, :Platform platform) =
-        toolContext;
+    final ToolContext(
+      :Cache cache,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+    ) = toolContext;
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
     final HttpsConfig? httpsConfig = webDevServerConfig.https;
@@ -313,7 +318,7 @@ class WebAssetServer implements AssetReader {
         entrypoint,
         fileSystem: fs,
         platform: platform,
-        flutterRoot: Cache.flutterRoot,
+        flutterRoot: cache.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(config: config, fileSystem: fs),
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,

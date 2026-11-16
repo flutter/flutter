@@ -677,6 +677,60 @@ void main() {
   );
 
   testUsingContext(
+    'ios build debug config-only writes TRACK_WIDGET_CREATION=true to Generated.xcconfig by default',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--debug', '--config-only', '--no-pub']);
+
+      final File configFile = fileSystem.file('ios/Flutter/Generated.xcconfig');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains('TRACK_WIDGET_CREATION=true'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
+
+  testUsingContext(
+    'ios build debug config-only respects --no-track-widget-creation flag',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+
+      await createTestCommandRunner(command).run(const <String>[
+        'build',
+        'ios',
+        '--debug',
+        '--config-only',
+        '--no-pub',
+        '--no-track-widget-creation',
+      ]);
+
+      final File configFile = fileSystem.file('ios/Flutter/Generated.xcconfig');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains('TRACK_WIDGET_CREATION=false'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
+
+  testUsingContext(
     'ios build invokes xcode build with verbosity',
     () async {
       final BuildCommand command = createBuildCommand();
@@ -857,6 +911,7 @@ void main() {
         FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
         FlutterProjectFactory: () => FlutterProjectFactory(
+          config: FakeConfig(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           plistParser: PlistParser(

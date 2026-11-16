@@ -92,9 +92,9 @@ def is_host_build(args):
   # If target_os == None, then this is a host build.
   if args.target_os is None:
     return True
-  # For linux arm64 builds, we cross compile from x64 hosts, so the
-  # target_os='linux' and linux-cpu='arm64'
-  if args.target_os == 'linux' and args.linux_cpu == 'arm64':
+  # For linux arm64/riscv64 builds, we cross compile from x64 hosts, so the
+  # target_os='linux' and linux-cpu='arm64' or 'riscv64'
+  if args.target_os == 'linux' and args.linux_cpu in ['arm64', 'riscv64']:
     return True
   # The Mac and host targets are redundant. Again, necessary to disambiguate
   # during cross-compilation.
@@ -518,6 +518,8 @@ def to_gn_args(args):
   if not sys.platform.startswith('win'):
     # The GN arg is not available in the windows toolchain.
     gn_args['enable_lto'] = enable_lto
+    if enable_lto:
+      gn_args['use_thin_lto'] = args.thin_lto
 
   # Set OS, CPU arch for host or target build.
   if is_host_build(args):
@@ -713,8 +715,8 @@ def to_gn_args(args):
     # it doesn't build properly with our gn configuration.
     gn_args['dart_include_wasm_opt'] = False
 
-    # dart_platform_sdk is only defined for host builds, linux arm host builds
-    # specify target_os=linux.
+    # dart_platform_sdk is only defined for host builds, linux arm/riscv64 host
+    # builds specify target_os=linux.
     # dart_platform_sdk=True means exclude web-related files, e.g. dart2js,
     # dartdevc, web SDK kernel and source files.
     gn_args['dart_platform_sdk'] = not args.full_dart_sdk
@@ -984,7 +986,7 @@ def parse_args(args):
   parser.add_argument('--web', action='store_true', default=False)
   parser.add_argument('--windows', dest='target_os', action='store_const', const='win')
 
-  parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
+  parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm', 'riscv64'])
   parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default='x64')
   parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64', 'x86'], default='x64')
   parser.add_argument('--simulator-cpu', type=str, choices=['x64', 'arm64'], default='x64')
@@ -1053,8 +1055,6 @@ def parse_args(args):
       '--rbe-dir', default=None, type=str, help='The location of the reclient binaries.'
   )
 
-  parser.add_argument('--goma', default=None, action='store_true')
-  parser.add_argument('--no-goma', dest='goma', action='store_false')
   parser.add_argument(
       '--xcode-symlinks',
       action='store_true',
@@ -1078,6 +1078,13 @@ def parse_args(args):
 
   parser.add_argument('--lto', default=True, action='store_true')
   parser.add_argument('--no-lto', dest='lto', action='store_false')
+  parser.add_argument(
+      '--thin-lto',
+      default=False,
+      action='store_true',
+      help='When LTO is enabled, use ThinLTO instead of full LTO.'
+  )
+  parser.add_argument('--no-thin-lto', dest='thin_lto', action='store_false')
 
   parser.add_argument('--clang', action='store_const', const=True)
   parser.add_argument('--no-clang', dest='clang', action='store_const', const=False)
