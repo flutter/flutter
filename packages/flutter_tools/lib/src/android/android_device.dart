@@ -846,51 +846,54 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 ///
 /// ```none
 /// Applications Memory Usage (in Kilobytes):
-/// Uptime: 441088659 Realtime: 521464097
+/// Uptime: 531675142 Realtime: 626068851
 ///
-/// ** MEMINFO in pid 16141 [io.flutter.demo.gallery] **
-///                    Pss  Private  Private  SwapPss     Heap     Heap     Heap
-///                  Total    Dirty    Clean    Dirty     Size    Alloc     Free
-///                 ------   ------   ------   ------   ------   ------   ------
-///   Native Heap     8648     8620        0       16    20480    12403     8076
-///   Dalvik Heap      547      424       40       18     2628     1092     1536
-///  Dalvik Other      464      464        0        0
-///         Stack      496      496        0        0
-///        Ashmem        2        0        0        0
-///       Gfx dev      212      204        0        0
-///     Other dev       48        0       48        0
-///      .so mmap    10770      708     9372       25
-///     .apk mmap      240        0        0        0
-///     .ttf mmap       35        0       32        0
-///     .dex mmap     2205        4     1172        0
-///     .oat mmap       64        0        0        0
-///     .art mmap     4228     3848       24        2
-///    Other mmap    20713        4    20704        0
-///     GL mtrack     2380     2380        0        0
-///       Unknown    43971    43968        0        1
-///         TOTAL    95085    61120    31392       62    23108    13495     9612
+/// ** MEMINFO in pid 24205 [com.example.official_demo] **
+///                    Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+///                  Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+///                 ------   ------   ------   ------   ------   ------   ------   ------
+///   Native Heap    22669    22644        4       23    24300    35148    19447    12320
+///   Dalvik Heap     3038     1292       68       11     8300    27038     2462    24576
+///  Dalvik Other     1292     1272        0        0     2052
+///         Stack     1224     1224        0        0     1232
+///        Ashmem       20        0        0        0     1664
+///       Gfx dev      556      556        0        0      560
+///     Other dev       25        0       24        0      812
+///      .so mmap     4176      636       64        9    61020
+///     .jar mmap      988        0        0        0    49988
+///     .apk mmap    11417    11344        0        0    13248
+///     .ttf mmap    11085        0    10808        0    12684
+///     .dex mmap        9        0        0        0     1388
+///     .oat mmap      222        0        0        0    14880
+///     .art mmap     1121      480        8       58    16884
+///    Other mmap     4843        4     4828        0     5756
+///    EGL mtrack    60138    60138        0        0    60138
+///     GL mtrack      768      768        0        0      768
+///         Memfd        4        4        0        0        4
+///       Unknown     5596     5500       88        3     6488
+///         TOTAL   129295   105862    15892      104   282166    62186    21909    36896
 ///
 ///  App Summary
-///                        Pss(KB)
-///                         ------
-///            Java Heap:     4296
-///          Native Heap:     8620
-///                 Code:    11288
-///                Stack:      496
-///             Graphics:     2584
-///        Private Other:    65228
-///               System:     2573
+///                        Pss(KB)                        Rss(KB)
+///                         ------                         ------
+///            Java Heap:     1780                          25184
+///          Native Heap:    22644                          24300
+///                 Code:    22868                         153224
+///                Stack:     1224                           1232
+///             Graphics:    61462                          61466
+///        Private Other:    11776
+///               System:     7541
+///              Unknown:                                   16760
 ///
-///                TOTAL:    95085       TOTAL SWAP PSS:       62
+///            TOTAL PSS:   129295            TOTAL RSS:   282166       TOTAL SWAP PSS:      104
 ///
 ///  Objects
-///                Views:        9         ViewRootImpl:        1
-///          AppContexts:        3           Activities:        1
-///              Assets:        4        AssetManagers:        3
-///        Local Binders:       10        Proxy Binders:       18
-///        Parcel memory:        6         Parcel count:       24
-///     Death Recipients:        0      OpenSSL Sockets:        0
-///             WebViews:        0
+///                Views:        6         ViewRootImpl:        1
+///          AppContexts:        6           Activities:        1
+///               Assets:       33        AssetManagers:        0
+///        Local Binders:       31        Proxy Binders:       93
+///        Parcel memory:       11         Parcel count:       42
+///     Death Recipients:        2             WebViews:        0
 ///
 ///  SQL
 ///          MEMORY_USED:        0
@@ -918,6 +921,7 @@ AndroidMemoryInfo parseMeminfoDump(String input) {
       .forEach((String line) {
         final List<String> sections = line.trim().split(':');
         final String key = sections.first.trim();
+        // Each row starts with its Pss value which may be followed by an Rss value that we ignore.
         final int value = int.tryParse(sections.last.trim().split(' ').first) ?? 0;
         switch (key) {
           case AndroidMemoryInfo._kJavaHeapKey:
