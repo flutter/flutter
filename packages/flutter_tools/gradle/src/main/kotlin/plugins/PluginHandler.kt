@@ -5,6 +5,7 @@
 package com.flutter.gradle.plugins
 
 import com.android.build.api.dsl.ApplicationBuildType
+import com.android.build.api.dsl.ApplicationVariantDimension
 import com.flutter.gradle.CompileSdkVersion
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
@@ -150,16 +151,23 @@ class PluginHandler(
             // Copy the app project's build types onto the plugin project so that its variants
             // resolve. These are `initWith` copies, not live aliases: `initWith` copies the
             // properties both build types understand (matchingFallbacks included), and
-            // app-specific properties are additionally copied when both sides are application
-            // build types. Library build types cannot receive app-specific properties (such
-            // as isDebuggable) through the public DSL.
+            // app-specific properties are additionally copied when the plugin is an app.
             val pluginProjectBuildTypes = getAndroidExtension(pluginProject).buildTypes
             getAndroidExtension(project).buildTypes.forEach { appBuildType ->
                 if (pluginProjectBuildTypes.findByName(appBuildType.name) == null) {
                     pluginProjectBuildTypes.create(appBuildType.name) {
                         initWith(appBuildType)
-                        if (this is ApplicationBuildType && appBuildType is ApplicationBuildType) {
-                            isDebuggable = appBuildType.isDebuggable
+                        if (FlutterPluginUtils.isBuiltAsApp(pluginProject)) {
+                            if (this is ApplicationBuildType && appBuildType is ApplicationBuildType) {
+                                isDebuggable = appBuildType.isDebuggable
+                            }
+                        } else if (this is ApplicationVariantDimension) {
+                            // `initWith` also copies applicationIdSuffix, and AGP fails to
+                            // configure a library that sets it. AGP uses one build type class
+                            // for every module type, so a library build type is also an
+                            // ApplicationVariantDimension and the suffix can be cleared here.
+                            // See https://github.com/flutter/flutter/issues/196412.
+                            applicationIdSuffix = null
                         }
                     }
                 }

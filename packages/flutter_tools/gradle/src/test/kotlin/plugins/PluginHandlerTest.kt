@@ -273,6 +273,54 @@ class PluginHandlerTest {
     }
 
     @Test
+    fun `configurePlugins clears applicationIdSuffix on build types copied to library plugins`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<Project>()
+        val pluginProject = mockk<Project>()
+        val appBuildType =
+            mockk<ApplicationBuildType> {
+                every { name } returns "profile"
+                every { isDebuggable } returns false
+            }
+        every { project.logger } returns mockk(relaxed = true)
+
+        setupMockProjectDir(project, tempDir)
+        setupMockPluginProject(project, pluginProject, isAppPlugin = false)
+
+        val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<LibraryBuildType>>(relaxed = true)
+        val mockLibraryExtension = setUpMockLibraryAndroidExtension(pluginProject)
+        every { mockLibraryExtension.buildTypes } returns pluginProjectBuildTypes
+
+        setUpMockAndroidExtension(project, compileSdk = 35, buildTypes = listOf(appBuildType))
+        setupMockPluginLoader(project, listOf(cameraDependency))
+
+        every { pluginProjectBuildTypes.findByName("profile") } returns null
+        // AGP uses one build type class for every module type, so a library build type is
+        // also an ApplicationBuildType and `initWith` copies applicationIdSuffix onto it.
+        val createdBuildType =
+            mockk<LibraryBuildType>(relaxed = true, moreInterfaces = arrayOf(ApplicationBuildType::class))
+        val createActionSlot = slot<Action<LibraryBuildType>>()
+        every {
+            pluginProjectBuildTypes.create("profile", capture(createActionSlot))
+        } returns createdBuildType
+
+        val pluginHandler = PluginHandler(project)
+        pluginHandler.configurePlugins(
+            engineVersionValue = EXAMPLE_ENGINE_VERSION
+        )
+
+        val capturePluginActionSlot = mutableListOf<Action<Project>>()
+        verify { pluginProject.afterEvaluate(capture(capturePluginActionSlot)) }
+        capturePluginActionSlot.forEach { it.execute(pluginProject) }
+
+        createActionSlot.captured.execute(createdBuildType)
+        verify { createdBuildType.initWith(appBuildType) }
+        verify { (createdBuildType as ApplicationBuildType).applicationIdSuffix = null }
+        verify(exactly = 0) { (createdBuildType as ApplicationBuildType).isDebuggable = any() }
+    }
+
+    @Test
     fun `configurePlugins skips creating build types that already exist on the plugin project`(
         @TempDir tempDir: Path
     ) {
