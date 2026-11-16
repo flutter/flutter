@@ -17,6 +17,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/context.dart' hide testLogger;
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 const kExtensionName = 'ext.flutter.test.interestingExtension';
 
@@ -77,10 +78,20 @@ void main() {
 
   testWithoutContext('VM Service returns correct FlutterVersion', () async {
     final mockVMService = FakeVMService();
-    await setUpVmService(vmService: mockVMService);
+    await setUpVmService(flutterVersion: FakeFlutterVersion(), vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
   });
+
+  testWithoutContext(
+    'VM Service does not register flutterVersion service when flutterVersion is null',
+    () async {
+      final mockVMService = FakeVMService();
+      await setUpVmService(vmService: mockVMService);
+
+      expect(mockVMService.services, isNot(contains(kFlutterVersionServiceName)));
+    },
+  );
 
   testUsingContext('VM Service prints messages for connection failures', () {
     final logger = BufferLogger.test();
@@ -194,7 +205,7 @@ void main() {
     expect(call.args, <String, String>{'isolateId': 'def'});
   });
 
-  testUsingContext('runInView forwards arguments correctly', () async {
+  testWithoutContext('runInView forwards arguments correctly', () async {
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(

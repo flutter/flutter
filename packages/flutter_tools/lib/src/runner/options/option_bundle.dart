@@ -26,18 +26,14 @@ abstract class OptionBundle {
 
   /// Registers all option descriptors and child bundles into [parser] and binds
   /// to [command].
-  void register(FlutterCommand command, ArgParser parser, {bool? verboseHelp, bool? hideOverride}) {
+  void register(FlutterCommand command, ArgParser parser, {bool? verboseHelp, bool? hide}) {
     if (title != null) {
       parser.addSeparator(title!);
     }
     onRegister(command);
-    parser.addDescriptors(
-      descriptors,
-      verboseHelp: verboseHelp ?? command.verboseHelp,
-      hideOverride: hideOverride,
-    );
+    parser.addDescriptors(descriptors, verboseHelp: verboseHelp ?? command.verboseHelp, hide: hide);
     for (final OptionBundle subBundle in subBundles) {
-      subBundle.register(command, parser, verboseHelp: verboseHelp, hideOverride: hideOverride);
+      subBundle.register(command, parser, verboseHelp: verboseHelp, hide: hide);
     }
   }
 }

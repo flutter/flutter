@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter_tools_core/flutter_tools_core.dart' as tools_core;
+import 'package:flutter_tools_core/flutter_tools_core.dart' show CpuArch;
 import 'package:meta/meta.dart';
 
 import 'package:package_config/package_config_types.dart';
@@ -15,9 +16,12 @@ import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
+import 'base/platform.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
-import 'globals.dart' as globals;
+
+export 'package:flutter_tools_core/flutter_tools_core.dart' show CpuArch;
 
 /// Whether icon font subsetting is enabled by default.
 const kIconTreeShakerEnabledDefault = true;
@@ -575,83 +579,48 @@ bool isEmulatorBuildMode(BuildMode mode) {
   return mode == BuildMode.debug;
 }
 
-/// Platform-agnostic CPU architecture type.
-enum CpuArch {
-  /// Unknown architecture. Used when the architecture is not relevant.
-  unknown,
-  armv7,
-  arm64,
-  x86,
-  x64,
-  riscv64;
-
-  factory CpuArch.fromName(String name) {
-    return switch (name) {
-      'unknown' => .unknown,
-      'armv7' => .armv7,
-      'arm64' => .arm64,
-      'x86' => .x86,
-      'x64' || 'x86_64' => .x64,
-      'riscv64' => .riscv64,
-      _ => throw Exception('Unsupported CPU arch name "$name"'),
-    };
-  }
-
-  /// The [CpuArch] of the given [hostPlatform].
-  factory CpuArch.fromHostPlatform(HostPlatform hostPlatform) {
-    return switch (hostPlatform) {
-      .darwin_x64 || .linux_x64 || .windows_x64 => .x64,
-      .darwin_arm64 || .linux_arm64 || .windows_arm64 => .arm64,
-      .linux_riscv64 => .riscv64,
-    };
-  }
-
+/// Platform-specific naming helpers on [CpuArch] for built-in Flutter tool
+/// targets.
+extension CpuArchExtension on CpuArch {
   /// Returns the Dart SDK's name for the specified target architecture.
   ///
   /// When building for Darwin platforms, the tool invokes architecture-specific
   /// variants of `gen_snapshot`, one for each target architecture. The output
   /// instructions are then built into architecture-specific binaries, which are
   /// merged into a universal binary using the `lipo` tool.
-  String get dartName {
-    return switch (this) {
-      armv7 => 'armv7',
-      arm64 => 'arm64',
-      x86 => 'x86',
-      x64 => 'x64',
-      riscv64 => 'riscv64',
-      unknown => throw UnsupportedError('Unexpected CPU arch $this'),
-    };
-  }
+  String get dartName => switch (this) {
+    .armv7 || .arm64 || .x86 || .x64 || .riscv64 => name,
+    _ => throw UnsupportedError('Unexpected CPU arch $this'),
+  };
 
   /// The Apple architecture name for this architecture.
   ///
   /// This is the name understood by the Darwin toolchain (e.g. `lipo`, `clang`,
   /// and the `-arch` flag) and used for architecture-specific build output
-  /// directories on iOS and macOS. This differs from [dartName] for [x64],
-  /// which maps to `x86_64` here.
+  /// directories on iOS and macOS. This differs from [dartName] for
+  /// [CpuArch.x64], which maps to `x86_64` here.
   String get darwinArchName => switch (this) {
-    armv7 => 'armv7',
-    arm64 => 'arm64',
-    x64 => 'x86_64',
-    x86 || riscv64 || unknown => throw UnsupportedError('Unexpected Darwin CPU arch $this'),
+    .armv7 || .arm64 => name,
+    .x64 => 'x86_64',
+    _ => throw UnsupportedError('Unexpected Darwin CPU arch $this'),
   };
 
   /// The name of the Android ABI (as used in `jniLibs` directories) for this
   /// architecture.
   String get androidArchName => switch (this) {
-    armv7 => 'armeabi-v7a',
-    arm64 => 'arm64-v8a',
-    x64 => 'x86_64',
-    x86 || riscv64 || unknown => throw UnsupportedError('Unexpected Android CPU arch $this'),
+    .armv7 => 'armeabi-v7a',
+    .arm64 => 'arm64-v8a',
+    .x64 => 'x86_64',
+    _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
   };
 
   /// The `TargetPlatform` name of the Android platform for this architecture.
   String get androidPlatformName => switch (this) {
-    armv7 => 'android-arm',
-    arm64 => 'android-arm64',
-    x64 => 'android-x64',
-    x86 || riscv64 || unknown => throw UnsupportedError('Unexpected Android CPU arch $this'),
-  };
+    .armv7 => TargetPlatform.android_arm,
+    .arm64 => TargetPlatform.android_arm64,
+    .x64 => TargetPlatform.android_x64,
+    _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
+  }.getName();
 }
 
 /// The operating system (or runtime environment) that a [TargetPlatform]
@@ -780,20 +749,19 @@ enum TargetPlatform {
     .unsupported => throw UnsupportedError('Unexpected target platform $this'),
   };
 
-  String get simpleName => switch (this) {
-    linux_x64 || darwin || windows_x64 => 'x64',
-    linux_arm64 || windows_arm64 => 'arm64',
-    linux_riscv64 => 'riscv64',
-    android ||
-    android_arm ||
-    android_arm64 ||
-    android_x64 ||
-    fuchsia_arm64 ||
-    fuchsia_x64 ||
-    ios ||
-    tester ||
-    web_javascript ||
-    unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  /// The [CpuArch] for architecture-specific target platforms.
+  ///
+  /// Throws an [UnsupportedError] for multi-architecture,
+  /// architecture-independent, or non-native target platforms ([android],
+  /// [darwin], [ios], [tester], [web_javascript], and [unsupported]).
+  CpuArch get cpuArch => switch (this) {
+    android_arm => .armv7,
+    android_arm64 || fuchsia_arm64 || linux_arm64 || windows_arm64 => .arm64,
+    android_x64 || fuchsia_x64 || linux_x64 || windows_x64 => .x64,
+    linux_riscv64 => .riscv64,
+    android || darwin || ios || tester || web_javascript || unsupported => throw UnsupportedError(
+      'Target platform $this does not specify a CPU architecture.',
+    ),
   };
 
   static Never throwUnsupportedTarget() =>
@@ -862,72 +830,71 @@ List<CpuArch> getCpuArchsFromEnv(Map<String, String> defines) {
       defaultDarwinArchitectures;
 }
 
-HostPlatform getCurrentHostPlatform() {
-  if (globals.platform.isMacOS) {
-    return switch (globals.os.hostPlatform) {
+/// Returns the current [HostPlatform] for the given [platform] and
+/// [operatingSystemUtils].
+///
+/// On macOS, throws an [Exception] if [OperatingSystemUtils.hostPlatform] is
+/// not a Darwin platform. On Windows, always returns
+/// [HostPlatform.windows_x64]. On unrecognized host platforms, defaults to
+/// [HostPlatform.linux_x64].
+HostPlatform getCurrentHostPlatform({
+  required OperatingSystemUtils operatingSystemUtils,
+  required Platform platform,
+}) {
+  if (platform.isMacOS) {
+    return switch (operatingSystemUtils.hostPlatform) {
       HostPlatform.darwin_arm64 => .darwin_arm64,
       HostPlatform.darwin_x64 => .darwin_x64,
-      _ => throw Exception('Unsupported Darwin host platform "${globals.os.hostPlatform}"'),
+      _ => throw Exception(
+        'Unsupported Darwin host platform "${operatingSystemUtils.hostPlatform}"',
+      ),
     };
   }
-  if (globals.platform.isLinux) {
+  if (platform.isLinux) {
     // support x64 and arm64 architecture.
-    return globals.os.hostPlatform;
+    return operatingSystemUtils.hostPlatform;
   }
-  if (globals.platform.isWindows) {
+  if (platform.isWindows) {
     return HostPlatform.windows_x64;
   }
-
-  globals.printWarning('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
 }
 
 /// Returns the top-level build output directory.
-String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
-  // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
+String getBuildDirectory(Config config, FileSystem fileSystem) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  final Config localConfig = config ?? globals.config;
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
-
-  final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
-  if (localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception('build-dir config setting in ${localConfig.configPath} must be relative');
+  final String buildDir = config.getValue('build-dir') as String? ?? 'build';
+  if (fileSystem.path.isAbsolute(buildDir)) {
+    throw Exception('build-dir config setting in ${config.configPath} must be relative');
   }
   return buildDir;
 }
 
 /// Returns the Android build output directory.
-String getAndroidBuildDirectory() {
+String getAndroidBuildDirectory({required Config config, required FileSystem fileSystem}) {
   // TODO(cbracken): move to android subdir.
-  return getBuildDirectory();
+  return getBuildDirectory(config, fileSystem);
 }
 
 /// Returns the asset build output directory.
-String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
-  return (fileSystem ?? globals.fs).path.join(
-    getBuildDirectory(config, fileSystem),
-    'flutter_assets',
-  );
+String getAssetBuildDirectory(Config config, FileSystem fileSystem) {
+  return fileSystem.path.join(getBuildDirectory(config, fileSystem), 'flutter_assets');
 }
 
 /// Returns the iOS build output directory.
-String getIosBuildDirectory({Config? config, FileSystem? fileSystem}) {
-  final Config localConfig = config ?? globals.config;
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
-  return localFilesystem.path.join(
-    getBuildDirectory(localConfig, localFilesystem),
+String getIosBuildDirectory({required Config config, required FileSystem fileSystem}) {
+  return fileSystem.path.join(
+    getBuildDirectory(config, fileSystem),
     FlutterDarwinPlatform.ios.name,
   );
 }
 
 /// Returns the macOS build output directory.
-String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
-  final Config localConfig = config ?? globals.config;
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
-  return localFilesystem.path.join(
-    getBuildDirectory(localConfig, localFilesystem),
+String getMacOSBuildDirectory({required Config config, required FileSystem fileSystem}) {
+  return fileSystem.path.join(
+    getBuildDirectory(config, fileSystem),
     FlutterDarwinPlatform.macos.name,
   );
 }
@@ -941,26 +908,47 @@ String getWebBuildDirectory({required Config config, required FileSystem fileSys
 ///
 /// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
 /// different flavors can coexist on disk without overwriting each other.
-String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) {
-  final String arch = (targetPlatform == null)
-      ? _getCurrentHostPlatformArchName()
-      : targetPlatform.simpleName;
-  final String subDirs = (flavor != null && flavor.isNotEmpty)
-      ? globals.fs.path.join('linux', arch, flavor)
-      : globals.fs.path.join('linux', arch);
-  return globals.fs.path.join(getBuildDirectory(), subDirs);
+String getLinuxBuildDirectory(
+  TargetPlatform? targetPlatform, {
+  required ToolContext toolContext,
+  String? flavor,
+}) {
+  final ToolContext(
+    :Config config,
+    fs: FileSystem fileSystem,
+    os: OperatingSystemUtils operatingSystemUtils,
+    :Platform platform,
+  ) = toolContext;
+  final CpuArch cpuArch =
+      targetPlatform?.cpuArch ??
+      getCurrentHostPlatform(
+        operatingSystemUtils: operatingSystemUtils,
+        platform: platform,
+      ).cpuArch;
+  final String subDirs = fileSystem.path.joinAll(<String>[
+    'linux',
+    cpuArch.name,
+    if (flavor != null && flavor.isNotEmpty) flavor,
+  ]);
+  return fileSystem.path.join(getBuildDirectory(config, fileSystem), subDirs);
 }
 
 /// Returns the Windows build output directory.
 ///
 /// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
 /// different flavors can coexist on disk without overwriting each other.
-String getWindowsBuildDirectory(TargetPlatform targetPlatform, [String? flavor]) {
-  final String arch = targetPlatform.simpleName;
-  final String subDirs = (flavor != null && flavor.isNotEmpty)
-      ? globals.fs.path.join('windows', arch, flavor)
-      : globals.fs.path.join('windows', arch);
-  return globals.fs.path.join(getBuildDirectory(), subDirs);
+String getWindowsBuildDirectory(
+  TargetPlatform targetPlatform, {
+  required Config config,
+  required FileSystem fileSystem,
+  String? flavor,
+}) {
+  final String subDirs = fileSystem.path.joinAll(<String>[
+    'windows',
+    targetPlatform.cpuArch.name,
+    if (flavor != null && flavor.isNotEmpty) flavor,
+  ]);
+  return fileSystem.path.join(getBuildDirectory(config, fileSystem), subDirs);
 }
 
 /// Defines specified via the `--dart-define` command-line option.
@@ -1172,11 +1160,6 @@ List<String> deprecatedJsInteropCompilerFlags(bool? deprecatedJsInterop) =>
       true => const <String>['--deprecated-js-interop'],
       false => const <String>['--no-deprecated-js-interop'],
     };
-
-String _getCurrentHostPlatformArchName() {
-  final HostPlatform hostPlatform = getCurrentHostPlatform();
-  return hostPlatform.platformName;
-}
 
 String? _uncapitalize(String? s) {
   if (s == null || s.isEmpty) {

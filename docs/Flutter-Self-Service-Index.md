@@ -22,7 +22,7 @@ Flutter provides multiple functionality through self-service services. Most of t
   <tr>
    <td>Flutter organization members
    </td>
-   <td>[Anyone with write access to the flutter organization resources.](./contributing/Contributor-access.md)
+   <td>[Members of the Flutter Contributor Ladder (Reviewers, Committers, and Maintainers).](./contributing/Contributor-access.md)
    </td>
   </tr>
   <tr>

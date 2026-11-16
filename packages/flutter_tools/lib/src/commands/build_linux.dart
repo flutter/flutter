@@ -22,7 +22,7 @@ import 'build.dart';
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
     required this.buildSystem,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     required this._featureFlags,
   }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
@@ -69,9 +69,6 @@ class BuildLinuxCommand extends BuildSubCommand {
   FeatureFlags get featureFlags => _featureFlags;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   final name = 'linux';
 
   @override
@@ -98,7 +95,7 @@ class BuildLinuxCommand extends BuildSubCommand {
 
     final BuildInfo buildInfo = await getBuildInfo();
     final TargetPlatform targetPlatform = getValue(_targetPlatformOption);
-    final needCrossBuild = os.hostPlatform.platformName != targetPlatform.simpleName;
+    final needCrossBuild = os.hostPlatform.cpuArch != targetPlatform.cpuArch;
 
     if (!_featureFlags.isLinuxEnabled) {
       throwToolExit(
