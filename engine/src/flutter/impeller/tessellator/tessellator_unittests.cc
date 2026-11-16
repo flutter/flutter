@@ -771,15 +771,19 @@ TEST(TessellatorTest, QuadrantDivisionsAreMonotonicAcrossAllRanges) {
 
   // Dense across the precomputed table and the table/formula boundary.
   size_t previous = QuadrantSteps(tessellator, 0.5f);
-  for (Scalar radius = 1.0f; radius <= 1100.0f; radius += 0.5f) {
+  // (Integer loop counters, since clang-tidy rejects floating point ones.)
+  for (int half_radius = 2; half_radius <= 2200; half_radius++) {
+    Scalar radius = static_cast<Scalar>(half_radius) * 0.5f;
     size_t steps = QuadrantSteps(tessellator, radius);
     EXPECT_GE(steps, previous) << "radius = " << radius;
     EXPECT_LE(steps, kCap) << "radius = " << radius;
     previous = steps;
   }
 
-  // Geometric sweep from there up through the cap and beyond INT_MAX.
-  for (double radius = 1100.0; radius < 1e20; radius *= 1.25) {
+  // Geometric sweep from there up through the cap and beyond INT_MAX:
+  // 1100 * 1.25^i for i in [0, 175), the last of which is about 8e19.
+  for (int i = 0; i < 175; i++) {
+    double radius = 1100.0 * std::pow(1.25, i);
     size_t steps = QuadrantSteps(tessellator, static_cast<Scalar>(radius));
     EXPECT_GE(steps, previous) << "radius = " << radius;
     EXPECT_LE(steps, kCap) << "radius = " << radius;
