@@ -380,6 +380,7 @@ if (!enable_lto) {
     # executable must connect to the compositor through real GTK and Wayland.
     deps = [
       ":flutter_linux",
+      ":flutter_linux_fixtures",
       "//flutter/testing",
     ]
   }
