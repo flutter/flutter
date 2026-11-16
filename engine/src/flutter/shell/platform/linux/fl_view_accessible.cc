@@ -29,6 +29,9 @@ struct _FlViewAccessible {
 
   // Flag to track when root node is created.
   gboolean root_node_created;
+
+  // TRUE once this view has asked the engine to build semantics.
+  gboolean semantics_requested;
 };
 
 G_DEFINE_TYPE(FlViewAccessible, fl_view_accessible, ATK_TYPE_PLUG)
@@ -90,10 +93,15 @@ static FlAccessibleNode* get_node(FlViewAccessible* self,
 // reads the tree without registering for events, so the AT-SPI registry does
 // not show it. get_n_children is not used for this, as the ATK bridge calls it
 // when it embeds the view whether or not an assistive technology is running.
+// Each request is a synchronous hop to the UI thread, so it is made once.
 static void enable_semantics(FlViewAccessible* self) {
+  if (self->semantics_requested) {
+    return;
+  }
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
   if (engine != nullptr) {
-    fl_engine_enable_semantics(engine);
+    fl_engine_update_semantics_enabled(engine, TRUE);
+    self->semantics_requested = TRUE;
   }
 }
 

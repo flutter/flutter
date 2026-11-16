@@ -11,9 +11,9 @@ static constexpr char kA11yBusPath[] = "/org/a11y/bus";
 static constexpr char kRegistryName[] = "org.a11y.atspi.Registry";
 static constexpr char kRegistryPath[] = "/org/a11y/atspi/registry";
 
-enum { SIGNAL_CLIENT_REGISTERED, LAST_SIGNAL };
+enum { PROP_0, PROP_ENABLED, PROP_LAST };
 
-static guint fl_at_spi_monitor_signals[LAST_SIGNAL];
+static GParamSpec* fl_at_spi_monitor_properties[PROP_LAST];
 
 struct _FlAtSpiMonitor {
   GObject parent_instance;
@@ -25,7 +25,7 @@ struct _FlAtSpiMonitor {
 
   guint listener_registered_id;
 
-  gboolean client_registered;
+  gboolean enabled;
 };
 
 G_DEFINE_TYPE(FlAtSpiMonitor, fl_at_spi_monitor, G_TYPE_OBJECT)
@@ -38,13 +38,14 @@ static void unsubscribe(FlAtSpiMonitor* self) {
   }
 }
 
-static void notify_client_registered(FlAtSpiMonitor* self) {
-  if (self->client_registered) {
+static void set_enabled(FlAtSpiMonitor* self) {
+  if (self->enabled) {
     return;
   }
-  self->client_registered = TRUE;
+  self->enabled = TRUE;
   unsubscribe(self);
-  g_signal_emit(self, fl_at_spi_monitor_signals[SIGNAL_CLIENT_REGISTERED], 0);
+  g_object_notify_by_pspec(G_OBJECT(self),
+                           fl_at_spi_monitor_properties[PROP_ENABLED]);
 }
 
 static void listener_registered_cb(GDBusConnection* connection,
@@ -54,7 +55,7 @@ static void listener_registered_cb(GDBusConnection* connection,
                                    const gchar* signal_name,
                                    GVariant* parameters,
                                    gpointer user_data) {
-  notify_client_registered(FL_AT_SPI_MONITOR(user_data));
+  set_enabled(FL_AT_SPI_MONITOR(user_data));
 }
 
 static void get_registered_events_cb(GObject* object,
@@ -72,7 +73,7 @@ static void get_registered_events_cb(GObject* object,
 
   g_autoptr(GVariant) events = g_variant_get_child_value(value, 0);
   if (g_variant_n_children(events) > 0) {
-    notify_client_registered(FL_AT_SPI_MONITOR(user_data));
+    set_enabled(FL_AT_SPI_MONITOR(user_data));
   }
 }
 
@@ -162,12 +163,32 @@ static void fl_at_spi_monitor_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_at_spi_monitor_parent_class)->dispose(object);
 }
 
-static void fl_at_spi_monitor_class_init(FlAtSpiMonitorClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_at_spi_monitor_dispose;
+static void fl_at_spi_monitor_get_property(GObject* object,
+                                           guint prop_id,
+                                           GValue* value,
+                                           GParamSpec* pspec) {
+  FlAtSpiMonitor* self = FL_AT_SPI_MONITOR(object);
+  switch (prop_id) {
+    case PROP_ENABLED:
+      g_value_set_boolean(value, self->enabled);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      break;
+  }
+}
 
-  fl_at_spi_monitor_signals[SIGNAL_CLIENT_REGISTERED] = g_signal_new(
-      "client-registered", fl_at_spi_monitor_get_type(), G_SIGNAL_RUN_LAST, 0,
-      nullptr, nullptr, nullptr, G_TYPE_NONE, 0);
+static void fl_at_spi_monitor_class_init(FlAtSpiMonitorClass* klass) {
+  GObjectClass* object_class = G_OBJECT_CLASS(klass);
+  object_class->dispose = fl_at_spi_monitor_dispose;
+  object_class->get_property = fl_at_spi_monitor_get_property;
+
+  fl_at_spi_monitor_properties[PROP_ENABLED] = g_param_spec_boolean(
+      "enabled", "enabled", "An assistive technology uses the application",
+      FALSE,
+      static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+  g_object_class_install_properties(object_class, PROP_LAST,
+                                    fl_at_spi_monitor_properties);
 }
 
 static void fl_at_spi_monitor_init(FlAtSpiMonitor* self) {
@@ -204,4 +225,9 @@ void fl_at_spi_monitor_start(FlAtSpiMonitor* self) {
           G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT |
           G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION),
       nullptr, self->cancellable, session_bus_cb, self);
+}
+
+gboolean fl_at_spi_monitor_get_enabled(FlAtSpiMonitor* self) {
+  g_return_val_if_fail(FL_IS_AT_SPI_MONITOR(self), FALSE);
+  return self->enabled;
 }

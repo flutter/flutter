@@ -25,10 +25,10 @@ G_DECLARE_FINAL_TYPE(FlAtSpiMonitor,
  * application. The ATK bridge uses the same registrations to decide when to
  * serve the tree.
  *
- * The "client-registered" signal is emitted once, when the registry has an
- * event listener for the first time. If the accessibility bus is not
- * available, the signal is never emitted, as no assistive technology can
- * connect.
+ * The #FlAtSpiMonitor:enabled property becomes %TRUE when the registry has an
+ * event listener for the first time, and then stays %TRUE. If the
+ * accessibility bus is not available, it stays %FALSE, as no assistive
+ * technology can connect.
  */
 
 /**
@@ -47,6 +47,17 @@ FlAtSpiMonitor* fl_at_spi_monitor_new();
  * Connects to the accessibility bus and starts to watch the registry.
  */
 void fl_at_spi_monitor_start(FlAtSpiMonitor* monitor);
+
+/**
+ * fl_at_spi_monitor_get_enabled:
+ * @monitor: an #FlAtSpiMonitor.
+ *
+ * Gets whether an assistive technology has registered with the AT-SPI
+ * registry.
+ *
+ * Returns: %TRUE if an assistive technology has registered.
+ */
+gboolean fl_at_spi_monitor_get_enabled(FlAtSpiMonitor* monitor);
 
 G_END_DECLS
 

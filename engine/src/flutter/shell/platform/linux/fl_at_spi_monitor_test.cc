@@ -5,10 +5,15 @@
 #include "flutter/shell/platform/linux/fl_at_spi_monitor.h"
 
 #include <gio/gio.h>
+#include <glib/gstdio.h>
+#include <unistd.h>
 
 #include <utility>
 #include <vector>
 
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 namespace {
@@ -32,9 +37,21 @@ constexpr char kIntrospection[] =
     "  </interface>"
     "</node>";
 
+constexpr char kBusConfig[] =
+    "<busconfig>"
+    "  <type>session</type>"
+    "  <listen>unix:tmpdir=/tmp</listen>"
+    "  <auth>EXTERNAL</auth>"
+    "  <policy context='default'>"
+    "    <allow send_destination='*' eavesdrop='true'/>"
+    "    <allow eavesdrop='true'/>"
+    "    <allow own='*'/>"
+    "  </policy>"
+    "</busconfig>";
+
 // Runs a private session bus that is also the accessibility bus, with a fake
 // AT-SPI registry on it.
-class FlAtSpiMonitorTest : public ::testing::Test {
+class FlAtSpiMonitorTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     // The test changes these, and later tests need the real values.
@@ -50,9 +67,19 @@ class FlAtSpiMonitorTest : public ::testing::Test {
       GTEST_SKIP() << "dbus-daemon is not installed";
     }
     g_autoptr(GError) error = nullptr;
+    // A session bus without service directories, so the real desktop portal
+    // and AT-SPI services are not started on it.
+    gint config_fd =
+        g_file_open_tmp("fl-at-spi-bus-XXXXXX.conf", &config_path_, &error);
+    ASSERT_NE(config_fd, -1) << error->message;
+    close(config_fd);
+    ASSERT_TRUE(g_file_set_contents(config_path_, kBusConfig, -1, &error))
+        << error->message;
+    g_autofree gchar* config_arg =
+        g_strdup_printf("--config-file=%s", config_path_);
     daemon_ =
         g_subprocess_new(G_SUBPROCESS_FLAGS_STDOUT_PIPE, &error, "dbus-daemon",
-                         "--session", "--nofork", "--print-address", nullptr);
+                         config_arg, "--nofork", "--print-address", nullptr);
     ASSERT_NE(daemon_, nullptr) << error->message;
     g_autoptr(GDataInputStream) out =
         g_data_input_stream_new(g_subprocess_get_stdout_pipe(daemon_));
@@ -88,6 +115,9 @@ class FlAtSpiMonitorTest : public ::testing::Test {
   }
 
   void TearDown() override {
+    // Free the engine and its monitor while the bus is still running.
+    LinuxTest::TearDown();
+
     g_clear_pointer(&node_, g_dbus_node_info_unref);
     g_clear_object(&connection_);
     if (daemon_ != nullptr) {
@@ -96,6 +126,10 @@ class FlAtSpiMonitorTest : public ::testing::Test {
     }
     g_clear_object(&daemon_);
     g_clear_pointer(&address_, g_free);
+    if (config_path_ != nullptr) {
+      g_unlink(config_path_);
+    }
+    g_clear_pointer(&config_path_, g_free);
 
     for (auto& [name, value] : saved_environment_) {
       if (value == nullptr) {
@@ -169,6 +203,7 @@ class FlAtSpiMonitorTest : public ::testing::Test {
 
   GSubprocess* daemon_ = nullptr;
   gchar* address_ = nullptr;
+  gchar* config_path_ = nullptr;
   GDBusConnection* connection_ = nullptr;
   GDBusNodeInfo* node_ = nullptr;
 };
@@ -182,40 +217,44 @@ void count_cb(int* count) {
 TEST_F(FlAtSpiMonitorTest, NoClient) {
   g_autoptr(FlAtSpiMonitor) monitor = fl_at_spi_monitor_new();
   int count = 0;
-  g_signal_connect_swapped(monitor, "client-registered", G_CALLBACK(count_cb),
+  g_signal_connect_swapped(monitor, "notify::enabled", G_CALLBACK(count_cb),
                            &count);
   fl_at_spi_monitor_start(monitor);
   Flush();
 
   EXPECT_EQ(count, 0);
+  EXPECT_FALSE(fl_at_spi_monitor_get_enabled(monitor));
 }
 
 TEST_F(FlAtSpiMonitorTest, ClientAlreadyRegistered) {
   has_listener_ = true;
   g_autoptr(FlAtSpiMonitor) monitor = fl_at_spi_monitor_new();
   int count = 0;
-  g_signal_connect_swapped(monitor, "client-registered", G_CALLBACK(count_cb),
+  g_signal_connect_swapped(monitor, "notify::enabled", G_CALLBACK(count_cb),
                            &count);
   fl_at_spi_monitor_start(monitor);
   Flush();
 
   EXPECT_EQ(count, 1);
+  EXPECT_TRUE(fl_at_spi_monitor_get_enabled(monitor));
 }
 
 TEST_F(FlAtSpiMonitorTest, ClientRegistersLater) {
   g_autoptr(FlAtSpiMonitor) monitor = fl_at_spi_monitor_new();
   int count = 0;
-  g_signal_connect_swapped(monitor, "client-registered", G_CALLBACK(count_cb),
+  g_signal_connect_swapped(monitor, "notify::enabled", G_CALLBACK(count_cb),
                            &count);
   fl_at_spi_monitor_start(monitor);
   Flush();
   EXPECT_EQ(count, 0);
+  EXPECT_FALSE(fl_at_spi_monitor_get_enabled(monitor));
 
   EmitListenerRegistered();
   Flush();
   EXPECT_EQ(count, 1);
+  EXPECT_TRUE(fl_at_spi_monitor_get_enabled(monitor));
 
-  // A second client does not emit again.
+  // A second client does not notify again.
   EmitListenerRegistered();
   Flush();
   EXPECT_EQ(count, 1);
@@ -238,10 +277,28 @@ TEST_F(FlAtSpiMonitorTest, BusAddressFromEnvironment) {
   g_setenv("AT_SPI_BUS_ADDRESS", bus_address(), TRUE);
   g_autoptr(FlAtSpiMonitor) monitor = fl_at_spi_monitor_new();
   int count = 0;
-  g_signal_connect_swapped(monitor, "client-registered", G_CALLBACK(count_cb),
+  g_signal_connect_swapped(monitor, "notify::enabled", G_CALLBACK(count_cb),
                            &count);
   fl_at_spi_monitor_start(monitor);
   Flush();
 
   EXPECT_EQ(count, 1);
+}
+
+// The engine builds semantics once an assistive technology registers.
+TEST_F(FlAtSpiMonitorTest, EnablesEngineSemantics) {
+  bool enabled = false;
+  fl_engine_get_embedder_api(engine)->UpdateSemanticsEnabled = MOCK_ENGINE_PROC(
+      UpdateSemanticsEnabled, ([&enabled](auto engine, bool value) {
+        enabled = value;
+        return kSuccess;
+      }));
+
+  StartEngine();
+  Flush();
+  EXPECT_FALSE(enabled);
+
+  EmitListenerRegistered();
+  Flush();
+  EXPECT_TRUE(enabled);
 }

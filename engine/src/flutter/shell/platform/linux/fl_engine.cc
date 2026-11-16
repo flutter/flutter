@@ -60,11 +60,8 @@ struct _FlEngine {
   // Implements the flutter/settings channel.
   FlSettingsHandler* settings_handler;
 
-  // Enables semantics when an assistive technology connects.
+  // Watches for accessibility clients.
   FlAtSpiMonitor* at_spi_monitor;
-
-  // TRUE once the engine has been told to build semantics.
-  gboolean semantics_enabled;
 
   // Implements the flutter/platform channel.
   FlPlatformHandler* platform_handler;
@@ -766,23 +763,9 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
   return self->display_monitor;
 }
 
-void fl_engine_enable_semantics(FlEngine* self) {
-  g_return_if_fail(FL_IS_ENGINE(self));
-
-  if (self->semantics_enabled || self->engine == nullptr) {
-    return;
-  }
-  if (self->embedder_api.UpdateSemanticsEnabled(self->engine, TRUE) !=
-      kSuccess) {
-    g_warning("Failed to enable semantics on Flutter engine");
-    return;
-  }
-  self->semantics_enabled = TRUE;
-  g_clear_object(&self->at_spi_monitor);
-}
-
-static void at_spi_client_registered_cb(FlEngine* self) {
-  fl_engine_enable_semantics(self);
+static void at_spi_enabled_cb(FlEngine* self) {
+  fl_engine_update_semantics_enabled(
+      self, fl_at_spi_monitor_get_enabled(self->at_spi_monitor));
 }
 
 gboolean fl_engine_start(FlEngine* self, GError** error) {
@@ -956,11 +939,10 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
   setup_keyboard(self);
 
-  // Semantics cost time on every frame, so build them only while an
-  // assistive technology uses them, as the other desktop embedders do.
   self->at_spi_monitor = fl_at_spi_monitor_new();
-  g_signal_connect_swapped(self->at_spi_monitor, "client-registered",
-                           G_CALLBACK(at_spi_client_registered_cb), self);
+  g_signal_connect_object(self->at_spi_monitor, "notify::enabled",
+                          G_CALLBACK(at_spi_enabled_cb), self,
+                          G_CONNECT_SWAPPED);
   fl_at_spi_monitor_start(self->at_spi_monitor);
 
   fl_display_monitor_start(self->display_monitor);
@@ -1646,6 +1628,19 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
           self->engine, static_cast<FlutterAccessibilityFeature>(flags)) !=
       kSuccess) {
     g_warning("Failed to update accessibility features");
+  }
+}
+
+void fl_engine_update_semantics_enabled(FlEngine* self, gboolean enabled) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  if (self->embedder_api.UpdateSemanticsEnabled(self->engine, enabled) !=
+      kSuccess) {
+    g_warning("Failed to update semantics enabled");
   }
 }
 
