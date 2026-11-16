@@ -169,15 +169,15 @@ class PluginHandler(
         /**
          * Copies the properties of [appBuildType] that a library plugin needs onto
          * [libraryBuildType].
-         *
-         * Unlike `initWith`, this skips app-only properties, such as applicationIdSuffix, that
-         * AGP rejects in a library (https://github.com/flutter/flutter/issues/196412). It also
-         * skips isMinifyEnabled, because the app's R8 run already shrinks the plugin code.
          */
         private fun copyLibraryBuildTypeProperties(
             appBuildType: DslBuildType,
             libraryBuildType: DslBuildType
         ) {
+            // Unlike initWith, this skips app-only properties, such as applicationIdSuffix,
+            // that AGP rejects in a library (https://github.com/flutter/flutter/issues/196412).
+            // It also skips isMinifyEnabled, because the app's R8 run already shrinks the
+            // plugin code.
             libraryBuildType.matchingFallbacks.addAll(appBuildType.matchingFallbacks)
             // isDebuggable is not on the LibraryBuildType interface, but library variants
             // still read it. AGP's build type class implements ApplicationBuildType too.
