@@ -148,7 +148,8 @@ void gdk_window_set_cursor(GdkWindow* window, GdkCursor* cursor) {
 
 GdkGLContext* gdk_window_create_gl_context(GdkWindow* window, GError** error) {
   check_thread();
-  return mock == nullptr ? nullptr : mock->gdk_window_create_gl_context(window, error);
+  return mock == nullptr ? nullptr
+                         : mock->gdk_window_create_gl_context(window, error);
 }
 
 void gdk_cairo_set_source_rgba(cairo_t* cr, const GdkRGBA* rgba) {
