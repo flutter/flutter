@@ -63,6 +63,14 @@ class ManifestVersionCodeTest {
     }
 
     @Test
+    fun `without a main manifest, the lowest-priority overlay is not read as the main manifest`() {
+        val flavor = manifest("free.xml", "android:versionCode=\"9\"")
+        val buildType = manifest("debug.xml", "android:versionCode=\"8\"")
+
+        assertEquals(Result.Found(9), ManifestVersionCode.from(listOf(flavor, buildType, "main.xml" to null)))
+    }
+
+    @Test
     fun `a placeholder in the main manifest is unresolved`() {
         val main = manifest("main.xml", "android:versionCode=\"\${vc}\"")
 

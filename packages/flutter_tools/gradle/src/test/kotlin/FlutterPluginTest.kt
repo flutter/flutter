@@ -476,17 +476,17 @@ class FlutterPluginTest {
         every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
         val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
         val project = stubManifestVersionCodeTaskRegistration(env, tempDir)
-        // Like AGP's ManifestFiles.all after addGeneratedManifestFile: a list whose last item
-        // is produced by a task.
+        // Like AGP's ManifestFiles.all after addGeneratedManifestFile: the reversed list of the
+        // main manifest and then the generated one, which a task produces.
         val generateManifest =
             project.tasks.register("generateEngineFlagsManifestDebug", GenerateEngineFlagsManifestTask::class.java) {
                 manifestOutputFile.set(project.layout.buildDirectory.file("generated/AndroidManifest.xml"))
             }
-        val manifests = project.objects.listProperty(RegularFile::class.java)
-        manifests.add(project.layout.projectDirectory.file("src/main/AndroidManifest.xml"))
-        manifests.add(generateManifest.flatMap { it.manifestOutputFile })
+        val manifestFiles = project.objects.listProperty(RegularFile::class.java)
+        manifestFiles.add(project.layout.projectDirectory.file("src/main/AndroidManifest.xml"))
+        manifestFiles.add(generateManifest.flatMap { it.manifestOutputFile })
         val variant = mockApplicationVariant(outputs = listOf(arm64.output))
-        every { variant.sources.manifests.all } returns manifests
+        every { variant.sources.manifests.all } returns manifestFiles.map { it.reversed() }
 
         onVariant(variant)
 
