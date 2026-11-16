@@ -33,6 +33,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -97,6 +98,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -149,6 +151,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -209,6 +212,7 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -257,6 +261,7 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -305,6 +310,7 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -366,6 +372,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -417,6 +424,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -467,6 +475,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -531,6 +540,7 @@
                 "debug",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -585,6 +595,7 @@
                 "debug",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -638,6 +649,7 @@
                 "debug",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -701,6 +713,7 @@
                 "profile",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -753,6 +766,7 @@
                 "profile",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -805,6 +819,7 @@
                 "profile",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -869,6 +884,7 @@
                 "release",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader"
@@ -924,6 +940,7 @@
                 "release",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader"
@@ -978,6 +995,7 @@
                 "release",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader"

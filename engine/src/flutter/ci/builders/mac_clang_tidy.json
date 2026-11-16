@@ -17,6 +17,7 @@
                 "--no-lto",
                 "--target-dir",
                 "ci/host_debug_clang_tidy",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -49,6 +50,7 @@
                 "--no-lto",
                 "--target-dir",
                 "ci/ios_debug_sim_clang_tidy",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -95,6 +97,7 @@
                         "--no-lto",
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
+                        "--siso",
                         "--rbe",
                         "--xcode-symlinks"
                     ]
@@ -148,6 +151,7 @@
                         "--no-lto",
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
+                        "--siso",
                         "--rbe",
                         "--xcode-symlinks"
                     ]
@@ -201,6 +205,7 @@
                         "--no-lto",
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
+                        "--siso",
                         "--rbe",
                         "--xcode-symlinks"
                     ]
@@ -254,6 +259,7 @@
                         "--no-lto",
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
+                        "--siso",
                         "--rbe",
                         "--xcode-symlinks"
                     ]
@@ -308,6 +314,7 @@
                         "--no-lto",
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
+                        "--siso",
                         "--rbe",
                         "--xcode-symlinks"
                     ]

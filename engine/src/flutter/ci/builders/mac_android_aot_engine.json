@@ -38,6 +38,7 @@
                 "--runtime-mode",
                 "profile",
                 "--android",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -94,6 +95,7 @@
                 "profile",
                 "--android",
                 "--android-cpu=arm64",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -151,6 +153,7 @@
                 "profile",
                 "--android",
                 "--android-cpu=x64",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -207,6 +210,7 @@
                 "--runtime-mode",
                 "release",
                 "--android",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -263,6 +267,7 @@
                 "release",
                 "--android",
                 "--android-cpu=arm64",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -320,6 +325,7 @@
                 "release",
                 "--android",
                 "--android-cpu=x64",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],

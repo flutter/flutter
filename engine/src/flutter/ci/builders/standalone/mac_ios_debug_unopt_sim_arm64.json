@@ -18,6 +18,7 @@
         "--no-lto",
         "--simulator-cpu",
         "arm64",
+        "--siso",
         "--rbe",
         "--xcode-symlinks",
         "--target-dir",
