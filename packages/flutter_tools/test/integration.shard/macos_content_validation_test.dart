@@ -8,6 +8,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -24,16 +25,7 @@ void main() {
       testWithoutContext('verify ${buildMode.cliName} FlutterMacOS.xcframework artifact', () {
         final String flutterRoot = getFlutterRoot();
 
-        final String artifactDir;
-        switch (buildMode) {
-          case BuildMode.debug:
-          case BuildMode.jitRelease:
-            artifactDir = 'darwin-x64';
-          case BuildMode.profile:
-            artifactDir = 'darwin-x64-profile';
-          case BuildMode.release:
-            artifactDir = 'darwin-x64-release';
-        }
+        final String artifactDir = FlutterDarwinPlatform.macos.artifactName(buildMode);
         final Directory xcframeworkArtifact = fileSystem.directory(
           fileSystem.path.join(
             flutterRoot,
@@ -58,6 +50,20 @@ void main() {
 
         expect(result, const ProcessResultMatcher());
         expect(xcframeworkArtifact.existsSync(), isTrue);
+
+        // Verify the Swift package checksum of the framework.zip was recorded.
+        final File checksumFile = xcframeworkArtifact.parent.childFile(
+          'framework.zip.checksum.json',
+        );
+        expect(checksumFile, exists);
+
+        final Object? checksumJson = json.decode(checksumFile.readAsStringSync());
+        if (checksumJson case {'url': final String url, 'checksum': final String checksum}) {
+          expect(url, endsWith('/$artifactDir/${FlutterDarwinPlatform.macos.artifactZip}'));
+          expect(checksum, isNotNull);
+        } else {
+          fail('${checksumFile.path} is missing "url" or "checksum" key: $checksumJson');
+        }
 
         final Directory frameworkArtifact = fileSystem.directory(
           fileSystem.path.joinAll(<String>[

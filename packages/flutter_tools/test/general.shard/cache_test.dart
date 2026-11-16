@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -27,6 +28,7 @@ import 'package:test/fake.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_http_client.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 const unameCommandForX64 = FakeCommand(command: <String>['uname', '-m'], stdout: 'x86_64');
@@ -1288,9 +1290,203 @@ void main() {
     ]);
   });
 
+  testWithoutContext('iOS engine artifacts record the checksum of artifacts.zip', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_cache_test_artifact.',
+    );
+    final cache = FakeSecondaryCache()..artifactDirectory = artifactDir;
+    artifactDir.childFile('LICENSE').createSync();
+    final File archive = fileSystem.file('downloaded.zip')..createSync();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      for (final String mode in <String>['debug', 'profile', 'release'])
+        FakeCommand(
+          command: <String>['xcrun', 'swift', 'package', 'compute-checksum', archive.path],
+          stdout: '${mode}_checksum\n',
+        ),
+    ]);
+    final artifacts = IOSEngineArtifacts(
+      cache,
+      platform: FakePlatform(operatingSystem: 'macos'),
+      processManager: processManager,
+      logger: BufferLogger.test(),
+    );
+    final artifactUpdater = FakeArtifactUpdater()
+      ..onDownloadZipArchive = (String message, Uri url, Directory location) {
+        location.createSync(recursive: true);
+      };
+
+    await artifacts.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+    for (final Future<void> Function(File)? onExtracted
+        in artifactUpdater.onExtractedCallbacks.values) {
+      await onExtracted!(archive);
+    }
+
+    expect(processManager, hasNoRemainingExpectations);
+    expect(
+      artifactDir.childFile('ios/artifacts.zip.checksum.json').readAsStringSync(),
+      json.encode(<String, String>{
+        'url':
+            'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/ios/artifacts.zip',
+        'checksum': 'debug_checksum',
+      }),
+    );
+    expect(
+      artifactDir.childFile('ios-profile/artifacts.zip.checksum.json').readAsStringSync(),
+      json.encode(<String, String>{
+        'url': 'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/ios-profile/artifacts.zip',
+        'checksum': 'profile_checksum',
+      }),
+    );
+    expect(
+      artifactDir.childFile('ios-release/artifacts.zip.checksum.json').readAsStringSync(),
+      json.encode(<String, String>{
+        'url': 'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/ios-release/artifacts.zip',
+        'checksum': 'release_checksum',
+      }),
+    );
+  });
+
+  testWithoutContext('iOS engine artifacts do not record checksums on non-macOS hosts', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_cache_test_artifact.',
+    );
+    final cache = FakeSecondaryCache()
+      ..artifactDirectory = artifactDir
+      ..includeAllPlatforms = true;
+    artifactDir.childFile('LICENSE').createSync();
+    final processManager = FakeProcessManager.empty();
+    final artifacts = IOSEngineArtifacts(
+      cache,
+      platform: FakePlatform(),
+      processManager: processManager,
+      logger: BufferLogger.test(),
+    );
+    final artifactUpdater = FakeArtifactUpdater()
+      ..onDownloadZipArchive = (String message, Uri url, Directory location) {
+        location.createSync(recursive: true);
+      };
+
+    await artifacts.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+    expect(artifactUpdater.onExtractedCallbacks, hasLength(3));
+    for (final Future<void> Function(File)? onExtracted
+        in artifactUpdater.onExtractedCallbacks.values) {
+      await onExtracted!(fileSystem.file('downloaded.zip'));
+    }
+
+    expect(processManager, hasNoRemainingExpectations);
+    expect(artifactDir.childFile('ios/artifacts.zip.checksum.json'), isNot(exists));
+  });
+
+  testWithoutContext(
+    'iOS engine artifacts remove a stale checksum if it cannot be computed',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_cache_test_artifact.',
+      );
+      final cache = FakeSecondaryCache()..artifactDirectory = artifactDir;
+      artifactDir.childFile('LICENSE').createSync();
+      final File staleChecksum = artifactDir.childFile('ios/artifacts.zip.checksum.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stale_checksum');
+      final File archive = fileSystem.file('downloaded.zip')..createSync();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>['xcrun', 'swift', 'package', 'compute-checksum', archive.path],
+          exitCode: 1,
+          stderr: 'xcrun: error',
+        ),
+      ]);
+      final logger = BufferLogger.test();
+      final artifacts = IOSEngineArtifacts(
+        cache,
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: processManager,
+        logger: logger,
+      );
+      final artifactUpdater = FakeArtifactUpdater()
+        ..onDownloadZipArchive = (String message, Uri url, Directory location) {
+          location.createSync(recursive: true);
+        };
+
+      await artifacts.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+      await artifactUpdater.onExtractedCallbacks[Uri.parse(
+        'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/ios/artifacts.zip',
+      )]!(archive);
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(staleChecksum, isNot(exists));
+      expect(logger.traceText, contains('xcrun: error'));
+    },
+  );
+
+  testWithoutContext('macOS engine artifacts only record the checksum of framework.zip', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_cache_test_artifact.',
+    );
+    final cache = FakeSecondaryCache()..artifactDirectory = artifactDir;
+    final File archive = fileSystem.file('downloaded.zip')..createSync();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      for (final String mode in <String>['debug', 'profile', 'release'])
+        FakeCommand(
+          command: <String>['xcrun', 'swift', 'package', 'compute-checksum', archive.path],
+          stdout: '${mode}_checksum\n',
+        ),
+    ]);
+    final artifacts = MacOSEngineArtifacts(
+      cache,
+      platform: FakePlatform(operatingSystem: 'macos'),
+      processManager: processManager,
+      logger: BufferLogger.test(),
+    );
+    final artifactUpdater = FakeArtifactUpdater()
+      ..onDownloadZipArchive = (String message, Uri url, Directory location) {
+        location.createSync(recursive: true);
+      };
+
+    await artifacts.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+    for (final Future<void> Function(File)? onExtracted
+        in artifactUpdater.onExtractedCallbacks.values) {
+      await onExtracted!(archive);
+    }
+
+    expect(processManager, hasNoRemainingExpectations);
+    expect(
+      artifactDir.childFile('darwin-x64/framework.zip.checksum.json').readAsStringSync(),
+      json.encode(<String, String>{
+        'url': 'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/darwin-x64/framework.zip',
+        'checksum': 'debug_checksum',
+      }),
+    );
+    expect(
+      artifactDir.childFile('darwin-x64-profile/framework.zip.checksum.json').readAsStringSync(),
+      json.encode(<String, String>{
+        'url': 'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/darwin-x64-profile/framework.zip',
+        'checksum': 'profile_checksum',
+      }),
+    );
+    expect(
+      artifactDir.childFile('darwin-x64-release/framework.zip.checksum.json').readAsStringSync(),
+      json.encode(<String, String>{
+        'url': 'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/darwin-x64-release/framework.zip',
+        'checksum': 'release_checksum',
+      }),
+    );
+    expect(artifactDir.childFile('darwin-x64/gen_snapshot.zip.checksum.json'), isNot(exists));
+    expect(artifactDir.childFile('darwin-x64-release/artifacts.zip.checksum.json'), isNot(exists));
+  });
+
   testWithoutContext('macOS desktop artifacts include all gen_snapshot binaries', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
-    final artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform());
+    final artifacts = MacOSEngineArtifacts(
+      cache,
+      platform: FakePlatform(),
+      processManager: FakeProcessManager.empty(),
+      logger: BufferLogger.test(),
+    );
     cache.includeAllPlatforms = false;
     cache.platformOverrideArtifacts = <String>{'macos'};
 
@@ -1306,7 +1502,12 @@ void main() {
 
   testWithoutContext('macOS desktop artifacts ignore filtering when requested', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
-    final artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform());
+    final artifacts = MacOSEngineArtifacts(
+      cache,
+      platform: FakePlatform(),
+      processManager: FakeProcessManager.empty(),
+      logger: BufferLogger.test(),
+    );
     cache.includeAllPlatforms = false;
     cache.platformOverrideArtifacts = <String>{'macos'};
 
@@ -2047,6 +2248,12 @@ class FakeSecondaryCache extends Fake implements Cache {
   late void Function(String artifactName, String version) onSetStamp;
 
   @override
+  bool includeAllPlatforms = false;
+
+  @override
+  Set<String>? platformOverrideArtifacts;
+
+  @override
   String get storageBaseUrl => 'https://storage.googleapis.com';
 
   @override
@@ -2144,13 +2351,22 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   void Function(String, Uri, Directory)? onDownloadZipTarball;
   void Function(String, Uri, Directory)? onDownloadFile;
 
+  /// The `onExtracted` callbacks passed to [downloadZipArchive], keyed by download URL.
+  final onExtractedCallbacks = <Uri, Future<void> Function(File archive)?>{};
+
   @override
   Future<void> downloadZippedTarball(String artifactName, Uri url, Directory location) async {
     onDownloadZipTarball?.call(artifactName, url, location);
   }
 
   @override
-  Future<void> downloadZipArchive(String artifactName, Uri url, Directory location) async {
+  Future<void> downloadZipArchive(
+    String artifactName,
+    Uri url,
+    Directory location, {
+    Future<void> Function(File archive)? onExtracted,
+  }) async {
+    onExtractedCallbacks[url] = onExtracted;
     onDownloadZipArchive?.call(artifactName, url, location);
   }
 
