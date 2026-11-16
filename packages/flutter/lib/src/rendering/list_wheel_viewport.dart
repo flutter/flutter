@@ -848,6 +848,19 @@ class RenderListWheelViewport extends RenderBox
     }
   }
 
+  @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    final childParentData = child.parentData! as ListWheelParentData;
+    // This render object is a repaint boundary, so it is always painted at
+    // Offset.zero.
+    final double fractionalY =
+        (_getUntransformedPaintingCoordinateY(childParentData.offset.dy) + _itemExtent / 2.0) /
+        size.height;
+    final double angle = -(fractionalY - 0.5) * 2.0 * _maxVisibleRadian / squeeze;
+    return !(angle > math.pi / 2.0 || angle < -math.pi / 2.0 || angle.isNaN);
+  }
+
   // Takes in a child with a **scrollable layout offset** and paints it in the
   // **transformed cylindrical space viewport painting coordinates**.
   //

@@ -16,6 +16,76 @@ import '../image_data.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('ListWheelScrollView does not report children on the back of the wheel as painted', (
+    WidgetTester tester,
+  ) async {
+    final controller = FixedExtentScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: ListWheelScrollView(
+              controller: controller,
+              itemExtent: 50,
+              diameterRatio: 0.5,
+              renderChildrenOutsideViewport: true,
+              clipBehavior: Clip.none,
+              children: List<Widget>.generate(5, (int index) => const SizedBox()),
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderListWheelViewport viewport = tester.renderObject(find.byType(ListWheelViewport));
+    List<bool> painted() {
+      final painted = <bool>[];
+      viewport.visitChildren(
+        (RenderObject child) => painted.add(viewport.paintsChild(child as RenderBox)),
+      );
+      return painted;
+    }
+
+    // With a diameter ratio below 1 and an item extent of a quarter of the
+    // viewport, the child at index i is at an angle of
+    // (selectedItem - i) * pi / 4 on the wheel.
+    expect(painted(), <bool>[true, true, true, false, false]);
+
+    controller.jumpToItem(4);
+    await tester.pump();
+    expect(painted(), <bool>[false, false, true, true, true]);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('ListWheelScrollView does not report children as painted at zero height', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 0,
+            child: ListWheelScrollView(
+              itemExtent: 50,
+              children: List<Widget>.generate(5, (int index) => const SizedBox()),
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderListWheelViewport viewport = tester.renderObject(find.byType(ListWheelViewport));
+    // The angle of the child is NaN, which paint skips.
+    expect(viewport.paintsChild(viewport.firstChild!), isFalse);
+  });
+
   testWidgets('ListWheelScrollView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
