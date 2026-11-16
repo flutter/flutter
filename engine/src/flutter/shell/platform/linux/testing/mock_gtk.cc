@@ -148,18 +148,19 @@ void gdk_window_set_cursor(GdkWindow* window, GdkCursor* cursor) {
 
 GdkGLContext* gdk_window_create_gl_context(GdkWindow* window, GError** error) {
   check_thread();
-  return nullptr;
+  return mock == nullptr ? nullptr : mock->gdk_window_create_gl_context(window, error);
 }
 
 void gdk_cairo_set_source_rgba(cairo_t* cr, const GdkRGBA* rgba) {
   check_thread();
 }
 
-void gdk_gl_context_realize(GdkGLContext* context) {
+gboolean gdk_gl_context_realize(GdkGLContext* context, GError** error) {
   check_thread();
+  return mock != nullptr && mock->gdk_gl_context_realize(context, error);
 }
 
-void gdk_gl_context_clear_current(GdkGLContext* context) {
+void gdk_gl_context_clear_current() {
   check_thread();
 }
 
@@ -252,6 +253,11 @@ void gtk_widget_get_allocation(GtkWidget* widget, GtkAllocation* allocation) {
 
 GdkDisplay* gtk_widget_get_display(GtkWidget* widget) {
   check_thread();
+  if (mock != nullptr && mock->realize_widgets) {
+    auto original = reinterpret_cast<GdkDisplay* (*)(GtkWidget*)>(
+        dlsym(RTLD_NEXT, "gtk_widget_get_display"));
+    return original(widget);
+  }
   return nullptr;
 }
 
@@ -262,6 +268,11 @@ gint gtk_widget_get_scale_factor(GtkWidget* widget) {
 
 void gtk_widget_realize(GtkWidget* widget) {
   check_thread();
+  if (mock != nullptr && mock->realize_widgets) {
+    auto original = reinterpret_cast<void (*)(GtkWidget*)>(
+        dlsym(RTLD_NEXT, "gtk_widget_realize"));
+    original(widget);
+  }
 }
 
 void gtk_widget_show(GtkWidget* widget) {
@@ -303,11 +314,21 @@ gboolean gtk_widget_translate_coordinates(GtkWidget* src_widget,
 
 GtkWidget* gtk_widget_get_toplevel(GtkWidget* widget) {
   check_thread();
+  if (mock != nullptr && mock->realize_widgets) {
+    auto original = reinterpret_cast<GtkWidget* (*)(GtkWidget*)>(
+        dlsym(RTLD_NEXT, "gtk_widget_get_toplevel"));
+    return original(widget);
+  }
   return widget;
 }
 
 GdkWindow* gtk_widget_get_window(GtkWidget* widget) {
   check_thread();
+  if (mock != nullptr && mock->realize_widgets) {
+    auto original = reinterpret_cast<GdkWindow* (*)(GtkWidget*)>(
+        dlsym(RTLD_NEXT, "gtk_widget_get_window"));
+    return original(widget);
+  }
   if (mock == nullptr) {
     return nullptr;
   }

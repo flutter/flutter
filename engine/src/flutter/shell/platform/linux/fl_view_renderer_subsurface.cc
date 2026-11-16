@@ -45,6 +45,9 @@ struct _FlViewRendererSubsurface {
   // Combines layers into a frame.
   FlCompositorOpenGL* compositor;
 
+  // Remains available to an in-flight presentation after engine disposal.
+  FlOpenGLManager* opengl_manager;
+
   // Framebuffer the current frame is composited into.
   FlFramebuffer* framebuffer;
 
@@ -237,8 +240,7 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
   // engine's frame texture is accessed directly without using EGLImage.
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
-  self->compositor =
-      fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine));
+  self->compositor = fl_compositor_opengl_new(self->opengl_manager);
 
   // Create a subsurface on the toplevel's surface. This asks for a frame, as
   // any rendered before this point were dropped.
@@ -405,7 +407,7 @@ static void fl_view_renderer_subsurface_present_layers(
   // that they have finished.
   g_autoptr(FlGLFence) fence = nullptr;
   if (fl_compositor_opengl_can_fence(self->compositor)) {
-    fence = fl_gl_fence_new(fl_engine_get_opengl_manager(self->engine));
+    fence = fl_gl_fence_new(self->opengl_manager);
   } else {
     // No fences on this driver, wait for the rendering here instead.
     glFinish();
@@ -434,8 +436,6 @@ static void fl_view_renderer_subsurface_dispose(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
   g_clear_object(&self->engine);
-  g_clear_object(&self->task_runner);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->dispose(object);
 }
@@ -450,6 +450,11 @@ static void fl_view_renderer_subsurface_finalize(GObject* object) {
   // presenting.
   g_clear_object(&self->compositor);
   g_clear_object(&self->framebuffer);
+  g_clear_object(&self->opengl_manager);
+
+  // Presentation wakes the task runner after releasing the frame mutex.
+  g_clear_object(&self->task_runner);
+  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->finalize(object);
 }
@@ -490,6 +495,8 @@ FlViewRendererSubsurface* fl_view_renderer_subsurface_new(
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(
       g_object_new(fl_view_renderer_subsurface_get_type(), nullptr));
   self->engine = FL_ENGINE(g_object_ref(engine));
+  self->opengl_manager =
+      FL_OPENGL_MANAGER(g_object_ref(fl_engine_get_opengl_manager(engine)));
   self->sized_to_content = sized_to_content;
   return self;
 }

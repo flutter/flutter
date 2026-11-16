@@ -222,8 +222,6 @@ static void fl_view_renderer_opengl_dispose(GObject* object) {
 
   g_clear_object(&self->engine);
   g_clear_object(&self->render_context);
-  g_clear_object(&self->task_runner);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_opengl_parent_class)->dispose(object);
 }
@@ -238,6 +236,10 @@ static void fl_view_renderer_opengl_finalize(GObject* object) {
   // presenting.
   g_clear_object(&self->compositor);
   g_clear_object(&self->frame);
+
+  // Presentation wakes the task runner after releasing the frame mutex.
+  g_clear_object(&self->task_runner);
+  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_opengl_parent_class)->finalize(object);
 }

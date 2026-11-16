@@ -260,8 +260,7 @@ static void fl_view_present_layers(FlRenderable* renderable,
                                    size_t layers_count) {
   FlView* self = FL_VIEW(renderable);
 
-  // If widget was destroyed then dispose will have been called and the
-  // renderer will be null.
+  // Frames may arrive before the renderer has been set up.
   if (self->renderer == nullptr) {
     return;
   }
@@ -576,7 +575,10 @@ static void fl_view_dispose(GObject* object) {
                           nullptr);
   }
 
-  g_clear_object(&self->renderer);
+  // Queued renderer signals must not call into a disposed view.
+  if (self->renderer != nullptr) {
+    g_signal_handlers_disconnect_by_data(self->renderer, self);
+  }
   g_clear_object(&self->engine);
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
@@ -657,10 +659,21 @@ static gboolean fl_view_key_release_event(GtkWidget* widget,
   return handle_key_event(self, key_event);
 }
 
+static void fl_view_finalize(GObject* object) {
+  FlView* self = FL_VIEW(object);
+
+  // A raster callback holds the view alive while presenting. Keep its renderer
+  // reference until that callback has returned, even after forced GTK disposal.
+  g_clear_object(&self->renderer);
+
+  G_OBJECT_CLASS(fl_view_parent_class)->finalize(object);
+}
+
 static void fl_view_class_init(FlViewClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   object_class->notify = fl_view_notify;
   object_class->dispose = fl_view_dispose;
+  object_class->finalize = fl_view_finalize;
 
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
   widget_class->realize = fl_view_realize;
