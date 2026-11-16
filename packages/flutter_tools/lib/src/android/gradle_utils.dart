@@ -826,7 +826,7 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
     return isWithinVersionRange(gradleV, min: '9.3.1', max: maxKnownAndSupportedGradleVersion);
   }
   if (isWithinVersionRange(agpV, min: '9.2.0', max: '9.2.99')) {
-    return isWithinVersionRange(gradleV, min: '9.3.1', max: maxKnownAndSupportedGradleVersion);
+    return isWithinVersionRange(gradleV, min: '9.4.1', max: maxKnownAndSupportedGradleVersion);
   }
   if (isWithinVersionRange(agpV, min: '9.3.0', max: '9.3.99')) {
     return isWithinVersionRange(gradleV, min: '9.5.0', max: maxKnownAndSupportedGradleVersion);
@@ -1144,7 +1144,7 @@ String getGradleVersionFor(String agpV) {
     GradleForAgp(agpMin: '8.13.0', agpMax: '8.13.99', minRequiredGradle: '8.14'),
     GradleForAgp(agpMin: '9.0', agpMax: '9.0.99', minRequiredGradle: '9.1.0'),
     GradleForAgp(agpMin: '9.1.0', agpMax: '9.1.99', minRequiredGradle: '9.3.1'),
-    GradleForAgp(agpMin: '9.2.0', agpMax: '9.2.99', minRequiredGradle: '9.3.1'),
+    GradleForAgp(agpMin: '9.2.0', agpMax: '9.2.99', minRequiredGradle: '9.4.1'),
     GradleForAgp(agpMin: '9.3.0', agpMax: '9.3.99', minRequiredGradle: '9.5.0'),
     // Assume if AGP is newer than this code knows about return the highest gradle
     // version we know about.
@@ -1171,6 +1171,7 @@ String getGradleVersionFor(String agpV) {
 /// If [requireAndroidSdk] is true (the default) and no Android SDK is found,
 /// this will fail with a [ToolExit].
 void updateLocalProperties({
+  required Cache cache,
   required FlutterProject project,
   Analytics? analytics,
   AndroidSdk? androidSdk,
@@ -1216,7 +1217,7 @@ void updateLocalProperties({
     changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary('flutter.sdk', fsUtils.escapePath(Cache.flutterRoot!));
+  changeIfNecessary('flutter.sdk', fsUtils.escapePath(cache.flutterRoot));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(

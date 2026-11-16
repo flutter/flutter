@@ -171,6 +171,16 @@ Matcher containsIgnoringWhitespace(String toSearch) {
   }, 'contains "$toSearch" ignoring whitespace.');
 }
 
+/// Expects [command] to accept the `--[no-]deprecated-js-interop` flag, whose
+/// value is `null` unless it is passed.
+void expectAcceptsDeprecatedJsInteropFlag(Command<void> command) {
+  Object? valueFor(List<String> args) => command.argParser.parse(args)['deprecated-js-interop'];
+
+  expect(valueFor(<String>[]), isNull);
+  expect(valueFor(<String>['--deprecated-js-interop']), isTrue);
+  expect(valueFor(<String>['--no-deprecated-js-interop']), isFalse);
+}
+
 /// The tool overrides `test` to ensure that files created under the
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
@@ -245,6 +255,12 @@ void testWithoutContext(
 /// a Zone value in place of a constructor parameter.
 class _NoContext implements AppContext {
   const _NoContext();
+
+  @override
+  bool hasOverride(Type type) => false;
+
+  @override
+  T? resolveOverride<T>() => null;
 
   @override
   T get<T>() {

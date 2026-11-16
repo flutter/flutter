@@ -3,14 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -18,6 +21,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/chrome_constants.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
@@ -352,7 +356,11 @@ void main() {
     await service.start(
       BuildInfo.profile,
       device,
-      DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: testUrl, ipv6: true),
+      DebuggingOptions.enabled(
+        BuildInfo.profile,
+        webConfig: const WebDebugConfig(launchUrl: testUrl),
+        ipv6: true,
+      ),
     );
     await service.stop();
     expect(service.webUri, Uri.parse(testUrl));
@@ -368,13 +376,13 @@ void main() {
       device,
       DebuggingOptions.enabled(
         BuildInfo.profile,
-        webDevServerConfig: webDevServerConfig,
+        webConfig: WebDebugConfig(devServerConfig: webDevServerConfig),
         ipv6: true,
       ),
     );
     await service.stop();
     expect(
-      FakeResidentRunner.instance.debuggingOptions.webDevServerConfig?.headers,
+      FakeResidentRunner.instance.debuggingOptions.webConfig.devServerConfig?.headers,
       equals(webHeaders),
     );
   }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
@@ -387,7 +395,11 @@ void main() {
       service.start(
         BuildInfo.profile,
         device,
-        DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: invalidTestUrl, ipv6: true),
+        DebuggingOptions.enabled(
+          BuildInfo.profile,
+          webConfig: const WebDebugConfig(launchUrl: invalidTestUrl),
+          ipv6: true,
+        ),
       ),
       throwsA(isA<FormatException>()),
     );
@@ -411,6 +423,54 @@ void main() {
       WebRunnerFactory: () => FakeWebRunnerFactory(doResolveToError: true),
     },
   );
+
+  testWithoutContext(
+    'WebDriverService exits the tool when the WebDriver server cannot create a session',
+    () async {
+      // A fake WebDriver server that rejects every session request, the way
+      // chromedriver does when it cannot launch the browser.
+      final io.HttpServer driverServer = await io.HttpServer.bind(
+        io.InternetAddress.loopbackIPv4,
+        0,
+      );
+      addTearDown(() => driverServer.close(force: true));
+      driverServer.listen((io.HttpRequest request) {
+        request.response
+          ..statusCode = io.HttpStatus.internalServerError
+          ..headers.contentType = io.ContentType.json
+          ..write(
+            json.encode(<String, Object?>{
+              'value': <String, Object?>{
+                'error': 'session not created',
+                'message': "session not created: DevToolsActivePort file doesn't exist",
+                'stacktrace': '',
+              },
+            }),
+          );
+        unawaited(request.response.close());
+      });
+
+      final service = WebDriverService(
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        dartSdkPath: 'dart',
+        toolContext: FakeToolContext(),
+      );
+      await expectLater(
+        service.startTest(
+          'test_driver/app_test.dart',
+          DriveTestSpecification(
+            packageConfig: PackageConfig.empty,
+            browserName: 'chrome',
+            headless: true,
+            driverPort: driverServer.port,
+          ),
+        ),
+        throwsToolExit(message: "DevToolsActivePort file doesn't exist"),
+      );
+    },
+  );
 }
 
 class FakeWebRunnerFactory implements WebRunnerFactory {
@@ -424,6 +484,8 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   ResidentRunner createWebRunner(
     FlutterDevice device, {
     required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
     required FlutterProject flutterProject,
     required bool stayResident,

@@ -12,12 +12,15 @@
 #include "impeller/core/texture.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/command_queue.h"
+#include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/sampler_library.h"
+#include "impeller/renderer/shader_function.h"
+#include "impeller/renderer/shader_library.h"
 
 #define FLT_FORWARD(mock, real, method) \
   EXPECT_CALL(*mock, method())          \
@@ -115,6 +118,45 @@ class MockRenderPass : public RenderPass {
               (const Context& context),
               (const, override));
   MOCK_METHOD(void, OnSetLabel, (std::string_view label), (override));
+};
+
+/// A compute pass whose recording calls tests can expect.
+class MockComputePass : public ComputePass {
+ public:
+  explicit MockComputePass(std::shared_ptr<const Context> context)
+      : ComputePass(std::move(context)) {}
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(void, SetCommandLabel, (std::string_view label), (override));
+  MOCK_METHOD(
+      void,
+      SetPipeline,
+      (const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline),
+      (override));
+  MOCK_METHOD(absl::Status,
+              Compute,
+              ((std::array<uint32_t, 3>)workgroup_count),
+              (override));
+  MOCK_METHOD(void, AddBufferMemoryBarrier, (), (override));
+  MOCK_METHOD(void, AddTextureMemoryBarrier, (), (override));
+  MOCK_METHOD(bool, EncodeCommands, (), (const, override));
+  MOCK_METHOD(void, OnSetLabel, (const std::string& label), (override));
+  MOCK_METHOD(bool,
+              BindResource,
+              (ShaderStage stage,
+               DescriptorType type,
+               const ShaderUniformSlot& slot,
+               const ShaderMetadata* metadata,
+               BufferView view),
+              (override));
+  MOCK_METHOD(bool,
+              BindResource,
+              (ShaderStage stage,
+               DescriptorType type,
+               const SampledImageSlot& slot,
+               const ShaderMetadata* metadata,
+               std::shared_ptr<const Texture> texture,
+               raw_ptr<const Sampler> sampler),
+              (override));
 };
 
 class MockPipelineLibrary : public PipelineLibrary {
@@ -273,11 +315,12 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(uint32_t, GetMaxSamplerAnisotropy, (), (const override));
   MOCK_METHOD(size_t, GetMinimumUniformAlignment, (), (const override));
   MOCK_METHOD(bool, NeedsPartitionedHostBuffer, (), (const, override));
+  MOCK_METHOD(ComputeLimits, GetComputeLimits, (), (const, override));
 };
 
 class MockCommandQueue : public CommandQueue {
  public:
-  MOCK_METHOD(fml::Status,
+  MOCK_METHOD(absl::Status,
               Submit,
               (const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
                const CompletionCallback& cb),
@@ -300,6 +343,25 @@ class MockSamplerLibrary : public SamplerLibrary {
 class MockSampler : public Sampler {
  public:
   explicit MockSampler(const SamplerDescriptor& desc) : Sampler(desc) {}
+};
+
+class MockShaderFunction : public ShaderFunction {
+ public:
+  MockShaderFunction(std::string name, ShaderStage stage)
+      : ShaderFunction(UniqueID{}, std::move(name), stage) {}
+};
+
+class MockShaderLibrary : public ShaderLibrary {
+ public:
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(std::shared_ptr<const ShaderFunction>,
+              GetFunction,
+              (std::string_view name, ShaderStage stage),
+              (override));
+  MOCK_METHOD(void,
+              UnregisterFunction,
+              (std::string name, ShaderStage stage),
+              (override));
 };
 
 }  // namespace testing

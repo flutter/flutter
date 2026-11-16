@@ -1,0 +1,50 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/toolchain/toolchain.gni")
+import("//flutter/build/dart/dart.gni")
+import("//flutter/common/config.gni")
+
+import("$dart_src/build/dart/dart_action.gni")
+
+template("check_forbidden_native_symbols") {
+  assert(defined(invoker.library), "Must specify 'library' path")
+  assert(defined(invoker.deps), "Must specify 'deps'")
+
+  prebuilt_dart_action(target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "deps",
+                             "testonly",
+                             "visibility",
+                           ])
+    script = "//flutter/testing/symbols/check_forbidden_native_symbols.dart"
+
+    inputs = [ invoker.library ]
+
+    stamp_file = "$target_gen_dir/$target_name.stamp"
+    outputs = [ stamp_file ]
+
+    _host_dir = ""
+    if (host_os == "linux") {
+      _host_dir = "linux-${host_cpu}"
+    } else if (host_os == "mac") {
+      _host_dir = "mac-${host_cpu}"
+    }
+    _nm_path = rebase_path("$buildtools_path/$_host_dir/clang/bin/llvm-nm",
+                           root_build_dir)
+
+    args = [
+      "--stamp",
+      rebase_path(stamp_file, root_build_dir),
+      "--nm",
+      _nm_path,
+      "--library",
+      rebase_path(invoker.library, root_build_dir),
+    ]
+    if (is_debug) {
+      args += [ "--unoptimized" ]
+    }
+  }
+}

@@ -190,10 +190,13 @@ public final class FlutterEngineFlags {
   /**
    * Sets whether the UI thread and platform thread should be merged.
    *
+   * <p>Accepts {@code enabled} (the default) or {@code mergeAfterLaunch}. {@code disabled} is not
+   * supported on Android.
+   *
    * <p>Allowed in release mode for performance purposes. Only settable via the manifest.
    */
   private static final Flag MERGED_PLATFORM_UI_THREAD =
-      new Flag("--merged-platform-ui-thread", "MergedPlatformUIThread", true);
+      new Flag("--merged-platform-ui-thread=", "MergedPlatformUIThread", true);
 
   /**
    * Specifies the path to the VM snapshot data file.
@@ -214,13 +217,15 @@ public final class FlutterEngineFlags {
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   /**
-   * Enables Hybrid Composition++.
+   * Enables or disables Hybrid Composition++.
+   *
+   * <p>Accepts {@code true} or {@code false}.
    *
    * <p>Allowed in release to opt-in to this platform views implementation in production. Settable
-   * via the manifest and the command line (via --enable-hcpp).
+   * via the manifest and the command line (via --[no-]enable-hcpp).
    */
   private static final Flag ENABLE_HCPP =
-      new Flag("--enable-hcpp-and-surface-control", "EnableHcpp", true);
+      new Flag("--enable-hcpp-and-surface-control=", "EnableHcpp", true);
 
   /**
    * Enables the Flutter GPU backend.
@@ -239,6 +244,17 @@ public final class FlutterEngineFlags {
    */
   private static final Flag IMPELLER_LAZY_SHADER_MODER =
       new Flag("--impeller-lazy-shader-mode", "ImpellerLazyShaderInitialization", true);
+
+  /**
+   * Enables rendering with signed distance fields (SDFs) in Impeller.
+   *
+   * <p>SDF rendering produces higher quality anti-aliasing for shapes like rounded rectangles at
+   * the cost of additional GPU work.
+   *
+   * <p>Allowed in release so that developers can opt-in to SDF rendering in production. Settable
+   * via the command line and the manifest.
+   */
+  private static final Flag IMPELLER_USE_SDFS = new Flag("--impeller-use-sdfs", "EnableSDFs", true);
 
   /**
    * Fake flag used for integration testing of the Android embedding processing engine flags.
@@ -474,6 +490,7 @@ public final class FlutterEngineFlags {
               TEST_FLAG,
               ENABLE_FLUTTER_GPU,
               IMPELLER_LAZY_SHADER_MODER,
+              IMPELLER_USE_SDFS,
               IMPELLER_OPENGL_GPU_TRACING,
               IMPELLER_VULKAN_GPU_TRACING,
               ENABLE_HCPP));

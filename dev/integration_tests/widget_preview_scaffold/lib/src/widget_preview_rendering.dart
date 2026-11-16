@@ -232,10 +232,6 @@ class WidgetPreviewGroupWidget extends StatefulWidget {
   static const _gridSpacing = 8.0;
   static const _gridRunSpacing = 8.0;
 
-  /// The default radius of a Material 3 `Card`, as per documentation for `Card.shape`.
-  // TODO(bkonyi): inherit this from the theme.
-  static const _kCardRadius = Radius.circular(12);
-
   @override
   State<WidgetPreviewGroupWidget> createState() =>
       _WidgetPreviewGroupWidgetState();
@@ -272,51 +268,36 @@ class _WidgetPreviewGroupWidgetState extends State<WidgetPreviewGroupWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Card(
-      child: ListTileTheme(
-        data: ListTileTheme.of(context).copyWith(
-          dense: true,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              WidgetPreviewGroupWidget._kCardRadius,
+      child: ExpansionTile(
+        key: PageStorageKey(widget.group.name),
+        title: Text(widget.group.name),
+        dense: true,
+        initiallyExpanded: true,
+        children: [
+          // Wrap children in a PageStorage to create a storage boundary.
+          // Without this, descendant scrollables (which search ancestor
+          // elements for a PageStorageKey when restoring scroll offset)
+          // inherit the PageStorageKey from the ExpansionTile and attempt
+          // to read the ExpansionTile's boolean expansion state as a double,
+          // throwing a TypeError (see https://github.com/flutter/flutter/issues/191242).
+          PageStorage(
+            bucket: _bucket,
+            child: ValueListenableBuilder<LayoutType>(
+              valueListenable: widget.controller.layoutTypeListenable,
+              builder: (context, selectedLayout, _) {
+                return switch (selectedLayout) {
+                  LayoutType.gridView => _buildGridViewFlex(
+                    widget.group.previews,
+                  ),
+                  LayoutType.listView => _buildVerticalListView(
+                    widget.group.previews,
+                  ),
+                };
+              },
             ),
           ),
-        ),
-        child: Theme(
-          // Prevents divider lines appearing at the top and bottom of the
-          // expanded ExpansionTile.
-          data: theme.copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            key: PageStorageKey(widget.group.name),
-            title: Text(widget.group.name),
-            initiallyExpanded: true,
-            children: [
-              // Wrap children in a PageStorage to create a storage boundary.
-              // Without this, descendant scrollables (which search ancestor
-              // elements for a PageStorageKey when restoring scroll offset)
-              // inherit the PageStorageKey from the ExpansionTile and attempt
-              // to read the ExpansionTile's boolean expansion state as a double,
-              // throwing a TypeError (see https://github.com/flutter/flutter/issues/191242).
-              PageStorage(
-                bucket: _bucket,
-                child: ValueListenableBuilder<LayoutType>(
-                  valueListenable: widget.controller.layoutTypeListenable,
-                  builder: (context, selectedLayout, _) {
-                    return switch (selectedLayout) {
-                      LayoutType.gridView => _buildGridViewFlex(
-                        widget.group.previews,
-                      ),
-                      LayoutType.listView => _buildVerticalListView(
-                        widget.group.previews,
-                      ),
-                    };
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -691,17 +672,21 @@ class _WidgetPreviewControlRow extends StatelessWidget {
     if (errorThrownDuringTreeConstruction) {
       return Container();
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      // If an unhandled exception was caught and we're displaying an error
-      // widget, these controls should be disabled.
-      // TODO(bkonyi): improve layout of controls.
+    return Wrap(
+      spacing: largeSpacing,
+      runSpacing: denseSpacing,
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         ZoomControls(transformationController: transformationController),
-        const SizedBox(width: 30),
-        BrightnessToggleButton(brightnessListenable: brightnessListenable),
-        const SizedBox(width: 10),
-        SoftRestartButton(softRestartListenable: softRestartListenable),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BrightnessToggleButton(brightnessListenable: brightnessListenable),
+            const SizedBox(width: intermediateSpacing),
+            SoftRestartButton(softRestartListenable: softRestartListenable),
+          ],
+        ),
       ],
     );
   }
@@ -1419,40 +1404,84 @@ class WidgetPreviewControls extends StatelessWidget {
   const WidgetPreviewControls({super.key, required this.controller});
 
   static const _controlsPadding = 20.0;
+  static const _compactControlsBreakpoint = 480.0;
+
   final WidgetPreviewScaffoldController controller;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         bottom: _controlsPadding,
         left: _controlsPadding,
         right: _controlsPadding,
       ),
-      child: Row(
-        children: [
-          LayoutTypeSelector(controller: controller),
-          ValueListenableBuilder(
-            valueListenable: controller.editorServiceAvailable,
-            builder: (context, editorServiceAvailable, _) {
-              if (!editorServiceAvailable) {
-                return Container();
-              }
-              return Row(
-                children: [
-                  HorizontalSpacer(),
-                  FilterBySelectedFileToggle(controller: controller),
-                ],
-              );
-            },
-          ),
-          HorizontalSpacer(),
-          Expanded(child: PreviewSearchControls(controller: controller)),
-          HorizontalSpacer(),
-          WidgetInspectorToggle(controller: controller),
-          Spacer(),
-          WidgetPreviewerRestartButton(controller: controller),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < _compactControlsBreakpoint) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                PreviewSearchControls(controller: controller),
+                const VerticalSpacer(),
+                ValueListenableBuilder<bool>(
+                  valueListenable: controller.editorServiceAvailable,
+                  builder: (context, editorServiceAvailable, _) {
+                    return Wrap(
+                      spacing: intermediateSpacing,
+                      runSpacing: denseSpacing,
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Wrap(
+                          spacing: intermediateSpacing,
+                          runSpacing: denseSpacing,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            LayoutTypeSelector(controller: controller),
+                            if (editorServiceAvailable)
+                              FilterBySelectedFileToggle(
+                                controller: controller,
+                              ),
+                            WidgetInspectorToggle(controller: controller),
+                          ],
+                        ),
+                        WidgetPreviewerRestartButton(controller: controller),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            );
+          }
+          return Row(
+            children: [
+              LayoutTypeSelector(controller: controller),
+              ValueListenableBuilder<bool>(
+                valueListenable: controller.editorServiceAvailable,
+                builder: (context, editorServiceAvailable, _) {
+                  if (!editorServiceAvailable) {
+                    return const SizedBox.shrink();
+                  }
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const HorizontalSpacer(),
+                      FilterBySelectedFileToggle(controller: controller),
+                    ],
+                  );
+                },
+              ),
+              const HorizontalSpacer(),
+              Expanded(child: PreviewSearchControls(controller: controller)),
+              const HorizontalSpacer(),
+              WidgetInspectorToggle(controller: controller),
+              const Spacer(),
+              WidgetPreviewerRestartButton(controller: controller),
+            ],
+          );
+        },
       ),
     );
   }

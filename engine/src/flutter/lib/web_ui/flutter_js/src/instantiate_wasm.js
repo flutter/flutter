@@ -17,7 +17,7 @@ export const createWasmInstantiator = (url, filename) => {
     hash = wasmHashes?.[basename];
   }
 
-  const supportsCrossOriginStorage = !!navigator.crossOriginStorage?.requestFileHandle;
+  const supportsCrossOriginStorage = !!navigator.crossOriginStorage?.getFileHandle;
   if (supportsCrossOriginStorage) {
     console.log('Cross-Origin Storage is supported. See https://wicg.github.io/cross-origin-storage/ for more details.');
   }
@@ -36,7 +36,7 @@ export const createWasmInstantiator = (url, filename) => {
   const tryGettingResponseFromCrossOriginStorage = async (hash) => {
     const cosHash = { algorithm: 'SHA-256', value: hash };
     try {
-      const handle = await navigator.crossOriginStorage.requestFileHandle(cosHash);
+      const handle = await navigator.crossOriginStorage.getFileHandle(cosHash);
       const file = await handle.getFile();
       // Stream the stored bytes so that compilation overlaps reading them, the
       // same way it overlaps the download on a cache miss.
@@ -61,7 +61,7 @@ export const createWasmInstantiator = (url, filename) => {
     const cosHash = { algorithm: 'SHA-256', value: hash };
     (async () => {
       try {
-        const handle = await navigator.crossOriginStorage.requestFileHandle(cosHash, {
+        const handle = await navigator.crossOriginStorage.getFileHandle(cosHash, {
           create: true,
           // CanvasKit and Skwasm are the same bytes for every app built against
           // a given engine revision, so any origin may read them back once they

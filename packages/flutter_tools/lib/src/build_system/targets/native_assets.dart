@@ -20,7 +20,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../dart/package_map.dart';
-import '../../features.dart';
+import '../../features.dart' show featureFlags;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
@@ -57,13 +57,17 @@ class BuildHooks extends Target {
       :SerializedBuildResults results,
       :DartHooksResult buildResult,
     ) = await runFlutterSpecificBuildHooks(
+      androidSdkProvider: environment,
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      featureFlags: featureFlags,
+      logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
+      visualStudio: environment.visualStudio,
     );
 
     final File dartBuildOutputJsonFile = environment.buildDir.childFile(resultFilename);
@@ -217,15 +221,19 @@ class LinkHooks extends Target {
     final DartHooksResult linkResult;
     if (linkingEnabled) {
       linkResult = await runFlutterSpecificLinkHooks(
+        androidSdkProvider: environment,
         environmentDefines: environment.defines,
         buildRunner: buildRunner,
         targetPlatform: targetPlatform,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
+        logger: environment.logger,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
         buildDataAssets: true,
         buildResults: buildResults,
         recordedUsesFile: recordedUsesFileToPass,
+        visualStudio: environment.visualStudio,
       );
     } else {
       linkResult = DartHooksResult.empty();
@@ -235,6 +243,7 @@ class LinkHooks extends Target {
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       fileSystem: fileSystem,
+      featureFlags: featureFlags,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
       buildResults: buildResults,
@@ -316,10 +325,9 @@ class InstallCodeAssets extends Target {
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
 
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    final String osName = targetPlatform.osName;
-    if (osName == 'linux' || osName == 'windows') {
+    if (targetPlatform.os case .linux || .windows) {
       // Avoid needing migration for CMake files, keep old directory structure.
-      targetUri = targetUri.resolve('$osName/');
+      targetUri = targetUri.resolve('${targetPlatform.osName}/');
     }
 
     final List<File> installedFiles = await installCodeAssets(
@@ -328,6 +336,8 @@ class InstallCodeAssets extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      logger: environment.logger,
+      processManager: environment.processManager,
       nativeAssetsFileUri: nativeAssetsFileUri,
       targetUri: targetUri,
     );
@@ -410,15 +420,34 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
   final BuildMode buildMode = buildModeEnvironment == null
       ? BuildMode.debug
       : BuildMode.fromCliName(buildModeEnvironment);
-  final bool includeDevDependencies = !buildMode.isRelease;
+  final bool includeDevDependencies = !buildMode.isRelease || _isTestTarget(environment);
   return FlutterNativeAssetsBuildRunnerImpl(
     environment.packageConfigPath,
     packageConfig,
     fileSystem,
     environment.logger,
     environment.platform,
+    environment.processManager,
     runPackageName,
-    includeDevDependencies: includeDevDependencies,
     pubspecPath,
+    flutterRoot: environment.flutterRootDir.path,
+    includeDevDependencies: includeDevDependencies,
   );
+}
+
+bool _isTestTarget(Environment environment) {
+  final String? targetFile = environment.defines[kTargetFile];
+  if (targetFile == null) {
+    return false;
+  }
+  final String absoluteTargetPath = environment.fileSystem.path.isAbsolute(targetFile)
+      ? targetFile
+      : environment.fileSystem.path.join(environment.projectDir.path, targetFile);
+  final String relativePath = environment.fileSystem.path.relative(
+    environment.fileSystem.path.normalize(absoluteTargetPath),
+    from: environment.projectDir.path,
+  );
+  final List<String> parts = environment.fileSystem.path.split(relativePath);
+  return parts.isNotEmpty &&
+      const <String>{'integration_test', 'test_driver', 'test'}.contains(parts.first);
 }

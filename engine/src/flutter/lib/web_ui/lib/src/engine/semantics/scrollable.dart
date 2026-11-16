@@ -115,7 +115,7 @@ class SemanticScrollable extends SemanticRole {
   void update() {
     super.update();
     semanticsObject.owner.addOneTimePostUpdateCallback(() {
-      if (!semanticsObject.hasLabel && hasMenuAncestor) {
+      if (!semanticsObject.hasLabel && hasMenuOrListBoxAncestor) {
         setAriaRole('none');
       } else {
         setAriaRole('group');

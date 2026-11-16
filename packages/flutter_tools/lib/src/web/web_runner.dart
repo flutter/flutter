@@ -6,6 +6,8 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/context.dart';
 import '../base/net.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
 import '../project.dart';
@@ -21,6 +23,8 @@ abstract class WebRunnerFactory {
   ResidentRunner createWebRunner(
     FlutterDevice device, {
     required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
     required FlutterProject flutterProject,
     required bool stayResident,

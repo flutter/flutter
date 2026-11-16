@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../context/tool_context.dart';
 import '../debug_adapters/server.dart';
 import '../runner/flutter_command.dart';
 
@@ -25,10 +24,9 @@ import '../runner/flutter_command.dart';
 /// The DAP specification can be found at
 /// https://microsoft.github.io/debug-adapter-protocol/.
 class DebugAdapterCommand extends FlutterCommand {
-  DebugAdapterCommand({required super.toolContext, bool verboseHelp = false})
-    : hidden = !verboseHelp {
-    usesIpv6Flag(verboseHelp: verboseHelp);
-    addDdsOptions(verboseHelp: verboseHelp);
+  DebugAdapterCommand({required super.toolContext, super.verboseHelp}) : hidden = !verboseHelp {
+    DebuggingOptionDescriptors.ipv6.addTo(argParser, verboseHelp: verboseHelp);
+    registerOptionBundle(const DdsAndDevToolsOptionsBundle(includeDevTools: false));
     argParser.addFlag(
       'test',
       help:
@@ -36,9 +34,6 @@ class DebugAdapterCommand extends FlutterCommand {
           ' and emit custom events for test progress/results.',
     );
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'debug-adapter';
@@ -65,6 +60,7 @@ class DebugAdapterCommand extends FlutterCommand {
       stdio.stdout.nonBlocking,
       fileSystem: toolContext.fs,
       platform: toolContext.platform,
+      cache: toolContext.cache,
       ipv6: ipv6 ?? false,
       enableDds: enableDds,
       test: boolArg('test'),
