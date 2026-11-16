@@ -216,8 +216,14 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
     // Supply only the bridge hooks so construction does not depend on AT-SPI.
     plug_class_ = ATK_PLUG_CLASS(g_type_class_ref(ATK_TYPE_PLUG));
     get_object_id_ = plug_class_->get_object_id;
-    plug_class_->get_object_id = [](AtkPlug*) {
-      return g_strdup("flutter-renderer-lifetime-test");
+    plug_class_->get_object_id = [](AtkPlug* plug) {
+      const gchar* key = "flutter-renderer-lifetime-plug-id";
+      gchar* id = static_cast<gchar*>(g_object_get_data(G_OBJECT(plug), key));
+      if (id == nullptr) {
+        id = g_strdup("flutter-renderer-lifetime-test");
+        g_object_set_data_full(G_OBJECT(plug), key, id, g_free);
+      }
+      return id;
     };
     socket_class_ = ATK_SOCKET_CLASS(g_type_class_ref(ATK_TYPE_SOCKET));
     embed_ = socket_class_->embed;
