@@ -455,6 +455,119 @@ void main() {
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
+
+    testWidgets('reports low-contrast child under labeled ancestor node', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Semantics(
+                container: true,
+                explicitChildNodes: true,
+                label: 'Labeled parent container',
+                child: SizedBox(
+                  width: 200.0,
+                  height: 100.0,
+                  child: Center(
+                    child: Semantics(
+                      container: true,
+                      child: const Text(
+                        'low contrast child',
+                        style: TextStyle(fontSize: 14.0, color: Color(0xFFEEEEEE)),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets(
+      'MinimumTextContrastGuideline respects overridden shouldSkipNode, targetContrastRatio, and isNodeOffScreen',
+      (WidgetTester tester) async {
+        const customGuideline = _CustomMinimumTextContrastGuideline();
+        final SemanticsHandle handle = tester.ensureSemantics();
+
+        // Low-contrast text exempted by overridden shouldSkipNode passes.
+        await tester.pumpWidget(
+          _boilerplate(
+            Container(
+              width: 200.0,
+              height: 100.0,
+              color: Colors.white,
+              child: const Text(
+                'exempt low contrast',
+                style: TextStyle(fontSize: 14.0, color: Color(0xFFEEEEEE)),
+              ),
+            ),
+          ),
+        );
+        await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+        await expectLater(tester, meetsGuideline(customGuideline));
+
+        // Contrast ~4.5 passes default 4.5 guideline, fails custom 10.0 targetContrastRatio.
+        await tester.pumpWidget(
+          _boilerplate(
+            Container(
+              width: 200.0,
+              height: 100.0,
+              color: const Color(0xFFF0F0F0),
+              child: const Text(
+                'medium contrast',
+                style: TextStyle(fontSize: 14.0, color: Color(0xFF5252FF)),
+              ),
+            ),
+          ),
+        );
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        await expectLater(tester, doesNotMeetGuideline(customGuideline));
+
+        // Partially offscreen box (left: -60, center at x = 40) is skipped by default
+        // isNodeOffScreen (< -50), fails when subclass overrides isNodeOffScreen to false.
+        await tester.pumpWidget(
+          _boilerplate(
+            Stack(
+              children: <Widget>[
+                Positioned(
+                  left: -60.0,
+                  top: 0.0,
+                  child: Container(
+                    width: 200.0,
+                    height: 100.0,
+                    color: Colors.yellow,
+                    child: const Text(
+                      'partially offscreen',
+                      style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        await expectLater(tester, doesNotMeetGuideline(customGuideline));
+
+        // Verify logical right-edge culling uses physicalSize / devicePixelRatio (800x600).
+        expect(
+          const MinimumTextContrastGuideline().isNodeOffScreen(
+            const Rect.fromLTWH(900.0, 0.0, 100.0, 50.0),
+            tester.view,
+          ),
+          isTrue,
+        );
+        handle.dispose();
+      },
+    );
   });
 
   group('custom minimum contrast guideline', () {
@@ -867,6 +980,60 @@ void main() {
       await tester.pump();
       await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
     });
+
+    testWidgets('MinimumTapTargetGuideline respects overridden shouldSkipNode in subclasses', (
+      WidgetTester tester,
+    ) async {
+      const guideline = _CustomMinimumTapTargetGuideline();
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(
+            container: true,
+            button: true,
+            tooltip: 'Exempt delete action',
+            onTap: () {},
+            child: const SizedBox(width: 32.0, height: 32.0),
+          ),
+        ),
+      );
+      await expectLater(tester, meetsGuideline(guideline));
+
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(
+            container: true,
+            button: true,
+            tooltip: 'Non-exempt action',
+            onTap: () {},
+            child: const SizedBox(width: 32.0, height: 32.0),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(guideline));
+      handle.dispose();
+    });
+
+    testWidgets(
+      'MinimumTapTargetGuideline subclass overriding shouldSkipNode without super can evaluate links',
+      (WidgetTester tester) async {
+        const guideline = _IncludeLinksMinimumTapTargetGuideline();
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          _boilerplate(
+            Semantics(
+              container: true,
+              link: true,
+              onTap: () {},
+              child: const SizedBox(width: 32.0, height: 32.0),
+            ),
+          ),
+        );
+        await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+        await expectLater(tester, doesNotMeetGuideline(guideline));
+        handle.dispose();
+      },
+    );
   });
 
   group('Labeled tappable node guideline', () {
@@ -970,4 +1137,53 @@ Widget _boilerplate(Widget child, {bool? useMaterial3}) {
     theme: ThemeData(useMaterial3: useMaterial3),
     home: Scaffold(body: Center(child: child)),
   );
+}
+
+class _CustomMinimumTapTargetGuideline extends MinimumTapTargetGuideline {
+  const _CustomMinimumTapTargetGuideline()
+    : super(
+        size: const Size(48.0, 48.0),
+        link: 'https://support.google.com/accessibility/android/answer/7101858?hl=en',
+      );
+
+  @override
+  bool shouldSkipNode(SemanticsNode node) {
+    if (super.shouldSkipNode(node)) {
+      return true;
+    }
+    return node.getSemanticsData().tooltip == 'Exempt delete action';
+  }
+}
+
+class _IncludeLinksMinimumTapTargetGuideline extends MinimumTapTargetGuideline {
+  const _IncludeLinksMinimumTapTargetGuideline()
+    : super(
+        size: const Size(48.0, 48.0),
+        link: 'https://support.google.com/accessibility/android/answer/7101858?hl=en',
+      );
+
+  @override
+  bool shouldSkipNode(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    return (!data.hasAction(SemanticsAction.longPress) && !data.hasAction(SemanticsAction.tap)) ||
+        data.flagsCollection.isHidden;
+  }
+}
+
+class _CustomMinimumTextContrastGuideline extends MinimumTextContrastGuideline {
+  const _CustomMinimumTextContrastGuideline();
+
+  @override
+  bool shouldSkipNode(SemanticsData data) {
+    if (super.shouldSkipNode(data)) {
+      return true;
+    }
+    return data.label == 'exempt low contrast';
+  }
+
+  @override
+  double targetContrastRatio(double? fontSize, {required bool bold}) => 10.0;
+
+  @override
+  bool isNodeOffScreen(Rect paintBounds, FlutterView window) => false;
 }

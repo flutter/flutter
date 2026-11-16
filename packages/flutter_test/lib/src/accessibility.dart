@@ -17,10 +17,9 @@ import 'package:flutter/widgets.dart';
 import 'finders.dart';
 import 'widget_tester.dart';
 
-Evaluation _toEvaluation(
-  EvaluationResult result, {
-  String Function(Violation violation)? formatReason,
-}) {
+typedef _ViolationReasonFormatter = String Function(Violation violation);
+
+Evaluation _toEvaluation(EvaluationResult result, {_ViolationReasonFormatter? formatReason}) {
   if (result.violations.isEmpty) {
     return const Evaluation.pass();
   }
@@ -136,8 +135,10 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    final FutureOr<EvaluationResult> result = MinimumTapTargetEvaluation(size: size)
-        .evaluate(tester.binding);
+    final FutureOr<EvaluationResult> result = MinimumTapTargetEvaluation(
+      size: size,
+      shouldSkipNode: shouldSkipNode,
+    ).evaluate(tester.binding);
     String formatReason(Violation violation) => '${violation.reason}See also: $link';
     if (result is Future<EvaluationResult>) {
       return result.then((EvaluationResult r) => _toEvaluation(r, formatReason: formatReason));
@@ -146,8 +147,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   }
 
   /// {@macro flutter.widgets.accessibility_evaluations.minimumTapTarget.shouldSkipNode}
-  bool shouldSkipNode(SemanticsNode node) =>
-      MinimumTapTargetEvaluation(size: size).shouldSkipNode(node);
+  bool shouldSkipNode(SemanticsNode node) => MinimumTapTargetEvaluation.defaultShouldSkipNode(node);
 
   @override
   String get description => 'Tappable objects should be at least $size';
@@ -202,47 +202,32 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   static const double _kDefaultFontSize = 12.0;
 
-  MinimumTextContrastEvaluation get _evaluation => const MinimumTextContrastEvaluation(
-    minNormalTextContrastRatio: kMinimumRatioNormalText,
-    minLargeTextContrastRatio: kMinimumRatioLargeText,
-  );
-
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
+    final evaluation = MinimumTextContrastEvaluation(
+      shouldSkipNode: (SemanticsNode node) => shouldSkipNode(node.getSemanticsData()),
+      isNodeOffScreen: isNodeOffScreen,
+      targetContrastRatio: targetContrastRatio,
+    );
     final EvaluationResult result = (await tester.binding.runAsync<EvaluationResult>(
-      () async => _evaluation.evaluate(tester.binding),
+      () async => evaluation.evaluate(tester.binding),
     ))!;
     return _toEvaluation(result);
   }
 
-  /// Returns whether node should be skipped.
+  /// Returns whether text contrast evaluation should be skipped for [data].
   ///
-  /// Skip routes which might have labels, and nodes without any text.
+  /// Skips routes which might have labels, and nodes without any text.
   bool shouldSkipNode(SemanticsData data) =>
       data.flagsCollection.scopesRoute || (data.label.trim().isEmpty && data.value.trim().isEmpty);
 
-  /// Returns if a rectangle of node is off the screen.
-  ///
-  /// Allows node to be of screen partially before culling the node.
-  bool isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
-    final Size windowPhysicalSize = window.physicalSize * window.devicePixelRatio;
-    return paintBounds.top < -50.0 ||
-        paintBounds.left < -50.0 ||
-        paintBounds.bottom > windowPhysicalSize.height + 50.0 ||
-        paintBounds.right > windowPhysicalSize.width + 50.0;
-  }
+  /// {@macro flutter.widgets.accessibility_evaluations.contrast.isNodeOffScreen}
+  bool isNodeOffScreen(Rect paintBounds, ui.FlutterView window) =>
+      MinimumTextContrastEvaluation.defaultIsNodeOffScreen(paintBounds, window);
 
-  /// Returns the required contrast ratio for the [fontSize] and [bold] setting.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  double targetContrastRatio(double? fontSize, {required bool bold}) {
-    final double fontSizeOrDefault = fontSize ?? _kDefaultFontSize;
-    if ((bold && fontSizeOrDefault >= kBoldTextMinimumSize) ||
-        fontSizeOrDefault >= kLargeTextMinimumSize) {
-      return kMinimumRatioLargeText;
-    }
-    return kMinimumRatioNormalText;
-  }
+  /// {@macro flutter.widgets.accessibility_evaluations.minimumTextContrast.targetContrastRatio}
+  double targetContrastRatio(double? fontSize, {required bool bold}) =>
+      MinimumTextContrastEvaluation.defaultTargetContrastRatio(fontSize, bold: bold);
 
   @override
   String get description => 'Text contrast should follow WCAG guidelines';
@@ -275,12 +260,6 @@ class MinimumTextContrastGuidelineAAA extends MinimumTextContrastGuideline {
   ///
   /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
   static const double kAAAMinimumRatioNormalText = 7.0;
-
-  @override
-  MinimumTextContrastEvaluation get _evaluation => const MinimumTextContrastEvaluation(
-    minNormalTextContrastRatio: kAAAMinimumRatioNormalText,
-    minLargeTextContrastRatio: kAAAMinimumRatioLargeText,
-  );
 
   @override
   double targetContrastRatio(double? fontSize, {required bool bold}) {
