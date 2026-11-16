@@ -21,14 +21,11 @@ class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to query extension capabilities.
   static const String getCapabilitiesMethod = 'extension.getCapabilities';
 
+  /// The reserved JSON-RPC notification method name used for extension log messages.
+  static const String logNotificationMethod = 'extension.log';
+
   /// The reserved JSON-RPC method name used to request graceful extension shutdown.
   static const String shutdownMethod = 'extension.shutdown';
-
-  static const _reservedMethods = <String>{
-    getCapabilitiesMethod,
-    shutdownMethod,
-    ToolExtensionService.logNotificationMethod,
-  };
 
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
@@ -80,7 +77,9 @@ class ToolExtensionEntryPoint {
       final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
       handlers.forEach((String method, ExtensionRpcHandler handler) {
         final fullMethod = '${service.namespace}.$method';
-        if (_reservedMethods.contains(fullMethod)) {
+        if (fullMethod == getCapabilitiesMethod ||
+            fullMethod == shutdownMethod ||
+            fullMethod == logNotificationMethod) {
           throw StateError('Reserved RPC method registered: "$fullMethod"');
         }
         if (rpcHandlers.containsKey(fullMethod)) {

@@ -64,8 +64,9 @@ base class ExtensionBuildManager {
 
     final List<ExtensionBuildTarget>? targets = await _queryTargets<ExtensionBuildTarget>(
       connectionMap: _buildTargetToConnection,
-      fetchTargets: (ExtensionConnection connection) => connection.buildRpc.getBuildTargets(),
+      listFromJson: ExtensionBuildTarget.listFromJson,
       nameOf: (ExtensionBuildTarget target) => target.name,
+      rpcMethod: BuildService.getBuildTargetsMethod,
       targetKind: 'build',
     );
     if (targets == null) {
@@ -86,8 +87,9 @@ base class ExtensionBuildManager {
 
     final List<ExtensionAssembleTarget>? targets = await _queryTargets<ExtensionAssembleTarget>(
       connectionMap: _assembleTargetToConnection,
-      fetchTargets: (ExtensionConnection connection) => connection.buildRpc.getAssembleTargets(),
+      listFromJson: ExtensionAssembleTarget.listFromJson,
       nameOf: (ExtensionAssembleTarget target) => target.name,
+      rpcMethod: BuildService.getAssembleTargetsMethod,
       targetKind: 'assemble',
     );
     if (targets == null) {
@@ -99,8 +101,9 @@ base class ExtensionBuildManager {
 
   Future<List<T>?> _queryTargets<T extends Object>({
     required Map<String, ExtensionConnection> connectionMap,
-    required Future<List<T>> Function(ExtensionConnection connection) fetchTargets,
+    required List<T> Function(Object? result) listFromJson,
     required String Function(T target) nameOf,
+    required String rpcMethod,
     required String targetKind,
   }) async {
     try {
@@ -120,7 +123,8 @@ base class ExtensionBuildManager {
     final List<(ExtensionConnection, List<T>)> connectionTargets = await Future.wait(
       connections.map((ExtensionConnection connection) async {
         try {
-          return (connection, await fetchTargets(connection));
+          final Object? result = await connection.sendRequest(rpcMethod);
+          return (connection, listFromJson(result));
         } on ToolExtensionException catch (e) {
           _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
           return (connection, <T>[]);
@@ -177,6 +181,7 @@ base class ExtensionBuildManager {
       outputDir: outputDir,
       projectRoot: projectRoot,
       resolvedArtifacts: resolvedArtifacts,
+      rpcMethod: BuildService.buildMethod,
       targetKind: 'build',
       targetName: targetName,
     );
@@ -207,6 +212,7 @@ base class ExtensionBuildManager {
       outputDir: outputDir,
       projectRoot: projectRoot,
       resolvedArtifacts: resolvedArtifacts,
+      rpcMethod: BuildService.assembleMethod,
       targetKind: 'assemble',
       targetName: targetName,
     );
@@ -221,6 +227,7 @@ base class ExtensionBuildManager {
     required Uri outputDir,
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
+    required String rpcMethod,
     required String targetKind,
     required String targetName,
     Uri? buildDir,
@@ -265,26 +272,29 @@ base class ExtensionBuildManager {
     }
 
     try {
-      return buildDir != null
-          ? await connection.buildRpc.assemble(
-              buildDir: buildDir,
-              buildMode: buildMode,
-              flutterRoot: flutterRoot,
-              mainPath: mainPath,
-              outputDir: outputDir,
-              projectRoot: projectRoot,
-              resolvedArtifacts: resolvedArtifacts,
-              targetName: targetName,
-            )
-          : await connection.buildRpc.build(
-              buildMode: buildMode,
-              flutterRoot: flutterRoot,
-              mainPath: mainPath,
-              outputDir: outputDir,
-              projectRoot: projectRoot,
-              resolvedArtifacts: resolvedArtifacts,
-              targetName: targetName,
-            );
+      final Object? result = await connection.sendRequest(
+        rpcMethod,
+        params: <String, Object?>{
+          BuildService.buildDirParam: ?buildDir?.toString(),
+          BuildService.buildModeParam: buildMode.cliName,
+          BuildService.flutterRootParam: flutterRoot.toString(),
+          BuildService.mainPathParam: mainPath,
+          BuildService.outputDirParam: outputDir.toString(),
+          BuildService.projectRootParam: projectRoot.toString(),
+          BuildService.resolvedArtifactsParam: resolvedArtifacts,
+          BuildService.targetNameParam: targetName,
+        },
+        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+        // https://github.com/flutter/flutter/issues/193955.
+        timeout: null,
+      );
+      if (result case final Map<String, Object?> resultMap) {
+        return ExtensionBuildResult.fromJson(resultMap);
+      }
+      return ExtensionBuildResult(
+        success: false,
+        errorMessage: 'Invalid $targetKind result from extension.',
+      );
     } on ToolExtensionException catch (e) {
       return ExtensionBuildResult(success: false, errorMessage: e.message);
     } on Object catch (e) {

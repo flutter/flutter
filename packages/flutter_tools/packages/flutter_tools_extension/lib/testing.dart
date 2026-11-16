@@ -4,18 +4,15 @@
 
 /// Testing utilities and harnesses for Flutter Tool Extensions.
 ///
-/// Provides [ExtensionTestHarness] for in-process Isolate and JSON-RPC 2.0
-/// testing, and [verifyExtensionPackage] for validating extension entrypoints
-/// and runtime capabilities.
+/// Provides [ServiceTestHarness] for in-process testing of
+/// [ToolExtensionService] implementations and [verifyExtensionPackage] for
+/// validating extension entrypoints and runtime capabilities over JSON-RPC 2.0.
 ///
-/// @docImport 'src/testing/harness.dart';
+/// @docImport 'src/protocol_base/service.dart';
+/// @docImport 'src/testing/service_harness.dart';
 /// @docImport 'src/testing/verify_package.dart';
 library flutter_tools_extension.testing;
 
-export 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
-
 export 'flutter_tools_extension.dart';
-export 'src/protocol_base/clients.dart';
-export 'src/protocol_base/connection.dart' show ExtensionIsolateEntryPoint, ExtensionRpcChannel;
-export 'src/testing/harness.dart';
+export 'src/testing/service_harness.dart';
 export 'src/testing/verify_package.dart';

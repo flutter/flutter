@@ -58,7 +58,13 @@ class ExtensionCleanManager {
       await Future.wait(
         cleanExtensions.map((ExtensionConnection connection) async {
           try {
-            await connection.cleanRpc.clean(environment);
+            await connection.sendRequest(
+              CleanService.cleanMethod,
+              params: <String, Object?>{CleanService.environmentParam: environment.toMap()},
+              // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+              // https://github.com/flutter/flutter/issues/193955.
+              timeout: null,
+            );
           } on ToolExtensionException catch (e) {
             _logger.printError(
               'Failed to clean extension artifacts for "${connection.extensionName}": ${e.message}',

@@ -66,6 +66,7 @@ class ExtensionDoctorValidator extends DoctorValidator {
 
 /// A host-side [DiagnosticsExtension] client adapter that delegates RPC queries to an [ExtensionConnection].
 final class DiagnosticsExtensionClient extends DiagnosticsExtension {
+  /// Creates a [DiagnosticsExtensionClient] wrapping the host [connection].
   DiagnosticsExtensionClient(
     this.connection, {
     required this._logger,
@@ -90,7 +91,12 @@ final class DiagnosticsExtensionClient extends DiagnosticsExtension {
       'DiagnosticsExtensionClient fetching title via RPC ("${DiagnosticsExtension.getTitleMethod}")...',
     );
     try {
-      _titleCache = await connection.diagnosticsRpc.getTitle();
+      final Object? response = await connection.sendRequest(DiagnosticsExtension.getTitleMethod);
+      if (response is String) {
+        _titleCache = response;
+      } else {
+        _logger.printTrace('DiagnosticsExtensionClient received invalid title response: $response');
+      }
     } on ToolExtensionException catch (err) {
       _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
@@ -105,11 +111,24 @@ final class DiagnosticsExtensionClient extends DiagnosticsExtension {
       'DiagnosticsExtensionClient running diagnostics via RPC ("${DiagnosticsExtension.runDiagnosticsMethod}")...',
     );
     try {
-      final List<ValidationResult> results = await connection.diagnosticsRpc.runDiagnostics();
-      _logger.printTrace(
-        'DiagnosticsExtensionClient received ${results.length} result(s) via RPC.',
+      final Object? response = await connection.sendRequest(
+        DiagnosticsExtension.runDiagnosticsMethod,
       );
-      return results;
+      if (response is List<Object?>) {
+        final results = <ValidationResult>[];
+        for (final Object? element in response) {
+          if (element is Map) {
+            results.add(ValidationResult.fromJson(element.cast<String, Object?>()));
+          }
+        }
+        _logger.printTrace(
+          'DiagnosticsExtensionClient received ${results.length} result(s) via RPC.',
+        );
+        return results;
+      }
+      _logger.printTrace(
+        'DiagnosticsExtensionClient received invalid diagnostics response: $response',
+      );
     } on ToolExtensionException catch (err) {
       return <ValidationResult>[
         ValidationResult(ValidationType.missing, <ValidationMessage>[

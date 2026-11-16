@@ -14,12 +14,15 @@ import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
 
+const Duration _kRpcTimeout = Duration(seconds: 5);
+
 /// Manages querying project templates from extension isolates.
 ///
 /// This manager interacts with active [ExtensionConnection]s to discover custom
 /// project templates, resolve their directories on the host, and generate
 /// template parameters over the extension protocol RPC.
 base class ExtensionTemplateManager extends TemplateService {
+  /// Creates an [ExtensionTemplateManager].
   ExtensionTemplateManager({
     required this._extensionManager,
     required this._featureFlags,
@@ -65,7 +68,10 @@ base class ExtensionTemplateManager extends TemplateService {
     final List<List<ExtensionProjectTemplate>> results = await Future.wait(
       connections.map((ExtensionConnection connection) async {
         try {
-          return await connection.templateRpc.getProjectTemplates();
+          final Object? rpcResult = await connection
+              .sendRequest(TemplateService.getProjectTemplatesMethod)
+              .timeout(_kRpcTimeout);
+          return ExtensionProjectTemplate.listFromJson(rpcResult);
         } on ToolExtensionException catch (e) {
           _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
           return const <ExtensionProjectTemplate>[];
@@ -142,10 +148,18 @@ base class ExtensionTemplateManager extends TemplateService {
 
     for (final connection in connections) {
       try {
-        return await connection.templateRpc.generateTemplateParameters(
-          templateName,
-          toolParameters,
-        );
+        final Object? result = await connection
+            .sendRequest(
+              TemplateService.generateTemplateParametersMethod,
+              params: <String, Object?>{
+                'templateName': templateName,
+                'toolParameters': toolParameters,
+              },
+            )
+            .timeout(_kRpcTimeout);
+        if (result is Map) {
+          return result.cast<String, Object?>();
+        }
       } on ToolExtensionException catch (e) {
         throwToolExit(e.message);
       } on Object catch (e) {

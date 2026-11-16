@@ -7,10 +7,8 @@ import 'dart:isolate';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/testing.dart';
-import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
-import 'package:flutter_tools_extension_linux_prototype/src/build.dart';
-import 'package:flutter_tools_extension_linux_prototype/src/config.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/device.dart';
+import 'package:flutter_tools_extension_linux_prototype/src/diagnostics.dart';
 import 'package:test/test.dart';
 
 Uri _resolvePrototypePackageRoot() {
@@ -26,176 +24,62 @@ Uri _resolvePrototypePackageRoot() {
 }
 
 void main() {
-  const methodNotFoundErrorCode = -32601;
-
-  group('Linux Prototype ExtensionTestHarness', () {
-    test('spawn exercises typed protocol clients and build validation over JSON-RPC 2.0', () async {
-      final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
-        linuxExtensionEntryPoint,
-      );
+  group('Linux Prototype Testing Harness', () {
+    test('ServiceTestHarness exercises LinuxExtensionDiagnostics in-process', () async {
+      final diagnostics = LinuxExtensionDiagnostics();
+      final harness = ServiceTestHarness<LinuxExtensionDiagnostics>(diagnostics);
       addTearDown(harness.dispose);
 
-      expect(harness.capabilities.extensionName, 'flutter_tools_extension_linux_prototype');
-      expect(harness.capabilities.supportedPlatforms, <String>{'linux'});
-      expect(
-        harness.capabilities.services,
-        unorderedEquals(<String>[
-          'diagnostics',
-          'config',
-          'template',
-          'device',
-          'build',
-          'clean',
-          'artifact',
-        ]),
-      );
+      expect(diagnostics.title, 'Linux Custom Extension Prototype');
+      final List<ValidationResult> results = await diagnostics.runDiagnostics();
+      expect(results, hasLength(1));
+      expect(results.first.type, ValidationType.success);
+      expect(results.first.statusInfo, 'Linux Prototype Extension OK');
 
-      expect(await harness.diagnosticsClient.getTitle(), 'Linux Custom Extension Prototype');
-      final List<ValidationResult> diagnostics = await harness.diagnosticsClient.runDiagnostics();
-      expect(diagnostics, hasLength(1));
-      expect(diagnostics.first.type, ValidationType.success);
-      expect(diagnostics.first.statusInfo, 'Linux Prototype Extension OK');
+      diagnostics.log('diagnostics checked');
+      expect(harness.logs, hasLength(1));
+      expect(harness.logs.single.level, ExtensionLogLevel.info);
+      expect(harness.logs.single.message, 'diagnostics checked');
+    });
 
-      expect(await harness.configClient.getTitle(), 'Linux Custom Extension Prototype');
-      final List<FeatureFlag> flags = await harness.configClient.getFeatureFlags();
-      expect(flags, hasLength(1));
-      expect(flags.first.name, LinuxConfigurationExtension.kEnableLinuxCustomPrototype);
-      final List<ConfigOption> configs = await harness.configClient.getConfigurations();
-      expect(configs, hasLength(1));
-      expect(configs.first.name, LinuxConfigurationExtension.kLinuxGtkVersion);
+    test('ServiceTestHarness exercises LinuxDeviceService in-process', () async {
+      final Directory tempDir = Directory.systemTemp.createTempSync('linux_harness_test.');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      Directory.fromUri(tempDir.uri.resolve('linux/')).createSync();
 
-      expect(await harness.templateClient.getAppTemplates(), isEmpty);
-      expect(await harness.templateClient.getPluginTemplates(), isEmpty);
-      final List<ExtensionProjectTemplate> templates = await harness.templateClient
-          .getProjectTemplates();
-      expect(templates, hasLength(1));
-      expect(templates.first.name, 'custom-linux-app');
-      final Map<String, Object?> params = await harness.templateClient.generateTemplateParameters(
-        'custom-linux-app',
-        const <String, Object?>{'projectName': 'demo_app'},
-      );
-      expect(params, const <String, Object?>{'projectName': 'demo_app'});
+      final deviceService = LinuxDeviceService();
+      final harness = ServiceTestHarness<LinuxDeviceService>(deviceService);
+      addTearDown(harness.dispose);
 
-      final List<TargetDevice> devices = await harness.deviceClient.getDevices();
+      final List<TargetDevice> devices = await deviceService.getDevices();
       expect(devices, hasLength(1));
       expect(devices.first.id, LinuxDeviceService.customLinuxDeviceId);
 
-      final List<ExtensionBuildTarget> buildTargets = await harness.buildClient.getBuildTargets();
-      expect(buildTargets, hasLength(1));
-      expect(buildTargets.first.name, LinuxBuildService.customLinuxBuildTargetName);
-
-      final List<ExtensionAssembleTarget> assembleTargets = await harness.buildClient
-          .getAssembleTargets();
-      expect(assembleTargets, hasLength(1));
-      expect(assembleTargets.first.name, 'custom-linux-assemble-only-debug');
-
-      final Uri projectRoot = Uri.parse('file:///nonexistent_project_root/');
-      final ExtensionBuildResult buildResult = await harness.buildClient.build(
-        buildMode: .debug,
-        flutterRoot: Uri.parse('file:///flutter_sdk/'),
-        mainPath: 'lib/main.dart',
-        outputDir: projectRoot.resolve('build/'),
-        projectRoot: projectRoot,
-        targetName: LinuxBuildService.customLinuxBuildTargetName,
-      );
-      expect(buildResult.success, isFalse);
-      expect(buildResult.errorMessage, contains('Missing linux/CMakeLists.txt'));
-
-      final List<ArtifactDependency> artifacts = await harness.artifactClient.listRequiredArtifacts(
-        engineVersion: 'abcdef123456',
-        hostPlatform: HostPlatform.linux_x64,
-      );
-      expect(artifacts, isEmpty);
-
-      await expectLater(
-        harness.sendRawRequest('unknown.method'),
-        throwsA(
-          isA<RpcException>().having((RpcException e) => e.code, 'code', methodNotFoundErrorCode),
+      final bool supported = await deviceService.isSupportedForProject(
+        deviceId: LinuxDeviceService.customLinuxDeviceId,
+        project: ExtensionFlutterProject(
+          appName: 'temp_app',
+          buildDirectory: tempDir.uri.resolve('build/'),
+          directory: tempDir.uri,
         ),
       );
-    });
+      expect(supported, isTrue);
 
-    test(
-      'deviceClient and cleanClient operate over JSON-RPC on a temporary project directory',
-      () async {
-        final Directory tempDir = Directory.systemTemp.createTempSync('linux_harness_test.');
-        addTearDown(() => tempDir.deleteSync(recursive: true));
-
-        final buildDir = Directory('${tempDir.path}/build')..createSync(recursive: true);
-        final linuxBuildDir = Directory('${buildDir.path}/linux')..createSync(recursive: true);
-        File('${linuxBuildDir.path}/libapp.so').writeAsStringSync('elf');
-        final linuxEphemeralDir = Directory('${tempDir.path}/linux/flutter/ephemeral')
-          ..createSync(recursive: true);
-        File('${linuxEphemeralDir.path}/generated.cmake').writeAsStringSync('cmake');
-
-        final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
-          linuxExtensionEntryPoint,
-        );
-        addTearDown(harness.dispose);
-
-        final project = ExtensionFlutterProject(
-          appName: 'temp_app',
-          buildDirectory: buildDir.uri,
-          directory: tempDir.uri,
-        );
-        expect(
-          await harness.deviceClient.isSupportedForProject(
-            deviceId: LinuxDeviceService.customLinuxDeviceId,
-            project: project,
-          ),
-          isTrue,
-        );
-        expect(
-          await harness.deviceClient.isSupportedForProject(
-            deviceId: LinuxDeviceService.customLinuxDeviceId,
-            project: ExtensionFlutterProject(
-              appName: 'unsupported_app',
-              buildDirectory: buildDir.uri,
-              directory: Uri.parse('file:///missing_project/'),
-            ),
-          ),
-          isFalse,
-        );
-
-        await harness.cleanClient.clean(
-          CleanEnvironment(buildDir: buildDir.uri, projectRoot: tempDir.uri),
-        );
-        expect(linuxBuildDir.existsSync(), isFalse);
-        expect(linuxEphemeralDir.existsSync(), isFalse);
-        expect(buildDir.existsSync(), isTrue);
-      },
-    );
-
-    test('spawnUri spawns bin/flutter_tools_extension_linux_prototype.dart', () async {
-      final Uri packageRoot = _resolvePrototypePackageRoot();
-      final Uri entrypointUri = packageRoot.resolve(
-        'bin/flutter_tools_extension_linux_prototype.dart',
+      deviceService.emitLogLine(
+        deviceId: LinuxDeviceService.customLinuxDeviceId,
+        line: 'device ready',
       );
-
-      final ExtensionTestHarness harness = await ExtensionTestHarness.spawnUri(entrypointUri);
-      addTearDown(harness.dispose);
-
-      expect(harness.capabilities.extensionName, 'flutter_tools_extension_linux_prototype');
-      final List<TargetDevice> devices = await harness.deviceClient.getDevices();
-      expect(devices, hasLength(1));
-      expect(devices.first.id, LinuxDeviceService.customLinuxDeviceId);
+      expect(harness.deviceLogLines(LinuxDeviceService.customLinuxDeviceId), <String>[
+        'device ready',
+      ]);
     });
 
     test(
-      'verifyExtensionPackage validates prototype entrypoint and runtime capabilities',
+      'verifyExtensionPackage spawns bin/flutter_tools_extension_linux_prototype.dart',
       () async {
-        final Uri packageRoot = _resolvePrototypePackageRoot();
-        const entrypointRelativePath = 'bin/flutter_tools_extension_linux_prototype.dart';
-
         await verifyExtensionPackage(
-          packageRoot: packageRoot,
-          entryPoint: linuxExtensionEntryPoint,
-          entrypointRelativePath: entrypointRelativePath,
-        );
-
-        await verifyExtensionPackage(
-          packageRoot: packageRoot,
-          entrypointRelativePath: entrypointRelativePath,
+          packageRoot: _resolvePrototypePackageRoot(),
+          entrypointRelativePath: 'bin/flutter_tools_extension_linux_prototype.dart',
         );
       },
     );

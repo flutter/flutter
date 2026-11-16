@@ -23,7 +23,7 @@ enum ExtensionLogLevel {
   /// Resolves an [ExtensionLogLevel] from its wire [name].
   ///
   /// Throws a [FormatException] if [name] is not a recognized log level.
-  static ExtensionLogLevel fromName(String name) {
+  factory ExtensionLogLevel.fromName(String name) {
     final ExtensionLogLevel? level = values.asNameMap()[name];
     if (level == null) {
       throw FormatException('Unknown ExtensionLogLevel: "$name".');
@@ -44,19 +44,14 @@ final class ExtensionLogMessage {
   /// invalid, or if [timestampKey] is present and not a valid ISO-8601
   /// timestamp.
   factory ExtensionLogMessage.fromJson(Map<String, Object?> json) {
-    final ExtensionLogLevel level = ExtensionLogLevel.fromName(
-      json.requiredField<String>(levelKey),
-    );
+    final level = ExtensionLogLevel.fromName(json.requiredField<String>(levelKey));
     final String message = json.requiredField<String>(messageKey);
     final String? rawTimestamp = json.nullableField<String>(timestampKey);
-    DateTime? parsedTimestamp;
-    if (rawTimestamp != null) {
-      parsedTimestamp = DateTime.tryParse(rawTimestamp);
-      if (parsedTimestamp == null) {
-        throw FormatException('Invalid "$timestampKey" ISO-8601 timestamp: "$rawTimestamp".');
-      }
-    }
-    return ExtensionLogMessage(level: level, message: message, timestamp: parsedTimestamp);
+    return ExtensionLogMessage(
+      level: level,
+      message: message,
+      timestamp: rawTimestamp == null ? null : DateTime.parse(rawTimestamp),
+    );
   }
 
   /// JSON key for the log severity level in `'extension.log'` notifications.

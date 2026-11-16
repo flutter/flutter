@@ -8,6 +8,8 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
 import 'package:meta/meta.dart';
 
+import 'provider.dart';
+
 /// Typedef for an extension RPC handler function.
 typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> params);
 
@@ -21,10 +23,6 @@ typedef ExtensionNotificationSender = void Function(String method, Map<String, O
 /// group related RPC endpoints under a specific [namespace] (e.g.
 /// `diagnostics`, `config`, `device`, `build`, `template`).
 abstract base class ToolExtensionService {
-  /// Reserved JSON-RPC 2.0 notification method for structured log messages
-  /// emitted by an extension to the host tool.
-  static const logNotificationMethod = 'extension.log';
-
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
   ///
   /// Wired by `ToolExtensionEntryPoint.run` before the extension peer begins
@@ -55,15 +53,12 @@ abstract base class ToolExtensionService {
     sender(method, params);
   }
 
-  /// Sends a structured [logNotificationMethod] notification to the host tool.
+  /// Sends a structured log notification to the host tool over
+  /// [ToolExtensionEntryPoint.logNotificationMethod].
   void log(String message, {ExtensionLogLevel level = .info, DateTime? timestamp}) {
     sendNotification(
-      logNotificationMethod,
-      ExtensionLogMessage(
-        level: level,
-        message: message,
-        timestamp: (timestamp ?? DateTime.now()).toUtc(),
-      ).toMap(),
+      ToolExtensionEntryPoint.logNotificationMethod,
+      ExtensionLogMessage(level: level, message: message, timestamp: timestamp).toMap(),
     );
   }
 
