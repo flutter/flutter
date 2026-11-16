@@ -82,6 +82,55 @@ void _notificationExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
+final class _LogTestService extends ToolExtensionService {
+  @override
+  String get namespace => 'log_test';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'emitAll': (Map<String, Object?> _) {
+        log('info message');
+        log('warning message', level: .warning);
+        log('error message', level: .error);
+        log('trace message', level: .trace);
+        return 'ok';
+      },
+      'emitMalformed': (Map<String, Object?> _) {
+        sendNotification(ToolExtensionEntryPoint.logNotificationMethod, const <String, Object?>{
+          ExtensionLogMessage.levelKey: 'unknown',
+          ExtensionLogMessage.messageKey: 'bad',
+        });
+        return 'ok';
+      },
+    };
+  }
+}
+
+void _logExtensionEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _LogTestService(),
+    ], extensionName: 'log_ext'),
+  );
+}
+
+final class _ReservedLogMethodService extends ToolExtensionService {
+  @override
+  String get namespace => 'extension';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{'log': (Map<String, Object?> _) => null};
+  }
+}
+
+void _reservedLogMethodEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ReservedLogMethodService()]),
+  );
+}
+
 final class _ExitingService extends ToolExtensionService {
   @override
   String get namespace => 'exit';
@@ -752,5 +801,67 @@ void main() {
         expect(shutdownServices, const <String>['gated_service']);
       },
     );
+
+    test('routes extension.log notifications for all levels to host Logger', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _logExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(await connection.sendRequest('log_test.emitAll'), 'ok');
+      await pumpEventQueue();
+
+      expect(logger.statusText, contains('[log_ext] info message'));
+      expect(logger.warningText, contains('[log_ext] warning message'));
+      expect(logger.errorText, contains('[log_ext] error message'));
+      expect(logger.traceText, contains('[log_ext] trace message'));
+    });
+
+    test('logs warning on malformed extension.log notification', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _logExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(await connection.sendRequest('log_test.emitMalformed'), 'ok');
+      await pumpEventQueue();
+
+      expect(
+        logger.warningText,
+        contains('Extension "log_ext" sent malformed "extension.log" notification'),
+      );
+    });
+
+    test('rejects registering reserved extension.log RPC method', () async {
+      final logger = BufferLogger.test();
+      await expectLater(
+        ExtensionConnection.spawn(_reservedLogMethodEntryPoint, logger: logger),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Reserved RPC method registered: "extension.log"'),
+          ),
+        ),
+      );
+    });
+
+    test('onNotification throws ArgumentError for extension.log', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _dummyExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(
+        () => connection.onNotification(ToolExtensionEntryPoint.logNotificationMethod),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
   });
 }
