@@ -1085,37 +1085,45 @@ void main() {
         TextGranularity.word,
         TextGranularity.paragraph,
       ];
+      // Drags that start before the paragraph and end after it, in the areas of
+      // SelectionUtils.adjustDragOffset.
+      final drags = <String, (Offset, Offset) Function(RenderParagraph)>{
+        'above to below': (RenderParagraph paragraph) => (
+          Offset(paragraph.size.width / 2, -10),
+          Offset(paragraph.size.width / 2, paragraph.size.height + 10),
+        ),
+        'left to right': (RenderParagraph paragraph) => (
+          Offset(-10, paragraph.textSize.height / 2),
+          Offset(paragraph.size.width + 10, paragraph.textSize.height / 2),
+        ),
+      };
       for (final (String text, TextDirection textDirection) in cases) {
         for (final granularity in granularities) {
-          final registrar = TestSelectionRegistrar();
-          final paragraph = RenderParagraph(
-            TextSpan(text: text),
-            textDirection: textDirection,
-            registrar: registrar,
-          );
-          layout(paragraph);
-          final Selectable selectable = registrar.selectables.single;
-          final Size size = paragraph.size;
+          for (final MapEntry<String, (Offset, Offset) Function(RenderParagraph)> drag
+              in drags.entries) {
+            final registrar = TestSelectionRegistrar();
+            final paragraph = RenderParagraph(
+              TextSpan(text: text),
+              textDirection: textDirection,
+              registrar: registrar,
+            );
+            layout(paragraph);
+            final Selectable selectable = registrar.selectables.single;
+            final (Offset start, Offset end) = drag.value(paragraph);
 
-          // A drag that starts above the paragraph and ends below it.
-          selectable.dispatchSelectionEvent(
-            SelectionEdgeUpdateEvent.forStart(
-              globalPosition: Offset(size.width / 2, -10),
-              granularity: granularity,
-            ),
-          );
-          selectable.dispatchSelectionEvent(
-            SelectionEdgeUpdateEvent.forEnd(
-              globalPosition: Offset(size.width / 2, size.height + 10),
-              granularity: granularity,
-            ),
-          );
-          expect(
-            paragraph.selections.single,
-            TextSelection(baseOffset: 0, extentOffset: text.length),
-            reason: '"$text" ($textDirection, $granularity)',
-          );
-          expect(selectable.getSelectedContent()!.plainText, text);
+            selectable.dispatchSelectionEvent(
+              SelectionEdgeUpdateEvent.forStart(globalPosition: start, granularity: granularity),
+            );
+            selectable.dispatchSelectionEvent(
+              SelectionEdgeUpdateEvent.forEnd(globalPosition: end, granularity: granularity),
+            );
+            expect(
+              paragraph.selections.single,
+              TextSelection(baseOffset: 0, extentOffset: text.length),
+              reason: '"$text" ($textDirection, $granularity, ${drag.key})',
+            );
+            expect(selectable.getSelectedContent()!.plainText, text);
+          }
         }
       }
     });
