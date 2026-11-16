@@ -126,6 +126,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _timeout,
       _ignoreTimeouts,
       _wasm,
+      _headless,
+      WebOptions.webBrowserFlags,
       WebOptions.crossOriginIsolation,
       _uninstall,
     ], verboseHelp: verboseHelp);
@@ -272,7 +274,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   // `package:integration_test` instead.
   static const _platform = DefaultedStringOptionDescriptor(
     name: 'platform',
-    allowed: <String>['tester', 'chrome'],
+    allowed: <String>['tester', 'chrome', 'firefox'],
     verboseOnly: true,
     defaultsTo: 'tester',
     help: 'Selects the test backend.',
@@ -282,7 +284,18 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           '(deprecated) Run tests using the Google Chrome web browser. '
           'This value is intended for testing the Flutter framework '
           'itself and may be removed at any time.',
+      'firefox':
+          'Run tests using the Mozilla Firefox web browser. '
+          'This value is intended for testing the Flutter framework '
+          'itself and may be removed at any time.',
     },
+  );
+
+  static const _headless = FlagOptionDescriptor(
+    name: 'headless',
+    defaultsTo: true,
+    verboseOnly: true,
+    help: 'Whether to run the web browser in headless mode when running web tests.',
   );
 
   static const _testRandomizeOrderingSeed = StringOptionDescriptor(
@@ -402,7 +415,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   final _testFileUris = <Uri>{};
 
-  bool get isWeb => getValue(_platform) == 'chrome';
+  String get _platformValue => getValue(_platform);
+  bool get isWeb => _platformValue != 'tester';
   bool get useWasm => getValue(_wasm);
 
   @override
@@ -557,6 +571,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         renderer: webRenderer,
         crossOriginIsolation: getValue(WebOptions.crossOriginIsolation),
         useWasm: useWasm,
+        runHeadless: getValue(_headless),
+        browserFlags: getValue(WebOptions.webBrowserFlags),
       ),
       printDtd: getValue(CommonOptions.printDtd),
       enableHcpp: explicitEnableHcpp,
@@ -727,6 +743,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       testAssetDirectory: testAssetPath,
       flutterProject: flutterProject,
       web: isWeb,
+      webRuntime: switch (_platformValue) {
+        'chrome' => Runtime.chrome,
+        'firefox' => Runtime.firefox,
+        _ => null,
+      },
       randomSeed: getValue(_testRandomizeOrderingSeed),
       reporter: getValue(_reporter),
       fileReporter: getValue(_fileReporter),

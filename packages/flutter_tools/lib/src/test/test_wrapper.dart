@@ -10,7 +10,7 @@ import 'package:test_core/src/platform.dart' // ignore: implementation_imports
     show registerPlatformPlugin;
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 
-export 'package:test_api/backend.dart' show Runtime;
+export 'package:test_api/backend.dart' show Compiler, Runtime, SuitePlatform;
 export 'package:test_core/src/platform.dart' show PlatformPlugin;
 
 abstract class TestWrapper {
