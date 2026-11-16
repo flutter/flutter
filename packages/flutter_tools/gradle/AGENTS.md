@@ -15,7 +15,8 @@
 
 ## 2. Type-Safe AGP & Gradle API Usage (No `@Suppress`)
 - **No Unsafe Casts or Suppression**: Never use raw wildcard casts (e.g., `as NamedDomainObjectContainer<Any>`) or `@Suppress("UNCHECKED_CAST")`. Unchecked casts conceal breaking changes across AGP versions.
-- **Use Idiomatic Type-Safe APIs**: Use official, type-safe AGP APIs (e.g., `pluginBuildTypes.create(name) { initWith(source) }`) to manipulate domain objects safely across AGP releases.
+- **Use Idiomatic Type-Safe APIs**: Use official, type-safe AGP APIs to manipulate domain objects safely across AGP releases.
+- **Do Not Use `initWith` Across Module Types**: AGP backs `ApplicationBuildType`, `LibraryBuildType`, `DynamicFeatureBuildType`, and `TestBuildType` with one class, so `initWith` copies every property, including app-only ones such as `applicationIdSuffix` and `isShrinkResources`. AGP rejects those in a library, so never call `initWith` to copy an app build type onto a plugin (library) build type ([#196412](https://github.com/flutter/flutter/issues/196412), [#196696](https://github.com/flutter/flutter/issues/196696)). Copy only the properties the target needs, as `PluginHandler.copyLibraryBuildTypeProperties` does.
 - **Structured Compatibility Layers**: When bridging binary- or DSL-incompatible AGP versions (e.g., AGP 8 vs 9), introduce explicit, type-safe abstraction wrappers or reflection bridges.
 
 ## 3. Lazy Configuration & Execution Avoidance

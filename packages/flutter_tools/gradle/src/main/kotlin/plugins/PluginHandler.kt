@@ -12,7 +12,6 @@ import com.flutter.gradle.FlutterPluginUtils.addApiDependencies
 import com.flutter.gradle.FlutterPluginUtils.buildModeFor
 import com.flutter.gradle.FlutterPluginUtils.getAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.getCompileSdkFromProject
-import com.flutter.gradle.FlutterPluginUtils.isBuiltAsApp
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
 import org.gradle.api.Project
@@ -150,17 +149,13 @@ class PluginHandler(
 
             // Give the plugin project every build type that the app project has, so that the
             // plugin's variants resolve. Build types that the plugin already defines are left
-            // alone.
+            // alone. Plugins are always Android libraries: an app cannot depend on a module
+            // that applies com.android.application.
             val pluginProjectBuildTypes = getAndroidExtension(pluginProject).buildTypes
-            val pluginIsApp = isBuiltAsApp(pluginProject)
             getAndroidExtension(project).buildTypes.forEach { appBuildType ->
                 if (pluginProjectBuildTypes.findByName(appBuildType.name) == null) {
                     pluginProjectBuildTypes.create(appBuildType.name) {
-                        if (pluginIsApp) {
-                            initWith(appBuildType)
-                        } else {
-                            copyLibraryBuildTypeProperties(appBuildType, this)
-                        }
+                        copyLibraryBuildTypeProperties(appBuildType, this)
                     }
                 }
             }
@@ -181,6 +176,7 @@ class PluginHandler(
             libraryBuildType.matchingFallbacks.addAll(appBuildType.matchingFallbacks)
             // isDebuggable is not on the LibraryBuildType interface, but library variants
             // still read it. AGP's build type class implements ApplicationBuildType too.
+            // android_plugin_example_app_build_test.dart fails if that stops being true.
             if (libraryBuildType is ApplicationBuildType && appBuildType is ApplicationBuildType) {
                 libraryBuildType.isDebuggable = appBuildType.isDebuggable
             }

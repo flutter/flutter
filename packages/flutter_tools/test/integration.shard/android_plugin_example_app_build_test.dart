@@ -70,6 +70,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
         }
+        create("qa") {
+            isDebuggable = true
+        }
     }
 }
 ''');
@@ -108,12 +111,31 @@ android {
       return;
     }
 
+    // Generate the plugin's BuildConfig, to check which build types it treats as
+    // debuggable.
+    final File pluginGradleFile = tempDir
+        .childDirectory(testName)
+        .childDirectory('android')
+        .childFile('build.gradle.kts');
+    expect(pluginGradleFile, exists);
+    pluginGradleFile.writeAsStringSync('''
+${pluginGradleFile.readAsStringSync()}
+
+android {
+    buildFeatures {
+        buildConfig = true
+    }
+}
+''');
+
     // The staging build type minifies the app. Check that R8 keeps the plugin
     // classes.
     final Directory exampleAndroidDir = exampleAppDir.childDirectory('android');
     result = processManager.runSync(<String>[
       exampleAndroidDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').path,
       ':app:assembleStaging',
+      ':$testName:generateStagingBuildConfig',
+      ':$testName:generateQaBuildConfig',
       '-Ptarget-platform=android-arm',
     ], workingDirectory: exampleAndroidDir.path);
     if (result.exitCode != 0) {
@@ -121,6 +143,26 @@ android {
         'gradlew :app:assembleStaging failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
       );
     }
+
+    // LibraryBuildType has no isDebuggable, so the Flutter Gradle plugin can
+    // only copy it because AGP uses one class for every build type. If a
+    // future AGP breaks that, the plugin's qa build type stops being
+    // debuggable and this check fails.
+    String pluginBuildConfig(String buildType) => exampleAppDir
+        .childDirectory('build')
+        .childDirectory(testName)
+        .childDirectory('generated')
+        .childDirectory('source')
+        .childDirectory('buildConfig')
+        .childDirectory(buildType)
+        .childDirectory('com')
+        .childDirectory('example')
+        .childDirectory(testName)
+        .childFile('BuildConfig.java')
+        .readAsStringSync();
+    final debugField = RegExp(r'boolean DEBUG = .*\btrue\b');
+    expect(pluginBuildConfig('qa'), matches(debugField));
+    expect(pluginBuildConfig('staging'), isNot(matches(debugField)));
 
     // Clean
     result = processManager.runSync(<String>[

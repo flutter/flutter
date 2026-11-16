@@ -225,7 +225,7 @@ class PluginHandlerTest {
     }
 
     @Test
-    fun `configurePlugins copies only library build type properties when the plugin project is a library`(
+    fun `configurePlugins copies only library build type properties onto plugin build types`(
         @TempDir tempDir: Path
     ) {
         val project = mockk<Project>()
@@ -240,7 +240,7 @@ class PluginHandlerTest {
         every { project.logger } returns mockk(relaxed = true)
 
         setupMockProjectDir(project, tempDir)
-        setupMockPluginProject(project, pluginProject, isAppPlugin = false)
+        setupMockPluginProject(project, pluginProject)
 
         val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<LibraryBuildType>>(relaxed = true)
         val mockLibraryExtension = setUpMockLibraryAndroidExtension(pluginProject)
@@ -288,49 +288,6 @@ class PluginHandlerTest {
     }
 
     @Test
-    fun `configurePlugins copies every build type property with initWith when the plugin project is an app`(
-        @TempDir tempDir: Path
-    ) {
-        val project = mockk<Project>()
-        val pluginProject = mockk<Project>()
-        val appBuildType =
-            mockk<ApplicationBuildType> {
-                every { name } returns "staging"
-                every { isDebuggable } returns true
-            }
-        every { project.logger } returns mockk(relaxed = true)
-
-        setupMockProjectDir(project, tempDir)
-        setupMockPluginProject(project, pluginProject, isAppPlugin = true)
-
-        val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<ApplicationBuildType>>(relaxed = true)
-        val mockAppExtension = setUpMockAndroidExtension(pluginProject)
-        every { mockAppExtension.buildTypes } returns pluginProjectBuildTypes
-
-        setUpMockAndroidExtension(project, compileSdk = 35, buildTypes = listOf(appBuildType))
-        setupMockPluginLoader(project, listOf(cameraDependency))
-
-        every { pluginProjectBuildTypes.findByName("staging") } returns null
-        val createdBuildType = mockk<ApplicationBuildType>(relaxed = true)
-        val createActionSlot = slot<Action<ApplicationBuildType>>()
-        every {
-            pluginProjectBuildTypes.create("staging", capture(createActionSlot))
-        } returns createdBuildType
-
-        val pluginHandler = PluginHandler(project)
-        pluginHandler.configurePlugins(
-            engineVersionValue = EXAMPLE_ENGINE_VERSION
-        )
-
-        val capturePluginActionSlot = mutableListOf<Action<Project>>()
-        verify { pluginProject.afterEvaluate(capture(capturePluginActionSlot)) }
-        capturePluginActionSlot.forEach { it.execute(pluginProject) }
-
-        createActionSlot.captured.execute(createdBuildType)
-        verify { createdBuildType.initWith(appBuildType) }
-    }
-
-    @Test
     fun `configurePlugins skips creating build types that already exist on the plugin project`(
         @TempDir tempDir: Path
     ) {
@@ -348,7 +305,7 @@ class PluginHandlerTest {
         every { project.logger } returns mockk(relaxed = true)
 
         setupMockProjectDir(project, tempDir)
-        setupMockPluginProject(project, pluginProject, isAppPlugin = false)
+        setupMockPluginProject(project, pluginProject)
 
         val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<LibraryBuildType>>(relaxed = true)
         val mockLibraryExtension = setUpMockLibraryAndroidExtension(pluginProject)
@@ -438,14 +395,10 @@ class PluginHandlerTest {
         project: Project,
         pluginProject: Project,
         pluginName: String = cameraDependency["name"] as String,
-        isAppPlugin: Boolean = false,
         dependencyProject: Project? = null
     ) {
         every { pluginProject.hasProperty("local-engine-repo") } returns false
         every { pluginProject.hasProperty("android") } returns true
-        val mockPluginContainer = mockk<org.gradle.api.plugins.PluginContainer>()
-        every { pluginProject.plugins } returns mockPluginContainer
-        every { mockPluginContainer.hasPlugin("com.android.application") } returns isAppPlugin
         every { project.rootProject.findProject(":$pluginName") } returns pluginProject
         if (dependencyProject != null) {
             every { project.rootProject.findProject(":${flutterPluginAndroidLifecycleDependency["name"]}") } returns dependencyProject
