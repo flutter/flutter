@@ -244,9 +244,12 @@ Future<void> _installPlugins({
   final pubspec = File(path.join(appDir.path, 'pubspec.yaml'));
   final String pubspecContent = pubspec.readAsStringSync();
   // Scenarios only change the pod set by swapping pubspec.yaml, so a reinstall
-  // is only needed when it differs from the last install.
+  // is only needed when it differs from the last install. Keep scenarios with
+  // the same pubspec.yaml adjacent so the install is reused.
   if (_installedPubspecs[xcodeProjectDir.path] == pubspecContent) {
-    print('Skipping pod install, pubspec.yaml is unchanged.');
+    print(
+      'Skipping flutter build --config-only, flutter pub get and pod install, pubspec.yaml is unchanged.',
+    );
     return;
   }
 
