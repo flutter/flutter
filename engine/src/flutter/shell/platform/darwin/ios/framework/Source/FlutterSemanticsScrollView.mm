@@ -140,24 +140,29 @@ FLUTTER_ASSERT_ARC
 }
 
 - (nullable id)accessibilityElementAtIndex:(NSInteger)index {
-  NSArray<SemanticsObject*>* children = self.semanticsObject.children;
-  if (index < 0 || index >= static_cast<NSInteger>(children.count)) {
-    return nil;
+  if (@available(iOS 27.0, *)) {
+    NSArray<SemanticsObject*>* children = self.semanticsObject.children;
+    if (index < 0 || index >= static_cast<NSInteger>(children.count)) {
+      return nil;
+    }
+    SemanticsObject* child = children[index];
+    if ([child hasChildren]) {
+      return child.accessibilityContainer;
+    }
+    return child.nativeAccessibility;
   }
-  SemanticsObject* child = children[index];
-  if ([child hasChildren]) {
-    return child.accessibilityContainer;
-  }
-  return child.nativeAccessibility;
+  return nil;
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element {
-  NSArray<SemanticsObject*>* children = self.semanticsObject.children;
-  for (size_t i = 0; i < children.count; i++) {
-    SemanticsObject* child = children[i];
-    if ((![child hasChildren] && child.nativeAccessibility == element) ||
-        ([child hasChildren] && [child accessibilityContainer] == element)) {
-      return i;
+  if (@available(iOS 27.0, *)) {
+    NSArray<SemanticsObject*>* children = self.semanticsObject.children;
+    for (size_t i = 0; i < children.count; i++) {
+      SemanticsObject* child = children[i];
+      if ((![child hasChildren] && child.nativeAccessibility == element) ||
+          ([child hasChildren] && [child accessibilityContainer] == element)) {
+        return i;
+      }
     }
   }
   return NSNotFound;

@@ -1101,6 +1101,8 @@ const float kFloatCompareEpsilon = 0.001;
     XCTAssertEqual([parentContainer indexOfAccessibilityElement:scrollableContainer], 1);
 
     XCTAssertEqual([scrollView accessibilityElementCount], 0);
+    XCTAssertNil([scrollView accessibilityElementAtIndex:0]);
+    XCTAssertEqual([scrollView indexOfAccessibilityElement:childObject], NSNotFound);
     XCTAssertEqual([scrollableContainer accessibilityElementCount], 2);
     XCTAssertEqual([scrollableContainer accessibilityElementAtIndex:0], scrollView);
     XCTAssertEqual([scrollableContainer accessibilityElementAtIndex:1], childObject);
