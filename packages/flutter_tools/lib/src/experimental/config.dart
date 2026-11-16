@@ -152,14 +152,7 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
       'ConfigurationExtensionClient fetching title via RPC ("${ConfigurationExtension.getTitleMethod}")...',
     );
     try {
-      final Object? response = await connection.sendRequest(ConfigurationExtension.getTitleMethod);
-      if (response case final String title) {
-        _titleCache = title;
-      } else {
-        _logger.printTrace(
-          'ConfigurationExtensionClient received invalid title response: $response',
-        );
-      }
+      _titleCache = await connection.configRpc.getTitle();
     } on ToolExtensionException catch (err) {
       _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
@@ -168,27 +161,18 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
     return _titleCache ?? _defaultTitle;
   }
 
-  Future<List<T>> _fetchList<T>(
+  Future<List<T>> _fetchEntities<T>(
     String method,
     String entityName,
-    T Function(Map<String, Object?>) fromJson,
+    Future<List<T>> Function() fetch,
   ) async {
     _logger.printTrace('ConfigurationExtensionClient fetching $entityName via RPC ("$method")...');
     try {
-      final Object? rawResult = await connection.sendRequest(method);
-      if (rawResult case final List<Object?> list) {
-        final results = <T>[
-          for (final Object? element in list)
-            if (element case final Map<Object?, Object?> map) fromJson(map.cast<String, Object?>()),
-        ];
-        _logger.printTrace(
-          'ConfigurationExtensionClient received ${results.length} $entityName via RPC.',
-        );
-        return results;
-      }
+      final List<T> results = await fetch();
       _logger.printTrace(
-        'ConfigurationExtensionClient received invalid or null $entityName response: $rawResult',
+        'ConfigurationExtensionClient received ${results.length} $entityName via RPC.',
       );
+      return results;
     } on ToolExtensionException {
       rethrow;
     } on Object catch (err, stack) {
@@ -198,16 +182,16 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
   }
 
   @override
-  Future<List<FeatureFlag>> getFeatureFlags() => _fetchList(
+  Future<List<FeatureFlag>> getFeatureFlags() => _fetchEntities(
     ConfigurationExtension.getFeatureFlagsMethod,
     'feature flag(s)',
-    FeatureFlag.fromJson,
+    connection.configRpc.getFeatureFlags,
   );
 
   @override
-  Future<List<ConfigOption>> getConfigurations() => _fetchList(
+  Future<List<ConfigOption>> getConfigurations() => _fetchEntities(
     ConfigurationExtension.getConfigurationsMethod,
     'config option(s)',
-    ConfigOption.fromJson,
+    connection.configRpc.getConfigurations,
   );
 }

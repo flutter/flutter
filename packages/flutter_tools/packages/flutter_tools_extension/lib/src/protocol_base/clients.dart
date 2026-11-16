@@ -14,19 +14,18 @@ import '../config.dart';
 import '../device.dart';
 import '../diagnostics.dart';
 import '../templates.dart';
-import 'harness.dart';
+import 'connection.dart';
 
-/// Typed JSON-RPC client for invoking [DiagnosticsExtension] methods on an
-/// [ExtensionTestHarness].
-final class ExtensionTestDiagnosticsClient {
-  /// Creates a client bound to [_harness].
-  ExtensionTestDiagnosticsClient(this._harness);
+/// Typed JSON-RPC 2.0 client for invoking [DiagnosticsExtension] methods over
+/// an [ExtensionRpcChannel].
+final class ExtensionDiagnosticsRpcClient {
+  ExtensionDiagnosticsRpcClient(this._channel);
 
-  final ExtensionTestHarness _harness;
+  final ExtensionRpcChannel _channel;
 
   /// Queries `diagnostics.getTitle` over JSON-RPC.
   Future<String> getTitle() async {
-    final Object? response = await _harness.sendRawRequest(DiagnosticsExtension.getTitleMethod);
+    final Object? response = await _channel.sendRequest(DiagnosticsExtension.getTitleMethod);
     if (response case final String value) {
       return value;
     }
@@ -35,9 +34,9 @@ final class ExtensionTestDiagnosticsClient {
     );
   }
 
-  /// Queries `diagnostics.runDiagnostics` over JSON-RPC.
+  /// Queries `diagnostics.runDiagnostics` over JSON-RPC without a deadline.
   Future<List<ValidationResult>> runDiagnostics() async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       DiagnosticsExtension.runDiagnosticsMethod,
       timeout: null,
     );
@@ -60,17 +59,16 @@ final class ExtensionTestDiagnosticsClient {
   }
 }
 
-/// Typed JSON-RPC client for invoking [ConfigurationExtension] methods on an
-/// [ExtensionTestHarness].
-final class ExtensionTestConfigurationClient {
-  /// Creates a client bound to [_harness].
-  ExtensionTestConfigurationClient(this._harness);
+/// Typed JSON-RPC 2.0 client for invoking [ConfigurationExtension] methods over
+/// an [ExtensionRpcChannel].
+final class ExtensionConfigurationRpcClient {
+  ExtensionConfigurationRpcClient(this._channel);
 
-  final ExtensionTestHarness _harness;
+  final ExtensionRpcChannel _channel;
 
   /// Queries `config.getTitle` over JSON-RPC.
   Future<String> getTitle() async {
-    final Object? response = await _harness.sendRawRequest(ConfigurationExtension.getTitleMethod);
+    final Object? response = await _channel.sendRequest(ConfigurationExtension.getTitleMethod);
     if (response case final String value) {
       return value;
     }
@@ -81,7 +79,7 @@ final class ExtensionTestConfigurationClient {
 
   /// Queries `config.getFeatureFlags` over JSON-RPC.
   Future<List<FeatureFlag>> getFeatureFlags() async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       ConfigurationExtension.getFeatureFlagsMethod,
     );
     if (response case final List<Object?> list) {
@@ -104,7 +102,7 @@ final class ExtensionTestConfigurationClient {
 
   /// Queries `config.getConfigurations` over JSON-RPC.
   Future<List<ConfigOption>> getConfigurations() async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       ConfigurationExtension.getConfigurationsMethod,
     );
     if (response case final List<Object?> list) {
@@ -126,36 +124,31 @@ final class ExtensionTestConfigurationClient {
   }
 }
 
-/// Typed JSON-RPC client for invoking [TemplateService] methods on an
-/// [ExtensionTestHarness].
-final class ExtensionTestTemplateClient {
-  /// Creates a client bound to [_harness].
-  ExtensionTestTemplateClient(this._harness);
+/// Typed JSON-RPC 2.0 client for invoking [TemplateService] methods over an
+/// [ExtensionRpcChannel].
+final class ExtensionTemplateRpcClient {
+  ExtensionTemplateRpcClient(this._channel);
 
   static const String _templateNameParam = 'templateName';
   static const String _toolParametersParam = 'toolParameters';
 
-  final ExtensionTestHarness _harness;
+  final ExtensionRpcChannel _channel;
 
   /// Queries `template.getAppTemplates` over JSON-RPC.
   Future<Set<String>> getAppTemplates() async {
-    final Object? response = await _harness.sendRawRequest(TemplateService.getAppTemplatesMethod);
+    final Object? response = await _channel.sendRequest(TemplateService.getAppTemplatesMethod);
     return _stringSetFromRpc(response, TemplateService.getAppTemplatesMethod);
   }
 
   /// Queries `template.getPluginTemplates` over JSON-RPC.
   Future<Set<String>> getPluginTemplates() async {
-    final Object? response = await _harness.sendRawRequest(
-      TemplateService.getPluginTemplatesMethod,
-    );
+    final Object? response = await _channel.sendRequest(TemplateService.getPluginTemplatesMethod);
     return _stringSetFromRpc(response, TemplateService.getPluginTemplatesMethod);
   }
 
   /// Queries `template.getProjectTemplates` over JSON-RPC.
   Future<List<ExtensionProjectTemplate>> getProjectTemplates() async {
-    final Object? response = await _harness.sendRawRequest(
-      TemplateService.getProjectTemplatesMethod,
-    );
+    final Object? response = await _channel.sendRequest(TemplateService.getProjectTemplatesMethod);
     return ExtensionProjectTemplate.listFromJson(response);
   }
 
@@ -164,7 +157,7 @@ final class ExtensionTestTemplateClient {
     String templateName,
     Map<String, Object?> toolParameters,
   ) async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       TemplateService.generateTemplateParametersMethod,
       params: <String, Object?>{
         _templateNameParam: templateName,
@@ -196,17 +189,16 @@ final class ExtensionTestTemplateClient {
   }
 }
 
-/// Typed JSON-RPC client for invoking [DeviceService] methods on an
-/// [ExtensionTestHarness].
-final class ExtensionTestDeviceClient {
-  /// Creates a client bound to [_harness].
-  ExtensionTestDeviceClient(this._harness);
+/// Typed JSON-RPC 2.0 client for invoking [DeviceService] methods over an
+/// [ExtensionRpcChannel].
+final class ExtensionDeviceRpcClient {
+  ExtensionDeviceRpcClient(this._channel);
 
-  final ExtensionTestHarness _harness;
+  final ExtensionRpcChannel _channel;
 
   /// Queries `device.getDevices` over JSON-RPC.
   Future<List<TargetDevice>> getDevices() async {
-    final Object? response = await _harness.sendRawRequest(DeviceService.getDevicesMethod);
+    final Object? response = await _channel.sendRequest(DeviceService.getDevicesMethod);
     return TargetDevice.listFromJson(response);
   }
 
@@ -215,7 +207,7 @@ final class ExtensionTestDeviceClient {
     required String deviceId,
     required ExtensionFlutterProject project,
   }) async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       DeviceService.isSupportedForProjectMethod,
       params: <String, Object?>{
         DeviceService.deviceIdParam: deviceId,
@@ -231,13 +223,13 @@ final class ExtensionTestDeviceClient {
     );
   }
 
-  /// Queries `device.launchApp` over JSON-RPC.
+  /// Queries `device.launchApp` over JSON-RPC without a deadline.
   Future<bool> launchApp({
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
   }) async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       DeviceService.launchAppMethod,
       params: <String, Object?>{
         DeviceService.debuggingOptionsParam: debuggingOptions.toMap(),
@@ -255,9 +247,9 @@ final class ExtensionTestDeviceClient {
     );
   }
 
-  /// Queries `device.getVmServiceUri` over JSON-RPC.
+  /// Queries `device.getVmServiceUri` over JSON-RPC without a deadline.
   Future<Uri?> getVmServiceUri({required String deviceId}) async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       DeviceService.getVmServiceUriMethod,
       params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
       timeout: null,
@@ -283,7 +275,7 @@ final class ExtensionTestDeviceClient {
 
   /// Queries `device.stopApp` over JSON-RPC.
   Future<bool> stopApp({required String deviceId}) async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       DeviceService.stopAppMethod,
       params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
     );
@@ -298,7 +290,7 @@ final class ExtensionTestDeviceClient {
 
   /// Queries `device.startLogStream` over JSON-RPC.
   Future<void> startLogStream({required String deviceId}) async {
-    await _harness.sendRawRequest(
+    await _channel.sendRequest(
       DeviceService.startLogStreamMethod,
       params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
     );
@@ -306,7 +298,7 @@ final class ExtensionTestDeviceClient {
 
   /// Queries `device.stopLogStream` over JSON-RPC.
   Future<void> stopLogStream({required String deviceId}) async {
-    await _harness.sendRawRequest(
+    await _channel.sendRequest(
       DeviceService.stopLogStreamMethod,
       params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
     );
@@ -318,7 +310,7 @@ final class ExtensionTestDeviceClient {
   /// Throws a [FormatException] on the returned stream if a `'device.logEntry'`
   /// notification payload is missing a valid string `deviceId` or `line`.
   Stream<String> logLines({required String deviceId}) {
-    return _harness.onNotification(DeviceService.logEntryNotificationMethod).expand<String>((
+    return _channel.onNotification(DeviceService.logEntryNotificationMethod).expand<String>((
       Map<String, Object?> params,
     ) {
       final String eventDeviceId = params.requiredField<String>(DeviceService.deviceIdParam);
@@ -328,27 +320,26 @@ final class ExtensionTestDeviceClient {
   }
 }
 
-/// Typed JSON-RPC client for invoking [BuildService] methods on an
-/// [ExtensionTestHarness].
-final class ExtensionTestBuildClient {
-  /// Creates a client bound to [_harness].
-  ExtensionTestBuildClient(this._harness);
+/// Typed JSON-RPC 2.0 client for invoking [BuildService] methods over an
+/// [ExtensionRpcChannel].
+final class ExtensionBuildRpcClient {
+  ExtensionBuildRpcClient(this._channel);
 
-  final ExtensionTestHarness _harness;
+  final ExtensionRpcChannel _channel;
 
   /// Queries `build.getBuildTargets` over JSON-RPC.
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
-    final Object? response = await _harness.sendRawRequest(BuildService.getBuildTargetsMethod);
+    final Object? response = await _channel.sendRequest(BuildService.getBuildTargetsMethod);
     return ExtensionBuildTarget.listFromJson(response);
   }
 
   /// Queries `build.getAssembleTargets` over JSON-RPC.
   Future<List<ExtensionAssembleTarget>> getAssembleTargets() async {
-    final Object? response = await _harness.sendRawRequest(BuildService.getAssembleTargetsMethod);
+    final Object? response = await _channel.sendRequest(BuildService.getAssembleTargetsMethod);
     return ExtensionAssembleTarget.listFromJson(response);
   }
 
-  /// Queries `build.build` over JSON-RPC.
+  /// Queries `build.build` over JSON-RPC without a deadline.
   Future<ExtensionBuildResult> build({
     required BuildMode buildMode,
     required Uri flutterRoot,
@@ -358,7 +349,7 @@ final class ExtensionTestBuildClient {
     required String targetName,
     Map<String, String> resolvedArtifacts = const <String, String>{},
   }) async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       BuildService.buildMethod,
       params: <String, Object?>{
         BuildService.buildModeParam: buildMode.cliName,
@@ -380,7 +371,7 @@ final class ExtensionTestBuildClient {
     );
   }
 
-  /// Queries `build.assemble` over JSON-RPC.
+  /// Queries `build.assemble` over JSON-RPC without a deadline.
   Future<ExtensionBuildResult> assemble({
     required Uri buildDir,
     required BuildMode buildMode,
@@ -391,7 +382,7 @@ final class ExtensionTestBuildClient {
     required String targetName,
     Map<String, String> resolvedArtifacts = const <String, String>{},
   }) async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       BuildService.assembleMethod,
       params: <String, Object?>{
         BuildService.buildDirParam: _ensureTrailingSlash(buildDir).toString(),
@@ -418,13 +409,12 @@ final class ExtensionTestBuildClient {
       uri.path.endsWith('/') ? uri : uri.replace(path: '${uri.path}/');
 }
 
-/// Typed JSON-RPC client for invoking [ArtifactService] methods on an
-/// [ExtensionTestHarness].
-final class ExtensionTestArtifactClient {
-  /// Creates a client bound to [_harness].
-  ExtensionTestArtifactClient(this._harness);
+/// Typed JSON-RPC 2.0 client for invoking [ArtifactService] methods over an
+/// [ExtensionRpcChannel].
+final class ExtensionArtifactRpcClient {
+  ExtensionArtifactRpcClient(this._channel);
 
-  final ExtensionTestHarness _harness;
+  final ExtensionRpcChannel _channel;
 
   /// Queries `artifact.listRequiredArtifacts` over JSON-RPC.
   Future<List<ArtifactDependency>> listRequiredArtifacts({
@@ -432,7 +422,7 @@ final class ExtensionTestArtifactClient {
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
   }) async {
-    final Object? response = await _harness.sendRawRequest(
+    final Object? response = await _channel.sendRequest(
       ArtifactService.listRequiredArtifactsMethod,
       params: <String, Object?>{
         ArtifactService.engineVersionParam: engineVersion,
@@ -444,17 +434,16 @@ final class ExtensionTestArtifactClient {
   }
 }
 
-/// Typed JSON-RPC client for invoking [CleanService] methods on an
-/// [ExtensionTestHarness].
-final class ExtensionTestCleanClient {
-  /// Creates a client bound to [_harness].
-  ExtensionTestCleanClient(this._harness);
+/// Typed JSON-RPC 2.0 client for invoking [CleanService] methods over an
+/// [ExtensionRpcChannel].
+final class ExtensionCleanRpcClient {
+  ExtensionCleanRpcClient(this._channel);
 
-  final ExtensionTestHarness _harness;
+  final ExtensionRpcChannel _channel;
 
-  /// Queries `clean.clean` over JSON-RPC.
+  /// Queries `clean.clean` over JSON-RPC without a deadline.
   Future<void> clean(CleanEnvironment environment) async {
-    await _harness.sendRawRequest(
+    await _channel.sendRequest(
       CleanService.cleanMethod,
       params: <String, Object?>{CleanService.environmentParam: environment.toMap()},
       timeout: null,

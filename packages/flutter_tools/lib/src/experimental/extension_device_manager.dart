@@ -26,7 +26,6 @@ import 'extension_manager.dart';
 
 /// A host-side [DeviceService] client adapter delegating RPC queries to an [ExtensionConnection].
 final class ExtensionDeviceClient extends DeviceService {
-  /// Creates an [ExtensionDeviceClient] wrapping the host [connection].
   ExtensionDeviceClient(this.connection, {required this._logger});
 
   /// The active extension isolate connection.
@@ -37,10 +36,7 @@ final class ExtensionDeviceClient extends DeviceService {
     _logger.printTrace(
       'ExtensionDeviceClient fetching devices via RPC ("${DeviceService.getDevicesMethod}")...',
     );
-    final Object? rawResult = await connection
-        .sendRequest(DeviceService.getDevicesMethod)
-        .timeout(const Duration(seconds: 5));
-    final List<TargetDevice> devices = TargetDevice.listFromJson(rawResult);
+    final List<TargetDevice> devices = await connection.deviceRpc.getDevices();
     _logger.printTrace('ExtensionDeviceClient received ${devices.length} device(s) via RPC.');
     return devices;
   }
@@ -67,16 +63,7 @@ final class ExtensionDeviceClient extends DeviceService {
       '("${DeviceService.isSupportedForProjectMethod}")...',
     );
     try {
-      final Object? rawResult = await connection.sendRequest(
-        DeviceService.isSupportedForProjectMethod,
-        params: <String, Object?>{
-          DeviceService.deviceIdParam: deviceId,
-          DeviceService.projectParam: project.toMap(),
-        },
-      );
-      if (rawResult case final bool supported) {
-        return supported;
-      }
+      return await connection.deviceRpc.isSupportedForProject(deviceId: deviceId, project: project);
     } on ToolExtensionException catch (err) {
       _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
@@ -98,23 +85,10 @@ final class ExtensionDeviceClient extends DeviceService {
       '("${DeviceService.launchAppMethod}")...',
     );
     try {
-      final Object? rawResult = await connection.sendRequest(
-        DeviceService.launchAppMethod,
-        params: <String, Object?>{
-          DeviceService.debuggingOptionsParam: debuggingOptions.toMap(),
-          DeviceService.deviceIdParam: deviceId,
-          DeviceService.executableUriParam: executableUri.toString(),
-        },
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
-        timeout: null,
-      );
-      if (rawResult case final bool launched) {
-        return launched;
-      }
-      _logger.printError(
-        'ExtensionDeviceClient received invalid response for "${DeviceService.launchAppMethod}": '
-        'expected bool, got ${rawResult.runtimeType}.',
+      return await connection.deviceRpc.launchApp(
+        debuggingOptions: debuggingOptions,
+        deviceId: deviceId,
+        executableUri: executableUri,
       );
     } on ToolExtensionException catch (err) {
       _logger.printError('Extension "${connection.extensionName}": ${err.message}');
@@ -132,30 +106,7 @@ final class ExtensionDeviceClient extends DeviceService {
       '("${DeviceService.getVmServiceUriMethod}")...',
     );
     try {
-      final Object? rawResult = await connection.sendRequest(
-        DeviceService.getVmServiceUriMethod,
-        params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
-        timeout: null,
-      );
-      if (rawResult case {DeviceService.vmServiceUriKey: final String uriStr}) {
-        final Uri? parsed = Uri.tryParse(uriStr);
-        if (parsed != null) {
-          return parsed;
-        }
-        _logger.printError(
-          'ExtensionDeviceClient received invalid VM Service URI for "$deviceId": "$uriStr".',
-        );
-        return null;
-      }
-      if (rawResult case {DeviceService.vmServiceUriKey: null}) {
-        return null;
-      }
-      _logger.printError(
-        'ExtensionDeviceClient received invalid response for "${DeviceService.getVmServiceUriMethod}": '
-        'expected Map with String or null "${DeviceService.vmServiceUriKey}", got ${rawResult.runtimeType}.',
-      );
+      return await connection.deviceRpc.getVmServiceUri(deviceId: deviceId);
     } on ToolExtensionException catch (err) {
       _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
@@ -174,17 +125,7 @@ final class ExtensionDeviceClient extends DeviceService {
       '("${DeviceService.stopAppMethod}")...',
     );
     try {
-      final Object? rawResult = await connection.sendRequest(
-        DeviceService.stopAppMethod,
-        params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-      );
-      if (rawResult case final bool stopped) {
-        return stopped;
-      }
-      _logger.printError(
-        'ExtensionDeviceClient received invalid response for "${DeviceService.stopAppMethod}": '
-        'expected bool, got ${rawResult.runtimeType}.',
-      );
+      return await connection.deviceRpc.stopApp(deviceId: deviceId);
     } on ToolExtensionException catch (err) {
       _logger.printError('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
@@ -200,10 +141,7 @@ final class ExtensionDeviceClient extends DeviceService {
       'ExtensionDeviceClient starting log stream for "$deviceId" via RPC '
       '("${DeviceService.startLogStreamMethod}")...',
     );
-    await connection.sendRequest(
-      DeviceService.startLogStreamMethod,
-      params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-    );
+    await connection.deviceRpc.startLogStream(deviceId: deviceId);
   }
 
   @override
@@ -212,10 +150,7 @@ final class ExtensionDeviceClient extends DeviceService {
       'ExtensionDeviceClient stopping log stream for "$deviceId" via RPC '
       '("${DeviceService.stopLogStreamMethod}")...',
     );
-    await connection.sendRequest(
-      DeviceService.stopLogStreamMethod,
-      params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-    );
+    await connection.deviceRpc.stopLogStream(deviceId: deviceId);
   }
 }
 
@@ -270,7 +205,7 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
   final String name;
 
   late final StreamController<String> _logLinesController;
-  StreamSubscription<Map<String, Object?>>? _notificationSubscription;
+  StreamSubscription<String>? _notificationSubscription;
   bool _closeAfterFlush = false;
   bool _isDisposed = false;
 
@@ -292,22 +227,24 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
 
   Future<void> _startLogStream() async {
     try {
-      _notificationSubscription = _connection
-          .onNotification(DeviceService.logEntryNotificationMethod)
+      _notificationSubscription = _connection.deviceRpc
+          .logLines(deviceId: _deviceId)
           .listen(
-            (Map<String, Object?> params) {
+            (String line) {
               if (_isDisposed || _logLinesController.isClosed) {
                 return;
               }
-              if (params[DeviceService.deviceIdParam] == _deviceId) {
-                if (params[DeviceService.lineKey] case final String line) {
-                  if (_logLinesController.hasListener) {
-                    _logLinesController.add(line);
-                  } else if (_pendingLines.length < _maxPendingLines) {
-                    _pendingLines.add(line);
-                  }
-                }
+              if (_logLinesController.hasListener) {
+                _logLinesController.add(line);
+              } else if (_pendingLines.length < _maxPendingLines) {
+                _pendingLines.add(line);
               }
+            },
+            onError: (Object error) {
+              _logger.printWarning(
+                'Extension "${_connection.extensionName}" sent malformed notification for '
+                '"${DeviceService.logEntryNotificationMethod}": $error',
+              );
             },
             onDone: () {
               if (_isDisposed || _logLinesController.isClosed) {

@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/experimental/config.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/client.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:test/fake.dart';
@@ -61,10 +62,13 @@ class _FakeExtensionConnection extends Fake implements ExtensionConnection {
   final Object? response;
 
   @override
+  late final configRpc = ExtensionConfigurationRpcClient(this);
+
+  @override
   Future<Object?> sendRequest(
     String method, {
     Object? params,
-    Duration? timeout = const Duration(seconds: 5),
+    Duration? timeout = ExtensionIsolateConnection.defaultRpcTimeout,
   }) async => response;
 }
 

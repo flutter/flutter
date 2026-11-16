@@ -6,140 +6,86 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
-import 'package:stream_channel/isolate_channel.dart';
 
-import '../protocol_base/provider.dart';
+import '../protocol_base/clients.dart';
+import '../protocol_base/connection.dart';
 import '../protocol_base/service.dart';
-import 'clients.dart';
-
-/// Typedef for an extension isolate entrypoint function accepted by
-/// [ExtensionTestHarness.spawn].
-typedef ExtensionTestEntryPoint = FutureOr<void> Function(SendPort sendPort);
 
 /// In-process Isolate and JSON-RPC 2.0 test harness for Flutter tool extensions.
 ///
 /// Spawns an extension isolate via [spawn] or [spawnUri], completes the
-/// `extension.getCapabilities` handshake, and exposes typed protocol clients
-/// ([diagnosticsClient], [configClient], [templateClient], [deviceClient],
-/// [buildClient], [artifactClient], [cleanClient]) along with notification
-/// streams ([onLog], [onNotification]) and raw JSON-RPC helpers
-/// ([sendRawRequest], [sendNotification]).
-// TODO(bkonyi): Share connection and client proxy implementations between
-// package:flutter_tools and package:flutter_tools_extension/testing.dart,
-// https://github.com/flutter/flutter/issues/190755.
+/// `extension.getCapabilities` handshake, and exposes shared typed protocol
+/// clients ([diagnosticsClient], [configClient], [templateClient],
+/// [deviceClient], [buildClient], [artifactClient], [cleanClient]) along with
+/// structured log and isolate-error streams ([onLog], [onIsolateError],
+/// [onNotification]) and raw JSON-RPC helpers ([sendRawRequest],
+/// [sendNotification]).
 final class ExtensionTestHarness {
   ExtensionTestHarness._({
-    required this.capabilities,
-    required this._errorPort,
-    required this._exitPort,
-    required Isolate this._isolate,
+    required this._connection,
+    required this._isolateErrorController,
     required this._isolateErrors,
     required this._logController,
     required this._logs,
-    required this._peer,
-    required this._receivePort,
   });
 
-  /// Capabilities reported by the extension isolate during handshake.
-  final ToolExtensionCapabilities capabilities;
+  static const _ownerName = 'ExtensionTestHarness';
 
-  final ReceivePort _errorPort;
-  final ReceivePort _exitPort;
-  Isolate? _isolate;
+  final ExtensionIsolateConnection _connection;
+  final StreamController<StateError> _isolateErrorController;
   final List<StateError> _isolateErrors;
   final StreamController<ExtensionLogMessage> _logController;
   final List<ExtensionLogMessage> _logs;
-  final _notificationControllers = <String, StreamController<Map<String, Object?>>>{};
-  final json_rpc.Peer _peer;
-  final ReceivePort _receivePort;
+
+  /// Capabilities reported by the extension isolate during handshake.
+  ToolExtensionCapabilities get capabilities => _connection.capabilities;
 
   /// Typed client for invoking `diagnostics.*` RPCs on the extension.
-  late final diagnosticsClient = ExtensionTestDiagnosticsClient(this);
+  late final diagnosticsClient = ExtensionDiagnosticsRpcClient(_connection);
 
   /// Typed client for invoking `config.*` RPCs on the extension.
-  late final configClient = ExtensionTestConfigurationClient(this);
+  late final configClient = ExtensionConfigurationRpcClient(_connection);
 
   /// Typed client for invoking `template.*` RPCs on the extension.
-  late final templateClient = ExtensionTestTemplateClient(this);
+  late final templateClient = ExtensionTemplateRpcClient(_connection);
 
   /// Typed client for invoking `device.*` RPCs on the extension.
-  late final deviceClient = ExtensionTestDeviceClient(this);
+  late final deviceClient = ExtensionDeviceRpcClient(_connection);
 
   /// Typed client for invoking `build.*` RPCs on the extension.
-  late final buildClient = ExtensionTestBuildClient(this);
+  late final buildClient = ExtensionBuildRpcClient(_connection);
 
   /// Typed client for invoking `artifact.*` RPCs on the extension.
-  late final artifactClient = ExtensionTestArtifactClient(this);
+  late final artifactClient = ExtensionArtifactRpcClient(_connection);
 
   /// Typed client for invoking `clean.*` RPCs on the extension.
-  late final cleanClient = ExtensionTestCleanClient(this);
-
-  bool _isDisposed = false;
+  late final cleanClient = ExtensionCleanRpcClient(_connection);
 
   /// Whether this harness has been disposed.
-  bool get isDisposed => _isDisposed;
+  bool get isDisposed => _connection.isDisposed;
 
   /// Unmodifiable snapshot of unhandled isolate errors received after handshake.
   List<StateError> get isolateErrors => List<StateError>.unmodifiable(_isolateErrors);
+
+  /// Broadcast stream of unhandled post-handshake isolate errors.
+  ///
+  /// If a listener is attached, unhandled isolate errors are emitted on this
+  /// stream; otherwise they are reported via `Zone.current.handleUncaughtError`.
+  Stream<StateError> get onIsolateError => _isolateErrorController.stream;
 
   /// Unmodifiable snapshot of all `'extension.log'` messages received so far.
   List<ExtensionLogMessage> get logs => List<ExtensionLogMessage>.unmodifiable(_logs);
 
   /// Broadcast stream of `'extension.log'` messages emitted by the extension.
   ///
-  /// When a listener is attached, malformed `'extension.log'` payloads are
-  /// delivered to this stream as [FormatException] errors and unhandled
-  /// post-handshake isolate errors are delivered as [StateError] errors.
+  /// Malformed `'extension.log'` payloads are delivered to this stream as
+  /// [FormatException] errors when a listener is attached, or reported via
+  /// `Zone.current.handleUncaughtError` otherwise.
   Stream<ExtensionLogMessage> get onLog => _logController.stream;
 
   /// Returns a broadcast stream of JSON-RPC 2.0 notifications sent by the
   /// extension isolate for [method].
-  ///
-  /// For `'extension.log'` notifications, use [onLog] or [logs] instead.
-  /// If the extension emits a non-map notification payload for [method], a
-  /// [FormatException] is delivered to the returned stream (or to the active
-  /// zone's uncaught error handler if no listener is attached).
-  Stream<Map<String, Object?>> onNotification(String method) {
-    if (_isDisposed) {
-      throw StateError('ExtensionTestHarness has been disposed.');
-    }
-    if (method == ToolExtensionService.logNotificationMethod) {
-      throw ArgumentError.value(
-        method,
-        'method',
-        'Use ExtensionTestHarness.onLog or logs to observe '
-            '"${ToolExtensionService.logNotificationMethod}" notifications.',
-      );
-    }
-    final StreamController<Map<String, Object?>> controller = _notificationControllers.putIfAbsent(
-      method,
-      () {
-        final newController = StreamController<Map<String, Object?>>.broadcast();
-        _peer.registerMethod(method, (json_rpc.Parameters params) {
-          if (newController.isClosed) {
-            return;
-          }
-          final Object? rawValue = params.value;
-          if (rawValue is! Map<String, Object?>) {
-            final error = FormatException(
-              'Invalid notification payload for "$method": '
-              'expected Map<String, Object?>, got ${rawValue.runtimeType}.',
-            );
-            if (newController.hasListener) {
-              newController.addError(error, StackTrace.current);
-            } else {
-              Zone.current.handleUncaughtError(error, StackTrace.current);
-            }
-            return;
-          }
-          newController.add(rawValue);
-        });
-        return newController;
-      },
-    );
-    return controller.stream;
-  }
+  Stream<Map<String, Object?>> onNotification(String method) => _connection.onNotification(method);
 
   /// Spawns an extension isolate running [entryPoint] and completes the
   /// `extension.getCapabilities` handshake.
@@ -149,13 +95,24 @@ final class ExtensionTestHarness {
   /// cannot be inspected directly from the parent isolate after an RPC; observe
   /// results through RPC responses or a [SendPort].
   static Future<ExtensionTestHarness> spawn(
-    ExtensionTestEntryPoint entryPoint, {
-    Duration timeout = const Duration(seconds: 5),
+    ExtensionIsolateEntryPoint entryPoint, {
+    Duration timeout = ExtensionIsolateConnection.defaultRpcTimeout,
   }) {
-    return _spawnWith(
-      (SendPort sendPort, SendPort onError, SendPort onExit) =>
-          Isolate.spawn(entryPoint, sendPort, onError: onError, onExit: onExit),
-      timeout: timeout,
+    return _create(
+      ({
+        required void Function() onDisposing,
+        required ExtensionIsolateErrorCallback onIsolateError,
+        required ExtensionLogMessageCallback onLogMessage,
+        required ExtensionMalformedNotificationCallback onMalformedNotification,
+      }) => ExtensionIsolateConnection.spawn(
+        entryPoint,
+        onDisposing: onDisposing,
+        onIsolateError: onIsolateError,
+        onLogMessage: onLogMessage,
+        onMalformedNotification: onMalformedNotification,
+        ownerName: _ownerName,
+        timeout: timeout,
+      ),
     );
   }
 
@@ -165,223 +122,97 @@ final class ExtensionTestHarness {
     Uri entrypointUri, {
     List<String> args = const <String>[],
     Uri? packageConfigUri,
-    Duration timeout = const Duration(seconds: 5),
+    Duration timeout = ExtensionIsolateConnection.defaultRpcTimeout,
   }) {
-    return _spawnWith((SendPort sendPort, SendPort onError, SendPort onExit) async {
-      final Uri? resolvedPackageConfig = packageConfigUri ?? await Isolate.packageConfig;
-      return Isolate.spawnUri(
+    return _create(
+      ({
+        required void Function() onDisposing,
+        required ExtensionIsolateErrorCallback onIsolateError,
+        required ExtensionLogMessageCallback onLogMessage,
+        required ExtensionMalformedNotificationCallback onMalformedNotification,
+      }) => ExtensionIsolateConnection.spawnUri(
         entrypointUri,
-        args,
-        sendPort,
-        packageConfig: resolvedPackageConfig,
-        automaticPackageResolution: resolvedPackageConfig == null,
-        onError: onError,
-        onExit: onExit,
-      );
-    }, timeout: timeout);
+        args: args,
+        onDisposing: onDisposing,
+        onIsolateError: onIsolateError,
+        onLogMessage: onLogMessage,
+        onMalformedNotification: onMalformedNotification,
+        ownerName: _ownerName,
+        packageConfigUri: packageConfigUri,
+        timeout: timeout,
+      ),
+    );
   }
 
-  static Future<ExtensionTestHarness> _spawnWith(
-    Future<Isolate> Function(SendPort sendPort, SendPort onError, SendPort onExit) isolateSpawner, {
-    required Duration timeout,
-  }) async {
-    final receivePort = ReceivePort();
-    final errorPort = ReceivePort();
-    final exitPort = ReceivePort();
-    final errorCompleter = Completer<Never>();
+  static Future<ExtensionTestHarness> _create(
+    Future<ExtensionIsolateConnection> Function({
+      required void Function() onDisposing,
+      required ExtensionIsolateErrorCallback onIsolateError,
+      required ExtensionLogMessageCallback onLogMessage,
+      required ExtensionMalformedNotificationCallback onMalformedNotification,
+    })
+    connector,
+  ) async {
     final isolateErrors = <StateError>[];
+    final isolateErrorController = StreamController<StateError>.broadcast();
     final logs = <ExtensionLogMessage>[];
     final logController = StreamController<ExtensionLogMessage>.broadcast();
 
-    Isolate? isolate;
-    ExtensionTestHarness? harness;
-
-    errorPort.listen((Object? error) {
-      final (String detail, StackTrace stackTrace) = switch (error) {
-        [final Object? description, final String trace] when trace.isNotEmpty => (
-          '$description',
-          StackTrace.fromString(trace),
-        ),
-        [final Object? description, _] => ('$description', StackTrace.current),
-        _ => ('$error', StackTrace.current),
-      };
-      if (harness case final ExtensionTestHarness activeHarness) {
+    final ExtensionIsolateConnection connection = await connector(
+      onDisposing: () {
+        unawaited(logController.close());
+        unawaited(isolateErrorController.close());
+      },
+      onIsolateError: (Object? _, String detail, StackTrace? stackTrace, String _) {
         final isolateError = StateError('Extension isolate unhandled error: $detail');
-        activeHarness._isolateErrors.add(isolateError);
-        if (!activeHarness._logController.isClosed && activeHarness._logController.hasListener) {
-          activeHarness._logController.addError(isolateError, stackTrace);
+        isolateErrors.add(isolateError);
+        if (!isolateErrorController.isClosed && isolateErrorController.hasListener) {
+          isolateErrorController.add(isolateError);
         } else {
-          Zone.current.handleUncaughtError(isolateError, stackTrace);
+          Zone.current.handleUncaughtError(isolateError, stackTrace ?? StackTrace.current);
         }
-        unawaited(activeHarness.dispose());
-        return;
-      }
-      if (!errorCompleter.isCompleted) {
-        errorCompleter.completeError(StateError('Extension isolate error: $detail'), stackTrace);
-      }
-    });
-
-    exitPort.listen((Object? _) {
-      if (harness case final ExtensionTestHarness activeHarness) {
-        unawaited(activeHarness.dispose());
-        return;
-      }
-      if (!errorCompleter.isCompleted) {
-        errorCompleter.completeError(
-          StateError('Extension isolate exited unexpectedly before handshake completed.'),
-        );
-      }
-    });
-
-    try {
-      isolate = await isolateSpawner(
-        receivePort.sendPort,
-        errorPort.sendPort,
-        exitPort.sendPort,
-      ).timeout(timeout);
-
-      final channel = IsolateChannel<Object?>.connectReceive(receivePort);
-      final peer = json_rpc.Peer.withoutJson(channel);
-
-      peer.registerMethod(ToolExtensionService.logNotificationMethod, (json_rpc.Parameters params) {
+      },
+      onLogMessage: (ExtensionLogMessage message, String _) {
         if (logController.isClosed) {
           return;
         }
-        final Object? rawValue = params.value;
-        if (rawValue is! Map<String, Object?>) {
-          final error = FormatException(
-            'Invalid notification payload for "${ToolExtensionService.logNotificationMethod}": '
-            'expected Map<String, Object?>, got ${rawValue.runtimeType}.',
-          );
-          if (logController.hasListener) {
-            logController.addError(error, StackTrace.current);
-          } else {
-            Zone.current.handleUncaughtError(error, StackTrace.current);
-          }
-          return;
-        }
-        try {
-          final logMessage = ExtensionLogMessage.fromJson(rawValue);
-          logs.add(logMessage);
-          logController.add(logMessage);
-        } on FormatException catch (error, stackTrace) {
-          if (logController.hasListener) {
-            logController.addError(error, stackTrace);
-          } else {
+        logs.add(message);
+        logController.add(message);
+      },
+      onMalformedNotification:
+          (String method, FormatException error, StackTrace stackTrace, String _) {
+            if (method == ToolExtensionService.logNotificationMethod &&
+                !logController.isClosed &&
+                logController.hasListener) {
+              logController.addError(error, stackTrace);
+              return;
+            }
             Zone.current.handleUncaughtError(error, stackTrace);
-          }
-        }
-      });
+          },
+    );
 
-      unawaited(peer.listen());
-
-      final Object? responseObj = await Future.any<Object?>(<Future<Object?>>[
-        peer.sendRequest(ToolExtensionEntryPoint.getCapabilitiesMethod),
-        errorCompleter.future,
-      ]).timeout(timeout);
-
-      if (responseObj is! Map<String, Object?>) {
-        throw StateError(
-          'Extension handshake failed: extension.getCapabilities did not return a Map.',
-        );
-      }
-
-      final capabilities = ToolExtensionCapabilities.fromJson(responseObj);
-      return harness = ExtensionTestHarness._(
-        capabilities: capabilities,
-        errorPort: errorPort,
-        exitPort: exitPort,
-        isolate: isolate,
-        isolateErrors: isolateErrors,
-        logController: logController,
-        logs: logs,
-        peer: peer,
-        receivePort: receivePort,
-      );
-    } on TimeoutException {
-      await _cleanupFailedSpawn(
-        errorPort: errorPort,
-        exitPort: exitPort,
-        isolate: isolate,
-        logController: logController,
-        receivePort: receivePort,
-      );
-      throw TimeoutException('Handshake with tool extension isolate timed out.');
-    } on Object {
-      await _cleanupFailedSpawn(
-        errorPort: errorPort,
-        exitPort: exitPort,
-        isolate: isolate,
-        logController: logController,
-        receivePort: receivePort,
-      );
-      rethrow;
-    }
+    return ExtensionTestHarness._(
+      connection: connection,
+      isolateErrorController: isolateErrorController,
+      isolateErrors: isolateErrors,
+      logController: logController,
+      logs: logs,
+    );
   }
 
-  static Future<void> _cleanupFailedSpawn({
-    required ReceivePort errorPort,
-    required ReceivePort exitPort,
-    required Isolate? isolate,
-    required StreamController<ExtensionLogMessage> logController,
-    required ReceivePort receivePort,
-  }) async {
-    errorPort.close();
-    exitPort.close();
-    receivePort.close();
-    isolate?.kill(priority: Isolate.immediate);
-    await logController.close();
-  }
-
-  /// Sends a raw JSON-RPC 2.0 request to the extension isolate.
-  ///
-  /// Pass `timeout: null` for long-running RPCs that should wait until
-  /// completion or isolate termination.
+  /// Sends a raw JSON-RPC 2.0 request to the extension isolate, unwrapping
+  /// domain errors (`-32001`) into [ToolExtensionException].
   Future<Object?> sendRawRequest(
     String method, {
     Map<String, Object?>? params,
-    Duration? timeout = const Duration(seconds: 5),
-  }) async {
-    if (_isDisposed) {
-      throw StateError('ExtensionTestHarness has been disposed.');
-    }
-    final Future<Object?> request = _peer.sendRequest(method, params);
-    return timeout != null ? request.timeout(timeout) : request;
-  }
+    Duration? timeout = ExtensionIsolateConnection.defaultRpcTimeout,
+  }) => _connection.sendRequest(method, params: params, timeout: timeout);
 
   /// Sends a fire-and-forget JSON-RPC 2.0 notification to the extension isolate.
-  void sendNotification(String method, {Map<String, Object?>? params}) {
-    if (_isDisposed) {
-      throw StateError('ExtensionTestHarness has been disposed.');
-    }
-    _peer.sendNotification(method, params);
-  }
+  void sendNotification(String method, {Map<String, Object?>? params}) =>
+      _connection.sendNotification(method, params: params);
 
-  /// Disposes the JSON-RPC peer, kills the extension isolate, and closes all
-  /// open receive ports and notification streams.
-  ///
-  /// Idempotent: calling [dispose] multiple times is a no-op.
-  Future<void> dispose() async {
-    if (_isDisposed) {
-      return;
-    }
-    _isDisposed = true;
-    _errorPort.close();
-    _exitPort.close();
-    _receivePort.close();
-    for (final StreamController<Map<String, Object?>> controller
-        in _notificationControllers.values) {
-      await controller.close();
-    }
-    _notificationControllers.clear();
-    await _logController.close();
-    try {
-      await _peer.close();
-    } on Object {
-      // Ignore peer closure errors during teardown.
-    } finally {
-      _isolate?.kill(priority: Isolate.immediate);
-      _isolate = null;
-    }
-  }
+  /// Sends `extension.shutdown`, closes all open receive ports and streams, and
+  /// kills the extension isolate.
+  Future<void> dispose() => _connection.dispose();
 }

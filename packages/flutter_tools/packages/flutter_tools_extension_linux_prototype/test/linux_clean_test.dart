@@ -5,76 +5,42 @@
 import 'dart:io';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
-import 'package:flutter_tools_extension/testing.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/clean.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('LinuxCleanService', () {
-    test(
-      'deletes linux build and ephemeral directories when present (MemoryExtensionFileSystem)',
-      () async {
-        final ExtensionDependencies dependencies = createTestDependencies();
-        final ExtensionDirectory projectDir = dependencies.fileSystem.directory(
-          Uri.parse('file:///project/'),
-        )..createSync(recursive: true);
+    test('deletes linux build and ephemeral directories when present', () async {
+      final Directory projectDir = Directory.systemTemp.createTempSync('linux_clean_test.');
+      addTearDown(() => projectDir.deleteSync(recursive: true));
 
-        final ExtensionDirectory buildDir = projectDir.childDirectory('build')
-          ..createSync(recursive: true);
-        final ExtensionDirectory linuxBuildDir = buildDir.childDirectory('linux')
-          ..createSync(recursive: true);
-        linuxBuildDir.childFile('app.so').writeAsStringSync('binary');
+      final buildDir = Directory.fromUri(projectDir.uri.resolve('build/'))
+        ..createSync(recursive: true);
+      final linuxBuildDir = Directory.fromUri(buildDir.uri.resolve('linux/'))
+        ..createSync(recursive: true);
+      File.fromUri(linuxBuildDir.uri.resolve('app.so')).writeAsStringSync('binary');
 
-        final ExtensionDirectory linuxEphemeralDir =
-            projectDir.childDirectory('linux').childDirectory('flutter').childDirectory('ephemeral')
-              ..createSync(recursive: true);
-        linuxEphemeralDir.childFile('generated_config.cmake').writeAsStringSync('cmake');
+      final linuxEphemeralDir = Directory.fromUri(
+        projectDir.uri.resolve('linux/flutter/ephemeral/'),
+      )..createSync(recursive: true);
+      File.fromUri(linuxEphemeralDir.uri.resolve('generated_config.cmake'))
+          .writeAsStringSync('cmake');
 
-        final service = LinuxCleanService(dependencies: dependencies);
-        await service.clean(CleanEnvironment(buildDir: buildDir.uri, projectRoot: projectDir.uri));
+      final service = LinuxCleanService();
+      await service.clean(CleanEnvironment(buildDir: buildDir.uri, projectRoot: projectDir.uri));
 
-        expect(linuxBuildDir.existsSync(), isFalse);
-        expect(linuxEphemeralDir.existsSync(), isFalse);
-        expect(buildDir.existsSync(), isTrue);
-      },
-    );
-
-    test(
-      'deletes linux build and ephemeral directories on real filesystem (LocalExtensionFileSystem)',
-      () async {
-        final Directory tempDir = Directory.systemTemp.createTempSync('linux_clean_test.');
-        addTearDown(() => tempDir.deleteSync(recursive: true));
-
-        const dependencies = ExtensionDependencies.bootstrap();
-        final ExtensionDirectory projectDir = dependencies.fileSystem.directory(tempDir.uri);
-        final ExtensionDirectory buildDir = projectDir.childDirectory('build')
-          ..createSync(recursive: true);
-        final ExtensionDirectory linuxBuildDir = buildDir.childDirectory('linux')
-          ..createSync(recursive: true);
-        linuxBuildDir.childFile('app.so').writeAsStringSync('binary');
-
-        final ExtensionDirectory linuxEphemeralDir =
-            projectDir.childDirectory('linux').childDirectory('flutter').childDirectory('ephemeral')
-              ..createSync(recursive: true);
-        linuxEphemeralDir.childFile('generated_config.cmake').writeAsStringSync('cmake');
-
-        final service = LinuxCleanService(dependencies: dependencies);
-        await service.clean(CleanEnvironment(buildDir: buildDir.uri, projectRoot: projectDir.uri));
-
-        expect(linuxBuildDir.existsSync(), isFalse);
-        expect(linuxEphemeralDir.existsSync(), isFalse);
-        expect(buildDir.existsSync(), isTrue);
-      },
-    );
+      expect(linuxBuildDir.existsSync(), isFalse);
+      expect(linuxEphemeralDir.existsSync(), isFalse);
+      expect(buildDir.existsSync(), isTrue);
+    });
 
     test('is a no-op when linux build and ephemeral directories do not exist', () async {
-      final ExtensionDependencies dependencies = createTestDependencies();
-      final ExtensionDirectory projectDir = dependencies.fileSystem.directory(
-        Uri.parse('file:///project/'),
-      )..createSync(recursive: true);
-      final ExtensionDirectory buildDir = projectDir.childDirectory('build');
+      final Directory projectDir = Directory.systemTemp.createTempSync('linux_clean_noop_test.');
+      addTearDown(() => projectDir.deleteSync(recursive: true));
 
-      final service = LinuxCleanService(dependencies: dependencies);
+      final buildDir = Directory.fromUri(projectDir.uri.resolve('build/'));
+
+      final service = LinuxCleanService();
       await service.clean(CleanEnvironment(buildDir: buildDir.uri, projectRoot: projectDir.uri));
 
       expect(buildDir.existsSync(), isFalse);

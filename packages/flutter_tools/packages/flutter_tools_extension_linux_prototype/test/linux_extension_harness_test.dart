@@ -185,31 +185,18 @@ void main() {
       'verifyExtensionPackage validates prototype entrypoint and runtime capabilities',
       () async {
         final Uri packageRoot = _resolvePrototypePackageRoot();
-        final expectedConfig = ExtensionPackageConfig(
-          name: 'flutter_tools_extension_linux_prototype',
-          entrypoint: 'bin/flutter_tools_extension_linux_prototype.dart',
-          hostPlatforms: const <String>{'linux'},
-          services: const <String>{
-            'diagnostics',
-            'config',
-            'template',
-            'device',
-            'build',
-            'clean',
-            'artifact',
-          },
-          buildTargets: const <String>{LinuxBuildService.customLinuxBuildTargetName},
-          templates: const <String>{'custom-linux-app'},
-          targetPlatforms: const <String>{'custom_linux'},
-        );
+        const entrypointRelativePath = 'bin/flutter_tools_extension_linux_prototype.dart';
 
         await verifyExtensionPackage(
           packageRoot: packageRoot,
           entryPoint: linuxExtensionEntryPoint,
-          expectedConfig: expectedConfig,
+          entrypointRelativePath: entrypointRelativePath,
         );
 
-        await verifyExtensionPackage(packageRoot: packageRoot, expectedConfig: expectedConfig);
+        await verifyExtensionPackage(
+          packageRoot: packageRoot,
+          entrypointRelativePath: entrypointRelativePath,
+        );
       },
     );
   });

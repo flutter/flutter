@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/testing.dart';
@@ -23,6 +23,16 @@ final class _TestDiagnosticsService extends DiagnosticsExtension {
         ValidationMessage('All checks passed'),
       ], statusInfo: 'OK'),
     ];
+  }
+}
+
+final class _DomainErrorDiagnosticsService extends DiagnosticsExtension {
+  @override
+  String get title => 'Failing Diagnostics';
+
+  @override
+  Future<List<ValidationResult>> runDiagnostics() async {
+    throw const ToolExtensionException('Missing custom toolchain at /opt/custom');
   }
 }
 
@@ -72,8 +82,12 @@ final class _TestProjectTemplate extends ProjectTemplate {
 }
 
 final class _TestTemplateService extends TemplateService {
+  _TestTemplateService({this.appTemplates = const <String>{'custom_os/Runner.tmpl'}});
+
+  final Set<String> appTemplates;
+
   @override
-  Set<String> get appPlatformTemplates => const <String>{'custom_os/Runner.tmpl'};
+  Set<String> get appPlatformTemplates => appTemplates;
 
   @override
   Set<String> get pluginPlatformTemplates => const <String>{'custom_os/Plugin.tmpl'};
@@ -181,11 +195,11 @@ final class _TestBuildTarget extends BuildTarget {
 }
 
 final class _TestAssembleTarget extends AssembleTarget {
-  const _TestAssembleTarget()
+  const _TestAssembleTarget([this.name = 'custom_assemble'])
     : super(description: 'Assembles custom_assemble', targetPlatform: 'linux-x64');
 
   @override
-  String get name => 'custom_assemble';
+  final String name;
 
   @override
   Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
@@ -197,15 +211,25 @@ final class _TestAssembleTarget extends AssembleTarget {
 }
 
 final class _TestBuildService extends BuildService {
-  _TestBuildService({this.targets = const <BuildTarget>[_TestBuildTarget()]});
+  _TestBuildService({
+    this.assembleTargetList = const <AssembleTarget>[_TestAssembleTarget()],
+    this.targets = const <BuildTarget>[_TestBuildTarget()],
+  });
 
+  final List<AssembleTarget> assembleTargetList;
   final List<BuildTarget> targets;
 
   @override
   List<BuildTarget> get buildTargets => targets;
 
   @override
-  List<AssembleTarget> get assembleTargets => const <AssembleTarget>[_TestAssembleTarget()];
+  List<AssembleTarget> get assembleTargets => assembleTargetList;
+}
+
+final class _ThrowingBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets =>
+      throw StateError('Service RPC should not be invoked when host platform is excluded.');
 }
 
 final class _TestArtifactService extends ArtifactService {
@@ -252,6 +276,29 @@ final class _ExitOnCleanService extends CleanService {
   }
 }
 
+final class _GatedShutdownService extends ToolExtensionService {
+  _GatedShutdownService({required this.completedSendPort, required this.gateSendPort});
+
+  final SendPort completedSendPort;
+  final SendPort gateSendPort;
+
+  @override
+  String get namespace => 'lifecycle';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async =>
+      const <String, ExtensionRpcHandler>{};
+
+  @override
+  Future<void> shutdown() async {
+    final releasePort = ReceivePort();
+    gateSendPort.send(releasePort.sendPort);
+    await releasePort.first;
+    releasePort.close();
+    completedSendPort.send('shutdown_complete');
+  }
+}
+
 final class _AsyncErrorService extends ToolExtensionService {
   @override
   String get namespace => 'error';
@@ -284,6 +331,13 @@ final class _MalformedNotificationService extends ToolExtensionService {
         });
         return 'ok';
       },
+      'emitTimestampFreeLog': (Map<String, Object?> _) {
+        sendNotification(ToolExtensionService.logNotificationMethod, const <String, Object?>{
+          ExtensionLogMessage.levelKey: 'info',
+          ExtensionLogMessage.messageKey: 'log without timestamp',
+        });
+        return 'ok';
+      },
       'emitBadDeviceLog': (Map<String, Object?> _) {
         sendNotification(DeviceService.logEntryNotificationMethod, <String, Object?>{
           DeviceService.deviceIdParam: 'test-device-1',
@@ -297,6 +351,15 @@ final class _MalformedNotificationService extends ToolExtensionService {
       },
     };
   }
+}
+
+final class _UnknownNamespaceService extends ToolExtensionService {
+  @override
+  String get namespace => 'unknown_namespace';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async =>
+      const <String, ExtensionRpcHandler>{};
 }
 
 Future<ExtensionTestHarness> _spawnFullTestHarness({
@@ -325,45 +388,7 @@ void main() {
   const methodNotFoundErrorCode = -32601;
   const invalidParamsErrorCode = -32602;
 
-  group('createTestDependencies (Tier 1)', () {
-    test('MemoryExtensionFileSystem supports hermetic file and directory operations', () async {
-      final ExtensionDependencies dependencies = createTestDependencies();
-      final ExtensionFileSystem fs = dependencies.fileSystem;
-      final ExtensionDirectory projectDir = fs.directory(Uri.parse('file:///workspace/app/'));
-      expect(projectDir.existsSync(), isFalse);
-
-      expect(() => projectDir.createSync(), throwsA(isA<FileSystemException>()));
-
-      projectDir.createSync(recursive: true);
-      expect(projectDir.existsSync(), isTrue);
-      expect(projectDir.path, '/workspace/app');
-      expect(projectDir.uri, Uri.parse('file:///workspace/app/'));
-
-      final ExtensionFile pubspecFile = projectDir.childFile('pubspec.yaml');
-      expect(pubspecFile.existsSync(), isFalse);
-      pubspecFile.writeAsStringSync('name: sample\n');
-      expect(pubspecFile.existsSync(), isTrue);
-      expect(pubspecFile.readAsStringSync(), 'name: sample\n');
-
-      final ExtensionFile binaryFile = projectDir.childDirectory('build').childFile('app.bin');
-      expect(
-        () => binaryFile.writeAsBytesSync(<int>[1, 2, 3]),
-        throwsA(isA<FileSystemException>()),
-      );
-      binaryFile.createSync(recursive: true);
-      binaryFile.writeAsBytesSync(Uint8List.fromList(<int>[10, 20, 30]));
-      expect(binaryFile.readAsBytesSync(), <int>[10, 20, 30]);
-
-      expect(() => projectDir.deleteSync(), throwsA(isA<FileSystemException>()));
-
-      await projectDir.delete(recursive: true);
-      expect(projectDir.existsSync(), isFalse);
-      expect(pubspecFile.existsSync(), isFalse);
-      expect(binaryFile.existsSync(), isFalse);
-    });
-  });
-
-  group('ExtensionTestHarness (Tier 2)', () {
+  group('ExtensionTestHarness', () {
     test('diagnosticsClient and configClient query diagnostics, logs, and configuration', () async {
       final ExtensionTestHarness harness = await _spawnFullTestHarness();
       addTearDown(harness.dispose);
@@ -560,7 +585,73 @@ void main() {
       expect(() => harness.onNotification('custom.event'), throwsA(isA<StateError>()));
     });
 
-    test('surfaces malformed log and device.logEntry notifications as FormatExceptions', () async {
+    test(
+      'dispose sends extension.shutdown and concurrent dispose calls await full shutdown',
+      () async {
+        final gatePort = ReceivePort();
+        final completedPort = ReceivePort();
+        addTearDown(gatePort.close);
+        addTearDown(completedPort.close);
+        final SendPort gateSendPort = gatePort.sendPort;
+        final SendPort completedSendPort = completedPort.sendPort;
+
+        final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
+          (SendPort sendPort) => ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _GatedShutdownService(completedSendPort: completedSendPort, gateSendPort: gateSendPort),
+          ], extensionName: 'gated_shutdown_ext'),
+        );
+
+        final Future<void> firstDispose = harness.dispose();
+        expect(harness.isDisposed, isTrue);
+
+        final releaseSendPort = await gatePort.first as SendPort;
+        var secondDisposeCompleted = false;
+        final Future<void> secondDispose = harness.dispose().then((_) {
+          secondDisposeCompleted = true;
+        });
+
+        await pumpEventQueue();
+        expect(secondDisposeCompleted, isFalse);
+
+        releaseSendPort.send(null);
+        await Future.wait(<Future<void>>[firstDispose, secondDispose]);
+        expect(secondDisposeCompleted, isTrue);
+        expect(await completedPort.first, 'shutdown_complete');
+      },
+    );
+
+    test('unwraps ToolExtensionException (-32001) on typed clients and sendRawRequest', () async {
+      final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
+        (SendPort sendPort) => ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+          _DomainErrorDiagnosticsService(),
+        ], extensionName: 'domain_error_ext'),
+      );
+      addTearDown(harness.dispose);
+
+      await expectLater(
+        harness.diagnosticsClient.runDiagnostics(),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'Missing custom toolchain at /opt/custom',
+          ),
+        ),
+      );
+
+      await expectLater(
+        harness.sendRawRequest(DiagnosticsExtension.runDiagnosticsMethod),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'Missing custom toolchain at /opt/custom',
+          ),
+        ),
+      );
+    });
+
+    test('handles timestamp-free extension.log and surfaces malformed notifications as FormatExceptions', () async {
       final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
         (SendPort sendPort) => ToolExtensionEntryPoint.run(
           sendPort,
@@ -575,6 +666,12 @@ void main() {
         () => harness.onNotification(ToolExtensionService.logNotificationMethod),
         throwsArgumentError,
       );
+
+      final Future<ExtensionLogMessage> logWithoutTimestamp = harness.onLog.first;
+      await harness.sendRawRequest('malformed.emitTimestampFreeLog');
+      final ExtensionLogMessage receivedLog = await logWithoutTimestamp;
+      expect(receivedLog.message, 'log without timestamp');
+      expect(receivedLog.timestamp, isNull);
 
       final Future<void> badLogError = expectLater(
         harness.onLog,
@@ -653,7 +750,7 @@ void main() {
       expect(harness.isDisposed, isTrue);
     });
 
-    test('surfaces post-handshake unhandled isolate errors with extension details', () async {
+    test('records post-handshake unhandled isolate error in isolateErrors and onIsolateError without emitting on onLog', () async {
       final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
         (SendPort sendPort) => ToolExtensionEntryPoint.run(
           sendPort,
@@ -664,102 +761,244 @@ void main() {
       );
       addTearDown(harness.dispose);
 
-      final Future<void> logError = expectLater(
-        harness.onLog,
-        emitsError(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('Simulated post-handshake isolate crash'),
-          ),
-        ),
+      final logEvents = <ExtensionLogMessage>[];
+      final logErrors = <Object>[];
+      final logDone = Completer<void>();
+      final StreamSubscription<ExtensionLogMessage> logSub = harness.onLog.listen(
+        logEvents.add,
+        onError: logErrors.add,
+        onDone: logDone.complete,
       );
+      addTearDown(logSub.cancel);
+
+      final Future<StateError> isolateErrorFuture = harness.onIsolateError.first;
+
       await expectLater(
         harness.sendRawRequest('error.triggerUnhandledError', timeout: null),
         throwsA(isA<StateError>()),
       );
-      await logError;
 
+      final StateError emittedIsolateError = await isolateErrorFuture;
+      expect(emittedIsolateError.message, contains('Simulated post-handshake isolate crash'));
       expect(harness.isolateErrors, hasLength(1));
       expect(
         harness.isolateErrors.single.message,
         contains('Simulated post-handshake isolate crash'),
       );
+
+      await logDone.future;
+      expect(logErrors, isEmpty);
+      expect(logEvents, isEmpty);
       expect(harness.isDisposed, isTrue);
     });
   });
 
-  group('verifyExtensionPackage (Tier 3)', () {
-    ExtensionFileSystem createPackageFileSystem({
+  group('verifyExtensionPackage', () {
+    Directory createTempPackage({
       String entrypointRelativePath = 'extension/flutter_tools/extension.dart',
       bool createEntrypoint = true,
     }) {
-      final fs = MemoryExtensionFileSystem();
-      final ExtensionDirectory root = fs.directory(Uri.parse('file:///ext_pkg/'))
-        ..createSync(recursive: true);
+      final Directory root = Directory.systemTemp.createTempSync('verify_ext_pkg.');
+      addTearDown(() {
+        if (root.existsSync()) {
+          root.deleteSync(recursive: true);
+        }
+      });
       if (createEntrypoint) {
-        final ExtensionFile entrypointFile = fs.file(root.uri.resolve(entrypointRelativePath));
-        entrypointFile.createSync(recursive: true);
-        entrypointFile.writeAsStringSync('// entrypoint stub\n');
+        File.fromUri(root.uri.resolve(entrypointRelativePath))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('// entrypoint stub\n');
       }
-      return fs;
+      return root;
     }
 
-    Future<void> validEntryPoint(SendPort sendPort) => ToolExtensionEntryPoint.run(
-      sendPort,
-      <ToolExtensionService>[
-        _TestDiagnosticsService(),
-        _TestBuildService(),
-        _TestTemplateService(),
-      ],
-      extensionName: 'test_ext',
-      supportedPlatforms: const <String>{'linux'},
-    );
+    Uri resolvePrototypePackageRoot() {
+      final Uri? libraryUri = Isolate.resolvePackageUriSync(
+        Uri.parse(
+          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
+        ),
+      );
+      if (libraryUri == null) {
+        throw StateError('Failed to resolve package:flutter_tools_extension_linux_prototype URI.');
+      }
+      return libraryUri.resolve('../');
+    }
+
+    Uri writeTempPackageConfig(Directory pkgDir, {required String packageName}) {
+      final Uri? currentConfigUri = Isolate.packageConfigSync;
+      if (currentConfigUri == null) {
+        throw StateError('Expected Isolate.packageConfigSync to be non-null in test environment.');
+      }
+      final Object? rawDecoded = jsonDecode(File.fromUri(currentConfigUri).readAsStringSync());
+      if (rawDecoded is! Map<String, Object?>) {
+        throw StateError('Expected JSON object in package_config.json.');
+      }
+      final Object? rawPackages = rawDecoded['packages'];
+      if (rawPackages is! List<Object?>) {
+        throw StateError('Expected packages list in package_config.json.');
+      }
+      final rewrittenPackages = <Map<String, Object?>>[
+        for (final Object? rawEntry in rawPackages)
+          if (rawEntry case final Map<String, Object?> entry)
+            if (entry['rootUri'] case final String rawRootUri)
+              <String, Object?>{
+                ...entry,
+                'rootUri': () {
+                  final Uri resolved = currentConfigUri.resolve(rawRootUri);
+                  return resolved.path.endsWith('/') ? resolved.toString() : '$resolved/';
+                }(),
+              },
+        <String, Object?>{
+          'name': packageName,
+          'rootUri': '../',
+          'packageUri': 'lib/',
+          'languageVersion': '3.8',
+        },
+      ];
+      final Uri configUri = pkgDir.uri.resolve('.dart_tool/package_config.json');
+      File.fromUri(configUri)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          jsonEncode(<String, Object?>{
+            'configVersion': rawDecoded['configVersion'] ?? 2,
+            'packages': rewrittenPackages,
+          }),
+        );
+      return configUri;
+    }
+
+    Future<void> validEntryPoint(SendPort sendPort) =>
+        ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+          _TestDiagnosticsService(),
+          _TestBuildService(),
+          _TestTemplateService(appTemplates: const <String>{'custom_os/app.tmpl'}),
+        ], extensionName: 'test_ext');
 
     test('succeeds for conventional extension/flutter_tools/extension.dart entrypoint', () async {
-      final ExtensionFileSystem fs = createPackageFileSystem();
+      final Directory pkgDir = createTempPackage();
 
+      await verifyExtensionPackage(packageRoot: pkgDir.uri, entryPoint: validEntryPoint);
+    });
+
+    test('resolves package: template URIs via Isolate.resolvePackageUri when packageConfigUri is null and enforces packageRoot containment', () async {
+      final Uri prototypeRoot = resolvePrototypePackageRoot();
       await verifyExtensionPackage(
-        packageRoot: Uri.parse('file:///ext_pkg/'),
-        entryPoint: validEntryPoint,
-        fileSystem: fs,
+        packageRoot: prototypeRoot,
+        entrypointRelativePath: 'bin/flutter_tools_extension_linux_prototype.dart',
+        entryPoint: (SendPort sendPort) =>
+            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+              _TestTemplateService(
+                appTemplates: const <String>{'package:flutter_tools_extension_linux_prototype/src'},
+              ),
+            ], extensionName: 'flutter_tools_extension_linux_prototype'),
+      );
+
+      final Directory pkgDir = createTempPackage();
+      await expectLater(
+        verifyExtensionPackage(
+          packageRoot: pkgDir.uri,
+          entryPoint: (SendPort sendPort) =>
+              ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+                _TestTemplateService(
+                  appTemplates: const <String>{'package:flutter_tools_extension/src'},
+                ),
+              ], extensionName: 'test_ext'),
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('resolves outside package root'),
+          ),
+        ),
       );
     });
 
-    test(
-      'succeeds when expectedConfig matches runtime capabilities, targets, and templates',
-      () async {
-        final ExtensionFileSystem fs = createPackageFileSystem(
-          entrypointRelativePath: 'bin/test_ext.dart',
-        );
-        final expectedConfig = ExtensionPackageConfig(
-          name: 'test_ext',
-          entrypoint: 'bin/test_ext.dart',
-          hostPlatforms: const <String>{'linux'},
-          services: const <String>{'diagnostics', 'build', 'template'},
-          buildTargets: const <String>{'custom-target'},
-          templates: const <String>{'custom-app'},
-          targetPlatforms: const <String>{'custom_os'},
-        );
+    test('resolves package: template URIs through packageConfigUri on spawnUri and rejects external or symlink-escaped templates', () async {
+      const tempPackageName = 'temp_spawned_ext';
+      final Directory pkgDir = createTempPackage(createEntrypoint: false);
+      Directory.fromUri(pkgDir.uri.resolve('lib/templates/app')).createSync(recursive: true);
+      Directory.fromUri(pkgDir.uri.resolve('lib/templates/plugin')).createSync(recursive: true);
+      final Uri configUri = writeTempPackageConfig(pkgDir, packageName: tempPackageName);
 
-        await verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: validEntryPoint,
-          expectedConfig: expectedConfig,
-          fileSystem: fs,
-        );
-      },
-    );
+      void writeEntrypointScript({required String appTemplateUri}) {
+        File.fromUri(pkgDir.uri.resolve('extension/flutter_tools/extension.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+import 'dart:isolate';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+
+final class _SpawnedTemplateService extends TemplateService {
+  @override
+  Set<String> get appPlatformTemplates => const <String>{'$appTemplateUri'};
+
+  @override
+  Set<String> get pluginPlatformTemplates =>
+      const <String>{'package:$tempPackageName/templates/plugin'};
+
+  @override
+  Set<ProjectTemplate> get projectTemplates => const <ProjectTemplate>{};
+}
+
+Future<void> main(List<String> args, SendPort sendPort) {
+  return ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_SpawnedTemplateService()],
+    extensionName: '$tempPackageName',
+  );
+}
+''');
+      }
+
+      expect(
+        await Isolate.resolvePackageUri(Uri.parse('package:$tempPackageName/templates/app')),
+        isNull,
+      );
+
+      writeEntrypointScript(appTemplateUri: 'package:$tempPackageName/templates/app');
+      await verifyExtensionPackage(packageRoot: pkgDir.uri, packageConfigUri: configUri);
+
+      writeEntrypointScript(appTemplateUri: 'package:flutter_tools_extension/src');
+      await expectLater(
+        verifyExtensionPackage(packageRoot: pkgDir.uri, packageConfigUri: configUri),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('references package "flutter_tools_extension", expected "$tempPackageName"'),
+          ),
+        ),
+      );
+
+      final Directory outsideTemplateDir = Directory.systemTemp.createTempSync(
+        'verify_ext_outside_tmpl.',
+      );
+      addTearDown(() {
+        if (outsideTemplateDir.existsSync()) {
+          outsideTemplateDir.deleteSync(recursive: true);
+        }
+      });
+      Link.fromUri(pkgDir.uri.resolve('lib/templates/escaped_link'))
+          .createSync(outsideTemplateDir.path, recursive: true);
+      writeEntrypointScript(appTemplateUri: 'package:$tempPackageName/templates/escaped_link');
+      await expectLater(
+        verifyExtensionPackage(packageRoot: pkgDir.uri, packageConfigUri: configUri),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('resolves outside package root'),
+          ),
+        ),
+      );
+    });
 
     test('throws StateError when entrypoint file is missing', () async {
-      final ExtensionFileSystem fs = createPackageFileSystem(createEntrypoint: false);
+      final Directory pkgDir = createTempPackage(createEntrypoint: false);
 
       await expectLater(
-        verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: validEntryPoint,
-          fileSystem: fs,
-        ),
+        verifyExtensionPackage(packageRoot: pkgDir.uri, entryPoint: validEntryPoint),
         throwsA(
           isA<StateError>().having(
             (StateError e) => e.message,
@@ -770,26 +1009,90 @@ void main() {
       );
     });
 
-    test('throws StateError when build target names are duplicated', () async {
-      final ExtensionFileSystem fs = createPackageFileSystem();
+    test('throws StateError when entrypoint symlink escapes packageRoot', () async {
+      final Directory pkgDir = createTempPackage(createEntrypoint: false);
+      final Directory outsideDir = Directory.systemTemp.createTempSync('verify_ext_outside.');
+      addTearDown(() {
+        if (outsideDir.existsSync()) {
+          outsideDir.deleteSync(recursive: true);
+        }
+      });
+      final outsideFile = File.fromUri(outsideDir.uri.resolve('outside_extension.dart'))
+        ..writeAsStringSync('// outside entrypoint\n');
+      final entrypointLink = Link.fromUri(
+        pkgDir.uri.resolve('extension/flutter_tools/extension.dart'),
+      )..createSync(outsideFile.path, recursive: true);
+      expect(entrypointLink.existsSync(), isTrue);
+
+      await expectLater(
+        verifyExtensionPackage(packageRoot: pkgDir.uri, entryPoint: validEntryPoint),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('resolves outside package root'),
+          ),
+        ),
+      );
+    });
+
+    test('skips service RPCs cleanly when supportedPlatforms excludes host OS', () async {
+      final Directory pkgDir = createTempPackage();
+      final excludedPlatform = Platform.isLinux ? 'macos' : 'linux';
+
+      await verifyExtensionPackage(
+        packageRoot: pkgDir.uri,
+        entryPoint: (SendPort sendPort) => ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[_ThrowingBuildService()],
+          extensionName: 'excluded_platform_ext',
+          supportedPlatforms: <String>{excludedPlatform},
+        ),
+      );
+    });
+
+    test('throws StateError when package: template URI points to nonexistent directory', () async {
+      final Directory pkgDir = createTempPackage();
 
       await expectLater(
         verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: (SendPort sendPort) => ToolExtensionEntryPoint.run(
-            sendPort,
-            <ToolExtensionService>[
-              _TestBuildService(
-                targets: const <BuildTarget>[
-                  _TestBuildTarget('dup-target'),
-                  _TestBuildTarget('dup-target'),
-                ],
-              ),
-            ],
-            extensionName: 'test_ext',
-            supportedPlatforms: const <String>{'linux'},
+          packageRoot: pkgDir.uri,
+          entryPoint: (SendPort sendPort) =>
+              ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+                _TestTemplateService(
+                  appTemplates: const <String>{
+                    'package:flutter_tools_extension/nonexistent_template_dir',
+                  },
+                ),
+              ], extensionName: 'bad_template_ext'),
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'Template directory "package:flutter_tools_extension/nonexistent_template_dir" does not exist',
+            ),
           ),
-          fileSystem: fs,
+        ),
+      );
+    });
+
+    test('throws StateError when build or assemble target names are duplicated', () async {
+      final Directory pkgDir = createTempPackage();
+
+      await expectLater(
+        verifyExtensionPackage(
+          packageRoot: pkgDir.uri,
+          entryPoint: (SendPort sendPort) =>
+              ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+                _TestBuildService(
+                  targets: const <BuildTarget>[
+                    _TestBuildTarget('dup-target'),
+                    _TestBuildTarget('dup-target'),
+                  ],
+                ),
+              ], extensionName: 'test_ext'),
         ),
         throwsA(
           isA<StateError>().having(
@@ -799,122 +1102,68 @@ void main() {
           ),
         ),
       );
-    });
-
-    test('throws FormatException when expectedConfig declares an unknown service', () async {
-      final ExtensionFileSystem fs = createPackageFileSystem();
-      final expectedConfig = ExtensionPackageConfig(
-        name: 'test_ext',
-        services: const <String>{'invalid_service'},
-      );
 
       await expectLater(
         verifyExtensionPackage(
-          packageRoot: Uri.parse('file:///ext_pkg/'),
-          entryPoint: validEntryPoint,
-          expectedConfig: expectedConfig,
-          fileSystem: fs,
+          packageRoot: pkgDir.uri,
+          entryPoint: (SendPort sendPort) =>
+              ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+                _TestBuildService(
+                  assembleTargetList: const <AssembleTarget>[
+                    _TestAssembleTarget('dup_assemble'),
+                    _TestAssembleTarget('dup_assemble'),
+                  ],
+                ),
+              ], extensionName: 'test_ext'),
         ),
         throwsA(
-          isA<FormatException>().having(
-            (FormatException e) => e.message,
+          isA<StateError>().having(
+            (StateError e) => e.message,
             'message',
-            contains('Unknown service "invalid_service"'),
+            contains('Duplicate assemble target name "dup_assemble"'),
           ),
         ),
       );
     });
 
     test(
-      'throws StateError when expectedConfig drifts from runtime capabilities or targets',
+      'throws FormatException on unknown service namespace and StateError on empty platforms',
       () async {
-        final ExtensionFileSystem fs = createPackageFileSystem(
-          entrypointRelativePath: 'bin/test_ext.dart',
-        );
+        final Directory pkgDir = createTempPackage();
 
         await expectLater(
           verifyExtensionPackage(
-            packageRoot: Uri.parse('file:///ext_pkg/'),
-            entryPoint: validEntryPoint,
-            expectedConfig: ExtensionPackageConfig(
-              name: 'wrong_name',
-              entrypoint: 'bin/test_ext.dart',
-              hostPlatforms: const <String>{'linux'},
-              services: const <String>{'diagnostics', 'build', 'template'},
+            packageRoot: pkgDir.uri,
+            entryPoint: (SendPort sendPort) => ToolExtensionEntryPoint.run(
+              sendPort,
+              <ToolExtensionService>[_UnknownNamespaceService()],
+              extensionName: 'unknown_service_ext',
             ),
-            fileSystem: fs,
           ),
           throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
+            isA<FormatException>().having(
+              (FormatException e) => e.message,
               'message',
-              contains('Extension name mismatch'),
+              contains('Extension reported unknown service "unknown_namespace"'),
             ),
           ),
         );
 
         await expectLater(
           verifyExtensionPackage(
-            packageRoot: Uri.parse('file:///ext_pkg/'),
-            entryPoint: validEntryPoint,
-            expectedConfig: ExtensionPackageConfig(
-              name: 'test_ext',
-              entrypoint: 'bin/test_ext.dart',
-              hostPlatforms: const <String>{'linux'},
-              services: const <String>{'diagnostics'},
+            packageRoot: pkgDir.uri,
+            entryPoint: (SendPort sendPort) => ToolExtensionEntryPoint.run(
+              sendPort,
+              <ToolExtensionService>[_TestDiagnosticsService()],
+              extensionName: 'empty_platforms_ext',
+              supportedPlatforms: const <String>{},
             ),
-            fileSystem: fs,
           ),
           throwsA(
             isA<StateError>().having(
               (StateError e) => e.message,
               'message',
-              contains('Services mismatch'),
-            ),
-          ),
-        );
-
-        await expectLater(
-          verifyExtensionPackage(
-            packageRoot: Uri.parse('file:///ext_pkg/'),
-            entryPoint: validEntryPoint,
-            expectedConfig: ExtensionPackageConfig(
-              name: 'test_ext',
-              entrypoint: 'bin/test_ext.dart',
-              hostPlatforms: const <String>{'linux'},
-              services: const <String>{'diagnostics', 'build', 'template'},
-              buildTargets: const <String>{'wrong-target'},
-            ),
-            fileSystem: fs,
-          ),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('Build targets mismatch'),
-            ),
-          ),
-        );
-
-        await expectLater(
-          verifyExtensionPackage(
-            packageRoot: Uri.parse('file:///ext_pkg/'),
-            entryPoint: validEntryPoint,
-            expectedConfig: ExtensionPackageConfig(
-              name: 'test_ext',
-              entrypoint: 'bin/test_ext.dart',
-              hostPlatforms: const <String>{'linux'},
-              services: const <String>{'diagnostics', 'build', 'template'},
-              buildTargets: const <String>{'custom-target'},
-              templates: const <String>{'wrong-template'},
-            ),
-            fileSystem: fs,
-          ),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('Templates mismatch'),
+              contains('Runtime supportedPlatforms must not be empty'),
             ),
           ),
         );

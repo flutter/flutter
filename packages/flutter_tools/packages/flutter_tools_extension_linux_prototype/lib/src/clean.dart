@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
@@ -11,20 +13,14 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 /// ephemeral directories before the host `CleanCommand` performs its own
 /// directory deletion.
 final class LinuxCleanService extends CleanService {
-  LinuxCleanService({required this._dependencies});
-
-  final ExtensionDependencies _dependencies;
-
   @override
   Future<void> clean(CleanEnvironment environment) async {
-    final ExtensionDirectory linuxBuildDir = _dependencies.fileSystem.directory(
-      environment.buildDir.resolve('linux/'),
-    );
+    final linuxBuildDir = Directory.fromUri(environment.buildDir.resolve('linux/'));
     if (linuxBuildDir.existsSync()) {
       await linuxBuildDir.delete(recursive: true);
     }
 
-    final ExtensionDirectory linuxEphemeralDir = _dependencies.fileSystem.directory(
+    final linuxEphemeralDir = Directory.fromUri(
       environment.projectRoot.resolve('linux/flutter/ephemeral/'),
     );
     if (linuxEphemeralDir.existsSync()) {

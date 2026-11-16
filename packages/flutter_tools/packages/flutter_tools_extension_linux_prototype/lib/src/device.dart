@@ -20,8 +20,6 @@ class _RunningApp {
 
 /// Prototype Linux [DeviceService] implementation.
 final class LinuxDeviceService extends DeviceService {
-  LinuxDeviceService({required this._dependencies});
-
   /// Identifier of the prototype Linux target device.
   static const String customLinuxDeviceId = 'custom_linux_device';
 
@@ -30,7 +28,6 @@ final class LinuxDeviceService extends DeviceService {
     r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
   );
 
-  final ExtensionDependencies _dependencies;
   final _runningApps = <String, _RunningApp>{};
 
   @override
@@ -56,7 +53,7 @@ final class LinuxDeviceService extends DeviceService {
     if (deviceId != customLinuxDeviceId) {
       return false;
     }
-    return _dependencies.fileSystem.directory(project.directory.resolve('linux')).existsSync();
+    return Directory.fromUri(project.directory.resolve('linux')).existsSync();
   }
 
   @override

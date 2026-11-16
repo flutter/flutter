@@ -28,10 +28,25 @@ void main() {
       expect(parsed.toString(), contains('SDK path looks unusual'));
     });
 
+    test('round-trips when timestamp is omitted', () {
+      const message = ExtensionLogMessage(message: 'Using system CMake');
+
+      final Map<String, Object?> serialized = message.toMap();
+      expect(serialized, <String, Object?>{
+        ExtensionLogMessage.levelKey: 'info',
+        ExtensionLogMessage.messageKey: 'Using system CMake',
+      });
+
+      final parsed = ExtensionLogMessage.fromJson(serialized);
+      expect(parsed, equals(message));
+      expect(parsed.timestamp, isNull);
+      expect(parsed.hashCode, equals(message.hashCode));
+    });
+
     test('throws FormatException when required fields are missing or invalid', () {
       expect(
         () => ExtensionLogMessage.fromJson(const <String, Object?>{
-          ExtensionLogMessage.messageKey: 'missing level and timestamp',
+          ExtensionLogMessage.messageKey: 'missing level',
           ExtensionLogMessage.timestampKey: '2026-11-11T12:30:00.000Z',
         }),
         throwsFormatException,
@@ -57,7 +72,8 @@ void main() {
       expect(
         () => ExtensionLogMessage.fromJson(const <String, Object?>{
           ExtensionLogMessage.levelKey: 'info',
-          ExtensionLogMessage.messageKey: 'missing timestamp',
+          ExtensionLogMessage.messageKey: 'non-string timestamp',
+          ExtensionLogMessage.timestampKey: 123,
         }),
         throwsFormatException,
       );

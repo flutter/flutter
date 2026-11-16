@@ -36,21 +36,25 @@ enum ExtensionLogLevel {
 /// JSON-RPC notification channel.
 @immutable
 final class ExtensionLogMessage {
-  const ExtensionLogMessage({required this.message, required this.timestamp, this.level = .info});
+  const ExtensionLogMessage({required this.message, this.level = .info, this.timestamp});
 
   /// Deserializes an [ExtensionLogMessage] from a JSON notification payload.
   ///
-  /// Throws a [FormatException] if any required field ([levelKey],
-  /// [messageKey], or [timestampKey]) is missing or invalid.
+  /// Throws a [FormatException] if [levelKey] or [messageKey] is missing or
+  /// invalid, or if [timestampKey] is present and not a valid ISO-8601
+  /// timestamp.
   factory ExtensionLogMessage.fromJson(Map<String, Object?> json) {
     final ExtensionLogLevel level = ExtensionLogLevel.fromName(
       json.requiredField<String>(levelKey),
     );
     final String message = json.requiredField<String>(messageKey);
-    final String rawTimestamp = json.requiredField<String>(timestampKey);
-    final DateTime? parsedTimestamp = DateTime.tryParse(rawTimestamp);
-    if (parsedTimestamp == null) {
-      throw FormatException('Invalid "$timestampKey" ISO-8601 timestamp: "$rawTimestamp".');
+    final String? rawTimestamp = json.nullableField<String>(timestampKey);
+    DateTime? parsedTimestamp;
+    if (rawTimestamp != null) {
+      parsedTimestamp = DateTime.tryParse(rawTimestamp);
+      if (parsedTimestamp == null) {
+        throw FormatException('Invalid "$timestampKey" ISO-8601 timestamp: "$rawTimestamp".');
+      }
     }
     return ExtensionLogMessage(level: level, message: message, timestamp: parsedTimestamp);
   }
@@ -70,14 +74,14 @@ final class ExtensionLogMessage {
   /// Human-readable log message content.
   final String message;
 
-  /// Timestamp when the log entry was emitted.
-  final DateTime timestamp;
+  /// Optional timestamp when the log entry was emitted.
+  final DateTime? timestamp;
 
   /// Serializes this log message to a JSON-compatible map.
   Map<String, Object?> toMap() => <String, Object?>{
     levelKey: level.name,
     messageKey: message,
-    timestampKey: timestamp.toUtc().toIso8601String(),
+    timestampKey: ?timestamp?.toUtc().toIso8601String(),
   };
 
   @override
