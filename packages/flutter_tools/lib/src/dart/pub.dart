@@ -420,7 +420,7 @@ class _DefaultPub implements Pub {
       _fileSystem.path.relative(directory),
       'check-resolution-up-to-date',
     ];
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+    final Map<String, String> pubEnvironment = _createPubEnvironment(
       context: context,
       flutterRootOverride: flutterRootOverride,
     );
@@ -457,7 +457,7 @@ class _DefaultPub implements Pub {
     int exitCode;
 
     final pubCommand = <String>[..._pubCommand, ...arguments];
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+    final Map<String, String> pubEnvironment = _createPubEnvironment(
       context: context,
       flutterRootOverride: flutterRootOverride,
       summaryOnly: outputMode == PubOutputMode.summaryOnly,
@@ -591,7 +591,7 @@ class _DefaultPub implements Pub {
     String failureMessage = 'pub failed',
     String? flutterRootOverride,
   }) async {
-    final bool showTraceForErrors = await _botDetector.isRunningOnBot;
+    final bool showTraceForErrors = _botDetector.isRunningOnBot;
 
     var lastPubMessage = 'no message';
     String? filterWrapper(String line) {
@@ -605,7 +605,7 @@ class _DefaultPub implements Pub {
     if (showTraceForErrors) {
       arguments.insert(0, '--trace');
     }
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+    final Map<String, String> pubEnvironment = _createPubEnvironment(
       context: context,
       flutterRootOverride: flutterRootOverride,
     );
@@ -678,13 +678,13 @@ class _DefaultPub implements Pub {
   //
   // [context] provides extra information to package server requests to
   // understand usage.
-  Future<String> _getPubEnvironmentValue(PubContext pubContext) async {
+  String _getPubEnvironmentValue(PubContext pubContext) {
     // DO NOT update this function without contacting kevmoo.
     // We have server-side tooling that assumes the values are consistent.
     final String? existing = _platform.environment[_kPubEnvironmentKey];
     final values = <String>[
       if (existing != null && existing.isNotEmpty) existing,
-      if (await _botDetector.isRunningOnBot) 'flutter_bot',
+      if (_botDetector.isRunningOnBot) 'flutter_bot',
       'flutter_cli',
       ...pubContext._values,
     ];
@@ -742,14 +742,14 @@ class _DefaultPub implements Pub {
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
-  Future<Map<String, String>> _createPubEnvironment({
+  Map<String, String> _createPubEnvironment({
     required PubContext context,
     String? flutterRootOverride,
     bool? summaryOnly = false,
-  }) async {
+  }) {
     final environment = <String, String>{
       'FLUTTER_ROOT': flutterRootOverride ?? _flutterRoot,
-      _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
+      _kPubEnvironmentKey: _getPubEnvironmentValue(context),
       if (summaryOnly ?? false) 'PUB_SUMMARY_ONLY': '1',
     };
     final String? pubCache = _getPubCacheIfAvailable();

@@ -33,7 +33,6 @@ import '../device.dart';
 import '../doctor.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
-import '../ios/plist_parser.dart';
 import '../package_graph.dart';
 import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
@@ -341,9 +340,10 @@ abstract class FlutterCommand extends Command<void> {
   void addDdsOptions({required bool verboseHelp}) {
     DebuggingOptionDescriptors.dds.addTo(argParser);
     DebuggingOptionDescriptors.ddsPort.addTo(argParser, verboseHelp: verboseHelp);
-    DebuggingOptionDescriptors.devToolsServerAddressOption.addTo(
+    DebuggingOptionDescriptors.devToolsServerAddress.addTo(
       argParser,
       verboseHelp: verboseHelp,
+      help: DebuggingOptionDescriptors.devToolsServerAddressBaseHelp,
     );
   }
 
@@ -421,10 +421,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Uri? get devToolsServerAddress {
-    if (wasParsed(DebuggingOptionDescriptors.devToolsServerAddressOption)) {
-      final Uri? uri = Uri.tryParse(
-        getValue(DebuggingOptionDescriptors.devToolsServerAddressOption)!,
-      );
+    if (wasParsed(DebuggingOptionDescriptors.devToolsServerAddress)) {
+      final Uri? uri = Uri.tryParse(getValue(DebuggingOptionDescriptors.devToolsServerAddress)!);
       if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
         return uri;
       }
@@ -589,7 +587,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags?.isHcppEnabled ?? false;
+  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags.isHcppEnabled ?? false;
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -1286,21 +1284,20 @@ abstract class FlutterCommand extends Command<void> {
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) {
+    final FlutterCommandRunner commandRunner = runner!;
     return project.regeneratePlatformSpecificTooling(
       toolContext: toolContext,
-      analytics: _analytics,
-      cocoaPods: runner?.cocoaPods,
+      analytics: commandRunner.analytics,
+      cocoaPods: commandRunner.cocoaPods,
       deprecationBehavior: deprecationBehavior,
-      featureFlags: runner?.featureFlags ?? featureFlags,
-      gradleUtils: runner?.gradleUtils,
-      plistParser:
-          runner?.plistParser ??
-          PlistParser(fileSystem: _fs, logger: _logger, processManager: toolContext.processManager),
+      featureFlags: commandRunner.featureFlags,
+      gradleUtils: commandRunner.gradleUtils,
+      plistParser: commandRunner.plistParser,
       releaseMode: releaseMode,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
-      templateRenderer: runner!.templateRenderer!,
+      templateRenderer: commandRunner.templateRenderer,
     );
   }
 

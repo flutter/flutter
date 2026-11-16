@@ -135,7 +135,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     name: 'experimental-faster-testing',
     negatable: false,
     verboseOnly: true,
-    help: 'Run each test in a separate lightweight Flutter Engine to speed up testing.',
+    help:
+        '(deprecated) This option is deprecated and no longer has any effect. '
+        'This flag will be removed in a future version of Flutter.',
   );
 
   static const _name = MultiOptionDescriptor(
@@ -524,21 +526,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    bool experimentalFasterTesting = getValue(_experimentalFasterTesting);
-    if (experimentalFasterTesting) {
-      if (_isIntegrationTest || isWeb) {
-        experimentalFasterTesting = false;
-        logger.printStatus(
-          '--experimental-faster-testing was parsed but will be ignored. This '
-          'option is not supported when running integration tests or web tests.',
-        );
-      } else if (_testFileUris.length == 1) {
-        experimentalFasterTesting = false;
-        logger.printStatus(
-          '--experimental-faster-testing was parsed but will be ignored. This '
-          'option should not be used when running a single test file.',
-        );
-      }
+    if (getValue(_experimentalFasterTesting)) {
+      logger.printWarning(
+        'The "--experimental-faster-testing" flag is deprecated and no longer '
+        'has any effect. This flag will be removed in a future version of Flutter.',
+      );
     }
 
     final bool startPaused = getValue(_startPaused);
@@ -619,13 +611,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       // Running with concurrency will result in deploying multiple test apps
       // on the connected device concurrently, which is not supported.
       jobs = 1;
-    } else if (experimentalFasterTesting) {
-      if (wasParsed(_concurrency)) {
-        logger.printStatus(
-          '-j/--concurrency was parsed but will be ignored. This option is not '
-          'compatible with --experimental-faster-testing.',
-        );
-      }
     }
 
     final int? shardIndex = getValue(_shardIndex);
@@ -650,23 +635,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final bool enableVmService = getValue(_enableVmService);
-    if (experimentalFasterTesting && enableVmService) {
-      logger.printStatus(
-        '--enable-vmservice was parsed but will be ignored. This option is not '
-        'compatible with --experimental-faster-testing.',
-      );
-    }
-
-    final bool ipv6 = getValue(_ipv6);
-    if (experimentalFasterTesting && ipv6) {
-      // [ipv6] is set when the user desires for the test harness server to use
-      // IPv6, but a test harness server will not be started at all when
-      // [experimentalFasterTesting] is set.
-      logger.printStatus(
-        '--ipv6 was parsed but will be ignored. This option is not compatible '
-        'with --experimental-faster-testing.',
-      );
-    }
 
     CoverageCollector? collector;
     if (getValue(_coverage) || getValue(_mergeCoverage) || getValue(_branchCoverage)) {
@@ -774,16 +742,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final Stopwatch? testRunnerTimeRecorderStopwatch = testTimeRecorder?.start(
       TestTimePhases.TestRunner,
     );
-    final int result;
-    if (experimentalFasterTesting) {
-      assert(!isWeb && !_isIntegrationTest && _testFileUris.length > 1);
-      result = await _testRunner.runTestsBySpawningLightweightEngines(
-        _testFileUris.toList(),
-        executionSpec,
-      );
-    } else {
-      result = await _testRunner.runTests(testWrapper, _testFileUris.toList(), executionSpec);
-    }
+    final int result = await _testRunner.runTests(
+      testWrapper,
+      _testFileUris.toList(),
+      executionSpec,
+    );
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
     if (collector != null) {

@@ -28,7 +28,10 @@ import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/pre_run_validator.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -46,6 +49,8 @@ class FakeBuildTargets extends Fake implements BuildTargets {}
 class FakeGradleUtils extends Fake implements GradleUtils {}
 
 class FakeJava extends Fake implements Java {}
+
+class _StubFlutterVersion extends Fake implements FlutterVersion {}
 
 void main() {
   group('ToolDependencies.bootstrap', () {
@@ -448,6 +453,28 @@ void main() {
       expect(dependencies.androidContext.gradleUtils, same(mockGradle));
       expect(gradleEvaluations, 1);
     });
+
+    testWithoutContext(
+      'does not eagerly evaluate FlutterVersion.channel or enable PreRunValidator by default',
+      () async {
+        final emptyFs = MemoryFileSystem.test();
+        final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+          analytics: const NoOpAnalytics(),
+          flutterVersion: _StubFlutterVersion(),
+          fs: emptyFs,
+          logger: logger,
+          platform: FakePlatform(
+            environment: <String, String>{'FLUTTER_ROOT': '/missing_sdk', 'HOME': '/home/user'},
+          ),
+          processManager: processManager,
+          templateRenderer: FakeTemplateRenderer(),
+        );
+
+        final PreRunValidator preRunValidator = dependencies.toolContext.preRunValidator;
+        expect(preRunValidator, isA<NoOpPreRunValidator>());
+        preRunValidator.validate();
+      },
+    );
   });
 
   group('runInContext fallback generators', () {

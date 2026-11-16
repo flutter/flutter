@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 
 void main() {
   test('Exceptions', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final missingInputException = MissingInputException(<File>[
-      globals.fs.file('foo'),
-      globals.fs.file('bar'),
+      fileSystem.file('foo'),
+      fileSystem.file('bar'),
     ], 'example');
     final cycleException = CycleException(<Target>{
       TestTarget()..name = 'foo',
@@ -21,8 +22,8 @@ void main() {
     });
     final invalidPatternException = InvalidPatternException('ABC');
     final missingOutputException = MissingOutputException(<File>[
-      globals.fs.file('foo'),
-      globals.fs.file('bar'),
+      fileSystem.file('foo'),
+      fileSystem.file('bar'),
     ], 'example');
     final misplacedOutputException = MisplacedOutputException('foo', 'example');
     final missingDefineException = MissingDefineException('foobar', 'example');

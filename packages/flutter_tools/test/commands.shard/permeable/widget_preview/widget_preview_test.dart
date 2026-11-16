@@ -26,7 +26,6 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -246,7 +245,8 @@ void main() {
 
   setUp(() async {
     Cache.disableLocking();
-    originalCwd = globals.fs.currentDirectory;
+    fs = LocalFileSystem.test(signals: Signals.test());
+    originalCwd = fs.currentDirectory;
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     shutdownHooks = ShutdownHooks();
@@ -257,7 +257,6 @@ void main() {
       stdio: mockStdio,
       verbose: false,
     );
-    fs = LocalFileSystem.test(signals: Signals.test());
     flutterRoot = fs.path.absolute('..', '..');
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
@@ -283,8 +282,8 @@ void main() {
   tearDown(() async {
     await shutdownHooks.runShutdownHooks(logger);
     tryToDelete(tempDir);
+    fs.currentDirectory = originalCwd;
     await fs.dispose();
-    globals.fs.currentDirectory = originalCwd;
   });
 
   Future<Directory> createRootProject() async {

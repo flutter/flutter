@@ -147,6 +147,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildBundleCommand(
+        androidContext: androidContext,
         buildSystem: buildSystem,
         featureFlags: featureFlags,
         toolContext: toolContext,
