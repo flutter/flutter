@@ -983,7 +983,7 @@ void FlutterWindow::OnImeComposition(UINT const message,
   // Update the IME window position.
   text_input_manager_->UpdateImeWindow();
 
-  if (lparam == 0) {
+  if (ime_composing_ && lparam == 0) {
     OnComposeChange(u"", 0);
     OnComposeCommit();
   }
