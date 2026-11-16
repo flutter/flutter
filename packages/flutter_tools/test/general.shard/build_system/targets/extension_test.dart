@@ -398,27 +398,6 @@ void main() {
     expect(target.dependencies, equals(<Target>[depTarget]));
   });
 
-  testWithoutContext('ExtensionTarget merges extraDefines into environment.defines without overwriting existing or reserved defines', () async {
-    environment.defines['ExistingDefine'] = 'existing-value';
-    final buildManager = FakeExtensionBuildManager(
-      buildResult: const ExtensionBuildResult(
-        success: true,
-        extraDefines: <String, String>{
-          'CustomDefine': 'custom-value',
-          'ExistingDefine': 'overwritten-value',
-          kTargetFile: 'lib/other.dart',
-        },
-      ),
-    );
-    final ExtensionTarget target = _createTarget(buildManager: buildManager);
-
-    await target.build(environment);
-
-    expect(environment.defines['CustomDefine'], equals('custom-value'));
-    expect(environment.defines['ExistingDefine'], equals('existing-value'));
-    expect(environment.defines.containsKey(kTargetFile), isFalse);
-  });
-
   testWithoutContext('ExtensionTarget normalizes declared depfiles', () async {
     final buildManager = FakeExtensionBuildManager(
       onAssemble: (Uri buildDir) {

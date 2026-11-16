@@ -15,9 +15,6 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 
-/// Host-owned build environment define keys that extension targets cannot set.
-const _reservedEnvironmentDefines = <String>{kBuildMode, kTargetFile, kTargetPlatform};
-
 /// Resolves a build target dependency by its [dependency] name.
 typedef DependencyResolverCallback = Target Function(String dependency);
 
@@ -192,17 +189,6 @@ class ExtensionTarget extends Target {
         continue;
       }
       depFileService.writeToFile(depfile, depfileFile, writeEmpty: true);
-    }
-
-    for (final MapEntry(:String key, :String value) in result.extraDefines.entries) {
-      if (_reservedEnvironmentDefines.contains(key) || defines.containsKey(key)) {
-        logger.printTrace(
-          'Ignoring extraDefine "$key" from extension assemble target "${assembleTarget.name}" '
-          'because it is reserved or already defined.',
-        );
-        continue;
-      }
-      defines[key] = value;
     }
   }
 }

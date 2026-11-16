@@ -620,38 +620,13 @@ void main() {
       final Map<String, Object?> map = result.toMap();
       expect(map[ExtensionBuildResult.successKey], isTrue);
       expect(map.containsKey(ExtensionBuildResult.errorMessageKey), isFalse);
-      expect(map.containsKey(ExtensionBuildResult.extraDefinesKey), isFalse);
       expect(map[ExtensionBuildResult.executableUriKey], 'file:///path/to/bundle/app');
 
       final parsed = ExtensionBuildResult.fromJson(map);
       expect(parsed, equals(result));
-      expect(parsed.extraDefines, isEmpty);
       expect(parsed.hashCode, equals(result.hashCode));
       expect(parsed.toString(), contains('success: true'));
       expect(parsed.toString(), contains('file:///path/to/bundle/app'));
-    });
-
-    test('serializes and deserializes result with extraDefines', () {
-      const result = ExtensionBuildResult(
-        success: true,
-        extraDefines: <String, String>{'FOO': 'bar', 'BAZ': 'qux'},
-      );
-      const resultReordered = ExtensionBuildResult(
-        success: true,
-        extraDefines: <String, String>{'BAZ': 'qux', 'FOO': 'bar'},
-      );
-
-      final Map<String, Object?> map = result.toMap();
-      expect(
-        map[ExtensionBuildResult.extraDefinesKey],
-        equals(const <String, String>{'FOO': 'bar', 'BAZ': 'qux'}),
-      );
-
-      final parsed = ExtensionBuildResult.fromJson(map);
-      expect(parsed, equals(result));
-      expect(parsed, equals(resultReordered));
-      expect(parsed.hashCode, equals(resultReordered.hashCode));
-      expect(parsed.toString(), contains('extraDefines: {FOO: bar, BAZ: qux}'));
     });
 
     test('serializes and deserializes failed result with errorMessage', () {
@@ -693,14 +668,11 @@ void main() {
     });
 
     test('equality and hashCode distinguish different results', () {
-      const result1 = ExtensionBuildResult(success: true, extraDefines: <String, String>{'A': '1'});
+      const result1 = ExtensionBuildResult(success: true);
       const result2 = ExtensionBuildResult(success: false, errorMessage: 'Failed');
-      const result3 = ExtensionBuildResult(success: true, extraDefines: <String, String>{'A': '2'});
 
       expect(result1, isNot(equals(result2)));
       expect(result1.hashCode, isNot(equals(result2.hashCode)));
-      expect(result1, isNot(equals(result3)));
-      expect(result1.hashCode, isNot(equals(result3.hashCode)));
     });
 
     test('fromJson throws FormatException when fields have invalid types', () {
@@ -713,24 +685,6 @@ void main() {
       expect(
         () => ExtensionBuildResult.fromJson(const <String, Object?>{
           ExtensionBuildResult.errorMessageKey: 404,
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ExtensionBuildResult.fromJson(const <String, Object?>{
-          ExtensionBuildResult.extraDefinesKey: 'not-a-map',
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ExtensionBuildResult.fromJson(const <String, Object?>{
-          ExtensionBuildResult.extraDefinesKey: <Object?, Object?>{'key': 123},
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ExtensionBuildResult.fromJson(const <String, Object?>{
-          ExtensionBuildResult.extraDefinesKey: <Object?, Object?>{123: 'value'},
         }),
         throwsFormatException,
       );

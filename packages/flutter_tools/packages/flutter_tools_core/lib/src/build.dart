@@ -17,7 +17,6 @@ export 'build_system/depfile.dart';
 export 'build_system/source.dart';
 
 const _listEquality = ListEquality<Object?>();
-const _mapEquality = MapEquality<String, String>();
 const _setEquality = SetEquality<Object?>();
 
 final _upperRegex = RegExp(r'[A-Z]');
@@ -426,26 +425,17 @@ class ExtensionAssembleTarget {
 /// Representation of a build result returned by a tool extension.
 @immutable
 class ExtensionBuildResult {
-  const ExtensionBuildResult({
-    required this.success,
-    this.errorMessage,
-    this.executableUri,
-    this.extraDefines = const <String, String>{},
-  });
+  const ExtensionBuildResult({required this.success, this.errorMessage, this.executableUri});
 
   /// Deserializes an [ExtensionBuildResult] from a JSON-serializable map.
   ///
   /// Throws a [FormatException] if [executableUriKey] is present and is not a
-  /// valid absolute `file:` URI, or if [extraDefinesKey] is not a
-  /// `Map<String, String>`.
+  /// valid absolute `file:` URI.
   factory ExtensionBuildResult.fromJson(Map<String, Object?> json) {
     return ExtensionBuildResult(
       success: json.optionalField<bool>(successKey, defaultValue: false),
       errorMessage: json.nullableField<String>(errorMessageKey),
       executableUri: _parseExecutableUri(json),
-      extraDefines: json[extraDefinesKey] != null
-          ? Map<String, String>.unmodifiable(json.stringMap(extraDefinesKey))
-          : const <String, String>{},
     );
   }
 
@@ -469,9 +459,6 @@ class ExtensionBuildResult {
   /// Map key for [executableUri].
   static const String executableUriKey = 'executableUri';
 
-  /// Map key for [extraDefines].
-  static const String extraDefinesKey = 'extraDefines';
-
   /// Map key for [success].
   static const String successKey = 'success';
 
@@ -484,28 +471,17 @@ class ExtensionBuildResult {
   /// Optional absolute `file:` URI to the built application executable or bundle.
   final Uri? executableUri;
 
-  /// Additional build defines produced by an `AssembleTarget` when it runs,
-  /// merged into the host build `Environment.defines` for downstream built-in
-  /// targets without overwriting existing or reserved defines.
-  ///
-  /// Note: these defines are only merged when the producing assemble target
-  /// executes (not when skipped on an incremental build) and are not currently
-  /// forwarded to extension targets via `ExtensionAssembleContext`.
-  // TODO(bkonyi): Persist extraDefines across skipped incremental builds and forward defines via ExtensionAssembleContext.
-  final Map<String, String> extraDefines;
-
   /// Serializes the build result to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     successKey: success,
     errorMessageKey: ?errorMessage,
     executableUriKey: ?executableUri?.toString(),
-    if (extraDefines.isNotEmpty) extraDefinesKey: extraDefines,
   };
 
   @override
   String toString() =>
       'ExtensionBuildResult(success: $success, errorMessage: $errorMessage, '
-      'executableUri: $executableUri, extraDefines: $extraDefines)';
+      'executableUri: $executableUri)';
 
   @override
   bool operator ==(Object other) {
@@ -513,11 +489,9 @@ class ExtensionBuildResult {
         (other is ExtensionBuildResult &&
             other.success == success &&
             other.errorMessage == errorMessage &&
-            other.executableUri == executableUri &&
-            _mapEquality.equals(other.extraDefines, extraDefines));
+            other.executableUri == executableUri);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(success, errorMessage, executableUri, _mapEquality.hash(extraDefines));
+  int get hashCode => Object.hash(success, errorMessage, executableUri);
 }
