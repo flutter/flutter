@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Include before EGL headers to disable X11 platform declarations and macros.
+#include "flutter/shell/platform/linux/fl_opengl_manager.h"
+
 #include "flutter/shell/platform/linux/fl_view_renderer_subsurface.h"
 
 #include <cerrno>
