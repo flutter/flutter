@@ -472,6 +472,7 @@ def run_cc_tests(
     capture_core_dump: bool
 ) -> None:
   _logger.info('Running Engine Unit-tests.')
+  wayland_test = 'flutter_linux_wayland_unittests'
 
   if capture_core_dump and is_linux():
     import resource  # pylint: disable=import-outside-toplevel
@@ -556,13 +557,19 @@ def run_cc_tests(
     # The real Wayland tests require --no-lto for their ELF linker barriers.
     # Include them for that configuration, and report a missing binary if
     # explicitly selected. Without a compositor they report a GTest skip.
-    wayland_test = 'flutter_linux_wayland_unittests'
     with open(os.path.join(build_dir, 'args.gn'), encoding='utf-8') as args:
       wayland_tests_enabled = re.search(r'^enable_lto\s*=\s*false\b', args.read(), re.MULTILINE)
     if (wayland_tests_enabled or
         (executable_filter is not None and wayland_test in executable_filter)):
       unittests += [
-          make_test(wayland_test, extra_env={'G_DEBUG': 'fatal-criticals'}),
+          make_test(
+              wayland_test,
+              flags=shuffle_flags + ['--timeout=30'],
+              extra_env={
+                  'G_DEBUG': 'fatal-criticals',
+                  'GDK_BACKEND': 'wayland',
+              }
+          ),
       ]
   else:
     flow_flags = ['--gtest_filter=-PerformanceOverlayLayer.Gold']
@@ -571,8 +578,11 @@ def run_cc_tests(
     ]
 
   build_name = os.path.basename(build_dir)
+  # A focused Wayland run needs only its existing compositor. Keep Xvfb for
+  # the normal suite and mixed selections, whose other executables use X11.
+  use_xvfb = is_linux() and executable_filter != [wayland_test]
   try:
-    if is_linux():
+    if use_xvfb:
       xvfb.start_virtual_x(build_name, build_dir)
     for test, flags, extra_env in unittests:
       run_engine_executable(
@@ -582,10 +592,11 @@ def run_cc_tests(
           flags,
           coverage=coverage,
           extra_env=extra_env,
-          gtest=True
+          # Keep the real compositor lifecycle cases serial in one process.
+          gtest=test != wayland_test
       )
   finally:
-    if is_linux():
+    if use_xvfb:
       xvfb.stop_virtual_x(build_name)
 
   if is_mac():

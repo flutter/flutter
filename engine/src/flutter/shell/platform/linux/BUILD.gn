@@ -347,6 +347,7 @@ executable("flutter_linux_unittests") {
 # These tests use ELF --wrap on calls between the embedding's source files.
 # LTO can inline those calls and bypass the barriers. Keep the real embedding
 # and its callers in separate translation units by building without LTO.
+# See testing/wayland_tests.md for the focused runner convention.
 if (!enable_lto) {
   executable("flutter_linux_wayland_unittests") {
     testonly = true
