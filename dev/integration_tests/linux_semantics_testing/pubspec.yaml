@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
+  material_ui: ^1.1.0
 
 dev_dependencies:
   dbus: any
@@ -21,4 +22,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 7kovqm
+# PUBSPEC CHECKSUM: 22ptn2

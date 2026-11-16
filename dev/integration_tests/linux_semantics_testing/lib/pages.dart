@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Pages to test, keyed by the name used by the driver test.
 final Map<String, WidgetBuilder> pages = <String, WidgetBuilder>{
