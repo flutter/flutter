@@ -155,8 +155,7 @@ TEST_F(EmbedderTest, CanRenderWithImpellerVulkan) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  // Bounded so that a dropped frame reads as a test failure rather than
-  // hanging until the suite timeout. WaitWithTimeout returns true on timeout.
+  // Bound the wait so a dropped frame fails instead of hanging.
   ASSERT_FALSE(latch.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)))
       << "no frame reached the compositor";
   EXPECT_TRUE(layer_was_a_vulkan_backing_store);

@@ -44,9 +44,8 @@ class TrackedObjectsVK {
   // `shared_ptr` since command buffers have a link to the command pool.
   std::shared_ptr<CommandPoolVK> pool_;
   vk::UniqueCommandBuffer buffer_;
-  // `tracked_textures_` must be declared before `tracked_objects_` so
-  // `tracked_objects_` (which may hold framebuffers referencing image views)
-  // is destroyed first.
+  // Declared before `tracked_objects_` so framebuffers are destroyed before
+  // the image views they reference.
   std::vector<std::shared_ptr<const TextureSourceVK>> tracked_textures_;
   std::vector<std::shared_ptr<SharedObjectVK>> tracked_objects_;
   std::vector<std::shared_ptr<const DeviceBuffer>> tracked_buffers_;

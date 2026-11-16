@@ -2096,22 +2096,18 @@ typedef struct {
   /// written layer images can be freely bound by the embedder without any
   /// additional synchronization.
   ///
-  /// When Impeller is enabled:
-  /// - The engine submits GPU commands without a host-side fence wait prior to
-  ///   calling the compositor present callback; the embedder must synchronize
-  ///   GPU access (for example, via a `VkSemaphore` or an explicit
-  ///   `VkImageMemoryBarrier` from
-  ///   `VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT` /
-  ///   `VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT`, acquiring the Vulkan queue mutex
-  ///   if submitting on the engine's queue).
-  /// - The incoming image layout is ignored (`VK_IMAGE_LAYOUT_UNDEFINED`) and
-  ///   prior contents are discarded.
-  /// - The image must be single-sample (`VK_SAMPLE_COUNT_1_BIT`), single-mip
-  ///   (`mipLevels = 1`), match `FlutterBackingStoreConfig.size`, include
-  ///   `VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT`, and use a supported format
-  ///   (`VK_FORMAT_R8G8B8A8_UNORM` or `VK_FORMAT_B8G8R8A8_UNORM`).
-  /// - The engine currently hands the image back in `VK_IMAGE_LAYOUT_GENERAL`
-  ///   (whereas Skia leaves it in `VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL`).
+  /// When Impeller is enabled, the engine submits GPU commands without a host
+  /// sync before the present callback, so the embedder must synchronize GPU
+  /// access. For example, it can use a `VkSemaphore` or `VkImageMemoryBarrier`
+  /// from `VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT` /
+  /// `VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT`, holding the queue mutex if
+  /// sharing the engine's queue. The incoming layout is ignored
+  /// (`VK_IMAGE_LAYOUT_UNDEFINED`) and prior contents are discarded. The image
+  /// must be single-sample, single-mip, match `FlutterBackingStoreConfig.size`,
+  /// include `VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT`, and use
+  /// `VK_FORMAT_R8G8B8A8_UNORM` or `VK_FORMAT_B8G8R8A8_UNORM`. The engine
+  /// currently hands the image back in `VK_IMAGE_LAYOUT_GENERAL` (Skia leaves
+  /// it in `VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL`).
   const FlutterVulkanImage* image;
   /// A baton that is not interpreted by the engine in any way. It will be given
   /// back to the embedder in the destruction callback below. Embedder resources

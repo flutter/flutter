@@ -28,9 +28,8 @@ class WrappedTextureSourceVK final : public TextureSourceVK {
         cleanup_(std::move(cleanup)) {}
 
   ~WrappedTextureSourceVK() override {
-    // Order matters: the cleanup callback may destroy the embedder-owned
-    // VkImage, and Vulkan requires framebuffers and image views referencing
-    // it to be destroyed first (VUID-vkDestroyImage-image-01000).
+    // Release framebuffers and image views before invoking cleanup, which may
+    // destroy the underlying VkImage.
     ResetFrameData();
     image_view_.reset();
     if (cleanup_) {

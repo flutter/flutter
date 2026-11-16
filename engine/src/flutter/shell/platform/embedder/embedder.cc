@@ -1310,18 +1310,16 @@ MakeRenderTargetFromBackingStoreImpeller(
     FML_LOG(ERROR) << "Could not wrap embedder supplied Vulkan image.";
     return nullptr;
   }
-  // Ownership of the destruction callback now belongs to `texture_source`.
+  // Disarm the failure guard since `texture_source` owns the callback.
   vulkan_destruct.Release();
 
   // TODO(https://github.com/flutter/flutter/issues/194239): Cache swapchain
-  // transients in Impeller core (ContextVK) instead of allocating per backing
-  // store (which becomes per frame when avoid_backing_store_cache is true).
+  // transients in ContextVK instead of allocating per backing store.
   auto transients = std::make_shared<impeller::SwapchainTransientsVK>(
       aiks_context->GetContext(), desc, /*enable_msaa=*/true);
 
-  // TODO(https://github.com/flutter/flutter/issues/194238): Extract a helper
-  // for wrapping offscreen render targets and support configurable presentation
-  // layouts instead of using WrapSwapchainImage.
+  // TODO(https://github.com/flutter/flutter/issues/194238): Extract an
+  // offscreen render-target helper with configurable presentation layouts.
   auto surface = impeller::SurfaceVK::WrapSwapchainImage(
       transients, texture_source, []() -> bool { return true; });
   if (!surface) {
