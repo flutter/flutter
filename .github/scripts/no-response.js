@@ -51,21 +51,21 @@ Thanks for your contribution.`;
     }
 
     const labeledAt = new Date(labelEvent.created_at);
+    const issueUserId = issue.user?.id;
     let isResponse = false;
 
     // Check if the author marked the PR ready for review after label (and it is not still a draft)
-    if (isPr && !issue.draft) {
+    if (isPr && !issue.draft && issueUserId) {
       isResponse = events.some(
         event =>
           event.event === 'ready_for_review' &&
-          issue.user?.id &&
-          event.actor?.id === issue.user.id &&
+          event.actor?.id === issueUserId &&
           new Date(event.created_at) > labeledAt
       );
     }
 
     // Check for author comments after label
-    if (!isResponse) {
+    if (!isResponse && issueUserId) {
       const comments = await github.paginate(github.rest.issues.listComments, {
         owner,
         repo,
@@ -74,7 +74,7 @@ Thanks for your contribution.`;
       });
 
       for (const comment of comments) {
-        if (comment.user.id === issue.user.id && new Date(comment.created_at) > labeledAt) {
+        if (comment.user?.id === issueUserId && new Date(comment.created_at) > labeledAt) {
           isResponse = true;
           break;
         }
