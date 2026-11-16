@@ -6,6 +6,7 @@ import 'dart:ui'
     show
         AccessibilityFeatures,
         Brightness,
+        DartPerformanceMode,
         Display,
         FlutterView,
         Locale,
@@ -49,6 +50,30 @@ void main() {
     expect(fakePlatformDispatcher.resetInternalStateCalled, isFalse);
     testPlatformDispatcher.resetInternalState();
     expect(fakePlatformDispatcher.resetInternalStateCalled, isTrue);
+  });
+
+  test('TestPlatformDispatcher delegates and tracks requestDartPerformanceMode', () {
+    final fakePlatformDispatcher = _FakePlatformDispatcher(
+      displays: const <Display>[],
+      views: const <FlutterView>[],
+    );
+    final testPlatformDispatcher = TestPlatformDispatcher(
+      platformDispatcher: fakePlatformDispatcher,
+    );
+    expect(testPlatformDispatcher.testPerformanceModeRequests, isEmpty);
+
+    testPlatformDispatcher.requestDartPerformanceMode(DartPerformanceMode.latency);
+    expect(
+      testPlatformDispatcher.testPerformanceModeRequests,
+      equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+    );
+    expect(
+      fakePlatformDispatcher.requestedPerformanceModes,
+      equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+    );
+
+    testPlatformDispatcher.resetPerformanceModeTestValues();
+    expect(testPlatformDispatcher.testPerformanceModeRequests, isEmpty);
   });
 
   testWidgets('TestPlatformDispatcher can fake locale', (WidgetTester tester) async {
@@ -205,6 +230,7 @@ void main() {
     testPlatformDispatcher.localeTestValue = const Locale('foobar');
     testPlatformDispatcher.textScaleFactorTestValue = 3.0;
     testPlatformDispatcher.applicationLocale = const Locale('foobar_app');
+    testPlatformDispatcher.requestDartPerformanceMode(DartPerformanceMode.latency);
 
     // Erase fake window property values.
     testPlatformDispatcher.clearAllTestValues();
@@ -213,6 +239,7 @@ void main() {
     expect(WidgetsBinding.instance.platformDispatcher.locale, originalLocale);
     expect(WidgetsBinding.instance.platformDispatcher.textScaleFactor, originalTextScaleFactor);
     expect(testPlatformDispatcher.applicationLocale, isNull);
+    expect(testPlatformDispatcher.testPerformanceModeRequests, isEmpty);
   });
 
   testWidgets(
@@ -778,6 +805,13 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
   @override
   void resetInternalState() {
     resetInternalStateCalled = true;
+  }
+
+  final List<DartPerformanceMode> requestedPerformanceModes = <DartPerformanceMode>[];
+
+  @override
+  void requestDartPerformanceMode(DartPerformanceMode mode) {
+    requestedPerformanceModes.add(mode);
   }
 }
 

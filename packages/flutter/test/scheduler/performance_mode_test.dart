@@ -5,17 +5,71 @@
 import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   late SchedulerBinding binding;
+  late TestPlatformDispatcher testDispatcher;
 
   setUpAll(() {
-    WidgetsFlutterBinding.ensureInitialized();
-    binding = SchedulerBinding.instance;
+    final TestWidgetsFlutterBinding testBinding = TestWidgetsFlutterBinding.ensureInitialized();
+    binding = testBinding;
+    testDispatcher = testBinding.platformDispatcher;
   });
+
+  test(
+    'PerformanceModeHandler forwards requested mode to platform dispatcher and reverts to balanced',
+    () async {
+      testDispatcher.resetPerformanceModeTestValues();
+
+      final PerformanceModeRequestHandle? requestHandle1 = binding.requestPerformanceMode(
+        DartPerformanceMode.latency,
+      );
+      expect(requestHandle1, isNotNull);
+      expect(binding.debugGetRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
+      expect(
+        testDispatcher.testPerformanceModeRequests,
+        equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+      );
+
+      // Conflicting request is rejected and not forwarded.
+      final PerformanceModeRequestHandle? requestHandle2 = binding.requestPerformanceMode(
+        DartPerformanceMode.throughput,
+      );
+      expect(requestHandle2, isNull);
+      expect(
+        testDispatcher.testPerformanceModeRequests,
+        equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+      );
+
+      // Additional matching request does not forward duplicate call to platform dispatcher.
+      final PerformanceModeRequestHandle? requestHandle3 = binding.requestPerformanceMode(
+        DartPerformanceMode.latency,
+      );
+      expect(requestHandle3, isNotNull);
+      expect(
+        testDispatcher.testPerformanceModeRequests,
+        equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+      );
+
+      // Disposing first handle does not revert engine mode.
+      requestHandle1?.dispose();
+      expect(binding.debugGetRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
+      expect(
+        testDispatcher.testPerformanceModeRequests,
+        equals(<DartPerformanceMode>[DartPerformanceMode.latency]),
+      );
+
+      // Disposing last handle reverts engine mode to balanced.
+      requestHandle3?.dispose();
+      expect(binding.debugGetRequestedPerformanceMode(), isNull);
+      expect(
+        testDispatcher.testPerformanceModeRequests,
+        equals(<DartPerformanceMode>[DartPerformanceMode.latency, DartPerformanceMode.balanced]),
+      );
+    },
+  );
 
   test('PerformanceModeHandler make one request', () async {
     final PerformanceModeRequestHandle? requestHandle = binding.requestPerformanceMode(
