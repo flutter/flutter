@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -67,6 +68,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
+        templateRenderer: const MustacheTemplateRenderer(),
       );
       try {
         for (final relativePath in <String>[

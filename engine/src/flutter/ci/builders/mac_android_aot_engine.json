@@ -39,7 +39,6 @@
                 "profile",
                 "--android",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_profile",
@@ -58,8 +57,7 @@
                     "--runtime-mode",
                     "profile",
                     "--android",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -97,7 +95,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_profile_arm64",
@@ -117,8 +114,7 @@
                     "profile",
                     "--android",
                     "--android-cpu=arm64",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -156,7 +152,6 @@
                 "--android",
                 "--android-cpu=x64",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_profile_x64",
@@ -176,8 +171,7 @@
                     "profile",
                     "--android",
                     "--android-cpu=x64",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -214,7 +208,6 @@
                 "release",
                 "--android",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_release",
@@ -233,8 +226,7 @@
                     "--runtime-mode",
                     "release",
                     "--android",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -272,7 +264,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_release_arm64",
@@ -292,8 +283,7 @@
                     "release",
                     "--android",
                     "--android-cpu=arm64",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -331,7 +321,6 @@
                 "--android",
                 "--android-cpu=x64",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/android_release_x64",
@@ -351,8 +340,7 @@
                     "release",
                     "--android",
                     "--android-cpu=x64",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {

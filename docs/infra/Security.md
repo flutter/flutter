@@ -19,5 +19,5 @@ Sanitizer builds:
 Tests with assertions enabled:
 
 * [Linux unopt](https://ci.chromium.org/p/flutter/builders/prod/Linux%20Unopt)
-* [Mac unopt](https://ci.chromium.org/p/flutter/builders/prod/Linux%20mac_unopt)
+* [Mac unopt](https://ci.chromium.org/p/flutter/builders/prod/Mac%20mac_host_debug_unopt_arm64)
 * [Windows unopt](https://ci.chromium.org/p/flutter/builders/prod/Windows%20Unopt)

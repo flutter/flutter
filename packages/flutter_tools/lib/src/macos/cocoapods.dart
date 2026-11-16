@@ -20,6 +20,7 @@ import '../base/project_migrator.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
@@ -97,17 +98,43 @@ const cocoaPodsRecommendedVersion = Version.withText(1, 16, 2, '1.16.2');
 ///   * https://flutter.dev/to/macos-ios-setup - instructions for
 ///     installing iOS/macOS dependencies.
 class CocoaPods {
-  CocoaPods({
+  factory CocoaPods({
+    required Analytics analytics,
+    required ToolContext toolContext,
+    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    Abi? currentAbi,
+  }) {
+    final ToolContext(
+      :Cache cache,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
+    return CocoaPods._(
+      analytics: analytics,
+      cache: cache,
+      currentAbi: currentAbi,
+      fileSystem: fs,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
+    );
+  }
+
+  CocoaPods._({
+    required this._analytics,
+    required this._cache,
     required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required this._xcodeProjectInterpreter,
     required Logger logger,
     required Platform platform,
-    required this._analytics,
+    required ProcessManager processManager,
+    required this._xcodeProjectInterpreter,
     Abi? currentAbi,
   }) : _fileSystem = fileSystem,
-       _processManager = processManager,
        _logger = logger,
+       _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _operatingSystemUtils = OperatingSystemUtils(
          fileSystem: fileSystem,
@@ -124,6 +151,7 @@ class CocoaPods {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
   final Analytics _analytics;
+  final Cache _cache;
 
   Future<String?>? _versionText;
 
@@ -270,7 +298,7 @@ class CocoaPods {
     final podfileTemplateName = (xcodeProject is MacOSProject) ? 'Podfile-macos' : 'Podfile-ios';
     return _fileSystem.file(
       _fileSystem.path.join(
-        Cache.flutterRoot!,
+        _cache.flutterRoot,
         'packages',
         'flutter_tools',
         'templates',

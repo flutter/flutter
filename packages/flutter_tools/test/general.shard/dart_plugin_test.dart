@@ -1178,6 +1178,7 @@ void main() {
             flutterProject,
             packageConfig,
             mainFile,
+            flutterRoot: '',
             logger: testLogger,
             templateRenderer: const MustacheTemplateRenderer(),
           );
@@ -1304,6 +1305,7 @@ void main() {
               flutterProject,
               packageConfig,
               mainFile,
+              flutterRoot: '',
               logger: testLogger,
               templateRenderer: const MustacheTemplateRenderer(),
             ),
@@ -1348,6 +1350,7 @@ void main() {
               flutterProject,
               packageConfig,
               mainFile,
+              flutterRoot: '',
               logger: testLogger,
               templateRenderer: const MustacheTemplateRenderer(),
             ),
@@ -1386,6 +1389,7 @@ void main() {
             flutterProject,
             packageConfig,
             mainFile,
+            flutterRoot: '',
             logger: testLogger,
             templateRenderer: const MustacheTemplateRenderer(),
           );
@@ -1427,6 +1431,7 @@ void main() {
             flutterProject,
             packageConfig,
             mainFile,
+            flutterRoot: '',
             logger: testLogger,
             templateRenderer: const MustacheTemplateRenderer(),
           );
@@ -1439,6 +1444,7 @@ void main() {
             flutterProject,
             packageConfig,
             mainFile,
+            flutterRoot: '',
             logger: testLogger,
             templateRenderer: const MustacheTemplateRenderer(),
           );
