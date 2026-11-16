@@ -410,7 +410,8 @@ static void release_renderables(FlEngine* self) {
       g_source_destroy(self->renderables_release_source);
       g_clear_pointer(&self->renderables_release_source, g_source_unref);
     }
-    renderables = g_steal_pointer(&self->renderables_to_release);
+    renderables =
+        static_cast<GList*>(g_steal_pointer(&self->renderables_to_release));
   }
 
   // Dropping a view can dispose the engine, so do not hold the mutex here.
@@ -455,7 +456,8 @@ static bool compositor_present_view_callback(
   }
 
   fl_renderable_present_layers(renderable, info->layers, info->layers_count);
-  queue_renderable_release(self, g_steal_pointer(&renderable));
+  queue_renderable_release(
+      self, static_cast<FlRenderable*>(g_steal_pointer(&renderable)));
   return true;
 }
 
