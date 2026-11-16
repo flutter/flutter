@@ -554,9 +554,10 @@ def run_cc_tests(
         # https://github.com/flutter/flutter/issues/36296
         make_test('txt_unittests', flags=repeat_flags + ['--'] + icu_flags),
     ]
-    # ELF linker barriers require --no-lto; explicit selection checks for a binary.
-    with open(os.path.join(build_dir, 'args.gn'), encoding='utf-8') as args:
-      wayland_tests_enabled = re.search(r'^enable_lto\s*=\s*false\b', args.read(), re.MULTILINE)
+    wayland_tests_enabled = (
+        os.path.exists(os.path.join(build_dir, wayland_test)) or
+        os.path.exists(os.path.join(build_dir, 'exe.unstripped', wayland_test))
+    )
     if (wayland_tests_enabled or
         (executable_filter is not None and wayland_test in executable_filter)):
       unittests += [
