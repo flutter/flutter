@@ -554,9 +554,7 @@ def run_cc_tests(
         # https://github.com/flutter/flutter/issues/36296
         make_test('txt_unittests', flags=repeat_flags + ['--'] + icu_flags),
     ]
-    # The real Wayland tests require --no-lto for their ELF linker barriers.
-    # Include them for that configuration, and report a missing binary if
-    # explicitly selected. Without a compositor they report a GTest skip.
+    # ELF linker barriers require --no-lto; explicit selection checks for a binary.
     with open(os.path.join(build_dir, 'args.gn'), encoding='utf-8') as args:
       wayland_tests_enabled = re.search(r'^enable_lto\s*=\s*false\b', args.read(), re.MULTILINE)
     if (wayland_tests_enabled or
@@ -578,8 +576,7 @@ def run_cc_tests(
     ]
 
   build_name = os.path.basename(build_dir)
-  # A focused Wayland run needs only its existing compositor. Keep Xvfb for
-  # the normal suite and mixed selections, whose other executables use X11.
+  # Mixed selections still need Xvfb for executables that use X11.
   use_xvfb = is_linux() and executable_filter != [wayland_test]
   try:
     if use_xvfb:
@@ -592,7 +589,7 @@ def run_cc_tests(
           flags,
           coverage=coverage,
           extra_env=extra_env,
-          # Keep the real compositor lifecycle cases serial in one process.
+          # Keep Wayland lifecycle cases serial in one process.
           gtest=test != wayland_test
       )
   finally:

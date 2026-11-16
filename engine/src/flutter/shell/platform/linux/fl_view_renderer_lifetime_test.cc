@@ -35,8 +35,7 @@ namespace {
 
 using namespace std::chrono_literals;
 
-// Every wait releases on timeout, including when a fatal expectation unwinds
-// the main-thread scope. No worker is detached or left holding a test barrier.
+// Bound waits and join the worker even after a fatal assertion.
 class CompositionBarrier {
  public:
   ~CompositionBarrier() { ReleaseAndJoin(); }
@@ -77,8 +76,7 @@ class CompositionBarrier {
   std::thread worker_;
 };
 
-// Only the explicitly selected raster thread intercepts Cairo. The actual
-// compositor and actual Cairo operation still run, rather than a fake present.
+// Intercept Cairo only on the selected raster thread.
 thread_local CompositionBarrier* cairo_barrier = nullptr;
 
 bool Present(const FlutterCompositor& compositor,
@@ -96,8 +94,7 @@ bool Present(const FlutterCompositor& compositor,
 class PresentationBarrier;
 thread_local PresentationBarrier* presentation_barrier = nullptr;
 
-// Pause after the production compositor callback has acquired its view, then
-// run the actual FlView implementation after GTK has destroyed that view.
+// Pause after the compositor callback acquires its view, before presentation.
 class PresentationBarrier {
  public:
   explicit PresentationBarrier(FlView* view) {
@@ -146,8 +143,7 @@ struct Finalization {
   }
 
   ~Finalization() {
-    // Workers are joined and main-context work is drained before scope exit.
-    // Detach a failed lifetime observation before fixture teardown can fire it.
+    // Detach failed observations so teardown cannot access a dead record.
     if (count == 0 && observed != nullptr) {
       g_object_steal_qdata(observed, Key());
     }
@@ -167,8 +163,7 @@ struct Finalization {
 };
 
 void DrainIdles() {
-  // GTK may leave persistent sources; cap iterations instead of running an
-  // unbounded main loop. A queued renderer idle must complete within this cap.
+  // GTK may leave persistent sources, so bound the drain.
   for (int i = 0; i < 1000 && g_main_context_pending(nullptr); i++) {
     g_main_context_iteration(nullptr, FALSE);
   }
@@ -212,8 +207,7 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     gtk.realize_widgets = true;
-    // FlView embeds an ATK plug even when no accessibility bridge is running.
-    // Supply only the bridge hooks so construction does not depend on AT-SPI.
+    // Supply bridge hooks so FlView construction does not depend on AT-SPI.
     plug_class_ = ATK_PLUG_CLASS(g_type_class_ref(ATK_TYPE_PLUG));
     get_object_id_ = plug_class_->get_object_id;
     plug_class_->get_object_id = [](AtkPlug* plug) {
@@ -228,8 +222,7 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
     socket_class_ = ATK_SOCKET_CLASS(g_type_class_ref(ATK_TYPE_SOCKET));
     embed_ = socket_class_->embed;
     socket_class_->embed = [](AtkSocket*, const gchar*) {};
-    // The token is only ref-counted by the renderer. Every GL context operation
-    // is mocked with its exact GDK ABI; no real driver context is needed.
+    // GL operations are mocked; the renderer only needs a ref-counted token.
     ON_CALL(gtk, gdk_window_create_gl_context)
         .WillByDefault([](GdkWindow*, GError**) {
           return reinterpret_cast<GdkGLContext*>(
@@ -276,8 +269,7 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
     g_clear_object(&engine);
     engine = FL_ENGINE(g_object_ref(fl_view_get_engine(view)));
     FlutterEngineProcTable* api = fl_engine_get_embedder_api(engine);
-    // Capture the real production callback without replacing its ownership
-    // logic, and keep the mock embedder's valid engine handle for Shutdown.
+    // Capture the production callback without changing ownership or Shutdown.
     api->Initialize = MOCK_ENGINE_PROC(
         Initialize, ([this, initialize = api->Initialize](
                          size_t version, const FlutterRendererConfig* config,
@@ -286,7 +278,7 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
           compositor = *args->compositor;
           return initialize(version, config, args, user_data, engine_out);
         }));
-    // The legacy mock never completes RemoveView, leaking its GTask and engine.
+    // Complete RemoveView to release its GTask and engine.
     api->RemoveView = MOCK_ENGINE_PROC(
         RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
           FlutterRemoveViewResult result = {};
@@ -307,8 +299,7 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
     finalization.Watch(context);
   }
 
-  // An unrealized renderer (or one whose GL realization failed) drops the frame
-  // without queuing a renderer-owning idle. Only the engine callback owns view.
+  // No redraw idle owns the renderer here; only the callback owns the view.
   void TestNoRedraw(bool fail_realize, bool zero_layers, bool shutdown);
   void TestComposite(bool unrealize_before_present, bool shutdown = false);
 
@@ -340,14 +331,12 @@ TEST_F(FlViewRendererLifetimeTest, OpenGLDisposeDuringComposite) {
     completed = true;
   });
   EXPECT_TRUE(barrier.WaitForEntry());
-  // The fixture retains engine independently, excluding engine Shutdown's
-  // raster join from the mutex regression. The caller retains renderer.
+  // Retain the engine independently to exclude Shutdown's raster join.
   fl_gtk_widget_destroy(GTK_WIDGET(renderer));
   EXPECT_EQ(finalization.count, 0);
   barrier.ReleaseAndJoin();
   EXPECT_TRUE(completed);
-  // The queued idle owns the renderer until drained, even after its caller
-  // releases its reference. This also exercises stop_wait after mutex unlock.
+  // The queued idle retains the renderer after the caller releases it.
   g_object_unref(renderer);
   EXPECT_EQ(finalization.count, 0);
   DrainIdles();
@@ -429,8 +418,7 @@ void FlViewRendererLifetimeTest::TestComposite(bool unrealize_before_present,
     EXPECT_FALSE(gtk_widget_get_realized(renderer));
   }
   std::atomic<bool> completed{false};
-  // The production callback must acquire and hand off the view reference.
-  // No test-owned reference may conceal broken engine ownership.
+  // Do not add a test-owned reference that could mask callback ownership.
   flutter::testing::fl_reset_received_gtk_log_levels();
   barrier.Start([&] {
     EXPECT_TRUE(Present(compositor, layers, 1));
@@ -474,9 +462,8 @@ void FlViewRendererLifetimeTest::TestComposite(bool unrealize_before_present,
       EXPECT_TRUE(g_source_is_destroyed(release_source));
       g_source_unref(release_source);
     }
-    // Shutdown drains the callback's view reference without a loop iteration.
-    // Successful composition also queues an existing renderer redraw idle;
-    // that separate owner is released when GTK dispatches its pending work.
+    // Shutdown drains the callback reference; the redraw idle remains an owner
+    // until GTK dispatches it.
     EXPECT_EQ(view_finalization.count, 1);
     EXPECT_EQ(view_finalization.thread, std::this_thread::get_id());
     EXPECT_EQ(renderer_finalization.count, 0);
@@ -573,14 +560,11 @@ void FlViewRendererLifetimeTest::TestNoRedraw(bool fail_realize,
     EXPECT_EQ(renderer_finalization.count, 0);
     EXPECT_EQ(view_style_finalization.count, 0);
     EXPECT_EQ(renderer_style_finalization.count, 0);
-    // This path must not be rescued by a successful renderer redraw idle.
     EXPECT_EQ(g_main_context_find_source_by_user_data(nullptr, renderer),
               nullptr);
   };
   if (shutdown) {
-    // Model Shutdown joining an in-flight raster callback. It queues its final
-    // reference while GTK main is synchronously shutting down, with no further
-    // main-loop iterations available to release it.
+    // Queue the callback release during Shutdown with no further loop dispatch.
     GSource* release_source = nullptr;
     bool shutdown_called = false;
     FlutterEngineProcTable* api = fl_engine_get_embedder_api(engine);
@@ -629,8 +613,6 @@ void FlViewRendererLifetimeTest::TestNoRedraw(bool fail_realize,
   ExpectNoCritical();
 }
 
-// The previous early-drop test explicitly expected raster finalization. The
-// actual engine callback must now defer both widgets and their CSS state.
 TEST_F(FlViewRendererLifetimeTest, ViewEarlyDropFinalizationOnMain) {
   TestNoRedraw(/*fail_realize=*/false, /*zero_layers=*/true,
                /*shutdown=*/false);
@@ -687,8 +669,7 @@ TEST_F(FlViewRendererLifetimeTest, QueuedIdleAndTimerAfterEngineDispose) {
   flutter::testing::fl_reset_received_gtk_log_levels();
   fl_view_renderer_present_layers(FL_VIEW_RENDERER(renderer), layers, 1);
   fl_gtk_widget_destroy(GTK_WIDGET(renderer));
-  // Forced engine disposal removes its ownership, while the pending redraw
-  // and renderer keep the presentation resources alive through completion.
+  // The pending redraw retains presentation resources after engine disposal.
   g_object_run_dispose(G_OBJECT(engine));
   g_clear_object(&engine);
   EXPECT_EQ(runner_finalization.count, 0);
@@ -727,8 +708,6 @@ TEST_F(FlViewRendererLifetimeTest, RepeatedDisposeBeforeRealize) {
 
 }  // namespace
 
-// Interposition is confined to this test executable and to the selected raster
-// thread. Other suites, GTK drawing, and the actual Cairo paint are unchanged.
 extern "C" void cairo_paint(cairo_t* cr) {
   if (cairo_barrier != nullptr) {
     CompositionBarrier* barrier = cairo_barrier;

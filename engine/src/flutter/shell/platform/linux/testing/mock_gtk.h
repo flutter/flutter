@@ -85,8 +85,7 @@ class MockGtk {
               g_object_set,
               (GObject * object, const gchar* property_name, gint value));
 
-  // Opt in to real widget realization/querying for lifecycle tests. GL context
-  // operations remain mocked, so these tests do not require a hardware driver.
+  // Opt in to widget realization/querying while keeping GL operations mocked.
   bool realize_widgets = false;
   MOCK_METHOD(GdkGLContext*,
               gdk_window_create_gl_context,

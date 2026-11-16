@@ -344,10 +344,7 @@ executable("flutter_linux_unittests") {
   ]
 }
 
-# These tests use ELF --wrap on calls between the embedding's source files.
-# LTO can inline those calls and bypass the barriers. Keep the real embedding
-# and its callers in separate translation units by building without LTO.
-# See testing/wayland_tests.md for the focused runner convention.
+# LTO can inline calls across source files and bypass the ELF --wrap barriers.
 if (!enable_lto) {
   executable("flutter_linux_wayland_unittests") {
     testonly = true
@@ -376,8 +373,7 @@ if (!enable_lto) {
       "-Wl,--wrap=fl_wayland_display_create_subsurface",
     ]
 
-    # In particular, do not link linux_test.cc or testing/mock_*.cc. This
-    # executable must connect to the compositor through real GTK and Wayland.
+    # Keep this target free of LinuxTest and GTK/Wayland mocks.
     deps = [
       ":flutter_linux",
       ":flutter_linux_fixtures",

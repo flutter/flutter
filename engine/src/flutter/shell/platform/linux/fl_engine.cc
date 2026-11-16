@@ -397,8 +397,6 @@ static bool compositor_collect_backing_store_callback(
   }
 }
 
-// Release presentation references only on the GTK thread. Shutdown also calls
-// this after joining the raster thread, since the main loop may have stopped.
 static void release_renderables(FlEngine* self) {
   g_assert(self->thread == g_thread_self());
 
@@ -419,23 +417,21 @@ static void release_renderables(FlEngine* self) {
 }
 
 static gboolean release_renderables_cb(gpointer user_data) {
-  // A view may own the last engine reference. Keep the engine alive while
-  // releasing the batch, without making the queued source own the engine.
+  // A view may own the last engine reference; keep it alive during release.
   g_autoptr(FlEngine) self = FL_ENGINE(g_object_ref(user_data));
   release_renderables(self);
   return G_SOURCE_REMOVE;
 }
 
-// Takes ownership of the callback's reference. Even a disposed GtkWidget still
-// has GTK/CSS state that must be finalized on the GTK thread.
+// Takes ownership: disposed GtkWidgets must still be finalized on the GTK
+// thread.
 static void queue_renderable_release(FlEngine* self, FlRenderable* renderable) {
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->renderables_mutex);
   self->renderables_to_release =
       g_list_prepend(self->renderables_to_release, renderable);
   if (self->renderables_release_source == nullptr) {
-    // Explicitly attach a source: g_main_context_invoke() can run inline on
-    // the raster thread when the main context is unowned. A destroy notifier
-    // likewise provides no thread-affinity guarantee.
+    // Attach explicitly: g_main_context_invoke() can run inline on the raster
+    // thread, and destroy notifiers provide no thread-affinity guarantee.
     self->renderables_release_source = g_idle_source_new();
     g_source_set_name(self->renderables_release_source,
                       "FlEngine::release_renderables");
@@ -654,9 +650,8 @@ static void fl_engine_dispose(GObject* object) {
     self->engine = nullptr;
   }
 
-  // Shutdown has finished all compositor callbacks. Cancel the idle and drain
-  // its references here on GTK main, without requiring another loop iteration
-  // or relying on source destruction to release thread-affine objects.
+  // Compositor callbacks have finished. Drain on GTK now, since the main loop
+  // may have stopped.
   release_renderables(self);
 
   if (self->aot_data != nullptr) {

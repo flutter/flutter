@@ -260,7 +260,6 @@ static void fl_view_present_layers(FlRenderable* renderable,
                                    size_t layers_count) {
   FlView* self = FL_VIEW(renderable);
 
-  // Frames may arrive before the renderer has been set up.
   if (self->renderer == nullptr) {
     return;
   }
@@ -575,7 +574,6 @@ static void fl_view_dispose(GObject* object) {
                           nullptr);
   }
 
-  // Queued renderer signals must not call into a disposed view.
   if (self->renderer != nullptr) {
     g_signal_handlers_disconnect_by_data(self->renderer, self);
   }
@@ -662,8 +660,8 @@ static gboolean fl_view_key_release_event(GtkWidget* widget,
 static void fl_view_finalize(GObject* object) {
   FlView* self = FL_VIEW(object);
 
-  // A raster callback holds the view alive while presenting. Keep its renderer
-  // reference until that callback has returned, even after forced GTK disposal.
+  // Keep the renderer alive for raster callbacks, even after forced GTK
+  // disposal.
   g_clear_object(&self->renderer);
 
   G_OBJECT_CLASS(fl_view_parent_class)->finalize(object);

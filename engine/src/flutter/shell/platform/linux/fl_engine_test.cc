@@ -23,8 +23,6 @@
 
 class FlEngineTest : public flutter::testing::LinuxTest {};
 
-// Cancelling a source on raster must not release its GTK-affine references.
-// Engine shutdown must still drain them without running the main loop again.
 TEST_F(FlEngineTest, CancelledPresentationReleaseDrainedDuringShutdown) {
   FlutterCompositor compositor = {};
   FlutterEngineProcTable* api = fl_engine_get_embedder_api(engine);
@@ -60,7 +58,6 @@ TEST_F(FlEngineTest, CancelledPresentationReleaseDrainedDuringShutdown) {
     info.struct_size = sizeof(FlutterPresentViewInfo);
     info.view_id = 0;
     info.user_data = compositor.user_data;
-    // Multiple callback references share one pending drain.
     EXPECT_TRUE(compositor.present_view_callback(&info));
     EXPECT_TRUE(compositor.present_view_callback(&info));
     release_source = g_main_context_find_source_by_user_data(nullptr, engine);
@@ -77,7 +74,6 @@ TEST_F(FlEngineTest, CancelledPresentationReleaseDrainedDuringShutdown) {
   g_object_run_dispose(G_OBJECT(engine));
   EXPECT_EQ(finalization.count, 1);
   EXPECT_EQ(finalization.thread, std::this_thread::get_id());
-  // Repeated dispose must neither double-unref nor clear a live mutex twice.
   g_object_run_dispose(G_OBJECT(engine));
   EXPECT_EQ(finalization.count, 1);
   if (release_source != nullptr) {

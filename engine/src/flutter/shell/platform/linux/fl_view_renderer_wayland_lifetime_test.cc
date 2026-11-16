@@ -41,9 +41,8 @@ enum Resource {
   kResourceCount
 };
 
-// qdata destroy notifications observe finalization, unlike weak notifications
-// which can run during forced dispose. The records own their counters, so even
-// a failed leak assertion cannot leave a callback pointing into a dead fixture.
+// Weak notifications can run during dispose; qdata observes finalization.
+// Records retain counters so failed assertions cannot outlive their storage.
 struct Counts {
   GThread* main_thread;
   gint created[kResourceCount];
@@ -70,8 +69,6 @@ static void finalized_cb(gpointer data) {
   if (g_thread_self() == counts->main_thread) {
     g_atomic_int_inc(&counts->finalized_on_main[resource]);
   }
-  // A fence must finish destruction while the manager still keeps the shared
-  // contexts alive, even after the engine and child surface are gone.
   if (resource == kFence) {
     EXPECT_EQ(g_atomic_int_get(&counts->finalized[kManager]), 0);
     EXPECT_NE(eglQueryString(counts->display, EGL_VERSION), nullptr);
@@ -165,9 +162,7 @@ struct Presentation {
   }
 };
 
-// Only the raster worker and the GTK thread constructing this test's widgets
-// are observed. All wrappers call the actual implementation, with the sole
-// capability override being the explicitly tested glFinish fallback.
+// Observe only the raster worker and this test's GTK construction thread.
 thread_local Counts* current_counts = nullptr;
 thread_local Presentation* current_presentation = nullptr;
 
@@ -218,9 +213,7 @@ static gpointer present_thread(gpointer data) {
   return nullptr;
 }
 
-// Always release and join, including on a fatal assertion in the main thread.
-// A driver hang fails the process after a bounded wait instead of leaving an
-// unbounded join. The normal engine test timeout is an additional backstop.
+// Release and join even after a fatal assertion; bound driver hangs.
 class RasterThread {
  public:
   RasterThread(Counts* counts,
@@ -254,9 +247,8 @@ class RasterThread {
   GThread* thread_;
 };
 
-// GTK's unrealize signal runs before its default handler. The supervisor
-// releases the held-frame_mutex barrier only after GTK has entered unrealize,
-// without asking GTK's blocked thread to dispatch an idle or timeout.
+// GTK signals unrealize before its default handler. Release the frame_mutex
+// barrier from the supervisor without dispatch on the blocked GTK thread.
 class UnrealizeRelease {
  public:
   UnrealizeRelease(GtkWidget* widget, RasterThread* raster, Counts* counts)
@@ -307,8 +299,7 @@ static void drain_main_context() {
   }
 }
 
-// Unlike draining ready sources, this also waits for asynchronous Wayland
-// events. The timeout source bounds a blocking iteration with no other events.
+// Wait for asynchronous Wayland events with a timeout for blocking iterations.
 static gboolean wait_for_count(gint* count, gint expected) {
   gboolean timed_out = FALSE;
   g_autoptr(GSource) timeout =
@@ -331,8 +322,7 @@ static gboolean wait_for_count(gint* count, gint expected) {
 class FlViewRendererWaylandLifetimeTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    // LinuxTest forces X11 and links mocked Wayland/EGL; this executable must
-    // initialize GTK itself. Skipping never counts as realized coverage.
+    // Initialize GTK here because LinuxTest forces X11 and mocks Wayland/EGL.
     static gboolean gtk_initialized = []() {
       GLogLevelFlags fatal = g_log_set_always_fatal(G_LOG_LEVEL_ERROR);
       g_log_set_always_fatal(
@@ -350,9 +340,7 @@ class FlViewRendererWaylandLifetimeTest : public ::testing::Test {
     counts_->main_thread = g_thread_self();
     current_counts = counts_;
     g_autoptr(FlDartProject) project = fl_dart_project_new();
-    // Do not start the native engine: Shutdown joins the raster thread, which
-    // is intentionally held by this test. The objects and all graphics calls
-    // here are real; only engine execution is absent.
+    // Leave the engine unstarted: Shutdown would join the held raster thread.
     engine_ = fl_engine_new(project);
     observe(G_OBJECT(engine_), counts_, kEngine);
     manager_ = fl_engine_get_opengl_manager(engine_);
@@ -394,7 +382,6 @@ class FlViewRendererWaylandLifetimeTest : public ::testing::Test {
     ASSERT_EQ(g_atomic_int_get(&counts_->created[kEGL]), 1);
     ASSERT_TRUE(fl_opengl_manager_clear_current(manager_));
 
-    // Require a completed nonzero-layer present before any destruction race.
     Present();
     ASSERT_GT(g_atomic_int_get(&counts_->composites), 0);
     ASSERT_GT(g_atomic_int_get(&counts_->presents), 0);
@@ -409,8 +396,8 @@ class FlViewRendererWaylandLifetimeTest : public ::testing::Test {
       gtk_widget_destroy(window_);
       g_clear_object(&window_);
     }
-    // Unrealize clears the GTK thread's child context. Framebuffer cleanup at
-    // the final owner/idle release still needs a current shared GL context.
+    // Unrealize clears the child context; framebuffer cleanup needs a shared
+    // context current through the final owner/idle release.
     EGLDisplay display = MakeCurrentForFinalization();
     g_clear_object(&renderer_);
     g_clear_object(&engine_);
@@ -453,8 +440,7 @@ class FlViewRendererWaylandLifetimeTest : public ::testing::Test {
   void CheckProtocol() {
     struct wl_display* display =
         gdk_wayland_display_get_wl_display(gdk_display_get_default());
-    // A sync on a private queue checks for protocol errors without dispatching
-    // the renderer's GTK idle or blocking indefinitely in roundtrip().
+    // Bound the protocol sync without dispatching the renderer idle.
     struct wl_event_queue* queue = wl_display_create_queue(display);
     auto* wrapper =
         static_cast<struct wl_display*>(wl_proxy_create_wrapper(display));
@@ -539,8 +525,8 @@ TEST_P(FlViewRendererWaylandRaceTest, DestroyOrUnrealizeDuringPresentation) {
                       FALSE);
   ASSERT_TRUE(raster.WaitForEntry()) << "Linker wrapper was not reached";
   if (pause == Pause::kBeforeWake) {
-    // The frame mutex has been released, but the task runner and scoped fence
-    // are still in use. No main-context dispatch occurs until the worker joins.
+    // After frame_mutex unlock, the runner and fence are still in use.
+    // Defer main-context dispatch until the worker joins.
     if (destroy) {
       gtk_widget_destroy(GTK_WIDGET(renderer_));
     } else {
@@ -570,8 +556,7 @@ TEST_P(FlViewRendererWaylandRaceTest, DestroyOrUnrealizeDuringPresentation) {
     }
     CheckChildrenReleased();
     if (!destroy) {
-      // Keep the visible parent from re-realizing the explicitly unrealized
-      // child when the pending GTK work is eventually dispatched.
+      // Prevent pending GTK work from re-realizing the child.
       gtk_widget_destroy(GTK_WIDGET(renderer_));
     }
   }
@@ -593,8 +578,7 @@ INSTANTIATE_TEST_SUITE_P(
                        ::testing::Bool()));
 
 TEST_F(FlViewRendererWaylandLifetimeTest, DestroyBeforeQueuedRedraw) {
-  // Present returns after enqueueing the GTK idle. Keep it pending across
-  // destruction and engine finalization, then let the idle release its owner.
+  // Keep the redraw idle pending across destruction and engine finalization.
   Present();
   gtk_widget_destroy(GTK_WIDGET(renderer_));
   CheckChildrenReleased();
@@ -619,9 +603,8 @@ TEST_F(FlViewRendererWaylandLifetimeTest,
   EXPECT_EQ(gdk_wayland_window_get_wl_surface(gtk_widget_get_window(window_)),
             nullptr);
   gtk_widget_show_all(window_);
-  // GTK maps children before creating the replacement toplevel surface. This
-  // direct-renderer fixture has no running engine and explicitly requests the
-  // allocation that lets the renderer detect the replacement parent.
+  // GTK maps children before replacing the toplevel surface. Allocate again
+  // to detect the replacement parent.
   gtk_widget_queue_allocate(GTK_WIDGET(renderer_));
   ASSERT_TRUE(wait_for_count(&counts_->created[kEGL], 2))
       << "GTK did not recreate the subsurface after showing the window";
@@ -631,15 +614,14 @@ TEST_F(FlViewRendererWaylandLifetimeTest,
   EXPECT_EQ(counts_->parent, parent);
   EXPECT_EQ(counts_->parent_id,
             wl_proxy_get_id(reinterpret_cast<struct wl_proxy*>(parent)));
-  // Addresses and protocol IDs can be reused; creation/finalization counters
-  // prove that the old resources were replaced.
+  // Addresses and protocol IDs can be reused; check resource counts instead.
   EXPECT_EQ(g_atomic_int_get(&counts_->created[kChild]), 2);
   EXPECT_EQ(g_atomic_int_get(&counts_->created[kEGL]), 2);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 1);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEGL]), 1);
   int presents = g_atomic_int_get(&counts_->presents);
   Present();
-  Present(TRUE, TRUE);  // A zero-layer frame clears the existing real frame.
+  Present(TRUE, TRUE);
   EXPECT_EQ(g_atomic_int_get(&counts_->presents), presents + 2);
   CheckProtocol();
 }
@@ -652,14 +634,12 @@ TEST_F(FlViewRendererWaylandLifetimeTest, UnrealizedRendererDropsFrames) {
   Present();
   EXPECT_EQ(g_atomic_int_get(&counts_->composites), composites);
   EXPECT_EQ(g_atomic_int_get(&counts_->presents), presents);
-  // Do not re-realize: the existing realize path overwrites its retained task
-  // runner reference. That separate leak is not changed by the lifetime fix.
+  // Re-realization would hit a preexisting task runner reference leak.
 }
 
 }  // namespace
 
-// These must have C linkage and remain separate from production translation
-// units. The runtime counters and barriers fail if --wrap is bypassed.
+// --wrap requires C linkage and separate production translation units.
 extern "C" {
 void __real_fl_compositor_opengl_composite_layers(FlCompositorOpenGL*,
                                                   const FlutterLayer**,
@@ -699,9 +679,8 @@ FlGLFence* __wrap_fl_gl_fence_new(FlOpenGLManager* manager) {
 gboolean __real_fl_opengl_manager_make_current(FlOpenGLManager*);
 gboolean __wrap_fl_opengl_manager_make_current(FlOpenGLManager* manager) {
   if (current_presentation != nullptr && current_presentation->in_present) {
-    // Called from the real subsurface present just before restoring the engine
-    // context. Prove that it actually used a distinct child context and native
-    // EGL window surface, including on the glFinish path without a fence.
+    // Inspect the child context and surface before restoring the engine
+    // context.
     EXPECT_EQ(eglGetCurrentDisplay(), fl_opengl_manager_get_display(manager));
     EXPECT_NE(eglGetCurrentContext(), EGL_NO_CONTEXT);
     EXPECT_NE(eglGetCurrentContext(), fl_opengl_manager_get_context(manager));
