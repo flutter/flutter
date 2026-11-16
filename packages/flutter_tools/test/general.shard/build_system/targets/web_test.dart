@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -18,16 +19,15 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/content_hash.dart';
-import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:flutter_tools/src/web_template.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
+import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
@@ -62,62 +62,82 @@ void main() {
   late TestBed testbed;
   late Environment environment;
   late FakeProcessManager processManager;
+  late FileSystem fs;
 
   final Platform linux = FakePlatform(environment: <String, String>{});
   final Platform windows = FakePlatform(
     operatingSystem: 'windows',
     environment: <String, String>{},
   );
+  final localFileSystem = LocalFileSystem.test(signals: FakeSignals());
+  tearDownAll(localFileSystem.dispose);
+  final String serviceWorkerStub = localFileSystem
+      .directory(
+        Artifacts.test(fileSystem: localFileSystem)
+            .getArtifactPath(Artifact.flutterToolsFileGenerators),
+      )
+      .childDirectory('js')
+      .childFile('flutter_service_worker.js')
+      .readAsStringSync();
 
   setUp(() {
+    final rawFs = MemoryFileSystem.test();
+    fs = ErrorHandlingFileSystem(delegate: rawFs, platform: linux);
+    final logger = BufferLogger.test();
     testbed = TestBed(
       setup: () {
-        globals.fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+        fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 name: foo
 ''');
 
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: fs.currentDirectory,
           mainLibName: 'my_app',
           packages: <String, String>{'foo': 'foo/'},
           languageVersions: <String, String>{'foo': '2.7'},
         );
-        globals.fs.currentDirectory.childDirectory('bar').createSync();
+        fs.currentDirectory.childDirectory('bar').createSync();
         processManager = FakeProcessManager.empty();
-        globals.fs
-            .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
-            .createSync(recursive: true);
-        globals.fs
-            .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js.map')
-            .createSync(recursive: true);
-        globals.fs
+        fs.file('bin/cache/flutter_web_sdk/flutter_js/flutter.js').createSync(recursive: true);
+        fs.file('bin/cache/flutter_web_sdk/flutter_js/flutter.js.map').createSync(recursive: true);
+        fs
             .file('engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf')
             .createSync(recursive: true);
 
         environment = Environment.test(
-          globals.fs.currentDirectory,
-          projectDir: globals.fs.currentDirectory.childDirectory('foo'),
-          outputDir: globals.fs.currentDirectory.childDirectory('bar'),
+          fs.currentDirectory,
+          projectDir: fs.currentDirectory.childDirectory('foo'),
+          outputDir: fs.currentDirectory.childDirectory('bar'),
           defines: <String, String>{
-            kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
+            kTargetFile: fs.path.join('foo', 'lib', 'main.dart'),
             kBuildMode: BuildMode.debug.cliName,
           },
-          artifacts: Artifacts.test(fileSystem: globals.fs),
+          artifacts: Artifacts.test(fileSystem: fs),
           processManager: processManager,
-          logger: globals.logger,
-          fileSystem: globals.fs,
+          logger: logger,
+          fileSystem: fs,
         );
-        globals.fs
+        fs
             .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterJsDirectory))
             .childFile('flutter.js')
             .createSync(recursive: true);
-        globals.fs
+        fs
             .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterJsDirectory))
             .childFile('flutter.js.map')
             .createSync(recursive: true);
+        fs
+            .directory(environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators))
+            .childDirectory('js')
+            .childFile('flutter_service_worker.js')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(serviceWorkerStub);
         environment.buildDir.createSync(recursive: true);
       },
-      overrides: <Type, Generator>{Platform: () => linux},
+      overrides: <Type, Generator>{
+        FileSystem: () => rawFs,
+        Logger: () => logger,
+        Platform: () => linux,
+      },
     );
   });
 
@@ -125,7 +145,7 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with plugins and init platform',
     () => testbed.run(
       () async {
-        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+        final File mainFile = fs.file(fs.path.join('foo', 'lib', 'main.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
@@ -261,10 +281,9 @@ name: foo
   );
 
   test(
-    'WebTemplatedFiles includes serviceWorkerSettings in flutter_bootstrap.js by default',
+    'WebTemplatedFiles generates default _flutter.loader.load() in flutter_bootstrap.js',
     () => testbed.run(() async {
       final Directory webResources = environment.projectDir.childDirectory('web');
-      environment.defines[kServiceWorkerStrategy] = 'none';
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
       await WebTemplatedFiles(
@@ -275,28 +294,6 @@ name: foo
       expect(
         environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
         contains('_flutter.loader.load();'),
-      );
-    }),
-  );
-
-  test(
-    'WebTemplatedFiles omits serviceWorkerSettings in flutter_bootstrap.js when environment specifies',
-    () => testbed.run(() async {
-      final Directory webResources = environment.projectDir.childDirectory('web');
-      webResources.childFile('index.html').createSync(recursive: true);
-      environment.buildDir.childFile('main.dart.js').createSync();
-      await WebTemplatedFiles(
-        <Map<String, Object?>>[],
-        engineRevision: _kEngineRevision,
-      ).build(environment);
-
-      expect(
-        environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
-        stringContainsInOrder(<String>[
-          '_flutter.loader.load({',
-          'serviceWorkerSettings',
-          'serviceWorkerVersion',
-        ]),
       );
     }),
   );
@@ -582,7 +579,7 @@ _flutter.loader.load();
     'WebEntrypointTarget generates an entrypoint for a file outside of main',
     () => testbed.run(
       () async {
-        final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+        final File mainFile = fs.file(fs.path.join('other', 'lib', 'main.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
@@ -604,7 +601,7 @@ _flutter.loader.load();
     'WebEntrypointTarget generates a plugin registrant for a file outside of main',
     () => testbed.run(
       () async {
-        final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+        final File mainFile = fs.file(fs.path.join('other', 'lib', 'main.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
@@ -626,42 +623,47 @@ _flutter.loader.load();
 
   test(
     'WebEntrypointTarget generates an entrypoint with plugins and init platform on windows',
-    () => testbed.run(
-      () async {
-        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('void main() {}');
-        environment.defines[kTargetFile] = mainFile.path;
+    () async {
+      final rawWindowsFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      fs = ErrorHandlingFileSystem(delegate: rawWindowsFs, platform: windows);
+      await testbed.run(
+        () async {
+          final File mainFile = fs.file(fs.path.join('foo', 'lib', 'main.dart'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('void main() {}');
+          environment.defines[kTargetFile] = mainFile.path;
 
-        environment.defines[kHasWebPlugins] = 'true';
-        await const WebEntrypointTarget().build(environment);
+          environment.defines[kHasWebPlugins] = 'true';
+          await const WebEntrypointTarget().build(environment);
 
-        final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
+          final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
-        // Plugins
-        expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
-        expect(generated, contains('pluginRegistrant.registerPlugins();'));
+          // Plugins
+          expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
+          expect(generated, contains('pluginRegistrant.registerPlugins();'));
 
-        // Import.
-        expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
+          // Import.
+          expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
 
-        // Main
-        expect(generated, contains('ui_web.bootstrapEngine('));
-        expect(generated, contains('entrypoint.main as _'));
-      },
-      overrides: <Type, Generator>{
-        Platform: () => windows,
-        TemplateRenderer: () => const MustacheTemplateRenderer(),
-        Pub: ThrowingPub.new,
-      },
-    ),
+          // Main
+          expect(generated, contains('ui_web.bootstrapEngine('));
+          expect(generated, contains('entrypoint.main as _'));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => rawWindowsFs,
+          Platform: () => windows,
+          TemplateRenderer: () => const MustacheTemplateRenderer(),
+          Pub: ThrowingPub.new,
+        },
+      );
+    },
   );
 
   test(
     'WebEntrypointTarget generates an entrypoint without plugins and init platform',
     () => testbed.run(
       () async {
-        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+        final File mainFile = fs.file(fs.path.join('foo', 'lib', 'main.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
@@ -692,7 +694,7 @@ _flutter.loader.load();
     'WebEntrypointTarget generates an entrypoint with a language version',
     () => testbed.run(
       () async {
-        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+        final File mainFile = fs.file(fs.path.join('foo', 'lib', 'main.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('// @dart=2.8\nvoid main() {}');
         environment.defines[kTargetFile] = mainFile.path;
@@ -714,10 +716,10 @@ _flutter.loader.load();
     'WebEntrypointTarget generates an entrypoint with a language version from a package config',
     () => testbed.run(
       () async {
-        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+        final File mainFile = fs.file(fs.path.join('foo', 'lib', 'main.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('void main() {}');
-        globals.fs.file(globals.fs.path.join('pubspec.yaml')).writeAsStringSync('name: foo\n');
+        fs.file(fs.path.join('pubspec.yaml')).writeAsStringSync('name: foo\n');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
 
@@ -737,7 +739,7 @@ _flutter.loader.load();
     'WebEntrypointTarget generates an entrypoint without plugins and without init platform',
     () => testbed.run(
       () async {
-        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+        final File mainFile = fs.file(fs.path.join('foo', 'lib', 'main.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
@@ -923,7 +925,7 @@ _flutter.loader.load();
         throwsToolExit(message: 'Failed to compile application for the Web.'),
       );
 
-      final logger = globals.logger as BufferLogger;
+      final logger = environment.logger as BufferLogger;
       expect(logger.statusText, isEmpty);
       expect(logger.errorText, '${diagnostics}Unhandled dart2js issue\n');
       // The second dart2js phase must not run after the first one fails.
@@ -1228,7 +1230,7 @@ _flutter.loader.load();
         environment.buildDir.childFile('dart2js.d'),
       );
 
-      expect(depfile.inputs.single.path, globals.fs.path.absolute('a.dart'));
+      expect(depfile.inputs.single.path, fs.path.absolute('a.dart'));
       expect(
         depfile.outputs.single.path,
         environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -1649,7 +1651,7 @@ _flutter.loader.load();
         expect(e.toString(), contains('Failed to compile application for the Web.'));
       }
 
-      final logger = globals.logger as BufferLogger;
+      final logger = environment.logger as BufferLogger;
       expect(
         logger.statusText,
         contains('Note: WebAssembly compilation failed due to legacy web imports.'),
@@ -1696,7 +1698,7 @@ _flutter.loader.load();
         expect(e.toString(), contains('Failed to compile application for the Web.'));
       }
 
-      final logger = globals.logger as BufferLogger;
+      final logger = environment.logger as BufferLogger;
       expect(
         logger.statusText,
         contains('Note: WebAssembly compilation failed due to legacy web imports.'),
@@ -1730,7 +1732,7 @@ _flutter.loader.load();
         expect(e.toString(), contains('Failed to compile application for the Web.'));
       }
 
-      final logger = globals.logger as BufferLogger;
+      final logger = environment.logger as BufferLogger;
       expect(
         logger.statusText,
         isNot(contains('Note: WebAssembly compilation failed due to legacy web imports.')),
@@ -1914,36 +1916,20 @@ _flutter.loader.load();
   });
 
   test(
-    'Generated service worker is empty with none-strategy',
-    () => testbed.run(() {
-      final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
-        Artifact.flutterToolsFileGenerators,
-      );
-      final String result = generateServiceWorker(
-        fileGeneratorsPath,
-        fileSystem: environment.fileSystem,
-        serviceWorkerStrategy: ServiceWorkerStrategy.none,
-      );
-
-      expect(result, '');
-    }),
-  );
-
-  test(
     'WebBuiltInAssets declares and copies the Flutter loader source map',
     () => testbed.run(() async {
       final File flutterJsMapInput =
-          globals.fs
+          fs
               .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterJsDirectory))
               .childFile('flutter.js.map')
             ..createSync(recursive: true);
       flutterJsMapInput.writeAsStringSync('source map', flush: true);
-      globals.fs
+      fs
           .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterWebSdk))
           .childDirectory('canvaskit')
           .createSync(recursive: true);
 
-      final target = WebBuiltInAssets(globals.fs, environment.artifacts);
+      final target = WebBuiltInAssets(fs, environment.artifacts);
       expect(target.outputs, contains(const Source.pattern('{BUILD_DIR}/flutter.js.map')));
       await target.build(environment);
 
@@ -1957,14 +1943,14 @@ _flutter.loader.load();
     'WebBuiltInAssets copies over canvaskit again if the web sdk changes',
     () => testbed.run(() async {
       final File canvasKitInput =
-          globals.fs
+          fs
               .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterWebSdk))
               .childDirectory('canvaskit')
               .childFile('canvaskit.wasm')
             ..createSync(recursive: true);
       canvasKitInput.writeAsStringSync('foo', flush: true);
 
-      await WebBuiltInAssets(globals.fs, environment.artifacts).build(environment);
+      await WebBuiltInAssets(fs, environment.artifacts).build(environment);
 
       final File canvasKitOutputBefore = environment.outputDir
           .childDirectory('canvaskit')
@@ -1974,7 +1960,7 @@ _flutter.loader.load();
 
       canvasKitInput.writeAsStringSync('bar', flush: true);
 
-      await WebBuiltInAssets(globals.fs, environment.artifacts).build(environment);
+      await WebBuiltInAssets(fs, environment.artifacts).build(environment);
 
       final File canvasKitOutputAfter = environment.outputDir
           .childDirectory('canvaskit')
@@ -3160,20 +3146,6 @@ flutter:
   test(
     'WebServiceWorker emits precache_manifest.json and excludes non-runtime bloat when webContentHash is true',
     () => testbed.run(() async {
-      final File fileGenerators =
-          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators).isEmpty
-          ? environment.fileSystem.file('flutter_service_worker.js')
-          : environment.fileSystem.file(
-              environment.fileSystem.path.join(
-                environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
-                'js',
-                'flutter_service_worker.js',
-              ),
-            );
-      fileGenerators
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// service worker stub');
-
       const indexBytes = <int>[1, 2, 3, 4];
       const bootstrapBytes = <int>[5, 6, 7, 8, 9];
       const mainJsBytes = <int>[10, 20, 30, 40, 50, 60];
@@ -3285,9 +3257,41 @@ flutter:
         },
       ]);
 
+      final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
+      expect(serviceWorkerFile, exists);
+      expect(serviceWorkerFile.readAsStringSync(), contains('self.registration.unregister()'));
+      expect(serviceWorkerFile.readAsStringSync(), contains("'flutter-app-cache'"));
+
       final File serviceWorkerDepfile = environment.buildDir.childFile('service_worker.d');
       expect(serviceWorkerDepfile, exists);
+      expect(serviceWorkerDepfile.readAsStringSync(), contains('flutter_service_worker.js'));
       expect(serviceWorkerDepfile.readAsStringSync(), contains('precache_manifest.json:'));
+    }),
+  );
+
+  test(
+    'WebServiceWorker preserves custom web/flutter_service_worker.js when present in project',
+    () => testbed.run(() async {
+      environment.projectDir.childDirectory('web').childFile('flutter_service_worker.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// custom user service worker');
+      final File outputServiceWorker = environment.outputDir.childFile('flutter_service_worker.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// custom user service worker');
+
+      final target = WebServiceWorker(
+        environment.fileSystem,
+        const <WebCompilerConfig>[JsCompilerConfig()],
+        const NoOpAnalytics(),
+        environment.artifacts,
+        engineRevision: _kEngineRevision,
+      );
+      await target.build(environment);
+
+      expect(outputServiceWorker.readAsStringSync(), '// custom user service worker');
+      final File serviceWorkerDepfile = environment.buildDir.childFile('service_worker.d');
+      expect(serviceWorkerDepfile, exists);
+      expect(serviceWorkerDepfile.readAsStringSync(), isNot(contains('flutter_service_worker.js')));
     }),
   );
 
@@ -3295,16 +3299,6 @@ flutter:
     'WebServiceWorker includes canvaskit in precache_manifest.json when kUseLocalCanvasKitFlag is true',
     () => testbed.run(() async {
       environment.defines[kUseLocalCanvasKitFlag] = 'true';
-      final File fileGenerators = environment.fileSystem.file(
-        environment.fileSystem.path.join(
-          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
-          'js',
-          'flutter_service_worker.js',
-        ),
-      );
-      fileGenerators
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// service worker stub');
 
       const wasmBytes = <int>[0, 97, 115, 109];
       final String wasmHash = crypto.sha256.convert(wasmBytes).toString().substring(0, 8);
@@ -3337,17 +3331,6 @@ flutter:
   test(
     'WebServiceWorker deletes stale precache_manifest.json when webContentHash is false',
     () => testbed.run(() async {
-      final File fileGenerators = environment.fileSystem.file(
-        environment.fileSystem.path.join(
-          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
-          'js',
-          'flutter_service_worker.js',
-        ),
-      );
-      fileGenerators
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// service worker stub');
-
       final File staleManifest = environment.outputDir.childFile('precache_manifest.json')
         ..createSync(recursive: true)
         ..writeAsStringSync('{"version":1,"entries":[]}');
@@ -3362,6 +3345,7 @@ flutter:
       await target.build(environment);
 
       expect(staleManifest, isNot(exists));
+      expect(environment.buildDir.childFile('service_worker.d'), exists);
     }),
   );
 

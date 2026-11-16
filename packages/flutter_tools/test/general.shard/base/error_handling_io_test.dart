@@ -4,7 +4,6 @@
 
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -12,12 +11,13 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 
 final _FakeAnalytics fakeAnalytics = _FakeAnalytics();
 
@@ -481,6 +481,7 @@ void main() {
     const eperm = 1;
     const enospc = 28;
     const eacces = 13;
+    const exdev = 18;
     const erofs = 30;
 
     late FileExceptionHandler exceptionHandler;
@@ -765,12 +766,69 @@ void main() {
         throwsToolExit(message: 'The file or directory could not be found'),
       );
     });
+
+    testWithoutContext('when a cross-device link error occurs (exdev)', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file')..createSync();
+
+      exceptionHandler
+        ..addError(
+          file,
+          FileSystemOp.delete,
+          FileSystemException(
+            'Cannot delete file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.copy,
+          FileSystemException(
+            'Cannot copy file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.write,
+          FileSystemException(
+            'Cannot write file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        );
+
+      const expectedCrossDeviceMessage =
+          'A file system operation failed across different volumes or mount points.';
+      await expectLater(() => file.delete(), throwsToolExit(message: expectedCrossDeviceMessage));
+      expect(() => file.deleteSync(), throwsToolExit(message: expectedCrossDeviceMessage));
+      expect(
+        () => ErrorHandlingFileSystem.deleteIfExists(file, recursive: true),
+        throwsToolExit(message: expectedCrossDeviceMessage),
+      );
+      await expectLater(
+        () => file.copy('dir/copied'),
+        throwsToolExit(message: expectedCrossDeviceMessage),
+      );
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedCrossDeviceMessage));
+      expect(
+        () => ErrorHandlingFileSystem.noExitOnFailure(() => file.deleteSync()),
+        throwsFileSystemException(),
+      );
+    });
   });
 
   group('throws ToolExit on macOS', () {
     const eperm = 1;
     const enospc = 28;
     const eacces = 13;
+    const exdev = 18;
     const erofs = 30;
     late FileExceptionHandler exceptionHandler;
 
@@ -1052,6 +1110,54 @@ void main() {
         () => fileSystem.currentDirectory,
         throwsToolExit(message: 'The flutter tool cannot access the file or directory'),
       );
+    });
+
+    testWithoutContext('when a cross-device link error occurs (exdev)', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file')..createSync();
+
+      exceptionHandler
+        ..addError(
+          file,
+          FileSystemOp.delete,
+          FileSystemException(
+            'Cannot delete file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.write,
+          FileSystemException(
+            'Cannot write file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        );
+
+      const expectedDeleteMessage =
+          'Flutter failed to delete file at "dir/file".\n'
+          'A file system operation failed across different volumes or mount points.';
+      await expectLater(() => file.delete(), throwsToolExit(message: expectedDeleteMessage));
+      expect(() => file.deleteSync(), throwsToolExit(message: expectedDeleteMessage));
+      expect(
+        () => ErrorHandlingFileSystem.deleteIfExists(file, recursive: true),
+        throwsToolExit(message: expectedDeleteMessage),
+      );
+
+      const expectedWriteMessage =
+          'Flutter failed to write to a file at "dir/file".\n'
+          'A file system operation failed across different volumes or mount points.';
+      await expectLater(
+        () => file.writeAsString(''),
+        throwsToolExit(message: expectedWriteMessage),
+      );
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedWriteMessage));
     });
   });
 
@@ -2062,6 +2168,34 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
       expect(fileSystem.typeSync(file.path, followLinks: false), FileSystemEntityType.notFound);
     });
+  });
+
+  group('readAsStringSync', () {
+    const invalidUtf8Bytes = <int>[0xFF, 0xFE, 0x41];
+
+    for (final (String encodingName, Encoding encoding, String expected)
+        in <(String, Encoding, String)>[
+          ('AsciiCodec(allowInvalid: true)', const AsciiCodec(allowInvalid: true), '\uFFFD\uFFFDA'),
+          ('latin1', latin1, '\u00FF\u00FEA'),
+        ]) {
+      testWithoutContext('forwards $encodingName to LocalFileSystem delegate', () {
+        final localFileSystem = LocalFileSystem.test(signals: FakeSignals());
+        addTearDown(localFileSystem.dispose);
+        final Directory tempDir = localFileSystem.systemTempDirectory.createTempSync(
+          'flutter_tools_read_as_string_sync_test.',
+        );
+        addTearDown(() => tryToDelete(tempDir));
+
+        final fileSystem = ErrorHandlingFileSystem(
+          delegate: localFileSystem,
+          platform: linuxPlatform,
+        );
+        final File file = fileSystem.file(fileSystem.path.join(tempDir.path, 'binary.bin'))
+          ..writeAsBytesSync(invalidUtf8Bytes);
+
+        expect(file.readAsStringSync(encoding: encoding), expected);
+      });
+    }
   });
 }
 

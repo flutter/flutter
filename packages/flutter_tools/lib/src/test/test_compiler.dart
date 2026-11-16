@@ -248,7 +248,8 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = _toolContext;
+    final ToolContext(:Cache cache, :FileSystem fs, :Logger logger, :Platform platform) =
+        _toolContext;
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       logger.printTrace('Compiling ${request.mainUri}');
@@ -266,7 +267,7 @@ class TestCompiler {
         final LanguageVersion languageVersion = determineLanguageVersion(
           mainFile,
           buildInfo.packageConfig.packageOf(request.mainUri),
-          Cache.flutterRoot!,
+          cache.flutterRoot,
         );
         if (languageVersion != _registrantLanguageVersion) {
           // (Re)generate the registrant. The output is keyed only on the plugin
@@ -277,6 +278,7 @@ class TestCompiler {
             flutterProject!,
             buildInfo.packageConfig,
             mainFile,
+            flutterRoot: cache.flutterRoot,
             logger: logger,
             templateRenderer: templateRenderer,
           );
