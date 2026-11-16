@@ -198,6 +198,7 @@ class ToolDependencies {
     EmulatorManager? emulatorManager,
     List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
+    String? flutterRoot,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
     Git? git,
@@ -291,6 +292,10 @@ class ToolDependencies {
       xcodeProjectInterpreter == null || xcodeProjectInterpreterBuilder == null,
       'Cannot provide both xcodeProjectInterpreter and xcodeProjectInterpreterBuilder to ToolDependencies.bootstrap.',
     );
+    assert(
+      cache == null || flutterRoot == null,
+      'Cannot provide both cache and flutterRoot to ToolDependencies.bootstrap.',
+    );
 
     // 1. Core Platform Inputs
     final Platform finalPlatform = platform ?? const LocalPlatform();
@@ -381,7 +386,8 @@ class ToolDependencies {
         git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
     // 7. Project Factory, Operating System Utilities, and Cache
-    final String flutterRoot =
+    final String finalFlutterRoot =
+        flutterRoot ??
         cache?.flutterRoot ??
         Cache.defaultFlutterRoot(
           platform: finalPlatform,
@@ -433,7 +439,7 @@ class ToolDependencies {
     final Cache finalCache =
         cache ??
         FlutterCache(
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
           fileSystem: finalFS,
           logger: finalLogger,
           platform: finalPlatform,
@@ -447,7 +453,7 @@ class ToolDependencies {
         flutterVersion ??
         FlutterVersion(
           cache: finalCache,
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
           fs: finalFS,
           git: finalGit,
           logger: finalLogger,
@@ -526,7 +532,7 @@ class ToolDependencies {
           logger: finalLogger,
           platform: finalPlatform,
           fileSystem: finalFS,
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
         );
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
@@ -707,6 +713,7 @@ class ToolDependencies {
       hostPlatform: finalOS.hostPlatform,
       logger: finalLogger,
     );
+    finalShutdownHooks.addShutdownHook(extensionManager.dispose);
 
     final appleContext = AppleContext(
       cocoaPodsBuilder: () => finalCocoaPods,

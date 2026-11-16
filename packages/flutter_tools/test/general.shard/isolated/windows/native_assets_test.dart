@@ -115,6 +115,7 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            featureFlags: featureFlags,
             logger: logger,
             buildRunner: buildRunner,
             buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
@@ -358,26 +359,23 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'runFlutterSpecificBuildHooks succeeds for data-only hooks on Windows when visualStudio is null',
-      () async {
-        final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
-          environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-          targetPlatform: TargetPlatform.windows_x64,
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          logger: logger,
-          buildRunner: FakeFlutterNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <String>['bar'],
-          ),
-          buildCodeAssets: null,
-          buildDataAssets: true,
-        );
-        expect(buildResult.codeAssets, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isDartDataAssetsEnabled: true),
-      },
-    );
+    testWithoutContext('runFlutterSpecificBuildHooks succeeds for data-only hooks on Windows when visualStudio is null', () async {
+      final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
+        androidSdkProvider: null,
+        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+        targetPlatform: TargetPlatform.windows_x64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        featureFlags: TestFeatureFlags(isDartDataAssetsEnabled: true),
+        logger: logger,
+        buildRunner: FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['bar'],
+        ),
+        buildCodeAssets: null,
+        buildDataAssets: true,
+        visualStudio: null,
+      );
+      expect(buildResult.codeAssets, isEmpty);
+    });
   });
 }

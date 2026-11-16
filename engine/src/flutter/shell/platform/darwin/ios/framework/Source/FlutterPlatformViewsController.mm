@@ -115,11 +115,25 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 @property(nonatomic, readonly)
     NSMutableDictionary<NSNumber*, FlutterPlatformViewInfo*>* platformViews;
 
-/// The composition parameters for each platform view.
+/// The composition parameters for each platform view in the current frame, keyed by view ID.
+/// Cleared at the start of each frame in `resetFrameState`.
 ///
 /// This state is only modified on the raster thread.
 @property(nonatomic, readonly)
     std::unordered_map<int64_t, flutter::EmbeddedViewParams>& currentCompositionParams;
+
+/// The composition parameters submitted for each platform view in the previous frame, indexed by
+/// view ID. Views will be recomposited in `submitFrame:` if their current parameters differ from
+/// this mapping, or if there was no entry.
+///
+/// When a view is recreated under a disposed ID, it will not be mapped. This is to ensure that it
+/// is composited even if the view is recreated with the same parameters. `onCreate:` rejects any ID
+/// that is still in `platformViews`. `computeViewsToDisposeWithCompositionOrder:` removes an ID
+/// only when presenting a frame that no longer includes that view.
+///
+/// This state is only modified on the raster thread.
+@property(nonatomic, readonly)
+    std::unordered_map<int64_t, flutter::EmbeddedViewParams>& previousCompositionParams;
 
 /// The IDs of views to be disposed, as requested via the `dispose` method channel call.
 ///
@@ -139,11 +153,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 ///
 /// This state is only modified on the raster thread.
 @property(nonatomic, readonly) std::vector<int64_t>& visitedPlatformViews;
-
-/// Only composite platform views in this set.
-///
-/// This state is only modified on the raster thread.
-@property(nonatomic, readonly) std::unordered_set<int64_t>& viewsToRecomposite;
 
 /// Whether the previous frame had any platform views in active composition order.
 ///
@@ -215,11 +224,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (void)removeUnusedLayers:(const std::vector<std::shared_ptr<flutter::OverlayLayer>>&)unusedLayers
       withCompositionOrder:(const std::vector<int64_t>&)compositionOrder;
 
-/// Computes and returns all views to be disposed on the platform thread, removes them from
-/// self.platformViews, self.viewsToRecomposite, and self.currentCompositionParams. Any views that
-/// still require compositing are not returned, but instead added to `viewsToDelayDispose` for
-/// disposal on the next call.
-- (NSArray<UIView*>*)computeViewsToDispose;
+/// Returns the views to be disposed (as requested via the `dispose` method channel call) and
+/// removes them from `self.platformViews`. Any views still in `compositionOrder` are not returned,
+/// but are instead kept in `viewsToDispose` for disposal on a later call.
+///
+/// Must run on the platform thread.
+- (NSArray<UIView*>*)computeViewsToDisposeWithCompositionOrder:
+    (const std::vector<int64_t>&)compositionOrder;
 
 /// Resets the state of the frame.
 - (void)resetFrameState;
@@ -240,10 +251,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   FlutterFMLTaskRunner* _platformTaskRunner;
   NSMutableDictionary<NSNumber*, FlutterPlatformViewInfo*>* _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
+  std::unordered_map<int64_t, flutter::EmbeddedViewParams> _previousCompositionParams;
   NSMutableSet<NSNumber*>* _viewsToDispose;
   std::vector<int64_t> _compositionOrder;
   std::vector<int64_t> _visitedPlatformViews;
-  std::unordered_set<int64_t> _viewsToRecomposite;
   NSMutableArray<NSNumber*>* _previousCompositionOrder;
 }
 
@@ -460,14 +471,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.slices.insert_or_assign(viewId, std::move(view));
 
   self.compositionOrder.push_back(viewId);
-
-  if (self.currentCompositionParams.count(viewId) == 1 &&
-      self.currentCompositionParams[viewId] == *params.get()) {
-    // Do nothing if the params didn't change.
-    return;
-  }
   self.currentCompositionParams[viewId] = flutter::EmbeddedViewParams(*params.get());
-  self.viewsToRecomposite.insert(viewId);
 }
 
 - (size_t)embeddedViewCount {
@@ -718,7 +722,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 }
 
 - (void)reset {
-  // Reset will only be called from the raster thread or a merged raster/platform thread.
+  // `PlatformViewIOS::OnPreEngineRestart` calls this on the platform thread during hot restart.
   // _platformViews must only be modified on the platform thread, and any operations that
   // read or modify platform views should occur there.
   std::vector<int64_t> compositionOrder = self.compositionOrder;
@@ -730,10 +734,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     [_previousCompositionOrder removeAllObjects];
   }];
 
+  // The state below is otherwise only modified on the raster thread.
   self.compositionOrder.clear();
   self.slices.clear();
   self.currentCompositionParams.clear();
-  self.viewsToRecomposite.clear();
+  self.previousCompositionParams.clear();
   self.layerPool->RecycleLayers();
   self.visitedPlatformViews.clear();
 }
@@ -760,10 +765,29 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     }
 
     self.hadPlatformViews = NO;
+
+    // No platform views are composited when there is no Flutter view, or when neither this frame
+    // nor the previous one had any. The next frame that has platform views must composite all of
+    // them.
+    self.previousCompositionParams.clear();
     background_frame->Submit();
     return;
   }
   self.hadPlatformViews = !self.compositionOrder.empty();
+
+  // Recomposite only the views whose parameters changed since the previous frame.
+  //
+  // Backdrop filter and clip mutators are appended to the parameters via the
+  // `push*ToVisitedPlatformViews:` methods after preroll. As a result, we can't compare in preroll;
+  // we need to do it here.
+  std::unordered_set<int64_t> viewsToRecomposite;
+  for (int64_t viewId : self.compositionOrder) {
+    auto previous = self.previousCompositionParams.find(viewId);
+    if (previous == self.previousCompositionParams.end() ||
+        previous->second != self.currentCompositionParams[viewId]) {
+      viewsToRecomposite.insert(viewId);
+    }
+  }
 
   LayersMap platformViewLayers;
   std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
@@ -842,10 +866,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
+  self.previousCompositionParams = self.currentCompositionParams;
   auto task = fml::MakeCopyable([self,                                                      //
                                  platformViewLayers = std::move(platformViewLayers),        //
                                  currentCompositionParams = self.currentCompositionParams,  //
-                                 viewsToRecomposite = self.viewsToRecomposite,              //
+                                 viewsToRecomposite = std::move(viewsToRecomposite),        //
                                  compositionOrder = self.compositionOrder,                  //
                                  unusedLayers = std::move(unusedLayers),                    //
                                  surfaceFrames = std::move(surfaceFrames)]() mutable {
@@ -921,7 +946,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   }
 
   // Dispose unused Flutter Views.
-  for (UIView* view in [self computeViewsToDispose]) {
+  for (UIView* view in [self computeViewsToDisposeWithCompositionOrder:compositionOrder]) {
     [view removeFromSuperview];
   }
 
@@ -1017,13 +1042,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   }
 }
 
-- (NSArray<UIView*>*)computeViewsToDispose {
+- (NSArray<UIView*>*)computeViewsToDisposeWithCompositionOrder:
+    (const std::vector<int64_t>&)compositionOrder {
   if (self.viewsToDispose.count == 0) {
     return @[];
   }
 
-  std::unordered_set<int64_t> viewsToComposite(self.compositionOrder.begin(),
-                                               self.compositionOrder.end());
+  std::unordered_set<int64_t> viewsToComposite(compositionOrder.begin(), compositionOrder.end());
   NSMutableArray<UIView*>* views = [NSMutableArray array];
   NSMutableSet<NSNumber*>* viewsToDelayDispose = [NSMutableSet set];
   for (NSNumber* viewId in self.viewsToDispose) {
@@ -1035,8 +1060,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     if (rootView != nil) {
       [views addObject:rootView];
     }
-    self.currentCompositionParams.erase(viewId.longLongValue);
-    self.viewsToRecomposite.erase(viewId.longLongValue);
     [self.platformViews removeObjectForKey:viewId];
   }
   [self.viewsToDispose setSet:viewsToDelayDispose];
@@ -1046,6 +1069,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (void)resetFrameState {
   self.slices.clear();
   self.compositionOrder.clear();
+  self.currentCompositionParams.clear();
   self.visitedPlatformViews.clear();
 }
 
@@ -1103,16 +1127,16 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return _currentCompositionParams;
 }
 
+- (std::unordered_map<int64_t, flutter::EmbeddedViewParams>&)previousCompositionParams {
+  return _previousCompositionParams;
+}
+
 - (std::vector<int64_t>&)compositionOrder {
   return _compositionOrder;
 }
 
 - (std::vector<int64_t>&)visitedPlatformViews {
   return _visitedPlatformViews;
-}
-
-- (std::unordered_set<int64_t>&)viewsToRecomposite {
-  return _viewsToRecomposite;
 }
 
 - (NSArray<NSNumber*>*)previousCompositionOrder {

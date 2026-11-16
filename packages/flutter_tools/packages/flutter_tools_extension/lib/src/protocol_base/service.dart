@@ -17,9 +17,10 @@ typedef ExtensionNotificationSender = void Function(String method, Map<String, O
 
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
-/// Extension authors implement this class to group related RPC endpoints under
-/// a specific [namespace] (e.g. `diagnostics`, `config`, `device`, `build`, `template`).
-abstract class ToolExtensionService {
+/// Extension authors extend this class (via specific service base classes) to
+/// group related RPC endpoints under a specific [namespace] (e.g.
+/// `diagnostics`, `config`, `device`, `build`, `template`).
+abstract base class ToolExtensionService {
   /// Reserved JSON-RPC 2.0 notification method for structured log messages
   /// emitted by an extension to the host tool.
   static const logNotificationMethod = 'extension.log';
@@ -67,6 +68,12 @@ abstract class ToolExtensionService {
   }
 
   /// Cleans up resources held by the service when the extension is shut down.
+  ///
+  /// Invoked by `ToolExtensionEntryPoint.run` when the host tool sends an
+  /// `extension.shutdown` RPC on CLI exit or connection disposal. Runs
+  /// concurrently across all registered services in the isolate via
+  /// `Future.wait`, with a short bounded grace period before the
+  /// extension isolate is terminated.
   Future<void> shutdown() async {}
 }
 

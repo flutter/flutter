@@ -207,9 +207,10 @@ class StackFrame {
     }
 
     final parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
-    Match? match = parser.firstMatch(line);
-    assert(match != null, 'Expected $line to match $parser.');
-    match = match!;
+    final Match? match = parser.firstMatch(line);
+    if (match == null) {
+      return null;
+    }
 
     var isConstructor = false;
     var className = '';
