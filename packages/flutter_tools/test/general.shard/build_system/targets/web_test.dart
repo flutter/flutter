@@ -4148,5 +4148,32 @@ _flutter.loader.load();
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: buildOverrides()),
     );
+
+    test(
+      'plain build skips web_release_bundle when web/ only has index.html and it is edited',
+      () => testbed.run(() async {
+        setUpWebProject();
+        environment.projectDir.childFile('web/favicon.png').deleteSync();
+        const configs = <WebCompilerConfig>[JsCompilerConfig(sourceMaps: false)];
+
+        queueDart2JsCompile(sourceMaps: false);
+        expect((await runWebBuild(configs)).success, isTrue);
+
+        final BuildResult noOp = await runWebBuild(configs);
+        expect(noOp.performance['web_release_bundle']!.skipped, isTrue);
+
+        environment.projectDir
+            .childFile('web/index.html')
+            .writeAsStringSync('<html><head><title>Edited</title></head></html>');
+        final BuildResult afterEdit = await runWebBuild(configs);
+        expect(afterEdit.performance['web_templated_files']!.skipped, isFalse);
+        expect(afterEdit.performance['web_release_bundle']!.skipped, isTrue);
+        expect(
+          environment.outputDir.childFile('index.html').readAsStringSync(),
+          contains('<title>Edited</title>'),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: buildOverrides()),
+    );
   });
 }
