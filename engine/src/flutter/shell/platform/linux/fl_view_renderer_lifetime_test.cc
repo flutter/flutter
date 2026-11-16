@@ -212,6 +212,16 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     gtk.realize_widgets = true;
+    // FlView embeds an ATK plug even when no accessibility bridge is running.
+    // Supply only the bridge hooks so construction does not depend on AT-SPI.
+    plug_class_ = ATK_PLUG_CLASS(g_type_class_ref(ATK_TYPE_PLUG));
+    get_object_id_ = plug_class_->get_object_id;
+    plug_class_->get_object_id = [](AtkPlug*) {
+      return g_strdup("flutter-renderer-lifetime-test");
+    };
+    socket_class_ = ATK_SOCKET_CLASS(g_type_class_ref(ATK_TYPE_SOCKET));
+    embed_ = socket_class_->embed;
+    socket_class_->embed = [](AtkSocket*, const gchar*) {};
     // The token is only ref-counted by the renderer. Every GL context operation
     // is mocked with its exact GDK ABI; no real driver context is needed.
     ON_CALL(gtk, gdk_window_create_gl_context)
@@ -220,6 +230,14 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
               g_object_new(G_TYPE_OBJECT, nullptr));
         });
     ON_CALL(gtk, gdk_gl_context_realize).WillByDefault(::testing::Return(TRUE));
+  }
+
+  void TearDown() override {
+    LinuxTest::TearDown();
+    plug_class_->get_object_id = get_object_id_;
+    socket_class_->embed = embed_;
+    g_type_class_unref(plug_class_);
+    g_type_class_unref(socket_class_);
   }
 
   GtkWidget* Realize(GtkWidget* child) {
@@ -291,6 +309,12 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
   FlutterCompositor compositor = {};
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+
+ private:
+  AtkPlugClass* plug_class_ = nullptr;
+  decltype(AtkPlugClass::get_object_id) get_object_id_ = nullptr;
+  AtkSocketClass* socket_class_ = nullptr;
+  decltype(AtkSocketClass::embed) embed_ = nullptr;
 };
 
 TEST_F(FlViewRendererLifetimeTest, OpenGLDisposeDuringComposite) {
