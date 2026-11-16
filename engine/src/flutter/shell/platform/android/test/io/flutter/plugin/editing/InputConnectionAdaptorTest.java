@@ -1,5 +1,6 @@
 package io.flutter.plugin.editing;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -47,10 +48,13 @@ import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.StandardMethodCodec;
 import io.flutter.util.FakeKeyEvent;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Before;
@@ -195,10 +199,10 @@ public class InputConnectionAdaptorTest {
     assertTrue(editable.toString().startsWith(textToBePasted));
   }
 
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings({"deprecation", "unchecked"})
   // DartExecutor.send is deprecated.
   @Test
-  public void testCommitContent() throws JSONException {
+  public void testCommitContent() {
     View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
@@ -236,26 +240,18 @@ public class InputConnectionAdaptorTest {
     ArgumentCaptor<String> channelCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ByteBuffer> bufferCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
     verify(dartExecutor, times(1)).send(channelCaptor.capture(), bufferCaptor.capture(), isNull());
-    assertEquals("flutter/textinput", channelCaptor.getValue());
+    assertEquals("flutter/contentinsertion", channelCaptor.getValue());
 
-    StringBuilder fakeImageDataIntString = new StringBuilder();
-    for (int i = 0; i < fakeImageDataBytes.length; i++) {
-      int byteAsInt = fakeImageDataBytes[i];
-      fakeImageDataIntString.append(byteAsInt);
-      if (i < (fakeImageDataBytes.length - 1)) {
-        fakeImageDataIntString.append(",");
-      }
-    }
-    verifyMethodCall(
-        bufferCaptor.getValue(),
-        "TextInputClient.performAction",
-        new String[] {
-          "0",
-          "TextInputAction.commitContent",
-          "{\"data\":["
-              + fakeImageDataIntString
-              + "],\"mimeType\":\"image\\/png\",\"uri\":\"content:\\/\\/mock\\/uri\\/test\\/commitContent\"}"
-        });
+    ByteBuffer buffer = bufferCaptor.getValue();
+    buffer.rewind();
+    MethodCall methodCall = StandardMethodCodec.INSTANCE.decodeMethodCall(buffer);
+    assertEquals("ContentInsertion.commitContent", methodCall.method);
+    List<Object> args = methodCall.arguments();
+    assertEquals(client, args.get(0));
+    Map<String, Object> content = (Map<String, Object>) args.get(1);
+    assertEquals("image/png", content.get("mimeType"));
+    assertEquals(uri, content.get("uri"));
+    assertArrayEquals(fakeImageDataBytes, (byte[]) content.get("data"));
   }
 
   @SuppressWarnings("deprecation")

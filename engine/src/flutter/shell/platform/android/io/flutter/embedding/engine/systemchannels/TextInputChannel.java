@@ -18,6 +18,7 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.common.StandardMethodCodec;
 import io.flutter.plugin.editing.TextEditingDelta;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,6 +51,8 @@ public class TextInputChannel {
   private static final String TAG = "TextInputChannel";
 
   @NonNull public final MethodChannel channel;
+  // Binary channel, so that inserted content is not serialized to JSON.
+  @NonNull private final MethodChannel contentInsertionChannel;
   @Nullable private TextInputMethodHandler textInputMethodHandler;
 
   @NonNull @VisibleForTesting
@@ -173,6 +176,8 @@ public class TextInputChannel {
   public TextInputChannel(@NonNull DartExecutor dartExecutor) {
     this.channel = new MethodChannel(dartExecutor, "flutter/textinput", JSONMethodCodec.INSTANCE);
     channel.setMethodCallHandler(parsingMethodHandler);
+    this.contentInsertionChannel =
+        new MethodChannel(dartExecutor, "flutter/contentinsertion", StandardMethodCodec.INSTANCE);
   }
 
   /**
@@ -329,12 +334,15 @@ public class TextInputChannel {
         Arrays.asList(inputClientId, "TextInputAction.unspecified"));
   }
 
-  /** Instructs Flutter to commit inserted content back to the text channel. */
+  /**
+   * Instructs Flutter to commit inserted content to the text input client.
+   *
+   * <p>The content map holds the keys mimeType, uri and data (a byte array).
+   */
   public void commitContent(int inputClientId, Map<String, Object> content) {
     Log.v(TAG, "Sending 'commitContent' message.");
-    channel.invokeMethod(
-        "TextInputClient.performAction",
-        Arrays.asList(inputClientId, "TextInputAction.commitContent", content));
+    contentInsertionChannel.invokeMethod(
+        "ContentInsertion.commitContent", Arrays.asList(inputClientId, content));
   }
 
   public void performPrivateCommand(
