@@ -3,24 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/asset.dart';
-import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -59,8 +55,9 @@ void main() {
   late FakeToolContext toolContext;
 
   setUp(() {
+    const hostPlatform = LocalPlatform();
     fs = MemoryFileSystem.test(
-      style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      style: hostPlatform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
 
     final Directory package = fs.directory('package');
@@ -84,24 +81,13 @@ void main() {
         .childFile('some_integration_test.dart')
         .createSync(recursive: true);
 
-    writePackageConfigFiles(
-      directory: fs.directory(fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools')),
-      packages: <String, String>{
-        'ffi': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/ffi-2.1.2',
-        'test': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test-1.24.9',
-        'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_api-0.6.1',
-        'test_core': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_core-0.5.9',
-      },
-      mainLibName: 'my_app',
-    );
-
     fs.currentDirectory = package.path;
 
     logger = LoggingLogger();
     toolContext = FakeToolContext(
       fs: fs,
       logger: logger,
-      platform: FakePlatform(operatingSystem: globals.platform.operatingSystem),
+      platform: FakePlatform(operatingSystem: hostPlatform.operatingSystem),
       processManager: FakeProcessManager.any(),
     );
   });
@@ -763,198 +749,50 @@ resolution: workspace
     },
   );
 
-  testUsingContext(
-    'Generates a satisfactory test runner package_config.json when --experimental-faster-testing is set',
+  testWithoutContext(
+    '--experimental-faster-testing logs deprecation warning and runs tests',
     () async {
+      final testRunner = FakeFlutterTestRunner(0);
       final testCommand = TestCommand(
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
+        testRunner: testRunner,
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      var caughtToolExit = false;
-      await asyncGuard<void>(
-        () => commandRunner.run(const <String>[
-          'test',
-          '--no-pub',
-          '--experimental-faster-testing',
-          '--',
-          'test/fake_test.dart',
-          'test/fake_test_2.dart',
-        ]),
-        onError: (Object error) async {
-          expect(error, isA<ToolExit>());
-          // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
-          caughtToolExit = true;
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--no-test-assets',
+        '--experimental-faster-testing',
+      ]);
 
-          final File isolateSpawningTesterPackageConfigFile = fs
-              .directory(fs.path.join('build', 'isolate_spawning_tester'))
-              .childDirectory('.dart_tool')
-              .childFile('package_config.json');
-          expect(isolateSpawningTesterPackageConfigFile.existsSync(), true);
-          // We expect [isolateSpawningTesterPackageConfigFile] to contain the
-          // union of the packages in [_packageConfigContents] and
-          // [_flutterToolsPackageConfigContents].
-          final String configContents = isolateSpawningTesterPackageConfigFile.readAsStringSync();
-          expect(configContents.contains('"name": "integration_test"'), true);
-          expect(configContents.contains('"name": "ffi"'), true);
-          expect(configContents.contains('"name": "test"'), true);
-          expect(configContents.contains('"name": "test_api"'), true);
-          expect(configContents.contains('"name": "test_core"'), true);
-
-          final config = json.decode(configContents) as Map<String, dynamic>;
-          final packages = config['packages'] as List<dynamic>;
-          final Map<String, dynamic> myApp = packages.cast<Map<String, dynamic>>().firstWhere(
-            (Map<String, dynamic> p) => p['name'] == 'my_app',
-          );
-          expect(myApp['rootUri'], fs.currentDirectory.uri.toString());
-        },
+      expect(
+        logger.warningText,
+        contains(
+          'The "--experimental-faster-testing" flag is deprecated and no longer '
+          'has any effect. This flag will be removed in a future version of Flutter.',
+        ),
       );
-      expect(caughtToolExit, true);
-    },
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => _FakeTerminal(),
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => _FakeDeviceManager(<Device>[]),
+      expect(testRunner.lastExecutionSpec, isNotNull);
     },
   );
 
-  testUsingContext(
-    'Pipes specified arguments to package:test when --experimental-faster-testing is set',
+  testWithoutContext(
+    'omitting --experimental-faster-testing does not log deprecation warning',
     () async {
+      final testRunner = FakeFlutterTestRunner(0);
       final testCommand = TestCommand(
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
+        testRunner: testRunner,
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      var caughtToolExit = false;
-      await asyncGuard<void>(
-        () => commandRunner.run(const <String>[
-          'test',
-          '--no-pub',
-          '--experimental-faster-testing',
-          '--reporter=compact',
-          '--file-reporter=json:reports/tests.json',
-          '--timeout=100',
-          '--ignore-timeouts',
-          '--concurrency=3',
-          '--name=name1',
-          '--plain-name=name2',
-          '--test-randomize-ordering-seed=random',
-          '--tags=tag1',
-          '--exclude-tags=tag2',
-          '--preset=preset1',
-          '--fail-fast',
-          '--run-skipped',
-          '--total-shards=1',
-          '--shard-index=1',
-          '--',
-          'test/fake_test.dart',
-          'test/fake_test_2.dart',
-        ]),
-        onError: (Object error) async {
-          expect(error, isA<ToolExit>());
-          // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
-          caughtToolExit = true;
+      await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
 
-          final File childTestIsolateSpawnerSourceFile = fs
-              .directory(fs.path.join('build', 'isolate_spawning_tester'))
-              .childFile('child_test_isolate_spawner.dart');
-          expect(childTestIsolateSpawnerSourceFile.existsSync(), true);
-          expect(
-            childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
-const List<String> packageTestArgs = <String>[
-  '--no-color',
-  '-r',
-  'compact',
-  '--file-reporter=json:reports/tests.json',
-  '--timeout',
-  '100',
-  '--ignore-timeouts',
-  '--concurrency=3',
-  '--name',
-  'name1',
-  '--plain-name',
-  'name2',
-  '--test-randomize-ordering-seed=random',
-  '--tags',
-  'tag1',
-  '--exclude-tags',
-  'tag2',
-  '--preset',
-  'preset1',
-  '--fail-fast',
-  '--run-skipped',
-  '--total-shards=1',
-  '--shard-index=1',
-  '--chain-stack-traces',
-];
-'''),
-            true,
-          );
-        },
-      );
-      expect(caughtToolExit, true);
-    },
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => _FakeTerminal(),
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => _FakeDeviceManager(<Device>[]),
-    },
-  );
-
-  testUsingContext(
-    'Only passes --no-color and --chain-stack-traces to package:test by default when --experimental-faster-testing is set',
-    () async {
-      final testCommand = TestCommand(
-        templateRenderer: const MustacheTemplateRenderer(),
-        toolContext: toolContext,
-      );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-      var caughtToolExit = false;
-      await asyncGuard<void>(
-        () => commandRunner.run(const <String>[
-          'test',
-          '--no-pub',
-          '--experimental-faster-testing',
-          '--',
-          'test/fake_test.dart',
-          'test/fake_test_2.dart',
-        ]),
-        onError: (Object error) async {
-          expect(error, isA<ToolExit>());
-          // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
-          caughtToolExit = true;
-
-          final File childTestIsolateSpawnerSourceFile = fs
-              .directory(fs.path.join('build', 'isolate_spawning_tester'))
-              .childFile('child_test_isolate_spawner.dart');
-          expect(childTestIsolateSpawnerSourceFile.existsSync(), true);
-          expect(
-            childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
-const List<String> packageTestArgs = <String>[
-  '--no-color',
-  '--chain-stack-traces',
-];
-'''),
-            true,
-          );
-        },
-      );
-      expect(caughtToolExit, true);
-    },
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => _FakeTerminal(),
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => _FakeDeviceManager(<Device>[]),
+      expect(logger.warningText, isNot(contains('--experimental-faster-testing')));
+      expect(testRunner.lastExecutionSpec, isNotNull);
     },
   );
 
@@ -1467,7 +1305,7 @@ const List<String> packageTestArgs = <String>[
       await commandRunner.run(const <String>['test', '--no-pub']);
 
       final bool fileExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
       );
       expect(fileExists, true);
     },
@@ -1509,11 +1347,11 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub', '--flavor', 'vanilla']);
 
       final bool vanillaExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'vanilla.txt'),
+        fs.path.join('build', 'unit_test_assets', 'vanilla.txt'),
       );
       expect(vanillaExists, true, reason: 'vanilla.txt should be bundled');
       final bool orangeExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'orange.txt'),
+        fs.path.join('build', 'unit_test_assets', 'orange.txt'),
       );
       expect(orangeExists, false, reason: 'orange.txt should not be bundled');
     },
@@ -1593,7 +1431,7 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
 
       final bool fileExists = await fs.isFile(
-        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
       );
       expect(fileExists, false);
     },
@@ -1633,7 +1471,7 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub']);
 
       final String fileContent = fs
-          .file(globals.fs.path.join('build', 'unit_test_assets', 'asset.txt'))
+          .file(fs.path.join('build', 'unit_test_assets', 'asset.txt'))
           .readAsStringSync();
       expect(fileContent, '2');
     },
@@ -1673,10 +1511,10 @@ dev_dependencies:
       await commandRunner.run(const <String>['test', '--no-pub']);
 
       final File bundledDataAsset = fs.file(
-        globals.fs.path.join('build', 'unit_test_assets', 'packages/my_app/data/hook_asset.txt'),
+        fs.path.join('build', 'unit_test_assets', 'packages/my_app/data/hook_asset.txt'),
       );
       final File assetManifestBin = fs.file(
-        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
       );
       expect(bundledDataAsset, exists);
       expect(bundledDataAsset.readAsStringSync(), 'from_hook');
@@ -2131,10 +1969,13 @@ resolution: workspace
     },
   );
 
-  testUsingContext(
+  testWithoutContext(
     'throws ToolExit when test argument contains Windows reserved characters',
     () async {
-      final Directory package = globals.fs.directory('package');
+      final windowsFs = MemoryFileSystem(style: FileSystemStyle.windows);
+      final windowsPlatform = FakePlatform(operatingSystem: 'windows');
+      final ProcessManager windowsProcessManager = FakeProcessManager.any();
+      final Directory package = windowsFs.directory('package');
       package.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(_pubspecContents);
@@ -2147,16 +1988,16 @@ resolution: workspace
         mainLibName: 'my_app',
         devDependencies: <String>['test_api', 'integration_test'],
       );
-      globals.fs.currentDirectory = package.path;
+      windowsFs.currentDirectory = package.path;
 
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
-          fs: globals.fs,
-          logger: logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
+          fs: windowsFs,
+          logger: BufferLogger.test(),
+          platform: windowsPlatform,
+          processManager: windowsProcessManager,
         ),
         testWrapper: fakePackageTest,
       );
@@ -2168,11 +2009,6 @@ resolution: workspace
           message: r'Invalid test path "test\foo*bar_test.dart": Illegal character in path',
         ),
       );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'windows'),
     },
   );
 
@@ -2366,11 +2202,6 @@ class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
 
     return exitCode;
   }
-
-  @override
-  Never runTestsBySpawningLightweightEngines(List<Uri> testFiles, TestExecutionSpecification spec) {
-    throw UnimplementedError();
-  }
 }
 
 class TestTestDevice extends Fake implements TestDevice {
@@ -2404,16 +2235,9 @@ class FakePackageTest implements TestWrapper {
   ) {}
 }
 
-class _FakeTerminal extends Fake implements AnsiTerminal {
-  @override
-  final supportsColor = false;
-
-  @override
-  bool get isCliAnimationEnabled => supportsColor;
-}
-
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger);
+  _FakeDeviceManager(this._connectedDevices)
+    : super(logger: testLogger, fileSystem: MemoryFileSystem.test());
 
   final List<Device> _connectedDevices;
 

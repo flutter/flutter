@@ -24,22 +24,19 @@ class CkPictureRecorder implements LayerPictureRecorder {
   });
 
   SkPictureRecorder? _skRecorder;
-  CkCanvas? _recordingCanvas;
+  EngineCanvas? _recordingCanvas;
 
   /// Tracks [ImageSource] references for draw operations recorded on this recorder.
   final PictureImageTracker tracker = PictureImageTracker();
 
   /// Begins recording canvas commands within the specified [bounds].
-  CkCanvas beginRecording(ui.Rect bounds) {
+  EngineCanvas beginRecording(ui.Rect bounds) {
     final SkPictureRecorder recorder = _skRecorder = SkPictureRecorder();
     final Float32List skRect = toSkRect(bounds);
     final SkCanvas skCanvas = recorder.beginRecording(skRect);
     finalizer.attach(this, tracker, detach: this);
-    return _recordingCanvas = CkCanvas.fromSkCanvas(skCanvas, recorder: this, tracker: tracker);
+    return _recordingCanvas = EngineCanvas(CkCanvas(skCanvas), recorder: this, tracker: tracker);
   }
-
-  /// The active recording canvas, or null if not recording.
-  CkCanvas? get recordingCanvas => _recordingCanvas;
 
   @override
   CkPicture endRecording() {

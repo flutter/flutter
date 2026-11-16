@@ -54,7 +54,7 @@ void main() {
       logger: logger,
       platform: platform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger, config: FakeConfig()),
     );
     androidContext = FakeAndroidContext(androidSdk: FakeAndroidSdk());
   });

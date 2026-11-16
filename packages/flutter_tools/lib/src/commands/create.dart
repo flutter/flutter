@@ -802,10 +802,16 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         await project.ensureReadyForPlatformSpecificTooling(
           toolContext: toolContext,
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          analytics: analytics,
           androidPlatform: includeAndroid,
+          cocoaPods: appleContext.cocoaPods,
+          featureFlags: featureFlags,
+          gradleUtils: androidContext.gradleUtils,
           iosPlatform: includeIos || includeDarwin,
           linuxPlatform: includeLinux,
           macOSPlatform: includeMacos || includeDarwin,
+          plistParser: appleContext.plistParser,
+          templateRenderer: templateRenderer,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
         );

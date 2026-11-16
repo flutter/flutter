@@ -10,14 +10,13 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../context/tool_context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 
 /// Show log output for running Flutter apps.
 class LogsCommand extends FlutterCommand {
   LogsCommand({
-    required ToolContext super.toolContext,
+    required super.toolContext,
     ApplicationPackageFactory? applicationPackageFactory,
     ProcessSignal? sigint,
     ProcessSignal? sigterm,
@@ -31,14 +30,11 @@ class LogsCommand extends FlutterCommand {
       help: 'Clear log history before reading from logs.',
     );
     registerOptionBundle(const DeviceDiscoveryOptionsBundle());
-    DebuggingOptionDescriptors.adbLogFiltering.addTo(argParser, hideOverride: false);
+    DebuggingOptionDescriptors.adbLogFiltering.addTo(argParser, hide: false);
   }
 
   final ProcessSignal _sigint;
   final ProcessSignal _sigterm;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'logs';
