@@ -13,6 +13,7 @@
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/arc.h"
+#include "impeller/geometry/constants.h"
 #include "impeller/geometry/path_source.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/stroke_parameters.h"
@@ -280,10 +281,9 @@ class Tessellator {
   static constexpr Scalar kCircleTolerance = 0.1f;
 
   /// @brief   The maximum number of divisions per quarter circle. Beyond
-  ///          this, the chord error R(1 - cos(pi/4N)) is smaller than
-  ///          float32 rounding error (R * 2^-24), so more divisions cannot
-  ///          improve accuracy. N = (pi/4) / acos(1 - 2^-24) ~= 2274.76.
-  static constexpr size_t kMaxQuadrantDivisions = 2275;
+  ///          this, more divisions cannot improve accuracy in float32.
+  ///          See |kMaxSegmentsPerQuarterTurn|.
+  static constexpr size_t kMaxQuadrantDivisions = kMaxSegmentsPerQuarterTurn;
 
   /// @brief   Create a |VertexGenerator| that can produce vertices for
   ///          a filled circle of the given radius around the given center
