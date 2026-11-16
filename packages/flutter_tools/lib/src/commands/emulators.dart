@@ -184,50 +184,20 @@ class EmulatorsCommand extends FlutterCommand {
     required Logger logger,
     required AnsiTerminal terminal,
   }) async {
-    const prompt = 'Please choose one (or "q" to quit)';
     logger.printStatus('Multiple emulator creation platforms are available:');
     for (final (int index, String platform) in platforms.indexed) {
       logger.printStatus('[${index + 1}]: $platform');
     }
-    final String choice;
-    if (platforms.length < 10) {
-      terminal.usesTerminalUi = true;
-      choice = await terminal.promptForCharInput(
-        <String>[for (var i = 0; i < platforms.length; i++) '${i + 1}', 'q', 'Q'],
-        displayAcceptedCharacters: false,
-        logger: logger,
-        prompt: prompt,
-      );
-    } else {
-      choice = await _readPlatformChoiceLine(
-        logger: logger,
-        optionCount: platforms.length,
-        prompt: prompt,
-        terminal: terminal,
-      );
-    }
+    final String choice = await terminal.promptForNumberedChoice(
+      logger: logger,
+      optionCount: platforms.length,
+    );
     if (choice.toLowerCase() == 'q') {
       throwToolExit('');
     }
     final String selected = platforms[int.parse(choice) - 1];
     logger.printStatus('To skip this prompt in the future, pass "--$_platformOption $selected".');
     return selected;
-  }
-
-  Future<String> _readPlatformChoiceLine({
-    required Logger logger,
-    required int optionCount,
-    required String prompt,
-    required AnsiTerminal terminal,
-  }) async {
-    while (true) {
-      logger.printStatus('$prompt: ', emphasis: true, newline: false);
-      final String line = (await terminal.readLine()).trim();
-      final int? number = int.tryParse(line);
-      if (line.toLowerCase() == 'q' || (number != null && number >= 1 && number <= optionCount)) {
-        return line;
-      }
-    }
   }
 
   Future<void> _listEmulators(String? searchText) async {

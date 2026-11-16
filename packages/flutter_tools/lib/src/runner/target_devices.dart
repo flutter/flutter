@@ -14,7 +14,6 @@ import '../doctor.dart';
 import '../ios/devices.dart';
 
 const _checkingForWirelessDevicesMessage = 'Checking for wireless devices...';
-const _chooseOneMessage = 'Please choose one (or "q" to quit)';
 const _connectedDevicesMessage = 'Connected devices:';
 const _foundButUnsupportedDevicesMessage =
     'The following devices were found, but are not supported by this project:';
@@ -352,7 +351,10 @@ $platformMessage
 
   Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
     _displayDeviceOptions(devices);
-    final String userInput = await _readUserInput(devices.length);
+    final String userInput = await _terminal.promptForNumberedChoice(
+      logger: _logger,
+      optionCount: devices.length,
+    );
     if (userInput.toLowerCase() == 'q') {
       throwToolExit('');
     }
@@ -367,20 +369,6 @@ $platformMessage
       _logger.printStatus(_chooseDeviceOptionMessage(count, device.displayName, device.id));
       count++;
     }
-  }
-
-  Future<String> _readUserInput(int deviceCount) async {
-    if (deviceCount >= 10) {
-      return _readDeviceChoiceLine(deviceCount: deviceCount, logger: _logger, terminal: _terminal);
-    }
-    _terminal.usesTerminalUi = true;
-    final String result = await _terminal.promptForCharInput(
-      <String>[for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
-      displayAcceptedCharacters: false,
-      logger: _logger,
-      prompt: _chooseOneMessage,
-    );
-    return result;
   }
 }
 
@@ -729,7 +717,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       _displayDeviceOptions(allDevices);
       deviceSelection.devices = allDevices;
       // Reprint device option prompt.
-      _logger.printStatus('$_chooseOneMessage: ', emphasis: true, newline: false);
+      _logger.printStatus('$defaultNumberedChoicePrompt: ', emphasis: true, newline: false);
       return wirelessDevices;
     });
 
@@ -824,20 +812,19 @@ class TargetDeviceSelection {
   @visibleForTesting
   Future<String> readUserInput() async {
     if (devices.length >= 10) {
-      return _readDeviceChoiceLine(
-        deviceCount: devices.length,
+      return _terminal.readNumberedChoiceLine(
         logger: _logger,
-        terminal: _terminal,
         onInvalidInput: () {
           invalidAttempts++;
         },
+        optionCount: devices.length,
       );
     }
     final pattern = RegExp(r'\d+$|q', caseSensitive: false);
     String? choice;
     _terminal.singleCharMode = true;
     while (choice == null || choice.length > 1 || !pattern.hasMatch(choice)) {
-      _logger.printStatus(_chooseOneMessage, emphasis: true, newline: false);
+      _logger.printStatus(defaultNumberedChoicePrompt, emphasis: true, newline: false);
       // prompt ends with ': '
       _logger.printStatus(': ', emphasis: true, newline: false);
       choice = (await _terminal.keystrokes.first).trim();
@@ -847,32 +834,4 @@ class TargetDeviceSelection {
     _terminal.singleCharMode = false;
     return choice;
   }
-}
-
-Future<String> _readDeviceChoiceLine({
-  required int deviceCount,
-  required Logger logger,
-  required Terminal terminal,
-  void Function()? onInvalidInput,
-}) async {
-  while (true) {
-    logger.printStatus(_chooseOneMessage, emphasis: true, newline: false);
-    logger.printStatus(': ', emphasis: true, newline: false);
-    final String choice = (await terminal.readLine()).trim();
-    if (_isValidDeviceChoice(choice, deviceCount)) {
-      return choice;
-    }
-    onInvalidInput?.call();
-  }
-}
-
-bool _isValidDeviceChoice(String? choice, int deviceCount) {
-  if (choice == null) {
-    return false;
-  }
-  if (choice.toLowerCase() == 'q') {
-    return true;
-  }
-  final int? deviceNumber = int.tryParse(choice);
-  return deviceNumber != null && deviceNumber >= 1 && deviceNumber <= deviceCount;
 }

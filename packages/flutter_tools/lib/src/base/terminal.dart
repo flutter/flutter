@@ -416,6 +416,59 @@ class AnsiTerminal implements Terminal {
   }
 }
 
+/// Default prompt string displayed when selecting from a numbered list of options.
+const defaultNumberedChoicePrompt = 'Please choose one (or "q" to quit)';
+
+/// Helpers on [Terminal] for selecting a 1-based numbered option or `'q'` to quit.
+extension TerminalNumberedChoicePrompt on Terminal {
+  /// Prompts the user to pick a 1-based option from `1..optionCount` or `'q'` to
+  /// quit, using single-character input when [optionCount] is less than `10` and
+  /// line-buffered input otherwise.
+  Future<String> promptForNumberedChoice({
+    required Logger logger,
+    required int optionCount,
+    void Function()? onInvalidInput,
+    String prompt = defaultNumberedChoicePrompt,
+  }) async {
+    assert(optionCount > 0, 'optionCount must be positive.');
+    if (optionCount >= 10) {
+      return readNumberedChoiceLine(
+        logger: logger,
+        onInvalidInput: onInvalidInput,
+        optionCount: optionCount,
+        prompt: prompt,
+      );
+    }
+    usesTerminalUi = true;
+    return promptForCharInput(
+      <String>[for (var i = 0; i < optionCount; i++) '${i + 1}', 'q', 'Q'],
+      displayAcceptedCharacters: false,
+      logger: logger,
+      prompt: prompt,
+    );
+  }
+
+  /// Reads a line-buffered 1-based choice from `1..optionCount` or `'q'` to quit.
+  Future<String> readNumberedChoiceLine({
+    required Logger logger,
+    required int optionCount,
+    void Function()? onInvalidInput,
+    String prompt = defaultNumberedChoicePrompt,
+  }) async {
+    assert(optionCount > 0, 'optionCount must be positive.');
+    while (true) {
+      logger.printStatus(prompt, emphasis: true, newline: false);
+      logger.printStatus(': ', emphasis: true, newline: false);
+      final String choice = (await readLine()).trim();
+      final int? number = int.tryParse(choice);
+      if (choice.toLowerCase() == 'q' || (number != null && number >= 1 && number <= optionCount)) {
+        return choice;
+      }
+      onInvalidInput?.call();
+    }
+  }
+}
+
 class _TestTerminal implements Terminal {
   _TestTerminal({this.supportsColor = false, this.supportsEmoji = false});
 
