@@ -267,6 +267,9 @@ final _undefinedTaskPattern = RegExp(r'Task .+ not found in root project.');
 
 final _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
+// Android Gradle Plugin creates `debug` and `release` by default, and the
+// Flutter Gradle plugin (`FlutterPlugin.kt`) adds `profile` via
+// `buildTypes.create("profile")`. Keep this in sync if those defaults change.
 const _defaultBuildTypes = <String>{'debug', 'profile', 'release'};
 
 /// Handler when a flavor is undefined.
