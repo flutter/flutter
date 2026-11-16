@@ -59,8 +59,11 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
     );
   }
 
+  // In package:archive 3.x, `content` is `dynamic`, and a decompressed entry
+  // is only typed as a List<int>, so copy it into a Uint8List.
+  final assetManifestFileData = Uint8List.fromList(assetManifestFile.content as List<int>);
   final assetManifest = const StandardMessageCodec().decodeMessage(
-    ByteData.sublistView(assetManifestFile.content as Uint8List),
+    ByteData.sublistView(assetManifestFileData),
   ) as Map<Object?, Object?>;
 
   if (assetManifest.containsKey('assets/free/free.txt')) {
