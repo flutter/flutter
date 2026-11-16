@@ -157,8 +157,6 @@ class PluginHandler(
                 if (pluginProjectBuildTypes.findByName(appBuildType.name) == null) {
                     pluginProjectBuildTypes.create(appBuildType.name) {
                         if (pluginIsApp) {
-                            // An app accepts every build type property, so copy all of them.
-                            // `initWith` copies isDebuggable too.
                             initWith(appBuildType)
                         } else {
                             copyLibraryBuildTypeProperties(appBuildType, this)
@@ -169,28 +167,20 @@ class PluginHandler(
         }
 
         /**
-         * Copies the properties of [appBuildType] that a library needs onto
-         * [libraryBuildType], a build type of a library plugin.
+         * Copies the properties of [appBuildType] that a library plugin needs onto
+         * [libraryBuildType].
          *
-         * This deliberately doesn't use `initWith`, which copies every property. AGP rejects
-         * some of those properties in a library: applicationIdSuffix and isShrinkResources
-         * always, and buildConfigField and resValue unless the library enables those build
-         * features. See https://github.com/flutter/flutter/issues/169215,
-         * https://github.com/flutter/flutter/issues/196412 and
-         * https://github.com/flutter/flutter/issues/196696.
-         *
-         * isMinifyEnabled is deliberately not copied either. A minified library runs R8 with
-         * only its own keep rules, which removes the plugin classes that the app's
-         * GeneratedPluginRegistrant uses. The app's R8 run already shrinks the plugin code.
+         * Unlike `initWith`, this skips app-only properties, such as applicationIdSuffix, that
+         * AGP rejects in a library (https://github.com/flutter/flutter/issues/196412). It also
+         * skips isMinifyEnabled, because the app's R8 run already shrinks the plugin code.
          */
         private fun copyLibraryBuildTypeProperties(
             appBuildType: DslBuildType,
             libraryBuildType: DslBuildType
         ) {
             libraryBuildType.matchingFallbacks.addAll(appBuildType.matchingFallbacks)
-            // The public library DSL has no isDebuggable, but library variants still use it,
-            // for example for BuildConfig.DEBUG. AGP implements every build type with one class
-            // that also implements ApplicationBuildType, so this check passes for libraries.
+            // isDebuggable is not on the LibraryBuildType interface, but library variants
+            // still read it. AGP's build type class implements ApplicationBuildType too.
             if (libraryBuildType is ApplicationBuildType && appBuildType is ApplicationBuildType) {
                 libraryBuildType.isDebuggable = appBuildType.isDebuggable
             }

@@ -42,17 +42,9 @@ void main() {
 
     final Directory exampleAppDir = tempDir.childDirectory(testName).childDirectory('example');
 
-    // Regression test for https://github.com/flutter/flutter/issues/169215,
-    // https://github.com/flutter/flutter/issues/196412 and
-    // https://github.com/flutter/flutter/issues/196696.
-    //
-    // The Flutter Gradle Plugin copies the app's build types onto library
-    // plugins that don't define them, such as this plugin and integration_test.
-    // The settings below break a library plugin if they are copied onto it:
-    // applicationIdSuffix and isShrinkResources are app-only, the plugins don't
-    // enable the buildConfig or resValues build features, and isMinifyEnabled
-    // strips the plugin classes. Gradle configures every build type, so any
-    // build catches the configuration errors.
+    // Add build type settings that AGP rejects in a library, to check that they
+    // are not copied onto library plugins.
+    // Regression test for https://github.com/flutter/flutter/issues/196412.
     final File appGradleFile = exampleAppDir
         .childDirectory('android')
         .childDirectory('app')
@@ -116,11 +108,8 @@ android {
       return;
     }
 
-    // Build the staging variant, which uses the staging build type that the
-    // Flutter Gradle Plugin created on the library plugins. If that build type
-    // minifies the library, R8 removes the plugin classes that
-    // GeneratedPluginRegistrant uses, and the app's R8 run fails with
-    // "Missing class".
+    // The staging build type minifies the app. Check that R8 keeps the plugin
+    // classes.
     final Directory exampleAndroidDir = exampleAppDir.childDirectory('android');
     result = processManager.runSync(<String>[
       exampleAndroidDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').path,

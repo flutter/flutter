@@ -225,7 +225,7 @@ class PluginHandlerTest {
     }
 
     @Test
-    fun `configurePlugins copies only library properties onto library plugin build types`(
+    fun `configurePlugins copies only library build type properties when the plugin project is a library`(
         @TempDir tempDir: Path
     ) {
         val project = mockk<Project>()
@@ -288,47 +288,6 @@ class PluginHandlerTest {
     }
 
     @Test
-    fun `configurePlugins skips creating build types that already exist on the plugin project`(
-        @TempDir tempDir: Path
-    ) {
-        val project = mockk<Project>()
-        val pluginProject = mockk<Project>()
-        val appBuildType =
-            mockk<ApplicationBuildType> {
-                every { name } returns "staging"
-                every { isDebuggable } returns true
-            }
-        val existingPluginBuildType =
-            mockk<LibraryBuildType> {
-                every { name } returns "staging"
-            }
-        every { project.logger } returns mockk(relaxed = true)
-
-        setupMockProjectDir(project, tempDir)
-        setupMockPluginProject(project, pluginProject, isAppPlugin = false)
-
-        val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<LibraryBuildType>>(relaxed = true)
-        val mockLibraryExtension = setUpMockLibraryAndroidExtension(pluginProject)
-        every { mockLibraryExtension.buildTypes } returns pluginProjectBuildTypes
-
-        setUpMockAndroidExtension(project, compileSdk = 35, buildTypes = listOf(appBuildType))
-        setupMockPluginLoader(project, listOf(cameraDependency))
-
-        every { pluginProjectBuildTypes.findByName("staging") } returns existingPluginBuildType
-
-        val pluginHandler = PluginHandler(project)
-        pluginHandler.configurePlugins(
-            engineVersionValue = EXAMPLE_ENGINE_VERSION
-        )
-
-        val capturePluginActionSlot = mutableListOf<Action<Project>>()
-        verify { pluginProject.afterEvaluate(capture(capturePluginActionSlot)) }
-        capturePluginActionSlot.forEach { it.execute(pluginProject) }
-
-        verify(exactly = 0) { pluginProjectBuildTypes.create(any(), any<Action<LibraryBuildType>>()) }
-    }
-
-    @Test
     fun `configurePlugins copies every build type property with initWith when the plugin project is an app`(
         @TempDir tempDir: Path
     ) {
@@ -368,8 +327,48 @@ class PluginHandlerTest {
         capturePluginActionSlot.forEach { it.execute(pluginProject) }
 
         createActionSlot.captured.execute(createdBuildType)
-        // initWith also copies isDebuggable and the other app-only properties.
         verify { createdBuildType.initWith(appBuildType) }
+    }
+
+    @Test
+    fun `configurePlugins skips creating build types that already exist on the plugin project`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<Project>()
+        val pluginProject = mockk<Project>()
+        val appBuildType =
+            mockk<ApplicationBuildType> {
+                every { name } returns "staging"
+                every { isDebuggable } returns true
+            }
+        val existingPluginBuildType =
+            mockk<LibraryBuildType> {
+                every { name } returns "staging"
+            }
+        every { project.logger } returns mockk(relaxed = true)
+
+        setupMockProjectDir(project, tempDir)
+        setupMockPluginProject(project, pluginProject, isAppPlugin = false)
+
+        val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<LibraryBuildType>>(relaxed = true)
+        val mockLibraryExtension = setUpMockLibraryAndroidExtension(pluginProject)
+        every { mockLibraryExtension.buildTypes } returns pluginProjectBuildTypes
+
+        setUpMockAndroidExtension(project, compileSdk = 35, buildTypes = listOf(appBuildType))
+        setupMockPluginLoader(project, listOf(cameraDependency))
+
+        every { pluginProjectBuildTypes.findByName("staging") } returns existingPluginBuildType
+
+        val pluginHandler = PluginHandler(project)
+        pluginHandler.configurePlugins(
+            engineVersionValue = EXAMPLE_ENGINE_VERSION
+        )
+
+        val capturePluginActionSlot = mutableListOf<Action<Project>>()
+        verify { pluginProject.afterEvaluate(capture(capturePluginActionSlot)) }
+        capturePluginActionSlot.forEach { it.execute(pluginProject) }
+
+        verify(exactly = 0) { pluginProjectBuildTypes.create(any(), any<Action<LibraryBuildType>>()) }
     }
 
     @Test
