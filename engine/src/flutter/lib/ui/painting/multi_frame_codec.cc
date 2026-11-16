@@ -10,6 +10,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "flutter/lib/ui/painting/image_decoder.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
@@ -20,7 +21,6 @@
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
-#include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
@@ -61,9 +61,8 @@ static void InvokeNextFrameCallback(
                      tonic::ToDart(decode_error)});
 }
 
-// Resizes a fully composited frame to |target_size|. This uses the same
-// sampling as the resizing of single-frame images (`ResizeRasterImage` in
-// image_decoder_skia.cc and `ResizeOnCpu` in image_decoder_impeller.cc), so
+// Resizes a fully composited frame to |target_size|. This resizes the same way
+// as single-frame images are resized (see `ImageDecoder::ResizePixels`), so
 // `targetWidth` and `targetHeight` behave the same way for every image.
 static std::optional<SkBitmap> ResizeFrame(const SkBitmap& frame,
                                            SkISize target_size) {
@@ -71,9 +70,7 @@ static std::optional<SkBitmap> ResizeFrame(const SkBitmap& frame,
   if (!resized.tryAllocPixels(frame.info().makeDimensions(target_size))) {
     return std::nullopt;
   }
-  if (!frame.pixmap().scalePixels(
-          resized.pixmap(),
-          SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone))) {
+  if (!ImageDecoder::ResizePixels(frame.pixmap(), resized.pixmap())) {
     return std::nullopt;
   }
   resized.setImmutable();

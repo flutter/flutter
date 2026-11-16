@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/painting/image_decoder_no_gl_unittests.h"
 #include <memory>
+#include <utility>
+#include <vector>
 
 #include "flutter/fml/endianness.h"
 #include "impeller/renderer/capabilities.h"
@@ -83,6 +85,17 @@ float DecodeBGR10(uint32_t x) {
   return (x * slope) + intercept;
 }
 
+SkBitmap MakeThinStripesBitmap(int size) {
+  SkBitmap bitmap;
+  bitmap.allocPixels(SkImageInfo::Make(size, size, kRGBA_8888_SkColorType,
+                                       kOpaque_SkAlphaType));
+  bitmap.eraseColor(SK_ColorBLACK);
+  for (int x = 1; x < size; x += 2) {
+    bitmap.erase(SK_ColorWHITE, SkIRect::MakeXYWH(x, 0, 1, size));
+  }
+  return bitmap;
+}
+
 TEST(ImageDecoderNoGLTest, ImpellerUploadTracksSchedulingReceipt) {
 #if !IMPELLER_SUPPORTS_RENDERING
   GTEST_SKIP() << "Test only supported with Impeller rendering.";
@@ -104,8 +117,6 @@ TEST(ImageDecoderNoGLTest, ImpellerUploadTracksSchedulingReceipt) {
   std::shared_ptr<impeller::CommandBufferSchedulingReceipt> receipt =
       std::make_shared<impeller::CommandBufferSchedulingReceiptState>();
 
-  EXPECT_CALL(*context, GetBackendType)
-      .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetResourceAllocator).WillOnce(Return(allocator));
   EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
@@ -521,6 +532,178 @@ TEST(ImageDecoderNoGLTest,
   ExpectDecodedFormat(
       SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020),
       /*supports_wide_gamut=*/false, impeller::PixelFormat::kR8G8B8A8UNormInt);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderNoGLTest, GetResizeStepSizeHalvesTowardsTargetSize) {
+  // Sides that are at least twice as long as the target are halved.
+  EXPECT_EQ(ImageDecoder::GetResizeStepSize(SkISize::Make(1024, 1024),
+                                            SkISize::Make(120, 120)),
+            SkISize::Make(512, 512));
+  EXPECT_EQ(ImageDecoder::GetResizeStepSize(SkISize::Make(256, 256),
+                                            SkISize::Make(120, 120)),
+            SkISize::Make(128, 128));
+  // Each side is halved on its own.
+  EXPECT_EQ(ImageDecoder::GetResizeStepSize(SkISize::Make(1024, 1024),
+                                            SkISize::Make(600, 100)),
+            SkISize::Make(1024, 512));
+  // Halving to exactly the target size is the final step.
+  EXPECT_EQ(ImageDecoder::GetResizeStepSize(SkISize::Make(240, 240),
+                                            SkISize::Make(120, 120)),
+            SkISize::Make(120, 120));
+  // Less than 2x left: the final step scales to the target size.
+  EXPECT_EQ(ImageDecoder::GetResizeStepSize(SkISize::Make(128, 128),
+                                            SkISize::Make(120, 120)),
+            SkISize::Make(120, 120));
+  // Images are scaled up in a single step.
+  EXPECT_EQ(ImageDecoder::GetResizeStepSize(SkISize::Make(100, 100),
+                                            SkISize::Make(300, 300)),
+            SkISize::Make(300, 300));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/193779.
+TEST(ImageDecoderNoGLTest, ResizePixelsDoesNotAliasThinLines) {
+  const SkBitmap stripes = MakeThinStripesBitmap(256);
+  SkBitmap resized;
+  ASSERT_TRUE(resized.tryAllocPixels(stripes.info().makeWH(30, 30)));
+
+  ASSERT_TRUE(ImageDecoder::ResizePixels(stripes.pixmap(), resized.pixmap()));
+
+  // A single linear step would only read 2 of the ~8.5 columns covered by each
+  // pixel, which gives anything from almost black to almost white.
+  for (int y = 0; y < resized.height(); y++) {
+    for (int x = 0; x < resized.width(); x++) {
+      EXPECT_NEAR(SkColorGetR(resized.getColor(x, y)), 128, 2)
+          << "at (" << x << ", " << y << ")";
+    }
+  }
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/193779.
+TEST(ImageDecoderNoGLTest, ImpellerCpuResizeDoesNotAliasThinLines) {
+#if !IMPELLER_SUPPORTS_RENDERING
+  GTEST_SKIP() << "Test only supported with Impeller rendering.";
+#else
+  const SkBitmap stripes = MakeThinStripesBitmap(256);
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
+      SkData::MakeWithCopy(stripes.getPixels(), stripes.computeByteSize()),
+      ImageDescriptor::CreateImageInfo(stripes.info()), stripes.rowBytes());
+  // Without texture to texture blits, images are resized on the CPU.
+  std::shared_ptr<impeller::Capabilities> capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(false)
+          .Build();
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), {.target_width = 30, .target_height = 30},
+          {1000, 1000}, /*supports_wide_gamut=*/false, capabilities, allocator);
+
+  ASSERT_TRUE(result.ok());
+  ASSERT_FALSE(result->resize_info.has_value());
+  ASSERT_EQ(result->image_info.size, impeller::ISize(30, 30));
+  ASSERT_EQ(result->image_info.format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
+  const uint8_t* pixels = result->device_buffer->OnGetContents();
+  for (int i = 0; i < 30 * 30; i++) {
+    EXPECT_NEAR(pixels[i * 4], 128, 2) << "at pixel " << i;
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/193779.
+TEST(ImageDecoderNoGLTest, ImpellerGpuResizeHalvesTowardsTargetSize) {
+#if !IMPELLER_SUPPORTS_RENDERING
+  GTEST_SKIP() << "Test only supported with Impeller rendering.";
+#else
+  using ::impeller::testing::MockBlitPass;
+  using ::impeller::testing::MockCommandBuffer;
+  using ::impeller::testing::MockCommandQueue;
+  using ::impeller::testing::MockImpellerContext;
+  using ::testing::_;
+  using ::testing::Return;
+
+  auto context = std::make_shared<MockImpellerContext>();
+  auto allocator = std::make_shared<impeller::TestImpellerAllocator>();
+  auto command_buffer = std::make_shared<MockCommandBuffer>(context);
+  auto blit_pass = std::make_shared<MockBlitPass>();
+  auto command_queue = std::make_shared<MockCommandQueue>();
+
+  EXPECT_CALL(*context, GetBackendType)
+      .WillRepeatedly(Return(impeller::Context::BackendType::kVulkan));
+  EXPECT_CALL(*context, GetResourceAllocator).WillRepeatedly(Return(allocator));
+  EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
+  EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
+  EXPECT_CALL(*command_buffer, SetLabel(_));
+  EXPECT_CALL(*command_buffer, OnCreateBlitPass).WillOnce(Return(blit_pass));
+  EXPECT_CALL(*command_buffer, OnWaitUntilCompleted);
+  EXPECT_CALL(*blit_pass, IsValid).WillOnce(Return(true));
+  EXPECT_CALL(*blit_pass, OnSetLabel(_)).Times(2);
+  EXPECT_CALL(*blit_pass, OnCopyBufferToTextureCommand(_, _, _, _, _, _, _))
+      .WillOnce(Return(true));
+  // The (source, destination) sizes of each resize blit.
+  using Resizes = std::vector<std::pair<impeller::ISize, impeller::ISize>>;
+  Resizes resizes;
+  EXPECT_CALL(*blit_pass, ResizeTexture(_, _))
+      .WillRepeatedly(
+          [&resizes](const std::shared_ptr<impeller::Texture>& source,
+                     const std::shared_ptr<impeller::Texture>& destination) {
+            resizes.emplace_back(source->GetSize(), destination->GetSize());
+            return true;
+          });
+  // Only the resized texture gets mipmaps.
+  EXPECT_CALL(*blit_pass, OnGenerateMipmapCommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(*blit_pass, EncodeCommands).WillOnce(Return(true));
+  EXPECT_CALL(*command_queue, SubmitWithReceipt(_, _))
+      .WillOnce([](const std::shared_ptr<impeller::CommandBuffer>&,
+                   const impeller::CommandQueue::CompletionCallback&) {
+        return impeller::CommandQueue::SubmitResult{
+            .status = absl::OkStatus(),
+        };
+      });
+
+  impeller::DeviceBufferDescriptor buffer_descriptor;
+  buffer_descriptor.size = 256u * 256u * 4u;
+  auto buffer =
+      std::make_shared<impeller::TestImpellerDeviceBuffer>(buffer_descriptor);
+  auto gpu_disabled_switch = std::make_shared<fml::SyncSwitch>(false);
+  sk_sp<DlImage> image;
+  std::string decode_error;
+
+  ImageDecoderImpeller::UploadTextureToPrivate(
+      [&](const sk_sp<DlImage>& result, const std::string& error) {
+        image = result;
+        decode_error = error;
+      },
+      context, buffer,
+      {.size = impeller::ISize(256, 256),
+       .format = impeller::PixelFormat::kR8G8B8A8UNormInt},
+      SkImageInfo::Make(30, 30, kRGBA_8888_SkColorType, kPremul_SkAlphaType),
+      gpu_disabled_switch);
+
+  EXPECT_NE(image, nullptr);
+  EXPECT_TRUE(decode_error.empty());
+  // A single 256x256 to 30x30 blit would only read 2x2 of the ~8x8 source
+  // pixels covered by each destination pixel.
+  const Resizes expected_resizes = {
+      {impeller::ISize(256, 256), impeller::ISize(128, 128)},
+      {impeller::ISize(128, 128), impeller::ISize(64, 64)},
+      {impeller::ISize(64, 64), impeller::ISize(32, 32)},
+      {impeller::ISize(32, 32), impeller::ISize(30, 30)},
+  };
+  EXPECT_EQ(resizes, expected_resizes);
+  // The full size texture is only read by the first blit, so it has no
+  // mipmaps.
+  ASSERT_EQ(allocator->created_textures().size(), 5u);
+  EXPECT_EQ(allocator->created_textures().front()->GetSize(),
+            impeller::ISize(256, 256));
+  EXPECT_EQ(
+      allocator->created_textures().front()->GetTextureDescriptor().mip_count,
+      1u);
+  EXPECT_EQ(allocator->last_created_texture()->GetTextureDescriptor().mip_count,
+            impeller::ISize(30, 30).MipCount());
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 

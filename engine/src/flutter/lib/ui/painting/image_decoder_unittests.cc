@@ -985,6 +985,33 @@ TEST(ImageDecoderTest, ImagesWithTransparencyArePremulAlpha) {
   ASSERT_EQ(compressed_image->alphaType(), kPremul_SkAlphaType);
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/193779.
+TEST(ImageDecoderTest, SkiaResizeDoesNotAliasThinLines) {
+  const SkBitmap stripes = MakeThinStripesBitmap(256);
+  sk_sp<SkData> data = SkPngEncoder::Encode(stripes.pixmap(), {});
+  ASSERT_TRUE(data);
+  ImageGeneratorRegistry registry;
+  std::shared_ptr<ImageGenerator> generator =
+      registry.CreateCompatibleGenerator(data);
+  ASSERT_TRUE(generator);
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
+                                                         std::move(generator));
+
+  sk_sp<SkImage> image = ImageDecoderSkia::ImageFromCompressedData(
+      descriptor.get(), 30, 30, fml::tracing::TraceFlow(""));
+
+  ASSERT_TRUE(image);
+  SkPixmap pixels;
+  ASSERT_TRUE(image->peekPixels(&pixels));
+  ASSERT_EQ(pixels.dimensions(), SkISize::Make(30, 30));
+  for (int y = 0; y < pixels.height(); y++) {
+    for (int x = 0; x < pixels.width(); x++) {
+      EXPECT_NEAR(SkColorGetR(pixels.getColor(x, y)), 128, 2)
+          << "at (" << x << ", " << y << ")";
+    }
+  }
+}
+
 TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   auto data = flutter::testing::OpenFixtureAsSkData("Horizontal.jpg");
 

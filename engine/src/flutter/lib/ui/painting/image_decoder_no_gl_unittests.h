@@ -14,6 +14,7 @@
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #include "flutter/testing/testing.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 
 namespace impeller {
 
@@ -110,6 +111,11 @@ namespace testing {
 
 float HalfToFloat(uint16_t half);
 float DecodeBGR10(uint32_t x);
+
+/// Returns a |size| x |size| opaque image of 1 pixel wide, alternating black
+/// and white columns. When the image is scaled down a lot, each destination
+/// pixel covers as many black as white columns, so it should be grey.
+SkBitmap MakeThinStripesBitmap(int size);
 
 }  // namespace testing
 }  // namespace flutter

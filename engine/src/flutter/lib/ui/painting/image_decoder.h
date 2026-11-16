@@ -13,6 +13,8 @@
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/lib/ui/io_manager.h"
 #include "flutter/lib/ui/painting/image_descriptor.h"
+#include "third_party/skia/include/core/SkPixmap.h"
+#include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
 
@@ -59,6 +61,36 @@ class ImageDecoder {
                       const ImageResult& result) = 0;
 
   fml::TaskRunnerAffineWeakPtr<ImageDecoder> GetWeakPtr() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Returns the size of the next step when resizing an image from
+  ///             |size| to |target_size|.
+  ///
+  ///             A linear filter only reads the 2x2 pixels nearest to each
+  ///             sample point, so scaling down by more than 2x in one step
+  ///             skips source pixels and makes thin details alias. Images are
+  ///             therefore resized in steps: every side that is at least twice
+  ///             as long as the target is halved, which averages exactly two
+  ///             source pixels per destination pixel like building a mipmap
+  ///             level does, and the final step scales by less than 2x. The
+  ///             result is close to drawing the full size image with mipmaps
+  ///             (`FilterQuality.medium`, the default of the `Image` widget).
+  ///
+  ///             See https://github.com/flutter/flutter/issues/193779.
+  ///
+  /// @return     The size of an intermediate halving step, or |target_size| if
+  ///             the next step is the final one.
+  ///
+  static SkISize GetResizeStepSize(const SkISize& size,
+                                   const SkISize& target_size);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Resizes |source| to the size of |destination| in the steps
+  ///             described in |GetResizeStepSize|.
+  ///
+  /// @return     Whether the resized pixels were written to |destination|.
+  ///
+  static bool ResizePixels(const SkPixmap& source, const SkPixmap& destination);
 
  protected:
   TaskRunners runners_;

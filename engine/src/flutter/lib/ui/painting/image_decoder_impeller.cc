@@ -258,9 +258,7 @@ absl::StatusOr<ImageDecoderImpeller::DecompressResult> ResizeOnCpu(
     FML_DLOG(ERROR) << error;
     return absl::ResourceExhaustedError(error);
   }
-  if (!bitmap->pixmap().scalePixels(
-          scaled_bitmap->pixmap(),
-          SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone))) {
+  if (!ImageDecoder::ResizePixels(bitmap->pixmap(), scaled_bitmap->pixmap())) {
     FML_LOG(ERROR) << "Could not scale decoded bitmap data.";
   }
   scaled_bitmap->setImmutable();
@@ -290,6 +288,26 @@ bool IsZeroOpConversion(ImageDescriptor::PixelFormat input,
     default:
       return false;
   }
+}
+
+// Creates a texture that |BlitPass::ResizeTexture| can write to.
+std::shared_ptr<impeller::Texture> CreateResizeTexture(
+    const std::shared_ptr<impeller::Context>& context,
+    impeller::PixelFormat format,
+    const SkISize& size,
+    size_t mip_count) {
+  impeller::TextureDescriptor descriptor;
+  descriptor.storage_mode = impeller::StorageMode::kDevicePrivate;
+  descriptor.format = format;
+  descriptor.size = {size.width(), size.height()};
+  descriptor.mip_count = mip_count;
+  descriptor.usage = impeller::TextureUsage::kShaderRead;
+  if (context->GetBackendType() == impeller::Context::BackendType::kMetal) {
+    // Resizing requires a MPS on Metal platforms.
+    descriptor.usage |= impeller::TextureUsage::kShaderWrite;
+    descriptor.compression_type = impeller::CompressionType::kLossless;
+  }
+  return context->GetResourceAllocator()->CreateTexture(descriptor);
 }
 
 impeller::PixelFormat ToImpellerPixelFormat(
@@ -494,13 +512,10 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
   texture_descriptor.storage_mode = impeller::StorageMode::kDevicePrivate;
   texture_descriptor.format = image_info.format;
   texture_descriptor.size = {image_info.size.width, image_info.size.height};
-  texture_descriptor.mip_count = texture_descriptor.size.MipCount();
-  if (context->GetBackendType() == impeller::Context::BackendType::kMetal &&
-      resize_info.has_value()) {
-    // The MPS used to resize images on iOS does not require mip generation.
-    // Remove mip count if we are resizing the image on the GPU.
-    texture_descriptor.mip_count = 1;
-  }
+  // A texture that is resized below is only read by the resize blits, which
+  // don't use mipmaps.
+  texture_descriptor.mip_count =
+      resize_info.has_value() ? 1u : texture_descriptor.size.MipCount();
 
   auto dest_texture =
       context->GetResourceAllocator()->CreateTexture(texture_descriptor);
@@ -538,28 +553,45 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
 
   std::shared_ptr<impeller::Texture> result_texture = dest_texture;
   if (resize_info.has_value()) {
-    impeller::TextureDescriptor resize_desc;
-    resize_desc.storage_mode = impeller::StorageMode::kDevicePrivate;
-    resize_desc.format = image_info.format;
-    resize_desc.size = {resize_info->width(), resize_info->height()};
-    resize_desc.mip_count = resize_desc.size.MipCount();
-    resize_desc.usage = impeller::TextureUsage::kShaderRead;
-    if (context->GetBackendType() == impeller::Context::BackendType::kMetal) {
-      // Resizing requires a MPS on Metal platforms.
-      resize_desc.usage |= impeller::TextureUsage::kShaderWrite;
-      resize_desc.compression_type = impeller::CompressionType::kLossless;
+    // A single linear blit would alias when it scales down by more than 2x,
+    // so the image is halved in steps first. See
+    // ImageDecoder::GetResizeStepSize. The command buffer keeps the
+    // intermediate textures alive until the blits are done.
+    const SkISize source_size =
+        SkISize::Make(static_cast<int32_t>(image_info.size.width),
+                      static_cast<int32_t>(image_info.size.height));
+    const SkISize target_size = resize_info->dimensions();
+    std::shared_ptr<impeller::Texture> resize_source = dest_texture;
+    SkISize step_size =
+        ImageDecoder::GetResizeStepSize(source_size, target_size);
+    while (step_size != target_size) {
+      std::shared_ptr<impeller::Texture> step_texture =
+          CreateResizeTexture(context, image_info.format, step_size,
+                              /*mip_count=*/1u);
+      if (!step_texture) {
+        std::string decode_error("Could not create resized Impeller texture.");
+        FML_DLOG(ERROR) << decode_error;
+        return std::make_pair(nullptr, decode_error);
+      }
+      blit_pass->ResizeTexture(/*source=*/resize_source,
+                               /*destination=*/step_texture);
+      resize_source = std::move(step_texture);
+      step_size = ImageDecoder::GetResizeStepSize(step_size, target_size);
     }
-    auto resize_texture =
-        context->GetResourceAllocator()->CreateTexture(resize_desc);
+
+    const size_t mip_count =
+        impeller::ISize(target_size.width(), target_size.height()).MipCount();
+    std::shared_ptr<impeller::Texture> resize_texture =
+        CreateResizeTexture(context, image_info.format, target_size, mip_count);
     if (!resize_texture) {
       std::string decode_error("Could not create resized Impeller texture.");
       FML_DLOG(ERROR) << decode_error;
       return std::make_pair(nullptr, decode_error);
     }
 
-    blit_pass->ResizeTexture(/*source=*/dest_texture,
+    blit_pass->ResizeTexture(/*source=*/resize_source,
                              /*destination=*/resize_texture);
-    if (resize_desc.mip_count > 1) {
+    if (mip_count > 1) {
       blit_pass->GenerateMipmap(resize_texture);
     }
 

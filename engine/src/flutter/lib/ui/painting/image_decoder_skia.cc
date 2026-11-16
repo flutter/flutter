@@ -54,10 +54,17 @@ static sk_sp<SkImage> ResizeRasterImage(const sk_sp<SkImage>& image,
     return nullptr;
   }
 
-  if (!image->scalePixels(
-          scaled_bitmap.pixmap(),
-          SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
-          SkImage::kDisallow_CachingHint)) {
+  // Decodes lazily generated images without caching them. Raster images are
+  // returned as is.
+  const sk_sp<SkImage> raster_image =
+      image->makeRasterImage(nullptr, SkImage::kDisallow_CachingHint);
+  SkPixmap pixels;
+  if (!raster_image || !raster_image->peekPixels(&pixels)) {
+    FML_LOG(ERROR) << "Could not read the pixels of the image to resize.";
+    return nullptr;
+  }
+
+  if (!ImageDecoder::ResizePixels(pixels, scaled_bitmap.pixmap())) {
     FML_LOG(ERROR) << "Could not scale pixels";
     return nullptr;
   }

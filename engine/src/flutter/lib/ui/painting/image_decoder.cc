@@ -4,7 +4,11 @@
 
 #include "flutter/lib/ui/painting/image_decoder.h"
 
+#include <utility>
+
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkSamplingOptions.h"
 
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
@@ -57,6 +61,40 @@ ImageDecoder::~ImageDecoder() = default;
 
 fml::TaskRunnerAffineWeakPtr<ImageDecoder> ImageDecoder::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
+}
+
+// static
+SkISize ImageDecoder::GetResizeStepSize(const SkISize& size,
+                                        const SkISize& target_size) {
+  auto halve = [](int32_t side, int32_t target_side) {
+    return side / 2 >= target_side ? side / 2 : side;
+  };
+  const SkISize step_size =
+      SkISize::Make(halve(size.width(), target_size.width()),
+                    halve(size.height(), target_size.height()));
+  return step_size == size ? target_size : step_size;
+}
+
+// static
+bool ImageDecoder::ResizePixels(const SkPixmap& source,
+                                const SkPixmap& destination) {
+  const SkSamplingOptions linear(SkFilterMode::kLinear, SkMipmapMode::kNone);
+  const SkISize target_size = destination.dimensions();
+  SkPixmap step_source = source;
+  SkBitmap step;
+  SkISize step_size = GetResizeStepSize(source.dimensions(), target_size);
+  while (step_size != target_size) {
+    SkBitmap next_step;
+    if (!next_step.tryAllocPixels(source.info().makeDimensions(step_size)) ||
+        !step_source.scalePixels(next_step.pixmap(), linear)) {
+      return false;
+    }
+    // The previous step is not needed anymore.
+    step = std::move(next_step);
+    step_source = step.pixmap();
+    step_size = GetResizeStepSize(step_size, target_size);
+  }
+  return step_source.scalePixels(destination, linear);
 }
 
 }  // namespace flutter
