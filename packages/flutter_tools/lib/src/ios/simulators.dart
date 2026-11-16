@@ -98,7 +98,7 @@ class IOSSimulatorUtils {
     }
 
     final ToolContext(:Logger logger, :OperatingSystemUtils os) = _toolContext;
-    final cpuArch = CpuArch.fromHostPlatform(os.hostPlatform);
+    final CpuArch cpuArch = os.hostPlatform.cpuArch;
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected

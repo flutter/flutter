@@ -347,7 +347,7 @@ Future<int> run(
               cocoaPods: appleContext.cocoaPods,
               deviceManager: deviceManager,
               doctor: doctor,
-              extensionManager: extensionManager,
+              extensionManager: extensionManager!,
               featureFlags: featureFlags,
               plistParser: appleContext.plistParser,
               templateRenderer: resolvedTemplateRenderer,

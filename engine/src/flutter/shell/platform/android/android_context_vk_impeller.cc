@@ -73,12 +73,15 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   }
 
   if (!p_settings.quiet) {
+    const char* backend_name =
+        p_settings.impeller_flags.use_sdfs ? "VulkanSDF" : "Vulkan";
     if (impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
             .AreValidationsEnabled()) {
-      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan with "
-                            "Validation Layers).";
+      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend ("
+                         << backend_name << " with Validation Layers).";
     } else {
-      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
+      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend ("
+                         << backend_name << ").";
     }
   }
 
