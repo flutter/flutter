@@ -599,8 +599,9 @@ TEST(PathTessellatorTest, HugeOvalTessellationIsBounded) {
 
   size_t written = 0u;
   ::testing::NiceMock<MockPathVertexWriter> mock_writer;
-  ON_CALL(mock_writer, Write(::testing::_))
-      .WillByDefault([&written](Point) { written++; });
+  ON_CALL(mock_writer, Write(::testing::_)).WillByDefault([&written](Point) {
+    written++;
+  });
   PathTessellator::PathToFilledVertices(oval, mock_writer, 1.0f);
   EXPECT_LE(written, max_points);
   EXPECT_LE(written, points);
