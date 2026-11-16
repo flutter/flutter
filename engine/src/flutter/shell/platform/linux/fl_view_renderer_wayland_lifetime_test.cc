@@ -307,6 +307,27 @@ static void drain_main_context() {
   }
 }
 
+// Unlike draining ready sources, this also waits for asynchronous Wayland
+// events. The timeout source bounds a blocking iteration with no other events.
+static gboolean wait_for_count(gint* count, gint expected) {
+  gboolean timed_out = FALSE;
+  g_autoptr(GSource) timeout =
+      g_timeout_source_new(kTimeout / G_TIME_SPAN_MILLISECOND);
+  g_source_set_callback(
+      timeout,
+      [](gpointer data) {
+        *static_cast<gboolean*>(data) = TRUE;
+        return G_SOURCE_REMOVE;
+      },
+      &timed_out, nullptr);
+  g_source_attach(timeout, nullptr);
+  while (!timed_out && g_atomic_int_get(count) < expected) {
+    g_main_context_iteration(nullptr, TRUE);
+  }
+  g_source_destroy(timeout);
+  return g_atomic_int_get(count) == expected;
+}
+
 class FlViewRendererWaylandLifetimeTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -592,17 +613,26 @@ TEST_F(FlViewRendererWaylandLifetimeTest, DestroyBeforeQueuedRedraw) {
 }
 
 TEST_F(FlViewRendererWaylandLifetimeTest,
-       HideShowReplacesParentAndPresentsAgain) {
-  struct wl_surface* old_parent = counts_->parent;
-  uint32_t old_parent_id = counts_->parent_id;
+       HideShowAndAllocateReplacesParentAndPresentsAgain) {
   gtk_widget_hide(window_);
   ASSERT_TRUE(gtk_widget_get_realized(GTK_WIDGET(renderer_)));
   EXPECT_EQ(gdk_wayland_window_get_wl_surface(gtk_widget_get_window(window_)),
             nullptr);
   gtk_widget_show_all(window_);
-  drain_main_context();
-  EXPECT_TRUE(counts_->parent != old_parent ||
-              counts_->parent_id != old_parent_id);
+  // GTK maps children before creating the replacement toplevel surface. This
+  // direct-renderer fixture has no running engine and explicitly requests the
+  // allocation that lets the renderer detect the replacement parent.
+  gtk_widget_queue_allocate(GTK_WIDGET(renderer_));
+  ASSERT_TRUE(wait_for_count(&counts_->created[kEGL], 2))
+      << "GTK did not recreate the subsurface after showing the window";
+  struct wl_surface* parent =
+      gdk_wayland_window_get_wl_surface(gtk_widget_get_window(window_));
+  ASSERT_NE(parent, nullptr);
+  EXPECT_EQ(counts_->parent, parent);
+  EXPECT_EQ(counts_->parent_id,
+            wl_proxy_get_id(reinterpret_cast<struct wl_proxy*>(parent)));
+  // Addresses and protocol IDs can be reused; creation/finalization counters
+  // prove that the old resources were replaced.
   EXPECT_EQ(g_atomic_int_get(&counts_->created[kChild]), 2);
   EXPECT_EQ(g_atomic_int_get(&counts_->created[kEGL]), 2);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 1);
