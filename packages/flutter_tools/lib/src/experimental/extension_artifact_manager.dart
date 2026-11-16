@@ -14,6 +14,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../context/tool_context.dart';
@@ -59,8 +60,8 @@ class ExtensionArtifactManager {
     required this._featureFlags,
     required this._toolContext,
     @visibleForTesting this._cacheDir,
-    @visibleForTesting HttpClient? httpClient,
-  }) : _httpClient = httpClient ?? HttpClient();
+    HttpClientFactory? httpClientFactory,
+  }) : _httpClientFactory = httpClientFactory ?? HttpClient.new;
 
   static const String _dartDataHomeEnvKey = 'DART_DATA_HOME';
   static const String _localAppDataEnvKey = 'LOCALAPPDATA';
@@ -78,7 +79,8 @@ class ExtensionArtifactManager {
   final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
   final Directory? _cacheDir;
-  final HttpClient _httpClient;
+  final HttpClientFactory _httpClientFactory;
+  late final HttpClient _httpClient = _httpClientFactory();
 
   /// Tracks in-flight download futures keyed by destination path
   /// (`<cacheDir>/<extensionName>/<sha256>/<artifactName>`) to deduplicate

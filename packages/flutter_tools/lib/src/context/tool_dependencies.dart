@@ -734,6 +734,7 @@ class ToolDependencies {
     final extensionArtifactManager = ExtensionArtifactManager(
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
+      httpClientFactory: httpClientFactory,
       toolContext: finalToolContext,
     );
 

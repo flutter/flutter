@@ -14,6 +14,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
@@ -23,7 +25,9 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:flutter_tools_extension_linux_prototype/src/artifact.dart';
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 final class _FakeArtifactService extends ArtifactService {
@@ -52,7 +56,8 @@ final class _FakeArtifactService extends ArtifactService {
 
 ExtensionEntryPoint _createMultiTargetEntryPoint({
   required List<ArtifactDependency> artifacts,
-  required SendPort targetPlatformsObserver,
+  Set<String>? supportedPlatforms = const <String>{'linux'},
+  SendPort? targetPlatformsObserver,
 }) {
   return (SendPort sendPort) {
     ToolExtensionEntryPoint.run(
@@ -61,7 +66,7 @@ ExtensionEntryPoint _createMultiTargetEntryPoint({
         _FakeArtifactService(artifacts, targetPlatformsObserver: targetPlatformsObserver),
       ],
       extensionName: 'multi_ext',
-      supportedPlatforms: const <String>{'linux'},
+      supportedPlatforms: supportedPlatforms,
     );
   };
 }
@@ -264,7 +269,7 @@ void main() {
       final artifactManager = ExtensionArtifactManager(
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
+        httpClientFactory: () => httpClient,
         toolContext: FakeToolContext(
           fs: fs,
           logger: logger,
@@ -352,7 +357,7 @@ void main() {
         cacheDir: customCacheDir,
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
+        httpClientFactory: () => httpClient,
         toolContext: FakeToolContext(
           cache: FakeCache(engineRevision: 'engine_rev_123', fileSystem: fs),
           fs: fs,
@@ -448,7 +453,7 @@ void main() {
           cacheDir: cacheDir,
           extensionManager: manager,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          httpClient: httpClient,
+          httpClientFactory: () => httpClient,
           toolContext: FakeToolContext(
             fs: fs,
             logger: logger,
@@ -516,7 +521,7 @@ void main() {
         cacheDir: fs.directory('/bad_cache'),
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
+        httpClientFactory: () => httpClient,
         toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
@@ -538,7 +543,7 @@ void main() {
         cacheDir: fs.directory('/bad_network_cache'),
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: failingNetworkClient,
+        httpClientFactory: () => failingNetworkClient,
         toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
@@ -605,7 +610,7 @@ void main() {
         cacheDir: cacheDir,
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
+        httpClientFactory: () => httpClient,
         toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
@@ -667,7 +672,7 @@ void main() {
           cacheDir: cacheDir,
           extensionManager: manager,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          httpClient: httpClient,
+          httpClientFactory: () => httpClient,
           toolContext: FakeToolContext(
             fs: fs,
             logger: logger,
@@ -759,7 +764,7 @@ void main() {
         cacheDir: cacheDir,
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
+        httpClientFactory: () => httpClient,
         toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
@@ -852,7 +857,7 @@ void main() {
         cacheDir: cacheDir,
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
+        httpClientFactory: () => httpClient,
         toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
@@ -930,7 +935,7 @@ void main() {
         cacheDir: cacheDir,
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
+        httpClientFactory: () => httpClient,
         toolContext: FakeToolContext(
           fs: fs,
           logger: logger,
@@ -991,7 +996,7 @@ void main() {
         cacheDir: cacheDir,
         extensionManager: missingManager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
+        httpClientFactory: () => httpClient,
         toolContext: FakeToolContext(
           fs: fs,
           logger: logger,
@@ -1084,7 +1089,7 @@ void main() {
           cacheDir: cacheDir,
           extensionManager: symlinkManager,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          httpClient: httpClient,
+          httpClientFactory: () => httpClient,
           toolContext: FakeToolContext(
             fs: fs,
             logger: logger,
@@ -1160,7 +1165,7 @@ void main() {
         cacheDir: cacheDir,
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
+        httpClientFactory: () => httpClient,
         toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
@@ -1213,6 +1218,68 @@ void main() {
         ),
       );
     });
+
+    test(
+      'ToolDependencies.bootstrap wires httpClientFactory lazily into ExtensionArtifactManager',
+      () async {
+        final List<int> content = utf8.encode('factory payload');
+        final contentSha256 = sha256.convert(content).toString();
+        final ExtensionEntryPoint entryPoint = _createMultiTargetEntryPoint(
+          artifacts: <ArtifactDependency>[
+            ArtifactDependency.remote(
+              name: 'factory_bin',
+              sha256: contentSha256,
+              url: Uri.parse('https://example.com/factory_bin'),
+            ),
+          ],
+          // Match any host platform.
+          supportedPlatforms: null,
+        );
+
+        var factoryCallCount = 0;
+        var downloadCount = 0;
+        final shutdownHooks = ShutdownHooks();
+        final ToolDependencies deps = await ToolDependencies.bootstrap(
+          analytics: const NoOpAnalytics(),
+          botDetector: const FakeBotDetector(true),
+          cache: FakeCache(engineRevision: 'engine_rev_123', fileSystem: fs),
+          extensionEntryPoints: <ExtensionEntryPoint>[entryPoint],
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          flutterVersion: FakeFlutterVersion(),
+          fs: fs,
+          httpClientFactory: () {
+            factoryCallCount++;
+            return _FakeHttpClient((Uri url) async {
+              downloadCount++;
+              return _FakeHttpClientResponse(HttpStatus.ok, content);
+            });
+          },
+          logger: logger,
+          platform: FakePlatform(
+            environment: const <String, String>{'DART_DATA_HOME': '/dart_data'},
+          ),
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+          stdio: FakeStdio(),
+          templateRenderer: FakeTemplateRenderer(),
+        );
+        addTearDown(() => shutdownHooks.runShutdownHooks(logger));
+
+        expect(factoryCallCount, 0);
+
+        final ExtensionArtifactManager artifactManager = deps.extensionArtifactManager!;
+        final Map<String, ResolvedExtensionArtifact> resolved = await artifactManager
+            .ensureArtifactsDownloaded();
+        expect(factoryCallCount, 1);
+        expect(downloadCount, 1);
+        expect(fs.file(resolved['factory_bin']!.path).readAsBytesSync(), equals(content));
+
+        // Re-downloading reuses the lazily created HttpClient instance.
+        await artifactManager.ensureArtifactsDownloaded(force: true);
+        expect(factoryCallCount, 1);
+        expect(downloadCount, 2);
+      },
+    );
   });
 }
 
