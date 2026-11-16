@@ -330,7 +330,7 @@ class PluginHandlerTest {
     }
 
     @Test
-    fun `configurePlugins copies app-specific properties when the plugin project is an app`(
+    fun `configurePlugins copies every build type property with initWith when the plugin project is an app`(
         @TempDir tempDir: Path
     ) {
         val project = mockk<Project>()
@@ -369,8 +369,8 @@ class PluginHandlerTest {
         capturePluginActionSlot.forEach { it.execute(pluginProject) }
 
         createActionSlot.captured.execute(createdBuildType)
+        // initWith also copies isDebuggable and the other app-only properties.
         verify { createdBuildType.initWith(appBuildType) }
-        verify { createdBuildType.isDebuggable = true }
     }
 
     @Test

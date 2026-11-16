@@ -42,6 +42,45 @@ void main() {
 
     final Directory exampleAppDir = tempDir.childDirectory(testName).childDirectory('example');
 
+    // Regression test for https://github.com/flutter/flutter/issues/169215,
+    // https://github.com/flutter/flutter/issues/196412 and
+    // https://github.com/flutter/flutter/issues/196696.
+    //
+    // The Flutter Gradle Plugin copies the app's build types onto library
+    // plugins that don't define them, such as this plugin and integration_test.
+    // A library can't use any of the settings below: applicationIdSuffix and
+    // isShrinkResources are app-only, and the plugins don't enable the
+    // buildConfig or resValues build features. Gradle configures every build
+    // type, so building one variant is enough to catch a bad copy.
+    final File appGradleFile = exampleAppDir
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle.kts');
+    expect(appGradleFile, exists);
+    appGradleFile.writeAsStringSync('''
+${appGradleFile.readAsStringSync()}
+
+android {
+    buildFeatures {
+        buildConfig = true
+        resValues = true
+    }
+    buildTypes {
+        getByName("profile") {
+            applicationIdSuffix = ".profile"
+            versionNameSuffix = "-PROFILE"
+            buildConfigField("String", "BUILD_TYPE_NOTE", "\\"profile\\"")
+            resValue("string", "build_type_note", "profile")
+        }
+        create("staging") {
+            initWith(getByName("release"))
+            isMinifyEnabled = true
+            isShrinkResources = true
+        }
+    }
+}
+''');
+
     result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -49,6 +88,10 @@ void main() {
       'apk',
       '--target-platform=android-arm',
     ], workingDirectory: exampleAppDir.path);
+    expect(result.stderr, isNot(contains('Library projects cannot set applicationIdSuffix')));
+    expect(result.stderr, isNot(contains('Resource shrinker cannot be used for libraries')));
+    expect(result.stderr, isNot(contains('contains custom BuildConfig fields')));
+    expect(result.stderr, isNot(contains('contains custom resource values')));
     if (result.exitCode != 0) {
       throw Exception(
         'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',

@@ -148,29 +148,48 @@ class PluginHandler(
                 return
             }
 
-            // Copy the app project's build types onto the plugin project so that its variants
-            // resolve. App plugins get an `initWith` copy of each build type. Library plugins
-            // only get the properties that a library supports, because `initWith` also copies
-            // app-only properties, such as applicationIdSuffix and isShrinkResources, that AGP
-            // rejects in a library. See https://github.com/flutter/flutter/issues/196412.
+            // Give the plugin project every build type that the app project has, so that the
+            // plugin's variants resolve. Build types that the plugin already defines are left
+            // alone.
             val pluginProjectBuildTypes = getAndroidExtension(pluginProject).buildTypes
             val pluginIsApp = isBuiltAsApp(pluginProject)
             getAndroidExtension(project).buildTypes.forEach { appBuildType ->
                 if (pluginProjectBuildTypes.findByName(appBuildType.name) == null) {
                     pluginProjectBuildTypes.create(appBuildType.name) {
                         if (pluginIsApp) {
+                            // An app accepts every build type property, so copy all of them.
+                            // `initWith` copies isDebuggable too.
                             initWith(appBuildType)
                         } else {
-                            isMinifyEnabled = appBuildType.isMinifyEnabled
-                            matchingFallbacks.addAll(appBuildType.matchingFallbacks)
-                        }
-                        // AGP uses one build type class for every module type, so this check
-                        // also passes for library build types.
-                        if (this is ApplicationBuildType && appBuildType is ApplicationBuildType) {
-                            isDebuggable = appBuildType.isDebuggable
+                            copyLibraryBuildTypeProperties(appBuildType, this)
                         }
                     }
                 }
+            }
+        }
+
+        /**
+         * Copies the properties of [appBuildType] that a library accepts onto
+         * [libraryBuildType], a build type of a library plugin.
+         *
+         * This deliberately doesn't use `initWith`, which copies every property. AGP rejects
+         * some of those properties in a library: applicationIdSuffix and isShrinkResources
+         * always, and buildConfigField and resValue unless the library enables those build
+         * features. See https://github.com/flutter/flutter/issues/169215,
+         * https://github.com/flutter/flutter/issues/196412 and
+         * https://github.com/flutter/flutter/issues/196696.
+         */
+        private fun copyLibraryBuildTypeProperties(
+            appBuildType: DslBuildType,
+            libraryBuildType: DslBuildType
+        ) {
+            libraryBuildType.isMinifyEnabled = appBuildType.isMinifyEnabled
+            libraryBuildType.matchingFallbacks.addAll(appBuildType.matchingFallbacks)
+            // The public library DSL has no isDebuggable, but library variants still use it,
+            // for example for BuildConfig.DEBUG. AGP implements every build type with one class
+            // that also implements ApplicationBuildType, so this check passes for libraries.
+            if (libraryBuildType is ApplicationBuildType && appBuildType is ApplicationBuildType) {
+                libraryBuildType.isDebuggable = appBuildType.isDebuggable
             }
         }
 
