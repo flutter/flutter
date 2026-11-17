@@ -37,6 +37,9 @@ import '../../../src/throwing_pub.dart';
 
 const _kEngineRevision = 'abcdefghijklmnopqrstuvwxyz';
 
+/// Minimal valid WebAssembly binary header (`\0asm` magic bytes + version 1).
+const _kMinimalWasmHeader = <int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00];
+
 const _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
   'compile',
@@ -3679,13 +3682,12 @@ _flutter.loader.load({
       fs
           .file('packages/flutter_tools/lib/src/build_system/targets/native_assets.dart')
           .createSync(recursive: true);
-      // Minimal Wasm binary header ('\0asm' magic bytes + version 1).
       fs
           .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterWebSdk))
           .childDirectory('canvaskit')
           .childFile('canvaskit.wasm')
         ..createSync(recursive: true)
-        ..writeAsBytesSync(<int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
+        ..writeAsBytesSync(_kMinimalWasmHeader);
       final File mainDart = resolvedProjectDir.childFile('lib/main.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('void main() {}');
@@ -4325,31 +4327,36 @@ _flutter.loader.load();
     );
   });
 
-  test(
-    'injectManifestBuildConfig drops stale manifest keys that are absent from the new hash result',
-    () => testbed.run(() async {
-      final File bootstrapFile = environment.outputDir.childFile('flutter_bootstrap.js')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(
-          '_flutter.buildConfig = {"builds":[], '
-          '"fontManifest":"FontManifest.old.json", '
-          '"extraAssets":{"NOTICES":"NOTICES.old"}};',
-        );
-
-      injectManifestBuildConfig(
-        environment.outputDir,
-        const WebAssetHashResult(
-          renamedFiles: <String, File>{},
-          assetManifestBinJson: 'AssetManifest.bin.new.json',
-        ),
+  testWithoutContext('injectManifestBuildConfig drops stale manifest keys that are absent from the new hash result, including when all manifests become absent', () {
+    final fileSystem = MemoryFileSystem.test();
+    final Directory outputDir = fileSystem.directory('/out')..createSync(recursive: true);
+    final File bootstrapFile = outputDir.childFile('flutter_bootstrap.js')
+      ..writeAsStringSync(
+        '_flutter.buildConfig = {"builds":[], '
+        '"fontManifest":"FontManifest.old.json", '
+        '"extraAssets":{"NOTICES":"NOTICES.old"}};',
       );
 
-      final String updated = bootstrapFile.readAsStringSync();
-      expect(updated, contains('"assetManifest":"AssetManifest.bin.new.json"'));
-      expect(updated, isNot(contains('"fontManifest"')));
-      expect(updated, isNot(contains('"extraAssets"')));
-    }),
-  );
+    injectManifestBuildConfig(
+      outputDir,
+      const WebAssetHashResult(
+        renamedFiles: <String, File>{},
+        assetManifestBinJson: 'AssetManifest.bin.new.json',
+      ),
+    );
+
+    final String partialUpdated = bootstrapFile.readAsStringSync();
+    expect(partialUpdated, contains('"assetManifest":"AssetManifest.bin.new.json"'));
+    expect(partialUpdated, isNot(contains('"fontManifest"')));
+    expect(partialUpdated, isNot(contains('"extraAssets"')));
+
+    injectManifestBuildConfig(outputDir, const WebAssetHashResult(renamedFiles: <String, File>{}));
+
+    final String allEmptyUpdated = bootstrapFile.readAsStringSync();
+    expect(allEmptyUpdated, isNot(contains('"assetManifest"')));
+    expect(allEmptyUpdated, isNot(contains('"fontManifest"')));
+    expect(allEmptyUpdated, isNot(contains('"extraAssets"')));
+  });
 
   group('FlutterBuildSystem compiler and artifact tracking transitions', () {
     late FlutterBuildSystem buildSystem;
@@ -4369,7 +4376,7 @@ _flutter.loader.load();
           .childDirectory('canvaskit')
           .childFile('canvaskit.wasm')
         ..createSync(recursive: true)
-        ..writeAsBytesSync(<int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
+        ..writeAsBytesSync(_kMinimalWasmHeader);
       final File mainDart = resolvedProjectDir.childFile('lib/main.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('void main() {}');
@@ -4510,11 +4517,14 @@ flutter:
             if (dryRun) {
               return;
             }
-            outWasm.writeAsBytesSync(<int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
+            outWasm.writeAsBytesSync(_kMinimalWasmHeader);
             environment.buildDir.childFile('main.dart.mjs').writeAsStringSync('export {};\n');
             environment.buildDir
                 .childFile('main.dart.support.js')
                 .writeAsStringSync('$supportJs\n');
+            environment.buildDir
+                .childFile('recorded_uses_wasm.json')
+                .writeAsStringSync('{"wasm":true}');
             if (sourceMaps) {
               environment.buildDir
                   .childFile('main.dart.wasm.map')
@@ -4542,24 +4552,37 @@ flutter:
     }
 
     test(
-      'wasm dry run resets stale recorded_uses_wasm.json from a previous --wasm build',
+      'wasm dry run cleans stale recorded_uses_wasm.json, dart2wasm.d, and buildDir wasm outputs from a previous --wasm build',
       () => testbed.run(
         () async {
           setUpWebProject();
-          final File recordedUses = environment.buildDir.childFile('recorded_uses_wasm.json')
-            ..writeAsStringSync('{"stale":true}');
 
+          queueDart2WasmCompile(sourceMaps: false, dryRun: false);
           queueDart2JsCompile(sourceMaps: false);
-          queueDart2WasmCompile(sourceMaps: false, dryRun: true);
           await runWebBuild(const <WebCompilerConfig>[
+            WasmCompilerConfig(sourceMaps: false),
+            JsCompilerConfig(sourceMaps: false),
+          ]);
+          expect(environment.buildDir.childFile('recorded_uses_wasm.json'), exists);
+          expect(environment.buildDir.childFile('main.dart.wasm'), exists);
+          expect(environment.buildDir.childFile('dart2wasm.d'), exists);
+
+          // Switching to default JS (with wasm dryRun) skips dart2js (same config)
+          // and runs only the wasm dry-run, cleaning stale wasm outputs from buildDir.
+          queueDart2WasmCompile(sourceMaps: false, dryRun: true);
+          final BuildResult dryRunResult = await runWebBuild(const <WebCompilerConfig>[
             JsCompilerConfig(sourceMaps: false),
             WasmCompilerConfig(sourceMaps: false, dryRun: true),
           ]);
+          expect(dryRunResult.performance['dart2js']!.skipped, isTrue);
 
-          expect(recordedUses.readAsStringSync(), '{}');
+          expect(environment.buildDir.childFile('recorded_uses_wasm.json'), isNot(exists));
+          expect(environment.buildDir.childFile('main.dart.wasm'), isNot(exists));
+          expect(environment.buildDir.childFile('dart2wasm.d'), isNot(exists));
           expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
+          FeatureFlags: () => TestFeatureFlags(isRecordUseEnabled: true),
           ProcessManager: () => processManager,
           TemplateRenderer: () => const MustacheTemplateRenderer(),
           Pub: ThrowingPub.new,
@@ -4623,6 +4646,8 @@ flutter:
           expect(environment.outputDir.childFile('main.dart.js.map'), isNot(exists));
           expect(environment.buildDir.childFile('main.dart.js.map'), isNot(exists));
           expect(environment.outputDir.childFile('main.dart.wasm'), isNot(exists));
+          expect(environment.buildDir.childFile('main.dart.wasm'), isNot(exists));
+          expect(environment.buildDir.childFile('dart2wasm.d'), isNot(exists));
           expect(environment.outputDir.childFile('main.dart.mjs'), isNot(exists));
           expect(environment.outputDir.childFile('main.dart.wasm.map'), isNot(exists));
           expect(environment.outputDir.childFile('main.dart.support.js'), isNot(exists));
@@ -4655,9 +4680,48 @@ flutter:
           expect(wasmHash2.success, isTrue);
           expect(wasmHash2.performance['dart2wasm']!.skipped, isTrue);
           expect(wasmHash2.performance['dart2js']!.skipped, isTrue);
+
+          // 6. Switch directly to --web-content-hash --no-wasm-dry-run (Dart2WasmTarget omitted).
+          // Stale main.dart.support.js and recorded_uses_wasm.json remain in buildDir,
+          // and must be excluded from WebReleaseBundle and WebTemplatedFiles inputs.
+          const jsHashNoDryRunConfigs = <WebCompilerConfig>[
+            JsCompilerConfig(webContentHash: true, sourceMaps: false),
+          ];
+          final jsHashBundle = WebReleaseBundle(
+            jsHashNoDryRunConfigs,
+            const NoOpAnalytics(),
+            engineRevision: _kEngineRevision,
+          );
+          expect(
+            jsHashBundle.resolveInputs(environment).sources.map((File f) => f.basename),
+            isNot(contains('main.dart.support.js')),
+          );
+          expect(
+            jsHashBundle.templatedFilesTarget
+                .resolveInputs(environment)
+                .sources
+                .map((File f) => f.basename),
+            isNot(contains('main.dart.support.js')),
+          );
+
+          queueDart2JsCompile(sourceMaps: false);
+          final BuildResult jsHash1 = await runWebBuild(jsHashNoDryRunConfigs);
+          expect(jsHash1.success, isTrue);
+          expect(
+            environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
+            isNot(contains('_flutter.supportsDart2Wasm')),
+          );
+
+          final BuildResult jsHash2 = await runWebBuild(jsHashNoDryRunConfigs);
+          expect(jsHash2.success, isTrue);
+          expect(jsHash2.performance['dart2js']!.skipped, isTrue);
+          expect(jsHash2.performance['web_templated_files']!.skipped, isTrue);
+          expect(jsHash2.performance['web_release_bundle']!.skipped, isTrue);
+          expect(jsHash2.performance['web_service_worker']!.skipped, isTrue);
           expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
+          FeatureFlags: () => TestFeatureFlags(isRecordUseEnabled: true),
           ProcessManager: () => processManager,
           TemplateRenderer: () => const MustacheTemplateRenderer(),
           Pub: ThrowingPub.new,
@@ -4666,29 +4730,42 @@ flutter:
     );
   });
 
+  testWithoutContext('Dart2WebTarget.buildStemSource marks unhashed main.dart.mjs.map optional and resolves absent wildcard stems empty', () {
+    final fileSystem = MemoryFileSystem.test();
+    final testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    testEnvironment.buildDir.createSync(recursive: true);
+
+    final mjsMapVisitor = SourceVisitor(testEnvironment);
+    Dart2WebTarget.buildStemSource(
+      Environment.kBuildDirectory,
+      'main.dart.mjs.map',
+    ).accept(mjsMapVisitor);
+    expect(mjsMapVisitor.sources, isEmpty);
+
+    final hashedMjsMapVisitor = SourceVisitor(testEnvironment);
+    Dart2WebTarget.buildStemSource(
+      Environment.kBuildDirectory,
+      'main.dart.*.mjs.map',
+    ).accept(hashedMjsMapVisitor);
+    expect(hashedMjsMapVisitor.sources, isEmpty);
+
+    final dumpInfoVisitor = SourceVisitor(testEnvironment);
+    Dart2WebTarget.buildStemSource(
+      Environment.kBuildDirectory,
+      'main.dart.js.info.json',
+    ).accept(dumpInfoVisitor);
+    expect(dumpInfoVisitor.sources.single.basename, 'main.dart.js.info.json');
+  });
+
   testWithoutContext(
     'WebCompiledArtifact.tryParse classifies hashed, unhashed, multi-dot, and negative basenames',
     () {
-      final fileSystem = MemoryFileSystem.test();
-      final testEnvironment = Environment.test(
-        fileSystem.currentDirectory,
-        artifacts: Artifacts.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-      );
-      testEnvironment.buildDir.createSync(recursive: true);
-      final mjsMapVisitor = SourceVisitor(testEnvironment);
-      Dart2WebTarget.buildStemSource('{BUILD_DIR}', 'main.dart.mjs.map').accept(mjsMapVisitor);
-      expect(mjsMapVisitor.sources, isEmpty);
-
-      final dumpInfoVisitor = SourceVisitor(testEnvironment);
-      Dart2WebTarget.buildStemSource(
-        '{BUILD_DIR}',
-        'main.dart.js.info.json',
-      ).accept(dumpInfoVisitor);
-      expect(dumpInfoVisitor.sources.single.basename, 'main.dart.js.info.json');
-
       const positiveCases = <(String, WebCompiledArtifact)>[
         ('main.dart.js', WebCompiledArtifact.mainJs),
         ('main.dart.a1b2c3d4.js', WebCompiledArtifact.mainJs),

@@ -171,12 +171,6 @@ final RegExp _lowerHexRegex = RegExp(r'^[a-f0-9]+$');
 final RegExp _jsPartPrefixRegex = RegExp(r'^js_[0-9]');
 final RegExp _wasmModulePrefixRegex = RegExp(r'^dart_module[0-9]');
 
-bool _isLowerHex(String value) => _lowerHexRegex.hasMatch(value);
-
-bool _isJsPartPrefix(String segment) => _jsPartPrefixRegex.hasMatch(segment);
-
-bool _isWasmModulePrefix(String segment) => _wasmModulePrefixRegex.hasMatch(segment);
-
 enum _WebCompiler { js, wasm }
 
 /// Classifies compiled web entrypoint, source-map, dump-info, and deferred
@@ -209,29 +203,29 @@ enum WebCompiledArtifact {
     if (!basename.startsWith('main.')) {
       return null;
     }
-    final List<String> rawParts = basename.split('.');
-    final List<String> parts = switch (rawParts) {
-      ['main', 'dart', final String h, ('js' || 'wasm' || 'mjs') && final String ext]
-          when _isLowerHex(h) =>
-        <String>['main', 'dart', ext],
-      ['main', 'dart', final String h, ('js' || 'wasm' || 'mjs') && final String ext, 'map']
-          when _isLowerHex(h) =>
-        <String>['main', 'dart', ext, 'map'],
-      _ => rawParts,
-    };
-    return switch (parts) {
+    return switch (basename.split('.')) {
       ['main', 'dart', 'js'] => mainJs,
+      ['main', 'dart', final String h, 'js'] when _lowerHexRegex.hasMatch(h) => mainJs,
       ['main', 'dart', 'js', 'map'] => mainJsMap,
+      ['main', 'dart', final String h, 'js', 'map'] when _lowerHexRegex.hasMatch(h) => mainJsMap,
       ['main', 'dart', 'js', 'info', 'json'] => jsDumpInfo,
-      ['main', 'dart', final String p, ..., 'part', 'js'] when _isJsPartPrefix(p) => jsPart,
-      ['main', 'dart', final String p, ..., 'part', 'js', 'map'] when _isJsPartPrefix(p) =>
+      ['main', 'dart', final String p, ..., 'part', 'js'] when _jsPartPrefixRegex.hasMatch(p) =>
+        jsPart,
+      ['main', 'dart', final String p, ..., 'part', 'js', 'map']
+          when _jsPartPrefixRegex.hasMatch(p) =>
         jsPartMap,
       ['main', 'dart', 'wasm'] => mainWasm,
+      ['main', 'dart', final String h, 'wasm'] when _lowerHexRegex.hasMatch(h) => mainWasm,
       ['main', 'dart', 'wasm', 'map'] => mainWasmMap,
+      ['main', 'dart', final String h, 'wasm', 'map'] when _lowerHexRegex.hasMatch(h) =>
+        mainWasmMap,
       ['main', 'dart', 'mjs'] => mainMjs,
+      ['main', 'dart', final String h, 'mjs'] when _lowerHexRegex.hasMatch(h) => mainMjs,
       ['main', 'dart', 'mjs', 'map'] => mainMjsMap,
-      ['main', final String m, ..., 'wasm'] when _isWasmModulePrefix(m) => wasmModule,
-      ['main', final String m, ..., 'wasm', 'map'] when _isWasmModulePrefix(m) => wasmModuleMap,
+      ['main', 'dart', final String h, 'mjs', 'map'] when _lowerHexRegex.hasMatch(h) => mainMjsMap,
+      ['main', final String m, ..., 'wasm'] when _wasmModulePrefixRegex.hasMatch(m) => wasmModule,
+      ['main', final String m, ..., 'wasm', 'map'] when _wasmModulePrefixRegex.hasMatch(m) =>
+        wasmModuleMap,
       _ => null,
     };
   }
@@ -283,6 +277,7 @@ abstract class Dart2WebTarget extends Target {
   @protected
   String? get recordedUsesFileName => null;
 
+  @visibleForTesting
   static Source buildStemSource(String directoryPrefix, String stem) =>
       Source.pattern('$directoryPrefix/$stem', optional: stem == 'main.dart.mjs.map');
 
@@ -540,7 +535,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     final ResolvedFiles resolved = super.resolveOutputs(environment);
     // `{BUILD_DIR}/main.dart.*.js` matches `Dart2WasmTarget`'s `main.dart.support.js`;
     // exclude it so `dart2js` never claims or deletes wasm support output.
-    resolved.sources.removeWhere((File file) => file.basename == 'main.dart.support.js');
+    resolved.sources.removeWhere((File file) => file.basename == Dart2WasmTarget.supportJsFileName);
     return resolved;
   }
 
@@ -589,6 +584,8 @@ enum _DryRunOutcome {
 class Dart2WasmTarget extends Dart2WebTarget {
   Dart2WasmTarget(this.compilerConfig, this._analytics, {required super.engineRevision});
 
+  static const String supportJsFileName = 'main.dart.support.js';
+
   @override
   final WasmCompilerConfig compilerConfig;
 
@@ -631,12 +628,13 @@ class Dart2WasmTarget extends Dart2WebTarget {
     }
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
 
-    if (!compilerConfig.dryRun) {
-      _cleanStaleBuildOutputs(environment.buildDir, (WebCompiledArtifact a) => a.isWasmArtifact);
-    }
+    _cleanStaleBuildOutputs(environment.buildDir, (WebCompiledArtifact a) => a.isWasmArtifact);
     final Artifacts artifacts = environment.artifacts;
     final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
+    if (compilerConfig.dryRun && depFile.existsSync()) {
+      depFile.deleteSync();
+    }
     final String platformBinariesPath = artifacts
         .getHostArtifact(HostArtifact.webPlatformKernelFolder)
         .path;
@@ -704,7 +702,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
       LinkHooks.recordedUsesWasmFileName,
     );
     if (featureFlags.isRecordUseEnabled &&
-        (compilerConfig.dryRun || !recordedUsesFile.existsSync())) {
+        !compilerConfig.dryRun &&
+        !recordedUsesFile.existsSync()) {
       recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
     }
   }
@@ -797,13 +796,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
   }
 
   @override
-  String get recordedUsesFileName => LinkHooks.recordedUsesWasmFileName;
+  String? get recordedUsesFileName =>
+      compilerConfig.dryRun ? null : LinkHooks.recordedUsesWasmFileName;
 
   @override
   List<Source> get outputs => <Source>[
     ...super.outputs,
     if (!compilerConfig.dryRun)
-      const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true),
+      const Source.pattern('{BUILD_DIR}/$supportJsFileName', optional: true),
   ];
 
   @override
@@ -1233,7 +1233,13 @@ class WebReleaseBundle extends Target {
   List<Target> get dependencies => <Target>[
     ...compileTargets,
     templatedFilesTarget,
-    LinkHooks(platform: HookPlatform.web, extraDependencies: compileTargets),
+    LinkHooks(
+      platform: HookPlatform.web,
+      extraDependencies: compileTargets,
+      recordedUsesFileNames: <String>[
+        for (final Dart2WebTarget target in compileTargets) ?target.recordedUsesFileName,
+      ],
+    ),
   ];
 
   Iterable<String> get buildPatternStems =>
@@ -1254,6 +1260,13 @@ class WebReleaseBundle extends Target {
       const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js', optional: true),
     ],
   ];
+
+  @override
+  ResolvedFiles resolveInputs(Environment environment) {
+    final ResolvedFiles resolved = super.resolveInputs(environment);
+    resolved.sources.removeWhere((File file) => file.basename == Dart2WasmTarget.supportJsFileName);
+    return resolved;
+  }
 
   @override
   List<Source> get outputs => <Source>[
@@ -1541,7 +1554,7 @@ class WebTemplatedFiles extends Target {
     final bool hasWasmBuild = descriptions.any(
       (Map<String, Object?> description) => description['compileTarget'] == 'dart2wasm',
     );
-    final File supportJsFile = environment.buildDir.childFile('main.dart.support.js');
+    final File supportJsFile = environment.buildDir.childFile(Dart2WasmTarget.supportJsFileName);
     final String? supportJs = hasWasmBuild && supportJsFile.existsSync()
         ? supportJsFile.readAsStringSync().trim()
         : null;
@@ -1643,21 +1656,44 @@ $supportsDart2WasmLine''';
   @override
   List<String> get depfiles => const <String>['web_templated_files.d'];
 
+  bool get _hasWasmBuild =>
+      compileTargets?.any(
+        (Dart2WebTarget target) => target is Dart2WasmTarget && !target.compilerConfig.dryRun,
+      ) ??
+      false;
+
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/web/index.html', optional: true),
     const Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js', optional: true),
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
-    if (compileTargets?.any(
-          (Dart2WebTarget target) => target is Dart2WasmTarget && !target.compilerConfig.dryRun,
-        ) ??
-        false)
-      const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true),
+    if (_hasWasmBuild)
+      const Source.pattern('{BUILD_DIR}/${Dart2WasmTarget.supportJsFileName}', optional: true),
     if (compileTargets != null)
       for (final Dart2WebTarget target in compileTargets!)
         for (final String stem in target.buildPatternStems)
           Dart2WebTarget.buildStemSource(Environment.kBuildDirectory, stem),
   ];
+
+  @override
+  ResolvedFiles resolveInputs(Environment environment) {
+    final ResolvedFiles resolved = super.resolveInputs(environment);
+    // `{BUILD_DIR}/main.dart.*.js` from `Dart2JSTarget` also matches
+    // `Dart2WasmTarget.supportJsFileName`; exclude it on non-Wasm builds and
+    // deduplicate it when `_hasWasmBuild` is true.
+    bool retainFirstSupportJs = _hasWasmBuild;
+    resolved.sources.removeWhere((File file) {
+      if (file.basename != Dart2WasmTarget.supportJsFileName) {
+        return false;
+      }
+      if (retainFirstSupportJs) {
+        retainFirstSupportJs = false;
+        return false;
+      }
+      return true;
+    });
+    return resolved;
+  }
 
   @override
   String get name => 'web_templated_files';
