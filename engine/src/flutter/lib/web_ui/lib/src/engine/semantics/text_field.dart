@@ -548,17 +548,19 @@ class SemanticTextField extends SemanticRole {
 
   void _updateInputType() {
     if (semanticsObject.flags.isMultiline) {
-      // text area can't be annotated with input type
+      // A text area can't be annotated with an input type, but it can declare
+      // its purpose, for example a multiline street address.
+      if (!_isAutofillOwned) {
+        editableElement.setAttribute('autocomplete', 'off');
+      }
+      _updateAutofillHint();
       return;
     }
     final input = editableElement as DomHTMLInputElement;
     if (semanticsObject.flags.isObscured) {
       input.type = 'password';
       if (!_isAutofillOwned) {
-        // Declare the most common purpose so a password field without
-        // autofill hints is not exposed as `off`. Hints carried by semantics
-        // replace this in [_updateAutofillHint].
-        input.autocomplete = 'current-password';
+        input.autocomplete = 'off';
       }
     } else {
       // For email inputs, prefer type="text" with inputmode="email" so that
@@ -588,7 +590,7 @@ class SemanticTextField extends SemanticRole {
         default:
       }
     }
-    _updateAutofillHint(input);
+    _updateAutofillHint();
   }
 
   /// Declares the field's purpose from the autofill hints carried by
@@ -596,12 +598,15 @@ class SemanticTextField extends SemanticRole {
   ///
   /// Once an autofill group or a text input connection applies its own hint,
   /// [_isAutofillOwned] is true and that hint is kept.
-  void _updateAutofillHint(DomHTMLInputElement input) {
+  void _updateAutofillHint() {
     final List<String>? hints = semanticsObject.autofillHints;
     if (hints == null || hints.isEmpty || _isAutofillOwned) {
       return;
     }
-    input.autocomplete = BrowserAutofillHints.instance.flutterToEngine(hints.first);
+    editableElement.setAttribute(
+      'autocomplete',
+      BrowserAutofillHints.instance.flutterToEngine(hints.first),
+    );
   }
 
   @override

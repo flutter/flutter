@@ -7663,6 +7663,23 @@ void main() {
     expect(scrollInvoked, isFalse);
   }, variant: KeySimulatorTransitModeVariant.all());
 
+  testWidgets('CupertinoTextField exposes its autofill hints in semantics', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(autofillHints: <String>[AutofillHints.postalCode])),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(EditableText)).getSemanticsData().autofillHints,
+      <String>[AutofillHints.postalCode],
+    );
+    handle.dispose();
+  });
+
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
