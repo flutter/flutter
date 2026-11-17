@@ -214,6 +214,33 @@ void main() {
             return jsonEncode({'result': 'unsupported'});
           }
           return jsonEncode({'result': true});
+        } else if (jsonMap['type'] == 'popup_focus_loss') {
+          // Opens a popup, moves focus to another window and reports whether
+          // the popup was closed as a result.
+          if (!controller.isActivated) {
+            await awaitNotification(controller.activate, () => controller.isActivated);
+          }
+          final popup = PopupWindowController(
+            parent: controller,
+            anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
+            positioner: _kSecondaryPositioner,
+          );
+          final otherWindow = WindowController(size: const Size(200, 200), title: 'Other');
+          try {
+            await awaitNotification(otherWindow.activate, () => !controller.isActivated);
+            // The popup is closed asynchronously after the focus change.
+            final stopwatch = Stopwatch()..start();
+            while (!popup.isDestroyed && stopwatch.elapsed < const Duration(seconds: 5)) {
+              await Future<void>.delayed(const Duration(milliseconds: 50));
+            }
+            return jsonEncode({'popupDestroyed': popup.isDestroyed});
+          } finally {
+            if (!popup.isDestroyed) {
+              popup.destroy();
+            }
+            otherWindow.destroy();
+            controller.activate();
+          }
         } else if (jsonMap['type'] == 'is_window_destroyed') {
           return jsonEncode({'isDestroyed': secondaryController?.isDestroyed});
         } else if (jsonMap['type'] == 'destroy_window') {

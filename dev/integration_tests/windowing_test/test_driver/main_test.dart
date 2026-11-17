@@ -245,6 +245,21 @@ void main() {
       await _expectIsDestroyedTransition(driver, 'popup');
     }, timeout: Timeout.none);
 
+    test(
+      'Popup window is closed when another window is focused',
+      () async {
+        final String response = await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'popup_focus_loss'}),
+          maxRetries: 1,
+        );
+        final data = jsonDecode(response) as Map<String, Object?>;
+        expect(data['popupDestroyed'], true);
+      },
+      timeout: Timeout.none,
+      testOn: 'linux',
+    );
+
     test('Satellite window is not destroyed until closed', () async {
       await _expectIsDestroyedTransition(driver, 'satellite');
     }, timeout: Timeout.none);
