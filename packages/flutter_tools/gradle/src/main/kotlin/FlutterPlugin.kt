@@ -316,9 +316,10 @@ class FlutterPlugin : Plugin<Project> {
         // `this` is shadowed inside the task configuration blocks reached from here, so capture the
         // plugin instance that owns the resolved Flutter SDK and local engine paths.
         val flutterGradlePlugin = this
-        // Read on the first onVariants call rather than in finalizeDsl. AGP runs onVariants only
-        // after every finalizeDsl callback, including ones registered after Flutter's, so this
-        // includes a versionCode that the app's build script or another plugin sets there.
+        // Only read `dslVersionCodes` inside `onVariants`, never earlier during `apply()`. AGP runs
+        // `onVariants` after all `finalizeDsl` callbacks, including ones registered after
+        // Flutter's. Evaluating this lazy value inside `onVariants` therefore sees any
+        // `versionCode` set in `finalizeDsl`.
         val dslVersionCodes by lazy {
             DslVersionCodes.from(FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo))
         }

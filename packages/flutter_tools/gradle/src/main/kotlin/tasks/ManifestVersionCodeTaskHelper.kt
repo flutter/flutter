@@ -58,10 +58,10 @@ object ManifestVersionCodeTaskHelper {
                 "resolveManifestVersionCode${FlutterPluginUtils.capitalize(variant.name)}",
                 ManifestVersionCodeTask::class.java
             ) {
-                // AGP's Variant API has no direct getter for the main manifest. ManifestFiles.all
-                // orders sources from highest to lowest priority (generated, overlays, then main;
-                // AGP itself gets overlays with all.dropLast(1)), so last() is the main manifest.
-                // Using map keeps this lazy because manifests.all can contain other tasks' outputs.
+                // AGP's Variant API has no direct getter for the main manifest; see
+                // `manifestOverlayFiles` in AGP's `SourcesImpl.kt` for `manifests.all` ordering:
+                // https://android.googlesource.com/platform/tools/base/+/refs/heads/mirror-goog-studio-main/build-system/gradle-core/src/main/java/com/android/build/api/variant/impl/SourcesImpl.kt
+                // Using `map` keeps this lazy because `manifests.all` can contain task outputs.
                 mainManifest.set(
                     variant.sources.manifests.all
                         .map { it.last() }
@@ -86,13 +86,10 @@ object ManifestVersionCodeTaskHelper {
     /**
      * Reads the `android:versionCode` attribute from [manifest]'s root `<manifest>` element.
      *
-     * For example, `<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     * android:versionCode="7">` returns `Result.Found(7)`. Returns [Result.NotFound] if the file
-     * cannot be read or parsed, omits `android:versionCode`, sets a value `<= 0`, or sets anything
-     * other than a decimal integer, such as a placeholder (`${versionCode}`), a resource reference
-     * (`@integer/version_code`), or hex (`0x10`). AGP parses this attribute with
-     * `Integer.parseInt` too, so it fails on those values even without Flutter. AGP ignores values
-     * `<= 0` and Google Play rejects them.
+     * Returns [Result.Found] when `android:versionCode` is a positive 32-bit decimal integer (for
+     * example, `android:versionCode="7"` returns `Result.Found(7)`). Returns [Result.NotFound]
+     * otherwise, including when [manifest] cannot be read, omits `android:versionCode`, or uses a
+     * placeholder such as `${versionCode}`.
      */
     internal fun readVersionCode(manifest: File): Result {
         val root =
@@ -104,8 +101,15 @@ object ManifestVersionCodeTaskHelper {
                 return Result.NotFound("$manifest could not be read (${e.message})")
             }
         val value = root.getAttributeNS(ANDROID_NAMESPACE, "versionCode").trim()
-        // Like AGP's Integer.parseInt, BigInteger accepts a leading + or -. Unlike it, BigInteger
-        // also parses values outside the Int range, so they get an accurate reason.
+        // Reject non-decimal values (${versionCode}, @integer/..., 0x10) and values <= 0 to match
+        // AGP. When the DSL omits versionCode, AGP's ManifestData parser runs Integer.parseInt on
+        // the raw main manifest before ProcessApplicationManifest replaces manifestPlaceholders.
+        // AGP also ignores values <= 0, and Google Play rejects them. Reading
+        // SingleArtifact.MERGED_MANIFEST instead would create a task cycle because
+        // ProcessApplicationManifest takes VariantOutput.versionCode as an input.
+        //
+        // BigInteger accepts a leading + or - like Integer.parseInt, and also parses values outside
+        // the Int range so overflow gets a specific reason.
         val versionCode =
             try {
                 BigInteger(value)
