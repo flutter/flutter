@@ -1584,7 +1584,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             autofocus: widget.autofocus,
             obscuringCharacter: widget.obscuringCharacter,
             obscureText: widget.obscureText,
-            autofillHints: widget.autofillHints,
             autocorrect: widget.autocorrect,
             smartDashesType: widget.smartDashesType,
             smartQuotesType: widget.smartQuotesType,
