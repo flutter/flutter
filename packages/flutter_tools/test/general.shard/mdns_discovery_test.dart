@@ -596,6 +596,35 @@ You can check which processes are using port 5353 by running:
           throwsToolExit(message: 'Did not find a Dart VM Service advertised for srv-asdf.'),
         );
       });
+
+      testWithoutContext('queryForAttach uses mdnsClientFactory for preliminary and main queries when preliminaryMDnsClient is omitted', () async {
+        final preliminaryClient = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+        );
+        final mainClient = FakeMDnsClient(
+          <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
+          <String, List<SrvResourceRecord>>{
+            'bar': <SrvResourceRecord>[
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
+            ],
+          },
+        );
+
+        final clients = <MDnsClient>[preliminaryClient, mainClient];
+        var clientIndex = 0;
+
+        final portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClientFactory: () => clients[clientIndex++],
+          logger: BufferLogger.test(),
+          analytics: const NoOpAnalytics(),
+          platform: FakePlatform(),
+        );
+
+        final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach();
+        expect(result?.port, 123);
+        expect(clientIndex, 2);
+      });
     });
 
     group('for launch', () {

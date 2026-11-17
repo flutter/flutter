@@ -48,6 +48,8 @@ typedef MDnsClientFactory = MDnsClient Function();
 
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
+  /// [mdnsClientFactory] is invoked once per mDNS query so cached records do
+  /// not persist across queries.
   MDnsVmServiceDiscovery({
     required this._analytics,
     required this._logger,
@@ -59,8 +61,8 @@ class MDnsVmServiceDiscovery {
 
   final MDnsClientFactory _clientFactory;
 
-  // Used when discovering VM services with `queryForAttach` to do a preliminary
-  // check for already running services so that results are not cached in client.
+  // Overrides `_clientFactory` for the initial running-service check in
+  // `queryForAttach`.
   final MDnsClient? _preliminaryClient;
 
   final Logger _logger;
@@ -112,12 +114,12 @@ class MDnsVmServiceDiscovery {
     bool useDeviceIPAsHost = false,
   }) async {
     // Poll for 5 seconds to see if there are already services running.
-    // Use a new instance of MDnsClient so results don't get cached in _client.
+    // Use a separate MDnsClient instance so cached records do not carry over to the main query.
     // If no results are found, poll for a longer duration to wait for connections.
     // If more than 1 result is found, throw an error since it can't be determined which to pick.
     // If only one is found, return it.
     final List<MDnsVmServiceDiscoveryResult> results = await _pollingVmService(
-      _preliminaryClient ?? MDnsClient(),
+      _preliminaryClient ?? _clientFactory(),
       applicationId: applicationId,
       deviceVmServicePort: deviceVmservicePort,
       ipv6: ipv6,
