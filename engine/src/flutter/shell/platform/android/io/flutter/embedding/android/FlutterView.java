@@ -1125,6 +1125,25 @@ public class FlutterView extends FrameLayout
 
   // -------- Start: Keyboard -------
 
+  /**
+   * Invoked by Android when the window containing this view gains or loses focus.
+   *
+   * <p>Android tears down the input connection when the app loses window focus (e.g. when the app
+   * is backgrounded), but the framework is unaware of this: it still considers its input connection
+   * to be active and will not call TextInput.show again when the window regains focus. Forward
+   * window focus changes to the {@link TextInputPlugin} so that it can re-establish the input
+   * connection if necessary.
+   *
+   * <p>See https://github.com/flutter/flutter/issues/182941.
+   */
+  @Override
+  public void onWindowFocusChanged(boolean hasFocus) {
+    super.onWindowFocusChanged(hasFocus);
+    if (textInputPlugin != null) {
+      textInputPlugin.onWindowFocusChanged(hasFocus);
+    }
+  }
+
   @Override
   public BinaryMessenger getBinaryMessenger() {
     return flutterEngine.getDartExecutor();
