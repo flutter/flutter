@@ -136,8 +136,7 @@ class SawTooth extends Curve {
 
   @override
   double transformInternal(double t) {
-    t *= count;
-    return t - t.truncateToDouble();
+    return (t * count) % 1.0;
   }
 
   @override
@@ -1265,8 +1264,7 @@ class _DecelerateCurve extends Curve {
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
-    t = 1.0 - t;
-    return 1.0 - t * t;
+    return t * (t - 2);
   }
 }
 
@@ -1276,8 +1274,7 @@ double _bounce(double t) {
   if (t < 1.0 / 2.75) {
     return 7.5625 * t * t;
   } else if (t < 2 / 2.75) {
-    t -= 1.5 / 2.75;
-    return 7.5625 * t * t + 0.75;
+    return t * (7.5625 * t - 8.25) + 3;
   } else if (t < 2.5 / 2.75) {
     t -= 2.25 / 2.75;
     return 7.5625 * t * t + 0.9375;
@@ -1346,8 +1343,7 @@ class ElasticInCurve extends Curve {
   @override
   double transformInternal(double t) {
     final double s = period / 4.0;
-    t = t - 1.0;
-    return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
+    return -math.pow(2.0, 10.0 * (t - 1.0)) * math.sin(((t - 1.0) - s) * (math.pi * 2.0) / period);
   }
 
   @override

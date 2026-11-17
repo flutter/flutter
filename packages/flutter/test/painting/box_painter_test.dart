@@ -133,6 +133,7 @@ void main() {
     expect(BoxShadow.lerpList(null, null, 0), null);
     const border = <BoxShadow>[BoxShadow()];
     expect(identical(BoxShadow.lerpList(border, border, 0.5), border), true);
+
   });
 
   test('BoxShadow BlurStyle test', () {
