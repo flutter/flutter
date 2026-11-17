@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/compiler/compiler.gni")
-import("//build/toolchain/clang.gni")
 import("//build/toolchain/rbe.gni")
 import("//build/toolchain/toolchain.gni")
 import("//build/toolchain/win/win_toolchain_data.gni")
@@ -91,9 +89,10 @@ template("msvc_toolchain") {
 
     cl = invoker.cl
 
-    # ThinLTO object files are LLVM bitcode, which MSVC's link.exe and lib.exe
-    # can't consume, so use lld-link (and its /lib mode) when ThinLTO is on.
-    if (toolchain_is_clang && enable_lto && use_thin_lto) {
+    # Clang toolchains link with lld-link (and use its /lib mode for static
+    # libraries). This is required for ThinLTO, since its object files are
+    # LLVM bitcode, which MSVC's link.exe and lib.exe can't consume.
+    if (toolchain_is_clang) {
       lld_prefix = rebase_path("$clang_base_path/bin", root_build_dir)
       lib = "$lld_prefix/lld-link.exe /lib"
       link = "$lld_prefix/lld-link.exe"

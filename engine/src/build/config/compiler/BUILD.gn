@@ -1056,9 +1056,9 @@ config("optimize") {
   cflags += lto_flags
 
   # On Windows only ThinLTO is supported. clang-cl emits LLVM bitcode objects
-  # and the toolchain (//build/toolchain/win) switches to lld-link, which
-  # performs the ThinLTO backend automatically when it sees bitcode inputs, so
-  # no LTO specific linker flag is needed.
+  # and lld-link (see //build/toolchain/win) performs the ThinLTO backend
+  # automatically when it sees bitcode inputs, so no LTO specific linker flag
+  # is needed.
   if (is_win && enable_lto && use_thin_lto) {
     cflags += [ "-flto=thin" ]
   }
