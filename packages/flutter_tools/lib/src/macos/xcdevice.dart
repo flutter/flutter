@@ -29,6 +29,8 @@ import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcode_debug.dart';
 import '../ios/xcodeproj.dart';
+import '../mdns_discovery.dart';
+import '../template.dart';
 import 'cocoapods.dart';
 import 'xcode.dart';
 
@@ -57,7 +59,9 @@ class XCDevice {
     required this._analytics,
     required this._cocoaPods,
     required IProxy iproxy,
+    required this._mdnsVmServiceDiscovery,
     required this._plistParser,
+    required TemplatePathProvider templatePathProvider,
     required this._templateRenderer,
     required this._toolContext,
     required this._xcode,
@@ -84,7 +88,13 @@ class XCDevice {
         coreDeviceControl ?? IOSCoreDeviceControl(toolContext: _toolContext, xcode: _xcode);
     _xcodeDebug =
         xcodeDebug ??
-        XcodeDebug(logger: logger, processManager: processManager, xcode: _xcode, fileSystem: fs);
+        XcodeDebug(
+          fileSystem: fs,
+          logger: logger,
+          processManager: processManager,
+          templatePathProvider: templatePathProvider,
+          xcode: _xcode,
+        );
     shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();
@@ -111,6 +121,7 @@ class XCDevice {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final IProxy _iProxy;
   late final IOSCoreDeviceControl _coreDeviceControl;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
   late final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
   final CocoaPods _cocoaPods;
@@ -641,6 +652,7 @@ class XCDevice {
           toolContext: _toolContext,
           analytics: _analytics,
           cocoaPods: _cocoaPods,
+          mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
           plistParser: _plistParser,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,

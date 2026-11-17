@@ -6,7 +6,10 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -14,11 +17,13 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 
@@ -56,6 +61,18 @@ name: my_app
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
       final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(fs: fileSystem),
+        ),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -90,6 +107,18 @@ name: my_app
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
       final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(fs: fileSystem),
+        ),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         buildSystem: TestBuildSystem.all(BuildResult(success: false)),
@@ -121,6 +150,18 @@ name: my_app
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
       final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(fs: fileSystem),
+        ),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         buildSystem: TestBuildSystem.error(Exception('foo')),
@@ -151,6 +192,18 @@ name: my_app
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
       final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(fs: fileSystem),
+        ),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -184,6 +237,18 @@ name: my_app
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
       final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(fs: fileSystem),
+        ),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         buildSystem: TestBuildSystem.list(<BuildResult>[

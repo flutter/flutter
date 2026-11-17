@@ -223,10 +223,33 @@ public class FlutterRenderer implements TextureRegistry {
   @NonNull
   @Override
   public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
+    return createSurfaceProducerInternal(lifecycle, /* skipHardwareBufferDefectCheck= */ false);
+  }
+
+  /**
+   * Creates a {@link SurfaceProducer} for a platform view render target.
+   *
+   * <p>Unlike {@link #createSurfaceProducer(SurfaceLifecycle)}, this skips the HardwareBuffer
+   * defect check. That check is a workaround for video decoders that write directly into the
+   * producer's surface. Platform views draw into the surface through the Android view renderer
+   * instead, and the workaround breaks them on some devices. See
+   * https://github.com/flutter/flutter/issues/188303.
+   *
+   * <p>This is only meant for {@code PlatformViewsController}. Plugins should use {@link
+   * #createSurfaceProducer(SurfaceLifecycle)}.
+   */
+  @NonNull
+  public SurfaceProducer createPlatformViewSurfaceProducer(@NonNull SurfaceLifecycle lifecycle) {
+    return createSurfaceProducerInternal(lifecycle, /* skipHardwareBufferDefectCheck= */ true);
+  }
+
+  @NonNull
+  private SurfaceProducer createSurfaceProducerInternal(
+      SurfaceLifecycle lifecycle, boolean skipHardwareBufferDefectCheck) {
     final SurfaceProducer entry;
     if (!debugForceSurfaceProducerGlTextures
         && Build.VERSION.SDK_INT >= API_LEVELS.API_29
-        && !hasAndroidHardwareBufferDefect()) {
+        && (skipHardwareBufferDefectCheck || !hasAndroidHardwareBufferDefect())) {
       final long id = nextTextureId.getAndIncrement();
       final ImageReaderSurfaceProducer producer = new ImageReaderSurfaceProducer(id);
       boolean reset = lifecycle == SurfaceLifecycle.resetInBackground;
