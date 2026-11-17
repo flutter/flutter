@@ -4,7 +4,6 @@
 
 import imp
 import os
-import sys
 import unittest
 
 SKY_TOOLS = os.path.dirname(os.path.abspath(__file__))
@@ -72,7 +71,6 @@ class GNTestCase(unittest.TestCase):
     self.assertEqual(gn.parse_size('5MB'), 5 * 2**20)
     self.assertEqual(gn.parse_size('5GB'), 5 * 2**30)
 
-  @unittest.skipIf(sys.platform.startswith('win'), 'LTO GN args are not set on Windows')
   def test_thin_lto(self):
     release = ['--runtime-mode', 'release']
     self.assertFalse(self._gn_args(release)['use_thin_lto'])

@@ -85,7 +85,7 @@
                 "ci/host_profile",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe"
             ],
             "name": "ci\\host_profile",
@@ -125,7 +125,7 @@
                 "ci/host_release",
                 "--runtime-mode",
                 "release",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe"
             ],
             "name": "ci\\host_release",

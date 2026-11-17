@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/compiler/compiler.gni")
+import("//build/toolchain/clang.gni")
 import("//build/toolchain/rbe.gni")
 import("//build/toolchain/toolchain.gni")
 import("//build/toolchain/win/win_toolchain_data.gni")
@@ -88,6 +90,17 @@ template("msvc_toolchain") {
     print(env_file)
 
     cl = invoker.cl
+
+    # ThinLTO object files are LLVM bitcode, which MSVC's link.exe and lib.exe
+    # can't consume, so use lld-link (and its /lib mode) when ThinLTO is on.
+    if (toolchain_is_clang && enable_lto && use_thin_lto) {
+      lld_prefix = rebase_path("$clang_base_path/bin", root_build_dir)
+      lib = "$lld_prefix/lld-link.exe /lib"
+      link = "$lld_prefix/lld-link.exe"
+    } else {
+      lib = "lib.exe"
+      link = "link.exe"
+    }
 
     # Make these apply to all tools below.
     lib_switch = ""
@@ -183,7 +196,7 @@ template("msvc_toolchain") {
 
     tool("alink") {
       rspfile = "{{output}}.rsp"
-      command = "\"$python_path\" $tool_wrapper_path link-wrapper $env False lib.exe /nologo /ignore:4221 /OUT:{{output}} @$rspfile"
+      command = "\"$python_path\" $tool_wrapper_path link-wrapper $env False $lib /nologo /ignore:4221 /OUT:{{output}} @$rspfile"
       description = "LIB {{output}}"
       outputs = [
         # Ignore {{output_extension}} and always use .lib, there's no reason to
@@ -205,7 +218,7 @@ template("msvc_toolchain") {
       pdbname = "${dllname}.pdb"
       rspfile = "${dllname}.rsp"
 
-      link_command = "\"$python_path\" $tool_wrapper_path link-wrapper $env False link.exe /nologo /IMPLIB:$libname /DLL /OUT:$dllname /PDB:${dllname}.pdb @$rspfile"
+      link_command = "\"$python_path\" $tool_wrapper_path link-wrapper $env False $link /nologo /IMPLIB:$libname /DLL /OUT:$dllname /PDB:${dllname}.pdb @$rspfile"
 
       # TODO(brettw) support manifests
       #manifest_command = "\"$python_path\" $tool_wrapper_path manifest-wrapper $env mt.exe -nologo -manifest $manifests -out:${dllname}.manifest"
@@ -236,7 +249,7 @@ template("msvc_toolchain") {
       rspfile = "$binary_output.rsp"
       pdbfile = "$binary_output.pdb"
 
-      link_command = "\"$python_path\" $tool_wrapper_path link-wrapper $env False link.exe /nologo /OUT:$binary_output /PDB:$pdbfile @$rspfile"
+      link_command = "\"$python_path\" $tool_wrapper_path link-wrapper $env False $link /nologo /OUT:$binary_output /PDB:$pdbfile @$rspfile"
 
       # TODO(brettw) support manifests
       #manifest_command = "\"$python_path\" $tool_wrapper_path manifest-wrapper $env mt.exe -nologo -manifest $manifests -out:{{output}}.manifest"
