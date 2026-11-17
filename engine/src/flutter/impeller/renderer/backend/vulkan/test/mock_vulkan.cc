@@ -1397,6 +1397,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroySurfaceKHR);
   } else if (strcmp("vkAcquireNextImageKHR", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkAcquireNextImageKHR);
+  } else if (strcmp("vkQueuePresentKHR", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkQueuePresentKHR);
   } else if (strcmp("vkCreateFramebuffer", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateFramebuffer);
   } else if (strcmp("vkDestroyFramebuffer", pName) == 0) {

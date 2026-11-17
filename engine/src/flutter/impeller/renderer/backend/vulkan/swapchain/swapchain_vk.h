@@ -21,6 +21,9 @@
 
 namespace impeller {
 
+class ContextVK;
+class PendingGpuSubmission;
+
 #if FML_OS_ANDROID
 using CreateTransactionCB = std::function<android::SurfaceTransaction()>;
 #endif  // FML_OS_ANDROID
@@ -69,6 +72,13 @@ class SwapchainVK {
  protected:
   SwapchainVK();
 };
+
+/// Submits a completion fence on [context]'s graphics queue to [FenceWaiterVK]
+/// so [submission] is marked complete in [GpuSubmissionTracker] as soon as
+/// the GPU finishes the swapchain's preceding submit.
+void TrackSwapchainSubmissionWithFenceWaiter(
+    const ContextVK& context,
+    const PendingGpuSubmission& submission);
 
 }  // namespace impeller
 

@@ -87,7 +87,8 @@ class KHRSwapchainImplVK final
                      vk::SwapchainKHR old_swapchain);
 
   bool Present(const std::shared_ptr<KHRSwapchainImageVK>& image,
-               uint32_t index);
+               uint32_t index,
+               size_t frame_index);
 
   void WaitIdle() const;
 

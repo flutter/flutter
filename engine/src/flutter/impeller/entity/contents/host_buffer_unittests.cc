@@ -288,5 +288,54 @@ TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrash) {
   EXPECT_EQ(view.GetRange().length, 0u);
 }
 
+TEST(PendingGpuSubmissionTest, LifecycleAndMoves) {
+  PendingGpuSubmission empty;
+  EXPECT_FALSE(empty.IsPending());
+  EXPECT_EQ(empty.GetId(), 0u);
+  empty.Complete();
+
+  PendingGpuSubmission null_tracker(nullptr);
+  EXPECT_FALSE(null_tracker.IsPending());
+  EXPECT_EQ(null_tracker.GetId(), 0u);
+
+  auto tracker = std::make_shared<GpuSubmissionTracker>();
+  {
+    PendingGpuSubmission s1(tracker);
+    EXPECT_TRUE(s1.IsPending());
+    EXPECT_EQ(s1.GetId(), 1u);
+    EXPECT_EQ(tracker->LatestSubmission(), 1u);
+    EXPECT_EQ(tracker->CompletedThrough(), 0u);
+
+    // Move constructor transfers ownership without completing.
+    PendingGpuSubmission s1_moved(std::move(s1));
+    // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
+    EXPECT_FALSE(s1.IsPending());
+    EXPECT_TRUE(s1_moved.IsPending());
+    EXPECT_EQ(tracker->CompletedThrough(), 0u);
+
+    // Move assignment completes the displaced submission.
+    PendingGpuSubmission s2(tracker);
+    EXPECT_EQ(s2.GetId(), 2u);
+    s1_moved = std::move(s2);
+    EXPECT_EQ(tracker->CompletedThrough(), 1u);
+    EXPECT_TRUE(s1_moved.IsPending());
+    EXPECT_EQ(s1_moved.GetId(), 2u);
+
+    // Self-move is a no-op.
+    auto* alias = &s1_moved;
+    s1_moved = std::move(*alias);
+    EXPECT_TRUE(s1_moved.IsPending());
+    EXPECT_EQ(tracker->CompletedThrough(), 1u);
+
+    // Complete() is idempotent.
+    s1_moved.Complete();
+    EXPECT_FALSE(s1_moved.IsPending());
+    EXPECT_EQ(tracker->CompletedThrough(), 2u);
+    s1_moved.Complete();
+    EXPECT_EQ(tracker->CompletedThrough(), 2u);
+  }
+  EXPECT_EQ(tracker->CompletedThrough(), 2u);
+}
+
 }  // namespace  testing
 }  // namespace impeller
