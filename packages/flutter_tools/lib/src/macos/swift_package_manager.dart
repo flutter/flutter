@@ -547,4 +547,62 @@ class SwiftPackageManager {
       // Ignore errors, as another process might be concurrently modifying the directory.
     }
   }
+
+  static final List<_SwiftPMPluginErrorMatcher> _errorMatchers = <_SwiftPMPluginErrorMatcher>[
+    _SwiftPMPluginErrorMatcher(
+      // A target uses a custom `path` that resolves outside of the directory containing
+      // Package.swift, such as `path: "../Classes"`. SwiftPM requires target sources to be within
+      // the package root. See https://github.com/flutter/flutter/issues/184021.
+      //
+      // Example: target 'plugin_a' in package 'plugin_a' is outside the package root
+      pattern: RegExp(r"target '[^']+' in package '(?<package>[^']+)' is outside the package root"),
+      // Use package name as the plugin name (target name could be different).
+      pluginName: (RegExpMatch match) => match.namedGroup('package'),
+      message: (String pluginName) =>
+          'Flutter plugin "$pluginName" has an incorrectly configured Package.swift file: '
+          'a target uses a path outside of the package root.\n'
+          "Swift Package Manager requires all of a target's sources and resources to be inside "
+          'the package root (the directory containing Package.swift). Paths such as '
+          '`path: "../Classes"` are not supported.\n'
+          'Please contact the plugin maintainers for assistance. Plugin authors can follow the '
+          'migration guide to move the sources inside the package root:\n'
+          '  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-plugin-authors',
+    ),
+  ];
+
+  /// Parses a Swift Package Manager error message and returns a guided error
+  /// message if the error matches a known pattern caused by one of [pluginNames].
+  static String? parsePluginError(String? message, {required List<String> pluginNames}) {
+    if (message == null || message.isEmpty) {
+      return null;
+    }
+    for (final _SwiftPMPluginErrorMatcher matcher in _errorMatchers) {
+      for (final RegExpMatch match in matcher.pattern.allMatches(message)) {
+        final String? pluginName = matcher.pluginName(match);
+        if (pluginName != null && pluginNames.contains(pluginName)) {
+          // The plugin can't be fixed by the app developer, so always offer disabling Swift
+          // Package Manager as a workaround.
+          return '${matcher.message(pluginName)}\n\n$kDisableSwiftPMInstructions';
+        }
+      }
+    }
+    return null;
+  }
+}
+
+class _SwiftPMPluginErrorMatcher {
+  const _SwiftPMPluginErrorMatcher({
+    required this.pattern,
+    required this.pluginName,
+    required this.message,
+  });
+
+  /// The pattern to match against the Swift Package Manager error output.
+  final RegExp pattern;
+
+  /// Extracts the name of the plugin that caused the error from a match of [pattern].
+  final String? Function(RegExpMatch match) pluginName;
+
+  /// Builds the guided error message for the plugin that caused the error.
+  final String Function(String pluginName) message;
 }
