@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -173,6 +174,99 @@ void main() {
     expect(controller.size, greaterThan(.5));
     expect(scrollController.offset, 100.0);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scrolls to a negative minScrollExtent before shrinking', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    const Key centerKey = ValueKey<String>('center');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DraggableScrollableSheet(
+          controller: controller,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return CustomScrollView(
+              controller: scrollController,
+              center: centerKey,
+              slivers: const <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 200.0)),
+                SliverToBoxAdapter(key: centerKey, child: SizedBox(height: 2000.0)),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<CustomScrollView>(find.byType(CustomScrollView))
+        .controller!;
+    expect(scrollController.position.minScrollExtent, -200.0);
+    expect(scrollController.offset, 0.0);
+    // The content above the center sliver is the start of the list. A downward
+    // drag scrolls to it before it shrinks the sheet.
+    await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 100.0));
+    await tester.pumpAndSettle();
+    expect(controller.size, .5);
+    expect(scrollController.offset, -100.0);
+    await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 100.0));
+    await tester.pumpAndSettle();
+    expect(controller.size, .5);
+    expect(scrollController.offset, -200.0);
+    await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 60.0));
+    await tester.pumpAndSettle();
+    expect(controller.size, closeTo(.4, precisionErrorTolerance));
+    expect(scrollController.offset, -200.0);
+  });
+
+  for (final atSnapSize in <bool>[false, true]) {
+    testWidgets(
+      atSnapSize
+          ? 'Scrolls the list on a downward fling when already at a snap size'
+          : 'Snaps on a downward fling after expanding with an already scrolled list',
+      (WidgetTester tester) async {
+        final controller = DraggableScrollableController();
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          boilerplateWidget(
+            null,
+            controller: controller,
+            itemExtent: 50.0,
+            snap: true,
+            snapSizes: <double>[.4, if (atSnapSize) .65, .8],
+          ),
+        );
+        final ScrollController scrollController = tester
+            .widget<ListView>(find.byType(ListView))
+            .controller!;
+        scrollController.jumpTo(100.0);
+        await tester.pump();
+        // Expand the sheet, then release with a downward velocity.
+        final Drag drag = scrollController.position.drag(DragStartDetails(), () {});
+        drag.update(
+          DragUpdateDetails(
+            globalPosition: Offset.zero,
+            delta: const Offset(0.0, -90.0),
+            primaryDelta: -90.0,
+          ),
+        );
+        expect(controller.size, closeTo(.65, precisionErrorTolerance));
+        expect(scrollController.offset, 100.0);
+        drag.end(
+          DragEndDetails(
+            primaryVelocity: 1000.0,
+            velocity: const Velocity(pixelsPerSecond: Offset(0.0, 1000.0)),
+          ),
+        );
+        await tester.pumpAndSettle(const Duration(milliseconds: 16));
+        // A sheet already at a snap size lets the list scroll. Otherwise, it
+        // snaps in the direction of the fling without moving the list.
+        expect(controller.size, atSnapSize ? .65 : .4);
+        expect(scrollController.offset, atSnapSize ? 0.0 : 100.0);
+      },
+    );
+  }
 
   testWidgets(
     'Invalid snap targets throw assertion errors.',
