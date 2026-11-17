@@ -320,15 +320,16 @@ bool ReactorGLES::ConsolidateHandles() {
         // Some objects can only be deleted on a specific thread.  Collection
         // of these objects will be deferred until the owner thead executes
         // a reaction and triggers collection of handles.
+        //
+        // Other objects collected by a thread that can react are deleted on
+        // that thread, after the commands its context issued against them.
+        // An owned object ignores its collecting thread, since only its
+        // owner's context can have issued commands against it.
         const auto& owner_thread = handle.first.owner_thread_;
-        if (owner_thread.has_value() && *owner_thread != current_thread) {
-          continue;
-        }
-        // Objects collected by a thread that can react are deleted on that
-        // thread, after the commands its context issued against them.
-        const auto& collecting_thread = handle.second.collecting_thread;
-        if (collecting_thread.has_value() &&
-            *collecting_thread != current_thread) {
+        const auto& deleting_thread = owner_thread.has_value()
+                                          ? owner_thread
+                                          : handle.second.collecting_thread;
+        if (deleting_thread.has_value() && *deleting_thread != current_thread) {
           continue;
         }
         std::optional<GLStorage> storage;
