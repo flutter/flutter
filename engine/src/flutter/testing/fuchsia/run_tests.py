@@ -132,6 +132,9 @@ def main() -> int:
   if VARIANT.endswith('_arm64') or VARIANT.endswith('_arm64_tester'):
     setup_cmd.append('--product=terminal.qemu-arm64')
   elif VARIANT.endswith('_x64') or VARIANT.endswith('_x64_tester'):
+    os.environ['FUCHSIA_ORCHESTRATE_CONFIG'] = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), 'orchestrate_x64.json')
+    )
     setup_cmd.append('--orchestrate')
   else:
     assert False, 'Unsupported variant ' + VARIANT

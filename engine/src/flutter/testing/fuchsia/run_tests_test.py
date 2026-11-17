@@ -23,12 +23,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../tools/fuchsia'))
-
 # pylint is looking for a wrong //testing/run_tests.py.
-# pylint: disable=import-error, no-member, wrong-import-position
+# pylint: disable=no-member
 import run_tests
-import with_envs
 
 run_tests.OUT_DIR = '/tmp/out/fuchsia_debug_x64'
 os.makedirs(run_tests.OUT_DIR, exist_ok=True)
@@ -135,47 +132,16 @@ class RunTestsTest(unittest.TestCase):
         self.assertNotIn('--', txt_calls[0])
         setup_proc.terminate.assert_called_once()
         setup_proc.wait.assert_called_once()
-        with open(os.path.join(os.path.dirname(run_tests.__file__), 'orchestrate_x64.json'),
-                  'r') as config_file:
+        expected_config = os.path.abspath(
+            os.path.join(os.path.dirname(run_tests.__file__), 'orchestrate_x64.json')
+        )
+        self.assertEqual(os.environ['FUCHSIA_ORCHESTRATE_CONFIG'], expected_config)
+        with open(expected_config, 'r') as config_file:
           config = json.load(config_file)
         self.assertIn('orchestrate-error-on-test-failure', config['experiments'])
         self.assertEqual(config['emulator']['ffx_path'], 'fuchsia-sdk/tools/x64/ffx')
         self.assertEqual(config['emulator']['local_pb'], 'fuchsia-images/terminal/x64/')
         self.assertEqual(config['emulator']['build_ids'], ['.build-id', 'fuchsia-sdk/.build-id'])
-
-  def test_with_envs_sets_orchestrate_config(self):
-    mock_proc = MagicMock()
-    mock_proc.__enter__.return_value = mock_proc
-    mock_proc.returncode = 0
-    with patch.object(with_envs, 'catch_sigterm'), \
-         patch.object(with_envs.platform, 'system', return_value='Linux'), \
-         patch.object(with_envs, 'get_host_arch', return_value='x64'), \
-         patch.object(with_envs.subprocess, 'Popen', return_value=mock_proc):
-      with patch.dict(os.environ, {}, clear=True), \
-           patch.object(
-               sys, 'argv',
-               ['with_envs.py', 'testing/fuchsia/run_tests.py', 'ci/fuchsia_debug_x64_tester']):
-        self.assertEqual(with_envs.Main(), 0)
-        self.assertEqual(
-            os.environ['FUCHSIA_ORCHESTRATE_CONFIG'],
-            os.path.join(os.environ['SRC_ROOT'], 'flutter/testing/fuchsia/orchestrate_x64.json')
-        )
-      with patch.dict(os.environ, {}, clear=True), \
-           patch.object(
-               sys, 'argv',
-               ['with_envs.py', 'testing/fuchsia/run_tests.py', 'ci/fuchsia_debug_arm64_tester']):
-        self.assertEqual(with_envs.Main(), 0)
-        self.assertEqual(
-            os.environ['FUCHSIA_ORCHESTRATE_CONFIG'],
-            os.path.join(
-                os.environ['SRC_ROOT'], 'flutter/testing/fuchsia/orchestrate_x64_arm64.json'
-            )
-        )
-      with patch.dict(os.environ, {'FUCHSIA_ORCHESTRATE_CONFIG': '/custom/config.json'},
-                      clear=True), \
-           patch.object(sys, 'argv', ['with_envs.py', 'testing/fuchsia/run_tests.py']):
-        self.assertEqual(with_envs.Main(), 0)
-        self.assertEqual(os.environ['FUCHSIA_ORCHESTRATE_CONFIG'], '/custom/config.json')
 
   def test_main_arm64_uses_qemu_product_without_orchestrate(self):
     with tempfile.TemporaryDirectory() as temp_dir, \
