@@ -198,6 +198,169 @@ void main() {
     );
   });
 
+  const initialManifest = '''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+</manifest>
+''';
+
+  Future<({String manifest, TaskResult result})> runPerfTestAndReadManifest({
+    required DeviceOperatingSystem os,
+    bool? enableImpeller,
+    bool? forceOpenGLES,
+    bool enableVulkanGPUTracing = true,
+    bool isE2e = false,
+  }) async {
+    deviceOperatingSystem = os;
+    addTearDown(() {
+      deviceOperatingSystem = DeviceOperatingSystem.fake;
+    });
+
+    final manifestFile =
+        File('${testDirectory.absolute.path}/android/app/src/main/AndroidManifest.xml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(initialManifest);
+
+    final fakeData = <String, dynamic>{
+      'frame_count': 5,
+      'average_frame_build_time_millis': 0.1,
+      'worst_frame_build_time_millis': 0.1,
+      '90th_percentile_frame_build_time_millis': 0.1,
+      '99th_percentile_frame_build_time_millis': 0.1,
+      'average_frame_rasterizer_time_millis': 0.1,
+      'worst_frame_rasterizer_time_millis': 0.1,
+      '90th_percentile_frame_rasterizer_time_millis': 0.1,
+      '99th_percentile_frame_rasterizer_time_millis': 0.1,
+      'old_gen_gc_count': 1,
+      'total_ui_gc_time': 1,
+      'average_vsync_transitions_missed': 1,
+      '90th_percentile_vsync_transitions_missed': 1,
+      '99th_percentile_vsync_transitions_missed': 1,
+      'average_gpu_frame_time': 1.2,
+      'worst_gpu_frame_time': 2.4,
+    };
+    const resultFileName = 'fake_result';
+    String? manifestDuringDrive;
+    void driveCallback(List<String> arguments) {
+      manifestDuringDrive = manifestFile.readAsStringSync();
+      final resultFile = File('$perfTestOutputPath/$resultFileName.json')
+        ..createSync(recursive: true);
+      resultFile.writeAsStringSync(json.encode(fakeData));
+    }
+
+    final perfTest = isE2e
+        ? PerfTest.e2e(
+            testDirectory.absolute.path,
+            testTarget.absolute.path,
+            resultFilename: resultFileName,
+            device: device,
+            flutterDriveCallback: driveCallback,
+            enableImpeller: enableImpeller,
+            forceOpenGLES: forceOpenGLES,
+          )
+        : PerfTest(
+            testDirectory.absolute.path,
+            testTarget.absolute.path,
+            'test_file',
+            resultFilename: resultFileName,
+            device: device,
+            flutterDriveCallback: driveCallback,
+            enableImpeller: enableImpeller,
+            forceOpenGLES: forceOpenGLES,
+            enableVulkanGPUTracing: enableVulkanGPUTracing,
+          );
+    final TaskResult result = await perfTest.run();
+    return (manifest: manifestDuringDrive!, result: result);
+  }
+
+  test('enables Vulkan GPU tracing in AndroidManifest by default on Android', () async {
+    for (final os in <DeviceOperatingSystem>[
+      DeviceOperatingSystem.android,
+      DeviceOperatingSystem.androidArm,
+      DeviceOperatingSystem.androidArm64,
+    ]) {
+      final (:String manifest, :TaskResult result) = await runPerfTestAndReadManifest(os: os);
+      expect(
+        manifest,
+        contains('android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"'),
+      );
+      expect(
+        result.benchmarkScoreKeys,
+        containsAll(<String>['average_gpu_frame_time', 'worst_gpu_frame_time']),
+      );
+    }
+  });
+
+  test('skips Vulkan GPU tracing when enableImpeller is false on Android', () async {
+    final (:String manifest, :TaskResult result) = await runPerfTestAndReadManifest(
+      os: DeviceOperatingSystem.android,
+      enableImpeller: false,
+    );
+    expect(manifest, equals(initialManifest));
+    expect(
+      result.benchmarkScoreKeys,
+      isNot(anyOf(contains('average_gpu_frame_time'), contains('worst_gpu_frame_time'))),
+    );
+  });
+
+  test('skips Vulkan GPU tracing when enableVulkanGPUTracing is false on Android', () async {
+    final (:String manifest, :TaskResult result) = await runPerfTestAndReadManifest(
+      os: DeviceOperatingSystem.android,
+      enableVulkanGPUTracing: false,
+    );
+    expect(manifest, equals(initialManifest));
+    expect(
+      result.benchmarkScoreKeys,
+      isNot(anyOf(contains('average_gpu_frame_time'), contains('worst_gpu_frame_time'))),
+    );
+  });
+
+  test('skips Vulkan GPU tracing when forceOpenGLES is true on Android', () async {
+    final (:String manifest, :TaskResult result) = await runPerfTestAndReadManifest(
+      os: DeviceOperatingSystem.android,
+      enableImpeller: true,
+      forceOpenGLES: true,
+    );
+    expect(
+      manifest,
+      isNot(contains('android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"')),
+    );
+    expect(
+      manifest,
+      contains('android:name="io.flutter.embedding.android.EnableOpenGLGPUTracing"'),
+    );
+    expect(
+      result.benchmarkScoreKeys,
+      containsAll(<String>['average_gpu_frame_time', 'worst_gpu_frame_time']),
+    );
+  });
+
+  test('skips Vulkan GPU tracing by default on PerfTest.e2e', () async {
+    final (:String manifest, :TaskResult result) = await runPerfTestAndReadManifest(
+      os: DeviceOperatingSystem.android,
+      enableImpeller: true,
+      isE2e: true,
+    );
+    expect(manifest, equals(initialManifest));
+    expect(result.succeeded, isTrue);
+  });
+
+  test('skips AndroidManifest edits on non-Android even when enableImpeller is true', () async {
+    final (:String manifest, :TaskResult result) = await runPerfTestAndReadManifest(
+      os: DeviceOperatingSystem.ios,
+      enableImpeller: true,
+    );
+    expect(manifest, equals(initialManifest));
+    expect(
+      result.benchmarkScoreKeys,
+      containsAll(<String>['average_gpu_frame_time', 'worst_gpu_frame_time']),
+    );
+  });
+
   test('MemoryTest.handleLogcatLine ignores duplicate benchmark markers', () async {
     final memoryTest = MemoryTest('project', 'test', 'package');
     memoryTest.prepareForNextMessage('TAPPED');
