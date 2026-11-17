@@ -544,7 +544,7 @@ class _HeroFlightManifest {
   /// position to animate the hero to or from.
   late final bool isValid = _computeIsValid();
 
-  bool _computeIsValid() {
+  _computeIsValid() {
     final Rect? toLocation = toHeroLocation;
     if (toLocation == null || !toLocation.isFinite) {
       return false;
@@ -988,7 +988,7 @@ class HeroController extends NavigatorObserver {
       // frame completes, we'll know where the heroes in the `to` route are
       // going to end up, and the `to` route will go back onstage.
       final shouldWaitForLayout = !hasValidSize;
-      toRoute.offstage = toRoute.animation!.value == 0.0;
+      toRoute.offstage = shouldWaitForLayout;
       WidgetsBinding.instance.addPostFrameCallback((Duration value) {
         if (fromRoute.navigator == null || toRoute.navigator == null) {
           return;
