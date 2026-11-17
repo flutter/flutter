@@ -559,7 +559,7 @@ targets:
       $flutter/osx_sdk: >-
         {
           "sdk_version": "27a9275",
-          "runtime_versions": ["ios-27-0_27a9275"]
+          "runtime_versions": ["ios-27-0_24a434"]
         }
 
   - name: Mac mac_ios_debug_unopt_sim_arm64_extension_safe
@@ -571,7 +571,7 @@ targets:
       $flutter/osx_sdk: >-
         {
           "sdk_version": "27a9275",
-          "runtime_versions": ["ios-27-0_27a9275"]
+          "runtime_versions": ["ios-27-0_24a434"]
         }
 
   - name: Mac mac_ios_engine
