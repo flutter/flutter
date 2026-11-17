@@ -95,6 +95,7 @@ final _testbedDefaults = <Type, Generator>{
     platform: _contextPlatform(),
     osUtils: context.get<OperatingSystemUtils>()!,
     projectFactory: _contextProjectFactory(),
+    pub: () => const ThrowingPub(),
   ),
   Config: () => Config.test(
     name: Config.kFlutterSettings,
