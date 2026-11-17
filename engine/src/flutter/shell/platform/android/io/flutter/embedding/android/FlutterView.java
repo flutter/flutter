@@ -1522,6 +1522,12 @@ public class FlutterView extends FrameLayout
     return false;
   }
 
+  public void drainImageViewPendingImages() {
+    if (flutterImageView != null) {
+      flutterImageView.drainPendingImages();
+    }
+  }
+
   /**
    * Returns true if this {@code FlutterView} is currently attached to a {@link
    * io.flutter.embedding.engine.FlutterEngine}.

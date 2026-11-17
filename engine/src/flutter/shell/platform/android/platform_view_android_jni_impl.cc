@@ -104,6 +104,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "(II)Lio/flutter/embedding/engine/FlutterOverlaySurface;")                \
   V(g_destroy_overlay_surfaces_by_ids_method, destroyOverlaySurfacesByIds,    \
     "([I)V")                                                                  \
+  V(g_drain_aborted_frame_method, drainAbortedFrame, "([I)V")                 \
   V(g_destroy_overlay_surfaces_method, destroyOverlaySurfaces, "()V")         \
   V(g_maybe_resize_surface_view, maybeResizeSurfaceView, "(II)V")             \
   //
@@ -1930,19 +1931,30 @@ std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata> CreateOverlaySurface(
           ? env->CallObjectMethod(java_object.obj(), create_overlay_method,
                                   size->first, size->second)
           : env->CallObjectMethod(java_object.obj(), create_overlay_method));
-  FML_CHECK(fml::jni::CheckException(env));
+  if (!fml::jni::CheckException(env)) {
+    return nullptr;
+  }
 
   if (overlay.is_null()) {
-    return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(0,
-                                                                     nullptr);
+    return nullptr;
   }
 
   jint overlay_id =
       env->CallIntMethod(overlay.obj(), g_overlay_surface_id_method);
+  if (!fml::jni::CheckException(env)) {
+    return nullptr;
+  }
 
   fml::jni::ScopedJavaLocalRef<jobject> overlay_surface(
       env,
       env->CallObjectMethod(overlay.obj(), g_overlay_surface_surface_method));
+  if (!fml::jni::CheckException(env)) {
+    return nullptr;
+  }
+  if (overlay_surface.is_null()) {
+    return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(overlay_id,
+                                                                     nullptr);
+  }
 
   // Push a local reference frame so any internal local references created by
   // ANativeWindow_fromSurface are released immediately (especially on the
@@ -1986,12 +1998,40 @@ void PlatformViewAndroidJNIImpl::FlutterViewDestroyOverlaySurfacesByIds(
 
   fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
   jintArray j_ids = env->NewIntArray(static_cast<jsize>(ids.size()));
+  if (j_ids == nullptr) {
+    fml::jni::CheckException(env);
+    return;
+  }
   static_assert(sizeof(jint) == sizeof(int32_t),
                 "jint must match int32_t size");
   env->SetIntArrayRegion(j_ids, 0, static_cast<jsize>(ids.size()),
                          reinterpret_cast<const jint*>(ids.data()));
   env->CallVoidMethod(java_object.obj(),
                       g_destroy_overlay_surfaces_by_ids_method, j_ids);
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::FlutterViewDrainAbortedFrame(
+    const std::vector<int32_t>& overlay_ids) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
+  jintArray j_ids = env->NewIntArray(static_cast<jsize>(overlay_ids.size()));
+  if (j_ids == nullptr) {
+    fml::jni::CheckException(env);
+    return;
+  }
+  static_assert(sizeof(jint) == sizeof(int32_t),
+                "jint must match int32_t size");
+  if (!overlay_ids.empty()) {
+    env->SetIntArrayRegion(j_ids, 0, static_cast<jsize>(overlay_ids.size()),
+                           reinterpret_cast<const jint*>(overlay_ids.data()));
+  }
+  env->CallVoidMethod(java_object.obj(), g_drain_aborted_frame_method, j_ids);
   FML_CHECK(fml::jni::CheckException(env));
 }
 

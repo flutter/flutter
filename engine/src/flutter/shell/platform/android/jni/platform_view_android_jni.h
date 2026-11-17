@@ -233,6 +233,17 @@ class PlatformViewAndroidJNI {
       const std::vector<int32_t>& ids) = 0;
 
   //----------------------------------------------------------------------------
+  /// @brief      Drains and discards buffers enqueued into the root
+  ///             FlutterImageView and any submitted overlay ImageReaders for an
+  ///             aborted partial frame without mutating view visibility or
+  ///             layout.
+  ///
+  /// @note       Must be called from the platform thread.
+  ///
+  virtual void FlutterViewDrainAbortedFrame(
+      const std::vector<int32_t>& overlay_ids) = 0;
+
+  //----------------------------------------------------------------------------
   /// @brief      Destroys the overlay surfaces.
   ///
   /// @note       Must be called from the platform thread.

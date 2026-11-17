@@ -469,7 +469,11 @@ std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
   return std::make_shared<AndroidExternalViewEmbedderWrapper>(
       android_meets_hcpp_criteria_, *android_context_, jni_facade_,
-      surface_factory_, task_runners_);
+      surface_factory_, task_runners_, [weak_platform_view = GetWeakPtr()]() {
+        if (weak_platform_view) {
+          weak_platform_view->ScheduleFrame();
+        }
+      });
 }
 
 // |PlatformView|

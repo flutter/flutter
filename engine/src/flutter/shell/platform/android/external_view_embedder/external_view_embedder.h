@@ -14,6 +14,7 @@
 
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
+#include "flutter/fml/closure.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/surface_pool.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
@@ -37,7 +38,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-      const TaskRunners& task_runners);
+      const TaskRunners& task_runners,
+      fml::closure schedule_frame = {});
 
   ~AndroidExternalViewEmbedder() override;
 
@@ -112,13 +114,19 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
     MutatorsStack mutators_stack;
   };
 
+  enum class PlatformWorkMode {
+    kRetiredIdsOnly,
+    kPresent,
+    kDrainAborted,
+  };
+
   struct State {
     std::atomic<bool> destroyed{false};
     std::atomic<uint64_t> generation{0};
     std::atomic<uint64_t> next_trace_flow_id{1};
     std::mutex mutex;
     bool in_flight = false;
-    std::vector<fml::closure> pending_resumes;
+    fml::closure pending_resume;
   };
 
   // Provides metadata to the Android surfaces.
@@ -135,6 +143,10 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // The task runners.
   const TaskRunners task_runners_;
+
+  // Platform-thread callback to request a follow-up frame after Frame 0 enters
+  // Hybrid Composition mode.
+  const fml::closure schedule_frame_;
 
   // Synchronization and lifetime state shared with asynchronous platform/raster
   // callbacks.
@@ -183,13 +195,16 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // pending when a frame ends without reaching |SubmitFlutterView|.
   void FlushRetiredOverlayIds();
 
-  // Posts platform-thread view/overlay presentation ops and retired overlay ID
-  // destruction. When |present| is true, marks presentation as in-flight so
-  // |ReadyForNextFrame| applies backpressure until the platform thread finishes
-  // and signals the raster thread.
-  void PostPlatformWork(bool present,
+  // Posts platform-thread view/overlay presentation ops, aborted-frame buffer
+  // draining, and retired overlay ID destruction. For |kPresent| and
+  // |kDrainAborted|, marks work as in-flight so |ReadyForNextFrame| applies
+  // backpressure until the platform thread finishes and signals the raster
+  // thread.
+  void PostPlatformWork(PlatformWorkMode mode,
                         std::vector<PlatformOp> ops,
-                        std::vector<int32_t> retired_ids);
+                        std::vector<int32_t> retired_ids,
+                        std::vector<int32_t> aborted_overlay_ids = {},
+                        bool schedule_frame_after_present = false);
 
   // Resets the frame state.
   void Reset();

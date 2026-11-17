@@ -56,7 +56,8 @@ TEST(SurfacePool, GetLayerAllocateOneLayer) {
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
   auto jni_mock = std::make_shared<JNIMock>();
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
   EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(0, 0))
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
@@ -88,7 +89,8 @@ TEST(SurfacePool, GetUnusedLayers) {
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
   auto jni_mock = std::make_shared<JNIMock>();
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
   EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(0, 0))
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
@@ -119,7 +121,8 @@ TEST(SurfacePool, GetLayerRecycle) {
 
   auto gr_context_1 = GrDirectContext::MakeMock(nullptr);
   auto jni_mock = std::make_shared<JNIMock>();
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
   EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(0, 0))
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
@@ -167,7 +170,8 @@ TEST(SurfacePool, GetLayerAllocateTwoLayers) {
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
   auto jni_mock = std::make_shared<JNIMock>();
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
   EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(0, 0))
       .Times(2)
       .WillOnce(Return(
@@ -210,7 +214,8 @@ TEST(SurfacePool, DestroyLayersNew) {
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
   EXPECT_CALL(*jni_mock, createOverlaySurface2())
       .Times(1)
       .WillOnce(Return(
@@ -248,7 +253,8 @@ TEST(SurfacePool, DestroyLayers) {
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
   EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(0, 0))
       .Times(1)
       .WillOnce(Return(
@@ -288,7 +294,8 @@ TEST(SurfacePool, TakeLayers) {
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
   EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(0, 0))
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
@@ -375,7 +382,8 @@ TEST(SurfacePool, GetLayerRetiresOldLayersOnResizeWithoutCallingJNIDestroy) {
   auto gr_context = GrDirectContext::MakeMock(nullptr);
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
 
   auto surface_factory =
       std::make_shared<TestAndroidSurfaceFactory>([gr_context, window]() {
@@ -437,7 +445,8 @@ TEST(SurfacePool,
   auto gr_context = GrDirectContext::MakeMock(nullptr);
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
 
   auto surface_factory =
       std::make_shared<TestAndroidSurfaceFactory>([gr_context, window]() {
@@ -488,7 +497,8 @@ TEST(SurfacePool, RetireLayersWhenFrameSizeChanged) {
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
 
   auto surface_factory =
       std::make_shared<TestAndroidSurfaceFactory>([gr_context, window]() {
@@ -540,7 +550,8 @@ TEST(SurfacePool, DoesNotDestroyLayersFrameSizeChangedNew) {
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
 
   auto surface_factory =
       std::make_shared<TestAndroidSurfaceFactory>([gr_context, window]() {
@@ -587,7 +598,8 @@ TEST(SurfacePool, GetLayerReturnsNullOnAllocationOrSurfaceFailures) {
   auto gr_context_2 = GrDirectContext::MakeMock(nullptr);
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
 
   pool->SetFrameSize(DlISize(50, 50));
 
@@ -605,18 +617,29 @@ TEST(SurfacePool, GetLayerReturnsNullOnAllocationOrSurfaceFailures) {
     EXPECT_FALSE(pool->HasLayers());
   }
 
-  // Case 2: Null metadata or null window returns nullptr cleanly.
+  // Case 2: Null metadata returns nullptr without retiring an ID; null or
+  // invalid native windows retire the allocated Java overlay ID without calling
+  // SetNativeWindow.
   {
+    auto invalid_window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
     auto factory = std::make_shared<TestAndroidSurfaceFactory>([]() {
       auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
       EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
+      EXPECT_CALL(*android_surface_mock, SetNativeWindow(_, _)).Times(0);
       return android_surface_mock;
     });
     EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(50, 50))
         .WillOnce(Return(ByMove(nullptr)))
         .WillOnce(Return(
             ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
-                5, nullptr))));
+                5, nullptr))))
+        .WillOnce(Return(
+            ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+                6, invalid_window))));
+    EXPECT_EQ(
+        pool->GetLayer(gr_context_1.get(), *android_context, jni_mock, factory),
+        nullptr);
+    EXPECT_TRUE(pool->TakeRetiredLayerIds().empty());
     EXPECT_EQ(
         pool->GetLayer(gr_context_1.get(), *android_context, jni_mock, factory),
         nullptr);
@@ -624,7 +647,29 @@ TEST(SurfacePool, GetLayerReturnsNullOnAllocationOrSurfaceFailures) {
         pool->GetLayer(gr_context_1.get(), *android_context, jni_mock, factory),
         nullptr);
     EXPECT_FALSE(pool->HasLayers());
-    EXPECT_TRUE(pool->TakeRetiredLayerIds().empty());
+    EXPECT_THAT(pool->TakeRetiredLayerIds(), ElementsAre(5, 6));
+  }
+
+  // Case 2b: SetNativeWindow failure retires the Java overlay ID without
+  // creating a GPU surface or poisoning SurfacePool.
+  {
+    auto factory = std::make_shared<TestAndroidSurfaceFactory>([window]() {
+      auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
+      EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
+      EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _))
+          .WillOnce(Return(false));
+      EXPECT_CALL(*android_surface_mock, CreateGPUSurface(_)).Times(0);
+      return android_surface_mock;
+    });
+    EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface(50, 50))
+        .WillOnce(Return(
+            ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+                8, window))));
+    EXPECT_EQ(
+        pool->GetLayer(gr_context_1.get(), *android_context, jni_mock, factory),
+        nullptr);
+    EXPECT_FALSE(pool->HasLayers());
+    EXPECT_THAT(pool->TakeRetiredLayerIds(), ElementsAre(8));
   }
 
   // Case 3: Null GPU surface retires the newly created Java overlay ID.

@@ -126,6 +126,11 @@ class JNIMock final : public PlatformViewAndroidJNI {
               (const std::vector<int32_t>& ids),
               (override));
 
+  MOCK_METHOD(void,
+              FlutterViewDrainAbortedFrame,
+              (const std::vector<int32_t>& overlay_ids),
+              (override));
+
   MOCK_METHOD(void, FlutterViewDestroyOverlaySurfaces, (), (override));
 
   MOCK_METHOD(ASurfaceTransaction*,

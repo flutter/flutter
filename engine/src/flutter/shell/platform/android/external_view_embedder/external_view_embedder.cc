@@ -40,7 +40,8 @@ AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
     const AndroidContext& android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-    const TaskRunners& task_runners)
+    const TaskRunners& task_runners,
+    fml::closure schedule_frame)
     : ExternalViewEmbedder(),
       android_context_(android_context),
       jni_facade_(std::move(jni_facade)),
@@ -48,6 +49,7 @@ AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
       surface_pool_(
           std::make_shared<SurfacePool>(/*use_new_surface_methods=*/false)),
       task_runners_(task_runners),
+      schedule_frame_(std::move(schedule_frame)),
       state_(std::make_shared<State>()) {}
 
 AndroidExternalViewEmbedder::~AndroidExternalViewEmbedder() {
@@ -55,7 +57,7 @@ AndroidExternalViewEmbedder::~AndroidExternalViewEmbedder() {
   state_->generation.fetch_add(1);
   std::lock_guard lock(state_->mutex);
   state_->in_flight = false;
-  state_->pending_resumes.clear();
+  state_->pending_resume = nullptr;
 }
 
 bool AndroidExternalViewEmbedder::ReadyForNextFrame(
@@ -66,7 +68,7 @@ bool AndroidExternalViewEmbedder::ReadyForNextFrame(
   }
   TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder::DeferredFrame");
   if (resume) {
-    state_->pending_resumes.push_back(resume);
+    state_->pending_resume = resume;
   }
   return false;
 }
@@ -132,37 +134,28 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
       TRACE_EVENT0("flutter",
                    "AndroidExternalViewEmbedder::TransitionOutOfPlatformViews");
       presented_platform_views_ = false;
-      PostPlatformWork(/*present=*/true, /*ops=*/{}, std::move(retired_ids));
+      PostPlatformWork(PlatformWorkMode::kPresent, /*ops=*/{},
+                       std::move(retired_ids));
     } else if (!retired_ids.empty()) {
-      PostPlatformWork(/*present=*/false, /*ops=*/{}, std::move(retired_ids));
+      PostPlatformWork(PlatformWorkMode::kRetiredIdsOnly, /*ops=*/{},
+                       std::move(retired_ids));
     }
     return;
   }
 
-  std::unordered_map<int64_t, DlRect> view_rects;
-  for (auto platform_id : composition_order_) {
-    view_rects[platform_id] = GetViewRect(platform_id);
-  }
-
-  std::unordered_map<int64_t, DlRect> overlay_layers =
-      SliceViews(frame->Canvas(),     //
-                 composition_order_,  //
-                 slices_,             //
-                 view_rects           //
-      );
-
   if (!presented_platform_views_) {
-    // Frame 0: FlutterView is still rendering into FlutterSurfaceView until the
-    // platform thread converts to FlutterImageView in the queued present below.
-    // Fill back the punched overlay regions onto the root canvas so Frame 0
-    // presents complete UI immediately, then schedule/transition on the
-    // platform thread.
+    // Frame 0: FlutterView may still be rendering into FlutterSurfaceView until
+    // the platform thread converts to FlutterImageView in the queued present
+    // below. Skip SliceViews and replay every slice directly in composition
+    // order onto the root canvas so Frame 0 renders complete z-ordered UI
+    // without clipped overhangs, then explicitly schedule Frame 1 on the
+    // platform thread so overlays render even when convertToImageView() does
+    // not swap surfaces.
     for (int64_t view_id : composition_order_) {
-      auto overlay = overlay_layers.find(view_id);
-      if (overlay != overlay_layers.end()) {
-        DlAutoCanvasRestore save(frame->Canvas(), /*do_save=*/true);
-        frame->Canvas()->ClipRect(overlay->second);
-        slices_.at(view_id)->render_into(frame->Canvas());
+      EmbedderViewSlice* slice = slices_.at(view_id).get();
+      if (slice->canvas() != nullptr) {
+        slice->end_recording();
+        slice->render_into(frame->Canvas());
       }
     }
     frame->Submit();
@@ -190,9 +183,23 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
 
     std::vector<int32_t> retired_ids;
     retired_ids.swap(pending_retired_overlay_ids_);
-    PostPlatformWork(/*present=*/true, std::move(ops), std::move(retired_ids));
+    PostPlatformWork(PlatformWorkMode::kPresent, std::move(ops),
+                     std::move(retired_ids), /*aborted_overlay_ids=*/{},
+                     /*schedule_frame_after_present=*/true);
     return;
   }
+
+  std::unordered_map<int64_t, DlRect> view_rects;
+  for (auto platform_id : composition_order_) {
+    view_rects[platform_id] = GetViewRect(platform_id);
+  }
+
+  std::unordered_map<int64_t, DlRect> overlay_layers =
+      SliceViews(frame->Canvas(),     //
+                 composition_order_,  //
+                 slices_,             //
+                 view_rects           //
+      );
 
   // Submit the background canvas frame before switching the GPU context to
   // the overlay surfaces.
@@ -200,6 +207,7 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
 
   std::vector<PlatformOp> ops;
   ops.reserve(composition_order_.size() * 2);
+  std::vector<int32_t> submitted_overlay_ids;
   bool aborted = false;
 
   for (int64_t view_id : composition_order_) {
@@ -226,7 +234,6 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
       continue;
     }
     int32_t overlay_surface_id = 0;
-    overlays_may_exist_ = true;
     std::unique_ptr<SurfaceFrame> overlay_frame =
         CreateSurfaceIfNeeded(context,                    //
                               view_id,                    //
@@ -234,6 +241,9 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
                               overlay->second,            //
                               &overlay_surface_id         //
         );
+    if (overlay_frame || surface_pool_->HasPendingDestroy()) {
+      overlays_may_exist_ = true;
+    }
     if (!overlay_frame) {
       FML_LOG(ERROR) << "Aborting partial Hybrid Composition present after "
                         "overlay creation/acquire failed for view "
@@ -242,6 +252,7 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
       break;
     }
     overlay_frame->Submit();
+    submitted_overlay_ids.push_back(overlay_surface_id);
     ops.push_back(PlatformOp{
         .type = PlatformOp::Type::kDisplayOverlaySurface,
         .surface_id = overlay_surface_id,
@@ -261,13 +272,17 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
 
   if (aborted) {
     ops.clear();
-    if (!retired_ids.empty()) {
-      PostPlatformWork(/*present=*/false, /*ops=*/{}, std::move(retired_ids));
-    }
+    // Root frame->Submit() (and any earlier overlay_frame->Submit()) already
+    // enqueued buffers into ImageReaders (maxImages = 3). Drain them on the
+    // platform thread without mutating view visibility so repeated aborts
+    // cannot exhaust ImageReader buffers and deadlock vkAcquireNextImageKHR.
+    PostPlatformWork(PlatformWorkMode::kDrainAborted, /*ops=*/{},
+                     std::move(retired_ids), std::move(submitted_overlay_ids));
     return;
   }
 
-  PostPlatformWork(/*present=*/true, std::move(ops), std::move(retired_ids));
+  PostPlatformWork(PlatformWorkMode::kPresent, std::move(ops),
+                   std::move(retired_ids));
 }
 
 // |ExternalViewEmbedder|
@@ -376,11 +391,11 @@ void AndroidExternalViewEmbedder::Teardown() {
 
   uint64_t new_generation = state_->generation.fetch_add(1) + 1;
   bool should_destroy_java_overlays = false;
-  std::vector<fml::closure> deferred_resumes;
+  fml::closure deferred_resume;
   fml::AutoResetWaitableEvent raster_latch;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetRasterTaskRunner(),
-      [this, new_generation, &should_destroy_java_overlays, &deferred_resumes,
+      [this, new_generation, &should_destroy_java_overlays, &deferred_resume,
        &raster_latch]() {
         presented_platform_views_ = false;
         Reset();
@@ -398,7 +413,7 @@ void AndroidExternalViewEmbedder::Teardown() {
           std::lock_guard lock(state_->mutex);
           if (state_->generation.load() == new_generation) {
             state_->in_flight = false;
-            deferred_resumes.swap(state_->pending_resumes);
+            deferred_resume = std::move(state_->pending_resume);
           }
         }
         raster_latch.Signal();
@@ -409,19 +424,15 @@ void AndroidExternalViewEmbedder::Teardown() {
     jni_facade_->FlutterViewDestroyOverlaySurfaces();
   }
 
-  if (!deferred_resumes.empty()) {
+  if (deferred_resume) {
     task_runners_.GetRasterTaskRunner()->PostTask(
         fml::MakeCopyable([state = state_, new_generation,
-                           deferred_resumes = std::move(deferred_resumes)]() {
+                           deferred_resume = std::move(deferred_resume)]() {
           if (state->destroyed.load() ||
               state->generation.load() != new_generation) {
             return;
           }
-          for (const fml::closure& resume : deferred_resumes) {
-            if (resume) {
-              resume();
-            }
-          }
+          deferred_resume();
         }));
   }
 }
@@ -448,22 +459,26 @@ void AndroidExternalViewEmbedder::FlushRetiredOverlayIds() {
   }
   std::vector<int32_t> retired_ids;
   retired_ids.swap(pending_retired_overlay_ids_);
-  PostPlatformWork(/*present=*/false, /*ops=*/{}, std::move(retired_ids));
+  PostPlatformWork(PlatformWorkMode::kRetiredIdsOnly, /*ops=*/{},
+                   std::move(retired_ids));
 }
 
 void AndroidExternalViewEmbedder::PostPlatformWork(
-    bool present,
+    PlatformWorkMode mode,
     std::vector<PlatformOp> ops,
-    std::vector<int32_t> retired_ids) {
-  if (!present && retired_ids.empty()) {
+    std::vector<int32_t> retired_ids,
+    std::vector<int32_t> aborted_overlay_ids,
+    bool schedule_frame_after_present) {
+  if (mode == PlatformWorkMode::kRetiredIdsOnly && retired_ids.empty()) {
     return;
   }
 
+  const bool track_in_flight = mode != PlatformWorkMode::kRetiredIdsOnly;
   uint64_t expected_generation = 0;
   {
     std::lock_guard lock(state_->mutex);
     expected_generation = state_->generation.load();
-    if (present) {
+    if (track_in_flight) {
       state_->in_flight = true;
     }
   }
@@ -475,8 +490,10 @@ void AndroidExternalViewEmbedder::PostPlatformWork(
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [state = state_, jni_facade = jni_facade_,
        raster_task_runner = task_runners_.GetRasterTaskRunner(),
-       expected_generation, flow_id, present, ops = std::move(ops),
-       retired_ids = std::move(retired_ids)]() {
+       schedule_frame = schedule_frame_, expected_generation, flow_id, mode,
+       ops = std::move(ops), retired_ids = std::move(retired_ids),
+       aborted_overlay_ids = std::move(aborted_overlay_ids),
+       schedule_frame_after_present]() {
         TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder::Present");
         if (state->destroyed.load() ||
             state->generation.load() != expected_generation) {
@@ -484,30 +501,42 @@ void AndroidExternalViewEmbedder::PostPlatformWork(
           return;
         }
 
-        if (!retired_ids.empty()) {
-          jni_facade->FlutterViewDestroyOverlaySurfacesByIds(retired_ids);
-        }
-
-        if (!present) {
+        if (mode == PlatformWorkMode::kRetiredIdsOnly) {
+          if (!retired_ids.empty()) {
+            jni_facade->FlutterViewDestroyOverlaySurfacesByIds(retired_ids);
+          }
           TRACE_FLOW_END("flutter", "HybridCompositionPresent", flow_id);
           return;
         }
 
-        jni_facade->FlutterViewBeginFrame();
-        for (const PlatformOp& op : ops) {
-          switch (op.type) {
-            case PlatformOp::Type::kDisplayPlatformView:
-              jni_facade->FlutterViewOnDisplayPlatformView(
-                  op.view_id, op.x, op.y, op.width, op.height, op.view_width,
-                  op.view_height, op.mutators_stack);
-              break;
-            case PlatformOp::Type::kDisplayOverlaySurface:
-              jni_facade->FlutterViewDisplayOverlaySurface(
-                  op.surface_id, op.x, op.y, op.width, op.height);
-              break;
+        if (mode == PlatformWorkMode::kDrainAborted) {
+          jni_facade->FlutterViewDrainAbortedFrame(aborted_overlay_ids);
+          if (!retired_ids.empty()) {
+            jni_facade->FlutterViewDestroyOverlaySurfacesByIds(retired_ids);
+          }
+        } else {
+          jni_facade->FlutterViewBeginFrame();
+          for (const PlatformOp& op : ops) {
+            switch (op.type) {
+              case PlatformOp::Type::kDisplayPlatformView:
+                jni_facade->FlutterViewOnDisplayPlatformView(
+                    op.view_id, op.x, op.y, op.width, op.height, op.view_width,
+                    op.view_height, op.mutators_stack);
+                break;
+              case PlatformOp::Type::kDisplayOverlaySurface:
+                jni_facade->FlutterViewDisplayOverlaySurface(
+                    op.surface_id, op.x, op.y, op.width, op.height);
+                break;
+            }
+          }
+          jni_facade->FlutterViewEndFrame();
+          if (!retired_ids.empty()) {
+            jni_facade->FlutterViewDestroyOverlaySurfacesByIds(retired_ids);
+          }
+          if (schedule_frame_after_present && schedule_frame) {
+            schedule_frame();
           }
         }
-        jni_facade->FlutterViewEndFrame();
 
         TRACE_FLOW_STEP("flutter", "HybridCompositionPresent", flow_id);
         raster_task_runner->PostTask([state, expected_generation, flow_id]() {
@@ -517,19 +546,17 @@ void AndroidExternalViewEmbedder::PostPlatformWork(
               state->generation.load() != expected_generation) {
             return;
           }
-          std::vector<fml::closure> resumes;
+          fml::closure resume;
           {
             std::lock_guard lock(state->mutex);
             if (state->generation.load() != expected_generation) {
               return;
             }
             state->in_flight = false;
-            resumes.swap(state->pending_resumes);
+            resume = std::move(state->pending_resume);
           }
-          for (const fml::closure& resume : resumes) {
-            if (resume) {
-              resume();
-            }
+          if (resume) {
+            resume();
           }
         });
       }));

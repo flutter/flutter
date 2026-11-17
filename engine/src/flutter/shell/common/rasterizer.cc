@@ -145,6 +145,19 @@ void Rasterizer::Teardown() {
 
   view_records_.clear();
   deferred_last_layer_trees_recorder_.reset();
+  if (has_deferred_pipeline_) {
+    has_deferred_pipeline_ = false;
+    std::shared_ptr<FramePipeline> pipeline = deferred_pipeline_.lock();
+    deferred_pipeline_.reset();
+    if (pipeline) {
+      // Drain the deferred frame while surface_ is null so the pipeline is not
+      // left wedged and first-frame waiters are flushed synchronously before
+      // Teardown() returns.
+      Draw(pipeline);
+    } else {
+      delegate_.OnDrawFinished(DrawStatus::kNotSetUp);
+    }
+  }
 
   if (raster_thread_merger_.get() != nullptr &&
       raster_thread_merger_.get()->IsMerged()) {
@@ -246,23 +259,47 @@ flutter::LayerTree* Rasterizer::GetLastLayerTree(int64_t view_id) {
   return last_task->layer_tree.get();
 }
 
+fml::closure Rasterizer::MakeResumeDeferredDrawCallback() {
+  return [weak_this = weak_factory_.GetWeakPtr()]() {
+    if (weak_this) {
+      weak_this->ResumeDeferredDraw();
+    }
+  };
+}
+
+void Rasterizer::ResumeDeferredDraw() {
+  FML_DCHECK(delegate_.GetTaskRunners()
+                 .GetRasterTaskRunner()
+                 ->RunsTasksOnCurrentThread());
+  if (has_deferred_pipeline_) {
+    has_deferred_pipeline_ = false;
+    std::shared_ptr<FramePipeline> pipeline = deferred_pipeline_.lock();
+    deferred_pipeline_.reset();
+    deferred_last_layer_trees_recorder_.reset();
+    if (pipeline) {
+      Draw(pipeline);
+    } else {
+      delegate_.OnDrawFinished(DrawStatus::kPipelineEmpty);
+    }
+    return;
+  }
+  if (deferred_last_layer_trees_recorder_) {
+    DrawLastLayerTrees(std::move(deferred_last_layer_trees_recorder_));
+  }
+}
+
 void Rasterizer::DrawLastLayerTrees(
     std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) {
   if (!surface_) {
     return;
   }
-  if (external_view_embedder_ &&
-      !external_view_embedder_->ReadyForNextFrame(
-          [raster_task_runner =
-               delegate_.GetTaskRunners().GetRasterTaskRunner(),
-           weak_this = weak_factory_.GetWeakPtr()]() {
-            raster_task_runner->PostTask([weak_this]() {
-              if (weak_this && weak_this->deferred_last_layer_trees_recorder_) {
-                weak_this->DrawLastLayerTrees(
-                    std::move(weak_this->deferred_last_layer_trees_recorder_));
-              }
-            });
-          })) {
+  if (has_deferred_pipeline_) {
+    // A newer FramePipeline draw is already deferred and supersedes redrawing
+    // the previous layer trees.
+    return;
+  }
+  if (external_view_embedder_ && !external_view_embedder_->ReadyForNextFrame(
+                                     MakeResumeDeferredDrawCallback())) {
     TRACE_EVENT0("flutter", "Rasterizer::DrawLastLayerTreesDeferred");
     deferred_last_layer_trees_recorder_ = std::move(frame_timings_recorder);
     return;
@@ -278,8 +315,29 @@ void Rasterizer::DrawLastLayerTrees(
     return;
   }
 
-  DoDrawResult result =
-      DrawToSurfaces(*frame_timings_recorder, std::move(tasks));
+  DoDrawResult result = DrawToSurfaces(*frame_timings_recorder, tasks);
+
+  // Restore any tasks that were not consumed by a successful draw (for example
+  // on kGpuUnavailable, kFailed, or kRetry) so subsequent DrawLastLayerTrees
+  // calls do not lose the last successful layer tree.
+  for (auto& task : tasks) {
+    if (task) {
+      auto& view_record = EnsureViewRecord(task->view_id);
+      if (!view_record.last_successful_task) {
+        view_record.last_successful_task = std::move(task);
+      }
+    }
+  }
+  if (result.resubmitted_item) {
+    for (auto& task : result.resubmitted_item->layer_tree_tasks) {
+      if (task) {
+        auto& view_record = EnsureViewRecord(task->view_id);
+        if (!view_record.last_successful_task) {
+          view_record.last_successful_task = std::move(task);
+        }
+      }
+    }
+  }
 
   // EndFrame should perform cleanups for the external_view_embedder.
   if (external_view_embedder_ && external_view_embedder_->GetUsedThisFrame()) {
@@ -306,23 +364,20 @@ DrawStatus Rasterizer::Draw(const std::shared_ptr<FramePipeline>& pipeline) {
                  ->RunsTasksOnCurrentThread());
 
   // Leave the frame in the pipeline while the embedder isn't ready for it. The
-  // embedder resumes drawing instead of blocking the raster thread.
-  if (external_view_embedder_ &&
+  // embedder resumes drawing instead of blocking the raster thread. Only query
+  // the embedder when a surface is set up so torn-down draws drain as kNotSetUp
+  // without racing TeardownExternalViewEmbedder() on the platform thread.
+  if (surface_ && external_view_embedder_ &&
       !external_view_embedder_->ReadyForNextFrame(
-          [raster_task_runner =
-               delegate_.GetTaskRunners().GetRasterTaskRunner(),
-           weak_this = weak_factory_.GetWeakPtr(),
-           weak_pipeline = std::weak_ptr<FramePipeline>(pipeline)]() {
-            raster_task_runner->PostTask([weak_this, weak_pipeline]() {
-              std::shared_ptr<FramePipeline> pipeline = weak_pipeline.lock();
-              if (weak_this && pipeline) {
-                weak_this->Draw(pipeline);
-              }
-            });
-          })) {
+          MakeResumeDeferredDrawCallback())) {
     TRACE_EVENT0("flutter", "Rasterizer::DrawDeferred");
+    deferred_last_layer_trees_recorder_.reset();
+    deferred_pipeline_ = pipeline;
+    has_deferred_pipeline_ = true;
     return finish(DrawStatus::kDeferred);
   }
+  has_deferred_pipeline_ = false;
+  deferred_pipeline_.reset();
 
   DoDrawResult draw_result;
   FramePipeline::Consumer consumer = [&draw_result,
@@ -598,8 +653,7 @@ Rasterizer::DoDrawResult Rasterizer::DoDraw(
   persistent_cache->ResetStoredNewShaders();
 #endif  //  !SLIMPELLER
 
-  DoDrawResult result =
-      DrawToSurfaces(*frame_timings_recorder, std::move(tasks));
+  DoDrawResult result = DrawToSurfaces(*frame_timings_recorder, tasks);
 
   FML_DCHECK(result.status != DoDrawStatus::kEnqueuePipeline);
   if (result.status == DoDrawStatus::kGpuUnavailable) {
@@ -685,7 +739,7 @@ Rasterizer::DoDrawResult Rasterizer::DoDraw(
 
 Rasterizer::DoDrawResult Rasterizer::DrawToSurfaces(
     FrameTimingsRecorder& frame_timings_recorder,
-    std::vector<std::unique_ptr<LayerTreeTask>> tasks) {
+    std::vector<std::unique_ptr<LayerTreeTask>>& tasks) {
   TRACE_EVENT0("flutter", "Rasterizer::DrawToSurfaces");
   FML_DCHECK(surface_);
   frame_timings_recorder.AssertInState(FrameTimingsRecorder::State::kBuildEnd);
@@ -695,7 +749,7 @@ Rasterizer::DoDrawResult Rasterizer::DrawToSurfaces(
   };
   if (surface_->AllowsDrawingWhenGpuDisabled()) {
     result.resubmitted_item =
-        DrawToSurfacesUnsafe(frame_timings_recorder, std::move(tasks));
+        DrawToSurfacesUnsafe(frame_timings_recorder, tasks);
   } else {
     delegate_.GetIsGpuDisabledSyncSwitch()->Execute(
         fml::SyncSwitch::Handlers()
@@ -705,8 +759,8 @@ Rasterizer::DoDrawResult Rasterizer::DrawToSurfaces(
               frame_timings_recorder.RecordRasterEnd();
             })
             .SetIfFalse([&] {
-              result.resubmitted_item = DrawToSurfacesUnsafe(
-                  frame_timings_recorder, std::move(tasks));
+              result.resubmitted_item =
+                  DrawToSurfacesUnsafe(frame_timings_recorder, tasks);
             }));
   }
   frame_timings_recorder.AssertInState(FrameTimingsRecorder::State::kRasterEnd);
@@ -716,7 +770,7 @@ Rasterizer::DoDrawResult Rasterizer::DrawToSurfaces(
 
 std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
     FrameTimingsRecorder& frame_timings_recorder,
-    std::vector<std::unique_ptr<LayerTreeTask>> tasks) {
+    std::vector<std::unique_ptr<LayerTreeTask>>& tasks) {
   compositor_context_->ui_time().SetLapTime(
       frame_timings_recorder.GetBuildDuration());
 
@@ -763,21 +817,18 @@ std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
   std::vector<std::unique_ptr<LayerTreeTask>> resubmitted_tasks;
   for (std::unique_ptr<LayerTreeTask>& task : tasks) {
     int64_t view_id = task->view_id;
-    std::unique_ptr<LayerTree> layer_tree = std::move(task->layer_tree);
     float device_pixel_ratio = task->device_pixel_ratio;
 
     DrawSurfaceStatus status = DrawToSurfaceUnsafe(
-        view_id, *layer_tree, device_pixel_ratio, presentation_time);
+        view_id, *task->layer_tree, device_pixel_ratio, presentation_time);
     FML_DCHECK(status != DrawSurfaceStatus::kDiscarded);
 
-    auto& view_record = EnsureViewRecord(task->view_id);
+    auto& view_record = EnsureViewRecord(view_id);
     view_record.last_draw_status = status;
     if (status == DrawSurfaceStatus::kSuccess) {
-      view_record.last_successful_task = std::make_unique<LayerTreeTask>(
-          view_id, std::move(layer_tree), device_pixel_ratio);
+      view_record.last_successful_task = std::move(task);
     } else if (status == DrawSurfaceStatus::kRetry) {
-      resubmitted_tasks.push_back(std::make_unique<LayerTreeTask>(
-          view_id, std::move(layer_tree), device_pixel_ratio));
+      resubmitted_tasks.push_back(std::move(task));
     }
   }
   // TODO(dkwingsmt): Pass in raster cache(s) for all views.

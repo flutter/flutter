@@ -107,14 +107,32 @@ bool SurfacePool::AddLayerLocked(
           : jni_facade->FlutterViewCreateOverlaySurface(
                 requested_frame_size_.width, requested_frame_size_.height);
 
-  if (!java_metadata || !java_metadata->window) {
+  if (!java_metadata) {
     FML_LOG(ERROR) << "Could not create Java overlay surface for frame size "
                    << requested_frame_size_.width << "x"
                    << requested_frame_size_.height << ".";
     return false;
   }
-  android_surface->SetNativeWindow(java_metadata->window, jni_facade);
+  if (!java_metadata->window || (!java_metadata->window->IsValid() &&
+                                 !java_metadata->window->IsFakeWindow())) {
+    if (!use_new_surface_methods_) {
+      retired_layer_ids_.push_back(java_metadata->id);
+    }
+    FML_LOG(ERROR) << "Java overlay surface " << java_metadata->id
+                   << " returned an invalid native window for frame size "
+                   << requested_frame_size_.width << "x"
+                   << requested_frame_size_.height << ".";
+    return false;
+  }
   android_surface->SetupImpellerSurface();
+  if (!android_surface->SetNativeWindow(java_metadata->window, jni_facade)) {
+    if (!use_new_surface_methods_) {
+      retired_layer_ids_.push_back(java_metadata->id);
+    }
+    FML_LOG(ERROR) << "Could not bind native window for overlay layer "
+                   << java_metadata->id << ".";
+    return false;
+  }
 
   std::unique_ptr<Surface> surface =
       android_surface->CreateGPUSurface(gr_context);

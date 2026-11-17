@@ -115,6 +115,9 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   void FlutterViewDestroyOverlaySurfacesByIds(
       const std::vector<int32_t>& ids) override;
 
+  void FlutterViewDrainAbortedFrame(
+      const std::vector<int32_t>& overlay_ids) override;
+
   void FlutterViewDestroyOverlaySurfaces() override;
 
   std::unique_ptr<std::vector<std::string>>

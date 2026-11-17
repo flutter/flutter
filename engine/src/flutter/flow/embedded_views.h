@@ -483,7 +483,7 @@ class ExternalViewEmbedder {
   // Returns false to defer the frame without blocking the raster thread, for
   // example while the platform thread is still presenting the previous frame.
   // The frame stays queued. Once the embedder can accept another frame, it
-  // invokes every `resume` callback it was given.
+  // invokes the latest `resume` callback on the raster thread.
   virtual bool ReadyForNextFrame(const fml::closure& resume) { return true; }
 
   // Must be called on the UI thread.

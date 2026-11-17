@@ -32,13 +32,21 @@ std::unique_ptr<Surface> AndroidSurfaceDynamicImpeller::CreateGPUSurface(
     GrDirectContext* gr_context) {
   if (vulkan_surface_) {
     if (window_) {
-      vulkan_surface_->SetNativeWindow(window_, jni_facade_);
+      auto window = std::move(window_);
+      auto jni_facade = std::move(jni_facade_);
+      if (!vulkan_surface_->SetNativeWindow(std::move(window), jni_facade)) {
+        return nullptr;
+      }
     }
     return vulkan_surface_->CreateGPUSurface(gr_context);
   }
   if (gl_surface_) {
     if (window_) {
-      gl_surface_->SetNativeWindow(window_, jni_facade_);
+      auto window = std::move(window_);
+      auto jni_facade = std::move(jni_facade_);
+      if (!gl_surface_->SetNativeWindow(std::move(window), jni_facade)) {
+        return nullptr;
+      }
     }
     return gl_surface_->CreateGPUSurface(gr_context);
   }

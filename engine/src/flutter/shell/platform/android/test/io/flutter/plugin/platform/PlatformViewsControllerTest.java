@@ -2322,7 +2322,7 @@ public class PlatformViewsControllerTest {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void createOverlaySurfaceWithDimensions_worksOffMainThreadAndReusesOverlayView()
+  public void createOverlaySurfaceWithDimensions_worksOffMainThreadAndRemovesRetiredOverlayView()
       throws InterruptedException {
     final PlatformViewsController platformViewsController = new PlatformViewsController();
     final FlutterJNI jni = new FlutterJNI();
@@ -2343,19 +2343,20 @@ public class PlatformViewsControllerTest {
 
     platformViewsController.onBeginFrame();
     platformViewsController.onDisplayOverlaySurface(firstSurface.getId(), 0, 0, 120, 80);
-    platformViewsController.onEndFrame();
 
     final PlatformOverlayView firstView =
         platformViewsController.getOverlayLayerViews().get(firstSurface.getId());
     assertNotNull(firstView);
     assertEquals(View.VISIBLE, firstView.getVisibility());
+    assertSame(flutterView, firstView.getParent());
 
-    // Destroying the first overlay ID retires it into reusableOverlayViews without removing it.
+    // Destroying the first overlay ID removes it directly from overlayLayerViews and flutterView.
     platformViewsController.destroyOverlaySurfacesByIds(new int[] {firstSurface.getId()});
     assertNull(platformViewsController.getOverlayLayerViews().get(firstSurface.getId()));
     assertEquals(View.GONE, firstView.getVisibility());
+    assertNull(firstView.getParent());
 
-    // Allocating a second overlay off the main thread and displaying it reuses the pooled view.
+    // Allocating a second overlay off the main thread and displaying it creates a fresh view.
     final Thread secondBackground =
         new Thread(
             () -> offThreadResult[0] = platformViewsController.createOverlaySurface(200, 100));
@@ -2366,13 +2367,92 @@ public class PlatformViewsControllerTest {
     assertNotNull(secondSurface);
     platformViewsController.onBeginFrame();
     platformViewsController.onDisplayOverlaySurface(secondSurface.getId(), 0, 0, 200, 100);
-    platformViewsController.onEndFrame();
 
     final PlatformOverlayView secondView =
         platformViewsController.getOverlayLayerViews().get(secondSurface.getId());
-    assertSame(firstView, secondView);
+    assertNotNull(secondView);
+    assertNotSame(firstView, secondView);
     assertEquals(View.VISIBLE, secondView.getVisibility());
     assertSame(flutterView, secondView.getParent());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onDetachedFromJNI_closesPendingReadersAndOverlayViews() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    final PlatformOverlayView overlayView = mock(PlatformOverlayView.class);
+    platformViewsController.createOverlaySurface(overlayView);
+    final FlutterOverlaySurface pendingSurface =
+        platformViewsController.createOverlaySurface(64, 64);
+    assertNotNull(pendingSurface);
+
+    platformViewsController.onDetachedFromJNI();
+
+    verify(overlayView, times(1)).detachFromRenderer();
+    verify(overlayView, times(1)).closeImageReader();
+    assertNull(platformViewsController.createOverlaySurface(64, 64));
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void drainAbortedFrame_drainsRootAndOverlaysWithoutMutatingVisibility() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    final FlutterView flutterView = mock(FlutterView.class);
+    platformViewsController.attachToView(flutterView);
+
+    final PlatformOverlayView overlayView = mock(PlatformOverlayView.class);
+    final FlutterOverlaySurface overlaySurface =
+        platformViewsController.createOverlaySurface(overlayView);
+    final FlutterOverlaySurface pendingSurface =
+        platformViewsController.createOverlaySurface(64, 64);
+    assertNotNull(pendingSurface);
+
+    platformViewsController.drainAbortedFrame(
+        new int[] {overlaySurface.getId(), pendingSurface.getId()});
+
+    verify(flutterView, times(1)).drainImageViewPendingImages();
+    verify(overlayView, times(1)).drainPendingImages();
+    verify(overlayView, never()).setVisibility(anyInt());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void finishFrame_hidesOverlaysWhenImageAcquisitionFailsAndSynchronized() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+    final FlutterView flutterView = mock(FlutterView.class);
+    when(flutterView.acquireLatestImageViewFrame()).thenReturn(false);
+    platformViewsController.attachToView(flutterView);
+
+    final PlatformOverlayView overlayView = mock(PlatformOverlayView.class);
+    when(overlayView.acquireLatestImage()).thenReturn(true);
+    final FlutterOverlaySurface overlaySurface =
+        platformViewsController.createOverlaySurface(overlayView);
+
+    platformViewsController.onBeginFrame();
+    platformViewsController.onDisplayOverlaySurface(overlaySurface.getId(), 0, 0, 100, 100);
+    // Simulate a PlatformView in the frame so onEndFrame() doesn't revert the ImageView.
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(mock(View.class));
+    when(viewFactory.create(any(), eq(0), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+    createPlatformView(jni, platformViewsController, 0, "testType", /* hybrid=*/ true);
+    platformViewsController.onDisplayPlatformView(
+        0, 0, 0, 100, 100, 100, 100, new FlutterMutatorsStack());
+    clearInvocations(overlayView);
+
+    platformViewsController.onEndFrame();
+    verify(overlayView, times(1)).setVisibility(View.GONE);
   }
 
   @Test

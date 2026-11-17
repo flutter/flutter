@@ -5,8 +5,12 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 
+#include <atomic>
+#include <mutex>
+
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
+#include "flutter/fml/closure.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
@@ -28,7 +32,8 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-      const TaskRunners& task_runners);
+      const TaskRunners& task_runners,
+      fml::closure schedule_frame = {});
 
   // |ExternalViewEmbedder|
   bool ReadyForNextFrame(const fml::closure& resume) override;
@@ -88,6 +93,9 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   const TaskRunners& task_runners_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
+  fml::closure schedule_frame_;
+  std::mutex init_mutex_;
+  std::atomic<bool> initialized_{false};
   std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;
   std::unique_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
 };

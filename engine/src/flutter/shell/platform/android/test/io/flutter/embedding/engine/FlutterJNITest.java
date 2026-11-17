@@ -413,6 +413,24 @@ public class FlutterJNITest {
     verify(platformViewsController, times(1)).destroyOverlaySurfacesByIds(ids);
   }
 
+  @Test
+  public void destroyOverlaySurfaces_doesNotThrowWhenPlatformViewsControllerIsNull() {
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.destroyOverlaySurfaces();
+  }
+
+  @Test
+  public void drainAbortedFrame_delegatesToPlatformViewsController() {
+    FlutterJNI flutterJNI = new FlutterJNI();
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    flutterJNI.setPlatformViewsController(platformViewsController);
+    int[] ids = new int[] {4, 8};
+
+    flutterJNI.drainAbortedFrame(ids);
+
+    verify(platformViewsController, times(1)).drainAbortedFrame(ids);
+  }
+
   static class FlutterJNITester extends FlutterJNI {
     FlutterJNITester(boolean attached) {
       this.isAttached = attached;

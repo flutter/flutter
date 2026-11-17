@@ -1354,8 +1354,7 @@ public class FlutterJNI {
   public void destroyOverlaySurfaces() {
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
-      throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
+      return;
     }
     platformViewsController.destroyOverlaySurfaces();
   }
@@ -1368,6 +1367,16 @@ public class FlutterJNI {
       return;
     }
     platformViewsController.destroyOverlaySurfacesByIds(ids);
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void drainAbortedFrame(@NonNull int[] overlayIds) {
+    ensureRunningOnMainThread();
+    if (platformViewsController == null) {
+      return;
+    }
+    platformViewsController.drainAbortedFrame(overlayIds);
   }
 
   @SuppressWarnings("unused")

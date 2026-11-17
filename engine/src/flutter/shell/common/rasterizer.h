@@ -244,8 +244,10 @@ class Rasterizer final : public SnapshotDelegate,
   //----------------------------------------------------------------------------
   /// @brief      Releases any resource used by the external view embedder.
   ///             For example, overlay surfaces or Android views.
-  ///             On Android, this method post a task to the platform thread,
-  ///             and waits until it completes.
+  ///             Must be called on the platform thread; on Android, this
+  ///             synchronizes with the raster thread to release GPU overlay
+  ///             layers before destroying Java overlay surfaces on the platform
+  ///             thread.
   void TeardownExternalViewEmbedder();
 
   //----------------------------------------------------------------------------
@@ -773,9 +775,12 @@ class Rasterizer final : public SnapshotDelegate,
       std::vector<std::unique_ptr<LayerTreeTask>> tasks);
 
   // This method pushes the frame timing recorder from build end to raster end.
+  // Tasks that complete successfully or are resubmitted are moved out of
+  // |tasks|; failed or GPU-unavailable tasks remain in |tasks| so callers like
+  // |DrawLastLayerTrees| can preserve them.
   DoDrawResult DrawToSurfaces(
       FrameTimingsRecorder& frame_timings_recorder,
-      std::vector<std::unique_ptr<LayerTreeTask>> tasks);
+      std::vector<std::unique_ptr<LayerTreeTask>>& tasks);
 
   // Draws the specified layer trees to views, assuming we have access to the
   // GPU.
@@ -789,7 +794,7 @@ class Rasterizer final : public SnapshotDelegate,
   // This method pushes the frame timing recorder from build end to raster end.
   std::unique_ptr<FrameItem> DrawToSurfacesUnsafe(
       FrameTimingsRecorder& frame_timings_recorder,
-      std::vector<std::unique_ptr<LayerTreeTask>> tasks);
+      std::vector<std::unique_ptr<LayerTreeTask>>& tasks);
 
   // Draws the layer tree to the specified view, assuming we have access to the
   // GPU.
@@ -805,6 +810,9 @@ class Rasterizer final : public SnapshotDelegate,
   ViewRecord& EnsureViewRecord(int64_t view_id);
 
   void FireNextFrameCallbackIfPresent();
+
+  fml::closure MakeResumeDeferredDrawCallback();
+  void ResumeDeferredDraw();
 
   static bool ShouldResubmitFrame(const DoDrawResult& result);
   static DrawStatus ToDrawStatus(DoDrawStatus status);
@@ -827,6 +835,8 @@ class Rasterizer final : public SnapshotDelegate,
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
   bool thread_merger_disabled_ = false;
   std::shared_ptr<ExternalViewEmbedder> external_view_embedder_;
+  std::weak_ptr<FramePipeline> deferred_pipeline_;
+  bool has_deferred_pipeline_ = false;
   std::unique_ptr<FrameTimingsRecorder> deferred_last_layer_trees_recorder_;
   std::unique_ptr<SnapshotController> snapshot_controller_;
 

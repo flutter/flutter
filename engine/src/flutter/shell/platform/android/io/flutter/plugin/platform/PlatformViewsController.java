@@ -10,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.MutableContextWrapper;
+import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
 import android.util.SparseArray;
@@ -42,7 +43,6 @@ import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.util.ViewUtils;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -146,10 +146,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // ImageReaders created on the raster thread awaiting promotion to PlatformOverlayViews on the
   // next platform-thread present.
   private final SparseArray<ImageReader> pendingOverlayReaders;
-
-  // Retired PlatformOverlayViews retained across resize/frame transitions so swapImageReader()
-  // can reuse them without inflating a new View or mutating flutterView's children.
-  private final ArrayDeque<PlatformOverlayView> reusableOverlayViews;
 
   // Tracks whether the flutterView has been converted to use a FlutterImageView.
   private boolean flutterViewConvertedToImageView = false;
@@ -825,7 +821,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     contextToEmbeddedView = new HashMap<>();
     overlayLayerViews = new SparseArray<>();
     pendingOverlayReaders = new SparseArray<>();
-    reusableOverlayViews = new ArrayDeque<>();
     currentFrameUsedOverlayLayerIds = new HashSet<>();
     destroyedOverlayLayerIds = new HashSet<>();
     currentFrameUsedPlatformViewIds = new HashSet<>();
@@ -1034,6 +1029,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * PlatformViewsController} detaches from JNI.
    */
   public void onDetachedFromJNI() {
+    synchronized (overlayLock) {
+      overlayActive = false;
+      closePendingOverlayReadersLocked();
+    }
+    destroyOverlaySurfaces();
     disposeAllViews();
   }
 
@@ -1334,14 +1334,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     PlatformOverlayView overlayView = overlayLayerViews.get(id);
     if (overlayView == null) {
       final ImageReader pendingReader;
-      final PlatformOverlayView pooledView;
       synchronized (overlayLock) {
         pendingReader = pendingOverlayReaders.get(id);
         if (pendingReader != null) {
           pendingOverlayReaders.remove(id);
-          pooledView = reusableOverlayViews.pollFirst();
-        } else {
-          pooledView = null;
         }
       }
       if (pendingReader == null) {
@@ -1349,17 +1345,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         return;
       }
       initializeRootImageViewIfNeeded();
-      if (pooledView != null) {
-        if (pooledView.getParent() != null && pooledView.getParent() != flutterView) {
-          ((ViewGroup) pooledView.getParent()).removeView(pooledView);
-        }
-        pooledView.swapImageReader(pendingReader);
-        overlayView = pooledView;
-      } else {
-        overlayView =
-            new PlatformOverlayView(
-                flutterView.getContext(), pendingReader, accessibilityEventsDelegate);
-      }
+      overlayView =
+          new PlatformOverlayView(
+              flutterView.getContext(), pendingReader, accessibilityEventsDelegate);
       overlayLayerViews.put(id, overlayView);
     } else {
       initializeRootImageViewIfNeeded();
@@ -1451,7 +1439,14 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       }
     }
 
-    drainReusableOverlayViews();
+    if (!isFrameRenderedUsingImageReaders && synchronizeToNativeViewHierarchy) {
+      for (int i = 0; i < overlayLayerViews.size(); i++) {
+        final int overlayId = overlayLayerViews.keyAt(i);
+        if (currentFrameUsedOverlayLayerIds.contains(overlayId)) {
+          overlayLayerViews.valueAt(i).setVisibility(View.GONE);
+        }
+      }
+    }
 
     for (int i = 0; i < platformViewParent.size(); i++) {
       final int viewId = platformViewParent.keyAt(i);
@@ -1540,6 +1535,35 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   /**
+   * Drains and closes buffers enqueued into the root {@link FlutterImageView} and any submitted
+   * overlay {@link ImageReader}s for an aborted partial frame without mutating view visibility or
+   * layout.
+   */
+  @UiThread
+  public void drainAbortedFrame(@NonNull int[] overlayIds) {
+    if (flutterView != null) {
+      flutterView.drainImageViewPendingImages();
+    }
+    for (int id : overlayIds) {
+      final PlatformOverlayView overlayView = overlayLayerViews.get(id);
+      if (overlayView != null) {
+        overlayView.drainPendingImages();
+        continue;
+      }
+      final ImageReader pendingReader;
+      synchronized (overlayLock) {
+        pendingReader = pendingOverlayReaders.get(id);
+      }
+      if (pendingReader != null) {
+        final Image dropped = pendingReader.acquireLatestImage();
+        if (dropped != null) {
+          dropped.close();
+        }
+      }
+    }
+  }
+
+  /**
    * Retires only the specified overlay surface IDs (e.g., stale IDs from a previous viewport size)
    * without touching newly allocated IDs from the current frame.
    */
@@ -1564,8 +1588,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         overlayView.detachFromRenderer();
         overlayView.closeImageReader();
         overlayView.setVisibility(View.GONE);
-        synchronized (overlayLock) {
-          reusableOverlayViews.addLast(overlayView);
+        if (flutterView != null) {
+          flutterView.removeView(overlayView);
         }
       }
     }
@@ -1602,24 +1626,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     pendingOverlayReaders.clear();
   }
 
-  private void drainReusableOverlayViews() {
-    while (true) {
-      final PlatformOverlayView unusedView;
-      synchronized (overlayLock) {
-        unusedView = reusableOverlayViews.pollFirst();
-      }
-      if (unusedView == null) {
-        break;
-      }
-      unusedView.setVisibility(View.GONE);
-      if (flutterView != null) {
-        flutterView.removeView(unusedView);
-      }
-    }
-  }
-
   private void removeOverlaySurfaces() {
-    drainReusableOverlayViews();
     if (flutterView == null) {
       Log.e(TAG, "removeOverlaySurfaces called while flutter view is null");
       return;

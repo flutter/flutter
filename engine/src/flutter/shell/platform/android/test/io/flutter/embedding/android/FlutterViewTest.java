@@ -1463,18 +1463,60 @@ public class FlutterViewTest {
     when(plane.getBuffer()).thenReturn(ByteBuffer.allocate(400 * 100));
     when(image.getPlanes()).thenReturn(new Plane[] {plane});
     when(image.getHeight()).thenReturn(100);
-    when(initialReader.acquireLatestImage()).thenReturn(image);
+    // First acquireLatestImage() consumes the frame; resizeIfNeeded() then sees null (no unconsumed
+    // frame queued).
+    when(initialReader.acquireLatestImage()).thenReturn(image).thenReturn(null);
 
     final FlutterImageView imageView =
         spy(new FlutterImageView(ctx, initialReader, FlutterImageView.SurfaceKind.background));
     final FlutterRenderer flutterRenderer = mock(FlutterRenderer.class);
     imageView.attachToRenderer(flutterRenderer);
 
-    // Resizing converts any pending pre-resize image into currentBitmap for onDraw(), but
-    // acquireLatestImage() must still return false until the resized ImageReader produces a frame.
+    assertTrue(imageView.acquireLatestImage());
+
+    // Resizing preserves the already-displayed image in currentBitmap for onDraw(), while
+    // acquireLatestImage() returns false until the resized ImageReader produces a new frame.
     imageView.resizeIfNeeded(200, 200);
     imageView.resizeIfNeeded(300, 300);
 
+    assertFalse(imageView.acquireLatestImage());
+    final Canvas canvas = mock(Canvas.class);
+    imageView.onDraw(canvas);
+    verify(canvas, times(1)).drawBitmap(any(Bitmap.class), eq(0.0f), eq(0.0f), isNull());
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_28)
+  public void flutterImageView_acquireLatestImageReturnsTrueOnceWhenResizeDrainedUnconsumedFrame() {
+    final ImageReader initialReader = mock(ImageReader.class);
+    when(initialReader.getWidth()).thenReturn(100);
+    when(initialReader.getHeight()).thenReturn(100);
+    when(initialReader.getSurface()).thenReturn(mock(Surface.class));
+
+    final Image unconsumedFrame = mock(Image.class);
+    final Plane plane = mock(Plane.class);
+    when(plane.getRowStride()).thenReturn(400);
+    when(plane.getPixelStride()).thenReturn(4);
+    when(plane.getBuffer()).thenReturn(ByteBuffer.allocate(400 * 100));
+    when(unconsumedFrame.getPlanes()).thenReturn(new Plane[] {plane});
+    when(unconsumedFrame.getHeight()).thenReturn(100);
+    when(initialReader.acquireLatestImage()).thenReturn(unconsumedFrame);
+
+    final FlutterImageView imageView =
+        spy(new FlutterImageView(ctx, initialReader, FlutterImageView.SurfaceKind.background));
+    final FlutterRenderer flutterRenderer = mock(FlutterRenderer.class);
+    imageView.attachToRenderer(flutterRenderer);
+    clearInvocations(imageView);
+
+    // Resize outruns Present(N): resizeIfNeeded() drains the unconsumed frame into currentBitmap,
+    // invalidates the view, and latches hasUnconsumedResizedFrame across back-to-back resizes.
+    imageView.resizeIfNeeded(200, 200);
+    verify(imageView, times(1)).invalidate();
+    imageView.resizeIfNeeded(300, 300);
+
+    // Present(N)'s acquireLatestImage() sees the drained frame once, then subsequent calls return
+    // false until the resized reader receives a matching-size frame.
+    assertTrue(imageView.acquireLatestImage());
     assertFalse(imageView.acquireLatestImage());
     final Canvas canvas = mock(Canvas.class);
     imageView.onDraw(canvas);

@@ -733,5 +733,96 @@ TEST_F(PlatformViewAndroidJNIImplTest, DestroyOverlaySurfacesByIds) {
   EXPECT_EQ(tracker.ActiveCount(), 0u);
 }
 
+TEST_F(PlatformViewAndroidJNIImplTest,
+       CreateOverlaySurfaceHandlesNullAndJavaExceptions) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+
+  const jobject kFlutterJniObj = reinterpret_cast<jobject>(0x1001);
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  // Case 1: Java returns null (e.g. detached FlutterView) -> returns nullptr
+  // (not OverlayMetadata(0, nullptr)).
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillOnce(Return(JNI_FALSE));
+  EXPECT_CALL(mock_env, CallObjectMethodV(kFlutterJniObj, _, _))
+      .WillOnce(Return(nullptr));
+  EXPECT_EQ(android_jni.FlutterViewCreateOverlaySurface(100, 100), nullptr);
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+  ::testing::Mock::VerifyAndClearExpectations(&mock_env);
+  tracker.InstallDefaults(mock_env);
+
+  // Case 2: Java throws an exception in createOverlaySurface(w, h) -> clears
+  // exception and returns nullptr without aborting.
+  jthrowable fake_throwable = tracker.AllocateNew<jthrowable>();
+  EXPECT_CALL(mock_env, CallObjectMethodV(kFlutterJniObj, _, _))
+      .WillOnce(Return(nullptr));
+  EXPECT_CALL(mock_env, ExceptionCheck())
+      .WillOnce(Return(JNI_TRUE))
+      .WillRepeatedly(Return(JNI_FALSE));
+  EXPECT_CALL(mock_env, ExceptionOccurred()).WillOnce(Return(fake_throwable));
+  EXPECT_CALL(mock_env, ExceptionClear()).Times(1);
+  EXPECT_CALL(mock_env, FindClass(_))
+      .WillRepeatedly(
+          [&](const char*) -> jclass { return tracker.AllocateNew<jclass>(); });
+  EXPECT_CALL(mock_env, GetMethodID(_, _, _)).WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(mock_env, NewObjectV(_, _, _))
+      .WillRepeatedly([&](jclass, jmethodID, va_list) -> jobject {
+        return tracker.AllocateNew<jobject>();
+      });
+  EXPECT_CALL(mock_env, CallVoidMethodV(_, _, _)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, CallObjectMethodV(::testing::Ne(kFlutterJniObj), _, _))
+      .WillRepeatedly(Return(nullptr));
+
+  EXPECT_EQ(android_jni.FlutterViewCreateOverlaySurface(100, 100), nullptr);
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, DrainAbortedFrame) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+
+  const jobject kFlutterJniObj = reinterpret_cast<jobject>(0x1001);
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  // Empty overlay_ids still invokes drainAbortedFrame([]) so the root
+  // FlutterImageView buffer is drained.
+  EXPECT_CALL(mock_env, NewIntArray(0)).WillOnce([&](jsize) -> jintArray {
+    return tracker.AllocateNew<jintArray>();
+  });
+  EXPECT_CALL(mock_env, SetIntArrayRegion(_, _, _, _)).Times(0);
+  EXPECT_CALL(mock_env, CallVoidMethodV(kFlutterJniObj, _, _)).Times(1);
+  android_jni.FlutterViewDrainAbortedFrame({});
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+  ::testing::Mock::VerifyAndClearExpectations(&mock_env);
+  tracker.InstallDefaults(mock_env);
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  // Non-empty overlay_ids passes every submitted overlay ID to Java.
+  jintArray created_array = nullptr;
+  std::vector<jint> captured_ids;
+  EXPECT_CALL(mock_env, NewIntArray(2)).WillOnce([&](jsize) -> jintArray {
+    created_array = tracker.AllocateNew<jintArray>();
+    return created_array;
+  });
+  EXPECT_CALL(mock_env, SetIntArrayRegion(_, 0, 2, _))
+      .WillOnce([&](jintArray arr, jsize, jsize len, const jint* buf) {
+        EXPECT_EQ(arr, created_array);
+        captured_ids.assign(buf, buf + len);
+      });
+  EXPECT_CALL(mock_env, CallVoidMethodV(kFlutterJniObj, _, _)).Times(1);
+
+  android_jni.FlutterViewDrainAbortedFrame({5, 9});
+  EXPECT_THAT(captured_ids, ElementsAre(5, 9));
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+}
+
 }  // namespace testing
 }  // namespace flutter

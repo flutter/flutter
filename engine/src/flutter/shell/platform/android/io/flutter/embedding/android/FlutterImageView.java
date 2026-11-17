@@ -78,6 +78,12 @@ public class FlutterImageView extends View implements RenderSurface {
   private boolean isImageReaderClosed = false;
 
   /**
+   * Whether {@link #resizeIfNeeded} drained an unconsumed pre-resize {@link Image} into {@link
+   * #currentBitmap} before the corresponding {@link #acquireLatestImage} call ran.
+   */
+  private boolean hasUnconsumedResizedFrame = false;
+
+  /**
    * Constructs a {@code FlutterImageView} with an {@link android.media.ImageReader} that provides
    * the Flutter UI.
    */
@@ -192,6 +198,7 @@ public class FlutterImageView extends View implements RenderSurface {
 
     // Close and clear the current image if any.
     closeCurrentImage();
+    hasUnconsumedResizedFrame = false;
     invalidate();
     isAttachedToFlutterRenderer = false;
     isPaused = false;
@@ -232,19 +239,28 @@ public class FlutterImageView extends View implements RenderSurface {
     // 3. While the engine will also stop producing frames, there is a race condition.
     final Image newImage = imageReader.acquireLatestImage();
     if (newImage != null) {
+      hasUnconsumedResizedFrame = false;
       // Only close current image after acquiring valid new image
       closeCurrentImage();
       currentImage = newImage;
       invalidate();
+      return true;
     }
-    return newImage != null;
+    if (hasUnconsumedResizedFrame) {
+      hasUnconsumedResizedFrame = false;
+      invalidate();
+      return true;
+    }
+    return false;
   }
 
   /**
-   * Drains and closes any pending images currently queued in {@link #imageReader} before
-   * reattaching a reused {@code FlutterImageView} to the renderer.
+   * Drains and closes any pending images currently queued in {@link #imageReader} without updating
+   * the currently displayed frame (for example, before reattaching a reused view or when discarding
+   * an aborted partial frame).
    */
-  void drainPendingImages() {
+  public void drainPendingImages() {
+    hasUnconsumedResizedFrame = false;
     if (isImageReaderClosed) {
       return;
     }
@@ -252,25 +268,6 @@ public class FlutterImageView extends View implements RenderSurface {
     if (droppedImage != null) {
       droppedImage.close();
     }
-  }
-
-  /**
-   * Replaces the underlying {@link ImageReader} when reusing a pooled overlay view, closing the
-   * previous reader if it has not already been closed.
-   */
-  public void swapImageReader(@NonNull ImageReader newImageReader) {
-    if (imageReader == newImageReader) {
-      return;
-    }
-    detachFromRenderer();
-    closeCurrentImage();
-    currentBitmap = null;
-    if (!isImageReaderClosed) {
-      imageReader.close();
-    }
-    imageReader = newImageReader;
-    isImageReaderClosed = false;
-    setAlpha(0.0f);
   }
 
   /** Creates a new image reader with the provided size. */
@@ -287,8 +284,8 @@ public class FlutterImageView extends View implements RenderSurface {
     // ImageReaders cannot be resized once created. Allocate the replacement first and, when active
     // as the background surface, move FlutterRenderer onto the new Surface before closing the old
     // ImageReader so the raster thread is never left bound to a closed BufferQueue. Convert any
-    // pending Image to currentBitmap before closing its reader, while letting acquireLatestImage()
-    // return false until the resized ImageReader receives a matching-size frame.
+    // pending Image to currentBitmap before closing its reader, and latch
+    // hasUnconsumedResizedFrame only when an unpresented Image was drained from oldImageReader.
     final ImageReader oldImageReader = imageReader;
     final boolean oldReaderWasClosed = isImageReaderClosed;
     imageReader = createImageReader(width, height);
@@ -306,6 +303,10 @@ public class FlutterImageView extends View implements RenderSurface {
         updateCurrentBitmap();
         closeCurrentImage();
       }
+      if (latest != null) {
+        hasUnconsumedResizedFrame = true;
+        invalidate();
+      }
       oldImageReader.close();
     }
   }
@@ -317,6 +318,7 @@ public class FlutterImageView extends View implements RenderSurface {
    * IllegalStateException}.
    */
   public void closeImageReader() {
+    hasUnconsumedResizedFrame = false;
     if (!isImageReaderClosed) {
       imageReader.close();
       isImageReaderClosed = true;
