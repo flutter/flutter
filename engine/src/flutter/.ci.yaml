@@ -34,7 +34,7 @@ platform_properties:
       os: Mac-15.7|Mac-26.6
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17c52"
+          "sdk_version": "27a9275"
         }
   windows:
     properties:
@@ -493,7 +493,7 @@ targets:
         ]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17c52"
+          "sdk_version": "27a9275"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -558,8 +558,8 @@ targets:
       cpu: arm64
       $flutter/osx_sdk: >-
         {
-          "sdk_version": "17c52",
-          "runtime_versions": ["ios-26-2_17c52"]
+          "sdk_version": "27a9275",
+          "runtime_versions": ["ios-27-0_27a9275"]
         }
 
   - name: Mac mac_ios_debug_unopt_sim_arm64_extension_safe
@@ -570,8 +570,8 @@ targets:
       cpu: arm64
       $flutter/osx_sdk: >-
         {
-          "sdk_version": "17c52",
-          "runtime_versions": ["ios-26-2_17c52"]
+          "sdk_version": "27a9275",
+          "runtime_versions": ["ios-27-0_27a9275"]
         }
 
   - name: Mac mac_ios_engine
@@ -583,7 +583,7 @@ targets:
       config_name: mac_ios_engine
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17c52"
+          "sdk_version": "27a9275"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -603,7 +603,7 @@ targets:
       config_name: mac_ios_engine_ddm
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17c52"
+          "sdk_version": "27a9275"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
