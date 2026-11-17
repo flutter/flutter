@@ -1956,8 +1956,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     }
 
     UIView* hostView = _textInputPlugin.hostView;
-    NSAssert(hostView == nil || [self isDescendantOfView:hostView], @"%@ is not a descendant of %@",
-             self, hostView);
+    // UIKit can query the previous input view while the engine is switching hosts.
+    if (hostView && ![self isDescendantOfView:hostView]) {
+      return kInvalidFirstRect;
+    }
     return hostView ? [hostView convertRect:_cachedFirstRect toView:self] : _cachedFirstRect;
   }
 
