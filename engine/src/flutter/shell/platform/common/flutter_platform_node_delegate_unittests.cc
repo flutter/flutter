@@ -338,7 +338,8 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   EXPECT_EQ(child1_node->GetPlatformNode(), node_by_id);
 }
 
-TEST(FlutterPlatformNodeDelegateTest, parentRectOriginDoesNotOffsetChildBounds) {
+TEST(FlutterPlatformNodeDelegateTest,
+     parentRectOriginDoesNotOffsetChildBounds) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
@@ -662,7 +663,8 @@ TEST(FlutterPlatformNodeDelegateTest,
   EXPECT_EQ(left_top_result, ui::AXOffscreenResult::kOffscreen);
 }
 
-TEST(FlutterPlatformNodeDelegateTest, emptyBoundsFallbackWithChildrenAndSibling) {
+TEST(FlutterPlatformNodeDelegateTest,
+     emptyBoundsFallbackWithChildrenAndSibling) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};

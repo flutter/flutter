@@ -319,12 +319,12 @@ static void transform_rect(gdouble* left,
   for (int i = 0; i < 4; i++) {
     const gdouble w =
         transform.pers0 * xs[i] + transform.pers1 * ys[i] + transform.pers2;
-    const gdouble tx =
-        (transform.scaleX * xs[i] + transform.skewX * ys[i] + transform.transX) /
-        (w != 0 ? w : 1.0);
-    const gdouble ty =
-        (transform.skewY * xs[i] + transform.scaleY * ys[i] + transform.transY) /
-        (w != 0 ? w : 1.0);
+    const gdouble tx = (transform.scaleX * xs[i] + transform.skewX * ys[i] +
+                        transform.transX) /
+                       (w != 0 ? w : 1.0);
+    const gdouble ty = (transform.skewY * xs[i] + transform.scaleY * ys[i] +
+                        transform.transY) /
+                       (w != 0 ? w : 1.0);
     if (i == 0) {
       min_x = max_x = tx;
       min_y = max_y = ty;
