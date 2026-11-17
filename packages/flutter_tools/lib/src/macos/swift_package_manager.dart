@@ -574,14 +574,15 @@ class SwiftPackageManager {
 
   /// Parses a Swift Package Manager error message and returns a guided error
   /// message if the error matches a known pattern caused by one of [pluginNames].
-  static String? parsePluginError(String? message, {required List<String> pluginNames}) {
+  static String? parsePluginError(String? message, {required Iterable<String> pluginNames}) {
     if (message == null || message.isEmpty) {
       return null;
     }
+    final Set<String> pluginNameSet = pluginNames.toSet();
     for (final _SwiftPMPluginErrorMatcher matcher in _errorMatchers) {
       for (final RegExpMatch match in matcher.pattern.allMatches(message)) {
         final String? pluginName = matcher.pluginName(match);
-        if (pluginName != null && pluginNames.contains(pluginName)) {
+        if (pluginName != null && pluginNameSet.contains(pluginName)) {
           // The plugin can't be fixed by the app developer, so always offer disabling Swift
           // Package Manager as a workaround.
           return '${matcher.message(pluginName, match)}\n\n$kDisableSwiftPMInstructions';

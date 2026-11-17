@@ -461,7 +461,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         final List<Plugin> plugins = await getPlugins();
         final String? pluginError = SwiftPackageManager.parsePluginError(
           stderrString,
-          pluginNames: plugins.map((p) => p.name).toList(),
+          pluginNames: plugins.map((p) => p.name),
         );
 
         if (pluginError != null) {
