@@ -331,6 +331,7 @@ void main() {
       fileSystemScheme: 'scheme',
       buildName: '122',
       buildNumber: '22',
+      linuxGtkVersion: 'gtk4',
     );
 
     expect(buildInfo.toBuildSystemEnvironment(), <String, String>{
@@ -348,6 +349,7 @@ void main() {
       'FileSystemScheme': 'scheme',
       'BuildName': '122',
       'BuildNumber': '22',
+      'FLUTTER_LINUX_GTK': 'gtk4',
     });
   });
 
@@ -367,6 +369,7 @@ void main() {
       codeSizeDirectory: 'foo/code-size',
       // These values are ignored by toEnvironmentConfig
       androidGradleConfig: AndroidGradleConfig(projectArgs: <String>['foo=bar', 'fizz=bazz']),
+      linuxGtkVersion: 'gtk3',
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
@@ -381,6 +384,7 @@ void main() {
       'PACKAGE_CONFIG': 'foo/.dart_tool/package_config.json',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
       'FLAVOR': 'strawberry',
+      'FLUTTER_LINUX_GTK': 'gtk3',
     });
   });
 
@@ -771,6 +775,46 @@ void main() {
       );
     });
   });
+
+  testUsingContext(
+    'Linux GTK4 builds use a separate output directory',
+    () {
+      final toolContext = FakeToolContext(config: Config.test(), fs: MemoryFileSystem.test());
+      expect(
+        getLinuxBuildDirectory(TargetPlatform.linux_x64, toolContext: toolContext),
+        'build/linux/x64',
+      );
+      expect(
+        getLinuxBuildDirectory(
+          TargetPlatform.linux_x64,
+          linuxGtkVersion: 'gtk3',
+          toolContext: toolContext,
+        ),
+        'build/linux/x64',
+      );
+      expect(
+        getLinuxBuildDirectory(
+          TargetPlatform.linux_x64,
+          linuxGtkVersion: 'gtk4',
+          toolContext: toolContext,
+        ),
+        'build/linux-gtk4/x64',
+      );
+      expect(
+        getLinuxBuildDirectory(
+          TargetPlatform.linux_x64,
+          flavor: 'demo',
+          linuxGtkVersion: 'gtk4',
+          toolContext: toolContext,
+        ),
+        'build/linux-gtk4/x64/demo',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 
   group('deprecatedJsInterop', () {
     testWithoutContext('passes no compiler flags when unset', () {

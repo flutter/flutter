@@ -8,8 +8,10 @@
 #include <gmodule.h>
 
 #include <cstring>
+#include <string>
 
 #include "flutter/common/constants.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_accessibility_handler.h"
@@ -20,6 +22,10 @@
 #include "flutter/shell/platform/linux/fl_keyboard_handler.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_pixel_buffer_texture_vulkan.h"  // nogncheck
+#endif
+#include "flutter/shell/platform/linux/fl_gtk_frame_pacer.h"
 #include "flutter/shell/platform/linux/fl_platform_handler.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_settings_handler.h"
@@ -52,6 +58,9 @@ struct _FlEngine {
 
   // Manages OpenGL contexts.
   FlOpenGLManager* opengl_manager;
+#if FLUTTER_LINUX_GTK4
+  FlVulkanManager* vulkan_manager;
+#endif
 
   // Messenger used to send and receive platform messages.
   FlBinaryMessenger* binary_messenger;
@@ -83,6 +92,13 @@ struct _FlEngine {
   // Schedules tasks to be run on the appropriate thread.
   FlTaskRunner* task_runner;
 
+  // Schedules vsync delivery on the GTK frame clock.
+  FlGtkFramePacer* frame_pacer;
+
+  // Serialize worker admission and texture calls with explicit shutdown.
+  GRecMutex lifecycle_mutex;
+  gboolean shutting_down;
+
   // Ahead of time data used to make engine run faster.
   FlutterEngineAOTData aot_data;
 
@@ -109,12 +125,58 @@ struct _FlEngine {
   GDestroyNotify platform_message_handler_destroy_notify;
 };
 
+static void fl_engine_deliver_vsync(intptr_t baton,
+                                    uint64_t frame_start_ns,
+                                    uint64_t frame_target_ns,
+                                    gpointer user_data) {
+  auto* self = FL_ENGINE(user_data);
+  if (self->engine == nullptr) {
+    return;
+  }
+  TRACE_EVENT_INSTANT2("flutter", "LinuxVsyncDeliver", "baton",
+                       std::to_string(baton).c_str(), "frame_start_ns",
+                       std::to_string(frame_start_ns).c_str());
+  FlutterEngineResult result = self->embedder_api.OnVsync(
+      self->engine, baton, frame_start_ns, frame_target_ns);
+  if (result != kSuccess) {
+    g_warning("Failed to deliver Flutter vsync: %d", result);
+  }
+}
+
+static FlRenderable* get_renderable(FlEngine* self, int64_t view_id);
+
+static void fl_engine_vsync_callback(void* user_data, intptr_t baton) {
+  auto* self = FL_ENGINE(user_data);
+  g_autoptr(GRecMutexLocker) lock =
+      g_rec_mutex_locker_new(&self->lifecycle_mutex);
+  if (self->shutting_down) {
+    // The embedder waiter owns undelivered batons until its destruction.
+    return;
+  }
+  TRACE_EVENT_INSTANT1("flutter", "LinuxVsyncRequest", "baton",
+                       std::to_string(baton).c_str());
+  // The implicit view remains this engine's primary presentation clock.
+  g_autoptr(FlRenderable) renderable =
+      get_renderable(self, flutter::kFlutterImplicitViewId);
+  GtkWidget* widget = renderable != nullptr && GTK_IS_WIDGET(renderable)
+                          ? GTK_WIDGET(renderable)
+                          : nullptr;
+  fl_gtk_frame_pacer_request(self->frame_pacer, widget, baton,
+                             fl_engine_deliver_vsync, g_object_ref(self),
+                             g_object_unref);
+}
+
 G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
 
 static void fl_engine_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
 
-enum { SIGNAL_ON_PRE_ENGINE_RESTART, SIGNAL_UPDATE_SEMANTICS, LAST_SIGNAL };
+enum {
+  SIGNAL_ON_PRE_ENGINE_RESTART,
+  SIGNAL_UPDATE_SEMANTICS,
+  SIGNAL_SHUTDOWN_COMPLETE,
+  LAST_SIGNAL
+};
 
 static guint fl_engine_signals[LAST_SIGNAL];
 
@@ -370,6 +432,11 @@ static bool compositor_create_backing_store_callback(
   switch (self->renderer_type) {
     case kOpenGL:
       return create_opengl_backing_store(self, config, backing_store_out);
+#if FLUTTER_LINUX_GTK4
+    case kVulkan:
+      return fl_vulkan_manager_create_backing_store(self->vulkan_manager,
+                                                    config, backing_store_out);
+#endif
     case kSoftware:
       return create_software_backing_store(self, config, backing_store_out);
     default:
@@ -385,6 +452,11 @@ static bool compositor_collect_backing_store_callback(
   switch (self->renderer_type) {
     case kOpenGL:
       return collect_opengl_backing_store(self, backing_store);
+#if FLUTTER_LINUX_GTK4
+    case kVulkan:
+      fl_vulkan_manager_collect_backing_store(backing_store);
+      return true;
+#endif
     case kSoftware:
       return collect_software_backing_store(self, backing_store);
     default:
@@ -466,12 +538,41 @@ static bool fl_engine_gl_external_texture_frame_callback(
   }
 
   if (!result) {
-    g_warning("%s", error->message);
+    g_warning("External texture callback failed for texture %" G_GINT64_FORMAT
+              ": %s",
+              texture_id,
+              error != nullptr ? error->message : "no error detail supplied");
     return false;
   }
 
   return true;
 }
+
+#if FLUTTER_LINUX_GTK4
+static bool fl_engine_vulkan_external_texture_frame_callback(
+    void* user_data,
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterVulkanExternalTexture* output) {
+  auto* self = FL_ENGINE(user_data);
+  if (!self->texture_registrar || width > UINT32_MAX || height > UINT32_MAX)
+    return false;
+  g_autoptr(FlTexture) texture =
+      fl_texture_registrar_ref_texture(self->texture_registrar, texture_id);
+  if (!texture || !FL_IS_PIXEL_BUFFER_TEXTURE(texture))
+    return false;
+  g_autoptr(GError) error = nullptr;
+  if (!fl_pixel_buffer_texture_populate_vulkan(FL_PIXEL_BUFFER_TEXTURE(texture),
+                                               self->vulkan_manager, width,
+                                               height, output, &error)) {
+    g_warning("Vulkan pixel-buffer texture failed: %s",
+              error ? error->message : "invalid pixel buffer");
+    return false;
+  }
+  return true;
+}
+#endif
 
 // Called by the engine to determine if it is on the GTK thread.
 static bool fl_engine_runs_task_on_current_thread(void* user_data) {
@@ -589,15 +690,58 @@ static void fl_engine_set_property(GObject* object,
   }
 }
 
+static void shutdown_engine(FlEngine* self) {
+  g_return_if_fail(self->thread == g_thread_self());
+  {
+    g_autoptr(GRecMutexLocker) lock =
+        g_rec_mutex_locker_new(&self->lifecycle_mutex);
+    if (self->shutting_down) {
+      return;
+    }
+    self->shutting_down = TRUE;
+  }
+  // Closing admission also waits for registrations, textures, and replies in
+  // flight. Do not hold that lock across Shutdown: it joins engine workers.
+  const bool diagnostics =
+      g_strcmp0(g_getenv("FLUTTER_LINUX_SHUTDOWN_DIAGNOSTICS"), "1") == 0;
+  if (diagnostics) {
+    g_message(
+        "[FlutterShutdown] engine=%p begin monotonic_us=%" G_GINT64_FORMAT,
+        self, g_get_monotonic_time());
+  }
+  TRACE_EVENT_INSTANT0("flutter", "LinuxEngineShutdownBegin");
+  if (self->frame_pacer != nullptr) {
+    fl_gtk_frame_pacer_stop(self->frame_pacer);
+  }
+  auto engine = self->engine;
+  self->engine = nullptr;
+  if (engine != nullptr && self->embedder_api.Shutdown(engine) != kSuccess) {
+    g_warning("Failed to shutdown Flutter engine");
+    return;
+  }
+  TRACE_EVENT_INSTANT0("flutter", "LinuxEngineShutdownComplete");
+  if (diagnostics) {
+    g_message(
+        "[FlutterShutdown] engine=%p complete monotonic_us=%" G_GINT64_FORMAT,
+        self, g_get_monotonic_time());
+  }
+  g_signal_emit(self, fl_engine_signals[SIGNAL_SHUTDOWN_COMPLETE], 0);
+}
+
+void fl_engine_shutdown(FlEngine* self) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+  g_autoptr(FlEngine) retained = FL_ENGINE(g_object_ref(self));
+  shutdown_engine(self);
+}
+
+static void application_shutdown_cb(GApplication*, FlEngine* self) {
+  fl_engine_shutdown(self);
+}
+
 static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
-  if (self->engine != nullptr) {
-    if (self->embedder_api.Shutdown(self->engine) != kSuccess) {
-      g_warning("Failed to shutdown Flutter engine");
-    }
-    self->engine = nullptr;
-  }
+  shutdown_engine(self);
 
   if (self->aot_data != nullptr) {
     if (self->embedder_api.CollectAOTData(self->aot_data) != kSuccess) {
@@ -612,6 +756,9 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->project);
   g_clear_object(&self->display_monitor);
   g_clear_object(&self->opengl_manager);
+#if FLUTTER_LINUX_GTK4
+  g_clear_object(&self->vulkan_manager);
+#endif
   g_clear_object(&self->texture_registrar);
   g_clear_object(&self->binary_messenger);
   g_clear_object(&self->settings_handler);
@@ -621,6 +768,7 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->text_input_handler);
   g_clear_object(&self->keyboard_handler);
   g_clear_object(&self->mouse_cursor_handler);
+  g_clear_object(&self->frame_pacer);
   g_clear_object(&self->task_runner);
   {
     g_autoptr(GMutexLocker) locker =
@@ -639,7 +787,16 @@ static void fl_engine_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_engine_parent_class)->dispose(object);
 }
 
+static void fl_engine_finalize(GObject* object) {
+  g_rec_mutex_clear(&FL_ENGINE(object)->lifecycle_mutex);
+  G_OBJECT_CLASS(fl_engine_parent_class)->finalize(object);
+}
+
 static void fl_engine_class_init(FlEngineClass* klass) {
+  G_OBJECT_CLASS(klass)->finalize = fl_engine_finalize;
+  fl_engine_signals[SIGNAL_SHUTDOWN_COMPLETE] =
+      g_signal_new("shutdown-complete", fl_engine_get_type(), G_SIGNAL_RUN_LAST,
+                   0, nullptr, nullptr, nullptr, G_TYPE_NONE, 0);
   G_OBJECT_CLASS(klass)->dispose = fl_engine_dispose;
   G_OBJECT_CLASS(klass)->set_property = fl_engine_set_property;
 
@@ -661,6 +818,7 @@ static void fl_engine_class_init(FlEngineClass* klass) {
 
 static void fl_engine_init(FlEngine* self) {
   self->thread = g_thread_self();
+  g_rec_mutex_init(&self->lifecycle_mutex);
 
   self->embedder_api.struct_size = sizeof(FlutterEngineProcTable);
   if (FlutterEngineGetProcAddresses(&self->embedder_api) != kSuccess) {
@@ -702,6 +860,11 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
         "\n"
         "To switch back to the default renderer, unset the "
         "FLUTTER_LINUX_RENDERER environment variable.");
+#if FLUTTER_LINUX_GTK4
+  } else if (g_strcmp0(renderer, "vulkan") == 0) {
+    self->renderer_type = kVulkan;
+    self->vulkan_manager = fl_vulkan_manager_new();
+#endif
   } else {
     if (renderer != nullptr && strcmp(renderer, "opengl") != 0) {
       g_warning("Unknown renderer type '%s', defaulting to opengl", renderer);
@@ -753,6 +916,13 @@ FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* self) {
   return self->opengl_manager;
 }
 
+#if FLUTTER_LINUX_GTK4
+FlVulkanManager* fl_engine_get_vulkan_manager(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+  return self->vulkan_manager;
+}
+#endif
+
 FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
   return self->display_monitor;
@@ -760,6 +930,33 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
 
 gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+
+  if (self->shutting_down) {
+    g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+                "Cannot restart a shut down engine");
+    return FALSE;
+  }
+  GApplication* application = g_application_get_default();
+  if (application != nullptr) {
+    // Normal handlers precede the RUN_LAST class handler, including runner
+    // overrides that destroy windows or drain callbacks before chaining up.
+    g_signal_connect_object(application, "shutdown",
+                            G_CALLBACK(application_shutdown_cb), self,
+                            static_cast<GConnectFlags>(0));
+  }
+
+  // Select once before initialization. Renderer selection does not affect
+  // pacing.
+  const gchar* frame_pacer = g_getenv("FLUTTER_LINUX_FRAME_PACER");
+  const bool use_gtk_pacer =
+      frame_pacer == nullptr || strcmp(frame_pacer, "gtk") == 0;
+  if (!use_gtk_pacer && strcmp(frame_pacer, "engine") != 0) {
+    g_set_error(
+        error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+        "Unknown FLUTTER_LINUX_FRAME_PACER '%s'; expected gtk or engine",
+        frame_pacer);
+    return FALSE;
+  }
 
   FlutterRendererConfig config = {};
   config.type = self->renderer_type;
@@ -785,8 +982,14 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       config.open_gl.gl_external_texture_frame_callback =
           fl_engine_gl_external_texture_frame_callback;
       break;
-    case kMetal:
+#if FLUTTER_LINUX_GTK4
     case kVulkan:
+      // Initialize after validating the Impeller switches below.
+      break;
+#else
+    case kVulkan:
+#endif
+    case kMetal:
     default:
       g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
                   "Unsupported renderer type");
@@ -830,6 +1033,24 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
     }
   }
 
+  if (self->renderer_type == kVulkan) {
+    if (has_enable_impeller && !enable_impeller) {
+      g_set_error_literal(error, fl_engine_error_quark(),
+                          FL_ENGINE_ERROR_FAILED,
+                          "The Vulkan renderer requires Impeller");
+      return FALSE;
+    }
+    enable_impeller = TRUE;
+#if FLUTTER_LINUX_GTK4
+    if (!fl_vulkan_manager_initialize(self->vulkan_manager, &config.vulkan,
+                                      error)) {
+      return FALSE;
+    }
+    config.vulkan.external_texture_frame_callback =
+        fl_engine_vulkan_external_texture_frame_callback;
+#endif
+  }
+
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
   g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
@@ -871,6 +1092,16 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   args.command_line_argv =
       reinterpret_cast<const char* const*>(command_line_args->pdata);
   args.platform_message_callback = fl_engine_platform_message_cb;
+  if (use_gtk_pacer) {
+    if (self->frame_pacer == nullptr) {
+      self->frame_pacer = fl_gtk_frame_pacer_new();
+    }
+    args.vsync_callback = fl_engine_vsync_callback;
+  }
+  if (frame_pacer != nullptr) {
+    g_message("Flutter Linux frame pacer: %s",
+              use_gtk_pacer ? "gtk" : "engine");
+  }
   args.update_semantics_callback2 = fl_engine_update_semantics_cb;
   args.custom_task_runners = &custom_task_runners;
   args.shutdown_dart_vm_when_done = true;
@@ -947,6 +1178,9 @@ void fl_engine_notify_display_update(FlEngine* self,
                                      const FlutterEngineDisplay* displays,
                                      size_t displays_length) {
   g_return_if_fail(FL_IS_ENGINE(self));
+  if (self->shutting_down) {
+    return;
+  }
 
   FlutterEngineResult result = self->embedder_api.NotifyDisplayUpdate(
       self->engine, kFlutterEngineDisplaysUpdateTypeStartup, displays,
@@ -973,6 +1207,12 @@ FlutterViewId fl_engine_add_view(FlEngine* self,
   g_return_val_if_fail(FL_IS_ENGINE(self), -1);
 
   g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
+
+  if (self->shutting_down) {
+    g_task_return_new_error(task, fl_engine_error_quark(),
+                            FL_ENGINE_ERROR_FAILED, "Engine is shut down");
+    return -1;
+  }
 
   FlutterViewId view_id = self->next_view_id;
   self->next_view_id++;
@@ -1037,6 +1277,11 @@ void fl_engine_remove_view(FlEngine* self,
 
   g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
 
+  if (self->shutting_down) {
+    g_task_return_boolean(task, TRUE);
+    return;
+  }
+
   FlutterRemoveViewInfo info;
   info.struct_size = sizeof(FlutterRemoveViewInfo);
   info.view_id = view_id;
@@ -1087,7 +1332,9 @@ gboolean fl_engine_send_platform_message_response(
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
   g_return_val_if_fail(handle != nullptr, FALSE);
 
-  if (self->engine == nullptr) {
+  g_autoptr(GRecMutexLocker) locker =
+      g_rec_mutex_locker_new(&self->lifecycle_mutex);
+  if (self->shutting_down || self->engine == nullptr) {
     g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
                 "No engine to send response to");
     return FALSE;
@@ -1564,6 +1811,11 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
 gboolean fl_engine_mark_texture_frame_available(FlEngine* self,
                                                 int64_t texture_id) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  g_autoptr(GRecMutexLocker) lock =
+      g_rec_mutex_locker_new(&self->lifecycle_mutex);
+  if (self->shutting_down) {
+    return FALSE;
+  }
   return self->embedder_api.MarkExternalTextureFrameAvailable(
              self->engine, texture_id) == kSuccess;
 }
@@ -1571,6 +1823,11 @@ gboolean fl_engine_mark_texture_frame_available(FlEngine* self,
 gboolean fl_engine_register_external_texture(FlEngine* self,
                                              int64_t texture_id) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  g_autoptr(GRecMutexLocker) lock =
+      g_rec_mutex_locker_new(&self->lifecycle_mutex);
+  if (self->shutting_down) {
+    return FALSE;
+  }
   return self->embedder_api.RegisterExternalTexture(self->engine, texture_id) ==
          kSuccess;
 }
@@ -1578,6 +1835,11 @@ gboolean fl_engine_register_external_texture(FlEngine* self,
 gboolean fl_engine_unregister_external_texture(FlEngine* self,
                                                int64_t texture_id) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  g_autoptr(GRecMutexLocker) lock =
+      g_rec_mutex_locker_new(&self->lifecycle_mutex);
+  if (self->shutting_down) {
+    return FALSE;
+  }
   return self->embedder_api.UnregisterExternalTexture(self->engine,
                                                       texture_id) == kSuccess;
 }
@@ -1595,6 +1857,10 @@ FlTaskRunner* fl_engine_get_task_runner(FlEngine* self) {
 
 void fl_engine_execute_task(FlEngine* self, FlutterTask* task) {
   g_return_if_fail(FL_IS_ENGINE(self));
+  if (self->shutting_down) {
+    return;
+  }
+
   if (self->embedder_api.RunTask(self->engine, task) != kSuccess) {
     g_warning("Failed to run task");
   }

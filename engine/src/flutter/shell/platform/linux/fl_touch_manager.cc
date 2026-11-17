@@ -159,8 +159,14 @@ static void remove_touch_point(_FlTouchManager* self,
 }
 
 void fl_touch_manager_handle_touch_event(FlTouchManager* self,
+#if FLUTTER_LINUX_GTK4
+                                         GdkEvent* event,
+                                         gdouble event_x,
+                                         gdouble event_y,
+#else
                                          GdkEventTouch* touch_event,
-                                         gint scale_factor) {
+#endif
+                                         gdouble scale_factor) {
   g_return_if_fail(FL_IS_TOUCH_MANAGER(self));
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -168,7 +174,9 @@ void fl_touch_manager_handle_touch_event(FlTouchManager* self,
     return;
   }
 
+#if !FLUTTER_LINUX_GTK4
   GdkEvent* event = reinterpret_cast<GdkEvent*>(touch_event);
+#endif
   // get sequence id from GdkEvent
   GdkEventSequence* seq = gdk_event_get_event_sequence(event);
   // cast pointer to int to get unique id
@@ -179,8 +187,10 @@ void fl_touch_manager_handle_touch_event(FlTouchManager* self,
   auto device_id =
       static_cast<int32_t>(kFlutterPointerDeviceKindTouch) << 28 | touch_id;
 
+#if !FLUTTER_LINUX_GTK4
   gdouble event_x = 0.0, event_y = 0.0;
   gdk_event_get_coords(event, &event_x, &event_y);
+#endif
 
   double x = event_x * scale_factor;
   double y = event_y * scale_factor;

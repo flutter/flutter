@@ -18,6 +18,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
@@ -34,6 +35,7 @@ import 'features.dart';
 import 'http_host_validator.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
+import 'linux/gtk4_doctor.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/cocoapods_validator.dart';
@@ -178,7 +180,24 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           platform: platform,
         ),
       if (linuxWorkflow.appliesToHostPlatform)
-        LinuxDoctorValidator(processManager: processManager, userMessages: userMessages),
+        LinuxDoctorValidator(
+          processManager: processManager,
+          userMessages: userMessages,
+          useGtk4: _toolContext.config.getValue('linux-gtk-default') == 'gtk4',
+        ),
+      if (linuxWorkflow.appliesToHostPlatform)
+        Gtk4DoctorValidator(
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          dartBinary: fs.path.join(cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+          probePath: fs.path.join(
+            cache.flutterRoot,
+            'packages',
+            'flutter_tools',
+            'bin',
+            'gtk4_runtime_probe.dart',
+          ),
+          requiredForBuild: _toolContext.config.getValue('linux-gtk-default') == 'gtk4',
+        ),
       if (extensionManager case final ExtensionManager manager)
         for (final DiagnosticsExtension extension in manager.diagnosticsExtensions)
           ExtensionDoctorValidator(extension: extension, logger: logger),

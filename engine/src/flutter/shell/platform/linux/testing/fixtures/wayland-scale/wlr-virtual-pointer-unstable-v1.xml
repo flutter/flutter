@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="wlr_virtual_pointer_unstable_v1">
+  <copyright>
+    Copyright © 2019 Josef Gajdusek
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice (including the next
+    paragraph) shall be included in all copies or substantial portions of the
+    Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+  </copyright>
+
+  <interface name="zwlr_virtual_pointer_v1" version="2">
+    <description summary="virtual pointer">
+      This protocol allows clients to emulate a physical pointer device. The
+      requests are mostly mirror opposites of those specified in wl_pointer.
+    </description>
+
+    <enum name="error">
+      <entry name="invalid_axis" value="0"
+        summary="client sent invalid axis enumeration value" />
+      <entry name="invalid_axis_source" value="1"
+        summary="client sent invalid axis source enumeration value" />
+    </enum>
+
+    <request name="motion">
+      <description summary="pointer relative motion event">
+        The pointer has moved by a relative amount to the previous request.
+
+        Values are in the global compositor space.
+      </description>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="dx" type="fixed" summary="displacement on the x-axis"/>
+      <arg name="dy" type="fixed" summary="displacement on the y-axis"/>
+    </request>
+
+    <request name="motion_absolute">
+      <description summary="pointer absolute motion event">
+        The pointer has moved in an absolute coordinate frame.
+
+        Value of x can range from 0 to x_extent, value of y can range from 0
+        to y_extent.
+      </description>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="x" type="uint" summary="position on the x-axis"/>
+      <arg name="y" type="uint" summary="position on the y-axis"/>
+      <arg name="x_extent" type="uint" summary="extent of the x-axis"/>
+      <arg name="y_extent" type="uint" summary="extent of the y-axis"/>
+    </request>
+
+    <request name="button">
+      <description summary="button event">
+        A button was pressed or released.
+      </description>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="button" type="uint" summary="button that produced the event"/>
+      <arg name="state" type="uint" enum="wl_pointer.button_state" summary="physical state of the button"/>
+    </request>
+
+    <request name="axis">
+      <description summary="axis event">
+        Scroll and other axis requests.
+      </description>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="axis" type="uint" enum="wl_pointer.axis" summary="axis type"/>
+      <arg name="value" type="fixed" summary="length of vector in touchpad coordinates"/>
+    </request>
+
+    <request name="frame">
+      <description summary="end of a pointer event sequence">
+        Indicates the set of events that logically belong together.
+      </description>
+    </request>
+
+    <request name="axis_source">
+      <description summary="axis source event">
+        Source information for scroll and other axis.
+      </description>
+      <arg name="axis_source" type="uint" enum="wl_pointer.axis_source" summary="source of the axis event"/>
+    </request>
+
+    <request name="axis_stop">
+      <description summary="axis stop event">
+        Stop notification for scroll and other axes.
+      </description>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="axis" type="uint" enum="wl_pointer.axis" summary="the axis stopped with this event"/>
+    </request>
+
+    <request name="axis_discrete">
+      <description summary="axis click event">
+        Discrete step information for scroll and other axes.
+
+        This event allows the client to extend data normally sent using the axis
+        event with discrete value.
+      </description>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="axis" type="uint" enum="wl_pointer.axis" summary="axis type"/>
+      <arg name="value" type="fixed" summary="length of vector in touchpad coordinates"/>
+      <arg name="discrete" type="int" summary="number of steps"/>
+    </request>
+
+    <request name="destroy" type="destructor" since="1">
+      <description summary="destroy the virtual pointer object"/>
+    </request>
+  </interface>
+
+  <interface name="zwlr_virtual_pointer_manager_v1" version="2">
+    <description summary="virtual pointer manager">
+      This object allows clients to create individual virtual pointer objects.
+    </description>
+
+    <request name="create_virtual_pointer">
+      <description summary="Create a new virtual pointer">
+        Creates a new virtual pointer. The optional seat is a suggestion to the
+        compositor.
+      </description>
+      <arg name="seat" type="object" interface="wl_seat" allow-null="true"/>
+      <arg name="id" type="new_id" interface="zwlr_virtual_pointer_v1"/>
+    </request>
+
+    <request name="destroy" type="destructor" since="1">
+      <description summary="destroy the virtual pointer manager"/>
+    </request>
+
+    <!-- Version 2 additions -->
+    <request name="create_virtual_pointer_with_output" since="2">
+      <description summary="Create a new virtual pointer">
+        Creates a new virtual pointer. The seat and the output arguments are
+        optional. If the seat argument is set, the compositor should assign the
+        input device to the requested seat. If the output argument is set, the
+        compositor should map the input device to the requested output.
+      </description>
+      <arg name="seat" type="object" interface="wl_seat" allow-null="true"/>
+      <arg name="output" type="object" interface="wl_output" allow-null="true"/>
+      <arg name="id" type="new_id" interface="zwlr_virtual_pointer_v1"/>
+    </request>
+  </interface>
+</protocol>

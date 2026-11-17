@@ -5,20 +5,51 @@
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
 
 #include <cassert>
+#include <limits>
 #include <utility>
 
 #include "flutter/common/constants.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/embedder/embedder_layers.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 #ifdef IMPELLER_SUPPORTS_RENDERING
-#include "impeller/display_list/dl_dispatcher.h"  // nogncheck
-#endif                                            // IMPELLER_SUPPORTS_RENDERING
+#include "impeller/display_list/dl_dispatcher.h"          // nogncheck
+#include "impeller/renderer/backend/vulkan/context_vk.h"  // nogncheck
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 namespace flutter {
 
 static const auto kRootViewIdentifier = EmbedderExternalView::ViewIdentifier{};
+
+#ifdef IMPELLER_SUPPORTS_RENDERING
+// Wait only for the Vulkan graphics queue work submitted before this point.
+// Device-wide idle also blocks unrelated transfer/compute queues and other
+// engines sharing the device, while this marker fence preserves the embedder's
+// host-completion guarantee for the frame being presented.
+static bool WaitForVulkanGraphicsQueue(
+    const std::shared_ptr<impeller::AiksContext>& aiks_context) {
+  if (!aiks_context || aiks_context->GetContext()->GetBackendType() !=
+                           impeller::Context::BackendType::kVulkan) {
+    return true;
+  }
+  TRACE_EVENT0("flutter", "VulkanGraphicsCompletion");
+  auto& context = impeller::ContextVK::Cast(*aiks_context->GetContext());
+  auto [fence_result, fence] = context.GetDevice().createFenceUnique({});
+  if (fence_result != impeller::vk::Result::eSuccess) {
+    return false;
+  }
+  if (context.GetGraphicsQueue()->Submit(impeller::vk::SubmitInfo{}, *fence) !=
+      impeller::vk::Result::eSuccess) {
+    return false;
+  }
+  TRACE_EVENT0("flutter", "VulkanGraphicsFenceWait");
+  return context.GetDevice().waitForFences(
+             *fence, true, std::numeric_limits<uint64_t>::max()) ==
+         impeller::vk::Result::eSuccess;
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 EmbedderExternalViewEmbedder::EmbedderExternalViewEmbedder(
     bool avoid_backing_store_cache,
@@ -607,6 +638,18 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
     context->flushAndSubmit();
   }
 #endif  //  !SLIMPELLER
+
+#ifdef IMPELLER_SUPPORTS_RENDERING
+  // Complete this frame's graphics-queue work before handing backing images to
+  // the embedder. A marker fence avoids idling unrelated queues and devices.
+  if (aiks_context &&
+      aiks_context->GetContext()->GetBackendType() ==
+          impeller::Context::BackendType::kVulkan &&
+      !WaitForVulkanGraphicsQueue(aiks_context)) {
+    // Retain the old correctness path if fence creation or submission fails.
+    aiks_context->GetContext()->GetIdleWaiter()->WaitIdle();
+  }
+#endif
 
   {
     auto presentation_time_optional = frame->submit_info().presentation_time;

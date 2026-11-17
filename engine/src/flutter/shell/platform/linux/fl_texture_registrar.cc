@@ -82,6 +82,14 @@ static gboolean register_texture(FlTextureRegistrar* registrar,
       return FALSE;
     }
 
+#if FLUTTER_LINUX_GTK4
+    if (fl_engine_get_vulkan_manager(engine) &&
+        !FL_IS_PIXEL_BUFFER_TEXTURE(texture)) {
+      g_warning("OpenGL plugin textures require the OpenGL renderer");
+      return FALSE;
+    }
+#endif
+
     // We ideally would use numeric IDs, but for backwards compatibility with
     // existing code use the address of the texture. Once all code uses
     // fl_texture_get_id we can re-enable this method. See
@@ -228,4 +236,13 @@ FlTextureRegistrar* fl_texture_registrar_new(FlEngine* engine) {
   g_weak_ref_init(&self->engine, G_OBJECT(engine));
 
   return FL_TEXTURE_REGISTRAR(self);
+}
+
+FlTexture* fl_texture_registrar_ref_texture(FlTextureRegistrar* registrar,
+                                            int64_t texture_id) {
+  auto* self = FL_TEXTURE_REGISTRAR_IMPL(registrar);
+  g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->textures_mutex);
+  auto* texture =
+      g_hash_table_lookup(self->textures, GINT_TO_POINTER(texture_id));
+  return texture ? FL_TEXTURE(g_object_ref(texture)) : nullptr;
 }

@@ -22,11 +22,15 @@ endfunction()
 # === Flutter Library ===
 # System-level dependencies.
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
+pkg_check_modules(GTK REQUIRED IMPORTED_TARGET ${LINUX_GTK_PKG})
 pkg_check_modules(GLIB REQUIRED IMPORTED_TARGET glib-2.0)
 pkg_check_modules(GIO REQUIRED IMPORTED_TARGET gio-2.0)
 
-set(FLUTTER_LIBRARY "${EPHEMERAL_DIR}/libflutter_linux_gtk.so")
+if("${LINUX_GTK_VARIANT}" STREQUAL "gtk4")
+  set(FLUTTER_LIBRARY "${EPHEMERAL_DIR}/libflutter_linux_gtk4.so")
+else()
+  set(FLUTTER_LIBRARY "${EPHEMERAL_DIR}/libflutter_linux_gtk.so")
+endif()
 
 # Published to parent scope for install step.
 set(FLUTTER_LIBRARY ${FLUTTER_LIBRARY} PARENT_SCOPE)
@@ -61,6 +65,7 @@ add_library(flutter INTERFACE)
 target_include_directories(flutter INTERFACE
   "${EPHEMERAL_DIR}"
 )
+target_compile_definitions(flutter INTERFACE ${LINUX_GTK_DEFINE})
 target_link_libraries(flutter INTERFACE "${FLUTTER_LIBRARY}")
 target_link_libraries(flutter INTERFACE
   PkgConfig::GTK

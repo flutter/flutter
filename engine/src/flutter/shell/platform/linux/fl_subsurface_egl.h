@@ -52,6 +52,9 @@ FlSubsurfaceEGL* fl_subsurface_egl_new(FlOpenGLManager* opengl_manager,
                                        size_t height,
                                        gint scale);
 
+// Returns whether the EGL context and window surface were created.
+gboolean fl_subsurface_egl_is_ready(FlSubsurfaceEGL* egl);
+
 /**
  * fl_subsurface_egl_resize:
  * @egl: an #FlSubsurfaceEGL.

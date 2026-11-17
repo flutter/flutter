@@ -5,8 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_ACCESSIBILITY_HANDLER_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_ACCESSIBILITY_HANDLER_H_
 
-#include <gtk/gtk.h>
-
+#include <glib-object.h>
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS

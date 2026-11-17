@@ -550,6 +550,7 @@ def run_cc_tests(
         make_test('flow_unittests', flags=repeat_flags + ['--'] + flow_flags),
         make_test('flutter_glfw_unittests'),
         make_test('flutter_linux_unittests', extra_env={'G_DEBUG': 'fatal-criticals'}),
+        make_test('flutter_linux_gtk3_frame_pacer_tests', extra_env={'G_DEBUG': 'fatal-criticals'}),
         # https://github.com/flutter/flutter/issues/36296
         make_test('txt_unittests', flags=repeat_flags + ['--'] + icu_flags),
     ]

@@ -18,7 +18,16 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_vulkan_manager.h"  // nogncheck
+#endif
+
 G_BEGIN_DECLS
+
+// Internal GTK-thread shutdown boundary used by application shutdown and tests.
+// Stops the whole native engine independently of remaining GObject references.
+// Idempotent; the engine cannot be restarted. Not part of the public Linux API.
+void fl_engine_shutdown(FlEngine* engine);
 
 /**
  * FlEngineError:
@@ -80,6 +89,10 @@ FlutterRendererType fl_engine_get_renderer_type(FlEngine* engine);
  * Returns: an #FlOpenGLManager.
  */
 FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* engine);
+
+#if FLUTTER_LINUX_GTK4
+FlVulkanManager* fl_engine_get_vulkan_manager(FlEngine* engine);
+#endif
 
 /**
  * fl_engine_get_display_monitor:

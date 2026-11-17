@@ -4,7 +4,11 @@
 
 #include "flutter/shell/platform/linux/fl_wayland_display.h"
 
+#if FLUTTER_LINUX_GTK4
+#include <gdk/wayland/gdkwayland.h>
+#else
 #include <gdk/gdkwayland.h>
+#endif
 #include <wayland-client.h>
 
 // Key used to attach the #FlWaylandDisplay to the #GdkDisplay it was created

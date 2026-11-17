@@ -469,8 +469,9 @@ void main() {
       await fileSystem.file('/usr/bin/clang++').create();
 
       final Directory project = fileSystem.directory(projectUri);
-      await project.childDirectory('build/linux/arm64/release').create(recursive: true);
-      await project.childFile('build/linux/arm64/release/CMakeCache.txt').writeAsString('''
+      final Directory cmakeBuildDirectory = project.childDirectory('build/linux/arm64/release');
+      await cmakeBuildDirectory.create(recursive: true);
+      await cmakeBuildDirectory.childFile('CMakeCache.txt').writeAsString('''
 CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/clang++
 CMAKE_AR:FILEPATH=/usr/bin/llvm-ar
 CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
@@ -484,7 +485,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: target,
-        buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: project.childDirectory('build')),
+        buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: cmakeBuildDirectory),
         buildDataAssets: false,
         recordedUsesFile: null,
       );

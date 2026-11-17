@@ -5,14 +5,21 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_application.h"
 
 #include <gtk/gtk.h>
+#if !FLUTTER_LINUX_GTK4
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
+#endif
 #endif
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
+
+#if FLUTTER_LINUX_GTK4
+GtkWindow* fl_application_gtk4_create_window(FlApplication* self, FlView* view);
+void fl_application_gtk4_first_frame_cb(FlApplication* self, FlView* view);
+#endif
 
 struct FlApplicationPrivate {
   // Arguments to pass to Dart.
@@ -34,12 +41,15 @@ G_DEFINE_TYPE_WITH_CODE(FlApplication,
 
 // Called when the first frame is received.
 static void first_frame_cb(FlApplication* self, FlView* view) {
+#if FLUTTER_LINUX_GTK4
+  fl_application_gtk4_first_frame_cb(self, view);
+#else
   GtkWidget* window = gtk_widget_get_toplevel(GTK_WIDGET(view));
-
   // Show the main window.
   if (window != nullptr && GTK_IS_WINDOW(window)) {
     gtk_window_present(GTK_WINDOW(window));
   }
+#endif
 }
 
 // Default implementation of FlApplication::register_plugins
@@ -49,6 +59,9 @@ static void fl_application_register_plugins(FlApplication* self,
 // Default implementation of FlApplication::create_window
 static GtkWindow* fl_application_create_window(FlApplication* self,
                                                FlView* view) {
+#if FLUTTER_LINUX_GTK4
+  return fl_application_gtk4_create_window(self, view);
+#else
   GtkApplicationWindow* window =
       GTK_APPLICATION_WINDOW(gtk_application_window_new(GTK_APPLICATION(self)));
 
@@ -61,6 +74,7 @@ static GtkWindow* fl_application_create_window(FlApplication* self,
   // if future cases occur).
   gboolean use_header_bar = TRUE;
 #ifdef GDK_WINDOWING_X11
+#if !FLUTTER_LINUX_GTK4
   GdkScreen* screen = gtk_window_get_screen(GTK_WINDOW(window));
   if (GDK_IS_X11_SCREEN(screen)) {
     const gchar* wm_name = gdk_x11_screen_get_window_manager_name(screen);
@@ -69,16 +83,27 @@ static GtkWindow* fl_application_create_window(FlApplication* self,
     }
   }
 #endif
+#endif
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
+#if FLUTTER_LINUX_GTK4
+    gtk_widget_set_visible(GTK_WIDGET(header_bar), TRUE);
+    gtk_header_bar_set_show_title_buttons(header_bar, TRUE);
+#else
     gtk_widget_show(GTK_WIDGET(header_bar));
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
+#endif
     gtk_window_set_titlebar(GTK_WINDOW(window), GTK_WIDGET(header_bar));
   }
 
+#if FLUTTER_LINUX_GTK4
+  gtk_window_set_child(GTK_WINDOW(window), GTK_WIDGET(view));
+#else
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
+#endif
 
   return GTK_WINDOW(window);
+#endif
 }
 
 // Implements GApplication::activate.
@@ -93,7 +118,11 @@ static void fl_application_activate(GApplication* application) {
   FlView* view = fl_view_new(project);
   g_signal_connect_swapped(view, "first-frame", G_CALLBACK(first_frame_cb),
                            self);
+#if FLUTTER_LINUX_GTK4
+  gtk_widget_set_visible(GTK_WIDGET(view), TRUE);
+#else
   gtk_widget_show(GTK_WIDGET(view));
+#endif
 
   GtkWindow* window;
   g_signal_emit(self, fl_application_signals[SIGNAL_CREATE_WINDOW], 0, view,
