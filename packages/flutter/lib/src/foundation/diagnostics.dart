@@ -2009,7 +2009,13 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    return {...super.toJsonMap(delegate), 'unit': ?unit, 'numberToString': numberToString()};
+    final Map<String, Object?> json = super.toJsonMap(delegate);
+    if (unit != null) {
+      json['unit'] = unit;
+    }
+
+    json['numberToString'] = numberToString();
+    return json;
   }
 
   /// Optional unit the [value] is measured in.
@@ -2182,7 +2188,15 @@ class FlagProperty extends DiagnosticsProperty<bool> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    return {...super.toJsonMap(delegate), 'ifTrue': ?ifTrue, 'ifFalse': ?ifFalse};
+    final Map<String, Object?> json = super.toJsonMap(delegate);
+    if (ifTrue != null) {
+      json['ifTrue'] = ifTrue;
+    }
+    if (ifFalse != null) {
+      json['ifFalse'] = ifFalse;
+    }
+
+    return json;
   }
 
   /// Description to use if the property [value] is true.
@@ -2301,10 +2315,11 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    return {
-      ...super.toJsonMap(delegate),
-      if (value != null) 'values': value!.map<String>((T value) => value.toString()).toList(),
-    };
+    final Map<String, Object?> json = super.toJsonMap(delegate);
+    if (value != null) {
+      json['values'] = value!.map<String>((T value) => value.toString()).toList();
+    }
+    return json;
   }
 }
 
@@ -2421,7 +2436,11 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    return {...super.toJsonMap(delegate), 'ifPresent': ?ifPresent};
+    final Map<String, Object?> json = super.toJsonMap(delegate);
+    if (ifPresent != null) {
+      json['ifPresent'] = ifPresent;
+    }
+    return json;
   }
 }
 
@@ -2495,10 +2514,11 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    return {
-      ...super.toJsonMap(delegate),
-      if (value.isNotEmpty) 'values': _formattedValues().toList(),
-    };
+    final Map<String, Object?> json = super.toJsonMap(delegate);
+    if (value.isNotEmpty) {
+      json['values'] = _formattedValues().toList();
+    }
+    return json;
   }
 
   bool _hasNonNullEntry() => value.values.any((T? o) => o != null);
