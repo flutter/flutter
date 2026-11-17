@@ -72,62 +72,75 @@ class TableCellSpanExample extends StatelessWidget {
         child: Table(
           border: TableBorder.all(color: colors.primary),
           columnWidths: const <int, TableColumnWidth>{
-            0: FixedColumnWidth(96),
+            0: FlexColumnWidth(),
             1: FlexColumnWidth(),
             2: FlexColumnWidth(),
           },
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: <TableRow>[
-            // The first header spans two rows, and the second one spans
-            // the remaining two columns, so the slot it covers holds a
-            // placeholder.
+            // Header row 1: '2026 Sales Performance' spans all three columns,
+            // so the two slots it covers hold placeholders.
             TableRow(
               decoration: BoxDecoration(color: colors.primary),
               children: <Widget>[
                 cell(
-                  'Region totals',
+                  '2026 Sales Performance',
                   background: colors.primary,
                   style: header(),
-                  rowSpan: 2,
+                  colSpan: 3,
                   alignment: Alignment.center,
                 ),
-                cell('Half-year sales', background: colors.primary, style: header(), colSpan: 2),
+                TableCell.none,
                 TableCell.none,
               ],
             ),
-            // The placeholder in this row is covered by the rowSpan above;
-            // the other two slots hold regular cells.
+            // Header row 2: regular column headers.
             TableRow(
               children: <Widget>[
-                TableCell.none,
+                cell('Quarter', background: colors.primary, style: header()),
                 cell('Product', background: colors.primary, style: header()),
                 cell('Revenue', background: colors.primary, style: header()),
               ],
             ),
+            // 'Q1' spans two rows, so the slot it covers in the next row
+            // holds a placeholder.
             TableRow(
               children: <Widget>[
-                cell('2026 overall', background: colors.surfaceContainerHighest, style: body(bold: true), alignment: Alignment.center),
-                cell('Widgets', background: colors.surfaceContainerHighest, style: body(bold: true)),
-                cell(r'$18,600', background: colors.surfaceContainerHighest, style: body(bold: true)),
-              ],
-            ),
-            // The last header spans two rows, so the slot it covers in the
-            // next row holds a placeholder.
-            TableRow(
-              children: <Widget>[
+                cell(
+                  'Q1',
+                  background: colors.surfaceContainerHighest,
+                  style: body(bold: true),
+                  rowSpan: 2,
+                  alignment: Alignment.center,
+                ),
                 cell('Widgets', background: colors.surface, style: body()),
                 cell(r'$18,600', background: colors.surface, style: body(), alignment: Alignment.centerRight),
-                cell('3,900', background: colors.surface, style: body(), rowSpan: 2, alignment: Alignment.center),
               ],
             ),
-            // The last cell spans the two columns of this row that are not
-            // covered by the rowSpan above, so the covered slots hold
-            // placeholders.
             TableRow(
               children: <Widget>[
-                cell('Full year 2026', background: colors.surface, style: body(bold: true), colSpan: 2),
                 TableCell.none,
+                cell('Gidgets', background: colors.surface, style: body()),
+                cell(r'$12,000', background: colors.surface, style: body(), alignment: Alignment.centerRight),
+              ],
+            ),
+            // The total cell spans the first two columns, so the slot it
+            // covers holds a placeholder.
+            TableRow(
+              children: <Widget>[
+                cell(
+                  'Total Q1 Revenue',
+                  background: colors.surfaceContainerHighest,
+                  style: body(bold: true),
+                  colSpan: 2,
+                ),
                 TableCell.none,
+                cell(
+                  r'$30,600',
+                  background: colors.surfaceContainerHighest,
+                  style: body(bold: true),
+                  alignment: Alignment.centerRight,
+                ),
               ],
             ),
           ],

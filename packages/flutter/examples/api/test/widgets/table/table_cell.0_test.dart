@@ -16,7 +16,7 @@ void main() {
 
     // Check the defined columnWidths.
     expect(table.columnWidths, const <int, TableColumnWidth>{
-      0: FixedColumnWidth(96),
+      0: FlexColumnWidth(),
       1: FlexColumnWidth(),
       2: FlexColumnWidth(),
     });
@@ -43,10 +43,10 @@ void main() {
       }
     }
 
-    // Spanning cells: region totals (rowSpan: 2), half-year sales
-    // (colSpan: 2), 3,900 (rowSpan: 2), full year 2026 (colSpan: 2).
-    expect(spanningCount, 4);
-    // Placeholders: one in row 0, one in row 1, none in rows 2-3, two in row 4.
+    // Spanning cells: 2026 Sales Performance (colSpan: 3), Q1 (rowSpan: 2),
+    // Total Q1 Revenue (colSpan: 2).
+    expect(spanningCount, 3);
+    // Placeholders: two in row 0, one in row 3, one in row 4.
     expect(placeholderCount, 4);
   });
 
@@ -56,17 +56,30 @@ void main() {
     await tester.pumpWidget(const example.TableCellSpanExampleApp());
     await tester.pumpAndSettle();
 
-    // The spanning header starts in column 1 and covers two columns, so
-    // its rendered width is wider than one column of the table.
-    final Rect spanningHeader = tester.getRect(find.text('Half-year sales'));
-    final Rect product = tester.getRect(find.text('Product'));
+    // The spanning header covers three columns, so its rendered width is
+    // wider than a single column of the table.
+    final Rect spanningHeader = tester.getRect(
+      find.ancestor(of: find.text('2026 Sales Performance'), matching: find.byType(Container)).last,
+    );
+    final Rect product = tester.getRect(
+      find.ancestor(of: find.text('Product'), matching: find.byType(Container)).last,
+    );
 
     expect(spanningHeader.width, greaterThan(product.width));
 
-    // The row-spanning cell in the last column covers two rows, so it is
-    // taller than the regular header cell in the first column.
-    final Rect regionTotals = tester.getRect(find.text('Region totals'));
-    final Rect h2 = tester.getRect(find.text('2026 overall'));
-    expect(regionTotals.height, greaterThan(h2.height));
+    // The row-spanning cell is middle-aligned within the two rows it
+    // covers, so its center sits below the first row it starts in.
+    final Rect q1 = tester.getRect(
+      find.ancestor(of: find.text('Q1'), matching: find.byType(Container)).first,
+    );
+    final Rect quarter = tester.getRect(
+      find.ancestor(of: find.text('Quarter'), matching: find.byType(Container)).first,
+    );
+    expect(q1.center.dy, greaterThan(quarter.center.dy));
+    // And above the last row it covers (the total row).
+    final Rect total = tester.getRect(
+      find.ancestor(of: find.text('Total Q1 Revenue'), matching: find.byType(Container)).first,
+    );
+    expect(q1.center.dy, lessThan(total.center.dy));
   });
 }
