@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -29,6 +30,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
@@ -295,8 +297,24 @@ void main() {
     ResidentRunnerFactory? residentRunnerFactoryOverride,
   }) {
     return WidgetPreviewCommand(
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: fs,
+        flutterRoot: flutterRoot,
+        logger: logger,
+        platform: platform,
+      ),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
+      pub: Pub.test(
+        flutterRoot: flutterRoot,
+        fileSystem: fs,
+        logger: logger,
+        processManager: loggingProcessManager,
+        botDetector: botDetector,
+        platform: platform,
+        stdio: mockStdio,
+      ),
+      templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         cache: Cache.test(
