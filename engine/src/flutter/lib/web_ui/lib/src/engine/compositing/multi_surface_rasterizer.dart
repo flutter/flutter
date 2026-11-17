@@ -95,20 +95,6 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
-<<<<<<< HEAD
-    if (_disposed) {
-      recorder?.recordRasterFinish();
-      return;
-    }
-||||||| parent of e32638d (refactor(web): centralize surface and view rasterizer disposal in base classes)
-    recorder?.recordRasterStart();
-    if (_disposed) {
-      recorder?.recordRasterFinish();
-      return;
-    }
-=======
-    recorder?.recordRasterStart();
->>>>>>> e32638d (refactor(web): centralize surface and view rasterizer disposal in base classes)
     final rasterizeFutures = <Future<void>>[];
     for (var i = 0; i < displayCanvases.length; i++) {
       rasterizeFutures.add(rasterizeToCanvas(displayCanvases[i] as OnscreenSurface, pictures[i]));
