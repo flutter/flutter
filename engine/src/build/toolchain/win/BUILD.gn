@@ -94,8 +94,8 @@ template("msvc_toolchain") {
     # LLVM bitcode, which MSVC's link.exe and lib.exe can't consume.
     if (toolchain_is_clang) {
       lld_prefix = rebase_path("$clang_base_path/bin", root_build_dir)
-      lib = "$lld_prefix/lld-link.exe /lib"
-      link = "$lld_prefix/lld-link.exe"
+      lib = "\"$lld_prefix/lld-link.exe\" /lib"
+      link = "\"$lld_prefix/lld-link.exe\""
     } else {
       lib = "lib.exe"
       link = "link.exe"
