@@ -7,4 +7,4 @@ skills_lint:
     check-absolute-paths: error
     check-trailing-whitespace: error
   directories:
-    - path: ".agents/skills"
+    - path: "../../.agents/skills"

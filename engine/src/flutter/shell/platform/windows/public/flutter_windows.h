@@ -378,6 +378,25 @@ FLUTTER_EXPORT bool FlutterDesktopPluginRegistrarGetGraphicsAdapter(
     FlutterDesktopPluginRegistrarRef registrar,
     IDXGIAdapter** adapter_out);
 
+// Returns true if the current thread is the platform thread.
+// This can be called on any thread.
+FLUTTER_EXPORT bool FlutterDesktopPluginRegistrarIsPlatformThread(
+    FlutterDesktopPluginRegistrarRef registrar);
+
+// Schedule a callback to be called on the platform thread.
+//
+// This can be called on any thread. The callback is executed only
+// once on the platform thread.
+//
+// If the task is discarded without being executed (e.g. during engine
+// shutdown), |on_cancel| is called on the platform thread so the caller can
+// cleanup allocations. |on_cancel| can be nullptr if no cleanup is needed.
+FLUTTER_EXPORT void FlutterDesktopPluginRegistrarPostPlatformThreadTask(
+    FlutterDesktopPluginRegistrarRef registrar,
+    VoidCallback callback,
+    VoidCallback on_cancel,
+    void* user_data);
+
 // ========== Freestanding Utilities ==========
 
 // Gets the DPI for a given |hwnd|, depending on the supported APIs per

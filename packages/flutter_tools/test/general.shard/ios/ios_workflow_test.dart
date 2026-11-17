@@ -16,7 +16,9 @@ void main() {
   testWithoutContext('iOS workflow is disabled if feature is disabled', () {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macOS'),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      ),
       featureFlags: TestFeatureFlags(isIOSEnabled: false),
     );
 
@@ -28,7 +30,9 @@ void main() {
   testWithoutContext('iOS workflow is disabled on Linux', () {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      ),
       featureFlags: TestFeatureFlags(),
     );
 
@@ -40,7 +44,9 @@ void main() {
   testWithoutContext('iOS workflow is disabled on windows', () {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'windows'),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      ),
       featureFlags: TestFeatureFlags(),
     );
 
@@ -59,9 +65,9 @@ void main() {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
       xcode: Xcode.test(
-        processManager: xcodeProcessManager,
+        toolContext: FakeToolContext.macosHost(processManager: xcodeProcessManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
           version: null,
         ),
       ),
@@ -77,9 +83,9 @@ void main() {
 
   testWithoutContext('iOS workflow can list devices even when Xcode version is too low', () {
     final xcode = Xcode.test(
-      processManager: FakeProcessManager.any(),
+      toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         version: Version(1, 0, 0),
       ),
     );
@@ -100,9 +106,9 @@ void main() {
 
   testWithoutContext('iOS workflow can launch devices when Xcode is set up', () {
     final xcode = Xcode.test(
-      processManager: FakeProcessManager.any(),
+      toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         version: Version(1000, 0, 0),
       ),
     );

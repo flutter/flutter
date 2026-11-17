@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
+#include <memory>
+#include <vector>
+
 #include "display_list/display_list.h"
 #include "display_list/dl_sampling_options.h"
 #include "display_list/dl_tile_mode.h"
@@ -17,12 +21,19 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
+#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/scalar.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
 #include "imgui.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/texture.h"
+#include "impeller/geometry/color.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/playground/yuv_test_textures.h"
+#include "impeller/renderer/context.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {
@@ -2817,6 +2828,94 @@ TEST_P(AiksTest, CanRenderLinesWithCapsAnglesAndAlphas) {
       builder.Restore();
     }
   }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// `DlImageImpeller::MakeFromYUVTextures` is the only production path to the
+// YUV to RGB conversion shader. It renders the conversion eagerly, so the image
+// can then be drawn like any other. Expected output: two images of red, green,
+// blue, and white horizontal bands, one per color space.
+TEST_P(AiksTest, DrawImageFromYUVTextures) {
+  if (GetBackend() != PlaygroundBackend::kMetal &&
+      GetBackend() != PlaygroundBackend::kMetalSDF) {
+    // See https://github.com/flutter/flutter/issues/114588.
+    GTEST_SKIP() << "YUV to RGB conversion is only supported on Metal.";
+  }
+  AiksContext aiks_context(GetContext(), nullptr);
+
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kDarkGrey(), DlBlendMode::kSrc);
+  constexpr std::array<YUVColorSpace, 2> kColorSpaces = {
+      YUVColorSpace::kBT601FullRange, YUVColorSpace::kBT601LimitedRange};
+  for (size_t i = 0; i < kColorSpaces.size(); i++) {
+    auto textures = CreateTestYUVTextures(*GetContext(), kColorSpaces[i]);
+    ABSL_ASSERT_OK(textures);
+    auto image = DlImageImpeller::MakeFromYUVTextures(
+        &aiks_context, textures->y, textures->uv, kColorSpaces[i]);
+    ASSERT_TRUE(image);
+    builder.DrawImageRect(image, DlRect::MakeXYWH(50 + i * 320, 50, 256, 256),
+                          DlImageSampling::kNearestNeighbor);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/195859.
+// Renders two green circles, one above the other. Both are drawn at x=-100
+// inside a SaveLayer whose image filter translates them +300 on-screen. The
+// top one is drawn directly; the bottom one is drawn through DrawDisplayList
+// (a nested DisplayList with an RTree, like a dart:ui Picture). If only the
+// top circle is visible, the nested DisplayList was culled against the root
+// render target instead of the subpass.
+TEST_P(AiksTest, DrawDisplayListInTranslatedSaveLayerIsNotCulled) {
+  DlPaint green;
+  green.setColor(DlColor::kGreen());
+
+  DisplayListBuilder inner_builder(/*prepare_rtree=*/true);
+  inner_builder.DrawCircle(DlPoint(-100, 300), 80, green);
+  auto inner_dl = inner_builder.Build();
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({300, 0}), DlImageSampling::kLinear));
+  builder.SaveLayer(std::nullopt, &paint);
+  // Control: drawn directly, not subject to DisplayList culling.
+  builder.DrawCircle(DlPoint(-100, 100), 80, green);
+  // Drawn through DrawDisplayList; was culled before the fix.
+  builder.DrawDisplayList(inner_dl, 1.0f);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/195859.
+// Same as DrawDisplayListInTranslatedSaveLayerIsNotCulled, but the bottom
+// circle is drawn inside a nested SaveLayer. If only the top circle is
+// visible, the child SaveLayer's subpass was clamped to the root render target
+// and its off-screen content was dropped before the parent filter moved it.
+TEST_P(AiksTest, NestedSaveLayerInTranslatedSaveLayerIsNotCulled) {
+  DlPaint green;
+  green.setColor(DlColor::kGreen());
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({300, 0}), DlImageSampling::kLinear));
+  builder.SaveLayer(std::nullopt, &paint);
+  // Control: drawn directly into the parent layer.
+  builder.DrawCircle(DlPoint(-100, 100), 80, green);
+  DlPaint child_paint;
+  builder.SaveLayer(std::nullopt, &child_paint);
+  // Drawn inside the child SaveLayer; not visible when SaveLayer clamps.
+  builder.DrawCircle(DlPoint(-100, 300), 80, green);
+  builder.Restore();
+  builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

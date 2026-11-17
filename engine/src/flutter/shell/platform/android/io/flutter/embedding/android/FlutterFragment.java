@@ -1101,9 +1101,9 @@ public class FlutterFragment extends Fragment
   public void onAttach(@NonNull Context context) {
     super.onAttach(context);
     delegate = delegateFactory.createDelegate(this);
-    delegate.onAttach(context);
-    if (getArguments().getBoolean(ARG_SHOULD_AUTOMATICALLY_HANDLE_ON_BACK_PRESSED, false)) {
-      requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
+    final boolean automaticallyHandleOnBackPressed =
+        getArguments().getBoolean(ARG_SHOULD_AUTOMATICALLY_HANDLE_ON_BACK_PRESSED, false);
+    if (automaticallyHandleOnBackPressed) {
       // When Android handles a back gesture, it pops an Activity or goes back
       // to the home screen. When Flutter handles a back gesture, it pops a
       // route inside of the Flutter part of the app. By default, Android
@@ -1112,6 +1112,11 @@ public class FlutterFragment extends Fragment
       // gesture, then it will enable this callback using
       // setFrameworkHandlesBack.
       onBackPressedCallback.setEnabled(false);
+    }
+    // Attaching can synchronously restore the cached engine's back handling state.
+    delegate.onAttach(context);
+    if (automaticallyHandleOnBackPressed) {
+      requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
     }
     context.registerComponentCallbacks(this);
   }

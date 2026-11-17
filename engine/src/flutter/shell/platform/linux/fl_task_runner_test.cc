@@ -9,6 +9,8 @@
 #include "flutter/shell/platform/linux/fl_task_runner.h"
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 
+#include <atomic>
+#include <thread>
 #include <vector>
 
 // MOCK_ENGINE_PROC is leaky by design.
@@ -190,6 +192,126 @@ TEST_F(FlTaskRunnerTest, StopWaitWithoutWaitIsNoOp) {
 
   ASSERT_EQ(executed.size(), 1u);
   EXPECT_EQ(executed[0], 123u);
+}
+
+// A task that is already due runs on the next main loop iteration, without
+// waiting for a timeout.
+// https://github.com/flutter/flutter/issues/190620
+TEST_F(FlTaskRunnerTest, DueTaskRunsWithoutDelay) {
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+
+  std::vector<uint64_t> executed;
+  fl_engine_get_embedder_api(engine)->RunTask = MOCK_ENGINE_PROC(
+      RunTask, ([&executed](auto engine, const FlutterTask* task) {
+        executed.push_back(task->task);
+        return kSuccess;
+      }));
+
+  // Process any events left over from the fixture setup, so the next iteration
+  // only has the task runner to dispatch.
+  while (g_main_context_pending(nullptr)) {
+    g_main_context_iteration(nullptr, FALSE);
+  }
+
+  uint64_t target_time_nanos = g_get_monotonic_time() * 1000;
+  fl_task_runner_post_flutter_task(task_runner, make_task(1),
+                                   target_time_nanos);
+
+  g_main_context_iteration(nullptr, FALSE);
+
+  ASSERT_EQ(executed.size(), 1u);
+  EXPECT_EQ(executed[0], 1u);
+}
+
+// Disposing the runner removes its main loop source, so nothing can fire on
+// the freed runner.
+// https://github.com/flutter/flutter/issues/193742
+TEST_F(FlTaskRunnerTest, DisposeRemovesSource) {
+  FlTaskRunner* task_runner = fl_task_runner_new(engine);
+
+  gboolean executed = FALSE;
+  fl_engine_get_embedder_api(engine)->RunTask = MOCK_ENGINE_PROC(
+      RunTask, ([&executed](auto engine, const FlutterTask* task) {
+        executed = TRUE;
+        return kSuccess;
+      }));
+
+  // Schedule a task that is pending when the runner is disposed.
+  uint64_t target_time_nanos =
+      (g_get_monotonic_time() + 10 * G_TIME_SPAN_MILLISECOND) * 1000;
+  fl_task_runner_post_flutter_task(task_runner, make_task(1),
+                                   target_time_nanos);
+
+  gpointer address = task_runner;
+  g_object_unref(task_runner);
+  EXPECT_EQ(g_main_context_find_source_by_user_data(nullptr, address), nullptr);
+
+  // The pending task is not run.
+  gint64 deadline = g_get_monotonic_time() + 50 * G_TIME_SPAN_MILLISECOND;
+  while (g_get_monotonic_time() < deadline) {
+    g_main_context_iteration(nullptr, FALSE);
+  }
+  EXPECT_FALSE(executed);
+}
+
+// A task can drop the last reference to the runner while it is running.
+TEST_F(FlTaskRunnerTest, TaskDropsLastReference) {
+  FlTaskRunner* task_runner = fl_task_runner_new(engine);
+  g_object_add_weak_pointer(G_OBJECT(task_runner),
+                            reinterpret_cast<gpointer*>(&task_runner));
+
+  fl_engine_get_embedder_api(engine)->RunTask = MOCK_ENGINE_PROC(
+      RunTask, ([&task_runner](auto engine, const FlutterTask* task) {
+        g_object_unref(task_runner);
+        return kSuccess;
+      }));
+
+  fl_task_runner_post_flutter_task(task_runner, make_task(1), 0);
+
+  pump_main_loop_until([&task_runner]() { return task_runner == nullptr; });
+
+  EXPECT_EQ(task_runner, nullptr);
+}
+
+// Tasks posted concurrently from other threads are all executed on the main
+// loop, and disposing the runner afterwards leaves no source behind.
+// https://github.com/flutter/flutter/issues/193742
+TEST_F(FlTaskRunnerTest, PostFromMultipleThreads) {
+  FlTaskRunner* task_runner = fl_task_runner_new(engine);
+
+  std::atomic<int> executed = 0;
+  fl_engine_get_embedder_api(engine)->RunTask = MOCK_ENGINE_PROC(
+      RunTask, ([&executed](auto engine, const FlutterTask* task) {
+        executed++;
+        return kSuccess;
+      }));
+
+  constexpr int kThreads = 4;
+  constexpr int kTasksPerThread = 100;
+  std::vector<std::thread> threads;
+  threads.reserve(kThreads);
+  for (int i = 0; i < kThreads; i++) {
+    threads.emplace_back([task_runner]() {
+      for (int j = 0; j < kTasksPerThread; j++) {
+        uint64_t target_time_nanos =
+            (g_get_monotonic_time() + (j % 3) * G_TIME_SPAN_MILLISECOND) * 1000;
+        fl_task_runner_post_flutter_task(task_runner, make_task(j),
+                                         target_time_nanos);
+        g_usleep(100);
+      }
+    });
+  }
+
+  pump_main_loop_until(
+      [&executed]() { return executed == kThreads * kTasksPerThread; });
+  for (auto& thread : threads) {
+    thread.join();
+  }
+  EXPECT_EQ(executed, kThreads * kTasksPerThread);
+
+  gpointer address = task_runner;
+  g_object_unref(task_runner);
+  EXPECT_EQ(g_main_context_find_source_by_user_data(nullptr, address), nullptr);
 }
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)

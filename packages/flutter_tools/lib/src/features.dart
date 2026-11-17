@@ -346,6 +346,15 @@ const hcpp = Feature(
   stable: FeatureChannelSetting(available: true),
 );
 
+/// Environment variable that disables all tool extensions when set to `'1'`, `'true'`, or `'yes'`.
+const kFlutterNoExtensionsEnv = 'FLUTTER_NO_EXTENSIONS';
+
+/// Whether [environment] sets [kFlutterNoExtensionsEnv] to a truthy value (`1`, `true`, or `yes`).
+bool isSafeModeActive(Map<String, String> environment) {
+  final String? value = environment[kFlutterNoExtensionsEnv]?.trim().toLowerCase();
+  return value == '1' || value == 'true' || value == 'yes';
+}
+
 /// Enable tool extensions feature.
 const toolExtensionsFeature = Feature(
   name: 'support for tool extensions',

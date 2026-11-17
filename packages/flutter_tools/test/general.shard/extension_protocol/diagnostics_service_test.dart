@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:isolate';
+
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/experimental/diagnostics.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
@@ -14,7 +16,7 @@ import 'package:test/test.dart';
 
 import '../../src/fakes.dart';
 
-class _SecondaryTestDiagnostics extends DiagnosticsExtension {
+final class _SecondaryTestDiagnostics extends DiagnosticsExtension {
   @override
   String get title => 'Secondary Diagnostic Check';
 
@@ -26,6 +28,24 @@ class _SecondaryTestDiagnostics extends DiagnosticsExtension {
       ], statusInfo: 'Secondary OK'),
     ];
   }
+}
+
+final class _DomainErrorDiagnosticsService extends DiagnosticsExtension {
+  @override
+  String get title => 'Custom Diagnostics';
+
+  @override
+  Future<List<ValidationResult>> runDiagnostics() async {
+    throw const ToolExtensionException('Diagnostics failed with actionable user error.');
+  }
+}
+
+void _domainErrorDiagnosticsEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _DomainErrorDiagnosticsService(),
+    ], extensionName: 'custom_diagnostics_ext'),
+  );
 }
 
 void main() {
@@ -83,6 +103,31 @@ void main() {
         expect(result1.messages.last.message, 'Secondary diagnostic check operational');
 
         await manager.dispose();
+      },
+    );
+
+    test(
+      'DiagnosticsExtensionClient converts ToolExtensionException into failed ValidationResult',
+      () async {
+        final logger = BufferLogger.test();
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        addTearDown(manager.dispose);
+        await manager.initialize(
+          entryPoints: <ExtensionEntryPoint>[_domainErrorDiagnosticsEntryPoint],
+        );
+
+        final List<DiagnosticsExtension> extensions = manager.diagnosticsExtensions;
+        expect(extensions, hasLength(1));
+
+        final validator = ExtensionDoctorValidator(extension: extensions.single, logger: logger);
+        final ValidationResult result = await validator.validate();
+        expect(result.type, ValidationType.missing);
+        expect(result.messages, hasLength(1));
+        expect(result.messages.single.message, 'Diagnostics failed with actionable user error.');
       },
     );
   });

@@ -104,6 +104,63 @@ Future<void> testMain() async {
     expect(decoder.debugCachedWebDecoder, isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/160600
+  test('ImageDecoder-based codec decodes still AVIF images', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/dog.avif');
+    final Uint8List avifBytes = (await response.payload.asByteBuffer()).asUint8List();
+
+    final ui.Codec codec = await renderer.instantiateImageCodec(avifBytes);
+    addTearDown(codec.dispose);
+    expect(codec.frameCount, 1);
+
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    addTearDown(frame.image.dispose);
+    expect(frame.image.width, 180);
+    expect(frame.image.height, 180);
+  }, skip: !browserSupportsImageDecoder);
+
+  test('ImageDecoder-based codec reports multiple frames for animated AVIF images', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/alphabetAnim.avif');
+    final Uint8List avifBytes = (await response.payload.asByteBuffer()).asUint8List();
+
+    final ui.Codec codec = await renderer.instantiateImageCodec(avifBytes);
+    addTearDown(codec.dispose);
+    expect(codec.frameCount, greaterThan(1));
+
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    addTearDown(frame.image.dispose);
+    expect(frame.image.width, 100);
+    expect(frame.image.height, 100);
+  }, skip: !browserSupportsImageDecoder);
+
+  test('ImageDecoder-based codec decodes still AVIF images loaded from a URL', () async {
+    // The test server serves .avif files as image/avif, so the response body
+    // is streamed directly to ImageDecoder instead of being sniffed.
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/dog.avif'),
+    );
+    addTearDown(codec.dispose);
+    expect(codec.frameCount, 1);
+
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    addTearDown(frame.image.dispose);
+    expect(frame.image.width, 180);
+    expect(frame.image.height, 180);
+  }, skip: !browserSupportsImageDecoder);
+
+  test('ImageDecoder-based codec decodes animated AVIF images loaded from a URL', () async {
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/alphabetAnim.avif'),
+    );
+    addTearDown(codec.dispose);
+    expect(codec.frameCount, greaterThan(1));
+
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    addTearDown(frame.image.dispose);
+    expect(frame.image.width, 100);
+    expect(frame.image.height, 100);
+  }, skip: !browserSupportsImageDecoder);
+
   test(
     '_BrowserEngineCodec.getNextFrame() throws StateError and cleans up if disposed during decode',
     () async {
@@ -258,6 +315,117 @@ Future<void> testMain() async {
     }
 
     expect(disposeCalled, isTrue);
+  });
+
+  // Exercises the decode routing used when the browser has no `ImageDecoder`.
+  // This is the path Safari and Firefox take, and the only place
+  // `Renderer.supportsAnimatedImages` is consulted.
+  //
+  // `supportsAnimatedImages` is a property of the build under test rather than
+  // something a test can set: it is true for CanvasKit and false for the skwasm
+  // variants whose animated codecs are stubbed out. Each test below therefore
+  // asserts the behavior appropriate to the build it is running in, and CI
+  // covers both sides (`chrome-dart2js-canvaskit-ui` for true,
+  // `chrome-coi-dart2wasm-skwasm-ui` and `chrome-dart2wasm-wimp-ui` for false).
+  //
+  // These tests assert on `frameCount` rather than on the decoded pixels or
+  // dimensions. `frameCount` is what distinguishes the two routes (1 for the
+  // still-image path, >1 for a backend animated codec) and, unlike the decoded
+  // image, it is reliable today.
+  // TODO(gaaclarke): Assert the decoded dimensions as well once images decoded
+  // through `createImageBitmap` stop reporting a size of 0x0 under skwasm.
+  group('decode routing when ImageDecoder is unavailable', () {
+    setUp(() {
+      browserSupportsImageDecoder = false;
+    });
+
+    tearDown(() {
+      debugResetBrowserSupportsImageDecoder();
+      debugDisableCreateImageBitmapSupport = false;
+    });
+
+    Future<Uint8List> fetchBytes(String path) async {
+      final HttpFetchResponse response = await httpFetch(path);
+      return (await response.payload.asByteBuffer()).asUint8List();
+    }
+
+    test('static image decodes via createImageBitmap', () async {
+      if (!browserSupportsCreateImageBitmap) {
+        return;
+      }
+      final Uint8List pngBytes = await fetchBytes('/test_images/1x1.png');
+
+      final ui.Codec codec = await renderer.instantiateImageCodec(pngBytes);
+      final ui.FrameInfo frame = await codec.getNextFrame();
+
+      expect(codec.frameCount, 1);
+
+      frame.image.dispose();
+      codec.dispose();
+    });
+
+    test('animated image uses the backend codec only when it has one', () async {
+      if (!browserSupportsCreateImageBitmap) {
+        return;
+      }
+      final Uint8List gifBytes = await fetchBytes('/test_images/flightAnim.gif');
+
+      final ui.Codec codec = await renderer.instantiateImageCodec(gifBytes);
+      final ui.FrameInfo frame = await codec.getNextFrame();
+
+      if (renderer.supportsAnimatedImages) {
+        expect(codec.frameCount, greaterThan(1));
+      } else {
+        // Degrades to a still of the first frame via createImageBitmap rather
+        // than failing.
+        expect(codec.frameCount, 1);
+      }
+
+      frame.image.dispose();
+      codec.dispose();
+    });
+
+    test('animated image throws when nothing can decode it', () async {
+      // Regression test for the routing this change touches: with no
+      // `ImageDecoder` and no `createImageBitmap`, the backend codec is the
+      // only thing left. A backend that has one must still be reached, and a
+      // backend that does not must fail explicitly rather than silently.
+      debugDisableCreateImageBitmapSupport = true;
+      final Uint8List gifBytes = await fetchBytes('/test_images/flightAnim.gif');
+
+      if (renderer.supportsAnimatedImages) {
+        final ui.Codec codec = await renderer.instantiateImageCodec(gifBytes);
+        expect(codec.frameCount, greaterThan(1));
+        codec.dispose();
+        return;
+      }
+
+      await expectLater(
+        renderer.instantiateImageCodec(gifBytes),
+        throwsA(isA<ImageCodecException>()),
+      );
+    });
+
+    test('static image throws when nothing can decode it', () async {
+      // A backend without builtin codecs can't decode static images either, so
+      // it must not be used as a fallback for them.
+      //
+      // The case where the backend *does* have a codec is skipped on purpose.
+      // CanvasKit Chromium reports `supportsAnimatedImages == true` but is
+      // built without the PNG, JPEG and WebP decoders, so it fails that case
+      // while still handling GIF. Covering it needs a real capability probe on
+      // the CanvasKit renderer.
+      if (renderer.supportsAnimatedImages) {
+        return;
+      }
+      debugDisableCreateImageBitmapSupport = true;
+      final Uint8List pngBytes = await fetchBytes('/test_images/1x1.png');
+
+      await expectLater(
+        renderer.instantiateImageCodec(pngBytes),
+        throwsA(isA<ImageCodecException>()),
+      );
+    });
   });
 }
 

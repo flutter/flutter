@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -27,6 +28,7 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
+import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -116,8 +118,8 @@ void main() {
           ..dds = fakeDds;
       });
 
-      tearDown(() {
-        fakeLogReader.dispose();
+      tearDown(() async {
+        await fakeLogReader.dispose();
       });
 
       testUsingContext(
@@ -126,6 +128,19 @@ void main() {
           final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 12,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              mdnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              preliminaryMDnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              logger: logger,
+              analytics: const NoOpAnalytics(),
+              platform: FakePlatform(),
+            ),
             onGetLogReader: () {
               fakeLogReader.addLine('Foo');
               fakeLogReader.addLine(
@@ -157,7 +172,9 @@ void main() {
           await createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
@@ -180,15 +197,6 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-            preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          ),
         },
       );
 
@@ -198,6 +206,19 @@ void main() {
           final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 12,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              mdnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              preliminaryMDnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              logger: logger,
+              analytics: const NoOpAnalytics(),
+              platform: FakePlatform(),
+            ),
             onGetLogReader: () {
               fakeLogReader.addLine('Foo');
               fakeLogReader.addLine(
@@ -233,7 +254,9 @@ void main() {
           await createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
@@ -252,15 +275,6 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-            preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          ),
           Signals: () => FakeSignals(),
         },
       );
@@ -276,6 +290,19 @@ void main() {
           final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 12,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              mdnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              preliminaryMDnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              logger: logger,
+              analytics: const NoOpAnalytics(),
+              platform: FakePlatform(),
+            ),
             onGetLogReader: () {
               fakeLogReader.addLine('Foo');
               fakeLogReader.addLine(
@@ -314,7 +341,9 @@ void main() {
           await createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
@@ -337,15 +366,6 @@ void main() {
           DeviceManager: () => testDeviceManager,
           FileSystem: () => testFileSystem,
           Logger: () => logger,
-          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-            preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          ),
           ProcessManager: () => FakeProcessManager.empty(),
         },
       );
@@ -356,6 +376,35 @@ void main() {
           final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 16,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              mdnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              preliminaryMDnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
+                <String, List<SrvResourceRecord>>{
+                  'bar': <SrvResourceRecord>[
+                    SrvResourceRecord(
+                      'bar',
+                      future,
+                      port: devicePort,
+                      weight: 1,
+                      priority: 1,
+                      target: 'appId',
+                    ),
+                  ],
+                },
+                txtResponse: <String, List<TxtResourceRecord>>{
+                  'bar': <TxtResourceRecord>[
+                    TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
+                  ],
+                },
+              ),
+              logger: logger,
+              analytics: const NoOpAnalytics(),
+              platform: FakePlatform(),
+            ),
             onGetLogReader: () {
               fakeLogReader.addLine('Foo');
               fakeLogReader.addLine(
@@ -378,7 +427,9 @@ void main() {
           await createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
@@ -404,31 +455,6 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-            preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
-              <String, List<SrvResourceRecord>>{
-                'bar': <SrvResourceRecord>[
-                  SrvResourceRecord(
-                    'bar',
-                    future,
-                    port: devicePort,
-                    weight: 1,
-                    priority: 1,
-                    target: 'appId',
-                  ),
-                ],
-              },
-              txtResponse: <String, List<TxtResourceRecord>>{
-                'bar': <TxtResourceRecord>[
-                  TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
-                ],
-              },
-            ),
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          ),
         },
       );
 
@@ -439,6 +465,44 @@ void main() {
             portForwarder: portForwarder,
             majorSdkVersion: 16,
             connectionInterface: DeviceConnectionInterface.wireless,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              mdnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              preliminaryMDnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-foo')],
+                <String, List<SrvResourceRecord>>{
+                  'srv-foo': <SrvResourceRecord>[
+                    SrvResourceRecord(
+                      'srv-foo',
+                      future,
+                      port: 123,
+                      weight: 1,
+                      priority: 1,
+                      target: 'target-foo',
+                    ),
+                  ],
+                },
+                ipResponse: <String, List<IPAddressResourceRecord>>{
+                  'target-foo': <IPAddressResourceRecord>[
+                    IPAddressResourceRecord(
+                      'target-foo',
+                      0,
+                      address: InternetAddress.tryParse('111.111.111.111')!,
+                    ),
+                  ],
+                },
+                txtResponse: <String, List<TxtResourceRecord>>{
+                  'srv-foo': <TxtResourceRecord>[
+                    TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+                  ],
+                },
+              ),
+              logger: logger,
+              analytics: const NoOpAnalytics(),
+              platform: FakePlatform(),
+            ),
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
@@ -454,7 +518,9 @@ void main() {
           await createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
@@ -476,40 +542,6 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-            preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-foo')],
-              <String, List<SrvResourceRecord>>{
-                'srv-foo': <SrvResourceRecord>[
-                  SrvResourceRecord(
-                    'srv-foo',
-                    future,
-                    port: 123,
-                    weight: 1,
-                    priority: 1,
-                    target: 'target-foo',
-                  ),
-                ],
-              },
-              ipResponse: <String, List<IPAddressResourceRecord>>{
-                'target-foo': <IPAddressResourceRecord>[
-                  IPAddressResourceRecord(
-                    'target-foo',
-                    0,
-                    address: InternetAddress.tryParse('111.111.111.111')!,
-                  ),
-                ],
-              },
-              txtResponse: <String, List<TxtResourceRecord>>{
-                'srv-foo': <TxtResourceRecord>[
-                  TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
-                ],
-              },
-            ),
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          ),
         },
       );
 
@@ -520,6 +552,57 @@ void main() {
             portForwarder: portForwarder,
             majorSdkVersion: 16,
             connectionInterface: DeviceConnectionInterface.wireless,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              mdnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              preliminaryMDnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[
+                  PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+                  PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+                ],
+                <String, List<SrvResourceRecord>>{
+                  'srv-bar': <SrvResourceRecord>[
+                    SrvResourceRecord(
+                      'srv-bar',
+                      future,
+                      port: 321,
+                      weight: 1,
+                      priority: 1,
+                      target: 'target-bar',
+                    ),
+                  ],
+                  'srv-foo': <SrvResourceRecord>[
+                    SrvResourceRecord(
+                      'srv-foo',
+                      future,
+                      port: 123,
+                      weight: 1,
+                      priority: 1,
+                      target: 'target-foo',
+                    ),
+                  ],
+                },
+                ipResponse: <String, List<IPAddressResourceRecord>>{
+                  'target-foo': <IPAddressResourceRecord>[
+                    IPAddressResourceRecord(
+                      'target-foo',
+                      0,
+                      address: InternetAddress.tryParse('111.111.111.111')!,
+                    ),
+                  ],
+                },
+                txtResponse: <String, List<TxtResourceRecord>>{
+                  'srv-foo': <TxtResourceRecord>[
+                    TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+                  ],
+                },
+              ),
+              logger: logger,
+              analytics: const NoOpAnalytics(),
+              platform: FakePlatform(),
+            ),
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
@@ -535,7 +618,9 @@ void main() {
           await createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
@@ -557,53 +642,6 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-            preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[
-                PtrResourceRecord('bar', future, domainName: 'srv-bar'),
-                PtrResourceRecord('foo', future, domainName: 'srv-foo'),
-              ],
-              <String, List<SrvResourceRecord>>{
-                'srv-bar': <SrvResourceRecord>[
-                  SrvResourceRecord(
-                    'srv-bar',
-                    future,
-                    port: 321,
-                    weight: 1,
-                    priority: 1,
-                    target: 'target-bar',
-                  ),
-                ],
-                'srv-foo': <SrvResourceRecord>[
-                  SrvResourceRecord(
-                    'srv-foo',
-                    future,
-                    port: 123,
-                    weight: 1,
-                    priority: 1,
-                    target: 'target-foo',
-                  ),
-                ],
-              },
-              ipResponse: <String, List<IPAddressResourceRecord>>{
-                'target-foo': <IPAddressResourceRecord>[
-                  IPAddressResourceRecord(
-                    'target-foo',
-                    0,
-                    address: InternetAddress.tryParse('111.111.111.111')!,
-                  ),
-                ],
-              },
-              txtResponse: <String, List<TxtResourceRecord>>{
-                'srv-foo': <TxtResourceRecord>[
-                  TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
-                ],
-              },
-            ),
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          ),
         },
       );
 
@@ -614,6 +652,57 @@ void main() {
             portForwarder: portForwarder,
             majorSdkVersion: 16,
             connectionInterface: DeviceConnectionInterface.wireless,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              mdnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              preliminaryMDnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[
+                  PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+                  PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+                ],
+                <String, List<SrvResourceRecord>>{
+                  'srv-bar': <SrvResourceRecord>[
+                    SrvResourceRecord(
+                      'srv-bar',
+                      future,
+                      port: 321,
+                      weight: 1,
+                      priority: 1,
+                      target: 'target-bar',
+                    ),
+                  ],
+                  'srv-foo': <SrvResourceRecord>[
+                    SrvResourceRecord(
+                      'srv-foo',
+                      future,
+                      port: 123,
+                      weight: 1,
+                      priority: 1,
+                      target: 'target-foo',
+                    ),
+                  ],
+                },
+                ipResponse: <String, List<IPAddressResourceRecord>>{
+                  'target-foo': <IPAddressResourceRecord>[
+                    IPAddressResourceRecord(
+                      'target-foo',
+                      0,
+                      address: InternetAddress.tryParse('111.111.111.111')!,
+                    ),
+                  ],
+                },
+                txtResponse: <String, List<TxtResourceRecord>>{
+                  'srv-foo': <TxtResourceRecord>[
+                    TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+                  ],
+                },
+              ),
+              logger: logger,
+              analytics: const NoOpAnalytics(),
+              platform: FakePlatform(),
+            ),
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
@@ -629,7 +718,9 @@ void main() {
           await createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
@@ -651,53 +742,6 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-            preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[
-                PtrResourceRecord('bar', future, domainName: 'srv-bar'),
-                PtrResourceRecord('foo', future, domainName: 'srv-foo'),
-              ],
-              <String, List<SrvResourceRecord>>{
-                'srv-bar': <SrvResourceRecord>[
-                  SrvResourceRecord(
-                    'srv-bar',
-                    future,
-                    port: 321,
-                    weight: 1,
-                    priority: 1,
-                    target: 'target-bar',
-                  ),
-                ],
-                'srv-foo': <SrvResourceRecord>[
-                  SrvResourceRecord(
-                    'srv-foo',
-                    future,
-                    port: 123,
-                    weight: 1,
-                    priority: 1,
-                    target: 'target-foo',
-                  ),
-                ],
-              },
-              ipResponse: <String, List<IPAddressResourceRecord>>{
-                'target-foo': <IPAddressResourceRecord>[
-                  IPAddressResourceRecord(
-                    'target-foo',
-                    0,
-                    address: InternetAddress.tryParse('111.111.111.111')!,
-                  ),
-                ],
-              },
-              txtResponse: <String, List<TxtResourceRecord>>{
-                'srv-foo': <TxtResourceRecord>[
-                  TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
-                ],
-              },
-            ),
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          ),
         },
       );
 
@@ -724,7 +768,9 @@ void main() {
           final Future<void> task = createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
             ),
@@ -765,7 +811,9 @@ void main() {
             () => createTestCommandRunner(
               AttachCommand(
                 buildSystem: buildSystem,
+                assetBundleFactory: _FakeAssetBundleFactory(),
                 buildTargets: const BuildTargetsImpl(),
+                devtoolsLauncher: FakeDevtoolsLauncher(),
                 xcode: null,
                 toolContext: createToolContext(),
               ),
@@ -811,7 +859,9 @@ void main() {
 
           final command = AttachCommand(
             buildSystem: buildSystem,
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: createToolContext(),
             xcode: null,
             hotRunnerFactory: hotRunnerFactory,
@@ -856,7 +906,9 @@ void main() {
 
           final command = AttachCommand(
             buildSystem: buildSystem,
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             xcode: null,
             toolContext: createToolContext(),
           );
@@ -882,6 +934,19 @@ void main() {
           final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 12,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              mdnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              preliminaryMDnsClient: FakeMDnsClient(
+                <PtrResourceRecord>[],
+                <String, List<SrvResourceRecord>>{},
+              ),
+              logger: logger,
+              analytics: const NoOpAnalytics(),
+              platform: FakePlatform(),
+            ),
             onGetLogReader: () {
               fakeLogReader.addLine('Foo');
               fakeLogReader.addLine('The Dart VM service is listening on http://[::1]:$devicePort');
@@ -911,7 +976,9 @@ void main() {
           await createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
@@ -933,15 +1000,6 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-            preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          ),
         },
       );
 
@@ -959,7 +1017,9 @@ void main() {
 
           final command = AttachCommand(
             buildSystem: buildSystem,
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             xcode: null,
             toolContext: createToolContext(),
           );
@@ -1012,7 +1072,9 @@ void main() {
           final Future<void> task = createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
             ),
@@ -1054,7 +1116,9 @@ void main() {
           final Future<void> task = createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
             ),
@@ -1097,7 +1161,9 @@ void main() {
               createTestCommandRunner(
                 AttachCommand(
                   buildSystem: buildSystem,
+                  assetBundleFactory: _FakeAssetBundleFactory(),
                   buildTargets: const BuildTargetsImpl(),
+                  devtoolsLauncher: FakeDevtoolsLauncher(),
                   xcode: null,
                   toolContext: createToolContext(),
                 ),
@@ -1145,7 +1211,9 @@ void main() {
               createTestCommandRunner(
                 AttachCommand(
                   buildSystem: buildSystem,
+                  assetBundleFactory: _FakeAssetBundleFactory(),
                   buildTargets: const BuildTargetsImpl(),
+                  devtoolsLauncher: FakeDevtoolsLauncher(),
                   xcode: null,
                   toolContext: createToolContext(),
                 ),
@@ -1181,7 +1249,9 @@ void main() {
       () async {
         final command = AttachCommand(
           buildSystem: buildSystem,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           xcode: null,
           toolContext: createToolContext(loggerOverride: testLogger),
         );
@@ -1207,7 +1277,9 @@ void main() {
           createTestCommandRunner(
             AttachCommand(
               buildSystem: buildSystem,
+              assetBundleFactory: _FakeAssetBundleFactory(),
               buildTargets: const BuildTargetsImpl(),
+              devtoolsLauncher: FakeDevtoolsLauncher(),
               xcode: null,
               toolContext: createToolContext(),
             ),
@@ -1228,7 +1300,9 @@ void main() {
         terminal = FakeTerminal(stdinHasTerminal: false);
         final command = AttachCommand(
           buildSystem: buildSystem,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           xcode: null,
           toolContext: createToolContext(loggerOverride: testLogger),
         );
@@ -1279,7 +1353,9 @@ void main() {
 
         final command = AttachCommand(
           buildSystem: buildSystem,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: createToolContext(),
           xcode: null,
           hotRunnerFactory: hotRunnerFactory,
@@ -1323,7 +1399,9 @@ void main() {
 
         final command = AttachCommand(
           buildSystem: buildSystem,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: createToolContext(),
           xcode: null,
           hotRunnerFactory: hotRunnerFactory,
@@ -1367,7 +1445,9 @@ void main() {
 
         final command = AttachCommand(
           buildSystem: buildSystem,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: createToolContext(),
           xcode: null,
           hotRunnerFactory: hotRunnerFactory,
@@ -1412,7 +1492,9 @@ void main() {
 
         final command = AttachCommand(
           buildSystem: buildSystem,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: createToolContext(),
           xcode: null,
           hotRunnerFactory: hotRunnerFactory,
@@ -1458,7 +1540,9 @@ void main() {
 
         final command = AttachCommand(
           buildSystem: buildSystem,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: createToolContext(),
           xcode: null,
           hotRunnerFactory: hotRunnerFactory,
@@ -1491,7 +1575,9 @@ void main() {
             createTestCommandRunner(
               AttachCommand(
                 buildSystem: buildSystem,
+                assetBundleFactory: _FakeAssetBundleFactory(),
                 buildTargets: const BuildTargetsImpl(),
+                devtoolsLauncher: FakeDevtoolsLauncher(),
                 xcode: null,
                 toolContext: createToolContext(),
               ),
@@ -1521,7 +1607,9 @@ void main() {
     testUsingContext('preserves expected hidden and visible options across verboseHelp modes', () {
       final defaultCommand = AttachCommand(
         buildSystem: buildSystem,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         xcode: null,
         toolContext: createToolContext(),
       );
@@ -1584,7 +1672,9 @@ void main() {
 
       final verboseCommand = AttachCommand(
         buildSystem: buildSystem,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         xcode: null,
         toolContext: createToolContext(),
         verboseHelp: true,
@@ -1641,6 +1731,8 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
   HotRunner build(
     List<FlutterDevice> devices, {
     required Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
@@ -1649,6 +1741,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     required Xcode? xcode,
     File? applicationBinary,
     bool benchmarkMode = false,
+    FlutterHookRunner? dartBuilder,
     String? dillOutputPath,
     bool hostIsIde = false,
     String? nativeAssetsYamlFile,
@@ -1847,6 +1940,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    Artifacts? artifacts,
     String? appName = 'Fake App',
     int? ddsPort,
     FlutterDevice? device,
@@ -1960,12 +2054,14 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
+    this._mdnsVmServiceDiscovery,
     this._portForwarder,
     this.onGetLogReader,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.majorSdkVersion = 0,
   });
 
+  final MDnsVmServiceDiscovery? _mdnsVmServiceDiscovery;
   final DevicePortForwarder? _portForwarder;
   @override
   int majorSdkVersion;
@@ -2039,6 +2135,13 @@ class FakeIOSDevice extends Fake implements IOSDevice {
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
+      mdnsVmServiceDiscovery:
+          _mdnsVmServiceDiscovery ??
+          MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: FakePlatform(),
+          ),
       usesIpv6: ipv6,
       useDeviceIPAsHost: isWirelesslyConnected,
     );
@@ -2109,6 +2212,11 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
+      mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+        analytics: const NoOpAnalytics(),
+        logger: logger,
+        platform: FakePlatform(),
+      ),
       usesIpv6: ipv6,
       useDeviceIPAsHost: isWirelesslyConnected,
     );
@@ -2177,7 +2285,8 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required super.logger});
+  TestDeviceManager({required super.logger, FileSystem? fileSystem})
+    : super(fileSystem: fileSystem ?? MemoryFileSystem.test());
   List<Device> devices = <Device>[];
 
   @override
@@ -2220,4 +2329,14 @@ class SlowWarningCallbackBufferLogger extends BufferLogger {
     expect(slowWarningCallback!(), expectedWarning);
     return SilentStatus(stopwatch: Stopwatch(), onFinish: onFinish)..start();
   }
+}
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {
+  @override
+  AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
+    fileSystem: MemoryFileSystem.test(),
+    flutterRoot: '',
+    logger: BufferLogger.test(),
+    platform: FakePlatform(),
+  ).createBundle();
 }

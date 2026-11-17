@@ -11,6 +11,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -26,12 +27,13 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compiler_config.dart';
@@ -107,11 +109,13 @@ void main() {
   late FakeWebServerDevice webServerDevice;
   late FakeDevice mockDevice;
   late FakeVmServiceHost fakeVmServiceHost;
+  late Config config;
   late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
+    config = Config.test();
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.any();
     debugConnection = FakeDebugConnection();
@@ -150,6 +154,49 @@ name: my_app
     chromeConnection.tabs.add(chromeTab);
   }
 
+  ResidentRunner setUpResidentRunner(
+    FlutterDevice flutterDevice, {
+    Logger? logger,
+    SystemClock? systemClock,
+    BuildSystem? buildSystem,
+    DebuggingOptions? debuggingOptions,
+  }) {
+    final toolContext = test_fakes.FakeToolContext(
+      config: config,
+      fs: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      systemClock: systemClock,
+    );
+    return ResidentWebRunner(
+      flutterDevice,
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: test_fakes.FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: toolContext,
+      ),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
+      analytics: fakeAnalytics,
+      buildSystem:
+          buildSystem ??
+          FlutterBuildSystem(
+            fileSystem: fileSystem,
+            platform: FakePlatform(),
+            logger: BufferLogger.test(),
+          ),
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: fileSystem,
+        flutterRoot: '',
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+      ),
+      buildTargets: const BuildTargetsImpl(),
+      toolContext: toolContext,
+    );
+  }
+
   testUsingContext(
     'runner with web server device supports debugging without --start-paused',
     () {
@@ -158,12 +205,24 @@ name: my_app
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       expect(profileResidentWebRunner.debuggingEnabled, true);
@@ -187,12 +246,24 @@ name: my_app
       flutterDevice.device = WebServerDevice(logger: BufferLogger.test());
       final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       expect(profileResidentWebRunner.uri, webDevFS.baseUri);
@@ -208,23 +279,47 @@ name: my_app
     () {
       final ResidentRunner residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       flutterDevice.device = chromeDevice;
       final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -347,7 +442,7 @@ name: my_app
       final String expectedPath = getDefaultCachedKernelPath(
         trackWidgetCreation: false,
         dartDefines: const <String>[],
-        config: globals.config,
+        config: config,
         fileSystem: fileSystem,
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
@@ -376,7 +471,7 @@ name: my_app
       final String expectedPath = getDefaultCachedKernelPath(
         trackWidgetCreation: true,
         dartDefines: const <String>[],
-        config: globals.config,
+        config: config,
         fileSystem: fileSystem,
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: kDdcLibraryBundleFlags,
@@ -421,7 +516,7 @@ name: my_app
         platform: FakePlatform(),
         fileSystem: fileSystem,
         shutdownHooks: test_fakes.FakeShutdownHooks(),
-        config: globals.config,
+        config: config,
       ) as DefaultResidentCompiler;
       expect(await fileSystem.file(compiler.initializeFromDill).readAsString(), 'ABC');
     },
@@ -439,7 +534,7 @@ name: my_app
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
-      fileSystem.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
       webDevFS.report = UpdateFSReport();
 
       expect(await residentWebRunner.run(), 1);
@@ -462,13 +557,25 @@ name: my_app
       fileSystem.directory('web').deleteSync(recursive: true);
       final residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         stayResident: false,
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       expect(await residentWebRunner.run(), 0);
@@ -488,13 +595,25 @@ name: my_app
       setupMocks();
       final ResidentRunner residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         stayResident: false,
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       expect(await residentWebRunner.run(), 0);
@@ -515,12 +634,24 @@ name: my_app
       fileSystem.directory('web').deleteSync(recursive: true);
       final residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       expect(mockDevice.isRunning, false);
@@ -550,12 +681,24 @@ name: my_app
       fileSystem.directory('web').deleteSync(recursive: true);
       final residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       expect(mockDevice.isRunning, false);
@@ -801,12 +944,24 @@ name: my_app
     () async {
       final ResidentRunner residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
       fakeVmServiceHost = FakeVmServiceHost(requests: kStartPausedAndAttachExpectations.toList());
       setupMocks();
@@ -1433,13 +1588,25 @@ name: my_app
       setupMocks();
       final ResidentRunner runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         platformArgs: <String, Object?>{'no-launch-chrome': true},
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1467,13 +1634,25 @@ name: my_app
       flutterDevice.device = chromeDevice;
       final runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         platformArgs: <String, Object?>{'no-launch-chrome': true},
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       final appStartedCompleter = Completer<void>();
@@ -1504,12 +1683,24 @@ name: my_app
       flutterDevice.device = chromeDevice;
       final runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       expect(runner.useDwdsWebSocketConnection, isFalse);
@@ -1806,12 +1997,24 @@ name: my_app
 
       final runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1848,12 +2051,24 @@ name: my_app
 
       final runner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1886,6 +2101,12 @@ name: my_app
       setupMocks();
       final ResidentRunner residentWebRunner = ResidentWebRunner(
         flutterDevice,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: test_fakes.FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+        ),
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         stayResident: false,
@@ -1894,14 +2115,20 @@ name: my_app
           platform: FakePlatform(),
           logger: BufferLogger.test(),
         ),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
         buildTargets: const BuildTargetsImpl(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-        analytics: globals.analytics,
+        analytics: fakeAnalytics,
       );
 
       // Create necessary files.
-      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+      fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 {
@@ -1910,21 +2137,21 @@ name: my_app
     "description": "Sample description"
   }
 }''');
-      globals.fs.file('l10n.yaml').createSync();
-      globals.fs.file('pubspec.yaml').writeAsStringSync('''
+      fileSystem.file('l10n.yaml').createSync();
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 flutter:
   generate: true
 ''');
       writePackageConfigFiles(
-        directory: globals.fs.currentDirectory,
+        directory: fileSystem.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
       );
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       expect(await residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter), 0);
       await connectionInfoCompleter.future;
-      final File generatedLocalizationsFile = globals.fs
+      final File generatedLocalizationsFile = fileSystem
           .directory('lib')
           .childDirectory('l10n')
           .childFile('app_localizations.dart');
@@ -1946,13 +2173,13 @@ flutter:
     () async {
       // Create necessary files for [DartPluginRegistrantTarget]
       writePackageConfigFiles(
-        directory: globals.fs.currentDirectory,
+        directory: fileSystem.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
       );
 
       // Start with a dart_plugin_registrant.dart file.
-      globals.fs
+      fileSystem
           .directory('.dart_tool')
           .childDirectory('flutter_build')
           .childFile('dart_plugin_registrant.dart')
@@ -2192,6 +2419,12 @@ flutter:
         setupMocks();
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
           stayResident: false,
@@ -2201,9 +2434,15 @@ flutter:
           ) {
             expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-          analytics: globals.analytics,
+          analytics: fakeAnalytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
@@ -2223,6 +2462,12 @@ flutter:
         setupMocks();
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -2231,9 +2476,15 @@ flutter:
           ) {
             expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-          analytics: globals.analytics,
+          analytics: fakeAnalytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
@@ -2258,6 +2509,12 @@ flutter:
         setupMocks();
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
@@ -2270,9 +2527,15 @@ flutter:
           ) {
             expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-          analytics: globals.analytics,
+          analytics: fakeAnalytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
@@ -2298,6 +2561,12 @@ flutter:
 
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.release,
@@ -2312,12 +2581,18 @@ flutter:
               capturedConfig = target.compileConfigs.first;
             }
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),
           ),
-          analytics: globals.analytics,
+          analytics: fakeAnalytics,
         );
 
         expect(await residentWebRunner.run(), 0);
@@ -2349,6 +2624,12 @@ flutter:
 
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
@@ -2363,12 +2644,18 @@ flutter:
               capturedConfig = target.compileConfigs.first;
             }
           }),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: '',
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),
           ),
-          analytics: globals.analytics,
+          analytics: fakeAnalytics,
         );
 
         expect(await residentWebRunner.run(), 0);
@@ -2406,6 +2693,12 @@ flutter:
 
           final residentWebRunner = ResidentWebRunner(
             flutterDevice,
+            applicationPackageFactory: FlutterApplicationPackageFactory(
+              androidSdkBuilder: () => null,
+              plistParserBuilder: test_fakes.FakePlistParser.new,
+              templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+              toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+            ),
             flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
             debuggingOptions: DebuggingOptions.enabled(
               BuildInfo(
@@ -2425,12 +2718,18 @@ flutter:
                 capturedConfig = target.compileConfigs.first;
               }
             }),
+            assetBundleFactory: AssetBundleFactory.defaultInstance(
+              fileSystem: fileSystem,
+              flutterRoot: '',
+              logger: BufferLogger.test(),
+              platform: FakePlatform(),
+            ),
             buildTargets: const BuildTargetsImpl(),
             toolContext: test_fakes.FakeToolContext(
               fs: fileSystem,
               systemClock: SystemClock.fixed(DateTime(2001)),
             ),
-            analytics: globals.analytics,
+            analytics: fakeAnalytics,
           );
 
           expect(await residentWebRunner.run(), 0);
@@ -2450,31 +2749,180 @@ flutter:
         },
       );
     }
-  });
-}
 
-ResidentRunner setUpResidentRunner(
-  FlutterDevice flutterDevice, {
-  Logger? logger,
-  SystemClock? systemClock,
-  BuildSystem? buildSystem,
-  DebuggingOptions? debuggingOptions,
-}) {
-  return ResidentWebRunner(
-    flutterDevice,
-    flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
-    debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
-    analytics: globals.analytics,
-    buildSystem:
-        buildSystem ??
-        FlutterBuildSystem(
-          fileSystem: globals.fs,
-          platform: FakePlatform(),
-          logger: BufferLogger.test(),
-        ),
-    buildTargets: const BuildTargetsImpl(),
-    toolContext: test_fakes.DelegatingToolContext(logger: logger, systemClock: systemClock),
-  );
+    for (final deprecatedJsInterop in <bool>[true, false]) {
+      testUsingContext(
+        'ResidentWebRunner sends flutterBuildInfo analytics on debug DDC '
+        'compile success when deprecatedJsInterop: $deprecatedJsInterop',
+        () async {
+          fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+          setupMocks();
+
+          final ResidentRunner residentWebRunner = setUpResidentRunner(
+            flutterDevice,
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo(
+                BuildMode.debug,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+                deprecatedJsInterop: deprecatedJsInterop,
+              ),
+            ),
+          );
+          residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+
+          final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+          unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+          await connectionInfoCompleter.future;
+
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(
+                label: 'web-compile',
+                buildType: 'web',
+                command: 'run',
+                settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
+        'ResidentWebRunner sends flutterBuildInfo analytics with error on debug '
+        'DDC compile failure when deprecatedJsInterop: $deprecatedJsInterop',
+        () async {
+          fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+          setupMocks();
+          webDevFS.report = UpdateFSReport();
+
+          final ResidentRunner residentWebRunner = setUpResidentRunner(
+            flutterDevice,
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo(
+                BuildMode.debug,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+                deprecatedJsInterop: deprecatedJsInterop,
+              ),
+            ),
+          );
+
+          expect(await residentWebRunner.run(), 1);
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(
+                label: 'web-compile',
+                buildType: 'web',
+                command: 'run',
+                settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+                error: 'ddc-compile-failure',
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Pub: ThrowingPub.new,
+        },
+      );
+    }
+
+    testUsingContext(
+      'ResidentWebRunner does not send flutterBuildInfo analytics on debug DDC '
+      'compile when deprecatedJsInterop is null',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+        setupMocks();
+
+        final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+        residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+        await connectionInfoCompleter.future;
+
+        expect(
+          fakeAnalytics.sentEvents.where((Event e) => e.eventData['label'] == 'web-compile'),
+          isEmpty,
+        );
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+
+    testUsingContext(
+      'passes manifestPath to assetBundle when cwd is not project directory',
+      () async {
+        final Directory projectDir = fileSystem.directory('/other_project')..createSync();
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: other_project\n');
+        projectDir.childFile('lib/main.dart').createSync(recursive: true);
+        writePackageConfigFiles(directory: projectDir, mainLibName: 'other_project');
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+
+        final ResidentRunner residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: test_fakes.FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: test_fakes.FakeToolContext(fs: fileSystem),
+          ),
+          flutterProject: project,
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo(
+              .debug,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: projectDir
+                  .childDirectory('.dart_tool')
+                  .childFile('package_config.json')
+                  .path,
+            ),
+          ),
+          stayResident: false,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: FakeAssetBundleFactory(),
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: test_fakes.FakeToolContext(
+            fs: fileSystem,
+            systemClock: SystemClock.fixed(DateTime(2001)),
+          ),
+          analytics: fakeAnalytics,
+        );
+
+        expect(fileSystem.currentDirectory.path, isNot(projectDir.path));
+
+        webDevFS.report = UpdateFSReport(success: true);
+        expect(await residentWebRunner.run(), 0);
+        final fakeAssetBundle = residentWebRunner.assetBundle as FakeCapturingAssetBundle;
+        expect(fakeAssetBundle.lastNeedsBuildManifestPath, project.pubspecFile.path);
+        expect(fakeAssetBundle.lastBuildManifestPath, project.pubspecFile.path);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+  });
 }
 
 class FakeWebServerDevice extends FakeDevice implements WebServerDevice {}
@@ -2873,4 +3321,37 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   bool areDependenciesModified(DevFSContent shaderContent) => false;
+}
+
+class FakeCapturingAssetBundle extends Fake implements AssetBundle {
+  String? lastNeedsBuildManifestPath;
+  String? lastBuildManifestPath;
+
+  @override
+  bool wasBuiltOnce() => false;
+
+  @override
+  bool needsBuild({String manifestPath = 'pubspec.yaml'}) {
+    lastNeedsBuildManifestPath = manifestPath;
+    return true;
+  }
+
+  @override
+  Future<int> build({
+    FlutterHookResult? flutterHookResult,
+    String manifestPath = 'pubspec.yaml',
+    required String packageConfigPath,
+    bool deferredComponentsEnabled = false,
+    required TargetPlatform targetPlatform,
+    String? flavor,
+    bool includeAssetsFromDevDependencies = false,
+  }) async {
+    lastBuildManifestPath = manifestPath;
+    return 0;
+  }
+}
+
+class FakeAssetBundleFactory implements AssetBundleFactory {
+  @override
+  AssetBundle createBundle() => FakeCapturingAssetBundle();
 }
