@@ -3792,6 +3792,7 @@ _flutter.loader.load({
         },
         engineVersion: _kEngineRevision,
         artifacts: environment.artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: processManager,
         logger: environment.logger,
         fileSystem: fs,
