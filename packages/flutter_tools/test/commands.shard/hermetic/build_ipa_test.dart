@@ -2348,6 +2348,158 @@ void main() {
       Artifacts: () => Artifacts.test(),
     },
   );
+
+  testUsingContext(
+    'Validate launch image logs error and does not crash when Contents.json has invalid JSON',
+    () async {
+      const projectLaunchImageContentsJsonPath =
+          'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(projectLaunchImageContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    },
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(
+        logger.errorText,
+        contains(
+          'Image asset manifest at "$projectLaunchImageContentsJsonPath" was invalid JSON. '
+          'Ensure the file contains valid JSON (for example, remove any trailing commas):\n'
+          'FormatException:',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'Validate image assets does not crash when Contents.json is missing or has unexpected JSON types',
+    () async {
+      const projectIconDirPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset';
+      const projectLaunchImageContentsJsonPath =
+          'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.directory(projectIconDirPath).createSync(recursive: true);
+            fileSystem.file(projectLaunchImageContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('["not", "an", "object"]');
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(
+        logger.errorText,
+        contains(
+          'Image asset manifest at "$projectLaunchImageContentsJsonPath" must be a JSON object.',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'Validate app icon skips malformed non-string and non-map entries in Contents.json',
+    () async {
+      const projectIconContentsJsonPath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(projectIconContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
+{
+  "images": [
+    "not_a_map",
+    {
+      "size": 20,
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(logger.errorText, isNot(contains('Image asset manifest')));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 }
 
 const _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';

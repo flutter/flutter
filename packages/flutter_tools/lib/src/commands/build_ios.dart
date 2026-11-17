@@ -213,27 +213,54 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return <_ImageAssetFileKey, String>{};
     }
     final File contentsJsonFile = contentsJsonDirectory.childFile('Contents.json');
-    final Map<String, dynamic> contents =
-        json.decode(contentsJsonFile.readAsStringSync()) as Map<String, dynamic>? ??
-        <String, dynamic>{};
-    final List<dynamic> images = contents['images'] as List<dynamic>? ?? <dynamic>[];
-    final Map<String, dynamic> info =
-        contents['info'] as Map<String, dynamic>? ?? <String, dynamic>{};
-    if ((info['version'] as int?) != 1) {
+    if (!contentsJsonFile.existsSync()) {
+      return <_ImageAssetFileKey, String>{};
+    }
+    final Object? decodedContents;
+    try {
+      decodedContents = json.decode(contentsJsonFile.readAsStringSync());
+    } on FormatException catch (e) {
+      logger.printError(
+        'Image asset manifest at "${contentsJsonFile.path}" was invalid JSON. '
+        'Ensure the file contains valid JSON (for example, remove any trailing commas):\n$e',
+      );
+      return <_ImageAssetFileKey, String>{};
+    }
+    if (decodedContents == null) {
+      return <_ImageAssetFileKey, String>{};
+    }
+    if (decodedContents is! Map<String, Object?>) {
+      logger.printError(
+        'Image asset manifest at "${contentsJsonFile.path}" must be a JSON object.',
+      );
+      return <_ImageAssetFileKey, String>{};
+    }
+    final Object? info = decodedContents['info'];
+    if (info is! Map<String, Object?> || info['version'] != 1) {
       // Skips validation for unknown format.
+      return <_ImageAssetFileKey, String>{};
+    }
+    final Object? images = decodedContents['images'];
+    if (images is! List<Object?>) {
       return <_ImageAssetFileKey, String>{};
     }
 
     final iconInfo = <_ImageAssetFileKey, String>{};
-    for (final dynamic image in images) {
-      final imageMap = image as Map<String, dynamic>;
-      final idiom = imageMap['idiom'] as String?;
-      final size = imageMap['size'] as String?;
-      final scale = imageMap['scale'] as String?;
-      final fileName = imageMap['filename'] as String?;
+    for (final Object? image in images) {
+      if (image is! Map<String, Object?>) {
+        continue;
+      }
+      final Object? idiom = image['idiom'];
+      final Object? size = image['size'];
+      final Object? scale = image['scale'];
+      final Object? fileName = image['filename'];
 
       // requiresSize must match the actual presence of size in json.
-      if (requiresSize != (size != null) || idiom == null || scale == null || fileName == null) {
+      if (requiresSize != (size != null) ||
+          idiom is! String ||
+          size is! String? ||
+          scale is! String ||
+          fileName is! String) {
         continue;
       }
 
