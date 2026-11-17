@@ -13,6 +13,7 @@ import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 
 class ManifestVersionCodeTaskHelperTest {
@@ -37,6 +38,7 @@ class ManifestVersionCodeTaskHelperTest {
     fun `reads a positive android versionCode`() {
         assertEquals(Result.Found(7), readVersionCode("android:versionCode=\"7\""))
         assertEquals(Result.Found(7), readVersionCode("android:versionCode=\" 7 \""))
+        assertEquals(Result.Found(7), readVersionCode("android:versionCode=\"+7\""))
     }
 
     @Test
@@ -56,16 +58,29 @@ class ManifestVersionCodeTaskHelperTest {
     }
 
     @Test
-    fun `a placeholder is not found`() {
-        val result = assertIs<Result.NotFound>(readVersionCode("android:versionCode=\"\${versionCode}\""))
-        assertContains(result.reason, "android:versionCode=\"\${versionCode}\"")
-        assertContains(result.reason, "is not an integer")
+    fun `a value that is not a decimal integer is not found`() {
+        // AGP parses android:versionCode with Integer.parseInt, so it rejects these too.
+        for (value in listOf("\${versionCode}", "@integer/version_code", "0x10")) {
+            val result = assertIs<Result.NotFound>(readVersionCode("android:versionCode=\"$value\""))
+            assertContains(result.reason, "android:versionCode=\"$value\"")
+            assertContains(result.reason, "is not a decimal integer")
+        }
+    }
+
+    @Test
+    fun `a versionCode larger than Int MAX_VALUE is not found`() {
+        for (value in listOf("2147483648", "+2147483648")) {
+            val result = assertIs<Result.NotFound>(readVersionCode("android:versionCode=\"$value\""))
+            assertContains(result.reason, "android:versionCode=\"$value\"")
+            assertContains(result.reason, "is larger than 2147483647")
+        }
+        assertEquals(Result.Found(Int.MAX_VALUE), readVersionCode("android:versionCode=\"2147483647\""))
     }
 
     @Test
     fun `zero or a negative versionCode is not found`() {
         // AGP does not write these into the merged manifest, and Google Play rejects them.
-        for (value in listOf("0", "-1")) {
+        for (value in listOf("0", "-1", "-99999999999")) {
             val result = assertIs<Result.NotFound>(readVersionCode("android:versionCode=\"$value\""))
             assertContains(result.reason, "is not positive")
         }
@@ -124,11 +139,13 @@ class ManifestVersionCodeTaskHelperTest {
     }
 
     @Test
-    fun `the error message names the variant, the reason, and the fixes`() {
+    fun `the error message names the variant, the reason, and the fix`() {
         val message = ManifestVersionCodeTaskHelper.errorMessage("freeRelease", "the manifest does not set android:versionCode")
         assertContains(message, "variant 'freeRelease'")
         assertContains(message, "the manifest does not set android:versionCode")
         assertContains(message, "versionCode = flutter.versionCode")
-        assertContains(message, "force-version-code-ignoring-abi=true")
+        // With no positive versionCode in the manifest, that flag builds APKs that Android
+        // refuses to install.
+        assertFalse(message.contains("force-version-code-ignoring-abi"))
     }
 }

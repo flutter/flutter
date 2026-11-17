@@ -316,12 +316,11 @@ class FlutterPlugin : Plugin<Project> {
         // `this` is shadowed inside the task configuration blocks reached from here, so capture the
         // plugin instance that owns the resolved Flutter SDK and local engine paths.
         val flutterGradlePlugin = this
-        val isApplicationProject = FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)
-        // Set in finalizeDsl, which AGP runs before any onVariants callback.
-        var dslVersionCodes: DslVersionCodes? = null
-        if (isApplicationProject) {
-            val appExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
-            androidComponents.finalizeDsl { dslVersionCodes = DslVersionCodes.from(appExtension) }
+        // Read on the first onVariants call rather than in finalizeDsl. AGP runs onVariants only
+        // after every finalizeDsl callback, including ones registered after Flutter's, so this
+        // includes a versionCode that the app's build script or another plugin sets there.
+        val dslVersionCodes by lazy {
+            DslVersionCodes.from(FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo))
         }
         androidComponents.onVariants { variant ->
             if (shouldCompileFlutterForVariant(projectToAddTasksTo, variant)) {
@@ -335,13 +334,7 @@ class FlutterPlugin : Plugin<Project> {
                 registerFlutterAssetTasks(projectToAddTasksTo, variant, compileTaskProvider)
                 registerFlutterJniLibsTask(projectToAddTasksTo, variant, compileTaskProvider, targetPlatforms)
                 if (variant is ApplicationVariant) {
-                    configureApplicationOutputs(
-                        projectToAddTasksTo,
-                        variant,
-                        checkNotNull(dslVersionCodes) {
-                            "Flutter read the DSL versionCodes before AGP ran finalizeDsl."
-                        }
-                    )
+                    configureApplicationOutputs(projectToAddTasksTo, variant, dslVersionCodes)
                 }
             }
         }
@@ -685,17 +678,48 @@ class FlutterPlugin : Plugin<Project> {
             // Lazily register the manifest fallback task so it is only created when the DSL omits
             // versionCode and at least one output has an ABI filter.
             val manifestVersionCode by lazy { ManifestVersionCodeTaskHelper.registerTask(project, variant) }
+            // Captured by the provider below instead of variant, which the configuration cache
+            // cannot store.
+            val variantName = variant.name
             variant.outputs.forEach { output ->
-                val abiVersionCode =
-                    FlutterPluginConstants.ABI_VERSION[CopyFlutterApksTask.abiOf(output.filters)]
-                        ?: return@forEach
+                val abi = CopyFlutterApksTask.abiOf(output.filters)
+                val abiVersionCode = FlutterPluginConstants.ABI_VERSION[abi] ?: return@forEach
                 if (baseVersionCode != null) {
-                    output.versionCode.set(abiVersionCode * 1000 + baseVersionCode)
+                    output.versionCode.set(splitApkVersionCode(variantName, abi, abiVersionCode, baseVersionCode))
                 } else {
-                    output.versionCode.set(manifestVersionCode.map { abiVersionCode * 1000 + it })
+                    output.versionCode.set(
+                        manifestVersionCode.map { splitApkVersionCode(variantName, abi, abiVersionCode, it) }
+                    )
                 }
             }
         }
+
+        /**
+         * Returns `abiVersionCode * 1000 + baseVersionCode`, the `versionCode` of the [abi] split
+         * APK of [variantName].
+         *
+         * @throws GradleException if the sum is larger than [Int.MAX_VALUE], the largest
+         *   `versionCode` Android accepts, instead of letting it wrap around to a negative number.
+         */
+        internal fun splitApkVersionCode(
+            variantName: String,
+            abi: String,
+            abiVersionCode: Int,
+            baseVersionCode: Int
+        ): Int =
+            try {
+                Math.addExact(abiVersionCode * 1000, baseVersionCode)
+            } catch (e: ArithmeticException) {
+                throw GradleException(
+                    "Flutter cannot give the $abi split APK of variant '$variantName' a versionCode: " +
+                        "${abiVersionCode * 1000} + $baseVersionCode is larger than ${Int.MAX_VALUE}, " +
+                        "the largest versionCode Android allows. Lower the versionCode. If you do " +
+                        "not publish these APKs on Google Play, you can instead pass " +
+                        "-P ${FlutterPluginUtils.PROP_FORCE_VERSION_CODE_IGNORING_ABI}=true to give " +
+                        "every split APK the versionCode $baseVersionCode.",
+                    e
+                )
+            }
 
         /** Registers the copy of [variant]'s APKs into flutter-apk, run by `assemble<Variant>`. */
         private fun registerCopyFlutterApksTask(

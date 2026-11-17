@@ -116,7 +116,6 @@ class FlutterPluginTest {
             FlutterPluginUtils.detectApplyingKotlinGradlePlugin(project)
             DependencyVersionChecker.checkDependencyVersions(project)
             project.tasks.register("javaVersion", PrintTask::class.java, any())
-            mockComponentsExtension.finalizeDsl(any<(Any) -> Unit>())
             mockComponentsExtension.onVariants(any(), any<(Variant) -> Unit>())
             mockApplicationExtension.defaultConfig
             mockApplicationExtension.buildTypes
@@ -423,6 +422,54 @@ class FlutterPluginTest {
         )
 
         verify { arm64.versionCode.set(2009) }
+    }
+
+    @Test
+    fun `onVariants offsets a versionCode that a later finalizeDsl callback sets`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        // Like a finalizeDsl block in the app's build script, which AGP runs after Flutter's
+        // callbacks and before any onVariants callback.
+        val appExtension = env.project.extensions.getByType(ApplicationExtension::class.java)
+        every { appExtension.defaultConfig.versionCode } returns 55
+
+        onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
+
+        verify { arm64.versionCode.set(2055) }
+    }
+
+    @Test
+    fun `onVariants fails instead of overflowing a split APK versionCode`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm32 = mockVariantOutput(abi = "armeabi-v7a")
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = 2147482000)
+
+        val error =
+            assertThrows<GradleException> {
+                onVariant(mockApplicationVariant(outputs = listOf(arm32.output, arm64.output)))
+            }
+
+        // 1000 + 2147482000 still fits in an Int; 2000 + 2147482000 does not.
+        verify { arm32.versionCode.set(2147483000) }
+        assertContains(error.message!!, "arm64-v8a split APK of variant 'debug'")
+        assertContains(error.message!!, "2000 + 2147482000 is larger than 2147483647")
+        assertContains(error.message!!, "force-version-code-ignoring-abi=true")
+    }
+
+    @Test
+    fun `splitApkVersionCode allows versionCodes up to Int MAX_VALUE`() {
+        assertEquals(Int.MAX_VALUE, FlutterPlugin.splitApkVersionCode("release", "x86_64", 4, Int.MAX_VALUE - 4000))
+        assertThrows<GradleException> {
+            FlutterPlugin.splitApkVersionCode("release", "x86_64", 4, Int.MAX_VALUE - 3999)
+        }
     }
 
     @Test

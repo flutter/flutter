@@ -12,6 +12,7 @@ import org.gradle.api.provider.Provider
 import org.xml.sax.SAXException
 import java.io.File
 import java.io.IOException
+import java.math.BigInteger
 import javax.xml.parsers.DocumentBuilderFactory
 
 /**
@@ -87,9 +88,11 @@ object ManifestVersionCodeTaskHelper {
      *
      * For example, `<manifest xmlns:android="http://schemas.android.com/apk/res/android"
      * android:versionCode="7">` returns `Result.Found(7)`. Returns [Result.NotFound] if the file
-     * cannot be read or parsed, omits `android:versionCode`, uses a placeholder such as
-     * `${versionCode}`, or sets a value `<= 0`. AGP ignores values `<= 0` and Google Play rejects
-     * them.
+     * cannot be read or parsed, omits `android:versionCode`, sets a value `<= 0`, or sets anything
+     * other than a decimal integer, such as a placeholder (`${versionCode}`), a resource reference
+     * (`@integer/version_code`), or hex (`0x10`). AGP parses this attribute with
+     * `Integer.parseInt` too, so it fails on those values even without Flutter. AGP ignores values
+     * `<= 0` and Google Play rejects them.
      */
     internal fun readVersionCode(manifest: File): Result {
         val root =
@@ -101,12 +104,21 @@ object ManifestVersionCodeTaskHelper {
                 return Result.NotFound("$manifest could not be read (${e.message})")
             }
         val value = root.getAttributeNS(ANDROID_NAMESPACE, "versionCode").trim()
-        val versionCode = value.toIntOrNull()
+        // Like AGP's Integer.parseInt, BigInteger accepts a leading + or -. Unlike it, BigInteger
+        // also parses values outside the Int range, so they get an accurate reason.
+        val versionCode =
+            try {
+                BigInteger(value)
+            } catch (e: NumberFormatException) {
+                null
+            }
         return when {
             value.isEmpty() -> Result.NotFound("$manifest does not set android:versionCode")
-            versionCode == null -> Result.NotFound("android:versionCode=\"$value\" in $manifest is not an integer")
-            versionCode <= 0 -> Result.NotFound("android:versionCode=\"$value\" in $manifest is not positive")
-            else -> Result.Found(versionCode)
+            versionCode == null -> Result.NotFound("android:versionCode=\"$value\" in $manifest is not a decimal integer")
+            versionCode.signum() <= 0 -> Result.NotFound("android:versionCode=\"$value\" in $manifest is not positive")
+            versionCode > Int.MAX_VALUE.toBigInteger() ->
+                Result.NotFound("android:versionCode=\"$value\" in $manifest is larger than ${Int.MAX_VALUE}")
+            else -> Result.Found(versionCode.toInt())
         }
     }
 
@@ -130,6 +142,10 @@ object ManifestVersionCodeTaskHelper {
     /**
      * Formats the `--split-per-abi` error for [variantName] when `android {}` omits `versionCode`
      * and reading the main manifest fails ([reason]).
+     *
+     * Does not suggest `force-version-code-ignoring-abi`, because it cannot help here. When the
+     * manifest has no positive `versionCode`, the flag builds APKs with no `versionCode`, which
+     * Android refuses to install. When the value is not a decimal integer, AGP fails the build.
      */
     internal fun errorMessage(
         variantName: String,
@@ -138,6 +154,5 @@ object ManifestVersionCodeTaskHelper {
         "Flutter cannot give each split APK of variant '$variantName' a distinct " +
             "versionCode: its android {} block sets no versionCode, and $reason. " +
             "Google Play does not accept split APKs that share a versionCode. Set " +
-            "versionCode = flutter.versionCode in defaultConfig (or on each product " +
-            "flavor), or pass -P ${FlutterPluginUtils.PROP_FORCE_VERSION_CODE_IGNORING_ABI}=true to keep one versionCode."
+            "versionCode = flutter.versionCode in defaultConfig (or on each product flavor)."
 }

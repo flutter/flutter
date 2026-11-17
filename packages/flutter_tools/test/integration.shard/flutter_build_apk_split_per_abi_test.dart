@@ -359,6 +359,31 @@ void main() {
     await _assertSplitPerAbiVersionCodes(42, appDir, false, compatibilityModeOff: true);
   });
 
+  testWithoutContext(
+    '--split-per-abi offsets a versionCode that the app sets in androidComponents.finalizeDsl',
+    () {
+      _removeDslVersionCode(appDir);
+      // The build script applies the Flutter Gradle Plugin first, so AGP runs this callback
+      // after any finalizeDsl callback that Flutter registers.
+      _appBuildGradle(appDir).writeAsStringSync('''
+
+androidComponents {
+    finalizeDsl { extension ->
+        extension.defaultConfig.versionCode = 55
+    }
+}
+''', mode: FileMode.append);
+      _addGradleProperties(
+        appDir,
+        'android.compatibility.enableLegacyApi=false\n'
+        'android.newDsl=true\n'
+        'android.builtInKotlin=true',
+      );
+
+      _expectSplitApkVersionCodes(appDir, _buildSplitPerAbiApks(appDir), base: 55);
+    },
+  );
+
   group('versionCode set only in AndroidManifest.xml', () {
     setUp(() {
       _removeDslVersionCode(appDir);
