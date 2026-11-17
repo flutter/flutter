@@ -28,6 +28,50 @@ static NSUInteger lowestSetBit(NSUInteger bitmask) {
 }
 
 /**
+ * Sets the left or right bit of each modifier whose device-independent flag
+ * (such as NSEventModifierFlagCommand) is set without either of them.
+ *
+ * Key events posted by other apps, for example a launcher or a dictation tool
+ * that sends Cmd+V through CGEventPost, usually carry only the device-independent
+ * flag. Without a side, such a modifier would never be synchronized and the
+ * framework would receive a plain V.
+ *
+ * The modifier is attributed to the side in |preferredSideFlags| if that
+ * contains one, and to the left key otherwise.
+ */
+static NSUInteger fillInModifierSides(NSUInteger modifierFlags, NSUInteger preferredSideFlags) {
+  static const struct {
+    NSUInteger deviceIndependentFlag;
+    NSUInteger leftFlag;
+    NSUInteger rightFlag;
+  } kModifierSides[] = {
+      {NSEventModifierFlagShift, flutter::kModifierFlagShiftLeft, flutter::kModifierFlagShiftRight},
+      {NSEventModifierFlagControl, flutter::kModifierFlagControlLeft,
+       flutter::kModifierFlagControlRight},
+      {NSEventModifierFlagOption, flutter::kModifierFlagAltLeft, flutter::kModifierFlagAltRight},
+      {NSEventModifierFlagCommand, flutter::kModifierFlagMetaLeft, flutter::kModifierFlagMetaRight},
+  };
+  for (const auto& sides : kModifierSides) {
+    const NSUInteger sideFlags = sides.leftFlag | sides.rightFlag;
+    if ((modifierFlags & sides.deviceIndependentFlag) == 0 || (modifierFlags & sideFlags) != 0) {
+      continue;
+    }
+    const NSUInteger preferredSide = preferredSideFlags & sideFlags;
+    modifierFlags |= preferredSide != 0 ? preferredSide : sides.leftFlag;
+  }
+  return modifierFlags;
+}
+
+/**
+ * The modifier flags of |event|, with sides filled in by
+ * |fillInModifierSides|. A modifier key event prefers the side of its own key.
+ */
+static NSUInteger sidedModifierFlagsOfEvent(NSEvent* event) {
+  NSNumber* ownModifierFlag = flutter::keyCodeToModifierFlag[@(event.keyCode)];
+  return fillInModifierSides(event.modifierFlags, [ownModifierFlag unsignedLongValue]);
+}
+
+/**
  * Whether a string represents a control character.
  */
 static bool IsControlCharacter(uint64_t character) {
@@ -521,9 +565,11 @@ struct FlutterKeyPendingResponse {
     };
     _sendEvent(flutterEvent, nullptr, nullptr);
   }
-  NSAssert(_lastModifierFlagsOfInterest == (event.modifierFlags & _modifierFlagOfInterestMask),
+  NSAssert(_lastModifierFlagsOfInterest ==
+               (sidedModifierFlagsOfEvent(event) & _modifierFlagOfInterestMask),
            @"The modifier flags are not properly updated: recorded 0x%lx, event with mask 0x%lx",
-           _lastModifierFlagsOfInterest, event.modifierFlags & _modifierFlagOfInterestMask);
+           _lastModifierFlagsOfInterest,
+           sidedModifierFlagsOfEvent(event) & _modifierFlagOfInterestMask);
 }
 
 #pragma mark - Private
@@ -533,7 +579,9 @@ struct FlutterKeyPendingResponse {
                    timestamp:(NSTimeInterval)timestamp
                        guard:(FlutterKeyCallbackGuard*)guard {
   const NSUInteger updatingMask = _modifierFlagOfInterestMask & ~ignoringFlags;
-  const NSUInteger currentFlagsOfInterest = currentFlags & updatingMask;
+  // A modifier key event ignores its own flag, so it is the preferred side.
+  const NSUInteger currentFlagsOfInterest =
+      fillInModifierSides(currentFlags, ignoringFlags) & updatingMask;
   const NSUInteger lastFlagsOfInterest = _lastModifierFlagsOfInterest & updatingMask;
   NSUInteger flagDifference = currentFlagsOfInterest ^ lastFlagsOfInterest;
   if (flagDifference & NSEventModifierFlagCapsLock) {
@@ -763,7 +811,7 @@ struct FlutterKeyPendingResponse {
                ? [NSString stringWithFormat:@"0x%llx", [pressedLogicalKey unsignedLongLongValue]]
                : @"empty");
 
-  BOOL shouldBePressed = (event.modifierFlags & targetModifierFlag) != 0;
+  BOOL shouldBePressed = (sidedModifierFlagsOfEvent(event) & targetModifierFlag) != 0;
   if (lastTargetPressed == shouldBePressed) {
     [callback resolveTo:TRUE];
     return;

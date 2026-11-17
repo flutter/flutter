@@ -61,7 +61,9 @@ namespace flutter::testing {
 
 namespace {
 constexpr uint64_t kKeyCodeKeyA = 0x00;
+constexpr uint64_t kKeyCodeKeyV = 0x09;
 constexpr uint64_t kKeyCodeKeyW = 0x0d;
+constexpr uint64_t kKeyCodeMetaRight = 0x36;
 constexpr uint64_t kKeyCodeShiftLeft = 0x38;
 constexpr uint64_t kKeyCodeShiftRight = 0x3c;
 constexpr uint64_t kKeyCodeCapsLock = 0x39;
@@ -1093,6 +1095,163 @@ TEST(FlutterEmbedderKeyResponderUnittests, SynthesizeMissedModifierEventsInNorma
   EXPECT_EQ(last_handled, FALSE);
   [[events lastObject] respond:TRUE];
   EXPECT_EQ(last_handled, TRUE);
+
+  [events removeAllObjects];
+}
+
+// Apps such as launchers and dictation tools post Cmd+V with CGEventPost. Such an
+// event only carries the device-independent NSEventModifierFlagCommand, without
+// the bit for the left or the right command key.
+TEST(FlutterEmbedderKeyResponderUnittests, SynthesizeModifiersFromDeviceIndependentFlags) {
+  __block NSMutableArray<TestKeyEvent*>* events = [[NSMutableArray<TestKeyEvent*> alloc] init];
+  __block BOOL last_handled = TRUE;
+  id keyEventCallback = ^(BOOL handled) {
+    last_handled = handled;
+  };
+  FlutterKeyEvent* event;
+
+  FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
+      initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
+                          void* _Nullable user_data) {
+        [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
+                                                     callback:callback
+                                                     userData:user_data]];
+      }];
+
+  // In:  V down (Command), V up (Command), A down
+  // Out: *MetaLeft down & V down, V up, *MetaLeft up & A down
+
+  last_handled = FALSE;
+  [responder handleEvent:keyEvent(NSEventTypeKeyDown, 0x100100, @"v", @"v", FALSE, kKeyCodeKeyV)
+                callback:keyEventCallback];
+
+  EXPECT_EQ([events count], 2u);
+  event = [events firstObject].data;
+  ASSERT_NE(event, nullptr);
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(event->physical, kPhysicalMetaLeft);
+  EXPECT_EQ(event->logical, kLogicalMetaLeft);
+  EXPECT_STREQ(event->character, nullptr);
+  EXPECT_EQ(event->synthesized, true);
+  EXPECT_FALSE([[events firstObject] hasCallback]);
+
+  event = [events lastObject].data;
+  ASSERT_NE(event, nullptr);
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(event->physical, kPhysicalKeyV);
+  EXPECT_EQ(event->logical, kLogicalKeyV);
+  EXPECT_EQ(event->synthesized, false);
+  EXPECT_TRUE([[events lastObject] hasCallback]);
+
+  [[events lastObject] respond:TRUE];
+  EXPECT_EQ(last_handled, TRUE);
+
+  [events removeAllObjects];
+
+  last_handled = FALSE;
+  [responder handleEvent:keyEvent(NSEventTypeKeyUp, 0x100100, @"v", @"v", FALSE, kKeyCodeKeyV)
+                callback:keyEventCallback];
+
+  EXPECT_EQ([events count], 1u);
+  event = [events lastObject].data;
+  ASSERT_NE(event, nullptr);
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(event->physical, kPhysicalKeyV);
+  EXPECT_EQ(event->logical, kLogicalKeyV);
+  EXPECT_EQ(event->synthesized, false);
+
+  [[events lastObject] respond:TRUE];
+  EXPECT_EQ(last_handled, TRUE);
+
+  [events removeAllObjects];
+
+  last_handled = FALSE;
+  [responder handleEvent:keyEvent(NSEventTypeKeyDown, 0x100, @"a", @"a", FALSE, kKeyCodeKeyA)
+                callback:keyEventCallback];
+
+  EXPECT_EQ([events count], 2u);
+  event = [events firstObject].data;
+  ASSERT_NE(event, nullptr);
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(event->physical, kPhysicalMetaLeft);
+  EXPECT_EQ(event->logical, kLogicalMetaLeft);
+  EXPECT_EQ(event->synthesized, true);
+
+  event = [events lastObject].data;
+  ASSERT_NE(event, nullptr);
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(event->physical, kPhysicalKeyA);
+  EXPECT_EQ(event->logical, kLogicalKeyA);
+  EXPECT_EQ(event->synthesized, false);
+
+  [[events lastObject] respond:TRUE];
+  EXPECT_EQ(last_handled, TRUE);
+
+  [events removeAllObjects];
+
+  // All four device-independent flags at once: Shift, Control, Option and
+  // Command. Each one is attributed to the left key.
+  [responder handleEvent:keyEvent(NSEventTypeKeyUp, 0x1E0100, @"a", @"a", FALSE, kKeyCodeKeyA)
+                callback:keyEventCallback];
+
+  ASSERT_EQ([events count], 5u);
+  EXPECT_EQ(events[0].data->physical, kPhysicalControlLeft);
+  EXPECT_EQ(events[1].data->physical, kPhysicalShiftLeft);
+  EXPECT_EQ(events[2].data->physical, kPhysicalMetaLeft);
+  EXPECT_EQ(events[3].data->physical, kPhysicalAltLeft);
+  for (NSUInteger i = 0; i < 4; i++) {
+    EXPECT_EQ(events[i].data->type, kFlutterKeyEventTypeDown);
+    EXPECT_EQ(events[i].data->synthesized, true);
+  }
+  EXPECT_EQ(events[4].data->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(events[4].data->physical, kPhysicalKeyA);
+
+  [events removeAllObjects];
+}
+
+// A modifier key event whose flags carry only the device-independent flag is
+// attributed to the side of the key that changed.
+TEST(FlutterEmbedderKeyResponderUnittests, AttributeDeviceIndependentFlagToChangedModifier) {
+  __block NSMutableArray<TestKeyEvent*>* events = [[NSMutableArray<TestKeyEvent*> alloc] init];
+  FlutterKeyEvent* event;
+
+  FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
+      initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
+                          void* _Nullable user_data) {
+        [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
+                                                     callback:callback
+                                                     userData:user_data]];
+      }];
+
+  [responder
+      handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x100100, @"", @"", FALSE, kKeyCodeMetaRight)
+         callback:^(BOOL handled){
+         }];
+
+  EXPECT_EQ([events count], 1u);
+  event = [events lastObject].data;
+  ASSERT_NE(event, nullptr);
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(event->physical, kPhysicalMetaRight);
+  EXPECT_EQ(event->logical, kLogicalMetaRight);
+  EXPECT_EQ(event->synthesized, false);
+  [[events lastObject] respond:TRUE];
+
+  [events removeAllObjects];
+
+  [responder
+      handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x100, @"", @"", FALSE, kKeyCodeMetaRight)
+         callback:^(BOOL handled){
+         }];
+
+  EXPECT_EQ([events count], 1u);
+  event = [events lastObject].data;
+  ASSERT_NE(event, nullptr);
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(event->physical, kPhysicalMetaRight);
+  EXPECT_EQ(event->logical, kLogicalMetaRight);
+  EXPECT_EQ(event->synthesized, false);
+  [[events lastObject] respond:TRUE];
 
   [events removeAllObjects];
 }
