@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
@@ -22,10 +23,12 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -2261,6 +2264,18 @@ flutter:
         setup: () {
           residentRunner = TestHotRunner(
             <FlutterDevice>[flutterDevice],
+            applicationPackageFactory: FlutterApplicationPackageFactory(
+              androidSdkBuilder: () => null,
+              plistParserBuilder: FakePlistParser.new,
+              templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+              toolContext: FakeToolContext(config: localConfig, fs: localFs),
+            ),
+            assetBundleFactory: AssetBundleFactory.defaultInstance(
+              fileSystem: localFs,
+              flutterRoot: getFlutterRoot(),
+              logger: BufferLogger.test(),
+              platform: FakePlatform(),
+            ),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             buildTargets: const BuildTargetsImpl(),
             stayResident: false,
@@ -2350,14 +2365,16 @@ flutter:
 class TestHotRunner extends HotRunner {
   TestHotRunner(
     super.flutterDevices, {
+    required super.analytics,
+    required super.applicationPackageFactory,
+    required super.assetBundleFactory,
     required super.buildSystem,
     required super.buildTargets,
-    required super.stayResident,
     required super.debuggingOptions,
+    required super.stayResident,
     required super.target,
     required super.toolContext,
     required super.xcode,
-    required super.analytics,
   });
 
   void testCacheInitialDillCompilation() {
