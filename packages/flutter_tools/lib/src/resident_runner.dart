@@ -388,13 +388,16 @@ class FlutterDevice {
     final ApplicationPackage? applicationPackage = package;
 
     if (applicationPackage == null) {
-      logger.printError(
-        await missingApplicationPackageMessage(
-          targetPlatform,
-          fileSystem: fs,
-          projectFactory: projectFactory,
-        ),
+      var message = 'No application found for $targetPlatform.';
+      final String? hint = await getMissingPackageHintForPlatform(
+        targetPlatform,
+        fileSystem: fs,
+        projectFactory: projectFactory,
       );
+      if (hint != null) {
+        message += '\n$hint';
+      }
+      logger.printError(message);
       return 1;
     }
     devFSWriter = device!.createDevFSWriter(applicationPackage, userIdentifier);
@@ -439,13 +442,16 @@ class FlutterDevice {
     final ApplicationPackage? applicationPackage = package;
 
     if (applicationPackage == null) {
-      logger.printError(
-        await missingApplicationPackageMessage(
-          targetPlatform,
-          fileSystem: fs,
-          projectFactory: projectFactory,
-        ),
+      var message = 'No application found for $targetPlatform.';
+      final String? hint = await getMissingPackageHintForPlatform(
+        targetPlatform,
+        fileSystem: fs,
+        projectFactory: projectFactory,
       );
+      if (hint != null) {
+        message += '\n$hint';
+      }
+      logger.printError(message);
       return 1;
     }
 
@@ -1645,28 +1651,6 @@ class OperationResultExtraTiming {
 
   /// The time this operation took in milliseconds.
   final int timeInMs;
-}
-
-/// Returns the error shown when no [ApplicationPackage] exists for [platform],
-/// optionally with a project-setup hint.
-Future<String> missingApplicationPackageMessage(
-  TargetPlatform platform, {
-  required FileSystem fileSystem,
-  required FlutterProjectFactory projectFactory,
-  bool includeHint = true,
-}) async {
-  var message = 'No application found for $platform.';
-  if (includeHint) {
-    final String? hint = await getMissingPackageHintForPlatform(
-      platform,
-      fileSystem: fileSystem,
-      projectFactory: projectFactory,
-    );
-    if (hint != null) {
-      message += '\n$hint';
-    }
-  }
-  return message;
 }
 
 Future<String?> getMissingPackageHintForPlatform(

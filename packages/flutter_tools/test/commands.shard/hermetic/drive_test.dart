@@ -116,7 +116,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
-      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -283,7 +282,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
-      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -375,7 +373,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
-      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -482,7 +479,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
-      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -542,7 +538,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
-      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -800,7 +795,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
-      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -857,7 +851,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
-      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 
@@ -924,7 +917,6 @@ void main() {}
       ProcessManager: () => FakeProcessManager.any(),
       Pub: () => FakePub(),
       DeviceManager: () => fakeDeviceManager,
-      ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
     },
   );
 

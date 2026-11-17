@@ -188,15 +188,16 @@ class FlutterDriverService extends DriverService {
       applicationBinary: applicationBinary,
     );
     if (_applicationPackage == null) {
-      final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
-      throwToolExit(
-        await missingApplicationPackageMessage(
+      String? hint;
+      if (applicationBinary == null) {
+        final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+        hint = await getMissingPackageHintForPlatform(
           targetPlatform,
           fileSystem: fs,
           projectFactory: projectFactory,
-          includeHint: applicationBinary == null,
-        ),
-      );
+        );
+      }
+      throwToolExit(<String>['No application found for $targetPlatform.', ?hint].join('\n'));
     }
     var attempt = 0;
     LaunchResult? result;
