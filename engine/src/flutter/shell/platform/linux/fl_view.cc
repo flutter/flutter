@@ -40,6 +40,7 @@
 #include "flutter/shell/platform/linux/fl_view_renderer.h"
 #include "flutter/shell/platform/linux/fl_view_renderer_opengl.h"
 #include "flutter/shell/platform/linux/fl_view_renderer_software.h"
+#include "flutter/shell/platform/linux/fl_view_renderer_subsurface.h"
 #endif
 #include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
@@ -846,8 +847,13 @@ static void setup_engine(FlView* self) {
       break;
     case kOpenGL:
     default:
-      self->renderer = FL_VIEW_RENDERER(
-          fl_view_renderer_opengl_new(self->engine, self->sized_to_content));
+      if (GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)))) {
+        self->renderer = FL_VIEW_RENDERER(fl_view_renderer_subsurface_new(
+            self->engine, self->sized_to_content));
+      } else {
+        self->renderer = FL_VIEW_RENDERER(
+            fl_view_renderer_opengl_new(self->engine, self->sized_to_content));
+      }
       break;
   }
   g_object_ref_sink(self->renderer);
