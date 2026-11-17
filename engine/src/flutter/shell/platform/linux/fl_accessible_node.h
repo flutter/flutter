@@ -166,6 +166,16 @@ void fl_accessible_node_set_text_direction(FlAccessibleNode* node,
                                            FlutterTextDirection direction);
 
 /**
+ * fl_accessible_node_set_heading_level:
+ * @node: an #FlAccessibleNode.
+ * @heading_level: the heading level, or 0 if this node is not a heading.
+ *
+ * Sets the heading level of this node.
+ */
+void fl_accessible_node_set_heading_level(FlAccessibleNode* node,
+                                          int32_t heading_level);
+
+/**
  * fl_accessible_node_perform_action:
  * @node: an #FlAccessibleNode.
  * @action: the action being dispatched.

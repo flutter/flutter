@@ -340,7 +340,25 @@ TEST_F(FlAccessibleNodeTest, GetRole) {
   FlutterSemanticsFlags flags7 = {};
   flags7.is_header = true;
   fl_accessible_node_set_flags(node, &flags7);
+  EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_HEADER);
+}
+
+// Checks the heading level is exposed as a role and "level" attribute.
+TEST_F(FlAccessibleNodeTest, HeadingLevel) {
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
+
+  AtkAttributeSet* attributes = atk_object_get_attributes(ATK_OBJECT(node));
+  EXPECT_EQ(attributes, nullptr);
+  EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_PANEL);
+
+  fl_accessible_node_set_heading_level(node, 2);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_HEADING);
+  attributes = atk_object_get_attributes(ATK_OBJECT(node));
+  ASSERT_EQ(g_slist_length(attributes), 1u);
+  AtkAttribute* attribute = static_cast<AtkAttribute*>(attributes->data);
+  EXPECT_STREQ(attribute->name, "level");
+  EXPECT_STREQ(attribute->value, "2");
+  atk_attribute_set_free(attributes);
 }
 
 // Checks the node's name is exposed through the AtkText interface so that
