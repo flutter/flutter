@@ -932,7 +932,9 @@ environment:
         expect(hostFileSystem.file(nativeAssetsManifest).existsSync(), isTrue);
         expect(
           hostFileSystem.file(nativeAssetsManifest).path,
-          endsWith(hostFileSystem.path.join('build', 'native_assets', 'native_assets.json')),
+          endsWith(
+            hostFileSystem.path.join('build', 'native_assets', 'flutter_test_native_assets.json'),
+          ),
         );
       },
     );

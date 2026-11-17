@@ -24,7 +24,7 @@ import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
 const _fileScheme = 'file';
-const _nativeAssetsJsonFileName = 'native_assets.json';
+const _nativeAssetsJsonFileName = 'flutter_test_native_assets.json';
 const _pubspecYamlFileName = 'pubspec.yaml';
 
 /// Builds native assets for `flutter test` targets on the host platform.
@@ -53,12 +53,13 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 ///
 /// Resolves the target package name for the current project and executes build
 /// and install hooks for the host test platform ([TargetPlatform.tester]),
-/// writing the generated manifest to `build/native_assets/native_assets.json`.
+/// writing the generated manifest to
+/// `build/native_assets/flutter_test_native_assets.json`.
 ///
 /// Returns the [TestCompilerNativeAssetsBuildResult] containing the [Uri] to the
-/// generated `native_assets.json` file and hook output, or `null` fields if
-/// native assets are disabled, unsupported on the host OS, or no package can
-/// be resolved.
+/// generated `flutter_test_native_assets.json` file and hook output, or `null`
+/// fields if native assets are disabled, unsupported on the host OS, or no
+/// package can be resolved.
 Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   BuildInfo buildInfo, {
   required ToolContext toolContext,
@@ -124,8 +125,8 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   }
 
   // Only `flutter test` uses the
-  // `build/native_assets/native_assets.json` file which uses absolute
-  // paths to the shared libraries.
+  // `build/native_assets/flutter_test_native_assets.json` file which uses
+  // absolute paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
   final String buildDir = getBuildDirectory(config, fileSystem);
   final String osName = targetOS.name;

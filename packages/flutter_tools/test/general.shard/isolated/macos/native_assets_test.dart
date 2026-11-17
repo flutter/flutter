@@ -356,7 +356,7 @@ void main() {
             recordedUsesFile: null,
           );
           final Uri nativeAssetsFileUri = flutterTester
-              ? projectUri.resolve('build/native_assets/${InstallCodeAssets.nativeAssetsFilename}')
+              ? projectUri.resolve('build/native_assets/flutter_test_native_assets.json')
               : nonFlutterTesterAssetUri;
 
           await installCodeAssets(
