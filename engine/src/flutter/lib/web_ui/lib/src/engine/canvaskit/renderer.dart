@@ -97,8 +97,10 @@ class CanvasKitRenderer extends Renderer {
   );
 
   @override
-  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
-      CkCanvas(recorder, cullRect);
+  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
+    final ui.Rect rect = EngineCanvas.resolveCullRect(recorder, cullRect);
+    return (recorder as CkPictureRecorder).beginRecording(rect);
+  }
 
   @override
   BackendGradient createGradientLinear(
