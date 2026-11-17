@@ -10,6 +10,8 @@ import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
+import '../application_package.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -22,6 +24,7 @@ import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
@@ -32,16 +35,24 @@ import 'drive_service.dart';
 class WebDriverService extends DriverService {
   WebDriverService({
     required this._analytics,
+    required this._applicationPackageFactory,
+    required this._assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
     required this._dartSdkPath,
     required super.toolContext,
+    this._flutterHookRunner,
+    this._webRunnerFactory,
   });
 
   final Analytics _analytics;
+  final ApplicationPackageFactory _applicationPackageFactory;
+  final AssetBundleFactory _assetBundleFactory;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
   final String _dartSdkPath;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -81,9 +92,13 @@ class WebDriverService extends DriverService {
       renderer: debuggingOptions.webConfig.renderer,
       useWasm: debuggingOptions.webConfig.useWasm,
     );
-    _residentRunner = webRunnerFactory!.createWebRunner(
+    _residentRunner = _webRunnerFactory!.createWebRunner(
       flutterDevice,
-      target: mainPath,
+      analytics: _analytics,
+      applicationPackageFactory: _applicationPackageFactory,
+      assetBundleFactory: _assetBundleFactory,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       debuggingOptions: buildInfo.isRelease
           ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)
           : DebuggingOptions.enabled(
@@ -91,14 +106,13 @@ class WebDriverService extends DriverService {
               disablePortPublication: debuggingOptions.disablePortPublication,
               webConfig: webConfig,
             ),
+      flutterHookRunner: _flutterHookRunner,
+      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       platformArgs: platformArgs,
       stayResident: true,
-      webDefines: webDefines,
-      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
-      analytics: _analytics,
-      buildSystem: buildSystem,
-      buildTargets: buildTargets,
+      target: mainPath,
       toolContext: toolContext,
+      webDefines: webDefines,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
