@@ -67,6 +67,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   static const int _kAutoPlayAnimatedImagesIndex = 1 << 8;
   static const int _kAutoPlayVideosIndex = 1 << 9;
   static const int _kDeterministicCursorIndex = 1 << 10;
+  static const int _kReduceTransparencyIndex = 1 << 11;
 
   static const int _kDefaultIndex =
       _kSupportsAnnounceIndex | _kAutoPlayAnimatedImagesIndex | _kAutoPlayVideosIndex;
@@ -96,6 +97,8 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   bool get autoPlayVideos => _kAutoPlayVideosIndex & _index != 0;
   @override
   bool get deterministicCursor => _kDeterministicCursorIndex & _index != 0;
+  @override
+  bool get reduceTransparency => _kReduceTransparencyIndex & _index != 0;
 
   @override
   String toString() {
@@ -133,6 +136,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     if (deterministicCursor) {
       features.add('deterministicCursor');
     }
+    if (reduceTransparency) {
+      features.add('reduceTransparency');
+    }
     return 'AccessibilityFeatures$features';
   }
 
@@ -159,6 +165,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     bool? autoPlayAnimatedImages,
     bool? autoPlayVideos,
     bool? deterministicCursor,
+    bool? reduceTransparency,
   }) {
     final builder = EngineAccessibilityFeaturesBuilder(_index);
 
@@ -195,6 +202,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     if (deterministicCursor != null) {
       builder.deterministicCursor = deterministicCursor;
     }
+    if (reduceTransparency != null) {
+      builder.reduceTransparency = reduceTransparency;
+    }
 
     return builder.build();
   }
@@ -218,6 +228,8 @@ class EngineAccessibilityFeaturesBuilder {
   bool get autoPlayVideos => EngineAccessibilityFeatures._kAutoPlayVideosIndex & _index != 0;
   bool get deterministicCursor =>
       EngineAccessibilityFeatures._kDeterministicCursorIndex & _index != 0;
+  bool get reduceTransparency =>
+      EngineAccessibilityFeatures._kReduceTransparencyIndex & _index != 0;
 
   set accessibleNavigation(bool value) {
     const int accessibleNavigation = EngineAccessibilityFeatures._kAccessibleNavigation;
@@ -272,6 +284,11 @@ class EngineAccessibilityFeaturesBuilder {
   set deterministicCursor(bool value) {
     const int deterministicCursor = EngineAccessibilityFeatures._kDeterministicCursorIndex;
     _index = value ? _index | deterministicCursor : _index & ~deterministicCursor;
+  }
+
+  set reduceTransparency(bool value) {
+    const int reduceTransparency = EngineAccessibilityFeatures._kReduceTransparencyIndex;
+    _index = value ? _index | reduceTransparency : _index & ~reduceTransparency;
   }
 
   /// Creates and returns an instance of EngineAccessibilityFeatures based on the value of _index

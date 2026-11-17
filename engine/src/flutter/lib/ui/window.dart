@@ -937,6 +937,7 @@ class AccessibilityFeatures {
   static const int _kNoAutoPlayAnimatedImagesIndex = 1 << 8;
   static const int _kNoAutoPlayVideosIndex = 1 << 9;
   static const int _kDeterministicCursorIndex = 1 << 10;
+  static const int _kReduceTransparencyIndex = 1 << 11;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -1018,6 +1019,12 @@ class AccessibilityFeatures {
   /// Only supported on iOS.
   bool get deterministicCursor => _kDeterministicCursorIndex & _index != 0;
 
+  /// Whether the platform requests more opaque backgrounds to improve legibility.
+  ///
+  /// On iOS, this reflects the Reduce Transparency accessibility setting.
+  /// Defaults to false on platforms that do not report this preference.
+  bool get reduceTransparency => _kReduceTransparencyIndex & _index != 0;
+
   @override
   String toString() {
     final features = <String>[];
@@ -1053,6 +1060,9 @@ class AccessibilityFeatures {
     }
     if (deterministicCursor) {
       features.add('deterministicCursor');
+    }
+    if (reduceTransparency) {
+      features.add('reduceTransparency');
     }
     return 'AccessibilityFeatures$features';
   }

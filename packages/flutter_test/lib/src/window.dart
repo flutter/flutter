@@ -31,6 +31,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.boldText = false,
     this.reduceMotion = false,
     this.highContrast = false,
+    this.reduceTransparency = false,
     this.onOffSwitchLabels = false,
     this.supportsAnnounce = false,
     this.autoPlayAnimatedImages = false,
@@ -46,6 +47,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     boldText: true,
     reduceMotion: true,
     highContrast: true,
+    reduceTransparency: true,
     onOffSwitchLabels: true,
     supportsAnnounce: true,
     autoPlayAnimatedImages: true,
@@ -70,6 +72,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
 
   @override
   final bool highContrast;
+
+  @override
+  final bool reduceTransparency;
 
   @override
   final bool onOffSwitchLabels;
@@ -98,6 +103,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         other.boldText == boldText &&
         other.reduceMotion == reduceMotion &&
         other.highContrast == highContrast &&
+        other.reduceTransparency == reduceTransparency &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
         other.supportsAnnounce == supportsAnnounce &&
         other.autoPlayAnimatedImages == autoPlayAnimatedImages &&
@@ -114,6 +120,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
       boldText,
       reduceMotion,
       highContrast,
+      reduceTransparency,
       onOffSwitchLabels,
       supportsAnnounce,
       autoPlayAnimatedImages,

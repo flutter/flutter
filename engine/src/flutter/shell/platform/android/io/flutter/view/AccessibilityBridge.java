@@ -2145,7 +2145,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     NO_ANNOUNCE(1 << 7),
     NO_AUTO_PLAY_ANIMATED_IMAGES(1 << 8), // NOT SUPPORTED
     NO_AUTO_PLAY_VIDEOS(1 << 9), // NOT SUPPORTED
-    DETERMINISTIC_CURSOR(1 << 10); // NOT SUPPORTED
+    DETERMINISTIC_CURSOR(1 << 10), // NOT SUPPORTED
+    REDUCE_TRANSPARENCY(1 << 11); // NOT SUPPORTED
 
     final int value;
 

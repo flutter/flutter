@@ -108,6 +108,11 @@ final Map<String, (DebugViewMetricsOverride, _MetricReader, Object?)> _surfacedM
         (MediaQueryData data) => data.highContrast,
         true,
       ),
+      'reduceTransparency': (
+        const DebugViewMetricsOverride(reduceTransparency: true),
+        (MediaQueryData data) => data.reduceTransparency,
+        true,
+      ),
       'onOffSwitchLabels': (
         const DebugViewMetricsOverride(onOffSwitchLabels: true),
         (MediaQueryData data) => data.onOffSwitchLabels,
@@ -903,6 +908,7 @@ void main() {
         boldText: false,
         reduceMotion: false,
         highContrast: false,
+        reduceTransparency: false,
         onOffSwitchLabels: false,
         supportsAnnounce: true,
       );

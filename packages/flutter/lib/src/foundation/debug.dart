@@ -314,6 +314,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     this.boldText,
     this.reduceMotion,
     this.highContrast,
+    this.reduceTransparency,
     this.onOffSwitchLabels,
     this.supportsAnnounce,
     this.autoPlayAnimatedImages,
@@ -378,6 +379,7 @@ class DebugViewMetricsOverride with Diagnosticable {
       boldText: _boolFromJson(json, 'boldText'),
       reduceMotion: _boolFromJson(json, 'reduceMotion'),
       highContrast: _boolFromJson(json, 'highContrast'),
+      reduceTransparency: _boolFromJson(json, 'reduceTransparency'),
       onOffSwitchLabels: _boolFromJson(json, 'onOffSwitchLabels'),
       supportsAnnounce: _boolFromJson(json, 'supportsAnnounce'),
       autoPlayAnimatedImages: _boolFromJson(json, 'autoPlayAnimatedImages'),
@@ -496,6 +498,9 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// Overrides [ui.AccessibilityFeatures.highContrast].
   final bool? highContrast;
 
+  /// Overrides [ui.AccessibilityFeatures.reduceTransparency].
+  final bool? reduceTransparency;
+
   /// Overrides [ui.AccessibilityFeatures.onOffSwitchLabels].
   final bool? onOffSwitchLabels;
 
@@ -558,6 +563,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     bool? boldText,
     bool? reduceMotion,
     bool? highContrast,
+    bool? reduceTransparency,
     bool? onOffSwitchLabels,
     bool? supportsAnnounce,
     bool? autoPlayAnimatedImages,
@@ -615,6 +621,11 @@ class DebugViewMetricsOverride with Diagnosticable {
       boldText: resolve(DebugViewMetric.boldText, boldText, this.boldText),
       reduceMotion: resolve(DebugViewMetric.reduceMotion, reduceMotion, this.reduceMotion),
       highContrast: resolve(DebugViewMetric.highContrast, highContrast, this.highContrast),
+      reduceTransparency: resolve(
+        DebugViewMetric.reduceTransparency,
+        reduceTransparency,
+        this.reduceTransparency,
+      ),
       onOffSwitchLabels: resolve(
         DebugViewMetric.onOffSwitchLabels,
         onOffSwitchLabels,
@@ -670,6 +681,7 @@ class DebugViewMetricsOverride with Diagnosticable {
       if (boldText != null) 'boldText': boldText,
       if (reduceMotion != null) 'reduceMotion': reduceMotion,
       if (highContrast != null) 'highContrast': highContrast,
+      if (reduceTransparency != null) 'reduceTransparency': reduceTransparency,
       if (onOffSwitchLabels != null) 'onOffSwitchLabels': onOffSwitchLabels,
       if (supportsAnnounce != null) 'supportsAnnounce': supportsAnnounce,
       if (autoPlayAnimatedImages != null) 'autoPlayAnimatedImages': autoPlayAnimatedImages,
@@ -708,6 +720,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     boldText: boldText,
     reduceMotion: reduceMotion,
     highContrast: highContrast,
+    reduceTransparency: reduceTransparency,
     onOffSwitchLabels: onOffSwitchLabels,
     supportsAnnounce: supportsAnnounce,
     autoPlayAnimatedImages: autoPlayAnimatedImages,
@@ -789,6 +802,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     _addFlag(properties, 'boldText', boldText);
     _addFlag(properties, 'reduceMotion', reduceMotion);
     _addFlag(properties, 'highContrast', highContrast);
+    _addFlag(properties, 'reduceTransparency', reduceTransparency);
     _addFlag(properties, 'onOffSwitchLabels', onOffSwitchLabels);
     _addFlag(properties, 'supportsAnnounce', supportsAnnounce);
     _addFlag(properties, 'autoPlayAnimatedImages', autoPlayAnimatedImages);
@@ -1310,6 +1324,9 @@ enum DebugViewMetric {
 
   /// Names [DebugViewMetricsOverride.deterministicCursor].
   deterministicCursor,
+
+  /// Names [DebugViewMetricsOverride.reduceTransparency].
+  reduceTransparency,
 }
 
 // The edges of a [ui.ViewPadding], which has no == of its own, as left, top,
@@ -1337,6 +1354,7 @@ typedef _AccessibilityFlags = ({
   bool? boldText,
   bool? reduceMotion,
   bool? highContrast,
+  bool? reduceTransparency,
   bool? onOffSwitchLabels,
   bool? supportsAnnounce,
   bool? autoPlayAnimatedImages,
@@ -1888,6 +1906,9 @@ class _DebugAccessibilityFeatures implements ui.AccessibilityFeatures {
   bool get reduceMotion => _override.reduceMotion ?? _features.reduceMotion;
 
   @override
+  bool get reduceTransparency => _override.reduceTransparency ?? _features.reduceTransparency;
+
+  @override
   bool get supportsAnnounce => _override.supportsAnnounce ?? _features.supportsAnnounce;
 
   // ui.AccessibilityFeatures compares by value (after a runtimeType check that
@@ -1900,13 +1921,14 @@ class _DebugAccessibilityFeatures implements ui.AccessibilityFeatures {
   @override
   int get hashCode => _flags.hashCode;
 
-  (bool, bool, bool, bool, bool, bool, bool, bool, bool, bool, bool) get _flags => (
+  (bool, bool, bool, bool, bool, bool, bool, bool, bool, bool, bool, bool) get _flags => (
     accessibleNavigation,
     invertColors,
     disableAnimations,
     boldText,
     reduceMotion,
     highContrast,
+    reduceTransparency,
     onOffSwitchLabels,
     supportsAnnounce,
     autoPlayAnimatedImages,
@@ -1923,6 +1945,7 @@ class _DebugAccessibilityFeatures implements ui.AccessibilityFeatures {
       if (boldText) 'boldText',
       if (reduceMotion) 'reduceMotion',
       if (highContrast) 'highContrast',
+      if (reduceTransparency) 'reduceTransparency',
       if (onOffSwitchLabels) 'onOffSwitchLabels',
       if (supportsAnnounce) 'supportsAnnounce',
       if (autoPlayAnimatedImages) 'autoPlayAnimatedImages',
