@@ -40,6 +40,7 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.gradle.api.Action
+import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -63,6 +64,7 @@ import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FlutterPluginTest {
     // Clear global singleton mocks to prevent mock state leaking into other tests in the same JVM.
@@ -424,7 +426,7 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants reads the manifest versionCode in a task when the DSL declares none`(
+    fun `onVariants reads the main manifest versionCode in a task when the DSL declares none`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
@@ -434,14 +436,19 @@ class FlutterPluginTest {
         every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
         val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
         val project = stubManifestVersionCodeTaskRegistration(env, tempDir)
-        val manifest = tempDir.resolve("AndroidManifest.xml").toFile()
+        val debugManifest = tempDir.resolve("debug.xml").toFile()
+        val mainManifest = tempDir.resolve("main.xml").toFile()
         val variant = mockApplicationVariant(outputs = listOf(arm64.output))
+        // AGP's ManifestFiles.all lists the main manifest last.
         every { variant.sources.manifests.all } returns
-            project.provider { listOf(project.layout.projectDirectory.file(manifest.path)) }
+            project.provider { listOf(debugManifest, mainManifest).map { project.layout.projectDirectory.file(it.path) } }
 
         onVariant(variant)
         // Written after configuration, so the value must be read when the task runs.
-        manifest.writeText(
+        debugManifest.writeText(
+            """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="9"/>"""
+        )
+        mainManifest.writeText(
             """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="7"/>"""
         )
 
@@ -455,14 +462,11 @@ class FlutterPluginTest {
         // Gradle refuses to query the offset provider outside a build, because it maps a task
         // output. flutter_build_apk_split_per_abi_test checks the offset values.
         assertEquals("7", versionCodeFile.readText())
-        manifest.writeText(
-            """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="${'$'}{vc}"/>"""
-        )
+        mainManifest.writeText("""<manifest xmlns:android="http://schemas.android.com/apk/res/android"/>""")
         val error = assertThrows<GradleException> { task.writeVersionCode() }
         assertContains(error.message!!, "variant 'debug'")
+        assertContains(error.message!!, "$mainManifest does not set android:versionCode")
         assertContains(error.message!!, "versionCode = flutter.versionCode")
-        manifest.writeText("""<manifest xmlns:android="http://schemas.android.com/apk/res/android"/>""")
-        assertContains(assertThrows<GradleException> { task.writeVersionCode() }.message!!, "no manifest sets one")
     }
 
     @Test
